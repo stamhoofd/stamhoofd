@@ -16,9 +16,9 @@
 -- @include facts
 SELECT
     t.name AS `Netwerk`,
-    COUNT(DISTINCT CASE WHEN f.categorie = 'child' THEN f.member_id END) AS `Aantal kinderen`,
-    COUNT(DISTINCT CASE WHEN f.categorie = 'leader' THEN f.member_id END) AS `Aantal leiding`,
-    COUNT(DISTINCT CASE WHEN f.categorie = 'adult' THEN f.member_id END) AS `Aantal volwassenen`
+    COUNT(DISTINCT CASE WHEN f.effective_category = 'child' THEN f.member_id END) AS `Aantal kinderen`,
+    COUNT(DISTINCT CASE WHEN f.effective_category = 'leader' THEN f.member_id END) AS `Aantal leiding`,
+    COUNT(DISTINCT CASE WHEN f.effective_category = 'adult' THEN f.member_id END) AS `Aantal volwassenen`
 FROM facts f
 JOIN _organizations_organization_tags link
     ON link.organizationsId = f.organization_id AND link.periodId = f.period_id

@@ -13,8 +13,9 @@
 -- Eekhoorns and Wolven are not named by the client's formula. Eekhoorns weigh a third, with the
 -- takken of the same ages; Wolven weigh one, like the JVG/JG-A they sit just below.
 --
--- Leiding comes from the categorie instead, which is set on the Leiding tak and nothing else, so it
--- is the same members either way and the omkaderingscijfer below divides by the same count.
+-- Leiding comes from `effective_category` instead, which only says leader where the tak was
+-- recorded as one, so it is the same members either way and the omkaderingscijfer below divides by
+-- the same count.
 --
 -- What the years before 2020-2021 weigh rests on the import: the client's export names no tak on the
 -- children of those years, so theirs is read from their age and from what their own unit does with it.
@@ -33,6 +34,6 @@ ROUND(
         + COUNT(DISTINCT CASE WHEN `Tak` = 'Jongverkenners/Jonggidsen - Aspiranten' THEN member_id END)
         + 2 * COUNT(DISTINCT CASE WHEN `Tak` = 'Verkenners/Gidsen - Juniors' THEN member_id END)
         + 3 * COUNT(DISTINCT CASE WHEN `Tak` = 'Seniors' THEN member_id END)
-        + COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END)
-        - 2 * COUNT(DISTINCT CASE WHEN categorie = 'child' THEN member_id END)
-            / NULLIF(COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END), 0), 2)
+        + COUNT(DISTINCT CASE WHEN effective_category = 'leader' THEN member_id END)
+        - 2 * COUNT(DISTINCT CASE WHEN effective_category = 'child' THEN member_id END)
+            / NULLIF(COUNT(DISTINCT CASE WHEN effective_category = 'leader' THEN member_id END), 0), 2)

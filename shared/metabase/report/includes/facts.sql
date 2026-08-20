@@ -9,8 +9,12 @@
 -- A registration counts when it is active: not cancelled, not on a waiting list, and actually
 -- registered. A member in two groups appears twice here, so member counts are always COUNT(DISTINCT).
 --
--- `Categorie` is what splits the report into kinderen, leiding and volwassenen. It comes from the tak,
--- falling back to the tak's age range, and then to the member's own age at the start of the year.
+-- Two columns say what a registration counts as, and they answer different questions.
+-- `tak_category` is what the tak was recorded as -- kinderen, leiding or volwassenen -- and is null
+-- wherever nobody has said, which is what the aanlevering reads: a sheet delivered to a department
+-- may not guess. `effective_category` is that same answer with the fallbacks the ledenstatistieken
+-- need behind it -- the tak's age range, and then the member's own age at the start of the year --
+-- so that nobody drops out of a total for want of a tak that was never categorised.
 --
 -- That last fallback catches what the import could not name. The client's export leaves the tak empty
 -- on the children of the years before 2020-2021; the import reads those from the member's age, except
@@ -37,13 +41,14 @@ WITH all_registrations AS (
         p.name AS `Scoutsjaar`,
         p.startDate AS period_start,
         COALESCE(dag.name, g.name) AS `Tak`,
+        dag.category AS tak_category,
+        dag.minAge AS tak_min_age,
+        dag.maxAge AS tak_max_age,
         COALESCE(
             dag.category,
             CASE WHEN dag.maxAge < 18 THEN 'child' END,
             CASE WHEN TIMESTAMPDIFF(YEAR, m.birthDate, p.startDate) < 18 THEN 'child' END
-        ) AS categorie,
-        dag.minAge AS tak_min_age,
-        dag.maxAge AS tak_max_age,
+        ) AS effective_category,
         CASE m.gender
             WHEN 'Male' THEN 'Man'
             WHEN 'Female' THEN 'Vrouw'

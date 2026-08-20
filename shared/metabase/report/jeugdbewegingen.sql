@@ -121,20 +121,24 @@ ORDER BY `Naam_Organisatie`
 -- display: table
 -- size: full
 -- columns: ID_Organisatie, Type_deelnemers, Geboortejaar_deelnemers, Gender_deelnemers, Aantal_deelnemers
--- description: Tabblad 'Deelnemers_Lokale_groep': de leden en de leiding van elke lokale groep, per geboortejaar en geslacht, met een aansluiting in dat werkjaar. Wie in de Leiding-tak zit, telt enkel als leiding, ook al is die daarnaast in een andere tak ingeschreven.
+-- description: Tabblad 'Deelnemers_Lokale_groep': de leden en de leiding van elke lokale groep, per geboortejaar en geslacht, met een aansluiting in dat werkjaar. Wie leiding is in de ene tak en lid in de andere, telt enkel als leiding. Takken zonder categorie leveren niemand: vul die eerst aan.
 --
 -- The deelnemers of the groups the sheet above delivers, split into the two words the template
 -- allows: 'leden' and 'leiding', that exact spelling.
 --
--- Leiding is read off the tak first: a registration in the Leiding tak makes someone leiding whatever
--- else they are registered for. That has to come before the categorie, which is what the rest of the
--- report splits by, because a tak that was never given a `category` in the statistics database leaves
--- the categorie falling back to the age -- which reads a leider of seventeen as a kind.
+-- Read from `tak_category`, what the takken were recorded as, and never from `effective_category`,
+-- which the ledenstatistieken split by. That one falls back to the ages so nobody drops out of a
+-- total, and the ages cannot tell leiding from anything: a leider of seventeen reads as a kind and
+-- one of twenty as nothing at all. A sheet that goes to a department may not guess, so a tak nobody
+-- has categorised delivers nobody here -- visibly missing rather than quietly counted as leden.
 --
--- After that the categorie decides: a kind is a lid, and everyone else is leiding. That covers the
--- volwassen begeleiders, kassabeheerders and secretarissen the metadatafiche counts as leiding, and
--- the imported registrations with no tak at all, which belong to adults -- anyone under 18 without a
--- tak was already read as a kind.
+-- Only the two the template allows are delivered. A tak recorded as volwassenen is neither, and its
+-- members are left out of the sheet entirely; the metadatafiche does count the volwassen
+-- begeleiders, kassabeheerders and secretarissen of a group as leiding, so a koepel with such a tak
+-- has to say whether it is leiding rather than leaving it as volwassenen.
+--
+-- The numbers rank rather than label: leiding beats leden, and leden beats a tak that is neither,
+-- so the MAX below picks the strongest thing any registration of that member says.
 --
 -- Decided once per member per group, before anything is counted. Someone can be a lid in one tak and
 -- leiding in another of the same unit, and the metadatafiche is explicit that they are leiding there
@@ -166,7 +170,7 @@ ORDER BY `Naam_Organisatie`
         f.birth_date,
         f.`Geslacht`,
         f.deactivated_at,
-        CASE WHEN f.categorie = 'leader' THEN 2 WHEN f.categorie = 'child' THEN 1 ELSE 0 END AS type_number
+        CASE WHEN f.tak_category = 'leader' THEN 2 WHEN f.tak_category = 'child' THEN 1 ELSE 0 END AS type_number
     FROM all_registrations f
     WHERE
         -- @include aangesloten

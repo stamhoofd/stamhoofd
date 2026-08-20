@@ -22,21 +22,21 @@ SELECT COUNT(DISTINCT member_id) AS `Totaal leden` FROM facts
 -- display: scalar
 -- size: sixth
 -- @include facts
-SELECT COUNT(DISTINCT member_id) AS `Aantal kinderen` FROM facts WHERE categorie = 'child'
+SELECT COUNT(DISTINCT member_id) AS `Aantal kinderen` FROM facts WHERE effective_category = 'child'
 
 -- @card aantal-leiding
 -- title: Aantal leiding
 -- display: scalar
 -- size: sixth
 -- @include facts
-SELECT COUNT(DISTINCT member_id) AS `Aantal leiding` FROM facts WHERE categorie = 'leader'
+SELECT COUNT(DISTINCT member_id) AS `Aantal leiding` FROM facts WHERE effective_category = 'leader'
 
 -- @card aantal-volwassenen
 -- title: Aantal volwassenen
 -- display: scalar
 -- size: sixth
 -- @include facts
-SELECT COUNT(DISTINCT member_id) AS `Aantal volwassenen` FROM facts WHERE categorie = 'adult'
+SELECT COUNT(DISTINCT member_id) AS `Aantal volwassenen` FROM facts WHERE effective_category = 'adult'
 
 -- @card leden-per-eenheid
 -- title: Aantal leden per eenheid & GTP index per eenheid
@@ -155,9 +155,9 @@ ORDER BY `Aantal leden` DESC
 -- @include facts
 SELECT
     YEAR(birth_date) AS `Geboortejaar`,
-    COUNT(DISTINCT CASE WHEN categorie = 'child' THEN member_id END) AS `Aantal kinderen`,
-    COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END) AS `Aantal leiding`,
-    COUNT(DISTINCT CASE WHEN categorie = 'adult' THEN member_id END) AS `Aantal volwassenen`
+    COUNT(DISTINCT CASE WHEN effective_category = 'child' THEN member_id END) AS `Aantal kinderen`,
+    COUNT(DISTINCT CASE WHEN effective_category = 'leader' THEN member_id END) AS `Aantal leiding`,
+    COUNT(DISTINCT CASE WHEN effective_category = 'adult' THEN member_id END) AS `Aantal volwassenen`
 FROM facts
 WHERE birth_date IS NOT NULL
 GROUP BY YEAR(birth_date)
@@ -200,9 +200,9 @@ ORDER BY `Aantal leden` DESC
 SELECT
     `Scoutsjaar`,
     COUNT(DISTINCT member_id) AS `Totaal leden`,
-    COUNT(DISTINCT CASE WHEN categorie = 'child' THEN member_id END) AS `Aantal kinderen`,
-    COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END) AS `Aantal leiding`,
-    COUNT(DISTINCT CASE WHEN categorie = 'adult' THEN member_id END) AS `Aantal volwassenen`
+    COUNT(DISTINCT CASE WHEN effective_category = 'child' THEN member_id END) AS `Aantal kinderen`,
+    COUNT(DISTINCT CASE WHEN effective_category = 'leader' THEN member_id END) AS `Aantal leiding`,
+    COUNT(DISTINCT CASE WHEN effective_category = 'adult' THEN member_id END) AS `Aantal volwassenen`
 FROM facts
 GROUP BY `Scoutsjaar`
 ORDER BY MIN(period_start)

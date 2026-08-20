@@ -172,9 +172,9 @@ describe('report', () => {
         it('counts a member of a group once, as leiding when they are leiding anywhere in it', () => {
             const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql.replaceAll(/\s+/g, ' ');
 
-            expect(sql).toContain("CASE WHEN f.`Tak` = 'Leiding' THEN 1 WHEN f.categorie = 'child' THEN 0 ELSE 1 END AS is_leiding");
+            expect(sql).toContain("CASE WHEN f.tak_category = 'leader' THEN 2 WHEN f.tak_category = 'child' THEN 1 ELSE 0 END AS type_number");
             expect(sql).toContain('GROUP BY i.organization_id, i.member_id )');
-            expect(sql).toContain("CASE WHEN d.is_leiding = 1 THEN 'leiding' ELSE 'leden' END");
+            expect(sql).toContain("CASE WHEN d.type_number = 2 THEN 'leiding' ELSE 'leden' END");
         });
 
         /**
@@ -188,7 +188,7 @@ describe('report', () => {
         it('lets the registrations that still stand decide what someone is', () => {
             const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql.replaceAll(/\s+/g, ' ');
 
-            expect(sql).toContain('COALESCE( MAX(CASE WHEN i.deactivated_at IS NULL THEN i.is_leiding END), MAX(i.is_leiding) ) AS is_leiding');
+            expect(sql).toContain('COALESCE( MAX(CASE WHEN i.deactivated_at IS NULL THEN i.type_number END), MAX(i.type_number) ) AS type_number');
         });
 
         /**
@@ -207,16 +207,20 @@ describe('report', () => {
         });
 
         /**
-         * The tak comes first, before the categorie the rest of the report splits by. A platform that
-         * never filled in `default_age_groups`.`category` falls back to the age, which reads a leider
-         * of seventeen as a kind -- a plausible row in a sheet that has no way of showing it is wrong.
+         * The two categories answer different questions, and the sheet may only read one of them.
+         * `effective_category` falls back to the ages so that nobody drops out of a total, which is
+         * what the ledenstatistieken want; the ages cannot tell leiding from anything, so reading it
+         * here would deliver a leider of seventeen as a lid. A tak nobody has categorised delivers
+         * nobody instead, which is missing rather than wrong.
          */
-        it('reads leiding off the tak before the categorie it falls back to', () => {
-            const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql.replaceAll(/\s+/g, ' ');
-            const [tak, categorie] = ["WHEN f.`Tak` = 'Leiding'", "WHEN f.categorie = 'child'"].map(term => sql.indexOf(term));
+        it('splits the sheet by what the takken were recorded as, never by what the ages suggest', () => {
+            const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql;
+            // The card's own query: `effective_category` is a column of the fragment it includes, and
+            // being selected there says nothing about what the sheet splits by.
+            const query = sql.slice(sql.indexOf('\n, inschrijvingen AS ('));
 
-            expect(`tak ${tak >= 0}, categorie ${categorie >= 0}`).toEqual('tak true, categorie true');
-            expect(`tak before categorie: ${tak < categorie}`).toEqual('tak before categorie: true');
+            expect(query).toContain('f.tak_category');
+            expect(`reads the fallback: ${query.includes('effective_category')}`).toEqual('reads the fallback: false');
         });
 
         /**
@@ -319,8 +323,8 @@ describe('report', () => {
                 ['JVG/JG-A', "+ COUNT(DISTINCT CASE WHEN `Tak` = 'Jongverkenners/Jonggidsen - Aspiranten' THEN member_id END)"],
                 ['VG/G-J', "+ 2 * COUNT(DISTINCT CASE WHEN `Tak` = 'Verkenners/Gidsen - Juniors' THEN member_id END)"],
                 ['Seniors', "+ 3 * COUNT(DISTINCT CASE WHEN `Tak` = 'Seniors' THEN member_id END)"],
-                ['Leiding', "+ COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END)"],
-                ['omkaderingscijfer', "- 2 * COUNT(DISTINCT CASE WHEN categorie = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END), 0)"],
+                ['Leiding', "+ COUNT(DISTINCT CASE WHEN effective_category = 'leader' THEN member_id END)"],
+                ['omkaderingscijfer', "- 2 * COUNT(DISTINCT CASE WHEN effective_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN effective_category = 'leader' THEN member_id END), 0)"],
             ]) {
                 expect(`${tak}: ${sql.includes(term)}`).toEqual(`${tak}: true`);
             }
@@ -339,7 +343,7 @@ describe('report', () => {
         });
 
         it('counts the omkaderingscijfer the same way wherever it is shown', () => {
-            const expression = "ROUND( COUNT(DISTINCT CASE WHEN categorie = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END), 0), 2)";
+            const expression = "ROUND( COUNT(DISTINCT CASE WHEN effective_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN effective_category = 'leader' THEN member_id END), 0), 2)";
 
             for (const key of ['eenheid-omkaderingscijfer', 'eenheid-omkaderingscijfer-meter', 'eenheid-omkaderingscijfer-per-scoutsjaar']) {
                 const sql = cardOf(dashboards, 'eenheden', key).sql.replaceAll(/\s+/g, ' ');

@@ -7,5 +7,5 @@
 --
 -- Reads from `facts`.
 ROUND(
-        COUNT(DISTINCT CASE WHEN categorie = 'child' THEN member_id END)
-        / NULLIF(COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END), 0), 2)
+        COUNT(DISTINCT CASE WHEN effective_category = 'child' THEN member_id END)
+        / NULLIF(COUNT(DISTINCT CASE WHEN effective_category = 'leader' THEN member_id END), 0), 2)

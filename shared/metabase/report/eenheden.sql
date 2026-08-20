@@ -15,21 +15,21 @@ SELECT COUNT(DISTINCT member_id) AS `Totaal aantal leden` FROM facts
 -- display: scalar
 -- size: sixth
 -- @include facts
-SELECT COUNT(DISTINCT member_id) AS `Aantal kinderen` FROM facts WHERE categorie = 'child'
+SELECT COUNT(DISTINCT member_id) AS `Aantal kinderen` FROM facts WHERE effective_category = 'child'
 
 -- @card eenheid-aantal-leiding
 -- title: Aantal leiding
 -- display: scalar
 -- size: sixth
 -- @include facts
-SELECT COUNT(DISTINCT member_id) AS `Aantal leiding` FROM facts WHERE categorie = 'leader'
+SELECT COUNT(DISTINCT member_id) AS `Aantal leiding` FROM facts WHERE effective_category = 'leader'
 
 -- @card eenheid-aantal-volwassenen
 -- title: Aantal volwassenen
 -- display: scalar
 -- size: sixth
 -- @include facts
-SELECT COUNT(DISTINCT member_id) AS `Aantal volwassenen` FROM facts WHERE categorie = 'adult'
+SELECT COUNT(DISTINCT member_id) AS `Aantal volwassenen` FROM facts WHERE effective_category = 'adult'
 
 -- @card eenheid-gtp
 -- title: GTP Index
@@ -84,9 +84,9 @@ ORDER BY `Aantal leden` DESC
 SELECT
     `Scoutsjaar`,
     COUNT(DISTINCT member_id) AS `Totaal leden`,
-    COUNT(DISTINCT CASE WHEN categorie = 'child' THEN member_id END) AS `Aantal kinderen`,
-    COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END) AS `Aantal leiding`,
-    COUNT(DISTINCT CASE WHEN categorie = 'adult' THEN member_id END) AS `Aantal volwassenen`
+    COUNT(DISTINCT CASE WHEN effective_category = 'child' THEN member_id END) AS `Aantal kinderen`,
+    COUNT(DISTINCT CASE WHEN effective_category = 'leader' THEN member_id END) AS `Aantal leiding`,
+    COUNT(DISTINCT CASE WHEN effective_category = 'adult' THEN member_id END) AS `Aantal volwassenen`
 FROM facts
 GROUP BY `Scoutsjaar`
 ORDER BY MIN(period_start)
@@ -194,7 +194,7 @@ SELECT
     `Tak`,
     COUNT(DISTINCT member_id) AS `Aantal kinderen`
 FROM facts
-WHERE categorie = 'child'
+WHERE effective_category = 'child'
 GROUP BY `Scoutsjaar`, `Tak`
 ORDER BY MIN(period_start), `Tak`
 
@@ -212,7 +212,7 @@ SELECT
     COUNT(DISTINCT CASE WHEN tak_max_age <= 10 THEN member_id END) AS `Jong`,
     COUNT(DISTINCT CASE WHEN tak_min_age >= 11 THEN member_id END) AS `Oud`
 FROM facts
-WHERE categorie = 'child'
+WHERE effective_category = 'child'
 GROUP BY `Scoutsjaar`
 ORDER BY MIN(period_start)
 
@@ -229,7 +229,7 @@ SELECT
     `Geslacht`,
     COUNT(DISTINCT member_id) AS `Aantal kinderen`
 FROM facts
-WHERE categorie = 'child'
+WHERE effective_category = 'child'
 GROUP BY `Scoutsjaar`, `Geslacht`
 ORDER BY MIN(period_start)
 
@@ -242,7 +242,7 @@ ORDER BY MIN(period_start)
 -- @include facts
 SELECT `Geslacht`, COUNT(DISTINCT member_id) AS `Aantal kinderen`
 FROM facts
-WHERE categorie = 'child'
+WHERE effective_category = 'child'
 GROUP BY `Geslacht`
 ORDER BY `Aantal kinderen` DESC
 
@@ -259,7 +259,7 @@ SELECT
     `Geslacht`,
     COUNT(DISTINCT member_id) AS `Aantal leiding`
 FROM facts
-WHERE categorie = 'leader'
+WHERE effective_category = 'leader'
 GROUP BY `Scoutsjaar`, `Geslacht`
 ORDER BY MIN(period_start)
 
@@ -272,7 +272,7 @@ ORDER BY MIN(period_start)
 -- @include facts
 SELECT `Geslacht`, COUNT(DISTINCT member_id) AS `Aantal leiding`
 FROM facts
-WHERE categorie = 'leader'
+WHERE effective_category = 'leader'
 GROUP BY `Geslacht`
 ORDER BY `Aantal leiding` DESC
 
@@ -285,8 +285,8 @@ ORDER BY `Aantal leiding` DESC
 -- @include facts
 SELECT
     YEAR(birth_date) AS `Geboortejaar`,
-    COUNT(DISTINCT CASE WHEN categorie = 'child' THEN member_id END) AS `Aantal kinderen`,
-    COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END) AS `Aantal leiding`
+    COUNT(DISTINCT CASE WHEN effective_category = 'child' THEN member_id END) AS `Aantal kinderen`,
+    COUNT(DISTINCT CASE WHEN effective_category = 'leader' THEN member_id END) AS `Aantal leiding`
 FROM facts
 WHERE birth_date IS NOT NULL
 GROUP BY YEAR(birth_date)
@@ -319,7 +319,7 @@ SELECT
     `Scoutsjaar`,
     ROUND(AVG(leeftijd), 1) AS `Gemiddelde leeftijd leiding`
 FROM facts
-WHERE categorie = 'leader' AND birth_date IS NOT NULL
+WHERE effective_category = 'leader' AND birth_date IS NOT NULL
 GROUP BY `Scoutsjaar`
 ORDER BY MIN(period_start)
 
