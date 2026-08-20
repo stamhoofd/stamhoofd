@@ -70,15 +70,23 @@ test.describe('SSO login', () => {
         expect(refreshToken).toBeDefined();
         await expect(page.getByTestId('members-start-view')).toBeVisible({ timeout: 30_000 });
 
-        const replayExchange = await page.request.post(`${WorkerData.urls.api}/oauth/token`, {
-            data: {
-                grant_type: 'refresh_token',
-                refresh_token: refreshToken,
-            },
-        });
+        // Replayed from the browser: a request from the worker process itself can get
+        // intercepted by nock (activated by mockers of specs that shared this worker),
+        // which crashes on Playwright's own HTTP stack.
+        const replayExchange = await page.evaluate(async ({ url, refreshToken }) => {
+            const response = await fetch(`${url}/oauth/token`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    grant_type: 'refresh_token',
+                    refresh_token: refreshToken,
+                }),
+            });
+            return { status: response.status, body: await response.text() };
+        }, { url: WorkerData.urls.api, refreshToken });
 
-        expect(replayExchange.status()).toBe(400);
-        expect(await replayExchange.text()).toContain('invalid_refresh_token');
+        expect(replayExchange.status).toBe(400);
+        expect(replayExchange.body).toContain('invalid_refresh_token');
     });
 
     test('signs in on an existing account and links the SSO provider to it', async ({ page, pages }) => {
