@@ -15,7 +15,7 @@ describe('metabaseReportCollectionName', () => {
      * environment written last, and a server holds one platform to begin with.
      */
     it('names the collection after the report and not after a platform', () => {
-        expect(metabaseReportCollectionName).toBe('Ledenstatistieken');
+        expect(metabaseReportCollectionName).toBe('Statistieken');
     });
 });
 

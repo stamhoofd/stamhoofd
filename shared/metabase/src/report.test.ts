@@ -76,7 +76,7 @@ describe('report', () => {
          * it mirrors none of them, and is read once a year by whoever files it.
          */
         it('gives the aanlevering a dashboard of its own and leaves every other tab on the report', () => {
-            expect(dashboards.find(tab => tab.key === 'jeugdbewegingen')!.dashboard).toEqual('groepen en deelnemers - departement jeugd');
+            expect(dashboards.find(tab => tab.key === 'jeugdbewegingen')!.dashboard).toEqual('Groepen en Deelnemers - Departement Jeugd');
 
             for (const key of ['nationaal', 'eenheden', 'netwerk', 'varia']) {
                 expect(`${key}: ${dashboards.find(tab => tab.key === key)!.dashboard}`).toEqual(`${key}: undefined`);
@@ -149,12 +149,12 @@ describe('report', () => {
          * answered leaves the cell empty, which the metadatafiche asks for rather than a value of its
          * own. Kept here because nothing else notices -- an unmapped value reads as a plausible row.
          */
-        it('says a geslacht in the letters the template allows, and nothing where there is no answer', () => {
+        it('says a geslacht in the letters the metadatafiche allows, and nothing where there is no answer', () => {
             const cards = dashboards.flatMap(dashboard => dashboard.cards.filter(card => card.columns.includes('Gender_deelnemers')));
             expect(cards.map(card => card.key)).toEqual(['deelnemers-bovenlokaal', 'deelnemers-lokale-groep']);
 
             for (const card of cards) {
-                const letters = /CASE \w+\.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' WHEN 'Andere' THEN 'X' END/;
+                const letters = /CASE \w+\.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' ELSE NULL END/;
 
                 expect(`${card.key}: ${letters.test(card.sql.replaceAll(/\s+/g, ' '))}`).toEqual(`${card.key}: true`);
             }
@@ -172,10 +172,37 @@ describe('report', () => {
         it('counts a member of a group once, as leiding when they are leiding anywhere in it', () => {
             const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql.replaceAll(/\s+/g, ' ');
 
-            expect(sql).toContain("MAX(CASE WHEN f.categorie = 'child' THEN 0 ELSE 1 END) AS is_leiding");
-            expect(sql).toContain('GROUP BY f.organization_id, f.member_id, f.birth_date, f.`Geslacht`');
+            expect(sql).toContain("MAX(CASE WHEN f.`Tak` = 'Leiding' THEN 1 WHEN f.categorie = 'child' THEN 0 ELSE 1 END) AS is_leiding");
+            expect(sql).toContain('GROUP BY f.organization_id, f.member_id )');
             expect(sql).toContain("CASE WHEN d.is_leiding = 1 THEN 'leiding' ELSE 'leden' END");
-            expect(sql).toContain('COUNT(*) AS `Aantal_deelnemers`');
+        });
+
+        /**
+         * The tak comes first, before the categorie the rest of the report splits by. A platform that
+         * never filled in `default_age_groups`.`category` falls back to the age, which reads a leider
+         * of seventeen as a kind -- a plausible row in a sheet that has no way of showing it is wrong.
+         */
+        it('reads leiding off the tak before the categorie it falls back to', () => {
+            const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql.replaceAll(/\s+/g, ' ');
+            const [tak, categorie] = ["WHEN f.`Tak` = 'Leiding'", "WHEN f.categorie = 'child'"].map(term => sql.indexOf(term));
+
+            expect(`tak ${tak >= 0}, categorie ${categorie >= 0}`).toEqual('tak true, categorie true');
+            expect(`tak before categorie: ${tak < categorie}`).toEqual('tak before categorie: true');
+        });
+
+        /**
+         * A registration is not an aansluiting: a group can register someone it never aansluit, and
+         * the dataset is about the deelnemers a koepel is aangesloten for. Both deelnemers sheets ask
+         * for one, the aanlevering being the only thing here that does -- the ledenstatistieken count
+         * every active registration.
+         */
+        it('delivers only the deelnemers with an aansluiting in that werkjaar', () => {
+            // Every card reads the aansluiting filter through `facts`, which asks about the
+            // registration as `r`; the condition of the sheets themselves asks about a fact as `f`.
+            const asked = /EXISTS \( SELECT 1 FROM member_platform_memberships mpm WHERE mpm\.memberId = f\.member_id AND mpm\.periodId = f\.period_id AND mpm\.deletedAt IS NULL \)/;
+            const cards = dashboards.flatMap(dashboard => dashboard.cards.filter(card => asked.test(card.sql.replaceAll(/\s+/g, ' '))));
+
+            expect(cards.map(card => card.key)).toEqual(['deelnemers-bovenlokaal', 'deelnemers-lokale-groep']);
         });
 
         /**

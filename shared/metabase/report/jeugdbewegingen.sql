@@ -51,12 +51,12 @@ ORDER BY o.name
 -- display: table
 -- size: full
 -- columns: ID_Organisatie, Geboortejaar_deelnemers, Gender_deelnemers, Aantal_deelnemers
--- description: Tabblad 'Deelnemers_Bovenlokaal': de structuurvrijwilligers van de koepel, per geboortejaar en geslacht. Unieke personen, geen inschrijvingen: zo vraagt de metadatafiche het voor de nationale ploegen.
+-- description: Tabblad 'Deelnemers_Bovenlokaal': de structuurvrijwilligers van de koepel, per geboortejaar en geslacht, met een aansluiting in dat werkjaar. Unieke personen, geen inschrijvingen: zo vraagt de metadatafiche het voor de nationale ploegen.
 --
--- The deelnemers of the structure the sheet above delivers: everyone registered at the koepel's own
+-- The deelnemers of the structure the sheet above delivers: everyone aangesloten at the koepel's own
 -- organization in that werkjaar. Being registered there is the engagement that makes someone a
 -- structuurvrijwilliger -- nothing in the administration says what a person does within a ploeg -- so
--- a registration is what this counts.
+-- a registration with an aansluiting behind it is what this counts.
 --
 -- Unique people rather than registrations, which is what the metadatafiche asks for at this one
 -- organization: the national ploegen count as a single structure, so someone in two of them is one
@@ -77,6 +77,8 @@ SELECT
     COUNT(DISTINCT f.member_id) AS `Aantal_deelnemers`
 FROM all_facts f
 JOIN platform pf ON pf.membershipOrganizationId = f.organization_id
+WHERE
+    -- @include aangesloten
 GROUP BY `ID_Organisatie`, `Geboortejaar_deelnemers`, `Gender_deelnemers`
 ORDER BY `Geboortejaar_deelnemers`, `Gender_deelnemers`
 
@@ -116,18 +118,27 @@ ORDER BY `Naam_Organisatie`
 -- display: table
 -- size: full
 -- columns: ID_Organisatie, Type_deelnemers, Geboortejaar_deelnemers, Gender_deelnemers, Aantal_deelnemers
--- description: Tabblad 'Deelnemers_Lokale_groep': de leden en de leiding van elke lokale groep, per geboortejaar en geslacht. Wie in dezelfde groep zowel lid als leiding is, telt enkel als leiding.
+-- description: Tabblad 'Deelnemers_Lokale_groep': de leden en de leiding van elke lokale groep, per geboortejaar en geslacht, met een aansluiting in dat werkjaar. Wie in de Leiding-tak zit, telt enkel als leiding, ook al is die daarnaast in een andere tak ingeschreven.
 --
 -- The deelnemers of the groups the sheet above delivers, split into the two words the template
--- allows: 'leden' and 'leiding', that exact spelling. Kinderen are the leden; leiding is everyone
--- else registered at the group, which is what the metadatafiche asks for -- it counts the volwassen
--- begeleiders, kassabeheerders and secretarissen of a group as leiding as well, and a registration
--- the import could not place at all belongs to an adult, since anyone under 18 is read as a kind.
+-- allows: 'leden' and 'leiding', that exact spelling.
 --
--- Classified per member per group before anything is counted, because someone can be a lid in one tak
--- and leiding in another of the same unit. The metadatafiche is explicit that they are leiding there
--- and not a lid, so leiding wins; counted straight off the registrations they would be one person
--- delivered in both rows.
+-- Leiding is read off the tak first: a registration in the Leiding tak makes someone leiding whatever
+-- else they are registered for. That has to come before the categorie, which is what the rest of the
+-- report splits by, because a platform that never filled in `default_age_groups`.`category` falls
+-- back to the age -- and a leider of seventeen is then read as a kind.
+--
+-- After that the categorie decides: a kind is a lid, and everyone else is leiding. That covers the
+-- volwassen begeleiders, kassabeheerders and secretarissen the metadatafiche counts as leiding, and
+-- the imported registrations with no tak at all, which belong to adults -- anyone under 18 without a
+-- tak was already read as a kind.
+--
+-- Decided once per member per group, before anything is counted. Someone can be a lid in one tak and
+-- leiding in another of the same unit, and the metadatafiche is explicit that they are leiding there
+-- and not a lid; counted per registration they would be one person delivered in both rows, and the
+-- group would report more deelnemers than it has. The date of birth and the geslacht are taken the
+-- same way, so that a member whose answer was corrected between two werkjaren cannot split into two
+-- people either.
 --
 -- One row per member per group is also what the counting asks for. The metadatafiche counts
 -- inschrijvingen rather than unique inschrijvers, and says what it means by that: someone registered
@@ -138,11 +149,13 @@ ORDER BY `Naam_Organisatie`
     SELECT
         f.organization_id,
         f.member_id,
-        f.birth_date,
-        f.`Geslacht`,
-        MAX(CASE WHEN f.categorie = 'child' THEN 0 ELSE 1 END) AS is_leiding
+        MAX(f.birth_date) AS birth_date,
+        MAX(f.`Geslacht`) AS `Geslacht`,
+        MAX(CASE WHEN f.`Tak` = 'Leiding' THEN 1 WHEN f.categorie = 'child' THEN 0 ELSE 1 END) AS is_leiding
     FROM facts f
-    GROUP BY f.organization_id, f.member_id, f.birth_date, f.`Geslacht`
+    WHERE
+        -- @include aangesloten
+    GROUP BY f.organization_id, f.member_id
 )
 SELECT
     d.organization_id AS `ID_Organisatie`,
