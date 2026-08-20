@@ -55,6 +55,12 @@ export const registrationFilterCompilers: SQLFilterDefinitions = {
             }),
         },
     ),
+    /**
+     * There is a bug in MySQL 8 that is fixed in 9.3
+     * where EXISTS (select * from json_table(...)) does not work
+     * To fix this, we do a double select with join inside the select
+     * It is a bit slower, but it works for now.
+     */
     options: createExistsFilter(
         SQL.select()
             .from(SQL.table('registrations', 'innerRegistrations'))
