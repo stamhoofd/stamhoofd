@@ -67,15 +67,18 @@ ORDER BY o.name
 -- rather than a value of its own: a member without a date of birth gets no geboortejaar, and one
 -- whose geslacht was never filled in gets no letter, since the CASE has no ELSE to fall back on.
 --
--- Read from `all_facts` rather than from `facts`: the ledenstatistieken leave this organization out,
--- and this sheet is the one thing that is about it.
+-- Read from `all_registrations` rather than from `facts`, on two counts. The ledenstatistieken leave
+-- this organization out and this sheet is the one thing that is about it; and they leave out a
+-- registration that was cancelled during the year, while the department counts everyone who was
+-- registered at some point in the werkjaar -- someone who stopped in november was a deelnemer of that
+-- year, and the aansluiting the koepel charged them says so.
 -- @include facts
 SELECT
     f.organization_id AS `ID_Organisatie`,
     YEAR(f.birth_date) AS `Geboortejaar_deelnemers`,
     CASE f.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' ELSE NULL END AS `Gender_deelnemers`,
     COUNT(DISTINCT f.member_id) AS `Aantal_deelnemers`
-FROM all_facts f
+FROM all_registrations f
 JOIN platform pf ON pf.membershipOrganizationId = f.organization_id
 WHERE
     -- @include aangesloten
@@ -140,22 +143,47 @@ ORDER BY `Naam_Organisatie`
 -- same way, so that a member whose answer was corrected between two werkjaren cannot split into two
 -- people either.
 --
+-- Decided by the registrations that still stand, and by the cancelled ones only when none of them do.
+-- A cancelled registration says someone was there, not what they were: an administrator who puts a
+-- lid in the Leiding tak by mistake and undoes it would otherwise leave them leiding for the rest of
+-- the werkjaar, while the registration they really hold says what they are. A member whose
+-- registrations at the group were all cancelled -- someone who left during the year -- has nothing
+-- else to be read from, and is what the cancelled ones are kept for.
+--
 -- One row per member per group is also what the counting asks for. The metadatafiche counts
 -- inschrijvingen rather than unique inschrijvers, and says what it means by that: someone registered
 -- at two groups counts at both. Within one group they are one deelnemer, however many takken they are
 -- registered in.
+--
+-- Read from `all_registrations`, which keeps the registrations that were cancelled during the year:
+-- someone who stopped in november was a deelnemer of that werkjaar. The koepel's own organization is
+-- dropped here rather than by reading `facts`, since that would drop those registrations with it.
 -- @include facts
-, deelnemers AS (
+, inschrijvingen AS (
     SELECT
         f.organization_id,
         f.member_id,
-        MAX(f.birth_date) AS birth_date,
-        MAX(f.`Geslacht`) AS `Geslacht`,
-        MAX(CASE WHEN f.`Tak` = 'Leiding' THEN 1 WHEN f.categorie = 'child' THEN 0 ELSE 1 END) AS is_leiding
-    FROM facts f
+        f.birth_date,
+        f.`Geslacht`,
+        f.deactivated_at,
+        CASE WHEN f.`Tak` = 'Leiding' THEN 1 WHEN f.categorie = 'child' THEN 0 ELSE 1 END AS is_leiding
+    FROM all_registrations f
     WHERE
         -- @include aangesloten
-    GROUP BY f.organization_id, f.member_id
+      AND NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = f.organization_id)
+),
+deelnemers AS (
+    SELECT
+        i.organization_id,
+        i.member_id,
+        MAX(i.birth_date) AS birth_date,
+        MAX(i.`Geslacht`) AS `Geslacht`,
+        COALESCE(
+            MAX(CASE WHEN i.deactivated_at IS NULL THEN i.is_leiding END),
+            MAX(i.is_leiding)
+        ) AS is_leiding
+    FROM inschrijvingen i
+    GROUP BY i.organization_id, i.member_id
 )
 SELECT
     d.organization_id AS `ID_Organisatie`,

@@ -18,10 +18,15 @@
 -- towards the total while showing up in none of the three categories. The handful of adults among
 -- them stay null, because nothing here tells leiding from volwassenen.
 --
--- Two names for the same rows. `facts` is what every figure of the ledenstatistieken is counted from;
--- `all_facts` is the same set with the koepel's own organization still in it, for the aanlevering,
--- which is the one thing here that is about that organization.
-WITH all_facts AS (
+-- Three names for the same rows, each one dropping something the one before it keeps:
+--
+--   * `all_registrations` is every registration of the werkjaar, the ones that were cancelled during
+--     it included. Only the aanlevering reads it: the department counts everyone who was registered
+--     at some point between september and august, not who was still registered in august.
+--   * `all_facts` keeps the ones that are still active, which is what the report means by a lid.
+--   * `facts` is that without the koepel's own organization, and is what every figure of the
+--     ledenstatistieken is counted from.
+WITH all_registrations AS (
     SELECT
         r.memberId AS member_id,
         r.organizationId AS organization_id,
@@ -47,7 +52,8 @@ WITH all_facts AS (
         END AS `Geslacht`,
         m.birthDate AS birth_date,
         TIMESTAMPDIFF(YEAR, m.birthDate, p.startDate) AS leeftijd,
-        m.postalCode AS postcode
+        m.postalCode AS postcode,
+        r.deactivatedAt AS deactivated_at
     FROM registrations r
     JOIN registration_periods p ON p.id = r.periodId
     JOIN `groups` g ON g.id = r.groupId AND g.deletedAt IS NULL
@@ -57,11 +63,16 @@ WITH all_facts AS (
     LEFT JOIN default_age_groups dag ON dag.id = g.defaultAgeGroupId AND dag.periodId = r.periodId
     JOIN members m ON m.id = r.memberId AND m.periodId = r.periodId
     JOIN organizations o ON o.id = r.organizationId AND o.periodId = r.periodId
-    WHERE r.deactivatedAt IS NULL
-      AND r.registeredAt IS NOT NULL
+    WHERE r.registeredAt IS NOT NULL
       [[AND p.name = {{scoutsjaar}}]]
       [[AND o.name = {{eenheid}}]]
       -- @include aansluiting
+),
+-- Where a registration that was cancelled during the year drops out. It stays a registration of that
+-- werkjaar -- someone who left in november was a lid of that year -- but it is no longer one of the
+-- registrations the ledenstatistieken count, which are the ones that are still standing.
+all_facts AS (
+    SELECT f.* FROM all_registrations f WHERE f.deactivated_at IS NULL
 ),
 -- The koepel's own organization is not an eenheid: it is the national body, and the client's report
 -- counts the structuurvrijwilligers of its ploegen as nobody's leden and nobody's leiding. Which

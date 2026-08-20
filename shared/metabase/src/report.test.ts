@@ -40,7 +40,7 @@ describe('report', () => {
 
             expect(card.title).toEqual('Totaal leden');
             expect(card.display).toEqual('scalar');
-            expect(card.sql).toContain('WITH all_facts AS');
+            expect(card.sql).toContain('WITH all_registrations AS');
             expect(card.sql).not.toContain('@include');
         });
 
@@ -109,13 +109,13 @@ describe('report', () => {
         });
 
         /**
-         * The one card that is about that organization. It reads `all_facts`, the same rows before
-         * the koepel is dropped -- filtered like the rest, it would deliver an empty sheet.
+         * The one card that is about that organization. It reads the rows before the koepel is
+         * dropped -- filtered like the rest, it would deliver an empty sheet.
          */
         it('delivers the koepel itself in the aanlevering', () => {
             const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-bovenlokaal').sql;
 
-            expect(sql).toContain('FROM all_facts f\nJOIN platform pf ON pf.membershipOrganizationId = f.organization_id');
+            expect(sql).toContain('FROM all_registrations f\nJOIN platform pf ON pf.membershipOrganizationId = f.organization_id');
             expect(/FROM facts\b/.test(sql)).toBe(false);
         });
 
@@ -172,9 +172,38 @@ describe('report', () => {
         it('counts a member of a group once, as leiding when they are leiding anywhere in it', () => {
             const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql.replaceAll(/\s+/g, ' ');
 
-            expect(sql).toContain("MAX(CASE WHEN f.`Tak` = 'Leiding' THEN 1 WHEN f.categorie = 'child' THEN 0 ELSE 1 END) AS is_leiding");
-            expect(sql).toContain('GROUP BY f.organization_id, f.member_id )');
+            expect(sql).toContain("CASE WHEN f.`Tak` = 'Leiding' THEN 1 WHEN f.categorie = 'child' THEN 0 ELSE 1 END AS is_leiding");
+            expect(sql).toContain('GROUP BY i.organization_id, i.member_id )');
             expect(sql).toContain("CASE WHEN d.is_leiding = 1 THEN 'leiding' ELSE 'leden' END");
+        });
+
+        /**
+         * A cancelled registration says someone was there, not what they were. An administrator who
+         * puts a lid in the Leiding tak by mistake and undoes it would otherwise leave them leiding
+         * for the rest of the werkjaar, while the registration they really hold says what they are.
+         *
+         * Only a member whose registrations at the group were all cancelled -- someone who left
+         * during the year -- has nothing else to be read from, which is what the fallback is for.
+         */
+        it('lets the registrations that still stand decide what someone is', () => {
+            const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql.replaceAll(/\s+/g, ' ');
+
+            expect(sql).toContain('COALESCE( MAX(CASE WHEN i.deactivated_at IS NULL THEN i.is_leiding END), MAX(i.is_leiding) ) AS is_leiding');
+        });
+
+        /**
+         * Someone who stopped in november was a deelnemer of that werkjaar: the metadatafiche counts
+         * everyone who was registered at some point between september and august. The
+         * ledenstatistieken count what is still standing, so the two read a different set of rows --
+         * which is the whole reason `all_facts` is a step of its own.
+         */
+        it('delivers the deelnemers who left during the werkjaar, which the ledenstatistieken drop', () => {
+            // Every card carries the line the fragment reads it by; what counts is the card's own FROM.
+            const own = (sql: string) => sql.replace('SELECT f.* FROM all_registrations f WHERE f.deactivated_at IS NULL', '');
+            const cards = dashboards.flatMap(dashboard => dashboard.cards.filter(card => own(card.sql).includes('FROM all_registrations f')));
+
+            expect(cards.map(card => card.key)).toEqual(['deelnemers-bovenlokaal', 'deelnemers-lokale-groep']);
+            expect(cards[0].sql.replaceAll(/\s+/g, ' ')).toContain('all_facts AS ( SELECT f.* FROM all_registrations f WHERE f.deactivated_at IS NULL )');
         });
 
         /**
