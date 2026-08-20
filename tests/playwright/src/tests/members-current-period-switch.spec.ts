@@ -6,6 +6,7 @@ setup();
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization, User } from '@stamhoofd/models';
 import { GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { appToUri, GroupCategory, GroupCategorySettings, PermissionLevel, Permissions, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
@@ -145,7 +146,7 @@ test.describe('Switching the current period from the members menu @members-perio
     }
 
     async function loginAs({ page, user }: { page: Page; user: User }) {
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
         const tokenString = JSON.stringify(new TokenStruct(token).encode({ version: Version }));
 
         const organizationId = user.organizationId;

@@ -10,12 +10,13 @@ import { exportSlice } from '../../../../../tests/helpers/ExportSlice.js';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { GetBalanceItemBreakdownEndpoint } from './GetBalanceItemBreakdownEndpoint.js';
 import { GetBalanceItemEndpoint } from './GetBalanceItemEndpoint.js';
+import { SessionService } from '../../../../services/SessionService.js';
 
 describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
     const endpoint = new GetBalanceItemBreakdownEndpoint();
 
     const getBreakdown = async ({ filter, path, organization, user }: { filter?: StamhoofdFilter; path?: BreakdownPathItem[]; organization: Organization; user: User }) => {
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const request = Request.get({
             path: '/balance-items/breakdown',

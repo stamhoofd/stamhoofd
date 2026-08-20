@@ -3,6 +3,7 @@ import type { Organization, User } from '@stamhoofd/models';
 import { MFATOTP, OrganizationFactory, Token, UserFactory, WebauthnCredential } from '@stamhoofd/models';
 import { OrganizationAdmins, PermissionLevel, Permissions } from '@stamhoofd/structures';
 import crypto from 'crypto';
+import { SessionService } from '../../../../services/SessionService.js';
 
 import { MFATestHelper } from '../../../../../tests/helpers/MFATestHelper.js';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
@@ -19,7 +20,7 @@ describe('Endpoint.GetOrganizationAdmins', () => {
     }
 
     async function getAdmins(organization: Organization, user: User) {
-        const token = await Token.createToken(user, new Date());
+        const token = await SessionService.createSession(user, { authenticatedAt: new Date() });
         const request = Request.buildJson('GET', '/organization/admins', organization.getApiHost());
         request.headers.authorization = 'Bearer ' + token.accessToken;
 
@@ -45,7 +46,7 @@ describe('Endpoint.GetOrganizationAdmins', () => {
         inactiveAdmin.lastActiveAt = lastActiveAt;
         await inactiveAdmin.save();
 
-        const token = await Token.createToken(user, new Date());
+        const token = await SessionService.createSession(user, { authenticatedAt: new Date() });
         const request = Request.buildJson('GET', '/organization/admins', organization.getApiHost());
         request.headers.authorization = 'Bearer ' + token.accessToken;
 

@@ -31,6 +31,7 @@ export * from './STPackage.js';
 export { STPendingInvoice } from './STPendingInvoice.js';
 export * from './Ticket.js';
 export { Token, type TokenWithUser } from './Token.js';
+export { UserSession } from './UserSession.js';
 export * from './UsedRegisterCode.js';
 export * from './Webshop.js';
 

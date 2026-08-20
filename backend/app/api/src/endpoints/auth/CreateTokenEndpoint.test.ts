@@ -1,6 +1,9 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { OrganizationFactory, Token, User, UserFactory } from '@stamhoofd/models';
-import { Token as TokenStruct } from '@stamhoofd/structures';
+import type { Organization } from '@stamhoofd/models';
+import { OrganizationFactory, Token, User, UserFactory, UserSession } from '@stamhoofd/models';
+import { SESSION_DURATIONS } from '@stamhoofd/models/constants/sessions.js';
+import { PermissionLevel, Permissions, SessionClientType, Token as TokenStruct } from '@stamhoofd/structures';
+import { SessionService } from '../../services/SessionService.js';
 
 import { testServer } from '../../../tests/helpers/TestServer.js';
 import { CreateTokenEndpoint } from './CreateTokenEndpoint.js';
@@ -41,7 +44,7 @@ describe('Endpoint.CreateToken', () => {
         // Also check UTF8 passwords
         const password = '54😂test👌🏾86s&é';
         const user = await new UserFactory({ organization, password }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const r = Request.buildJson('POST', '/oauth/token', organization.getApiHost(), {
             grant_type: 'refresh_token',
@@ -94,7 +97,7 @@ describe('Endpoint.CreateToken', () => {
         test('refreshing a token marks the user as active again', async () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization, password }).create();
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const monthsAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
             monthsAgo.setMilliseconds(0);
@@ -123,6 +126,209 @@ describe('Endpoint.CreateToken', () => {
             await expect(testServer.test(endpoint, r)).rejects.toThrow();
 
             expect(await getLastActiveAt(user)).toBeNull();
+        });
+    });
+
+    describe('session length', () => {
+        const password = 'test-password-1234';
+        const DAY = 24 * 60 * 60 * 1000;
+
+        function expectValidFor(date: Date, duration: number) {
+            expect(date.getTime()).toBeGreaterThan(Date.now() + duration - 5000);
+            expect(date.getTime()).toBeLessThanOrEqual(Date.now() + duration);
+        }
+
+        async function login(organization: Organization, user: User, platform: string | null = null): Promise<Token> {
+            const r = Request.buildJson('POST', '/oauth/token', organization.getApiHost(), {
+                grant_type: 'password',
+                username: user.email,
+                password,
+            });
+            if (platform) {
+                r.headers['x-platform'] = platform;
+            }
+
+            const response = await testServer.test(endpoint, r);
+            if (!(response.body instanceof TokenStruct)) {
+                throw new Error('Expected TokenStruct');
+            }
+
+            const token = await Token.getByAccessToken(response.body.accessToken);
+            expect(token).toBeDefined();
+            return token!;
+        }
+
+        async function refresh(organization: Organization, refreshToken: string): Promise<Token> {
+            const r = Request.buildJson('POST', '/oauth/token', organization.getApiHost(), {
+                grant_type: 'refresh_token',
+                refresh_token: refreshToken,
+            });
+
+            const response = await testServer.test(endpoint, r);
+            if (!(response.body instanceof TokenStruct)) {
+                throw new Error('Expected TokenStruct');
+            }
+
+            const token = await Token.getByAccessToken(response.body.accessToken);
+            expect(token).toBeDefined();
+            return token!;
+        }
+
+        async function getSession(token: Token): Promise<UserSession> {
+            const session = await UserSession.getByID(token.sessionId);
+            if (!session) throw new Error('Expected user session');
+            return session;
+        }
+
+        test('an administrator that signs in in a browser gets a limited session', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const admin = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            const token = await login(organization, admin, 'web');
+
+            expect((await getSession(token)).clientType).toBe(SessionClientType.Browser);
+            expectValidFor(token.refreshTokenValidUntil, SESSION_DURATIONS.admin[SessionClientType.Browser].refreshToken);
+        });
+
+        test('an administrator that signs in in the native app has no maximum session length', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const admin = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            const token = await login(organization, admin, 'ios');
+
+            expect((await getSession(token)).clientType).toBe(SessionClientType.iOS);
+            expectValidFor(token.refreshTokenValidUntil, SESSION_DURATIONS.admin[SessionClientType.iOS].refreshToken);
+
+            const browserSessionDuration = SESSION_DURATIONS.admin[SessionClientType.Browser].session;
+            if (browserSessionDuration === null) {
+                throw new Error('Expected browser administrator sessions to have a maximum length');
+            }
+            const userSession = await getSession(token);
+            userSession.startedAt = new Date(Date.now() - 2 * browserSessionDuration);
+            await userSession.save();
+
+            const renewed = await refresh(organization, token.refreshToken);
+            expectValidFor(renewed.refreshTokenValidUntil, SESSION_DURATIONS.admin[SessionClientType.iOS].refreshToken);
+        });
+
+        test('renewing the same active token twice revokes the first replacement', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ organization, password }).create();
+            const original = await login(organization, user);
+
+            const firstReplacement = await refresh(organization, original.refreshToken);
+            const secondReplacement = await refresh(organization, original.refreshToken);
+
+            expect(secondReplacement.sessionId).toBe(original.sessionId);
+            expect(await Token.getByAccessToken(firstReplacement.accessToken)).toBeUndefined();
+            expect(await Token.getByAccessToken(original.accessToken)).toBeDefined();
+            expect(await Token.getByAccessToken(secondReplacement.accessToken)).toBeDefined();
+
+            const sessionTokens = await Token.where({ sessionId: original.sessionId });
+            expect(sessionTokens.map(token => token.id).sort()).toEqual([original.id, secondReplacement.id].sort());
+
+            const forkRequest = Request.buildJson('POST', '/oauth/token', organization.getApiHost(), {
+                grant_type: 'refresh_token',
+                refresh_token: firstReplacement.refreshToken,
+            });
+            await expect(testServer.test(endpoint, forkRequest)).rejects.toMatchObject({ code: 'invalid_refresh_token' });
+        });
+
+        test('an SSO handoff refresh token can only be exchanged once', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ organization }).create();
+            const handoff = await SessionService.createSSOHandoff(user);
+
+            const sessionToken = await refresh(organization, handoff.refreshToken);
+            expect(sessionToken.sessionId).toBe(handoff.sessionId);
+
+            await expect(refresh(organization, handoff.refreshToken)).rejects.toMatchObject({
+                code: 'invalid_refresh_token',
+            });
+        });
+
+        test('concurrent exchanges cannot fork an SSO handoff', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ organization }).create();
+            const handoff = await SessionService.createSSOHandoff(user);
+
+            const exchanges = await Promise.allSettled([
+                refresh(organization, handoff.refreshToken),
+                refresh(organization, handoff.refreshToken),
+            ]);
+
+            expect(exchanges.filter(result => result.status === 'fulfilled')).toHaveLength(1);
+            const rejected = exchanges.filter(result => result.status === 'rejected');
+            expect(rejected).toHaveLength(1);
+            expect(rejected[0].reason).toMatchObject({ code: 'invalid_refresh_token' });
+        });
+
+        test('renewing an access token does not extend the session past its maximum length', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const admin = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            const token = await login(organization, admin, 'web');
+
+            const sessionDuration = SESSION_DURATIONS.admin[SessionClientType.Browser].session;
+            if (sessionDuration === null) {
+                throw new Error('Expected browser administrator sessions to have a maximum length');
+            }
+            const sessionStartedAt = new Date(Date.now() - sessionDuration + DAY);
+            sessionStartedAt.setMilliseconds(0);
+            const userSession = await getSession(token);
+            userSession.startedAt = sessionStartedAt;
+            await userSession.save();
+
+            const renewed = await refresh(organization, token.refreshToken);
+
+            expect((await getSession(renewed)).startedAt).toEqual(sessionStartedAt);
+            expect(renewed.refreshTokenValidUntil.getTime()).toBeLessThanOrEqual(sessionStartedAt.getTime() + sessionDuration);
+            expect(renewed.refreshTokenValidUntil.getTime()).toBeGreaterThan(Date.now());
+        });
+
+        test('a session that reached its maximum length cannot be renewed', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const admin = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            const token = await login(organization, admin, 'web');
+            const sessionDuration = SESSION_DURATIONS.admin[SessionClientType.Browser].session;
+            if (sessionDuration === null) {
+                throw new Error('Expected browser administrator sessions to have a maximum length');
+            }
+            const userSession = await getSession(token);
+            userSession.startedAt = new Date(Date.now() - sessionDuration - DAY);
+            await userSession.save();
+            token.refreshTokenValidUntil = new Date(Date.now() + DAY);
+            await token.save();
+
+            const otherSession = await login(organization, admin, 'web');
+
+            const r = Request.buildJson('POST', '/oauth/token', organization.getApiHost(), {
+                grant_type: 'refresh_token',
+                refresh_token: token.refreshToken,
+            });
+
+            await expect(testServer.test(endpoint, r)).rejects.toMatchObject({ code: 'invalid_refresh_token' });
+            expect(await Token.getByAccessToken(otherSession.accessToken)).toBeDefined();
+
+            await expect(testServer.test(endpoint, r)).rejects.toMatchObject({ code: 'invalid_refresh_token' });
+            expect(await Token.getByAccessToken(otherSession.accessToken)).toBeDefined();
         });
     });
 });

@@ -6,6 +6,7 @@ import { TestUtils } from '@stamhoofd/test-utils';
 import { promises as fs } from 'fs';
 import type { IncomingMessage } from 'node:http';
 import { Readable } from 'node:stream';
+import { SessionService } from '../../../services/SessionService.js';
 
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { UploadFile } from './UploadFile.js';
@@ -59,7 +60,7 @@ describe('Endpoint.UploadFile', () => {
             organization,
             permissions: Permissions.create({ level: PermissionLevel.Full }),
         }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const boundary = '--------------------------StamhoofdTest';
         const body = Buffer.concat([

@@ -8,6 +8,7 @@ import { GroupType, PermissionLevel, Permissions, PermissionsResourceType, Regis
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { PatchRegistrationInvitationsEndpoint } from './PatchRegistrationInvitationsEndpoint.js';
+import { SessionService } from '../../../services/SessionService.js';
 
 describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
     const endpoint = new PatchRegistrationInvitationsEndpoint();
@@ -15,7 +16,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
     const patchInvitations = async ({ patch, organization, user }: { patch: PatchableArrayAutoEncoder<RegistrationInvitationRequest>; organization: Organization | null; user: User | null }) => {
         const request = Request.buildJson('PATCH', '/registration-invitations', organization?.getApiHost(), patch);
         if (user) {
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             request.headers.authorization = 'Bearer ' + token.accessToken;
         }
         return await testServer.test<RegistrationInvitationStruct[]>(endpoint, request);

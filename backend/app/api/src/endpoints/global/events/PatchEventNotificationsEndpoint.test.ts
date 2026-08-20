@@ -10,6 +10,7 @@ import { testServer } from '../../../../tests/helpers/TestServer.js';
 import '../../../audit-logs/init.js';
 import { AuditLogService } from '../../../services/AuditLogService.js';
 import { PatchEventNotificationsEndpoint } from './PatchEventNotificationsEndpoint.js';
+import { SessionService } from '../../../services/SessionService.js';
 
 const baseUrl = `/event-notifications`;
 const endpoint = new PatchEventNotificationsEndpoint();
@@ -34,7 +35,7 @@ const TestRequest = {
     }) {
         const request = Request.buildJson('PATCH', baseUrl, options.organization?.getApiHost(), options.body);
         if (options.user) {
-            const token = await Token.createToken(options.user);
+            const token = await SessionService.createSession(options.user);
             request.headers.authorization = 'Bearer ' + token.accessToken;
         }
         return await testServer.test(endpoint, request);

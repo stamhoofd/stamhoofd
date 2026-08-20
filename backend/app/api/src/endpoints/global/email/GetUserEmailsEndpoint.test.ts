@@ -1,12 +1,13 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, RegistrationPeriod, User } from '@stamhoofd/models';
-import { Email, EmailRecipient, MemberFactory, OrganizationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { Organization, RegistrationPeriod, User, Token } from '@stamhoofd/models';
+import { Email, EmailRecipient, MemberFactory, OrganizationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { EmailContent, EmailStatus, LimitedFilteredRequest, Replacement } from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { GetUserEmailsEndpoint } from './GetUserEmailsEndpoint.js';
 import { Formatter } from '@stamhoofd/utility';
+import { SessionService } from '../../../services/SessionService.js';
 
 const baseUrl = `/user/email`;
 
@@ -39,7 +40,7 @@ describe('Endpoint.GetUserEmails', () => {
             user,
         }).create();
 
-        userToken = await Token.createToken(user);
+        userToken = await SessionService.createSession(user);
     });
 
     afterEach(async () => {
@@ -726,7 +727,7 @@ describe('Endpoint.GetUserEmails', () => {
         expect(response.body.results.find(e => e.id === email.id)).toBeUndefined();
 
         // Test that is IS included if we request the same data via the 'otherUser' token
-        const otherUserToken = await Token.createToken(otherUser);
+        const otherUserToken = await SessionService.createSession(otherUser);
         const responseForOtherUser = await getUserEmails(new LimitedFilteredRequest({ limit: 10 }), otherUserToken);
         expect(responseForOtherUser.body.results.find(e => e.id === email.id)).toBeDefined();
     });
@@ -805,7 +806,7 @@ describe('Endpoint.GetUserEmails', () => {
                 host: organization.getApiHost(),
                 query: new LimitedFilteredRequest({ limit: 10 }),
                 headers: {
-                    'authorization': 'Bearer ' + userToken.accessToken,
+                    authorization: 'Bearer ' + userToken.accessToken,
                     ...(language ? { 'accept-language': language } : {}),
                 },
             });

@@ -80,6 +80,7 @@ const email = ref($user.value?.email ?? '');
 const password = ref('');
 const loading = ref(false);
 let didComplete = false;
+let accessTokenToEnd: string | null = null;
 const { gotoPasswordForgot } = useForgotPassword({ email });
 
 const passwordEnabled = useLoginMethodEnabled(email, LoginMethod.Password);
@@ -100,6 +101,12 @@ async function complete(navigation: NavigationActions) {
     if (didComplete) {
         return;
     }
+
+    const currentAccessToken = $context.value.currentAccessToken;
+    if (accessTokenToEnd && currentAccessToken && currentAccessToken !== accessTokenToEnd) {
+        await $context.value.endSession(accessTokenToEnd);
+    }
+
     didComplete = true;
     await props.onAuthenticated(navigation);
 }
@@ -163,6 +170,7 @@ async function submit() {
     errors.errorBox = null;
 
     try {
+        accessTokenToEnd ??= $context.value.currentAccessToken;
         const result = await LoginHelper.login($context.value, email.value, password.value);
 
         if (result.mfaChallenge) {

@@ -7,6 +7,7 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { EmailMocker } from '@stamhoofd/email';
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization, User } from '@stamhoofd/models';
 import { STPackageFactory, Token, UserFactory } from '@stamhoofd/models';
 import {
@@ -24,7 +25,7 @@ import { WorkerData } from '../helpers/index.js';
 EmailMocker.infect();
 
 async function loginAs({ page, user }: { page: Page; user: User }) {
-    const token = await Token.createToken(user);
+    const token = await SessionService.createSession(user);
     const tokenString = JSON.stringify(new TokenStruct(token).encode({ version: Version }));
 
     const organizationId = user.organizationId;

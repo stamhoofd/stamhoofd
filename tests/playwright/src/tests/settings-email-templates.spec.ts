@@ -4,6 +4,7 @@ setup();
 
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization, User } from '@stamhoofd/models';
 import { EmailTemplate, GroupFactory, OrganizationFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import { EmailContent, EmailTemplateType, PermissionLevel, Permissions, STPackageStatus, STPackageType } from '@stamhoofd/structures';
@@ -46,7 +47,7 @@ test.describe('Settings email templates', () => {
             }),
         }).create();
 
-        await Token.createToken(user);
+        await SessionService.createSession(user);
     });
 
     test.beforeEach(async () => {

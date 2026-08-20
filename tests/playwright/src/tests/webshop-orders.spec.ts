@@ -6,6 +6,7 @@ setup();
 import type { Browser, Page } from '@playwright/test';
 import { devices, expect } from '@playwright/test';
 import { MollieMocker, PayconiqMocker, STPackageService, StripeMocker } from '@stamhoofd/backend/tests/helpers';
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { User } from '@stamhoofd/models';
 import { Order, OrderFactory, Organization, OrganizationFactory, Payment, TicketFactory, Token, UserFactory } from '@stamhoofd/models';
 import {
@@ -45,19 +46,24 @@ const MOLLIE_CHECKOUT_URL = 'https://molliecheckout/';
  * Only used for the admin "mark paid" step; the customer order flow itself is unauthenticated.
  */
 async function loginAs({ page, user }: { page: Page; user: User }) {
-    const token = await Token.createToken(user);
+    const token = await SessionService.createSession(user);
     const tokenString = JSON.stringify(new TokenStruct(token).encode({ version: Version }));
 
     if (STAMHOOFD.userMode === 'platform') {
         await page.addInitScript(({ tokenString }) => {
-            window.localStorage.setItem('token-platform', tokenString);
+            if (!window.localStorage.getItem('token-platform')) {
+                window.localStorage.setItem('token-platform', tokenString);
+            }
         }, { tokenString });
     } else {
         const organizationId = user.organizationId;
         await page.addInitScript(({ organizationId, tokenString }) => {
             if (organizationId) {
-                window.localStorage.setItem('token-' + organizationId, tokenString);
-            } else {
+                const key = 'token-' + organizationId;
+                if (!window.localStorage.getItem(key)) {
+                    window.localStorage.setItem(key, tokenString);
+                }
+            } else if (!window.localStorage.getItem('token-platform')) {
                 window.localStorage.setItem('token-platform', tokenString);
             }
         }, { organizationId, tokenString });

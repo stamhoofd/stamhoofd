@@ -1,10 +1,14 @@
-import { Endpoint, Request } from '@simonbackx/simple-endpoints';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import type { Endpoint } from '@simonbackx/simple-endpoints';
+import { Request } from '@simonbackx/simple-endpoints';
+import type { SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { EmailMocker } from '@stamhoofd/email';
-import { AuditLog, EmailTemplateFactory, EmailVerificationCode, MFARecoveryCode, MFATOTP, MFAToken, Organization, PasswordToken, Platform, Token, User, UserFactory, OrganizationFactory, WebauthnChallenge, WebauthnCredential } from '@stamhoofd/models';
-import { AuditLogReplacementType, AuditLogType, EmailTemplateType, MFAMethodType, PermissionLevel, Permissions, Token as TokenStruct } from '@stamhoofd/structures';
+import type { Organization } from '@stamhoofd/models';
+import { AuditLog, EmailTemplateFactory, EmailVerificationCode, MFARecoveryCode, MFATOTP, MFAToken, PasswordToken, Platform, Token, User, UserFactory, OrganizationFactory, UserSession, WebauthnChallenge, WebauthnCredential } from '@stamhoofd/models';
+import { AuditLogReplacementType, AuditLogType, EmailTemplateType, MFAMethodType, PermissionLevel, Permissions, SessionLoginMethod, Token as TokenStruct } from '@stamhoofd/structures';
 import { authenticator } from 'otplib';
 import crypto from 'crypto';
+import { SessionService } from '../../services/SessionService.js';
 
 import { MFATestHelper } from '../../../tests/helpers/MFATestHelper.js';
 import { testServer } from '../../../tests/helpers/TestServer.js';
@@ -43,8 +47,7 @@ function firstError(e: unknown): SimpleError {
 async function captureError(promise: Promise<unknown>): Promise<SimpleError> {
     try {
         await promise;
-    }
-    catch (e) {
+    } catch (e) {
         return firstError(e);
     }
     throw new Error('Expected the request to throw');
@@ -106,12 +109,12 @@ function bearer(request: Request, token: Token) {
 }
 
 async function freshToken(user: User): Promise<Token> {
-    return await Token.createToken(user, new Date());
+    return await SessionService.createSession(user, { authenticatedAt: new Date() });
 }
 
 async function staleToken(user: User): Promise<Token> {
     // A token as produced by a refresh_token rotation (never authenticatedAt).
-    return await Token.createToken(user);
+    return await SessionService.createSession(user);
 }
 
 async function requireMfa(organization: Organization | null, email: string, password: string): Promise<{ token: string; methods: string[]; webauthnAuthenticationOptions: unknown }> {
@@ -668,8 +671,7 @@ describe('MFA', () => {
                 const err = await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)));
                 expect(err.code).toBe('require_email_confirmation');
                 expect(send).toHaveBeenCalledOnce();
-            }
-            finally {
+            } finally {
                 send.mockRestore();
             }
         });
@@ -690,7 +692,7 @@ describe('MFA', () => {
             // The identity provider authenticated the user, so there is nothing to confirm.
             const { organization, user } = await inactiveAdmin();
 
-            const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod: 'sso' });
+            const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod: SessionLoginMethod.SSO });
             expect(requirement.type).toBe('setup');
         });
     });
@@ -1414,14 +1416,14 @@ describe('MFA', () => {
             const { organization, user } = await adminOfOrgRequiringTwoFactor({ withPassword: false });
             await addConfirmedTOTP(user);
 
-            const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod: 'sso' });
+            const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod: SessionLoginMethod.SSO });
             expect(requirement.type).toBe('challenge');
         });
 
         test('an SSO-only account is not forced to enroll: the provider is the second factor', async () => {
             const { organization, user } = await adminOfOrgRequiringTwoFactor({ withPassword: false });
 
-            const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod: 'sso' });
+            const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod: SessionLoginMethod.SSO });
             expect(requirement.type).toBe('none');
         });
 
@@ -1430,15 +1432,40 @@ describe('MFA', () => {
             // requirement is not satisfied by signing in through SSO.
             const { organization, user } = await adminOfOrgRequiringTwoFactor({ withPassword: true });
 
-            const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod: 'sso' });
+            const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod: SessionLoginMethod.SSO });
             expect(requirement.type).toBe('setup');
         });
 
         test('a password login is always forced to enroll', async () => {
             const { organization, user } = await adminOfOrgRequiringTwoFactor({ withPassword: true });
 
-            const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod: 'password' });
+            const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod: SessionLoginMethod.Password });
             expect(requirement.type).toBe('setup');
+        });
+
+        test('the session of an SSO login that passed a second factor is an SSO session', async () => {
+            // The session is only created after the second factor, so the challenge has to
+            // remember how the user got there: it decides how long the session may live.
+            const { organization, user } = await adminOfOrgRequiringTwoFactor({ withPassword: false });
+            const { secret } = await addConfirmedTOTP(user);
+
+            const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod: SessionLoginMethod.SSO });
+            if (requirement.type !== 'challenge') {
+                throw new Error('Expected a challenge');
+            }
+
+            const response = await testServer.test(tokenEndpoint, mfaGrant(organization, {
+                mfa_token: requirement.challenge.token,
+                method: 'TOTP',
+                code: authenticator.generate(secret),
+            }));
+            if (!(response.body instanceof TokenStruct)) {
+                throw new Error('Expected TokenStruct');
+            }
+
+            const token = await Token.getByAccessToken(response.body.accessToken);
+            expect((await UserSession.getByID(token!.sessionId))!.loginMethod).toBe(SessionLoginMethod.SSO);
+            expect(token!.refreshTokenValidUntil.getTime()).toBeLessThanOrEqual(Date.now() + 3 * 60 * 60 * 1000);
         });
     });
 

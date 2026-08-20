@@ -5,6 +5,7 @@ setup();
 // other imports
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization, User } from '@stamhoofd/models';
 import { OrganizationFactory, Platform, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel, Permissions, Token as TokenStruct, Version } from '@stamhoofd/structures';
@@ -40,7 +41,7 @@ async function setPlatformFeatureFlags(featureFlags: string[]) {
  * get used.
  */
 async function loginAs({ page, user }: { page: Page; user: User }) {
-    const token = await Token.createToken(user);
+    const token = await SessionService.createSession(user);
     const tokenString = JSON.stringify(
         new TokenStruct(token).encode({ version: Version }),
     );

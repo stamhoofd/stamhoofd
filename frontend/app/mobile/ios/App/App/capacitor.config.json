@@ -30,6 +30,7 @@
 		"InAppReviewPlugin",
 		"AppPlugin",
 		"AppLauncherPlugin",
+		"DevicePlugin",
 		"FilesystemPlugin",
 		"HapticsPlugin",
 		"KeyboardPlugin",

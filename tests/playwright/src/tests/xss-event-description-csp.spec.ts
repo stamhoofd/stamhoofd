@@ -4,6 +4,7 @@ setup();
 
 // other imports
 import { expect } from '@playwright/test';
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization, User } from '@stamhoofd/models';
 import {
     EventFactory,
@@ -74,7 +75,7 @@ test.describe('Stored XSS in event description is blocked by CSP @xss', () => {
             permissions: Permissions.create({ level: PermissionLevel.Full }),
         }).create();
 
-        await Token.createToken(user);
+        await SessionService.createSession(user);
 
         const startDate = new Date();
         startDate.setDate(startDate.getDate() + 1);

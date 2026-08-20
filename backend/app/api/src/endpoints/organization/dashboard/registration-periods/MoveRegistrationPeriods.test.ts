@@ -1,8 +1,9 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/models';
-import { GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { Organization, OrganizationRegistrationPeriod, RegistrationPeriod, Token } from '@stamhoofd/models';
+import { GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { Group, GroupCategory, GroupCategorySettings, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, OrganizationRegistrationPeriodSettings, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
 import { PatchOrganizationRegistrationPeriodsEndpoint } from './PatchOrganizationRegistrationPeriodsEndpoint.js';
+import { SessionService } from '../../../../services/SessionService.js';
 
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
@@ -37,7 +38,7 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveRegistration
                     level: PermissionLevel.Full,
                 }),
             }).create();
-            token = await Token.createToken(user);
+            token = await SessionService.createSession(user);
 
             const allGroupsUser = await new UserFactory({
                 organization,
@@ -52,7 +53,7 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveRegistration
                     ]]),
                 }),
             }).create();
-            allGroupsToken = await Token.createToken(allGroupsUser);
+            allGroupsToken = await SessionService.createSession(allGroupsUser);
         });
 
         const patchOrganizationRegistrationPeriods = async ({ patch, organization, token }: { patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> | OrganizationRegistrationPeriodStruct[]; organization: Organization; token: Token }) => {
@@ -317,7 +318,7 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveRegistration
                     level: PermissionLevel.Full,
                 }),
             }).create();
-            token = await Token.createToken(user);
+            token = await SessionService.createSession(user);
         });
 
         const patchOrganizationRegistrationPeriods = async ({ patch, organization, token }: { patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> | OrganizationRegistrationPeriodStruct[]; organization: Organization; token: Token }) => {
@@ -506,7 +507,7 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveCategoryToPe
                 level: PermissionLevel.Full,
             }),
         }).create();
-        token = await Token.createToken(user);
+        token = await SessionService.createSession(user);
     });
 
     const patchOrganizationRegistrationPeriods = async ({ patch }: { patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> }) => {

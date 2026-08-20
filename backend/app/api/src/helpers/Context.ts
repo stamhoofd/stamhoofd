@@ -1,13 +1,11 @@
-import { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@simonbackx/simple-endpoints';
 import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { MFAToken, Organization, Platform, RateLimiter, Token, User } from '@stamhoofd/models';
-import { AsyncLocalStorage } from 'async_hooks';
-
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { ApiUserRateLimits } from '@stamhoofd/structures';
+import { SessionService } from '../services/SessionService.js';
 import { AdminPermissionChecker } from './AdminPermissionChecker.js';
+import { contextStorage } from './ContextStorage.js';
 import { TwoFactorHelper } from './TwoFactorHelper.js';
 
 export const apiUserRateLimiter = new RateLimiter({
@@ -62,7 +60,7 @@ export class ContextInstance {
         this.request = request;
     }
 
-    static asyncLocalStorage = new AsyncLocalStorage<ContextInstance>();
+    static asyncLocalStorage = contextStorage;
 
     static get optional(): ContextInstance | null {
         const c = this.asyncLocalStorage.getStore();
@@ -292,6 +290,15 @@ export class ContextInstance {
             throw new SimpleError({
                 code: 'expired_access_token',
                 message: 'The access token is expired',
+                human: $t(`%Fi`),
+                statusCode: 401,
+            });
+        }
+
+        if (!await SessionService.activateToken(token)) {
+            throw new SimpleError({
+                code: 'invalid_access_token',
+                message: 'The access token is invalid',
                 human: $t(`%Fi`),
                 statusCode: 401,
             });

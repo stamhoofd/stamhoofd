@@ -1,11 +1,12 @@
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, StripeAccount } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemFactory, BalanceItemPayment, Order, OrderFactory, OrganizationFactory, Payment, Token, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
+import type { Organization, StripeAccount, Token } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemFactory, BalanceItemPayment, Order, OrderFactory, OrganizationFactory, Payment, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
 import type { OrderResponse } from '@stamhoofd/structures';
 import { BalanceItemStatus, Cart, CartItem, Customer, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, PaymentStatus, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductPrice, TransferSettings, WebshopCrowdfunding, WebshopMetaData, WebshopPrivateMetaData } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
+import { SessionService } from './SessionService.js';
 
 import type { StripeObject } from '../../tests/helpers/StripeMocker.js';
 import { StripeMocker } from '../../tests/helpers/StripeMocker.js';
@@ -234,7 +235,7 @@ describe('WebshopCrowdfundingService', () => {
                     level: PermissionLevel.Full,
                 }),
             }).create();
-            token = await Token.createToken(user);
+            token = await SessionService.createSession(user);
         });
 
         afterAll(() => {

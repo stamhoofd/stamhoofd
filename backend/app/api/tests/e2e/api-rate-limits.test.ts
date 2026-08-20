@@ -1,6 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization } from '@stamhoofd/models';
 import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
+import { SessionService } from '../../src/services/SessionService.js';
 
 import { ApiUser, ApiUserRateLimits, PermissionLevel, Permissions, UserMeta, UserPermissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
@@ -29,7 +30,7 @@ describe('E2E.APIRateLimits', () => {
                 level: PermissionLevel.Full,
             }),
         }).create();
-        const token = await Token.createToken(user, new Date());
+        const token = await SessionService.createSession(user, { authenticatedAt: new Date() });
 
         const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
             permissions: UserPermissions.create({

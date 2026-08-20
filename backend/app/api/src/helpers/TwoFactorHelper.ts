@@ -1,13 +1,14 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { I18n } from '@stamhoofd/backend-i18n/I18n';
-import type { User } from '@stamhoofd/models';
-import { MFARecoveryCode, MFATOTP, MFAToken, Organization, Platform, RateLimiter, Token, WebauthnCredential } from '@stamhoofd/models';
+import type { User, Token } from '@stamhoofd/models';
+import { MFARecoveryCode, MFATOTP, MFAToken, Organization, Platform, RateLimiter, WebauthnCredential } from '@stamhoofd/models';
 import type { User as UserStruct } from '@stamhoofd/structures';
-import { MFAChallengeResponse, MFAEnrollmentResult, MFAMethodType, MFASetupResponse, MFAStatus, PasskeyCredential, RecoveryCodes, TOTPCredential, Token as TokenStruct } from '@stamhoofd/structures';
+import { MFAChallengeResponse, MFAEnrollmentResult, MFAMethodType, MFASetupResponse, MFAStatus, PasskeyCredential, RecoveryCodes, SessionLoginMethod, TOTPCredential, Token as TokenStruct } from '@stamhoofd/structures';
 
 import type { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/server';
 
 import { PasswordForgotService } from '../services/PasswordForgotService.js';
+import { SessionService } from '../services/SessionService.js';
 import { RecoveryCodeHelper } from './RecoveryCodeHelper.js';
 import { WebauthnHelper } from './WebauthnHelper.js';
 import { Formatter, Sorter } from '@stamhoofd/utility';
@@ -133,33 +134,33 @@ export class TwoFactorHelper {
      * credential was accepted.
      *
      * `loginMethod` describes the credential that was just verified:
-     *  - 'password': the account password. A single credential that says nothing about
+     *  - Password: the account password. A single credential that says nothing about
      *    whether the user still reads the email address on the account, so a required
      *    second factor must be set up here if the user does not have one yet — and a
      *    long-inactive admin has to confirm their email address before they may.
-     *  - 'email': a password token or email verification code. Also a single credential,
+     *  - Email: a password token or email verification code. Also a single credential,
      *    but one that only reaches someone who reads the account's email, so it is the way
      *    out of that email confirmation.
-     *  - 'sso': an external identity provider already authenticated the user, and is
+     *  - SSO: an external identity provider already authenticated the user, and is
      *    trusted to apply its own second factor. An enrolled factor is still verified
      *    (the user asked us to protect their account), but we do not force enrollment —
      *    unless the account ALSO has a password, because then the password remains a way
      *    in that bypasses whatever the provider enforces.
      */
-    static async getSecondFactorRequirement(user: User, organization: Organization | null, { loginMethod }: { loginMethod: 'password' | 'email' | 'sso' }): Promise<SecondFactorRequirement> {
+    static async getSecondFactorRequirement(user: User, organization: Organization | null, { loginMethod }: { loginMethod: SessionLoginMethod }): Promise<SecondFactorRequirement> {
         if (await TwoFactorHelper.userHasFactors(user.id)) {
-            return { type: 'challenge', challenge: await TwoFactorHelper.createLoginChallenge(user) };
+            return { type: 'challenge', challenge: await TwoFactorHelper.createLoginChallenge(user, { loginMethod }) };
         }
 
-        if (loginMethod === 'sso' && !user.hasPasswordBasedAccount()) {
+        if (loginMethod === SessionLoginMethod.SSO && !user.hasPasswordBasedAccount()) {
             return { type: 'none' };
         }
 
         if (await TwoFactorHelper.isTwoFactorRequired(user, organization)) {
-            if (loginMethod === 'password' && TwoFactorHelper.isInactiveForEnrollment(user)) {
+            if (loginMethod === SessionLoginMethod.Password && TwoFactorHelper.isInactiveForEnrollment(user)) {
                 return { type: 'confirm-email' };
             }
-            return { type: 'setup', setupToken: await MFAToken.createFor(user.id, 'setup') };
+            return { type: 'setup', setupToken: await MFAToken.createFor(user.id, 'setup', { loginMethod }) };
         }
 
         return { type: 'none' };
@@ -173,16 +174,14 @@ export class TwoFactorHelper {
     static async sendEnrollmentConfirmationEmail(user: User, organization: Organization | null, i18n: I18n): Promise<void> {
         try {
             enrollmentConfirmationRateLimiter.track(user.id);
-        }
-        catch {
+        } catch {
             // Sent often enough already.
             return;
         }
 
         try {
             await PasswordForgotService.sendPasswordRecoveryEmail(user, organization, i18n);
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Could not send the two-factor enrollment confirmation email', e);
         }
     }
@@ -203,7 +202,7 @@ export class TwoFactorHelper {
      * whoever holds the link could enroll one and get a session anyway, and the client
      * needs a session to let the user choose a password before enrolling.
      */
-    static async assertSecondFactorOrThrow(user: User, organization: Organization | null, version: number, { loginMethod, i18n, allowTemporarySession = false }: { loginMethod: 'password' | 'email'; i18n: I18n; allowTemporarySession?: boolean }): Promise<void> {
+    static async assertSecondFactorOrThrow(user: User, organization: Organization | null, version: number, { loginMethod, i18n, allowTemporarySession = false }: { loginMethod: SessionLoginMethod.Password | SessionLoginMethod.Email; i18n: I18n; allowTemporarySession?: boolean }): Promise<void> {
         const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod });
 
         if (requirement.type === 'confirm-email') {
@@ -228,7 +227,7 @@ export class TwoFactorHelper {
         }
 
         if (requirement.type === 'setup') {
-            const temporaryToken = allowTemporarySession ? new TokenStruct(await Token.createToken(user, new Date())) : null;
+            const temporaryToken = allowTemporarySession ? new TokenStruct(await SessionService.createSession(user, { loginMethod, authenticatedAt: new Date() })) : null;
 
             throw new SimpleError({
                 code: 'require_mfa_setup',
@@ -313,7 +312,7 @@ export class TwoFactorHelper {
     /**
      * Create a login MFA session token and the challenge payload returned to the client.
      */
-    static async createLoginChallenge(user: User): Promise<MFAChallengeResponse> {
+    static async createLoginChallenge(user: User, { loginMethod }: { loginMethod: SessionLoginMethod }): Promise<MFAChallengeResponse> {
         const { methods, passkeys } = await TwoFactorHelper.getEnrolledMethods(user.id);
 
         let webauthnOptions: PublicKeyCredentialRequestOptionsJSON | null = null;
@@ -323,7 +322,7 @@ export class TwoFactorHelper {
             challenge = webauthnOptions.challenge;
         }
 
-        const mfaToken = await MFAToken.createFor(user.id, 'login', challenge);
+        const mfaToken = await MFAToken.createFor(user.id, 'login', { webauthnChallenge: challenge, loginMethod });
 
         return MFAChallengeResponse.create({
             token: mfaToken.token,
@@ -376,12 +375,12 @@ export class TwoFactorHelper {
         }
 
         // Before minting the new session, so it is never signed out by its own enrollment.
-        await Token.deleteOtherSessions(user.id, currentToken?.accessToken ?? null);
+        await SessionService.deleteOtherSessions({ userId: user.id, keepAccessToken: currentToken?.accessToken ?? null });
 
         let token: TokenStruct | null = null;
         if (setupToken) {
             await setupToken.consume();
-            const t = await Token.createToken(user, new Date());
+            const t = await SessionService.createSession(user, { loginMethod: setupToken.loginMethod, authenticatedAt: new Date() });
             await user.markActive();
             token = new TokenStruct(t);
         }
@@ -403,7 +402,7 @@ export class TwoFactorHelper {
             await MFARecoveryCode.deleteForUser(user.id);
         }
 
-        await Token.deleteOtherSessions(user.id, currentToken?.accessToken ?? null);
+        await SessionService.deleteOtherSessions({ userId: user.id, keepAccessToken: currentToken?.accessToken ?? null });
 
         return await TwoFactorHelper.buildStatus(user);
     }

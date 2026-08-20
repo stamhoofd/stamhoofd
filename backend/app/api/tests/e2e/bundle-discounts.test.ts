@@ -1,6 +1,6 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { BalanceItem, Organization, RegistrationPeriod } from '@stamhoofd/models';
-import { BalanceItemFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { BalanceItem, Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
+import { BalanceItemFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { AccessRight, AppliedRegistrationDiscount, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, GroupPriceDiscount, GroupPriceDiscountType, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, PermissionLevel, Permissions, PermissionsResourceType, ReduceablePrice, ResourcePermissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { RegisterMembersEndpoint } from '../../src/endpoints/global/registration/RegisterMembersEndpoint.js';
@@ -12,6 +12,7 @@ import { initBundleDiscount } from '../init/initBundleDiscount.js';
 import { initPermissionRole } from '../init/initPermissionRole.js';
 import { initStripe } from '../init/initStripe.js';
 import { initMembershipOrganization } from '../init/initMembershipOrganization.js';
+import { SessionService } from '../../src/services/SessionService.js';
 
 const baseUrl = `/members/register`;
 
@@ -64,7 +65,7 @@ describe('E2E.Bundle Discounts', () => {
             permissions: null,
         }).create();
 
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const member = await new MemberFactory({ organization, user })
             .create();

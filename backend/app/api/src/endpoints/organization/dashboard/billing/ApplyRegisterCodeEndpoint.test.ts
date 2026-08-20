@@ -1,6 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { BalanceItem, OrganizationFactory, RegisterCodeFactory, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { SessionService } from '../../../../services/SessionService.js';
 
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { ApplyRegisterCodeEndpoint } from './ApplyRegisterCodeEndpoint.js';
@@ -20,7 +21,7 @@ describe('Endpoint.ApplyRegisterCodeEndpoint', () => {
 
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const r = Request.buildJson(
             'POST',
@@ -45,7 +46,7 @@ describe('Endpoint.ApplyRegisterCodeEndpoint', () => {
             globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             email: 'admin@stamhoofd.be',
         }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const r = Request.buildJson(
             'POST',

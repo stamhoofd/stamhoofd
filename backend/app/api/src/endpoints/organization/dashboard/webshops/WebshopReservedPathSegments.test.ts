@@ -2,6 +2,7 @@ import { Request } from '@simonbackx/simple-endpoints';
 import { OrganizationFactory, Token, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
 import { Permissions, PermissionLevel, PrivateWebshop, WebshopMetaData } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
+import { SessionService } from '../../../../services/SessionService.js';
 
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { CreateWebshopEndpoint } from './CreateWebshopEndpoint.js';
@@ -25,7 +26,7 @@ describe('Endpoint.WebshopReservedPathSegments', () => {
                 level: PermissionLevel.Full,
             }),
         }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         return { organization, token };
     }

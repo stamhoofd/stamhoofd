@@ -3,6 +3,7 @@ import { OrganizationFactory, Token, UserFactory, Webshop, WebshopFactory } from
 import { PermissionLevel, Permissions, PrivateWebshop, WebshopMetaData } from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';
 import { TestUtils } from '@stamhoofd/test-utils';
+import { SessionService } from '../../../../services/SessionService.js';
 
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { PatchWebshopEndpoint } from './PatchWebshopEndpoint.js';
@@ -22,7 +23,7 @@ describe('Endpoint.PatchWebshop', () => {
                 level: PermissionLevel.Full,
             }),
         }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         return { organization, token };
     }

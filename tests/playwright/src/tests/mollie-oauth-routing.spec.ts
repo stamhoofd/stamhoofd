@@ -4,6 +4,7 @@ setup();
 
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization, User } from '@stamhoofd/models';
 import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel, Permissions, Token as TokenStruct, Version } from '@stamhoofd/structures';
@@ -16,7 +17,7 @@ import { WorkerData } from '../helpers/worker/WorkerData.js';
  */
 
 async function loginAs({ page, user }: { page: Page; user: User }) {
-    const token = await Token.createToken(user);
+    const token = await SessionService.createSession(user);
     const tokenString = JSON.stringify(
         new TokenStruct(token).encode({ version: Version }),
     );

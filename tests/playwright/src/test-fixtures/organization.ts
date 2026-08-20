@@ -3,6 +3,7 @@ import { test, setup as originalSetup } from './base.js';
 export { test } from './base.js';
 
 // All other imports perferably later
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -42,7 +43,7 @@ export function setup() {
         }).create();
 
         // create token
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
         const tokenString = JSON.stringify(
             new TokenStruct(token).encode({ version: Version }),
         );

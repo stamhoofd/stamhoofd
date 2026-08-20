@@ -6,6 +6,7 @@ import { Token, User } from '@stamhoofd/models';
 import { ApiUser, ApiUserWithToken, UserMeta, UserPermissions } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
+import { SessionService } from '../../../../services/SessionService.js';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = ApiUser;
@@ -79,7 +80,7 @@ export class CreateApiUserEndpoint extends Endpoint<Params, Query, Body, Respons
         admin.email = admin.id + '.api';
         await admin.save();
 
-        const createdToken = await Token.createApiToken(admin);
+        const createdToken = await SessionService.createApiSession(admin);
 
         return new Response(ApiUserWithToken.create({
             ...(await Token.getAPIUserWithToken(admin)),

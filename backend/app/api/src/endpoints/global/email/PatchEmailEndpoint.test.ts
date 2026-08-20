@@ -1,14 +1,15 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, RegistrationPeriod, User } from '@stamhoofd/models';
-import { Email, EmailRecipient, GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { Organization, RegistrationPeriod, User, Token } from '@stamhoofd/models';
+import { Email, EmailRecipient, GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { AccessRight, EmailContent, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, Email as EmailStruct, OrganizationEmail, Parent, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, UserPermissions, Version } from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { PatchEmailEndpoint } from './PatchEmailEndpoint.js';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
+import { SessionService } from '../../../services/SessionService.js';
 
 // Import recipient loaders to initialize them
 import { Formatter } from '@stamhoofd/utility';
@@ -82,7 +83,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         })
             .create();
 
-        token = await Token.createToken(user);
+        token = await SessionService.createSession(user);
 
         user2 = await new UserFactory({
             organization,
@@ -99,7 +100,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         })
             .create();
 
-        token2 = await Token.createToken(user2);
+        token2 = await SessionService.createSession(user2);
     });
 
     test('Should throw for invalid senderId', async () => {

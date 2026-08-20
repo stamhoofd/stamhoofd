@@ -13,6 +13,7 @@ import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initUitpasApi } from '../../../../tests/init/index.js';
 import { UniqueMemberNumberService } from '../../../services/UniqueMemberNumberService.js';
 import { PatchOrganizationMembersEndpoint } from './PatchOrganizationMembersEndpoint.js';
+import { SessionService } from '../../../services/SessionService.js';
 
 const baseUrl = `/organization/members`;
 const endpoint = new PatchOrganizationMembersEndpoint();
@@ -50,7 +51,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 generateSensitiveData: true,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
             const put = MemberWithRegistrationsBlob.create({
@@ -100,7 +101,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 organization,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
             const put = MemberWithRegistrationsBlob.create({
@@ -173,7 +174,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 group,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
 
@@ -229,7 +230,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 }),
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
             const newBirthDay = new Date(existingMember.details.birthDay!.getTime() + 1);
@@ -275,7 +276,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 generateData: false,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
             const newBirthDay = new Date(existingMember.details.birthDay!.getTime() + 1);
@@ -361,7 +362,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 group,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
             const newBirthDay = new Date(existingMember.details.birthDay!.getTime() + 1);
@@ -423,7 +424,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             existingMember.organizationId = organization.id;
             await existingMember.save();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
             const put = MemberWithRegistrationsBlob.create({
@@ -465,7 +466,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             existingMember.organizationId = organization.id;
             await existingMember.save();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
             const put = MemberWithRegistrationsBlob.create({
@@ -511,7 +512,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 organization: otherOrganization,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -550,7 +551,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 organization,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -614,7 +615,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 group,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -687,7 +688,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 deactivatedAt: new Date(),
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -733,7 +734,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 generateData: false,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -779,7 +780,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 generateData: false,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -825,7 +826,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false }).create();
             await new RegistrationFactory({ member, group }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
             arr.addPatch(MemberWithRegistrationsBlob.patch({
@@ -851,7 +852,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false }).create();
             await new RegistrationFactory({ member, organization }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const base = member.details.birthDay!;
             const newBirthDay = new Date(base.getFullYear() + 5, base.getMonth() + 4, base.getDate() + 6);
@@ -911,7 +912,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 organization,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
@@ -980,7 +981,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 organization,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
@@ -1052,7 +1053,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 organization,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
@@ -1128,7 +1129,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 group,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
@@ -1197,7 +1198,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 group,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
@@ -1267,7 +1268,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 group,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
@@ -1345,7 +1346,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 group,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
@@ -1429,7 +1430,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(admin);
+            const token = await SessionService.createSession(admin);
 
             const arr: Body = new PatchableArray();
             const d = new Date();
@@ -1543,7 +1544,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(admin);
+            const token = await SessionService.createSession(admin);
 
             const arr: Body = new PatchableArray();
             const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
@@ -1670,7 +1671,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(admin);
+            const token = await SessionService.createSession(admin);
 
             const arr: Body = new PatchableArray();
             const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
@@ -1787,7 +1788,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(admin);
+            const token = await SessionService.createSession(admin);
 
             const arr: Body = new PatchableArray();
             const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
@@ -1939,7 +1940,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(admin);
+            const token = await SessionService.createSession(admin);
 
             const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
             nonEmtpyArray.addPatch(Parent.patch({
@@ -2082,7 +2083,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(admin);
+            const token = await SessionService.createSession(admin);
             const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
             nonEmtpyArray.addPatch(Parent.patch({
                 id: parent1.id,
@@ -2220,7 +2221,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(admin);
+            const token = await SessionService.createSession(admin);
             const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
             nonEmtpyArray.addPatch(Parent.patch({
                 id: parent1.id,
@@ -2322,7 +2323,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(admin);
+            const token = await SessionService.createSession(admin);
             const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
             nonEmtpyArray.addPut(oldestParent);
 
@@ -2410,7 +2411,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(admin);
+            const token = await SessionService.createSession(admin);
             const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
             nonEmtpyArray.addPatch(Parent.patch({
                 id: latestParent.id,
@@ -2532,7 +2533,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(admin);
+            const token = await SessionService.createSession(admin);
             const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
             nonEmtpyArray.addPatch(EmergencyContact.patch({
                 id: contact1.id,
@@ -2650,7 +2651,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(admin);
+            const token = await SessionService.createSession(admin);
             const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
             nonEmtpyArray.addPatch(EmergencyContact.patch({
                 id: contact1.id,
@@ -2727,7 +2728,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(admin);
+            const token = await SessionService.createSession(admin);
             const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
             nonEmtpyArray.addPut(EmergencyContact.create({
                 name: 'Linda Doe',
@@ -2811,7 +2812,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(admin);
+            const token = await SessionService.createSession(admin);
             const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
             nonEmtpyArray.addPut(oldVersionContact);
 
@@ -2881,7 +2882,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(admin);
+            const token = await SessionService.createSession(admin);
             const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
             nonEmtpyArray.addPatch(EmergencyContact.patch({
                 id: contact1.id,
@@ -2956,7 +2957,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(admin);
+            const token = await SessionService.createSession(admin);
             const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
             const d = new Date();
             nonEmtpyArray.addPatch(EmergencyContact.patch({
@@ -3027,7 +3028,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(admin);
+            const token = await SessionService.createSession(admin);
             const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
             nonEmtpyArray.addPut(newContact);
 
@@ -3085,7 +3086,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(admin);
+            const token = await SessionService.createSession(admin);
             const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
             nonEmtpyArray.addPatch(updatedContact);
 
@@ -3140,7 +3141,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(admin);
+            const token = await SessionService.createSession(admin);
             const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
             nonEmtpyArray.addDelete(contact1.id);
 
@@ -3206,7 +3207,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(admin);
+            const token = await SessionService.createSession(admin);
             const nonEmtpyArray1 = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
             nonEmtpyArray1.addPatch(EmergencyContact.patch({
                 id: contact1.id,
@@ -3300,7 +3301,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(admin);
+            const token = await SessionService.createSession(admin);
             const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
             nonEmtpyArray.addPatch(EmergencyContact.patch({
                 id: contact1.id,
@@ -3354,7 +3355,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                         organization, // since we are in platform mode, this will only set the permissions for this organization
                     }).create();
 
-                    const token = await Token.createToken(user);
+                    const token = await SessionService.createSession(user);
 
                     // patch uitpas number
                     const arr: Body = new PatchableArray();
@@ -3401,7 +3402,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                         organization, // since we are in platform mode, this will only set the permissions for this organization
                     }).create();
 
-                    const token = await Token.createToken(user);
+                    const token = await SessionService.createSession(user);
 
                     // create member
                     const member = await new MemberFactory({
@@ -3459,7 +3460,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                         organization, // since we are in platform mode, this will only set the permissions for this organization
                     }).create();
 
-                    const token = await Token.createToken(user);
+                    const token = await SessionService.createSession(user);
 
                     // create member
                     const member = await new MemberFactory({
@@ -3513,7 +3514,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                             organization, // since we are in platform mode, this will only set the permissions for this organization
                         }).create();
 
-                        const token = await Token.createToken(user);
+                        const token = await SessionService.createSession(user);
 
                         // create member
                         const member = await new MemberFactory({
@@ -3566,7 +3567,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                             organization, // since we are in platform mode, this will only set the permissions for this organization
                         }).create();
 
-                        const token = await Token.createToken(user);
+                        const token = await SessionService.createSession(user);
 
                         // create member
                         const member = await new MemberFactory({
@@ -3627,7 +3628,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                             organization, // since we are in platform mode, this will only set the permissions for this organization
                         }).create();
 
-                        const token = await Token.createToken(user);
+                        const token = await SessionService.createSession(user);
 
                         // create member
                         const member = await new MemberFactory({
@@ -3686,7 +3687,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                             organization, // since we are in platform mode, this will only set the permissions for this organization
                         }).create();
 
-                        const token = await Token.createToken(user);
+                        const token = await SessionService.createSession(user);
 
                         // create member
                         const member = await new MemberFactory({
@@ -3747,7 +3748,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                             organization, // since we are in platform mode, this will only set the permissions for this organization
                         }).create();
 
-                        const token = await Token.createToken(user);
+                        const token = await SessionService.createSession(user);
 
                         // create member
                         const member = await new MemberFactory({
@@ -3813,7 +3814,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                         organization, // since we are in platform mode, this will only set the permissions for this organization
                     }).create();
 
-                    const token = await Token.createToken(user);
+                    const token = await SessionService.createSession(user);
 
                     // create member
                     const member = await new MemberFactory({
@@ -3870,7 +3871,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                         organization, // since we are in platform mode, this will only set the permissions for this organization
                     }).create();
 
-                    const token = await Token.createToken(user);
+                    const token = await SessionService.createSession(user);
 
                     // create member
                     const member = await new MemberFactory({
@@ -3921,7 +3922,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                         organization, // since we are in platform mode, this will only set the permissions for this organization
                     }).create();
 
-                    const token = await Token.createToken(user);
+                    const token = await SessionService.createSession(user);
 
                     // create member
                     const member = await new MemberFactory({
@@ -3982,7 +3983,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                         organization, // since we are in platform mode, this will only set the permissions for this organization
                     }).create();
 
-                    const token = await Token.createToken(user);
+                    const token = await SessionService.createSession(user);
 
                     // create member
                     const member = await new MemberFactory({
@@ -4084,7 +4085,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
                 organization,
             }).create();
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const member = await new MemberFactory({ organization }).create();
             const group = await new GroupFactory({ organization, period }).create();

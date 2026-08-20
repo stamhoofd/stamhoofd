@@ -4,6 +4,7 @@ setup();
 
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization, User } from '@stamhoofd/models';
 import { Email, EmailRecipient, MemberFactory, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { EmailContent, EmailStatus, Token as TokenStruct, Version } from '@stamhoofd/structures';
@@ -74,7 +75,7 @@ test.describe('Member portal emails @member-portal-emails', () => {
      * browser language) and navigate to the email list
      */
     async function openMemberPortalEmails(page: Page) {
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
         const tokenString = JSON.stringify(new TokenStruct(token).encode({ version: Version }));
         await page.addInitScript((tokenString) => {
             window.localStorage.setItem('token-platform', tokenString);

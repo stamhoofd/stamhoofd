@@ -47,16 +47,16 @@ export class NetworkManagerStatic implements RequestMiddleware {
         return server;
     }
 
-    onBeforeRequest(request: Request<any>): Promise<void> {
+    async onBeforeRequest(request: Request<any>): Promise<void> {
         request.version = Version;
         (request as any).retryCount = ((request as any).retryCount ?? 0) + 1;
 
         request.headers['X-Platform'] = AppManager.shared.platform;
+        request.headers['X-Session-Metadata'] = encodeURIComponent(JSON.stringify(await AppManager.shared.getSessionMetaData()));
 
         if (I18nController.shared) {
             request.headers['X-Locale'] = I18nController.shared.locale;
         }
-        return Promise.resolve();
     }
 
     async shouldRetryNetworkError(request: Request<any>, error: Error): Promise<boolean> {

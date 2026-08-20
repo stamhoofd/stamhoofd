@@ -5,12 +5,13 @@ import type { PaginatedResponse, PrivateOrder, StamhoofdFilter } from '@stamhoof
 import { Cart, Customer, LimitedFilteredRequest, OrderData, PermissionLevel, Permissions, RecordDateAnswer, RecordSettings, RecordType } from '@stamhoofd/structures';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { GetWebshopOrdersEndpoint } from './GetWebshopOrdersEndpoint.js';
+import { SessionService } from '../../../../services/SessionService.js';
 
 describe('Endpoint.GetWebshopOrdersEndpoint', () => {
     const endpoint = new GetWebshopOrdersEndpoint();
 
     const getOrders = async ({ filter, organization, user }: { filter: StamhoofdFilter | null; organization: Organization; user: User }) => {
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const request = Request.get({
             path: '/webshop/orders',

@@ -8,6 +8,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast';
 import type { LoginProviderType } from '@stamhoofd/structures';
 import { OpenIDAuthTokenResponse, Organization, Platform, Token, UserWithMembers, Version } from '@stamhoofd/structures';
 import { isReactive, reactive } from 'vue';
+import { AppManager } from './AppManager';
 import { ContextPermissions } from './ContextPermissions';
 import { loadPlatform, savePlatformToStorage } from './loadPlatform';
 import { ManagedToken } from './ManagedToken';
@@ -165,6 +166,25 @@ export class SessionContext implements RequestMiddleware {
         this.callListeners('preventComplete');
     }
 
+    /**
+     * A stored session whose refresh token expired can never be used again: it is dropped
+     * instead of restored, so we never end up sending that refresh token to the server (it
+     * would sign the user out of their other sessions as well).
+     */
+    private async dropExpiredStoredToken(token: Token, key: string): Promise<boolean> {
+        if (!token.isRefreshTokenExpired()) {
+            return false;
+        }
+
+        console.log('[SessionContext] Dropping stored session: the refresh token expired');
+        try {
+            await Storage.secure.removeItem(key);
+        } catch (e) {
+            console.error(e);
+        }
+        return true;
+    }
+
     async loadTokenFromStorage() {
         if (this.isStorageDisabled) {
             return;
@@ -179,13 +199,16 @@ export class SessionContext implements RequestMiddleware {
         // Check localstorage
         try {
             let usePlatformStorage = !this.organization || STAMHOOFD.userMode === 'platform';
-            const json = await Storage.secure.getItem('token-' + (!usePlatformStorage ? this.organization!.id : 'platform'));
+            const key = 'token-' + (!usePlatformStorage ? this.organization!.id : 'platform');
+            const json = await Storage.secure.getItem(key);
             if (json) {
                 try {
                     const parsed = JSON.parse(json);
                     const token = Token.decode(new ObjectData(parsed, { version: Version }));
-                    this.setTokenWithoutSaving(token, usePlatformStorage);
-                    return;
+                    if (!await this.dropExpiredStoredToken(token, key)) {
+                        this.setTokenWithoutSaving(token, usePlatformStorage);
+                        return;
+                    }
                 } catch (e) {
                     console.error(e);
                 }
@@ -194,12 +217,14 @@ export class SessionContext implements RequestMiddleware {
             if (!usePlatformStorage) {
                 usePlatformStorage = true;
                 // Also try platform token
-                const json2 = await Storage.secure.getItem('token-' + 'platform');
+                const json2 = await Storage.secure.getItem('token-platform');
                 if (json2) {
                     try {
                         const parsed = JSON.parse(json2);
                         const token = Token.decode(new ObjectData(parsed, { version: Version }));
-                        this.setTokenWithoutSaving(token, usePlatformStorage);
+                        if (!await this.dropExpiredStoredToken(token, 'token-platform')) {
+                            this.setTokenWithoutSaving(token, usePlatformStorage);
+                        }
                     } catch (e) {
                         console.error(e);
                     }
@@ -492,6 +517,8 @@ export class SessionContext implements RequestMiddleware {
         const url = new URL(this.identityServer.host + '/openid/start');
         url.searchParams.set('spaState', spaState);
         url.searchParams.set('provider', data.providerType);
+        url.searchParams.set('clientPlatform', AppManager.shared.platform);
+        url.searchParams.set('sessionMetaData', JSON.stringify(await AppManager.shared.getSessionMetaData()));
         if (data.webshopId) {
             url.searchParams.set('webshopId', data.webshopId);
         }
@@ -943,6 +970,25 @@ export class SessionContext implements RequestMiddleware {
 
     isLoggingOut = false;
 
+    async renewToken(): Promise<void> {
+        await QueueHandler.schedule('session-context-token', async () => {
+            await this.loadTokenFromStorage();
+            if (!this.token) {
+                throw new Error('Could not refresh a session without a token');
+            }
+            await this.token.refresh(this.identityServer);
+        });
+    }
+
+    async endSession(accessToken: string): Promise<void> {
+        await this.identityServer.request({
+            method: 'DELETE',
+            path: '/oauth/token',
+            headers: { Authorization: 'Bearer ' + accessToken },
+            shouldRetry: false,
+        });
+    }
+
     async logout(updateUIForLogout = true) {
         if (this.isLoggingOut) {
             // Prevents loops when refreshing inside the logout endpoint
@@ -967,7 +1013,7 @@ export class SessionContext implements RequestMiddleware {
                     this.isLoggingOut = false;
                     throw e;
                 }
-                console.error('Failed to delete token. Probably already deleted?', e);
+                console.error('Failed to end session. Probably already ended?', e);
             }
 
             this.isLoggingOut = false;

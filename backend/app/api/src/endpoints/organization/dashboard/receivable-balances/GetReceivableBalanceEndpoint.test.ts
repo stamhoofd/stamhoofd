@@ -6,6 +6,7 @@ import { PaymentMethod, PaymentStatus, PermissionLevel, Permissions, ReceivableB
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { GetReceivableBalanceEndpoint } from './GetReceivableBalanceEndpoint.js';
+import { SessionService } from '../../../../services/SessionService.js';
 
 describe('Endpoint.GetReceivableBalanceEndpoint', () => {
     const endpoint = new GetReceivableBalanceEndpoint();
@@ -56,7 +57,7 @@ describe('Endpoint.GetReceivableBalanceEndpoint', () => {
     };
 
     const getReceivableBalance = async ({ type, id, organization, user }: { type: ReceivableBalanceType; id: string; organization: Organization; user: User }) => {
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const request = Request.get({
             path: `/receivable-balances/${type}/${id}`,

@@ -5,6 +5,7 @@ setup();
 // other imports
 import { expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization, User } from '@stamhoofd/models';
 import {
     EventFactory,
@@ -95,7 +96,7 @@ test.describe('Events management', () => {
             }),
         }).create();
 
-        await Token.createToken(user);
+        await SessionService.createSession(user);
 
         const nonMatchingOrganization = await new OrganizationFactory({
             name: `Non matching organization ${runId}`,
@@ -266,7 +267,7 @@ test.describe('Duplicate event', () => {
             }),
         }).create();
 
-        await Token.createToken(user);
+        await SessionService.createSession(user);
 
         // A locked registration period in the past. The event and its registration group live
         // in this period, so the registration group cannot be copied when the event is

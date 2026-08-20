@@ -6,6 +6,7 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { EmailMocker } from '@stamhoofd/email';
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization, User, Webshop } from '@stamhoofd/models';
 import { OrderFactory, Organization as OrganizationModel, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { OrganizationEmail, PermissionLevel, Permissions, STPackageBundle, Token as TokenStruct, Version, WebshopTicketType } from '@stamhoofd/structures';
@@ -146,7 +147,7 @@ test.describe('Translated emails to webshop orders @translated-order-email', () 
 
     /** Log in by injecting the admin token and open the email composer for all orders of the webshop */
     async function openComposerForAllOrders(page: Page) {
-        const token = await Token.createToken(admin);
+        const token = await SessionService.createSession(admin);
         const tokenString = JSON.stringify(new TokenStruct(token).encode({ version: Version }));
         await page.addInitScript(({ organizationId, tokenString }) => {
             window.localStorage.setItem('token-' + organizationId, tokenString);

@@ -6,6 +6,7 @@ setup();
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { MFATestHelper, STPackageService } from '@stamhoofd/backend/tests/helpers';
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import { EmailVerificationCode, Organization, OrganizationFactory, Token, User, UserFactory } from '@stamhoofd/models';
 import { AcquisitionType, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -185,7 +186,7 @@ async function loginViaUI(page: Page, { email, password }: { email: string; pass
  * Sign in by setting the token in local storage (same as routing.spec.ts).
  */
 async function loginAs({ page, user }: { page: Page; user: User }) {
-    const token = await Token.createToken(user);
+    const token = await SessionService.createSession(user);
     const tokenString = JSON.stringify(
         new TokenStruct(token).encode({ version: Version }),
     );

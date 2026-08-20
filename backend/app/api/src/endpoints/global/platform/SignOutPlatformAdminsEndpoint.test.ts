@@ -3,6 +3,7 @@ import type { Organization } from '@stamhoofd/models';
 import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel, Permissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
+import { SessionService } from '../../../services/SessionService.js';
 
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { SignOutPlatformAdminsEndpoint } from './SignOutPlatformAdminsEndpoint.js';
@@ -44,10 +45,10 @@ describe('Endpoint.SignOutPlatformAdmins', () => {
         organizationAdmin.organizationId = null;
         await organizationAdmin.save();
 
-        const currentToken = await Token.createToken(admin, new Date());
-        const secondDeviceOfAdmin = await Token.createToken(admin, new Date());
-        const otherAdminToken = await Token.createToken(otherAdmin, new Date());
-        const organizationAdminToken = await Token.createToken(organizationAdmin, new Date());
+        const currentToken = await SessionService.createSession(admin, { authenticatedAt: new Date() });
+        const secondDeviceOfAdmin = await SessionService.createSession(admin, { authenticatedAt: new Date() });
+        const otherAdminToken = await SessionService.createSession(otherAdmin, { authenticatedAt: new Date() });
+        const organizationAdminToken = await SessionService.createSession(organizationAdmin, { authenticatedAt: new Date() });
 
         const response = await signOut(organization, currentToken);
 
@@ -63,9 +64,9 @@ describe('Endpoint.SignOutPlatformAdmins', () => {
 
         const admin = await createPlatformAdmin(PermissionLevel.Write);
         const otherAdmin = await createPlatformAdmin();
-        const otherAdminToken = await Token.createToken(otherAdmin, new Date());
+        const otherAdminToken = await SessionService.createSession(otherAdmin, { authenticatedAt: new Date() });
 
-        await expect(signOut(organization, await Token.createToken(admin, new Date()))).rejects.toThrow(STExpect.simpleError({
+        await expect(signOut(organization, await SessionService.createSession(admin, { authenticatedAt: new Date() }))).rejects.toThrow(STExpect.simpleError({
             code: 'permission_denied',
         }));
         expect(await tokenExists(otherAdminToken)).toBe(true);
@@ -82,9 +83,9 @@ describe('Endpoint.SignOutPlatformAdmins', () => {
         await organizationAdmin.save();
 
         const platformAdmin = await createPlatformAdmin();
-        const platformAdminToken = await Token.createToken(platformAdmin, new Date());
+        const platformAdminToken = await SessionService.createSession(platformAdmin, { authenticatedAt: new Date() });
 
-        await expect(signOut(organization, await Token.createToken(organizationAdmin, new Date()))).rejects.toThrow(STExpect.simpleError({
+        await expect(signOut(organization, await SessionService.createSession(organizationAdmin, { authenticatedAt: new Date() }))).rejects.toThrow(STExpect.simpleError({
             code: 'permission_denied',
         }));
         expect(await tokenExists(platformAdminToken)).toBe(true);

@@ -1,4 +1,6 @@
-import { Token, User } from '@stamhoofd/models';
+import { User } from '@stamhoofd/models';
+
+import { SessionService } from './SessionService.js';
 
 /**
  * Signs out administrators in bulk.
@@ -25,7 +27,7 @@ export class AdminSessionService {
      */
     static async signOutOrganizationAdmins(organizationId: string, keepAccessToken: string | null): Promise<number> {
         const admins = await User.getAdmins(organizationId);
-        return await Token.deleteForUsers(admins.map(a => a.id), keepAccessToken);
+        return await SessionService.deleteForUsers({ userIds: admins.map(a => a.id), keepAccessToken });
     }
 
     /**
@@ -36,6 +38,6 @@ export class AdminSessionService {
      */
     static async signOutPlatformAdmins(keepAccessToken: string | null): Promise<number> {
         const admins = await User.getPlatformAdmins();
-        return await Token.deleteForUsers(admins.map(a => a.id), keepAccessToken);
+        return await SessionService.deleteForUsers({ userIds: admins.map(a => a.id), keepAccessToken });
     }
 }

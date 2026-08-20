@@ -8,6 +8,7 @@ import { AccessRight, Event, Group, GroupSettings, GroupType, OrganizationEventT
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { PatchEventsEndpoint } from './PatchEventsEndpoint.js';
+import { SessionService } from '../../../services/SessionService.js';
 
 const baseUrl = `/events`;
 const endpoint = new PatchEventsEndpoint();
@@ -32,7 +33,7 @@ const TestRequest = {
     }) {
         const request = Request.buildJson('PATCH', baseUrl, options.organization?.getApiHost(), options.body);
         if (options.user) {
-            const token = await Token.createToken(options.user);
+            const token = await SessionService.createSession(options.user);
             request.headers.authorization = 'Bearer ' + token.accessToken;
         }
         return await testServer.test(endpoint, request);

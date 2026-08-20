@@ -6,6 +6,7 @@ setup();
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { MFATestHelper } from '@stamhoofd/backend/tests/helpers';
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization, User } from '@stamhoofd/models';
 import { OrganizationFactory, Token, User as UserModel, UserFactory } from '@stamhoofd/models';
 import { appToUri, PermissionLevel, Permissions, Token as TokenStruct, Version } from '@stamhoofd/structures';
@@ -27,7 +28,7 @@ function randomEmail(prefix: string) {
  * been open for a while is in.
  */
 async function loginAs({ page, user, authenticatedAt = null }: { page: Page; user: User; authenticatedAt?: Date | null }) {
-    const token = await Token.createToken(user, authenticatedAt);
+    const token = await SessionService.createSession(user, { authenticatedAt: authenticatedAt });
     const tokenString = JSON.stringify(
         new TokenStruct(token).encode({ version: Version }),
     );

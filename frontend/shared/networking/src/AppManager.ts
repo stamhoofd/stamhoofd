@@ -1,4 +1,5 @@
 import { UrlHelper } from '@simonbackx/vue-app-navigation';
+import { SessionDeviceType, type SessionMetaData, SessionOS } from '@stamhoofd/structures';
 import type { SessionContext } from './SessionContext';
 
 // TODO: remove duplicate type definitions, but need to check if capacitor won't get loaded on the web...
@@ -47,6 +48,7 @@ export class AppManager {
 
     nativeVersion?: string;
     nativeBuild?: string;
+    private nativeDeviceInfo: Promise<{ name?: string; model: string; operatingSystem: string; osVersion: string }> | null = null;
 
     get isNative(): boolean {
         return this.platform !== 'web';
@@ -59,6 +61,63 @@ export class AppManager {
     setVersion({ version, build }: { version: string; build: string }) {
         this.nativeVersion = version;
         this.nativeBuild = build;
+    }
+
+    setNativeDeviceInfo(info: Promise<{ name?: string; model: string; operatingSystem: string; osVersion: string }>) {
+        this.nativeDeviceInfo = info;
+    }
+
+    async getSessionMetaData(): Promise<SessionMetaData> {
+        const userAgent = navigator.userAgent || '';
+        const native = this.nativeDeviceInfo ? await this.nativeDeviceInfo.catch(() => null) : null;
+        const isIPad = native?.model.toLowerCase().includes('ipad') || (/Macintosh/.test(userAgent) && navigator.maxTouchPoints > 1);
+        const isTablet = isIPad || (/Android/.test(userAgent) && !/Mobile/.test(userAgent));
+        const isPhone = !isTablet && (this.platform === 'ios' || this.platform === 'android' || /iPhone|iPod|Android.+Mobile/.test(userAgent));
+
+        return {
+            deviceType: isTablet ? SessionDeviceType.Tablet : (isPhone ? SessionDeviceType.Phone : SessionDeviceType.Desktop),
+            deviceName: native?.name || native?.model || null,
+            osName: native ? this.getNativeSessionOS(native.operatingSystem, isIPad) : this.getBrowserSessionOS(userAgent, isIPad),
+            osVersion: native?.osVersion || this.getBrowserOSVersion(userAgent),
+            appVersion: STAMHOOFD.VERSION?.toString() ?? null,
+            nativeAppVersion: this.nativeVersion ?? null,
+            browserName: this.isNative ? null : this.getBrowserName(userAgent),
+        };
+    }
+
+    private getNativeSessionOS(operatingSystem: string, isIPad: boolean): SessionOS | null {
+        if (isIPad) return SessionOS.iPadOS;
+        if (operatingSystem === 'ios') return SessionOS.iOS;
+        if (operatingSystem === 'android') return SessionOS.Android;
+        return null;
+    }
+
+    private getBrowserSessionOS(userAgent: string, isIPad: boolean): SessionOS | null {
+        if (isIPad) return SessionOS.iPadOS;
+        if (/iPhone|iPod/.test(userAgent)) return SessionOS.iOS;
+        if (/Android/.test(userAgent)) return SessionOS.Android;
+        if (/CrOS/.test(userAgent)) return SessionOS.ChromeOS;
+        if (/Windows/.test(userAgent)) return SessionOS.Windows;
+        if (/Mac OS X/.test(userAgent)) return SessionOS.MacOS;
+        if (/Linux/.test(userAgent)) return SessionOS.Linux;
+        return null;
+    }
+
+    private getBrowserOSVersion(userAgent: string): string | null {
+        const match = userAgent.match(/(?:CPU (?:iPhone )?OS|Android|Windows NT|Mac OS X|CrOS \S+) ([0-9._]+)/);
+        return match?.[1]?.replaceAll('_', '.') ?? null;
+    }
+
+    private getBrowserName(userAgent: string): string {
+        if (/SamsungBrowser\//.test(userAgent)) return 'SamsungBrowser';
+        if (/Ecosia\//.test(userAgent)) return 'Ecosia';
+        if (/DuckDuckGo|DdgA|DdgI/.test(userAgent)) return 'DuckDuckGo';
+        if (/Edg(?:e|A|iOS)?\//.test(userAgent)) return 'Edge';
+        if (/OPR\//.test(userAgent)) return 'Opera';
+        if (/Firefox\/|FxiOS\//.test(userAgent)) return 'Firefox';
+        if (/Chrome\/|CriOS\//.test(userAgent)) return 'Chrome';
+        if (/Safari\//.test(userAgent)) return 'Safari';
+        return 'Other';
     }
 
     hapticWarning = () => {

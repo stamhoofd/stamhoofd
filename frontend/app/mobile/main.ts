@@ -4,6 +4,7 @@ import 'virtual:vite-svg-2-webfont.css';
 import { InAppReview } from '@capacitor-community/in-app-review';
 import { App as CApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
+import { Device } from '@capacitor/device';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import { Haptics, NotificationType } from '@capacitor/haptics';
 import { Keyboard } from '@capacitor/keyboard';
@@ -43,6 +44,14 @@ const throttledSetKeyboardHeight = throttle(setKeyboardHeight, 100);
 // Implement smooth keyboard behavior on both iOS and Android instead of the bad default handling
 if (Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android') {
     AppManager.shared.platform = Capacitor.getPlatform() as 'android' | 'ios' | 'web';
+    CApp.getInfo().then((app) => {
+        AppManager.shared.setVersion({ version: app.version, build: app.build });
+    }).catch(console.error);
+
+    // The Device plugin can be missing: JS updates ship over the air, older native builds don't include it
+    if (Capacitor.isPluginAvailable('Device')) {
+        AppManager.shared.setNativeDeviceInfo(Device.getInfo());
+    }
 
     // Force set margin of navigation bar (disable jumping when scrolling which is only needed on webistes)
     document.documentElement.style.setProperty('--navigation-bar-margin', `0px`);
@@ -287,13 +296,6 @@ CApp.addListener('appStateChange', (state) => {
             checkTimeout: 10 * 1000,
         }).catch(console.error);
     }
-}).catch(console.error);
-
-CApp.getInfo().then((info) => {
-    AppManager.shared.setVersion({
-        version: info.version,
-        build: info.build,
-    });
 }).catch(console.error);
 
 AppManager.shared.checkUpdates = async (options) => {

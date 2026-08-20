@@ -2,8 +2,8 @@ import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import type { Response } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, StripeAccount, User } from '@stamhoofd/models';
-import { MolliePayment, Order, OrganizationFactory, Payment, Token, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
+import type { Organization, StripeAccount, User, Token } from '@stamhoofd/models';
+import { MolliePayment, Order, OrganizationFactory, Payment, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
 import type { OrderResponse } from '@stamhoofd/structures';
 import { Address, Cart, CartItem, CartItemOption, Customer, MollieOnboarding, MollieStatus, Option, OptionMenu, OrderData, PaymentConfiguration, PaymentMethod, PaymentProvider, PaymentStatus, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopAuthType, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
 import { I18n } from '@stamhoofd/backend-i18n';
@@ -12,6 +12,7 @@ import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import sinon from 'sinon';
 import { v4 as uuidv4 } from 'uuid';
+import { SessionService } from '../../../services/SessionService.js';
 
 import { MollieMocker } from '../../../../tests/helpers/MollieMocker.js';
 import { StripeMocker } from '../../../../tests/helpers/StripeMocker.js';
@@ -121,7 +122,7 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
                 level: PermissionLevel.Full,
             }),
         }).create();
-        token = await Token.createToken(user);
+        token = await SessionService.createSession(user);
     });
 
     afterAll(() => {
@@ -369,7 +370,7 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
 
         test('Placing an order with a signed in user overrides the order customer', async () => {
             const user = await new UserFactory({ organization, firstName: 'User', lastName: 'Tester' }).create();
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const orderData = OrderData.create({
                 paymentMethod: PaymentMethod.Unknown,
@@ -414,9 +415,9 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
             await webshop.save();
 
             const user = await new UserFactory({ organization, firstName: 'User', lastName: 'Tester' }).create();
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const otherUser = await new UserFactory({ organization }).create();
-            const otherToken = await Token.createToken(otherUser);
+            const otherToken = await SessionService.createSession(otherUser);
 
             const orderData = OrderData.create({
                 paymentMethod: PaymentMethod.Unknown,
@@ -505,7 +506,7 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
             const pendingResponses: { promise: Promise<Response<OrderResponse>>; user: User }[] = [];
             for (let i = 0; i < 10; i++) {
                 const user = await new UserFactory({ organization, firstName: 'User', lastName: 'Tester' }).create();
-                const token = await Token.createToken(user);
+                const token = await SessionService.createSession(user);
 
                 const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
                 r.headers.authorization = 'Bearer ' + token.accessToken;

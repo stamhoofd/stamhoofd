@@ -1,11 +1,12 @@
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, StripeAccount } from '@stamhoofd/models';
-import { Order, OrganizationFactory, Token, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
+import type { Organization, StripeAccount, Token } from '@stamhoofd/models';
+import { Order, OrganizationFactory, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
 import { Address, Cart, CartItem, CartItemOption, CartReservedSeat, Customer, Option, OptionMenu, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, ValidatedAddress, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { v4 as uuidv4 } from 'uuid';
+import { SessionService } from '../../src/services/SessionService.js';
 
 import { PatchWebshopOrdersEndpoint } from '../../src/endpoints/organization/dashboard/webshops/PatchWebshopOrdersEndpoint.js';
 import { PlaceOrderEndpoint } from '../../src/endpoints/organization/webshops/PlaceOrderEndpoint.js';
@@ -253,7 +254,7 @@ describe('E2E.Stock', () => {
                 level: PermissionLevel.Full,
             }),
         }).create();
-        token = await Token.createToken(user);
+        token = await SessionService.createSession(user);
 
         await initMembershipOrganization();
     });

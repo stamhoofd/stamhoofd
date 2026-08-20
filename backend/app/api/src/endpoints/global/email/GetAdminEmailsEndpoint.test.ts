@@ -1,11 +1,12 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, RegistrationPeriod, User } from '@stamhoofd/models';
-import { Email, EmailRecipient, MemberFactory, OrganizationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { Organization, RegistrationPeriod, User, Token } from '@stamhoofd/models';
+import { Email, EmailRecipient, MemberFactory, OrganizationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { EmailStatus, LimitedFilteredRequest, PermissionLevel, Permissions, Replacement } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { GetAdminEmailsEndpoint } from './GetAdminEmailsEndpoint.js';
 import { Formatter } from '@stamhoofd/utility';
+import { SessionService } from '../../../services/SessionService.js';
 
 const baseUrl = `/email`;
 
@@ -39,7 +40,7 @@ describe('Endpoint.getAdminEmails', () => {
             user,
         }).create();
 
-        userToken = await Token.createToken(user);
+        userToken = await SessionService.createSession(user);
     });
 
     const getAdminEmails = async (query: LimitedFilteredRequest = new LimitedFilteredRequest({ limit: 10 }), token: Token = userToken, testOrganization: Organization = organization) => {

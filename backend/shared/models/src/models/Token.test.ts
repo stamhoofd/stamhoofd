@@ -1,10 +1,13 @@
 import { Database } from '@simonbackx/simple-database';
+import { SessionClientType, SessionDeviceType, SessionLoginMethod } from '@stamhoofd/structures';
+import { v4 as uuidv4 } from 'uuid';
 
 import { OrganizationFactory } from '../factories/OrganizationFactory.js';
 import { UserFactory } from '../factories/UserFactory.js';
 import type { Organization } from './Organization.js';
 import { Token } from './Token.js';
 import type { User } from './User.js';
+import { UserSession } from './UserSession.js';
 
 describe('Model.Token', () => {
     const existingToken = 'ABCDEFG';
@@ -14,9 +17,21 @@ describe('Model.Token', () => {
     beforeAll(async () => {
         organization = await new OrganizationFactory({}).create();
         user = await new UserFactory({ organization }).create();
+        const tokenId = uuidv4();
+        const session = new UserSession();
+        session.userId = user.id;
+        session.clientType = SessionClientType.Browser;
+        session.loginMethod = SessionLoginMethod.Password;
+        session.deviceType = SessionDeviceType.Desktop;
+        session.startedAt = new Date();
+        session.lastUsedTokenId = tokenId;
+        session.lastActiveTokenId = tokenId;
+        await session.save();
 
         await Database.insert('INSERT INTO ' + Token.table + ' SET ?', [
             {
+                id: tokenId,
+                sessionId: session.id,
                 accessToken: existingToken,
                 refreshToken: 'refreshtoken',
 
@@ -39,31 +54,4 @@ describe('Model.Token', () => {
         expect(token.userId).toEqual(user.id);
     });
 
-    test('Create a token', async () => {
-        const token = await Token.createToken(user);
-        expect(token).toBeDefined();
-        if (!token) return;
-        expect(token).toBeInstanceOf(Token);
-        expect(token.user.id).toEqual(user.id);
-        expect(token.accessToken).toHaveLength(256);
-        expect(token.refreshToken).toHaveLength(256);
-        expect(token.accessTokenValidUntil.getTime()).toBeGreaterThan(new Date().getTime() + (3600 * 1000) / 2 - 1);
-        expect(token.accessTokenValidUntil.getTime()).toBeLessThan(new Date().getTime() + 3600 * 1000 * 24 * 365);
-
-        expect(token.refreshTokenValidUntil.getTime()).toBeGreaterThan(token.accessTokenValidUntil.getTime());
-        expect(token.refreshTokenValidUntil.getTime()).toBeLessThan(new Date().getTime() + 3600 * 1000 * 24 * 365);
-
-        expect(token.userId).toEqual(user.id);
-
-        const search = await Token.getByAccessToken(token.accessToken);
-        // Make sure we do not compare the organization, since that won't be loaded now, but is loaded on user, and on token
-
-        expect(search).toMatchObject({
-            accessToken: token.accessToken,
-            refreshToken: token.refreshToken,
-            userId: token.userId,
-            accessTokenValidUntil: token.accessTokenValidUntil,
-            refreshTokenValidUntil: token.refreshTokenValidUntil,
-        });
-    });
 });

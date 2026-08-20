@@ -86,6 +86,7 @@ export * from './RegistrationPeriodBase.js';
 export * from './ResourcePermissions.js';
 export * from './RichText.js';
 export * from './SeatingPlan.js';
+export * from './Session.js';
 export * from './SetupStepReview.js';
 export * from './SetupSteps.js';
 export * from './SetupStepType.js';
