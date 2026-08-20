@@ -112,7 +112,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem class="left-center" :selectable="true" @click="$navigate(Routes.Payments)">
+                    <STListItem class="left-center" :selectable="true" data-testid="payments-button" @click="$navigate(Routes.Payments)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/creditcards.svg" class="style-illustration-img">
                         </template>

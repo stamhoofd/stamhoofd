@@ -319,7 +319,7 @@ export class RegisterCheckout {
         }
 
         // Remove all negative balance items
-        for (const item of this.cart.balanceItems) {
+        for (const item of this.cart.balanceItems.slice()) {
             if (item.price < 0) {
                 this.removeBalanceItem(item, { calculate: false });
             }
@@ -328,34 +328,49 @@ export class RegisterCheckout {
         if (!this.singleOrganizationId) {
             return;
         }
-        const minimumAmount = 0;
-        const totalOpenBalance = this.balanceItems.reduce((a, b) => a + b.priceOpen, 0);
+
+        const discounts = RegisterCheckout.calculateAutomaticDiscounts({
+            organizationId: this.singleOrganizationId,
+            balanceItems: this.balanceItems,
+            payingNow: this.cart.balanceItems.reduce((a, b) => a + b.price, 0),
+            price: this.totalPrice - this.administrationFee - this.freeContribution,
+        });
+
+        for (const [item, amount] of discounts) {
+            this.addBalanceItem(item, -amount, { calculate: false });
+        }
+    }
+
+    /**
+     * The part of the negative balance items (credits) that gets applied to a price.
+     * Credits are only applied when the balance that remains open after this payment is negative.
+     *
+     * @param payingNow Open balance items that are being paid as part of the same price
+     */
+    static calculateAutomaticDiscounts({ organizationId, balanceItems, payingNow, price }: { organizationId: string; balanceItems: BalanceItem[]; payingNow: number; price: number }): Map<BalanceItem, number> {
+        const discounts = new Map<BalanceItem, number>();
+        const items = balanceItems.filter(b => b.organizationId === organizationId);
+        const totalOpenBalance = items.reduce((a, b) => a + b.priceOpen, 0) - payingNow;
 
         if (totalOpenBalance >= 0) {
-            return;
-        }
-        const maximumAmount = -totalOpenBalance;
-
-        let totalPrice = this.totalPrice - this.administrationFee - this.freeContribution;
-
-        if (totalPrice > maximumAmount) {
-            totalPrice = maximumAmount;
+            return discounts;
         }
 
-        for (const item of this.balanceItems) {
-            if (item.organizationId !== this.singleOrganizationId) {
-                continue;
-            }
+        let remaining = Math.min(price, -totalOpenBalance);
+
+        for (const item of items) {
             if (item.priceOpen >= 0) {
                 continue;
             }
-            const remove = Math.min(totalPrice - (minimumAmount ?? 0), -item.priceOpen);
-            if (remove === 0) {
+            const amount = Math.min(remaining, -item.priceOpen);
+            if (amount <= 0) {
                 break;
             }
-            this.addBalanceItem(item, -remove, { calculate: false });
-            totalPrice -= remove;
+            discounts.set(item, amount);
+            remaining -= amount;
         }
+
+        return discounts;
     }
 
     validate(data: { memberBalanceItems?: BalanceItem[] }) {

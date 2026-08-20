@@ -2,7 +2,7 @@
     <SaveView :error-box="errors.errorBox" :loading="saving" :title="title" :disabled="total == 0" :save-text="$t('%eX')" save-icon-right="arrow-right" @save="save">
         <h1>{{ title }}</h1>
         <STErrorsDefault :error-box="errors.errorBox" />
-        <SelectBalanceItemsList :items="items" :list="list" :is-payable="isPayable" :can-customize-item-value="canCustomizeItemValue" @patch="addPatch" />
+        <SelectBalanceItemsList :items="items" :list="list" :is-payable="isPayable" :can-customize-item-value="canCustomizeItemValue" :open-balance-items="openBalanceItems" @patch="addPatch" />
     </SaveView>
 </template>
 
@@ -22,6 +22,7 @@ const props = defineProps<{
     isPayable: boolean;
     saveHandler: (navigate: NavigationActions, list: BalanceItemPaymentDetailed[]) => void | Promise<void>;
     canCustomizeItemValue?: (item: BalanceItem) => boolean;
+    openBalanceItems?: BalanceItem[] | null;
 }>();
 
 const list = ref([] as BalanceItemPaymentDetailed[]);
