@@ -21,6 +21,7 @@ import { createMemberWithRegistrationsBlobFilterBuilders, useAdvancedPlatformMem
 import { useGetOrganizationUIFilterBuilders } from './organizations';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
 import { getFilterBuildersForOptionMenus } from './option-menus';
+import { getFilterBuildersForRecordCategories } from './record-categories';
 
 export function useAdvancedRegistrationWithMemberUIFilterBuilders({
     multipleGroups,
@@ -50,7 +51,9 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({
             key: 'registeredAt',
         }));
 
-        if (currentGroup) {
+        console.log(currentGroup);
+
+        if (currentGroup && currentGroup.settings.optionMenus.length > 0) {
             const optionMenusFilters = getFilterBuildersForOptionMenus(currentGroup.settings.optionMenus);
 
             optionMenusFilters.unshift(
@@ -71,6 +74,23 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({
                     },
                 }),
             );
+        }
+        if (currentGroup && currentGroup.settings.recordCategories.length > 0) {
+            const recordCategoriesFilters = getFilterBuildersForRecordCategories(currentGroup.settings.recordCategories);
+
+            recordCategoriesFilters.unshift(
+                new GroupUIFilterBuilder({
+                    builders: recordCategoriesFilters,
+                }),
+            );
+
+            all.push(new GroupUIFilterBuilder({
+                name: $t('%8i'),
+                builders: recordCategoriesFilters,
+                wrapper: {
+                    details: FilterWrapperMarker,
+                },
+            }));
         }
 
         if (app === 'admin' && STAMHOOFD.userMode === 'platform') {

@@ -1,6 +1,6 @@
 import { Group, Member, Organization, Registration } from '@stamhoofd/models';
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
-import { baseSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, SQL, SQLValueType } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJoinedRelationFilter, SQL, SQLValueType } from '@stamhoofd/sql';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers.js';
 import { memberFilterCompilers } from './members.js';
@@ -53,6 +53,58 @@ export const registrationFilterCompilers: SQLFilterDefinitions = {
                 type: SQLValueType.Datetime,
                 nullable: true,
             }),
+        },
+    ),
+    options: createExistsFilter(
+        SQL.select()
+            .from(SQL.table('registrations', 'innerRegistrations'))
+            .join(
+                SQL.join(
+                    SQL.jsonTable(
+                        SQL.jsonExtract(SQL.column('innerRegistrations', 'options'), '$.value'),
+                        'options',
+                    )
+                        .addColumn(
+                            'amount',
+                            'INT',
+                            '$.amount',
+                        )
+                        .addColumn(
+                            'optionId',
+                            'TEXT',
+                            '$.option.id',
+                        )
+                        .addColumn(
+                            'optionMenuId',
+                            'TEXT',
+                            '$.optionMenu.id',
+                        ),
+                ),
+            )
+            .where(SQL.column('innerRegistrations', 'id'), SQL.column('registrations', 'id')),
+        {
+            ...baseSQLFilterCompilers,
+            amount: createColumnFilter({
+                expression: SQL.column('options', 'amount'),
+                type: SQLValueType.Number,
+                nullable: false,
+            }),
+            option: {
+                ...baseSQLFilterCompilers,
+                id: createColumnFilter({
+                    expression: SQL.column('options', 'optionId'),
+                    type: SQLValueType.String,
+                    nullable: false,
+                }),
+            },
+            optionMenu: {
+                ...baseSQLFilterCompilers,
+                id: createColumnFilter({
+                    expression: SQL.column('options', 'optionMenuId'),
+                    type: SQLValueType.String,
+                    nullable: false,
+                }),
+            },
         },
     ),
     organization: createJoinedRelationFilter(
