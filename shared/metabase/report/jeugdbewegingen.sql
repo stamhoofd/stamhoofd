@@ -128,8 +128,8 @@ ORDER BY `Naam_Organisatie`
 --
 -- Leiding is read off the tak first: a registration in the Leiding tak makes someone leiding whatever
 -- else they are registered for. That has to come before the categorie, which is what the rest of the
--- report splits by, because a platform that never filled in `default_age_groups`.`category` falls
--- back to the age -- and a leider of seventeen is then read as a kind.
+-- report splits by, because a tak that was never given a `category` in the statistics database leaves
+-- the categorie falling back to the age -- which reads a leider of seventeen as a kind.
 --
 -- After that the categorie decides: a kind is a lid, and everyone else is leiding. That covers the
 -- volwassen begeleiders, kassabeheerders and secretarissen the metadatafiche counts as leiding, and
