@@ -27,7 +27,6 @@ class WorkerDataInstance {
     private _user: User | null = null;
     private _initialUser: User | null = null;
     private _databaseHelper: DatabaseHelper | null = null;
-    private _lastFile: string | null = null;
 
     get urls() {
         return this._urls;
@@ -60,14 +59,6 @@ class WorkerDataInstance {
             this._databaseHelper = new DatabaseHelper(WorkerData.id);
         }
         return this._databaseHelper;
-    }
-
-    get lastFile() {
-        return this._lastFile;
-    }
-
-    set lastFile(file: string | null) {
-        this._lastFile = file;
     }
 
     get configureUser() {

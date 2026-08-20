@@ -58,8 +58,9 @@ test.describe('Settlements administration (organization mode) @settlements-admin
         membershipOrganization.privateMeta.featureFlags = featureFlag ? ['settlements'] : [];
         await membershipOrganization.save();
 
+        // Both tests can run on the same worker (and database): the email has to be unique per test
         const admin = await new UserFactory({
-            email: 'settlements-admin@stamhoofd.be',
+            email: `settlements-admin-${Math.random().toString(36).slice(2)}@stamhoofd.be`,
             globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
         }).create();
 
