@@ -7447,10 +7447,6 @@
     "original": "Tag verwijderen",
     "translation": "Remove tag"
   },
-  "%1WE": {
-    "original": "Activeer nieuwe fucnties",
-    "translation": "Activate new features"
-  },
   "%1WH": {
     "original": "{orgName} heeft de tag {tagName} niet",
     "translation": "{orgName} does not have the tag {tagName}"
@@ -19511,6 +19507,10 @@
     "original": "Betalingen aanmaken...",
     "translation": "Creating payments..."
   },
+  "%Zlz": {
+    "original": "Andere vereniging zoeken",
+    "translation": "Search for another association"
+  },
   "%Zm": {
     "original": "Log in via de knop hieronder.",
     "translation": "Log in via the button below."
@@ -19566,10 +19566,6 @@
   "%a1": {
     "original": "Vul een URL in",
     "translation": "Enter a URL"
-  },
-  "%a3": {
-    "original": "Andere zoeken",
-    "translation": "Search others"
   },
   "%a4": {
     "original": "Kiezen",

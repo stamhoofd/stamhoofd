@@ -7487,10 +7487,6 @@
     "original": "Tag verwijderen",
     "translation": "Supprimer le tag"
   },
-  "%1WE": {
-    "original": "Activeer nieuwe fucnties",
-    "translation": "Activer de nouvelles fonctionnalités"
-  },
   "%1WH": {
     "original": "{orgName} heeft de tag {tagName} niet",
     "translation": "{orgName} n’a pas le tag {tagName}"
@@ -19695,6 +19691,10 @@
     "original": "Betalingen aanmaken...",
     "translation": "Créer des paiements..."
   },
+  "%Zlz": {
+    "original": "Andere vereniging zoeken",
+    "translation": "Rechercher une autre association"
+  },
   "%Zm": {
     "original": "Log in via de knop hieronder.",
     "translation": "Connectez-vous via le bouton ci-dessous."
@@ -19754,10 +19754,6 @@
   "%a1": {
     "original": "Vul een URL in",
     "translation": "Entrez une URL"
-  },
-  "%a3": {
-    "original": "Andere zoeken",
-    "translation": "Rechercher autre"
   },
   "%a4": {
     "original": "Kiezen",

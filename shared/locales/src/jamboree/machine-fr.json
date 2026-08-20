@@ -1635,6 +1635,10 @@
     "original": "Openstaande bedragen van leden en eenheden",
     "translation": "Montants ouverts des membres et des unités"
   },
+  "%Zlz": {
+    "original": "Andere eenheid zoeken",
+    "translation": "Rechercher une autre unité"
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Jamboree. Voor Microsoft kan je",
     "translation": "Assurez-vous que les utilisateurs peuvent se connecter via votre propre système de compte, séparément de Jamboree. Pour Microsoft, vous pouvez"

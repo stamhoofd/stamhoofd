@@ -144,11 +144,11 @@ const priceBreakdown = computed(() => {
     }
     return [
         {
-            name: $t('Subtotaal'),
+            name: $t('%xJ'),
             price: total.value,
         },
         {
-            name: $t('Tegoed'),
+            name: $t('%1Xl'),
             price: -automaticDiscount.value,
         },
         {
