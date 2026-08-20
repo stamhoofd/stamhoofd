@@ -17,10 +17,10 @@ export class Token extends QueryableModel {
     static FRESH_WINDOW = 10 * 60 * 1000;
 
     @column({ type: 'string' })
-    userId: string;
+    id: string;
 
     @column({ type: 'string' })
-    id: string;
+    userId: string;
 
     @column({ type: 'string' })
     sessionId: string;

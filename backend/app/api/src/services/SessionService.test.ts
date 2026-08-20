@@ -296,6 +296,8 @@ describe('SessionService', () => {
 
             expect(await Token.getByAccessToken(expired.accessToken)).toBeUndefined();
             expect(await Token.getByAccessToken(other.accessToken)).toBeUndefined();
+            expect(await UserSession.getByID(expired.sessionId)).toBeUndefined();
+            expect(await UserSession.getByID(other.sessionId)).toBeUndefined();
         });
     });
 

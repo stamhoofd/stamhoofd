@@ -106,10 +106,6 @@ export class SessionService {
             throw this.invalidRefreshTokenError();
         }
 
-        if (isSSOHandoff) {
-            await oldToken.delete();
-        }
-
         const metaData = this.getMetaData();
         session.appVersion = metaData.appVersion ?? session.appVersion;
         session.nativeAppVersion = metaData.nativeAppVersion ?? session.nativeAppVersion;
@@ -129,7 +125,8 @@ export class SessionService {
             return undefined;
         }
         if (token.refreshTokenValidUntil < new Date()) {
-            console.error('Detected an expired refresh token, deleting all tokens for user', token.userId);
+            console.error('Detected an expired refresh token, deleting all sessions and tokens for user', token.userId);
+            await UserSession.delete().where('userId', token.userId).delete();
             await Token.delete().where('userId', token.userId).delete();
             return undefined;
         }
@@ -255,7 +252,7 @@ export class SessionService {
         if (result.affectedRows === 0) {
             return false;
         }
-        await Database.delete('DELETE FROM `tokens` WHERE `sessionId` = ? AND `id` != ? AND `id` != ?', [sessionId, tokenId, handoffTokenId]);
+        await Database.delete('DELETE FROM `tokens` WHERE `sessionId` = ? AND `id` != ?', [sessionId, tokenId]);
         return true;
     }
 

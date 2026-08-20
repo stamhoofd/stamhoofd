@@ -1,13 +1,9 @@
-import { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@simonbackx/simple-endpoints';
 import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { MFAToken, Organization, Platform, RateLimiter, Token, User } from '@stamhoofd/models';
-
-import { SessionService } from '../services/SessionService.js';
-
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { ApiUserRateLimits } from '@stamhoofd/structures';
+import { SessionService } from '../services/SessionService.js';
 import { AdminPermissionChecker } from './AdminPermissionChecker.js';
 import { contextStorage } from './ContextStorage.js';
 import { TwoFactorHelper } from './TwoFactorHelper.js';
