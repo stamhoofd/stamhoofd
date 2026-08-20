@@ -166,7 +166,7 @@ ORDER BY `Naam_Organisatie`
         f.birth_date,
         f.`Geslacht`,
         f.deactivated_at,
-        CASE WHEN f.`Tak` = 'Leiding' THEN 1 WHEN f.categorie = 'child' THEN 0 ELSE 1 END AS is_leiding
+        CASE WHEN f.categorie = 'leader' THEN 2 WHEN f.categorie = 'child' THEN 1 ELSE 0 END AS type_number
     FROM all_registrations f
     WHERE
         -- @include aangesloten
@@ -179,18 +179,19 @@ deelnemers AS (
         MAX(i.birth_date) AS birth_date,
         MAX(i.`Geslacht`) AS `Geslacht`,
         COALESCE(
-            MAX(CASE WHEN i.deactivated_at IS NULL THEN i.is_leiding END),
-            MAX(i.is_leiding)
-        ) AS is_leiding
+            MAX(CASE WHEN i.deactivated_at IS NULL THEN i.type_number END),
+            MAX(i.type_number)
+        ) AS type_number
     FROM inschrijvingen i
     GROUP BY i.organization_id, i.member_id
 )
 SELECT
     d.organization_id AS `ID_Organisatie`,
-    CASE WHEN d.is_leiding = 1 THEN 'leiding' ELSE 'leden' END AS `Type_deelnemers`,
+    CASE WHEN d.type_number = 2 THEN 'leiding' ELSE 'leden' END AS `Type_deelnemers`,
     YEAR(d.birth_date) AS `Geboortejaar_deelnemers`,
     CASE d.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' ELSE NULL END AS `Gender_deelnemers`,
     COUNT(DISTINCT d.member_id) AS `Aantal_deelnemers`
 FROM deelnemers d
+where d.type_number > 0
 GROUP BY `ID_Organisatie`, `Type_deelnemers`, `Geboortejaar_deelnemers`, `Gender_deelnemers`
 ORDER BY `ID_Organisatie`, `Type_deelnemers`, `Geboortejaar_deelnemers`, `Gender_deelnemers`
