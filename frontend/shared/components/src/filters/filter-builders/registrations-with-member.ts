@@ -51,28 +51,11 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({
             key: 'registeredAt',
         }));
 
-        console.log(currentGroup);
-
         if (currentGroup && currentGroup.settings.optionMenus.length > 0) {
             const optionMenusFilters = getFilterBuildersForOptionMenus(currentGroup.settings.optionMenus);
 
-            optionMenusFilters.unshift(
-                new GroupUIFilterBuilder({
-                    builders: optionMenusFilters,
-                }),
-            );
-
             all.push(
-                new GroupUIFilterBuilder({
-                    name: $t('Bijhorende inschrijving'),
-                    description: $t("Filter op keuzemenu's van de inschrijving"),
-                    builders: optionMenusFilters,
-                    wrapper: {
-                        options: {
-                            $elemMatch: FilterWrapperMarker,
-                        },
-                    },
-                }),
+                ...optionMenusFilters,
             );
         }
         if (currentGroup && currentGroup.settings.recordCategories.length > 0) {

@@ -12,12 +12,16 @@ export function getFilterBuildersForOptionMenus(optionMenus: GroupOptionMenu[], 
                 name: prefix + optionMenu.name,
                 options: optionMenu.options.map(o => new MultipleChoiceUIFilterOption(o.name.toString(), o.id)),
                 wrapper: {
-                    optionMenu: {
-                        id: optionMenu.id,
-                    },
-                    option: {
-                        id: {
-                            $in: FilterWrapperMarker,
+                    options: {
+                        $elemMatch: {
+                            optionMenu: {
+                                id: optionMenu.id,
+                            },
+                            option: {
+                                id: {
+                                    $in: FilterWrapperMarker,
+                                },
+                            },
                         },
                     },
                 },
