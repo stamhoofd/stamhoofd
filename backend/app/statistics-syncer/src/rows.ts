@@ -111,7 +111,11 @@ export type ResponsibilityRecordSource = {
 
 export type NamedConfigSource = { id: string; name: string };
 
-export type PlatformSource = { id: string; config: { name: string }; membershipOrganizationId: string | null };
+export type PlatformSource = {
+    id: string;
+    config: { name: string; financialSupport: { priceName: string } | null };
+    membershipOrganizationId: string | null;
+};
 
 /**
  * The label the reports show for a period, mirroring `RegistrationPeriodBase.nameShort`: the custom
@@ -233,11 +237,17 @@ export function flattenRegistration(registration: RegistrationSource): Statistic
     };
 }
 
-export function flattenMembership(membership: MembershipSource): StatisticsRow {
+/**
+ * `reducedPrice` is not on the source record: the price of a lidgeld is worked out from whether the
+ * member has financiële ondersteuning or an active UITPAS and only the amount is kept, so the caller
+ * passes that same status here. It is what the reports split the lidgelden by.
+ */
+export function flattenMembership(membership: MembershipSource, reducedPrice: boolean): StatisticsRow {
     return {
         id: membership.id,
         memberId: membership.memberId,
         membershipTypeId: membership.membershipTypeId,
+        reducedPrice,
         organizationId: membership.organizationId,
         periodId: membership.periodId,
         startDate: membership.startDate,
@@ -277,15 +287,24 @@ export function flattenNamedConfig(config: NamedConfigSource, periodId: string):
 }
 
 /**
- * The platform itself, which the reports need for one thing: which organization it runs on its own.
- * That is the koepel rather than one of its local groups, and the jeugdbewegingen report delivers it
- * as the bovenlokale ondersteuningsstructuur.
+ * The platform itself, which the reports need for two things: which organization it runs on its own,
+ * and what it calls its verlaagd lidgeld. The first is the koepel rather than one of its local
+ * groups, which the jeugdbewegingen report delivers as the bovenlokale ondersteuningsstructuur.
  *
  * Not written per period, so the name here is the one the platform carries today. Nothing is reported
  * per year out of it -- the name a sheet prints is the organization's own, per period.
+ *
+ * `reducedPriceName` is the label the platform gives its lower lidgeld, which the reports print
+ * beside the standaardtarief. Null when the platform names none, and the report says it in words of
+ * its own rather than inventing a name here.
  */
 export function flattenPlatform(platform: PlatformSource): StatisticsRow {
-    return { id: platform.id, name: platform.config.name, membershipOrganizationId: platform.membershipOrganizationId };
+    return {
+        id: platform.id,
+        name: platform.config.name,
+        membershipOrganizationId: platform.membershipOrganizationId,
+        reducedPriceName: platform.config.financialSupport?.priceName ?? null,
+    };
 }
 
 export function flattenDefaultAgeGroup(group: { id: string; name: string; minAge: number | null; maxAge: number | null }, periodId: string): StatisticsRow {

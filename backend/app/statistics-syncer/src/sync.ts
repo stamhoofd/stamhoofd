@@ -130,6 +130,27 @@ function periodIdsByMember(memberIds: string[]): Promise<Map<string, Set<string>
 }
 
 /**
+ * Which of these members are charged the platform's verlaagd lidgeld: those with financiële
+ * ondersteuning or an active UITPAS.
+ *
+ * That status is the input the price of a lidgeld is calculated from, and the only record of which
+ * tarief was charged -- the membership itself keeps the amount and not what it was made of. Read off
+ * the member here so a lidgeld row can carry it, which is the grain the reports split on.
+ *
+ * It answers what is true of the member now, like their gender and postal code, and lands in the
+ * years still open only: a settled year keeps the tarief it was counted with.
+ */
+async function reducedPriceByMember(memberIds: string[]): Promise<Set<string>> {
+    const unique = [...new Set(memberIds)];
+    if (unique.length === 0) {
+        return new Set();
+    }
+
+    const members = await Member.select().where(SQL.column('id'), unique).fetch() as Member[];
+    return new Set(members.filter(member => member.details.shouldApplyReducedPrice).map(member => member.id));
+}
+
+/**
  * A unit also gets a row for the period it is in now, before anyone has registered in it: its netwerk
  * is recorded against that period, and a netwerk link to a unit that has no row yet is a link to
  * nothing.
@@ -270,11 +291,13 @@ function buildIncrementalTables(known: { ageGroups: Set<string>; membershipTypes
         },
         {
             table: 'member_platform_memberships',
-            columns: ['id', 'memberId', 'membershipTypeId', 'organizationId', 'periodId', 'startDate', 'endDate', 'expireDate', 'trialUntil', 'deletedAt', 'createdAt', 'updatedAt'],
+            columns: ['id', 'memberId', 'membershipTypeId', 'reducedPrice', 'organizationId', 'periodId', 'startDate', 'endDate', 'expireDate', 'trialUntil', 'deletedAt', 'createdAt', 'updatedAt'],
             fetch: async (since, afterId, limit) => {
                 const memberships = await incrementalQuery(MemberPlatformMembership, since, afterId, limit).fetch() as MemberPlatformMembership[];
                 const kept = memberships.filter(membership => known.membershipTypes.has(membership.membershipTypeId));
-                return { rows: kept.map(flattenMembership), updatedAt: kept.map(membership => membership.updatedAt), lastId: memberships.at(-1)?.id ?? afterId };
+                const reduced = await reducedPriceByMember(kept.map(membership => membership.memberId));
+                const rows = kept.map(membership => flattenMembership(membership, reduced.has(membership.memberId)));
+                return { rows, updatedAt: kept.map(membership => membership.updatedAt), lastId: memberships.at(-1)?.id ?? afterId };
             },
             existingIds: ids => existingModelIds(MemberPlatformMembership, ids),
             periodColumn: 'periodId',
@@ -298,9 +321,10 @@ async function syncPlatformConfig(openPeriodIds: string[]): Promise<void> {
         openPeriodIds.flatMap(periodId => items.map(item => flatten(item, periodId)));
 
     // The platform record itself rather than its configuration, and therefore not per period: the
-    // reports read only which organization it runs, and what they print of that organization comes
-    // from `organizations`, which is recorded per year like everything else.
-    await upsertRows('platform', ['id', 'name', 'membershipOrganizationId'], [flattenPlatform(platform)], ['id']);
+    // reports read which organization it runs and what it calls its verlaagd lidgeld, and what they
+    // print of that organization comes from `organizations`, which is recorded per year like
+    // everything else.
+    await upsertRows('platform', ['id', 'name', 'membershipOrganizationId', 'reducedPriceName'], [flattenPlatform(platform)], ['id']);
 
     await upsertRows('organization_tags', ['id', 'periodId', 'name'], perPeriod(config.tags, flattenNamedConfig), namedConfigKey);
     // `category` is left out on purpose: the platform configuration has no equivalent, and listing it

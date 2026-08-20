@@ -223,6 +223,33 @@ describe('report', () => {
         });
 
         /**
+         * What a member paid for their lidgeld, which is the split the two lidgeld cards draw: the
+         * standaardtarief against the lower one. The aansluiting they hold says what they are
+         * aangesloten for and nothing about the price, so a card that groups on its name reads as a
+         * plausible pie of the wrong thing -- which is what these two used to be.
+         *
+         * The name of the lower tarief is the koepel's own and comes from the platform row. A
+         * platform that gives it none, or a statistics database with nothing synced into it yet,
+         * still has to name the slice rather than leave it empty.
+         */
+        it('splits the lidgelden by the tarief they were charged at, named as the koepel names it', () => {
+            const cards = [cardOf(dashboards, 'nationaal', 'leden-per-type-lidgeld'), cardOf(dashboards, 'eenheden', 'eenheid-leden-per-type-lidgeld')];
+
+            for (const card of cards) {
+                const sql = card.sql.replaceAll(/\s+/g, ' ');
+
+                expect(`${card.key}: ${sql.includes('CASE WHEN mpm.reducedPrice = 1')}`).toEqual(`${card.key}: true`);
+                expect(`${card.key}: ${sql.includes("ELSE 'Standaardtarief' END AS `Type lidgeld`")}`).toEqual(`${card.key}: true`);
+                expect(`${card.key}: ${sql.includes('SELECT pf.reducedPriceName FROM platform pf')}`).toEqual(`${card.key}: true`);
+                expect(`${card.key}: ${sql.includes("COALESCE((SELECT pf.reducedPriceName FROM platform pf WHERE pf.reducedPriceName IS NOT NULL LIMIT 1), 'Verlaagd tarief')")}`).toEqual(`${card.key}: true`);
+                expect(`${card.key}: ${sql.includes('mt.name AS `Type lidgeld`')}`).toEqual(`${card.key}: false`);
+            }
+
+            // One expression, so the two cards cannot start naming the same tarief differently.
+            expect(new Set(cards.map(card => card.sql.replaceAll(/\s+/g, ' ').match(/CASE WHEN mpm\.reducedPrice.*?END/)?.[0])).size).toBe(1);
+        });
+
+        /**
          * The weights of the index, kept here because nothing else checks them: a wrong weight, or a
          * tak spelled differently from the row in `default_age_groups`, is a plausible number rather
          * than a failure.

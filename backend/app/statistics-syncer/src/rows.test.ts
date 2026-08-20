@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { flattenGroup, flattenMember, flattenOrganization, flattenPlatform, flattenRegistration } from './rows.js';
+import { flattenGroup, flattenMember, flattenMembership, flattenOrganization, flattenPlatform, flattenRegistration } from './rows.js';
 
 describe('flattenMember', () => {
     const member = {
@@ -100,7 +100,7 @@ describe('flattenOrganization', () => {
 describe('flattenPlatform', () => {
     const platform = {
         id: 'platform-1',
-        config: { name: 'Scouts en Gidsen Vlaanderen' },
+        config: { name: 'Scouts en Gidsen Vlaanderen', financialSupport: { priceName: 'SOMkort' } },
         membershipOrganizationId: 'org-1',
     };
 
@@ -110,11 +110,53 @@ describe('flattenPlatform', () => {
      * a local group.
      */
     it('keeps the name and the organization the platform runs itself', () => {
-        expect(flattenPlatform(platform)).toEqual({ id: 'platform-1', name: 'Scouts en Gidsen Vlaanderen', membershipOrganizationId: 'org-1' });
+        expect(flattenPlatform(platform)).toEqual({
+            id: 'platform-1',
+            name: 'Scouts en Gidsen Vlaanderen',
+            membershipOrganizationId: 'org-1',
+            reducedPriceName: 'SOMkort',
+        });
     });
 
     it('stores no organization for a platform that runs none', () => {
         expect(flattenPlatform({ ...platform, membershipOrganizationId: null }).membershipOrganizationId).toBeNull();
+    });
+
+    /**
+     * What a koepel calls its verlaagd lidgeld is a name it sets itself -- SOMkort, kansentarief --
+     * and the reports print it beside the standaardtarief. A platform that names none leaves it to
+     * the report to word, rather than being given a name here that nobody uses.
+     */
+    it('keeps what the platform calls its verlaagd lidgeld, and nothing when it names none', () => {
+        expect(flattenPlatform({ ...platform, config: { ...platform.config, financialSupport: null } }).reducedPriceName).toBeNull();
+    });
+});
+
+describe('flattenMembership', () => {
+    const membership = {
+        id: 'membership-1',
+        memberId: 'member-1',
+        membershipTypeId: 'type-1',
+        organizationId: 'org-1',
+        periodId: 'period-1',
+        startDate: new Date(2025, 8, 1),
+        endDate: new Date(2026, 7, 31),
+        expireDate: null,
+        trialUntil: null,
+        deletedAt: null,
+        createdAt: new Date(2025, 8, 1),
+        updatedAt: new Date(2025, 8, 1),
+    };
+
+    /**
+     * Which tarief a lidgeld was charged at is the one thing about its price that reaches this
+     * database, and it is not on the record: the source keeps the amount, not what it was made of.
+     * The caller reads the member's status, which is the input that made it.
+     */
+    it('records the tarief the lidgeld was charged at, and none of its prices', () => {
+        expect(flattenMembership(membership, true).reducedPrice).toBe(true);
+        expect(flattenMembership(membership, false).reducedPrice).toBe(false);
+        expect(Object.keys(flattenMembership(membership, false)).filter(key => /price/i.test(key))).toEqual(['reducedPrice']);
     });
 });
 

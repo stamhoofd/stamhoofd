@@ -163,20 +163,23 @@ ORDER BY `Aantal leden` DESC
 -- metrics: Aantal leden
 -- @include facts
 SELECT
-    mt.name AS `Type lidgeld`,
+    -- @include tarief
+        AS `Type lidgeld`,
     COUNT(DISTINCT mpm.memberId) AS `Aantal leden`
 FROM member_platform_memberships mpm
+-- Enkel nog om op de aansluiting te kunnen filteren: waar de taart op splitst is het tarief, en dat
+-- staat op het lidgeld zelf.
 JOIN platform_membership_types mt ON mt.id = mpm.membershipTypeId AND mt.periodId = mpm.periodId
 WHERE mpm.deletedAt IS NULL
   AND mpm.periodId IN (SELECT DISTINCT period_id FROM facts)
   AND mpm.memberId IN (SELECT DISTINCT member_id FROM facts)
   -- Geen lidmaatschap bij de koepel zelf: `facts` laat die organisatie weg, en wie naast een eenheid
-  -- ook in een nationale ploeg zit zou het lidgeldtype daarvan anders in deze grafiek zetten.
+  -- ook in een nationale ploeg zit zou het tarief daarvan anders in deze grafiek zetten.
   AND NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = mpm.organizationId)
   -- Alleen de gekozen aansluitingen: `facts` houdt de leden over die er een van hebben, en zonder
   -- dit zou de taart daarnaast ook de andere aansluitingen van net die leden tonen.
   [[AND mt.name IN ({{aansluiting}})]]
-GROUP BY mt.name
+GROUP BY mpm.reducedPrice
 ORDER BY `Aantal leden` DESC
 
 -- @card eenheid-evolutie-per-tak

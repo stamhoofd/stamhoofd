@@ -107,13 +107,20 @@ CREATE TABLE `postal_codes` (
 -- that organization in a given werkjaar -- is already in `organizations`. No foreign key on it for
 -- the reason given above: `organizations` is keyed on an id and a period.
 --
+-- `reducedPriceName` is what this platform calls its lower lidgeld -- SOMkort, kansentarief -- which
+-- is a label the platform sets and nothing else in here knows. It is the one every report prints
+-- beside `standaardtarief`, so a member paying the lower one is named the way the koepel names it
+-- rather than in words of this database's own.
+--
 -- Keyed on the id alone rather than per period, unlike the configuration below. Nothing is reported
--- per year out of this row: it says which platform this is and which organization is its own, so
--- there is no answer here that a settled year could keep.
+-- per year out of this row: it says which platform this is, which organization is its own and what it
+-- calls its lower tarief. Renaming that tarief therefore renames it in the settled years too, which
+-- is a label moving rather than a figure changing.
 CREATE TABLE `platform` (
   `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `membershipOrganizationId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `reducedPriceName` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'What this platform calls its verlaagd lidgeld, e.g. SOMkort. Null means it names none, and the reports fall back to their own wording.',
   PRIMARY KEY (`id`),
   KEY `membershipOrganizationId` (`membershipOrganizationId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -293,10 +300,22 @@ CREATE TABLE `registrations` (
 
 -- Which lidgeld a member holds in a period. The price columns of the source are dropped: these
 -- reports count members, not money.
+--
+-- `reducedPrice` is the exception, and it is a tarief rather than a price: whether this lidgeld was
+-- charged at the platform's lower tarief instead of the standard one. That is what the reports split
+-- the lidgelden by -- the aansluiting a member holds says what they are aangesloten for, and says
+-- nothing about what they paid for it.
+--
+-- Nothing in the source records it per lidgeld: the price is worked out from whether the member has
+-- financiële ondersteuning or an active UITPAS at the moment it is calculated, and only the resulting
+-- amount is stored. The sync therefore reads that same status off the member, which is the input the
+-- price was made from. It is a status about a person and a sensitive one at that, kept here as a
+-- single flag and no more -- see the note at the top of this file on who may reach this database.
 CREATE TABLE `member_platform_memberships` (
   `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
   `memberId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `membershipTypeId` varchar(36) NOT NULL,
+  `reducedPrice` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Whether this lidgeld was charged at the platform reduced tarief rather than the standard one',
   `organizationId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `startDate` datetime NOT NULL,

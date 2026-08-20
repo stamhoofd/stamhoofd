@@ -1,6 +1,6 @@
-import type { Member, Organization, Registration, RegistrationPeriod } from '@stamhoofd/models';
-import { GroupFactory, MemberFactory, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
-import { DefaultAgeGroup, Gender } from '@stamhoofd/structures';
+import type { Organization, Registration, RegistrationPeriod } from '@stamhoofd/models';
+import { GroupFactory, Member, MemberFactory, MemberPlatformMembership, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
+import { BooleanStatus, DefaultAgeGroup, FinancialSupportSettings, Gender, PlatformMembershipType } from '@stamhoofd/structures';
 import { getStatisticsConnection } from './database.js';
 import { syncStatistics, syncStatisticsDeletes } from './sync.js';
 import { readSyncState } from './sync-state.js';
@@ -309,6 +309,62 @@ describe('statistics sync', () => {
             const links = await statisticsRows('_organizations_organization_tags');
             expect(links.some(row => row.periodId === settledPeriod.id && row.organizationTagsId === tag.id)).toBe(true);
             expect(links.some(row => row.periodId === organization.periodId && row.organizationTagsId === moved.id)).toBe(true);
+        });
+    });
+
+    /**
+     * Which tarief a lidgeld was charged at is what the reports split the lidgelden by, and nothing in
+     * the administration records it per lidgeld: the price is worked out from whether the member has
+     * financiële ondersteuning or an active UITPAS, and only the amount is kept. The sync reads that
+     * same status off the member, so a lidgeld carries the tarief it was made at.
+     */
+    describe('the tarief of a lidgeld', () => {
+        async function membershipOf(member: Member, type: PlatformMembershipType): Promise<MemberPlatformMembership> {
+            const membership = new MemberPlatformMembership();
+            membership.memberId = member.id;
+            membership.membershipTypeId = type.id;
+            membership.organizationId = organization.id;
+            membership.periodId = period.id;
+            membership.startDate = period.startDate;
+            membership.endDate = period.endDate;
+            await membership.save();
+            return membership;
+        }
+
+        it('marks the lidgeld of a member with financiële ondersteuning as the verlaagd tarief', async () => {
+            const type = PlatformMembershipType.create({ name: 'Volledig scoutsjaar' });
+            const platform = await Platform.getForEditing();
+            platform.config.membershipTypes = [type];
+            platform.config.financialSupport = FinancialSupportSettings.create({ priceName: 'SOMkort' });
+            await platform.save();
+            await Platform.clearCache();
+
+            const supported = await new MemberFactory({ organization }).create();
+            supported.details.requiresFinancialSupport = BooleanStatus.create({ value: true });
+            await supported.save();
+
+            const standard = await membershipOf(member, type);
+            const reduced = await membershipOf(supported, type);
+
+            await syncStatistics();
+
+            expect((await statisticsRows('member_platform_memberships', standard.id))[0].reducedPrice).toBe(0);
+            expect((await statisticsRows('member_platform_memberships', reduced.id))[0].reducedPrice).toBe(1);
+        });
+
+        /**
+         * The name of that tarief is the koepel's own -- SOMkort, kansentarief -- so the reports print
+         * what the platform calls it instead of a wording of their own.
+         */
+        it('writes what the platform calls its verlaagd tarief', async () => {
+            const platform = await Platform.getForEditing();
+            platform.config.financialSupport = FinancialSupportSettings.create({ priceName: 'SOMkort' });
+            await platform.save();
+            await Platform.clearCache();
+
+            await syncStatistics();
+
+            expect((await statisticsRows('platform', platform.id))[0].reducedPriceName).toBe('SOMkort');
         });
     });
 
