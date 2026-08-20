@@ -97,8 +97,8 @@ const priceBreakdown = computed((): PriceBreakdown => {
     return [
         ...all,
         {
-            name: laterBalance.priceOpen !== 0 ? $t(`%10c`) : $t(`%m0`),
-            price: balance.priceOpen < 0 ? 0 : Math.abs(balance.priceOpen),
+            name: balance.priceOpen < 0 ? (isPayable ? $t(`%m0`) : $t(`%10b`)) : (laterBalance.priceOpen !== 0 ? $t(`%10c`) : $t(`%m0`)),
+            price: balance.priceOpen < 0 && isPayable ? 0 : Math.abs(balance.priceOpen),
         },
     ];
 });
