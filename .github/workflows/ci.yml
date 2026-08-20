@@ -50,6 +50,11 @@ jobs:
             playwright:
               - 'yarn.lock'
               - 'tests/playwright/**'
+            # Changing the workflow itself (or the shared setup action) can affect
+            # any job, so all of them run.
+            ci:
+              - '.github/workflows/ci.yml'
+              - '.github/actions/**'
 
       # On pushes, paths-filter only diffs against the previous commit. If the
       # previous run was red, an unrelated commit would skip the broken job and
@@ -91,11 +96,11 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
     outputs:
-      changed_backend_apps: ${{ steps.changed.outputs.backend_apps == 'true' || steps.prev.outputs.backend_apps == 'true' }}
-      changed_backend_shared: ${{ steps.changed.outputs.backend_shared == 'true' || steps.prev.outputs.backend_shared == 'true' }}
-      changed_shared: ${{ steps.changed.outputs.shared == 'true' || steps.prev.outputs.shared == 'true' }}
-      changed_frontend: ${{ steps.changed.outputs.frontend == 'true' || steps.prev.outputs.frontend == 'true' }}
-      rerun_playwright: ${{ steps.changed.outputs.playwright == 'true' || steps.prev.outputs.playwright == 'true' }}
+      changed_backend_apps: ${{ steps.changed.outputs.ci == 'true' || steps.changed.outputs.backend_apps == 'true' || steps.prev.outputs.backend_apps == 'true' }}
+      changed_backend_shared: ${{ steps.changed.outputs.ci == 'true' || steps.changed.outputs.backend_shared == 'true' || steps.prev.outputs.backend_shared == 'true' }}
+      changed_shared: ${{ steps.changed.outputs.ci == 'true' || steps.changed.outputs.shared == 'true' || steps.prev.outputs.shared == 'true' }}
+      changed_frontend: ${{ steps.changed.outputs.ci == 'true' || steps.changed.outputs.frontend == 'true' || steps.prev.outputs.frontend == 'true' }}
+      rerun_playwright: ${{ steps.changed.outputs.ci == 'true' || steps.changed.outputs.playwright == 'true' || steps.prev.outputs.playwright == 'true' }}
 
   # Build all shared TypeScript packages exactly once and share the compiled output
   # (dist + tsbuildinfo) with every downstream job via an artifact. This removes the
