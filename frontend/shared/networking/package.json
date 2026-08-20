@@ -33,7 +33,13 @@
         "file-saver": "2.0.5"
     },
     "devDependencies": {
+        "@stamhoofd/test-utils": "*",
+        "@stamhoofd/vite-config": "*",
         "@types/file-saver": "2.0.7",
-        "eslint-plugin-stamhoofd": "*"
+        "@vitest/browser": "4.1.10",
+        "eslint-plugin-stamhoofd": "*",
+        "vite": "8.1.5",
+        "vitest": "4.1.10",
+        "vitest-browser-vue": "2.1.0"
     }
 }

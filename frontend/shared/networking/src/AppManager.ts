@@ -1,5 +1,6 @@
 import { UrlHelper } from '@simonbackx/vue-app-navigation';
-import { SessionDeviceType, type SessionMetaData, SessionOS } from '@stamhoofd/structures';
+import { SessionDeviceType, SessionOS } from '@stamhoofd/structures';
+import type { SessionMetaData } from '@stamhoofd/structures';
 import type { SessionContext } from './SessionContext';
 
 // TODO: remove duplicate type definitions, but need to check if capacitor won't get loaded on the web...
@@ -70,7 +71,7 @@ export class AppManager {
     async getSessionMetaData(): Promise<SessionMetaData> {
         const userAgent = navigator.userAgent || '';
         const native = this.nativeDeviceInfo ? await this.nativeDeviceInfo.catch(() => null) : null;
-        const isIPad = native?.model.toLowerCase().includes('ipad') || (/Macintosh/.test(userAgent) && navigator.maxTouchPoints > 1);
+        const isIPad = native?.model.toLowerCase().includes('ipad') || /iPad/.test(userAgent) || (/Macintosh/.test(userAgent) && navigator.maxTouchPoints > 1);
         const isTablet = isIPad || (/Android/.test(userAgent) && !/Mobile/.test(userAgent));
         const isPhone = !isTablet && (this.platform === 'ios' || this.platform === 'android' || /iPhone|iPod|Android.+Mobile/.test(userAgent));
 
@@ -110,7 +111,7 @@ export class AppManager {
 
     private getBrowserName(userAgent: string): string {
         if (/SamsungBrowser\//.test(userAgent)) return 'SamsungBrowser';
-        if (/Ecosia\//.test(userAgent)) return 'Ecosia';
+        if (/Ecosia[/ ]/.test(userAgent)) return 'Ecosia';
         if (/DuckDuckGo|DdgA|DdgI/.test(userAgent)) return 'DuckDuckGo';
         if (/Edg(?:e|A|iOS)?\//.test(userAgent)) return 'Edge';
         if (/OPR\//.test(userAgent)) return 'Opera';

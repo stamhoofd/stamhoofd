@@ -283,6 +283,8 @@ jobs:
           name: shared-dist
       - name: Run components browser tests
         run: cd frontend/shared/components && yarn vitest run
+      - name: Run networking browser tests
+        run: cd frontend/shared/networking && yarn vitest run
 
   job_test_playwright:
     name: 'Playwright Tests'
