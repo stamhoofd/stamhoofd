@@ -6,7 +6,7 @@
         <GroupedBalanceList :item="item" :exclude-vat="hasExclusiveVAT" />
         <BalancePriceBreakdown :item="item" />
         <p v-if="payableBalanceItems.length" class="style-button-bar right-align">
-            <button class="button primary" type="button" @click="$emit('checkout')">
+            <button class="button primary" type="button" data-testid="pay-balance-button" @click="$emit('checkout')">
                 <span>{{ $t('%eX') }}</span>
                 <span class="icon arrow-right" />
             </button>

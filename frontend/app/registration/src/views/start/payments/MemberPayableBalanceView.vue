@@ -74,6 +74,7 @@ async function checkout(item: DetailedPayableBalance) {
                             title: $t(`%1Qf`),
                             items,
                             isPayable: true,
+                            openBalanceItems: item.balanceItems,
                             canCustomizeItemValue: (item: BalanceItem) => {
                                 return item.organizationId !== platform.value.membershipOrganizationId;
                             },

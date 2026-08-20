@@ -111,6 +111,7 @@ export class MemberPortalRegistrationFlow {
 
     private cartCreditRow() {
         return this.page
+            .getByTestId('cart-view')
             .locator('.pricing-box .left')
             .filter({ hasText: 'Tegoed' });
     }

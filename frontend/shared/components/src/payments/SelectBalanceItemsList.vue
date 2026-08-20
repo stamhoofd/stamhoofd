@@ -38,7 +38,7 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
 import PriceInput from '#inputs/PriceInput.vue';
 import STInputBox from '#inputs/STInputBox.vue';
-import { BalanceItem, BalanceItemPaymentDetailed } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemPaymentDetailed, RegisterCheckout } from '@stamhoofd/structures';
 import { computed, nextTick, onMounted, ref } from 'vue';
 import BalanceItemTitleBox from './BalanceItemTitleBox.vue';
 
@@ -53,9 +53,16 @@ const props = withDefaults(defineProps<{
      * Used when refunding a specific payment: then the price paid via that payment is used instead.
      */
     getFullPrice?: ((item: BalanceItem) => number) | null;
+
+    /**
+     * All open balance items of the payer (including credits). When set, the credits the
+     * checkout will apply automatically are shown in the price breakdown.
+     */
+    openBalanceItems?: BalanceItem[] | null;
 }>(), {
     canCustomizeItemValue: () => true,
     getFullPrice: null,
+    openBalanceItems: null,
 });
 
 function fullPrice(item: BalanceItem) {
@@ -112,11 +119,41 @@ const total = computed(() => {
     return props.list.reduce((total, item) => total + item.price, 0);
 });
 
+const automaticDiscount = computed(() => {
+    const organizationId = props.items[0]?.organizationId;
+    if (!props.openBalanceItems || !organizationId) {
+        return 0;
+    }
+    const discounts = RegisterCheckout.calculateAutomaticDiscounts({
+        organizationId,
+        balanceItems: props.openBalanceItems,
+        payingNow: total.value,
+        price: total.value,
+    });
+    return [...discounts.values()].reduce((a, b) => a + b, 0);
+});
+
 const priceBreakdown = computed(() => {
+    if (automaticDiscount.value === 0) {
+        return [
+            {
+                name: $t(`%xL`),
+                price: total.value,
+            },
+        ];
+    }
     return [
         {
-            name: $t(`%xL`),
+            name: $t('Subtotaal'),
             price: total.value,
+        },
+        {
+            name: $t('Tegoed'),
+            price: -automaticDiscount.value,
+        },
+        {
+            name: $t(`%xL`),
+            price: total.value - automaticDiscount.value,
         },
     ];
 });

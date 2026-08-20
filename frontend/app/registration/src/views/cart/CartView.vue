@@ -1,5 +1,5 @@
 <template>
-    <section class="st-view">
+    <section class="st-view" data-testid="cart-view">
         <STNavigationBar :title="$t(`%1DQ`)" />
         <main class="center">
             <h1>
