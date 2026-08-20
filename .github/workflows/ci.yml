@@ -146,6 +146,11 @@ jobs:
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: shared-dist
+      - name: Allow Chrome to use unprivileged user namespaces
+        # ubuntu-latest restricts unprivileged user namespaces via AppArmor, which makes the
+        # Chrome that puppeteer launches in the renderer tests abort with "No usable sandbox!".
+        # Production grants the same exception via /etc/apparmor.d/chrome-dev-builds.
+        run: sudo sysctl -e -w kernel.apparmor_restrict_unprivileged_userns=0
       - name: Run tests
         run: |
           for package in backend/app/renderer backend/app/redirecter backend/app/api; do
