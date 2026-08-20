@@ -7,6 +7,7 @@ import { useAuth } from '#hooks/useAuth.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useUser } from '#hooks/useUser.ts';
+import type { Group } from '@stamhoofd/structures';
 import { FilterWrapperMarker, getGroupStatusName, getGroupTypeName, GroupStatus, GroupType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
@@ -19,8 +20,16 @@ import type { UIFilter, UIFilterBuilder } from '../UIFilter';
 import { createMemberWithRegistrationsBlobFilterBuilders, useAdvancedPlatformMembershipUIFilterBuilders } from './members';
 import { useGetOrganizationUIFilterBuilders } from './organizations';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
+import { getFilterBuildersForOptionMenus } from './option-menus';
+import { getFilterBuildersForRecordCategories } from './record-categories';
 
-export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGroups }: { multipleGroups: boolean }) {
+export function useAdvancedRegistrationWithMemberUIFilterBuilders({
+    multipleGroups,
+    currentGroup = null,
+}: {
+    multipleGroups: boolean;
+    currentGroup?: Group | null;
+}) {
     const $platform = usePlatform();
     const isPlatform = STAMHOOFD.userMode === 'platform';
     const $user = useUser();
@@ -41,6 +50,31 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGrou
             name: $t('%zg'),
             key: 'registeredAt',
         }));
+
+        if (currentGroup && currentGroup.settings.optionMenus.length > 0) {
+            const optionMenusFilters = getFilterBuildersForOptionMenus(currentGroup.settings.optionMenus);
+
+            all.push(
+                ...optionMenusFilters,
+            );
+        }
+        if (currentGroup && currentGroup.settings.recordCategories.length > 0) {
+            const recordCategoriesFilters = getFilterBuildersForRecordCategories(currentGroup.settings.recordCategories);
+
+            recordCategoriesFilters.unshift(
+                new GroupUIFilterBuilder({
+                    builders: recordCategoriesFilters,
+                }),
+            );
+
+            all.push(new GroupUIFilterBuilder({
+                name: $t('%8i'),
+                builders: recordCategoriesFilters,
+                wrapper: {
+                    details: FilterWrapperMarker,
+                },
+            }));
+        }
 
         if (app === 'admin' && STAMHOOFD.userMode === 'platform') {
             all.push(new RelationFilterBuilder({
