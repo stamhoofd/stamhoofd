@@ -151,7 +151,7 @@
                 </STList>
             </div>
 
-            <div v-if="app !== 'admin' || scope === 'organization'" class="container">
+            <div v-if="(app !== 'admin' || scope === 'organization') && organization?.meta.packages.useMembers" class="container">
                 <hr><h2>
                     {{ $t('%Z9') }}
                 </h2>
