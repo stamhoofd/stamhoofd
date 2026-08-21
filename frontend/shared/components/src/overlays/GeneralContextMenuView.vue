@@ -54,14 +54,14 @@ function pop(popParents = false) {
 function addFocusClass() {
     const target = props.menu.focusElement;
     if (target) {
-        target.classList.add('focused');
+        target.classList.add('open-context-menu');
     }
 }
 
 function removeFocusClass() {
     const target = props.menu.focusElement;
     if (target) {
-        target.classList.remove('focused');
+        target.classList.remove('open-context-menu');
     }
 }
 

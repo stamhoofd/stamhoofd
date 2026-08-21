@@ -34,6 +34,10 @@ export class OpenIDConnectAuthTokenEndpoint extends Endpoint<Params, Query, Body
         await Context.setUserOrganizationScope();
         const { token: sessionToken } = await Context.authenticate({ allowWithoutAccount: false });
 
+        // The resulting token links an external login provider to the account of the
+        // session, which would hand an administrator a way into the account afterwards.
+        Context.assertNotImpersonating();
+
         // Create a SSO auth token that can only be used once
         const token = await SSOService.createToken(sessionToken);
 

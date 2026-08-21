@@ -6,6 +6,7 @@ import type { BaseOrganization, EmailRecipient as EmailRecipientStruct, Replacem
 import { EmailPreview, EmailRecipientFilter, EmailWithRecipients, getExampleRecipient } from '@stamhoofd/structures';
 import { ExampleReplacements } from '@stamhoofd/structures/email/exampleReplacements.js';
 import type { Language } from '@stamhoofd/types/Language';
+import { ContextInstance } from '../helpers/Context.js';
 
 /**
  * Builds the read-only structures of an email: the preview an administrator sees while composing or
@@ -172,13 +173,16 @@ export class EmailPreviewService {
                 struct.language = options.language;
             }
 
+            // An administrator looking through this user's account must not receive links that
+            // sign in as the user, so those are rendered as previews instead.
+            const actingUser = ContextInstance.optional?.user;
             // We always refresh the data when we display it on the web (so everything is up to date)
             // The replacements are regenerated in struct.language, so they match the displayed content
             await fillRecipientReplacements(struct, {
                 organization,
                 from: email.getFromAddress(),
                 replyTo: null,
-                forPreview: false,
+                forPreview: actingUser !== undefined && actingUser.id !== user.id,
                 forceRefresh: true,
                 allowedLanguages: email.getLanguages(),
             });
