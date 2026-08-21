@@ -388,7 +388,7 @@ button.st-list-item {
             }
         }
 
-        &:active, &.hoverable:active, &.active, &.focused {
+        &:active, &.hoverable:active, &.active, &.open-context-menu {
             &:before {
                 opacity: 1;
                 transition: none;

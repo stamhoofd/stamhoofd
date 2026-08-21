@@ -71,7 +71,7 @@ const ViewRoute = defineRoute({
         --color-current-background-shade-darker: #{$color-background-shade-darker-darker};
     }
 
-    &:active, &.active, &.focused {
+    &:active, &.active, &.open-context-menu {
         background: $color-background-shade-darker;
         --color-current-background: #{$color-background-shade-darker};
         --color-current-background-shade: #{$color-background-shade-darker-darker};

@@ -5,10 +5,16 @@
         </template>
 
         <h1>{{ adminRolesTitle }}</h1>
-        <p>{{ adminRolesDescription }}</p>
+        <p>
+            {{ adminRolesDescription }}
+        </p>
 
         <p v-if="showInternalAdmins" class="info-box">
             {{ $t('%ZG') }}
+        </p>
+
+        <p class="info-box icon trial">
+            {{ $t('Tip: Gebruik de ‘Inloggen als’-functie om te kijken hoe Stamhoofd er voor een andere beheerder uitziet en de rechten uit te proberen.') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />

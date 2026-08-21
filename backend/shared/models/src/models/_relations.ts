@@ -11,6 +11,7 @@ import { Organization } from './Organization.js';
 import { STPendingInvoice } from './STPendingInvoice.js';
 import { Ticket } from './Ticket.js';
 import { User } from './User.js';
+import { UserSession } from './UserSession.js';
 import { UserPermissions } from './UserPermissions.js';
 import { Webshop } from './Webshop.js';
 import { InvoicedBalanceItem } from './InvoicedBalanceItem.js';
@@ -128,6 +129,9 @@ if (!Token.relations) {
 Token.user = new ManyToOneRelation(User, 'user');
 Token.user.foreignKey = 'userId';
 Token.relations.push(Token.user);
+Token.session = new ManyToOneRelation(UserSession, 'session');
+Token.session.foreignKey = 'sessionId';
+Token.relations.push(Token.session);
 
 if (!PasswordToken.relations) {
     PasswordToken.relations = [];

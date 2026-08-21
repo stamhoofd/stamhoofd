@@ -70,17 +70,7 @@
         </p>
         <code v-if="STAMHOOFD.environment === 'development'" class="style-code">{{ JSON.stringify(getUnloadedPermissions(user)?.encode({version: 1000}), undefined, '    ') }}</code>
 
-        <template v-if="!isNew && getUnloadedPermissions(user)">
-            <hr v-if="!isNew"><h2>
-                {{ $t('%CJ') }}
-            </h2>
-            <p>{{ $t('%Yu') }}</p>
-
-            <button class="button secundary danger" type="button" @click="doDelete()">
-                <span class="icon trash" />
-                <span>{{ $t('%CJ') }}</span>
-            </button>
-        </template>
+        <ActionButtonsBox :title="$t('%16X')" :actions="adminActions" />
     </SaveView>
 </template>
 
@@ -99,13 +89,16 @@ import { useContext } from '#hooks/useContext.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { useUninheritedPermissions } from '#hooks/useUninheritedPermissions.ts';
-import type { Permissions, PermissionsResourceType} from '@stamhoofd/structures';
+import type { Permissions, PermissionsResourceType } from '@stamhoofd/structures';
 import { User, UserWithMembers } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
+import ActionButtonsBox from '#payments/components/ActionButtonsBox.vue';
+import type { ActionButton } from '#payments/components/ActionButtonsBox.vue';
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
 import { useAdminLabels } from './hooks/useAdminLabels';
 import { useAdmins, usePermissionsCache } from './hooks/useAdmins';
+import { useImpersonation } from './hooks/useImpersonation';
 
 const $errors = useErrors();
 const saving = ref(false);
@@ -144,6 +137,32 @@ const canEditDetails = computed(() => {
     return patched.value.id === $context.value?.user?.id || (!patched.value.hasAccount && (!patched.value?.permissions?.globalPermissions || $context.value.auth.hasPlatformFullAccess()));
 });
 
+const { canImpersonate, impersonate } = useImpersonation();
+const showImpersonate = computed(() => canImpersonate(props.user));
+
+const adminActions = computed<ActionButton[]>(() => [
+    {
+        name: $t('Inloggen als deze beheerder'),
+        description: $t('Bekijk het platform zoals deze beheerder het ziet. Je krijgt een link die je in een privévenster opent.'),
+        icon: 'eye',
+        asideIcon: 'key tiny stroke',
+        testId: 'impersonate-admin',
+        enabled: !props.isNew && showImpersonate.value,
+        action: () => impersonate(props.user),
+    },
+    {
+        name: $t('%CJ'),
+        description: $t('%Yu'),
+        icon: 'trash',
+        iconClass: 'error',
+        listItemClass: 'theme-error',
+        enabled: !props.isNew && !!getUnloadedPermissions(props.user),
+        action: async () => {
+            await doDelete();
+        },
+    },
+]);
+
 const addPermissionPatch = (patch: AutoEncoderPatchType<Permissions>) => {
     addPatch(User.patch({
         permissions: getPermissionsPatch(patched.value, patch),
@@ -178,8 +197,7 @@ const save = async () => {
 
     if (errors.errors.length > 0) {
         $errors.errorBox = new ErrorBox(errors);
-    }
-    else {
+    } else {
         $errors.errorBox = null;
         valid = true;
     }
@@ -203,8 +221,7 @@ const save = async () => {
             });
             user = response.data;
             new Toast($t(`%14i`, { firstName: user.firstName || user.email }), 'success').setHide(5000).show();
-        }
-        else {
+        } else {
             const response = await $context.value.authenticatedServer.request({
                 method: 'PATCH',
                 path: '/user/' + patched.value.id,
@@ -224,8 +241,7 @@ const save = async () => {
         }
         await GlobalEventBus.sendEvent('user-updated', props.user);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         $errors.errorBox = new ErrorBox(e);
         saving.value = false;
@@ -273,8 +289,7 @@ const doDelete = async () => {
             $t('%14h', { firstName: props.user.firstName ?? props.user.email }),
             'success',
         ).setHide(2000).show();
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         $errors.errorBox = new ErrorBox(e);
         deleting.value = false;
@@ -306,8 +321,7 @@ const resendInvite = async () => {
         didSendInvite.value = true;
 
         new Toast($t(`%uL`) + ' ' + props.user.email, 'success').setHide(2000).show();
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         $errors.errorBox = new ErrorBox(e);
     }

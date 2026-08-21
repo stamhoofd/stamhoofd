@@ -116,7 +116,11 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
         try {
             const context = ContextInstance.optional;
             let settings = AuditLogService.getContext();
-            let userId = settings?.userId !== undefined ? settings?.userId : (context?.optionalAuth?.user?.id ?? settings?.fallbackUserId ?? null);
+
+            // While impersonating, a change is made by the administrator behind the
+            // session, never by the account they are looking through.
+            const actor = context?.impersonatedUser ? context.user : context?.optionalAuth?.user;
+            let userId = settings?.userId !== undefined ? settings?.userId : (actor?.id ?? settings?.fallbackUserId ?? null);
 
             if (userId === '1') {
                 // System user

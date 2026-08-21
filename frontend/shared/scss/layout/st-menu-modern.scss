@@ -93,7 +93,7 @@
                 }
             }
 
-            .split-view-controller[data-has-detail="true"] > .master &.selected, &.active, &.focused, &:active  {
+            .split-view-controller[data-has-detail="true"] > .master &.selected, &.active, &.open-context-menu, &:active  {
                 background-color: $color-background-shade-darker-darker;
                 color: $color-darkest;
 

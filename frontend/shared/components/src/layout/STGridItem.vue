@@ -251,7 +251,7 @@ button.st-grid-item {
         }
     }
 
-    &.selectable:not(.is-dragging):active, &.hoverable:active, &.rightClickable.right-click, &.rightClickable.focused {
+    &.selectable:not(.is-dragging):active, &.hoverable:active, &.rightClickable.right-click, &.rightClickable.open-context-menu {
         &:before {
             opacity: 1;
             transition: none;

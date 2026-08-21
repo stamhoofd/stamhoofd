@@ -9,6 +9,10 @@
         </h1>
         <p>{{ $t('%1dj') }}</p>
 
+        <p class="info-box icon trial">
+            {{ $t('Tip: Gebruik de ‘Inloggen als’-functie om te kijken hoe Stamhoofd er voor een andere beheerder uitziet en de rechten uit te proberen.') }}
+        </p>
+
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="inheritedResponsibilitiesWithGroup.length">
