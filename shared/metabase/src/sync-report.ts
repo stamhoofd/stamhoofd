@@ -1,6 +1,6 @@
 import type { MetabaseApi } from './api.js';
 import { isLegacyReportCollectionName } from './naming.js';
-import type { ReportCard, ReportTab } from './report.js';
+import type { ReportCard, ReportCardBest, ReportTab } from './report.js';
 
 /**
  * Turns the report definition of `report.ts` into one Metabase dashboard, with a tab per page of the
@@ -162,14 +162,19 @@ const gaugeScale = ['#ED6E6E', '#F9CF48', '#84BB4C'];
  * The color of each range, mixed along that scale rather than picked per range: the ranges of a
  * figure are read against each other, so what a color says has to be where it sits between the worst
  * and the best -- whether a card splits its arc in three or in six.
+ *
+ * A figure that is better the lower it is runs the scale the other way, which is the whole of the
+ * difference between the two gauges: green is always the end an eenheid is doing well at.
  */
-export function gaugeColors(count: number): string[] {
-    return [...new Array(count).keys()].map((index) => {
+export function gaugeColors(count: number, best: ReportCardBest): string[] {
+    const colors = [...new Array(count).keys()].map((index) => {
         const position = count === 1 ? 0 : (index / (count - 1)) * (gaugeScale.length - 1);
         const step = Math.min(Math.floor(position), gaugeScale.length - 2);
 
         return mixColors(gaugeScale[step], gaugeScale[step + 1], position - step);
     });
+
+    return best === 'low' ? colors.reverse() : colors;
 }
 
 function mixColors(from: string, to: string, ratio: number): string {
@@ -241,7 +246,7 @@ export function buildVisualizationSettings(card: ReportCard, hasCoordinates = tr
         // Left unsaid, Metabase splits the arc in three equal ranges of its own between 0 and the
         // value it first drew, which says nothing about whether the figure is a good one.
         if (card.segments.length > 0) {
-            const colors = gaugeColors(card.segments.length - 1);
+            const colors = gaugeColors(card.segments.length - 1, card.best);
 
             settings['gauge.segments'] = card.segments.slice(0, -1).map((min, index) => ({
                 min,

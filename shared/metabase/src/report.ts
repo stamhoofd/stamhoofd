@@ -64,6 +64,12 @@ export type ReportCard = {
      */
     segments: number[];
     /**
+     * Which end of a gauge's ranges is the good one, and therefore which of them is drawn green:
+     * `high` unless the card says otherwise. The omkaderingscijfer is the one that reads the other
+     * way round -- the fewer leden a leider has to look after, the better.
+     */
+    best: ReportCardBest;
+    /**
      * How the labels along the x-axis are drawn. Absent lets the chart decide, which drops them
      * entirely when too many do not fit -- an eenheid or tak chart needs a rotation to keep them.
      */
@@ -101,6 +107,9 @@ export type ReportCardSize = typeof reportCardSizes[number];
 
 export const reportCardXLabels = ['show', 'hide', 'compact', 'rotate-45', 'rotate-90'] as const;
 export type ReportCardXLabels = typeof reportCardXLabels[number];
+
+export const reportCardBest = ['low', 'high'] as const;
+export type ReportCardBest = typeof reportCardBest[number];
 
 /** The order the tabs are written in: the pages of the client's report first, then what is not one. */
 export const reportTabOrder = ['nationaal', 'eenheden', 'netwerk', 'varia', 'jeugdbewegingen', 'filters'];
@@ -222,7 +231,7 @@ type Section = { kind: 'tab' | 'card'; key: string; attributes: Map<string, stri
  * slipped down rather than a comment, and would otherwise be dropped without a word: writing a
  * comment above `-- size:` is enough to make the whole block below it stop counting.
  */
-const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'columns', 'stacked', 'segments', 'xlabels', 'latitude', 'longitude', 'filters', 'hidden', 'dashboard']);
+const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'columns', 'stacked', 'segments', 'best', 'xlabels', 'latitude', 'longitude', 'filters', 'hidden', 'dashboard']);
 
 function splitSections(contents: string, file: string, env?: string): Section[] {
     const sections: Section[] = [];
@@ -301,7 +310,7 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
         throw new Error(`${file}: card "${section.key}" is a map but names no latitude and longitude columns`);
     }
 
-    const segments = parseSegments(section, file, display);
+    const { segments, best } = parseGauge(section, file, display);
 
     const sql = expandIncludes(section.body, includes, file, section.key).trim();
 
@@ -318,6 +327,7 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
         columns: splitList(section.attributes.get('columns')),
         stacked,
         segments,
+        best,
         xLabels: xLabels as ReportCardXLabels | undefined,
         parameters: parameterNames(sql),
         sql,
@@ -325,17 +335,29 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
 }
 
 /**
- * The boundaries of a gauge's ranges, which every other display would silently drop. Rising, because
- * a range that ends before it starts is drawn nowhere on the arc, and at least three of them so the
- * gauge says something a plain number does not.
+ * How a gauge is divided and which way it is read, both of which every other display would silently
+ * drop. The boundaries rise, because a range that ends before it starts is drawn nowhere on the arc,
+ * and there are at least three of them so the gauge says something a plain number does not.
  */
-function parseSegments(section: Section, file: string, display: string): number[] {
+function parseGauge(section: Section, file: string, display: string): { segments: number[]; best: ReportCardBest } {
     const written = section.attributes.get('segments');
-    if (written === undefined) {
-        return [];
+    const best = section.attributes.get('best') ?? 'high';
+
+    for (const name of ['segments', 'best']) {
+        if (section.attributes.has(name) && display !== 'gauge') {
+            throw new Error(`${file}: card "${section.key}" names ${name}, which only a gauge draws`);
+        }
     }
-    if (display !== 'gauge') {
-        throw new Error(`${file}: card "${section.key}" names segments, which only a gauge draws`);
+    if (!(reportCardBest as readonly string[]).includes(best)) {
+        throw new Error(`${file}: card "${section.key}" has best "${best}", expected one of ${reportCardBest.join(', ')}`);
+    }
+    // Which end is the good one only decides how the ranges are colored, so on its own it colors
+    // nothing: the ranges Metabase falls back to are drawn in its own colors, not in these.
+    if (section.attributes.has('best') && written === undefined) {
+        throw new Error(`${file}: card "${section.key}" says its best is "${best}" but names no segments to color`);
+    }
+    if (written === undefined) {
+        return { segments: [], best: best as ReportCardBest };
     }
 
     const segments = splitList(written).map(entry => Number(entry));
@@ -346,7 +368,7 @@ function parseSegments(section: Section, file: string, display: string): number[
         throw new Error(`${file}: card "${section.key}" has segments "${written}", expected rising numbers`);
     }
 
-    return segments;
+    return { segments, best: best as ReportCardBest };
 }
 
 /** A fragment may include another, which is how the two grains of `facts` share their filters. */

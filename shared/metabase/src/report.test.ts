@@ -471,6 +471,19 @@ describe('report', () => {
             }
         });
 
+        /**
+         * The two meters of the page are read in opposite directions: a high GTP index is an eenheid
+         * doing well, a high omkaderingscijfer is one leider looking after too many leden. Green
+         * stands at the end each of them is doing well at, which is the whole of what `best` says.
+         */
+        it('reads the omkaderingscijfer meter from the end its ranges are good at', () => {
+            const meter = cardOf(dashboards, 'eenheden', 'eenheid-omkaderingscijfer-meter');
+
+            expect(meter.segments).toEqual([0, 4, 6, 8, 10, 12]);
+            expect(meter.best).toEqual('low');
+            expect(cardOf(dashboards, 'eenheden', 'eenheid-gtp-meter').best).toEqual('high');
+        });
+
         /** The gauge is the one card that explains the formula, so it explains the one it draws. */
         it('describes the GTP index in the terms the environment weighs it in', () => {
             expect(cardOf(dashboards, 'eenheden', 'eenheid-gtp-meter').description).toContain("(VG's & Seniors)");
@@ -676,7 +689,9 @@ describe('report', () => {
         /** Every other display drops the setting without a word, leaving a chart that looks right. */
         it('rejects ranges on a card that draws no arc', () => {
             expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- segments: 0, 35, 55, 75\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('only a gauge draws');
+                .toThrow('names segments, which only a gauge draws');
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- best: low\nSELECT 1', 'x.sql', new Map()))
+                .toThrow('names best, which only a gauge draws');
         });
 
         /** A range that ends before it starts is drawn nowhere, so the arc loses it silently. */
@@ -690,6 +705,17 @@ describe('report', () => {
         it('rejects a gauge divided at fewer boundaries than it takes to draw two ranges', () => {
             expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: gauge\n-- segments: 0, 100\nSELECT 1', 'x.sql', new Map()))
                 .toThrow('at least three boundaries');
+        });
+
+        it('rejects a gauge read from an end it cannot have', () => {
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: gauge\n-- segments: 0, 6, 12\n-- best: laag\nSELECT 1', 'x.sql', new Map()))
+                .toThrow('has best "laag"');
+        });
+
+        /** Metabase draws the ranges it falls back to in its own colors, so this one colors nothing. */
+        it('rejects an end to read from without ranges to color', () => {
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: gauge\n-- best: low\nSELECT 1', 'x.sql', new Map()))
+                .toThrow('no segments to color');
         });
 
         it('rejects a filter no card can be driven by', () => {

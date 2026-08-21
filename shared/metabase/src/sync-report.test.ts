@@ -12,6 +12,7 @@ function card(overrides: Partial<ReportCard> = {}): ReportCard {
         metrics: [],
         columns: [],
         segments: [],
+        best: 'high',
         parameters: [],
         sql: 'SELECT 1',
         ...overrides,
@@ -176,6 +177,24 @@ describe('buildVisualizationSettings', () => {
         ]);
     });
 
+    /**
+     * The other meter of the page: an omkaderingscijfer is better the lower it is, so the same scale
+     * is read from the other end. Its first range is twice as long as the others -- a leider looking
+     * after two leden and one looking after four are the same eenheid in practice -- which the arc
+     * shows as a wider band rather than as a jump in the colors.
+     */
+    it('colors a gauge whose low end is the good one from green to red', () => {
+        const settings = buildVisualizationSettings(card({ display: 'gauge', segments: [0, 4, 6, 8, 10, 12], best: 'low' }));
+
+        expect(settings['gauge.segments']).toEqual([
+            { min: 0, max: 4, color: '#84bb4c', label: '< 4' },
+            { min: 4, max: 6, color: '#bfc54a', label: '4-6' },
+            { min: 6, max: 8, color: '#f9cf48', label: '6-8' },
+            { min: 8, max: 10, color: '#f39f5b', label: '8-10' },
+            { min: 10, max: 12, color: '#ed6e6e', label: '> 10' },
+        ]);
+    });
+
     it('leaves the ranges of a gauge that names none to Metabase', () => {
         expect(buildVisualizationSettings(card({ display: 'gauge' }))).not.toHaveProperty('gauge.segments');
     });
@@ -186,10 +205,15 @@ describe('buildVisualizationSettings', () => {
      */
     it('keeps the ends of the scale wherever the ranges are split', () => {
         for (const count of [2, 3, 6, 9]) {
-            const colors = gaugeColors(count);
+            const colors = gaugeColors(count, 'high');
 
             expect(`${count}: ${colors.length} from ${colors[0]} to ${colors[colors.length - 1]}`).toEqual(`${count}: ${count} from #ed6e6e to #84bb4c`);
         }
+    });
+
+    /** The two meters share one scale, so the same shade means the same thing on both of them. */
+    it('reads the same scale from either end', () => {
+        expect(gaugeColors(6, 'low')).toEqual([...gaugeColors(6, 'high')].reverse());
     });
 
     it('uses the pie settings for a pie, which ignores the graph ones', () => {

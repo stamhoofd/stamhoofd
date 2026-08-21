@@ -133,6 +133,8 @@ ORDER BY MIN(period_start)
 -- title: Omkaderingscijfer (meter)
 -- display: gauge
 -- size: third
+-- segments: 0, 4, 6, 8, 10, 12
+-- best: low
 -- description: Het omkaderingscijfer geeft weer voor hoeveel leden een leider gemiddeld dient te zorgen. Idealiter scoort een eenheid hier laag op. Bij een cijfer van 10 of meer wordt toezicht houden op de leden moeilijker.
 -- @include facts
 -- @include leden
