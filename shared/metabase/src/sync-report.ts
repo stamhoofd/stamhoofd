@@ -152,6 +152,53 @@ export function effectiveDisplay(card: ReportCard, hasCoordinates: boolean): str
 }
 
 /**
+ * The scale a gauge's ranges are colored along: red where the figure is at its worst, green where it
+ * is at its best, through the yellow that lies between them. Metabase's own three, so a gauge sits
+ * beside the rest of the report rather than beside a palette of its own.
+ */
+const gaugeScale = ['#ED6E6E', '#F9CF48', '#84BB4C'];
+
+/**
+ * The color of each range, mixed along that scale rather than picked per range: the ranges of a
+ * figure are read against each other, so what a color says has to be where it sits between the worst
+ * and the best -- whether a card splits its arc in three or in six.
+ */
+export function gaugeColors(count: number): string[] {
+    return [...new Array(count).keys()].map((index) => {
+        const position = count === 1 ? 0 : (index / (count - 1)) * (gaugeScale.length - 1);
+        const step = Math.min(Math.floor(position), gaugeScale.length - 2);
+
+        return mixColors(gaugeScale[step], gaugeScale[step + 1], position - step);
+    });
+}
+
+function mixColors(from: string, to: string, ratio: number): string {
+    const channels = [0, 1, 2].map((channel) => {
+        const start = Number.parseInt(from.slice(1 + channel * 2, 3 + channel * 2), 16);
+        const end = Number.parseInt(to.slice(1 + channel * 2, 3 + channel * 2), 16);
+
+        return Math.round(start + (end - start) * ratio).toString(16).padStart(2, '0');
+    });
+
+    return `#${channels.join('')}`;
+}
+
+/**
+ * What a range is called under the gauge. The two outer ones say where they open rather than where
+ * they end: they are as long as the arc has room for, and an eenheid twice over the highest boundary
+ * is read in the same range as one just above it.
+ */
+function gaugeLabel(segments: number[], index: number): string {
+    if (index === 0) {
+        return `< ${segments[1]}`;
+    }
+    if (index === segments.length - 2) {
+        return `> ${segments[index]}`;
+    }
+    return `${segments[index]}-${segments[index + 1]}`;
+}
+
+/**
  * How the report describes its x-axis labels, in what Metabase calls them.
  */
 const xAxisLabels: Record<string, boolean | string> = {
@@ -187,6 +234,22 @@ export function buildVisualizationSettings(card: ReportCard, hasCoordinates = tr
         settings['map.type'] = 'pin';
         settings['map.latitude_column'] = card.latitude;
         settings['map.longitude_column'] = card.longitude;
+        return settings;
+    }
+
+    if (display === 'gauge') {
+        // Left unsaid, Metabase splits the arc in three equal ranges of its own between 0 and the
+        // value it first drew, which says nothing about whether the figure is a good one.
+        if (card.segments.length > 0) {
+            const colors = gaugeColors(card.segments.length - 1);
+
+            settings['gauge.segments'] = card.segments.slice(0, -1).map((min, index) => ({
+                min,
+                max: card.segments[index + 1],
+                color: colors[index],
+                label: gaugeLabel(card.segments, index),
+            }));
+        }
         return settings;
     }
 

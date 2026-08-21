@@ -460,6 +460,17 @@ describe('report', () => {
             }
         });
 
+        /**
+         * The meter says whether a GTP index is a good one, which the number beside it cannot: the
+         * ranges are the ones of the report it mirrors, and they are read the same way in both
+         * environments since each weighs its own figure towards the same 100.
+         */
+        it('divides the GTP meter into the ranges the report reads the index in', () => {
+            for (const tabs of [dashboards, ravotDashboards]) {
+                expect(cardOf(tabs, 'eenheden', 'eenheid-gtp-meter').segments).toEqual([0, 35, 55, 75, 95, 115, 135]);
+            }
+        });
+
         /** The gauge is the one card that explains the formula, so it explains the one it draws. */
         it('describes the GTP index in the terms the environment weighs it in', () => {
             expect(cardOf(dashboards, 'eenheden', 'eenheid-gtp-meter').description).toContain("(VG's & Seniors)");
@@ -655,6 +666,30 @@ describe('report', () => {
         it('rejects an x-axis setting it cannot pass on', () => {
             expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- xlabels: sideways\nSELECT 1', 'x.sql', new Map()))
                 .toThrow('has xlabels "sideways"');
+        });
+
+        it('reads the boundaries a gauge is divided at', () => {
+            expect(parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: gauge\n-- segments: 0, 35, 55, 75\nSELECT 1', 'x.sql', new Map()).cards[0].segments)
+                .toEqual([0, 35, 55, 75]);
+        });
+
+        /** Every other display drops the setting without a word, leaving a chart that looks right. */
+        it('rejects ranges on a card that draws no arc', () => {
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- segments: 0, 35, 55, 75\nSELECT 1', 'x.sql', new Map()))
+                .toThrow('only a gauge draws');
+        });
+
+        /** A range that ends before it starts is drawn nowhere, so the arc loses it silently. */
+        it('rejects gauge ranges that do not rise', () => {
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: gauge\n-- segments: 0, 55, 35, 75\nSELECT 1', 'x.sql', new Map()))
+                .toThrow('expected rising numbers');
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: gauge\n-- segments: 0, veel, 75\nSELECT 1', 'x.sql', new Map()))
+                .toThrow('expected rising numbers');
+        });
+
+        it('rejects a gauge divided at fewer boundaries than it takes to draw two ranges', () => {
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: gauge\n-- segments: 0, 100\nSELECT 1', 'x.sql', new Map()))
+                .toThrow('at least three boundaries');
         });
 
         it('rejects a filter no card can be driven by', () => {

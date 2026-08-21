@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ReportCard, ReportTab } from './report.js';
-import { buildDashcards, buildParameters, buildTabs, buildTemplateTags, buildVisualizationSettings, collectionToRename, dashcardKey, groupByDashboard, layoutCards, templateTagId } from './sync-report.js';
+import { buildDashcards, buildParameters, buildTabs, buildTemplateTags, buildVisualizationSettings, collectionToRename, dashcardKey, gaugeColors, groupByDashboard, layoutCards, templateTagId } from './sync-report.js';
 
 function card(overrides: Partial<ReportCard> = {}): ReportCard {
     return {
@@ -11,6 +11,7 @@ function card(overrides: Partial<ReportCard> = {}): ReportCard {
         dimensions: [],
         metrics: [],
         columns: [],
+        segments: [],
         parameters: [],
         sql: 'SELECT 1',
         ...overrides,
@@ -155,6 +156,40 @@ describe('buildVisualizationSettings', () => {
     it('turns the report\'s own words for the x-axis into the ones Metabase uses', () => {
         expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Tak'], metrics: ['A'], xLabels: 'hide' }))['graph.x_axis.axis_enabled']).toEqual(false);
         expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Tak'], metrics: ['A'], xLabels: 'show' }))['graph.x_axis.axis_enabled']).toEqual(true);
+    });
+
+    /**
+     * A gauge without ranges of its own is three equal ones between zero and whatever it first drew,
+     * which says nothing about whether the figure is a good one. The boundaries come from the card;
+     * what a color says is decided here, so the ranges of one figure are read against each other.
+     */
+    it('colors a gauge from red at its worst to green at its best', () => {
+        const settings = buildVisualizationSettings(card({ display: 'gauge', segments: [0, 35, 55, 75, 95, 115, 135] }));
+
+        expect(settings['gauge.segments']).toEqual([
+            { min: 0, max: 35, color: '#ed6e6e', label: '< 35' },
+            { min: 35, max: 55, color: '#f2955f', label: '35-55' },
+            { min: 55, max: 75, color: '#f7bc50', label: '55-75' },
+            { min: 75, max: 95, color: '#e2cb49', label: '75-95' },
+            { min: 95, max: 115, color: '#b3c34a', label: '95-115' },
+            { min: 115, max: 135, color: '#84bb4c', label: '> 115' },
+        ]);
+    });
+
+    it('leaves the ranges of a gauge that names none to Metabase', () => {
+        expect(buildVisualizationSettings(card({ display: 'gauge' }))).not.toHaveProperty('gauge.segments');
+    });
+
+    /**
+     * The ends are what say good and bad, so they stay put however many ranges lie between them: a
+     * gauge split in three has to be read against one split in six.
+     */
+    it('keeps the ends of the scale wherever the ranges are split', () => {
+        for (const count of [2, 3, 6, 9]) {
+            const colors = gaugeColors(count);
+
+            expect(`${count}: ${colors.length} from ${colors[0]} to ${colors[colors.length - 1]}`).toEqual(`${count}: ${count} from #ed6e6e to #84bb4c`);
+        }
     });
 
     it('uses the pie settings for a pie, which ignores the graph ones', () => {

@@ -57,6 +57,13 @@ export type ReportCard = {
     /** How bars are stacked: absent, `stacked` or `normalized`. */
     stacked?: 'stacked' | 'normalized';
     /**
+     * The boundaries a gauge is divided at, lowest first: `0, 35, 55, 75, 95, 115, 135` draws six
+     * ranges. The two outer ones are the ends of the arc rather than a figure anything is measured
+     * against, since a gauge has to start and stop somewhere while the figure itself does not.
+     * Absent leaves the ranges to Metabase, which splits the arc in three.
+     */
+    segments: number[];
+    /**
      * How the labels along the x-axis are drawn. Absent lets the chart decide, which drops them
      * entirely when too many do not fit -- an eenheid or tak chart needs a rotation to keep them.
      */
@@ -215,7 +222,7 @@ type Section = { kind: 'tab' | 'card'; key: string; attributes: Map<string, stri
  * slipped down rather than a comment, and would otherwise be dropped without a word: writing a
  * comment above `-- size:` is enough to make the whole block below it stop counting.
  */
-const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'columns', 'stacked', 'xlabels', 'latitude', 'longitude', 'filters', 'hidden', 'dashboard']);
+const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'columns', 'stacked', 'segments', 'xlabels', 'latitude', 'longitude', 'filters', 'hidden', 'dashboard']);
 
 function splitSections(contents: string, file: string, env?: string): Section[] {
     const sections: Section[] = [];
@@ -294,6 +301,8 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
         throw new Error(`${file}: card "${section.key}" is a map but names no latitude and longitude columns`);
     }
 
+    const segments = parseSegments(section, file, display);
+
     const sql = expandIncludes(section.body, includes, file, section.key).trim();
 
     return {
@@ -308,10 +317,36 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
         metrics: splitList(section.attributes.get('metrics')),
         columns: splitList(section.attributes.get('columns')),
         stacked,
+        segments,
         xLabels: xLabels as ReportCardXLabels | undefined,
         parameters: parameterNames(sql),
         sql,
     };
+}
+
+/**
+ * The boundaries of a gauge's ranges, which every other display would silently drop. Rising, because
+ * a range that ends before it starts is drawn nowhere on the arc, and at least three of them so the
+ * gauge says something a plain number does not.
+ */
+function parseSegments(section: Section, file: string, display: string): number[] {
+    const written = section.attributes.get('segments');
+    if (written === undefined) {
+        return [];
+    }
+    if (display !== 'gauge') {
+        throw new Error(`${file}: card "${section.key}" names segments, which only a gauge draws`);
+    }
+
+    const segments = splitList(written).map(entry => Number(entry));
+    if (segments.length < 3) {
+        throw new Error(`${file}: card "${section.key}" has segments "${written}", expected at least three boundaries`);
+    }
+    if (segments.some((boundary, index) => !Number.isFinite(boundary) || (index > 0 && boundary <= segments[index - 1]))) {
+        throw new Error(`${file}: card "${section.key}" has segments "${written}", expected rising numbers`);
+    }
+
+    return segments;
 }
 
 /** A fragment may include another, which is how the two grains of `facts` share their filters. */
