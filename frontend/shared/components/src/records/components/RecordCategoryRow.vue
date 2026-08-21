@@ -149,9 +149,9 @@ function showContextMenu(event: MouseEvent) {
 
 async function deleteCategory() {
     if (!await CenteredMessage.confirm({
-        title: $t(`%10w`),
+        title: props.category.name.toString() ? $t('Vragenlijst ‘{name}’ verwijderen?', { name: props.category.name.toString() }) : $t('Deze vragenlijst verwijderen?'),
         confirmText: $t(`%CJ`),
-        description: $t(`%11j`),
+        description: $t(`%11j`) + ' ' + $t('De vragenlijst wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
         availabilityDelay: 2_000,
     })) {
         return;

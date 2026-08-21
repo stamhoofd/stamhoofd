@@ -1040,8 +1040,9 @@ async function save() {
 
 async function deleteMe() {
     if (!await CenteredMessage.confirm({
-        title: 'Ben je zeker dat je dit artikel wilt verwijderen?',
+        title: name.value ? $t('‘{name}’ verwijderen?', { name: name.value }) : $t('Dit artikel verwijderen?'),
         confirmText: 'Verwijderen',
+        description: $t('Het artikel wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
         availabilityDelay: 2_000,
     })) {
         return;

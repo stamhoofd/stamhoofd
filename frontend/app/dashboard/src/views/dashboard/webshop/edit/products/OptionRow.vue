@@ -66,8 +66,9 @@ function moveDown() {
 
 async function doDelete() {
     if (!(await CenteredMessage.confirm({
-        title: 'Deze keuze verwijderen?',
+        title: props.option.name ? $t('‘{name}’ verwijderen?', { name: props.option.name }) : $t('Deze keuze verwijderen?'),
         confirmText: 'Verwijderen',
+        description: $t('De keuze wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
         availabilityDelay: 2_000,
     }))) {
         return;

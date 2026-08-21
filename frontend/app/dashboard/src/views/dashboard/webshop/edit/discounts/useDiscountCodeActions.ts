@@ -6,6 +6,7 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { DiscountCode, PrivateWebshop } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 // Hard cap on the number of discount codes a single webshop can have. Enforced in the frontend only (for now).
@@ -159,8 +160,9 @@ export function useDiscountCodeActions(saveHandler: (patch: PatchableArrayAutoEn
 
         async function deleteDiscountCode() {
             if (!await CenteredMessage.confirm({
-                title: $t('%1eb'),
+                title: props.discountCode.code ? $t('‘{name}’ verwijderen?', { name: props.discountCode.code }) : $t('Deze kortingscode verwijderen?'),
                 confirmText: $t('%CJ'),
+                description: $t('De kortingscode wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
                 availabilityDelay: 2_000,
             })) {
                 return;
@@ -175,12 +177,20 @@ export function useDiscountCodeActions(saveHandler: (patch: PatchableArrayAutoEn
             // When a search or filter is active, only delete the currently visible codes.
             const codes = props.isFiltering ? props.visibleDiscountCodes : props.discountCodes;
             const confirmText = props.isFiltering
-                ? $t('%1dz')
-                : $t('%1eS');
+                ? $t('Alle zichtbare kortingscodes verwijderen?')
+                : $t('Alle kortingscodes verwijderen?');
 
             if (!await CenteredMessage.confirm({
                 title: confirmText,
                 confirmText: $t('%CJ'),
+                description: $t('Volgende kortingscodes worden verwijderd: {codes}. Ze worden pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.', {
+                    codes: Formatter.joinLastLimited(codes.map(c => c.code), {
+                        separator: ', ',
+                        lastSeparator: ' ' + $t('%M1') + ' ',
+                        maxLength: 70,
+                        maxCount: 3,
+                    }),
+                }),
                 availabilityDelay: 2_000,
             })) {
                 return;

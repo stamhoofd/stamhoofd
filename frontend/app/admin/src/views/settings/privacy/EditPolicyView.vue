@@ -101,8 +101,9 @@ const doDelete = async () => {
     }
 
     if (!await CenteredMessage.confirm({
-        title: $t(`%IQ`),
+        title: $t('‘{name}’ verwijderen?', { name: props.policy.name }),
         confirmText: $t(`%CJ`),
+        description: $t('De voorwaarden worden pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
         availabilityDelay: 2_000,
     })) {
         return;

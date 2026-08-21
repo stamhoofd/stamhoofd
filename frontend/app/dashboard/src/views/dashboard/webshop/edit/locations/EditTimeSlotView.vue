@@ -123,8 +123,9 @@ async function save() {
 
 async function deleteMe() {
     if (!await CenteredMessage.confirm({
-        title: 'Ben je zeker dat je dit tijdvak wilt verwijderen?',
+        title: $t('Dit tijdvak verwijderen?'),
         confirmText: 'Verwijderen',
+        description: $t('Het tijdvak wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
         availabilityDelay: 2_000,
     })) {
         return;

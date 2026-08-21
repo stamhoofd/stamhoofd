@@ -83,8 +83,9 @@ async function save() {
 
 async function deleteMe() {
     if (!await CenteredMessage.confirm({
-        title: 'Ben je zeker dat je deze voorwaarde wilt verwijderen?',
+        title: $t('Deze voorwaarde verwijderen?'),
         confirmText: 'Verwijderen',
+        description: $t('De voorwaarde wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
         availabilityDelay: 2_000,
     })) {
         return;

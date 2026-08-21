@@ -220,7 +220,7 @@ async function showContextMenu(event: MouseEvent) {
                 destructive: true,
                 action: async () => {
                     if (!await CenteredMessage.confirm({
-                        title: $t('%66'),
+                        title: props.optionMenu.name ? $t('{name} verwijderen?', { name: props.optionMenu.name }) : $t('%66'),
                         confirmText: $t('%55'),
                         description: $t('%67'),
                         destructive: true,

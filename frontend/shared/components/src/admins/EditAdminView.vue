@@ -241,7 +241,7 @@ const doDelete = async () => {
     }
 
     if (!await CenteredMessage.confirm({
-        title: $t(`%uI`),
+        title: props.user.name ? $t('‘{name}’ verwijderen?', { name: props.user.name }) : $t('Deze beheerder verwijderen?'),
         confirmText: $t(`%CJ`),
         availabilityDelay: 2_000,
     })) {

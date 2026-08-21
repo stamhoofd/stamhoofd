@@ -13,6 +13,7 @@ import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { DocumentTemplatePrivate } from '@stamhoofd/structures';
 import { DocumentData, DocumentStatus, Document as DocumentStruct, EmailRecipientSubfilter } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
+import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 export class DocumentActionBuilder {
@@ -171,8 +172,19 @@ export class DocumentActionBuilder {
     }
 
     async deleteDocuments(documents: DocumentStruct[]) {
+        const title = documents.length > 1
+            ? $t('{names} verwijderen?', {
+                names: Formatter.joinLastLimited(documents.map(d => d.data.description || d.data.name), {
+                    separator: ', ',
+                    lastSeparator: ' ' + $t('%M1') + ' ',
+                    maxLength: 70,
+                    maxCount: 3,
+                }),
+            })
+            : $t('‘{name}’ verwijderen?', { name: documents[0].data.description || documents[0].data.name });
+
         if (!(await CenteredMessage.confirm({
-            title: documents.length > 1 ? $t('%KE', { count: documents.length.toString() }) : $t(`%KM`),
+            title,
             confirmText: $t(`%CJ`),
             availabilityDelay: 2_000,
         }))) {

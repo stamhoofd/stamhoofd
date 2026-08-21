@@ -259,7 +259,14 @@ export class MemberActionBuilder {
             enabled: () => !this.context.organization && this.context.auth.hasPlatformFullAccess(),
             handler: async (members: PlatformMember[]) => {
                 if (!await CenteredMessage.confirm({
-                    title: 'Alle vragenlijsten verwijderen?',
+                    title: $t('Vragenlijsten van {names} verwijderen?', {
+                        names: Formatter.joinLastLimited(members.map(m => m.member.name), {
+                            separator: ', ',
+                            lastSeparator: ' ' + $t('%M1') + ' ',
+                            maxLength: 70,
+                            maxCount: 3,
+                        }),
+                    }),
                     confirmText: 'Ja, verwijderen',
                     destructive: true,
                     availabilityDelay: 2_000,
