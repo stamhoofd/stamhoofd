@@ -295,8 +295,10 @@ function getRoot() {
             }
 
             if (STAMHOOFD.userMode === 'organization' && !organization!.meta.packages.useMembers && !organization!.meta.packages.useWebshops && !organization!.meta.packages.wasPaid) {
-                // Override to onboarding
-                tabs = [onboardingTab];
+                if (context.value.auth.hasFullAccess()) {
+                    // Override to onboarding
+                    tabs = [onboardingTab, settingsTab];
+                }
             }
 
             return tabs;
