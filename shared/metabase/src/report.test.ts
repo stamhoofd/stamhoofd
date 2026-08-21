@@ -659,6 +659,25 @@ describe('report', () => {
             expect(rows.filter(row => row.width !== 24)).toEqual([]);
         });
 
+        /**
+         * The netwerk page is read as two columns: the leden and the eenheden of every netwerk
+         * stacked on the left, the map of where those eenheden sit beside them. The map is the one
+         * card of the report that stands across two rows, and it ends exactly where the pie does.
+         */
+        it('stands the netwerk map beside the chart and the pie stacked next to it', () => {
+            const placed = layoutCards(dashboards.find(dashboard => dashboard.key === 'netwerk')!.cards);
+            const at = (key: string) => placed.find(entry => entry.card.key === key)!;
+
+            expect(placed.map(entry => entry.card.key)).toEqual(['leden-per-netwerk', 'locatie-eenheden', 'eenheden-per-netwerk']);
+            expect(at('leden-per-netwerk')).toMatchObject({ row: 0, col: 0, sizeX: 12, sizeY: 10 });
+            expect(at('eenheden-per-netwerk')).toMatchObject({ row: 10, col: 0, sizeX: 12, sizeY: 6 });
+            expect(at('locatie-eenheden')).toMatchObject({ row: 0, col: 12, sizeX: 12 });
+
+            const map = at('locatie-eenheden');
+            const pie = at('eenheden-per-netwerk');
+            expect(map.row + map.sizeY).toEqual(pie.row + pie.sizeY);
+        });
+
         it('gives the unit filter to the eenheden tab only, as the report does', () => {
             expect(dashboards.find(dashboard => dashboard.key === 'eenheden')!.filters).toEqual(['scoutsjaar', 'eenheid', 'aansluiting']);
 
@@ -790,6 +809,19 @@ describe('report', () => {
         it('rejects an end to read from without ranges to color', () => {
             expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: gauge\n-- best: low\nSELECT 1', 'x.sql', new Map()))
                 .toThrow('no segments to color');
+        });
+
+        it('rejects a height that is no height', () => {
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- height: hoog\nSELECT 1', 'x.sql', new Map()))
+                .toThrow('has height "hoog"');
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- span: 0\nSELECT 1', 'x.sql', new Map()))
+                .toThrow('has span "0"');
+        });
+
+        /** The rows it spans decide, so a height of its own would be read by neither. */
+        it('rejects a card that spans rows and names a height as well', () => {
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: map\n-- latitude: A\n-- longitude: B\n-- span: 2\n-- height: 12\nSELECT 1', 'x.sql', new Map()))
+                .toThrow('spans 2 rows and names a height');
         });
 
         it('rejects a filter no card can be driven by', () => {

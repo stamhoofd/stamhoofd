@@ -42,6 +42,18 @@ export type ReportCard = {
     longitude?: string;
     /** Width on the dashboard: full, two-thirds, half, third, quarter or sixth of a row. */
     size: ReportCardSize;
+    /**
+     * How tall the card is drawn, in rows of the dashboard grid -- the unit the layout counts in.
+     * Absent takes the height its display asks for, which is what nearly every card does; a chart
+     * that has to be read closely says its own.
+     */
+    height?: number;
+    /**
+     * How many rows of cards this one stands across. `1` unless it says otherwise: a card spanning
+     * two stands beside the two cards stacked next to it and is as tall as both of those rows
+     * together, which is how the netwerk map keeps the height of the chart and the pie beside it.
+     */
+    span: number;
     description?: string;
     /** Columns to group by, for the chart displays. */
     dimensions: string[];
@@ -232,7 +244,7 @@ type Section = { kind: 'tab' | 'card'; key: string; attributes: Map<string, stri
  * slipped down rather than a comment, and would otherwise be dropped without a word: writing a
  * comment above `-- size:` is enough to make the whole block below it stop counting.
  */
-const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'columns', 'stacked', 'segments', 'best', 'xlabels', 'latitude', 'longitude', 'filters', 'hidden', 'dashboard']);
+const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'columns', 'stacked', 'segments', 'best', 'xlabels', 'height', 'span', 'latitude', 'longitude', 'filters', 'hidden', 'dashboard']);
 
 function splitSections(contents: string, file: string, env?: string): Section[] {
     const sections: Section[] = [];
@@ -312,6 +324,14 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
     }
 
     const { segments, best } = parseRanges(section, file, display);
+    const height = parseCount(section, file, 'height');
+    const span = parseCount(section, file, 'span') ?? 1;
+
+    // A spanning card is as tall as the rows it stands across, so a height of its own would be read
+    // by neither: the layout hands it the one it computes.
+    if (height !== undefined && span > 1) {
+        throw new Error(`${file}: card "${section.key}" spans ${span} rows and names a height, which the rows it spans decide`);
+    }
 
     const sql = expandIncludes(section.body, includes, file, section.key).trim();
 
@@ -322,6 +342,8 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
         latitude,
         longitude,
         size: size as ReportCardSize,
+        height,
+        span,
         description: section.attributes.get('description'),
         dimensions: splitList(section.attributes.get('dimensions')),
         metrics: splitList(section.attributes.get('metrics')),
@@ -333,6 +355,20 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
         parameters: parameterNames(sql),
         sql,
     };
+}
+
+/** A setting counted in whole cards or rows, which is only a size while it is a positive number. */
+function parseCount(section: Section, file: string, name: string): number | undefined {
+    const written = section.attributes.get(name);
+    if (written === undefined) {
+        return undefined;
+    }
+
+    const count = Number(written);
+    if (!Number.isInteger(count) || count < 1) {
+        throw new Error(`${file}: card "${section.key}" has ${name} "${written}", expected a whole number of rows`);
+    }
+    return count;
 }
 
 /** The displays that read a figure against ranges: a gauge draws them, a number is colored by them. */

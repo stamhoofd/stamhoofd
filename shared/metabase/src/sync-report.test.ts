@@ -13,6 +13,7 @@ function card(overrides: Partial<ReportCard> = {}): ReportCard {
         columns: [],
         segments: [],
         best: 'high',
+        span: 1,
         parameters: [],
         sql: 'SELECT 1',
         ...overrides,
@@ -29,6 +30,30 @@ describe('layoutCards', () => {
 
         expect(placed.map(entry => entry.col)).toEqual([0, 4, 8, 12, 16, 20]);
         expect(placed.every(entry => entry.row === 0)).toBe(true);
+    });
+
+    /**
+     * A card spanning two rows keeps its columns in the second one, so the card after it wraps under
+     * the first rather than beside it, and ends up as tall as both rows together. It does not decide
+     * how tall they are: the cards stacked beside it do, which is what makes the two columns end on
+     * the same line.
+     */
+    it('stands a spanning card beside the cards stacked next to it', () => {
+        const [chart, map, pie] = layoutCards([
+            card({ key: 'chart', size: 'half', display: 'bar', height: 10 }),
+            card({ key: 'map', size: 'half', display: 'map', span: 2 }),
+            card({ key: 'pie', size: 'half', display: 'pie' }),
+        ]);
+
+        expect(chart).toMatchObject({ row: 0, col: 0, sizeX: 12, sizeY: 10 });
+        expect(map).toMatchObject({ row: 0, col: 12, sizeX: 12, sizeY: 16 });
+        expect(pie).toMatchObject({ row: 10, col: 0, sizeX: 12, sizeY: 6 });
+    });
+
+    it('draws a card at the height it asks for instead of the one its display takes', () => {
+        const [placed] = layoutCards([card({ size: 'full', display: 'bar', height: 12 })]);
+
+        expect(placed.sizeY).toEqual(12);
     });
 
     /**

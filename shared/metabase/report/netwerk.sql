@@ -10,6 +10,7 @@
 -- title: Aantal leden per netwerk
 -- display: bar
 -- size: half
+-- height: 10
 -- dimensions: Netwerk
 -- metrics: Aantal kinderen, Aantal leiding, Aantal volwassenen
 -- stacked: stacked
@@ -26,6 +27,29 @@ JOIN _organizations_organization_tags link
 JOIN organization_tags t ON t.id = link.organizationTagsId AND t.periodId = link.periodId
 GROUP BY t.name
 ORDER BY t.name
+
+-- @card locatie-eenheden
+-- title: Locatie eenheden
+-- display: map
+-- latitude: Breedtegraad
+-- longitude: Lengtegraad
+-- size: half
+-- span: 2
+-- dimensions: Postcode
+-- metrics: Aantal eenheden
+-- description: Een punt per postcode waar eenheden zitten. Het originele rapport zet een stip per eenheid; zonder coordinaat per eenheid is de postcode het dichtstbij.
+-- @include facts
+-- @include leden
+-- @include postcode-coordinaten
+SELECT
+    f.eenheid_postcode AS `Postcode`,
+    c.latitude AS `Breedtegraad`,
+    c.longitude AS `Lengtegraad`,
+    COUNT(DISTINCT f.organization_id) AS `Aantal eenheden`
+FROM leden f
+LEFT JOIN postcode_coordinaten c ON c.postalCode = f.eenheid_postcode
+GROUP BY f.eenheid_postcode, c.latitude, c.longitude
+ORDER BY `Aantal eenheden` DESC
 
 -- @card eenheden-per-netwerk
 -- title: Aantal eenheden per netwerk
@@ -44,44 +68,3 @@ JOIN _organizations_organization_tags link
 JOIN organization_tags t ON t.id = link.organizationTagsId AND t.periodId = link.periodId
 GROUP BY t.name
 ORDER BY t.name
-
--- @card locatie-eenheden
--- title: Locatie eenheden
--- display: map
--- latitude: Breedtegraad
--- longitude: Lengtegraad
--- size: half
--- dimensions: Postcode
--- metrics: Aantal eenheden
--- description: Een punt per postcode waar eenheden zitten. Het originele rapport zet een stip per eenheid; zonder coordinaat per eenheid is de postcode het dichtstbij.
--- @include facts
--- @include leden
--- @include postcode-coordinaten
-SELECT
-    f.eenheid_postcode AS `Postcode`,
-    c.latitude AS `Breedtegraad`,
-    c.longitude AS `Lengtegraad`,
-    COUNT(DISTINCT f.organization_id) AS `Aantal eenheden`
-FROM leden f
-LEFT JOIN postcode_coordinaten c ON c.postalCode = f.eenheid_postcode
-GROUP BY f.eenheid_postcode, c.latitude, c.longitude
-ORDER BY `Aantal eenheden` DESC
-
--- @card eenheden-lijst
--- title: Eenheden per netwerk
--- display: table
--- size: half
--- @include facts
--- @include leden
-SELECT
-    f.`Eenheid`,
-    f.eenheid_postcode AS `Postcode`,
-    f.eenheid_gemeente AS `Gemeente`,
-    COALESCE(t.name, 'Geen netwerk') AS `Netwerk`,
-    COUNT(DISTINCT f.member_id) AS `Aantal leden`
-FROM leden f
-LEFT JOIN _organizations_organization_tags link
-    ON link.organizationsId = f.organization_id AND link.periodId = f.period_id
-LEFT JOIN organization_tags t ON t.id = link.organizationTagsId AND t.periodId = link.periodId
-GROUP BY f.`Eenheid`, f.eenheid_postcode, f.eenheid_gemeente, t.name
-ORDER BY f.`Eenheid`

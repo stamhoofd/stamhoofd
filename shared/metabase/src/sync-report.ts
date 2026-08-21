@@ -68,6 +68,9 @@ const xLabelRows: Record<NonNullable<ReportCard['xLabels']>, number> = {
 };
 
 function heightOf(card: ReportCard): number {
+    if (card.height !== undefined) {
+        return card.height;
+    }
     if (card.display === 'scalar') {
         return 3;
     }
@@ -89,6 +92,9 @@ function heightOf(card: ReportCard): number {
     return (card.size === 'full' ? 7 : 6) + (card.xLabels === undefined ? 0 : xLabelRows[card.xLabels]);
 }
 
+/** A row of the page while it is being filled: which columns are taken, and how tall it ended up. */
+type LayoutRow = { taken: { col: number; sizeX: number }[]; height: number };
+
 /**
  * Places the cards left to right in the order the report lists them, wrapping to a new row when the
  * next one no longer fits.
@@ -97,34 +103,67 @@ function heightOf(card: ReportCard): number {
  * one line. The cards of a row are two readings of one thing -- the geslachten as a pie beside the
  * geslachten over the years -- and one of them stopping halfway leaves a hole under it that the row
  * below cannot fill.
+ *
+ * A card that spans rows keeps its columns in the rows below it, which the cards after it wrap
+ * around, and ends up as tall as those rows together: the netwerk map stands beside the chart and
+ * the pie stacked next to it. It does not decide how tall those rows are -- the cards stacked beside
+ * it do, which is what makes it end exactly where they do.
  */
 export function layoutCards(cards: ReportCard[]): { card: ReportCard; row: number; col: number; sizeX: number; sizeY: number }[] {
-    const placed: { card: ReportCard; row: number; col: number; sizeX: number; sizeY: number }[] = [];
-    let row = 0;
-    let col = 0;
-    let rowHeight = 0;
+    const rows: LayoutRow[] = [];
+    const placed: { card: ReportCard; index: number; col: number; sizeX: number }[] = [];
+    let index = 0;
+
+    const rowAt = (position: number): LayoutRow => {
+        while (rows.length <= position) {
+            rows.push({ taken: [], height: 0 });
+        }
+        return rows[position];
+    };
 
     for (const card of cards) {
         const sizeX = widths[card.size];
-        const sizeY = heightOf(card);
+        let col = freeColumn(rowAt(index), sizeX);
 
-        if (col + sizeX > gridWidth) {
-            row += rowHeight;
-            col = 0;
-            rowHeight = 0;
+        while (col === undefined) {
+            index += 1;
+            col = freeColumn(rowAt(index), sizeX);
         }
 
-        placed.push({ card, row, col, sizeX, sizeY });
-        col += sizeX;
-        rowHeight = Math.max(rowHeight, sizeY);
+        for (let offset = 0; offset < card.span; offset++) {
+            rowAt(index + offset).taken.push({ col, sizeX });
+        }
+
+        // Only what a row holds on its own decides how tall it is. A card spanning several still has
+        // to fit in them, so it asks each for its share -- which is what a row holding nothing else
+        // ends up at.
+        const height = card.span === 1 ? heightOf(card) : Math.ceil(heightOf(card) / card.span);
+        for (let offset = 0; offset < card.span; offset++) {
+            rowAt(index + offset).height = Math.max(rowAt(index + offset).height, height);
+        }
+
+        placed.push({ card, index, col, sizeX });
     }
 
-    const heights = new Map<number, number>();
-    for (const entry of placed) {
-        heights.set(entry.row, Math.max(heights.get(entry.row) ?? 0, entry.sizeY));
-    }
+    const tops = rows.reduce<number[]>((offsets, row, position) => [...offsets, offsets[position] + row.height], [0]);
 
-    return placed.map(entry => ({ ...entry, sizeY: heights.get(entry.row)! }));
+    return placed.map(entry => ({
+        card: entry.card,
+        row: tops[entry.index],
+        col: entry.col,
+        sizeX: entry.sizeX,
+        sizeY: tops[entry.index + entry.card.span] - tops[entry.index],
+    }));
+}
+
+/** The leftmost column a card of this width still fits at, or nothing when the row is full. */
+function freeColumn(row: LayoutRow, sizeX: number): number | undefined {
+    for (let col = 0; col + sizeX <= gridWidth; col++) {
+        if (row.taken.every(entry => col + sizeX <= entry.col || entry.col + entry.sizeX <= col)) {
+            return col;
+        }
+    }
+    return undefined;
 }
 
 /**
