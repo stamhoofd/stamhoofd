@@ -67,7 +67,8 @@ export class MetabaseService extends SharedDockerService {
      * several platforms and shows the report of the one that was written last.
      *
      * The definition is read for that environment too. Not every platform counts every figure the
-     * same way, and which variant a card carries is decided while the report is loaded.
+     * same way, and which variant a card carries is decided while the report is loaded. The writer
+     * is told the same environment: it says which colors a chart falls back to.
      */
     async provisionReport(context: CliContext): Promise<ReportSyncResult & { database: string; dataSource: string; tableCount: number; postalCodeCount: number }> {
         const { api, id, database, dataSource } = await this.connectDataSource(context);
@@ -75,7 +76,7 @@ export class MetabaseService extends SharedDockerService {
         const tableCount = await this.countTables(context, database);
         const postalCodeCount = tableCount === 0 ? 0 : await this.countRows(context, database, 'postal_codes');
 
-        const result = await syncReport(api, id, tabs, metabaseReportCollectionName, metabaseReportDashboardName, postalCodeCount > 0);
+        const result = await syncReport(api, id, tabs, metabaseReportCollectionName, metabaseReportDashboardName, postalCodeCount > 0, context.env);
 
         return { ...result, database, dataSource, tableCount, postalCodeCount };
     }

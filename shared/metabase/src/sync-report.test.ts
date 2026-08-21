@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ReportCard, ReportTab } from './report.js';
-import { buildDashcards, buildParameters, buildTabs, buildTemplateTags, buildVisualizationSettings, collectionToRename, columnPalettes, dashcardKey, groupByDashboard, layoutCards, segmentColors, templateTagId } from './sync-report.js';
+import { buildDashcards, buildParameters, buildTabs, buildTemplateTags, buildVisualizationSettings, chartColors, collectionToRename, columnPalettes, dashcardKey, environmentColors, groupByDashboard, layoutCards, segmentColors, templateTagId } from './sync-report.js';
 
 function card(overrides: Partial<ReportCard> = {}): ReportCard {
     return {
@@ -327,6 +327,54 @@ describe('buildVisualizationSettings', () => {
         expect(buildVisualizationSettings(card({ display: 'pie', dimensions: ['Geslacht'], metrics: ['Aantal leden'] }))['pie.colors']).toEqual(colors);
         expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Scoutsjaar', 'Geslacht'], metrics: ['Aantal leden'] }))['series_settings'])
             .toEqual({ Man: { color: colors.Man }, Vrouw: { color: colors.Vrouw }, Andere: { color: colors.Andere }, Onbekend: { color: colors.Onbekend } });
+    });
+
+    /**
+     * The colors of the platform the report is written for, which is what a chart falls back to. By
+     * position for the series that are values in the data, and by name for the ones that are metrics
+     * -- the only colors a row chart reads.
+     */
+    it('draws a chart in the colors of the platform it is written for', () => {
+        const chart = card({ display: 'bar', dimensions: ['Scoutsjaar'], metrics: ['Aantal kinderen', 'Aantal leiding'] });
+
+        const keeo = buildVisualizationSettings(chart, true, 'keeo');
+        expect((keeo['graph.colors'] as string[]).slice(0, 3)).toEqual(['#00549E', '#C7DD06', '#FF5797']);
+        expect(keeo['series_settings']).toEqual({ 'Aantal kinderen': { color: '#00549E' }, 'Aantal leiding': { color: '#C7DD06' } });
+
+        const ravot = buildVisualizationSettings(chart, true, 'ravot');
+        expect((ravot['graph.colors'] as string[]).slice(0, 3)).toEqual(['#0067B1', '#EF3E42', '#ED7D34']);
+    });
+
+    /** A platform the report is not written for has no colors of its own to fall back to. */
+    it('leaves a chart of an unknown platform in Metabase\'s colors', () => {
+        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Tak'], metrics: ['A'] }), true, 'ergens')).not.toHaveProperty('graph.colors');
+        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Tak'], metrics: ['A'] }))).not.toHaveProperty('graph.colors');
+    });
+
+    /**
+     * The platform's colors are what a series falls back to, so a card that says what a value is
+     * drawn in keeps saying it: Metabase reads `graph.colors` only where nothing else colored the
+     * series, and the metrics of a chart that splits on a column are not its series at all.
+     */
+    it('keeps the colors a card already names over the ones of the platform', () => {
+        const settings = buildVisualizationSettings(card({ display: 'bar', dimensions: ['Scoutsjaar', 'Geslacht'], metrics: ['Aantal kinderen'] }), true, 'keeo');
+        const colors = columnPalettes.get('Geslacht')!;
+
+        expect(settings['series_settings']).toEqual({
+            Man: { color: colors.Man }, Vrouw: { color: colors.Vrouw }, Andere: { color: colors.Andere }, Onbekend: { color: colors.Onbekend },
+        });
+        expect(settings).toHaveProperty('graph.colors');
+    });
+
+    /**
+     * A chart with more series than the platform has colors gets shades of the same three: repeating
+     * one would draw two of them as if they were one series.
+     */
+    it('shades the platform colors for a chart with more series than colors', () => {
+        const colors = chartColors(environmentColors.get('keeo')!);
+
+        expect(colors.slice(0, 3)).toEqual(['#00549E', '#C7DD06', '#FF5797']);
+        expect(`${colors.length} colors, ${new Set(colors).size} of them different`).toEqual('12 colors, 12 of them different');
     });
 
     it('leaves a card that splits on something the palette says nothing about to Metabase', () => {

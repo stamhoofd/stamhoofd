@@ -302,6 +302,43 @@ export const columnPalettes = new Map<string, Record<string, string>>([
 ]);
 
 /**
+ * The colors a chart falls back to, per platform: the ones the platform shows itself in everywhere
+ * else. A chart takes them for the series nothing else has colored -- a column palette colors first,
+ * and a card that says its own colors keeps them -- which is what makes these the default rather
+ * than the colors. A platform the report is not written for keeps Metabase's own palette.
+ *
+ * Said per card because the setting that colors every chart of an instance at once,
+ * `application-colors`, is a paid feature. An instance serves one platform anyway.
+ */
+export const environmentColors = new Map<string, string[]>([
+    ['keeo', ['#00549E', '#C7DD06', '#FF5797']],
+    ['ravot', ['#0067B1', '#EF3E42', '#ED7D34']],
+]);
+
+/** How many series a chart is handed colors for before Metabase's own palette takes over. */
+const chartColorCount = 12;
+
+/**
+ * The platform's colors, and after them the same ones lightened and darkened.
+ *
+ * A chart with more series than the platform has colors has to get them from somewhere: repeating
+ * one draws two takken as if they were one, and stopping after three leaves the rest of the legend in
+ * Metabase's palette, which reads as a chart drawn in two sets of colors. Shades of the three stay
+ * the platform's own.
+ */
+export function chartColors(colors: string[], count = chartColorCount): string[] {
+    // Towards white where positive, towards black where negative, and the platform's own where zero.
+    const shades = [0, 0.35, -0.3, 0.6, -0.55];
+
+    return [...new Array(count).keys()].map((index) => {
+        const color = colors[index % colors.length];
+        const shade = shades[Math.floor(index / colors.length) % shades.length];
+
+        return shade === 0 ? color : mixColors(color, shade > 0 ? '#FFFFFF' : '#000000', Math.abs(shade));
+    });
+}
+
+/**
  * How the report describes its x-axis labels, in what Metabase calls them.
  */
 const xAxisLabels: Record<string, boolean | string> = {
@@ -312,7 +349,7 @@ const xAxisLabels: Record<string, boolean | string> = {
     'rotate-90': 'rotate-90',
 };
 
-export function buildVisualizationSettings(card: ReportCard, hasCoordinates = true): Record<string, unknown> {
+export function buildVisualizationSettings(card: ReportCard, hasCoordinates = true, env?: string): Record<string, unknown> {
     const settings: Record<string, unknown> = { 'card.title': card.title };
 
     if (card.description !== undefined) {
@@ -392,6 +429,25 @@ export function buildVisualizationSettings(card: ReportCard, hasCoordinates = tr
         const series: Record<string, Record<string, unknown>> = Object.fromEntries(
             Object.entries(columnPalettes.get(card.dimensions[1]) ?? {}).map(([value, color]) => [value, { color }]),
         );
+
+        const platform = env === undefined ? undefined : environmentColors.get(env);
+        if (platform !== undefined) {
+            const colors = chartColors(platform);
+
+            // By position, since the series of a chart that splits on a column are its values, which
+            // are in the data rather than in the report. Metabase reads them only where nothing else
+            // colored that series.
+            settings['graph.colors'] = colors;
+
+            // A chart without a second dimension draws a series per metric, and a metric has a name
+            // this can hand a color to. It is also the only place a row chart reads a color: that
+            // one colors by series name and never looks at `graph.colors`.
+            if (card.dimensions.length < 2) {
+                for (const [index, metric] of card.metrics.entries()) {
+                    series[metric] = { ...series[metric], color: colors[index] };
+                }
+            }
+        }
 
         // Left to itself a combo chart draws its first series as a line and the rest as bars, the
         // other way round from what the "aantal leden + GTP index" chart needs, so every series is
@@ -578,8 +634,11 @@ export function groupByDashboard(tabs: ReportTab[], dashboardName: string): { na
  * Write the whole report to Metabase: a dashboard with a tab per page, and one per tab that asked for
  * its own. Cards first, because a dashboard can only point at cards that exist, and the filter
  * dropdowns point at cards too.
+ *
+ * `env` is the platform being written, the same name the report was loaded for. It says which colors
+ * a chart falls back to; without it they are Metabase's.
  */
-export async function syncReport(api: MetabaseApi, databaseId: number, tabs: ReportTab[], collection: string, dashboardName: string, hasCoordinates = false): Promise<ReportSyncResult> {
+export async function syncReport(api: MetabaseApi, databaseId: number, tabs: ReportTab[], collection: string, dashboardName: string, hasCoordinates = false, env?: string): Promise<ReportSyncResult> {
     const renamedCollection = await renameLegacyCollection(api, collection);
     const { id: collectionId, created: createdCollection } = await api.ensureCollection(collection);
 
@@ -596,7 +655,7 @@ export async function syncReport(api: MetabaseApi, databaseId: number, tabs: Rep
                 databaseId,
                 query: card.sql,
                 templateTags: buildTemplateTags(card),
-                visualizationSettings: buildVisualizationSettings(card, hasCoordinates),
+                visualizationSettings: buildVisualizationSettings(card, hasCoordinates, env),
                 collectionId,
             }, existingCards.get(cardName(card, tab)));
 
