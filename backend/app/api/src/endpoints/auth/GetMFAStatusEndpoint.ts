@@ -26,6 +26,8 @@ export class GetMFAStatusEndpoint extends Endpoint<Params, Query, Body, Response
         await Context.setOptionalOrganizationScope();
         const { user } = await Context.authenticate({ allowWithoutAccount: true, allowUnscoped: true });
 
+        Context.assertNotImpersonating();
+
         return new Response(await TwoFactorHelper.buildStatus(user));
     }
 }

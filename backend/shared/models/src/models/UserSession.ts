@@ -12,6 +12,16 @@ export class UserSession extends QueryableModel {
     @column({ type: 'string' })
     userId: string;
 
+    /**
+     * When set, this session belongs to `userId` but presents itself as this other user:
+     * an administrator is looking at the application through the eyes of that account.
+     *
+     * The session never stops being the administrator's: everything it changes is
+     * attributed to `userId`, and every access check has to pass for both accounts.
+     */
+    @column({ type: 'string', nullable: true })
+    impersonatedUserId: string | null = null;
+
     @column({ type: 'string' })
     clientType = SessionClientType.Browser;
 

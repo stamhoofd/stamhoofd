@@ -60,7 +60,7 @@
 
         <template #right>
             <span v-if="!registration.deactivatedAt && registration.balances.length" class="style-price-base">{{ formatPrice(registration.calculatedPrice) }}</span>
-            <span v-if="isEditable" class="icon arrow-down-small gray" />
+            <span v-if="isEditable" class="icon more small gray hover-show" />
         </template>
     </STListItem>
 </template>

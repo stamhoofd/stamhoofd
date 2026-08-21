@@ -820,7 +820,7 @@
                     transition: color 0.2s ease-out, transform 0.2s;
                 }
 
-                &:active, &.focused, &.active {
+                &:active, &.open-context-menu, &.active {
                     &:before {
                         color: $color-dark;
                         transition: color 0s;
@@ -838,7 +838,7 @@
                     z-index: 1;
                 }
 
-                &.active, &:hover, &:active, &.focused {
+                &.active, &:hover, &:active, &.open-context-menu {
                     &:after {
 
                         opacity: 1;
@@ -848,7 +848,7 @@
                     }
                 }
 
-                &:active, &.active, &.focused {
+                &:active, &.active, &.open-context-menu {
                     &:after {
                         background-color: var(--color-current-background-shade-darker, #{$color-background-shade-darker});
                     }
@@ -894,7 +894,7 @@
                 z-index: 1;
             }
 
-            &.active , &.focused{
+            &.active , &.open-context-menu{
                 opacity: 1;
                 &:after {
 

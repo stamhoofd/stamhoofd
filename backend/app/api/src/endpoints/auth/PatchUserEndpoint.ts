@@ -46,6 +46,12 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             });
         }
 
+        // Looking through an account may never turn into taking it over: the credentials
+        // and the email address stay in the hands of whoever owns the account.
+        if (request.body.password || request.body.email !== undefined || request.body.hasPassword !== undefined || request.body.meta !== undefined) {
+            Context.assertNotImpersonating();
+        }
+
         const editUser = request.body.id === user.id ? user : await User.getByID(request.body.id);
 
         if (!editUser || !await Context.auth.canAccessUser(editUser, PermissionLevel.Write) || editUser.isApiUser) {

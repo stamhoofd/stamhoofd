@@ -4,9 +4,10 @@ import type { SimpleErrors } from '@simonbackx/simple-errors';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import type { RequestMiddleware } from '@simonbackx/simple-networking';
 import { Request } from '@simonbackx/simple-networking';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import type { LoginProviderType } from '@stamhoofd/structures';
-import { OpenIDAuthTokenResponse, Organization, Platform, Token, UserWithMembers, Version } from '@stamhoofd/structures';
+import { ImpersonationTicketGrant, OpenIDAuthTokenResponse, Organization, Platform, Token, UserWithMembers, Version } from '@stamhoofd/structures';
 import { isReactive, reactive } from 'vue';
 import { AppManager } from './AppManager';
 import { ContextPermissions } from './ContextPermissions';
@@ -490,6 +491,59 @@ export class SessionContext implements RequestMiddleware {
                 console.error(e);
                 return;
             }
+        }
+    }
+
+    /**
+     * Sign in through an impersonation link: an administrator asked to see the application
+     * as one of their users, and opened the resulting link here.
+     *
+     * The ticket travels in the fragment of the url, so it never reaches a server log or a
+     * referrer. It is single use, expires within minutes and only works from the address
+     * that asked for it - but a link is still something that can be sent to somebody else,
+     * so this refuses to run in a browser that already has a session and asks before it
+     * signs anybody in.
+     */
+    async checkImpersonation() {
+        const hash = new URLSearchParams(window.location.hash.startsWith('#') ? window.location.hash.substring(1) : window.location.hash);
+        const ticket = hash.get('impersonate');
+
+        if (!ticket) {
+            return;
+        }
+
+        // Drop the ticket from the address bar before anything else, so a reload or a
+        // shared url cannot carry it any further.
+        hash.delete('impersonate');
+        const remaining = hash.toString();
+        window.history.replaceState(null, '', window.location.pathname + window.location.search + (remaining ? '#' + remaining : ''));
+
+        if (this.hasToken()) {
+            new Toast($t(`Je bent al ingelogd in deze browser. Open deze link in een privévenster om als een andere gebruiker aan te melden.`), 'error red').setHide(30000).show();
+            return;
+        }
+
+        if (!await CenteredMessage.confirm({
+            title: $t(`Inloggen als een andere gebruiker?`),
+            confirmText: $t(`Ja, inloggen`),
+            description: $t(`Je meldt je aan via een link als een andere gebruiker. Hierna zie je alles net zoals die gebruiker Stamhoofd ziet. Ga enkel verder als je deze link zelf hebt aangemaakt.`),
+        })) {
+            return;
+        }
+
+        try {
+            const response = await this.identityServer.request({
+                method: 'POST',
+                path: '/impersonation/token',
+                body: ImpersonationTicketGrant.create({ ticket }),
+                decoder: Token as Decoder<Token>,
+                shouldRetry: false,
+            });
+
+            await this.setToken(response.data);
+        } catch (e) {
+            console.error(e);
+            Toast.fromError(e).setHide(30000).show();
         }
     }
 
