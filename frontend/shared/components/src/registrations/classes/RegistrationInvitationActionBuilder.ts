@@ -85,7 +85,12 @@ export function getDeleteInvitationAction({ organizationId, context, owner, even
             const message = invitations.length === 1
                 ? $t('%1Tv', { name: invitations[0].member.name })
                 : $t('%Zg7', { count: invitations.length });
-            const isConfirm = await CenteredMessage.confirm(message, $t('%Kk'));
+            const isConfirm = await CenteredMessage.confirm({
+                title: message,
+                confirmText: $t('%Kk'),
+                destructive: true,
+                availabilityDelay: 2_000,
+            });
 
             if (isConfirm) {
                 deleteInvitations({

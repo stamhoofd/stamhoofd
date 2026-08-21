@@ -107,6 +107,7 @@ async function deleteRow(row: GroupRow) {
             title: $t('%1VJ', { groupName: group?.settings.name.toString() ?? row.name }),
             confirmText: $t('%55'),
             destructive: true,
+            availabilityDelay: 2_000,
         })) {
             return;
         }

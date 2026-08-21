@@ -262,7 +262,11 @@ async function createCategory() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm(groups.value.length ? $t('%ZZr') : $t('%ZZk'), $t('%CJ'))) {
+    if (!await CenteredMessage.confirm({
+        title: groups.value.length ? $t('%ZZr') : $t('%ZZk'),
+        confirmText: $t('%CJ'),
+        availabilityDelay: 2_000,
+    })) {
         return;
     }
     const settings = OrganizationRegistrationPeriodSettings.patch({});

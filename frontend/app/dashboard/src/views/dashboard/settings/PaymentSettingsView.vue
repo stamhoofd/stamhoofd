@@ -817,11 +817,23 @@ async function openStripeAccountLink(accountId: string, initialTab?: Window | nu
 }
 
 async function deleteStripeAccount(accountId: string) {
-    if (!(await CenteredMessage.confirm($t('%1ZI'), $t('%CJ'), $t('%1Fc')))) {
+    if (!(await CenteredMessage.confirm({
+        title: $t('%1ZI'),
+        confirmText: $t('%CJ'),
+        description: $t('%1Fc'),
+        destructive: true,
+        availabilityDelay: 2_000,
+    }))) {
         return;
     }
 
-    if (!(await CenteredMessage.confirm($t('%1b8'), $t('%CJ'), $t('%1Fc')))) {
+    if (!(await CenteredMessage.confirm({
+        title: $t('%1b8'),
+        confirmText: $t('%CJ'),
+        description: $t('%1Fc'),
+        destructive: true,
+        availabilityDelay: 2_000,
+    }))) {
         return;
     }
 

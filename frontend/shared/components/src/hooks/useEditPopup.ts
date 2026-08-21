@@ -42,7 +42,13 @@ export function useEditPopup<T extends AutoEncoder>({ errors, saveHandler, delet
             return;
         }
 
-        if (!await CenteredMessage.confirm(text, confirmText ?? $t('%55'), description)) {
+        if (!await CenteredMessage.confirm({
+            title: text,
+            confirmText: confirmText ?? $t('%55'),
+            description,
+            destructive: true,
+            availabilityDelay: 2_000,
+        })) {
             return;
         }
 

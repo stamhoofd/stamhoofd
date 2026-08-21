@@ -171,7 +171,11 @@ export class DocumentActionBuilder {
     }
 
     async deleteDocuments(documents: DocumentStruct[]) {
-        if (!(await CenteredMessage.confirm(documents.length > 1 ? $t('%KE', { count: documents.length.toString() }) : $t(`%KM`), $t(`%CJ`)))) {
+        if (!(await CenteredMessage.confirm({
+            title: documents.length > 1 ? $t('%KE', { count: documents.length.toString() }) : $t(`%KM`),
+            confirmText: $t(`%CJ`),
+            availabilityDelay: 2_000,
+        }))) {
             return;
         }
         try {

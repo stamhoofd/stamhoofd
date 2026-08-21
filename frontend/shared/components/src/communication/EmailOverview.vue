@@ -458,10 +458,12 @@ async function doDelete() {
     if (isDeletingEmail.value) {
         return;
     }
-    if (!await CenteredMessage.confirm(
-        $t('%1Ev'),
-        $t('%55'),
-    )) {
+    if (!await CenteredMessage.confirm({
+        title: $t('%1Ev'),
+        confirmText: $t('%55'),
+        destructive: true,
+        availabilityDelay: 2_000,
+    })) {
         return;
     }
 

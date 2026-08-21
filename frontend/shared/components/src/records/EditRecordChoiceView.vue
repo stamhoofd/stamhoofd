@@ -197,7 +197,11 @@ async function save() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm($t(`%10z`), $t(`%CJ`))) {
+    if (!await CenteredMessage.confirm({
+        title: $t(`%10z`),
+        confirmText: $t(`%CJ`),
+        availabilityDelay: 2_000,
+    })) {
         return;
     }
 

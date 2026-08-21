@@ -612,7 +612,12 @@ async function doDelete() {
     if (loading.value) {
         return;
     }
-    if (!(await CenteredMessage.confirm($t(`%10f`), $t(`%CJ`), $t(`%1Fc`)))) {
+    if (!(await CenteredMessage.confirm({
+        title: $t(`%10f`),
+        confirmText: $t(`%CJ`),
+        description: $t(`%1Fc`),
+        availabilityDelay: 2_000,
+    }))) {
         return;
     }
     if (loading.value) {

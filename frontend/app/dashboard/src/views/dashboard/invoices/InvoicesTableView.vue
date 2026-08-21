@@ -289,13 +289,13 @@ async function deleteInvoice(invoice: Invoice) {
     const invoiceName = invoice.number ? '#' + invoice.number : invoice.id;
 
     // Double verification: two separate confirmations before we permanently delete the invoice.
-    if (!await CenteredMessage.confirm(
-        $t('%Zc6', { number: invoiceName }),
-        $t('%CJ'),
-        $t('%ZcH'),
-        undefined,
-        true,
-    )) {
+    if (!await CenteredMessage.confirm({
+        title: $t('%Zc6', { number: invoiceName }),
+        confirmText: $t('%CJ'),
+        description: $t('%ZcH'),
+        destructive: true,
+        availabilityDelay: 2_000,
+    })) {
         return;
     }
 

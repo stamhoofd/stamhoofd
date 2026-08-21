@@ -298,7 +298,13 @@ export function useEmailContentLanguage(options: {
             description = $t('%Zdz');
         }
 
-        if (!await CenteredMessage.confirm($t('%ZeD'), $t('%CJ'), description)) {
+        if (!await CenteredMessage.confirm({
+            title: $t('%ZeD'),
+            confirmText: $t('%CJ'),
+            description,
+            destructive: true,
+            availabilityDelay: 2_000,
+        })) {
             return;
         }
         // The switching guard stops onEditorUpdate from writing a patch while the editor content is replaced

@@ -239,7 +239,11 @@ async function addPasskey() {
 }
 
 async function deleteTotp(id: string) {
-    if (!await CenteredMessage.confirm($t('%ZhF'), $t('%CJ'))) {
+    if (!await CenteredMessage.confirm({
+        title: $t('%ZhF'),
+        confirmText: $t('%CJ'),
+        availabilityDelay: 2_000,
+    })) {
         return;
     }
     errors.errorBox = null;
@@ -251,7 +255,11 @@ async function deleteTotp(id: string) {
 }
 
 async function deletePasskey(id: string) {
-    if (!await CenteredMessage.confirm($t('%Zh0'), $t('%CJ'))) {
+    if (!await CenteredMessage.confirm({
+        title: $t('%Zh0'),
+        confirmText: $t('%CJ'),
+        availabilityDelay: 2_000,
+    })) {
         return;
     }
     errors.errorBox = null;

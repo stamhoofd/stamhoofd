@@ -421,7 +421,12 @@ async function disconnectProvider(provider: LoginProviderType) {
 }
 
 async function deletePassword() {
-    if (await CenteredMessage.confirm($t(`%12I`), $t(`%55`))) {
+    if (await CenteredMessage.confirm({
+        title: $t(`%12I`),
+        confirmText: $t(`%55`),
+        destructive: true,
+        availabilityDelay: 2_000,
+    })) {
         const patch = NewUser.patch({
             id: $user.value!.id,
             hasPassword: false,

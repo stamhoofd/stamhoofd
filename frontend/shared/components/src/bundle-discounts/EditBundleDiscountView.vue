@@ -354,7 +354,11 @@ async function doDelete() {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('%16Q'), $t('%CJ'))) {
+    if (!await CenteredMessage.confirm({
+        title: $t('%16Q'),
+        confirmText: $t('%CJ'),
+        availabilityDelay: 2_000,
+    })) {
         return;
     }
 

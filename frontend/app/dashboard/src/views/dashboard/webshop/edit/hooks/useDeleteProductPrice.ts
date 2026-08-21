@@ -11,7 +11,11 @@ export function useDeleteProductPrice() {
             Toast.error($t('%1Ae')).show();
             return;
         }
-        const confirmed = await CenteredMessage.confirm($t('%1Af'), $t('%CJ'));
+        const confirmed = await CenteredMessage.confirm({
+            title: $t('%1Af'),
+            confirmText: $t('%CJ'),
+            availabilityDelay: 2_000,
+        });
         if (!confirmed) return;
 
         const patch = Product.patch({ id: product.id });

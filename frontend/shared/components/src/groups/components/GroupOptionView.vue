@@ -172,7 +172,13 @@ async function save() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm($t('%6D'), $t('%55'), $t('%6E'))) {
+    if (!await CenteredMessage.confirm({
+        title: $t('%6D'),
+        confirmText: $t('%55'),
+        description: $t('%6E'),
+        destructive: true,
+        availabilityDelay: 2_000,
+    })) {
         return;
     }
     if (deleting.value || saving.value || !props.deleteHandler) {

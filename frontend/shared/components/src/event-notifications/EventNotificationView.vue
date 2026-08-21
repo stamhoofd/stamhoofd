@@ -472,7 +472,13 @@ async function showOriginalAnswers() {
 }
 
 async function doDelete() {
-    if (!await CenteredMessage.confirm($t(`%vS`), $t(`%55`), $t(`%vT`))) {
+    if (!await CenteredMessage.confirm({
+        title: $t(`%vS`),
+        confirmText: $t(`%55`),
+        description: $t(`%vT`),
+        destructive: true,
+        availabilityDelay: 2_000,
+    })) {
         return;
     }
     try {

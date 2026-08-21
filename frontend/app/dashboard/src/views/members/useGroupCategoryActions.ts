@@ -324,6 +324,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
                 title: $t('%1WJ', { destinationName }),
                 confirmText: $t('%55'),
                 destructive: true,
+                availabilityDelay: 2_000,
             })) {
                 return;
             }
@@ -365,6 +366,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
                 }),
                 confirmText: $t('%55'),
                 destructive: true,
+                availabilityDelay: 2_000,
             })) {
                 return;
             }

@@ -270,7 +270,13 @@ async function deleteMe() {
     if (saving.value) {
         return;
     }
-    if (!await CenteredMessage.confirm($t('%1Fb'), $t('%55'), $t('%1Fc'))) {
+    if (!await CenteredMessage.confirm({
+        title: $t('%1Fb'),
+        confirmText: $t('%55'),
+        description: $t('%1Fc'),
+        destructive: true,
+        availabilityDelay: 2_000,
+    })) {
         return;
     }
     saving.value = true;

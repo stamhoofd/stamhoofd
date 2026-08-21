@@ -65,7 +65,11 @@ function moveDown() {
 }
 
 async function doDelete() {
-    if (!(await CenteredMessage.confirm('Deze keuze verwijderen?', 'Verwijderen'))) {
+    if (!(await CenteredMessage.confirm({
+        title: 'Deze keuze verwijderen?',
+        confirmText: 'Verwijderen',
+        availabilityDelay: 2_000,
+    }))) {
         return;
     }
     const p = OptionMenu.patch({ id: props.optionMenu.id });

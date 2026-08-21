@@ -118,7 +118,11 @@ async function save() {
 const isSingle = computed(() => patchedSeatingPlan.value.categories.length <= 1);
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm('Ben je zeker dat je deze categorie wilt verwijderen?', 'Verwijderen')) {
+    if (!await CenteredMessage.confirm({
+        title: 'Ben je zeker dat je deze categorie wilt verwijderen?',
+        confirmText: 'Verwijderen',
+        availabilityDelay: 2_000,
+    })) {
         return;
     }
     const p = SeatingPlan.patch({});
