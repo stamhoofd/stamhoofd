@@ -13,13 +13,16 @@ function cardOf(tabs: ReportTab[], tab: string, card: string): ReportCard {
     return found;
 }
 
-/** The cards of a tab as the rows they end up on, in order, with the width they take up together. */
-function rowsOf(cards: ReportCard[]): { keys: string[]; width: number }[] {
-    const rows = new Map<number, { keys: string[]; width: number }>();
+/**
+ * The cards of a tab as the rows they end up on, in order, with the width they take up together and
+ * the heights they are drawn at.
+ */
+function rowsOf(cards: ReportCard[]): { keys: string[]; width: number; heights: number[] }[] {
+    const rows = new Map<number, { keys: string[]; width: number; heights: number[] }>();
 
     for (const placed of layoutCards(cards)) {
-        const row = rows.get(placed.row) ?? { keys: [], width: 0 };
-        rows.set(placed.row, { keys: [...row.keys, placed.card.key], width: row.width + placed.sizeX });
+        const row = rows.get(placed.row) ?? { keys: [], width: 0, heights: [] };
+        rows.set(placed.row, { keys: [...row.keys, placed.card.key], width: row.width + placed.sizeX, heights: [...new Set([...row.heights, placed.sizeY])] });
     }
 
     return [...rows.values()];
@@ -652,6 +655,7 @@ describe('report', () => {
             expect(rowWith('eenheid-omkaderingscijfer-meter')).toEqual(['eenheid-omkaderingscijfer-meter', 'eenheid-omkaderingscijfer-per-scoutsjaar']);
             expect(rowWith('eenheid-kinderen-per-geslacht')).toEqual(['eenheid-geslacht-kinderen-per-jaar', 'eenheid-kinderen-per-geslacht']);
             expect(rowWith('eenheid-leiding-per-geslacht')).toEqual(['eenheid-geslacht-leiding-per-jaar', 'eenheid-leiding-per-geslacht']);
+            expect(rows.filter(row => row.heights.length !== 1)).toEqual([]);
             expect(rows.filter(row => row.width !== 24)).toEqual([]);
         });
 

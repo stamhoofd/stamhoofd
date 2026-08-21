@@ -32,6 +32,22 @@ describe('layoutCards', () => {
     });
 
     /**
+     * The pie of the geslachten stands beside the chart of the same geslachten over the years, and a
+     * pie that stops at the height of a normal chart leaves a hole under it: the row below starts
+     * where the taller card ends either way.
+     */
+    it('draws every card of a row down to the same line', () => {
+        const [chart, pie] = layoutCards([
+            card({ key: 'a', size: 'two-thirds', display: 'row' }),
+            card({ key: 'b', size: 'third', display: 'pie' }),
+        ]);
+
+        expect(pie.row).toEqual(chart.row);
+        expect(pie.sizeY).toEqual(chart.sizeY);
+        expect(pie.sizeX).toEqual(8);
+    });
+
+    /**
      * A row chart holds a bar per scoutsjaar, and Metabase gives each of them 24 pixels: the ones
      * that no longer fit in the card are dropped rather than squeezed, so a row chart the height of
      * a normal chart would quietly lose the oldest years as they pile up.

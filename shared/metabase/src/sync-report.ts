@@ -91,7 +91,12 @@ function heightOf(card: ReportCard): number {
 
 /**
  * Places the cards left to right in the order the report lists them, wrapping to a new row when the
- * next one no longer fits. A row is as tall as its tallest card.
+ * next one no longer fits.
+ *
+ * A row is as tall as its tallest card and every card in it is drawn that tall, so the row ends on
+ * one line. The cards of a row are two readings of one thing -- the geslachten as a pie beside the
+ * geslachten over the years -- and one of them stopping halfway leaves a hole under it that the row
+ * below cannot fill.
  */
 export function layoutCards(cards: ReportCard[]): { card: ReportCard; row: number; col: number; sizeX: number; sizeY: number }[] {
     const placed: { card: ReportCard; row: number; col: number; sizeX: number; sizeY: number }[] = [];
@@ -114,7 +119,12 @@ export function layoutCards(cards: ReportCard[]): { card: ReportCard; row: numbe
         rowHeight = Math.max(rowHeight, sizeY);
     }
 
-    return placed;
+    const heights = new Map<number, number>();
+    for (const entry of placed) {
+        heights.set(entry.row, Math.max(heights.get(entry.row) ?? 0, entry.sizeY));
+    }
+
+    return placed.map(entry => ({ ...entry, sizeY: heights.get(entry.row)! }));
 }
 
 /**
