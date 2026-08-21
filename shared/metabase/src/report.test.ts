@@ -1,5 +1,8 @@
+import fs from 'fs/promises';
+import os from 'os';
+import path from 'path';
 import type { ReportCard, ReportTab } from './report.js';
-import { loadReport, parseTab, parameterNames, resolveSql } from './report.js';
+import { getReportDirectory, loadReport, parseTab, parameterNames, resolveSql } from './report.js';
 import { layoutCards } from './sync-report.js';
 
 function cardOf(tabs: ReportTab[], tab: string, card: string): ReportCard {
@@ -23,10 +26,13 @@ function rowsOf(cards: ReportCard[]): { keys: string[]; width: number }[] {
 }
 
 describe('report', () => {
+    /** The report as keeo counts it. What ravot counts differently is `ravotDashboards`. */
     let dashboards: ReportTab[];
+    let ravotDashboards: ReportTab[];
 
     beforeAll(async () => {
-        dashboards = await loadReport();
+        dashboards = await loadReport('keeo');
+        ravotDashboards = await loadReport('ravot');
     });
 
     describe('definition', () => {
@@ -331,15 +337,90 @@ describe('report', () => {
         });
 
         /**
+         * Ravot weighs the same index by the age a lid reaches in the werkjaar rather than by their
+         * tak, and counts a leider as one and a half. Kept here for the same reason as the weights
+         * above: a wrong one is a plausible number rather than a failure.
+         */
+        it('weighs each leeftijd of the GTP index as the ravot formula does', () => {
+            const sql = cardOf(ravotDashboards, 'eenheden', 'eenheid-gtp').sql.replaceAll(/\s+/g, ' ');
+
+            for (const [bucket, term] of [
+                ['jonger dan 10', "ROUND( COUNT(DISTINCT CASE WHEN effective_category = 'child' AND leeftijd < 10 THEN member_id END) / 3"],
+                ['10 tot 13', "+ COUNT(DISTINCT CASE WHEN effective_category = 'child' AND leeftijd BETWEEN 10 AND 13 THEN member_id END)"],
+                ['14 tot 15', "+ 2 * COUNT(DISTINCT CASE WHEN effective_category = 'child' AND leeftijd BETWEEN 14 AND 15 THEN member_id END)"],
+                ['16', "+ 3 * COUNT(DISTINCT CASE WHEN effective_category = 'child' AND leeftijd = 16 THEN member_id END)"],
+                ['Leiding', "+ 1.5 * COUNT(DISTINCT CASE WHEN effective_category = 'leader' THEN member_id END)"],
+                ['omkaderingscijfer', "- 2 * COUNT(DISTINCT CASE WHEN effective_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN effective_category = 'leader' THEN member_id END), 0)"],
+            ]) {
+                expect(`${bucket}: ${sql.includes(term)}`).toEqual(`${bucket}: true`);
+            }
+
+            // Every bucket counts kinderen, so a leider of sixteen weighs as leiding rather than as
+            // both, and a tak weighs nothing at all here.
+            expect(sql).not.toContain('`Tak` =');
+        });
+
+        /**
          * Four cards draw a GTP index, at three different grains. They only agree because they share
-         * one fragment, and nothing but this notices when one grows a copy of its own.
+         * one fragment, and nothing but this notices when one grows a copy of its own -- in either
+         * environment, since each has a fragment of its own to drift from.
          */
         it('computes the GTP index from one expression wherever it is shown', () => {
-            const expressions = [['nationaal', 'leden-per-eenheid'], ['eenheden', 'eenheid-gtp'], ['eenheden', 'eenheid-gtp-meter'], ['eenheden', 'eenheid-gtp-per-scoutsjaar']]
-                .map(([tab, key]) => cardOf(dashboards, tab, key).sql.replaceAll(/\s+/g, ' ').match(/ROUND\( \( COUNT\(DISTINCT CASE WHEN `Tak` = 'Bevers'.*?, 2\)/)?.[0]);
+            for (const [env, tabs, pattern] of [
+                ['keeo', dashboards, /ROUND\( \( COUNT\(DISTINCT CASE WHEN `Tak` = 'Bevers'.*?, 2\)/],
+                ['ravot', ravotDashboards, /ROUND\( COUNT\(DISTINCT CASE WHEN effective_category = 'child' AND leeftijd < 10.*?, 2\)/],
+            ] as const) {
+                const expressions = [['nationaal', 'leden-per-eenheid'], ['eenheden', 'eenheid-gtp'], ['eenheden', 'eenheid-gtp-meter'], ['eenheden', 'eenheid-gtp-per-scoutsjaar']]
+                    .map(([tab, key]) => cardOf(tabs, tab, key).sql.replaceAll(/\s+/g, ' ').match(pattern)?.[0]);
 
-            expect(expressions.filter(expression => expression !== undefined)).toHaveLength(4);
-            expect(new Set(expressions).size).toBe(1);
+                expect(`${env}: ${expressions.filter(expression => expression !== undefined).length}`).toEqual(`${env}: 4`);
+                expect(`${env}: ${new Set(expressions).size}`).toEqual(`${env}: 1`);
+            }
+        });
+
+        /** The gauge is the one card that explains the formula, so it explains the one it draws. */
+        it('describes the GTP index in the terms the environment weighs it in', () => {
+            expect(cardOf(dashboards, 'eenheden', 'eenheid-gtp-meter').description).toContain("(VG's & Seniors)");
+            expect(cardOf(ravotDashboards, 'eenheden', 'eenheid-gtp-meter').description).toContain('(14- tot 16-jarigen)');
+        });
+
+        /**
+         * An environment says a figure in words of its own; it does not get a report of its own. Two
+         * platforms reading pages that no longer hold the same cards is a report that has quietly
+         * forked, which is what the shared definition exists to prevent.
+         */
+        it('varies what a card counts, never which cards the report holds', () => {
+            const shapeOf = (tabs: ReportTab[]) => tabs.map(tab => ({
+                key: tab.key,
+                filters: tab.filters,
+                dashboard: tab.dashboard,
+                cards: tab.cards.map(card => ({ key: card.key, title: card.title, display: card.display, size: card.size, parameters: card.parameters })),
+            }));
+
+            expect(shapeOf(ravotDashboards)).toEqual(shapeOf(dashboards));
+        });
+
+        /**
+         * Which environments the report is written differently for, read from the report itself. An
+         * override directory or a `@` qualifier naming an environment nobody loads is read by
+         * nothing and changes nothing, which a misspelling looks exactly like. Extend this when a
+         * third platform starts counting something its own way.
+         */
+        it('varies for the environments it names and no others', async () => {
+            const directory = getReportDirectory();
+            const entries = await fs.readdir(path.join(directory, 'includes'), { withFileTypes: true });
+            const qualifiers = new Set<string>();
+
+            for (const file of (await fs.readdir(directory)).filter(entry => entry.endsWith('.sql'))) {
+                const contents = await fs.readFile(path.join(directory, file), 'utf-8');
+
+                for (const match of contents.matchAll(/^--[ \t]*[a-z]+@([a-z0-9-]+):/gm)) {
+                    qualifiers.add(match[1]);
+                }
+            }
+
+            expect(entries.filter(entry => entry.isDirectory()).map(entry => entry.name).sort()).toEqual(['ravot']);
+            expect([...qualifiers].sort()).toEqual(['ravot']);
         });
 
         it('counts the omkaderingscijfer the same way wherever it is shown', () => {
@@ -471,6 +552,16 @@ describe('report', () => {
         it('rejects a setting that slipped below the query', () => {
             expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- A note.\n-- display: bar\nSELECT 1', 'x.sql', new Map()))
                 .toThrow('has "display:" below the query');
+
+            // Naming an environment does not make it a comment either: it is the same setting.
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- A note.\n-- description@ravot: Zo telt ravot\nSELECT 1', 'x.sql', new Map(), 'ravot'))
+                .toThrow('has "description:" below the query');
+        });
+
+        it('ignores a setting written for an environment other than the one being loaded', () => {
+            const tab = parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- description@keeo: Alleen daar\nSELECT 1', 'x.sql', new Map(), 'ravot');
+
+            expect(tab.cards[0].description).toBeUndefined();
         });
 
         it('leaves a comment that merely looks like a setting alone', () => {
@@ -515,6 +606,74 @@ describe('report', () => {
         it('rejects an include that does not exist', () => {
             expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- @include nope\nSELECT 1', 'x.sql', new Map()))
                 .toThrow('report/includes/nope.sql');
+        });
+    });
+
+    /**
+     * The mechanism itself, on a report written for the test: the real one only varies the GTP index,
+     * and what breaks here is the resolving rather than the formula.
+     */
+    describe('environment variants', () => {
+        const fixtures: string[] = [];
+
+        async function writeReport(files: Record<string, string>): Promise<string> {
+            const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'stamhoofd-report-'));
+            fixtures.push(directory);
+
+            for (const [name, contents] of Object.entries(files)) {
+                await fs.mkdir(path.join(directory, path.dirname(name)), { recursive: true });
+                await fs.writeFile(path.join(directory, name), contents);
+            }
+            return directory;
+        }
+
+        const tab = [
+            '-- @tab nationaal',
+            '-- title: Nationaal',
+            '',
+            '-- @card leden',
+            '-- title: Leden',
+            '-- display: scalar',
+            // Written above the unqualified one, which it still beats: the order they stand in says
+            // nothing about which of the two holds.
+            '-- description@ravot: Zoals ravot telt',
+            '-- description: Zoals de rest telt',
+            'SELECT',
+            '    -- @include telling',
+            '        AS `Leden`',
+        ].join('\n');
+
+        afterAll(async () => {
+            await Promise.all(fixtures.map(async directory => await fs.rm(directory, { recursive: true, force: true })));
+        });
+
+        it('expands the fragment an environment overrides, and the shared one everywhere else', async () => {
+            const directory = await writeReport({
+                'nationaal.sql': tab,
+                'includes/telling.sql': 'COUNT(*)',
+                'includes/ravot/telling.sql': 'COUNT(DISTINCT member_id)',
+            });
+
+            expect(cardOf(await loadReport('ravot', directory), 'nationaal', 'leden').sql).toContain('COUNT(DISTINCT member_id)');
+            expect(cardOf(await loadReport('keeo', directory), 'nationaal', 'leden').sql).toContain('COUNT(*)');
+        });
+
+        it('gives a setting to the environment it names and the plain one to the rest', async () => {
+            const directory = await writeReport({ 'nationaal.sql': tab, 'includes/telling.sql': 'COUNT(*)' });
+
+            expect(cardOf(await loadReport('ravot', directory), 'nationaal', 'leden').description).toEqual('Zoals ravot telt');
+            expect(cardOf(await loadReport('keeo', directory), 'nationaal', 'leden').description).toEqual('Zoals de rest telt');
+        });
+
+        /** Nothing includes it, so a misspelled override would change nothing and say nothing. */
+        it('rejects an override of a fragment no card can include', async () => {
+            const directory = await writeReport({
+                'nationaal.sql': tab,
+                'includes/telling.sql': 'COUNT(*)',
+                'includes/ravot/teling.sql': 'COUNT(DISTINCT member_id)',
+            });
+
+            await expect(loadReport('ravot', directory)).rejects.toThrow('includes/ravot/teling.sql overrides "teling"');
         });
     });
 

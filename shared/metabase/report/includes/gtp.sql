@@ -5,6 +5,9 @@
 --
 -- A unit ideally scores 100 or more. The scale only says something up to roughly 150 members.
 --
+-- Not every platform weighs the index this way: ravot reads the age of a lid rather than the tak, in
+-- `ravot/gtp.sql`, which is what `@include gtp` expands to there.
+--
 -- The takken are the ones the platform defines, matched on the name they carry in
 -- `default_age_groups`. Every group that is a tak points at one of those rows, so `Tak` is that name
 -- rather than whatever an eenheid called its own group -- the only groups not pointing at one are

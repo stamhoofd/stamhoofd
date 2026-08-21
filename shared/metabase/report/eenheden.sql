@@ -96,6 +96,7 @@ ORDER BY MIN(period_start)
 -- display: gauge
 -- size: third
 -- description: GTP staat voor Gezond Toekomst Perspectief. De berekening schenkt veel waarde aan potentieel toekomstige leiding (VG's & Seniors) op korte termijn. Idealiter scoort een eenheid 100 of meer op deze index. Dit geeft enkel een indicatie voor eenheden tot ongeveer 150 leden, daarna worden ze sowieso gezond geacht.
+-- description@ravot: GTP staat voor Gezond Toekomst Perspectief. De berekening schenkt veel waarde aan potentieel toekomstige leiding (14- tot 16-jarigen) op korte termijn. Idealiter scoort een eenheid 100 of meer op deze index. Dit geeft enkel een indicatie voor eenheden tot ongeveer 150 leden, daarna worden ze sowieso gezond geacht.
 -- @include facts
 SELECT
     -- @include gtp

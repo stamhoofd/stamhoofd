@@ -65,10 +65,13 @@ export class MetabaseService extends SharedDockerService {
      * The report is written into one collection whichever environment it counts, so this points that
      * collection at the data source of the selected environment: a local Metabase holds the data of
      * several platforms and shows the report of the one that was written last.
+     *
+     * The definition is read for that environment too. Not every platform counts every figure the
+     * same way, and which variant a card carries is decided while the report is loaded.
      */
     async provisionReport(context: CliContext): Promise<ReportSyncResult & { database: string; dataSource: string; tableCount: number; postalCodeCount: number }> {
         const { api, id, database, dataSource } = await this.connectDataSource(context);
-        const tabs = await loadReport();
+        const tabs = await loadReport(context.env);
         const tableCount = await this.countTables(context, database);
         const postalCodeCount = tableCount === 0 ? 0 : await this.countRows(context, database, 'postal_codes');
 

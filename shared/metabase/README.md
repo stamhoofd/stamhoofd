@@ -10,6 +10,22 @@ Everything that configures Metabase: the ledenstatistieken report and the API cl
 | `src/sync-report.ts` | Says the report in Metabase's vocabulary and writes it |
 | `src/naming.ts` | What things are called in Metabase, so every caller agrees |
 
+## One report, several platforms
+
+The same report is written for every platform, and they do not all count every figure the same way:
+the GTP index weighs takken for keeo and the age of a lid for ravot, where leiding count as one and a
+half. A statistics database holds one platform, so which variant a card gets is decided while the
+report is loaded — `loadReport(env)` takes the environment, the same name the data source carries.
+
+| | |
+|---|---|
+| `report/includes/<env>/gtp.sql` | what `@include gtp` expands to in that environment |
+| `-- description@ravot:` | what a card's `-- description:` says there |
+
+A card names neither and keeps saying `@include gtp`, which is what keeps one report from quietly
+becoming two. An override of a name no fragment carries is refused rather than ignored: nothing
+includes it, so a misspelled file would change nothing and say nothing.
+
 One tab is not part of the client's own report. `report/jeugdbewegingen.sql` is the dataset the
 koepel delivers to the Departement Cultuur, Jeugd en Media every september, one card per sheet of the
 delivery template: tables to download as .xlsx and paste into it rather than charts to read. It names

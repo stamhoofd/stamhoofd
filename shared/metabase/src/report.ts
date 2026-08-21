@@ -25,6 +25,11 @@ import { fileURLToPath } from 'url';
  * Metabase uses, and `[[...]]` around a clause drops it when that parameter is empty. A parameter
  * several values can be chosen for is written `IN ({{name}})`, since Metabase replaces it with all of
  * them, comma separated.
+ *
+ * The same report is written for every platform, which do not all count the same thing the same way.
+ * Where they differ, the environment says which variant a card gets: `includes/<env>/<name>.sql`
+ * replaces the fragment of that name, and a setting written `-- description@<env>:` replaces the
+ * unqualified one. Neither is visible to a card, which keeps saying `@include gtp`.
  */
 
 export type ReportCard = {
@@ -97,12 +102,19 @@ export function getReportDirectory(): string {
     return path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'report');
 }
 
-export async function loadReport(directory = getReportDirectory()): Promise<ReportTab[]> {
-    const includes = await loadIncludes(path.join(directory, 'includes'));
+/**
+ * The report as one environment counts it.
+ *
+ * Not every figure is counted the same everywhere -- the GTP index weighs takken for keeo and ages
+ * for ravot -- and a statistics database holds one platform, so which variant a card gets is decided
+ * here rather than in the queries. `env` is the same name the data source carries.
+ */
+export async function loadReport(env: string, directory = getReportDirectory()): Promise<ReportTab[]> {
+    const includes = await loadIncludes(path.join(directory, 'includes'), env);
     const files = (await fs.readdir(directory)).filter(file => file.endsWith('.sql')).sort();
 
     const tabs = await Promise.all(files.map(async (file) => {
-        return parseTab(await fs.readFile(path.join(directory, file), 'utf-8'), file, includes);
+        return parseTab(await fs.readFile(path.join(directory, file), 'utf-8'), file, includes, env);
     }));
 
     return tabs.sort((a, b) => orderOf(a.key) - orderOf(b.key));
@@ -113,11 +125,42 @@ function orderOf(key: string): number {
     return index === -1 ? reportTabOrder.length : index;
 }
 
-async function loadIncludes(directory: string): Promise<Map<string, string>> {
-    const files = (await fs.readdir(directory)).filter(file => file.endsWith('.sql'));
-    const includes = new Map<string, string>();
+/**
+ * The shared fragments, with the ones this environment counts differently laid over them:
+ * `includes/<env>/gtp.sql` is what `@include gtp` expands to there, while every other environment
+ * keeps `includes/gtp.sql`. A card therefore never says which platform it is written for.
+ *
+ * An override of a name no fragment carries is a mistake rather than a fragment only one environment
+ * has: nothing includes it, so a misspelled file would change nothing and say nothing.
+ */
+async function loadIncludes(directory: string, env: string): Promise<Map<string, string>> {
+    const includes = await readIncludes(directory);
 
-    for (const file of files) {
+    for (const [name, sql] of await readIncludes(path.join(directory, env))) {
+        if (!includes.has(name)) {
+            throw new Error(`includes/${env}/${name}.sql overrides "${name}", which has no includes/${name}.sql`);
+        }
+        includes.set(name, sql);
+    }
+
+    return includes;
+}
+
+/** The `.sql` files of a directory by name. An environment that overrides nothing has no directory. */
+async function readIncludes(directory: string): Promise<Map<string, string>> {
+    let entries: string[];
+    try {
+        entries = await fs.readdir(directory);
+    }
+    catch (error) {
+        if ((error as { code?: string }).code === 'ENOENT') {
+            return new Map();
+        }
+        throw error;
+    }
+
+    const includes = new Map<string, string>();
+    for (const file of entries.filter(entry => entry.endsWith('.sql'))) {
         includes.set(path.basename(file, '.sql'), (await fs.readFile(path.join(directory, file), 'utf-8')).trim());
     }
     return includes;
@@ -127,8 +170,8 @@ async function loadIncludes(directory: string): Promise<Map<string, string>> {
  * Splits a file into its `@tab` header and `@card` sections. Everything that is not a directive
  * stays as it is, so a card's sql keeps the comments written above it.
  */
-export function parseTab(contents: string, file: string, includes: Map<string, string>): ReportTab {
-    const sections = splitSections(contents, file);
+export function parseTab(contents: string, file: string, includes: Map<string, string>, env?: string): ReportTab {
+    const sections = splitSections(contents, file, env);
     const header = sections.find(section => section.kind === 'tab');
 
     if (!header) {
@@ -165,7 +208,7 @@ export function parseTab(contents: string, file: string, includes: Map<string, s
     };
 }
 
-type Section = { kind: 'tab' | 'card'; key: string; attributes: Map<string, string>; body: string };
+type Section = { kind: 'tab' | 'card'; key: string; attributes: Map<string, string>; qualified: Set<string>; body: string };
 
 /**
  * Every setting a tab or card understands. A line shaped like one below the query is a setting that
@@ -174,14 +217,14 @@ type Section = { kind: 'tab' | 'card'; key: string; attributes: Map<string, stri
  */
 const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'columns', 'stacked', 'xlabels', 'latitude', 'longitude', 'filters', 'hidden', 'dashboard']);
 
-function splitSections(contents: string, file: string): Section[] {
+function splitSections(contents: string, file: string, env?: string): Section[] {
     const sections: Section[] = [];
     let current: Section | undefined;
 
     for (const line of contents.split('\n')) {
         const directive = /^--[ \t]*@(tab|card)[ \t]+(\S+)[ \t]*$/.exec(line);
         if (directive) {
-            current = { kind: directive[1] as 'tab' | 'card', key: directive[2], attributes: new Map(), body: '' };
+            current = { kind: directive[1] as 'tab' | 'card', key: directive[2], attributes: new Map(), qualified: new Set(), body: '' };
             sections.push(current);
             continue;
         }
@@ -192,10 +235,10 @@ function splitSections(contents: string, file: string): Section[] {
         // An attribute only counts while the body has not started; further comments belong to the sql.
         // The value keeps its leading spaces here and is trimmed below: matching them separately
         // would let the two quantifiers split the same run of spaces in several ways.
-        const attribute = /^--[ \t]*([a-z]+):(.*)$/.exec(line);
+        const attribute = /^--[ \t]*([a-z]+)(?:@([a-z0-9-]+))?:(.*)$/.exec(line);
         if (attribute) {
             if (current.body.trim().length === 0) {
-                current.attributes.set(attribute[1], attribute[2].trim());
+                setAttribute(current, attribute[1], attribute[2], attribute[3].trim(), env);
                 continue;
             }
             if (knownAttributes.has(attribute[1])) {
@@ -206,6 +249,26 @@ function splitSections(contents: string, file: string): Section[] {
     }
 
     return sections;
+}
+
+/**
+ * A setting written `-- description@ravot:` only holds in that environment, and beats the unqualified
+ * one wherever it does, whichever of the two is written first. It is how a card says a figure that is
+ * not counted the same everywhere in the words of the platform reading it, without becoming two cards.
+ */
+function setAttribute(section: Section, name: string, qualifier: string | undefined, value: string, env: string | undefined): void {
+    if (qualifier === undefined) {
+        if (!section.qualified.has(name)) {
+            section.attributes.set(name, value);
+        }
+        return;
+    }
+    if (qualifier !== env) {
+        return;
+    }
+
+    section.qualified.add(name);
+    section.attributes.set(name, value);
 }
 
 function parseCard(section: Section, file: string, includes: Map<string, string>): ReportCard {
