@@ -11,6 +11,8 @@ export type SaveViewProps = {
     saveText?: string;
     saveIcon?: string | null;
     saveButtonClass?: string | null;
+    /** Temporarily disables the save button for this many ms (e.g. to slow down a destructive action) */
+    availabilityDelay?: number;
     saveIconRight?: string | null;
     saveIconMobile?: string | null;
     saveBadge?: string | number | null;

@@ -1,5 +1,5 @@
 <template>
-    <SaveView :save-text="checkout.isAdminFromSameOrganization ? $t('%X9') : $t('%16p')" :save-button-class="hasDeleteRegistrations ? 'destructive' : 'primary'" main-class="flex" :save-badge="cartLength" :disabled="cartLength === 0" :loading="saving" :title="$t(`%du`)" @save="goToCheckout">
+    <SaveView :save-text="checkout.isAdminFromSameOrganization ? $t('%X9') : $t('%16p')" :save-button-class="hasDeleteRegistrations ? 'destructive' : 'primary'" :availability-delay="hasDeleteRegistrations ? 2_000 : undefined" main-class="flex" :save-badge="cartLength" :disabled="cartLength === 0" :loading="saving" :title="$t(`%du`)" @save="goToCheckout">
         <p v-if="!checkout.isAdminFromSameOrganization && checkout.singleOrganization" class="style-title-prefix">
             {{ checkout.singleOrganization.name }}
         </p>
@@ -211,15 +211,6 @@ async function searchMembers() {
 
 async function goToCheckout() {
     if (saving.value) {
-        return;
-    }
-
-    if (hasDeleteRegistrations.value && !await CenteredMessage.confirm({
-        title: $t('Ben je zeker dat je deze leden wilt uitschrijven?'),
-        confirmText: $t('Uitschrijven'),
-        destructive: true,
-        availabilityDelay: 2_000,
-    })) {
         return;
     }
 
