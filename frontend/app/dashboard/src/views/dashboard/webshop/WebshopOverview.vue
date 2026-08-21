@@ -895,7 +895,7 @@ async function archiveWebshop() {
 
 async function deleteWebshop() {
     if (!await CenteredMessage.confirm({
-        title: "Ben je zeker dat je de webshop '" + webshopManager.value.preview.meta.name + "' wilt verwijderen?",
+        title: "'" + webshopManager.value.preview.meta.name + "' verwijderen?",
         confirmText: 'Ja, verwijderen',
         description: 'Alle bijhorende bestellingen worden ook definitief verwijderd. Je kan dit niet ongedaan maken.',
         availabilityDelay: 2_000,

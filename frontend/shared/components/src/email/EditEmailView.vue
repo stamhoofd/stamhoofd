@@ -271,7 +271,7 @@ async function deleteMe() {
         return;
     }
     if (!await CenteredMessage.confirm({
-        title: $t('%1Fb'),
+        title: name.value ? $t('{name} verwijderen?', { name: name.value }) : $t('%1Fb'),
         confirmText: $t('%55'),
         description: $t('%1Fc'),
         destructive: true,

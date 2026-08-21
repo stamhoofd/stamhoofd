@@ -242,7 +242,7 @@ const doDelete = async () => {
     }
 
     if (!await CenteredMessage.confirm({
-        title: $t('%3k'),
+        title: name.value.toString() ? $t('‘{name}’ verwijderen?', { name: name.value.toString() }) : $t('Deze functie verwijderen?'),
         confirmText: $t('%CJ'),
         description: $t('%3j'),
         availabilityDelay: 2_000,

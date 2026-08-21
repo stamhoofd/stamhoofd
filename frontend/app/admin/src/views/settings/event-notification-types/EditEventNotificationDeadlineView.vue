@@ -96,8 +96,9 @@ const doDelete = async () => {
     }
 
     if (!await CenteredMessage.confirm({
-        title: $t('%8f'),
+        title: $t('Deze deadline verwijderen?'),
         confirmText: $t('%55'),
+        description: $t('De deadline wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
         availabilityDelay: 2_000,
     })) {
         return;

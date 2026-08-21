@@ -59,9 +59,11 @@ function moveDown() {
 }
 
 async function onDelete(keepArticles = false) {
+    const name = props.category.name || 'Naamloos';
     if (!(await CenteredMessage.confirm({
-        title: keepArticles ? 'Deze categorie verwijderen en alle artikels erin behouden?' : 'Deze categorie en artikels verwijderen?',
+        title: keepArticles ? $t('‘{name}’ verwijderen en alle artikels erin behouden?', { name }) : $t('‘{name}’ en artikels verwijderen?', { name }),
         confirmText: 'Verwijderen',
+        description: $t('De categorie wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
         availabilityDelay: 2_000,
     }))) {
         return;

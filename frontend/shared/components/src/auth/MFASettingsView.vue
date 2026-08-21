@@ -239,8 +239,9 @@ async function addPasskey() {
 }
 
 async function deleteTotp(id: string) {
+    const totpName = status.value?.totp.find(t => t.id === id)?.name;
     if (!await CenteredMessage.confirm({
-        title: $t('%ZhF'),
+        title: totpName ? $t('Authenticator-app ‘{name}’ verwijderen?', { name: totpName }) : $t('%ZhF'),
         confirmText: $t('%CJ'),
         availabilityDelay: 2_000,
     })) {
@@ -255,8 +256,9 @@ async function deleteTotp(id: string) {
 }
 
 async function deletePasskey(id: string) {
+    const passkeyName = status.value?.passkeys.find(p => p.id === id)?.derivedName;
     if (!await CenteredMessage.confirm({
-        title: $t('%Zh0'),
+        title: passkeyName ? $t('Passkey ‘{name}’ verwijderen?', { name: passkeyName }) : $t('%Zh0'),
         confirmText: $t('%CJ'),
         availabilityDelay: 2_000,
     })) {

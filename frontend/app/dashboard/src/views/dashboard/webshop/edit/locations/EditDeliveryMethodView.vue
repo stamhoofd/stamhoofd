@@ -103,8 +103,9 @@ async function save() {
 
 async function deleteMe() {
     if (!await CenteredMessage.confirm({
-        title: 'Ben je zeker dat je deze leveringsoptie wilt verwijderen?',
+        title: name.value ? $t('‘{name}’ verwijderen?', { name: name.value }) : $t('Deze leveringsoptie verwijderen?'),
         confirmText: 'Verwijderen',
+        description: $t('De leveringsoptie wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
         availabilityDelay: 2_000,
     })) {
         return;

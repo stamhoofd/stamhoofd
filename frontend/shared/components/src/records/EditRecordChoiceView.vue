@@ -198,8 +198,9 @@ async function save() {
 
 async function deleteMe() {
     if (!await CenteredMessage.confirm({
-        title: $t(`%10z`),
+        title: name.value.toString() ? $t('Optie ‘{name}’ verwijderen?', { name: name.value.toString() }) : $t('Deze optie verwijderen?'),
         confirmText: $t(`%CJ`),
+        description: $t('De optie wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
         availabilityDelay: 2_000,
     })) {
         return;

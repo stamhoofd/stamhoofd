@@ -613,7 +613,7 @@ async function doDelete() {
         return;
     }
     if (!(await CenteredMessage.confirm({
-        title: $t(`%10f`),
+        title: $t('Aanrekening ‘{name}’ verwijderen?', { name: balanceItem.value.itemTitle }),
         confirmText: $t(`%CJ`),
         description: $t(`%1Fc`),
         availabilityDelay: 2_000,

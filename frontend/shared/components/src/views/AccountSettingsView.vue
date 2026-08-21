@@ -422,7 +422,7 @@ async function disconnectProvider(provider: LoginProviderType) {
 
 async function deletePassword() {
     if (await CenteredMessage.confirm({
-        title: $t(`%12I`),
+        title: $t('Wachtwoord verwijderen?'),
         confirmText: $t(`%55`),
         destructive: true,
         availabilityDelay: 2_000,

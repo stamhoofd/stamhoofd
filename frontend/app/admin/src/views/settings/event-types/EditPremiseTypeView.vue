@@ -86,9 +86,9 @@ const doDelete = async () => {
     }
 
     if (!await CenteredMessage.confirm({
-        title: $t('%5v'),
+        title: $t('‘{name}’ verwijderen?', { name: props.type.name }),
         confirmText: $t('%CJ'),
-        description: $t('%5w'),
+        description: $t('Dit kan nare gevolgen hebben als er al lokalen van dit type zijn. Het lokaaltype wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
         availabilityDelay: 2_000,
     })) {
         return;

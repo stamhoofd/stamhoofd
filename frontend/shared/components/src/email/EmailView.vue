@@ -368,7 +368,7 @@ async function doDelete() {
         return false;
     }
     if (!await CenteredMessage.confirm({
-        title: $t('%1Ev'),
+        title: subject.value ? $t('{subject} verwijderen?', { subject: subject.value }) : $t('%1Ev'),
         confirmText: $t('%55'),
         destructive: true,
         availabilityDelay: 2_000,

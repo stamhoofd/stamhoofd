@@ -652,7 +652,7 @@ async function editCartItem(cartItem: CartItem) {
 
 async function deleteItem(cartItem: CartItem) {
     if (!await CenteredMessage.confirm({
-        title: 'Ben je zeker dat je dit wilt verwijderen?',
+        title: cartItem.product.name ? $t('‘{name}’ verwijderen?', { name: cartItem.product.name }) : $t('Dit verwijderen?'),
         confirmText: 'Ja, verwijderen',
         description: 'Je kan de bestelling nog nakijken voor je het definitief verwijdert.',
         availabilityDelay: 2_000,

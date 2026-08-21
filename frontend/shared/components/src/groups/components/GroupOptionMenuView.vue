@@ -67,7 +67,7 @@ async function save() {
 
 async function deleteMe() {
     if (!await CenteredMessage.confirm({
-        title: $t('%66'),
+        title: patched.value.name ? $t('{name} verwijderen?', { name: patched.value.name }) : $t('%66'),
         confirmText: $t('%55'),
         description: $t('%67'),
         destructive: true,

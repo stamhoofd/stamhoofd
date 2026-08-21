@@ -203,6 +203,12 @@
                 box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-error;
             }
         }
+
+        > .bubble {
+            @extend %style-bubble;
+            background: white;
+            color: $color-error;
+        }
     }
 
     &.secundary {

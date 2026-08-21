@@ -46,6 +46,7 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import TransitionFade from '#transitions/TransitionFade.vue';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import type { OrganizationTag } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 
 const props = withDefaults(
@@ -135,16 +136,16 @@ async function save() {
         let confirmText = $t(`%10X`);
 
         if (allTags.length) {
-            const deleteCount = deletedTags.length;
             const selectionCount = allTags.length;
-            const deletedTagsString = deletedTags.map(t => t.name).join(', ');
             const selectionText = selectionCount === 1 ? $t(`%10Y`) : `Er zijn ${selectionCount} tags geselecteerd.`;
+            const deletedTagsString = Formatter.joinLastLimited(deletedTags.map(t => t.name), {
+                separator: ', ',
+                lastSeparator: ' ' + $t('%M1') + ' ',
+                maxLength: 70,
+                maxCount: 3,
+            });
 
-            if (deletedTagsString.length > 100) {
-                confirmText = `${selectionText} Ben je zeker dat je ${deleteCount} tags wilt verwijderen?`;
-            } else {
-                confirmText = `${selectionText} Ben je zeker dat je de volgende tag(s) wilt verwijderen: ${deletedTagsString}`;
-            }
+            confirmText = `${selectionText} ${deletedTagsString} verwijderen?`;
         }
 
         const isConfirm = await CenteredMessage.confirm({

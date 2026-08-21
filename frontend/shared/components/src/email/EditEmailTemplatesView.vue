@@ -320,9 +320,11 @@ async function addCreateOption() {
 
 async function deleteEmail(emailTemplate: EmailTemplate) {
     if (emailTemplate.id) {
+        const templateName = EmailTemplate.isSavedEmail(emailTemplate.type) ? emailTemplate.subject : EmailTemplate.getTypeTitle(emailTemplate.type);
         if (!await CenteredMessage.confirm({
-            title: $t('%9q'),
+            title: templateName ? $t('{name} verwijderen?', { name: templateName }) : $t('%9q'),
             confirmText: $t('%CJ'),
+            description: props.onSelect ? undefined : $t('Het sjabloon wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
             destructive: true,
             availabilityDelay: 2_000,
         })) {

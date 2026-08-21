@@ -55,7 +55,7 @@ withDefaults(defineProps<{
         }
 
         > rect.track {
-            stroke: $color-border-shade;
+            stroke: $color-border;
         }
 
         > rect.bar {

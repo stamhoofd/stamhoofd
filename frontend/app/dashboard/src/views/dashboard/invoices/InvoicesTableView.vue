@@ -290,7 +290,7 @@ async function deleteInvoice(invoice: Invoice) {
 
     // Double verification: two separate confirmations before we permanently delete the invoice.
     if (!await CenteredMessage.confirm({
-        title: $t('%Zc6', { number: invoiceName }),
+        title: $t('Factuur {number} verwijderen?', { number: invoiceName }),
         confirmText: $t('%CJ'),
         description: $t('%ZcH'),
         destructive: true,

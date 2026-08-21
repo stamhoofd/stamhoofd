@@ -104,7 +104,7 @@
                     <span>{{ $t('%1M') }}</span>
                 </button>
 
-                <button v-if="account.canDelete || isStamhoofd" class="button text red" type="button" @click="deleteStripeAccount(account.id)">
+                <button v-if="account.canDelete || isStamhoofd" class="button text red" type="button" @click="deleteStripeAccount(account)">
                     <span class="icon trash" />
                     <span>{{ $t('%Kk') }}</span>
                 </button>
@@ -816,9 +816,11 @@ async function openStripeAccountLink(accountId: string, initialTab?: Window | nu
     }
 }
 
-async function deleteStripeAccount(accountId: string) {
+async function deleteStripeAccount(account: StripeAccount) {
+    const accountName = account.meta.settings.dashboard.display_name || account.meta.business_profile.name;
+
     if (!(await CenteredMessage.confirm({
-        title: $t('%1ZI'),
+        title: accountName ? $t('‘{name}’ verwijderen?', { name: accountName }) : $t('%1ZI'),
         confirmText: $t('%CJ'),
         description: $t('%1Fc'),
         destructive: true,
@@ -840,10 +842,10 @@ async function deleteStripeAccount(accountId: string) {
     try {
         await context.value.authenticatedServer.request({
             method: 'DELETE',
-            path: '/stripe/accounts/' + encodeURIComponent(accountId),
+            path: '/stripe/accounts/' + encodeURIComponent(account.id),
             owner,
         });
-        stripeAccounts.value = stripeAccounts.value.filter(a => a.id !== accountId);
+        stripeAccounts.value = stripeAccounts.value.filter(a => a.id !== account.id);
     } catch (e) {
         console.error(e);
         Toast.fromError(e).show();

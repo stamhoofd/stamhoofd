@@ -124,9 +124,9 @@ const doDelete = async () => {
     }
 
     if (!await CenteredMessage.confirm({
-        title: $t('%5p'),
+        title: $t('‘{name}’ verwijderen?', { name: props.type.title }),
         confirmText: $t('%CJ'),
-        description: $t('%5q'),
+        description: $t('Dit kan nare gevolgen hebben als er al activiteiten van dit type zijn. De soort activiteit wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
         availabilityDelay: 2_000,
     })) {
         return;

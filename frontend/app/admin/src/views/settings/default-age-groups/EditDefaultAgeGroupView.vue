@@ -179,9 +179,9 @@ const doDelete = async () => {
     }
 
     if (!await CenteredMessage.confirm({
-        title: $t('%9Z'),
+        title: $t('‘{name}’ verwijderen?', { name: props.group.name }),
         confirmText: $t('%CJ'),
-        description: $t('%9a'),
+        description: $t('Je kan dit niet ongedaan maken. Er gaat mogelijks informatie verloren over alle gekoppelde inschrijvingsgroepen. De standaard leeftijdsgroep wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
         availabilityDelay: 2_000,
     })) {
         return;

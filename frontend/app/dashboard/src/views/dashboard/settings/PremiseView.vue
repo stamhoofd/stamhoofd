@@ -210,7 +210,7 @@ function updatePremiseTypeWarnings() {
 }
 
 async function deleteMe() {
-    await doDelete('Ben je zeker dat je dit lokaal wil verwijderen?');
+    await doDelete(name.value ? $t('{name} verwijderen?', { name: name.value }) : $t('Dit lokaal verwijderen?'));
 }
 
 defineExpose({

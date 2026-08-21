@@ -133,8 +133,9 @@ const isSingle = computed(() => patched.value.options.length <= 1);
 
 async function deleteMe() {
     if (!await CenteredMessage.confirm({
-        title: 'Ben je zeker dat je deze keuze wilt verwijderen?',
+        title: name.value ? $t('‘{name}’ verwijderen?', { name: name.value }) : $t('Deze keuze verwijderen?'),
         confirmText: 'Verwijderen',
+        description: $t('De keuze wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
         availabilityDelay: 2_000,
     })) {
         return;
