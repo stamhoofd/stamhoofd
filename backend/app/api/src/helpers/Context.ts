@@ -391,6 +391,10 @@ export class ContextInstance {
         return impersonatedUser;
     }
 
+    async isImpersonationEnabled(): Promise<boolean> {
+        return await this.checkFeatureFlag('impersonation');
+    }
+
     get isImpersonating() {
         return !!this.impersonatedUser;
     }

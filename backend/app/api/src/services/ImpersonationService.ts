@@ -38,6 +38,8 @@ export class ImpersonationService {
         // which the account that is responsible becomes impossible to tell.
         Context.assertNotImpersonating();
 
+        await this.assertEnabled();
+
         if (!await Context.auth.canImpersonate(impersonatedUser)) {
             throw Context.auth.error({
                 message: 'Not allowed to impersonate this user',
@@ -110,6 +112,11 @@ export class ImpersonationService {
 
         await Context.insecurelyAuthenticateAs(user);
 
+        if (!await Context.isImpersonationEnabled()) {
+            await model.consume();
+            throw invalid;
+        }
+
         if (!await Context.auth.canImpersonate(impersonatedUser)) {
             await model.consume();
             throw Context.auth.error({
@@ -143,6 +150,22 @@ export class ImpersonationService {
         await this.logImpersonation(user, impersonatedUser, model.organizationId);
 
         return token;
+    }
+
+    /**
+     * Impersonation is opt-in: for the whole platform, or for one organization (which only
+     * a platform admin can switch on). Checked where a session is handed out, not on every
+     * request: a session that is already running only depends on the permissions.
+     */
+    private static async assertEnabled() {
+        if (!await Context.isImpersonationEnabled()) {
+            throw new SimpleError({
+                code: 'feature_disabled',
+                message: 'Impersonation is not enabled for this organization',
+                human: $t(`Inloggen als een andere gebruiker is niet ingeschakeld voor deze vereniging.`),
+                statusCode: 403,
+            });
+        }
     }
 
     /**

@@ -121,6 +121,8 @@ test.describe('Impersonation @impersonation', () => {
             packages: [STPackageBundle.Webshops, STPackageBundle.Members],
         }).create();
         await STPackageService.updateOrganizationPackages(organization.id);
+        organization.privateMeta.featureFlags = ['impersonation'];
+        await organization.save();
 
         admin = await new UserFactory({
             organization,
