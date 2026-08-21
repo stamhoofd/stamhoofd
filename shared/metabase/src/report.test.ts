@@ -472,6 +472,21 @@ describe('report', () => {
         });
 
         /**
+         * The three ratio charts of the page are read per scoutsjaar rather than as a trend, which
+         * is what a row chart draws: one bar per year, the year beside it. Metabase draws the first
+         * row it is given at the top, so the sql of each of them has to come back the other way
+         * round from every other card over the years -- the most recent scoutsjaar first.
+         */
+        it('gives the ratio charts their most recent scoutsjaar on top', () => {
+            for (const key of ['eenheid-jong-versus-oud', 'eenheid-geslacht-kinderen-per-jaar', 'eenheid-geslacht-leiding-per-jaar']) {
+                const card = cardOf(dashboards, 'eenheden', key);
+
+                expect(`${key}: ${card.display}, ${/ORDER BY MIN\(period_start\)(?: DESC)?$/.exec(card.sql)?.[0]}`)
+                    .toEqual(`${key}: row, ORDER BY MIN(period_start) DESC`);
+            }
+        });
+
+        /**
          * Seven cards over two pages split on the geslachten, as pies and as bars. They are read
          * side by side -- the kinderen next to the leiding, this year next to the ones before -- so
          * a geslacht that changed color between two of them would be two different readings of the

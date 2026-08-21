@@ -222,7 +222,7 @@ ORDER BY MIN(period_start), `Tak`
 
 -- @card eenheid-jong-versus-oud
 -- title: Verhouding jongste versus oudste leden
--- display: bar
+-- display: row
 -- size: full
 -- dimensions: Scoutsjaar
 -- metrics: Jong, Oud
@@ -237,11 +237,12 @@ SELECT
 FROM leden
 WHERE effective_category = 'child'
 GROUP BY `Scoutsjaar`
-ORDER BY MIN(period_start)
+-- A row chart draws its first row at the top, so the most recent scoutsjaar comes back first.
+ORDER BY MIN(period_start) DESC
 
 -- @card eenheid-geslacht-kinderen-per-jaar
 -- title: Verhouding tussen de geslachten: kinderen
--- display: bar
+-- display: row
 -- size: two-thirds
 -- dimensions: Scoutsjaar, Geslacht
 -- metrics: Aantal kinderen
@@ -255,7 +256,8 @@ SELECT
 FROM leden
 WHERE effective_category = 'child'
 GROUP BY `Scoutsjaar`, `Geslacht`
-ORDER BY MIN(period_start)
+-- A row chart draws its first row at the top, so the most recent scoutsjaar comes back first.
+ORDER BY MIN(period_start) DESC
 
 -- @card eenheid-kinderen-per-geslacht
 -- title: Aantal kinderen per geslacht
@@ -273,7 +275,7 @@ ORDER BY `Aantal kinderen` DESC
 
 -- @card eenheid-geslacht-leiding-per-jaar
 -- title: Verhouding tussen de geslachten: leiding
--- display: bar
+-- display: row
 -- size: two-thirds
 -- dimensions: Scoutsjaar, Geslacht
 -- metrics: Aantal leiding
@@ -287,7 +289,8 @@ SELECT
 FROM leden
 WHERE effective_category = 'leader'
 GROUP BY `Scoutsjaar`, `Geslacht`
-ORDER BY MIN(period_start)
+-- A row chart draws its first row at the top, so the most recent scoutsjaar comes back first.
+ORDER BY MIN(period_start) DESC
 
 -- @card eenheid-leiding-per-geslacht
 -- title: Aantal leiding per geslacht

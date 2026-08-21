@@ -79,6 +79,13 @@ function heightOf(card: ReportCard): number {
     if (card.display === 'table') {
         return 8;
     }
+    // A row chart is as tall as the rows it has to hold: Metabase gives each of them 24 pixels and
+    // silently drops the ones that no longer fit, so a row chart at the height of a normal chart
+    // would quietly stop showing the oldest scoutsjaren as the years pile up. Ten grid rows hold
+    // some eighteen of them.
+    if (card.display === 'row') {
+        return 10;
+    }
     return (card.size === 'full' ? 7 : 6) + (card.xLabels === undefined ? 0 : xLabelRows[card.xLabels]);
 }
 

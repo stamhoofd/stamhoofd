@@ -32,6 +32,21 @@ describe('layoutCards', () => {
     });
 
     /**
+     * A row chart holds a bar per scoutsjaar, and Metabase gives each of them 24 pixels: the ones
+     * that no longer fit in the card are dropped rather than squeezed, so a row chart the height of
+     * a normal chart would quietly lose the oldest years as they pile up.
+     */
+    it('makes a row chart tall enough for the years it holds', () => {
+        const [rows, bars] = layoutCards([
+            card({ key: 'a', size: 'two-thirds', display: 'row' }),
+            card({ key: 'b', size: 'two-thirds', display: 'bar' }),
+        ]);
+
+        expect(rows.sizeY).toBeGreaterThan(bars.sizeY);
+        expect(rows.sizeY).toEqual(10);
+    });
+
+    /**
      * Each gauge of the eenheden page stands beside the chart of the same figure over the years. At
      * the height of a scalar it would hang above the chart with a band of empty grid under it.
      */
