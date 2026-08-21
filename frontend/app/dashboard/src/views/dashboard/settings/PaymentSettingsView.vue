@@ -547,20 +547,16 @@ async function shouldNavigateAway() {
     });
 }
 
-let didReadMollie = false;
-
 async function linkMollie() {
-    const time = new Date();
-    if (!await CenteredMessage.confirm($t('%1Pe'), $t('%1Oj'), $t('%1PR'))) {
+    if (!await CenteredMessage.confirm({
+        title: $t('%1Pe'),
+        confirmText: $t('%1Oj'),
+        description: $t('%1PR'),
+        requireCheckbox: $t('Ik heb de documentatie gelezen'),
+        availabilityDelay: 2_000,
+    })) {
         return;
     }
-    const end = new Date();
-
-    if (!didReadMollie && end.getTime() - time.getTime() < 5_000) {
-        new Toast($t('%1OW'), 'error red').setHide(10_000).show();
-        return;
-    }
-    didReadMollie = true;
 
     // Start oauth flow
     const client_id = STAMHOOFD.MOLLIE_CLIENT_ID;
@@ -741,26 +737,17 @@ function editStripeAccount(account: StripeAccount) {
         .show();
 }
 
-let didReadStripe = false;
-
 async function createStripeAccount() {
     if (isBelgium.value) {
-        const time = new Date();
-        if ((!await CenteredMessage.confirm(
-            $t('%1Pe'),
-            $t('%1Oj'),
-            $t('%ZgG'),
-        ))) {
+        if (!await CenteredMessage.confirm({
+            title: $t('%1Pe'),
+            confirmText: $t('%1Oj'),
+            description: $t('%ZgG'),
+            requireCheckbox: $t('Ik heb de documentatie gelezen'),
+            availabilityDelay: 2_000,
+        })) {
             return;
         }
-
-        const end = new Date();
-
-        if (!didReadStripe && end.getTime() - time.getTime() < 5_000) {
-            new Toast($t('%1bg'), 'error red').setHide(10_000).show();
-            return;
-        }
-        didReadStripe = true;
     }
 
     let tab: Window | null = null;
