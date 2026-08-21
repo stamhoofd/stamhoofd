@@ -112,6 +112,10 @@
         <Checkbox v-if="!!STAMHOOFD.domains.webshop" :model-value="getFeatureFlag('webshop-advanced-settings')" @update:model-value="setFeatureFlag('webshop-advanced-settings', !!$event)">
             {{ $t('%15o') }}
         </Checkbox>
+
+        <Checkbox :model-value="getFeatureFlag('impersonation')" @update:model-value="setFeatureFlag('impersonation', !!$event)">
+            {{ $t('Inloggen als een andere gebruiker (voor alle verenigingen)') }}
+        </Checkbox>
     </SaveView>
 </template>
 

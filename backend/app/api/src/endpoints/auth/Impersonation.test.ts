@@ -3,7 +3,7 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import type { Organization } from '@stamhoofd/models';
-import { AuditLog, ImpersonationToken, MemberFactory, OrganizationFactory, RegistrationFactory, Token, User, UserFactory, UserSession } from '@stamhoofd/models';
+import { AuditLog, ImpersonationToken, MemberFactory, OrganizationFactory, Platform, RegistrationFactory, Token, User, UserFactory, UserSession } from '@stamhoofd/models';
 import { AuditLogType, BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, NewUser, PermissionLevel, Permissions, Token as TokenStruct, UserPermissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 
@@ -105,10 +105,25 @@ async function impersonate(organization: Organization | null, admin: User, targe
 }
 
 /**
+ * Impersonation is opt-in: platform wide, or per organization by a platform admin.
+ */
+async function enableImpersonation(organization: Organization) {
+    organization.privateMeta.featureFlags = ['impersonation'];
+    await organization.save();
+}
+
+async function setPlatformFeatureFlags(featureFlags: string[]) {
+    const platform = await Platform.getForEditing();
+    platform.config.featureFlags = featureFlags;
+    await platform.save();
+}
+
+/**
  * An organization with a full administrator and a member whose parent has an account.
  */
 async function setup() {
     const organization = await new OrganizationFactory({}).create();
+    await enableImpersonation(organization);
     const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
     const user = await new UserFactory({ organization, password }).create();
     const member = await new MemberFactory({ organization, user }).create();
@@ -126,6 +141,43 @@ describe('Impersonation', () => {
     // happens while booting the server. Test files are isolated, so this stays local.
     beforeAll(() => {
         AuditLogService.listen();
+    });
+
+    afterEach(async () => {
+        await setPlatformFeatureFlags([]);
+    });
+
+    describe('the feature flag', () => {
+        test('without it nobody can impersonate', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const user = await new UserFactory({ organization, password }).create();
+
+            const token = await SessionService.createSession(admin);
+            const error = await captureError(testServer.test(startEndpoint, bearer(startRequest(organization, user.id), token)));
+            expect(error.code).toBe('feature_disabled');
+        });
+
+        test('the platform flag enables it for every organization', async () => {
+            await setPlatformFeatureFlags(['impersonation']);
+            const organization = await new OrganizationFactory({}).create();
+            const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const user = await new UserFactory({ organization, password }).create();
+
+            const token = await impersonate(organization, admin, user);
+            expect((await Token.getByAccessToken(token.accessToken))!.session.impersonatedUserId).toBe(user.id);
+        });
+
+        test('a link that was made before the flag was turned off no longer works', async () => {
+            const { organization, admin, user } = await setup();
+            const ticket = await createTicket(organization, admin, user);
+
+            organization.privateMeta.featureFlags = [];
+            await organization.save();
+
+            const error = await captureError(testServer.test(redeemEndpoint, redeemRequest(organization, ticket)));
+            expect(error.code).toBe('invalid_impersonation_ticket');
+        });
     });
 
     describe('starting an impersonation', () => {
@@ -165,6 +217,7 @@ describe('Impersonation', () => {
 
         test('an administrator without full access cannot start one', async () => {
             const organization = await new OrganizationFactory({}).create();
+            await enableImpersonation(organization);
             const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Write }) }).create();
             const user = await new UserFactory({ organization, password }).create();
             await new MemberFactory({ organization, user }).create();
@@ -188,6 +241,7 @@ describe('Impersonation', () => {
         test('in platform mode an organization admin can impersonate an administrator of their own organization', async () => {
             TestUtils.setEnvironment('userMode', 'platform');
             const organization = await new OrganizationFactory({}).create();
+            await enableImpersonation(organization);
             const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
             const colleague = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Write }) }).create();
 
@@ -198,6 +252,7 @@ describe('Impersonation', () => {
         test('an organization admin cannot impersonate a platform admin', async () => {
             TestUtils.setEnvironment('userMode', 'platform');
             const organization = await new OrganizationFactory({}).create();
+            await enableImpersonation(organization);
             const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
             const platformAdmin = await new UserFactory({ password, globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
 
@@ -336,6 +391,7 @@ describe('Impersonation', () => {
 
         test('attributes what it changes to the administrator, not to the account it looks at', async () => {
             const organization = await new OrganizationFactory({}).create();
+            await enableImpersonation(organization);
             const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
             const colleague = await new UserFactory({ organization, password, firstName: 'Oude', lastName: 'Naam', permissions: Permissions.create({ level: PermissionLevel.Write }) }).create();
 
@@ -403,6 +459,7 @@ describe('Impersonation', () => {
             TestUtils.setEnvironment('userMode', 'platform');
 
             const organization = await new OrganizationFactory({}).create();
+            await enableImpersonation(organization);
             const other = await new OrganizationFactory({}).create();
             const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
             const user = await new UserFactory({ password }).create();
@@ -451,6 +508,7 @@ describe('Impersonation', () => {
             TestUtils.setEnvironment('userMode', 'platform');
 
             const fullOrganization = await new OrganizationFactory({}).create();
+            await enableImpersonation(fullOrganization);
             const readOrganization = await new OrganizationFactory({}).create();
             const noAccessOrganization = await new OrganizationFactory({}).create();
 
