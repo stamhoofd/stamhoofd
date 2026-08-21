@@ -30,8 +30,8 @@
 --     it included. Only the aanlevering reads it: the department counts everyone who was registered
 --     at some point between september and august, not who was still registered in august.
 --   * `all_facts` keeps the ones that are still active, which is what the report means by a lid.
---   * `facts` is that without the koepel's own organization, and is what every figure of the
---     ledenstatistieken is counted from.
+--   * `facts` is that without the koepel's own organization. Every figure of the ledenstatistieken
+--     is counted from it, through `leden.sql`, which narrows it to one row per member.
 WITH all_registrations AS (
     SELECT
         r.memberId AS member_id,

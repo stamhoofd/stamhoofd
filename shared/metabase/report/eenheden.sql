@@ -8,28 +8,32 @@
 -- display: scalar
 -- size: sixth
 -- @include facts
-SELECT COUNT(DISTINCT member_id) AS `Totaal aantal leden` FROM facts
+-- @include leden
+SELECT COUNT(DISTINCT member_id) AS `Totaal aantal leden` FROM leden
 
 -- @card eenheid-aantal-kinderen
 -- title: Aantal kinderen
 -- display: scalar
 -- size: sixth
 -- @include facts
-SELECT COUNT(DISTINCT member_id) AS `Aantal kinderen` FROM facts WHERE effective_category = 'child'
+-- @include leden
+SELECT COUNT(DISTINCT member_id) AS `Aantal kinderen` FROM leden WHERE effective_category = 'child'
 
 -- @card eenheid-aantal-leiding
 -- title: Aantal leiding
 -- display: scalar
 -- size: sixth
 -- @include facts
-SELECT COUNT(DISTINCT member_id) AS `Aantal leiding` FROM facts WHERE effective_category = 'leader'
+-- @include leden
+SELECT COUNT(DISTINCT member_id) AS `Aantal leiding` FROM leden WHERE effective_category = 'leader'
 
 -- @card eenheid-aantal-volwassenen
 -- title: Aantal volwassenen
 -- display: scalar
 -- size: sixth
 -- @include facts
-SELECT COUNT(DISTINCT member_id) AS `Aantal volwassenen` FROM facts WHERE effective_category = 'adult'
+-- @include leden
+SELECT COUNT(DISTINCT member_id) AS `Aantal volwassenen` FROM leden WHERE effective_category = 'adult'
 
 -- @card eenheid-gtp
 -- title: GTP Index
@@ -65,13 +69,14 @@ FROM leden
 -- metrics: Aantal leden
 -- description: Een punt per postcode. Een postcode zonder coordinaat in `postal_codes` telt wel mee, maar staat niet op de kaart.
 -- @include facts
+-- @include leden
 -- @include postcode-coordinaten
 SELECT
     f.postcode AS `Postcode`,
     c.latitude AS `Breedtegraad`,
     c.longitude AS `Lengtegraad`,
     COUNT(DISTINCT f.member_id) AS `Aantal leden`
-FROM facts f
+FROM leden f
 LEFT JOIN postcode_coordinaten c ON c.postalCode = f.postcode
 GROUP BY f.postcode, c.latitude, c.longitude
 ORDER BY `Aantal leden` DESC
@@ -83,13 +88,14 @@ ORDER BY `Aantal leden` DESC
 -- dimensions: Scoutsjaar
 -- metrics: Totaal leden, Aantal kinderen, Aantal leiding, Aantal volwassenen
 -- @include facts-alle-jaren
+-- @include leden
 SELECT
     `Scoutsjaar`,
     COUNT(DISTINCT member_id) AS `Totaal leden`,
     COUNT(DISTINCT CASE WHEN effective_category = 'child' THEN member_id END) AS `Aantal kinderen`,
     COUNT(DISTINCT CASE WHEN effective_category = 'leader' THEN member_id END) AS `Aantal leiding`,
     COUNT(DISTINCT CASE WHEN effective_category = 'adult' THEN member_id END) AS `Aantal volwassenen`
-FROM facts
+FROM leden
 GROUP BY `Scoutsjaar`
 ORDER BY MIN(period_start)
 
@@ -157,8 +163,9 @@ ORDER BY MIN(period_start)
 -- dimensions: Geslacht
 -- metrics: Aantal leden
 -- @include facts
+-- @include leden
 SELECT `Geslacht`, COUNT(DISTINCT member_id) AS `Aantal leden`
-FROM facts
+FROM leden
 GROUP BY `Geslacht`
 ORDER BY `Aantal leden` DESC
 
@@ -169,6 +176,7 @@ ORDER BY `Aantal leden` DESC
 -- dimensions: Type lidgeld
 -- metrics: Aantal leden
 -- @include facts
+-- @include leden
 SELECT
     -- @include tarief
         AS `Type lidgeld`,
@@ -178,8 +186,8 @@ FROM member_platform_memberships mpm
 -- staat op het lidgeld zelf.
 JOIN platform_membership_types mt ON mt.id = mpm.membershipTypeId AND mt.periodId = mpm.periodId
 WHERE mpm.deletedAt IS NULL
-  AND mpm.periodId IN (SELECT DISTINCT period_id FROM facts)
-  AND mpm.memberId IN (SELECT DISTINCT member_id FROM facts)
+  AND mpm.periodId IN (SELECT DISTINCT period_id FROM leden)
+  AND mpm.memberId IN (SELECT DISTINCT member_id FROM leden)
   -- Geen lidmaatschap bij de koepel zelf: `facts` laat die organisatie weg, en wie naast een eenheid
   -- ook in een nationale ploeg zit zou het tarief daarvan anders in deze grafiek zetten.
   AND NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = mpm.organizationId)
@@ -196,11 +204,12 @@ ORDER BY `Aantal leden` DESC
 -- dimensions: Scoutsjaar, Tak
 -- metrics: Aantal kinderen
 -- @include facts-alle-jaren
+-- @include leden
 SELECT
     `Scoutsjaar`,
     `Tak`,
     COUNT(DISTINCT member_id) AS `Aantal kinderen`
-FROM facts
+FROM leden
 WHERE effective_category = 'child'
 GROUP BY `Scoutsjaar`, `Tak`
 ORDER BY MIN(period_start), `Tak`
@@ -214,11 +223,12 @@ ORDER BY MIN(period_start), `Tak`
 -- stacked: normalized
 -- description: Jong zijn de takken tot en met 10 jaar, oud de takken vanaf 11 jaar. Het originele rapport benoemt de grens niet.
 -- @include facts-alle-jaren
+-- @include leden
 SELECT
     `Scoutsjaar`,
     COUNT(DISTINCT CASE WHEN tak_max_age <= 10 THEN member_id END) AS `Jong`,
     COUNT(DISTINCT CASE WHEN tak_min_age >= 11 THEN member_id END) AS `Oud`
-FROM facts
+FROM leden
 WHERE effective_category = 'child'
 GROUP BY `Scoutsjaar`
 ORDER BY MIN(period_start)
@@ -231,11 +241,12 @@ ORDER BY MIN(period_start)
 -- metrics: Aantal kinderen
 -- stacked: normalized
 -- @include facts-alle-jaren
+-- @include leden
 SELECT
     `Scoutsjaar`,
     `Geslacht`,
     COUNT(DISTINCT member_id) AS `Aantal kinderen`
-FROM facts
+FROM leden
 WHERE effective_category = 'child'
 GROUP BY `Scoutsjaar`, `Geslacht`
 ORDER BY MIN(period_start)
@@ -247,8 +258,9 @@ ORDER BY MIN(period_start)
 -- dimensions: Geslacht
 -- metrics: Aantal kinderen
 -- @include facts
+-- @include leden
 SELECT `Geslacht`, COUNT(DISTINCT member_id) AS `Aantal kinderen`
-FROM facts
+FROM leden
 WHERE effective_category = 'child'
 GROUP BY `Geslacht`
 ORDER BY `Aantal kinderen` DESC
@@ -261,11 +273,12 @@ ORDER BY `Aantal kinderen` DESC
 -- metrics: Aantal leiding
 -- stacked: normalized
 -- @include facts-alle-jaren
+-- @include leden
 SELECT
     `Scoutsjaar`,
     `Geslacht`,
     COUNT(DISTINCT member_id) AS `Aantal leiding`
-FROM facts
+FROM leden
 WHERE effective_category = 'leader'
 GROUP BY `Scoutsjaar`, `Geslacht`
 ORDER BY MIN(period_start)
@@ -277,8 +290,9 @@ ORDER BY MIN(period_start)
 -- dimensions: Geslacht
 -- metrics: Aantal leiding
 -- @include facts
+-- @include leden
 SELECT `Geslacht`, COUNT(DISTINCT member_id) AS `Aantal leiding`
-FROM facts
+FROM leden
 WHERE effective_category = 'leader'
 GROUP BY `Geslacht`
 ORDER BY `Aantal leiding` DESC
@@ -290,11 +304,12 @@ ORDER BY `Aantal leiding` DESC
 -- dimensions: Geboortejaar
 -- metrics: Aantal kinderen, Aantal leiding
 -- @include facts
+-- @include leden
 SELECT
     YEAR(birth_date) AS `Geboortejaar`,
     COUNT(DISTINCT CASE WHEN effective_category = 'child' THEN member_id END) AS `Aantal kinderen`,
     COUNT(DISTINCT CASE WHEN effective_category = 'leader' THEN member_id END) AS `Aantal leiding`
-FROM facts
+FROM leden
 WHERE birth_date IS NOT NULL
 GROUP BY YEAR(birth_date)
 ORDER BY `Geboortejaar`
@@ -306,11 +321,12 @@ ORDER BY `Geboortejaar`
 -- dimensions: Leeftijd, Geslacht
 -- metrics: Aantal leden
 -- @include facts
+-- @include leden
 SELECT
     leeftijd AS `Leeftijd`,
     `Geslacht`,
     COUNT(DISTINCT member_id) AS `Aantal leden`
-FROM facts
+FROM leden
 WHERE birth_date IS NOT NULL
 GROUP BY leeftijd, `Geslacht`
 ORDER BY leeftijd
@@ -322,10 +338,11 @@ ORDER BY leeftijd
 -- dimensions: Scoutsjaar
 -- metrics: Gemiddelde leeftijd leiding
 -- @include facts-alle-jaren
+-- @include leden
 SELECT
     `Scoutsjaar`,
     ROUND(AVG(leeftijd), 1) AS `Gemiddelde leeftijd leiding`
-FROM facts
+FROM leden
 WHERE effective_category = 'leader' AND birth_date IS NOT NULL
 GROUP BY `Scoutsjaar`
 ORDER BY MIN(period_start)
@@ -336,6 +353,7 @@ ORDER BY MIN(period_start)
 -- size: half
 -- description: Per scoutsjaar: hoeveel leden de eenheid dat jaar had, en hoeveel daarvan het jaar erna nog lid waren. Het laatste scoutsjaar staat er niet bij: het jaar erna moet eerst bestaan.
 -- @include facts-alle-jaren
+-- @include leden
 -- @include leden-per-jaar
 -- @include jaren
 SELECT
@@ -345,7 +363,7 @@ SELECT
     COUNT(DISTINCT huidig.member_id) - COUNT(DISTINCT gebleven.member_id) AS `Aantal vertrekkers`,
     ROUND(100 * COUNT(DISTINCT gebleven.member_id) / COUNT(DISTINCT huidig.member_id), 1) AS `Percentage blijvers`
 FROM jaren j
-JOIN facts huidig ON huidig.`Scoutsjaar` = j.name
+JOIN leden huidig ON huidig.`Scoutsjaar` = j.name
 LEFT JOIN leden_per_jaar gebleven
     ON gebleven.`Scoutsjaar` = j.volgend
     AND gebleven.member_id = huidig.member_id
@@ -359,6 +377,7 @@ ORDER BY j.startDate
 -- size: half
 -- description: De leden van het gekozen scoutsjaar, per tak waar ze toen zaten, en hoeveel daarvan het jaar erna nog lid waren. Het laatste scoutsjaar staat er niet bij: het jaar erna moet eerst bestaan.
 -- @include facts-alle-jaren
+-- @include leden
 -- @include leden-per-jaar
 -- @include jaren
 , gekozen AS (
@@ -374,7 +393,7 @@ SELECT
     COUNT(DISTINCT huidig.member_id) - COUNT(DISTINCT gebleven.member_id) AS `Aantal vertrekkers`,
     ROUND(100 * COUNT(DISTINCT gebleven.member_id) / COUNT(DISTINCT huidig.member_id), 1) AS `Percentage blijvers`
 FROM gekozen g
-JOIN facts huidig ON huidig.`Scoutsjaar` = g.name
+JOIN leden huidig ON huidig.`Scoutsjaar` = g.name
 LEFT JOIN leden_per_jaar gebleven
     ON gebleven.`Scoutsjaar` = g.volgend
     AND gebleven.member_id = huidig.member_id
@@ -389,13 +408,14 @@ ORDER BY MIN(COALESCE(huidig.tak_min_age, 99)), huidig.`Tak`
 -- metrics: Percentage blijvers
 -- description: Per scoutsjaar het percentage van de leden van dat jaar dat het jaar erna nog lid was. Het laatste scoutsjaar staat er niet bij: het jaar erna moet eerst bestaan.
 -- @include facts-alle-jaren
+-- @include leden
 -- @include leden-per-jaar
 -- @include jaren
 SELECT
     j.name AS `Scoutsjaar`,
     ROUND(100 * COUNT(DISTINCT gebleven.member_id) / COUNT(DISTINCT huidig.member_id), 1) AS `Percentage blijvers`
 FROM jaren j
-JOIN facts huidig ON huidig.`Scoutsjaar` = j.name
+JOIN leden huidig ON huidig.`Scoutsjaar` = j.name
 LEFT JOIN leden_per_jaar gebleven
     ON gebleven.`Scoutsjaar` = j.volgend
     AND gebleven.member_id = huidig.member_id
@@ -411,6 +431,7 @@ ORDER BY j.startDate
 -- metrics: Percentage blijvers
 -- description: Per scoutsjaar het percentage van de leden van dat jaar dat het jaar erna nog lid was, per tak waar ze dat jaar zaten. Het laatste scoutsjaar staat er niet bij: het jaar erna moet eerst bestaan.
 -- @include facts-alle-jaren
+-- @include leden
 -- @include leden-per-jaar
 -- @include jaren
 SELECT
@@ -418,7 +439,7 @@ SELECT
     huidig.`Tak`,
     ROUND(100 * COUNT(DISTINCT gebleven.member_id) / COUNT(DISTINCT huidig.member_id), 1) AS `Percentage blijvers`
 FROM jaren j
-JOIN facts huidig ON huidig.`Scoutsjaar` = j.name
+JOIN leden huidig ON huidig.`Scoutsjaar` = j.name
 LEFT JOIN leden_per_jaar gebleven
     ON gebleven.`Scoutsjaar` = j.volgend
     AND gebleven.member_id = huidig.member_id

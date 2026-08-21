@@ -11,14 +11,14 @@
 -- query cannot pick differently.
 --
 -- What a member is comes from `tak_category`, what the tak was recorded as, and never from
--- `effective_category`, which falls back to the member's own age so that nobody drops out of a total.
--- That fallback is right for a total and wrong here: it reads a kind out of a group nobody has
--- categorised, and an age cannot tell leiding from anything, so a leider of sixteen would read as a
--- kind and be counted on both sides of the same division.
+-- `effective_category`, which falls back to the member's own age. That fallback cannot tell leiding
+-- from anything, so a leider of sixteen would read as a kind and be counted on both sides of the same
+-- division. It does decide between two rows that the takken leave equally unsaid, so that a member
+-- whose only reading is the fallback keeps it rather than losing it to whichever row sorted first.
 --
--- Every member keeps a row, whether their tak is categorised or not, so a card that counts leden
--- beside these figures still counts all of them. It is the figures that leave out what no tak
--- categorises.
+-- Every member keeps a row, whether their tak is categorised or not, and every row keeps both
+-- columns: a card that counts kinderen the way the totals do goes on reading `effective_category`
+-- here, and only counts a member once now.
 --
 -- Belongs after `facts` or `facts-alle-jaren`, whichever grain the card reads.
 , leden AS (
@@ -28,7 +28,8 @@
             ROW_NUMBER() OVER (
                 PARTITION BY f.organization_id, f.`Scoutsjaar`, f.member_id
                 ORDER BY
-                    CASE f.tak_category WHEN 'leader' THEN 2 WHEN 'child' THEN 1 ELSE 0 END DESC,
+                    CASE f.tak_category WHEN 'leader' THEN 3 WHEN 'child' THEN 2 WHEN 'adult' THEN 1 ELSE 0 END DESC,
+                    CASE f.effective_category WHEN 'leader' THEN 3 WHEN 'child' THEN 2 WHEN 'adult' THEN 1 ELSE 0 END DESC,
                     f.tak_min_age DESC,
                     f.`Tak`
             ) AS rang

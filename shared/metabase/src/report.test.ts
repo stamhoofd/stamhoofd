@@ -370,20 +370,38 @@ describe('report', () => {
          * index would weigh them twice over -- as leiding and as a lid, or in two takken at once.
          * Nothing about a card says which of the two it reads, so it is checked here.
          */
-        it('counts both figures over members rather than over their registrations', () => {
+        it('counts every card of the ledenstatistieken over members rather than over their registrations', () => {
             for (const [env, tabs] of [['keeo', dashboards], ['ravot', ravotDashboards]] as const) {
-                for (const [tab, key] of [
-                    ['nationaal', 'leden-per-eenheid'], ['eenheden', 'eenheid-gtp'], ['eenheden', 'eenheid-gtp-meter'], ['eenheden', 'eenheid-gtp-per-scoutsjaar'],
-                    ['eenheden', 'eenheid-omkaderingscijfer'], ['eenheden', 'eenheid-omkaderingscijfer-meter'], ['eenheden', 'eenheid-omkaderingscijfer-per-scoutsjaar'],
-                ]) {
-                    // What the card itself selects, past the fragments it opens with. The last of
-                    // them reads `facts` to build `leden` out of it, which the card may not.
-                    const sql = cardOf(tabs, tab, key).sql.replaceAll(/\s+/g, ' ');
-                    const query = sql.slice(sql.indexOf('WHERE g.rang = 1 )'));
+                for (const tab of tabs.filter(tab => tab.dashboard === undefined)) {
+                    for (const card of tab.cards) {
+                        const sql = card.sql.replaceAll(/\s+/g, ' ');
+                        if (!sql.includes('facts AS (')) {
+                            continue;
+                        }
 
-                    expect(`${env}/${key}: ${query.includes('FROM leden')}`).toEqual(`${env}/${key}: true`);
-                    expect(`${env}/${key}: ${/FROM facts\b/.test(query)}`).toEqual(`${env}/${key}: false`);
+                        // What the card itself selects, past the fragments it opens with. The last of
+                        // them reads `facts` to build `leden` out of it, which the card may not.
+                        const query = sql.slice(sql.indexOf('WHERE g.rang = 1 )'));
+                        const where = `${env} ${tab.key}/${card.key}`;
+
+                        expect(`${where}: ${sql.includes(', leden AS (')}`).toEqual(`${where}: true`);
+                        expect(`${where}: ${/\b(?:FROM|JOIN) facts\b/.test(query)}`).toEqual(`${where}: false`);
+                    }
                 }
+            }
+        });
+
+        /**
+         * The aanlevering counts inschrijvingen where the ledenstatistieken count members -- someone
+         * registered at two groups is two deelnemers to the department and one lid here -- and it
+         * decides what a member is from the cancelled registrations as well. It keeps its own rows.
+         */
+        it('leaves the aanlevering on the grain the department asks for', () => {
+            const tabs = dashboards.filter(tab => tab.dashboard !== undefined);
+            expect(tabs.map(tab => tab.key)).toEqual(['jeugdbewegingen']);
+
+            for (const card of tabs[0].cards) {
+                expect(`${card.key}: ${card.sql.includes(', leden AS (')}`).toEqual(`${card.key}: false`);
             }
         });
 
@@ -397,7 +415,9 @@ describe('report', () => {
             const sql = cardOf(dashboards, 'eenheden', 'eenheid-gtp').sql.replaceAll(/\s+/g, ' ');
 
             expect(sql).toContain('ROW_NUMBER() OVER ( PARTITION BY f.organization_id, f.`Scoutsjaar`, f.member_id ORDER BY '
-                + "CASE f.tak_category WHEN 'leader' THEN 2 WHEN 'child' THEN 1 ELSE 0 END DESC, f.tak_min_age DESC, f.`Tak` ) AS rang");
+                + "CASE f.tak_category WHEN 'leader' THEN 3 WHEN 'child' THEN 2 WHEN 'adult' THEN 1 ELSE 0 END DESC, "
+                + "CASE f.effective_category WHEN 'leader' THEN 3 WHEN 'child' THEN 2 WHEN 'adult' THEN 1 ELSE 0 END DESC, "
+                + 'f.tak_min_age DESC, f.`Tak` ) AS rang');
             expect(sql).toContain('WHERE g.rang = 1');
         });
 
@@ -517,7 +537,7 @@ describe('report', () => {
 
             for (const [, card] of cards) {
                 const sql = card.sql.replaceAll(/\s+/g, ' ');
-                const cohort = /JOIN facts huidig ON huidig\.`Scoutsjaar` = \w+\.name/.test(sql);
+                const cohort = /JOIN leden huidig ON huidig\.`Scoutsjaar` = \w+\.name/.test(sql);
                 const blijvers = /gebleven\.`Scoutsjaar` = \w+\.volgend/.test(sql);
 
                 expect(`${card.key}: cohort ${cohort}, blijvers ${blijvers}, laatste jaar weg ${sql.includes('volgend IS NOT NULL')}`)

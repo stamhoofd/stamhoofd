@@ -10,6 +10,25 @@ Everything that configures Metabase: the ledenstatistieken report and the API cl
 | `src/sync-report.ts` | Says the report in Metabase's vocabulary and writes it |
 | `src/naming.ts` | What things are called in Metabase, so every caller agrees |
 
+## What the report counts
+
+Two fragments decide that, and every card opens with the pair:
+
+| | |
+|---|---|
+| `includes/facts.sql` | one row per registration: who was registered where, in which tak, in which year |
+| `includes/leden.sql` | that narrowed to one row per member per eenheid, carrying what they are |
+
+The ledenstatistieken count members, not registrations, so every card of that dashboard reads `leden`
+and none reads `facts` directly. Someone registered in two takken of the same eenheid stands twice in
+`facts`, and counted there they land in two bars of the same chart, or -- if they are leiding in one
+tak and lid in the other -- on both sides of the omkaderingscijfer at once. `leden` picks the one
+registration that speaks for them: leiding beats lid, and the oldest tak wins between two.
+
+The aanlevering is the exception and keeps reading its own rows. The department counts inschrijvingen
+rather than inschrijvers, and reads what a member is from the cancelled registrations as well, so
+`jeugdbewegingen.sql` decides it in its own `deelnemers`.
+
 ## One report, several platforms
 
 The same report is written for every platform, and they do not all count every figure the same way:

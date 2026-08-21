@@ -14,12 +14,13 @@
 -- metrics: Aantal kinderen, Aantal leiding, Aantal volwassenen
 -- stacked: stacked
 -- @include facts
+-- @include leden
 SELECT
     t.name AS `Netwerk`,
     COUNT(DISTINCT CASE WHEN f.effective_category = 'child' THEN f.member_id END) AS `Aantal kinderen`,
     COUNT(DISTINCT CASE WHEN f.effective_category = 'leader' THEN f.member_id END) AS `Aantal leiding`,
     COUNT(DISTINCT CASE WHEN f.effective_category = 'adult' THEN f.member_id END) AS `Aantal volwassenen`
-FROM facts f
+FROM leden f
 JOIN _organizations_organization_tags link
     ON link.organizationsId = f.organization_id AND link.periodId = f.period_id
 JOIN organization_tags t ON t.id = link.organizationTagsId AND t.periodId = link.periodId
@@ -33,10 +34,11 @@ ORDER BY t.name
 -- dimensions: Netwerk
 -- metrics: Aantal eenheden
 -- @include facts
+-- @include leden
 SELECT
     t.name AS `Netwerk`,
     COUNT(DISTINCT f.organization_id) AS `Aantal eenheden`
-FROM facts f
+FROM leden f
 JOIN _organizations_organization_tags link
     ON link.organizationsId = f.organization_id AND link.periodId = f.period_id
 JOIN organization_tags t ON t.id = link.organizationTagsId AND t.periodId = link.periodId
@@ -53,13 +55,14 @@ ORDER BY t.name
 -- metrics: Aantal eenheden
 -- description: Een punt per postcode waar eenheden zitten. Het originele rapport zet een stip per eenheid; zonder coordinaat per eenheid is de postcode het dichtstbij.
 -- @include facts
+-- @include leden
 -- @include postcode-coordinaten
 SELECT
     f.eenheid_postcode AS `Postcode`,
     c.latitude AS `Breedtegraad`,
     c.longitude AS `Lengtegraad`,
     COUNT(DISTINCT f.organization_id) AS `Aantal eenheden`
-FROM facts f
+FROM leden f
 LEFT JOIN postcode_coordinaten c ON c.postalCode = f.eenheid_postcode
 GROUP BY f.eenheid_postcode, c.latitude, c.longitude
 ORDER BY `Aantal eenheden` DESC
@@ -69,13 +72,14 @@ ORDER BY `Aantal eenheden` DESC
 -- display: table
 -- size: half
 -- @include facts
+-- @include leden
 SELECT
     f.`Eenheid`,
     f.eenheid_postcode AS `Postcode`,
     f.eenheid_gemeente AS `Gemeente`,
     COALESCE(t.name, 'Geen netwerk') AS `Netwerk`,
     COUNT(DISTINCT f.member_id) AS `Aantal leden`
-FROM facts f
+FROM leden f
 LEFT JOIN _organizations_organization_tags link
     ON link.organizationsId = f.organization_id AND link.periodId = f.period_id
 LEFT JOIN organization_tags t ON t.id = link.organizationTagsId AND t.periodId = link.periodId

@@ -8,6 +8,7 @@
 -- display: table
 -- size: full
 -- @include facts
+-- @include leden
 SELECT
     `Eenheid` AS `Name`,
     eenheid_gemeente AS `City`,
@@ -19,6 +20,6 @@ SELECT
     COUNT(DISTINCT CASE WHEN effective_category = 'leader' AND `Geslacht` = 'Vrouw' THEN member_id END) AS `Aantal leiding/Vrouw`,
     COUNT(DISTINCT CASE WHEN effective_category = 'leader' AND `Geslacht` = 'Andere' THEN member_id END) AS `Aantal leiding/Andere`,
     COUNT(DISTINCT CASE WHEN effective_category = 'leader' AND `Geslacht` = 'Onbekend' THEN member_id END) AS `Aantal leiding/Onbekend`
-FROM facts
+FROM leden
 GROUP BY `Eenheid`, eenheid_gemeente
 ORDER BY `Eenheid`
