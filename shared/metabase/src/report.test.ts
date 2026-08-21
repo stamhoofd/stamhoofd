@@ -3,7 +3,7 @@ import os from 'os';
 import path from 'path';
 import type { ReportCard, ReportTab } from './report.js';
 import { getReportDirectory, loadReport, parseTab, parameterNames, resolveSql } from './report.js';
-import { layoutCards } from './sync-report.js';
+import { buildVisualizationSettings, columnPalettes, layoutCards } from './sync-report.js';
 
 function cardOf(tabs: ReportTab[], tab: string, card: string): ReportCard {
     const found = tabs.find(entry => entry.key === tab)?.cards.find(entry => entry.key === card);
@@ -468,6 +468,41 @@ describe('report', () => {
         it('divides the GTP meter into the ranges the report reads the index in', () => {
             for (const tabs of [dashboards, ravotDashboards]) {
                 expect(cardOf(tabs, 'eenheden', 'eenheid-gtp-meter').segments).toEqual([0, 35, 55, 75, 95, 115, 135]);
+            }
+        });
+
+        /**
+         * Seven cards over two pages split on the geslachten, as pies and as bars. They are read
+         * side by side -- the kinderen next to the leiding, this year next to the ones before -- so
+         * a geslacht that changed color between two of them would be two different readings of the
+         * same page.
+         */
+        it('draws the geslachten in one set of colors, on every card that splits on them', () => {
+            const cards = dashboards.flatMap(tab => tab.cards.filter(card => card.dimensions.includes('Geslacht')));
+            const expected = columnPalettes.get('Geslacht')!;
+
+            expect(cards.map(card => card.key).length).toEqual(7);
+
+            for (const card of cards) {
+                const settings = buildVisualizationSettings(card);
+                const series = settings['series_settings'] as Record<string, { color: string }> | undefined;
+                const colors = settings['pie.colors'] ?? Object.fromEntries(Object.entries(series ?? {}).map(([value, setting]) => [value, setting.color]));
+
+                expect(`${card.key}: ${JSON.stringify(colors)}`).toEqual(`${card.key}: ${JSON.stringify(expected)}`);
+            }
+        });
+
+        /**
+         * The colors are kept per value, and the values are written in `facts`: renaming one there
+         * would leave its color on a slice that no longer exists, while the new name took whatever
+         * color Metabase had left over. Both grains write them, so both are read here.
+         */
+        it('colors every geslacht the facts can hold', () => {
+            for (const key of ['eenheid-leden-per-geslacht', 'eenheid-geslacht-kinderen-per-jaar']) {
+                const written = /CASE m\.gender([\s\S]*?)END AS `Geslacht`/.exec(cardOf(dashboards, 'eenheden', key).sql);
+                const values = [...(written?.[1] ?? '').matchAll(/(?:THEN|ELSE) '([^']+)'/g)].map(match => match[1]);
+
+                expect(`${key}: ${values.sort().join(',')}`).toEqual(`${key}: ${Object.keys(columnPalettes.get('Geslacht')!).sort().join(',')}`);
             }
         });
 

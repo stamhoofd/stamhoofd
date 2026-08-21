@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ReportCard, ReportTab } from './report.js';
-import { buildDashcards, buildParameters, buildTabs, buildTemplateTags, buildVisualizationSettings, collectionToRename, dashcardKey, groupByDashboard, layoutCards, segmentColors, templateTagId } from './sync-report.js';
+import { buildDashcards, buildParameters, buildTabs, buildTemplateTags, buildVisualizationSettings, collectionToRename, columnPalettes, dashcardKey, groupByDashboard, layoutCards, segmentColors, templateTagId } from './sync-report.js';
 
 function card(overrides: Partial<ReportCard> = {}): ReportCard {
     return {
@@ -258,6 +258,35 @@ describe('buildVisualizationSettings', () => {
 
         expect(settings['pie.dimension']).toEqual('Geslacht');
         expect(settings['graph.dimensions']).toBeUndefined();
+    });
+
+    /**
+     * A slice and a bar of the same geslacht are the same color, on whichever page they stand. The
+     * two displays hang a color on different things -- a pie has a slice per value, a chart a series
+     * -- so the palette is written twice over in Metabase's words and once here.
+     */
+    it('colors the geslachten the same in a pie and in a chart', () => {
+        const colors = columnPalettes.get('Geslacht')!;
+
+        expect(buildVisualizationSettings(card({ display: 'pie', dimensions: ['Geslacht'], metrics: ['Aantal leden'] }))['pie.colors']).toEqual(colors);
+        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Scoutsjaar', 'Geslacht'], metrics: ['Aantal leden'] }))['series_settings'])
+            .toEqual({ Man: { color: colors.Man }, Vrouw: { color: colors.Vrouw }, Andere: { color: colors.Andere }, Onbekend: { color: colors.Onbekend } });
+    });
+
+    it('leaves a card that splits on something the palette says nothing about to Metabase', () => {
+        expect(buildVisualizationSettings(card({ display: 'pie', dimensions: ['Tak'], metrics: ['Aantal leden'] }))).not.toHaveProperty('pie.colors');
+        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Scoutsjaar', 'Tak'], metrics: ['Aantal leden'] }))).not.toHaveProperty('series_settings');
+    });
+
+    /** The one chart that splits on both: the shapes it needs cannot cost it the colors it needs. */
+    it('gives a combo chart its shapes and its colors at once', () => {
+        const settings = buildVisualizationSettings(card({ display: 'combo', dimensions: ['Scoutsjaar', 'Geslacht'], metrics: ['Aantal leden', 'GTP index'] }));
+
+        expect(settings['series_settings']).toMatchObject({
+            Man: { color: columnPalettes.get('Geslacht')!.Man },
+            'Aantal leden': { display: 'bar' },
+            'GTP index': { display: 'line' },
+        });
     });
 });
 

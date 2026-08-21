@@ -229,6 +229,23 @@ function buildSegments(card: ReportCard, display: 'gauge' | 'scalar'): Record<st
 }
 
 /**
+ * The colors the values of a column are drawn in, wherever a card splits on it.
+ *
+ * Kept by the column rather than by the card because the same split stands on several pages -- the
+ * geslachten are a pie on two of them and the bars of a third -- and someone reading two pages side
+ * by side reads the colors before the legend. A value the palette does not name keeps whichever
+ * color Metabase gives it.
+ */
+export const columnPalettes = new Map<string, Record<string, string>>([
+    ['Geslacht', {
+        Man: '#0892D0',
+        Vrouw: '#DE8A8A',
+        Andere: '#8A2BE2',
+        Onbekend: '#949AAB',
+    }],
+]);
+
+/**
  * How the report describes its x-axis labels, in what Metabase calls them.
  */
 const xAxisLabels: Record<string, boolean | string> = {
@@ -288,6 +305,13 @@ export function buildVisualizationSettings(card: ReportCard, hasCoordinates = tr
     if (display === 'pie') {
         settings['pie.dimension'] = card.dimensions[0];
         settings['pie.metric'] = card.metrics[0];
+
+        // Keyed by the value of the dimension, which is what a slice is: the pie has no series to
+        // hang a color on the way a bar chart does.
+        const palette = columnPalettes.get(card.dimensions[0]);
+        if (palette !== undefined) {
+            settings['pie.colors'] = palette;
+        }
         return settings;
     }
 
@@ -304,12 +328,26 @@ export function buildVisualizationSettings(card: ReportCard, hasCoordinates = tr
         if (card.stacked !== undefined) {
             settings['stackable.stack_type'] = card.stacked === 'normalized' ? 'normalized' : 'stacked';
         }
+
+        // Under `series_settings` -- one of the few settings without the `graph.` prefix, and an
+        // unknown key is dropped without a word. A chart with a second dimension draws a series per
+        // value of it, keyed by the value itself; one without draws a series per metric, keyed by
+        // the column name.
+        const series: Record<string, Record<string, unknown>> = Object.fromEntries(
+            Object.entries(columnPalettes.get(card.dimensions[1]) ?? {}).map(([value, color]) => [value, { color }]),
+        );
+
         // Left to itself a combo chart draws its first series as a line and the rest as bars, the
         // other way round from what the "aantal leden + GTP index" chart needs, so every series is
-        // given its own shape. Keyed by column name, under `series_settings` -- one of the few
-        // settings without the `graph.` prefix, and an unknown key is dropped without a word.
+        // given its own shape.
         if (display === 'combo') {
-            settings['series_settings'] = Object.fromEntries(card.metrics.map((metric, index) => [metric, { display: index === 0 ? 'bar' : 'line' }]));
+            for (const [index, metric] of card.metrics.entries()) {
+                series[metric] = { ...series[metric], display: index === 0 ? 'bar' : 'line' };
+            }
+        }
+
+        if (Object.keys(series).length > 0) {
+            settings['series_settings'] = series;
         }
     }
 
