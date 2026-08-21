@@ -147,7 +147,11 @@ async function save() {
             }
         }
 
-        const isConfirm = await CenteredMessage.confirm(confirmText, $t(`%wo`));
+        const isConfirm = await CenteredMessage.confirm({
+            title: confirmText,
+            confirmText: $t(`%wo`),
+            availabilityDelay: 2_000,
+        });
         if (!isConfirm) return false;
     }
 

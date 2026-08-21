@@ -231,6 +231,7 @@ async function deleteBalanceItem(balanceItem: BalanceItem) {
         title: $t('%10f'),
         confirmText: $t('%CJ'),
         description: $t('%1Fc'),
+        availabilityDelay: 2_000,
     }))) {
         return;
     }

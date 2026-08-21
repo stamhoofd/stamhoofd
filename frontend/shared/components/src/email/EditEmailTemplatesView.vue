@@ -320,7 +320,12 @@ async function addCreateOption() {
 
 async function deleteEmail(emailTemplate: EmailTemplate) {
     if (emailTemplate.id) {
-        if (!await CenteredMessage.confirm($t('%9q'), $t('%CJ'))) {
+        if (!await CenteredMessage.confirm({
+            title: $t('%9q'),
+            confirmText: $t('%CJ'),
+            destructive: true,
+            availabilityDelay: 2_000,
+        })) {
             return;
         }
         addDelete(emailTemplate.id);

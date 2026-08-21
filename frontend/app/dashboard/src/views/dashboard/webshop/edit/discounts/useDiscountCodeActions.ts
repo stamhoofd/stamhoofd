@@ -158,7 +158,11 @@ export function useDiscountCodeActions(saveHandler: (patch: PatchableArrayAutoEn
         }
 
         async function deleteDiscountCode() {
-            if (!await CenteredMessage.confirm($t('%1eb'), $t('%CJ'))) {
+            if (!await CenteredMessage.confirm({
+                title: $t('%1eb'),
+                confirmText: $t('%CJ'),
+                availabilityDelay: 2_000,
+            })) {
                 return;
             }
 
@@ -174,7 +178,11 @@ export function useDiscountCodeActions(saveHandler: (patch: PatchableArrayAutoEn
                 ? $t('%1dz')
                 : $t('%1eS');
 
-            if (!await CenteredMessage.confirm(confirmText, $t('%CJ'))) {
+            if (!await CenteredMessage.confirm({
+                title: confirmText,
+                confirmText: $t('%CJ'),
+                availabilityDelay: 2_000,
+            })) {
                 return;
             }
 

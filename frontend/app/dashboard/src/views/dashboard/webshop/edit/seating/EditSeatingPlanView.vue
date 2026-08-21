@@ -234,7 +234,11 @@ function addSection() {
 }
 
 async function deleteSection(section: SeatingPlanSection) {
-    if (!(await CenteredMessage.confirm('Ben je zeker dat je deze zone wilt verwijderen?', 'Verwijderen'))) {
+    if (!(await CenteredMessage.confirm({
+        title: 'Ben je zeker dat je deze zone wilt verwijderen?',
+        confirmText: 'Verwijderen',
+        availabilityDelay: 2_000,
+    }))) {
         return;
     }
 

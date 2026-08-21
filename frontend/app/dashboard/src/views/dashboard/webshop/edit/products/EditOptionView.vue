@@ -132,7 +132,11 @@ async function save() {
 const isSingle = computed(() => patched.value.options.length <= 1);
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm('Ben je zeker dat je deze keuze wilt verwijderen?', 'Verwijderen')) {
+    if (!await CenteredMessage.confirm({
+        title: 'Ben je zeker dat je deze keuze wilt verwijderen?',
+        confirmText: 'Verwijderen',
+        availabilityDelay: 2_000,
+    })) {
         return;
     }
     const p = OptionMenu.patch({});

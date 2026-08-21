@@ -148,7 +148,12 @@ function showContextMenu(event: MouseEvent) {
 }
 
 async function deleteCategory() {
-    if (!await CenteredMessage.confirm($t(`%10w`), $t(`%CJ`), $t(`%11j`))) {
+    if (!await CenteredMessage.confirm({
+        title: $t(`%10w`),
+        confirmText: $t(`%CJ`),
+        description: $t(`%11j`),
+        availabilityDelay: 2_000,
+    })) {
         return;
     }
 

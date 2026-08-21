@@ -266,7 +266,12 @@ async function deleteTemplate() {
         return;
     }
 
-    if (!(await CenteredMessage.confirm('Ben je zeker dat je alle documenten wilt verwijderen?', 'Verwijderen', 'Verwijder nooit officiële documenten!'))) {
+    if (!(await CenteredMessage.confirm({
+        title: 'Ben je zeker dat je alle documenten wilt verwijderen?',
+        confirmText: 'Verwijderen',
+        description: 'Verwijder nooit officiële documenten!',
+        availabilityDelay: 2_000,
+    }))) {
         return;
     }
     deleting.value = true;

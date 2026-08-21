@@ -1,5 +1,5 @@
 <template>
-    <SaveView :save-text="checkout.isAdminFromSameOrganization ? $t('%X9') : $t('%16p')" main-class="flex" :save-badge="cartLength" :disabled="cartLength === 0" :loading="saving" :title="$t(`%du`)" @save="goToCheckout">
+    <SaveView :save-text="checkout.isAdminFromSameOrganization ? $t('%X9') : $t('%16p')" :save-button-class="hasDeleteRegistrations ? 'destructive' : 'primary'" main-class="flex" :save-badge="cartLength" :disabled="cartLength === 0" :loading="saving" :title="$t(`%du`)" @save="goToCheckout">
         <p v-if="!checkout.isAdminFromSameOrganization && checkout.singleOrganization" class="style-title-prefix">
             {{ checkout.singleOrganization.name }}
         </p>
@@ -126,6 +126,7 @@ const getDefaultItem = useGetDefaultItem();
 const chooseGroupForMember = useChooseGroupForMember();
 
 const isOnlyDeleting = computed(() => props.checkout.cart.items.length === 0 && props.checkout.cart.balanceItems.length === 0 && props.checkout.cart.deleteRegistrations.length > 0);
+const hasDeleteRegistrations = computed(() => props.checkout.cart.deleteRegistrations.length > 0);
 const hasPaidRegistrationDelete = computed(() => props.checkout.cart.deleteRegistrations.some(r => r.registration.balances.some(b => b.amountOpen > 0 || b.amountPaid > 0 || b.amountPending > 0)));
 const hadPaidByOrganization = computed(() => props.checkout.cart.deleteRegistrations.some(r => r.registration.payingOrganizationId && r.registration.balances.some(b => b.amountOpen > 0 || b.amountPaid > 0 || b.amountPending > 0)));
 
@@ -210,6 +211,15 @@ async function searchMembers() {
 
 async function goToCheckout() {
     if (saving.value) {
+        return;
+    }
+
+    if (hasDeleteRegistrations.value && !await CenteredMessage.confirm({
+        title: $t('Ben je zeker dat je deze leden wilt uitschrijven?'),
+        confirmText: $t('Uitschrijven'),
+        destructive: true,
+        availabilityDelay: 2_000,
+    })) {
         return;
     }
 

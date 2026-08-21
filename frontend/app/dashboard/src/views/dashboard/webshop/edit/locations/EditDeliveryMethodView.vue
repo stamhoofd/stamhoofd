@@ -102,7 +102,11 @@ async function save() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm('Ben je zeker dat je deze leveringsoptie wilt verwijderen?', 'Verwijderen')) {
+    if (!await CenteredMessage.confirm({
+        title: 'Ben je zeker dat je deze leveringsoptie wilt verwijderen?',
+        confirmText: 'Verwijderen',
+        availabilityDelay: 2_000,
+    })) {
         return;
     }
 

@@ -331,7 +331,12 @@ async function deleteMe() {
     }
     deleting.value = true;
 
-    if (!await CenteredMessage.confirm($t('%35'), $t('%55'), $t('%vT'))) {
+    if (!await CenteredMessage.confirm({
+        title: $t('%35'),
+        confirmText: $t('%55'),
+        description: $t('%vT'),
+        availabilityDelay: 2_000,
+    })) {
         deleting.value = false;
         return;
     }
@@ -341,7 +346,12 @@ async function deleteMe() {
 
     // Second confirmation window
 
-    if (!await CenteredMessage.confirm($t('%36'), $t('%55'), $t('%vT'))) {
+    if (!await CenteredMessage.confirm({
+        title: $t('%36'),
+        confirmText: $t('%55'),
+        description: $t('%vT'),
+        availabilityDelay: 2_000,
+    })) {
         deleting.value = false;
         return;
     }
@@ -349,7 +359,12 @@ async function deleteMe() {
     // Wait 3 seconds
     await new Promise(resolve => setTimeout(resolve, 3000));
 
-    if (!await CenteredMessage.confirm($t('%37'), $t('%55'), $t('%vT'))) {
+    if (!await CenteredMessage.confirm({
+        title: $t('%37'),
+        confirmText: $t('%55'),
+        description: $t('%vT'),
+        availabilityDelay: 2_000,
+    })) {
         deleting.value = false;
         return;
     }

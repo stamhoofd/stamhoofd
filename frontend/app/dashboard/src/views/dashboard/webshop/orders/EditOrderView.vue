@@ -651,7 +651,12 @@ async function editCartItem(cartItem: CartItem) {
 }
 
 async function deleteItem(cartItem: CartItem) {
-    if (!await CenteredMessage.confirm('Ben je zeker dat je dit wilt verwijderen?', 'Ja, verwijderen', 'Je kan de bestelling nog nakijken voor je het definitief verwijdert.')) {
+    if (!await CenteredMessage.confirm({
+        title: 'Ben je zeker dat je dit wilt verwijderen?',
+        confirmText: 'Ja, verwijderen',
+        description: 'Je kan de bestelling nog nakijken voor je het definitief verwijdert.',
+        availabilityDelay: 2_000,
+    })) {
         return;
     }
     const clone = patchedOrder.value.data.cart.clone();

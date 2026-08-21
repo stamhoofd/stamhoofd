@@ -59,7 +59,11 @@ function moveDown() {
 }
 
 async function onDelete(keepArticles = false) {
-    if (!(await CenteredMessage.confirm(keepArticles ? 'Deze categorie verwijderen en alle artikels erin behouden?' : 'Deze categorie en artikels verwijderen?', 'Verwijderen'))) {
+    if (!(await CenteredMessage.confirm({
+        title: keepArticles ? 'Deze categorie verwijderen en alle artikels erin behouden?' : 'Deze categorie en artikels verwijderen?',
+        confirmText: 'Verwijderen',
+        availabilityDelay: 2_000,
+    }))) {
         return;
     }
     const p = PrivateWebshop.patch({ id: props.webshop.id });

@@ -588,7 +588,11 @@ async function deleteMe() {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`%10w`), $t(`%CJ`))) {
+    if (!await CenteredMessage.confirm({
+        title: $t(`%10w`),
+        confirmText: $t(`%CJ`),
+        availabilityDelay: 2_000,
+    })) {
         return;
     }
     // Note we create a patch, but don't use it internally because that would throw errors. The view itszelf is not aware of the delete

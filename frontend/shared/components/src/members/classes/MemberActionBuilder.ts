@@ -258,7 +258,12 @@ export class MemberActionBuilder {
             icon: 'code',
             enabled: () => !this.context.organization && this.context.auth.hasPlatformFullAccess(),
             handler: async (members: PlatformMember[]) => {
-                if (!await CenteredMessage.confirm('Alle vragenlijsten verwijderen?', 'Ja, verwijderen')) {
+                if (!await CenteredMessage.confirm({
+                    title: 'Alle vragenlijsten verwijderen?',
+                    confirmText: 'Ja, verwijderen',
+                    destructive: true,
+                    availabilityDelay: 2_000,
+                })) {
                     return;
                 }
                 const patch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;

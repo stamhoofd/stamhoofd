@@ -1503,7 +1503,11 @@ async function save() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm(patchedGroup.value.type === GroupType.EventRegistration ? $t('%4I') : $t('%4J'), $t('%55'))) {
+    if (!await CenteredMessage.confirm({
+        title: patchedGroup.value.type === GroupType.EventRegistration ? $t('%4I') : $t('%4J'),
+        confirmText: $t('%55'),
+        availabilityDelay: 2_000,
+    })) {
         return;
     }
     if (deleting.value || saving.value || props.isNew) {

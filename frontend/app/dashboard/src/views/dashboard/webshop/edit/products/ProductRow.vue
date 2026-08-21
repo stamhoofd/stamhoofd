@@ -104,7 +104,11 @@ function duplicate() {
 }
 
 async function doDelete() {
-    if (!(await CenteredMessage.confirm('Dit artikel verwijderen?', 'Verwijderen'))) {
+    if (!(await CenteredMessage.confirm({
+        title: 'Dit artikel verwijderen?',
+        confirmText: 'Verwijderen',
+        availabilityDelay: 2_000,
+    }))) {
         return;
     }
     const webshopPatch = PrivateWebshop.patch({

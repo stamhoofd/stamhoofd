@@ -100,7 +100,11 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`%IQ`), $t(`%CJ`))) {
+    if (!await CenteredMessage.confirm({
+        title: $t(`%IQ`),
+        confirmText: $t(`%CJ`),
+        availabilityDelay: 2_000,
+    })) {
         return;
     }
 

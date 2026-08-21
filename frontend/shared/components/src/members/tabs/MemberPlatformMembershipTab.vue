@@ -187,7 +187,12 @@ async function deleteMembership(membership: MemberPlatformMembership) {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`%10O`), $t(`%55`))) {
+    if (!await CenteredMessage.confirm({
+        title: $t(`%10O`),
+        confirmText: $t(`%55`),
+        destructive: true,
+        availabilityDelay: 2_000,
+    })) {
         return;
     }
 
