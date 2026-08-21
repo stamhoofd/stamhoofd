@@ -472,6 +472,21 @@ describe('report', () => {
         });
 
         /**
+         * A figure stands twice on the page: as a number at the top and as a meter further down. The
+         * two are read side by side, so a number colored against ranges of its own would be the same
+         * eenheid scoring differently depending on which of the two you looked at.
+         */
+        it('reads a number in the same ranges as the meter of the same figure', () => {
+            for (const [number, meter] of [['eenheid-gtp', 'eenheid-gtp-meter'], ['eenheid-omkaderingscijfer', 'eenheid-omkaderingscijfer-meter']]) {
+                for (const tabs of [dashboards, ravotDashboards]) {
+                    const ranges = (key: string) => `${cardOf(tabs, 'eenheden', key).segments.join(',')} best ${cardOf(tabs, 'eenheden', key).best}`;
+
+                    expect(`${number}: ${ranges(number)}`).toEqual(`${number}: ${ranges(meter)}`);
+                }
+            }
+        });
+
+        /**
          * The two meters of the page are read in opposite directions: a high GTP index is an eenheid
          * doing well, a high omkaderingscijfer is one leider looking after too many leden. Green
          * stands at the end each of them is doing well at, which is the whole of what `best` says.
@@ -686,12 +701,17 @@ describe('report', () => {
                 .toEqual([0, 35, 55, 75]);
         });
 
+        it('reads the boundaries a number is colored against', () => {
+            expect(parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: scalar\n-- segments: 0, 4, 6, 8\n-- best: low\nSELECT 1', 'x.sql', new Map()).cards[0])
+                .toMatchObject({ segments: [0, 4, 6, 8], best: 'low' });
+        });
+
         /** Every other display drops the setting without a word, leaving a chart that looks right. */
-        it('rejects ranges on a card that draws no arc', () => {
+        it('rejects ranges on a card that reads none', () => {
             expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- segments: 0, 35, 55, 75\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('names segments, which only a gauge draws');
+                .toThrow('names segments, which only a gauge or a number reads');
             expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- best: low\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('names best, which only a gauge draws');
+                .toThrow('names best, which only a gauge or a number reads');
         });
 
         /** A range that ends before it starts is drawn nowhere, so the arc loses it silently. */

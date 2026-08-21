@@ -57,16 +57,17 @@ export type ReportCard = {
     /** How bars are stacked: absent, `stacked` or `normalized`. */
     stacked?: 'stacked' | 'normalized';
     /**
-     * The boundaries a gauge is divided at, lowest first: `0, 35, 55, 75, 95, 115, 135` draws six
-     * ranges. The two outer ones are the ends of the arc rather than a figure anything is measured
-     * against, since a gauge has to start and stop somewhere while the figure itself does not.
-     * Absent leaves the ranges to Metabase, which splits the arc in three.
+     * The boundaries the figure is read in, lowest first: `0, 35, 55, 75, 95, 115, 135` makes six
+     * ranges. A gauge draws them as its arc and a number is colored by the one it falls in, which is
+     * how the two cards of one figure say the same thing. The outer two are where the arc starts and
+     * stops rather than a figure anything is measured against, since the figure itself has no ends.
+     * Absent leaves a gauge to Metabase, which splits the arc in three, and a number uncolored.
      */
     segments: number[];
     /**
-     * Which end of a gauge's ranges is the good one, and therefore which of them is drawn green:
-     * `high` unless the card says otherwise. The omkaderingscijfer is the one that reads the other
-     * way round -- the fewer leden a leider has to look after, the better.
+     * Which end of those ranges is the good one, and therefore which of them is green: `high` unless
+     * the card says otherwise. The omkaderingscijfer is the one that reads the other way round --
+     * the fewer leden a leider has to look after, the better.
      */
     best: ReportCardBest;
     /**
@@ -310,7 +311,7 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
         throw new Error(`${file}: card "${section.key}" is a map but names no latitude and longitude columns`);
     }
 
-    const { segments, best } = parseGauge(section, file, display);
+    const { segments, best } = parseRanges(section, file, display);
 
     const sql = expandIncludes(section.body, includes, file, section.key).trim();
 
@@ -334,25 +335,30 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
     };
 }
 
+/** The displays that read a figure against ranges: a gauge draws them, a number is colored by them. */
+const rangedDisplays = ['gauge', 'scalar'];
+
 /**
- * How a gauge is divided and which way it is read, both of which every other display would silently
- * drop. The boundaries rise, because a range that ends before it starts is drawn nowhere on the arc,
- * and there are at least three of them so the gauge says something a plain number does not.
+ * How a figure is divided into ranges and which way they are read, both of which every other display
+ * would silently drop. The boundaries rise, because a range that ends before it starts is drawn
+ * nowhere on the arc, and there are at least three of them so the ranges say something the figure
+ * does not say on its own.
  */
-function parseGauge(section: Section, file: string, display: string): { segments: number[]; best: ReportCardBest } {
+function parseRanges(section: Section, file: string, display: string): { segments: number[]; best: ReportCardBest } {
     const written = section.attributes.get('segments');
     const best = section.attributes.get('best') ?? 'high';
 
     for (const name of ['segments', 'best']) {
-        if (section.attributes.has(name) && display !== 'gauge') {
-            throw new Error(`${file}: card "${section.key}" names ${name}, which only a gauge draws`);
+        if (section.attributes.has(name) && !rangedDisplays.includes(display)) {
+            throw new Error(`${file}: card "${section.key}" names ${name}, which only a gauge or a number reads`);
         }
     }
     if (!(reportCardBest as readonly string[]).includes(best)) {
         throw new Error(`${file}: card "${section.key}" has best "${best}", expected one of ${reportCardBest.join(', ')}`);
     }
     // Which end is the good one only decides how the ranges are colored, so on its own it colors
-    // nothing: the ranges Metabase falls back to are drawn in its own colors, not in these.
+    // nothing: a number without ranges keeps its own color, and the ones a gauge falls back to are
+    // drawn in Metabase's.
     if (section.attributes.has('best') && written === undefined) {
         throw new Error(`${file}: card "${section.key}" says its best is "${best}" but names no segments to color`);
     }

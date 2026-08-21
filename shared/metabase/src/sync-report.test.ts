@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ReportCard, ReportTab } from './report.js';
-import { buildDashcards, buildParameters, buildTabs, buildTemplateTags, buildVisualizationSettings, collectionToRename, dashcardKey, gaugeColors, groupByDashboard, layoutCards, templateTagId } from './sync-report.js';
+import { buildDashcards, buildParameters, buildTabs, buildTemplateTags, buildVisualizationSettings, collectionToRename, dashcardKey, groupByDashboard, layoutCards, segmentColors, templateTagId } from './sync-report.js';
 
 function card(overrides: Partial<ReportCard> = {}): ReportCard {
     return {
@@ -197,6 +197,43 @@ describe('buildVisualizationSettings', () => {
 
     it('leaves the ranges of a gauge that names none to Metabase', () => {
         expect(buildVisualizationSettings(card({ display: 'gauge' }))).not.toHaveProperty('gauge.segments');
+        expect(buildVisualizationSettings(card({ display: 'scalar' }))).not.toHaveProperty('scalar.segments');
+    });
+
+    /**
+     * The number at the top of the page in the colors of the meter below it. Its outer ranges are
+     * left open where the arc has to stop: an eenheid at 200 falls outside every range of the gauge,
+     * and a number that matches none is drawn in the plain text color -- the one reading where the
+     * color says the most.
+     */
+    it('colors a number in the ranges of the meter of the same figure', () => {
+        const segments = [0, 35, 55, 75, 95, 115, 135];
+        const number = buildVisualizationSettings(card({ display: 'scalar', segments }))['scalar.segments'];
+
+        expect(number).toEqual([
+            { max: 35, color: '#ed6e6e' },
+            { min: 35, max: 55, color: '#f2955f' },
+            { min: 55, max: 75, color: '#f7bc50' },
+            { min: 75, max: 95, color: '#e2cb49' },
+            { min: 95, max: 115, color: '#b3c34a' },
+            { min: 115, color: '#84bb4c' },
+        ]);
+
+        const meter = buildVisualizationSettings(card({ display: 'gauge', segments }))['gauge.segments'] as { color: string }[];
+        expect((number as { color: string }[]).map(segment => segment.color)).toEqual(meter.map(segment => segment.color));
+    });
+
+    it('reads a number from the end its ranges are good at, as its meter does', () => {
+        const segments = [0, 4, 6, 8, 10, 12];
+        const number = buildVisualizationSettings(card({ display: 'scalar', segments, best: 'low' }))['scalar.segments'];
+
+        expect(number).toEqual([
+            { max: 4, color: '#84bb4c' },
+            { min: 4, max: 6, color: '#bfc54a' },
+            { min: 6, max: 8, color: '#f9cf48' },
+            { min: 8, max: 10, color: '#f39f5b' },
+            { min: 10, color: '#ed6e6e' },
+        ]);
     });
 
     /**
@@ -205,7 +242,7 @@ describe('buildVisualizationSettings', () => {
      */
     it('keeps the ends of the scale wherever the ranges are split', () => {
         for (const count of [2, 3, 6, 9]) {
-            const colors = gaugeColors(count, 'high');
+            const colors = segmentColors(count, 'high');
 
             expect(`${count}: ${colors.length} from ${colors[0]} to ${colors[colors.length - 1]}`).toEqual(`${count}: ${count} from #ed6e6e to #84bb4c`);
         }
@@ -213,7 +250,7 @@ describe('buildVisualizationSettings', () => {
 
     /** The two meters share one scale, so the same shade means the same thing on both of them. */
     it('reads the same scale from either end', () => {
-        expect(gaugeColors(6, 'low')).toEqual([...gaugeColors(6, 'high')].reverse());
+        expect(segmentColors(6, 'low')).toEqual([...segmentColors(6, 'high')].reverse());
     });
 
     it('uses the pie settings for a pie, which ignores the graph ones', () => {

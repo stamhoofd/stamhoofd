@@ -39,6 +39,7 @@ SELECT COUNT(DISTINCT member_id) AS `Aantal volwassenen` FROM leden WHERE effect
 -- title: GTP Index
 -- display: scalar
 -- size: sixth
+-- segments: 0, 35, 55, 75, 95, 115, 135
 -- description: GTP staat voor Gezond Toekomst Perspectief. Idealiter scoort een eenheid 100 of meer.
 -- @include facts
 -- @include leden
@@ -51,6 +52,8 @@ FROM leden
 -- title: Omkaderingscijfer
 -- display: scalar
 -- size: sixth
+-- segments: 0, 4, 6, 8, 10, 12
+-- best: low
 -- description: Het omkaderingscijfer geeft weer voor hoeveel leden een leider gemiddeld dient te zorgen. Idealiter scoort een eenheid hier laag op.
 -- @include facts
 -- @include leden

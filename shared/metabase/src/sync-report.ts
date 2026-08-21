@@ -152,26 +152,26 @@ export function effectiveDisplay(card: ReportCard, hasCoordinates: boolean): str
 }
 
 /**
- * The scale a gauge's ranges are colored along: red where the figure is at its worst, green where it
- * is at its best, through the yellow that lies between them. Metabase's own three, so a gauge sits
- * beside the rest of the report rather than beside a palette of its own.
+ * The scale the ranges of a figure are colored along: red where it is at its worst, green where it is
+ * at its best, through the yellow that lies between them. Metabase's own three, so these cards sit
+ * beside the rest of the report rather than beside a palette of their own.
  */
-const gaugeScale = ['#ED6E6E', '#F9CF48', '#84BB4C'];
+const segmentScale = ['#ED6E6E', '#F9CF48', '#84BB4C'];
 
 /**
  * The color of each range, mixed along that scale rather than picked per range: the ranges of a
  * figure are read against each other, so what a color says has to be where it sits between the worst
- * and the best -- whether a card splits its arc in three or in six.
+ * and the best -- whether a card splits the figure in three or in six.
  *
  * A figure that is better the lower it is runs the scale the other way, which is the whole of the
- * difference between the two gauges: green is always the end an eenheid is doing well at.
+ * difference between the two figures of the page: green is always the end an eenheid is doing well at.
  */
-export function gaugeColors(count: number, best: ReportCardBest): string[] {
+export function segmentColors(count: number, best: ReportCardBest): string[] {
     const colors = [...new Array(count).keys()].map((index) => {
-        const position = count === 1 ? 0 : (index / (count - 1)) * (gaugeScale.length - 1);
-        const step = Math.min(Math.floor(position), gaugeScale.length - 2);
+        const position = count === 1 ? 0 : (index / (count - 1)) * (segmentScale.length - 1);
+        const step = Math.min(Math.floor(position), segmentScale.length - 2);
 
-        return mixColors(gaugeScale[step], gaugeScale[step + 1], position - step);
+        return mixColors(segmentScale[step], segmentScale[step + 1], position - step);
     });
 
     return best === 'low' ? colors.reverse() : colors;
@@ -201,6 +201,31 @@ function gaugeLabel(segments: number[], index: number): string {
         return `> ${segments[index]}`;
     }
     return `${segments[index]}-${segments[index + 1]}`;
+}
+
+/**
+ * The ranges of a figure as the display reading them says it. The colors are the same either way --
+ * the number at the top of the page and the meter below it are read together -- but the ends are
+ * not. An arc has to stop somewhere, while a number has nowhere to run out of: leaving its outer
+ * ranges open is what keeps an eenheid past the last boundary colored at all, instead of falling
+ * outside every range and being drawn in the plain text color exactly where it matters most.
+ *
+ * Only the arc carries labels. Under a number Metabase writes each range beside its own color.
+ */
+function buildSegments(card: ReportCard, display: 'gauge' | 'scalar'): Record<string, unknown>[] {
+    const colors = segmentColors(card.segments.length - 1, card.best);
+
+    return card.segments.slice(0, -1).map((min, index) => {
+        const open = display === 'scalar';
+        const last = index === card.segments.length - 2;
+
+        return {
+            ...(open && index === 0 ? {} : { min }),
+            ...(open && last ? {} : { max: card.segments[index + 1] }),
+            color: colors[index],
+            ...(display === 'gauge' ? { label: gaugeLabel(card.segments, index) } : {}),
+        };
+    });
 }
 
 /**
@@ -246,14 +271,16 @@ export function buildVisualizationSettings(card: ReportCard, hasCoordinates = tr
         // Left unsaid, Metabase splits the arc in three equal ranges of its own between 0 and the
         // value it first drew, which says nothing about whether the figure is a good one.
         if (card.segments.length > 0) {
-            const colors = gaugeColors(card.segments.length - 1, card.best);
+            settings['gauge.segments'] = buildSegments(card, 'gauge');
+        }
+        return settings;
+    }
 
-            settings['gauge.segments'] = card.segments.slice(0, -1).map((min, index) => ({
-                min,
-                max: card.segments[index + 1],
-                color: colors[index],
-                label: gaugeLabel(card.segments, index),
-            }));
+    if (display === 'scalar') {
+        // The figure at the top of the page in the color of the range it falls in, so it says what
+        // the meter further down says without having to be read against it.
+        if (card.segments.length > 0) {
+            settings['scalar.segments'] = buildSegments(card, 'scalar');
         }
         return settings;
     }
