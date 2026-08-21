@@ -17,6 +17,9 @@ export class CenteredMessageButton {
     icon: string | null = null;
     loading = false;
     disabled = false;
+    /** Set while the button is temporarily disabled by an availability delay */
+    availabilityDelay?: number;
+    availableAt?: number;
     /**
      * If true, the button will only be enabled if the checkbox is checked.
      * Do not forget to add a checkbox to the CenteredMessage first.
@@ -201,9 +204,14 @@ export class CenteredMessage {
                 );
 
                 if (data.availabilityDelay) {
+                    const delay = data.availabilityDelay + 300; // 300 ms for delay presenting the message
+                    button.availabilityDelay = delay;
+                    button.availableAt = Date.now() + delay;
                     setTimeout(() => {
                         button.disabled = false;
-                    }, data.availabilityDelay + 300); // 300 ms for delay presenting the message
+                        button.availabilityDelay = undefined;
+                        button.availableAt = undefined;
+                    }, delay);
                 }
             }
 

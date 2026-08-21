@@ -24,14 +24,16 @@
 
             <div class="buttons" :class="{'single-button': centeredMessage.buttons.length === 1, 'multiple-buttons': centeredMessage.buttons.length > 2}">
                 <LoadingButton v-for="(button, index) in centeredMessage.buttons" :key="index" :loading="button.loading">
-                    <a v-if="button.href" ref="buttons" :href="button.href" class="button full" :class="button.type" data-testid="centered-message-button" :disabled="button.disabled || (button.requireAcceptCheckbox && !isChecked)" @click="onClickButton(button)">
-                        <span v-if="button.icon" class="icon" :class="button.icon" />
-                        <span>{{ button.text }}</span>
-                    </a>
-                    <button v-else ref="buttons" class="button full" :class="button.type" type="button" :tabindex="0" data-testid="centered-message-button" :disabled="button.disabled || (button.requireAcceptCheckbox && !isChecked)" @click="onClickButton(button)">
-                        <span v-if="button.icon" class="icon" :class="button.icon" />
-                        <span>{{ button.text }}</span>
-                    </button>
+                    <ProgressOutline :progress="getProgress(button)" :radius="13" class="button-progress-outline" :class="button.type">
+                        <a v-if="button.href" ref="buttons" :href="button.href" class="button full" :class="button.type" data-testid="centered-message-button" :disabled="button.disabled || (button.requireAcceptCheckbox && !isChecked)" @click="onClickButton(button)">
+                            <span v-if="button.icon" class="icon" :class="button.icon" />
+                            <span>{{ button.text }}</span>
+                        </a>
+                        <button v-else ref="buttons" class="button full" :class="button.type" type="button" :tabindex="0" data-testid="centered-message-button" :disabled="button.disabled || (button.requireAcceptCheckbox && !isChecked)" @click="onClickButton(button)">
+                            <span v-if="button.icon" class="icon" :class="button.icon" />
+                            <span>{{ button.text }}</span>
+                        </button>
+                    </ProgressOutline>
                 </LoadingButton>
             </div>
         </div>
@@ -44,9 +46,10 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
 import LoadingButton from '../navigation/LoadingButton.vue';
+import ProgressOutline from '../ProgressOutline.vue';
 import Spinner from '../Spinner.vue';
 import type { CenteredMessage, CenteredMessageButton } from './CenteredMessage';
-import { onActivated, onDeactivated, onMounted, ref, useTemplateRef } from 'vue';
+import { onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, useTemplateRef, watch } from 'vue';
 import { useErrors } from '../errors/useErrors';
 
 const props = defineProps<{
@@ -57,6 +60,53 @@ const errors = useErrors();
 const pop = usePop();
 const buttonsRef = useTemplateRef<HTMLButtonElement[] | HTMLButtonElement | null>('buttons');
 const isChecked = ref(false);
+const now = ref(Date.now());
+let animationFrame: number | null = null;
+
+function tick() {
+    now.value = Date.now();
+    if (props.centeredMessage.buttons.some(b => b.availableAt && b.availableAt > now.value)) {
+        animationFrame = requestAnimationFrame(tick);
+    } else {
+        animationFrame = null;
+    }
+}
+
+const outlineShownSince = new Map<CenteredMessageButton, number>();
+const catchUpDuration = 400;
+
+function easeOut(t: number) {
+    return 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 3);
+}
+
+function getProgress(button: CenteredMessageButton) {
+    if (!button.availableAt || !button.availabilityDelay || (button.requireAcceptCheckbox && !isChecked.value)) {
+        outlineShownSince.delete(button);
+        return 100;
+    }
+    let shownSince = outlineShownSince.get(button);
+    if (shownSince === undefined) {
+        shownSince = now.value;
+        outlineShownSince.set(button, shownSince);
+    }
+    const progress = easeOut(1 - (button.availableAt - now.value) / button.availabilityDelay);
+
+    // When the outline appears mid-delay, ramp up from 0 to the real progress instead of jumping
+    const catchUp = easeOut((now.value - shownSince) / Math.min(catchUpDuration, button.availableAt - shownSince));
+    return progress * catchUp * 100;
+}
+
+watch(() => props.centeredMessage.buttons.map(b => b.availableAt), () => {
+    if (animationFrame === null) {
+        tick();
+    }
+}, { immediate: true });
+
+onBeforeUnmount(() => {
+    if (animationFrame !== null) {
+        cancelAnimationFrame(animationFrame);
+    }
+});
 
 onMounted(() => {
     props.centeredMessage.doHide = () => {
@@ -251,6 +301,21 @@ function onKey(event: KeyboardEvent) {
 
     .checkbox-container {
         padding-top: 15px;
+    }
+
+    // Matches the colors of a disabled button
+    .button-progress-outline {
+        &.primary, &.secundary {
+            color: $color-gray-2;
+        }
+
+        &.destructive {
+            color: $color-error;
+
+            .progress-outline-svg > rect.bar {
+                opacity: 0.4;
+            }
+        }
     }
 
     &.few-buttons {
