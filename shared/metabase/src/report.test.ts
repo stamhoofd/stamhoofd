@@ -319,18 +319,22 @@ describe('report', () => {
          * The weights of the index, kept here because nothing else checks them: a wrong weight, or a
          * tak spelled differently from the row in `default_age_groups`, is a plausible number rather
          * than a failure.
+         *
+         * Every tak term asks for the category as well as the name. A group an eenheid named `Bevers`
+         * itself is categorised as nothing, and weighing it as the tak it is named after is the same
+         * kind of plausible mistake.
          */
         it('weighs each tak of the GTP index as the formula does', () => {
             const sql = cardOf(dashboards, 'eenheden', 'eenheid-gtp').sql.replaceAll(/\s+/g, ' ');
 
             for (const [tak, term] of [
-                ['Bevers, Eekhoorns en Welpen', "( COUNT(DISTINCT CASE WHEN `Tak` = 'Bevers' THEN member_id END) + COUNT(DISTINCT CASE WHEN `Tak` = 'Eekhoorns' THEN member_id END) + COUNT(DISTINCT CASE WHEN `Tak` = 'Welpen' THEN member_id END) ) / 3"],
-                ['Wolven', "+ COUNT(DISTINCT CASE WHEN `Tak` = 'Wolven' THEN member_id END)"],
-                ['JVG/JG-A', "+ COUNT(DISTINCT CASE WHEN `Tak` = 'Jongverkenners/Jonggidsen - Aspiranten' THEN member_id END)"],
-                ['VG/G-J', "+ 2 * COUNT(DISTINCT CASE WHEN `Tak` = 'Verkenners/Gidsen - Juniors' THEN member_id END)"],
-                ['Seniors', "+ 3 * COUNT(DISTINCT CASE WHEN `Tak` = 'Seniors' THEN member_id END)"],
-                ['Leiding', "+ COUNT(DISTINCT CASE WHEN effective_category = 'leader' THEN member_id END)"],
-                ['omkaderingscijfer', "- 2 * COUNT(DISTINCT CASE WHEN effective_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN effective_category = 'leader' THEN member_id END), 0)"],
+                ['Bevers, Eekhoorns en Welpen', "( COUNT(DISTINCT CASE WHEN tak_category = 'child' AND `Tak` = 'Bevers' THEN member_id END) + COUNT(DISTINCT CASE WHEN tak_category = 'child' AND `Tak` = 'Eekhoorns' THEN member_id END) + COUNT(DISTINCT CASE WHEN tak_category = 'child' AND `Tak` = 'Welpen' THEN member_id END) ) / 3"],
+                ['Wolven', "+ COUNT(DISTINCT CASE WHEN tak_category = 'child' AND `Tak` = 'Wolven' THEN member_id END)"],
+                ['JVG/JG-A', "+ COUNT(DISTINCT CASE WHEN tak_category = 'child' AND `Tak` = 'Jongverkenners/Jonggidsen - Aspiranten' THEN member_id END)"],
+                ['VG/G-J', "+ 2 * COUNT(DISTINCT CASE WHEN tak_category = 'child' AND `Tak` = 'Verkenners/Gidsen - Juniors' THEN member_id END)"],
+                ['Seniors', "+ 3 * COUNT(DISTINCT CASE WHEN tak_category = 'child' AND `Tak` = 'Seniors' THEN member_id END)"],
+                ['Leiding', "+ COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END)"],
+                ['omkaderingscijfer', "- 2 * COUNT(DISTINCT CASE WHEN tak_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END), 0)"],
             ]) {
                 expect(`${tak}: ${sql.includes(term)}`).toEqual(`${tak}: true`);
             }
@@ -345,19 +349,71 @@ describe('report', () => {
             const sql = cardOf(ravotDashboards, 'eenheden', 'eenheid-gtp').sql.replaceAll(/\s+/g, ' ');
 
             for (const [bucket, term] of [
-                ['jonger dan 10', "ROUND( COUNT(DISTINCT CASE WHEN effective_category = 'child' AND leeftijd < 10 THEN member_id END) / 3"],
-                ['10 tot 13', "+ COUNT(DISTINCT CASE WHEN effective_category = 'child' AND leeftijd BETWEEN 10 AND 13 THEN member_id END)"],
-                ['14 tot 15', "+ 2 * COUNT(DISTINCT CASE WHEN effective_category = 'child' AND leeftijd BETWEEN 14 AND 15 THEN member_id END)"],
-                ['16', "+ 3 * COUNT(DISTINCT CASE WHEN effective_category = 'child' AND leeftijd = 16 THEN member_id END)"],
-                ['Leiding', "+ 1.5 * COUNT(DISTINCT CASE WHEN effective_category = 'leader' THEN member_id END)"],
-                ['omkaderingscijfer', "- 2 * COUNT(DISTINCT CASE WHEN effective_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN effective_category = 'leader' THEN member_id END), 0)"],
+                ['jonger dan 10', "ROUND( COUNT(DISTINCT CASE WHEN tak_category = 'child' AND leeftijd < 10 THEN member_id END) / 3"],
+                ['10 tot 13', "+ COUNT(DISTINCT CASE WHEN tak_category = 'child' AND leeftijd BETWEEN 10 AND 13 THEN member_id END)"],
+                ['14 tot 15', "+ 2 * COUNT(DISTINCT CASE WHEN tak_category = 'child' AND leeftijd BETWEEN 14 AND 15 THEN member_id END)"],
+                ['16', "+ 3 * COUNT(DISTINCT CASE WHEN tak_category = 'child' AND leeftijd = 16 THEN member_id END)"],
+                ['Leiding', "+ 1.5 * COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END)"],
+                ['omkaderingscijfer', "- 2 * COUNT(DISTINCT CASE WHEN tak_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END), 0)"],
             ]) {
                 expect(`${bucket}: ${sql.includes(term)}`).toEqual(`${bucket}: true`);
             }
 
-            // Every bucket counts kinderen, so a leider of sixteen weighs as leiding rather than as
-            // both, and a tak weighs nothing at all here.
+            // The age says which bucket a kind falls in, never whether they are one: a leider of
+            // sixteen is leiding here, and the tak weighs nothing at all.
             expect(sql).not.toContain('`Tak` =');
+        });
+
+        /**
+         * Both formulas weigh members rather than registrations, and only the fragment below them
+         * makes that true: a member in two takken stands in `facts` twice, and every term of the
+         * index would weigh them twice over -- as leiding and as a lid, or in two takken at once.
+         * Nothing about a card says which of the two it reads, so it is checked here.
+         */
+        it('weighs the GTP index over members rather than over their registrations', () => {
+            for (const [env, tabs] of [['keeo', dashboards], ['ravot', ravotDashboards]] as const) {
+                for (const [tab, key] of [['nationaal', 'leden-per-eenheid'], ['eenheden', 'eenheid-gtp'], ['eenheden', 'eenheid-gtp-meter'], ['eenheden', 'eenheid-gtp-per-scoutsjaar']]) {
+                    // What the card itself selects, past the fragments it opens with. The last of
+                    // them reads `facts` to build `gtp_leden` out of it, which the card may not.
+                    const sql = cardOf(tabs, tab, key).sql.replaceAll(/\s+/g, ' ');
+                    const query = sql.slice(sql.indexOf('WHERE g.gtp_rang = 1 )'));
+
+                    expect(`${env}/${key}: ${query.includes('FROM gtp_leden')}`).toEqual(`${env}/${key}: true`);
+                    expect(`${env}/${key}: ${/FROM facts\b/.test(query)}`).toEqual(`${env}/${key}: false`);
+                }
+            }
+        });
+
+        /**
+         * Which registration of a member speaks for them. Leiding beats lid, so someone leiding in one
+         * tak and lid in another is leiding and nothing else; between two takken the oldest wins; and
+         * the name of the tak settles what neither can, so two runs of the same query cannot pick
+         * differently and report two different numbers.
+         */
+        it('lets the strongest registration of a member say what they are', () => {
+            const sql = cardOf(dashboards, 'eenheden', 'eenheid-gtp').sql.replaceAll(/\s+/g, ' ');
+
+            expect(sql).toContain('ROW_NUMBER() OVER ( PARTITION BY f.organization_id, f.`Scoutsjaar`, f.member_id ORDER BY '
+                + "CASE f.tak_category WHEN 'leader' THEN 2 WHEN 'child' THEN 1 ELSE 0 END DESC, f.tak_min_age DESC, f.`Tak` ) AS gtp_rang");
+            expect(sql).toContain('WHERE g.gtp_rang = 1');
+        });
+
+        /**
+         * The omkaderingscijfer on the screen counts every kind the report knows of; the one the index
+         * subtracts counts the kinderen of a categorised tak. They are the same figure wherever every
+         * tak is categorised, which is why the difference is easy to lose again.
+         */
+        it('subtracts the kinderen it weighs, not the ones the omkaderingscijfer counts', () => {
+            for (const [env, tabs, pattern] of [
+                ['keeo', dashboards, /ROUND\( \( COUNT\(DISTINCT CASE WHEN tak_category.*?, 2\)/],
+                ['ravot', ravotDashboards, /ROUND\( COUNT\(DISTINCT CASE WHEN tak_category.*?, 2\)/],
+            ] as const) {
+                const index = cardOf(tabs, 'eenheden', 'eenheid-gtp').sql.replaceAll(/\s+/g, ' ').match(pattern)?.[0];
+
+                expect(`${env}: ${index?.includes('effective_category')}`).toEqual(`${env}: false`);
+            }
+
+            expect(cardOf(dashboards, 'eenheden', 'eenheid-omkaderingscijfer').sql).toContain("effective_category = 'child'");
         });
 
         /**
@@ -367,8 +423,8 @@ describe('report', () => {
          */
         it('computes the GTP index from one expression wherever it is shown', () => {
             for (const [env, tabs, pattern] of [
-                ['keeo', dashboards, /ROUND\( \( COUNT\(DISTINCT CASE WHEN `Tak` = 'Bevers'.*?, 2\)/],
-                ['ravot', ravotDashboards, /ROUND\( COUNT\(DISTINCT CASE WHEN effective_category = 'child' AND leeftijd < 10.*?, 2\)/],
+                ['keeo', dashboards, /ROUND\( \( COUNT\(DISTINCT CASE WHEN tak_category = 'child' AND `Tak` = 'Bevers'.*?, 2\)/],
+                ['ravot', ravotDashboards, /ROUND\( COUNT\(DISTINCT CASE WHEN tak_category = 'child' AND leeftijd < 10.*?, 2\)/],
             ] as const) {
                 const expressions = [['nationaal', 'leden-per-eenheid'], ['eenheden', 'eenheid-gtp'], ['eenheden', 'eenheid-gtp-meter'], ['eenheden', 'eenheid-gtp-per-scoutsjaar']]
                     .map(([tab, key]) => cardOf(tabs, tab, key).sql.replaceAll(/\s+/g, ' ').match(pattern)?.[0]);

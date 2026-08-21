@@ -11,10 +11,12 @@
 --
 -- Two columns say what a registration counts as, and they answer different questions.
 -- `tak_category` is what the tak was recorded as -- kinderen, leiding or volwassenen -- and is null
--- wherever nobody has said, which is what the aanlevering reads: a sheet delivered to a department
--- may not guess. `effective_category` is that same answer with the fallbacks the ledenstatistieken
--- need behind it -- the tak's age range, and then the member's own age at the start of the year --
--- so that nobody drops out of a total for want of a tak that was never categorised.
+-- wherever nobody has said. The aanlevering and the GTP index both read that one: a sheet delivered
+-- to a department may not guess, and an index that weighs leiding apart from kinderen cannot lean on
+-- a fallback that reads every young leider as a kind. `effective_category` is that same answer with
+-- the fallbacks the ledenstatistieken need behind it -- the tak's age range, and then the member's
+-- own age at the start of the year -- so that nobody drops out of a total for want of a tak that was
+-- never categorised.
 --
 -- That last fallback catches what the import could not name. The client's export leaves the tak empty
 -- on the children of the years before 2020-2021; the import reads those from the member's age, except
