@@ -370,15 +370,18 @@ describe('report', () => {
          * index would weigh them twice over -- as leiding and as a lid, or in two takken at once.
          * Nothing about a card says which of the two it reads, so it is checked here.
          */
-        it('weighs the GTP index over members rather than over their registrations', () => {
+        it('counts both figures over members rather than over their registrations', () => {
             for (const [env, tabs] of [['keeo', dashboards], ['ravot', ravotDashboards]] as const) {
-                for (const [tab, key] of [['nationaal', 'leden-per-eenheid'], ['eenheden', 'eenheid-gtp'], ['eenheden', 'eenheid-gtp-meter'], ['eenheden', 'eenheid-gtp-per-scoutsjaar']]) {
+                for (const [tab, key] of [
+                    ['nationaal', 'leden-per-eenheid'], ['eenheden', 'eenheid-gtp'], ['eenheden', 'eenheid-gtp-meter'], ['eenheden', 'eenheid-gtp-per-scoutsjaar'],
+                    ['eenheden', 'eenheid-omkaderingscijfer'], ['eenheden', 'eenheid-omkaderingscijfer-meter'], ['eenheden', 'eenheid-omkaderingscijfer-per-scoutsjaar'],
+                ]) {
                     // What the card itself selects, past the fragments it opens with. The last of
-                    // them reads `facts` to build `gtp_leden` out of it, which the card may not.
+                    // them reads `facts` to build `leden` out of it, which the card may not.
                     const sql = cardOf(tabs, tab, key).sql.replaceAll(/\s+/g, ' ');
-                    const query = sql.slice(sql.indexOf('WHERE g.gtp_rang = 1 )'));
+                    const query = sql.slice(sql.indexOf('WHERE g.rang = 1 )'));
 
-                    expect(`${env}/${key}: ${query.includes('FROM gtp_leden')}`).toEqual(`${env}/${key}: true`);
+                    expect(`${env}/${key}: ${query.includes('FROM leden')}`).toEqual(`${env}/${key}: true`);
                     expect(`${env}/${key}: ${/FROM facts\b/.test(query)}`).toEqual(`${env}/${key}: false`);
                 }
             }
@@ -394,26 +397,29 @@ describe('report', () => {
             const sql = cardOf(dashboards, 'eenheden', 'eenheid-gtp').sql.replaceAll(/\s+/g, ' ');
 
             expect(sql).toContain('ROW_NUMBER() OVER ( PARTITION BY f.organization_id, f.`Scoutsjaar`, f.member_id ORDER BY '
-                + "CASE f.tak_category WHEN 'leader' THEN 2 WHEN 'child' THEN 1 ELSE 0 END DESC, f.tak_min_age DESC, f.`Tak` ) AS gtp_rang");
-            expect(sql).toContain('WHERE g.gtp_rang = 1');
+                + "CASE f.tak_category WHEN 'leader' THEN 2 WHEN 'child' THEN 1 ELSE 0 END DESC, f.tak_min_age DESC, f.`Tak` ) AS rang");
+            expect(sql).toContain('WHERE g.rang = 1');
         });
 
         /**
-         * The omkaderingscijfer on the screen counts every kind the report knows of; the one the index
-         * subtracts counts the kinderen of a categorised tak. They are the same figure wherever every
-         * tak is categorised, which is why the difference is easy to lose again.
+         * The index subtracts the omkaderingscijfer, so the two have to count the same kinderen and
+         * the same leiding: one of them falling back to the ages again would leave the figure on the
+         * screen and the one inside the index quietly disagreeing.
          */
-        it('subtracts the kinderen it weighs, not the ones the omkaderingscijfer counts', () => {
+        it('subtracts the same omkaderingscijfer it puts on the screen', () => {
+            const divisie = "COUNT(DISTINCT CASE WHEN tak_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END), 0)";
+
             for (const [env, tabs, pattern] of [
                 ['keeo', dashboards, /ROUND\( \( COUNT\(DISTINCT CASE WHEN tak_category.*?, 2\)/],
                 ['ravot', ravotDashboards, /ROUND\( COUNT\(DISTINCT CASE WHEN tak_category.*?, 2\)/],
             ] as const) {
                 const index = cardOf(tabs, 'eenheden', 'eenheid-gtp').sql.replaceAll(/\s+/g, ' ').match(pattern)?.[0];
 
+                expect(`${env}: ${index?.includes(`- 2 * ${divisie}`)}`).toEqual(`${env}: true`);
                 expect(`${env}: ${index?.includes('effective_category')}`).toEqual(`${env}: false`);
             }
 
-            expect(cardOf(dashboards, 'eenheden', 'eenheid-omkaderingscijfer').sql).toContain("effective_category = 'child'");
+            expect(cardOf(dashboards, 'eenheden', 'eenheid-omkaderingscijfer').sql.replaceAll(/\s+/g, ' ')).toContain(`ROUND( ${divisie}, 2)`);
         });
 
         /**
@@ -480,7 +486,7 @@ describe('report', () => {
         });
 
         it('counts the omkaderingscijfer the same way wherever it is shown', () => {
-            const expression = "ROUND( COUNT(DISTINCT CASE WHEN effective_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN effective_category = 'leader' THEN member_id END), 0), 2)";
+            const expression = "ROUND( COUNT(DISTINCT CASE WHEN tak_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END), 0), 2)";
 
             for (const key of ['eenheid-omkaderingscijfer', 'eenheid-omkaderingscijfer-meter', 'eenheid-omkaderingscijfer-per-scoutsjaar']) {
                 const sql = cardOf(dashboards, 'eenheden', key).sql.replaceAll(/\s+/g, ' ');

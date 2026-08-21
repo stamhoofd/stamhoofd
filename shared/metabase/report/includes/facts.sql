@@ -11,9 +11,9 @@
 --
 -- Two columns say what a registration counts as, and they answer different questions.
 -- `tak_category` is what the tak was recorded as -- kinderen, leiding or volwassenen -- and is null
--- wherever nobody has said. The aanlevering and the GTP index both read that one: a sheet delivered
--- to a department may not guess, and an index that weighs leiding apart from kinderen cannot lean on
--- a fallback that reads every young leider as a kind. `effective_category` is that same answer with
+-- wherever nobody has said. The aanlevering reads that one, and so do the figures that weigh leiding
+-- against kinderen: a sheet delivered to a department may not guess, and a division with leiding on
+-- one side cannot lean on a fallback that reads every young leider as a kind. `effective_category` is that same answer with
 -- the fallbacks the ledenstatistieken need behind it -- the tak's age range, and then the member's
 -- own age at the start of the year -- so that nobody drops out of a total for want of a tak that was
 -- never categorised.

@@ -37,11 +37,11 @@ SELECT COUNT(DISTINCT member_id) AS `Aantal volwassenen` FROM facts WHERE effect
 -- size: sixth
 -- description: GTP staat voor Gezond Toekomst Perspectief. Idealiter scoort een eenheid 100 of meer.
 -- @include facts
--- @include gtp-leden
+-- @include leden
 SELECT
     -- @include gtp
         AS `GTP Index`
-FROM gtp_leden
+FROM leden
 
 -- @card eenheid-omkaderingscijfer
 -- title: Omkaderingscijfer
@@ -49,10 +49,11 @@ FROM gtp_leden
 -- size: sixth
 -- description: Het omkaderingscijfer geeft weer voor hoeveel leden een leider gemiddeld dient te zorgen. Idealiter scoort een eenheid hier laag op.
 -- @include facts
+-- @include leden
 SELECT
     -- @include omkaderingscijfer
         AS `Omkaderingscijfer`
-FROM facts
+FROM leden
 
 -- @card eenheid-leden-per-postcode
 -- title: Aantal leden per postcode
@@ -99,11 +100,11 @@ ORDER BY MIN(period_start)
 -- description: GTP staat voor Gezond Toekomst Perspectief. De berekening schenkt veel waarde aan potentieel toekomstige leiding (VG's & Seniors) op korte termijn. Idealiter scoort een eenheid 100 of meer op deze index. Dit geeft enkel een indicatie voor eenheden tot ongeveer 150 leden, daarna worden ze sowieso gezond geacht.
 -- description@ravot: GTP staat voor Gezond Toekomst Perspectief. De berekening schenkt veel waarde aan potentieel toekomstige leiding (14- tot 16-jarigen) op korte termijn. Idealiter scoort een eenheid 100 of meer op deze index. Dit geeft enkel een indicatie voor eenheden tot ongeveer 150 leden, daarna worden ze sowieso gezond geacht.
 -- @include facts
--- @include gtp-leden
+-- @include leden
 SELECT
     -- @include gtp
         AS `GTP Index`
-FROM gtp_leden
+FROM leden
 
 -- @card eenheid-gtp-per-scoutsjaar
 -- title: GTP index per Scoutsjaar
@@ -112,12 +113,12 @@ FROM gtp_leden
 -- dimensions: Scoutsjaar
 -- metrics: GTP index
 -- @include facts-alle-jaren
--- @include gtp-leden
+-- @include leden
 SELECT
     `Scoutsjaar`,
     -- @include gtp
         AS `GTP index`
-FROM gtp_leden
+FROM leden
 GROUP BY `Scoutsjaar`
 ORDER BY MIN(period_start)
 
@@ -127,10 +128,11 @@ ORDER BY MIN(period_start)
 -- size: third
 -- description: Het omkaderingscijfer geeft weer voor hoeveel leden een leider gemiddeld dient te zorgen. Idealiter scoort een eenheid hier laag op. Bij een cijfer van 10 of meer wordt toezicht houden op de leden moeilijker.
 -- @include facts
+-- @include leden
 SELECT
     -- @include omkaderingscijfer
         AS `Omkaderingscijfer`
-FROM facts
+FROM leden
 
 -- @card eenheid-omkaderingscijfer-per-scoutsjaar
 -- title: Omkaderingscijfer per Scoutsjaar
@@ -139,11 +141,12 @@ FROM facts
 -- dimensions: Scoutsjaar
 -- metrics: Omkaderingscijfer
 -- @include facts-alle-jaren
+-- @include leden
 SELECT
     `Scoutsjaar`,
     -- @include omkaderingscijfer
         AS `Omkaderingscijfer`
-FROM facts
+FROM leden
 GROUP BY `Scoutsjaar`
 ORDER BY MIN(period_start)
 

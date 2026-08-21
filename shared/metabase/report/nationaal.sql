@@ -49,13 +49,13 @@ SELECT COUNT(DISTINCT member_id) AS `Aantal volwassenen` FROM facts WHERE effect
 -- Rechtop, niet schuin: Metabase laat een label vallen zodra het het vorige raakt, en schuin heeft
 -- een naam per eenheid daar net te weinig plaats voor.
 -- @include facts
--- @include gtp-leden
+-- @include leden
 SELECT
     `Eenheid`,
     COUNT(DISTINCT member_id) AS `Aantal leden`,
     -- @include gtp
         AS `GTP index`
-FROM gtp_leden
+FROM leden
 GROUP BY `Eenheid`
 ORDER BY `Aantal leden` DESC
 
