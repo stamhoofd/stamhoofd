@@ -660,6 +660,35 @@ describe('report', () => {
         });
 
         /**
+         * A Metabase table can only pin rows at its top, so a total as the last row of the ULDK table
+         * would only be reached after scrolling past every eenheid. It stands under the table as a
+         * card of its own instead, which stays where it is however far the table is scrolled.
+         */
+        it('stands the ULDK totals under the table, in the same columns', () => {
+            const placed = layoutCards(dashboards.find(dashboard => dashboard.key === 'varia')!.cards);
+            const [table, totals] = placed;
+
+            expect(placed.map(entry => entry.card.key)).toEqual(['uldk', 'uldk-totaal']);
+            expect(totals.row).toEqual(table.row + table.sizeY);
+            expect(`${totals.sizeX} wide, ${table.sizeX} wide`).toEqual('24 wide, 24 wide');
+        });
+
+        /**
+         * The totals are the columns of the table added up rather than counted again, so both cards
+         * read one fragment. What is left to drift is the adding up itself: a column added to the
+         * table and not to the totals leaves the row under it one short, and reads as a table that
+         * does not add up.
+         */
+        it('adds up every column the ULDK table holds', async () => {
+            const fragment = await fs.readFile(path.join(getReportDirectory(), 'includes', 'uldk.sql'), 'utf-8');
+            const columns = [...fragment.matchAll(/AS `([^`]+)`/g)].map(match => match[1]).filter(column => !['Name', 'City'].includes(column));
+            const summed = [...cardOf(dashboards, 'varia', 'uldk-totaal').sql.matchAll(/SUM\(`([^`]+)`\)/g)].map(match => match[1]);
+
+            expect(summed).toEqual(columns);
+            expect(`${columns.length} columns`).toEqual('8 columns');
+        });
+
+        /**
          * The netwerk page is read as two columns: the leden and the eenheden of every netwerk
          * stacked on the left, the map of where those eenheden sit beside them. The map is the one
          * card of the report that stands across two rows, and it ends exactly where the pie does.
