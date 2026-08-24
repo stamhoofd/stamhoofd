@@ -1,4 +1,4 @@
-import { registerCron } from '@stamhoofd/crons';
+import { registerTenantCron } from './helpers/registerTenantCron.js';
 import { FlagMomentCleanup } from '../helpers/FlagMomentCleanup.js';
 import { Platform, RegistrationPeriod } from '@stamhoofd/models';
 
@@ -9,7 +9,7 @@ const now = new Date();
 let lastCleanupYear: number = now.getFullYear();
 let lastCleanupMonth: number = now.getMonth();
 
-registerCron('endFunctionsOfUsersWithoutRegistration', endFunctionsOfUsersWithoutRegistration);
+registerTenantCron('endFunctionsOfUsersWithoutRegistration', endFunctionsOfUsersWithoutRegistration);
 
 export async function endFunctionsOfUsersWithoutRegistration() {
     if (STAMHOOFD.userMode === 'organization') {

@@ -1,10 +1,10 @@
-import { registerCron } from '@stamhoofd/crons';
 import { Organization, Platform } from '@stamhoofd/models';
 import { Formatter } from '@stamhoofd/utility';
+import { registerRootTenantCron } from './helpers/registerTenantCron.js';
 
 import { ApplicationFeeInvoicer } from '../helpers/ApplicationFeeInvoicer.js';
 
-registerCron('stripe-invoices', createStripeInvoices);
+registerRootTenantCron('stripe-invoices', createStripeInvoices);
 
 let lastStripeInvoice: Date | null = null;
 

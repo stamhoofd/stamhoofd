@@ -3,13 +3,13 @@
  * After 1 month of deletion, we should delete it permanently.
  */
 
-import { registerCron } from '@stamhoofd/crons';
+import { registerTenantCron } from './helpers/registerTenantCron.js';
 import { Group } from '@stamhoofd/models';
 
 let lastRunDate: number | null = null;
 const keepDeletedDataForDays = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
 
-registerCron('delete-archived-data', deleteArchivedData);
+registerTenantCron('delete-archived-data', deleteArchivedData);
 
 function shouldRun() {
     const now = new Date();

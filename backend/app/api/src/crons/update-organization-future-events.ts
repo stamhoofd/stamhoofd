@@ -6,12 +6,12 @@
  * has (or vice versa). Recomputing it nightly keeps it accurate.
  */
 
-import { registerCron } from '@stamhoofd/crons';
+import { registerTenantCron } from './helpers/registerTenantCron.js';
 import { Organization } from '@stamhoofd/models';
 
 let lastRunDate: number | null = null;
 
-registerCron('updateOrganizationFutureEvents', updateOrganizationFutureEvents);
+registerTenantCron('updateOrganizationFutureEvents', updateOrganizationFutureEvents);
 
 function shouldRun() {
     const now = new Date();

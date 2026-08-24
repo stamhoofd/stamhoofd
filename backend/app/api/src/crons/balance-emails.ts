@@ -1,4 +1,4 @@
-import { registerCron } from '@stamhoofd/crons';
+import { registerTenantCron } from './helpers/registerTenantCron.js';
 import { CachedBalance, Email, EmailRecipient, Organization, User } from '@stamhoofd/models';
 import type { IterableSQLSelect } from '@stamhoofd/sql';
 import { readDynamicSQLExpression, SQL } from '@stamhoofd/sql';
@@ -8,7 +8,7 @@ import { ContextInstance } from '../helpers/Context.js';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { EmailSendService } from '../services/EmailSendService.js';
 
-registerCron('balanceEmails', balanceEmails);
+registerTenantCron('balanceEmails', balanceEmails);
 
 let lastFullRun = new Date(0);
 let savedIterator: IterableSQLSelect<Organization> | null = null;
