@@ -129,6 +129,7 @@ const isOnlyDeleting = computed(() => props.checkout.cart.items.length === 0 && 
 const hasDeleteRegistrations = computed(() => props.checkout.cart.deleteRegistrations.length > 0);
 const hasPaidRegistrationDelete = computed(() => props.checkout.cart.deleteRegistrations.some(r => r.registration.balances.some(b => b.amountOpen > 0 || b.amountPaid > 0 || b.amountPending > 0)));
 const hadPaidByOrganization = computed(() => props.checkout.cart.deleteRegistrations.some(r => r.registration.payingOrganizationId && r.registration.balances.some(b => b.amountOpen > 0 || b.amountPaid > 0 || b.amountPending > 0)));
+let added = false;
 
 async function addMember() {
     const family = new PlatformFamily({
@@ -179,6 +180,8 @@ async function addMember() {
                 displayOptions: { action: 'show', replace: 100, force: true },
                 navigate,
                 finishHandler: async (navigate: NavigationActions) => {
+                    added = true;
+
                     await checkoutRegisterItem({
                         item,
                         startCheckoutFlow: false,
@@ -200,6 +203,7 @@ async function searchMembers() {
                 root: AsyncComponent(() => import('./SearchOrganizationMembersForGroupView.vue'), {
                     ...props,
                     saveHandler: async (navigate: NavigationActions) => {
+                        added = true;
                         await navigate.dismiss({ force: true });
                     },
                 }),
@@ -236,7 +240,7 @@ async function goToCheckout() {
 }
 
 const shouldNavigateAway = async () => {
-    if (props.checkout.cart.isEmpty) {
+    if (props.checkout.cart.isEmpty || !added) {
         return true;
     }
     return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
