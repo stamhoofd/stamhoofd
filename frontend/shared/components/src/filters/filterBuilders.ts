@@ -576,7 +576,7 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions, g
         wrapper: FilterWrapperMarker,
         relationFetcher: groupsRelationFetcher({ type: GroupType.Membership, defaultPeriodId: periodId, isPeriodRequired: true }),
         defaultOptions: [{
-            name: $t('Geen'),
+            name: $t('%1FW'),
             value: null,
             description: $t('%1VF'),
         }],
