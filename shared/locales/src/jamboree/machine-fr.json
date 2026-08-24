@@ -615,18 +615,6 @@
     "original": "De eenheid is aangemaakt. Log in het beheerderportaal in om andere beheerders toegang te geven.",
     "translation": "L'unité a été créée. Connectez-vous au portail administrateur pour donner accès à d'autres administrateurs."
   },
-  "%35": {
-    "original": "Ben je zeker dat je deze eenheid wil verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer cette unité ?"
-  },
-  "%36": {
-    "original": "Bevestiging 2/3. Ben je 100% zeker dat je deze eenheid wilt verwijderen?",
-    "translation": "Confirmation 2/3. Êtes-vous sûr à 100 % de vouloir supprimer cette unité ?"
-  },
-  "%37": {
-    "original": "Bevestiging 3/3. Ben je 100% zeker dat je deze eenheid wilt verwijderen?",
-    "translation": "Confirmation 3/3. Êtes-vous sûr à 100 % de vouloir supprimer cette unité ?"
-  },
   "%38": {
     "original": "Eenheid bewerken",
     "translation": "Modifier l'unité"
@@ -678,10 +666,6 @@
   "%3Y": {
     "original": "Je hebt al voor elk scoutsjaar instellingen toegevoegd",
     "translation": "Vous avez déjà ajouté des paramètres pour chaque année scoute"
-  },
-  "%3d": {
-    "original": "Ben je zeker dat je dit scoutsjaar wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer cette année scoute ?"
   },
   "%3e": {
     "original": "Beheer de scoutsjaren en start een nieuw scoutsjaar op",
@@ -1638,6 +1622,38 @@
   "%Zlz": {
     "original": "Andere eenheid zoeken",
     "translation": "Rechercher une autre unité"
+  },
+  "%ZmJ": {
+    "original": "Je hebt geen toegang om aan te melden als deze gebruiker. Deze gebruiker heeft op één of andere manier meer toegangsrechten dan jou, of toegang tot data waar jij niet aankan (bv. inschrijvingen bij andere eenheid), vandaar dat het niet kan.",
+    "translation": "Vous n'avez pas la permission de vous connecter comme cet utilisateur. Ce dernier dispose de plus de droits d'accès ou d'un accès à des données auxquelles vous n'avez pas accès (par ex. inscriptions dans une autre unité), raison pour laquelle cela n'est pas permis."
+  },
+  "%ZmW": {
+    "original": "Je meldt je aan via een link als een andere gebruiker. Hierna zie je alles net zoals die gebruiker Jamboree ziet. Ga enkel verder als je deze link zelf hebt aangemaakt.",
+    "translation": "Vous vous connectez via un lien en tant qu'autre utilisateur. Ensuite, vous verrez la plateforme exactement comme cet utilisateur voit Jamboree. Continuez uniquement si vous avez créé ce lien vous-même."
+  },
+  "%Zma": {
+    "original": "Je bekijkt Jamboree nu als {name}",
+    "translation": "Vous consultez Jamboree maintenant en tant que {name}"
+  },
+  "%Zmb": {
+    "original": "Met deze link bekijk je Jamboree zoals deze gebruiker het ziet. Om veiligheidsredenen kan het soms zijn dat bepaalde dingen er toch een klein beetje anders uitzien. Alles wat je wijzigt, wordt geregistreerd onder jouw eigen naam.",
+    "translation": "Avec ce lien vous voyez Jamboree comme cet utilisateur. Pour des raisons de sécurité, certaines choses pourraient apparaître légèrement différemment. Toutes les modifications effectuées seront enregistrées sous votre propre nom."
+  },
+  "%Zml": {
+    "original": "Tip: Gebruik de ‘Inloggen als’-functie om te kijken hoe Jamboree er voor een andere beheerder uitziet en de rechten uit te proberen.",
+    "translation": "Astuce : utilisez la fonction « Se connecter en tant que » pour voir comment Jamboree apparaît pour un autre administrateur et tester les droits d'accès."
+  },
+  "%Zn8": {
+    "original": "Inloggen als een andere gebruiker is niet ingeschakeld voor deze eenheid.",
+    "translation": "La connexion en tant qu'un autre utilisateur n'est pas activée pour cette unité."
+  },
+  "%ZnQ": {
+    "original": "Inloggen als een andere gebruiker (voor alle eenheden)",
+    "translation": "Se connecter en tant qu'un autre utilisateur (pour toutes les unités)"
+  },
+  "%ZnV": {
+    "original": "Hoofdbeheerders van deze eenheid kunnen via een link inloggen als één van hun gebruikers, om te zien wat die gebruiker ziet.",
+    "translation": "Les administrateurs principaux de cette unité peuvent utiliser un lien pour se connecter comme l'un de leurs utilisateurs, afin de voir ce que cet utilisateur voit."
   },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Jamboree. Voor Microsoft kan je",

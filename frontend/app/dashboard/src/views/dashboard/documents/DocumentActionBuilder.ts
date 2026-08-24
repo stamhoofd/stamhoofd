@@ -173,7 +173,7 @@ export class DocumentActionBuilder {
 
     async deleteDocuments(documents: DocumentStruct[]) {
         const title = documents.length > 1
-            ? $t('{names} verwijderen?', {
+            ? $t('%ZnP', {
                 names: Formatter.joinLastLimited(documents.map(d => d.data.description || d.data.name), {
                     separator: ', ',
                     lastSeparator: ' ' + $t('%M1') + ' ',
@@ -181,7 +181,7 @@ export class DocumentActionBuilder {
                     maxCount: 3,
                 }),
             })
-            : $t('‘{name}’ verwijderen?', { name: documents[0].data.description || documents[0].data.name });
+            : $t('%Zn2', { name: documents[0].data.description || documents[0].data.name });
 
         if (!(await CenteredMessage.confirm({
             title,

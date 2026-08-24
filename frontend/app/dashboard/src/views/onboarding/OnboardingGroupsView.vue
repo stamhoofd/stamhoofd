@@ -104,9 +104,9 @@ async function deleteRow(row: GroupRow) {
     if (row.groupId) {
         const group = existingGroups.find(g => g.id === row.groupId);
         if (!await CenteredMessage.confirm({
-            title: $t('Groep ‘{groupName}’ en bijhorende gegevens verwijderen?', { groupName: group?.settings.name.toString() ?? row.name }),
+            title: $t('%ZmL', { groupName: group?.settings.name.toString() ?? row.name }),
             confirmText: $t('%55'),
-            description: $t('De groep wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
+            description: $t('%ZnE'),
             destructive: true,
             availabilityDelay: 2_000,
         })) {

@@ -267,7 +267,7 @@ async function deleteTemplate() {
     }
 
     if (!(await CenteredMessage.confirm({
-        title: $t('Alle documenten van ‘{name}’ verwijderen?', { name: props.template.settings.name }),
+        title: $t('%Zmn', { name: props.template.settings.name }),
         confirmText: 'Verwijderen',
         description: 'Verwijder nooit officiële documenten!',
         availabilityDelay: 2_000,

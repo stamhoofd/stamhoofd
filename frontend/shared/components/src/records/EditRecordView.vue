@@ -742,9 +742,9 @@ async function save() {
 
 async function deleteMe() {
     if (!await CenteredMessage.confirm({
-        title: name.value.toString() ? $t('‘{name}’ verwijderen?', { name: name.value.toString() }) : $t('Dit kenmerk verwijderen?'),
+        title: name.value.toString() ? $t('%Zn2', { name: name.value.toString() }) : $t('Dit kenmerk verwijderen?'),
         confirmText: $t(`%CJ`),
-        description: $t(`%11O`) + ' ' + $t('Het kenmerk wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
+        description: $t(`%11O`) + ' ' + $t('%ZnK'),
         availabilityDelay: 2_000,
     })) {
         return;

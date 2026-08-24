@@ -277,10 +277,10 @@
                         <Checkbox :model-value="getFeatureFlag('impersonation')" @update:model-value="setFeatureFlag('impersonation', !!$event)" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Inloggen als een andere gebruiker') }}
+                        {{ $t('%Zm1') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Hoofdbeheerders van deze vereniging kunnen via een link inloggen als één van hun gebruikers, om te zien wat die gebruiker ziet.') }}
+                        {{ $t('%ZnV') }}
                     </p>
                 </STListItem>
             </STList>

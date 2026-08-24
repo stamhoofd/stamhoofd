@@ -9,7 +9,7 @@
             <p>{{ $t('%jj') }}</p>
 
             <p v-if="impersonatedBy" class="warning-box icon eye" data-testid="impersonation-notice">
-                {{ $t('Je meldde jezelf aan als {name} om te bekijken wat deze gebruiker ziet. Alles wat je wijzigt, wordt nog steeds geregistreerd op naam van {email}.', {name: $user?.name || $user?.email || '', email: impersonatedBy.email}) }}
+                {{ $t('%Zmu', {name: $user?.name || $user?.email || '', email: impersonatedBy.email}) }}
             </p>
 
             <p v-if="isUserModeOrganization && patched.organizationId === null" class="error-box icon privacy">
@@ -434,7 +434,7 @@ async function disconnectProvider(provider: LoginProviderType) {
 
 async function deletePassword() {
     if (await CenteredMessage.confirm({
-        title: $t('Wachtwoord verwijderen?'),
+        title: $t('%ZnH'),
         confirmText: $t(`%55`),
         destructive: true,
         availabilityDelay: 2_000,

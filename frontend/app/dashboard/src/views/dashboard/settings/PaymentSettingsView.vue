@@ -552,7 +552,7 @@ async function linkMollie() {
         title: $t('%1Pe'),
         confirmText: $t('%1Oj'),
         description: $t('%1PR'),
-        requireCheckbox: $t('Ik heb de documentatie gelezen'),
+        requireCheckbox: $t('%ZmN'),
         availabilityDelay: 2_000,
     })) {
         return;
@@ -743,7 +743,7 @@ async function createStripeAccount() {
             title: $t('%1Pe'),
             confirmText: $t('%1Oj'),
             description: $t('%ZgG'),
-            requireCheckbox: $t('Ik heb de documentatie gelezen'),
+            requireCheckbox: $t('%ZmN'),
             availabilityDelay: 2_000,
         })) {
             return;
@@ -820,7 +820,7 @@ async function deleteStripeAccount(account: StripeAccount) {
     const accountName = account.meta.settings.dashboard.display_name || account.meta.business_profile.name;
 
     if (!(await CenteredMessage.confirm({
-        title: accountName ? $t('‘{name}’ verwijderen?', { name: accountName }) : $t('%1ZI'),
+        title: accountName ? $t('%Zn2', { name: accountName }) : $t('%1ZI'),
         confirmText: $t('%CJ'),
         description: $t('%1Fc'),
         destructive: true,

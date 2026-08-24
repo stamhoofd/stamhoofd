@@ -1505,8 +1505,8 @@ async function save() {
 async function deleteMe() {
     if (!await CenteredMessage.confirm({
         title: patchedGroup.value.type === GroupType.EventRegistration
-            ? $t('Alle inschrijvingen van ‘{name}’ verwijderen?', { name: patchedGroup.value.settings.name.toString() })
-            : $t('Inschrijvingsgroep ‘{name}’ en bijhorende inschrijvingen verwijderen?', { name: patchedGroup.value.settings.name.toString() }),
+            ? $t('%ZmD', { name: patchedGroup.value.settings.name.toString() })
+            : $t('%Zn4', { name: patchedGroup.value.settings.name.toString() }),
         confirmText: $t('%55'),
         availabilityDelay: 2_000,
     })) {

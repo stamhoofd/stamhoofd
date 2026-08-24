@@ -105,9 +105,9 @@ function duplicate() {
 
 async function doDelete() {
     if (!(await CenteredMessage.confirm({
-        title: props.product.name ? $t('‘{name}’ verwijderen?', { name: props.product.name }) : $t('Dit artikel verwijderen?'),
+        title: props.product.name ? $t('%Zn2', { name: props.product.name }) : $t('Dit artikel verwijderen?'),
         confirmText: 'Verwijderen',
-        description: $t('Het artikel wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
+        description: $t('%Zm6'),
         availabilityDelay: 2_000,
     }))) {
         return;

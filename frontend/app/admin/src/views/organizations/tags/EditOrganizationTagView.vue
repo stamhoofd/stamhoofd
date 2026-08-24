@@ -138,9 +138,9 @@ const doDelete = async () => {
     }
 
     if (!await CenteredMessage.confirm({
-        title: $t('‘{name}’ verwijderen?', { name: props.tag.name }),
+        title: $t('%Zn2', { name: props.tag.name }),
         confirmText: $t(`%CJ`),
-        description: $t('De tag wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
+        description: $t('%Zn1'),
         availabilityDelay: 2_000,
     })) {
         return;

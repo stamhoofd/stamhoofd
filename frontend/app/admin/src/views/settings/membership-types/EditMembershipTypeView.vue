@@ -196,9 +196,9 @@ const doDelete = async () => {
     }
 
     if (!await CenteredMessage.confirm({
-        title: $t('‘{name}’ verwijderen?', { name: props.type.name }),
+        title: $t('%Zn2', { name: props.type.name }),
         confirmText: $t('%CJ'),
-        description: $t('Je kan dit niet ongedaan maken en verliest hierdoor alle bijhorende informatie. Het aansluitingstype wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
+        description: $t('%ZnB'),
         availabilityDelay: 2_000,
     })) {
         return;

@@ -78,7 +78,7 @@ function showContextMenu(event: MouseEvent) {
     const actions: ContextMenuItem[] = [];
     if (showImpersonate.value) {
         actions.push(new ContextMenuItem({
-            name: $t('Inloggen als deze gebruiker'),
+            name: $t('%ZnL'),
             icon: 'eye',
             action: () => {
                 impersonate(props.user).catch(console.error);
@@ -90,7 +90,7 @@ function showContextMenu(event: MouseEvent) {
     const destructiveActions: ContextMenuItem[] = [];
     if (props.hasWrite) {
         destructiveActions.push(new ContextMenuItem({
-            name: $t('Verwijderen'),
+            name: $t('%CJ'),
             icon: 'trash',
             destructive: true,
             action: () => {

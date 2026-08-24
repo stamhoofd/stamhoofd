@@ -321,7 +321,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
         async function mergeWith(category: GroupCategory, destinationName: string) {
             // Only confirm when saving directly to the API, otherwise the change is collected in memory
             if (!saveHandler && !await CenteredMessage.confirm({
-                title: $t('Categorie ‘{categoryName}’ verwijderen en samenvoegen met ‘{destinationName}’?', {
+                title: $t('%ZmX', {
                     categoryName: props.category.getName(props.period),
                     destinationName,
                 }),

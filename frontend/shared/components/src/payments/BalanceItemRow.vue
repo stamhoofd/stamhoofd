@@ -228,7 +228,7 @@ async function cancelBalanceItem(balanceItem: BalanceItem) {
 
 async function deleteBalanceItem(balanceItem: BalanceItem) {
     if (!(await CenteredMessage.confirm({
-        title: $t('Aanrekening ‘{name}’ verwijderen?', { name: balanceItem.itemTitle }),
+        title: $t('%ZnF', { name: balanceItem.itemTitle }),
         confirmText: $t('%CJ'),
         description: $t('%1Fc'),
         availabilityDelay: 2_000,

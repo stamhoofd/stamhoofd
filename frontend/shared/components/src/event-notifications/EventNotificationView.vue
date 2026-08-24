@@ -473,7 +473,7 @@ async function showOriginalAnswers() {
 
 async function doDelete() {
     if (!await CenteredMessage.confirm({
-        title: $t('{name} verwijderen?', { name: title.value }),
+        title: $t('%Zmp', { name: title.value }),
         confirmText: $t(`%55`),
         description: $t(`%vT`),
         destructive: true,

@@ -107,10 +107,6 @@
     "original": "Weet je zeker dat je het adres '{address}' wilt verwijderen?",
     "translation": "Êtes-vous sûr de vouloir supprimer l'adresse '{address}' ?"
   },
-  "%10O": {
-    "original": "Ben je zeker dat je deze aansluiting wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer cette affiliation ?"
-  },
   "%10P": {
     "original": "Aansluiting verwijderd",
     "translation": "Affiliation supprimée"
@@ -175,10 +171,6 @@
     "original": "Terug te betalen bedrag bewerken",
     "translation": "Modifier le montant à rembourser"
   },
-  "%10f": {
-    "original": "Deze aanrekening verwijderen?",
-    "translation": "Supprimer cette facture ?"
-  },
   "%10h": {
     "original": "Openstaande rekening toegevoegd aan winkelmandje. Reken je winkelmandje af of voeg eventueel nog andere zaken toe.",
     "translation": "Compte en suspens ajouté au panier. Réglez votre panier ou ajoutez éventuellement d'autres articles."
@@ -239,10 +231,6 @@
     "original": "Deze subcategorie zal worden verplaatst naar deze vragenlijst als je de huidige vragenlijst opslaat.",
     "translation": "Cette sous-catégorie sera déplacée vers ce formulaire personnalisé lorsque vous enregistrez le formulaire personnalisé actuel."
   },
-  "%10w": {
-    "original": "Weet je zeker dat je deze vragenlijst wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer ce formulaire personnalisé ?"
-  },
   "%10x": {
     "original": "Nieuwe optie",
     "translation": "Nouvelle option"
@@ -250,10 +238,6 @@
   "%10y": {
     "original": "Optie bewerken",
     "translation": "Modifier l'option"
-  },
-  "%10z": {
-    "original": "Ben je zeker dat je deze optie wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer cette option ?"
   },
   "%110": {
     "original": "Tekst",
@@ -346,10 +330,6 @@
   "%11M": {
     "original": "Vul een naam in",
     "translation": "Entrez un nom"
-  },
-  "%11N": {
-    "original": "Ben je zeker dat je dit kenmerk wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer cette caractéristique ?"
   },
   "%11O": {
     "original": "Alle hieraan verbonden informatie gaat dan ook mogelijks verloren.",
@@ -574,10 +554,6 @@
   "%12H": {
     "original": "De inlogmethode is ontkoppeld",
     "translation": "La méthode de connexion a été dissociée"
-  },
-  "%12I": {
-    "original": "Ben je zeker dat je jouw wachtwoord wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer votre mot de passe ?"
   },
   "%12J": {
     "original": "Je wachtwoord is verwijderd",
@@ -1586,10 +1562,6 @@
   "%16P": {
     "original": "Enkel voor tarieven:",
     "translation": "Uniquement pour les tarifs :"
-  },
-  "%16Q": {
-    "original": "Ben je zeker dat je deze bundelkorting wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer cette réduction pour plusieurs inscriptions ?"
   },
   "%16R": {
     "original": "bv. Kampkorting broers en zussen",
@@ -5959,10 +5931,6 @@
     "original": "Webshop / andere",
     "translation": "Webshop / autre"
   },
-  "%1OW": {
-    "original": "Koppel Mollie niet als je gehaast bent. Je hebt in minder dan 5 seconden doorgeklikt, je had nooit alle waarschuwingen kunnen lezen. We doen dit voor je eigen bestwil.",
-    "translation": "Ne connecte pas Mollie si tu es pressé·e. Tu as cliqué trop vite, tu n'as probablement pas pu lire tous les avertissements. C'est pour ta propre sécurité."
-  },
   "%1OX": {
     "original": "De vereniging die bij de aansluiting hoort is niet gevonden.",
     "translation": "L'association liée à cette affiliation n'a pas été trouvée."
@@ -7495,10 +7463,6 @@
     "original": "{x} tot {y} jaar",
     "translation": "De {x} à {y} ans"
   },
-  "%1WJ": {
-    "original": "Ben je zeker dat je deze categorie wilt verwijderen en de inhoud verplaatsen naar ‘{destinationName}’?",
-    "translation": "Êtes-vous sûr(e) de vouloir supprimer cette catégorie et déplacer le contenu vers « {destinationName} » ?"
-  },
   "%1WK": {
     "original": "De tag {tagName} zal worden verwijderd van {orgName}.",
     "translation": "Le tag {tagName} sera supprimé de {orgName}."
@@ -8543,10 +8507,6 @@
     "original": "Omslagfoto en icoontje",
     "translation": "Photo de couverture et icône"
   },
-  "%1bg": {
-    "original": "Koppel Stripe niet als je gehaast bent. Je hebt in minder dan 5 seconden doorgeklikt, je had nooit alle waarschuwingen kunnen lezen.",
-    "translation": "N’associez pas Stripe si vous êtes pressé. Vous avez cliqué en moins de 5 secondes, il était impossible de lire tous les avertissements."
-  },
   "%1bh": {
     "original": "De ledenadministratie wordt uitgeschakeld na {date}. Verleng jouw pakket om onderbreking van online inschrijvingen en het bekijken van gegevens te voorkomen.",
     "translation": "L'administration des membres sera désactivée après le {date}. Prolongez votre formule pour éviter toute interruption des inscriptions en ligne et de l’accès aux données."
@@ -9019,10 +8979,6 @@
     "original": "Log in om jouw gegevens te wijzigen, documenten te raadplegen of in te schrijven.",
     "translation": "Connectez-vous pour modifier vos données, consulter des documents ou procéder à une inscription."
   },
-  "%1dz": {
-    "original": "Ben je zeker dat je alle zichtbare kortingscodes wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer tous les codes de réduction visibles ?"
-  },
   "%1e1": {
     "original": "Filter",
     "translation": "Filtre"
@@ -9095,10 +9051,6 @@
     "original": "Ik snap het",
     "translation": "J'ai compris"
   },
-  "%1eS": {
-    "original": "Ben je zeker dat je alle kortingscodes wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer tous les codes de réduction ?"
-  },
   "%1eT": {
     "original": "Ben je zeker dat je de categorie ‘{categoryName}’ wilt verplaatsen naar ‘{destinationName}’ in {periodName}?",
     "translation": "Êtes-vous sûr de vouloir déplacer la catégorie ‘{categoryName}’ vers ‘{destinationName}’ dans {periodName} ?"
@@ -9118,10 +9070,6 @@
   "%1eZ": {
     "original": "Verwijder uit favorieten",
     "translation": "Retirer des favoris"
-  },
-  "%1eb": {
-    "original": "Ben je zeker dat je deze kortingscode wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer ce code de réduction ?"
   },
   "%1ec": {
     "original": "Kortingscode verwijderen",
@@ -9359,18 +9307,6 @@
     "original": "De vereniging is aangemaakt. Log in het beheerderportaal in om andere beheerders toegang te geven.",
     "translation": "L'association a été créée. Connectez-vous au portail administrateur pour donner accès à d'autres administrateurs."
   },
-  "%35": {
-    "original": "Ben je zeker dat je deze vereniging wil verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer cette association ?"
-  },
-  "%36": {
-    "original": "Bevestiging 2/3. Ben je 100% zeker dat je deze vereniging wilt verwijderen?",
-    "translation": "Confirmation 2/3. Êtes-vous sûr à 100 % de vouloir supprimer cette association ?"
-  },
-  "%37": {
-    "original": "Bevestiging 3/3. Ben je 100% zeker dat je deze vereniging wilt verwijderen?",
-    "translation": "Confirmation 3/3. Êtes-vous sûr à 100 % de vouloir supprimer cette association ?"
-  },
   "%38": {
     "original": "Vereniging bewerken",
     "translation": "Modifier l'association"
@@ -9431,14 +9367,6 @@
     "original": "Standaard leeftijdsgroepen",
     "translation": "Groupes d'âge standard"
   },
-  "%3N": {
-    "original": "Je kan dit niet ongedaan maken en verliest hierdoor alle bijhorende informatie.",
-    "translation": "Vous ne pouvez pas annuler cette action et vous perdrez ainsi toutes les informations associées."
-  },
-  "%3O": {
-    "original": "Ben je zeker dat je dit aansluitingstype wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer ce type d'affiliation ?"
-  },
   "%3P": {
     "original": "Bepaal de beschikbare aansluitingen (o.a. verzekeringen), bijhorende kostprijs en instellingen",
     "translation": "Déterminez les connexions disponibles (notamment les assurances), le prix associé et les paramètres"
@@ -9471,10 +9399,6 @@
     "original": "Prijs voor organisatie tag",
     "translation": "Prix pour la balise d'organisation"
   },
-  "%3X": {
-    "original": "Ben je zeker dat je deze instellingen wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer ces paramètres ?"
-  },
   "%3Y": {
     "original": "Je hebt al voor elk werkjaar instellingen toegevoegd",
     "translation": "Vous avez déjà ajouté des paramètres pour chaque année associative"
@@ -9494,10 +9418,6 @@
   "%3c": {
     "original": "Dit verwijdert ook alle daarbij horende gegevens, zoals inschrijvingsgroepen. Je kan dit niet ongedaan maken.",
     "translation": "Cela supprime également toutes les données associées, telles que les groupes d'inscription. Vous ne pouvez pas annuler cette action."
-  },
-  "%3d": {
-    "original": "Ben je zeker dat je dit werkjaar wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer cette année associative ?"
   },
   "%3e": {
     "original": "Beheer de werkjaren en start een nieuw werkjaar op",
@@ -9523,10 +9443,6 @@
     "original": "Je kan dit niet ongedaan maken. Er gaat mogelijks informatie verloren over alle gekoppelde leden.",
     "translation": "Vous ne pouvez pas annuler cette action. Des informations sur tous les membres liés risquent d'être perdues."
   },
-  "%3k": {
-    "original": "Ben je zeker dat je deze functie wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer cette fonction ?"
-  },
   "%3l": {
     "original": "Verwijder deze functie",
     "translation": "Supprimer cette fonction"
@@ -9546,10 +9462,6 @@
   "%3p": {
     "original": "Functies van leden",
     "translation": "Fonctions des membres"
-  },
-  "%3q": {
-    "original": "Ben je zeker dat je deze facturatiegegevens wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer ces informations de facturation ?"
   },
   "%3r": {
     "original": "Beschrijving van het lokaal (optioneel)",
@@ -9662,14 +9574,6 @@
   "%4H": {
     "original": "Facturatiegegevens bewerken",
     "translation": "Modifier les données de facturation"
-  },
-  "%4I": {
-    "original": "Ben je zeker dat je alle inschrijvingen wilt verwijderen van deze activiteit?",
-    "translation": "Êtes-vous sûr de vouloir supprimer toutes les inscriptions de cette activité ?"
-  },
-  "%4J": {
-    "original": "Ben je zeker dat je deze inschrijvingsgroep en bijhorende inschrijvingen wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer ce groupe d’inscription et les inscriptions correspondantes ?"
   },
   "%4K": {
     "original": "Bewerk inschrijvingsinstellingen",
@@ -10031,14 +9935,6 @@
     "original": "Wijzig soort activiteit",
     "translation": "Modifier le type d'activité"
   },
-  "%5p": {
-    "original": "Ben je zeker dat je deze soort activiteit wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer ce type d'activité ?"
-  },
-  "%5q": {
-    "original": "Dit kan nare gevolgen hebben als er al activiteiten van dit type zijn",
-    "translation": "Cela peut avoir des conséquences désagréables s'il existe déjà des activités de ce type"
-  },
   "%5r": {
     "original": "Optioneel. Geef een beschrijving van dit soort lokaal.",
     "translation": "Facultatif. Donnez une description de ce type de local."
@@ -10054,14 +9950,6 @@
   "%5u": {
     "original": "Wijzig type lokaal",
     "translation": "Modifier le type de local"
-  },
-  "%5v": {
-    "original": "Ben je zeker dat je dit lokaaltype wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer ce type de local ?"
-  },
-  "%5w": {
-    "original": "Dit kan nare gevolgen hebben als er al lokalen van dit type zijn",
-    "translation": "Cela peut avoir des conséquences désagréables s'il existe déjà des locaux de ce type"
   },
   "%5x": {
     "original": "Nieuw soort lokaal",
@@ -10723,10 +10611,6 @@
     "original": "Wijzig deadline",
     "translation": "Modifier l'échéance"
   },
-  "%8f": {
-    "original": "Ben je zeker dat je deze deadline wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer cette échéance ?"
-  },
   "%8g": {
     "original": "Beschrijving van dit type kampmelding. Deze tekst is zichtbaar voor de leiding.",
     "translation": "Description de ce type de notification de camp. Ce texte est visible pour les dirigeants."
@@ -10946,14 +10830,6 @@
   "%9Y": {
     "original": "Deze gegevens worden verzameld en gekoppeld aan leden die inschrijven bij deze standaard leeftijdsgroep. Let erop dat deze gegevens gedeeld zijn met andere inschrijvingen. Als dezelfde gegevens dus voor meerdere inschrijvingen verzameld worden, dan worden ze maar één keer gevraagd (anders kunnen leden de gegevens wel nog nakijken als het al even geleden werd ingevuld) en kan je niet per inschrijving andere gegevens invullen. Gebruik ze dus niet voor tijdelijke vragen.",
     "translation": "Ces données sont collectées et associées aux membres qui s'inscrivent à ce groupe d'âge standard. Notez que ces données sont partagées avec d'autres inscriptions. Si les mêmes données sont donc collectées pour plusieurs inscriptions, elles ne sont demandées qu'une seule fois (sinon les membres peuvent toujours consulter les données si cela fait un certain temps qu'elles ont été saisies) et vous ne pouvez pas saisir de données différentes pour chaque inscription. Ne les utilisez donc pas pour des questions temporaires."
-  },
-  "%9Z": {
-    "original": "Ben je zeker dat je deze standaard leeftijdsgroep wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer ce groupe d'âge standard ?"
-  },
-  "%9a": {
-    "original": "Je kan dit niet ongedaan maken. Er gaat mogelijks informatie verloren over alle gekoppelde inschrijvingsgroepen.",
-    "translation": "Vous ne pouvez pas annuler cette opération. Des informations sur tous les groupes d'inscription liés risquent d'être perdues."
   },
   "%9b": {
     "original": "Sluiten",
@@ -12827,10 +12703,6 @@
     "original": "Nieuwe tag",
     "translation": "Nouvelle balise"
   },
-  "%H7": {
-    "original": "Ben je zeker dat je deze tag wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer cette balise ?"
-  },
   "%H8": {
     "original": "Je kan groepen onderverdelen in een hiërachie via tags, verbonden, gewesten en/of gouwen. Elke groep kan meerdere tags krijgen volgens de regels die je instelt bij elke tag.",
     "translation": "Vous pouvez subdiviser les groupes en une hiérarchie via des balises, des entités liées, des régions et/ou des provinces. Chaque groupe peut recevoir plusieurs balises selon les règles que vous définissez pour chaque balise."
@@ -13142,10 +13014,6 @@
   "%IP": {
     "original": "Voorwaarden bewerken",
     "translation": "Modifier les conditions"
-  },
-  "%IQ": {
-    "original": "Ben je zeker dat je deze voorwaarden wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer ces conditions ?"
   },
   "%IR": {
     "original": "Voeg voorwaarden toe die bij het registreren staan vermeld of geaccepteerd moeten worden.",
@@ -13567,10 +13435,6 @@
     "original": "Geen activiteiten gevonden",
     "translation": "Aucune activité trouvée"
   },
-  "%KE": {
-    "original": "{count} documenten verwijderen?",
-    "translation": "{count} documents à supprimer ?"
-  },
   "%KEY": {
     "original": "todo",
     "translation": "à faire"
@@ -13602,10 +13466,6 @@
   "%KL": {
     "original": "Terugzetten",
     "translation": "Restaurer"
-  },
-  "%KM": {
-    "original": "Dit document verwijderen?",
-    "translation": "Supprimer ce document ?"
   },
   "%KN": {
     "original": "Document verwijderd",
@@ -17219,10 +17079,6 @@
     "original": "Kalender uitschakelen",
     "translation": "Désactiver le calendrier"
   },
-  "%ZZk": {
-    "original": "Ben je zeker dat je deze categorie wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer cette catégorie ?"
-  },
   "%ZZl": {
     "original": "Actieve pakketten",
     "translation": "Forfaits actifs"
@@ -17230,10 +17086,6 @@
   "%ZZm": {
     "original": "Alle hoofdbeheerders",
     "translation": "Tous les administrateurs principaux"
-  },
-  "%ZZr": {
-    "original": "Ben je zeker dat je deze categorie en groepen wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer cette catégorie ainsi que les groupes ?"
   },
   "%ZZs": {
     "original": "Beheerders volledige boekhouding",
@@ -17679,10 +17531,6 @@
     "original": "Niet uitbetaald",
     "translation": "Non payé"
   },
-  "%Zc6": {
-    "original": "Ben je zeker dat je factuur {number} wil verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer la facture {number} ?"
-  },
   "%ZcA": {
     "original": "Weet je het echt zeker?",
     "translation": "En êtes-vous vraiment certain ?"
@@ -18082,10 +17930,6 @@
   "%ZeC": {
     "original": "Je hebt niet alle talen van deze e-mail aangepast. Kijk de andere vertalingen na zodat de inhoud in elke taal hetzelfde blijft.",
     "translation": "Vous n'avez pas adapté cette e-mail dans toutes les langues. Vérifiez les autres traductions pour que le contenu soit identique partout."
-  },
-  "%ZeD": {
-    "original": "Ben je zeker dat je deze taal wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer cette langue ?"
   },
   "%ZeE": {
     "original": "Vertaling verwijderen",
@@ -19699,9 +19543,369 @@
     "original": "Log in via de knop hieronder.",
     "translation": "Connectez-vous via le bouton ci-dessous."
   },
+  "%Zm0": {
+    "original": "Dit kan je niet doen terwijl je aangemeld bent als een andere gebruiker.",
+    "translation": "Vous ne pouvez pas faire cela lorsque vous êtes connecté en tant qu'autre utilisateur."
+  },
+  "%Zm1": {
+    "original": "Inloggen als een andere gebruiker",
+    "translation": "Se connecter en tant qu'autre utilisateur"
+  },
+  "%Zm2": {
+    "original": "Vragenlijst ‘{name}’ verwijderen?",
+    "translation": "Supprimer le formulaire personnalisé ‘{name}’ ?"
+  },
+  "%Zm3": {
+    "original": "Volgende kortingscodes worden verwijderd: {codes}. Ze worden pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "Les codes de réduction suivants seront supprimés : {codes}. Ils ne seront définitivement supprimés que lorsque vous poursuivez et enregistrez toutes les modifications."
+  },
+  "%Zm4": {
+    "original": "‘{name}’ verwijderen en alle artikels erin behouden?",
+    "translation": "Supprimer ‘{name}’ et garder tous les articles qu'il contient ?"
+  },
+  "%Zm5": {
+    "original": "De categorie wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "La catégorie ne sera supprimée définitivement que lorsque vous poursuivez et enregistrez toutes les modifications."
+  },
+  "%Zm6": {
+    "original": "Het artikel wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "L'article ne sera supprimé définitivement qu'après avoir poursuivi et enregistré toutes les modifications."
+  },
+  "%Zm7": {
+    "original": "Open deze link alleen in een privévenster (incognito). Je kan deze link niet delen met andere personen.",
+    "translation": "Ouvrez ce lien uniquement dans une fenêtre privée (navigation incognito). Vous ne pouvez pas partager ce lien avec d'autres personnes."
+  },
+  "%Zm8": {
+    "original": "Factuur {number} verwijderen?",
+    "translation": "Supprimer la facture {number} ?"
+  },
+  "%Zm9": {
+    "original": "Je bent al ingelogd in deze browser. Open deze link in een privévenster om als een andere gebruiker aan te melden.",
+    "translation": "Vous êtes déjà connecté sur ce navigateur. Ouvrez ce lien dans une fenêtre privée pour vous connecter comme un autre utilisateur."
+  },
+  "%ZmA": {
+    "original": "Inschrijvingen maken, mails versturen en andere acties of wijzigingen kan je niet uitvoeren als je bent ingelogd als een andere gebruiker.",
+    "translation": "Vous ne pouvez pas créer d'inscriptions, envoyer des mails, ni effectuer d'autres actions ou modifications lorsque vous êtes connecté comme un autre utilisateur."
+  },
+  "%ZmB": {
+    "original": "Je hebt geen toegang om aan te melden als deze gebruiker.",
+    "translation": "Vous n'avez pas les droits pour vous connecter en tant que cet utilisateur."
+  },
+  "%ZmC": {
+    "original": "De locatie wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "L'emplacement ne sera définitivement supprimé que lorsque vous poursuivez et enregistrez toutes les modifications."
+  },
+  "%ZmD": {
+    "original": "Alle inschrijvingen van ‘{name}’ verwijderen?",
+    "translation": "Supprimer toutes les inscriptions de ‘{name}’ ?"
+  },
+  "%ZmE": {
+    "original": "De optie wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "L'option ne sera définitivement supprimée que lorsque vous poursuivez et enregistrez toutes les modifications."
+  },
+  "%ZmF": {
+    "original": "Passkey ‘{name}’ verwijderen?",
+    "translation": "Supprimer la clé d’accès ‘{name}’ ?"
+  },
+  "%ZmG": {
+    "original": "Instellingen voor {periodName} verwijderen?",
+    "translation": "Supprimer les paramètres pour {periodName} ?"
+  },
+  "%ZmH": {
+    "original": "De instellingen worden pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "Les paramètres ne seront définitivement supprimés que lorsque vous poursuivez et enregistrez toutes les modifications."
+  },
+  "%ZmI": {
+    "original": "Bevestiging 3/3. ‘{name}’ verwijderen?",
+    "translation": "Confirmation 3/3. Supprimer ‘{name}’ ?"
+  },
+  "%ZmJ": {
+    "original": "Je hebt geen toegang om aan te melden als deze gebruiker. Deze gebruiker heeft op één of andere manier meer toegangsrechten dan jou, of toegang tot data waar jij niet aankan (bv. inschrijvingen bij andere vereniging), vandaar dat het niet kan.",
+    "translation": "Vous n'avez pas la permission de vous connecter comme cet utilisateur. Ce dernier dispose de plus de droits d'accès ou d'un accès à des données auxquelles vous n'avez pas accès (par ex. inscriptions dans une autre association), raison pour laquelle cela n'est pas permis."
+  },
+  "%ZmK": {
+    "original": "De leveringsoptie wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "L'option de livraison ne sera définitivement supprimée que lorsque vous poursuivez et enregistrez toutes les modifications."
+  },
+  "%ZmL": {
+    "original": "Groep ‘{groupName}’ en bijhorende gegevens verwijderen?",
+    "translation": "Supprimer le groupe ‘{groupName}’ et les données associées ?"
+  },
+  "%ZmM": {
+    "original": "Optie ‘{name}’ verwijderen?",
+    "translation": "Supprimer l'option ‘{name}’ ?"
+  },
+  "%ZmN": {
+    "original": "Ik heb de documentatie gelezen",
+    "translation": "J'ai lu la documentation"
+  },
+  "%ZmO": {
+    "original": "Deze deadline verwijderen?",
+    "translation": "Supprimer ce délai ?"
+  },
+  "%ZmP": {
+    "original": "De korting wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "La réduction ne sera définitivement supprimée que lorsque vous poursuivez et enregistrez toutes les modifications."
+  },
+  "%ZmQ": {
+    "original": "Categorie ‘{categoryName}’ en bijhorende groepen verwijderen?",
+    "translation": "Supprimer la catégorie ‘{categoryName}’ et les groupes associés ?"
+  },
+  "%ZmR": {
+    "original": "Deze facturatiegegevens verwijderen?",
+    "translation": "Supprimer ces informations de facturation ?"
+  },
+  "%ZmS": {
+    "original": "De kortingscode wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "Le code de réduction ne sera définitivement supprimé que lorsque vous poursuivez et enregistrez toutes les modifications."
+  },
+  "%ZmT": {
+    "original": "Bekijk het platform zoals deze beheerder het ziet. Je krijgt een link die je in een privévenster opent.",
+    "translation": "Affichez la plateforme telle que cet administrateur la voit. Vous recevrez un lien à ouvrir dans une fenêtre privée."
+  },
+  "%ZmU": {
+    "original": "De deadline wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "L'échéance ne sera définitivement supprimée que lorsque vous poursuivez et enregistrez toutes les modifications."
+  },
+  "%ZmV": {
+    "original": "Tarief ‘{name}’ verwijderen?",
+    "translation": "Supprimer le tarif ‘{name}’ ?"
+  },
+  "%ZmW": {
+    "original": "Je meldt je aan via een link als een andere gebruiker. Hierna zie je alles net zoals die gebruiker Stamhoofd ziet. Ga enkel verder als je deze link zelf hebt aangemaakt.",
+    "translation": "Vous vous connectez via un lien en tant qu'autre utilisateur. Ensuite, vous verrez la plateforme exactement comme cet utilisateur voit Stamhoofd. Continuez uniquement si vous avez créé ce lien vous-même."
+  },
+  "%ZmX": {
+    "original": "Categorie ‘{categoryName}’ verwijderen en samenvoegen met ‘{destinationName}’?",
+    "translation": "Supprimer la catégorie ‘{categoryName}’ et la fusionner avec ‘{destinationName}’ ?"
+  },
+  "%ZmY": {
+    "original": "{subject} verwijderen?",
+    "translation": "Supprimer {subject} ?"
+  },
+  "%ZmZ": {
+    "original": "Ja, inloggen",
+    "translation": "Oui, se connecter"
+  },
+  "%Zma": {
+    "original": "Je bekijkt Stamhoofd nu als {name}",
+    "translation": "Vous consultez Stamhoofd maintenant en tant que {name}"
+  },
+  "%Zmb": {
+    "original": "Met deze link bekijk je Stamhoofd zoals deze gebruiker het ziet. Om veiligheidsredenen kan het soms zijn dat bepaalde dingen er toch een klein beetje anders uitzien. Alles wat je wijzigt, wordt geregistreerd onder jouw eigen naam.",
+    "translation": "Avec ce lien vous voyez Stamhoofd comme cet utilisateur. Pour des raisons de sécurité, certaines choses pourraient apparaître légèrement différemment. Toutes les modifications effectuées seront enregistrées sous votre propre nom."
+  },
+  "%Zmc": {
+    "original": "De voorwaarden worden pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "Les conditions ne seront définitivement supprimées que lorsque vous poursuivez et enregistrez toutes les modifications."
+  },
+  "%Zmd": {
+    "original": "Vragenlijsten van {names} verwijderen?",
+    "translation": "Supprimer les formulaires personnalisés de {names} ?"
+  },
+  "%Zme": {
+    "original": "De sponsor wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "Le sponsor ne sera définitivement supprimé que lorsque vous poursuivez et enregistrez toutes les modifications."
+  },
+  "%Zmf": {
+    "original": "De voorwaarde wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "La condition ne sera définitivement supprimée que lorsque vous poursuivez et enregistrez toutes les modifications."
+  },
+  "%Zmh": {
+    "original": "Kopiëren is niet gelukt. Selecteer de link en kopieer ze zelf.",
+    "translation": "La copie n'a pas réussi. Sélectionnez le lien et copiez-le manuellement."
+  },
+  "%Zmk": {
+    "original": "De link staat op je klembord.",
+    "translation": "Le lien a été copié dans votre presse-papiers."
+  },
+  "%Zml": {
+    "original": "Tip: Gebruik de ‘Inloggen als’-functie om te kijken hoe Stamhoofd er voor een andere beheerder uitziet en de rechten uit te proberen.",
+    "translation": "Astuce : utilisez la fonction « Se connecter en tant que » pour voir comment Stamhoofd apparaît pour un autre administrateur et tester les droits d'accès."
+  },
+  "%Zmm": {
+    "original": "De vragenlijst wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "Le formulaire personnalisé ne sera définitivement supprimé que lorsque vous poursuivez et enregistrez toutes les modifications."
+  },
+  "%Zmn": {
+    "original": "Alle documenten van ‘{name}’ verwijderen?",
+    "translation": "Supprimer tous les documents de ‘{name}’ ?"
+  },
+  "%Zmo": {
+    "original": "Dit kan nare gevolgen hebben als er al activiteiten van dit type zijn. De soort activiteit wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "Cela peut avoir de graves conséquences s'il existe déjà des activités de ce type. Le type d'activité ne sera définitivement supprimé que lorsque vous poursuivez et enregistrez toutes les modifications."
+  },
+  "%Zmp": {
+    "original": "{name} verwijderen?",
+    "translation": "Supprimer {name} ?"
+  },
+  "%Zmq": {
+    "original": "Inloggen als gebruiker",
+    "translation": "Se connecter en tant qu'utilisateur"
+  },
+  "%Zmr": {
+    "original": "Deze voorwaarde verwijderen?",
+    "translation": "Supprimer cette condition ?"
+  },
+  "%Zms": {
+    "original": "{{u2}} meldde zich aan als {{u}}",
+    "translation": "{{u2}} s'est connecté comme {{u}}"
+  },
+  "%Zmt": {
+    "original": "Inloggen als {name}",
+    "translation": "Se connecter en tant que {name}"
+  },
+  "%Zmu": {
+    "original": "Je meldde jezelf aan als {name} om te bekijken wat deze gebruiker ziet. Alles wat je wijzigt, wordt nog steeds geregistreerd op naam van {email}.",
+    "translation": "Vous vous êtes connecté comme {name} pour voir l'interface de cet utilisateur. Toutes les modifications seront toujours enregistrées sous le nom {email}."
+  },
+  "%Zmv": {
+    "original": "Deze link vervalt {time} en kan maar één keer gebruikt worden, enkel vanaf dit toestel.",
+    "translation": "Ce lien expire {time} et ne peut être utilisé qu'une seule fois, et uniquement depuis cet appareil."
+  },
+  "%Zmw": {
+    "original": "API-key ‘{name}’ verwijderen?",
+    "translation": "Supprimer la clé API « {name} » ?"
+  },
+  "%Zmx": {
+    "original": "De vraag wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "La question ne sera vraiment supprimée que si vous continuez et enregistrez toutes les modifications."
+  },
+  "%Zmy": {
+    "original": "Aansluiting {name} verwijderen?",
+    "translation": "Supprimer l'affiliation {name} ?"
+  },
+  "%Zmz": {
+    "original": "Je kan dit niet ongedaan maken. Er gaat mogelijks informatie verloren over alle gekoppelde inschrijvingsgroepen. De standaard leeftijdsgroep wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "Cette action est irréversible. Vous pourriez perdre des informations concernant tous les groupes d'inscription associés. Le groupe d'âge par défaut ne sera définitivement supprimé que si vous continuez et enregistrez toutes les modifications."
+  },
   "%Zn": {
     "original": "Vul jouw wachtwoord hier in",
     "translation": "Entrez votre mot de passe ici"
+  },
+  "%Zn0": {
+    "original": "Authenticator-app ‘{name}’ verwijderen?",
+    "translation": "Supprimer l'application d'authentification « {name} » ?"
+  },
+  "%Zn1": {
+    "original": "De tag wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "Le tag ne sera réellement supprimé que si vous continuez et enregistrez toutes les modifications."
+  },
+  "%Zn2": {
+    "original": "‘{name}’ verwijderen?",
+    "translation": "Supprimer « {name} » ?"
+  },
+  "%Zn3": {
+    "original": "Aanmeldingen als een andere gebruiker",
+    "translation": "Connexions en tant qu'autre utilisateur"
+  },
+  "%Zn4": {
+    "original": "Inschrijvingsgroep ‘{name}’ en bijhorende inschrijvingen verwijderen?",
+    "translation": "Supprimer le groupe d'inscription « {name} » ainsi que les inscriptions associées ?"
+  },
+  "%Zn7": {
+    "original": "De zone wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "La zone ne sera définitivement supprimée que si vous continuez et enregistrez toutes les modifications."
+  },
+  "%Zn8": {
+    "original": "Inloggen als een andere gebruiker is niet ingeschakeld voor deze vereniging.",
+    "translation": "La connexion en tant qu'un autre utilisateur n'est pas activée pour cette association."
+  },
+  "%Zn9": {
+    "original": "Het sjabloon wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "Le modèle ne sera définitivement supprimé que si vous continuez et enregistrez toutes les modifications."
+  },
+  "%ZnA": {
+    "original": "Deze link is niet meer geldig. Vraag een nieuwe link aan.",
+    "translation": "Ce lien n'est plus valide. Demandez un nouveau lien."
+  },
+  "%ZnB": {
+    "original": "Je kan dit niet ongedaan maken en verliest hierdoor alle bijhorende informatie. Het aansluitingstype wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "Cette action est irréversible et entraînera la perte de toutes les informations associées. Le type d'affiliation ne sera définitivement supprimé que si vous continuez et enregistrez toutes les modifications."
+  },
+  "%ZnC": {
+    "original": "Bevestiging 2/3. ‘{name}’ verwijderen?",
+    "translation": "Confirmation 2/3. Supprimer « {name} » ?"
+  },
+  "%ZnD": {
+    "original": "Dit tijdvak verwijderen?",
+    "translation": "Supprimer cette plage horaire ?"
+  },
+  "%ZnE": {
+    "original": "De groep wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "Le groupe ne sera définitivement supprimé que si vous continuez et enregistrez toutes les modifications."
+  },
+  "%ZnF": {
+    "original": "Aanrekening ‘{name}’ verwijderen?",
+    "translation": "Supprimer la facture « {name} » ?"
+  },
+  "%ZnG": {
+    "original": "Inloggen als een andere gebruiker?",
+    "translation": "Se connecter en tant qu'un autre utilisateur ?"
+  },
+  "%ZnH": {
+    "original": "Wachtwoord verwijderen?",
+    "translation": "Supprimer le mot de passe ?"
+  },
+  "%ZnJ": {
+    "original": "Het tijdvak wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "La plage horaire ne sera définitivement supprimée que si vous continuez et enregistrez toutes les modifications."
+  },
+  "%ZnK": {
+    "original": "Het kenmerk wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "La caractéristique ne sera définitivement supprimée que si vous continuez et enregistrez toutes les modifications."
+  },
+  "%ZnL": {
+    "original": "Inloggen als deze gebruiker",
+    "translation": "Se connecter en tant que cet utilisateur"
+  },
+  "%ZnM": {
+    "original": "Alle kortingscodes verwijderen?",
+    "translation": "Supprimer tous les codes de réduction ?"
+  },
+  "%ZnN": {
+    "original": "Alle zichtbare kortingscodes verwijderen?",
+    "translation": "Supprimer tous les codes de réduction visibles ?"
+  },
+  "%ZnO": {
+    "original": "Het zaalplan wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "Le plan de la salle ne sera définitif supprimé que si vous continuez et enregistrez toutes les modifications."
+  },
+  "%ZnP": {
+    "original": "{names} verwijderen?",
+    "translation": "Supprimer {names} ?"
+  },
+  "%ZnQ": {
+    "original": "Inloggen als een andere gebruiker (voor alle verenigingen)",
+    "translation": "Se connecter en tant qu'un autre utilisateur (pour toutes les associations)"
+  },
+  "%ZnR": {
+    "original": "De rol wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "Le rôle ne sera définitivement supprimé que si vous continuez et enregistrez toutes les modifications."
+  },
+  "%ZnS": {
+    "original": "Deze korting verwijderen?",
+    "translation": "Supprimer cette réduction ?"
+  },
+  "%ZnT": {
+    "original": "Facturatiegegevens ‘{name}’ verwijderen?",
+    "translation": "Supprimer les données de facturation « {name} » ?"
+  },
+  "%ZnU": {
+    "original": "Dit kan nare gevolgen hebben als er al lokalen van dit type zijn. Het lokaaltype wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "Cela peut avoir des conséquences si des salles de ce type existent déjà. Le type de salle ne sera définitivement supprimé que si vous continuez et enregistrez toutes les modifications."
+  },
+  "%ZnV": {
+    "original": "Hoofdbeheerders van deze vereniging kunnen via een link inloggen als één van hun gebruikers, om te zien wat die gebruiker ziet.",
+    "translation": "Les administrateurs principaux de cette association peuvent utiliser un lien pour se connecter comme l'un de leurs utilisateurs, afin de voir ce que cet utilisateur voit."
+  },
+  "%ZnW": {
+    "original": "Categorie ‘{categoryName}’ verwijderen?",
+    "translation": "Supprimer la catégorie « {categoryName} » ?"
+  },
+  "%ZnX": {
+    "original": "Inloggen als deze beheerder",
+    "translation": "Se connecter en tant qu'administrateur"
   },
   "%Zo": {
     "original": "Deze pagina is voor administrators",
@@ -24687,10 +24891,6 @@
     "original": "Vul de voornaam in",
     "translation": "Veuillez saisir le prénom"
   },
-  "%uI": {
-    "original": "Ben je zeker dat je deze beheerder wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer cet administrateur ?"
-  },
   "%uJ": {
     "original": "Wijzigingen niet opgeslagen",
     "translation": "Modifications non enregistrées"
@@ -24958,10 +25158,6 @@
   "%vR": {
     "original": "Kies minstens één leeftijdsgroep.",
     "translation": "Choisissez au moins un groupe d’âge."
-  },
-  "%vS": {
-    "original": "Ben je zeker dat je deze melding wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer cette notification ?"
   },
   "%vT": {
     "original": "Je kan dit niet ongedaan maken",

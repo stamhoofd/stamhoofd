@@ -267,9 +267,9 @@ async function save() {
 
 async function deleteMe() {
     if (!await CenteredMessage.confirm({
-        title: code.value ? $t('‘{name}’ verwijderen?', { name: code.value }) : $t('Deze kortingscode verwijderen?'),
+        title: code.value ? $t('%Zn2', { name: code.value }) : $t('Deze kortingscode verwijderen?'),
         confirmText: 'Verwijderen',
-        description: $t('De kortingscode wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
+        description: $t('%ZmS'),
         availabilityDelay: 2_000,
     })) {
         return;

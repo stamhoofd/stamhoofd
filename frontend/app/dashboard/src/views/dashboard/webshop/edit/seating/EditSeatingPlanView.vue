@@ -235,9 +235,9 @@ function addSection() {
 
 async function deleteSection(section: SeatingPlanSection) {
     if (!(await CenteredMessage.confirm({
-        title: section.name ? $t('‘{name}’ verwijderen?', { name: section.name }) : $t('Deze zone verwijderen?'),
+        title: section.name ? $t('%Zn2', { name: section.name }) : $t('Deze zone verwijderen?'),
         confirmText: 'Verwijderen',
-        description: $t('De zone wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
+        description: $t('%Zn7'),
         availabilityDelay: 2_000,
     }))) {
         return;

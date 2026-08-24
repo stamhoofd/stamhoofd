@@ -159,9 +159,9 @@ const doDelete = async () => {
     }
 
     if (!await CenteredMessage.confirm({
-        title: $t('Instellingen voor {periodName} verwijderen?', { periodName: props.period.name }),
+        title: $t('%ZmG', { periodName: props.period.name }),
         confirmText: $t('%CJ'),
-        description: $t('De instellingen worden pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
+        description: $t('%ZmH'),
         availabilityDelay: 2_000,
     })) {
         return;

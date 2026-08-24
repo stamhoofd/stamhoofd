@@ -188,7 +188,7 @@ async function deleteMembership(membership: MemberPlatformMembership) {
     }
 
     if (!await CenteredMessage.confirm({
-        title: $t('Aansluiting {name} verwijderen?', { name: getMembershipType(membership).name }),
+        title: $t('%Zmy', { name: getMembershipType(membership).name }),
         confirmText: $t(`%55`),
         destructive: true,
         availabilityDelay: 2_000,

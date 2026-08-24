@@ -149,9 +149,9 @@ function save() {
 
 async function deleteMe() {
     if (!await CenteredMessage.confirm({
-        title: name.value ? $t('‘{name}’ verwijderen?', { name: name.value }) : $t('Dit keuzemenu verwijderen?'),
+        title: name.value ? $t('%Zn2', { name: name.value }) : $t('Dit keuzemenu verwijderen?'),
         confirmText: 'Verwijderen',
-        description: $t('Het keuzemenu wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
+        description: $t('%67'),
         availabilityDelay: 2_000,
     })) {
         return;

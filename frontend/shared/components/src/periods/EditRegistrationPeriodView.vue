@@ -120,7 +120,7 @@ const doDelete = async () => {
     }
 
     if (!await CenteredMessage.confirm({
-        title: $t('‘{name}’ verwijderen?', { name: patched.value.name }),
+        title: $t('%Zn2', { name: patched.value.name }),
         confirmText: $t('%CJ'),
         description: $t('%3c'),
         availabilityDelay: 2_000,

@@ -589,9 +589,9 @@ async function deleteMe() {
     }
 
     if (!await CenteredMessage.confirm({
-        title: name.value.toString() ? $t('Vragenlijst ‘{name}’ verwijderen?', { name: name.value.toString() }) : $t('Deze vragenlijst verwijderen?'),
+        title: name.value.toString() ? $t('%Zm2', { name: name.value.toString() }) : $t('Deze vragenlijst verwijderen?'),
         confirmText: $t(`%CJ`),
-        description: $t('De vragenlijst wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
+        description: $t('%Zmm'),
         availabilityDelay: 2_000,
     })) {
         return;
