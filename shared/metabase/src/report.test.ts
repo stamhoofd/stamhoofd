@@ -345,8 +345,9 @@ describe('report', () => {
 
         /**
          * Ravot weighs the same index by the age a lid reaches in the werkjaar rather than by their
-         * tak, and counts a leider as one and a half. Kept here for the same reason as the weights
-         * above: a wrong one is a plausible number rather than a failure.
+         * tak, counts a leider as one and a half, and subtracts an omkaderingscijfer over the
+         * kinderen under seventeen alone. Kept here for the same reason as the weights above: a
+         * wrong one is a plausible number rather than a failure.
          */
         it('weighs each leeftijd of the GTP index as the ravot formula does', () => {
             const sql = cardOf(ravotDashboards, 'eenheden', 'eenheid-gtp').sql.replaceAll(/\s+/g, ' ');
@@ -357,7 +358,7 @@ describe('report', () => {
                 ['14 tot 15', "+ 2 * COUNT(DISTINCT CASE WHEN tak_category = 'child' AND leeftijd BETWEEN 14 AND 15 THEN member_id END)"],
                 ['16', "+ 3 * COUNT(DISTINCT CASE WHEN tak_category = 'child' AND leeftijd = 16 THEN member_id END)"],
                 ['Leiding', "+ 1.5 * COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END)"],
-                ['omkaderingscijfer', "- 2 * COUNT(DISTINCT CASE WHEN tak_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END), 0)"],
+                ['omkaderingscijfer', "- 2 * COUNT(DISTINCT CASE WHEN tak_category = 'child' AND leeftijd < 17 THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END), 0)"],
             ]) {
                 expect(`${bucket}: ${sql.includes(term)}`).toEqual(`${bucket}: true`);
             }
@@ -427,22 +428,23 @@ describe('report', () => {
         /**
          * The index subtracts the omkaderingscijfer, so the two have to count the same kinderen and
          * the same leiding: one of them falling back to the ages again would leave the figure on the
-         * screen and the one inside the index quietly disagreeing.
+         * screen and the one inside the index quietly disagreeing. Ravot has a fragment of each to
+         * keep in step, over the kinderen under seventeen its buckets weigh.
          */
         it('subtracts the same omkaderingscijfer it puts on the screen', () => {
-            const divisie = "COUNT(DISTINCT CASE WHEN tak_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END), 0)";
-
-            for (const [env, tabs, pattern] of [
-                ['keeo', dashboards, /ROUND\( \( COUNT\(DISTINCT CASE WHEN tak_category.*?, 2\)/],
-                ['ravot', ravotDashboards, /ROUND\( COUNT\(DISTINCT CASE WHEN tak_category.*?, 2\)/],
+            for (const [env, tabs, pattern, divisie] of [
+                ['keeo', dashboards, /ROUND\( \( COUNT\(DISTINCT CASE WHEN tak_category.*?, 2\)/,
+                    "COUNT(DISTINCT CASE WHEN tak_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END), 0)"],
+                ['ravot', ravotDashboards, /ROUND\( COUNT\(DISTINCT CASE WHEN tak_category.*?, 2\)/,
+                    "COUNT(DISTINCT CASE WHEN tak_category = 'child' AND leeftijd < 17 THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END), 0)"],
             ] as const) {
                 const index = cardOf(tabs, 'eenheden', 'eenheid-gtp').sql.replaceAll(/\s+/g, ' ').match(pattern)?.[0];
+                const cijfer = cardOf(tabs, 'eenheden', 'eenheid-omkaderingscijfer').sql.replaceAll(/\s+/g, ' ');
 
                 expect(`${env}: ${index?.includes(`- 2 * ${divisie}`)}`).toEqual(`${env}: true`);
                 expect(`${env}: ${index?.includes('effective_category')}`).toEqual(`${env}: false`);
+                expect(`${env}: ${cijfer.includes(`ROUND( ${divisie}, 2)`)}`).toEqual(`${env}: true`);
             }
-
-            expect(cardOf(dashboards, 'eenheden', 'eenheid-omkaderingscijfer').sql.replaceAll(/\s+/g, ' ')).toContain(`ROUND( ${divisie}, 2)`);
         });
 
         /**
@@ -559,6 +561,17 @@ describe('report', () => {
         });
 
         /**
+         * Ravot divides by the kinderen under seventeen alone, so a reader told it counts every lid
+         * is reading the figure against leden it leaves out.
+         */
+        it('says which leden the omkaderingscijfer counts where that is not all of them', () => {
+            for (const key of ['eenheid-omkaderingscijfer', 'eenheid-omkaderingscijfer-meter']) {
+                expect(`${key}: ${cardOf(dashboards, 'eenheden', key).description}`).toContain('voor hoeveel leden een leider');
+                expect(`${key}: ${cardOf(ravotDashboards, 'eenheden', key).description}`).toContain('voor hoeveel leden jonger dan 17 jaar een leider');
+            }
+        });
+
+        /**
          * An environment says a figure in words of its own; it does not get a report of its own. Two
          * platforms reading pages that no longer hold the same cards is a report that has quietly
          * forked, which is what the shared definition exists to prevent.
@@ -597,13 +610,20 @@ describe('report', () => {
             expect([...qualifiers].sort()).toEqual(['ravot']);
         });
 
+        /**
+         * Three cards draw the omkaderingscijfer, and they only agree because they share one
+         * fragment -- in either environment, since each has one of its own to drift from.
+         */
         it('counts the omkaderingscijfer the same way wherever it is shown', () => {
-            const expression = "ROUND( COUNT(DISTINCT CASE WHEN tak_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END), 0), 2)";
+            for (const [env, tabs, expression] of [
+                ['keeo', dashboards, "ROUND( COUNT(DISTINCT CASE WHEN tak_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END), 0), 2)"],
+                ['ravot', ravotDashboards, "ROUND( COUNT(DISTINCT CASE WHEN tak_category = 'child' AND leeftijd < 17 THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END), 0), 2)"],
+            ] as const) {
+                for (const key of ['eenheid-omkaderingscijfer', 'eenheid-omkaderingscijfer-meter', 'eenheid-omkaderingscijfer-per-scoutsjaar']) {
+                    const sql = cardOf(tabs, 'eenheden', key).sql.replaceAll(/\s+/g, ' ');
 
-            for (const key of ['eenheid-omkaderingscijfer', 'eenheid-omkaderingscijfer-meter', 'eenheid-omkaderingscijfer-per-scoutsjaar']) {
-                const sql = cardOf(dashboards, 'eenheden', key).sql.replaceAll(/\s+/g, ' ');
-
-                expect(`${key}: ${sql.includes(expression)}`).toEqual(`${key}: true`);
+                    expect(`${env} ${key}: ${sql.includes(expression)}`).toEqual(`${env} ${key}: true`);
+                }
             }
         });
 

@@ -55,6 +55,7 @@ FROM leden
 -- segments: 0, 4, 6, 8, 10, 12
 -- best: low
 -- description: Het omkaderingscijfer geeft weer voor hoeveel leden een leider gemiddeld dient te zorgen. Idealiter scoort een eenheid hier laag op.
+-- description@ravot: Het omkaderingscijfer geeft weer voor hoeveel leden jonger dan 17 jaar een leider gemiddeld dient te zorgen. Idealiter scoort een eenheid hier laag op.
 -- @include facts
 -- @include leden
 SELECT
@@ -139,6 +140,7 @@ ORDER BY MIN(period_start)
 -- segments: 0, 4, 6, 8, 10, 12
 -- best: low
 -- description: Het omkaderingscijfer geeft weer voor hoeveel leden een leider gemiddeld dient te zorgen. Idealiter scoort een eenheid hier laag op. Bij een cijfer van 10 of meer wordt toezicht houden op de leden moeilijker.
+-- description@ravot: Het omkaderingscijfer geeft weer voor hoeveel leden jonger dan 17 jaar een leider gemiddeld dient te zorgen. Idealiter scoort een eenheid hier laag op. Bij een cijfer van 10 of meer wordt toezicht houden op de leden moeilijker.
 -- @include facts
 -- @include leden
 SELECT
