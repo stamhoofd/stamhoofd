@@ -12,9 +12,9 @@ export function useDeleteProductPrice() {
             return;
         }
         const confirmed = await CenteredMessage.confirm({
-            title: productPrice.name ? $t('Tarief ‘{name}’ verwijderen?', { name: productPrice.name }) : $t('%1Af'),
+            title: productPrice.name ? $t('%ZmV', { name: productPrice.name }) : $t('%1Af'),
             confirmText: $t('%CJ'),
-            description: $t('Het tarief wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
+            description: $t('%6I'),
             availabilityDelay: 2_000,
         });
         if (!confirmed) return;

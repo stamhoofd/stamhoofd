@@ -442,7 +442,7 @@ export class ContextInstance {
             throw new SimpleError({
                 code: 'not_allowed_while_impersonating',
                 message: 'This action is not allowed while impersonating another user',
-                human: $t(`Dit kan je niet doen terwijl je aangemeld bent als een andere gebruiker.`),
+                human: $t(`%Zm0`),
                 statusCode: 403,
             });
         }

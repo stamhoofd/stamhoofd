@@ -595,18 +595,6 @@
     "original": "De eenheid is aangemaakt. Log in het beheerderportaal in om andere beheerders toegang te geven.",
     "translation": "The unit has been created. Log in to the administrator portal to grant access to other administrators."
   },
-  "%35": {
-    "original": "Ben je zeker dat je deze eenheid wil verwijderen?",
-    "translation": "Are you sure you want to delete this unit?"
-  },
-  "%36": {
-    "original": "Bevestiging 2/3. Ben je 100% zeker dat je deze eenheid wilt verwijderen?",
-    "translation": "Confirmation 2/3. Are you 100% sure you want to delete this unit?"
-  },
-  "%37": {
-    "original": "Bevestiging 3/3. Ben je 100% zeker dat je deze eenheid wilt verwijderen?",
-    "translation": "Confirmation 3/3. Are you 100% sure you want to delete this unit?"
-  },
   "%38": {
     "original": "Eenheid bewerken",
     "translation": "Edit unit"
@@ -658,10 +646,6 @@
   "%3Y": {
     "original": "Je hebt al voor elk scoutsjaar instellingen toegevoegd",
     "translation": "You have already added settings for each scout year"
-  },
-  "%3d": {
-    "original": "Ben je zeker dat je dit scoutsjaar wilt verwijderen?",
-    "translation": "Are you sure you want to delete this scout year?"
   },
   "%3e": {
     "original": "Beheer de scoutsjaren en start een nieuw scoutsjaar op",
@@ -1622,6 +1606,38 @@
   "%Zlz": {
     "original": "Andere eenheid zoeken",
     "translation": "Search for another unit"
+  },
+  "%ZmJ": {
+    "original": "Je hebt geen toegang om aan te melden als deze gebruiker. Deze gebruiker heeft op één of andere manier meer toegangsrechten dan jou, of toegang tot data waar jij niet aankan (bv. inschrijvingen bij andere eenheid), vandaar dat het niet kan.",
+    "translation": "You do not have access to log in as this user. This user has more access rights than you, or access to data you cannot see (e.g., registrations with another group), so this cannot be done."
+  },
+  "%ZmW": {
+    "original": "Je meldt je aan via een link als een andere gebruiker. Hierna zie je alles net zoals die gebruiker Keeo ziet. Ga enkel verder als je deze link zelf hebt aangemaakt.",
+    "translation": "You are logging in via a link as another user. After this, everything will look the same as it does for that user in Keeo. Only proceed if you yourself created this link."
+  },
+  "%Zma": {
+    "original": "Je bekijkt Keeo nu als {name}",
+    "translation": "You are now viewing Keeo as {name}"
+  },
+  "%Zmb": {
+    "original": "Met deze link bekijk je Keeo zoals deze gebruiker het ziet. Om veiligheidsredenen kan het soms zijn dat bepaalde dingen er toch een klein beetje anders uitzien. Alles wat je wijzigt, wordt geregistreerd onder jouw eigen naam.",
+    "translation": "With this link, you can see Keeo as this user sees it. For security reasons, some things might look slightly different. Any changes you make are recorded under your own name."
+  },
+  "%Zml": {
+    "original": "Tip: Gebruik de ‘Inloggen als’-functie om te kijken hoe Keeo er voor een andere beheerder uitziet en de rechten uit te proberen.",
+    "translation": "Tip: Use the 'Log in as' feature to see what Keeo looks like for another administrator and to test permissions."
+  },
+  "%Zn8": {
+    "original": "Inloggen als een andere gebruiker is niet ingeschakeld voor deze eenheid.",
+    "translation": "Logging in as another user is not enabled for this group."
+  },
+  "%ZnQ": {
+    "original": "Inloggen als een andere gebruiker (voor alle eenheden)",
+    "translation": "Log in as another user (for all groups)"
+  },
+  "%ZnV": {
+    "original": "Hoofdbeheerders van deze eenheid kunnen via een link inloggen als één van hun gebruikers, om te zien wat die gebruiker ziet.",
+    "translation": "Admins of this group can log in as any of their users via a link, to see what that user sees."
   },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Keeo. Voor Microsoft kan je",

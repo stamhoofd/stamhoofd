@@ -273,9 +273,9 @@ async function save() {
 
 async function deleteMe() {
     if (!await CenteredMessage.confirm({
-        title: $t('Deze korting verwijderen?'),
+        title: $t('%ZnS'),
         confirmText: 'Verwijderen',
-        description: $t('De korting wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
+        description: $t('%ZmP'),
         availabilityDelay: 2_000,
     })) {
         return;

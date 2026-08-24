@@ -332,7 +332,7 @@ async function deleteMe() {
     deleting.value = true;
 
     if (!await CenteredMessage.confirm({
-        title: $t('‘{name}’ verwijderen?', { name: props.organization.name }),
+        title: $t('%Zn2', { name: props.organization.name }),
         confirmText: $t('%55'),
         description: $t('%vT'),
         availabilityDelay: 2_000,
@@ -347,7 +347,7 @@ async function deleteMe() {
     // Second confirmation window
 
     if (!await CenteredMessage.confirm({
-        title: $t('Bevestiging 2/3. ‘{name}’ verwijderen?', { name: props.organization.name }),
+        title: $t('%ZnC', { name: props.organization.name }),
         confirmText: $t('%55'),
         description: $t('%vT'),
         availabilityDelay: 2_000,
@@ -360,7 +360,7 @@ async function deleteMe() {
     await new Promise(resolve => setTimeout(resolve, 3000));
 
     if (!await CenteredMessage.confirm({
-        title: $t('Bevestiging 3/3. ‘{name}’ verwijderen?', { name: props.organization.name }),
+        title: $t('%ZmI', { name: props.organization.name }),
         confirmText: $t('%55'),
         description: $t('%vT'),
         availabilityDelay: 2_000,

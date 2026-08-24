@@ -229,7 +229,7 @@ export function getAuditLogTypeName(type: AuditLogType): string {
             return $t(`%ZgW`);
 
         case AuditLogType.UserImpersonated:
-            return $t(`Aanmeldingen als een andere gebruiker`);
+            return $t(`%Zn3`);
 
         case AuditLogType.MemberResponsibilityRecordAdded:
             return `Nieuwe toegekende functies`;
@@ -572,7 +572,7 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return $t(`%ZgU`);
 
         case AuditLogType.UserImpersonated:
-            return $t(`{{u2}} meldde zich aan als {{u}}`);
+            return $t(`%Zms`);
 
         case AuditLogType.MemberResponsibilityRecordAdded:
             return `Functie {{r}}{{if g " van " g}}{{if org " (" org ")"}} werd toegekend aan {{m}}`;

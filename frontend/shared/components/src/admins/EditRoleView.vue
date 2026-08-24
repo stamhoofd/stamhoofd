@@ -348,9 +348,9 @@ const doDelete = async () => {
     }
 
     if (!await CenteredMessage.confirm({
-        title: patched.value.name ? $t('{name} verwijderen?', { name: patched.value.name }) : $t(`%uQ`),
+        title: patched.value.name ? $t('%Zmp', { name: patched.value.name }) : $t(`%uQ`),
         confirmText: $t(`%CJ`),
-        description: $t('De rol wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
+        description: $t('%ZnR'),
         destructive: true,
         availabilityDelay: 2_000,
     })) {

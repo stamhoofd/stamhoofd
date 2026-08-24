@@ -355,7 +355,7 @@ async function doDelete() {
     }
 
     if (!await CenteredMessage.confirm({
-        title: name.value.toString() ? $t('‘{name}’ verwijderen?', { name: name.value.toString() }) : $t('Deze bundelkorting verwijderen?'),
+        title: name.value.toString() ? $t('%Zn2', { name: name.value.toString() }) : $t('Deze bundelkorting verwijderen?'),
         confirmText: $t('%CJ'),
         availabilityDelay: 2_000,
     })) {

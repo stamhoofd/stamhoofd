@@ -299,7 +299,7 @@ export function useEmailContentLanguage(options: {
         }
 
         if (!await CenteredMessage.confirm({
-            title: $t('{name} verwijderen?', { name: LanguageHelper.getName(language) }),
+            title: $t('%Zmp', { name: LanguageHelper.getName(language) }),
             confirmText: $t('%CJ'),
             description,
             destructive: true,

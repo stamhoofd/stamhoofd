@@ -142,8 +142,8 @@ const showImpersonate = computed(() => canImpersonate(props.user));
 
 const adminActions = computed<ActionButton[]>(() => [
     {
-        name: $t('Inloggen als deze beheerder'),
-        description: $t('Bekijk het platform zoals deze beheerder het ziet. Je krijgt een link die je in een privévenster opent.'),
+        name: $t('%ZnX'),
+        description: $t('%ZmT'),
         icon: 'eye',
         asideIcon: 'key tiny stroke',
         testId: 'impersonate-admin',
@@ -257,7 +257,7 @@ const doDelete = async () => {
     }
 
     if (!await CenteredMessage.confirm({
-        title: props.user.name ? $t('‘{name}’ verwijderen?', { name: props.user.name }) : $t('Deze beheerder verwijderen?'),
+        title: props.user.name ? $t('%Zn2', { name: props.user.name }) : $t('Deze beheerder verwijderen?'),
         confirmText: $t(`%CJ`),
         availabilityDelay: 2_000,
     })) {

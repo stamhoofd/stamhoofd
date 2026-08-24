@@ -1,25 +1,25 @@
 <template>
-    <SaveView :loading-view="loading" :error-box="errors.errorBox" :title="$t(`Inloggen als gebruiker`)" :disabled="!link" :save-text="$t(`Link kopiëren`)" save-icon="copy" data-testid="impersonation-link-view" @save="copy">
-        <h1>{{ $t('Inloggen als {name}', {name: userName}) }}</h1>
-        <p>{{ $t('Met deze link bekijk je Stamhoofd zoals deze gebruiker het ziet. Om veiligheidsredenen kan het soms zijn dat bepaalde dingen er toch een klein beetje anders uitzien. Alles wat je wijzigt, wordt geregistreerd onder jouw eigen naam.') }}</p>
+    <SaveView :loading-view="loading" :error-box="errors.errorBox" :title="$t(`%Zmq`)" :disabled="!link" :save-text="$t(`%az`)" save-icon="copy" data-testid="impersonation-link-view" @save="copy">
+        <h1>{{ $t('%Zmt', {name: userName}) }}</h1>
+        <p>{{ $t('%Zmb') }}</p>
 
         <p class="warning-box">
-            {{ $t('Open deze link alleen in een privévenster (incognito). Je kan deze link niet delen met andere personen.') }}
+            {{ $t('%Zm7') }}
         </p>
 
         <p class="warning-box">
-            {{ $t('Inschrijvingen maken, mails versturen en andere acties of wijzigingen kan je niet uitvoeren als je bent ingelogd als een andere gebruiker.') }}
+            {{ $t('%ZmA') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="link">
-            <STInputBox :title="$t(`Link`)" error-fields="link" :error-box="errors.errorBox" class="max">
+            <STInputBox :title="$t(`%Zel`)" error-fields="link" :error-box="errors.errorBox" class="max">
                 <input v-copyable class="input" type="text" :value="link" readonly data-testid="impersonation-link">
             </STInputBox>
 
             <p class="style-description-small">
-                {{ $t('Deze link vervalt {time} en kan maar één keer gebruikt worden, enkel vanaf dit toestel.', {time: validUntilText}) }}
+                {{ $t('%Zmv', {time: validUntilText}) }}
             </p>
         </template>
     </SaveView>
@@ -89,10 +89,10 @@ async function copy() {
 
     try {
         await navigator.clipboard.writeText(link.value);
-        Toast.success($t(`De link staat op je klembord.`)).show();
+        Toast.success($t(`%Zmk`)).show();
     } catch (e) {
         console.error(e);
-        Toast.error($t(`Kopiëren is niet gelukt. Selecteer de link en kopieer ze zelf.`)).show();
+        Toast.error($t(`%Zmh`)).show();
     }
 }
 </script>

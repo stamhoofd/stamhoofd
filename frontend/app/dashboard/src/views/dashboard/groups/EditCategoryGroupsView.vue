@@ -264,8 +264,8 @@ async function createCategory() {
 async function deleteMe() {
     if (!await CenteredMessage.confirm({
         title: groups.value.length
-            ? $t('Categorie ‘{categoryName}’ en bijhorende groepen verwijderen?', { categoryName: name.value })
-            : $t('Categorie ‘{categoryName}’ verwijderen?', { categoryName: name.value }),
+            ? $t('%ZmQ', { categoryName: name.value })
+            : $t('%ZnW', { categoryName: name.value }),
         confirmText: $t('%CJ'),
         availabilityDelay: 2_000,
     })) {

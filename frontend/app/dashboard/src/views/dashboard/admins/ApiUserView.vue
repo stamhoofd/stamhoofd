@@ -222,7 +222,7 @@ async function doDelete() {
     }
 
     if (!await CenteredMessage.confirm({
-        title: props.user.name ? $t('API-key ‘{name}’ verwijderen?', { name: props.user.name }) : $t('%CI'),
+        title: props.user.name ? $t('%Zmw', { name: props.user.name }) : $t('%CI'),
         confirmText: $t('%CJ'),
         availabilityDelay: 2_000,
     })) {

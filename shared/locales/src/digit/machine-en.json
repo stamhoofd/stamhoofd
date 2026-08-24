@@ -539,18 +539,6 @@
     "original": "De groep is aangemaakt. Log in het beheerderportaal in om andere beheerders toegang te geven.",
     "translation": "The group has been created. Log in to the administrator portal to give other administrators access."
   },
-  "%35": {
-    "original": "Ben je zeker dat je deze groep wil verwijderen?",
-    "translation": "Are you sure you want to delete this group?"
-  },
-  "%36": {
-    "original": "Bevestiging 2/3. Ben je 100% zeker dat je deze groep wilt verwijderen?",
-    "translation": "Confirmation 2/3. Are you 100% sure you want to delete this group?"
-  },
-  "%37": {
-    "original": "Bevestiging 3/3. Ben je 100% zeker dat je deze groep wilt verwijderen?",
-    "translation": "Confirmation 3/3. Are you 100% sure you want to delete this group?"
-  },
   "%38": {
     "original": "Groep bewerken",
     "translation": "Edit group"
@@ -1346,6 +1334,38 @@
   "%Zlz": {
     "original": "Andere groep zoeken",
     "translation": "Search for another group"
+  },
+  "%ZmJ": {
+    "original": "Je hebt geen toegang om aan te melden als deze gebruiker. Deze gebruiker heeft op één of andere manier meer toegangsrechten dan jou, of toegang tot data waar jij niet aankan (bv. inschrijvingen bij andere groep), vandaar dat het niet kan.",
+    "translation": "You don’t have access to log in as this user. This user has more access rights than you, or can access data that you can’t see (for example, registrations in another group), so logging in as them isn’t possible."
+  },
+  "%ZmW": {
+    "original": "Je meldt je aan via een link als een andere gebruiker. Hierna zie je alles net zoals die gebruiker Ravot ziet. Ga enkel verder als je deze link zelf hebt aangemaakt.",
+    "translation": "You are logging in via a link as another user. After this, everything will look the same as it does for that user in Ravot. Only continue if you created this link yourself."
+  },
+  "%Zma": {
+    "original": "Je bekijkt Ravot nu als {name}",
+    "translation": "You are now viewing Ravot as {name}"
+  },
+  "%Zmb": {
+    "original": "Met deze link bekijk je Ravot zoals deze gebruiker het ziet. Om veiligheidsredenen kan het soms zijn dat bepaalde dingen er toch een klein beetje anders uitzien. Alles wat je wijzigt, wordt geregistreerd onder jouw eigen naam.",
+    "translation": "With this link, you can see Ravot as this user sees it. For security reasons, some things might appear slightly different. Any changes you make will be recorded under your own name."
+  },
+  "%Zml": {
+    "original": "Tip: Gebruik de ‘Inloggen als’-functie om te kijken hoe Ravot er voor een andere beheerder uitziet en de rechten uit te proberen.",
+    "translation": "Tip: Use the 'Log in as' feature to see what Ravot looks like for another administrator and to test the permissions."
+  },
+  "%Zn8": {
+    "original": "Inloggen als een andere gebruiker is niet ingeschakeld voor deze groep.",
+    "translation": "Logging in as another user is not enabled for this group."
+  },
+  "%ZnQ": {
+    "original": "Inloggen als een andere gebruiker (voor alle groepen)",
+    "translation": "Log in as another user (across all groups)"
+  },
+  "%ZnV": {
+    "original": "Hoofdbeheerders van deze groep kunnen via een link inloggen als één van hun gebruikers, om te zien wat die gebruiker ziet.",
+    "translation": "Main administrators of this group can log in as one of their users via a link, to see what that user sees."
   },
   "%Zp": {
     "original": "Oeps, deze website is enkel voor beheerders van {organization}. Ga naar ‘Mijn account’ als je je wilt inschrijven als lid.",

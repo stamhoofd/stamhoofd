@@ -114,7 +114,7 @@
         </Checkbox>
 
         <Checkbox :model-value="getFeatureFlag('impersonation')" @update:model-value="setFeatureFlag('impersonation', !!$event)">
-            {{ $t('Inloggen als een andere gebruiker (voor alle verenigingen)') }}
+            {{ $t('%ZnQ') }}
         </Checkbox>
     </SaveView>
 </template>

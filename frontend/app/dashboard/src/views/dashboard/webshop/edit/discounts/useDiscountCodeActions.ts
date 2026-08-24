@@ -160,9 +160,9 @@ export function useDiscountCodeActions(saveHandler: (patch: PatchableArrayAutoEn
 
         async function deleteDiscountCode() {
             if (!await CenteredMessage.confirm({
-                title: props.discountCode.code ? $t('‘{name}’ verwijderen?', { name: props.discountCode.code }) : $t('Deze kortingscode verwijderen?'),
+                title: props.discountCode.code ? $t('%Zn2', { name: props.discountCode.code }) : $t('Deze kortingscode verwijderen?'),
                 confirmText: $t('%CJ'),
-                description: $t('De kortingscode wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
+                description: $t('%ZmS'),
                 availabilityDelay: 2_000,
             })) {
                 return;
@@ -177,13 +177,13 @@ export function useDiscountCodeActions(saveHandler: (patch: PatchableArrayAutoEn
             // When a search or filter is active, only delete the currently visible codes.
             const codes = props.isFiltering ? props.visibleDiscountCodes : props.discountCodes;
             const confirmText = props.isFiltering
-                ? $t('Alle zichtbare kortingscodes verwijderen?')
-                : $t('Alle kortingscodes verwijderen?');
+                ? $t('%ZnN')
+                : $t('%ZnM');
 
             if (!await CenteredMessage.confirm({
                 title: confirmText,
                 confirmText: $t('%CJ'),
-                description: $t('Volgende kortingscodes worden verwijderd: {codes}. Ze worden pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.', {
+                description: $t('%Zm3', {
                     codes: Formatter.joinLastLimited(codes.map(c => c.code), {
                         separator: ', ',
                         lastSeparator: ' ' + $t('%M1') + ' ',

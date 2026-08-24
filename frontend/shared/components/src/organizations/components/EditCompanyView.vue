@@ -70,8 +70,8 @@ async function save() {
 async function deleteMe() {
     if (!await CenteredMessage.confirm({
         title: patched.value.name
-            ? $t('Facturatiegegevens ‘{name}’ verwijderen?', { name: patched.value.name })
-            : $t('Deze facturatiegegevens verwijderen?'),
+            ? $t('%ZnT', { name: patched.value.name })
+            : $t('%ZmR'),
         confirmText: $t('%55'),
         availabilityDelay: 2_000,
     })) {

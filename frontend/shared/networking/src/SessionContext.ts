@@ -519,14 +519,14 @@ export class SessionContext implements RequestMiddleware {
         window.history.replaceState(null, '', window.location.pathname + window.location.search + (remaining ? '#' + remaining : ''));
 
         if (this.hasToken()) {
-            new Toast($t(`Je bent al ingelogd in deze browser. Open deze link in een privévenster om als een andere gebruiker aan te melden.`), 'error red').setHide(30000).show();
+            new Toast($t(`%Zm9`), 'error red').setHide(30000).show();
             return;
         }
 
         if (!await CenteredMessage.confirm({
-            title: $t(`Inloggen als een andere gebruiker?`),
-            confirmText: $t(`Ja, inloggen`),
-            description: $t(`Je meldt je aan via een link als een andere gebruiker. Hierna zie je alles net zoals die gebruiker Stamhoofd ziet. Ga enkel verder als je deze link zelf hebt aangemaakt.`),
+            title: $t(`%ZnG`),
+            confirmText: $t(`%ZmZ`),
+            description: $t(`%ZmW`),
         })) {
             return;
         }
@@ -810,7 +810,7 @@ export class SessionContext implements RequestMiddleware {
             this.clearAuthCache();
 
             if (this.user.impersonatedBy) {
-                Toast.success($t('Je bekijkt Stamhoofd nu als {name}', { name: this.user.name || this.user.email })).show();
+                Toast.success($t('%Zma', { name: this.user.name || this.user.email })).show();
             }
         }
         console.log('Fetched session user');

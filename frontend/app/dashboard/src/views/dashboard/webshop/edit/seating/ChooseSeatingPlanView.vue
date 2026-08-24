@@ -177,9 +177,9 @@ async function deleteSeatingPlan(id: string) {
     const planName = seatingPlans.value.find(p => p.id === id)?.name;
 
     if (!await CenteredMessage.confirm({
-        title: planName ? $t('‘{name}’ verwijderen?', { name: planName }) : $t('Dit zaalplan verwijderen?'),
+        title: planName ? $t('%Zn2', { name: planName }) : $t('Dit zaalplan verwijderen?'),
         confirmText: 'Ja, verwijderen',
-        description: $t('Het zaalplan wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
+        description: $t('%ZnO'),
         availabilityDelay: 2_000,
     })) {
         return;
@@ -190,7 +190,7 @@ async function deleteSeatingPlan(id: string) {
     if (!await CenteredMessage.confirm({
         title: 'Ben je helemaal zeker?',
         confirmText: 'Ja, verwijderen',
-        description: $t('Het zaalplan wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
+        description: $t('%ZnO'),
         availabilityDelay: 2_000,
     })) {
         return;
