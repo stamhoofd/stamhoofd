@@ -1,4 +1,4 @@
-import { registerFeesTenantCron } from './helpers/registerTenantCron.js';
+import { registerRootTenantCron } from './helpers/registerTenantCron.js';
 import { Organization } from '@stamhoofd/models';
 import { OrganizationEmailService } from '../services/OrganizationEmailService.js';
 import { isOutside } from './helpers/isOutside.js';
@@ -39,5 +39,5 @@ async function checkDrips() {
 }
 
 if (STAMHOOFD.userMode !== 'platform') {
-    registerFeesTenantCron('checkDrips', checkDrips);
+    registerRootTenantCron('checkDrips', checkDrips);
 }
