@@ -2,17 +2,16 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { Token } from '@stamhoofd/models';
 import { UserFactory } from '@stamhoofd/models';
 import { PermissionLevel, Permissions, Version } from '@stamhoofd/structures';
-import { SessionService } from '../../../services/SessionService.js';
-
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { SessionService } from '../../../services/SessionService.js';
 import { GetPlatformEndpoint } from './GetPlatformEndpoint.js';
 
 describe('Endpoint.GetPlatformEndpoint', () => {
     const endpoint = new GetPlatformEndpoint();
 
-    const getPlatform = async (token?: Token) => {
-        const request = Request.buildJson('GET', `/v${Version}/platform`);
+    const getPlatform = async (token?: Token, path = 'platform') => {
+        const request = Request.buildJson('GET', `/v${Version}/${path}`);
         if (token) {
             request.headers.authorization = 'Bearer ' + token.accessToken;
         }
@@ -66,5 +65,26 @@ describe('Endpoint.GetPlatformEndpoint', () => {
         token.accessToken = 'invalid-token';
         await token.save();
         await expect(getPlatform(token)).rejects.toThrow('The access token is invalid');
+    });
+
+    describe('/tenant', () => {
+        test('it answers on the canonical path too', async () => {
+            const viaTenant = await getPlatform(undefined, 'tenant');
+            const viaPlatform = await getPlatform(undefined, 'platform');
+
+            expect(viaTenant.body.privateConfig).toBeNull();
+            expect(viaTenant.body.encode({ version: Version })).toEqual(viaPlatform.body.encode({ version: Version }));
+        });
+
+        test('it applies the same authorization', async () => {
+            const user = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await SessionService.createSession(user);
+
+            const response = await getPlatform(token, 'tenant');
+
+            expect(response.body.privateConfig).not.toBeNull();
+        });
     });
 });
