@@ -37,12 +37,12 @@ export type SessionDurations = {
  */
 export const SESSION_DURATIONS: Record<SessionType, Record<SessionClientType, SessionDurations>> = {
     sso: {
-        [SessionClientType.Browser]: { session: 12 * HOUR, refreshToken: 3 * HOUR },
+        [SessionClientType.Browser]: { session: 12 * HOUR, refreshToken: 8 * HOUR },
         [SessionClientType.iOS]: { session: 7 * DAY, refreshToken: 36 * HOUR },
         [SessionClientType.Android]: { session: 7 * DAY, refreshToken: 36 * HOUR },
     },
     platformAdmin: {
-        [SessionClientType.Browser]: { session: 12 * HOUR, refreshToken: 3 * HOUR },
+        [SessionClientType.Browser]: { session: 12 * HOUR, refreshToken: 8 * HOUR },
         [SessionClientType.iOS]: { session: 7 * DAY, refreshToken: 36 * HOUR },
         [SessionClientType.Android]: { session: 7 * DAY, refreshToken: 36 * HOUR },
     },
