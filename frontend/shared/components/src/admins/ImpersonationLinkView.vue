@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="loading" :title="$t(`Inloggen als gebruiker`)" :disabled="!link" :save-text="$t(`Link kopiëren`)" save-icon="copy" data-testid="impersonation-link-view" @save="copy">
+    <SaveView :loading-view="loading" :error-box="errors.errorBox" :title="$t(`Inloggen als gebruiker`)" :disabled="!link" :save-text="$t(`Link kopiëren`)" save-icon="copy" data-testid="impersonation-link-view" @save="copy">
         <h1>{{ $t('Inloggen als {name}', {name: userName}) }}</h1>
         <p>{{ $t('Met deze link bekijk je Stamhoofd zoals deze gebruiker het ziet. Om veiligheidsredenen kan het soms zijn dat bepaalde dingen er toch een klein beetje anders uitzien. Alles wat je wijzigt, wordt geregistreerd onder jouw eigen naam.') }}</p>
 
