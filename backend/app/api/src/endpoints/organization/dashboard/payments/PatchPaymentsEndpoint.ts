@@ -77,6 +77,8 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                 });
             }
 
+            Context.assertNotImpersonating();
+
             const payment = new Payment();
             payment.organizationId = organization.id;
             payment.status = PaymentStatus.Created;

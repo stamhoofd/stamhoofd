@@ -57,6 +57,8 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 });
             }
 
+            Context.assertNotImpersonating(); // createdBy user id would be wrong
+
             const notification = new EventNotification();
             notification.organizationId = put.organization.id;
             notification.typeId = put.typeId;
@@ -190,6 +192,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 const previousStatus = notification.status;
                 notification.status = patch.status; // checks already happened
                 if (patch.status === EventNotificationStatus.Pending) {
+                    Context.assertNotImpersonating();
                     notification.submittedBy = user.id;
                     notification.submittedAt = new Date();
                 }
