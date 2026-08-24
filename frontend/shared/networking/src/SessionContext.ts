@@ -808,6 +808,10 @@ export class SessionContext implements RequestMiddleware {
         } else {
             this.user = response.data;
             this.clearAuthCache();
+
+            if (this.user.impersonatedBy) {
+                Toast.success($t('Je bekijkt Stamhoofd nu als {name}', { name: this.user.name || this.user.email })).show();
+            }
         }
         console.log('Fetched session user');
 
