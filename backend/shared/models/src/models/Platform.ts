@@ -125,6 +125,26 @@ export class Platform extends QueryableModel {
         return await this.getPrivateStructForTenant(ROOT_TENANT_ID);
     }
 
+    /**
+     * Both columns are nullable. Blank input is rejected so a caller cannot ask for "the tenant with
+     * no uri" — SQL would not match NULL with '=' anyway, but an explicit reject beats relying on it.
+     */
+    static async getByURI(uri: string): Promise<Platform | undefined> {
+        if (!uri) {
+            return undefined;
+        }
+
+        return await this.select().where('uri', uri).first(false) ?? undefined;
+    }
+
+    static async getByDomain(domain: string): Promise<Platform | undefined> {
+        if (!domain) {
+            return undefined;
+        }
+
+        return await this.select().where('domain', domain).first(false) ?? undefined;
+    }
+
     static async getForEditing(tenantId: string = ROOT_TENANT_ID): Promise<Platform> {
         return QueueHandler.schedule('Platform.getModel-' + tenantId, async () => {
             // Build a new one
