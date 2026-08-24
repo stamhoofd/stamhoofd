@@ -6,6 +6,14 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
+        <p v-if="errors.errorBox?.hasCode('cannot_invoice_balance_item')" class="error-box selectable with-button">
+            {{ $t('Je kan deze foutmelding tijdelijk negeren als je weet wat je aan het doen bent en je een afrekening wilt overfactureren (bv. voor correcties van facturatiegegevens)') }}
+
+            <LoadingButton class="button text" type="button" :loading="saving" @click="save({confirm: true})">
+                {{ $t('Negeren') }}
+            </LoadingButton>
+        </p>
+
         <CategorizedBox icon="company" :title="$t('%5M')">
             <template #summary>
                 <p class="style-description-small">
@@ -137,6 +145,7 @@ import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { computed, ref } from 'vue';
 import InvoiceItemsBox from './InvoiceItemsBox.vue';
+import LoadingButton from '#navigation/LoadingButton.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -185,7 +194,7 @@ const suggestedCustomers = computed(() => {
     return patched.value.payments.map(p => p.customer).filter(c => !!c);
 });
 
-async function save() {
+async function save(options?: { confirm?: boolean }) {
     if (saving.value) {
         return;
     }
@@ -211,6 +220,9 @@ async function save() {
             path: '/invoices',
             body: arr,
             decoder: new ArrayDecoder(Invoice as Decoder<Invoice>),
+            query: {
+                confirm: options?.confirm ? true : false,
+            },
             shouldRetry: true,
             owner,
         });
