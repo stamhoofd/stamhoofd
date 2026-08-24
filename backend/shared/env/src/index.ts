@@ -12,7 +12,6 @@ async function fileExists(path: string): Promise<boolean> {
     }
 }
 
-// todo: probably contains unneccessary code
 export async function load(settings?: { path?: string; service?: 'redirecter' | 'api' | 'renderer' | 'backup' | 'statistics-syncer' }) {
     let env: any;
 
