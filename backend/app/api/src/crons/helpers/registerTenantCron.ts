@@ -12,7 +12,13 @@ import { TenantContext } from '../../helpers/TenantContext.js';
  * a loop, the first tenant would set that state and every other tenant would be skipped for the rest
  * of the day — or worse, share the cursor.
  */
-export function withTenantScope(method: () => Promise<void>): () => Promise<void> {
+export function withAllTenantsScope(method: () => Promise<void>): () => Promise<void> {
+    return async () => {
+        await TenantContext.run(ROOT_TENANT_ID, method);
+    };
+}
+
+export function withRootTenantScope(method: () => Promise<void>): () => Promise<void> {
     return async () => {
         await TenantContext.run(ROOT_TENANT_ID, method);
     };
@@ -22,16 +28,12 @@ export function withTenantScope(method: () => Promise<void>): () => Promise<void
  * A cron that does work belonging to one tenant: its organizations, members, emails or balances.
  */
 export function registerTenantCron(name: string, method: () => Promise<void>) {
-    registerCron(name, withTenantScope(method));
+    registerCron(name, withAllTenantsScope(method));
 }
 
 /**
- * A cron that charges the tenants naming this one as their fees tenant: packages, transfer fees,
- * service fees, invoices and payout reports.
- *
- * Distinct from registerTenantCron because it will fan out over a different set: the tenants that
- * point at this one, rather than this one's own organizations. Today both are the root tenant.
+ * A cron that only needs to run for the root tenant
  */
-export function registerFeesTenantCron(name: string, method: () => Promise<void>) {
-    registerCron(name, withTenantScope(method));
+export function registerRootTenantCron(name: string, method: () => Promise<void>) {
+    registerCron(name, withRootTenantScope(method));
 }

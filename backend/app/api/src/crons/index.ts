@@ -2,7 +2,7 @@
  * Crons register themselves with one of three helpers, depending on whose work they do:
  *
  * - registerTenantCron — work belonging to one tenant (its organizations, members, emails, balances)
- * - registerFeesTenantCron — charging the tenants that name this one as their fees tenant
+ * - registerRootTenantCron — charging the tenants that name this one as their fees tenant
  * - registerCron — genuinely global: not attributable to a tenant
  *
  * The global ones are amazon-ses (bounces, complaints and replies arrive for every tenant at once),

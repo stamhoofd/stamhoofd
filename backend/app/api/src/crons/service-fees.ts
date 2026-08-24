@@ -1,4 +1,4 @@
-import { registerFeesTenantCron } from './helpers/registerTenantCron.js';
+import { registerRootTenantCron } from './helpers/registerTenantCron.js';
 import { BalanceItem, Organization, Payment, Platform } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { BalanceItemStatus, BalanceItemType, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
@@ -8,7 +8,7 @@ import { PaymentService } from '../services/PaymentService.js';
 import { VATService } from '../services/VATService.js';
 
 // Charge manual service fees every night
-registerFeesTenantCron('service-fees', chargeServiceFees);
+registerRootTenantCron('service-fees', chargeServiceFees);
 
 async function chargeServiceFees() {
     if (STAMHOOFD.environment !== 'development' && (new Date().getHours() > 5 || new Date().getHours() < 2)) {
