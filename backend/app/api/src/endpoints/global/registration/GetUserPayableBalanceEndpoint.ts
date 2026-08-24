@@ -32,7 +32,7 @@ export class GetUserPayableBalanceEndpoint extends Endpoint<Params, Query, Body,
         const organization = await Context.setUserOrganizationScope();
         const { user } = await Context.authenticate();
 
-        return new Response(await GetUserPayableBalanceEndpoint.getBillingStatusForObjects([user.id], organization, ReceivableBalanceType.user));
+        return new Response(await GetUserPayableBalanceEndpoint.getBillingStatusForObjects([Context.impersonatedUserOrUser.id], organization, ReceivableBalanceType.user));
     }
 
     static async getBillingStatusForObjects(objectIds: string[], organization: Organization | null, objectType: ReceivableBalanceType) {

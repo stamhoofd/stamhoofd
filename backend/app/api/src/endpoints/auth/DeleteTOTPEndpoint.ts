@@ -29,6 +29,7 @@ export class DeleteTOTPEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOptionalOrganizationScope();
         const { user, token } = await Context.authenticateFresh({ allowWithoutAccount: true, allowUnscoped: true });
+        Context.assertNotImpersonating();
 
         const totp = await MFATOTP.getByID(request.params.id);
         if (!totp || totp.userId !== user.id) {

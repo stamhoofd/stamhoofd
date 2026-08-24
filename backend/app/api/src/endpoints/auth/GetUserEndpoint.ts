@@ -25,10 +25,15 @@ export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody>
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         await Context.setOptionalOrganizationScope();
-        const { user } = await Context.authenticate({ allowWithoutAccount: true, allowUnscoped: true });
+        await Context.authenticate({ allowWithoutAccount: true, allowUnscoped: true });
 
+        // While impersonating, this returns the account that is being looked at: the whole
+        // point is that the frontend behaves as that user. The administrator behind it is
+        // reported separately, so the session can show who is really acting.
         return new Response(
-            await AuthenticatedStructures.userWithMembers(user),
+            await AuthenticatedStructures.userWithMembers(Context.impersonatedUserOrUser, {
+                impersonatedBy: Context.isImpersonating ? Context.user : null,
+            }),
         );
     }
 }

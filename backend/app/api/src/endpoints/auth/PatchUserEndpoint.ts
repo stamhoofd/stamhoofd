@@ -3,13 +3,13 @@ import { isPatch } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailVerificationCode, Member, PasswordToken, Platform, Token, User } from '@stamhoofd/models';
+import { EmailVerificationCode, Member, PasswordToken, Platform, User } from '@stamhoofd/models';
 import type { UserWithMembers } from '@stamhoofd/structures';
 import { LoginMethod, NewUser, PermissionLevel, SignupResponse, UserPermissions } from '@stamhoofd/structures';
 
+import { AuthenticatedStructures } from '../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../helpers/Context.js';
 import { MemberUserSyncer } from '../../helpers/MemberUserSyncer.js';
-import { AuthenticatedStructures } from '../../helpers/AuthenticatedStructures.js';
 import { SessionService } from '../../services/SessionService.js';
 import { VerificationCodeService } from '../../services/VerificationCodeService.js';
 
@@ -73,6 +73,8 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         }
 
         if (request.body.permissions !== undefined) {
+            Context.assertNotImpersonating();
+
             if (!await Context.auth.canAccessUser(editUser, PermissionLevel.Full)) {
                 throw new SimpleError({
                     code: 'permission_denied',
@@ -84,6 +86,11 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 const platform = await Platform.getSharedStruct();
 
                 if (organization) {
+                    if (!await Context.auth.hasFullAccess(organization.id)) {
+                        // Cannot grant permissions for this organization
+                        throw Context.auth.error();
+                    }
+
                     editUser.permissions = UserPermissions.limitedPatch(editUser.permissions, request.body.permissions, organization.id);
 
                     if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.forOrganization(organization, platform, { inheritFromPlatform: false })?.hasFullAccess()) && STAMHOOFD.environment !== 'development') {
@@ -93,6 +100,11 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                         });
                     }
                 } else {
+                    if (!Context.auth.hasPlatformFullAccess()) {
+                        // Cannot grant permissions for global permissions or any organization below
+                        throw Context.auth.error();
+                    }
+
                     if (editUser.permissions) {
                         editUser.permissions.patchOrPut(request.body.permissions);
                     } else {
@@ -121,6 +133,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                         // Not allowed
                         throw Context.auth.error('You are not allowed to change the login provider ids');
                     }
+                    Context.assertNotImpersonating();
 
                     if (editUser.meta?.loginProviderIds.has(key)) {
                         // Check has remaining method
@@ -138,7 +151,12 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             }
         }
 
-        if (editUser.id === user.id && request.body.password) {
+        if (request.body.password) {
+            if (editUser.id !== user.id) {
+                throw Context.auth.error();
+            }
+            Context.assertNotImpersonating(); // normally not triggers because user and editUser won't be the same, but to be sure...
+
             if (STAMHOOFD.userMode === 'platform') {
                 const platform = await Platform.getSharedPrivateStruct();
                 const config = platform.config.loginMethods.get(LoginMethod.Password);
@@ -169,6 +187,8 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
         if (request.body.hasPassword === false) {
             if (editUser.hasPasswordBasedAccount()) {
+                Context.assertNotImpersonating();
+
                 // Check other login methods available
                 if (!editUser.meta?.loginProviderIds?.size) {
                     throw new SimpleError({
@@ -188,6 +208,8 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
         if (await Context.auth.canEditUserEmail(editUser)) {
             if (request.body.email && request.body.email !== editUser.email) {
+                Context.assertNotImpersonating();
+
                 // Create an validation code
                 // We always need the code, to return it. Also on password recovery -> may not be visible to the client whether the user exists or not
                 const code = await EmailVerificationCode.createFor(editUser, request.body.email);

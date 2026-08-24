@@ -4,8 +4,10 @@ import { QueryableModel } from '@stamhoofd/sql';
 import { ApiUser } from '@stamhoofd/structures';
 
 import { User } from './User.js';
+import { UserSession } from './UserSession.js';
 
 export type TokenWithUser = Token & { user: User };
+export type TokenWithSession = Token & { user: User; session: UserSession };
 
 export class Token extends QueryableModel {
     static table = 'tokens';
@@ -69,6 +71,7 @@ export class Token extends QueryableModel {
     updatedAt: Date;
 
     static user: ManyToOneRelation<'user', User>;
+    static session: ManyToOneRelation<'session', UserSession>;
 
     isAccessTokenExpired(): boolean {
         return this.accessTokenValidUntil < new Date() || this.refreshTokenValidUntil < new Date();
@@ -105,11 +108,11 @@ export class Token extends QueryableModel {
     /**
      * Get the token and user for a given accessToken IF it is still valid
      */
-    static async getByAccessToken(accessToken: string, ignoreExpireDate = false): Promise<TokenWithUser | undefined> {
+    static async getByAccessToken(accessToken: string, ignoreExpireDate = false): Promise<TokenWithSession | undefined> {
         const [rows] = await Database.select(
-            `SELECT ${this.getDefaultSelect()}, user.*  FROM ${
+            `SELECT ${this.getDefaultSelect()}, ${User.getDefaultSelect('user')}, ${UserSession.getDefaultSelect('session')} FROM ${
                 this.table
-            } ${Token.user.joinQuery(this.table, 'user')} WHERE ${this.primary.name} = ? LIMIT 1 `,
+            } ${Token.user.joinQuery(this.table, 'user')} ${Token.session.joinQuery(this.table, 'session')} WHERE ${this.primary.name} = ? LIMIT 1 `,
             [accessToken],
         );
 
@@ -136,7 +139,14 @@ export class Token extends QueryableModel {
             return undefined;
         }
 
-        return token.setRelation(Token.user, user);
+        const session = UserSession.fromRow(rows[0]['session']) || null;
+
+        if (!session) {
+            console.warn('Selected a token without a session!');
+            return undefined;
+        }
+
+        return token.setRelation(Token.user, user).setRelation(Token.session, session);
     }
 
     // Methods

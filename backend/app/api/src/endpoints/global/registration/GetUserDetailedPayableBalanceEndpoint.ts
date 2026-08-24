@@ -32,16 +32,16 @@ export class GetUserDetailedPayableBalanceEndpoint extends Endpoint<Params, Quer
 
     async handle(_: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setUserOrganizationScope();
-        const { user } = await Context.authenticate();
+        await Context.authenticate();
 
-        const memberIds = await Member.getMemberIdsForUser(user);
+        const memberIds = await Member.getMemberIdsForUser(Context.impersonatedUserOrUser);
 
-        const balanceItemModels = await BalanceItem.balanceItemsForUsersAndMembers(organization?.id ?? null, [user.id], memberIds);
+        const balanceItemModels = await BalanceItem.balanceItemsForUsersAndMembers(organization?.id ?? null, [Context.impersonatedUserOrUser.id], memberIds);
 
         // todo: this is a duplicate query
         const q = Payment.select()
             .where(
-                SQL.where('payingUserId', user.id)
+                SQL.where('payingUserId', Context.impersonatedUserOrUser.id)
                     .or(
                         new SQLWhereExists(SQL.subQuery(
                             SQL.select().from('balance_items')
@@ -52,7 +52,7 @@ export class GetUserDetailedPayableBalanceEndpoint extends Endpoint<Params, Quer
                                         SQL.column(BalanceItem.table, 'id'),
                                     ),
                                 )
-                                .where(SQL.where('memberId', memberIds).or('userId', user.id))
+                                .where(SQL.where('memberId', memberIds).or('userId', Context.impersonatedUserOrUser.id))
                                 .where(SQL.column(BalanceItemPayment.table, 'paymentId'), SQL.column(Payment.table, 'id')),
                         ),
                         ),

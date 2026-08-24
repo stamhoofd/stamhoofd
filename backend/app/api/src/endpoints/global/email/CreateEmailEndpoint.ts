@@ -76,6 +76,8 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             });
         }
 
+        Context.assertNotImpersonating();
+
         const model = new Email();
         model.userId = user.id;
         model.organizationId = organization?.id ?? null;

@@ -7,6 +7,7 @@ export { User } from './User.js';
 
 export * from './EmailVerificationCode.js';
 
+export * from './ImpersonationToken.js';
 export * from './MFAToken.js';
 export * from './MFATOTP.js';
 export * from './MFARecoveryCode.js';

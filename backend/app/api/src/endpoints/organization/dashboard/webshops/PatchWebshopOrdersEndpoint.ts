@@ -156,6 +156,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         await OrderService.markPaid(order, null, organization, webshop);
                         await order.save();
                     } else {
+                        Context.assertNotImpersonating();
                         const payment = new Payment();
                         payment.organizationId = organization.id;
                         payment.method = struct.data.paymentMethod;

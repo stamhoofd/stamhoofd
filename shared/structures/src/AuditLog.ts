@@ -93,6 +93,9 @@ export enum AuditLogType {
     UserTwoFactorMethodDeleted = 'UserTwoFactorMethodDeleted',
     UserRecoveryCodesRegenerated = 'UserRecoveryCodesRegenerated',
 
+    // Impersonation
+    UserImpersonated = 'UserImpersonated',
+
     // MemberResponsibilityRecord
     MemberResponsibilityRecordAdded = 'MemberResponsibilityRecordAdded',
     MemberResponsibilityRecordEdited = 'MemberResponsibilityRecordEdited',
@@ -224,6 +227,9 @@ export function getAuditLogTypeName(type: AuditLogType): string {
             return $t(`%Zhl`);
         case AuditLogType.UserRecoveryCodesRegenerated:
             return $t(`%ZgW`);
+
+        case AuditLogType.UserImpersonated:
+            return $t(`Aanmeldingen als een andere gebruiker`);
 
         case AuditLogType.MemberResponsibilityRecordAdded:
             return `Nieuwe toegekende functies`;
@@ -388,6 +394,9 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
             return [`key`, `trash red stroke`];
         case AuditLogType.UserRecoveryCodesRegenerated:
             return [`recovery-keys`, `sync stroke`];
+
+        case AuditLogType.UserImpersonated:
+            return [`user`, `eye`];
 
         case AuditLogType.MemberResponsibilityRecordAdded:
             return [`star`, `add green`];
@@ -562,6 +571,9 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
         case AuditLogType.UserRecoveryCodesRegenerated:
             return $t(`%ZgU`);
 
+        case AuditLogType.UserImpersonated:
+            return $t(`{{u2}} meldde zich aan als {{u}}`);
+
         case AuditLogType.MemberResponsibilityRecordAdded:
             return `Functie {{r}}{{if g " van " g}}{{if org " (" org ")"}} werd toegekend aan {{m}}`;
         case AuditLogType.MemberResponsibilityRecordEdited:
@@ -727,6 +739,9 @@ export function getAuditLogTypeReplacements(type: AuditLogType): string[] {
         case AuditLogType.UserTwoFactorMethodAdded:
         case AuditLogType.UserTwoFactorMethodDeleted:
             return ['u', 'method'];
+
+        case AuditLogType.UserImpersonated:
+            return ['u', 'u2'];
 
         case AuditLogType.MemberResponsibilityRecordAdded:
         case AuditLogType.MemberResponsibilityRecordEdited:

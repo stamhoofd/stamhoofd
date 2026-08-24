@@ -68,6 +68,11 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const organization = await Context.setOrganizationScope();
         const { user } = await Context.authenticate();
 
+        // Registering creates balance items and payments, which have to belong to somebody
+        // for real: not to the administrator who is only looking, and not to the account
+        // they are looking through either. Refuse instead of guessing.
+        Context.assertNotImpersonating();
+
         // Who is going to pay?
         let whoWillPayNow: 'member' | 'organization' | 'nobody' = 'member'; // if this is set to 'organization', there will also be created separate balance items so the member can pay back the paying organization
 

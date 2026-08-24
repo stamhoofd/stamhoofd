@@ -107,7 +107,7 @@ export class GetUserEmailsEndpoint extends Endpoint<Params, Query, Body, Respons
     }
 
     static async buildData(requestQuery: LimitedFilteredRequest, options: { language?: Language | null } = {}) {
-        const user = Context.user;
+        const user = Context.impersonatedUserOrUser;
         if (!user) {
             throw new Error('Not authenticated');
         }

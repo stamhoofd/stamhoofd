@@ -486,6 +486,11 @@ export class AdminPermissionChecker {
      * Note: only checks admin permissions. Users that 'own' this member can also access it but that does not use the AdminPermissionChecker
      */
     async canAccessRegistration(registration: Registration, permissionLevel: PermissionLevel = PermissionLevel.Read, checkMember: boolean | MemberWithUsersRegistrationsAndGroups = true) {
+        if (permissionLevel === PermissionLevel.Read && typeof checkMember === 'object' && this.isUserManager(checkMember)) {
+            // Required for impersonation feature where both admin and user should have access
+            return true;
+        }
+
         const organizationPermissions = await this.getOrganizationPermissions(registration.organizationId);
 
         if (!organizationPermissions) {
@@ -787,6 +792,12 @@ export class AdminPermissionChecker {
             return false;
         }
 
+        if (level !== PermissionLevel.Read) {
+            if (!await this.coversPermissionsOf(user)) {
+                return false;
+            }
+        }
+
         if (!user.organizationId) {
             if (this.hasPlatformFullAccess()) {
                 return true;
@@ -805,8 +816,108 @@ export class AdminPermissionChecker {
         return await this.canManageAdmins(user.organizationId);
     }
 
+    async canImpersonate(user: User): Promise<boolean> {
+        // API keys are machine credentials and the system user is nobody: neither is an
+        // account you can look through.
+        if (this.user.isApiUser || user.isApiUser || user.isSystemUser) {
+            return false;
+        }
+
+        if (user.id === this.user.id) {
+            return false;
+        }
+
+        if (!this.checkScope(user.organizationId)) {
+            return false;
+        }
+
+        if (!await this.coversPermissionsOf(user)) {
+            return false;
+        }
+
+        if (await this.canAccessUser(user, PermissionLevel.Full)) {
+            // Works for admins only, so we need the next checks too
+            return true;
+        }
+
+        // For impersonating non-admins - organization mode
+        if (user.organizationId) {
+            if (await this.hasFullAccess(user.organizationId)) {
+                return true;
+            }
+            return false;
+        }
+
+        // For impersonating non-admins - platform mode
+        let has = false;
+
+        // Note: it is important we do not allow to impersonate users who have members the current user does not have access to.
+        // Otherwise the current user gains more access than it already has
+        for (const member of await Member.getMembersWithRegistrationForUser(user)) {
+            if (member.organizationId) {
+                if (await this.hasFullAccess(member.organizationId)) {
+                    has = true;
+                } else {
+                    return false;
+                }
+            }
+
+            for (const registration of member.registrations) {
+                if (await this.hasFullAccess(registration.organizationId)) {
+                    has = true;
+                } else {
+                    return false;
+                }
+            }
+        }
+
+        return has;
+    }
+
+    /**
+     * Whether every permission of the given user is also held by this user.
+     *
+     * An impersonated session presents the frontend with the permissions of the account it
+     * views, so an administrator may only step into an account that cannot do more than
+     * they can themselves.
+     */
+    async coversPermissionsOf(user: User): Promise<boolean> {
+        const permissions = user.permissions;
+
+        if (!permissions) {
+            return true;
+        }
+
+        if (this.hasPlatformFullAccess()) {
+            return true;
+        }
+
+        if (permissions.globalPermissions && !permissions.globalPermissions.isEmpty && !this.hasPlatformFullAccess()) {
+            return false;
+        }
+
+        for (const [organizationId, organizationPermissions] of permissions.organizationPermissions) {
+            if (organizationPermissions.isEmpty) {
+                continue;
+            }
+
+            try {
+                if (!await this.hasFullAccess(organizationId)) {
+                    return false;
+                }
+            } catch (e) {
+                // An organization that no longer exists cannot be judged, so don't allow it
+                console.error('Could not check permissions coverage for organization', organizationId, e);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     async canEditUserName(user: User) {
         if (user.hasAccount() && !user.hasPasswordBasedAccount()) {
+            // SSO-managed
             return false;
         }
 
@@ -814,17 +925,15 @@ export class AdminPermissionChecker {
             return true;
         }
 
-        if (user.organizationId) {
-            // normal behaviour
-            return this.canAccessUser(user, PermissionLevel.Write);
+        if (!this.checkScope(user.organizationId)) {
+            return false;
         }
 
-        // platform user: only allowed to change names if not platform admins
-        if (user.permissions?.globalPermissions) {
-            return this.hasPlatformFullAccess();
+        if (await this.coversPermissionsOf(user)) {
+            return true;
         }
 
-        return this.canAccessUser(user, PermissionLevel.Write);
+        return false;
     }
 
     async canEditUserEmail(user: User) {
@@ -1474,7 +1583,7 @@ export class AdminPermissionChecker {
                 const key = entry[0];
                 const cachedRecordEntry = map.get(key);
                 if (cachedRecordEntry) {
-                    const canAccess = await this.checkRecordAccess({
+                    const canAccess = await this.canAccessRecordCategory({
                         member,
                         record: cachedRecordEntry.record,
                         organizationId: cachedRecordEntry.organizationId,
@@ -1495,7 +1604,7 @@ export class AdminPermissionChecker {
             const key = entry[0];
             const cachedRecordEntry = await MemberRecordStore.getRecord(key);
             if (cachedRecordEntry) {
-                const canAccess = await this.checkRecordAccess({
+                const canAccess = await this.canAccessRecordCategory({
                     member,
                     record: cachedRecordEntry.record,
                     organizationId: cachedRecordEntry.organizationId,
@@ -1509,7 +1618,10 @@ export class AdminPermissionChecker {
         }
     }
 
-    private async checkRecordAccess({ member, level, record, organizationId, rootCategoryId }: { member: MemberWithUsersRegistrationsAndGroups; record: RecordSettings; organizationId: string | null; rootCategoryId: string; level: PermissionLevel }): Promise<boolean> {
+    /**
+     * Whether the answers of a member for a record in this category may be read or written.
+     */
+    async canAccessRecordCategory({ member, level, record, organizationId, rootCategoryId }: { member: MemberWithUsersRegistrationsAndGroups; record: RecordSettings; organizationId: string | null; rootCategoryId: string; level: PermissionLevel }): Promise<boolean> {
         if (!this.checkScope(organizationId)) {
             return false;
         }
