@@ -15,7 +15,7 @@ import { InvoiceXMlService } from './InvoiceXMLService.js';
 import { OrganizationAdminService } from './OrganizationAdminService.js';
 
 export class InvoiceService {
-    static async createFrom(organization: Organization, struct: InvoiceStruct, options?: { payments?: Payment[]; balanceItems?: BalanceItem[] }) {
+    static async createFrom(organization: Organization, struct: InvoiceStruct, options?: { payments?: Payment[]; balanceItems?: BalanceItem[]; confirmed?: boolean }) {
         if (struct.number) {
             throw new SimpleError({
                 code: 'invalid_field',
@@ -178,78 +178,83 @@ export class InvoiceService {
                     });
                 }
 
-                if (left < 0) {
-                    if (goingToInvoice > 0) {
-                        // Item should be credited, yet we are trying to invoice it
-                        throw new SimpleError({
-                            code: 'error',
-                            message: 'Cannot invoice',
-                            human: $t('%1RB', {
-                                'a-euro': Formatter.price(goingToInvoice),
-                                'name': balanceItem.getStructure().itemTitle,
-                                'left-euro': Formatter.price(-left),
-                            }),
-                        });
+                // We do allow to credit something that was wrongfully invoiced (possible on wrong invoice details).
+                // but only manually, not automatic.
+                if (options?.confirmed) {
+                    // Allowed
+                } else {
+                    if (left < 0) {
+                        if (goingToInvoice > 0) {
+                            // Item should be credited, yet we are trying to invoice it
+                            throw new SimpleError({
+                                code: 'cannot_invoice_balance_item',
+                                message: 'Cannot invoice',
+                                human: $t('%1RB', {
+                                    'a-euro': Formatter.price(goingToInvoice),
+                                    'name': balanceItem.getStructure().itemTitle,
+                                    'left-euro': Formatter.price(-left),
+                                }),
+                            });
+                        }
+
+                        if (goingToInvoice < left) {
+                            // too much
+                            throw new SimpleError({
+                                code: 'cannot_invoice_balance_item',
+                                message: 'Cannot invoice',
+                                human: $t('%1Tm', {
+                                    'a-euro': Formatter.price(-goingToInvoice),
+                                    'name': balanceItem.getStructure().itemTitle,
+                                    'left-euro': Formatter.price(-left),
+                                }),
+                            });
+                        }
                     }
 
-                    if (goingToInvoice < left) {
-                        // too much
-                        throw new SimpleError({
-                            code: 'error',
-                            message: 'Cannot invoice',
-                            human: $t('%1Tm', {
-                                'a-euro': Formatter.price(-goingToInvoice),
-                                'name': balanceItem.getStructure().itemTitle,
-                                'left-euro': Formatter.price(-left),
-                            }),
-                        });
+                    if (left === 0) {
+                        if (goingToInvoice < 0) {
+                            throw new SimpleError({
+                                code: 'cannot_invoice_balance_item',
+                                message: 'Cannot invoice',
+                                human: $t('%1R7', {
+                                    'a-euro': Formatter.price(-goingToInvoice),
+                                    'name': balanceItem.getStructure().itemTitle,
+                                }),
+                            });
+                        } else if (goingToInvoice > 0) {
+                            throw new SimpleError({
+                                code: 'cannot_invoice_balance_item',
+                                message: 'Cannot invoice',
+                                human: $t('%1QE', {
+                                    'a-euro': Formatter.price(-goingToInvoice),
+                                    'name': balanceItem.getStructure().itemTitle,
+                                }),
+                            });
+                        }
                     }
-                }
 
-                if (left === 0) {
-                    if (goingToInvoice < 0) {
-                        console.log(item);
-                        throw new SimpleError({
-                            code: 'error',
-                            message: 'Cannot invoice',
-                            human: $t('%1R7', {
-                                'a-euro': Formatter.price(-goingToInvoice),
-                                'name': balanceItem.getStructure().itemTitle,
-                            }),
-                        });
-                    } else if (goingToInvoice > 0) {
-                        throw new SimpleError({
-                            code: 'error',
-                            message: 'Cannot invoice',
-                            human: $t('%1QE', {
-                                'a-euro': Formatter.price(-goingToInvoice),
-                                'name': balanceItem.getStructure().itemTitle,
-                            }),
-                        });
-                    }
-                }
-
-                if (left > 0) {
-                    if (goingToInvoice < 0) {
-                        throw new SimpleError({
-                            code: 'error',
-                            message: 'Cannot invoice',
-                            human: $t('%1RA', {
-                                'a-euro': Formatter.price(-goingToInvoice),
-                                'name': balanceItem.getStructure().itemTitle,
-                                'left-euro': Formatter.price(left),
-                            }),
-                        });
-                    } else if (goingToInvoice > left) {
-                        throw new SimpleError({
-                            code: 'error',
-                            message: 'Cannot invoice',
-                            human: $t('%1TS', {
-                                'a-euro': Formatter.price(-goingToInvoice),
-                                'name': balanceItem.getStructure().itemTitle,
-                                'left-euro': Formatter.price(left),
-                            }),
-                        });
+                    if (left > 0) {
+                        if (goingToInvoice < 0) {
+                            throw new SimpleError({
+                                code: 'cannot_invoice_balance_item',
+                                message: 'Cannot invoice',
+                                human: $t('%1RA', {
+                                    'a-euro': Formatter.price(-goingToInvoice),
+                                    'name': balanceItem.getStructure().itemTitle,
+                                    'left-euro': Formatter.price(left),
+                                }),
+                            });
+                        } else if (goingToInvoice > left) {
+                            throw new SimpleError({
+                                code: 'cannot_invoice_balance_item',
+                                message: 'Cannot invoice',
+                                human: $t('%1TS', {
+                                    'a-euro': Formatter.price(-goingToInvoice),
+                                    'name': balanceItem.getStructure().itemTitle,
+                                    'left-euro': Formatter.price(left),
+                                }),
+                            });
+                        }
                     }
                 }
 

@@ -8,22 +8,27 @@ import { GlobalEventBus } from '../EventBus';
 export class ErrorBox {
     /// Remaining errors to distribute
     errors: SimpleErrors;
+    originalErrors: SimpleErrors;
+
     static scrollToElements: [any[], HTMLElement][] = [];
     static scrollTimer?: number;
 
     constructor(errors: unknown) {
         if (isSimpleError(errors)) {
             this.errors = new SimpleErrors(errors);
-        }
-        else if (isSimpleErrors(errors)) {
+        } else if (isSimpleErrors(errors)) {
             this.errors = errors;
-        }
-        else {
+        } else {
             this.errors = new SimpleErrors(new SimpleError({
                 code: 'unknown_error',
                 message: (errors as Error).message,
             }));
         }
+        this.originalErrors = new SimpleErrors(...this.errors.errors);
+    }
+
+    hasCode(code: string) {
+        return this.originalErrors.hasCode(code);
     }
 
     /// Register a handler for field.

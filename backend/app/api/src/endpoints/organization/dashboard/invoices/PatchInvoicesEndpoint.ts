@@ -1,22 +1,26 @@
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, field, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Invoice as InvoiceStruct } from '@stamhoofd/structures';
 
+import { Invoice } from '@stamhoofd/models';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
-import { Invoice } from '@stamhoofd/models';
-import { SimpleError } from '@simonbackx/simple-errors';
 import { InvoiceService } from '../../../../services/InvoiceService.js';
 
 type Params = Record<string, never>;
-type Query = undefined;
+class Query extends AutoEncoder {
+    @field({ decoder: BooleanDecoder, defaultValue: () => false })
+    confirm: boolean;
+}
+
 type Body = PatchableArrayAutoEncoder<InvoiceStruct>;
 type ResponseBody = InvoiceStruct[];
 
 export class PatchInvoicesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = new PatchableArrayDecoder(InvoiceStruct as Decoder<InvoiceStruct>, InvoiceStruct.patchType() as Decoder<AutoEncoderPatchType<InvoiceStruct>>, StringDecoder);
+    queryDecoder = Query as Decoder<Query>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
@@ -52,7 +56,7 @@ export class PatchInvoicesEndpoint extends Endpoint<Params, Query, Body, Respons
             put.stripeAccountId = null;
             put.reference = null;
 
-            const model = await InvoiceService.createFrom(organization, put);
+            const model = await InvoiceService.createFrom(organization, put, { confirmed: request.query.confirm });
             invoices.push(model);
         }
 
