@@ -1,5 +1,7 @@
+import { ObjectData } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
-import { PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig } from './Platform.js';
+import { Platform, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig } from './Platform.js';
+import { Version } from './Version.js';
 
 describe('PlatformMembershipTypeConfig', () => {
     describe('getMaximumEndDate', () => {
@@ -60,5 +62,47 @@ describe('PlatformMembershipTypeConfig', () => {
             expect(maximumEndDateBrussels.minute).toBe(59);
             expect(maximumEndDateBrussels.second).toBe(59);
         });
+    });
+});
+
+describe('Platform tenant identity', () => {
+    function roundtrip(platform: Platform, version: number = Version): Platform {
+        const encoded = JSON.parse(JSON.stringify(platform.encode({ version })));
+        return Platform.decode(new ObjectData(encoded, { version }));
+    }
+
+    test('the identity survives an encode and decode', () => {
+        const platform = Platform.create({
+            id: 'tenant-a',
+            feesTenantId: 'tenant-root',
+            uri: 'tenant-a',
+            domain: 'a.example.com',
+        });
+
+        const decoded = roundtrip(platform);
+
+        expect(decoded.id).toBe('tenant-a');
+        expect(decoded.feesTenantId).toBe('tenant-root');
+        expect(decoded.uri).toBe('tenant-a');
+        expect(decoded.domain).toBe('a.example.com');
+    });
+
+    test('the parent tenant survives an encode and decode', () => {
+        const platform = Platform.create({
+            id: 'tenant-a',
+            parentTenant: Platform.create({ id: 'tenant-root', uri: 'root' }),
+        });
+
+        const decoded = roundtrip(platform);
+
+        expect(decoded.parentTenant?.id).toBe('tenant-root');
+        expect(decoded.parentTenant?.uri).toBe('root');
+    });
+
+    test('a root tenant has no parent and charges its own fees', () => {
+        const decoded = roundtrip(Platform.create({ id: '1', feesTenantId: '1' }));
+
+        expect(decoded.parentTenant).toBeNull();
+        expect(decoded.feesTenantId).toBe('1');
     });
 });

@@ -230,6 +230,7 @@ export class Platform extends QueryableModel {
         const struct = PlatformStruct.create({
             ...model,
             period: period?.getStructure() ?? undefined,
+            parentTenant: await this.getParentStruct(model),
         });
 
         // We clone to avoid the chance of updating the platform model
@@ -253,6 +254,34 @@ export class Platform extends QueryableModel {
             model,
             struct: clone,
             privateStruct,
+        });
+    }
+
+    /**
+     * The immediate parent, without its own parent and without its private config.
+     *
+     * Reads the parent row directly instead of going through its cache: that keeps this one query
+     * deep, so a parentTenantId cycle cannot recurse, and it cannot hand a child tenant the parent's
+     * privateConfig.
+     */
+    private static async getParentStruct(model: Platform): Promise<PlatformStruct | null> {
+        if (!model.parentTenantId) {
+            return null;
+        }
+
+        const parent = await this.getByID(model.parentTenantId);
+        if (!parent) {
+            console.error('[Platform] Tenant ' + model.id + ' has an unknown parentTenantId', model.parentTenantId);
+            return null;
+        }
+
+        const parentPeriod = await RegistrationPeriod.getByID(parent.periodId);
+
+        return PlatformStruct.create({
+            ...parent,
+            period: parentPeriod?.getStructure() ?? undefined,
+            parentTenant: null,
+            privateConfig: null,
         });
     }
 
