@@ -12,6 +12,6 @@ export class UserWithMembers extends User {
      * impersonating: this user is the one being viewed, the account below is the one
      * actually acting.
      */
-    @field({ decoder: ImpersonatedBy, nullable: true, ...NextVersion })
+    @field({ decoder: ImpersonatedBy, nullable: true, version: 412 })
     impersonatedBy: ImpersonatedBy | null = null;
 }
