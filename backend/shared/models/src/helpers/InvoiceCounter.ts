@@ -6,8 +6,7 @@ import type { DateTime } from 'luxon';
 import { Invoice } from '../models/Invoice.js';
 
 export class InvoiceCounter {
-    static numberCache: Map<string, {lastNumber: number, date: Date}> = new Map();
-
+    static numberCache: Map<string, { lastNumber: number; date: Date }> = new Map();
 
     private static getNextResetDate(last: DateTime, resetMonth: number): DateTime {
         const candidate = last.set({ month: resetMonth, day: 1 }).startOf('day');
@@ -22,13 +21,13 @@ export class InvoiceCounter {
         const last = Formatter.luxon(lastInvoiceDate);
         const current = Formatter.luxon(invoiceDate);
 
-        return current >= this.getNextResetDate(last, settings.resetMonth)
+        return current >= this.getNextResetDate(last, settings.resetMonth);
     }
 
     /**
      * XXX-123 -> 123
      * YYY-0001 -> 1
-     * 
+     *
      * if prefix is enabled:
      * 2025001 -> 1
      * STA-2025001 -> 1
@@ -40,15 +39,15 @@ export class InvoiceCounter {
 
         let last = splitted[splitted.length - 1];
 
-        const stripYear = settings.prefixYear
+        const stripYear = settings.prefixYear;
 
         if (last.length) {
             if (stripYear) {
                 if (last.length <= 4) {
-                    console.error('Could not parse invoice number from string ' + str + ' (could not trim year prefix)')
+                    console.error('Could not parse invoice number from string ' + str + ' (could not trim year prefix)');
                     return null;
                 }
-                last = last.substring(4)
+                last = last.substring(4);
             }
 
             const int = parseInt(last);
@@ -57,15 +56,15 @@ export class InvoiceCounter {
             }
         }
 
-        console.error('Could not parse invoice number from string ' + str)
+        console.error('Could not parse invoice number from string ' + str);
         return null;
     }
 
     static formatNumber(settings: OrganizationInvoiceSettings, int: number, invoicedAt: Date) {
-        let str = int.toFixed(0).padStart(settings.padZeroLength, '0')
+        let str = int.toFixed(0).padStart(settings.padZeroLength, '0');
 
         if (settings.prefixYear) {
-            const year = Formatter.luxon(invoicedAt).year
+            const year = Formatter.luxon(invoicedAt).year;
             str = year + str;
         }
 
@@ -74,7 +73,7 @@ export class InvoiceCounter {
                 // Need seperation character
                 str = settings.fixedPrefix.replace(/-$/, '') + '-' + str;
             } else {
-                str = settings.fixedPrefix +  str;
+                str = settings.fixedPrefix + str;
             }
         }
 
@@ -82,14 +81,14 @@ export class InvoiceCounter {
     }
 
     static async assignNextNumber(invoice: Invoice, settings: OrganizationInvoiceSettings): Promise<void> {
-        const organizationId = invoice.organizationId
+        const organizationId = invoice.organizationId;
         return await QueueHandler.schedule('invoice/numbers-' + organizationId, async () => {
             // Invoice date should be inside the queue to ensure it is chronologically generated
             const invoicedAt = new Date();
 
             const c = this.numberCache.get(organizationId);
             if (c !== undefined) {
-                const lastNumber = c.lastNumber
+                const lastNumber = c.lastNumber;
 
                 // check date
                 if (!this.shouldStartNewSeries(settings, c.date, invoicedAt)) {
@@ -97,37 +96,38 @@ export class InvoiceCounter {
                     // we do this here because it assures we'll not increase the next number if the save fails
                     invoice.number = this.formatNumber(settings, lastNumber + 1, invoicedAt);
                     invoice.invoicedAt = invoicedAt;
-                    await invoice.save()
+                    await invoice.save();
 
                     // If save succeeds, increase cache:
                     this.numberCache.set(organizationId, {
                         lastNumber: lastNumber + 1,
-                        date: new Date(invoicedAt)
+                        date: new Date(invoicedAt),
                     });
-                    return
+                    return;
                 }
             }
 
             const lastInvoice = await Invoice.select()
-                    .where('organizationId', organizationId)
-                    .where('number', '!=', null)
-                    .where('invoicedAt', '!=', null)
-                    .orderBy('invoicedAt', 'DESC')
-                    .first(false);
+                .where('organizationId', organizationId)
+                .where('number', '!=', null)
+                .where('invoicedAt', '!=', null)
+                .orderBy('invoicedAt', 'DESC')
+                .orderBy('number', 'DESC')
+                .first(false);
 
             if (lastInvoice && lastInvoice.number && lastInvoice.invoicedAt) {
                 // check date
                 if (!this.shouldStartNewSeries(settings, lastInvoice.invoicedAt, invoicedAt)) {
-                    const lastNumber = this.parseNumber(settings, lastInvoice.number)
+                    const lastNumber = this.parseNumber(settings, lastInvoice.number);
 
                     if (lastNumber) {
                         invoice.number = this.formatNumber(settings, lastNumber + 1, invoicedAt);
                         invoice.invoicedAt = invoicedAt;
-                        await invoice.save()
-                        
+                        await invoice.save();
+
                         this.numberCache.set(organizationId, {
                             lastNumber: lastNumber + 1,
-                            date: new Date(invoicedAt)
+                            date: new Date(invoicedAt),
                         });
                         return;
                     }
@@ -137,11 +137,11 @@ export class InvoiceCounter {
             // Start new
             invoice.number = this.formatNumber(settings, 1, invoicedAt);
             invoice.invoicedAt = invoicedAt;
-            await invoice.save()
-            
+            await invoice.save();
+
             this.numberCache.set(organizationId, {
                 lastNumber: 1,
-                date: new Date(invoicedAt)
+                date: new Date(invoicedAt),
             });
             return;
         });
