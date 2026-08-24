@@ -46,12 +46,6 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             });
         }
 
-        // Looking through an account may never turn into taking it over: the credentials
-        // and the email address stay in the hands of whoever owns the account.
-        if (request.body.password || request.body.email !== undefined || request.body.hasPassword !== undefined || request.body.meta !== undefined) {
-            Context.assertNotImpersonating();
-        }
-
         const editUser = request.body.id === user.id ? user : await User.getByID(request.body.id);
 
         if (!editUser || !await Context.auth.canAccessUser(editUser, PermissionLevel.Write) || editUser.isApiUser) {
@@ -79,6 +73,8 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         }
 
         if (request.body.permissions !== undefined) {
+            Context.assertNotImpersonating();
+
             if (!await Context.auth.canAccessUser(editUser, PermissionLevel.Full)) {
                 throw new SimpleError({
                     code: 'permission_denied',
@@ -137,6 +133,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                         // Not allowed
                         throw Context.auth.error('You are not allowed to change the login provider ids');
                     }
+                    Context.assertNotImpersonating();
 
                     if (editUser.meta?.loginProviderIds.has(key)) {
                         // Check has remaining method
@@ -155,6 +152,8 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         }
 
         if (editUser.id === user.id && request.body.password) {
+            Context.assertNotImpersonating();
+
             if (STAMHOOFD.userMode === 'platform') {
                 const platform = await Platform.getSharedPrivateStruct();
                 const config = platform.config.loginMethods.get(LoginMethod.Password);
@@ -185,6 +184,8 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
         if (request.body.hasPassword === false) {
             if (editUser.hasPasswordBasedAccount()) {
+                Context.assertNotImpersonating();
+
                 // Check other login methods available
                 if (!editUser.meta?.loginProviderIds?.size) {
                     throw new SimpleError({
@@ -204,6 +205,8 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
         if (await Context.auth.canEditUserEmail(editUser)) {
             if (request.body.email && request.body.email !== editUser.email) {
+                Context.assertNotImpersonating();
+
                 // Create an validation code
                 // We always need the code, to return it. Also on password recovery -> may not be visible to the client whether the user exists or not
                 const code = await EmailVerificationCode.createFor(editUser, request.body.email);

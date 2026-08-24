@@ -1,14 +1,14 @@
 <template>
     <SaveView :loading="loading" :title="$t(`Inloggen als gebruiker`)" :disabled="!link" :save-text="$t(`Link kopiëren`)" save-icon="copy" data-testid="impersonation-link-view" @save="copy">
         <h1>{{ $t('Inloggen als {name}', {name: userName}) }}</h1>
-        <p>{{ $t('Met deze link bekijk je Stamhoofd zoals deze gebruiker het ziet. Om veiligheidsredenen kan het soms zijn dat bepaalde dingen er toch een klein beetje anders uitzien. Je blijft zelf verantwoordelijk: alles wat je wijzigt, wordt geregistreerd onder jouw eigen naam.') }}</p>
+        <p>{{ $t('Met deze link bekijk je Stamhoofd zoals deze gebruiker het ziet. Om veiligheidsredenen kan het soms zijn dat bepaalde dingen er toch een klein beetje anders uitzien. Alles wat je wijzigt, wordt geregistreerd onder jouw eigen naam.') }}</p>
 
         <p class="warning-box">
             {{ $t('Open deze link alleen in een privévenster (incognito). Je kan deze link niet delen met andere personen.') }}
         </p>
 
         <p class="warning-box">
-            {{ $t('Acties of wijzigingen maken is niet altijd waarheidsgetrouw: in werkelijkeheid maak je die in eigen naam. Dat veroorzaakt kleine problemen die een normale gebruiker nooit zou merken (bv. je kan de mail die je verstuurt niet meer bewerken of bekijken omdat het je eigen email niet is).') }}
+            {{ $t('Inschrijvingen maken, mails versturen en andere acties of wijzigingen kan je niet uitvoeren als je bent ingelogd als een andere gebruiker.') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
