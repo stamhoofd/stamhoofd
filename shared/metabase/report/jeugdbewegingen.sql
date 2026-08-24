@@ -133,6 +133,7 @@ ORDER BY `Naam_Organisatie`
 -- size: full
 -- columns: ID_Organisatie, Type_deelnemers, Geboortejaar_deelnemers, Gender_deelnemers, Aantal_deelnemers
 -- description: Tabblad 'Deelnemers_Lokale_groep': de leden en de leiding van elke lokale groep, per geboortejaar en geslacht, met een aansluiting in dat werkjaar. Wie leiding is in de ene tak en lid in de andere, telt enkel als leiding. Takken zonder categorie leveren niemand: vul die eerst aan.
+-- description@ravot: Tabblad 'Deelnemers_Lokale_groep': de leden en de leiding van elke lokale groep, per geboortejaar en geslacht, met een aansluiting in dat werkjaar. De tak 'Ondersteunende leden' telt hier mee als leiding. Wie leiding is in de ene tak en lid in de andere, telt enkel als leiding. Takken zonder categorie leveren niemand: vul die eerst aan.
 --
 -- The deelnemers of the groups the sheet above delivers, split into the two words the template
 -- allows: 'leden' and 'leiding', that exact spelling.
@@ -146,10 +147,12 @@ ORDER BY `Naam_Organisatie`
 -- Only the two the template allows are delivered. A tak recorded as volwassenen is neither, and its
 -- members are left out of the sheet entirely; the metadatafiche does count the volwassen
 -- begeleiders, kassabeheerders and secretarissen of a group as leiding, so a koepel with such a tak
--- has to say whether it is leiding rather than leaving it as volwassenen.
+-- has to say whether it is leiding rather than leaving it as volwassenen. Which of the two a
+-- registration is worth is `type-deelnemers.sql`, since a koepel with a tak the categories cannot
+-- say this of -- the ondersteunende leden of ravot -- names it there and nowhere else.
 --
--- The numbers rank rather than label: leiding beats leden, and leden beats a tak that is neither,
--- so the MAX below picks the strongest thing any registration of that member says.
+-- The numbers that fragment gives rank rather than label: leiding beats leden, and leden beats a tak
+-- that is neither, so the MAX below picks the strongest thing any registration of that member says.
 --
 -- Decided once per member per group, before anything is counted. Someone can be a lid in one tak and
 -- leiding in another of the same unit, and the metadatafiche is explicit that they are leiding there
@@ -181,7 +184,8 @@ ORDER BY `Naam_Organisatie`
         f.birth_date,
         f.`Geslacht`,
         f.deactivated_at,
-        CASE WHEN f.tak_category = 'leader' THEN 2 WHEN f.tak_category = 'child' THEN 1 ELSE 0 END AS type_number
+        -- @include type-deelnemers
+            AS type_number
     FROM all_registrations f
     WHERE
         -- @include aangesloten

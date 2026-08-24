@@ -187,6 +187,25 @@ describe('report', () => {
         });
 
         /**
+         * The metadatafiche has no third word for the volwassenen who carry a group, and counts them
+         * as leiding. Ravot holds them in a tak of its own that the categories may not say this of --
+         * categorised as leiding it would land in the omkaderingscijfer and the GTP index, which
+         * weigh the leiding an eenheid looks after its kinderen with -- so the aanlevering names the
+         * tak, there and nowhere else.
+         */
+        it('delivers the ondersteunende leden of ravot as leiding, and names that tak in no other environment', () => {
+            // The condition rather than the name, which the fragments also mention in prose.
+            const namesTheTak = (tabs: ReportTab[]) => tabs.flatMap(tab => tab.cards)
+                .filter(card => card.sql.replaceAll(/\s+/g, ' ').includes("`Tak` = 'Ondersteunende leden'"))
+                .map(card => card.key);
+            const sql = cardOf(ravotDashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql.replaceAll(/\s+/g, ' ');
+
+            expect(sql).toContain("CASE WHEN f.tak_category = 'leader' OR f.`Tak` = 'Ondersteunende leden' THEN 2 WHEN f.tak_category = 'child' THEN 1 ELSE 0 END AS type_number");
+            expect(namesTheTak(ravotDashboards)).toEqual(['deelnemers-lokale-groep']);
+            expect(namesTheTak(dashboards)).toEqual([]);
+        });
+
+        /**
          * A cancelled registration says someone was there, not what they were. An administrator who
          * puts a lid in the Leiding tak by mistake and undoes it would otherwise leave them leiding
          * for the rest of the werkjaar, while the registration they really hold says what they are.

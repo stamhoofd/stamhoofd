@@ -1,0 +1,13 @@
+-- What a deelnemer of a lokale groep is delivered as, as ravot counts it: the same as
+-- `../type-deelnemers.sql` with the ondersteunende leden among the leiding.
+--
+-- Ondersteunende leden are volwassenen who carry a group rather than a tak of kinderen, and the
+-- metadatafiche counts the volwassen begeleiders, kassabeheerders and secretarissen of a group as
+-- leiding -- the department has no third word for them. The tak is not categorised as leiding, and
+-- may not be: the omkaderingscijfer and the GTP index would then read it as leiding the kinderen of
+-- an eenheid are looked after by. The aanlevering therefore names the tak itself.
+--
+-- Matched on its name, the way `gtp.sql` matches the takken it weighs, since the category is the one
+-- thing that may not say it. `Tak` falls back to what an eenheid called its own group, so an eenheid
+-- that names a group of its own this way delivers it as leiding too.
+CASE WHEN f.tak_category = 'leader' OR f.`Tak` = 'Ondersteunende leden' THEN 2 WHEN f.tak_category = 'child' THEN 1 ELSE 0 END
