@@ -123,21 +123,6 @@ export class ImpersonationService {
             throw invalid;
         }
 
-        if (STAMHOOFD.environment === 'development') {
-            // Special case for debugging: we create true tokens
-            const token = await SessionService.createSession(impersonatedUser);
-
-            if (!impersonatedUser.verified) {
-                impersonatedUser.verified = true;
-            }
-            if (!impersonatedUser.hasAccount()) {
-                await impersonatedUser.changePassword('stamhoofd');
-            }
-            await impersonatedUser.save();
-            await this.logImpersonation(user, impersonatedUser, model.organizationId);
-            return token;
-        }
-
         const token = await SessionService.createImpersonationSession(user, impersonatedUser);
         await this.logImpersonation(user, impersonatedUser, model.organizationId);
 
