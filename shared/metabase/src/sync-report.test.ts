@@ -467,15 +467,30 @@ describe('buildParameters', () => {
 
     /**
      * Nothing chosen is what counts every member, including everyone holding no aansluiting at all, so
-     * the filters open empty: a default would leave the dashboards showing a slice of the platform to
-     * whoever does not look at the filter bar.
+     * those filters open empty: a default would leave the dashboards showing a slice of the platform
+     * to whoever does not look at the filter bar.
      */
-    it('gives no filter a value to start from', () => {
-        const entry = [tab({ filters: ['scoutsjaar', 'aansluiting'], cards: [card({ parameters: ['scoutsjaar', 'aansluiting'] })] })];
+    it('gives no filter a value to start from where empty counts everyone', () => {
+        const entry = [tab({ filters: ['scoutsjaar', 'eenheid', 'aansluiting'], cards: [card({ parameters: ['scoutsjaar', 'eenheid', 'aansluiting'] })] })];
 
         const started = buildParameters(entry, new Map()).filter(parameter => parameter.default !== undefined);
 
         expect(started.map(parameter => parameter.slug)).toEqual([]);
+    });
+
+    /**
+     * The one filter that reads the other way round: empty counts the wachtlijsten and the
+     * activiteiten along with the leden, so leaving it empty is what would show a figure nobody asked
+     * for. As a list, because a multi-select filter hands its cards every value it holds and a bare
+     * string is read as a filter holding none.
+     */
+    it('opens the ingeschreven voor filter on the leeftijdsgroepen', () => {
+        const entry = [tab({ filters: ['ingeschreven_voor'], cards: [card({ parameters: ['ingeschreven_voor'] })] })];
+
+        const parameters = buildParameters(entry, new Map());
+
+        expect(parameters.map(parameter => [parameter.slug, parameter.default, parameter.isMultiSelect]))
+            .toEqual([['ingeschreven_voor', ['Leeftijdsgroepen'], true]]);
     });
 
     it('falls back to the question when the values could not be read', () => {

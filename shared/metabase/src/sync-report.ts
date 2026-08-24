@@ -28,12 +28,29 @@ import type { ReportCard, ReportCardBest, ReportTab } from './report.js';
  * is said here for every filter rather than only where it is on, because a filter that drives a
  * variable is single-select unless told otherwise, and a second value would land beside the `=` of
  * the others as sql they cannot parse.
+ *
+ * `start` is what a filter is set to when a dashboard is opened. Only one filter has any: the others
+ * count every member while nothing is chosen, and a value to start from would show whoever does not
+ * read the filter bar a slice of the platform. "Ingeschreven voor" is the other way round -- empty
+ * counts the wachtlijsten and the activiteiten along with the leden -- so it opens on the
+ * leeftijdsgroepen, which is what the ledenstatistieken are read as.
  */
-export const reportFilters = [
+export type ReportFilter = {
+    name: string;
+    title: string;
+    valuesFrom: string;
+    column: string;
+    keepOrder: boolean;
+    multiple: boolean;
+    start?: string[];
+};
+
+export const reportFilters: readonly ReportFilter[] = [
     { name: 'scoutsjaar', title: 'Scoutsjaar', valuesFrom: 'scoutsjaar', column: 'Scoutsjaar', keepOrder: true, multiple: false },
     { name: 'eenheid', title: 'Eenheid', valuesFrom: 'eenheid', column: 'Eenheid', keepOrder: false, multiple: false },
     { name: 'aansluiting', title: 'Aansluiting', valuesFrom: 'aansluiting', column: 'Aansluiting', keepOrder: false, multiple: true },
-] as const;
+    { name: 'ingeschreven_voor', title: 'Ingeschreven voor', valuesFrom: 'ingeschreven-voor', column: 'Ingeschreven voor', keepOrder: true, multiple: true, start: ['Leeftijdsgroepen'] },
+];
 
 /**
  * What a question is called in the collection.
@@ -492,6 +509,9 @@ export function buildParameters(tabs: ReportTab[], filterCardIds: Map<string, nu
                 // Without this the widget is a plain text box, however well the values source is
                 // configured: it is what picks the dropdown over an input box.
                 values_query_type: 'list',
+                // A list even where one value is chosen: a multi-select filter hands its cards every
+                // value it holds, and a bare string is read as a filter holding none.
+                ...(filter.start === undefined ? {} : { default: filter.start }),
                 ...buildValuesSource(filter.column, cardId, values),
             };
         });

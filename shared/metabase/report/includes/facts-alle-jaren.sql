@@ -11,6 +11,7 @@ WITH facts AS (
         p.id AS period_id,
         p.name AS `Scoutsjaar`,
         p.startDate AS period_start,
+        g.type AS group_type,
         COALESCE(dag.name, g.name) AS `Tak`,
         dag.category AS tak_category,
         dag.minAge AS tak_min_age,
@@ -45,4 +46,5 @@ WITH facts AS (
       AND NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = r.organizationId)
       [[AND o.name = {{eenheid}}]]
       -- @include aansluiting
+      -- @include ingeschreven-voor
 )

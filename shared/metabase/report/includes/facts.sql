@@ -6,8 +6,13 @@
 -- only thing a national figure can group on. Imported years are single platform-wide rows and fall
 -- out of the same rule.
 --
--- A registration counts when it is active: not cancelled, not on a waiting list, and actually
--- registered. A member in two groups appears twice here, so member counts are always COUNT(DISTINCT).
+-- A registration counts when it is active: not cancelled and actually registered. A member in two
+-- groups appears twice here, so member counts are always COUNT(DISTINCT).
+--
+-- Which kinds of group count is the reader's, through `ingeschreven-voor.sql`: the ledenstatistieken
+-- open on the leeftijdsgroepen alone and can be asked for the activiteiten and the wachtlijsten
+-- beside them. `group_type` carries what that filter reads, so a card that may not be asked -- the
+-- aanlevering, which is about leden of a jeugdbeweging and about nothing else -- says so itself.
 --
 -- Two columns say what a registration counts as, and they answer different questions.
 -- `tak_category` is what the tak was recorded as -- kinderen, leiding or volwassenen -- and is null
@@ -42,6 +47,7 @@ WITH all_registrations AS (
         p.id AS period_id,
         p.name AS `Scoutsjaar`,
         p.startDate AS period_start,
+        g.type AS group_type,
         COALESCE(dag.name, g.name) AS `Tak`,
         dag.category AS tak_category,
         dag.minAge AS tak_min_age,
@@ -74,6 +80,7 @@ WITH all_registrations AS (
       [[AND p.name = {{scoutsjaar}}]]
       [[AND o.name = {{eenheid}}]]
       -- @include aansluiting
+      -- @include ingeschreven-voor
 ),
 -- Where a registration that was cancelled during the year drops out. It stays a registration of that
 -- werkjaar -- someone who left in november was a lid of that year -- but it is no longer one of the

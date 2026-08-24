@@ -29,6 +29,14 @@ The aanlevering is the exception and keeps reading its own rows. The department 
 rather than inschrijvers, and reads what a member is from the cancelled registrations as well, so
 `jeugdbewegingen.sql` decides it in its own `deelnemers`.
 
+Which registrations reach either of those is the "Ingeschreven voor" filter, in
+`includes/ingeschreven-voor.sql`: a registration stands in a leeftijdsgroep, an activiteit or a
+wachtlijst, and only the first of the three is being a lid of the eenheid. It is the one filter that
+opens on a value -- the leeftijdsgroepen -- because empty counts every registration, which would put
+the people waiting for a place among the leden. The aanlevering is not offered it and pins itself to
+the leeftijdsgroepen: an unconnected filter counts everything, which is the wrong way for a sheet
+delivered to a department to fail.
+
 ## One report, several platforms
 
 The same report is written for every platform, and they do not all count every figure the same way:

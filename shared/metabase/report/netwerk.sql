@@ -1,7 +1,7 @@
 -- @tab netwerk
 -- title: Netwerk
 -- description: Leden en eenheden per netwerk voor het gekozen scoutsjaar.
--- filters: scoutsjaar, aansluiting
+-- filters: scoutsjaar, aansluiting, ingeschreven_voor
 --
 -- Het netwerk van een eenheid is een tag op de organisatie, bijgehouden per periode: een afgesloten
 -- jaar houdt het netwerk waarmee het toen geregistreerd stond.

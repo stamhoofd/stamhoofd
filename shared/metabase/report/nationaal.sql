@@ -1,7 +1,7 @@
 -- @tab nationaal
 -- title: Nationaal
 -- description: Ledenaantallen over het hele platform voor het gekozen scoutsjaar.
--- filters: scoutsjaar, aansluiting
+-- filters: scoutsjaar, aansluiting, ingeschreven_voor
 
 -- @card aantal-eenheden
 -- title: Aantal eenheden

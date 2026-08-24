@@ -43,3 +43,23 @@ FROM organizations o
 WHERE NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = o.id)
 GROUP BY o.name
 ORDER BY o.name
+
+-- @card ingeschreven-voor
+-- title: Ingeschreven voor
+-- display: table
+-- size: half
+-- De drie soorten inschrijving die `includes/ingeschreven-voor.sql` kent, in de woorden waarin die ze
+-- benoemt. Ze staan in geen enkele tabel: een groep houdt haar soort als 'Membership',
+-- 'EventRegistration' of 'WaitingList' bij, en dat zijn geen woorden die dit rapport ergens toont.
+-- Vandaar hier een vaste lijst, die alleen kan wijzigen als er een soort bijkomt.
+--
+-- Leeftijdsgroepen eerst, want daarop staat de filter standaard; daarna wat een lezer erbij kan
+-- vragen. Metabase sorteert een keuzelijst uit een vraag zelf alfabetisch, dus de CLI neemt deze
+-- volgorde over in een vaste lijst -- en een UNION zonder ORDER BY belooft geen volgorde, vandaar de
+-- kolom waarop gesorteerd wordt.
+SELECT `Ingeschreven voor` FROM (
+    SELECT 1 AS volgorde, 'Leeftijdsgroepen' AS `Ingeschreven voor`
+    UNION ALL SELECT 2, 'Activiteiten'
+    UNION ALL SELECT 3, 'Wachtlijsten'
+) opties
+ORDER BY volgorde

@@ -21,6 +21,13 @@
 -- those list which groups existed in the werkjaar, which is not a question about members. Delivering
 -- under a chosen aansluiting therefore hands the department groups whose deelnemers were counted
 -- under it only -- the aanlevering itself is filed with the filter empty.
+--
+-- What the ledenstatistieken offer as "Ingeschreven voor" is not offered here. The department counts
+-- the deelnemers of a jeugdbeweging: someone waiting for a place has not joined one, and someone who
+-- came to a single activity is a deelnemer of that activity rather than of the group that held it.
+-- Both sheets therefore say `group_type = 'Membership'` themselves rather than leaving it to a filter
+-- this dashboard does not show -- an unanswered filter counts every registration, which is the wrong
+-- way for a sheet to fail.
 
 -- @card organisatie-bovenlokaal
 -- title: Organisatie_Bovenlokaal
@@ -82,6 +89,10 @@ FROM all_registrations f
 JOIN platform pf ON pf.membershipOrganizationId = f.organization_id
 WHERE
     -- @include aangesloten
+  -- A ploeg of the koepel, never one of the national events it also runs its registrations for: those
+  -- are open to the deelnemers of every group, and counted here every one of them would be delivered
+  -- as a structuurvrijwilliger of the bovenlokale structuur.
+  AND f.group_type = 'Membership'
 GROUP BY `ID_Organisatie`, `Geboortejaar_deelnemers`, `Gender_deelnemers`
 ORDER BY `Geboortejaar_deelnemers`, `Gender_deelnemers`
 
@@ -174,6 +185,11 @@ ORDER BY `Naam_Organisatie`
     FROM all_registrations f
     WHERE
         -- @include aangesloten
+      -- The takken of the group and nothing else. A wachtlijst and an activiteit carry no tak, so
+      -- they already deliver nobody through `type_number` below; said here as well because that is a
+      -- consequence of a group nobody categorised rather than a rule, and a koepel that categorises
+      -- one of its wachtlijsten would start delivering the people waiting on it as leden.
+      AND f.group_type = 'Membership'
       AND NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = f.organization_id)
 ),
 deelnemers AS (

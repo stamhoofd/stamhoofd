@@ -1,7 +1,7 @@
 -- @tab eenheden
 -- title: Eenheden
 -- description: Alles over een enkele eenheid. Kies een eenheid en een scoutsjaar bovenaan.
--- filters: scoutsjaar, eenheid, aansluiting
+-- filters: scoutsjaar, eenheid, aansluiting, ingeschreven_voor
 
 -- @card eenheid-totaal-leden
 -- title: Totaal aantal leden
