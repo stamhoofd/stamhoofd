@@ -18,7 +18,6 @@ import { useUser } from '#hooks/useUser.ts';
 export function useImpersonation() {
     const present = usePresent();
     const auth = useAuth();
-    const organization = useOrganization();
     const me = useUser();
     const hasFeatureFlag = useFeatureFlag();
 
@@ -34,15 +33,6 @@ export function useImpersonation() {
         // Only full platform admins can impersonate a user with platform access
         if (user.permissions?.globalPermissions && !user.permissions.globalPermissions.isEmpty && !auth.hasPlatformFullAccess()) {
             return false;
-        }
-
-        for (const [organizationId, permissions] of user.permissions?.organizationPermissions ?? []) {
-            if (permissions.isEmpty) {
-                continue;
-            }
-            if (organizationId !== organization.value?.id || !auth.hasFullAccess()) {
-                return false;
-            }
         }
 
         return auth.hasFullAccess() || auth.hasPlatformFullAccess();
