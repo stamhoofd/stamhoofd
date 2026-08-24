@@ -4,7 +4,6 @@ import type { User } from '@stamhoofd/structures';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useFeatureFlag } from '#hooks/useFeatureFlag.ts';
-import { useOrganization } from '#hooks/useOrganization.ts';
 import { useUser } from '#hooks/useUser.ts';
 
 /**
