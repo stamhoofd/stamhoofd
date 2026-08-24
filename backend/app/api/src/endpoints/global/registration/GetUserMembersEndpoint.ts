@@ -1,9 +1,7 @@
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import type { MemberWithUsersRegistrationsAndGroups } from '@stamhoofd/models';
 import { Member } from '@stamhoofd/models';
 import type { MembersBlob } from '@stamhoofd/structures';
-import { PermissionLevel } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
@@ -35,20 +33,8 @@ export class GetUserMembersEndpoint extends Endpoint<Params, Query, Body, Respon
         await Context.setUserOrganizationScope();
         await Context.authenticate();
 
-        // While impersonating, these are the members of the account being looked at: the
-        // frontend has to show that user's family. Which of them actually come through is
-        // still decided for the administrator behind the session as well.
-        const members = await Member.getMembersWithRegistrationForUser(Context.impersonatedUserOrUser);
-        const accessible: MemberWithUsersRegistrationsAndGroups[] = [];
-
-        for (const member of members) {
-            if (await Context.auth.canAccessMember(member, PermissionLevel.Read)) {
-                accessible.push(member);
-            }
-        }
-
         return new Response(
-            await AuthenticatedStructures.membersBlob(accessible),
+            await AuthenticatedStructures.membersBlob(await Member.getMembersWithRegistrationForUser(Context.impersonatedUserOrUser)),
         );
     }
 }

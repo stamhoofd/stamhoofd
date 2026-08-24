@@ -7,7 +7,6 @@ import { SessionService } from '../services/SessionService.js';
 import { AdminPermissionChecker } from './AdminPermissionChecker.js';
 import { contextStorage } from './ContextStorage.js';
 import { TwoFactorHelper } from './TwoFactorHelper.js';
-import { ImpersonatedPermissionChecker } from './ImpersonatedPermissionChecker.js';
 
 export const apiUserRateLimiter = new RateLimiter({
     limits: [
@@ -64,6 +63,7 @@ export class ContextInstance {
 
     #i18n: I18n | null = null;
     #auth: AdminPermissionChecker | null = null;
+    #actorAuth: AdminPermissionChecker | null = null;
 
     constructor(request: Request) {
         this.request = request;
@@ -153,6 +153,26 @@ export class ContextInstance {
 
     get optionalAuth() {
         return this.#auth;
+    }
+
+    /**
+     * The permissions of the account that is really acting. The same as `auth` for a normal
+     * session, and the administrator behind an impersonated one - without the narrowing to
+     * what the account they look through would see.
+     *
+     * Use `auth` to decide what this session may do. Use this one only to bound what an
+     * impersonated session may *read* through the account it looks through (see
+     * ImpersonationScope).
+     */
+    get actorAuth() {
+        if (!this.#actorAuth) {
+            throw new SimpleError({
+                code: 'internal_error',
+                statusCode: 500,
+                message: 'AdminPermissionChecker not set in RequestContext: make sure the request is authenticated before using the permissionChecker',
+            });
+        }
+        return this.#actorAuth;
     }
 
     async setOptionalOrganizationScope(options?: { willAuthenticate?: boolean }) {
@@ -333,10 +353,7 @@ export class ContextInstance {
         }
 
         const user = token.user;
-        this.user = user;
-
         const impersonatedUser = token.session.impersonatedUserId ? await this.resolveImpersonation(token.session.impersonatedUserId, user) : null;
-        this.impersonatedUser = impersonatedUser ?? undefined;
 
         if (impersonatedUser) {
             console.log(
@@ -497,7 +514,6 @@ export class ContextInstance {
                 });
             }
 
-            this.user = user;
             await this.insecurelyAuthenticateAs(user);
             return { user, setupToken };
         }
@@ -526,16 +542,16 @@ export class ContextInstance {
     async insecurelyAuthenticateAs(user: User, impersonatedUser?: User | null) {
         const platform = await Platform.getSharedPrivateStruct();
 
-        const def = new AdminPermissionChecker(user, platform, this.organization);
+        this.user = user;
+        this.impersonatedUser = impersonatedUser ?? undefined;
 
-        // For more reliable checking, we only allow platform admins to really check identical.
         this.#auth = impersonatedUser
-            ? def.hasPlatformFullAccess() ? new AdminPermissionChecker(impersonatedUser, platform, this.organization) : new ImpersonatedPermissionChecker(impersonatedUser, user, platform, this.organization)
-            : def;
+            ? new AdminPermissionChecker(impersonatedUser, platform, this.organization)
+            : new AdminPermissionChecker(user, platform, this.organization);
 
         if (this.organization && !this.organization.active) {
             // For inactive organizations, you always need permissions to view them
-            if (!Context.auth.hasSomePlatformAccess() || !await Context.auth.hasFullAccess(this.organization.id)) {
+            if (!this.auth.hasSomePlatformAccess() || !await this.auth.hasFullAccess(this.organization.id)) {
                 throw new SimpleError({
                     code: 'archived',
                     message: 'Platform access is required to view inactive organizations',

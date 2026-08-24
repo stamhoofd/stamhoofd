@@ -677,8 +677,6 @@ export class AuthenticatedStructures {
                         || await Context.auth.canAccessRegistration(registration, PermissionLevel.Read, member)
                     ) {
                         filtered.push(registration);
-                    } else {
-                        console.error('Filtered registration', registration.id, 'from member');
                     }
                 }
             }

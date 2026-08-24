@@ -11,7 +11,6 @@ import { MemberRecordStore } from '../services/MemberRecordStore.js';
 import { getFinancialSupportSettingsAsync } from './FinancialSupportHelper.js';
 import { RecordAnswerHelper } from './RecordAnswerHelper.js';
 import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryMemberAccess.js';
-import { Context } from './Context.js';
 
 /**
  * One class with all the responsabilities of checking permissions to each resource in the system by a given user, possibly in an organization context.
@@ -489,14 +488,12 @@ export class AdminPermissionChecker {
     async canAccessRegistration(registration: Registration, permissionLevel: PermissionLevel = PermissionLevel.Read, checkMember: boolean | MemberWithUsersRegistrationsAndGroups = true) {
         if (permissionLevel === PermissionLevel.Read && typeof checkMember === 'object' && this.isUserManager(checkMember)) {
             // Required for impersonation feature where both admin and user should have access
-            console.log('can access registration: user manager');
             return true;
         }
 
         const organizationPermissions = await this.getOrganizationPermissions(registration.organizationId);
 
         if (!organizationPermissions) {
-            console.log('no organization permissions', permissionLevel, checkMember);
             return false;
         }
 
@@ -795,6 +792,12 @@ export class AdminPermissionChecker {
             return false;
         }
 
+        if (level !== PermissionLevel.Read) {
+            if (!await this.coversPermissionsOf(user)) {
+                return false;
+            }
+        }
+
         if (!user.organizationId) {
             if (this.hasPlatformFullAccess()) {
                 return true;
@@ -840,29 +843,43 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        // Being allowed to hand out this account's permissions is the bar for stepping
-        // into it.
         if (await this.canAccessUser(user, PermissionLevel.Full)) {
+            // Works for admins only, so we need the next checks too
             return true;
         }
 
-        // Accounts without permissions (members and their parents) are not managed through
-        // the administrator list. Only full access to an organization the member belongs to
-        // grants it: full access to a single group of theirs is not enough, so an
-        // impersonated session can never reach a family the administrator does not fully run.
-        for (const member of await Member.getMembersWithRegistrationForUser(user)) {
-            if (member.organizationId && await this.hasFullAccess(member.organizationId)) {
+        // For impersonating non-admins - organization mode
+        if (user.organizationId) {
+            if (await this.hasFullAccess(user.organizationId)) {
                 return true;
+            }
+            return false;
+        }
+
+        // For impersonating non-admins - platform mode
+        let has = false;
+
+        // Note: it is important we do not allow to impersonate users who have members the current user does not have access to.
+        // Otherwise the current user gains more access than it already has
+        for (const member of await Member.getMembersWithRegistrationForUser(user)) {
+            if (member.organizationId) {
+                if (await this.hasFullAccess(member.organizationId)) {
+                    has = true;
+                } else {
+                    return false;
+                }
             }
 
             for (const registration of member.registrations) {
                 if (await this.hasFullAccess(registration.organizationId)) {
-                    return true;
+                    has = true;
+                } else {
+                    return false;
                 }
             }
         }
 
-        return false;
+        return has;
     }
 
     /**
@@ -876,6 +893,10 @@ export class AdminPermissionChecker {
         const permissions = user.permissions;
 
         if (!permissions) {
+            return true;
+        }
+
+        if (this.hasPlatformFullAccess()) {
             return true;
         }
 
@@ -904,6 +925,7 @@ export class AdminPermissionChecker {
 
     async canEditUserName(user: User) {
         if (user.hasAccount() && !user.hasPasswordBasedAccount()) {
+            // SSO-managed
             return false;
         }
 
@@ -911,17 +933,15 @@ export class AdminPermissionChecker {
             return true;
         }
 
-        if (user.organizationId) {
-            // normal behaviour
-            return this.canAccessUser(user, PermissionLevel.Write);
+        if (!this.checkScope(user.organizationId)) {
+            return false;
         }
 
-        // platform user: only allowed to change names if not platform admins
-        if (user.permissions?.globalPermissions) {
-            return this.hasPlatformFullAccess();
+        if (await this.coversPermissionsOf(user)) {
+            return true;
         }
 
-        return this.canAccessUser(user, PermissionLevel.Write);
+        return false;
     }
 
     async canEditUserEmail(user: User) {

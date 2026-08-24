@@ -42,6 +42,9 @@ export class ImpersonationToken extends QueryableModel {
     /**
      * The address the ticket was requested from. The link only works from that same
      * address, so a link that is forwarded to someone else is useless to them.
+     *
+     * Trustworthy because Caddy overwrites X-Forwarded-For in production: a client cannot
+     * claim an address of its own choosing.
      */
     @column({ type: 'string' })
     createdIp: string;

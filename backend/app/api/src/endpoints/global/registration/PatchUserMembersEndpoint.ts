@@ -3,7 +3,7 @@ import { isEmptyPatch, PatchableArrayDecoder, StringDecoder } from '@simonbackx/
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import type { Group, MemberWithUsersRegistrationsAndGroups, Registration } from '@stamhoofd/models';
+import type { Group, Registration } from '@stamhoofd/models';
 import { Document, Member, RateLimiter } from '@stamhoofd/models';
 import type { MemberDetails, MembersBlob } from '@stamhoofd/structures';
 import { BooleanStatus, MemberWithRegistrationsBlob, PermissionLevel } from '@stamhoofd/structures';
@@ -91,7 +91,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
         }
 
         // Modify members
-        let members = await this.accessibleMembers(await Member.getMembersWithRegistrationForUser(user));
+        let members = await Member.getMembersWithRegistrationForUser(user);
 
         for (let struct of request.body.getPatches()) {
             const member = members.find(m => m.id === struct.id);
@@ -201,28 +201,11 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
 
             await Document.updateForMember(updatedMember);
         }
-        members = await this.accessibleMembers(await Member.getMembersWithRegistrationForUser(user));
+        members = await Member.getMembersWithRegistrationForUser(user);
 
         return new Response(
             await AuthenticatedStructures.membersBlob(members),
         );
-    }
-
-    /**
-     * The members of the session's account that the caller may actually read. For the
-     * account itself this is its whole family, but while impersonating it is narrowed to
-     * what the administrator behind the session may see - the same gate
-     * GetUserMembersEndpoint applies, so a patch never returns (or looks up) a member the
-     * administrator could not access on their own.
-     */
-    private async accessibleMembers(members: MemberWithUsersRegistrationsAndGroups[]): Promise<MemberWithUsersRegistrationsAndGroups[]> {
-        const accessible: MemberWithUsersRegistrationsAndGroups[] = [];
-        for (const member of members) {
-            if (await Context.auth.canAccessMember(member, PermissionLevel.Read)) {
-                accessible.push(member);
-            }
-        }
-        return accessible;
     }
 
     private throwIfInvalidDetails(details: MemberDetails) {

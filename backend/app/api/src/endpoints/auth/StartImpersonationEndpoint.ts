@@ -2,7 +2,8 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { User } from '@stamhoofd/models';
-import { ImpersonationTicket, StartImpersonationRequest } from '@stamhoofd/structures';
+import type { ImpersonationTicket } from '@stamhoofd/structures';
+import { StartImpersonationRequest } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';
 import { ImpersonationService } from '../../services/ImpersonationService.js';

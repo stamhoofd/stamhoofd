@@ -43,7 +43,7 @@ export class ImpersonationService {
         if (!await Context.auth.canImpersonate(impersonatedUser)) {
             throw Context.auth.error({
                 message: 'Not allowed to impersonate this user',
-                human: $t(`Je hebt geen toegang om aan te melden als deze gebruiker.`),
+                human: $t(`Je hebt geen toegang om aan te melden als deze gebruiker. Deze gebruiker heeft op één of andere manier meer toegangsrechten dan jou, of toegang tot data waar jij niet aankan (bv. inschrijvingen bij andere vereniging), vandaar dat het niet kan.`),
             });
         }
 
@@ -82,6 +82,7 @@ export class ImpersonationService {
 
         // The link only works from the address it was requested from, so forwarding it to
         // somebody else - to sign them into an account that is not theirs - gets nowhere.
+        // A client cannot fake this address: Caddy overwrites X-Forwarded-For in production
         if (model.createdIp !== Context.request.getIP()) {
             console.error('Impersonation ticket used from a different IP address', model.createdIp, Context.request.getIP());
             throw invalid;

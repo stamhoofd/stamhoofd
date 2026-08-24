@@ -1,18 +1,17 @@
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import type { SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import type { Organization } from '@stamhoofd/models';
 import { AuditLog, ImpersonationToken, MemberFactory, OrganizationFactory, Platform, RegistrationFactory, Token, User, UserFactory, UserSession } from '@stamhoofd/models';
-import { AuditLogType, BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, NewUser, PermissionLevel, Permissions, Token as TokenStruct, UserPermissions } from '@stamhoofd/structures';
-import { TestUtils } from '@stamhoofd/test-utils';
+import { AuditLogType, BooleanStatus, NewUser, PermissionLevel, Permissions, Token as TokenStruct, UserPermissions } from '@stamhoofd/structures';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 
 import { testServer } from '../../../tests/helpers/TestServer.js';
 import '../../audit-logs/init.js';
 import { AuditLogService } from '../../services/AuditLogService.js';
 import { IMPERSONATION_SESSION_DURATION, SessionService } from '../../services/SessionService.js';
 import { GetUserMembersEndpoint } from '../global/registration/GetUserMembersEndpoint.js';
-import { PatchUserMembersEndpoint } from '../global/registration/PatchUserMembersEndpoint.js';
 import { CreateTokenEndpoint } from './CreateTokenEndpoint.js';
 import { DeleteUserEndpoint } from './DeleteUserEndpoint.js';
 import { GetMFAStatusEndpoint } from './GetMFAStatusEndpoint.js';
@@ -50,8 +49,7 @@ function firstError(e: unknown): SimpleError {
 async function captureError(promise: Promise<unknown>): Promise<SimpleError> {
     try {
         await promise;
-    }
-    catch (e) {
+    } catch (e) {
         return firstError(e);
     }
     throw new Error('Expected the request to be rejected, but it succeeded');
@@ -134,6 +132,15 @@ async function setup() {
 
 function membersRequest(organization: Organization, session: TokenStruct) {
     return bearer(Request.buildJson('GET', '/user/members', organization.getApiHost()), session);
+}
+
+const readMemberFirstName = 'Leesbaar';
+
+async function markSensitive(member: Awaited<ReturnType<MemberFactory['create']>>) {
+    member.details.nationalRegisterNumber = '123454123';
+    member.details.requiresFinancialSupport = BooleanStatus.create({ value: true });
+    await member.save();
+    return member;
 }
 
 describe('Impersonation', () => {
@@ -454,173 +461,40 @@ describe('Impersonation', () => {
             expect(await Token.getByAccessToken(session.accessToken)).toBeUndefined();
             expect(await Token.getByAccessToken(ownSession.accessToken)).toBeDefined();
         });
-
-        test('only sees the members the administrator may see as well', async () => {
-            TestUtils.setEnvironment('userMode', 'platform');
-
-            const organization = await new OrganizationFactory({}).create();
-            await enableImpersonation(organization);
-            const other = await new OrganizationFactory({}).create();
-            const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
-            const user = await new UserFactory({ password }).create();
-
-            // Two children of the same parent, in two different organizations. The
-            // administrator only runs one of them.
-            const own = await new MemberFactory({ user }).create();
-            await new RegistrationFactory({ member: own, organization }).create();
-
-            const elsewhere = await new MemberFactory({ user }).create();
-            await new RegistrationFactory({ member: elsewhere, organization: other }).create();
-
-            const session = await impersonate(organization, admin, user);
-            const response = await testServer.test(new GetUserMembersEndpoint(), membersRequest(organization, session));
-
-            const ids = response.body.members.map(m => m.id);
-            expect(ids).toContain(own.id);
-            expect(ids).not.toContain(elsewhere.id);
-        });
     });
 
-    /**
-     * A parent sees more of their own children than most administrators do. An
-     * administrator that steps into such an account may not pick that up along the way:
-     * what they get to see stays what they could see themselves.
-     */
-    describe('member data of the account being looked at', () => {
-        const readMemberFirstName = 'Leesbaar';
+    test('an admin gets locked out of an existing impersonation session when losing access rights', async () => {
+        TestUtils.setEnvironment('userMode', 'platform');
 
-        async function markSensitive(member: Awaited<ReturnType<MemberFactory['create']>>) {
-            member.details.nationalRegisterNumber = '123454123';
-            member.details.requiresFinancialSupport = BooleanStatus.create({ value: true });
-            await member.save();
-            return member;
-        }
+        const fullOrganization = await new OrganizationFactory({}).create();
+        await enableImpersonation(fullOrganization);
+        const readOrganization = await new OrganizationFactory({}).create();
+        const noAccessOrganization = await new OrganizationFactory({}).create();
 
-        /**
-         * A platform administrator that runs one organization in full, has plain read access
-         * to a second and none at all to a third. The parent they step into has a child in
-         * each: the full access is what lets them impersonate, and the other two children are
-         * there to check that stepping in never widens what the administrator may read - a
-         * member they can only read shows without its national register number or financial
-         * data, and a member they cannot read is hidden entirely.
-         */
-        async function setupPartialAccessAdmin() {
-            TestUtils.setEnvironment('userMode', 'platform');
+        const admin = await new UserFactory({ password }).create();
+        admin.permissions = UserPermissions.create({});
+        admin.permissions.organizationPermissions.set(fullOrganization.id, Permissions.create({ level: PermissionLevel.Full }));
+        admin.permissions.organizationPermissions.set(readOrganization.id, Permissions.create({ level: PermissionLevel.Read }));
+        await admin.save();
 
-            const fullOrganization = await new OrganizationFactory({}).create();
-            await enableImpersonation(fullOrganization);
-            const readOrganization = await new OrganizationFactory({}).create();
-            const noAccessOrganization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({ password }).create();
 
-            const admin = await new UserFactory({ password }).create();
-            admin.permissions = UserPermissions.create({});
-            admin.permissions.organizationPermissions.set(fullOrganization.id, Permissions.create({ level: PermissionLevel.Full }));
-            admin.permissions.organizationPermissions.set(readOrganization.id, Permissions.create({ level: PermissionLevel.Read }));
-            await admin.save();
+        const fullMember = await markSensitive(await new MemberFactory({ user }).create());
+        await new RegistrationFactory({ member: fullMember, organization: fullOrganization }).create();
 
-            const user = await new UserFactory({ password }).create();
+        const session = await impersonate(fullOrganization, admin, user);
+        await expect(testServer.test(new GetUserMembersEndpoint(), membersRequest(fullOrganization, session))).toResolve();
 
-            const fullMember = await markSensitive(await new MemberFactory({ user }).create());
-            await new RegistrationFactory({ member: fullMember, organization: fullOrganization }).create();
+        const readMember = await markSensitive(await new MemberFactory({ user, firstName: readMemberFirstName }).create());
+        await new RegistrationFactory({ member: readMember, organization: readOrganization }).create();
 
-            const readMember = await markSensitive(await new MemberFactory({ user, firstName: readMemberFirstName }).create());
-            await new RegistrationFactory({ member: readMember, organization: readOrganization }).create();
+        const hiddenMember = await markSensitive(await new MemberFactory({ user }).create());
+        await new RegistrationFactory({ member: hiddenMember, organization: noAccessOrganization }).create();
 
-            const hiddenMember = await markSensitive(await new MemberFactory({ user }).create());
-            await new RegistrationFactory({ member: hiddenMember, organization: noAccessOrganization }).create();
+        // Existing session stopped working
+        await expect(testServer.test(new GetUserMembersEndpoint(), membersRequest(fullOrganization, session))).rejects.toThrow(STExpect.errorWithCode('invalid_access_token'));
 
-            return { fullOrganization, admin, user, fullMember, readMember, hiddenMember };
-        }
-
-        test('the members endpoint hides members and fields the administrator may not read', async () => {
-            const { fullOrganization, admin, user, fullMember, readMember, hiddenMember } = await setupPartialAccessAdmin();
-
-            const session = await impersonate(fullOrganization, admin, user);
-            const response = await testServer.test(new GetUserMembersEndpoint(), membersRequest(fullOrganization, session));
-
-            const ids = response.body.members.map(m => m.id);
-            // A member the administrator cannot access is not part of the family the session sees.
-            expect(ids).not.toContain(hiddenMember.id);
-            // The members the administrator may access are there.
-            expect(ids).toContain(fullMember.id);
-            expect(ids).toContain(readMember.id);
-
-            // Only read access to the member's organization: the member itself comes through,
-            // but the fields that need more than read access do not.
-            const read = response.body.members.find(m => m.id === readMember.id)!;
-            expect(read.details.firstName).toBe(readMemberFirstName);
-            expect(read.details.nationalRegisterNumber).toBeNull();
-            expect(read.details.requiresFinancialSupport).toBeNull();
-        });
-
-        test('the user endpoint hides members and fields the administrator may not read', async () => {
-            const { fullOrganization, admin, user, fullMember, readMember, hiddenMember } = await setupPartialAccessAdmin();
-
-            const session = await impersonate(fullOrganization, admin, user);
-            const response = await testServer.test(userEndpoint, bearer(Request.buildJson('GET', '/v1/user', fullOrganization.getApiHost()), (await Token.getByAccessToken(session.accessToken))!));
-
-            const ids = response.body.members.members.map(m => m.id);
-            expect(ids).not.toContain(hiddenMember.id);
-            expect(ids).toContain(fullMember.id);
-            expect(ids).toContain(readMember.id);
-
-            const read = response.body.members.members.find(m => m.id === readMember.id)!;
-            expect(read.details.firstName).toBe(readMemberFirstName);
-            expect(read.details.nationalRegisterNumber).toBeNull();
-            expect(read.details.requiresFinancialSupport).toBeNull();
-        });
-
-        test('the members patch endpoint hides members and fields the administrator may not read', async () => {
-            const { fullOrganization, admin, user, fullMember, readMember, hiddenMember } = await setupPartialAccessAdmin();
-
-            const session = await impersonate(fullOrganization, admin, user);
-
-            // Even an empty patch returns the family blob, so it has to be narrowed exactly
-            // like the reads: the response must never carry a member the administrator cannot
-            // access.
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
-            const response = await testServer.test(new PatchUserMembersEndpoint(), Request.patch({
-                path: '/members',
-                host: fullOrganization.getApiHost(),
-                headers: { authorization: 'Bearer ' + session.accessToken },
-                body,
-            }));
-
-            const ids = response.body.members.map(m => m.id);
-            expect(ids).not.toContain(hiddenMember.id);
-            expect(ids).toContain(fullMember.id);
-            expect(ids).toContain(readMember.id);
-
-            const read = response.body.members.find(m => m.id === readMember.id)!;
-            expect(read.details.firstName).toBe(readMemberFirstName);
-            expect(read.details.nationalRegisterNumber).toBeNull();
-            expect(read.details.requiresFinancialSupport).toBeNull();
-        });
-
-        test('changes to the family go to the impersonated account, not to the administrator', async () => {
-            const { organization, admin, user, member } = await setup();
-
-            const session = await impersonate(organization, admin, user);
-
-            const patch = MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({ phone: '+32478123456' }),
-            });
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
-            body.addPatch(patch);
-
-            const response = await testServer.test(new PatchUserMembersEndpoint(), Request.patch({
-                path: '/members',
-                host: organization.getApiHost(),
-                headers: { authorization: 'Bearer ' + session.accessToken },
-                body,
-            }));
-
-            // The member of the impersonated account, not of the administrator's own family
-            expect(response.body.members.map(m => m.id)).toEqual([member.id]);
-
-            await member.refresh();
-            expect(member.details.phone).toBe('+32478123456');
-        });
+        // New sessions no longer possible
+        await expect(impersonate(fullOrganization, admin, user)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
     });
 });

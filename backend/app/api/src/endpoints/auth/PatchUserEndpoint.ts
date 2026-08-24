@@ -90,6 +90,11 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 const platform = await Platform.getSharedStruct();
 
                 if (organization) {
+                    if (!await Context.auth.hasFullAccess(organization.id)) {
+                        // Cannot grant permissions for this organization
+                        throw Context.auth.error();
+                    }
+
                     editUser.permissions = UserPermissions.limitedPatch(editUser.permissions, request.body.permissions, organization.id);
 
                     if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.forOrganization(organization, platform, { inheritFromPlatform: false })?.hasFullAccess()) && STAMHOOFD.environment !== 'development') {
@@ -99,6 +104,11 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                         });
                     }
                 } else {
+                    if (!Context.auth.hasPlatformFullAccess()) {
+                        // Cannot grant permissions for global permissions or any organization below
+                        throw Context.auth.error();
+                    }
+
                     if (editUser.permissions) {
                         editUser.permissions.patchOrPut(request.body.permissions);
                     } else {
