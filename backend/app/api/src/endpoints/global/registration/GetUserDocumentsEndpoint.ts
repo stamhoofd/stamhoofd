@@ -33,7 +33,7 @@ export class GetUserDocumentsEndpoint extends Endpoint<Params, Query, Body, Resp
         const organization = await Context.setUserOrganizationScope();
         const { user } = await Context.authenticate();
 
-        const members = await Member.getMembersForUser(user);
+        const members = await Member.getMembersForUser(Context.impersonatedUserOrUser);
         let templates = organization ? await DocumentTemplate.where({ status: 'Published', organizationId: organization.id }) : null;
         const memberIds = members.map(m => m.id);
         const templateIds = templates ? templates.map(t => t.id) : null;

@@ -271,6 +271,18 @@
                         {{ $t('%Zk4') }}
                     </p>
                 </STListItem>
+
+                <STListItem v-if="!platform.config.featureFlags.includes('impersonation')" :selectable="true" element-name="label" data-testid="impersonation-checkbox">
+                    <template #left>
+                        <Checkbox :model-value="getFeatureFlag('impersonation')" @update:model-value="setFeatureFlag('impersonation', !!$event)" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('Inloggen als een andere gebruiker') }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ $t('Hoofdbeheerders van deze vereniging kunnen via een link inloggen als één van hun gebruikers, om te zien wat die gebruiker ziet.') }}
+                    </p>
+                </STListItem>
             </STList>
         </div>
     </SaveView>
@@ -289,6 +301,7 @@ import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
@@ -306,6 +319,7 @@ import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 
 const context = useContext();
 const baseOrganization = useRequiredOrganization();
+const platform = usePlatform();
 const organizationManager = useOrganizationManager();
 const show = useShow();
 const present = usePresent();

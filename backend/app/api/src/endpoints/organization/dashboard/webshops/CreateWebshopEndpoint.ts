@@ -42,6 +42,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         if (!await Context.auth.canCreateWebshops(organization.id)) {
             throw Context.auth.error($t(`%FH`));
         }
+        Context.assertNotImpersonating(); // authorId would be wrong
 
         const errors = new SimpleErrors();
 

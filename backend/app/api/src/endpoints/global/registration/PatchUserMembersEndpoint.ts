@@ -52,7 +52,10 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setUserOrganizationScope();
-        const { user } = await Context.authenticate();
+        await Context.authenticate();
+
+        // Modify as impersonateduser instead of user
+        const user = Context.impersonatedUserOrUser;
 
         // Process changes
         const addedMembers: Member[] = [];

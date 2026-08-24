@@ -15,6 +15,12 @@ const DAY = 24 * 60 * 60 * 1000;
 const MAX_SESSIONS = 15;
 const API_TOKEN_DURATION = 5 * 365 * DAY;
 
+/**
+ * An impersonated session cannot be renewed, so this is its total lifetime: an
+ * administrator that needs more time starts a new impersonation, which is audit logged again.
+ */
+export const IMPERSONATION_SESSION_DURATION = 2 * 60 * 60 * 1000;
+
 async function randomBytes(size: number): Promise<Buffer> {
     return await new Promise((resolve, reject) => {
         crypto.randomBytes(size, (error, buffer) => error ? reject(error) : resolve(buffer));
@@ -77,12 +83,40 @@ export class SessionService {
     }
 
     /**
+     * A session for `user` that presents itself as `impersonatedUser`.
+     *
+     * Deliberately not created through createSession(): it is never fresh (so it cannot be
+     * used for sensitive actions) and it is short lived, because it cannot be renewed.
+     */
+    static async createImpersonationSession<U extends User>(user: U, impersonatedUser: User): Promise<Token & { user: U }> {
+        const tokenId = uuidv4();
+        const session = await this.createUserSession(user, {
+            tokenId,
+            clientType: this.getClientType(),
+            loginMethod: SessionLoginMethod.Password,
+            metaData: this.getMetaData(),
+            impersonatedUserId: impersonatedUser.id,
+        });
+        const token = await this.createToken(user, { session, tokenId });
+        token.accessTokenValidUntil = new Date(Date.now() + IMPERSONATION_SESSION_DURATION);
+        token.accessTokenValidUntil.setMilliseconds(0);
+        token.refreshTokenValidUntil = new Date(token.accessTokenValidUntil);
+        await token.save();
+        return token;
+    }
+
+    /**
      * The new token continues the session of the old one, so it keeps its start date and
      * cannot outlive it. Using the session is what postpones the inactivity limit.
      */
     static async rotateSession<U extends User>(oldToken: Token & { user: U }): Promise<Token & { user: U }> {
         const session = await UserSession.getByID(oldToken.sessionId);
         if (!session || session.userId !== oldToken.userId) {
+            throw this.invalidRefreshTokenError();
+        }
+
+        // An impersonated session ends when its access token expires.
+        if (session.impersonatedUserId) {
             throw this.invalidRefreshTokenError();
         }
 
@@ -125,6 +159,14 @@ export class SessionService {
             return undefined;
         }
         if (token.refreshTokenValidUntil < new Date()) {
+            // An expired impersonated session is expected: it cannot be renewed, so it says
+            // nothing about the administrator's other sessions.
+            const session = await UserSession.getByID(token.sessionId);
+            if (session?.impersonatedUserId) {
+                await token.delete();
+                await session.delete();
+                return undefined;
+            }
             console.error('Detected an expired refresh token, deleting all sessions and tokens for user', token.userId);
             await UserSession.delete().where('userId', token.userId).delete();
             await Token.delete().where('userId', token.userId).delete();
@@ -168,11 +210,24 @@ export class SessionService {
             query.where(Token.primary.name, SQLWhereSign.NotEqual, keepAccessToken);
         }
         const { affectedRows } = await query.delete();
+        await this.endImpersonationSessionsOf(userIds);
         return affectedRows;
     }
 
+    /**
+     * Sign out every session of this user, except the one the request was made with.
+     */
     static async clearFor({ userId, keepAccessToken }: { userId: string; keepAccessToken: string }): Promise<void> {
-        await Database.delete('DELETE FROM `tokens` WHERE `userId` = ? AND `accessToken` != ?', [userId, keepAccessToken]);
+        await this.deleteForUsers({ userIds: [userId], keepAccessToken });
+    }
+
+    /**
+     * Sessions of administrators that look through these accounts are dropped too: after a
+     * credential change the account expects to be alone, and an administrator can always
+     * start over. Their tokens go along through the foreign key.
+     */
+    private static async endImpersonationSessionsOf(userIds: string[]): Promise<void> {
+        await UserSession.delete().where('impersonatedUserId', userIds).delete();
     }
 
     private static invalidRefreshTokenError() {
@@ -203,10 +258,11 @@ export class SessionService {
         return token;
     }
 
-    private static async createUserSession(user: User, { tokenId, clientType, loginMethod, metaData }: { tokenId: string; clientType: SessionClientType; loginMethod: SessionLoginMethod; metaData: SessionMetaData }): Promise<UserSession> {
+    private static async createUserSession(user: User, { tokenId, clientType, loginMethod, metaData, impersonatedUserId = null }: { tokenId: string; clientType: SessionClientType; loginMethod: SessionLoginMethod; metaData: SessionMetaData; impersonatedUserId?: string | null }): Promise<UserSession> {
         const session = new UserSession();
         session.id = uuidv4();
         session.userId = user.id;
+        session.impersonatedUserId = impersonatedUserId;
         session.clientType = clientType;
         session.loginMethod = loginMethod;
         session.startedAt = new Date();

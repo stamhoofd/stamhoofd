@@ -6,7 +6,7 @@
         }
     }
 
-    .hover-box:hover, .hover-box.focused {
+    .hover-box:hover, .hover-box.open-context-menu {
         .hover-show {
             opacity: 1;
         }
@@ -18,7 +18,7 @@
         }
     }
 
-    .hover-show.focused, .focused .hover-show, .hover-show:has(.focused) {
+    .hover-show.open-context-menu, .open-context-menu .hover-show, .hover-show:has(.open-context-menu) {
         opacity: 1;
     }
 }

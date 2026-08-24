@@ -51,10 +51,19 @@ export class ContextInstance {
     timers: Map<string, number> = new Map();
 
     user?: User;
+
+    /**
+     * Set when the session is impersonating: `user` stays the administrator that is really
+     * acting (and that every change is attributed to), while this is the account the
+     * frontend is shown as.
+     */
+    impersonatedUser?: User;
+
     organization?: Organization;
 
     #i18n: I18n | null = null;
     #auth: AdminPermissionChecker | null = null;
+    #actorAuth: AdminPermissionChecker | null = null;
 
     constructor(request: Request) {
         this.request = request;
@@ -144,6 +153,26 @@ export class ContextInstance {
 
     get optionalAuth() {
         return this.#auth;
+    }
+
+    /**
+     * The permissions of the account that is really acting. The same as `auth` for a normal
+     * session, and the administrator behind an impersonated one - without the narrowing to
+     * what the account they look through would see.
+     *
+     * Use `auth` to decide what this session may do. Use this one only to bound what an
+     * impersonated session may *read* through the account it looks through (see
+     * ImpersonationScope).
+     */
+    get actorAuth() {
+        if (!this.#actorAuth) {
+            throw new SimpleError({
+                code: 'internal_error',
+                statusCode: 500,
+                message: 'AdminPermissionChecker not set in RequestContext: make sure the request is authenticated before using the permissionChecker',
+            });
+        }
+        return this.#actorAuth;
     }
 
     async setOptionalOrganizationScope(options?: { willAuthenticate?: boolean }) {
@@ -324,16 +353,99 @@ export class ContextInstance {
         }
 
         const user = token.user;
-        this.user = user;
+        const impersonatedUser = token.session.impersonatedUserId ? await this.resolveImpersonation(token.session.impersonatedUserId, user) : null;
 
-        console.log(
-            'Auth: ' + user.email + ' (' + user.id + ')',
-        );
+        if (impersonatedUser) {
+            console.log(
+                'Auth: ' + user.email + ' (' + user.id + ') impersonating ' + impersonatedUser.email + ' (' + impersonatedUser.id + ')',
+            );
+        } else {
+            console.log(
+                'Auth: ' + user.email + ' (' + user.id + ')',
+            );
+        }
 
         // Load member of user
-        await this.insecurelyAuthenticateAs(user);
+        await this.insecurelyAuthenticateAs(user, impersonatedUser);
 
         return { user, token };
+    }
+
+    /**
+     * Load the account an impersonated session presents itself as.
+     *
+     * The permission to impersonate is checked again here, on every request: an
+     * administrator that loses their rights - or an account that gains rights the
+     * administrator doesn't have - ends the session instead of keeping it alive.
+     */
+    private async resolveImpersonation(impersonatedUserId: string, actor: User): Promise<User> {
+        const invalid = new SimpleError({
+            code: 'invalid_access_token',
+            message: 'The impersonation is no longer allowed',
+            human: $t(`%Fi`),
+            statusCode: 401,
+        });
+
+        const impersonatedUser = await User.getByID(impersonatedUserId);
+
+        if (!impersonatedUser) {
+            throw invalid;
+        }
+
+        // The impersonated account has to live in the scope of the request, exactly like
+        // the account the token belongs to.
+        if (impersonatedUser.organizationId !== null && impersonatedUser.organizationId !== (this.organization?.id ?? null)) {
+            throw invalid;
+        }
+
+        const auth = new AdminPermissionChecker(actor, await Platform.getSharedPrivateStruct(), this.organization);
+
+        if (!await auth.canImpersonate(impersonatedUser)) {
+            console.log('Failed impersonation: ' + actor.email + ' (' + actor.id + ') as ' + impersonatedUser.email + ' (' + impersonatedUser.id + ')');
+            throw invalid;
+        }
+
+        return impersonatedUser;
+    }
+
+    async isImpersonationEnabled(): Promise<boolean> {
+        return await this.checkFeatureFlag('impersonation');
+    }
+
+    get isImpersonating() {
+        return !!this.impersonatedUser;
+    }
+
+    /**
+     * The impersonated account when there is one, and the account of the session
+     * otherwise. Only use this where the request is about "the user of this session"
+     * (their own members, their own account) - never to decide what may be changed, and
+     * never to attribute a change to somebody.
+     */
+    get impersonatedUserOrUser(): User {
+        if (!this.user) {
+            throw new SimpleError({
+                code: 'not_authenticated',
+                message: 'Not authenticated',
+                statusCode: 401,
+            });
+        }
+        return this.impersonatedUser ?? this.user;
+    }
+
+    /**
+     * Refuse an action that would change the account an impersonated session presents
+     * itself as. An administrator looks through an account, they never take it over.
+     */
+    assertNotImpersonating() {
+        if (this.impersonatedUser) {
+            throw new SimpleError({
+                code: 'not_allowed_while_impersonating',
+                message: 'This action is not allowed while impersonating another user',
+                human: $t(`Dit kan je niet doen terwijl je aangemeld bent als een andere gebruiker.`),
+                statusCode: 403,
+            });
+        }
     }
 
     /**
@@ -343,6 +455,11 @@ export class ContextInstance {
      */
     async authenticateFresh(options: { allowWithoutAccount?: boolean; allowUnscoped?: boolean } = {}): Promise<{ user: User; token: Token }> {
         const result = await this.authenticate(options);
+
+        // An impersonated session can never become fresh: there is no way to re-enter the
+        // credentials of an account you only borrowed.
+        this.assertNotImpersonating();
+
         if (!result.token.isFresh()) {
             throw new SimpleError({
                 code: 'require_fresh_auth',
@@ -397,7 +514,6 @@ export class ContextInstance {
                 });
             }
 
-            this.user = user;
             await this.insecurelyAuthenticateAs(user);
             return { user, setupToken };
         }
@@ -423,12 +539,19 @@ export class ContextInstance {
         return { user, setupToken: null, token };
     }
 
-    async insecurelyAuthenticateAs(user: User) {
-        this.#auth = new AdminPermissionChecker(user, await Platform.getSharedPrivateStruct(), this.organization);
+    async insecurelyAuthenticateAs(user: User, impersonatedUser?: User | null) {
+        const platform = await Platform.getSharedPrivateStruct();
+
+        this.user = user;
+        this.impersonatedUser = impersonatedUser ?? undefined;
+
+        this.#auth = impersonatedUser
+            ? new AdminPermissionChecker(impersonatedUser, platform, this.organization)
+            : new AdminPermissionChecker(user, platform, this.organization);
 
         if (this.organization && !this.organization.active) {
             // For inactive organizations, you always need permissions to view them
-            if (!Context.auth.hasSomePlatformAccess() || !await Context.auth.hasFullAccess(this.organization.id)) {
+            if (!this.auth.hasSomePlatformAccess() || !await this.auth.hasFullAccess(this.organization.id)) {
                 throw new SimpleError({
                     code: 'archived',
                     message: 'Platform access is required to view inactive organizations',
