@@ -3,13 +3,13 @@ import { isPatch } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailVerificationCode, Member, PasswordToken, Platform, Token, User } from '@stamhoofd/models';
+import { EmailVerificationCode, Member, PasswordToken, Platform, User } from '@stamhoofd/models';
 import type { UserWithMembers } from '@stamhoofd/structures';
 import { LoginMethod, NewUser, PermissionLevel, SignupResponse, UserPermissions } from '@stamhoofd/structures';
 
+import { AuthenticatedStructures } from '../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../helpers/Context.js';
 import { MemberUserSyncer } from '../../helpers/MemberUserSyncer.js';
-import { AuthenticatedStructures } from '../../helpers/AuthenticatedStructures.js';
 import { SessionService } from '../../services/SessionService.js';
 import { VerificationCodeService } from '../../services/VerificationCodeService.js';
 
@@ -151,8 +151,11 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             }
         }
 
-        if (editUser.id === user.id && request.body.password) {
-            Context.assertNotImpersonating();
+        if (request.body.password) {
+            if (editUser.id !== user.id) {
+                throw Context.auth.error();
+            }
+            Context.assertNotImpersonating(); // normally not triggers because user and editUser won't be the same, but to be sure...
 
             if (STAMHOOFD.userMode === 'platform') {
                 const platform = await Platform.getSharedPrivateStruct();

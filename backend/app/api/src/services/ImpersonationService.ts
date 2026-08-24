@@ -6,15 +6,6 @@ import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogT
 import { Context } from '../helpers/Context.js';
 import { SessionService } from './SessionService.js';
 
-/**
- * Signing in as another user, to see the application the way that user sees it.
- *
- * The session that comes out of this stays the administrator's: it keeps their user id and
- * only carries the impersonated account alongside it, so every change is attributed to the
- * administrator and every access check is made for both accounts (see UserSession and
- * ImpersonatedPermissionChecker). This service guards the two moments where impersonation
- * is handed out: asking for a link and trading that link for a session.
- */
 export class ImpersonationService {
     /**
      * Create the one-time ticket behind an impersonation link.

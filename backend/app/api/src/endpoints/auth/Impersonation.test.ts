@@ -371,7 +371,7 @@ describe('Impersonation', () => {
             expect(await Token.getByAccessToken(ownSession.accessToken)).toBeDefined();
         });
 
-        test('cannot change the password of the account it looks at', async () => {
+        test('cannot change the password while impersonating', async () => {
             const { organization, admin, user } = await setup();
             const session = await impersonate(organization, admin, user);
 
@@ -379,13 +379,13 @@ describe('Impersonation', () => {
                 id: user.id,
                 password: 'a-brand-new-password',
             }))));
-            expect(error.code).toBe('not_allowed_while_impersonating');
+            expect(error.code).toBe('permission_denied');
 
             // The account still belongs to whoever knows the original password.
             expect(await User.login(organization.id, user.email, password)).toBeDefined();
         });
 
-        test('cannot change the email address of the account it looks at', async () => {
+        test('cannot change the email address while impersonating', async () => {
             const { organization, admin, user } = await setup();
             const session = await impersonate(organization, admin, user);
 
@@ -396,7 +396,7 @@ describe('Impersonation', () => {
             expect(error.code).toBe('not_allowed_while_impersonating');
         });
 
-        test('attributes what it changes to the administrator, not to the account it looks at', async () => {
+        test('attributes what it changes to the administrator, not to the account while impersonating', async () => {
             const organization = await new OrganizationFactory({}).create();
             await enableImpersonation(organization);
             const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();

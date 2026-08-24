@@ -816,14 +816,6 @@ export class AdminPermissionChecker {
         return await this.canManageAdmins(user.organizationId);
     }
 
-    /**
-     * Whether this user may sign in as the given account to see the application through
-     * its eyes.
-     *
-     * Note that this only decides who may *start* an impersonation. What the resulting
-     * session can reach is limited on every request, by checking both accounts (see
-     * ImpersonatedPermissionChecker).
-     */
     async canImpersonate(user: User): Promise<boolean> {
         // API keys are machine credentials and the system user is nobody: neither is an
         // account you can look through.
