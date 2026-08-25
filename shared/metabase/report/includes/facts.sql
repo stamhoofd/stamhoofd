@@ -15,13 +15,13 @@
 -- aanlevering, which is about leden of a jeugdbeweging and about nothing else -- says so itself.
 --
 -- Two columns say what a registration counts as, and they answer different questions.
--- `tak_category` is what the tak was recorded as -- kinderen, leiding or volwassenen -- and is null
--- wherever nobody has said. The aanlevering reads that one, and so do the figures that weigh leiding
--- against kinderen: a sheet delivered to a department may not guess, and a division with leiding on
--- one side cannot lean on a fallback that reads every young leider as a kind. `effective_category` is that same answer with
--- the fallbacks the ledenstatistieken need behind it -- the tak's age range, and then the member's
--- own age at the start of the year -- so that nobody drops out of a total for want of a tak that was
--- never categorised.
+-- `tak_category` is what the tak counts as -- kinderen, leiding or volwassenen -- as `takken.sql`
+-- decides it, and is null wherever nobody has said. The aanlevering reads that one, and so do the
+-- figures that weigh leiding against kinderen: a sheet delivered to a department may not guess, and a
+-- division with leiding on one side cannot lean on a fallback that reads every young leider as a
+-- kind. `effective_category` is that same answer with the fallbacks the ledenstatistieken need behind
+-- it -- the tak's age range, and then the member's own age at the start of the year -- so that nobody
+-- drops out of a total for want of a tak that was never categorised.
 --
 -- That last fallback catches what the import could not name. The client's export leaves the tak empty
 -- on the children of the years before 2020-2021; the import reads those from the member's age, except
@@ -37,7 +37,9 @@
 --   * `all_facts` keeps the ones that are still active, which is what the report means by a lid.
 --   * `facts` is that without the koepel's own organization. Every figure of the ledenstatistieken
 --     is counted from it, through `leden.sql`, which narrows it to one row per member.
-WITH all_registrations AS (
+WITH
+-- @include takken
+all_registrations AS (
     SELECT
         r.memberId AS member_id,
         r.organizationId AS organization_id,
@@ -73,7 +75,7 @@ WITH all_registrations AS (
     -- The tak, the member and the eenheid are each recorded per year, so the period is part of what
     -- identifies the row to join to: a tak that is renamed or a member who moves changes the year it
     -- happened in, not every year they were ever counted in.
-    LEFT JOIN default_age_groups dag ON dag.id = g.defaultAgeGroupId AND dag.periodId = r.periodId
+    LEFT JOIN takken dag ON dag.id = g.defaultAgeGroupId AND dag.periodId = r.periodId
     JOIN members m ON m.id = r.memberId AND m.periodId = r.periodId
     JOIN organizations o ON o.id = r.organizationId AND o.periodId = r.periodId
     WHERE r.registeredAt IS NOT NULL

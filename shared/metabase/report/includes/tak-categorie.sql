@@ -1,0 +1,16 @@
+-- What a tak counts as -- kinderen, leiding or volwassenen -- which every figure that divides the
+-- one from the other reads.
+--
+-- It is a property of the tak rather than of a member, and nothing in the administration knows it:
+-- the platform configuration has no such field, and the ages do not answer it, since leiding and stam
+-- carry no age range and a tak of kinderen need not carry one either. The statistics database keeps a
+-- `category` column on `default_age_groups` for it, filled in by hand, and that is what this reads.
+--
+-- A platform that would rather say it in the query names its takken by id in
+-- `includes/<env>/tak-categorie.sql`, which is what `@include tak-categorie` expands to there. The
+-- column stays behind such a list as its fallback, so a tak the list does not name keeps whatever was
+-- set for it, and the years an import owns keep what the import gave them.
+--
+-- Belongs in the select list of the `takken` fragment, which has the row of `default_age_groups` as
+-- `dag`. It is the column the rest of the report reads as `dag.category`.
+dag.category AS category

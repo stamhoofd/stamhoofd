@@ -49,7 +49,9 @@ describe('report', () => {
 
             expect(card.title).toEqual('Totaal leden');
             expect(card.display).toEqual('scalar');
-            expect(card.sql).toContain('WITH all_registrations AS');
+            expect(card.sql).toContain('all_registrations AS (');
+            // A fragment the fragment above it includes, so this also says the nesting was resolved.
+            expect(card.sql).toContain('takken AS (');
             expect(card.sql).not.toContain('@include');
         });
 
@@ -388,6 +390,68 @@ describe('report', () => {
         });
 
         /**
+         * What a tak counts as is the one thing about it that nothing in the administration knows,
+         * and keeo says it in the query rather than leaving it to the `category` column of
+         * `default_age_groups`: a rebuilt statistics database keeps nothing of that column, and the
+         * UPDATE that fills it again is written down nowhere.
+         *
+         * Kept here for the same reason as the weights above. A tak that falls out of the list is a
+         * plausible number rather than a failure: it drops back to the column, which on a database
+         * nobody has filled in holds nothing, and the tak quietly stops being counted as anything.
+         */
+        it('names every tak of keeo in the query, with the column left behind it', () => {
+            const sql = cardOf(dashboards, 'nationaal', 'totaal-leden').sql;
+
+            for (const [tak, term] of [
+                ['Bevers en Zeehonden', "WHEN 'f274a949-9318-4c2b-ae35-e50114efe686' THEN 'child'"],
+                ['Welpen', "WHEN '316ea554-675a-493e-a152-365012851ae3' THEN 'child'"],
+                ['Wolven', "WHEN '01d62f7d-c3fa-4314-a33a-21da526a35ff' THEN 'child'"],
+                ['JVG/JG-A', "WHEN '57143f32-e4d2-46a7-96e2-9bf82f121e1c' THEN 'child'"],
+                ['VG/G-J', "WHEN '0eacf56f-3a1d-4e15-bebc-2bc66fc74c7a' THEN 'child'"],
+                ['Seniors', "WHEN 'b2275ec6-04ad-4232-bfe3-0eefed97f83b' THEN 'child'"],
+                ['Leiding', "WHEN 'b90e0833-7047-4283-8e25-cd65c5f09129' THEN 'leader'"],
+                ['Stam', "WHEN '6fc0775e-2851-4fe1-90cd-af9c74243ccd' THEN 'adult'"],
+                ['Nationaal vrijwilligers', "WHEN '77c2530c-2834-4da3-83c5-1cff9cf05c7e' THEN 'adult'"],
+                ['Nationaal vrijwilligers, rechtstreeks aan FOS', "WHEN 'd4bb14bf-4a52-44e4-a014-3333c5ebb36a' THEN 'adult'"],
+                ['Ereleden', "WHEN '8d42d2df-7787-4959-995d-c5a85d0e48c9' THEN 'adult'"],
+                ['Ondersteunende leden', "WHEN 'ac8848e9-9868-44a1-a057-2a189cce68ea' THEN 'adult'"],
+            ]) {
+                expect(`${tak}: ${sql.includes(term)}`).toEqual(`${tak}: true`);
+            }
+
+            // Every tak of the platform and no more: a second row for one of them would sit under the
+            // first and say nothing, which reads as a correction that was never applied.
+            expect(sql.match(/WHEN '[0-9a-f-]{36}' THEN/g)!.length).toBe(12);
+            // The years imported from the client's own statistics are categorised in the column, and
+            // a tak this does not name keeps whatever was set for it.
+            expect(sql).toContain('ELSE dag.category');
+        });
+
+        /** Only keeo says it in the query. Everywhere else the column is the whole answer. */
+        it('leaves the category to the column in an environment that names no takken', () => {
+            const sql = cardOf(ravotDashboards, 'nationaal', 'totaal-leden').sql;
+
+            expect(sql).toContain('dag.category AS category');
+            expect(`names takken by id: ${/WHEN '[0-9a-f-]{36}' THEN/.test(sql)}`).toEqual('names takken by id: false');
+        });
+
+        /**
+         * Both grains of `facts` read the takken through the fragment that decides the category, and
+         * a card reaching for `default_age_groups` beside it would count an uncategorised tak while
+         * the rest of the report has it categorised. Nothing about a card says which it does.
+         */
+        it('reads every tak through the fragment that decides its category', () => {
+            for (const [env, tabs] of [['keeo', dashboards], ['ravot', ravotDashboards]] as const) {
+                for (const card of tabs.flatMap(tab => tab.cards)) {
+                    const reads = [...card.sql.matchAll(/\b(?:FROM|JOIN) default_age_groups\b/g)].map(match => match[0]);
+                    const expected = card.sql.includes('takken AS (') ? ['FROM default_age_groups'] : [];
+
+                    expect(`${env}/${card.key}: ${reads.join(' + ')}`).toEqual(`${env}/${card.key}: ${expected.join(' + ')}`);
+                }
+            }
+        });
+
+        /**
          * Both formulas weigh members rather than registrations, and only the fragment below them
          * makes that true: a member in two takken stands in `facts` twice, and every term of the
          * index would weigh them twice over -- as leiding and as a lid, or in two takken at once.
@@ -625,7 +689,7 @@ describe('report', () => {
                 }
             }
 
-            expect(entries.filter(entry => entry.isDirectory()).map(entry => entry.name).sort()).toEqual(['ravot']);
+            expect(entries.filter(entry => entry.isDirectory()).map(entry => entry.name).sort()).toEqual(['keeo', 'ravot']);
             expect([...qualifiers].sort()).toEqual(['ravot']);
         });
 

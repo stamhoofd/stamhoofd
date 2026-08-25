@@ -1,7 +1,9 @@
 -- The same grain as `facts`, but never filtered by scoutsjaar: the cards that draw a line across the
 -- years need every year regardless of which one the dashboard filter has selected. Keep the two in
 -- step when changing what counts as an active registration.
-WITH facts AS (
+WITH
+-- @include takken
+facts AS (
     SELECT
         r.memberId AS member_id,
         r.organizationId AS organization_id,
@@ -36,7 +38,7 @@ WITH facts AS (
     -- The tak, the member and the eenheid are each recorded per year, so the period is part of what
     -- identifies the row to join to: a tak that is renamed or a member who moves changes the year it
     -- happened in, not every year they were ever counted in.
-    LEFT JOIN default_age_groups dag ON dag.id = g.defaultAgeGroupId AND dag.periodId = r.periodId
+    LEFT JOIN takken dag ON dag.id = g.defaultAgeGroupId AND dag.periodId = r.periodId
     JOIN members m ON m.id = r.memberId AND m.periodId = r.periodId
     JOIN organizations o ON o.id = r.organizationId AND o.periodId = r.periodId
     WHERE r.deactivatedAt IS NULL

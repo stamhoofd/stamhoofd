@@ -53,6 +53,25 @@ A card names neither and keeps saying `@include gtp`, which is what keeps one re
 becoming two. An override of a name no fragment carries is refused rather than ignored: nothing
 includes it, so a misspelled file would change nothing and say nothing.
 
+## What a tak counts as
+
+Kinderen, leiding or volwassenen. Every figure that divides the one from the other reads it, and it
+is the one thing about a tak that nothing in the administration knows: the platform configuration has
+no such field, and the ages do not answer it, since leiding and stam carry no age range and a tak of
+kinderen need not carry one either.
+
+`includes/takken.sql` is where it is settled, and `includes/tak-categorie.sql` is the answer itself.
+Unqualified, that reads the `category` column the statistics database keeps on `default_age_groups`,
+which is filled in by hand. `includes/keeo/tak-categorie.sql` instead names keeo's takken by id and
+leaves the column behind it as the fallback, so a tak it does not name — the years imported from the
+client's own statistics, most of all — keeps whatever was set for it.
+
+Naming them in the query is what keeps the answer readable. The column survives no rebuild of the
+statistics database, and the UPDATE that fills it again is written down nowhere; a list in the query
+is in git, is checked by the tests, and stands in front of whoever opens the question in Metabase.
+That last part only holds until the next `yarn metabase report`, which rewrites every card from these
+files — an edit made in Metabase is a correction to bring back here, not a place to keep one.
+
 One tab is not part of the client's own report. `report/jeugdbewegingen.sql` is the dataset the
 koepel delivers to the Departement Cultuur, Jeugd en Media every september, one card per sheet of the
 delivery template: tables to download as .xlsx and paste into it rather than charts to read. It names
