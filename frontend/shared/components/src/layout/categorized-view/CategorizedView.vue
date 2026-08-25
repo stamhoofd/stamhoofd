@@ -1,12 +1,12 @@
 <template>
-    <div class="st-view" :class="{'categorized-view': columnsEnabled && isEnabled,'shade': columnsEnabled && isEnabled, 'categorized-boxes': isEnabled}">
-        <div v-if="columnsEnabled && isEnabled">
+    <div class="st-view" :class="{'categorized-view': columnsEnabled, 'collapsed': !isEnabled, 'animated': animated, 'shade': columnsEnabled && isEnabled, 'categorized-boxes': isEnabled}">
+        <div v-if="columnsEnabled">
             <div class="st-view summary-column background">
                 <main>
                     <h1 class="style-navigation-title">
                         {{ title }}
                     </h1>
-                    <div ref="seeker-box" class="seeker-box">
+                    <div class="seeker-box">
                         <STList>
                             <STListItem v-for="(category, index) of categories" :key="index" ref="categoryRows" :selectable="true" class="" @click="scrollToCategory(category)">
                                 <template #left>
@@ -99,7 +99,6 @@ const scrollColumn = useTemplateRef('scrollColumn');
 
 const seekerHeight = ref(0);
 const seekeryOffset = ref(0);
-const maximumSummaryHeight = ref(null) as Ref<number | null>;
 let tick = false;
 
 const isEnabled = computed(() => {
@@ -136,7 +135,6 @@ function updateVisible() {
         }
 
         const scrollRect = scrollEl.getBoundingClientRect();
-        maximumSummaryHeight.value = scrollRect.height;
 
         let topPadding = parseInt(window.getComputedStyle(scrollEl, null).getPropertyValue('padding-top'));
         if (isNaN(topPadding)) {
@@ -238,8 +236,16 @@ watch(scrollColumn, () => {
     updateVisible();
 });
 
+const animated = ref(false);
+
 onMounted(() => {
     updateVisible();
+
+    // Categories only register themselves after their own mount, so the first render is always
+    // collapsed. Skip that initial state change.
+    requestAnimationFrame(() => {
+        animated.value = true;
+    });
 });
 
 useScrollListener(computed(() => isEnabled.value ? scrollElement.value : null), () => {
@@ -248,6 +254,10 @@ useScrollListener(computed(() => isEnabled.value ? scrollElement.value : null), 
 
 watch(isEnabled, () => {
     updateVisible();
+});
+
+useResizeObserver(scrollElement, () => {
+    throttledUpdateVisible();
 });
 
 function updateSeeker() {
@@ -391,6 +401,9 @@ defineExpose({
 <style lang="scss">
 @use '@stamhoofd/scss/base/variables' as *;
 
+$categorized-view-transition-duration: 0.25s;
+$categorized-view-transition: $categorized-view-transition-duration cubic-bezier(0.4, 0.0, 0.2, 1);
+
 .categorized-view {
     display: grid !important;
     grid-template-columns: 1fr;
@@ -403,9 +416,39 @@ defineExpose({
         .scroll-column {
             --vw: calc((var(--saved-vw, 1vw) * 100 - 350px) / 100);
         }
+
+        &.collapsed {
+            grid-template-columns: 0px 1fr;
+
+            .scroll-column {
+                --vw: var(--saved-vw, 1vw);
+            }
+        }
     }
 
-    --st-popup-width: 1200px;
+    &:not(.collapsed) {
+        --st-popup-width: 1200px;
+    }
+
+    &.animated {
+        transition: background-color $categorized-view-transition;
+
+        .scroll-column {
+            transition: background-color $categorized-view-transition;
+        }
+    }
+
+    @media not all and (prefers-reduced-motion) {
+        &.animated {
+            transition: --st-popup-width $categorized-view-transition, grid-template-columns $categorized-view-transition, background-color $categorized-view-transition;
+            will-change: width;
+        }
+
+        // Keep the column visible (and clipped by the view) while it slides out
+        &.collapsed.animated > div:first-child {
+            transition: visibility step-end $categorized-view-transition-duration;
+        }
+    }
 
     > main {
         --st-horizontal-padding: 15px;
@@ -415,9 +458,16 @@ defineExpose({
         --st-horizontal-padding: 30px;
         z-index: 1;
 
+        width: 350px;
+        justify-self: end;
+
         @media (max-width: 800px) {
             display: none;
         }
+    }
+
+    &.collapsed > div:first-child {
+        visibility: hidden;
     }
 
     > div > .summary-column {
