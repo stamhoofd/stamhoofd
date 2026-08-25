@@ -5,6 +5,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { ResolutionRequest } from '@stamhoofd/structures';
 import { File, Resolution, supportedImageTypes } from '@stamhoofd/structures';
+import type { OutputInfo } from 'sharp';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
 import type { Organization } from './Organization.js';
@@ -60,7 +61,7 @@ export class Image extends QueryableModel {
         console.log('creating image', fileType, type, resolutions);
 
         const supportsTransparency = fileType !== 'jpg';
-        const promises: Promise<{ data: Buffer; info: sharp.OutputInfo }>[] = [];
+        const promises: Promise<{ data: Buffer; info: OutputInfo }>[] = [];
 
         if (resolutions.length) {
             let sharpStream = sharp(fileContent, fileType === 'svg' ? { density: 600 } : {}).rotate();
