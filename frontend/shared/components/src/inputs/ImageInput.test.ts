@@ -1,9 +1,26 @@
 import { File as StructFile, Image, Resolution, ResolutionRequest } from '@stamhoofd/structures';
 import { userEvent } from 'vitest/browser';
-import { expect, test, vi } from 'vitest';
+import { afterEach, expect, test, vi } from 'vitest';
 import { render } from 'vitest-browser-vue';
 import type { RenderResult } from 'vitest-browser-vue';
 import ImageInput from './ImageInput.vue';
+
+const validImageSrc = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
+/**
+ * The image urls of the fixtures cannot be loaded in the browser (ImageComponent would then hide
+ * the <img>), so serve a valid image and record which file paths were rendered.
+ */
+function mockPublicPaths() {
+    const spy = vi.spyOn(StructFile.prototype, 'getPublicPath').mockImplementation(() => validImageSrc);
+    return {
+        renderedPaths: () => spy.mock.contexts.map(file => (file as StructFile).path),
+    };
+}
+
+afterEach(() => {
+    vi.restoreAllMocks();
+});
 
 function createImage(path: string, { width = 300, height = 300 }: { width?: number; height?: number } = {}): Image {
     const file = new StructFile({
@@ -52,6 +69,7 @@ test('Shows the upload icon when there is no value and no placeholder', () => {
 });
 
 test('Shows the placeholder image when there is no value but a placeholder', async () => {
+    const { renderedPaths } = mockPublicPaths();
     renderComponent({
         modelValue: null,
         placeholder: createImage('placeholder.png'),
@@ -60,20 +78,23 @@ test('Shows the placeholder image when there is no value but a placeholder', asy
 
     // ImageComponent renders the <img> once it has measured its size
     await vi.waitFor(() => {
-        expect(document.querySelector('img')?.getAttribute('src')).toBe('https://cdn.example.com/placeholder.png');
+        expect(document.querySelector('img')?.getAttribute('src')).toBe(validImageSrc);
     });
+    expect(renderedPaths()).toContain('placeholder.png');
 
     // The sync icon is shown for an optional input with a placeholder
     expect(document.querySelector('.icon.sync')).not.toBeNull();
 });
 
 test('Shows the uploaded image when there is a value', async () => {
+    const { renderedPaths } = mockPublicPaths();
     renderComponent({ modelValue: createImage('logo.png') });
 
     // ImageComponent renders the <img> once it has measured its size
     await vi.waitFor(() => {
-        expect(document.querySelector('img')?.getAttribute('src')).toBe('https://cdn.example.com/logo.png');
+        expect(document.querySelector('img')?.getAttribute('src')).toBe(validImageSrc);
     });
+    expect(renderedPaths()).toContain('logo.png');
 });
 
 test('Shows the trash icon for an optional input with a value', () => {
