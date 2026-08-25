@@ -1,7 +1,7 @@
 import type { EmailBuilder, EmailInterfaceRecipient } from '@stamhoofd/email';
 import { Email, EmailAddress } from '@stamhoofd/email';
 import type { EmailContent, EmailRecipient as EmailRecipientStruct, EmailTemplateType, OrganizationEmail, Platform as PlatformStruct, Recipient } from '@stamhoofd/structures';
-import { BalanceItem as BalanceItemStruct, getAppHost, ReceivableBalanceType, replaceEmailHtml, replaceEmailText, Replacement } from '@stamhoofd/structures';
+import { BalanceItem as BalanceItemStruct, getAppHost, getUsedReplacementFiles, ReceivableBalanceType, replaceEmailHtml, replaceEmailText, Replacement } from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -227,6 +227,8 @@ async function getEmailBuilderForTemplate(organization: Organization | null, opt
     });
 }
 
+export type EmailAttachmentData = { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string; encoding?: string; cid?: string };
+
 export type EmailBuilderOptions = {
     defaultReplacements?: Replacement[];
     recipients: Recipient[];
@@ -240,7 +242,7 @@ export type EmailBuilderOptions = {
      * receive that content, all others receive the default subject/html.
      */
     translations?: Map<Language, EmailContent>;
-    attachments?: { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string; encoding?: string }[];
+    attachments?: EmailAttachmentData[];
     type?: 'transactional' | 'broadcast';
     unsubscribeType?: 'all' | 'marketing';
     fromStamhoofd?: boolean;
@@ -249,6 +251,72 @@ export type EmailBuilderOptions = {
     callback?: (error: Error | null) => void; // for each email
     headers?: Record<string, string>;
 };
+
+/**
+ * Maximum total size of all attachments of a single email (same limit as Email.validateAttachments).
+ */
+export const MAX_EMAIL_ATTACHMENTS_BYTES = 9.5 * 1024 * 1024;
+
+function getAttachmentBytes(attachment: EmailAttachmentData): number {
+    if (!attachment.content) {
+        return 0;
+    }
+    if (typeof attachment.content === 'string') {
+        if (attachment.encoding === 'base64') {
+            return Math.ceil((attachment.content.length / 4) * 3);
+        }
+        return Buffer.byteLength(attachment.content);
+    }
+    return attachment.content.byteLength;
+}
+
+/**
+ * Attachments for the files of replacements that were replaced in this html body. Files are skipped
+ * when they would push the total attachment size of the email above MAX_EMAIL_ATTACHMENTS_BYTES.
+ *
+ * A file that the replaced html references as `cid:<file.id>` (e.g. `<img src="cid:...">`) becomes
+ * an inline attachment with that content id, so the image renders inside the email body.
+ */
+async function getReplacementAttachments(html: string, replacements: Replacement[], baseAttachments: EmailAttachmentData[]): Promise<EmailAttachmentData[]> {
+    const files = getUsedReplacementFiles(html, replacements);
+    if (files.length === 0) {
+        return [];
+    }
+
+    const replacedHtml = replaceEmailHtml(html, replacements);
+    let totalBytes = baseAttachments.reduce((total, attachment) => total + getAttachmentBytes(attachment), 0);
+    const attachments: EmailAttachmentData[] = [];
+
+    for (const file of files) {
+        if (totalBytes + file.size > MAX_EMAIL_ATTACHMENTS_BYTES) {
+            console.warn('Skipping replacement file attachment because the total attachment size would become too large', file.id);
+            continue;
+        }
+
+        let href: string;
+        if (file.isPrivate) {
+            // Only files with a valid signature get a signed url
+            const signed = await file.withSignedUrl();
+            if (!signed?.signedUrl) {
+                console.error('Could not create a signed url for replacement file attachment', file.id);
+                continue;
+            }
+            href = signed.signedUrl;
+        } else {
+            href = file.getPublicPath();
+        }
+
+        attachments.push({
+            filename: (file.name ?? file.path.split('/').pop() ?? 'attachment').toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+/, '').replace(/-+$/, ''),
+            href,
+            contentType: file.contentType ?? undefined,
+            cid: replacedHtml.includes(file.inlineEmailSrc) ? file.id : undefined,
+        });
+        totalBytes += file.size;
+    }
+
+    return attachments;
+}
 
 /**
  * @param organization defines replacements and unsubsribe behaviour
@@ -324,26 +392,6 @@ export async function getEmailBuilder(organization: Organization | null, email: 
     }
     email.recipients = cleaned;
 
-    // Update recipients
-    for (const recipient of email.recipients) {
-        recipient.replacements = recipient.replacements.slice();
-
-        if (email.defaultReplacements) {
-            recipient.replacements.push(...email.defaultReplacements);
-        }
-
-        await fillRecipientReplacements(recipient, {
-            organization,
-            platform,
-            from: email.from,
-            replyTo: email.replyTo ?? null,
-        });
-    }
-
-    const queue = email.recipients.slice();
-
-    let emailIndex = 0;
-
     // The subject and html can differ per recipient language
     const contentCache = new Map<Language | null, { subject: string; html: string }>();
     const resolveContent = (language: Language | null) => {
@@ -367,6 +415,33 @@ export async function getEmailBuilder(organization: Organization | null, email: 
         return result;
     };
 
+    // Update recipients
+    const replacementAttachments = new Map<Recipient, EmailAttachmentData[]>();
+    for (const recipient of email.recipients) {
+        recipient.replacements = recipient.replacements.slice();
+
+        if (email.defaultReplacements) {
+            recipient.replacements.push(...email.defaultReplacements);
+        }
+
+        await fillRecipientReplacements(recipient, {
+            organization,
+            platform,
+            from: email.from,
+            replyTo: email.replyTo ?? null,
+        });
+
+        const content = resolveContent(recipient.language ?? null);
+        const attachments = await getReplacementAttachments(content.html, recipient.replacements, email.attachments ?? []);
+        if (attachments.length > 0) {
+            replacementAttachments.set(recipient, attachments);
+        }
+    }
+
+    const queue = email.recipients.slice();
+
+    let emailIndex = 0;
+
     if (queue.length === 0) {
         if (email.callback) {
             email.callback(new SimpleError({
@@ -387,6 +462,9 @@ export async function getEmailBuilder(organization: Organization | null, email: 
         const replacedHtml = replaceEmailHtml(content.html, recipient.replacements);
         const replacedSubject = replaceEmailText(content.subject, recipient.replacements);
 
+        const extraAttachments = replacementAttachments.get(recipient);
+        const attachments = extraAttachments ? [...(email.attachments ?? []), ...extraAttachments] : email.attachments;
+
         emailIndex += 1;
 
         return {
@@ -402,7 +480,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
             ],
             subject: replacedSubject,
             html: replacedHtml ?? undefined,
-            attachments: email.attachments,
+            attachments,
             headers: recipient.headers,
             type: email.type,
             callback: email.callback,
@@ -485,6 +563,13 @@ export function mergeReplacementsIfEqual(replacementsA: Replacement[], replaceme
     for (const rA of replacementsA) {
         const rB = replacementsB.find(r => r.token === rA.token);
         if (!rB) {
+            return false;
+        }
+
+        // Replacements with different files can never merge: merging would drop attachments
+        const filesA = rA.files.map(f => f.id).join(',');
+        const filesB = rB.files.map(f => f.id).join(',');
+        if (filesA !== filesB) {
             return false;
         }
 

@@ -431,6 +431,15 @@ export class File implements Encodeable {
     }
 
     /**
+     * Src to render this file inline in an email html body (e.g. `<img src="...">`), used in the html of a
+     * `Replacement` that includes this file in its `files`: the email builder attaches the file with this
+     * content id so email clients render it inline.
+     */
+    get inlineEmailSrc(): string {
+        return 'cid:' + this.id;
+    }
+
+    /**
      * See {@link FileTypes.resolveUpload}: determines the content type and extension we'll store an uploaded
      * file with, or null if we don't support the file type.
      */
@@ -448,7 +457,7 @@ export class File implements Encodeable {
     get icon() {
         if (!this.contentType) {
             // Try based on extension
-            const extension = this.name?.split('.').pop()?.toLowerCase();
+            const extension = this.path.split('.').pop()?.toLowerCase() || this.name?.split('.').pop()?.toLowerCase();
             if (extension) {
                 switch (extension) {
                     case 'png':

@@ -230,9 +230,13 @@ export class Email extends AutoEncoder {
         return replaceEmailText(content.subject, recipient?.replacements || []);
     }
 
+    /**
+     * Html of this email for a recipient, rendered for display in a browser (not for sending).
+     */
     getHtmlFor(recipient: EmailRecipient | null) {
         const content = this.getContentForLanguage(recipient?.language ?? null);
-        return replaceEmailHtml(content.html, recipient?.replacements || []);
+        const replacements = (recipient?.replacements || []).map(r => Replacement.create({ ...r, html: r.getHtmlForWebDisplay() }));
+        return replaceEmailHtml(content.html, replacements);
     }
 
     getSnippetFor(recipient: EmailRecipient | null) {

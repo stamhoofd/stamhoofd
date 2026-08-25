@@ -49,7 +49,7 @@ export class EditorSmartVariable extends AutoEncoder {
             } else {
                 if (variable instanceof EditorSmartVariable) {
                     if (replacement.html) {
-                        variable.html = replacement.html;
+                        variable.html = replacement.getHtmlForWebDisplay();
                         variable.example = '';
                     } else if (replacement.value) {
                         variable.example = replacement.value;

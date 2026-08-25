@@ -30,6 +30,60 @@ export class Replacement extends AutoEncoder {
 
     @field({ decoder: StringDecoder, optional: true })
     html?: string;
+
+    /**
+     * Files that will be attached to the email when this replacement is used in the email html body.
+     */
+    @field({ decoder: new ArrayDecoder(File), ...NextVersion })
+    files: File[] = [];
+
+    /**
+     * The html to render in a browser (previews, web view of an email): inline images reference an
+     * attachment (`cid:`, see {@link File.inlineEmailSrc}) which only an email client can resolve, so
+     * they are swapped for the url of the file.
+     */
+    getHtmlForWebDisplay(): string | undefined {
+        if (!this.html) {
+            return this.html;
+        }
+
+        let html = this.html;
+        for (const file of this.files) {
+            html = html.replaceAll(file.inlineEmailSrc, Formatter.escapeHtml(file.getPublicPath()));
+        }
+        return html;
+    }
+}
+
+/**
+ * Returns the files of the replacements that {@link replaceEmailHtml} would insert into this html,
+ * following the same two passes so files of recursive replacements are also included.
+ */
+export function getUsedReplacementFiles(html: string, replacements: Replacement[]): File[] {
+    const files: File[] = [];
+    let replacedHtml = html;
+
+    for (let pass = 0; pass < 2; pass++) {
+        for (const replacement of replacements) {
+            const token = '{{' + replacement.token + '}}';
+            if (!replacedHtml.includes(token)) {
+                continue;
+            }
+
+            replacedHtml = replacedHtml.replace(
+                new RegExp(Formatter.escapeRegex(token), 'g'),
+                replacement.html || Formatter.escapeHtml(replacement.value),
+            );
+
+            for (const file of replacement.files) {
+                if (!files.some(f => f.id === file.id && f.path === file.path)) {
+                    files.push(file);
+                }
+            }
+        }
+    }
+
+    return files;
 }
 
 export function replaceEmailHtml(html: string, replacements: Replacement[]) {
