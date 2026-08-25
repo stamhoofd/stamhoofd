@@ -45,7 +45,7 @@ import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useEmitPatch } from '#hooks/useEmitPatch.ts';
 import type { AccessRight, PermissionsResourceType} from '@stamhoofd/structures';
-import { AccessRightHelper, PermissionLevel, PermissionRoleDetailed, Permissions, ResourcePermissions, getConfigurableAccessRightsForResourceType, getConfigurablePermissionLevelsForResourceType, getDefaultAccessRightsForResourceType, getDefaultPermissionLevelForResourceType, getPermissionLevelName, getPermissionLevelNumber, getPermissionResourceTypeName, maximumPermissionlevel } from '@stamhoofd/structures';
+import { AccessRightHelper, PermissionLevel, PermissionsResourceKey, PermissionRoleDetailed, Permissions, ResourcePermissions, getConfigurableAccessRightsForResourceType, getConfigurablePermissionLevelsForResourceType, getDefaultAccessRightsForResourceType, getDefaultPermissionLevelForResourceType, getPermissionLevelName, getPermissionLevelNumber, getPermissionResourceTypeName, maximumPermissionlevel } from '@stamhoofd/structures';
 import type { Ref} from 'vue';
 import { computed } from 'vue';
 
@@ -88,25 +88,32 @@ const isMe = computed(() => {
 
 const resourcePermissions = computed(() => role.value.resources.get(props.resource.type)?.get(props.resource.id));
 
-const lockedMinimumLevel = computed(() => {
-    const a = props.role.level;
-    const b = props.resource.id !== '' ? (role.value.resources.get(props.resource.type)?.get('')?.level ?? PermissionLevel.None) : PermissionLevel.None;
+const isAllResources = props.resource.id === PermissionsResourceKey.All;
 
-    const arr = [a, b];
+const lockedMinimumLevel = computed(() => {
+    const arr: PermissionLevel[] = [props.role.level];
+
+    if (!isAllResources) {
+        arr.push(role.value.resources.get(props.resource.type)?.get(PermissionsResourceKey.All)?.level ?? PermissionLevel.None);
+    }
 
     for (const role of props.inheritedRoles) {
-        const c = role.level;
-        const d = role.resources.get(props.resource.type)?.get('')?.level ?? PermissionLevel.None;
-        const e = props.resource.id !== '' ? (role.resources.get(props.resource.type)?.get(props.resource.id)?.level ?? PermissionLevel.None) : PermissionLevel.None;
-        arr.push(c, d, e);
+        arr.push(role.level);
+        arr.push(role.resources.get(props.resource.type)?.get(PermissionsResourceKey.All)?.level ?? PermissionLevel.None);
+
+        if (!isAllResources) {
+            arr.push(role.resources.get(props.resource.type)?.get(props.resource.id)?.level ?? PermissionLevel.None);
+        }
     }
 
     return maximumPermissionlevel(...arr);
 });
 
 const lockedAccessRights = computed(() => {
-    const accessRights = props.resource.id !== '' ? (role.value.resources.get(props.resource.type)?.get('')?.accessRights ?? []) : [];
-    return accessRights;
+    if (isAllResources) {
+        return [];
+    }
+    return role.value.resources.get(props.resource.type)?.get(PermissionsResourceKey.All)?.accessRights ?? [];
 });
 
 const permissionLevel = computed({
