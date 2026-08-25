@@ -93,6 +93,32 @@ export class PermissionRoleDetailed extends PermissionRole {
         if (this.level === PermissionLevel.Full) {
             this.accessRights = [];
             this.resources = new Map();
+            return;
+        }
+
+        // we don't delete resources in the current period, because the current period might change over time
+        for (const [type, resources] of this.resources) {
+            const coverage = ResourcePermissions.baseline(this);
+            const all = resources.get(PermissionsResourceKey.All);
+
+            if (all?.isCoveredBy(coverage)) {
+                resources.delete(PermissionsResourceKey.All);
+            } else if (all) {
+                coverage.add(all);
+            }
+
+            for (const [id, resource] of resources) {
+                if (id === PermissionsResourceKey.All) {
+                    continue;
+                }
+                if (resource.isEmpty || (id !== PermissionsResourceKey.CurrentPeriod && resource.isCoveredBy(coverage))) {
+                    resources.delete(id);
+                }
+            }
+
+            if (resources.size === 0) {
+                this.resources.delete(type);
+            }
         }
     }
 
