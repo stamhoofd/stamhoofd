@@ -24,39 +24,39 @@
             <p>{{ $t('%Yz') }}</p>
 
             <STList>
-                <STListItem :selectable="true" element-name="label">
+                <STListItem :selectable="!isLevelLocked(PermissionLevel.None)" :disabled="isLevelLocked(PermissionLevel.None)" element-name="label">
                     <template #left>
-                        <Radio v-model="basePermission" value="None" :disabled="lockedMinimumLevel !== PermissionLevel.None" />
+                        <Radio v-model="basePermission" :value="PermissionLevel.None" :disabled="isLevelLocked(PermissionLevel.None)" />
                     </template>
                     <h3 class="style-title-list">
                         {{ getPermissionLevelName(PermissionLevel.None) }}
                     </h3>
-                    <p v-if="basePermission === 'None'" class="style-description-small">
+                    <p v-if="basePermission === PermissionLevel.None" class="style-description-small">
                         {{ $t('%Z0') }}
                     </p>
                 </STListItem>
 
-                <STListItem v-if="basePermission === PermissionLevel.Read || auth.hasPlatformFullAccess()" :selectable="true" element-name="label">
+                <STListItem v-if="basePermission === PermissionLevel.Read || auth.hasPlatformFullAccess()" :selectable="!isLevelLocked(PermissionLevel.Read)" :disabled="isLevelLocked(PermissionLevel.Read)" element-name="label">
                     <template #left>
-                        <Radio v-model="basePermission" :value="PermissionLevel.Read" />
+                        <Radio v-model="basePermission" :value="PermissionLevel.Read" :disabled="isLevelLocked(PermissionLevel.Read)" />
                     </template>
                     <h3 class="style-title-list">
                         {{ getPermissionLevelName(PermissionLevel.Read) }}
                     </h3>
                 </STListItem>
 
-                <STListItem v-if="basePermission === PermissionLevel.Write || auth.hasPlatformFullAccess()" :selectable="true" element-name="label">
+                <STListItem v-if="basePermission === PermissionLevel.Write || auth.hasPlatformFullAccess()" :selectable="!isLevelLocked(PermissionLevel.Write)" :disabled="isLevelLocked(PermissionLevel.Write)" element-name="label">
                     <template #left>
-                        <Radio v-model="basePermission" :value="PermissionLevel.Write" />
+                        <Radio v-model="basePermission" :value="PermissionLevel.Write" :disabled="isLevelLocked(PermissionLevel.Write)" />
                     </template>
                     <h3 class="style-title-list">
                         {{ getPermissionLevelName(PermissionLevel.Write) }}
                     </h3>
                 </STListItem>
 
-                <STListItem :selectable="true" element-name="label">
+                <STListItem :selectable="!isLevelLocked(PermissionLevel.Full)" :disabled="isLevelLocked(PermissionLevel.Full)" element-name="label">
                     <template #left>
-                        <Radio v-model="basePermission" :value="PermissionLevel.Full" :disabled="lockedMinimumLevel !== PermissionLevel.None" />
+                        <Radio v-model="basePermission" :value="PermissionLevel.Full" :disabled="isLevelLocked(PermissionLevel.Full)" />
                     </template>
                     <h3 class="style-title-list">
                         {{ getPermissionLevelName(PermissionLevel.Full) }}
@@ -210,7 +210,7 @@ import CategorizedBox from '#layout/categorized-view/CategorizedBox.vue';
 import CategorizedView from '#layout/categorized-view/CategorizedView.vue';
 import Spinner from '#Spinner.vue';
 import type { Group, GroupCategory, PermissionRoleDetailed, User, WebshopPreview } from '@stamhoofd/structures';
-import { AccessRight, getUnlistedResources, maximumPermissionlevel, PermissionLevel, PermissionRoleForResponsibility, PermissionsResourceType, getPermissionLevelName } from '@stamhoofd/structures';
+import { AccessRight, getPermissionLevelNumber, getUnlistedResources, maximumPermissionlevel, PermissionLevel, PermissionRoleForResponsibility, PermissionsResourceType, getPermissionLevelName } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import AccessRightPermissionRow from './components/AccessRightPermissionRow.vue';
@@ -358,9 +358,16 @@ const lockedMinimumLevel = computed(() => {
     return maximumPermissionlevel(...arr);
 });
 
+const isLevelLocked = (level: PermissionLevel) => getPermissionLevelNumber(level) < getPermissionLevelNumber(lockedMinimumLevel.value);
+
 const basePermission = computed({
     get: () => maximumPermissionlevel(lockedMinimumLevel.value, patched.value.level),
-    set: level => addPatch({ level }),
+    set: (level) => {
+        if (isLevelLocked(level)) {
+            return;
+        }
+        addPatch({ level });
+    },
 });
 
 const shouldNavigateAway = async () => {
