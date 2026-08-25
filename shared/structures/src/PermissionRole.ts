@@ -96,8 +96,9 @@ export class PermissionRoleDetailed extends PermissionRole {
             return;
         }
 
-        // we don't delete resources in the current period, because the current period might change over time
         for (const [type, resources] of this.resources) {
+            // What the role grants for every resource of this type, in every period. The current period
+            // is left out: a specific resource keeps its access when the organization moves to a new period.
             const coverage = ResourcePermissions.create({ level: this.level, accessRights: this.accessRights });
             const all = resources.get(PermissionsResourceKey.All);
 
