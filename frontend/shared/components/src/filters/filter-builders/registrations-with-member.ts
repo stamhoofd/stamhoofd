@@ -53,20 +53,23 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({
         }));
 
         if (currentGroup) {
-            const groupPriceFilters = simpleMultipleChoiceFilterFactory({
-                name: $t('Prijs'),
-                filterMode: MultipleChoiceUIFilterMode.Or,
-                options: currentGroup.settings.prices.map(p => ({
-                    name: p.name.toString(),
-                    value: p.id,
-                    filter: {
-                        groupPrice: p.id,
-                    },
-                })),
-            });
+            if (currentGroup.settings.prices.length > 1) {
+                const groupPriceFilters = simpleMultipleChoiceFilterFactory({
+                    name: $t('Tarief'),
+                    filterMode: MultipleChoiceUIFilterMode.Or,
+                    options: currentGroup.settings.prices.map(p => ({
+                        name: p.name.toString(),
+                        value: p.id,
+                        filter: {
+                            groupPrice: {
+                                id: p.id,
+                            },
+                        },
+                    })),
+                });
 
-            all.push(groupPriceFilters);
-
+                all.push(groupPriceFilters);
+            }
             if (currentGroup.settings.optionMenus.length > 0) {
                 const optionMenusFilters = getFilterBuildersForOptionMenus(currentGroup.settings.optionMenus);
 
