@@ -92,7 +92,7 @@
                 <p>{{ $t('%Z6') }}</p>
 
                 <STList>
-                    <ResourcePermissionRow :role="patched" :inherited-roles="inheritedRoles" :resource="{id: '', name: $t('Alle categorieën'), type: PermissionsResourceType.GroupCategories }" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow :role="patched" :inherited-roles="inheritedRoles" :resource="{id: '', name: $t('Alle categorieën'), type: PermissionsResourceType.GroupCategories }" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="patchAllCategories" />
 
                     <ResourcePermissionRow v-for="resource in categoryResources" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="addPatch" />
                 </STList>
@@ -108,7 +108,7 @@
 
                 <Spinner v-if="loadingGroups" />
                 <STList v-else>
-                    <ResourcePermissionRow :role="patched" :inherited-roles="inheritedRoles" :resource="{id: '', name: $t('%L8'), type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow :role="patched" :inherited-roles="inheritedRoles" :resource="{id: '', name: $t('%L8'), type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="patchAllGroups" />
 
                     <ResourcePermissionRow v-for="resource in groupResources" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
                 </STList>
@@ -210,6 +210,7 @@
 
 <script setup lang="ts">
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
@@ -272,7 +273,7 @@ const title = computed(() => {
 const { sortedAdmins, loading, getUnloadedPermissions } = useAdmins();
 const organization = useOrganization();
 const platform = usePlatform();
-const { patched, addPatch, hasChanges, patch } = usePatch(props.role);
+const { patched, addPatch, createPatch, hasChanges, patch } = usePatch(props.role);
 const getGroupsById = useGetGroupsById();
 const webshops: Ref<WebshopPreview[]> = computed(() => organization.value?.webshops ?? []);
 const tags = computed(() => platform.value.config.tags);
@@ -529,6 +530,60 @@ const lockedMinimumLevel = computed(() => {
 
 const isLevelLocked = (level: PermissionLevel) => getPermissionLevelNumber(level) < getPermissionLevelNumber(lockedMinimumLevel.value);
 
+/**
+ * Delete the resources that no longer add anything on top of the base permission or the row for all resources
+ */
+function pruneRedundantResources(type: PermissionsResourceType.Groups | PermissionsResourceType.GroupCategories) {
+    const resources = patched.value.resources.get(type);
+    if (!resources) {
+        return;
+    }
+
+    // What is granted for every resource of this type, without the row for all resources itself
+    const coverage = ResourcePermissions.create({ level: patched.value.level });
+
+    for (const role of props.inheritedRoles) {
+        const all = role.getMergedResourcePermissions(type, '');
+        if (all) {
+            coverage.add(all);
+        }
+    }
+
+    const subPatch = new PatchMap<string, AutoEncoderPatchType<ResourcePermissions> | ResourcePermissions | null>();
+
+    const all = resources.get('');
+    if (all) {
+        if (all.isCoveredBy(coverage)) {
+            subPatch.set('', null);
+        }
+        coverage.add(all);
+    }
+
+    for (const [id, resourcePermissions] of resources) {
+        if (id !== '' && resourcePermissions.isCoveredBy(coverage)) {
+            subPatch.set(id, null);
+        }
+    }
+
+    if (subPatch.size === 0) {
+        return;
+    }
+
+    const patch = createPatch();
+    patch.resources!.set(type, subPatch);
+    addPatch(patch);
+}
+
+function patchAllGroups(patch: AutoEncoderPatchType<PermissionRoleDetailed | PermissionRoleForResponsibility>) {
+    addPatch(patch);
+    pruneRedundantResources(PermissionsResourceType.Groups);
+}
+
+function patchAllCategories(patch: AutoEncoderPatchType<PermissionRoleDetailed | PermissionRoleForResponsibility>) {
+    addPatch(patch);
+    pruneRedundantResources(PermissionsResourceType.GroupCategories);
+}
+
 const basePermission = computed({
     get: () => maximumPermissionlevel(lockedMinimumLevel.value, patched.value.level),
     set: (level) => {
@@ -536,6 +591,8 @@ const basePermission = computed({
             return;
         }
         addPatch({ level });
+        pruneRedundantResources(PermissionsResourceType.Groups);
+        pruneRedundantResources(PermissionsResourceType.GroupCategories);
     },
 });
 
