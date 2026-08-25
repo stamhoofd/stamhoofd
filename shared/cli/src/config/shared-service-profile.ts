@@ -31,7 +31,7 @@ export type SharedServiceProfile = {
 } & CaddyServiceProfile;
 
 export function buildCaddyServiceProfile(platform: NodeJS.Platform = process.platform): CaddyServiceProfile {
-    if (platform === 'darwin') {
+    if (platform === 'darwin' || platform === 'linux') {
         return {
             caddyHttpHostPort: caddyHttpPort,
             caddyHttpsHostPort: caddyHttpsPort,
@@ -57,7 +57,7 @@ export function buildCaddyServiceProfile(platform: NodeJS.Platform = process.pla
 }
 
 export function buildSharedServiceProfile(runtime: ContainerRuntime, platform: NodeJS.Platform = process.platform): SharedServiceProfile {
-    if (platform === 'darwin') {
+    if (platform === 'darwin' || platform === 'linux') {
         return {
             platform,
             runtime,
