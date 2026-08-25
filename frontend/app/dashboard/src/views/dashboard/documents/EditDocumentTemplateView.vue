@@ -280,6 +280,7 @@ const editingType = computed({
                     settings: DocumentSettings.patch({
                         name: patchedDocument.value.settings.name || definition.name,
                         maxAge: patchedDocument.value.settings.maxAge !== null && definition.allowChangingMaxAge ? patchedDocument.value.settings.maxAge : definition.defaultMaxAge,
+                        maxAgeSevereDisability: patchedDocument.value.settings.maxAgeSevereDisability !== null && editingType.value === fiscal.type ? definition.defaultMaxAgeSevereDisability : null,
                         minPrice: patchedDocument.value.settings.minPrice !== null && definition.allowChangingMinPrice ? patchedDocument.value.settings.minPrice : definition.defaultMinPrice,
                         minPricePaid: patchedDocument.value.settings.minPricePaid !== null && definition.allowChangingMinPricePaid ? patchedDocument.value.settings.minPricePaid : definition.defaultMinPricePaid,
                     }),
