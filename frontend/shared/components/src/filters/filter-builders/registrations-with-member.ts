@@ -13,7 +13,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
-import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
+import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 import { NumberFilterBuilder } from '../NumberUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
 import type { UIFilter, UIFilterBuilder } from '../UIFilter';
@@ -22,7 +22,6 @@ import { useGetOrganizationUIFilterBuilders } from './organizations';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
 import { getFilterBuildersForOptionMenus } from './option-menus';
 import { getFilterBuildersForRecordCategories } from './record-categories';
-import { simpleMultipleChoiceFilterFactory } from './helpers';
 
 export function useAdvancedRegistrationWithMemberUIFilterBuilders({
     multipleGroups,
@@ -54,21 +53,20 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({
 
         if (currentGroup) {
             if (currentGroup.settings.prices.length > 1) {
-                const groupPriceFilters = simpleMultipleChoiceFilterFactory({
+                all.push(new MultipleChoiceFilterBuilder({
                     name: $t('Tarief'),
-                    filterMode: MultipleChoiceUIFilterMode.Or,
                     options: currentGroup.settings.prices.map(p => ({
                         name: p.name.toString(),
                         value: p.id,
-                        filter: {
-                            groupPrice: {
-                                id: p.id,
+                    })),
+                    wrapper: {
+                        groupPrice: {
+                            id: {
+                                $in: FilterWrapperMarker,
                             },
                         },
-                    })),
-                });
-
-                all.push(groupPriceFilters);
+                    },
+                }));
             }
             if (currentGroup.settings.optionMenus.length > 0) {
                 const optionMenusFilters = getFilterBuildersForOptionMenus(currentGroup.settings.optionMenus);
