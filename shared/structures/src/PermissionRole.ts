@@ -80,6 +80,19 @@ export class PermissionRoleDetailed extends PermissionRole {
         if (this.level === PermissionLevel.Full) {
             this.accessRights = [];
             this.resources = new Map();
+            return;
+        }
+
+        for (const [type, resources] of this.resources) {
+            for (const [id, resource] of resources) {
+                if (resource.isEmpty) {
+                    resources.delete(id);
+                }
+            }
+
+            if (resources.size === 0) {
+                this.resources.delete(type);
+            }
         }
     }
 
