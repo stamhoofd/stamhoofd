@@ -17,7 +17,7 @@
         </div>
 
         <p v-if="filteredResources.length === 0" class="info-box">
-            {{ $t('%1AX') }}
+            {{ emptyText }}
         </p>
         <STList v-else>
             <ResourcePermissionRow v-for="resource in filteredResources" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="configurableAccessRights" type="resource" @patch:role="addPatch" />
@@ -82,6 +82,18 @@ const filteredResources = computed(() => {
         return resources.value;
     }
     return resources.value.filter(r => r.name.toLowerCase().includes(query));
+});
+
+const emptyText = computed(() => {
+    if (searchQuery.value) {
+        return $t('%1AX');
+    }
+
+    if (props.type === PermissionsResourceType.Groups) {
+        return $t('Er zijn geen inschrijvingsgroepen in deze periode.');
+    }
+
+    return $t('Er zijn geen inschrijvingscategorieën in deze periode.');
 });
 
 function blurFocus() {
