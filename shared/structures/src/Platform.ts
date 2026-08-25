@@ -559,7 +559,7 @@ export class Platform extends AutoEncoder {
     /**
      * Empty when it was decoded from data stored before tenants existed.
      */
-    @field({ decoder: StringDecoder, ...NextVersion })
+    @field({ decoder: StringDecoder, version: 413 })
     id: string = '';
 
     /**
@@ -569,22 +569,22 @@ export class Platform extends AutoEncoder {
      * always null. Nesting the whole chain would put every ancestor's config on every response, and a
      * child tenant's administrators have no rights on the parent.
      */
-    @field({ decoder: Platform, nullable: true, ...NextVersion })
+    @field({ decoder: Platform, nullable: true, version: 413 })
     parentTenant: Platform | null = null;
 
     /**
      * The tenant that charges this one for packages, transfer fees, service fees and invoices.
      */
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 413 })
     feesTenantId: string | null = null;
 
     /**
      * Globally unique, shares its namespace with Organization.uri.
      */
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 413 })
     uri: string | null = null;
 
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 413 })
     domain: string | null = null;
 
     @field({ decoder: PlatformConfig })
