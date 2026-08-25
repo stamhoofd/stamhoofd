@@ -7,10 +7,10 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="errors.errorBox?.hasCode('cannot_invoice_balance_item')" class="error-box selectable with-button">
-            {{ $t('Je kan deze foutmelding tijdelijk negeren als je weet wat je aan het doen bent en je een afrekening wilt overfactureren (bv. voor correcties van facturatiegegevens)') }}
+            {{ $t('%ZnY') }}
 
             <LoadingButton class="button text" type="button" :loading="saving" @click="save({confirm: true})">
-                {{ $t('Negeren') }}
+                {{ $t('%Znc') }}
             </LoadingButton>
         </p>
 

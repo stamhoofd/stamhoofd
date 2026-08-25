@@ -315,7 +315,7 @@ export class Order extends AutoEncoder {
 
                 // Files and images are attached to the email instead of showing their (potentially inaccessible) url
                 if (a instanceof RecordFileAnswer) {
-                    return { title, value: a.file?.name ?? $t('Bijlage') };
+                    return { title, value: a.file?.name ?? $t('%ZnZ') };
                 }
 
                 if (a instanceof RecordImageAnswer && a.image) {

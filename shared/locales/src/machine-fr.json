@@ -19907,6 +19907,26 @@
     "original": "Inloggen als deze beheerder",
     "translation": "Se connecter en tant qu'administrateur"
   },
+  "%ZnY": {
+    "original": "Je kan deze foutmelding tijdelijk negeren als je weet wat je aan het doen bent en je een afrekening wilt overfactureren (bv. voor correcties van facturatiegegevens)",
+    "translation": "Vous pouvez temporairement ignorer ce message d’erreur si vous savez ce que vous faites et que vous souhaitez surfacturer un décompte (par exemple pour corriger des informations de facturation)."
+  },
+  "%ZnZ": {
+    "original": "Bijlage",
+    "translation": "Pièce jointe"
+  },
+  "%Zna": {
+    "original": "Dit bestand is publiek toegankelijk.",
+    "translation": "Ce fichier est accessible publiquement."
+  },
+  "%Znb": {
+    "original": "Je hebt geen toegang tot dit bestand.",
+    "translation": "Vous n'avez pas accès à ce fichier."
+  },
+  "%Znc": {
+    "original": "Negeren",
+    "translation": "Ignorer"
+  },
   "%Zo": {
     "original": "Deze pagina is voor administrators",
     "translation": "Cette page est pour les administrateurs"

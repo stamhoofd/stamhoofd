@@ -19723,6 +19723,26 @@
     "original": "Inloggen als deze beheerder",
     "translation": "Log in as this administrator"
   },
+  "%ZnY": {
+    "original": "Je kan deze foutmelding tijdelijk negeren als je weet wat je aan het doen bent en je een afrekening wilt overfactureren (bv. voor correcties van facturatiegegevens)",
+    "translation": "You can temporarily ignore this error message if you know what you're doing and want to overcharge an invoice (e.g. for corrections to billing data)."
+  },
+  "%ZnZ": {
+    "original": "Bijlage",
+    "translation": "Attachment"
+  },
+  "%Zna": {
+    "original": "Dit bestand is publiek toegankelijk.",
+    "translation": "This file is publicly accessible."
+  },
+  "%Znb": {
+    "original": "Je hebt geen toegang tot dit bestand.",
+    "translation": "You do not have access to this file."
+  },
+  "%Znc": {
+    "original": "Negeren",
+    "translation": "Ignore"
+  },
   "%Zo": {
     "original": "Deze pagina is voor administrators",
     "translation": "This page is for administrators"

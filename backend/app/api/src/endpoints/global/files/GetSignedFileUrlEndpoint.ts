@@ -89,7 +89,7 @@ export class GetSignedFileUrlEndpoint extends Endpoint<Params, Query, Body, Resp
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'A public file does not need a signed url',
-                human: $t('Dit bestand is publiek toegankelijk.'),
+                human: $t('%Zna'),
                 field: 'isPrivate',
                 statusCode: 400,
             });
@@ -101,7 +101,7 @@ export class GetSignedFileUrlEndpoint extends Endpoint<Params, Query, Body, Resp
             throw new SimpleError({
                 code: 'invalid_signature',
                 message: 'Invalid signature for file',
-                human: $t('Je hebt geen toegang tot dit bestand.'),
+                human: $t('%Znb'),
                 statusCode: 400,
             });
         }
@@ -112,7 +112,7 @@ export class GetSignedFileUrlEndpoint extends Endpoint<Params, Query, Body, Resp
             throw new SimpleError({
                 code: 'not_supported',
                 message: 'Not supported file',
-                human: $t('Je hebt geen toegang tot dit bestand.'),
+                human: $t('%Znb'),
                 statusCode: 400,
             });
         }

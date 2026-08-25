@@ -6623,5 +6623,10 @@
   "%ZnU": "Dit kan nare gevolgen hebben als er al lokalen van dit type zijn. Het lokaaltype wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
   "%ZnV": "Hoofdbeheerders van deze vereniging kunnen via een link inloggen als één van hun gebruikers, om te zien wat die gebruiker ziet.",
   "%ZnW": "Categorie ‘{categoryName}’ verwijderen?",
-  "%ZnX": "Inloggen als deze beheerder"
+  "%ZnX": "Inloggen als deze beheerder",
+  "%ZnY": "Je kan deze foutmelding tijdelijk negeren als je weet wat je aan het doen bent en je een afrekening wilt overfactureren (bv. voor correcties van facturatiegegevens)",
+  "%ZnZ": "Bijlage",
+  "%Zna": "Dit bestand is publiek toegankelijk.",
+  "%Znb": "Je hebt geen toegang tot dit bestand.",
+  "%Znc": "Negeren"
 }
