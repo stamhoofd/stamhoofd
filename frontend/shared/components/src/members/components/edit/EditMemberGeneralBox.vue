@@ -34,6 +34,16 @@
                     </p>
                 </template>
 
+                <template v-if="isAdmin">
+                    <Checkbox v-model="severeDisability">
+                        {{ $t("Is erkend als persoon met een zware beperking") }}
+
+                        <p class="style-description-small">
+                            {{ $t("Dit wordt gebruikt om fiscale attesten op te maken.") }}
+                        </p>
+                    </Checkbox>
+                </template>
+
                 <STInputBox v-if="isPropertyEnabled('gender') || gender !== Gender.Other" error-fields="gender" :error-box="errors.errorBox" :title="$t(`%fO`)">
                     <RadioGroup>
                         <Radio v-model="gender" :value="Gender.Male" autocomplete="sex" name="sex">
@@ -132,8 +142,7 @@
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import type { PlatformMember } from '@stamhoofd/structures';
-import { Gender, LanguageHelper, NationalRegisterNumberOptOut } from '@stamhoofd/structures';
-import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
+import { BooleanStatus, Gender, NationalRegisterNumberOptOut } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
@@ -152,6 +161,7 @@ import { ContextMenu, ContextMenuItem } from '../../../overlays/ContextMenu';
 import { useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import { useShowMemberLanguage } from '../../hooks/useShowMemberLanguage';
 import Title from './Title.vue';
+import Checkbox from '#inputs/Checkbox.vue';
 
 defineOptions({
     inheritAttrs: false,
@@ -283,6 +293,15 @@ const birthDay = computed({
 const trackingYear = computed({
     get: () => props.member.patchedMember.details.trackingYear,
     set: trackingYear => props.member.addDetailsPatch({ trackingYear }),
+});
+
+const severeDisability = computed({
+    get: () => props.member.patchedMember.details.severeDisability?.value ?? false,
+    set: severeDisability => props.member.addDetailsPatch({ severeDisability:
+        BooleanStatus.create({
+            value: severeDisability,
+        }),
+    }),
 });
 
 const gender = computed({

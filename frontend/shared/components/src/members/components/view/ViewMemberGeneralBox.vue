@@ -38,6 +38,13 @@
                 </dd>
             </template>
 
+            <template v-if="member.patchedMember.details.severeDisability && member.patchedMember.details.severeDisability.value === true">
+                <dt>{{ $t('Zware beperking') }}</dt>
+                <dd>
+                    <span>{{ $t('Aangevinkt') }}</span>
+                </dd>
+            </template>
+
             <template v-if="member.patchedMember.details.phone">
                 <dt>{{ $t('%2k') }}</dt>
                 <dd>
