@@ -875,6 +875,55 @@ export class AdminPermissionChecker {
     }
 
     /**
+     * Whether this user may open a private file that the given user uploaded.
+     *
+     * Only the administrators that manage a user can read the files they uploaded. A user is not bound to an
+     * organization in platform mode, so the organizations of their members decide who that is - the same way
+     * impersonation is decided (see canImpersonate).
+     */
+    async canDownloadFileOfUser(user: User): Promise<boolean> {
+        if (user.id === this.user.id) {
+            return true;
+        }
+
+        if (!this.checkScope(user.organizationId)) {
+            return false;
+        }
+
+        if (await this.canAccessUser(user, PermissionLevel.Full)) {
+            // Works for admins only, so we need the next checks too
+            return true;
+        }
+
+        if (user.organizationId) {
+            return await this.hasFullAccess(user.organizationId);
+        }
+
+        let has = false;
+
+        // Note: it is important we do not allow reading files of users who have members the current user does not have access to.
+        for (const member of await Member.getMembersWithRegistrationForUser(user)) {
+            if (member.organizationId) {
+                if (await this.hasFullAccess(member.organizationId)) {
+                    has = true;
+                } else {
+                    return false;
+                }
+            }
+
+            for (const registration of member.registrations) {
+                if (await this.hasFullAccess(registration.organizationId)) {
+                    has = true;
+                } else {
+                    return false;
+                }
+            }
+        }
+
+        return has;
+    }
+
+    /**
      * Whether every permission of the given user is also held by this user.
      *
      * An impersonated session presents the frontend with the permissions of the account it
