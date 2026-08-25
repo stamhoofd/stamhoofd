@@ -38,7 +38,7 @@
                 </dd>
             </template>
 
-            <template v-if="member.patchedMember.details.severeDisability && member.patchedMember.details.severeDisability.value === true">
+            <template v-if="isAdmin && member.patchedMember.details.severeDisability && member.patchedMember.details.severeDisability.value === true">
                 <dt>{{ $t('Zware beperking') }}</dt>
                 <dd>
                     <span>{{ $t('Aangevinkt') }}</span>
@@ -119,6 +119,7 @@ import { computed } from 'vue';
 import EmailAddress from '../../../email/EmailAddress.vue';
 import { useCountry } from '#hooks/useCountry.ts';
 import { useShowMemberLanguage } from '../../hooks/useShowMemberLanguage';
+import { useAuth } from '#hooks/useAuth.ts';
 
 defineOptions({
     inheritAttrs: false,
@@ -127,6 +128,9 @@ defineOptions({
 const props = defineProps<{
     member: PlatformMember;
 }>();
+
+const auth = useAuth();
+const isAdmin = auth.hasFullAccess();
 
 const currentCountry = useCountry();
 const showLanguage = useShowMemberLanguage(computed(() => props.member));

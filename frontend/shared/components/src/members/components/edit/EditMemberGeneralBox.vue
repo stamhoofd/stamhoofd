@@ -34,7 +34,7 @@
                     </p>
                 </template>
 
-                <template v-if="isAdmin">
+                <template v-if="isAdmin && isFullAdmin">
                     <Checkbox v-model="severeDisability">
                         {{ $t("Is erkend als persoon met een zware beperking") }}
 
@@ -159,9 +159,9 @@ import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
 import TrackingYearInput from '../../../inputs/TrackingYearInput.vue';
 import { ContextMenu, ContextMenuItem } from '../../../overlays/ContextMenu';
 import { useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
-import { useShowMemberLanguage } from '../../hooks/useShowMemberLanguage';
 import Title from './Title.vue';
 import Checkbox from '#inputs/Checkbox.vue';
+import { useAuth } from '#hooks/useAuth.ts';
 
 defineOptions({
     inheritAttrs: false,
@@ -182,13 +182,8 @@ const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), tru
 const errors = useErrors({ validator: props.validator });
 const app = useAppContext();
 const isAdmin = app === 'dashboard' || app === 'admin';
-const showLanguage = useShowMemberLanguage(computed(() => props.member));
-const availableLanguages = I18nController.shared.availableLanguages;
-
-const language = computed({
-    get: () => props.member.patchedMember.details.language,
-    set: language => props.member.addDetailsPatch({ language }),
-});
+const auth = useAuth();
+const isFullAdmin = auth.hasFullAccess();
 
 const title = computed(() => {
     if (props.member.isNew) {
