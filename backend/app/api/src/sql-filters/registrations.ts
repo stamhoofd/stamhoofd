@@ -60,7 +60,7 @@ export const registrationFilterCompilers: SQLFilterDefinitions = {
         id: createColumnFilter({
             expression: SQL.jsonExtract(SQL.column('groupPrice'), '$.value.id'),
             type: SQLValueType.JSONString,
-            nullable: true,
+            nullable: false,
         }),
     },
     /**
