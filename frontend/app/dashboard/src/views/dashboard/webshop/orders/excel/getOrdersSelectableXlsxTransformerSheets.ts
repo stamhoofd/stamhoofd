@@ -2,7 +2,7 @@ import type { CellValue } from '@stamhoofd/excel-writer/core';
 import type { SelectableXlsxTransformerColumn } from '@stamhoofd/frontend-excel-export/SelectableXlsxTransformerColumn';
 import type { SelectableXlsxTransformerSheet } from '@stamhoofd/frontend-excel-export/SelectableXlsxTransformerSheet';
 import type { Organization, PrivateOrder, PrivateOrderWithTickets, Product, TicketPublicPrivate, Webshop } from '@stamhoofd/structures';
-import { CartItem, CartItemOption, CheckoutMethodType, Gender, getGenderName, OrderStatusHelper, PaymentMethodHelper, ProductType, RecordCategory, ReservedSeat, TicketPublic } from '@stamhoofd/structures';
+import { CartItem, CartItemOption, CheckoutMethodType, Gender, getGenderName, OrderStatusHelper, PaymentMethodHelper, ProductType, RecordCategory, RecordType, ReservedSeat, TicketPublic } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 type OrderLineRow = {
@@ -252,6 +252,9 @@ function getAnswerGroups<R>(webshop: Webshop, orders: PrivateOrder[], getOrder: 
     const fieldIds = new Set<string>();
     const recordIds = new Set<string>();
 
+    // Files and images cannot be represented in a spreadsheet cell
+    const isExportable = (record: { type: RecordType; excelColumns: unknown[] }) => record.type !== RecordType.File && record.type !== RecordType.Image && record.excelColumns.length > 0;
+
     const addRecordGroup = (recordId: string, recordName: string, category: string, excelColumns: { name: string; width?: number; defaultCategory?: string }[]) => {
         groups.push({
             id: `recordAnswers.${recordId}`,
@@ -290,7 +293,7 @@ function getAnswerGroups<R>(webshop: Webshop, orders: PrivateOrder[], getOrder: 
     }
 
     // Records configured on the webshop, grouped per record category (nested categories are flattened)
-    for (const recordCategory of RecordCategory.flattenCategoriesWith(webshop.meta.recordCategories, record => record.excelColumns.length > 0)) {
+    for (const recordCategory of RecordCategory.flattenCategoriesWith(webshop.meta.recordCategories, isExportable)) {
         for (const record of recordCategory.records) {
             if (recordIds.has(record.id)) {
                 continue;
@@ -303,7 +306,7 @@ function getAnswerGroups<R>(webshop: Webshop, orders: PrivateOrder[], getOrder: 
     // Deleted records that still have answers in the exported orders
     for (const order of orders) {
         for (const answer of order.data.recordAnswers.values()) {
-            if (recordIds.has(answer.settings.id)) {
+            if (recordIds.has(answer.settings.id) || !isExportable(answer.settings)) {
                 continue;
             }
             recordIds.add(answer.settings.id);
