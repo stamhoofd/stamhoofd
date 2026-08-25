@@ -62,7 +62,7 @@
             </template>
             <dd v-else-if="downloadableFile !== undefined">
                 <span v-if="!downloadableFile">/</span>
-                <button v-else type="button" class="button text" :disabled="downloadingFiles.has(downloadableFile.id)" @click="download(downloadableFile)">
+                <button v-else type="button" class="button text reduce-height" :disabled="downloadingFiles.has(downloadableFile.id)" @click="download(downloadableFile)">
                     <Spinner v-if="downloadingFiles.has(downloadableFile.id)" class="inline icon-spacer" />
                     <span v-else :class="'icon ' + downloadableFile.icon" />
                     <span>{{ downloadableFile.name ?? record.name }}</span>
@@ -129,7 +129,6 @@ const recordsWithAnswers = computed(() => {
 
 /**
  * Undefined for answers that are not a file or an image, null when nothing was uploaded.
- * An image is downloaded as the original upload, not as one of its resized resolutions.
  */
 function getDownloadableFile(answer: RecordAnswer | undefined): File | null | undefined {
     if (answer instanceof RecordFileAnswer) {
