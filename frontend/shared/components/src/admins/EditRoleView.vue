@@ -81,13 +81,20 @@
                 </STList>
             </CategorizedBox>
 
-            <CategorizedBox v-if="categories.length" icon="folder" :title="$t('%Z5')">
+            <CategorizedBox v-if="showCategoriesBox" icon="folder" :title="$t('%Z5')">
+                <template v-if="organization" #buttons>
+                    <button class="button text only-icon-smartphone" type="button" @click="addCategories">
+                        <span class="icon add" />
+                        <span>{{ $t('Meer toevoegen') }}</span>
+                    </button>
+                </template>
+
                 <p>{{ $t('%Z6') }}</p>
 
                 <STList>
-                    <ResourcePermissionRow v-for="category in categories" :key="category.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: category.id, name: category.settings.name, type: PermissionsResourceType.GroupCategories }" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow :role="patched" :inherited-roles="inheritedRoles" :resource="{id: '', name: $t('Alle categorieën'), type: PermissionsResourceType.GroupCategories }" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="addPatch" />
 
-                    <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.GroupCategories, patched, categories)" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" :unlisted="true" @patch:role="addPatch" />
+                    <ResourcePermissionRow v-for="resource in categoryResources" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="addPatch" />
                 </STList>
             </CategorizedBox>
 
@@ -268,7 +275,6 @@ const platform = usePlatform();
 const { patched, addPatch, hasChanges, patch } = usePatch(props.role);
 const getGroupsById = useGetGroupsById();
 const webshops: Ref<WebshopPreview[]> = computed(() => organization.value?.webshops ?? []);
-const categories: Ref<GroupCategory[]> = computed(() => organization.value?.getCategoryTree({ permissions: auth.permissions }).categories ?? []);
 const tags = computed(() => platform.value.config.tags);
 const recordCategories = computed(() => {
     const base = (organization.value?.meta.recordsConfiguration.recordCategories?.slice() ?? []).map(r => ({
@@ -341,11 +347,11 @@ watch(configuredGroupIds, async (ids) => {
     loadingGroups.value = false;
 }, { immediate: true });
 
-function getGroupsCoverage() {
+function getResourceCoverage(type: PermissionsResourceType) {
     const coverage = ResourcePermissions.create({});
 
     for (const role of [patched.value, ...props.inheritedRoles]) {
-        const all = role.getMergedResourcePermissions(PermissionsResourceType.Groups, '');
+        const all = role.getMergedResourcePermissions(type, '');
         if (all) {
             coverage.add(all);
         }
@@ -354,11 +360,11 @@ function getGroupsCoverage() {
     return coverage;
 }
 
-function groupAddsAccess(id: string) {
-    const coverage = getGroupsCoverage();
+function resourceAddsAccess(type: PermissionsResourceType, id: string) {
+    const coverage = getResourceCoverage(type);
 
     return [patched.value, ...props.inheritedRoles].some((role) => {
-        const resource = role.resources.get(PermissionsResourceType.Groups)?.get(id);
+        const resource = role.resources.get(type)?.get(id);
         return !!resource && !resource.isCoveredBy(coverage);
     });
 }
@@ -368,7 +374,7 @@ const groupResources = computed(() => {
 
     for (const id of configuredGroupIds.value) {
         const group = resolvedGroups.value.get(id);
-        if (!group || !groupAddsAccess(id)) {
+        if (!group || !resourceAddsAccess(PermissionsResourceType.Groups, id)) {
             continue;
         }
 
@@ -381,6 +387,26 @@ const groupResources = computed(() => {
 
     rows.sort((a, b) => Sorter.byStringValue(a.name, b.name));
     return rows;
+});
+
+// Categories are not resolved: they are rendered with the name cached in the role
+const categoryResources = computed(() => {
+    const rows = getUnlistedResources(PermissionsResourceType.GroupCategories, patched.value, []);
+    const ids = new Set(rows.map(r => r.id));
+
+    // Categories this role only has access to through an inherited role have no entry of their own
+    for (const role of props.inheritedRoles) {
+        for (const [id, resource] of role.resources.get(PermissionsResourceType.GroupCategories) ?? []) {
+            if (id === '' || ids.has(id)) {
+                continue;
+            }
+            ids.add(id);
+            rows.push({ id, name: resource.resourceName, type: PermissionsResourceType.GroupCategories });
+        }
+    }
+
+    rows.sort((a, b) => Sorter.byStringValue(a.name, b.name));
+    return rows.filter(resource => resourceAddsAccess(PermissionsResourceType.GroupCategories, resource.id));
 });
 
 const canAddGroups = computed(() => !!organization.value && maximumPermissionlevel(
@@ -406,7 +432,27 @@ async function addGroups() {
     });
 }
 
+async function addCategories() {
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: AsyncComponent(() => import('./EditResourcePermissionsView.vue'), {
+                    title: $t('Inschrijvingscategorieën'),
+                    role: patched.value,
+                    inheritedRoles: props.inheritedRoles,
+                    type: PermissionsResourceType.GroupCategories,
+                    configurableAccessRights: [AccessRight.OrganizationCreateGroups],
+                    saveHandler: addPatch,
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
+
 const showGroupsBox = computed(() => organization.value?.meta?.packages.useMembers || !!patched.value.resources.get(PermissionsResourceType.Groups)?.size || configuredGroupIds.value.length > 0);
+
+const showCategoriesBox = computed(() => organization.value?.meta?.packages.useMembers || !!patched.value.resources.get(PermissionsResourceType.GroupCategories)?.size);
 
 const save = async () => {
     if (saving.value || deleting.value) {
