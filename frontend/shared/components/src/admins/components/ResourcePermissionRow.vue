@@ -57,6 +57,11 @@ const props = withDefaults(defineProps<{
     configurableAccessRights?: AccessRight[] | null;
     configurablePermissionLevels?: PermissionLevel[] | null;
     unlisted?: boolean;
+
+    /**
+     * The general access of a role is limited to the current period, so it doesn't apply to a resource of another period
+     */
+    ignoreGeneralAccess?: boolean;
     defaultLevel?: PermissionLevel | null;
     defaultAccessRights?: AccessRight[] | null;
 }>(), {
@@ -66,6 +71,7 @@ const props = withDefaults(defineProps<{
     defaultLevel: null,
     defaultAccessRights: null,
     unlisted: false,
+    ignoreGeneralAccess: false,
 });
 
 const configurableAccessRights = props.configurableAccessRights ?? getConfigurableAccessRightsForResourceType(props.resource.type);
@@ -89,22 +95,28 @@ const isMe = computed(() => {
 const resourcePermissions = computed(() => role.value.resources.get(props.resource.type)?.get(props.resource.id));
 
 const lockedMinimumLevel = computed(() => {
-    const a = props.role.level;
-    const b = props.resource.id !== '' ? (role.value.resources.get(props.resource.type)?.get('')?.level ?? PermissionLevel.None) : PermissionLevel.None;
+    const arr: PermissionLevel[] = [];
 
-    const arr = [a, b];
+    if (!props.ignoreGeneralAccess) {
+        arr.push(props.role.level);
+        arr.push(props.resource.id !== '' ? (role.value.resources.get(props.resource.type)?.get('')?.level ?? PermissionLevel.None) : PermissionLevel.None);
+    }
 
     for (const role of props.inheritedRoles) {
-        const c = role.level;
-        const d = role.resources.get(props.resource.type)?.get('')?.level ?? PermissionLevel.None;
-        const e = props.resource.id !== '' ? (role.resources.get(props.resource.type)?.get(props.resource.id)?.level ?? PermissionLevel.None) : PermissionLevel.None;
-        arr.push(c, d, e);
+        if (!props.ignoreGeneralAccess) {
+            arr.push(role.level);
+            arr.push(role.resources.get(props.resource.type)?.get('')?.level ?? PermissionLevel.None);
+        }
+        arr.push(props.resource.id !== '' ? (role.resources.get(props.resource.type)?.get(props.resource.id)?.level ?? PermissionLevel.None) : PermissionLevel.None);
     }
 
     return maximumPermissionlevel(...arr);
 });
 
 const lockedAccessRights = computed(() => {
+    if (props.ignoreGeneralAccess) {
+        return [];
+    }
     const accessRights = props.resource.id !== '' ? (role.value.resources.get(props.resource.type)?.get('')?.accessRights ?? []) : [];
     return accessRights;
 });

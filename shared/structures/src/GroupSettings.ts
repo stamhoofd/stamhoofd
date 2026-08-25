@@ -969,6 +969,13 @@ export class GroupSettings extends AutoEncoder {
         return Formatter.firstLetters(this.name, maxLength);
     }
 
+    getNameWithPeriod(): string {
+        if (!this.period) {
+            return this.name.toString();
+        }
+        return this.name.toString() + ' (' + this.period.nameShort + ')';
+    }
+
     getFilteredPrices(options?: { admin?: boolean; date?: Date }) {
         if (options?.admin) {
             return [...this.prices];
