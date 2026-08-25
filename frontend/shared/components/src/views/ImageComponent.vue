@@ -4,7 +4,8 @@
             <div :style="sizerChildStyle" />
         </div>
 
-        <picture v-if="elWidth">
+        <span v-if="failed" class="icon file-image gray" />
+        <picture v-else-if="elWidth">
             <source
                 v-if="imageDark && srcDark && (darkMode === 'Auto' || darkMode === 'On')"
                 :srcset="srcDark"
@@ -17,13 +18,14 @@
                 :width="imgWidth"
                 :height="imgHeight"
                 :alt="alt"
+                @error="failed = true"
             >
         </picture>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref, useTemplateRef } from 'vue';
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue';
 import type { Image } from '@stamhoofd/structures';
 import { DarkMode } from '@stamhoofd/structures';
 
@@ -56,6 +58,11 @@ const src = computed(() => resolution.value.file.getPublicPath());
 const imgWidthDark = computed(() => darkResolution.value.width);
 const imgHeightDark = computed(() => darkResolution.value.height);
 const srcDark = computed(() => darkResolution.value.file.getPublicPath());
+
+const failed = ref(false);
+watch([src, srcDark], () => {
+    failed.value = false;
+});
 
 const sizerChildStyle = computed(() => {
     if (!props.autoHeight) return;
@@ -96,6 +103,13 @@ onMounted(() => {
 .image-component {
     position: relative;
     overflow: hidden;
+
+    > .icon {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
 
     // Width and height should be set by the parent.
     img {
