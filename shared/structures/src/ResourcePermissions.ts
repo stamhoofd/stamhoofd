@@ -45,6 +45,10 @@ export class ResourcePermissions extends AutoEncoder {
         return (gl && this.hasAccess(gl)) || this.accessRights.includes(right);
     }
 
+    isCoveredBy(other: ResourcePermissions): boolean {
+        return other.hasAccess(this.level) && this.accessRights.every(right => other.hasAccessRight(right));
+    }
+
     createInsertPatch(type: PermissionsResourceType, resourceId: string, roleOrPermissions: PermissionRoleDetailed): AutoEncoderPatchType<PermissionRoleDetailed>;
     createInsertPatch(type: PermissionsResourceType, resourceId: string, roleOrPermissions: import('./Permissions.js').Permissions): AutoEncoderPatchType<import('./Permissions.js').Permissions>;
     createInsertPatch(type: PermissionsResourceType, resourceId: string, roleOrPermissions: PermissionRoleDetailed | import('./Permissions.js').Permissions): AutoEncoderPatchType<PermissionRoleDetailed> | AutoEncoderPatchType<import('./Permissions.js').Permissions> {
