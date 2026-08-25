@@ -1,6 +1,6 @@
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import type { ObjectWithRecords, RecordAnswer } from '@stamhoofd/structures';
-import { File as FileStruct, Image, RecordCategory, RecordFileAnswer, RecordImageAnswer, RecordSettings, RecordType, TranslatedString } from '@stamhoofd/structures';
+import { File as FileStruct, Image, RecordCategory, RecordFileAnswer, RecordImageAnswer, RecordSettings, RecordType, Resolution, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { afterEach, expect, test, vi } from 'vitest';
 import { userEvent } from 'vitest/browser';
@@ -178,7 +178,7 @@ test('It shows the file type icon next to the file name', () => {
     expect(downloadButton().textContent).toContain('attest.pdf');
 });
 
-test('It downloads the original upload of an image answer', async () => {
+test('It downloads the first resolution of an image answer', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
         new Response(new Blob(['hello'], { type: 'image/png' }), { status: 200 }),
     );
@@ -187,11 +187,18 @@ test('It downloads the original upload of an image answer', async () => {
     const source = new FileStruct({
         id: 'image-source',
         server: 'https://files.example.com',
-        path: 'users/1/abc/photo.png',
-        name: 'photo.png',
+        path: 'users/1/abc/photo-original.png',
+        name: 'photo-original.png',
         size: 100,
     });
-    const image = Image.create({ source });
+    const resized = new FileStruct({
+        id: 'image-resized',
+        server: 'https://files.example.com',
+        path: 'users/1/abc/photo.png',
+        name: 'photo.png',
+        size: 50,
+    });
+    const image = Image.create({ source, resolutions: [new Resolution({ file: resized, width: 100, height: 100 })] });
     const imageSettings = RecordSettings.create({
         id: 'image-record',
         name: TranslatedString.create('Foto'),
