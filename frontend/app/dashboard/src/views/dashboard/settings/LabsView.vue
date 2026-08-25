@@ -247,6 +247,18 @@
                         {{ $t('%Zl0') }}
                     </p>
                 </STListItem>
+
+                <STListItem :selectable="true" element-name="label" data-testid="fiscal-document-no-timelimit">
+                    <template #left>
+                        <Checkbox :model-value="getFeatureFlag('fiscal-document-always')" @update:model-value="setFeatureFlag('fiscal-document-always', !!$event)" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('Fiscale documenten op elk moment aanmaken') }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ $t('Fiscale documenten kunnen op elk moment worden aangemaakt') }}
+                    </p>
+                </STListItem>
             </STList>
 
             <hr><button class="button text" type="button" @click="applyDiscountCode">
