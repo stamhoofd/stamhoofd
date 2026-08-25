@@ -159,6 +159,7 @@ if (orgInDomain) {
         buildTranslatedUrl({ nl: 'start', fr: 'debut', en: 'start' }),
         buildTranslatedUrl({ nl: 'mandje', fr: 'panier', en: 'basket' }),
         buildTranslatedUrl({ nl: 'activiteiten', fr: 'activites', en: 'activities' }),
+        'account',
         'reset-password',
     ];
 
