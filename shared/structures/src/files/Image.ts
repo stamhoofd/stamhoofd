@@ -38,6 +38,17 @@ export class Image extends AutoEncoder {
         return resolution.file.getPublicPath();
     }
 
+    /**
+     * File to use when embedding this image inline in an email (see {@link File.inlineEmailSrc}):
+     * a resolution bounded to a typical email width, so the full size source isn't attached.
+     */
+    getInlineEmailFile(): File {
+        if (this.resolutions.length > 0) {
+            return this.getResolutionForSize(600, undefined).file;
+        }
+        return this.source;
+    }
+
     getResolutionForSize(width: number | undefined, height: number | undefined): Resolution {
         let bestResolution: Resolution | undefined;
 

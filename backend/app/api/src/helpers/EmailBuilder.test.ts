@@ -1,11 +1,14 @@
+import { S3Client } from '@aws-sdk/client-s3';
 import { EmailMocker } from '@stamhoofd/email';
-import { EmailContent, EmailTemplateType, Recipient, Replacement } from '@stamhoofd/structures';
+import { EmailContent, EmailTemplateType, File, Recipient, Replacement } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import { TestUtils } from '@stamhoofd/test-utils';
 import type { Organization, RegistrationPeriod } from '@stamhoofd/models';
 import { Email, EmailTemplateFactory, OrganizationFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
-import { removeUnusedReplacements, sendEmailTemplate } from './EmailBuilder.js';
+import { FileSignService } from '../services/FileSignService.js';
+import type { EmailBuilderOptions } from './EmailBuilder.js';
+import { getEmailBuilder, removeUnusedReplacements, sendEmailTemplate } from './EmailBuilder.js';
 
 describe('sendEmailTemplate with translations', () => {
     let period: RegistrationPeriod;
@@ -283,5 +286,156 @@ describe('Email.getCombinedHtml', () => {
         expect(usingCombinedHtml).toContain('signInUrl');
         expect(usingCombinedHtml).toContain('balanceTable');
         expect(usingCombinedHtml).not.toContain('outstandingBalance');
+    });
+});
+
+describe('getEmailBuilder replacement file attachments', () => {
+    const from = { email: 'sender@example.com' };
+
+    const buildFile = (data: { id?: string; name?: string; size?: number; isPrivate?: boolean }) => {
+        return new File({
+            id: data.id ?? 'file-1',
+            server: 'https://files.example.com',
+            path: 'users/1/abc/attest.pdf',
+            name: data.name ?? 'Attest 2024.pdf',
+            size: data.size ?? 100,
+            isPrivate: data.isPrivate ?? false,
+            contentType: 'application/pdf',
+        });
+    };
+
+    const buildEmail = async (options: { html: string; replacements: Replacement[]; attachments?: EmailBuilderOptions['attachments'] }) => {
+        const builder = await getEmailBuilder(null, {
+            recipients: [
+                Recipient.create({ email: 'customer@example.com', replacements: options.replacements }),
+            ],
+            from,
+            subject: 'Subject',
+            html: options.html,
+            attachments: options.attachments,
+        });
+        const email = builder();
+        expect(email).toBeDefined();
+        return email!;
+    };
+
+    test('files of a replacement used in the html body are attached', async () => {
+        const email = await buildEmail({
+            html: '<p>{{orderDetailsTable}}</p>',
+            replacements: [
+                Replacement.create({ token: 'orderDetailsTable', html: '<table></table>', files: [buildFile({})] }),
+            ],
+        });
+
+        expect(email.attachments).toEqual([
+            {
+                filename: 'attest-2024.pdf',
+                href: 'https://files.example.com/users/1/abc/attest.pdf',
+                contentType: 'application/pdf',
+            },
+        ]);
+        expect(email.attachments![0].cid).toBeUndefined();
+    });
+
+    test('a file referenced with its inline src in the html is attached inline with a content id', async () => {
+        const file = buildFile({ id: 'inline-image', name: 'logo.png' });
+        const email = await buildEmail({
+            html: '<p>{{header}}</p>',
+            replacements: [
+                Replacement.create({ token: 'header', html: '<img src="' + file.inlineEmailSrc + '">', files: [file] }),
+            ],
+        });
+
+        expect(email.attachments).toHaveLength(1);
+        expect(email.attachments![0].cid).toBe('inline-image');
+        expect(email.html).toContain('src="cid:inline-image"');
+    });
+
+    test('files of a replacement that is not used in the html body are not attached', async () => {
+        const email = await buildEmail({
+            html: '<p>No replacements</p>',
+            replacements: [
+                Replacement.create({ token: 'orderDetailsTable', html: '<table></table>', files: [buildFile({})] }),
+            ],
+        });
+
+        expect(email.attachments ?? []).toEqual([]);
+    });
+
+    test('files of a replacement inserted through another replacement are attached', async () => {
+        const email = await buildEmail({
+            html: '<p>{{outer}}</p>',
+            replacements: [
+                Replacement.create({ token: 'inner', html: '<table></table>', files: [buildFile({})] }),
+                Replacement.create({ token: 'outer', html: '<div>{{inner}}</div>' }),
+            ],
+        });
+
+        expect(email.attachments).toHaveLength(1);
+    });
+
+    test('existing attachments are kept and files that would exceed the total size limit are skipped', async () => {
+        const email = await buildEmail({
+            html: '<p>{{orderDetailsTable}}</p>',
+            replacements: [
+                Replacement.create({
+                    token: 'orderDetailsTable',
+                    html: '<table></table>',
+                    files: [
+                        buildFile({ id: 'too-big', name: 'big.pdf', size: 6 * 1024 * 1024 }),
+                        buildFile({ id: 'small', name: 'small.pdf', size: 100 }),
+                    ],
+                }),
+            ],
+            attachments: [
+                { filename: 'existing.pdf', content: Buffer.alloc(5 * 1024 * 1024), contentType: 'application/pdf' },
+            ],
+        });
+
+        // 5MB + 6MB > 9.5MB, so the big file is skipped; the small file still fits
+        expect(email.attachments!.map(a => a.filename)).toEqual(['existing.pdf', 'small.pdf']);
+    });
+
+    test('a private file is attached with a signed url', async () => {
+        TestUtils.setEnvironment('SPACES_BUCKET', 'test-bucket');
+        const originalClient = FileSignService.s3;
+        FileSignService.s3 = new S3Client({
+            forcePathStyle: false,
+            endpoint: 'https://test.digitaloceanspaces.com',
+            credentials: {
+                accessKeyId: 'test-key',
+                secretAccessKey: 'test-secret',
+            },
+            region: 'eu-west-1',
+        });
+
+        try {
+            const file = buildFile({ isPrivate: true });
+            await file.sign();
+
+            const email = await buildEmail({
+                html: '<p>{{orderDetailsTable}}</p>',
+                replacements: [
+                    Replacement.create({ token: 'orderDetailsTable', html: '<table></table>', files: [file] }),
+                ],
+            });
+
+            expect(email.attachments).toHaveLength(1);
+            const query = new URL(email.attachments![0].href!).searchParams;
+            expect(query.get('X-Amz-Signature')).toBeTruthy();
+        } finally {
+            FileSignService.s3 = originalClient;
+        }
+    });
+
+    test('a private file without a valid signature is not attached', async () => {
+        const email = await buildEmail({
+            html: '<p>{{orderDetailsTable}}</p>',
+            replacements: [
+                Replacement.create({ token: 'orderDetailsTable', html: '<table></table>', files: [buildFile({ isPrivate: true })] }),
+            ],
+        });
+
+        expect(email.attachments ?? []).toEqual([]);
     });
 });

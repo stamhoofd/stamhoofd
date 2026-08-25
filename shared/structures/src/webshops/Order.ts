@@ -6,7 +6,8 @@ import { BalanceItemWithPayments, BalanceItemWithPrivatePayments } from '../Bala
 import { EmailRecipient } from '../email/Email.js';
 import { Recipient, Replacement } from '../endpoints/EmailRequest.js';
 import { Payment, PrivatePayment } from '../members/Payment.js';
-import { RecordCheckboxAnswer } from '../members/records/RecordAnswer.js';
+import type { File } from '../files/File.js';
+import { RecordCheckboxAnswer, RecordFileAnswer, RecordImageAnswer } from '../members/records/RecordAnswer.js';
 import { RecordCategory } from '../members/records/RecordCategory.js';
 import type { Organization } from '../Organization.js';
 import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodHelper, PaymentMethodV150 } from '../PaymentMethod.js';
@@ -244,7 +245,7 @@ export class Order extends AutoEncoder {
     getDetailsHTMLTable(webshop: WebshopPreview): string {
         let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>`;
 
-        const data = [
+        const data: { title: string; value: string; html?: string }[] = [
             {
                 title: $t('%xA'),
                 value: '' + (this.number ?? '?'),
@@ -309,10 +310,25 @@ export class Order extends AutoEncoder {
                 title: a.field.name,
                 value: a.answer,
             })),
-            ...RecordCategory.sortAnswers(this.data.recordAnswers, webshop.meta.recordCategories).filter(a => !a.isEmpty || a instanceof RecordCheckboxAnswer).map(a => ({
-                title: a.settings.name.toString(),
-                value: a.stringValue,
-            })),
+            ...RecordCategory.sortAnswers(this.data.recordAnswers, webshop.meta.recordCategories).filter(a => !a.isEmpty || a instanceof RecordCheckboxAnswer).map((a) => {
+                const title = a.settings.name.toString();
+
+                // Files and images are attached to the email instead of showing their (potentially inaccessible) url
+                if (a instanceof RecordFileAnswer) {
+                    return { title, value: a.file?.name ?? $t('Bijlage') };
+                }
+
+                if (a instanceof RecordImageAnswer && a.image) {
+                    const file = a.image.getInlineEmailFile();
+                    return {
+                        title,
+                        value: '',
+                        html: `<img src="${Formatter.escapeHtml(file.inlineEmailSrc)}" alt="${Formatter.escapeHtml(a.image.source.name ?? '')}" style="max-width: 200px; max-height: 64px; width: auto; height: auto;">`,
+                    };
+                }
+
+                return { title, value: a.stringValue };
+            }),
             ...(
                 (this.data.paymentMethod !== PaymentMethod.Unknown)
                     ? [
@@ -332,13 +348,31 @@ export class Order extends AutoEncoder {
         ];
 
         for (const replacement of data) {
-            if (replacement.value.length === 0) {
+            const cell = replacement.html ?? (replacement.value.length > 0 ? Formatter.escapeHtml(replacement.value) : null);
+            if (cell === null) {
                 continue;
             }
-            str += `<tr><td><h4>${Formatter.escapeHtml(replacement.title)}</h4></td><td>${Formatter.escapeHtml(replacement.value)}</td></tr>`;
+            str += `<tr><td><h4>${Formatter.escapeHtml(replacement.title)}</h4></td><td>${cell}</td></tr>`;
         }
 
         return str + '</tbody></table>';
+    }
+
+    /**
+     * Files of the record answers shown in {@link getDetailsHTMLTable}, so they can be attached to order emails.
+     * Images use the same file as the inline image in the table, so the email builder can render them inline.
+     */
+    getRecordAnswerFiles(webshop: WebshopPreview): File[] {
+        return RecordCategory.sortAnswers(this.data.recordAnswers, webshop.meta.recordCategories)
+            .flatMap((a) => {
+                if (a instanceof RecordFileAnswer && a.file) {
+                    return [a.file];
+                }
+                if (a instanceof RecordImageAnswer && a.image) {
+                    return [a.image.getInlineEmailFile()];
+                }
+                return [];
+            });
     }
 
     getEmailRecipient(organization: Organization, webshop: WebshopPreview): EmailRecipient {
@@ -435,6 +469,7 @@ export class Order extends AutoEncoder {
                 token: 'orderDetailsTable',
                 value: '',
                 html: order.getDetailsHTMLTable(webshop),
+                files: order.getRecordAnswerFiles(webshop),
             }),
             Replacement.create({
                 token: 'orderTable',
