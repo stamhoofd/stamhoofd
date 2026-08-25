@@ -62,9 +62,16 @@ kinderen need not carry one either.
 
 `includes/takken.sql` is where it is settled, and `includes/tak-categorie.sql` is the answer itself.
 Unqualified, that reads the `category` column the statistics database keeps on `default_age_groups`,
-which is filled in by hand. `includes/keeo/tak-categorie.sql` instead names keeo's takken by id and
-leaves the column behind it as the fallback, so a tak it does not name — the years imported from the
-client's own statistics, most of all — keeps whatever was set for it.
+which is filled in by hand. `includes/keeo/tak-categorie.sql` and `includes/ravot/tak-categorie.sql`
+instead name that platform's takken by id, and leave the column behind them as the fallback, so a tak
+they do not name — the years imported from the client's own statistics, most of all — keeps whatever
+was set for it.
+
+Ravot's list is the one to read before changing either. Its ondersteunende leden are volwassenen and
+may not be categorised as leiding: the omkaderingscijfer and the GTP index would then count them as
+leiding the kinderen of an eenheid are looked after by. The aanlevering delivers them among the
+leiding anyway — the department has no third word for them — by naming the tak itself in
+`ravot/type-deelnemers.sql`, which only works for as long as the category does not say it.
 
 Naming them in the query is what keeps the answer readable. The column survives no rebuild of the
 statistics database, and the UPDATE that fills it again is written down nowhere; a list in the query

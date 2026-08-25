@@ -427,9 +427,41 @@ describe('report', () => {
             expect(sql).toContain('ELSE dag.category');
         });
 
-        /** Only keeo says it in the query. Everywhere else the column is the whole answer. */
-        it('leaves the category to the column in an environment that names no takken', () => {
+        /**
+         * The same for ravot, whose takken divide differently: the ondersteunende leden are
+         * volwassenen and may not be categorised as leiding, since the omkaderingscijfer and the GTP
+         * index would then read them as leiding the kinderen of an eenheid are looked after by. The
+         * aanlevering delivers them among the leiding all the same, by naming the tak itself in
+         * `ravot/type-deelnemers.sql`, which only works while the category does not say it.
+         */
+        it('names every tak of ravot in the query, with the ondersteunende leden apart from the leiding', () => {
             const sql = cardOf(ravotDashboards, 'nationaal', 'totaal-leden').sql;
+
+            for (const [tak, term] of [
+                ['Leeuwkes, Kabouters en Sloebers', "WHEN 'bd63a6ef-d4a1-497d-87a5-d7c36b4ad220' THEN 'child'"],
+                ['Springers en Pagadders', "WHEN '23607074-624b-472f-926f-c719bb44e314' THEN 'child'"],
+                ['Jongknapen, Roodkapjes en Joro\'s', "WHEN '5730f613-fb72-465b-b902-45b281a0e8b8' THEN 'child'"],
+                ['Knapen, Jimmers en Knimmers', "WHEN '3d56a0b2-9f4b-46ac-998b-d45a9b64cab2' THEN 'child'"],
+                ['Sjo\'ers, Simmers en Jonghernieuwers', "WHEN '03680919-689c-4df1-8976-bb71758cc025' THEN 'child'"],
+                ['+16', "WHEN 'bed9b513-e0ff-4cc3-a0f3-1c021fc880a9' THEN 'child'"],
+                ['Hernieuwers', "WHEN '1ad6b686-d5fa-4168-8fa2-064d49f8c0e8' THEN 'child'"],
+                ['Leiding', "WHEN 'e3ec8d48-0d10-4f5d-9e50-dd3151c6666b' THEN 'leader'"],
+                ['Ondersteunende leden', "WHEN 'a28d290c-af71-4282-92cc-2224a18d3091' THEN 'adult'"],
+            ]) {
+                expect(`${tak}: ${sql.includes(term)}`).toEqual(`${tak}: true`);
+            }
+
+            expect(sql.match(/WHEN '[0-9a-f-]{36}' THEN/g)!.length).toBe(9);
+            expect(sql).toContain('ELSE dag.category');
+        });
+
+        /**
+         * A platform that names none of its takken is left with the column as the whole answer, which
+         * is what the unqualified fragment is for. Both platforms with a report of their own name
+         * theirs, so this is checked against an environment that overrides nothing.
+         */
+        it('leaves the category to the column in an environment that names no takken', async () => {
+            const sql = cardOf(await loadReport('development'), 'nationaal', 'totaal-leden').sql;
 
             expect(sql).toContain('dag.category AS category');
             expect(`names takken by id: ${/WHEN '[0-9a-f-]{36}' THEN/.test(sql)}`).toEqual('names takken by id: false');
