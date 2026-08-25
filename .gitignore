@@ -243,3 +243,6 @@ __screenshots__
 
 /.opencode
 ./worktrees
+
+# vitest browser-mode test attachments (screenshots)
+.vitest-attachments
