@@ -140,6 +140,7 @@ export class Image extends QueryableModel {
                 path: key,
                 size: f.info.size,
                 isPrivate: isPrivateFile,
+                contentType: !supportsTransparency ? 'image/jpeg' : 'image/png',
             });
 
             if (isPrivateFile) {
