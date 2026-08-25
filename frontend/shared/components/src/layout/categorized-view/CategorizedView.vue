@@ -37,14 +37,14 @@
                 <template #buttons>
                     <slot name="buttons" />
                 </template>
-                <header v-if="!columnsEnabled && isEnabled" class="container">
+                <header v-if="!columnsEnabled || !isEnabled" class="container">
                     <slot name="title">
                         <h1>
                             {{ title }}
                         </h1>
                     </slot>
                     <div class="inline-seeker-box">
-                        <STList>
+                        <STList v-if="isEnabled">
                             <STListItem v-for="(category, index) of categories" :key="index" :selectable="true" class="" @click="scrollToCategory(category)">
                                 <template #left>
                                     <span :class="'icon ' + category.icon.value" />
@@ -118,6 +118,11 @@ const canDelete = computed(() => {
 });
 
 function updateVisible() {
+    if (!isEnabled.value) {
+        visibleCategories.value = [];
+        return;
+    }
+
     // Prevent multiple updates in the same frame
     if (tick) {
         return;
@@ -237,8 +242,13 @@ onMounted(() => {
     updateVisible();
 });
 
-useScrollListener(scrollElement, () => {
+// Only listen while the categories are actually rendered
+useScrollListener(computed(() => isEnabled.value ? scrollElement.value : null), () => {
     throttledUpdateVisible();
+});
+
+watch(isEnabled, () => {
+    updateVisible();
 });
 
 function updateSeeker() {
