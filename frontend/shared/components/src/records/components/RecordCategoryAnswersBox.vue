@@ -1,6 +1,6 @@
 <template>
     <STList v-if="!compact" class="info">
-        <STListItem v-for="{record, answer, recordCheckboxAnswer, recordFileAnswer} of recordsWithAnswers" :key="record.id">
+        <STListItem v-for="{record, answer, recordCheckboxAnswer, downloadableFile} of recordsWithAnswers" :key="record.id">
             <h3 class="style-definition-label">
                 {{ record.name }}
             </h3>
@@ -14,15 +14,13 @@
                     <span v-if="recordCheckboxAnswer.comments" v-copyable class="pre-wrap style-copyable" v-text="recordCheckboxAnswer.comments" />
                 </p>
             </template>
-            <p v-else-if="recordFileAnswer" class="style-definition-text">
-                <span v-if="!recordFileAnswer.file">{{ $t('%Rs') }}</span>
-                <template v-else>
-                    <button type="button" class="button text" :disabled="downloadingFiles.has(recordFileAnswer.file.id)" @click="download(recordFileAnswer.file)">
-                        <Spinner v-if="downloadingFiles.has(recordFileAnswer.file.id)" class="inline icon-spacer" />
-                        <span v-else class="icon download" />
-                        <span>{{ recordFileAnswer.file.name }}</span>
-                    </button>
-                </template>
+            <p v-else-if="downloadableFile !== undefined" class="style-definition-text">
+                <span v-if="!downloadableFile">{{ $t('%Rs') }}</span>
+                <button v-else type="button" class="button text" :disabled="downloadingFiles.has(downloadableFile.id)" @click="download(downloadableFile)">
+                    <Spinner v-if="downloadingFiles.has(downloadableFile.id)" class="inline icon-spacer" />
+                    <span v-else :class="'icon ' + downloadableFile.icon" />
+                    <span>{{ downloadableFile.name ?? record.name }}</span>
+                </button>
             </p>
             <p v-else v-copyable class="style-definition-text pre-wrap style-copyable" v-text="answer.stringValue" />
         </STListItem>
@@ -48,7 +46,7 @@
     </template>
 
     <dl v-else class="details-grid">
-        <template v-for="{record, answer, recordCheckboxAnswer} of recordsWithAnswers" :key="record.id">
+        <template v-for="{record, answer, recordCheckboxAnswer, downloadableFile} of recordsWithAnswers" :key="record.id">
             <dt class="center">
                 {{ record.name }}
             </dt>
@@ -62,6 +60,14 @@
                 </dd>
                 <dd v-if="recordCheckboxAnswer.comments" :key="'dd-description-'+record.id" v-copyable class="description pre-wrap style-copyable" v-text="recordCheckboxAnswer.comments" />
             </template>
+            <dd v-else-if="downloadableFile !== undefined">
+                <span v-if="!downloadableFile">/</span>
+                <button v-else type="button" class="button text" :disabled="downloadingFiles.has(downloadableFile.id)" @click="download(downloadableFile)">
+                    <Spinner v-if="downloadingFiles.has(downloadableFile.id)" class="inline icon-spacer" />
+                    <span v-else :class="'icon ' + downloadableFile.icon" />
+                    <span>{{ downloadableFile.name ?? record.name }}</span>
+                </button>
+            </dd>
             <dd v-else v-copyable class="pre-wrap style-copyable" v-text="answer.stringValue" />
         </template>
     </dl>
@@ -70,8 +76,8 @@
 <script lang="ts" setup generic="T extends ObjectWithRecords">
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { ObjectWithRecords, RecordCategory } from '@stamhoofd/structures';
-import { File, PermissionLevel, RecordCheckboxAnswer, RecordFileAnswer } from '@stamhoofd/structures';
+import type { ObjectWithRecords, RecordAnswer, RecordCategory } from '@stamhoofd/structures';
+import { File, PermissionLevel, RecordCheckboxAnswer, RecordFileAnswer, RecordImageAnswer } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import Spinner from '#Spinner.vue';
 import { useAppContext } from '#context/appContext.ts';
@@ -116,10 +122,24 @@ const recordsWithAnswers = computed(() => {
             record,
             answer,
             recordCheckboxAnswer: answer instanceof RecordCheckboxAnswer ? answer : null,
-            recordFileAnswer: answer instanceof RecordFileAnswer ? answer : null,
+            downloadableFile: getDownloadableFile(answer),
         };
     });
 });
+
+/**
+ * Undefined for answers that are not a file or an image, null when nothing was uploaded.
+ * An image is downloaded as the original upload, not as one of its resized resolutions.
+ */
+function getDownloadableFile(answer: RecordAnswer | undefined): File | null | undefined {
+    if (answer instanceof RecordFileAnswer) {
+        return answer.file;
+    }
+    if (answer instanceof RecordImageAnswer) {
+        return answer.image?.resolutions[0]?.file ?? null;
+    }
+    return undefined;
+}
 
 const childCategories = computed(() => {
     return props.category.filterChildCategories(props.value, filterOptions);
@@ -152,20 +172,30 @@ async function getDownloadUrl(file: File): Promise<string> {
 }
 
 // A file of an answer is uploaded by a member, so we download it instead of sending anyone to its url
-function download(file: File) {
+async function download(file: File) {
     if (downloadingFiles.value.has(file.id)) {
         return;
     }
     downloadingFiles.value.add(file.id);
 
-    getDownloadUrl(file)
-        .then(url => downloadFile(url, file.name ?? $t('%yU')))
-        .catch((e) => {
-            Toast.fromError(e).show();
-        })
-        .finally(() => {
-            downloadingFiles.value.delete(file.id);
-        });
+    try {
+        const url = await getDownloadUrl(file);
+
+        try {
+            await downloadFile(url, file.name ?? $t('%yU'));
+        } catch (e) {
+            // A webshop can run on any domain, which the file server doesn't always allow to fetch its files
+            if (app === 'webshop') {
+                window.open(url, '_blank', 'noopener');
+                return;
+            }
+            throw e;
+        }
+    } catch (e) {
+        Toast.fromError(e).show();
+    } finally {
+        downloadingFiles.value.delete(file.id);
+    }
 }
 
 </script>
