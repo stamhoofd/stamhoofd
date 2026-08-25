@@ -85,6 +85,7 @@ import STList from '../STList.vue';
 import STListItem from '../STListItem.vue';
 import { CategorizedViewCategory } from './CategorizedViewCategory';
 import ScrollableSegmentedControl from '#inputs/ScrollableSegmentedControl.vue';
+import { useResizeObserver } from '#inputs/hooks/useResizeObserver.ts';
 
 const attrs = withDefaults(
     defineProps<SaveViewProps>(),
@@ -240,7 +241,7 @@ useScrollListener(scrollElement, () => {
     throttledUpdateVisible();
 });
 
-watch([visibleCategories, categoryRows], () => {
+function updateSeeker() {
     // Update seek height
     let height = 0;
     let yOffset = 0;
@@ -272,6 +273,20 @@ watch([visibleCategories, categoryRows], () => {
     }
     seekeryOffset.value = yOffset;
     seekerHeight.value = height;
+}
+
+watch([visibleCategories, categoryRows], () => {
+    updateSeeker();
+});
+
+const categoryRowElements = computed(() => (categoryRows.value ?? []).flatMap((row) => {
+    const el = row?.$el as HTMLElement | null;
+    return el instanceof HTMLElement ? [el] : [];
+}));
+
+// On size change of HTML-element of category -> update the seeker
+useResizeObserver(categoryRowElements, () => {
+    updateSeeker();
 });
 
 const forceVisibleCategory = shallowRef<CategorizedViewCategory | null>(null);
