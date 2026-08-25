@@ -17,8 +17,9 @@
             <p v-else-if="recordFileAnswer" class="style-definition-text">
                 <span v-if="!recordFileAnswer.file">{{ $t('%Rs') }}</span>
                 <template v-else>
-                    <button type="button" class="button text" @click="download(recordFileAnswer.file)">
-                        <span class="icon download" />
+                    <button type="button" class="button text" :disabled="downloadingFiles.has(recordFileAnswer.file.id)" @click="download(recordFileAnswer.file)">
+                        <Spinner v-if="downloadingFiles.has(recordFileAnswer.file.id)" class="inline icon-spacer" />
+                        <span v-else class="icon download" />
                         <span>{{ recordFileAnswer.file.name }}</span>
                     </button>
                 </template>
@@ -67,10 +68,14 @@
 </template>
 
 <script lang="ts" setup generic="T extends ObjectWithRecords">
-import type { File, ObjectWithRecords, RecordCategory } from '@stamhoofd/structures';
-import { PermissionLevel, RecordCheckboxAnswer, RecordFileAnswer } from '@stamhoofd/structures';
-import { computed } from 'vue';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import type { ObjectWithRecords, RecordCategory } from '@stamhoofd/structures';
+import { File, PermissionLevel, RecordCheckboxAnswer, RecordFileAnswer } from '@stamhoofd/structures';
+import { computed, ref } from 'vue';
+import Spinner from '#Spinner.vue';
 import { useAppContext } from '#context/appContext.ts';
+import { useContext } from '#hooks/useContext.ts';
 import { downloadFile } from '../../helpers/downloadFile.ts';
 import { Toast } from '../../overlays/Toast';
 
@@ -88,6 +93,9 @@ const props = withDefaults(
 );
 
 const app = useAppContext();
+const context = useContext();
+const owner = useRequestOwner();
+const downloadingFiles = ref(new Set<string>());
 const isAdmin = props.isAdmin ?? (app === 'dashboard' || app === 'admin');
 const filterOptions = isAdmin
     ? undefined
@@ -121,11 +129,43 @@ const isAllCheckboxAnswers = computed(() => {
     return recordsWithAnswers.value.every(({ recordCheckboxAnswer }) => recordCheckboxAnswer);
 });
 
+/**
+ * A private file can only be read with a signed url, and that url expires - it is also cleared when the answer
+ * is read from local storage. In that case we ask the server for a new one, which it only hands out for a file
+ * that carries a valid signature.
+ */
+async function getDownloadUrl(file: File): Promise<string> {
+    if (!file.isPrivate || file.signedUrl) {
+        return file.getPublicPath();
+    }
+
+    const response = await context.value.optionalAuthenticatedServer.request({
+        method: 'POST',
+        path: '/file-signed-url',
+        body: file,
+        decoder: File as Decoder<File>,
+        shouldRetry: false,
+        owner,
+    });
+
+    return response.data.getPublicPath();
+}
+
 // A file of an answer is uploaded by a member, so we download it instead of sending anyone to its url
 function download(file: File) {
-    downloadFile(file.getPublicPath(), file.name ?? $t('%yU')).catch((e) => {
-        Toast.fromError(e).show();
-    });
+    if (downloadingFiles.value.has(file.id)) {
+        return;
+    }
+    downloadingFiles.value.add(file.id);
+
+    getDownloadUrl(file)
+        .then(url => downloadFile(url, file.name ?? $t('%yU')))
+        .catch((e) => {
+            Toast.fromError(e).show();
+        })
+        .finally(() => {
+            downloadingFiles.value.delete(file.id);
+        });
 }
 
 </script>
