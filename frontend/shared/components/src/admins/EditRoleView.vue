@@ -107,14 +107,8 @@
             </CategorizedBox>
 
             <CategorizedBox v-if="showGroupsBox" icon="group" :title="$t('%Z7')">
-                <template v-if="canAddGroups" #buttons>
-                    <button class="button text only-icon-smartphone" type="button" @click="addGroups">
-                        <span class="icon add" />
-                        <span>{{ $t('Meer toevoegen') }}</span>
-                    </button>
-                </template>
-
-                <STList>
+                <Spinner v-if="loadingGroups" />
+                <STList v-else>
                     <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.Groups, PermissionsResourceKey.All)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.All, name: $t('%L8'), type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
 
                     <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.Groups, PermissionsResourceKey.CurrentPeriod)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.CurrentPeriod, name: $t('Alle leden van de huidige periode'), type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
@@ -233,14 +227,16 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import CategorizedBox from '#layout/categorized-view/CategorizedBox.vue';
 import CategorizedView from '#layout/categorized-view/CategorizedView.vue';
 import Spinner from '#Spinner.vue';
-import type { OrganizationRegistrationPeriod, PermissionRoleDetailed, User, WebshopPreview } from '@stamhoofd/structures';
-import { AccessRight, getGroupTypeName, getPermissionLevelName, getPermissionLevelNumber, getUnlistedResources, GroupType, maximumPermissionlevel, PermissionLevel, PermissionRoleForResponsibility, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
+import type { Group, PermissionRoleDetailed, User, WebshopPreview } from '@stamhoofd/structures';
+import { AccessRight, getPermissionLevelName, getPermissionLevelNumber, getUnlistedResources, maximumPermissionlevel, PermissionLevel, PermissionRoleForResponsibility, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
+import { useGetGroupsById } from '@stamhoofd/networking/hooks/useGetGroups';
 import type { Ref } from 'vue';
-import { computed, ref } from 'vue';
+import { computed, ref, shallowRef, watch } from 'vue';
 import AccessRightPermissionRow from './components/AccessRightPermissionRow.vue';
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
 import { useAdmins } from './hooks/useAdmins';
+import { Toast } from '#overlays/Toast.ts';
 
 const errors = useErrors();
 const auth = useAuth();
@@ -280,6 +276,7 @@ const { sortedAdmins, loading, getUnloadedPermissions } = useAdmins();
 const organization = useOrganization();
 const platform = usePlatform();
 const { patched, addPatch, hasChanges, patch } = usePatch(props.role);
+const getGroupsById = useGetGroupsById();
 const webshops: Ref<WebshopPreview[]> = computed(() => organization.value?.webshops ?? []);
 const tags = computed(() => platform.value.config.tags);
 const recordCategories = computed(() => {
@@ -305,42 +302,69 @@ const senders = computed(() => {
     return platform.value.privateConfig?.emails ?? [];
 });
 
-const allRoles = computed(() => [patched.value, ...props.inheritedRoles]);
-
-/**
- * The resources of a type that are explicitly granted by this role or one of the inherited roles,
- * named after the name that was stored when the permission was added.
- */
-function grantedResources(type: PermissionsResourceType) {
-    const rows: { id: string; name: string; type: PermissionsResourceType }[] = [];
+const configuredGroupIds = computed(() => {
     const ids = new Set<string>();
 
-    for (const role of allRoles.value) {
-        for (const resource of getUnlistedResources(type, role, [])) {
-            if (ids.has(resource.id) || !resourceAddsAccess(type, resource.id)) {
-                continue;
+    for (const role of [patched.value, ...props.inheritedRoles]) {
+        for (const id of role.resources.get(PermissionsResourceType.Groups)?.keys() ?? []) {
+            if (id !== PermissionsResourceKey.All && id !== PermissionsResourceKey.CurrentPeriod) {
+                ids.add(id);
             }
-            ids.add(resource.id);
-            rows.push(resource);
         }
     }
 
-    rows.sort((a, b) => Sorter.byStringValue(a.name, b.name));
-    return rows;
-}
+    return [...ids];
+});
 
-function resourceAddsAccess(type: PermissionsResourceType, id: string) {
-    return allRoles.value.some((role) => {
-        const resource = role.resources.get(type)?.get(id);
-        return !!resource && addsAccess(resource, type);
+function groupAddsAccess(id: string) {
+    return [patched.value, ...props.inheritedRoles].some((role) => {
+        const resource = role.resources.get(PermissionsResourceType.Groups)?.get(id);
+        return !!resource && addsAccess(resource, PermissionsResourceType.Groups);
     });
 }
 
-/** What the role already grants for every resource of a type, in every period. */
+const loadingGroups = ref(false);
+const resolvedGroups = shallowRef(new Map<string, Group>());
+
+const missingGroupIds = shallowRef(new Set<string>());
+
+watch(configuredGroupIds, async (ids) => {
+    const unknownIds = ids.filter(id => !resolvedGroups.value.has(id) && !missingGroupIds.value.has(id));
+    if (unknownIds.length === 0) {
+        return;
+    }
+
+    loadingGroups.value = true;
+    try {
+        const groups = await getGroupsById(unknownIds);
+
+        const resolved = new Map(resolvedGroups.value);
+        for (const group of groups) {
+            resolved.set(group.id, group);
+        }
+        resolvedGroups.value = resolved;
+
+        const missing = new Set(missingGroupIds.value);
+        for (const id of unknownIds) {
+            if (!resolved.has(id)) {
+                missing.add(id);
+            }
+        }
+        missingGroupIds.value = missing;
+    } catch (e) {
+        Toast.fromError(e).show();
+    }
+    loadingGroups.value = false;
+}, { immediate: true });
+
+/**
+ * What the role already grants for every resource of a type, in every period.
+ * The row for the current period is left out: which resources it covers changes at the period rollover.
+ */
 function getResourceCoverage(type: PermissionsResourceType, options?: { withAllResources?: boolean }) {
     const coverage = ResourcePermissions.create({});
 
-    for (const role of allRoles.value) {
+    for (const role of [patched.value, ...props.inheritedRoles]) {
         coverage.add(ResourcePermissions.create({ level: role.level }));
 
         const all = (options?.withAllResources ?? true) ? role.resources.get(type)?.get(PermissionsResourceKey.All) : undefined;
@@ -360,68 +384,27 @@ function canAddAccess(type: PermissionsResourceType, key: PermissionsResourceKey
     return getResourceCoverage(type, { withAllResources: key === PermissionsResourceKey.CurrentPeriod }).level !== PermissionLevel.Full;
 }
 
-const groupResources = computed(() => grantedResources(PermissionsResourceType.Groups));
+const groupResources = computed(() => {
+    const rows: { id: string; name: string; type: PermissionsResourceType }[] = [];
 
-const categoryResources = computed(() => grantedResources(PermissionsResourceType.GroupCategories));
+    for (const id of configuredGroupIds.value) {
+        const group = resolvedGroups.value.get(id);
+        if (!group || !groupAddsAccess(id)) {
+            continue;
+        }
 
-const canAddGroups = computed(() => !!organization.value && maximumPermissionlevel(
-    basePermission.value,
-    patched.value.resources.get(PermissionsResourceType.Groups)?.get('')?.level ?? PermissionLevel.None,
-) !== PermissionLevel.Full);
+        rows.push({
+            id,
+            name: group.settings.getNameWithPeriod(),
+            type: PermissionsResourceType.Groups,
+        });
+    }
 
-async function addGroups() {
-    await present({
-        components: [
-            new ComponentWithProperties(NavigationController, {
-                root: AsyncComponent(() => import('./EditResourcePermissionsView.vue'), {
-                    title: $t('Inschrijvingsgroepen'),
-                    role: patched.value,
-                    inheritedRoles: props.inheritedRoles,
-                    type: PermissionsResourceType.Groups,
-                    configurableAccessRights: [AccessRight.EventWrite],
-                    getResources: (period: OrganizationRegistrationPeriod) => [
-                        ...period.adminCategoryTree.getAllGroups(),
-                        ...period.waitingLists,
-                    ].map(group => ({
-                        id: group.id,
-                        name: group.settings.getNameWithPeriod(),
-                        type: PermissionsResourceType.Groups,
-                        description: group.type === GroupType.WaitingList ? getGroupTypeName(group.type) : undefined,
-                    })),
-                    saveHandler: addPatch,
-                }),
-            }),
-        ],
-        modalDisplayStyle: 'popup',
-    });
-}
+    rows.sort((a, b) => Sorter.byStringValue(a.name, b.name));
+    return rows;
+});
 
-async function addCategories() {
-    await present({
-        components: [
-            new ComponentWithProperties(NavigationController, {
-                root: AsyncComponent(() => import('./EditResourcePermissionsView.vue'), {
-                    title: $t('Inschrijvingscategorieën'),
-                    role: patched.value,
-                    inheritedRoles: props.inheritedRoles,
-                    type: PermissionsResourceType.GroupCategories,
-                    configurableAccessRights: [AccessRight.OrganizationCreateGroups],
-                    getResources: (period: OrganizationRegistrationPeriod) => period.adminCategoryTree.getAllCategories().map(category => ({
-                        id: category.id,
-                        name: category.getName(period) + ' (' + period.period.nameShort + ')',
-                        type: PermissionsResourceType.GroupCategories,
-                    })),
-                    saveHandler: addPatch,
-                }),
-            }),
-        ],
-        modalDisplayStyle: 'popup',
-    });
-}
-
-const showGroupsBox = computed(() => organization.value?.meta?.packages.useMembers || groupResources.value.length > 0);
-
-const showCategoriesBox = computed(() => organization.value?.meta?.packages.useMembers || categoryResources.value.length > 0);
+const showGroupsBox = computed(() => organization.value?.meta?.packages.useMembers || !!patched.value.resources.get(PermissionsResourceType.Groups)?.size || configuredGroupIds.value.length > 0);
 
 const save = async () => {
     if (saving.value || deleting.value) {
