@@ -50,11 +50,19 @@ export function minimumPermissionLevel(...levels: PermissionLevel[]): Permission
     return min;
 }
 
-export function getPermissionLevelName(level: PermissionLevel, resourceType: PermissionsResourceType | null = null): string {
+export function getPermissionLevelName(level: PermissionLevel, resourceType: PermissionsResourceType | 'base' = 'base'): string {
     if (resourceType === PermissionsResourceType.Senders) {
         switch (level) {
             case PermissionLevel.Read: return $t(`%1DG`);
             case PermissionLevel.Write: return $t(`%1DH`);
+        }
+    }
+    if (resourceType === 'base') {
+        switch (level) {
+            case PermissionLevel.None: return $t('Geen');
+            case PermissionLevel.Read: return $t('Alles lezen');
+            case PermissionLevel.Write: return $t('Alles lezen en bewerken');
+            case PermissionLevel.Full: return $t('Volledige toegang');
         }
     }
     switch (level) {

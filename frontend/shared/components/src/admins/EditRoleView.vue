@@ -1,68 +1,75 @@
 <template>
-    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save">
-        <h1>
-            {{ title }}
-        </h1>
-
+    <CategorizedView :title="title" :loading="saving" :deleting="deleting" :disabled="!hasChanges" @save="save" v-on="canDelete ? {delete: doDelete} : {}">
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox v-if="!isForResponsibility" error-fields="name" :error-box="errors.errorBox" :title="$t(`%vC`)">
-            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`%ZF`)">
-        </STInputBox>
-
-        <hr><h2>{{ $t('%Yy') }}</h2>
-        <p>{{ $t('%Yz') }}</p>
-
-        <STList>
-            <STListItem :selectable="true" element-name="label">
-                <template #left>
-                    <Radio v-model="basePermission" value="None" :disabled="lockedMinimumLevel !== PermissionLevel.None" />
-                </template>
-                <h3 class="style-title-list">
-                    {{ $t('%1FW') }}
-                </h3>
-                <p v-if="basePermission === 'None'" class="style-description-small">
-                    {{ $t('%Z0') }}
+        <CategorizedBox v-if="!isForResponsibility" icon="settings" :title="$t('Algemeen')">
+            <template #summary>
+                <p class="style-description-small">
+                    {{ name }}
                 </p>
-            </STListItem>
+            </template>
 
-            <STListItem v-if="basePermission === PermissionLevel.Read || auth.hasPlatformFullAccess()" :selectable="true" element-name="label">
-                <template #left>
-                    <Radio v-model="basePermission" :value="PermissionLevel.Read" />
-                </template>
-                <h3 class="style-title-list">
-                    {{ $t('%1eW') }}
-                </h3>
-            </STListItem>
+            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%vC`)">
+                <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`%ZF`)">
+            </STInputBox>
+        </CategorizedBox>
 
-            <STListItem v-if="basePermission === PermissionLevel.Write || auth.hasPlatformFullAccess()" :selectable="true" element-name="label">
-                <template #left>
-                    <Radio v-model="basePermission" :value="PermissionLevel.Write" />
-                </template>
-                <h3 class="style-title-list">
-                    {{ $t('%1eL') }}
-                </h3>
-            </STListItem>
-
-            <STListItem :selectable="true" element-name="label">
-                <template #left>
-                    <Radio v-model="basePermission" :value="PermissionLevel.Full" :disabled="lockedMinimumLevel !== PermissionLevel.None" />
-                </template>
-                <h3 class="style-title-list">
-                    {{ $t('%Z1') }}
-                </h3>
-                <p v-if="basePermission === PermissionLevel.Full" class="style-description-small">
-                    {{ $t('%Z2') }}
+        <CategorizedBox icon="key" :title="$t('%Yy')">
+            <template #summary>
+                <p class="style-description-small">
+                    {{ getPermissionLevelName(basePermission) }}
                 </p>
-            </STListItem>
-        </STList>
+            </template>
+
+            <p>{{ $t('%Yz') }}</p>
+
+            <STList>
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Radio v-model="basePermission" value="None" :disabled="lockedMinimumLevel !== PermissionLevel.None" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ getPermissionLevelName(PermissionLevel.None) }}
+                    </h3>
+                    <p v-if="basePermission === 'None'" class="style-description-small">
+                        {{ $t('%Z0') }}
+                    </p>
+                </STListItem>
+
+                <STListItem v-if="basePermission === PermissionLevel.Read || auth.hasPlatformFullAccess()" :selectable="true" element-name="label">
+                    <template #left>
+                        <Radio v-model="basePermission" :value="PermissionLevel.Read" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ getPermissionLevelName(PermissionLevel.Read) }}
+                    </h3>
+                </STListItem>
+
+                <STListItem v-if="basePermission === PermissionLevel.Write || auth.hasPlatformFullAccess()" :selectable="true" element-name="label">
+                    <template #left>
+                        <Radio v-model="basePermission" :value="PermissionLevel.Write" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ getPermissionLevelName(PermissionLevel.Write) }}
+                    </h3>
+                </STListItem>
+
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Radio v-model="basePermission" :value="PermissionLevel.Full" :disabled="lockedMinimumLevel !== PermissionLevel.None" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ getPermissionLevelName(PermissionLevel.Full) }}
+                    </h3>
+                    <p v-if="basePermission === PermissionLevel.Full" class="style-description-small">
+                        {{ $t('%Z2') }}
+                    </p>
+                </STListItem>
+            </STList>
+        </CategorizedBox>
 
         <template v-if="basePermission !== PermissionLevel.Full">
-            <template v-if="app === 'admin' && (scope === null || scope === 'admin')">
-                <hr><h2>
-                    {{ $t('%Z3') }}
-                </h2>
-
+            <CategorizedBox v-if="app === 'admin' && (scope === null || scope === 'admin')" icon="company" :title="$t('%Z3')">
                 <p>{{ $t('%Z4') }}</p>
 
                 <STList>
@@ -72,12 +79,9 @@
 
                     <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.OrganizationTags, patched, tags)" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.EventWrite, AccessRight.OrganizationFinanceDirector, AccessRight.OrganizationEventNotificationReviewer]" type="resource" :unlisted="true" @patch:role="addPatch" />
                 </STList>
-            </template>
+            </CategorizedBox>
 
-            <template v-if="categories.length">
-                <hr><h2>
-                    {{ $t('%Z5') }}
-                </h2>
+            <CategorizedBox v-if="categories.length" icon="folder" :title="$t('%Z5')">
                 <p>{{ $t('%Z6') }}</p>
 
                 <STList>
@@ -85,26 +89,18 @@
 
                     <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.GroupCategories, patched, categories)" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" :unlisted="true" @patch:role="addPatch" />
                 </STList>
-            </template>
+            </CategorizedBox>
 
-            <div v-if="enableMemberModule && groups.length" class="container">
-                <hr><h2>
-                    {{ $t('%Z7') }}
-                </h2>
-
+            <CategorizedBox v-if="enableMemberModule && groups.length" icon="group" :title="$t('%Z7')">
                 <STList>
                     <ResourcePermissionRow :role="patched" :inherited-roles="inheritedRoles" :resource="{id: '', name: $t('%L8'), type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
                     <ResourcePermissionRow v-for="group in groups" :key="group.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: group.id, name: group.settings.name + ' ('+(group.settings.period?.nameShort ?? '?')+')', type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
 
                     <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.Groups, patched, groups)" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" :unlisted="true" @patch:role="addPatch" />
                 </STList>
-            </div>
+            </CategorizedBox>
 
-            <div v-if="senders.length" class="container">
-                <hr>
-                <h2>
-                    {{ $t('%1DK') }}
-                </h2>
+            <CategorizedBox v-if="senders.length" icon="email" :title="$t('%1DK')">
                 <p>{{ $t('%1D6') }}</p>
 
                 <STList>
@@ -137,10 +133,9 @@
                     />
                     <AccessRightPermissionRow :access-right="AccessRight.ManageEmailTemplates" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
                 </STList>
-            </div>
+            </CategorizedBox>
 
-            <div v-if="enableWebshopModule" class="container">
-                <hr><h2>{{ $t('%1Pd') }}</h2>
+            <CategorizedBox v-if="enableWebshopModule" icon="basket" :title="$t('%1Pd')">
                 <p>{{ $t('%Z8') }}</p>
 
                 <STList>
@@ -149,12 +144,9 @@
                     <ResourcePermissionRow v-for="webshop in webshops" :key="webshop.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: webshop.id, name: webshop.meta.name, type: PermissionsResourceType.Webshops }" :configurable-access-rights="webshop.hasTickets ? [AccessRight.WebshopScanTickets] : []" type="resource" @patch:role="addPatch" />
                     <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.Webshops, patched, webshops)" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.WebshopScanTickets]" type="resource" :unlisted="true" @patch:role="addPatch" />
                 </STList>
-            </div>
+            </CategorizedBox>
 
-            <div v-if="(app !== 'admin' || scope === 'organization') && organization?.meta.packages.useMembers" class="container">
-                <hr><h2>
-                    {{ $t('%Z9') }}
-                </h2>
+            <CategorizedBox v-if="(app !== 'admin' || scope === 'organization') && organization?.meta.packages.useMembers" icon="privacy" :title="$t('%Z9')">
                 <p>{{ $t('%ZA') }}</p>
 
                 <STList>
@@ -166,40 +158,22 @@
 
                     <ResourcePermissionRow :role="patched" :resource="{id: '', name: $t('%1eC'), type: PermissionsResourceType.RecordCategories }" :inherited-roles="inheritedRoles" :configurable-access-rights="[]" type="resource" @patch:role="addPatch" />
 
-                    <ResourcePermissionRow v-for="{recordCategory, organization} in recordCategories" :key="recordCategory.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: recordCategory.id, name: recordCategory.name.toString(), type: PermissionsResourceType.RecordCategories, description: !organization ? $t('%CS') : $t('%CT') }" :configurable-access-rights="[]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow v-for="{recordCategory, organization: recordCategoryOrganization} in recordCategories" :key="recordCategory.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: recordCategory.id, name: recordCategory.name.toString(), type: PermissionsResourceType.RecordCategories, description: !recordCategoryOrganization ? $t('%CS') : $t('%CT') }" :configurable-access-rights="[]" type="resource" @patch:role="addPatch" />
 
                     <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.RecordCategories, patched, recordCategories.map(r => r.recordCategory))" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[]" type="resource" :unlisted="true" @patch:role="addPatch" />
                 </STList>
-            </div>
+            </CategorizedBox>
 
-            <template v-if="app !== 'admin' || scope === 'organization'">
-                <hr><h2>{{ $t('%tx') }}</h2>
-
+            <CategorizedBox v-if="app !== 'admin' || scope === 'organization'" icon="card" :title="$t('%tx')">
                 <STList>
                     <AccessRightPermissionRow :access-right="AccessRight.OrganizationFinanceDirector" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
 
                     <AccessRightPermissionRow :access-right="AccessRight.OrganizationManagePayments" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
                 </STList>
-            </template>
+            </CategorizedBox>
         </template>
 
-        <div v-if="!isNew && deleteHandler" class="container">
-            <hr><h2 v-if="responsibility">
-                {{ $t('%ZB') }}
-            </h2>
-            <h2 v-else>
-                {{ $t('%ZC') }}
-            </h2>
-
-            <button class="button secundary danger" type="button" @click="doDelete">
-                <span class="icon trash" />
-                <span>{{ $t('%CJ') }}</span>
-            </button>
-        </div>
-
-        <template v-if="!isNew && !isForResponsibility">
-            <hr><h2>{{ $t('%ZD') }}</h2>
-
+        <CategorizedBox v-if="!isNew && !isForResponsibility" icon="user" :title="$t('%ZD')">
             <Spinner v-if="loading" />
             <template v-else>
                 <p v-if="filteredAdmins.length === 0" class="info-box">
@@ -216,8 +190,8 @@
                     </STListItem>
                 </STList>
             </template>
-        </template>
-    </SaveView>
+        </CategorizedBox>
+    </CategorizedView>
 </template>
 
 <script setup lang="ts">
@@ -232,10 +206,11 @@ import { useAuth } from '#hooks/useAuth.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import SaveView from '#navigation/SaveView.vue';
+import CategorizedBox from '#layout/categorized-view/CategorizedBox.vue';
+import CategorizedView from '#layout/categorized-view/CategorizedView.vue';
 import Spinner from '#Spinner.vue';
 import type { Group, GroupCategory, PermissionRoleDetailed, User, WebshopPreview } from '@stamhoofd/structures';
-import { AccessRight, getUnlistedResources, maximumPermissionlevel, PermissionLevel, PermissionRoleForResponsibility, PermissionsResourceType } from '@stamhoofd/structures';
+import { AccessRight, getUnlistedResources, maximumPermissionlevel, PermissionLevel, PermissionRoleForResponsibility, PermissionsResourceType, getPermissionLevelName } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import AccessRightPermissionRow from './components/AccessRightPermissionRow.vue';
@@ -267,14 +242,7 @@ const enableWebshopModule = computed(() => (organization.value?.meta?.packages.u
 const enableMemberModule = computed(() => organization.value?.meta?.packages.useMembers ?? false);
 const pop = usePop();
 const isForResponsibility = props.role instanceof PermissionRoleForResponsibility;
-const responsibility = computed(() => {
-    if (!(props.role instanceof PermissionRoleForResponsibility)) {
-        return null;
-    }
-
-    const rid = props.role.responsibilityId;
-    return platform.value.config.responsibilities.find(r => r.id === rid) ?? null;
-});
+const canDelete = !props.isNew && !!props.deleteHandler;
 
 const title = computed(() => {
     if (props.role instanceof PermissionRoleForResponsibility) {
