@@ -91,6 +91,9 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'redirecter', path: 'backend/app/redirecter', needsDatabase: false },
     { name: 'statistics-syncer', path: 'backend/app/statistics-syncer', needsDatabase: true, typecheck: true },
     { name: 'api', path: 'backend/app/api', needsDatabase: true, typecheck: true },
+    // Browser tests (vitest browser mode); need a Playwright Chromium: `yarn playwright install chromium`.
+    { name: 'components', path: 'frontend/shared/components', needsDatabase: false },
+    { name: 'networking', path: 'frontend/shared/networking', needsDatabase: false },
 ];
 const sharedBuildReadyFile = `.development/cli/generated/shared-build-${process.pid}.ready`;
 

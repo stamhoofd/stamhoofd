@@ -262,13 +262,16 @@ yarn stam clean metabase
 
 ```bash
 yarn stam test unit                                 # every unit package (excludes Playwright)
-yarn stam test api                                  # one package (api, models, sql, structures, renderer, redirecter, queues, utility, sgv, object-differ, eslint)
+yarn stam test api                                  # one package (api, models, sql, structures, renderer, redirecter, queues, utility, sgv, object-differ, eslint, cli, components, networking)
 yarn stam test unit SomeFile                         # filter by filename across all packages
 yarn stam test structures bundle-discounts           # package + filename filter
 yarn stam test structures -t 'partial test name'     # package + test-name filter (passed to vitest -t)
 yarn stam test api --skip-build                      # skip the automatic build:shared step
 yarn stam test api --clear                           # reset the test database (drop its volume) before running
+yarn stam test components ImageComponent             # frontend browser tests (vitest browser mode)
 ```
+
+`components` and `networking` run in vitest browser mode and need a Playwright Chromium (`yarn playwright install chromium`); they are part of `stam test unit` too.
 
 Run Playwright tests with:
 

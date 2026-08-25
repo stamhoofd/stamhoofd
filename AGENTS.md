@@ -48,7 +48,7 @@ From repo root: `yarn lint` · `yarn typecheck`. **`yarn stam test` is the one g
 
 ```bash
 yarn stam test unit                 # every unit package (excludes Playwright)
-yarn stam test api                  # one package: api models sql structures renderer redirecter queues utility sgv object-differ eslint cli
+yarn stam test api                  # one package: api models sql structures renderer redirecter queues utility sgv object-differ eslint cli components networking
 yarn stam test unit SomeFile        # filename filter across all packages
 yarn stam test structures bundle-discounts          # package + filename filter
 yarn stam test structures -t 'partial test name'    # package + test-name filter (-t → vitest -t)
@@ -60,7 +60,7 @@ For running tests, your sandbox needs permission to open ports.
 
 The DB MySQL container is shut down after each run, but its data volume persists (per worktree) so migrations aren't reinitialized every time — use `--clear` for a clean database.
 
-**Never hand-roll test infrastructure.** The isolated MySQL, migrations, `build:shared`, and env are all provisioned by `yarn stam test` — don't spin up Docker, create databases, run `build:shared`, or set `DB_PORT`/env vars yourself. If it doesn't work, STOP and ask the user. Tests use **Vitest**; only `api`, `models`, and `sql` need MySQL. The frontend dashboard/web-app "test" is a `vue-tsc` typecheck (run via `yarn typecheck`); UI behavior is covered by Playwright.
+**Never hand-roll test infrastructure.** The isolated MySQL, migrations, `build:shared`, and env are all provisioned by `yarn stam test` — don't spin up Docker, create databases, run `build:shared`, or set `DB_PORT`/env vars yourself. If it doesn't work, STOP and ask the user. Tests use **Vitest**; only `api`, `models`, and `sql` need MySQL. `components` and `networking` are vitest browser-mode tests and need a Playwright Chromium (`yarn playwright install chromium`). The frontend dashboard/web-app "test" is a `vue-tsc` typecheck (run via `yarn typecheck`); UI behavior is covered by Playwright.
 
 ### Playwright
 

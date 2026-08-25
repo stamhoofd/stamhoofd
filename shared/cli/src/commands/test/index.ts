@@ -22,6 +22,7 @@ export default class Test extends BaseCommand {
         'stam test structures bundle-discounts -t "Only these tests"',
         'stam test structures -t "Only these tests"',
         'stam test api --skip-build',
+        'stam test components ImageComponent',
     ];
 
     // strict = false so unknown first arguments (package names, filename filters) fall through to
