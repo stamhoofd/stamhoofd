@@ -34,7 +34,7 @@ export class Replacement extends AutoEncoder {
     /**
      * Files that will be attached to the email when this replacement is used in the email html body.
      */
-    @field({ decoder: new ArrayDecoder(File), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(File), version: 413 })
     files: File[] = [];
 
     /**
