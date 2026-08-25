@@ -13,7 +13,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
-import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
+import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 import { NumberFilterBuilder } from '../NumberUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
 import type { UIFilter, UIFilterBuilder } from '../UIFilter';
@@ -22,6 +22,7 @@ import { useGetOrganizationUIFilterBuilders } from './organizations';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
 import { getFilterBuildersForOptionMenus } from './option-menus';
 import { getFilterBuildersForRecordCategories } from './record-categories';
+import { simpleMultipleChoiceFilterFactory } from './helpers';
 
 export function useAdvancedRegistrationWithMemberUIFilterBuilders({
     multipleGroups,
@@ -51,29 +52,45 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({
             key: 'registeredAt',
         }));
 
-        if (currentGroup && currentGroup.settings.optionMenus.length > 0) {
-            const optionMenusFilters = getFilterBuildersForOptionMenus(currentGroup.settings.optionMenus);
+        if (currentGroup) {
+            const groupPriceFilters = simpleMultipleChoiceFilterFactory({
+                name: $t('Prijs'),
+                filterMode: MultipleChoiceUIFilterMode.Or,
+                options: currentGroup.settings.prices.map(p => ({
+                    name: p.name.toString(),
+                    value: p.id,
+                    filter: {
+                        groupPrice: p.id,
+                    },
+                })),
+            });
 
-            all.push(
-                ...optionMenusFilters,
-            );
-        }
-        if (currentGroup && currentGroup.settings.recordCategories.length > 0) {
-            const recordCategoriesFilters = getFilterBuildersForRecordCategories(currentGroup.settings.recordCategories);
+            all.push(groupPriceFilters);
 
-            recordCategoriesFilters.unshift(
-                new GroupUIFilterBuilder({
+            if (currentGroup.settings.optionMenus.length > 0) {
+                const optionMenusFilters = getFilterBuildersForOptionMenus(currentGroup.settings.optionMenus);
+
+                all.push(
+                    ...optionMenusFilters,
+                );
+            }
+            if (currentGroup.settings.recordCategories.length > 0) {
+                const recordCategoriesFilters = getFilterBuildersForRecordCategories(currentGroup.settings.recordCategories);
+
+                recordCategoriesFilters.unshift(
+                    new GroupUIFilterBuilder({
+                        builders: recordCategoriesFilters,
+                    }),
+                );
+
+                all.push(new GroupUIFilterBuilder({
+                    name: $t('%8i'),
                     builders: recordCategoriesFilters,
-                }),
-            );
-
-            all.push(new GroupUIFilterBuilder({
-                name: $t('%8i'),
-                builders: recordCategoriesFilters,
-                wrapper: {
-                    details: FilterWrapperMarker,
-                },
-            }));
+                    wrapper: {
+                        details: FilterWrapperMarker,
+                    },
+                }));
+            }
         }
 
         if (app === 'admin' && STAMHOOFD.userMode === 'platform') {

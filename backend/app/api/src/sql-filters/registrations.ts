@@ -55,6 +55,11 @@ export const registrationFilterCompilers: SQLFilterDefinitions = {
             }),
         },
     ),
+    groupPrice: createColumnFilter({
+        expression: SQL.jsonExtract(SQL.column('groupPrice'), '$.value.id'),
+        type: SQLValueType.JSONString,
+        nullable: true,
+    }),
     /**
      * There is a bug in MySQL 8 that is fixed in 9.3
      * where EXISTS (select * from json_table(...)) does not work
