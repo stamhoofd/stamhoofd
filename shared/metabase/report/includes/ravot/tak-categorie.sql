@@ -1,8 +1,8 @@
 -- The takken of ravot, by the id they carry in the platform configuration.
 --
--- Said here rather than left to the `category` column of `default_age_groups`, for the reasons
--- `../tak-categorie.sql` gives: the column survives no rebuild of the statistics database, and the
--- UPDATE that fills it again is written down nowhere.
+-- Said here rather than in a hand-filled column of the statistics database, for the reasons
+-- `../tak-categorie.sql` gives. This is the whole answer, so a tak of ravot that is missing here
+-- counts as nothing at all, and a tak added to the platform configuration has to be added here too.
 --
 -- The ondersteunende leden are volwassenen and may not be categorised as leiding: the
 -- omkaderingscijfer and the GTP index would then read them as leiding that the kinderen of an eenheid
@@ -25,5 +25,4 @@ CASE dag.id
     WHEN 'e3ec8d48-0d10-4f5d-9e50-dd3151c6666b' THEN 'leader'  -- Leiding
     -- Volwassenen
     WHEN 'a28d290c-af71-4282-92cc-2224a18d3091' THEN 'adult'   -- Ondersteunende leden
-    ELSE dag.category
 END AS category

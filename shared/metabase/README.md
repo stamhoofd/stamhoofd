@@ -61,11 +61,16 @@ no such field, and the ages do not answer it, since leiding and stam carry no ag
 kinderen need not carry one either.
 
 `includes/takken.sql` is where it is settled, and `includes/tak-categorie.sql` is the answer itself.
-Unqualified, that reads the `category` column the statistics database keeps on `default_age_groups`,
-which is filled in by hand. `includes/keeo/tak-categorie.sql` and `includes/ravot/tak-categorie.sql`
-instead name that platform's takken by id, and leave the column behind them as the fallback, so a tak
-they do not name — the years imported from the client's own statistics, most of all — keeps whatever
-was set for it.
+`includes/keeo/tak-categorie.sql` and `includes/ravot/tak-categorie.sql` name that platform's takken
+by id; the unqualified fragment says nothing, which is what a platform that has not written its list
+is left with.
+
+The statistics database used to hold a hand-filled `category` column for this instead. It is dropped:
+a column no rebuild survives, refilled by an UPDATE recorded nowhere, is not somewhere an answer can
+live. A list in the query is in git, is checked by the tests, and stands in front of whoever opens
+the question in Metabase. The cost is that it is now the whole answer — a tak missing from its
+platform's list counts as nothing at all, so a tak added to the platform configuration has to be
+added here too.
 
 Ravot's list is the one to read before changing either. Its ondersteunende leden are volwassenen and
 may not be categorised as leiding: the omkaderingscijfer and the GTP index would then count them as
@@ -73,11 +78,9 @@ leiding the kinderen of an eenheid are looked after by. The aanlevering delivers
 leiding anyway — the department has no third word for them — by naming the tak itself in
 `ravot/type-deelnemers.sql`, which only works for as long as the category does not say it.
 
-Naming them in the query is what keeps the answer readable. The column survives no rebuild of the
-statistics database, and the UPDATE that fills it again is written down nowhere; a list in the query
-is in git, is checked by the tests, and stands in front of whoever opens the question in Metabase.
-That last part only holds until the next `yarn metabase report`, which rewrites every card from these
-files — an edit made in Metabase is a correction to bring back here, not a place to keep one.
+Standing in front of the reader only holds until the next `yarn metabase report`, which rewrites every
+card from these files — an edit made in Metabase is a correction to bring back here, not a place to
+keep one.
 
 One tab is not part of the client's own report. `report/jeugdbewegingen.sql` is the dataset the
 koepel delivers to the Departement Cultuur, Jeugd en Media every september, one card per sheet of the

@@ -422,9 +422,9 @@ describe('report', () => {
             // Every tak of the platform and no more: a second row for one of them would sit under the
             // first and say nothing, which reads as a correction that was never applied.
             expect(sql.match(/WHEN '[0-9a-f-]{36}' THEN/g)!.length).toBe(12);
-            // The years imported from the client's own statistics are categorised in the column, and
-            // a tak this does not name keeps whatever was set for it.
-            expect(sql).toContain('ELSE dag.category');
+            // Nothing behind the list: the statistics database holds no category of its own, so a tak
+            // missing here is counted as nothing rather than falling back to something.
+            expect(sql).not.toContain('ELSE dag.category');
         });
 
         /**
@@ -452,18 +452,20 @@ describe('report', () => {
             }
 
             expect(sql.match(/WHEN '[0-9a-f-]{36}' THEN/g)!.length).toBe(9);
-            expect(sql).toContain('ELSE dag.category');
+            expect(sql).not.toContain('ELSE dag.category');
         });
 
         /**
-         * A platform that names none of its takken is left with the column as the whole answer, which
-         * is what the unqualified fragment is for. Both platforms with a report of their own name
-         * theirs, so this is checked against an environment that overrides nothing.
+         * A platform that names none of its takken has no answer at all -- nothing else in the
+         * statistics database holds one. The report still runs and still counts its members; every
+         * figure that divides leiding from kinderen is simply empty until the list is written. Both
+         * platforms with a report of their own name theirs, so this reads an environment that
+         * overrides nothing.
          */
-        it('leaves the category to the column in an environment that names no takken', async () => {
+        it('has no category at all in an environment that names no takken', async () => {
             const sql = cardOf(await loadReport('development'), 'nationaal', 'totaal-leden').sql;
 
-            expect(sql).toContain('dag.category AS category');
+            expect(sql).toContain('CAST(NULL AS CHAR(16)) AS category');
             expect(`names takken by id: ${/WHEN '[0-9a-f-]{36}' THEN/.test(sql)}`).toEqual('names takken by id: false');
         });
 

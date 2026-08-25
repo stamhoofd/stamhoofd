@@ -328,52 +328,9 @@ async function syncPlatformConfig(openPeriodIds: string[]): Promise<void> {
 
     await upsertRows('organization_tags', ['id', 'periodId', 'name'], perPeriod(config.tags, flattenNamedConfig), namedConfigKey);
 
-    // `category` is left out on purpose: the platform configuration has no equivalent, and listing it
-    // here would overwrite whatever was set for the takken on every run.
     await upsertRows('default_age_groups', ['id', 'periodId', 'name', 'minAge', 'maxAge'], perPeriod(config.defaultAgeGroups, (group, periodId) => flattenDefaultAgeGroup({ id: group.id, name: group.name, minAge: group.minAge, maxAge: group.maxAge }, periodId)), namedConfigKey);
     await upsertRows('platform_membership_types', ['id', 'periodId', 'name'], perPeriod(config.membershipTypes, flattenNamedConfig), namedConfigKey);
     await upsertRows('responsibilities', ['id', 'periodId', 'name'], perPeriod(config.responsibilities, flattenNamedConfig), namedConfigKey);
-
-    await carryForwardAgeGroupCategories();
-}
-
-/**
- * Give a tak the category it was given for an earlier year in the years it has none for yet.
- *
- * What a tak counts as -- kinderen, leiding or volwassenen -- is the one thing about it that nothing
- * in the administration knows: the platform configuration has no such field, and the ages do not
- * answer it, since leiding and stam carry no age range and a tak of kinderen need not carry one
- * either. It is filled in by hand, here, by whoever administers the reports.
- *
- * The sync writes a row per tak per open period, so a new werkjaar arrives with the column empty, and
- * every figure that splits by category would quietly fall back to reading ages until someone noticed.
- * This carries the answer forward instead, from that tak's most recent year that has one.
- *
- * It only ever fills a blank. A category that is already there is left exactly as it is, so a
- * correction stays in the year it was made and a year that deliberately says something else keeps
- * saying it.
- */
-async function carryForwardAgeGroupCategories(): Promise<void> {
-    const connection = getStatisticsConnection();
-
-    // The derived table is what keeps this legal: MySQL refuses an update that reads the table it
-    // writes, unless what it reads is materialised first, which the window function forces.
-    await connection.update(
-        `UPDATE \`default_age_groups\` d
-         JOIN (
-            SELECT ranked.id, ranked.category
-            FROM (
-                SELECT dag.id, dag.category, ROW_NUMBER() OVER (PARTITION BY dag.id ORDER BY p.startDate DESC) AS recency
-                FROM \`default_age_groups\` dag
-                JOIN \`registration_periods\` p ON p.id = dag.periodId
-                WHERE dag.category IS NOT NULL
-            ) ranked
-            WHERE ranked.recency = 1
-         ) latest ON latest.id = d.id
-         SET d.category = latest.category
-         WHERE d.category IS NULL`,
-        [],
-    );
 }
 
 /** The periods the sync still writes into: everything the statistics database knows, minus the frozen ones. */

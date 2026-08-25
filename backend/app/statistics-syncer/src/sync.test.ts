@@ -100,51 +100,14 @@ describe('statistics sync', () => {
     });
 
     /**
-     * What a tak counts as is the one thing about it nothing in the administration knows: the platform
-     * configuration has no such field, and the ages do not answer it either -- leiding and stam carry
-     * no age range, and a tak of kinderen need not carry one. It is filled in by hand in the
-     * statistics database, so the sync has to leave it alone and keep it going.
+     * What a tak counts as -- kinderen, leiding or volwassenen -- is not in this database at all. The
+     * platform configuration has no such field and the ages do not answer it, so the reports name
+     * their takken by id themselves, in `report/includes/<env>/tak-categorie.sql`.
      */
-    describe('the category of a tak', () => {
-        const categoriesOf = async () => Object.fromEntries((await statisticsRows('default_age_groups', ageGroup.id)).map(row => [row.periodId, row.category]));
+    it('records no category for a tak, which the reports decide themselves', async () => {
+        const columns = Object.keys((await statisticsRows('default_age_groups', ageGroup.id))[0]);
 
-        const setCategory = async (category: string | null, periodId: string) =>
-            await getStatisticsConnection().update('UPDATE `default_age_groups` SET `category` = ? WHERE `id` = ? AND `periodId` = ?', [category, ageGroup.id, periodId]);
-
-        beforeEach(async () => {
-            await getStatisticsConnection().update('UPDATE `default_age_groups` SET `category` = NULL WHERE `id` = ?', [ageGroup.id]);
-        });
-
-        it('is never written by the sync, since only the administrator of the reports knows it', async () => {
-            await syncStatistics();
-
-            expect(Object.values(await categoriesOf()).filter(category => category !== null)).toEqual([]);
-        });
-
-        /**
-         * A new werkjaar arrives as a fresh row per tak. Left empty, every figure that splits by
-         * category would fall back to reading ages until someone noticed.
-         */
-        it('is carried into a werkjaar that has none yet', async () => {
-            await setCategory('child', period.id);
-            const next = await new RegistrationPeriodFactory({}).create();
-
-            await syncStatistics();
-
-            expect((await categoriesOf())[next.id]).toBe('child');
-        });
-
-        it('leaves a year that says something else alone, so a correction stays where it was made', async () => {
-            const next = await new RegistrationPeriodFactory({}).create();
-            await syncStatistics();
-            await setCategory('child', period.id);
-            await setCategory('leader', next.id);
-
-            await syncStatistics();
-
-            expect((await categoriesOf())[next.id]).toBe('leader');
-            expect((await categoriesOf())[period.id]).toBe('child');
-        });
+        expect(columns).not.toContain('category');
     });
 
     /**

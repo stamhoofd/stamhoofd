@@ -158,15 +158,7 @@ CREATE TABLE `_organizations_organization_tags` (
 
 -- The takken every organization's groups map onto.
 --
--- `category` is what splits the reports into kinderen, leiding and volwassenen. It is a property of
--- the tak rather than of a member, and it cannot be derived from the ages: leiding and stam both
--- carry no age range at all. Stamhoofd's platform configuration has no equivalent field either, so
--- the sync never writes this column: it is filled in here, by whoever administers the reports, and an
--- import that knows its own takken fills it in for the years it owns. A tak that was never given one
--- leaves the report falling back to the age range, which can only recognise children.
---
--- Set it once per tak. The sync writes a row per tak per period and carries the category of the most
--- recent year that has one into the years that have none, so a new werkjaar inherits it rather than
+-- Set it once per tak. The sync writes a row per tak per period so a new werkjaar inherits it rather than
 -- arriving empty. Only blanks are filled, so a correction stays in the year it was made.
 CREATE TABLE `default_age_groups` (
   `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
@@ -174,11 +166,9 @@ CREATE TABLE `default_age_groups` (
   `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `minAge` int DEFAULT NULL,
   `maxAge` int DEFAULT NULL,
-  `category` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'child, leader or adult. Null means unknown, which the reports count separately rather than guessing at.',
   PRIMARY KEY (`id`,`periodId`),
   KEY `periodId` (`periodId`),
   KEY `minAge` (`minAge`),
-  KEY `category` (`category`),
   CONSTRAINT `default_age_groups_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
