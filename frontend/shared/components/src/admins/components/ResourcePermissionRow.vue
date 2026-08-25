@@ -39,14 +39,14 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
-import { PatchMap } from '@simonbackx/simple-encoding';
-import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useEmitPatch } from '#hooks/useEmitPatch.ts';
-import type { AccessRight, PermissionsResourceType} from '@stamhoofd/structures';
-import { AccessRightHelper, PermissionLevel, PermissionRoleDetailed, Permissions, ResourcePermissions, getConfigurableAccessRightsForResourceType, getConfigurablePermissionLevelsForResourceType, getDefaultAccessRightsForResourceType, getDefaultPermissionLevelForResourceType, getPermissionLevelName, getPermissionLevelNumber, getPermissionResourceTypeName, getWildcardResourceKeys, maximumPermissionlevel } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { PatchMap } from '@simonbackx/simple-encoding';
+import type { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
+import { AccessRightHelper, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ResourcePermissions, getConfigurableAccessRightsForResourceType, getConfigurablePermissionLevelsForResourceType, getDefaultAccessRightsForResourceType, getDefaultPermissionLevelForResourceType, getPermissionLevelName, getPermissionLevelNumber, getPermissionResourceTypeName, maximumPermissionlevel } from '@stamhoofd/structures';
+import type { Ref } from 'vue';
 import { computed } from 'vue';
 
 const props = withDefaults(defineProps<{
@@ -88,29 +88,32 @@ const isMe = computed(() => {
 
 const resourcePermissions = computed(() => role.value.resources.get(props.resource.type)?.get(props.resource.id));
 
-const wildcardKeys = getWildcardResourceKeys(props.resource.type, props.resource.id);
-
-function getWildcardPermissions(permissions: PermissionRoleDetailed | Permissions): ResourcePermissions[] {
-    const resources = permissions.resources.get(props.resource.type);
-    return wildcardKeys.map(key => resources?.get(key)).filter(p => p !== undefined);
-}
+const isAllResources = props.resource.id === PermissionsResourceKey.All;
 
 const lockedMinimumLevel = computed(() => {
-    const levels = [role.value.level, ...getWildcardPermissions(role.value).map(p => p.level)];
+    const arr: PermissionLevel[] = [props.role.level];
 
-    for (const inheritedRole of props.inheritedRoles) {
-        levels.push(
-            inheritedRole.level,
-            ...getWildcardPermissions(inheritedRole).map(p => p.level),
-            inheritedRole.resources.get(props.resource.type)?.get(props.resource.id)?.level ?? PermissionLevel.None,
-        );
+    if (!isAllResources) {
+        arr.push(role.value.resources.get(props.resource.type)?.get(PermissionsResourceKey.All)?.level ?? PermissionLevel.None);
+    }
+
+    for (const role of props.inheritedRoles) {
+        arr.push(role.level);
+        arr.push(role.resources.get(props.resource.type)?.get(PermissionsResourceKey.All)?.level ?? PermissionLevel.None);
+
+        if (!isAllResources) {
+            arr.push(role.resources.get(props.resource.type)?.get(props.resource.id)?.level ?? PermissionLevel.None);
+        }
     }
 
     return maximumPermissionlevel(...levels);
 });
 
 const lockedAccessRights = computed(() => {
-    return [...new Set(getWildcardPermissions(role.value).flatMap(p => p.accessRights))];
+    if (isAllResources) {
+        return [];
+    }
+    return role.value.resources.get(props.resource.type)?.get(PermissionsResourceKey.All)?.accessRights ?? [];
 });
 
 const permissionLevel = computed({
@@ -138,8 +141,7 @@ const permissionLevel = computed({
             // Delete the resource if no access rights
             if (resourcePermissions.value?.accessRights.length) {
                 // Keep it but set the level
-            }
-            else {
+            } else {
                 // Delete it
                 const subPatch = new PatchMap<string, AutoEncoderPatchType<ResourcePermissions> | ResourcePermissions | null>();
                 subPatch.set(props.resource.id, null);
@@ -156,8 +158,7 @@ const permissionLevel = computed({
                 resourceName: props.resource.name,
                 level,
             }));
-        }
-        else {
+        } else {
             subPatch.set(props.resource.id, ResourcePermissions.create({
                 resourceName: props.resource.name,
                 level,
@@ -188,14 +189,12 @@ for (const accessRight of configurableAccessRights) {
                 if (enable) {
                     p.accessRights.addDelete(accessRight); // prevent creating duplicates
                     p.accessRights.addPut(accessRight);
-                }
-                else {
+                } else {
                     p.accessRights.addDelete(accessRight);
                     p.accessRights.addDelete(accessRight); // auto correct duplicates
                 }
                 subPatch.set(props.resource.id, p);
-            }
-            else {
+            } else {
                 subPatch.set(props.resource.id, ResourcePermissions.create({
                     resourceName: props.resource.name,
                     level: PermissionLevel.None,
@@ -228,15 +227,13 @@ const selected = computed({
         if (value) {
             if (defaultLevel) {
                 permissionLevel.value = defaultLevel;
-            }
-            else {
+            } else {
                 permissionLevel.value = configurablePermissionLevels.find(l => l !== PermissionLevel.None) ?? PermissionLevel.Read;
             }
             for (const accessRight of defaultAccessRights) {
                 accessRightsMap.get(accessRight)!.value = true;
             }
-        }
-        else {
+        } else {
             // Delete it
             const patch = createPatch();
             const subPatch = new PatchMap<string, AutoEncoderPatchType<ResourcePermissions> | ResourcePermissions | null>();
@@ -348,8 +345,7 @@ const choosePermissions = async (event: MouseEvent) => {
                         if (!isLocked) {
                             if (included) {
                                 description = ($t(`%uR`) + ' ' + getPermissionLevelName(baseLevel, props.resource.type));
-                            }
-                            else {
+                            } else {
                                 description = AccessRightHelper.getDescription(accessRight) || ($t(`%uS`) + ' ' + getPermissionLevelName(permissionLevel.value, props.resource.type));
                             }
                         }
