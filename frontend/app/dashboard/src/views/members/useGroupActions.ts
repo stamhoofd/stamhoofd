@@ -32,7 +32,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
         periods?: OrganizationRegistrationPeriod[];
     }) {
         const canManage = auth.hasFullAccess();
-        const canEdit = canManage || auth.canAccessGroup(props.group, PermissionLevel.Write);
+        const canEdit = canManage || auth.canAccessGroup(props.group, PermissionLevel.Write, undefined, props.period);
 
         function getParentCategory() {
             return props.group.getParentCategories(props.period.settings.categories)[0];

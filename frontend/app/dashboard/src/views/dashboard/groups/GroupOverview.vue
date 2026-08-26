@@ -240,7 +240,7 @@ const title = computed(() => props.group.settings.name.toString());
 const isArchive = computed(() => props.group.status === GroupStatus.Archived);
 const isOpen = computed(() => !props.group.closed);
 const auth = useAuth();
-const hasFullPermissions = computed(() => auth.canAccessGroup(props.group, PermissionLevel.Full));
+const hasFullPermissions = computed(() => auth.canAccessGroup(props.group, PermissionLevel.Full, undefined, props.period));
 const organizationManager = useOrganizationManager();
 const organization = useOrganization();
 const navigationController = useNavigationController();
