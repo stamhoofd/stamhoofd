@@ -1,13 +1,11 @@
 import { Args } from '@oclif/core';
 import { BaseCommand } from '../../base-command.js';
 import { dryRunFlag, yesFlag } from '../../command-flags.js';
-import { buildBackendEnv } from '../../config/build-config.js';
-import { localIpv4Host, mysqlContainer, mysqlRootPassword, mysqlRootUser } from '../../config/shared-service-config.js';
+import { currentDatabase, dropDatabase } from '../../runtime/database-command-helpers.js';
 import { cleanBuild } from '../../runtime/monorepo-runner.js';
 import { showHelp } from '../../runtime/show-help.js';
 import { confirm, warning } from '../../runtime/ux.js';
 import { ssoService } from '../../services/definitions/sso-service.js';
-import * as docker from '../../services/docker.js';
 import { deleteSharedServicesData, stopSharedServices } from '../../services/shared-services.js';
 
 export enum CleanTarget {
@@ -78,7 +76,7 @@ export default class Clean extends BaseCommand {
     private async cleanAll(context: Awaited<ReturnType<Clean['createContext']>>, options: { yes: boolean; dryRun: boolean }): Promise<void> {
         if (options.dryRun) {
             await cleanBuild(context, { dryRun: true });
-            console.log(`Would drop local MySQL database ${buildBackendEnv(context).DB_DATABASE ?? 'stamhoofd-development'}.`);
+            console.log(`Would drop local MySQL database ${currentDatabase(context)}.`);
             console.log('Would stop local SSO server.');
             console.log('Would stop shared services and delete MySQL, RustFS, and Caddy data.');
             return;
@@ -90,14 +88,14 @@ export default class Clean extends BaseCommand {
         }
 
         await cleanBuild(context);
-        await this.dropDatabase(context);
+        await this.dropCurrentDatabase(context);
         await ssoService.stop(context);
         await stopSharedServices(context);
         await deleteSharedServicesData(context);
     }
 
     private async cleanDatabase(context: Awaited<ReturnType<Clean['createContext']>>, options: { yes: boolean; dryRun: boolean }): Promise<void> {
-        const database = buildBackendEnv(context).DB_DATABASE ?? 'stamhoofd-development';
+        const database = currentDatabase(context);
 
         if (options.dryRun) {
             console.log(`Would drop local MySQL database ${database}.`);
@@ -109,7 +107,7 @@ export default class Clean extends BaseCommand {
             return;
         }
 
-        await this.dropDatabase(context);
+        await this.dropCurrentDatabase(context);
     }
 
     private async cleanServices(context: Awaited<ReturnType<Clean['createContext']>>, options: { yes: boolean; dryRun: boolean }): Promise<void> {
@@ -138,9 +136,8 @@ export default class Clean extends BaseCommand {
         this.log('Local SSO server stopped.');
     }
 
-    private async dropDatabase(context: Awaited<ReturnType<Clean['createContext']>>): Promise<void> {
-        const database = buildBackendEnv(context).DB_DATABASE ?? 'stamhoofd-development';
-        await docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-e', `DROP DATABASE IF EXISTS \`${database.replaceAll('`', '``')}\`;`]);
+    private async dropCurrentDatabase(context: Awaited<ReturnType<Clean['createContext']>>): Promise<void> {
+        await dropDatabase(currentDatabase(context));
     }
 
     private validateTargetFlags(target: CleanTarget, flags: { env?: string; name?: string }): void {
