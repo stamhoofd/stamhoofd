@@ -162,6 +162,7 @@
                     <span>{{ $t('%1IY') }}</span>
                 </button>
             </p>
+            <AddDiscountCodeBox v-if="webshop.meta.allowDiscountCodeEntry" :apply-code="applyCode" />
 
             <hr><PriceBreakdownBox :price-breakdown="patchedOrder.data.priceBreakown" />
 
@@ -174,8 +175,8 @@
     </SaveView>
 </template>
 <script lang="ts" setup>
-import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArray, patchContainsChanges } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
@@ -197,18 +198,20 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import FillRecordCategoryBox from '@stamhoofd/components/records/components/FillRecordCategoryBox.vue';
 import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
+import AddDiscountCodeBox from '@stamhoofd/components/views/AddDiscountCodeBox.vue';
 
 import FieldBox from '@stamhoofd/components/views/FieldBox.vue';
 import PaymentSelectionList from '@stamhoofd/components/views/PaymentSelectionList.vue';
 import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
-import type { Address, CartItem, CheckoutMethod, DiscountCode, PatchAnswers, ValidatedAddress, WebshopOnSiteMethod, WebshopTakeoutMethod } from '@stamhoofd/structures';
+import { DiscountCode } from '@stamhoofd/structures';
+import type { Address, CartItem, CheckoutMethod, PatchAnswers, ValidatedAddress, WebshopOnSiteMethod, WebshopTakeoutMethod } from '@stamhoofd/structures';
 import { CheckoutMethodType, Customer, Gender, OrderData, PaymentConfiguration, PaymentMethod, PrivateOrder, RecordCategory, Version, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
-
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 
 const props = withDefaults(defineProps<{
     initialOrder?: PrivateOrder | null;
@@ -250,6 +253,7 @@ const isChanged = computed(() => patchContainsChanges(finalPatch.value, order, {
 const errors = useErrors();
 const saving = ref(false);
 const isNew = props.initialOrder === null;
+const context = useContext();
 
 onMounted(() => {
     if (isNew && checkoutMethods.value.length > 0) {
@@ -263,6 +267,27 @@ function deleteCode(code: DiscountCode) {
     patchedData.discountCodes.addDelete(code.id);
 
     addPatch({ data: patchedData });
+}
+async function applyCode(code: string) {
+    const response = await context.value.optionalAuthenticatedServer.request({
+        method: 'POST',
+        path: '/webshop/' + webshopFull?.id + '/discount-codes',
+        body: [code],
+        decoder: new ArrayDecoder(DiscountCode as Decoder<DiscountCode>),
+    });
+
+    if (response.data.length > 0) {
+        const patchedData = OrderData.patch({});
+        patchedData.discountCodes.addPut(response.data[0]);
+
+        addPatch({ data: patchedData });
+
+        new Toast($t(`%Xd`), 'success primary').setHide(10 * 1000).show();
+        return true;
+    } else {
+        new Toast($t(`%Xe`) + ' ' + code, 'red error').setHide(10 * 1000).show();
+        return false;
+    }
 }
 
 const recordCategories = computed(() => {
@@ -544,8 +569,7 @@ async function save() {
 
         if (isNew) {
             patches.addPut(patchedOrder.value);
-        }
-        else {
+        } else {
             patches.addPatch(patch);
         }
 
@@ -566,8 +590,7 @@ async function save() {
         patchOrder.value = PrivateOrder.patch({});
         answersClone.value = order.data.fieldAnswers.map(f => f.clone());
         dismiss({ force: true }).catch(console.error);
-    }
-    catch (e) {
+    } catch (e) {
         saving.value = false;
         errors.errorBox = new ErrorBox(e);
     }
@@ -587,8 +610,7 @@ async function addProduct() {
 
                 if (oldItem) {
                     clone.cart.replaceItem(oldItem, cartItem);
-                }
-                else {
+                } else {
                     clone.cart.addItem(cartItem);
                 }
 
@@ -611,8 +633,7 @@ async function editCartItem(cartItem: CartItem) {
     // First refresh the item
     try {
         newCartItem.refresh(w);
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 
@@ -630,8 +651,7 @@ async function editCartItem(cartItem: CartItem) {
 
                         if (oldItem) {
                             clone.cart.replaceItem(oldItem, cartItem);
-                        }
-                        else {
+                        } else {
                             clone.cart.addItem(cartItem);
                         }
 
