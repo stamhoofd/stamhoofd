@@ -111,6 +111,27 @@ describe('statistics sync', () => {
     });
 
     /**
+     * A tak with several names has them joined by the structure with a translated separator. This
+     * service loads no locales, so reading that getter writes the translation key into the database
+     * instead of the word.
+     */
+    it('writes a tak with several names as words, not as a translation key', async () => {
+        const platform = await Platform.getForEditing();
+        const combined = DefaultAgeGroup.create({ names: ['Kapoenen', 'Welpen'], minAge: 6, maxAge: 10 });
+        platform.config.defaultAgeGroups = [...platform.config.defaultAgeGroups, combined];
+        await platform.save();
+        await Platform.clearCache();
+
+        await syncStatistics();
+
+        const rows = await statisticsRows('default_age_groups', combined.id);
+        expect(rows.length).toBeGreaterThan(0);
+        for (const row of rows) {
+            expect(row.name).toBe('Kapoenen of Welpen');
+        }
+    });
+
+    /**
      * The platform configuration holds one name per tak, netwerk, lidgeldtype and functie and no
      * history at all, so the name it carries now is written against each year still open.
      */

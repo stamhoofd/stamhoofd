@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { flattenGroup, flattenMember, flattenMembership, flattenOrganization, flattenPlatform, flattenRegistration } from './rows.js';
+import { flattenDefaultAgeGroup, flattenGroup, flattenMember, flattenMembership, flattenOrganization, flattenPlatform, flattenRegistration } from './rows.js';
 
 describe('flattenMember', () => {
     const member = {
@@ -177,6 +177,35 @@ describe('flattenGroup', () => {
 
         expect(row.name).toBe('Bevers');
         expect(Object.keys(row)).not.toContain('settings');
+    });
+});
+
+describe('flattenDefaultAgeGroup', () => {
+    const group = { id: 'age-1', names: ['Kapoenen'], minAge: 6, maxAge: 8 };
+
+    it('keeps a single name as it is', () => {
+        expect(flattenDefaultAgeGroup(group, 'period-1')).toEqual({
+            id: 'age-1',
+            periodId: 'period-1',
+            name: 'Kapoenen',
+            minAge: 6,
+            maxAge: 8,
+        });
+    });
+
+    /**
+     * The structure joins the names with a translated separator, which resolves to its own
+     * translation key in the sync because this service loads no locales.
+     */
+    it('joins several names with a real word, never a translation key', () => {
+        const row = flattenDefaultAgeGroup({ ...group, names: ['Kapoenen', 'Welpen'] }, 'period-1');
+
+        expect(row.name).toBe('Kapoenen of Welpen');
+        expect(row.name).not.toContain('%');
+    });
+
+    it('separates all but the last two with a comma', () => {
+        expect(flattenDefaultAgeGroup({ ...group, names: ['Kapoenen', 'Welpen', 'Jonggivers'] }, 'period-1').name).toBe('Kapoenen, Welpen of Jonggivers');
     });
 });
 

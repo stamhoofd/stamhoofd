@@ -328,7 +328,7 @@ async function syncPlatformConfig(openPeriodIds: string[]): Promise<void> {
 
     await upsertRows('organization_tags', ['id', 'periodId', 'name'], perPeriod(config.tags, flattenNamedConfig), namedConfigKey);
 
-    await upsertRows('default_age_groups', ['id', 'periodId', 'name', 'minAge', 'maxAge'], perPeriod(config.defaultAgeGroups, (group, periodId) => flattenDefaultAgeGroup({ id: group.id, name: group.name, minAge: group.minAge, maxAge: group.maxAge }, periodId)), namedConfigKey);
+    await upsertRows('default_age_groups', ['id', 'periodId', 'name', 'minAge', 'maxAge'], perPeriod(config.defaultAgeGroups, (group, periodId) => flattenDefaultAgeGroup({ id: group.id, names: group.names, minAge: group.minAge, maxAge: group.maxAge }, periodId)), namedConfigKey);
     await upsertRows('platform_membership_types', ['id', 'periodId', 'name'], perPeriod(config.membershipTypes, flattenNamedConfig), namedConfigKey);
     await upsertRows('responsibilities', ['id', 'periodId', 'name'], perPeriod(config.responsibilities, flattenNamedConfig), namedConfigKey);
 }

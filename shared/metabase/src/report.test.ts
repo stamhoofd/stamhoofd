@@ -391,15 +391,13 @@ describe('report', () => {
 
         /**
          * What a tak counts as is the one thing about it that nothing in the administration knows,
-         * and keeo says it in the query rather than leaving it to the `category` column of
-         * `default_age_groups`: a rebuilt statistics database keeps nothing of that column, and the
-         * UPDATE that fills it again is written down nowhere.
+         * and nothing in the statistics database holds either: this list is the whole answer.
          *
          * Kept here for the same reason as the weights above. A tak that falls out of the list is a
-         * plausible number rather than a failure: it drops back to the column, which on a database
-         * nobody has filled in holds nothing, and the tak quietly stops being counted as anything.
+         * plausible number rather than a failure: it is still counted in the totals, and in none of
+         * the three categories, so the report goes on adding up while quietly saying less.
          */
-        it('names every tak of keeo in the query, with the column left behind it', () => {
+        it('names every tak of keeo in the query, which is the whole answer', () => {
             const sql = cardOf(dashboards, 'nationaal', 'totaal-leden').sql;
 
             for (const [tak, term] of [

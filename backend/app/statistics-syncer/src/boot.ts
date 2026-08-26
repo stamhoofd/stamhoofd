@@ -24,9 +24,9 @@ if (new Date().getTimezoneOffset() !== 0) {
 
 /**
  * The sync reads models, whose structures reach for the global $t while they decode. Nothing it
- * writes is translated — rows.ts resolves group names per language and every other name it copies is
- * a plain string — so returning the key is enough to keep decoding from throwing, and this service
- * needs no locales of its own.
+ * writes is translated — rows.ts resolves every name it writes itself, never through a structure
+ * getter that runs $t — so returning the key is enough to keep decoding from throwing, and this
+ * service needs no locales of its own.
  */
 function loadGlobalTranslateFunction() {
     (global as any).$t = (key: string) => key;

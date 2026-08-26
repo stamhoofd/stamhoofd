@@ -307,8 +307,19 @@ export function flattenPlatform(platform: PlatformSource): StatisticsRow {
     };
 }
 
-export function flattenDefaultAgeGroup(group: { id: string; name: string; minAge: number | null; maxAge: number | null }, periodId: string): StatisticsRow {
-    return { id: group.id, periodId, name: group.name, minAge: group.minAge, maxAge: group.maxAge };
+/**
+ * The label a tak carries, mirroring `DefaultAgeGroup.name`: its names joined, the last two with
+ * "of".
+ *
+ * Reimplemented here rather than read off the structure because the structure's getter runs `$t` on
+ * the separator, which resolves to the translation key in the sync.
+ */
+export function defaultAgeGroupName(names: string[]): string {
+    return Formatter.joinLast(names, ', ', ' of ');
+}
+
+export function flattenDefaultAgeGroup(group: { id: string; names: string[]; minAge: number | null; maxAge: number | null }, periodId: string): StatisticsRow {
+    return { id: group.id, periodId, name: defaultAgeGroupName(group.names), minAge: group.minAge, maxAge: group.maxAge };
 }
 
 function emptyToNull(value: string): string | null {
