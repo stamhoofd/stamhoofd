@@ -289,9 +289,6 @@ export class AdminPermissionChecker {
             // return false;
         }
 
-        if (!await this.canAccessGroupsInPeriod(group.periodId, group.organizationId)) {
-            return false;
-        }
         const organization = await this.getOrganization(group.organizationId);
 
         if (group.deletedAt || group.status === GroupStatus.Archived) {
