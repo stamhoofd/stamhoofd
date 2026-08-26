@@ -232,7 +232,7 @@ export class MemberActionBuilder {
             priority: 1,
             groupIndex: 100,
             needsSelection: true,
-            singleSelection: true,
+            singleSelection: !canDeleteMembersInBulk(),
             allowAutoSelectAll: false,
             icon: 'trash',
             enabled: enabled,
@@ -1215,25 +1215,33 @@ export async function presentEditResponsibilities({ member, present }: { member:
     });
 }
 
+/**
+ * Bulk deletion is only meant for cleaning up test data, so it is never available in production.
+ */
+export function canDeleteMembersInBulk() {
+    return STAMHOOFD.environment === 'development' || STAMHOOFD.environment === 'staging';
+}
+
 export async function presentDeleteMembers({ members, present, platformFamilyManager }: { members: PlatformMember[]; present: ReturnType<typeof usePresent>; platformFamilyManager: PlatformFamilyManager }) {
-    if (members.length > 1) {
+    if (members.length > 1 && !canDeleteMembersInBulk()) {
         throw new SimpleError({
             code: 'not-supported',
             message: $t('%ef'),
         });
     }
 
-    const member = members[0].patchedMember;
-    const name = member.name;
+    const isBulk = members.length > 1;
+    const name = members[0].patchedMember.name;
+    const count = members.length;
 
     await present({
         components: [
             AsyncComponent(() => import('../../views/DeleteView.vue'), {
-                title: $t('%15Y', { name }),
-                description: $t(`%15X`, { name }),
+                title: isBulk ? $t('{count} leden definitief verwijderen?', { count }) : $t('%15Y', { name }),
+                description: isBulk ? $t('Ben je 100% zeker dat je deze {count} leden wilt verwijderen? Vul dan het aantal leden in ter bevestiging. De volledige geschiedenis gaat verloren.', { count }) : $t(`%15X`, { name }),
                 confirmationTitle: $t(`%eu`),
-                confirmationPlaceholder: $t(`%10H`),
-                confirmationCode: name,
+                confirmationPlaceholder: isBulk ? $t('Aantal leden') : $t(`%10H`),
+                confirmationCode: isBulk ? count.toString() : name,
                 checkboxText: $t(`%6P`),
                 onDelete: async () => {
                     const patch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
@@ -1245,7 +1253,7 @@ export async function presentDeleteMembers({ members, present, platformFamilyMan
                     GlobalEventBus.sendEvent('members-deleted', members).catch(console.error);
 
                     Toast.success(
-                        members.length ? $t('%14q') : $t('%14r', { count: members.length }),
+                        members.length === 1 ? $t('%14q') : $t('%14r', { count: members.length }),
                     ).show();
                     return true;
                 },
