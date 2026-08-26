@@ -154,6 +154,21 @@ export class ContextPermissions {
         return this.hasAccessRight(AccessRight.ManageEmailTemplates);
     }
 
+    /**
+     * Event groups live in the period of the event start date: only full admins can reach the ones outside
+     * the period that is currently being used.
+     */
+    canAccessGroupsInPeriod(periodId: string, organization: Organization) {
+        if (periodId !== organization.period.period.id) {
+            if (STAMHOOFD.userMode === 'organization' || periodId !== this.platform.period.id) {
+                if (!this.hasFullAccess()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read, organization?: Organization | null) {
         if (organization === undefined || (organization === null && this.organization)) {
             organization = this.organization;
@@ -192,12 +207,12 @@ export class ContextPermissions {
 
         if (group.type === GroupType.EventRegistration && group.event && group.event.organizationId === organization.id) {
             // we'll need to check the event permissions
-            return this.canWriteEventForOrganization(group.event, organization);
+            return this.canAccessGroupsInPeriod(group.periodId, organization) && this.canWriteEventForOrganization(group.event, organization);
         }
 
         if (group.type === GroupType.WaitingList && group.parentGroup && group.parentGroup.type === GroupType.EventRegistration && group.parentGroup.event && group.parentGroup.event.organizationId === organization.id) {
             // we'll need to check the event permissions
-            return this.canWriteEventForOrganization(group.parentGroup.event, organization);
+            return this.canAccessGroupsInPeriod(group.periodId, organization) && this.canWriteEventForOrganization(group.parentGroup.event, organization);
         }
 
         return false;
