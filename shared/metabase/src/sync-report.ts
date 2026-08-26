@@ -46,7 +46,7 @@ export type ReportFilter = {
 };
 
 export const reportFilters: readonly ReportFilter[] = [
-    { name: 'scoutsjaar', title: 'Scoutsjaar', valuesFrom: 'scoutsjaar', column: 'Scoutsjaar', keepOrder: true, multiple: false },
+    { name: 'scoutsjaar', title: 'Scoutsjaar', valuesFrom: 'scoutsjaar', column: 'Scoutsjaar', keepOrder: false, multiple: false },
     { name: 'eenheid', title: 'Eenheid', valuesFrom: 'eenheid', column: 'Eenheid', keepOrder: false, multiple: false },
     { name: 'aansluiting', title: 'Aansluiting', valuesFrom: 'aansluiting', column: 'Aansluiting', keepOrder: false, multiple: true },
     { name: 'ingeschreven_voor', title: 'Ingeschreven voor', valuesFrom: 'ingeschreven-voor', column: 'Ingeschreven voor', keepOrder: true, multiple: true, start: ['Leeftijdsgroepen'] },
