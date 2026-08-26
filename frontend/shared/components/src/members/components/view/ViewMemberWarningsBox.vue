@@ -92,6 +92,15 @@ const warnings = computed(() => {
         }
     }
 
+    if (isPropertyEnabled('nationalRegisterNumber')) {
+        if (props.member.patchedMember.details.severeDisability && props.member.patchedMember.details.age && props.member.patchedMember.details.age <= 21) {
+            warnings.push(RecordWarning.create({
+                text: TranslatedString.create($t('Heeft recht op een fiscaal attest kinderopvang tot 21 jaar')),
+                type: RecordWarningType.Info,
+            }));
+        }
+    }
+
     if (isPropertyEnabled('parents') && props.member.patchedMember.details.parents.length > 0) {
         if (props.member.patchedMember.details.parentsHaveAccess?.value === true) {
             if (props.member.patchedMember.details.defaultAge < 18) {

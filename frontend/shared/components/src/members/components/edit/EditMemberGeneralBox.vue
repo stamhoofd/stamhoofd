@@ -34,12 +34,18 @@
                     </p>
                 </template>
 
-                <template v-if="isAdmin && isFullAdmin">
+                <template v-if="!member.isNew && isAdmin && isFullAdmin && ((isBelgium && age <= 21 && isPropertyEnabled('nationalRegisterNumber')) || severeDisability)">
                     <Checkbox v-model="severeDisability">
                         {{ $t("Is erkend als persoon met een zware beperking") }}
 
                         <p class="style-description-small">
-                            {{ $t("Dit wordt gebruikt om fiscale attesten op te maken.") }}
+                            <I18nComponent :t="$t('Bij personen met een zware beperking, geldt er een hogere leeftijdslimiet van 21 jaar. <button>Meer info</button>')">
+                                <template #button="{content}">
+                                    <a class="inline-link" href="https://fin.belgium.be/nl/particulieren/belastingvoordelen/kinderopvang/belastingvermindering" target="_blank">
+                                        {{ content }}
+                                    </a>
+                                </template>
+                            </I18nComponent>
                         </p>
                     </Checkbox>
                 </template>
@@ -162,6 +168,7 @@ import { useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks/useIsPr
 import Title from './Title.vue';
 import Checkbox from '#inputs/Checkbox.vue';
 import { useAuth } from '#hooks/useAuth.ts';
+import { Country } from '@stamhoofd/types/Country';
 
 defineOptions({
     inheritAttrs: false,
@@ -283,6 +290,13 @@ const nationalRegisterNumber = computed({
 const birthDay = computed({
     get: () => props.member.patchedMember.details.birthDay,
     set: birthDay => props.member.addDetailsPatch({ birthDay }),
+});
+const age = computed(() => {
+    return props.member.patchedMember.details.age ?? props.member.patchedMember.details.defaultAge;
+});
+
+const isBelgium = computed(() => {
+    return address.value?.country === Country.Belgium;
 });
 
 const trackingYear = computed({
