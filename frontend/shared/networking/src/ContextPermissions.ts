@@ -376,6 +376,23 @@ export class ContextPermissions {
         return !!this.permissions && !this.permissions.isEmpty;
     }
 
+    /**
+     * Group and category permissions are period specific, so a role only reaches the periods it was
+     * granted groups in.
+     */
+    hasSomeAccessInPeriod(period: OrganizationRegistrationPeriod): boolean {
+        if (this.hasFullAccess()) {
+            return true;
+        }
+
+        const permissions = this.permissions;
+        if (!permissions) {
+            return false;
+        }
+
+        return period.getCategoryTree({ permissions }).getAllGroups().length > 0;
+    }
+
     hasPlatformFullAccess(): boolean {
         return !!this.platformPermissions && !!this.platformPermissions.hasFullAccess();
     }
