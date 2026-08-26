@@ -271,7 +271,7 @@ function deleteCode(code: DiscountCode) {
 async function applyCode(code: string) {
     const response = await context.value.optionalAuthenticatedServer.request({
         method: 'POST',
-        path: '/webshop/' + webshopFull?.id + '/discount-codes',
+        path: '/webshop/' + webshop.id + '/discount-codes',
         body: [code],
         decoder: new ArrayDecoder(DiscountCode as Decoder<DiscountCode>),
     });
