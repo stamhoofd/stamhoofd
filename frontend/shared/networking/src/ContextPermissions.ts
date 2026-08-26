@@ -178,14 +178,6 @@ export class ContextPermissions {
             return this.hasFullPlatformAccess();
         }
 
-        if (group.periodId !== organization.period.period.id) {
-            if (STAMHOOFD.userMode === 'organization' || group.periodId !== this.platform.period.id) {
-                if (!this.hasFullAccess()) {
-                    return false;
-                }
-            }
-        }
-
         const permissions = this.getPermissionsForOrganization(organization);
         if (!permissions) {
             return false;
