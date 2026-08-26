@@ -1,7 +1,7 @@
 <template>
     <EditorView ref="editorView" class="mail-view" :email-block="emailBlock" :save-text="$t('%1Op')" :loading="contentLanguage.switching.value" :replacements="replacements" :title="$t(`%aP`)" @save="save">
         <template #navigation-buttons>
-            <EmailLanguageButton :model-value="contentLanguage.currentLanguage.value" :languages="contentLanguage.languages.value" :default-language="contentLanguage.defaultLanguage.value" :supports-translations="true" :disabled="contentLanguage.switching.value" @update:model-value="contentLanguage.switchTo($event).catch(console.error)" @add="contentLanguage.addLanguage($event).catch(console.error)" @remove="contentLanguage.removeLanguage($event).catch(console.error)" />
+            <EmailLanguageButton :model-value="contentLanguage.currentLanguage.value" :languages="contentLanguage.languages.value" :default-language="contentLanguage.defaultLanguage.value" :supports-translations="true" :disabled="contentLanguage.switching.value" @update:model-value="contentLanguage.switchTo($event).catch(console.error)" @add="contentLanguage.addLanguage($event).catch(console.error)" @remove="contentLanguage.removeLanguage($event).catch(console.error)" @set-default="contentLanguage.setDefaultLanguage($event).catch(console.error)" />
         </template>
         <p v-if="prefix" class="style-title-prefix" v-text="prefix" />
         <h1 v-if="isNew" class="style-navigation-title">
