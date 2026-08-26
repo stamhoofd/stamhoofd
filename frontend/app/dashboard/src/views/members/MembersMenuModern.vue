@@ -34,7 +34,7 @@
 
             <GroupCategoryMenuBox :period="period" />
 
-            <div v-if="!props.period && auth.hasFullAccess()" class="container footer">
+            <div v-if="!props.period" class="container footer">
                 <hr>
 
                 <button class="st-menu-item" type="button" @click="switchPeriod">
@@ -69,6 +69,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast';
 
 import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods.ts';
 import { Organization } from '@stamhoofd/structures/Organization.js';
+import { PeriodAccessHelper } from '@stamhoofd/structures/helpers/PeriodAccessHelper.js';
 import type { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures/RegistrationPeriod.js';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onActivated, watch } from 'vue';
@@ -314,6 +315,23 @@ async function startPeriod(p: RegistrationPeriod) {
     });
 }
 
+function getPeriodDisabledReason(p: RegistrationPeriod, organizationPeriod: OrganizationRegistrationPeriod | undefined): string | false {
+    if (p.id === period.value.period.id) {
+        return $t('%1b0');
+    }
+
+    if (!organizationPeriod) {
+        // Choosing this period starts it
+        return hasFullAccess.value ? false : $t('Dit werkjaar is nog niet gestart');
+    }
+
+    if (!PeriodAccessHelper.isPeriodAccessible(organizationPeriod, context.value?.organizationPermissions ?? null)) {
+        return $t('Je hebt geen toegang tot dit werkjaar');
+    }
+
+    return false;
+}
+
 async function switchPeriod(event: MouseEvent) {
     let periods: RegistrationPeriodList;
     try {
@@ -325,11 +343,12 @@ async function switchPeriod(event: MouseEvent) {
 
     const menu = new ContextMenu([
         periods.periods.map((p) => {
+            const existing = periods.organizationPeriods.find(pp => pp.period.id === p.id);
+
             return new ContextMenuItem({
                 name: p.name,
-                disabled: p.id === period.value.period.id ? $t('%1b0') : false,
+                disabled: getPeriodDisabledReason(p, existing),
                 action: async () => {
-                    const existing = periods.organizationPeriods.find(pp => pp.period.id === p.id);
                     if (existing) {
                         await $navigate(Routes.Period, {
                             properties: {
@@ -344,7 +363,7 @@ async function switchPeriod(event: MouseEvent) {
             });
         }),
 
-        ...(STAMHOOFD.userMode === 'organization'
+        ...(STAMHOOFD.userMode === 'organization' && hasFullAccess.value
             ? ([
                     [
                         new ContextMenuItem({
