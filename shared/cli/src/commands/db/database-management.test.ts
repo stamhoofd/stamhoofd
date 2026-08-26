@@ -16,17 +16,29 @@ vi.mock('../../runtime/command-runner.js', () => ({
 }));
 
 describe('database management commands', () => {
+    let mysqlRunning: boolean;
+    let databases: string[];
+
     beforeEach(() => {
         vi.clearAllMocks();
         resetContainerRuntimeCacheForTests();
+        mysqlRunning = true;
+        databases = ['source-db', 'other-db'];
         vi.mocked(run).mockImplementation(async (_command, args) => {
             if (args[0] === '--version') {
                 return { stdout: 'podman version 5.0.0', stderr: '', status: 0 };
             }
-            if (args.includes('SHOW DATABASES;')) {
-                return { stdout: 'source-db\nother-db\n', stderr: '', status: 0 };
+            if (args[0] === 'inspect') {
+                return { stdout: mysqlRunning ? 'true\n' : 'false\n', stderr: '', status: 0 };
             }
-            return undefined;
+            if (args[0] === 'run') {
+                mysqlRunning = true;
+                return { stdout: '', stderr: '', status: 0 };
+            }
+            if (args.includes('SHOW DATABASES;')) {
+                return { stdout: `${databases.join('\n')}\n`, stderr: '', status: 0 };
+            }
+            return { stdout: '', stderr: '', status: 0 };
         });
     });
 
@@ -97,16 +109,18 @@ describe('database management commands', () => {
         expect(run).toHaveBeenCalledWith('podman', ['exec', 'stamhoofd-mysql', 'mysql', '-h127.0.0.1', '-uroot', '-proot', '-e', 'CREATE DATABASE IF NOT EXISTS `custom-target-db` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;'], expect.anything());
     });
 
+    it('starts MySQL when the container is not running', async () => {
+        mysqlRunning = false;
+        const command = createCommand(DbRemove, { from: 'source-db' });
+
+        await command.run();
+
+        expect(run).toHaveBeenCalledWith('podman', expect.arrayContaining(['run', '-d', '--name', 'stamhoofd-mysql']), expect.anything());
+        expect(run).toHaveBeenCalledWith('podman', ['exec', 'stamhoofd-mysql', 'mysql', '-h127.0.0.1', '-uroot', '-proot', '-e', 'DROP DATABASE IF EXISTS `source-db`;'], expect.anything());
+    });
+
     it('marks existing current setup database in interactive choices', async () => {
-        vi.mocked(run).mockImplementation(async (_command, args) => {
-            if (args[0] === '--version') {
-                return { stdout: 'podman version 5.0.0', stderr: '', status: 0 };
-            }
-            if (args.includes('SHOW DATABASES;')) {
-                return { stdout: 'stamhoofd-development\nother-db\n', stderr: '', status: 0 };
-            }
-            return undefined;
-        });
+        databases = ['stamhoofd-development', 'other-db'];
         vi.mocked(select).mockResolvedValueOnce('stamhoofd-development');
         const command = createCommand(DbRemove, {});
 
