@@ -169,7 +169,8 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveRegistration
             body.addPatch(periodPatch);
 
             await expect(patchOrganizationRegistrationPeriods({ patch: body, organization, token: allGroupsToken })).rejects.toThrow(STExpect.simpleError({
-                code: 'permission_denied',
+                code: 'locked_period',
+                message: 'This period is locked',
             }));
         });
 
