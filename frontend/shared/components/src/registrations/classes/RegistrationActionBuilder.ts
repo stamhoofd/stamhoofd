@@ -7,7 +7,7 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import type { PlatformFamilyManager } from '#members/PlatformFamilyManager.ts';
 import { usePlatformFamilyManager } from '#members/PlatformFamilyManager.ts';
 import { checkoutDefaultItem, chooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
-import { deleteInvitationsForMembers, getActionsForCategory, getCategoryTreeOfGroupsLinkedToWaitingList, inviteMembersForGroup, isMemberInvited, isMemberRegistered, presentDeleteMembers, presentEditMember, presentEditResponsibilities, presentExportMembersToPdf } from '#members/classes/MemberActionBuilder.ts';
+import { canDeleteMembersInBulk, deleteInvitationsForMembers, getActionsForCategory, getCategoryTreeOfGroupsLinkedToWaitingList, inviteMembersForGroup, isMemberInvited, isMemberRegistered, presentDeleteMembers, presentEditMember, presentEditResponsibilities, presentExportMembersToPdf } from '#members/classes/MemberActionBuilder.ts';
 import type { TableAction, TableActionSelection } from '#tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
@@ -452,7 +452,7 @@ export class RegistrationActionBuilder {
             priority: 1,
             groupIndex: 100,
             needsSelection: true,
-            singleSelection: true,
+            singleSelection: !canDeleteMembersInBulk(),
             allowAutoSelectAll: false,
             icon: 'trash',
             enabled,
