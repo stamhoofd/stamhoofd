@@ -51,29 +51,47 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({
             key: 'registeredAt',
         }));
 
-        if (currentGroup && currentGroup.settings.optionMenus.length > 0) {
-            const optionMenusFilters = getFilterBuildersForOptionMenus(currentGroup.settings.optionMenus);
+        if (currentGroup) {
+            if (currentGroup.settings.prices.length > 1) {
+                all.push(new MultipleChoiceFilterBuilder({
+                    name: $t('Tarief'),
+                    options: currentGroup.settings.prices.map(p => ({
+                        name: p.name.toString(),
+                        value: p.id,
+                    })),
+                    wrapper: {
+                        groupPrice: {
+                            id: {
+                                $in: FilterWrapperMarker,
+                            },
+                        },
+                    },
+                }));
+            }
+            if (currentGroup.settings.optionMenus.length > 0) {
+                const optionMenusFilters = getFilterBuildersForOptionMenus(currentGroup.settings.optionMenus);
 
-            all.push(
-                ...optionMenusFilters,
-            );
-        }
-        if (currentGroup && currentGroup.settings.recordCategories.length > 0) {
-            const recordCategoriesFilters = getFilterBuildersForRecordCategories(currentGroup.settings.recordCategories);
+                all.push(
+                    ...optionMenusFilters,
+                );
+            }
+            if (currentGroup.settings.recordCategories.length > 0) {
+                const recordCategoriesFilters = getFilterBuildersForRecordCategories(currentGroup.settings.recordCategories);
 
-            recordCategoriesFilters.unshift(
-                new GroupUIFilterBuilder({
+                recordCategoriesFilters.unshift(
+                    new GroupUIFilterBuilder({
+                        builders: recordCategoriesFilters,
+                    }),
+                );
+
+                all.push(new GroupUIFilterBuilder({
+                    name: $t('%8i'),
                     builders: recordCategoriesFilters,
-                }),
-            );
-
-            all.push(new GroupUIFilterBuilder({
-                name: $t('%8i'),
-                builders: recordCategoriesFilters,
-                wrapper: {
-                    details: FilterWrapperMarker,
-                },
-            }));
+                    wrapper: {
+                        details: FilterWrapperMarker,
+                    },
+                }));
+            }
         }
 
         if (app === 'admin' && STAMHOOFD.userMode === 'platform') {
