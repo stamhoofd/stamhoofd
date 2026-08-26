@@ -12,7 +12,7 @@ export function useGroupsRelationFetcher() {
     } });
     const fetchRegistrationPeriods = useFetchRegistrationPeriods();
 
-    return ({ periodId, type, defaultPeriodId, isPeriodRequired }: { periodId?: string; type?: GroupType | GroupType[]; defaultPeriodId?: string; isPeriodRequired?: boolean } = {}) => {
+    return ({ periodId, type, defaultPeriodId, isPeriodRequired, organizationIds }: { periodId?: string; type?: GroupType | GroupType[]; defaultPeriodId?: string; isPeriodRequired?: boolean; organizationIds?: string[] } = {}) => {
         const filter: StamhoofdFilter = {};
 
         if (type) {
@@ -21,6 +21,12 @@ export function useGroupsRelationFetcher() {
 
         if (periodId) {
             filter.periodId = periodId;
+        }
+
+        if (organizationIds && organizationIds.length > 0) {
+            filter.organizationId = {
+                $in: organizationIds,
+            };
         }
 
         let getName: (object: ObjectType) => string;
@@ -34,7 +40,7 @@ export function useGroupsRelationFetcher() {
                 if (periodName) {
                     return `${groupName} (${periodName})`;
                 }
-                return groupName;
+                return `${groupName}`;
             };
 
             subFilter = new RelationFetcherSubFilter({
