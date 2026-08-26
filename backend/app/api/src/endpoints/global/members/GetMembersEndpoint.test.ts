@@ -398,6 +398,73 @@ describe('Endpoint.GetMembersEndpoint', () => {
             ]);
         });
 
+        test('Allowed: Can fetch members of a group of a period the organization already left', async () => {
+            // Setup
+            const role = PermissionRoleDetailed.create({
+                name: 'Test Role',
+                accessRights: [],
+            });
+
+            const resources = new Map();
+
+            const previousPeriod = await new RegistrationPeriodFactory({
+                startDate: new Date(2022, 0, 1),
+                endDate: new Date(2022, 11, 31),
+            }).create();
+
+            // The organization already moved on to period
+            const organization = await new OrganizationFactory({ period, roles: [role] })
+                .create();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    roles: [
+                        role,
+                    ],
+                    resources,
+                }),
+            })
+                .create();
+
+            const token = await SessionService.createSession(user);
+            const member1 = await new MemberFactory({ }).create();
+            const member2 = await new MemberFactory({ }).create();
+            const previousPeriodGroup = await new GroupFactory({ organization, period: previousPeriod }).create();
+            const otherPreviousPeriodGroup = await new GroupFactory({ organization, period: previousPeriod }).create();
+
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    previousPeriodGroup.id,
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Read,
+                    }),
+                ]]),
+            );
+
+            await user.save();
+
+            await new RegistrationFactory({ member: member1, group: previousPeriodGroup }).create();
+            await new RegistrationFactory({ member: member2, group: otherPreviousPeriodGroup }).create();
+
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({
+                    limit: 10,
+                }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.results.members).toIncludeSameMembers([
+                expect.objectContaining({ id: member1.id }),
+            ]);
+        });
+
         test('Not allowed: Cannot fetch all members if no permissions for a single group', async () => {
             // Same test, but without giving the user permissions to read the group
             // Setup
