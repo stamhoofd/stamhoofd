@@ -1,8 +1,8 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, OrganizationRegistrationPeriod, User } from '@stamhoofd/models';
-import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, Organization, Payment, Registration, Webshop } from '@stamhoofd/models';
+import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, User } from '@stamhoofd/models';
+import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, Organization, OrganizationRegistrationPeriod, Payment, Registration, Webshop } from '@stamhoofd/models';
 import type { GroupCategory, MemberWithRegistrationsBlob, Platform as PlatformStruct, RecordAnswer, RecordSettings, ResourcePermissions } from '@stamhoofd/structures';
 import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPermissionChecker, FinancialSupportSettings, GroupStatus, GroupType, PermissionLevel, PermissionsResourceType, ReceivableBalanceType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -28,6 +28,7 @@ export class AdminPermissionChecker {
     organizationCache: Map<string, Organization | Promise<Organization | undefined>> = new Map();
     groupsCache: Map<string, Group | null | Promise<Group | null>> = new Map();
     webshopsCache: Map<string, Webshop | null | Promise<Webshop | null>> = new Map();
+    organizationPeriodsCache: Map<string, OrganizationRegistrationPeriod | null | Promise<OrganizationRegistrationPeriod | null>> = new Map();
 
     constructor(user: User, platform: PlatformStruct, organization?: Organization) {
         this.user = user;
@@ -154,9 +155,32 @@ export class AdminPermissionChecker {
         }
     }
 
-    async getOrganizationCurrentPeriod(id: string | Organization): Promise<OrganizationRegistrationPeriod> {
+    /**
+     * The settings (and thus the categories) of a period are period specific: a group can only be found back
+     * in the categories of the period it belongs to.
+     */
+    async getOrganizationPeriod(id: string | Organization, periodId: string): Promise<OrganizationRegistrationPeriod | null> {
         const organization = await this.getOrganization(id);
-        return await organization.getPeriod();
+
+        if (periodId === organization.periodId) {
+            return await organization.getPeriod();
+        }
+
+        const key = organization.id + '-' + periodId;
+        const cache = this.organizationPeriodsCache.get(key);
+        if (cache !== undefined) {
+            return await cache;
+        }
+
+        const promise = OrganizationRegistrationPeriod.select()
+            .where('organizationId', organization.id)
+            .where('periodId', periodId)
+            .first(false);
+
+        this.organizationPeriodsCache.set(key, promise);
+        const organizationPeriod = await promise;
+        this.organizationPeriodsCache.set(key, organizationPeriod);
+        return organizationPeriod;
     }
 
     error(humanOrData?: string | { message: string; human?: string }): SimpleError {
@@ -317,8 +341,8 @@ export class AdminPermissionChecker {
 
         // Check parent categories
         if (group.type === GroupType.Membership) {
-            const organizationPeriod = await this.getOrganizationCurrentPeriod(organization);
-            const parentCategories = group.getParentCategories(organizationPeriod.settings.categories);
+            const organizationPeriod = await this.getOrganizationPeriod(organization, organization.periodId);
+            const parentCategories = organizationPeriod ? group.getParentCategories(organizationPeriod.settings.categories) : [];
             for (const category of parentCategories) {
                 if (organizationPermissions.hasResourceAccess(PermissionsResourceType.GroupCategories, category.id, permissionLevel)) {
                     return true;
@@ -1245,8 +1269,8 @@ export class AdminPermissionChecker {
 
         // Check parents
         const organization = await this.getOrganization(organizationId);
-        const organizationPeriod = await this.getOrganizationCurrentPeriod(organization);
-        const parentCategories = category.getParentCategories(organizationPeriod.settings.categories);
+        const organizationPeriod = await this.getOrganizationPeriod(organization, organization.periodId);
+        const parentCategories = organizationPeriod ? category.getParentCategories(organizationPeriod.settings.categories) : [];
 
         for (const parentCategory of parentCategories) {
             if (organizationPermissions.hasResourceAccessRight(PermissionsResourceType.GroupCategories, parentCategory.id, AccessRight.OrganizationCreateGroups)) {
