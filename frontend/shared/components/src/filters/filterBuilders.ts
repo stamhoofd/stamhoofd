@@ -568,13 +568,15 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions, g
 
     const periodId = organizations[0]?.period.period.id;
 
+    const organizationIds = organizations.map(o => o.id);
+
     const groupFilter = new RelationFilterBuilder({
         name: $t('%14Z'),
         type: GroupType.Membership,
         key: 'groupIds',
         allowCreation: true,
         wrapper: FilterWrapperMarker,
-        relationFetcher: groupsRelationFetcher({ type: GroupType.Membership, defaultPeriodId: periodId, isPeriodRequired: true }),
+        relationFetcher: groupsRelationFetcher({ type: GroupType.Membership, defaultPeriodId: periodId, isPeriodRequired: true, organizationIds }),
         defaultOptions: [{
             name: $t('%1FW'),
             value: null,
