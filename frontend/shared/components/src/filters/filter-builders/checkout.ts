@@ -6,6 +6,8 @@ import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../Mu
 import { NumberFilterBuilder } from '../NumberUIFilter';
 import type { UIFilterBuilders } from '../UIFilter';
 import { getFilterBuildersForRecordCategories } from './record-categories';
+import { StringFilterBuilder } from '#filters/StringUIFilter.ts';
+import { getFilterBuildersForOptionMenus } from './option-menus';
 
 export function getCartFilterBuilder(webshop: Webshop) {
     return new GroupUIFilterBuilder({
@@ -30,22 +32,46 @@ export function getCartFilterBuilder(webshop: Webshop) {
                     },
                 },
             }),
-            ...webshop.products.filter(product => product.prices.length > 1).map(product => new MultipleChoiceFilterBuilder({
-                name: product.name + ' (' + $t('%17S') + ')',
-                options: product.prices.map((price) => {
-                    return new MultipleChoiceUIFilterOption(price.name, price.id);
-                }),
-                wrapper: {
-                    product: {
-                        id: product.id,
-                    },
-                    productPrice: {
-                        id: {
-                            $in: FilterWrapperMarker,
+            ...webshop.products.filter(product => product.prices.length > 1 || product.optionMenus.length > 0 || product.customFields.length > 0).map((product) => {
+                const filters = [];
+
+                if (product.prices.length > 1) {
+                    filters.push(new MultipleChoiceFilterBuilder({
+                        name: $t('Tarieven'),
+                        options: product.prices.map((price) => {
+                            return new MultipleChoiceUIFilterOption(price.name, price.id);
+                        }),
+                        wrapper: {
+                            product: {
+                                id: product.id,
+                            },
+                            productPrice: {
+                                id: {
+                                    $in: FilterWrapperMarker,
+                                },
+                            },
                         },
-                    },
-                },
-            })),
+                    }));
+                }
+
+                if (product.optionMenus.length > 0) {
+                    filters.push(...getFilterBuildersForOptionMenus(product.optionMenus));
+                }
+
+                if (product.customFields.length > 0) {
+                    for (const customField of product.customFields) {
+                        filters.push(new StringFilterBuilder({
+                            name: customField.name,
+                            key: customField.id,
+                        }));
+                    }
+                }
+
+                return new GroupUIFilterBuilder({
+                    name: product.name,
+                    builders: filters,
+                });
+            }),
         ],
         wrapper: {
             items: {
