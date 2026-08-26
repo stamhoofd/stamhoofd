@@ -5,6 +5,15 @@ import type { ReportCard, ReportTab } from './report.js';
 import { getReportDirectory, loadReport, parseTab, parameterNames, resolveSql } from './report.js';
 import { buildVisualizationSettings, columnPalettes, layoutCards } from './sync-report.js';
 
+/**
+ * A card's sql as one line. The comments go first: a term of an expression carries the name of the
+ * tak it weighs behind `--`, and collapsing the newlines would otherwise run that name into the term
+ * below it -- commenting the rest of the expression out of the string being asserted on.
+ */
+function expressionOf(sql: string): string {
+    return sql.replaceAll(/--[^\n]*/g, '').replaceAll(/\s+/g, ' ').trim();
+}
+
 function cardOf(tabs: ReportTab[], tab: string, card: string): ReportCard {
     const found = tabs.find(entry => entry.key === tab)?.cards.find(entry => entry.key === card);
     if (!found) {
@@ -196,13 +205,15 @@ describe('report', () => {
          * tak, there and nowhere else.
          */
         it('delivers the ondersteunende leden of ravot as leiding, and names that tak in no other environment', () => {
-            // The condition rather than the name, which the fragments also mention in prose.
+            // The condition rather than the prose: the fragments mention the tak in their comments too.
             const namesTheTak = (tabs: ReportTab[]) => tabs.flatMap(tab => tab.cards)
-                .filter(card => card.sql.replaceAll(/\s+/g, ' ').includes("`Tak` = 'Ondersteunende leden'"))
+                .filter(card => expressionOf(card.sql).includes("f.tak_id = 'a28d290c-af71-4282-92cc-2224a18d3091'"))
                 .map(card => card.key);
-            const sql = cardOf(ravotDashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql.replaceAll(/\s+/g, ' ');
+            const sql = expressionOf(cardOf(ravotDashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql);
 
-            expect(sql).toContain("CASE WHEN f.tak_category = 'leader' OR f.`Tak` = 'Ondersteunende leden' THEN 2 WHEN f.tak_category = 'child' THEN 1 ELSE 0 END AS type_number");
+            // By the id of the tak rather than by its name, which the years need not agree on.
+            expect(sql).toContain("CASE WHEN f.tak_category = 'leader' THEN 2 WHEN f.tak_id = 'a28d290c-af71-4282-92cc-2224a18d3091' THEN 2 WHEN f.tak_category = 'child' THEN 1 ELSE 0 END AS type_number");
+            expect(sql).not.toContain("`Tak` = 'Ondersteunende leden'");
             expect(namesTheTak(ravotDashboards)).toEqual(['deelnemers-lokale-groep']);
             expect(namesTheTak(dashboards)).toEqual([]);
         });
@@ -341,26 +352,36 @@ describe('report', () => {
 
         /**
          * The weights of the index, kept here because nothing else checks them: a wrong weight, or a
-         * tak spelled differently from the row in `default_age_groups`, is a plausible number rather
-         * than a failure.
+         * tak weighed under an id that is not the one the platform holds it under, is a plausible
+         * number rather than a failure.
          *
-         * Every tak term asks for the category as well as the name. A group an eenheid named `Bevers`
-         * itself is categorised as nothing, and weighing it as the tak it is named after is the same
-         * kind of plausible mistake.
+         * The ids rather than the names, which is what the takken were matched on until a name turned
+         * out to say different things in different years: the import writes `Bevers of Zeehonden`
+         * where the sync writes what the platform configuration spells today, and the client's own
+         * formula spells them a third way again. Every one of these is a tak of
+         * `keeo/tak-categorie.sql`, so the two lists have to keep saying the same ids.
          */
         it('weighs each tak of the GTP index as the formula does', () => {
-            const sql = cardOf(dashboards, 'eenheden', 'eenheid-gtp').sql.replaceAll(/\s+/g, ' ');
+            const sql = expressionOf(cardOf(dashboards, 'eenheden', 'eenheid-gtp').sql);
+            const categories = cardOf(dashboards, 'eenheden', 'eenheid-gtp').sql;
 
             for (const [tak, term] of [
-                ['Bevers, Eekhoorns en Welpen', "( COUNT(DISTINCT CASE WHEN tak_category = 'child' AND `Tak` = 'Bevers' THEN member_id END) + COUNT(DISTINCT CASE WHEN tak_category = 'child' AND `Tak` = 'Eekhoorns' THEN member_id END) + COUNT(DISTINCT CASE WHEN tak_category = 'child' AND `Tak` = 'Welpen' THEN member_id END) ) / 3"],
-                ['Wolven', "+ COUNT(DISTINCT CASE WHEN tak_category = 'child' AND `Tak` = 'Wolven' THEN member_id END)"],
-                ['JVG/JG-A', "+ COUNT(DISTINCT CASE WHEN tak_category = 'child' AND `Tak` = 'Jongverkenners/Jonggidsen - Aspiranten' THEN member_id END)"],
-                ['VG/G-J', "+ 2 * COUNT(DISTINCT CASE WHEN tak_category = 'child' AND `Tak` = 'Verkenners/Gidsen - Juniors' THEN member_id END)"],
-                ['Seniors', "+ 3 * COUNT(DISTINCT CASE WHEN tak_category = 'child' AND `Tak` = 'Seniors' THEN member_id END)"],
+                ['Bevers, Zeehonden, Eekhoorns en Welpen', "( COUNT(DISTINCT CASE WHEN tak_id = 'f274a949-9318-4c2b-ae35-e50114efe686' THEN member_id END) + COUNT(DISTINCT CASE WHEN tak_id = '316ea554-675a-493e-a152-365012851ae3' THEN member_id END) ) / 3"],
+                ['Wolven', "+ COUNT(DISTINCT CASE WHEN tak_id = '01d62f7d-c3fa-4314-a33a-21da526a35ff' THEN member_id END)"],
+                ['JVG/JG-A', "+ COUNT(DISTINCT CASE WHEN tak_id = '57143f32-e4d2-46a7-96e2-9bf82f121e1c' THEN member_id END)"],
+                ['VG/G-J', "+ 2 * COUNT(DISTINCT CASE WHEN tak_id = '0eacf56f-3a1d-4e15-bebc-2bc66fc74c7a' THEN member_id END)"],
+                ['Seniors', "+ 3 * COUNT(DISTINCT CASE WHEN tak_id = 'b2275ec6-04ad-4232-bfe3-0eefed97f83b' THEN member_id END)"],
                 ['Leiding', "+ COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END)"],
                 ['omkaderingscijfer', "- 2 * COUNT(DISTINCT CASE WHEN tak_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END), 0)"],
             ]) {
                 expect(`${tak}: ${sql.includes(term)}`).toEqual(`${tak}: true`);
+            }
+
+            // No tak is weighed by a name any more, and every id it weighs is one the categories name
+            // as kinderen -- the index has no term for anything else.
+            expect(sql).not.toContain('`Tak` =');
+            for (const [, term] of [...sql.matchAll(/tak_id = '([0-9a-f-]{36})'/g)].map(match => [match[0], match[1]])) {
+                expect(`${term} is kinderen: ${new RegExp(`WHEN '${term}' THEN 'child'`).test(categories)}`).toEqual(`${term} is kinderen: true`);
             }
         });
 
@@ -548,7 +569,7 @@ describe('report', () => {
          */
         it('subtracts the same omkaderingscijfer it puts on the screen', () => {
             for (const [env, tabs, pattern, divisie] of [
-                ['keeo', dashboards, /ROUND\( \( COUNT\(DISTINCT CASE WHEN tak_category.*?, 2\)/,
+                ['keeo', dashboards, /ROUND\( \( COUNT\(DISTINCT CASE WHEN tak_id.*?, 2\)/,
                     "COUNT(DISTINCT CASE WHEN tak_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END), 0)"],
                 ['ravot', ravotDashboards, /ROUND\( COUNT\(DISTINCT CASE WHEN tak_category.*?, 2\)/,
                     "COUNT(DISTINCT CASE WHEN tak_category = 'child' AND leeftijd < 17 THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END), 0)"],
@@ -569,7 +590,7 @@ describe('report', () => {
          */
         it('computes the GTP index from one expression wherever it is shown', () => {
             for (const [env, tabs, pattern] of [
-                ['keeo', dashboards, /ROUND\( \( COUNT\(DISTINCT CASE WHEN tak_category = 'child' AND `Tak` = 'Bevers'.*?, 2\)/],
+                ['keeo', dashboards, /ROUND\( \( COUNT\(DISTINCT CASE WHEN tak_id = 'f274a949-9318-4c2b-ae35-e50114efe686'.*?, 2\)/],
                 ['ravot', ravotDashboards, /ROUND\( COUNT\(DISTINCT CASE WHEN tak_category = 'child' AND leeftijd < 10.*?, 2\)/],
             ] as const) {
                 const expressions = [['nationaal', 'leden-per-eenheid'], ['eenheden', 'eenheid-gtp'], ['eenheden', 'eenheid-gtp-meter'], ['eenheden', 'eenheid-gtp-per-scoutsjaar']]

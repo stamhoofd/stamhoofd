@@ -15,6 +15,7 @@ facts AS (
         p.startDate AS period_start,
         g.type AS group_type,
         COALESCE(dag.name, g.name) AS `Tak`,
+        dag.id AS tak_id,
         dag.category AS tak_category,
         dag.minAge AS tak_min_age,
         dag.maxAge AS tak_max_age,
