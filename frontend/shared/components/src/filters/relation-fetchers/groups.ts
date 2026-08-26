@@ -40,7 +40,7 @@ export function useGroupsRelationFetcher() {
                 if (periodName) {
                     return `${groupName} (${periodName})`;
                 }
-                return `${groupName}`;
+                return groupName;
             };
 
             subFilter = new RelationFetcherSubFilter({
