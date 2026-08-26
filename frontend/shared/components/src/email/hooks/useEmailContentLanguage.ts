@@ -91,6 +91,29 @@ export function createRemoveLanguagePatch(holder: EmailContentHolder, language: 
 }
 
 /**
+ * The patch that makes an existing translation the default language: the translation moves into
+ * the default content and the previous default content becomes a translation.
+ */
+export function createSetDefaultLanguagePatch(holder: EmailContentHolder, language: Language): EmailContentPatch {
+    const previous = holder.language;
+    if (previous === null || previous === language || !holder.translations.has(language)) {
+        return {};
+    }
+    const content = getEmailContentFor(holder, language);
+    return {
+        language,
+        subject: content.subject,
+        html: content.html,
+        text: content.text,
+        json: content.json,
+        translations: new PatchMap([
+            [previous, getEmailContentFor(holder, previous)],
+            [language, null],
+        ]),
+    };
+}
+
+/**
  * Manages which language of an email (template) is being edited: keeps the subject input and the
  * TipTap editor in sync with the language that is being edited, and writes all edits back into the
  * patch of the view — into the root fields for the default language, into the translations map for
@@ -325,6 +348,25 @@ export function useEmailContentLanguage(options: {
     }
 
     /**
+     * Make one of the existing translations the default language. The edited language does not
+     * change: its content only moves to a different place in the holder.
+     */
+    async function setDefaultLanguage(language: Language) {
+        if (switching.value || !languages.value.includes(language) || language === defaultLanguage.value) {
+            return;
+        }
+        switching.value = true;
+        try {
+            await flush();
+            // The seeded copy becomes real content once it is the default or the default moved into it
+            seeded = null;
+            options.addPatch(createSetDefaultLanguagePatch(options.patched(), language));
+        } finally {
+            switching.value = false;
+        }
+    }
+
+    /**
      * Keep the json of the currently edited language in the patch on every editor change (used for
      * auto-saving). The html/text are not derived here because that is async and expensive: use
      * flush() or patchDerivedContent() before actually using them.
@@ -376,6 +418,7 @@ export function useEmailContentLanguage(options: {
         switchTo,
         addLanguage,
         removeLanguage,
+        setDefaultLanguage,
         patchDerivedContent,
     };
 }

@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 import type { Ref } from 'vue';
 import { ref } from 'vue';
 import type { EmailContentHolder, EmailContentPatch } from './useEmailContentLanguage';
-import { createAddLanguagePatch, createRemoveLanguagePatch, getChangedEmailContentLanguages, getEmailContentFor, getStaleEmailContentLanguages, useEmailContentLanguage } from './useEmailContentLanguage';
+import { createAddLanguagePatch, createRemoveLanguagePatch, createSetDefaultLanguagePatch, getChangedEmailContentLanguages, getEmailContentFor, getStaleEmailContentLanguages, useEmailContentLanguage } from './useEmailContentLanguage';
 
 function buildContent(content: { subject?: string; json?: any } = {}): EmailContent {
     return EmailContent.create({
@@ -81,6 +81,23 @@ describe('createRemoveLanguagePatch', () => {
         const patch = createRemoveLanguagePatch(holder, Language.Dutch);
         expect(patch).toEqual({ language: null });
         expect(patch.subject).toBeUndefined();
+    });
+});
+
+describe('createSetDefaultLanguagePatch', () => {
+    test('swaps the translation and the default content', () => {
+        const holder = buildHolder({ subject: 'Root subject', language: Language.Dutch, translations: [[Language.French, { subject: 'Sujet' }], [Language.English, { subject: 'English' }]] });
+        const patch = createSetDefaultLanguagePatch(holder, Language.French);
+        expect(patch.language).toBe(Language.French);
+        expect(patch.subject).toBe('Sujet');
+        expect([...patch.translations!.entries()]).toEqual([[Language.Dutch, expect.objectContaining({ subject: 'Root subject' })], [Language.French, null]]);
+    });
+
+    test('does nothing for the current default or an unknown language', () => {
+        const holder = buildHolder({ language: Language.Dutch, translations: [[Language.French, {}]] });
+        expect(createSetDefaultLanguagePatch(holder, Language.Dutch)).toEqual({});
+        expect(createSetDefaultLanguagePatch(holder, Language.English)).toEqual({});
+        expect(createSetDefaultLanguagePatch(buildHolder(), Language.French)).toEqual({});
     });
 });
 
@@ -283,6 +300,51 @@ describe('getStaleEmailContentLanguages', () => {
         const original = buildHolder({ language: Language.Dutch, translations: [[Language.French, {}]] });
         const patched = buildHolder({ subject: 'Updated default', language: Language.Dutch, translations: [[Language.French, {}], [Language.English, {}]] });
         expect(getStaleEmailContentLanguages(original, patched)).toEqual([Language.French]);
+    });
+});
+
+describe('useEmailContentLanguage setDefaultLanguage', () => {
+    function createHook(initial: Email) {
+        const email: Ref<Email> = ref(initial);
+        const hook = useEmailContentLanguage({
+            editor: () => null,
+            patched: () => email.value,
+            addPatch: (patch: EmailContentPatch) => {
+                email.value = email.value.patch(Email.patch(patch));
+            },
+        });
+        return { email, hook };
+    }
+
+    test('moves the translation into the default content and keeps editing the same language', async () => {
+        const { email, hook } = createHook(Email.create({
+            subject: 'Root subject',
+            json: { type: 'doc' },
+            language: Language.Dutch,
+            translations: new Map([[Language.French, buildContent({ subject: 'Sujet' })]]),
+        }));
+        await hook.switchTo(Language.French);
+
+        await hook.setDefaultLanguage(Language.French);
+
+        expect(email.value.language).toBe(Language.French);
+        expect(email.value.subject).toBe('Sujet');
+        expect(email.value.translations.get(Language.Dutch)!.subject).toBe('Root subject');
+        expect(email.value.translations.has(Language.French)).toBe(false);
+        expect(hook.currentLanguage.value).toBe(Language.French);
+        expect(hook.defaultLanguage.value).toBe(Language.French);
+        expect(hook.languages.value).toEqual([Language.French, Language.Dutch]);
+    });
+
+    test('an untouched seeded language is kept once it became the default', async () => {
+        const { email, hook } = createHook(Email.create({ subject: 'Root subject', json: { type: 'doc' }, language: Language.Dutch }));
+        await hook.addLanguage(Language.French);
+
+        await hook.setDefaultLanguage(Language.French);
+        await hook.switchTo(Language.Dutch);
+
+        expect(email.value.language).toBe(Language.French);
+        expect(email.value.translations.has(Language.Dutch)).toBe(true);
     });
 });
 

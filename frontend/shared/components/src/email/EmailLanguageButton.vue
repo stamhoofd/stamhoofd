@@ -41,6 +41,7 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
     add: [language: Language];
     remove: [language: Language];
+    setDefault: [language: Language];
 }>();
 
 /**
@@ -129,6 +130,29 @@ async function showMenu(event: MouseEvent) {
                                 name: LanguageHelper.getName(language),
                                 action: () => {
                                     emit('add', language);
+                                },
+                            });
+                        }),
+                    ]),
+                }),
+            );
+        }
+
+        if (props.languages.length > 1) {
+            group.push(
+                new ContextMenuItem({
+                    name: $t('Standaardtaal wijzigen'),
+                    icon: 'star',
+                    childMenu: new ContextMenu([
+                        props.languages.map((language) => {
+                            const isDefault = props.defaultLanguage === language;
+                            return new ContextMenuItem({
+                                name: LanguageHelper.getName(language),
+                                selected: isDefault,
+                                action: () => {
+                                    if (!isDefault) {
+                                        emit('setDefault', language);
+                                    }
                                 },
                             });
                         }),
