@@ -43,7 +43,6 @@ export class OrganizationFactory extends Factory<Options, Organization> {
             postalCode: '9000',
             country: Country.Belgium,
         });
-        organization.language = Language.Dutch;
 
         let period: RegistrationPeriod;
 
