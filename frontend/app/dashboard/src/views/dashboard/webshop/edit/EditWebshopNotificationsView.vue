@@ -41,7 +41,7 @@ import type { UseEditWebshopProps } from './useEditWebshop';
 import { useEditWebshop } from './useEditWebshop';
 
 const props = defineProps<UseEditWebshopProps>();
-const viewTitle = 'Meldingen';
+const viewTitle = $t('Meldingen');
 
 const { webshop, addPatch, errors, saving, save, hasChanges, shouldNavigateAway } = useEditWebshop({
     getProps: () => props,

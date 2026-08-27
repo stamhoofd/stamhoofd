@@ -147,7 +147,7 @@ const { webshop, addPatch, errors, saving, save, hasChanges, originalWebshop, sh
 const requestOwner = useRequestOwner();
 const context = useContext();
 
-const viewTitle = 'Webshop link wijzigen';
+const viewTitle = $t('Webshop link wijzigen');
 
 const present = usePresent();
 const show = useShow();
@@ -276,7 +276,7 @@ function updateUri() {
     const cleaned = Formatter.slug(uri.value);
     if (cleaned !== uri.value) {
         uri.value = cleaned;
-        new Toast('Een link mag geen spaties, speciale tekens of hoofdletters bevatten', 'info').show();
+        new Toast($t('Een link mag geen spaties, speciale tekens of hoofdletters bevatten'), 'info').show();
     }
     throttledCheckUriAvailability();
 }
@@ -440,7 +440,7 @@ async function copyLink(event: MouseEvent) {
     }
 
     const displayedComponent = new ComponentWithProperties(Tooltip, {
-        text: 'Link gekopieerd!',
+        text: $t('Link gekopieerd!'),
         x: event.clientX,
         y: event.clientY + 10,
     });
@@ -458,7 +458,8 @@ async function validate() {
             throw new SimpleError({
                 code: '',
                 field: 'uri',
-                message: 'Kies een andere link, deze is ongeldig of al in gebruik.',
+                message: 'Uri is invalid or already in use',
+                human: $t('Kies een andere link, deze is ongeldig of al in gebruik.'),
             });
         }
 
@@ -482,7 +483,8 @@ async function validate() {
                 throw new SimpleError({
                     code: '',
                     field: 'customUrl',
-                    message: 'Het is niet mogelijk om een hoofddomein te gebruiken voor een webshop. Lees de documentatie hierover na voor meer informatie.',
+                    message: 'Root domains are not supported',
+                    human: $t('Het is niet mogelijk om een hoofddomein te gebruiken voor een webshop. Lees de documentatie hierover na voor meer informatie.'),
                 });
             }
             const subdomain = parts[0];
@@ -491,7 +493,8 @@ async function validate() {
                 throw new SimpleError({
                     code: '',
                     field: 'customUrl',
-                    message: "Het is momenteel niet mogelijk om 'inschrijven' te gebruiken als een subdomeinnaam voor jouw webshop. Deze is gereserveerd voor de ledenadministratie.",
+                    message: 'Reserved subdomain',
+                    human: $t("Het is momenteel niet mogelijk om 'inschrijven' te gebruiken als een subdomeinnaam voor jouw webshop. Deze is gereserveerd voor de ledenadministratie."),
                 });
             }
         } catch (e) {
@@ -501,7 +504,8 @@ async function validate() {
             throw new SimpleError({
                 code: '',
                 field: 'customUrl',
-                message: 'Deze domeinnaam is ongeldig.',
+                message: 'Invalid domain',
+                human: $t('Deze domeinnaam is ongeldig.'),
             });
         }
     }

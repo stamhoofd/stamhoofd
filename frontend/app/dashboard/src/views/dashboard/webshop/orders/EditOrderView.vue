@@ -69,12 +69,12 @@
                             {{ checkoutMethod.description || (checkoutMethod as any).address || "" }}
                         </p>
                         <p v-if="checkoutMethod.timeSlots.timeSlots.length === 1" class="style-description-small">
-                            {{ capitalizeFirstLetter(formatDate(checkoutMethod.timeSlots.timeSlots[0].date)) }} tussen {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].startTime) }} - {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].endTime) }}
+                            {{ capitalizeFirstLetter(formatDate(checkoutMethod.timeSlots.timeSlots[0].date)) }} {{ $t('tussen') }} {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].startTime) }} - {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].endTime) }}
                         </p>
 
                         <template v-if="checkoutMethod.timeSlots.timeSlots.length === 1 && checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock !== null" #right>
                             <span v-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 0" class="style-tag error">{{ $t('%Um') }}</span>
-                            <span v-else class="style-tag">{{ $t('%Un') }} {{ checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock }} {{ checkoutMethod.timeSlots.timeSlots[0].remainingPersons !== null ? (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "persoon" : "personen") : (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
+                            <span v-else class="style-tag">{{ $t('%Un') }} {{ checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock }} {{ checkoutMethod.timeSlots.timeSlots[0].remainingPersons !== null ? (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? $t('persoon') : $t('personen')) : (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? $t('plaats') : $t('plaatsen')) }}</span>
                         </template>
                     </STListItem>
                 </STList>
@@ -116,7 +116,7 @@
 
                         <template v-if="slot.listedRemainingStock !== null" #right>
                             <span v-if="slot.listedRemainingStock === 0" class="style-tag error">{{ $t('%Um') }}</span>
-                            <span v-else class="style-tag">{{ $t('%Un') }} {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock === 1 ? "persoon" : "personen") : (slot.listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
+                            <span v-else class="style-tag">{{ $t('%Un') }} {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock === 1 ? $t('persoon') : $t('personen')) : (slot.listedRemainingStock === 1 ? $t('plaats') : $t('plaatsen')) }}</span>
                         </template>
                     </STListItem>
                 </STList>
@@ -282,26 +282,26 @@ const genderEnabled = computed(() => webshop.meta.genderEnabled);
 
 const emailPlaceholder = computed(() => {
     if (webshop.meta.ticketType !== WebshopTicketType.None) {
-        return 'Voor tickets';
+        return $t('Voor tickets');
     }
-    return 'Voor bevestigingsemail';
+    return $t('Voor bevestigingsemail');
 });
 
 const emailDescription = computed(() => {
     if (webshop.meta.ticketType !== WebshopTicketType.None) {
-        return 'De tickets worden verzonden naar dit e-mailadres (na betaling, of meteen als betaalmethode \'Ter plaatse\' gekozen wordt). Kijk het goed na.';
+        return $t("De tickets worden verzonden naar dit e-mailadres (na betaling, of meteen als betaalmethode 'Ter plaatse' gekozen wordt). Kijk het goed na.");
     }
     return null;
 });
 
 const title = computed(() => {
     if (props.mode === 'comments') {
-        return 'Notities bewerken';
+        return $t('Notities bewerken');
     }
     if (isNew) {
-        return 'Nieuwe bestelling';
+        return $t('Nieuwe bestelling');
     }
-    return 'Bestelling bewerken';
+    return $t('Bestelling bewerken');
 });
 
 const webshop = props.webshopManager.preview;
@@ -485,9 +485,9 @@ const paymentContext = computed(() => patchedOrder.value.data.paymentContext);
 
 function getTypeName(type: CheckoutMethodType) {
     switch (type) {
-        case CheckoutMethodType.Takeout: return 'Afhalen';
-        case CheckoutMethodType.Delivery: return 'Levering';
-        case CheckoutMethodType.OnSite: return 'Ter plaatse';
+        case CheckoutMethodType.Takeout: return $t('Afhalen');
+        case CheckoutMethodType.Delivery: return $t('Levering');
+        case CheckoutMethodType.OnSite: return $t('Ter plaatse');
     }
 }
 
@@ -555,7 +555,7 @@ async function save() {
         await props.webshopManager.loadWebshop(false);
 
         saving.value = false;
-        new Toast('Wijzigingen opgeslagen', 'success').setHide(1000).show();
+        new Toast($t('Wijzigingen opgeslagen'), 'success').setHide(1000).show();
 
         // Move all data to original order
         for (const receivedOrder of orders) {
@@ -593,7 +593,7 @@ async function addProduct() {
                 }
 
                 if (!isNew && clone.totalPrice !== patchedOrder.value.data.totalPrice) {
-                    new Toast('De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.', 'warning yellow').setHide(10 * 1000).show();
+                    new Toast($t('De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.'), 'warning yellow').setHide(10 * 1000).show();
                 }
 
                 patchOrder.value = patchOrder.value.patch({ data: clone });
@@ -636,7 +636,7 @@ async function editCartItem(cartItem: CartItem) {
                         }
 
                         if (clone.totalPrice !== patchedOrder.value.data.totalPrice) {
-                            new Toast('De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.', 'warning yellow').setHide(10 * 1000).show();
+                            new Toast($t('De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.'), 'warning yellow').setHide(10 * 1000).show();
                         }
 
                         patchOrder.value = patchOrder.value.patch({
@@ -653,8 +653,8 @@ async function editCartItem(cartItem: CartItem) {
 async function deleteItem(cartItem: CartItem) {
     if (!await CenteredMessage.confirm({
         title: cartItem.product.name ? $t('%Zn2', { name: cartItem.product.name }) : $t('Dit verwijderen?'),
-        confirmText: 'Ja, verwijderen',
-        description: 'Je kan de bestelling nog nakijken voor je het definitief verwijdert.',
+        confirmText: $t('Ja, verwijderen'),
+        description: $t('Je kan de bestelling nog nakijken voor je het definitief verwijdert.'),
         availabilityDelay: 2_000,
     })) {
         return;
@@ -663,7 +663,7 @@ async function deleteItem(cartItem: CartItem) {
     clone.removeItem(cartItem);
 
     if (clone.price !== patchedOrder.value.data.cart.price) {
-        new Toast('De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.', 'warning yellow').setHide(10 * 1000).show();
+        new Toast($t('De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.'), 'warning yellow').setHide(10 * 1000).show();
     }
 
     addPatch({
@@ -691,7 +691,7 @@ async function shouldNavigateAway() {
     if (!isChanged.value) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'));
 }
 
 defineExpose({

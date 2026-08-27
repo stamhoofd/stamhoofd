@@ -202,7 +202,7 @@ const { webshop, addPatch, errors, saving, save, hasChanges, shouldNavigateAway 
 });
 const present = usePresent();
 const organization = useOrganization();
-const viewTitle = 'Webshop pagina wijzigen';
+const viewTitle = $t('Webshop pagina wijzigen');
 const auth = useAuth();
 const hasFullAccess = computed(() => auth.permissions?.hasFullAccess() ?? false);
 
@@ -357,7 +357,7 @@ function previewTicket() {
     const product = webshop.value.products.find(p => p.type === ProductType.Ticket) ?? webshop.value.products[0];
 
     if (!product) {
-        new Toast('Voeg ten minste één ticket toe aan je webshop om een voorbeeld van een ticket te bekijken', 'error red').show();
+        new Toast($t('Voeg ten minste één ticket toe aan je webshop om een voorbeeld van een ticket te bekijken'), 'error red').show();
         return;
     }
     const cart = Cart.create({});

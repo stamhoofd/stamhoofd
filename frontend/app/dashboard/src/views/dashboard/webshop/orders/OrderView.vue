@@ -65,7 +65,7 @@
 
                 <STListItem v-for="(payment, index) in order.payments" :key="payment.id" v-long-press="(e: MouseEvent) => (hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus(e) : null)" data-testid="order-payment-row" :selectable="hasPaymentsWrite" class="right-description" @click="openPayment(payment)" @contextmenu.prevent="hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus($event) : null">
                     <h3 class="style-definition-label">
-                        {{ payment.price >= 0 ? 'Betaling' : 'Terugbetaling' }} {{ order.payments.length > 1 ? index + 1 : '' }}
+                        {{ payment.price >= 0 ? $t('Betaling') : $t('Terugbetaling') }} {{ order.payments.length > 1 ? index + 1 : '' }}
                     </h3>
                     <p class="style-definition-text with-icons">
                         <span>{{ getName(payment.method) }}</span>
@@ -641,10 +641,10 @@ function downloadNewTickets() {
     props.webshopManager.tickets.fetchAllUpdated().catch((e: Error) => {
         if (tickets.value.length === 0) {
             if (Request.isNetworkError(e)) {
-                new Toast('Het laden van de tickets die bij deze bestelling horen is mislukt. Controleer je internetverbinding en probeer opnieuw.', 'error red').show();
+                new Toast($t('Het laden van de tickets die bij deze bestelling horen is mislukt. Controleer je internetverbinding en probeer opnieuw.'), 'error red').show();
             } else {
                 Toast.fromError(e).show();
-                new Toast('Het laden van de tickets die bij deze bestelling horen is mislukt', 'error red').show();
+                new Toast($t('Het laden van de tickets die bij deze bestelling horen is mislukt'), 'error red').show();
             }
         }
     });

@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <hr><h2 class="style-with-button">
-            <div>{{ $t('%QA') }} {{ policy.name || "Naamloos" }}</div>
+            <div>{{ $t('%QA') }} {{ policy.name || $t('Naamloos') }}</div>
             <div>
                 <button class="button text only-icon-smartphone" type="button" @click="emits('delete')">
                     <span class="icon trash" />
@@ -97,7 +97,8 @@ function validate() {
         if (!file.value) {
             throw new SimpleError({
                 code: '',
-                message: 'Selecteer een bestand',
+                message: 'No file selected',
+                human: $t('Selecteer een bestand'),
             });
         }
     }
@@ -105,7 +106,8 @@ function validate() {
         if (!url.value) {
             throw new SimpleError({
                 code: '',
-                message: 'Vul een geldige link in',
+                message: 'Invalid url',
+                human: $t('Vul een geldige link in'),
             });
         }
     }
