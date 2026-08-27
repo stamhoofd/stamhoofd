@@ -269,6 +269,11 @@ function deleteCode(code: DiscountCode) {
     addPatch({ data: patchedData });
 }
 async function applyCode(code: string) {
+    if (patchedOrder.value.data?.discountCodes.some(d => d.code === code)) {
+        new Toast($t('Deze kortingscode is al toegevoegd aan de bestelling'), 'red error').setHide(10 * 1000).show();
+        return false;
+    }
+
     const response = await context.value.optionalAuthenticatedServer.request({
         method: 'POST',
         path: '/webshop/' + webshop.id + '/discount-codes',
