@@ -87,14 +87,14 @@ const description = computed(() => {
 const viewTitle = computed(() => {
     if (isTickets.value) {
         if (webshop.value.categories.length > 0) {
-            return 'Ticket categorieën';
+            return $t('Ticket categorieën');
         }
-        return 'Aanbod tickets en vouchers';
+        return $t('Aanbod tickets en vouchers');
     }
     if (webshop.value.categories.length > 0) {
-        return 'Product categorieën';
+        return $t('Product categorieën');
     }
-    return 'Productaanbod';
+    return $t('Productaanbod');
 });
 
 const isTickets = computed(() => webshop.value.meta.ticketType === WebshopTicketType.Tickets);

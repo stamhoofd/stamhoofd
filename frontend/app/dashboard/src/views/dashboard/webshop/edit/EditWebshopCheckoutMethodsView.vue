@@ -65,7 +65,7 @@ const { webshop, addPatch, errors, saving, save, hasChanges, shouldNavigateAway 
 const present = usePresent();
 const organization = useOrganization();
 
-const viewTitle = 'Afhaal- en leveringsopties';
+const viewTitle = $t('Afhaal- en leveringsopties');
 
 function addOnSiteMethod() {
     const onSiteMethod = WebshopOnSiteMethod.create({

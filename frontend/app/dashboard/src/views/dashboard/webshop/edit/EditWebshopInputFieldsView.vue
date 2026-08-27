@@ -24,7 +24,7 @@ import WebshopFieldsBox from './fields/WebshopFieldsBox.vue';
 import type { UseEditWebshopProps } from './useEditWebshop';
 import { useEditWebshop } from './useEditWebshop';
 
-const viewTitle = 'Vrije invoervelden';
+const viewTitle = $t('Vrije invoervelden');
 
 const props = defineProps<UseEditWebshopProps>();
 

@@ -9,7 +9,7 @@
         </STInputBox>
 
         <p v-if="name.length > 30 && isNew" class="style-description-small">
-            Lange naam? Je kan de zichtbare titel straks wijzigen bij de instellingen 'Personaliseren'. Hier houd je het beter kort.
+            {{ $t("Lange naam? Je kan de zichtbare titel straks wijzigen bij de instellingen 'Personaliseren'. Hier houd je het beter kort.") }}
         </p>
         <p v-else-if="name.length > 30" class="style-description-small">
             {{ $t("%Qm") }}
@@ -17,7 +17,7 @@
 
         <!-- type -->
         <template v-if="forceType === null || type !== forceType">
-            <STInputBox title="Type" error-fields="type" :error-box="errors.errorBox" class="max">
+            <STInputBox :title="$t('Type')" error-fields="type" :error-box="errors.errorBox" class="max">
                 <div class="illustration-radio-container">
                     <label class="illustration-radio-box">
                         <div>
@@ -26,8 +26,8 @@
                         <figure>
                             <img src="~@stamhoofd/assets/images/illustrations/stage.svg">
                         </figure>
-                        <h3>Zaalvoorstelling</h3>
-                        <p>Met tickets en vaste plaatsen</p>
+                        <h3>{{ $t('Zaalvoorstelling') }}</h3>
+                        <p>{{ $t('Met tickets en vaste plaatsen') }}</p>
                     </label>
 
                     <label class="illustration-radio-box">
@@ -37,8 +37,8 @@
                         <figure>
                             <img src="~@stamhoofd/assets/images/illustrations/tickets.svg">
                         </figure>
-                        <h3>Evenement met tickets</h3>
-                        <p>Fuif, festival, ...</p>
+                        <h3>{{ $t('Evenement met tickets') }}</h3>
+                        <p>{{ $t('Fuif, festival, ...') }}</p>
                     </label>
 
                     <label class="illustration-radio-box">
@@ -48,8 +48,8 @@
                         <figure>
                             <img src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
                         </figure>
-                        <h3>Inschrijvingen</h3>
-                        <p>Quiz, wandeltocht, eetfestijn, lessen, workshop...</p>
+                        <h3>{{ $t('Inschrijvingen') }}</h3>
+                        <p>{{ $t('Quiz, wandeltocht, eetfestijn, lessen, workshop...') }}</p>
                     </label>
 
                     <label class="illustration-radio-box">
@@ -59,7 +59,7 @@
                         <figure>
                             <img src="~@stamhoofd/assets/images/illustrations/truck.svg">
                         </figure>
-                        <h3>Take-away of levering</h3>
+                        <h3>{{ $t('Take-away of levering') }}</h3>
                     </label>
 
                     <label class="illustration-radio-box">
@@ -69,7 +69,7 @@
                         <figure>
                             <img src="~@stamhoofd/assets/images/illustrations/charity.svg">
                         </figure>
-                        <h3>Donaties of inzameling</h3>
+                        <h3>{{ $t('Donaties of inzameling') }}</h3>
                     </label>
 
                     <label class="illustration-radio-box">
@@ -79,12 +79,12 @@
                         <figure>
                             <img src="~@stamhoofd/assets/images/illustrations/cart.svg">
                         </figure>
-                        <h3>Webshop / andere</h3>
+                        <h3>{{ $t('Webshop / andere') }}</h3>
                     </label>
                 </div>
             </STInputBox>
             <p v-if="isNew" class="style-description-small">
-                Via het type van je webshop helpen we later makkelijk op weg.
+                {{ $t('Via het type van je webshop helpen we later makkelijk op weg.') }}
             </p>
         </template>
 
@@ -263,7 +263,7 @@ const { isNew, webshop, addPatch, patch: webshopPatch, originalWebshop, errors, 
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Name is empty',
-                human: 'Vul een naam in voor jouw webshop voor je doorgaat',
+                human: $t('Vul een naam in voor jouw webshop voor je doorgaat'),
                 field: 'meta.name',
             });
         }
@@ -278,24 +278,24 @@ const viewTitle = computed(() => {
     if (props.forceType) {
         switch (props.forceType) {
             case WebshopType.Performance:
-                return 'Nieuwe zaalvoorstelling';
+                return $t('Nieuwe zaalvoorstelling');
             case WebshopType.Event:
-                return 'Nieuw evenement met tickets';
+                return $t('Nieuw evenement met tickets');
             case WebshopType.Registrations:
-                return 'Nieuwe inschrijvingen';
+                return $t('Nieuwe inschrijvingen');
             case WebshopType.TakeawayAndDelivery:
-                return 'Nieuwe take-away of levering';
+                return $t('Nieuwe take-away of levering');
             case WebshopType.Donations:
-                return 'Nieuwe inzameling';
+                return $t('Nieuwe inzameling');
             default:
-                return 'Nieuwe webshop';
+                return $t('Nieuwe webshop');
         }
     }
 
     if (isNew.value) {
-        return 'Nieuwe verkoop, inschrijvingsformulier of geldinzameling starten';
+        return $t('Nieuwe verkoop, inschrijvingsformulier of geldinzameling starten');
     }
-    return 'Algemene instellingen';
+    return $t('Algemene instellingen');
 });
 
 const name = computed({
@@ -306,17 +306,17 @@ const name = computed({
 const namePlaceholder = computed(() => {
     switch (type.value) {
         case WebshopType.Performance:
-            return "Bv. 'Schaduwen van morgen'";
+            return $t("Bv. 'Schaduwen van morgen'");
         case WebshopType.Event:
-            return 'Bv. Ruimtefestival';
+            return $t('Bv. Ruimtefestival');
         case WebshopType.Registrations:
-            return 'Bv. Eetfestijn';
+            return $t('Bv. Eetfestijn');
         case WebshopType.TakeawayAndDelivery:
-            return 'bv. Wijnverkoop';
+            return $t('bv. Wijnverkoop');
         case WebshopType.Donations:
-            return 'bv. Inzameling nieuw materiaal';
+            return $t('bv. Inzameling nieuw materiaal');
         default:
-            return 'Bv. T-shirts';
+            return $t('Bv. T-shirts');
     }
 });
 
@@ -351,7 +351,7 @@ const ticketType = computed({
             }
 
             if (used) {
-                new Toast('Sommige artikelen zullen worden omgezet in tickets waardoor je hun locatie en datum nog zal moeten invullen', 'warning yellow').setHide(null).show();
+                new Toast($t('Sommige artikelen zullen worden omgezet in tickets waardoor je hun locatie en datum nog zal moeten invullen'), 'warning yellow').setHide(null).show();
             }
 
             // Remove all locations
@@ -362,7 +362,7 @@ const ticketType = computed({
             }
 
             if (deletedLocation) {
-                new Toast('Alle afhaal- en leveringslocaties zullen worden verwijderd als je opslaat omdat deze niet ondersteund worden bij een ticketverkoop voor personen', 'warning yellow').setHide(null).show();
+                new Toast($t('Alle afhaal- en leveringslocaties zullen worden verwijderd als je opslaat omdat deze niet ondersteund worden bij een ticketverkoop voor personen'), 'warning yellow').setHide(null).show();
             }
         } else {
             let used = false;
@@ -381,7 +381,7 @@ const ticketType = computed({
             }
 
             if (used) {
-                new Toast('Sommige tickets zullen worden omgezet in gewone artikels waardoor hun locatie en datum informatie verloren gaat als je nu opslaat.', 'warning yellow').setHide(null).show();
+                new Toast($t('Sommige tickets zullen worden omgezet in gewone artikels waardoor hun locatie en datum informatie verloren gaat als je nu opslaat.'), 'warning yellow').setHide(null).show();
             }
         }
 
@@ -391,9 +391,9 @@ const ticketType = computed({
 
 const accessControlLabel = computed(() => {
     if (webshop.value.meta.type === WebshopType.Webshop || webshop.value.meta.type === WebshopType.TakeawayAndDelivery) {
-        return 'Controle bij afhalen/leveren';
+        return $t('Controle bij afhalen/leveren');
     }
-    return 'Toegangscontrole';
+    return $t('Toegangscontrole');
 });
 
 const accessControlList = computed<{ label: string; value: WebshopTicketType; src: string; tag?: string; description?: string }[]>(() => {
@@ -402,12 +402,12 @@ const accessControlList = computed<{ label: string; value: WebshopTicketType; sr
     ) {
         return [
             {
-                label: 'Geen',
+                label: $t('Geen'),
                 value: WebshopTicketType.None,
                 src: listIllustrationSrc,
             },
             {
-                label: 'Scannen',
+                label: $t('Scannen'),
                 value: WebshopTicketType.SingleTicket,
                 src: scannerIllustrationSrc,
             },
@@ -417,7 +417,7 @@ const accessControlList = computed<{ label: string; value: WebshopTicketType; sr
     if (webshop.value.meta.type === WebshopType.Donations) {
         return [
             {
-                label: 'Geen',
+                label: $t('Geen'),
                 value: WebshopTicketType.None,
                 src: listIllustrationSrc,
             },
@@ -427,7 +427,7 @@ const accessControlList = computed<{ label: string; value: WebshopTicketType; sr
     if (webshop.value.meta.type === WebshopType.Performance) {
         return [
             {
-                label: 'Per persoon',
+                label: $t('Per persoon'),
                 value: WebshopTicketType.Tickets,
                 src: teamIllustrationSrc,
             },
@@ -438,7 +438,7 @@ const accessControlList = computed<{ label: string; value: WebshopTicketType; sr
 
     if (webshop.value.meta.type !== WebshopType.Event) {
         list.push({
-            label: 'Geen',
+            label: $t('Geen'),
             value: WebshopTicketType.None,
             src: listIllustrationSrc,
             // tag: 'Meest gekozen',
@@ -448,13 +448,13 @@ const accessControlList = computed<{ label: string; value: WebshopTicketType; sr
     return [
         ...list,
         {
-            label: 'Per persoon',
+            label: $t('Per persoon'),
             value: WebshopTicketType.Tickets,
             src: userIllustrationSrc,
             // tag: list.length === 0 ? 'Meest gekozen' : undefined,
         },
         {
-            label: 'Per bestelling',
+            label: $t('Per bestelling'),
             value: WebshopTicketType.SingleTicket,
             src: teamIllustrationSrc,
         },
@@ -682,13 +682,13 @@ function getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined
         case PaymentMethod.CreditCard:
         case PaymentMethod.Bancontact: {
             if (stripeAccountObject.value) {
-                return PaymentMethodHelper.getName(paymentMethod) + ' is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de vereniging niet werd ingevuld.';
+                return $t('{paymentMethod} is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de vereniging niet werd ingevuld.', { paymentMethod: PaymentMethodHelper.getName(paymentMethod) });
             }
             break;
         }
     }
 
-    return 'Je kan ' + PaymentMethodHelper.getName(paymentMethod) + ' niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Stamhoofd instellingen > Betaalaccounts.';
+    return $t('Je kan {paymentMethod} niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Stamhoofd instellingen > Betaalaccounts.', { paymentMethod: PaymentMethodHelper.getName(paymentMethod) });
 }
 
 // on created

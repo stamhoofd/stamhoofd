@@ -76,7 +76,7 @@ const isComplete = computed(() => !records.value.find(r => r.status !== DNSRecor
 
 function skip() {
     if (!isComplete.value) {
-        new Toast('Hou er rekening mee dat jouw webshop voorlopig nog niet bereikbaar is op de door jou gekozen link. We gebruiken intussen de standaard domeinnaam van Stamhoofd. Wijzig eventueel de link terug tot iemand dit in orde kan brengen.', 'warning yellow').setHide(15 * 1000).show();
+        new Toast($t('Hou er rekening mee dat jouw webshop voorlopig nog niet bereikbaar is op de door jou gekozen link. We gebruiken intussen de standaard domeinnaam van Stamhoofd. Wijzig eventueel de link terug tot iemand dit in orde kan brengen.'), 'warning yellow').setHide(15 * 1000).show();
     }
     dismiss().catch(console.error);
 }
@@ -101,11 +101,11 @@ async function validate() {
         props.webshopManager.updateWebshop(response.data).catch(console.error);
 
         if (response.data.meta.domainActive) {
-            new Toast('Je domeinnaam is goed geconfigureerd, jouw webshop is nu bereikbaar op deze nieuwe link.', 'success green').show();
+            new Toast($t('Je domeinnaam is goed geconfigureerd, jouw webshop is nu bereikbaar op deze nieuwe link.'), 'success green').show();
             dismiss({ force: true }).catch(console.error);
         }
         else {
-            new Toast('We konden jouw domeinnaam nog niet activeren (zie foutmeldingen bij de DNS-records). Soms kan het even duren voor de wijzigingen doorkomen, we sturen je een e-mail zodra we ze wel opmerken.', 'error red').show();
+            new Toast($t('We konden jouw domeinnaam nog niet activeren (zie foutmeldingen bij de DNS-records). Soms kan het even duren voor de wijzigingen doorkomen, we sturen je een e-mail zodra we ze wel opmerken.'), 'error red').show();
         }
     }
     catch (e) {
