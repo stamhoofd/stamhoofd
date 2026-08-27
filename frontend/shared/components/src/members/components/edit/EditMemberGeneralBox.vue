@@ -99,10 +99,10 @@
             <div v-if="!member.isNew">
                 <SelectionAddressInput v-if="address || isPropertyEnabled('address')" v-model="address" :addresses="availableAddresses" :required="isPropertyRequired('address')" :title="$t(`%Cn`) + lidSuffix + (isPropertyRequired('address') ? '' : ' ' + $t(`%br`))" :validator="validator" />
 
-                <STInputBox v-if="isAdmin && !member.isNew && showLanguage" error-fields="language" :error-box="errors.errorBox" :title="$t('Taal')">
+                <STInputBox v-if="isAdmin && !member.isNew && showLanguage" error-fields="language" :error-box="errors.errorBox" :title="$t('%14T')">
                     <Dropdown v-model="language">
                         <option :value="null">
-                            {{ $t('Geen voorkeur') }}
+                            {{ $t('%Zni') }}
                         </option>
                         <option v-for="l in availableLanguages" :key="l" :value="l">
                             {{ LanguageHelper.getNativeName(l) }}
@@ -110,7 +110,7 @@
                     </Dropdown>
                 </STInputBox>
                 <p v-if="isAdmin && !member.isNew && showLanguage" class="style-description-small">
-                    {{ $t('De taal waarin dit lid en de accounts van dit lid e-mails ontvangen. Wijzigingen worden ook toegepast op alle accounts van dit lid.') }}
+                    {{ $t('%Znn') }}
                 </p>
             </div>
         </div>

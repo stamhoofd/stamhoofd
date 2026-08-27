@@ -1639,6 +1639,10 @@
     "original": "Hoofdbeheerders van deze eenheid kunnen via een link inloggen als één van hun gebruikers, om te zien wat die gebruiker ziet.",
     "translation": "Admins of this group can log in as any of their users via a link, to see what that user sees."
   },
+  "%Znp": {
+    "original": "De standaardtaal van jouw eenheid. Stel dit in op de taal waarin je doorgaans communiceert. Kies enkel meertalig als emailcommunicatie actief in meerdere talen gebeurt, niet enkel voor uitzonderingen.",
+    "translation": "The default language for your group. Set this to the language you usually communicate in. Only choose multilingual if your email communication is actively done in multiple languages, not just for rare exceptions."
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Keeo. Voor Microsoft kan je",
     "translation": "Ensure that users can log in via your own account system, separate from Keeo. For Microsoft you can"

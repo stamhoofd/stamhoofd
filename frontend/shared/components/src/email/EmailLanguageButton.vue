@@ -126,7 +126,7 @@ async function showMenu(event: MouseEvent) {
         if (canAdd && listedLanguages.some(l => l !== modelValue.value) && context.value?.auth?.hasPlatformFullAccess()) {
             group.push(
                 new ContextMenuItem({
-                    name: $t('Automatisch vertalen naar alle talen'),
+                    name: $t('%Znv'),
                     icon: 'wand',
                     action: () => {
                         emit('translate');
@@ -157,7 +157,7 @@ async function showMenu(event: MouseEvent) {
         if (props.languages.length > 1) {
             group.push(
                 new ContextMenuItem({
-                    name: $t('Standaardtaal wijzigen'),
+                    name: $t('%Znm'),
                     icon: 'star',
                     childMenu: new ContextMenu([
                         props.languages.map((language) => {

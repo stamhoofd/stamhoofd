@@ -78,7 +78,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     },
     {
         id: 'language',
-        name: $t('Taal'),
+        name: $t('%14T'),
         width: 20,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
             value: object.details.language ? LanguageHelper.getName(object.details.language) : '',

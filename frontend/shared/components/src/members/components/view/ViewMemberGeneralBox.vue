@@ -87,9 +87,9 @@
             </template>
 
             <template v-if="showLanguage">
-                <dt>{{ $t('Taal') }}</dt>
+                <dt>{{ $t('%14T') }}</dt>
                 <dd>
-                    {{ member.patchedMember.details.language ? LanguageHelper.getNativeName(member.patchedMember.details.language) : $t('Geen voorkeur') }}
+                    {{ member.patchedMember.details.language ? LanguageHelper.getNativeName(member.patchedMember.details.language) : $t('%Zni') }}
                 </dd>
             </template>
 
