@@ -34,22 +34,6 @@
                     </p>
                 </template>
 
-                <template v-if="!member.isNew && isAdmin && isFullAdmin && ((isBelgium && age <= 21 && isPropertyEnabled('nationalRegisterNumber')) || severeDisability)">
-                    <Checkbox v-model="severeDisability">
-                        {{ $t("Is erkend als persoon met een zware beperking") }}
-
-                        <p class="style-description-small">
-                            <I18nComponent :t="$t('Bij personen met een zware beperking, geldt er een hogere leeftijdslimiet van 21 jaar. <button>Meer info</button>')">
-                                <template #button="{content}">
-                                    <a class="inline-link" href="https://fin.belgium.be/nl/particulieren/belastingvoordelen/kinderopvang/belastingvermindering" target="_blank">
-                                        {{ content }}
-                                    </a>
-                                </template>
-                            </I18nComponent>
-                        </p>
-                    </Checkbox>
-                </template>
-
                 <STInputBox v-if="isPropertyEnabled('gender') || gender !== Gender.Other" error-fields="gender" :error-box="errors.errorBox" :title="$t(`%fO`)">
                     <RadioGroup>
                         <Radio v-model="gender" :value="Gender.Male" autocomplete="sex" name="sex">
@@ -84,32 +68,6 @@
                         </template> {{ $t('%fM', {member: member.patchedMember.firstName}) }}
                     </p>
                 </div>
-
-                <div v-if="!member.isNew && (nationalRegisterNumber || isPropertyEnabled('nationalRegisterNumber') )">
-                    <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`) + lidSuffix + (!isPropertyRequired('nationalRegisterNumber') ? ' ('+$t('%1GF')+')' : '')" :required="isPropertyRequired('nationalRegisterNumber')" :nullable="true" :validator="validator" :birth-day="birthDay">
-                        <template v-if="!isPropertyEnabled('nationalRegisterNumber')" #right>
-                            <button class="button icon trash small gray" type="button" @click="nationalRegisterNumber = null" />
-                        </template>
-                    </NRNInput>
-                    <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
-                        <I18nComponent :t="$t('%15M', {firstName: firstName || $t('%15V')})">
-                            <template #button="{content}">
-                                <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
-                                    {{ content }}
-                                </button>
-                            </template>
-                        </I18nComponent>
-                    </p>
-                    <p v-else class="style-description-small">
-                        <I18nComponent :t="$t('%15N')">
-                            <template #button="{content}">
-                                <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
-                                    {{ content }}
-                                </button>
-                            </template>
-                        </I18nComponent>
-                    </p>
-                </div>
             </div>
 
             <div v-if="!member.isNew">
@@ -141,6 +99,49 @@
                 {{ $t('%jC') }}
             </button>
         </p>
+
+        <div v-if="!member.isNew && (nationalRegisterNumber || isPropertyEnabled('nationalRegisterNumber') )" class="container">
+            <hr>
+            <h2>{{ $t('Fiscale attesten') }}</h2>
+
+            <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`) + lidSuffix + (!isPropertyRequired('nationalRegisterNumber') ? ' ('+$t('%1GF')+')' : '')" :required="isPropertyRequired('nationalRegisterNumber')" :nullable="true" :validator="validator" :birth-day="birthDay">
+                <template v-if="!isPropertyEnabled('nationalRegisterNumber')" #right>
+                    <button class="button icon trash small gray" type="button" @click="nationalRegisterNumber = null" />
+                </template>
+            </NRNInput>
+            <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
+                <I18nComponent :t="$t('%15M', {firstName: firstName || $t('%15V')})">
+                    <template #button="{content}">
+                        <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
+                            {{ content }}
+                        </button>
+                    </template>
+                </I18nComponent>
+            </p>
+            <p v-else class="style-description-small">
+                <I18nComponent :t="$t('%15N')">
+                    <template #button="{content}">
+                        <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
+                            {{ content }}
+                        </button>
+                    </template>
+                </I18nComponent>
+            </p>
+
+            <STList v-if="!member.isNew && isAdmin && isFullAdmin && ((isBelgium && age <= 21 && nationalRegisterNumber && nationalRegisterNumber !== NationalRegisterNumberOptOut) || severeDisability)">
+                <CheckboxListItem v-model="severeDisability" :label="$t('Fiscaal attest uitreiken tot hogere leeftijd van 21 jaar', {firstName: firstName})">
+                    <p class="style-description-small">
+                        <I18nComponent :t="$t('Enkel voor leden met een attest van zware handicap. <button>Meer info</button>')">
+                            <template #button="{content}">
+                                <a class="inline-link" href="https://fin.belgium.be/nl/particulieren/belastingvoordelen/kinderopvang/belastingvermindering" target="_blank">
+                                    {{ content }}
+                                </a>
+                            </template>
+                        </I18nComponent>
+                    </p>
+                </CheckboxListItem>
+            </STList>
+        </div>
     </div>
 </template>
 
@@ -171,6 +172,9 @@ import { useAuth } from '#hooks/useAuth.ts';
 import { Country } from '@stamhoofd/types/Country';
 import { useShowMemberLanguage } from '#members/hooks/useShowMemberLanguage.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
+import CheckboxListItem from '#inputs/CheckboxListItem.vue';
+import STList from '#layout/STList.vue';
+import { useOrganization } from '#hooks/useOrganization.ts';
 
 defineOptions({
     inheritAttrs: false,
@@ -303,11 +307,10 @@ const birthDay = computed({
 const age = computed(() => {
     return props.member.patchedMember.details.age ?? props.member.patchedMember.details.defaultAge;
 });
+const organization = useOrganization();
 
 const isBelgium = computed(() => {
-    return address.value
-        ? address.value.country === Country.Belgium
-        : props.member.patchedMember.details.parents.some(p => p.address && p.address.country === Country.Belgium);
+    return organization.value?.address.country === Country.Belgium || address.value?.country === Country.Belgium || props.member.patchedMember.details.parents.some(p => p.address && p.address.country === Country.Belgium);
 });
 
 const trackingYear = computed({
