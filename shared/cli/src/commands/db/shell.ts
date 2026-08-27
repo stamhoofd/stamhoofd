@@ -1,7 +1,5 @@
 import { BaseCommand } from '../../base-command.js';
-import { buildBackendEnv } from '../../config/build-config.js';
-import { mysqlContainer, mysqlRootPassword, mysqlRootUser } from '../../config/shared-service-config.js';
-import * as docker from '../../services/docker.js';
+import { currentDatabase, openDatabaseShell } from '../../runtime/database-command-helpers.js';
 
 export default class DbShell extends BaseCommand {
     static summary = 'Open a MySQL shell for the selected database';
@@ -15,7 +13,6 @@ export default class DbShell extends BaseCommand {
     async run(): Promise<void> {
         const { flags } = await this.parse(DbShell);
         const context = await this.createContext(flags);
-        const env = buildBackendEnv(context);
-        await docker.run(['exec', '-it', mysqlContainer, 'mysql', `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, env.DB_DATABASE ?? 'stamhoofd-development']);
+        await openDatabaseShell(currentDatabase(context));
     }
 }
