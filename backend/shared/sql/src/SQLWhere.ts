@@ -213,8 +213,7 @@ export class SQLWhereEqual extends SQLWhere {
         if (value !== undefined) {
             this.value = value;
             this.sign = signOrValue as SQLWhereSign;
-        }
-        else {
+        } else {
             this.value = signOrValue as SQLExpression;
         }
     }
@@ -267,6 +266,18 @@ export class SQLWhereEqual extends SQLWhere {
     }
 
     get transformed() {
+        if (this.value instanceof SQLArray && this.value.value.length === 0) {
+            // `IN ()` is invalid SQL: an empty IN never matches, an empty NOT IN always matches
+            if (this.sign === SQLWhereSign.Equal) {
+                // Always false
+                return new SQLWhereOr([]);
+            }
+            if (this.sign === SQLWhereSign.NotEqual) {
+                // Always true
+                return new SQLWhereAnd([]);
+            }
+        }
+
         if (this.value instanceof SQLNull) {
             // We'll do some transformations to make this query work as expected.
             // < null = always false
@@ -338,8 +349,7 @@ export class SQLWhereEqual extends SQLWhere {
         if (this.sign === SQLWhereSign.Equal && this.nullable) {
             // Swap with null-safe equal
             sign = '<=>';
-        }
-        else if (this.sign === SQLWhereSign.NotEqual && this.nullable) {
+        } else if (this.sign === SQLWhereSign.NotEqual && this.nullable) {
             // Swap with null-safe not equal
             return joinSQLQuery([
                 'NOT (',
