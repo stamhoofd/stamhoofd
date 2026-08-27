@@ -148,7 +148,7 @@
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import type { PlatformMember } from '@stamhoofd/structures';
-import { BooleanStatus, Gender, NationalRegisterNumberOptOut } from '@stamhoofd/structures';
+import { BooleanStatus, Gender, LanguageHelper, NationalRegisterNumberOptOut } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
@@ -169,6 +169,8 @@ import Title from './Title.vue';
 import Checkbox from '#inputs/Checkbox.vue';
 import { useAuth } from '#hooks/useAuth.ts';
 import { Country } from '@stamhoofd/types/Country';
+import { useShowMemberLanguage } from '#members/hooks/useShowMemberLanguage.ts';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 
 defineOptions({
     inheritAttrs: false,
@@ -191,6 +193,13 @@ const app = useAppContext();
 const isAdmin = app === 'dashboard' || app === 'admin';
 const auth = useAuth();
 const isFullAdmin = auth.hasFullAccess();
+const showLanguage = useShowMemberLanguage(computed(() => props.member));
+const availableLanguages = I18nController.shared.availableLanguages;
+
+const language = computed({
+    get: () => props.member.patchedMember.details.language,
+    set: language => props.member.addDetailsPatch({ language }),
+});
 
 const title = computed(() => {
     if (props.member.isNew) {
