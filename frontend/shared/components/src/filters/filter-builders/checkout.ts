@@ -70,6 +70,16 @@ export function getCartFilterBuilder(webshop: Webshop) {
                 return new GroupUIFilterBuilder({
                     name: product.name,
                     builders: filters,
+                    wrapper: {
+                        $and: [
+                            {
+                                product: {
+                                    id: product.id,
+                                },
+                            },
+                            FilterWrapperMarker,
+                        ],
+                    },
                 });
             }),
         ],
