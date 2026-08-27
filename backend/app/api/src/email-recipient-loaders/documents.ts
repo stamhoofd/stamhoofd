@@ -25,6 +25,7 @@ async function fetch(query: LimitedFilteredRequest) {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
+                language: user.language,
                 replacements: [
                     Replacement.create({
                         token: 'firstNameMember',

@@ -192,7 +192,7 @@ async function sendTemplate({
         ],
     });
 
-    if (!await model.setFromTemplate(templateType)) {
+    if (!await model.setFromTemplate(templateType, { keepTranslations: true })) {
         console.warn('Skipped organization: email template not found', organization.id);
         return;
     }

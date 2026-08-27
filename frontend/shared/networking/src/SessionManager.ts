@@ -3,7 +3,7 @@ import { ArrayDecoder, AutoEncoder, field, ObjectData, StringDecoder, VersionBox
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import type { Platform } from '@stamhoofd/structures';
-import { Organization, Version } from '@stamhoofd/structures';
+import { Organization, User, Version } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 
@@ -234,7 +234,29 @@ export class SessionManagerStatic {
             defaultLanguage: Language.Dutch,
             country: session?.organization?.address?.country,
         });
+        this.saveMissingUserLanguage(session).catch(console.error);
         return session;
+    }
+
+    /**
+     * Users without a preferred language get the interface language they are using now,
+     * so it is reused on other devices and in emails.
+     */
+    private async saveMissingUserLanguage(session: SessionContext) {
+        const user = session.user;
+        if (!user || user.language !== null || !session.hasToken()) {
+            return;
+        }
+
+        const language = I18nController.shared.language;
+        await session.authenticatedIdentityServer.request({
+            method: 'PATCH',
+            path: '/user/' + user.id,
+            body: User.patch({ id: user.id, language }),
+            decoder: User as Decoder<User>,
+            shouldRetry: false,
+        });
+        await session.updateData(true, false);
     }
 
     /**

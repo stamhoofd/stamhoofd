@@ -99,6 +99,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
                                 firstName: user.firstName,
                                 lastName: user.lastName,
                                 email: request.body.email,
+                                language: user.language,
                                 replacements: [
                                     Replacement.create({
                                         token: 'resetUrl',

@@ -155,6 +155,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
             organization.uri = put.uri;
             organization.meta = put.meta;
             organization.address = put.address;
+            organization.language = put.language;
 
             let period: RegistrationPeriod | null = null;
 

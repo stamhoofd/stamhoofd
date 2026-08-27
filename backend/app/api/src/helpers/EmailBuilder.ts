@@ -9,6 +9,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { Group, Organization, Webshop } from '@stamhoofd/models';
 import { CachedBalance, EmailRecipient, EmailTemplate, Member, Platform, User } from '@stamhoofd/models';
+import { TenantContext } from './TenantContext.js';
 
 export type EmailTemplateOptions = {
     type: EmailTemplateType;
@@ -241,6 +242,7 @@ export type EmailBuilderOptions = {
      * Full content overrides per language. Recipients with a language that has an override
      * receive that content, all others receive the default subject/html.
      */
+    language?: Language | null;
     translations?: Map<Language, EmailContent>;
     attachments?: EmailAttachmentData[];
     type?: 'transactional' | 'broadcast';
@@ -372,7 +374,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
             }
 
             // Localize the unsubscribe page to the recipient's language (Organization.i18n is always Dutch)
-            const unsubscribeLocale = organization ? getRecipientI18n(recipient, organization).locale : null;
+            const unsubscribeLocale = organization ? (await getRecipientI18n(recipient, organization)).locale : null;
             const unsubscribeUrl = 'https://' + STAMHOOFD.domains.dashboard + '/' + (unsubscribeLocale ? (unsubscribeLocale + '/') : '') + 'unsubscribe?id=' + encodeURIComponent(unsubscribe.id) + '&token=' + encodeURIComponent(unsubscribe.token) + '&type=' + encodeURIComponent(email.unsubscribeType ?? 'all');
             recipient.replacements.push(Replacement.create({
                 token: 'unsubscribeUrl',
@@ -394,7 +396,12 @@ export async function getEmailBuilder(organization: Organization | null, email: 
 
     // The subject and html can differ per recipient language
     const contentCache = new Map<Language | null, { subject: string; html: string }>();
+    const tenant = await TenantContext.currentOrRoot.getTenant();
     const resolveContent = (language: Language | null) => {
+        if (language === null) {
+            // Use the organization or tenant default language
+            language = organization?.language ?? tenant.language ?? $getLanguage();
+        }
         const cached = contentCache.get(language);
         if (cached) {
             return cached;
@@ -402,7 +409,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
 
         // Strict selection: only use a translation of this email, never fall back to
         // a different template for a missing language (content correctness above language)
-        const translation = language !== null ? email.translations?.get(language) : undefined;
+        const translation = language !== null && language !== email.language ? email.translations?.get(language) : undefined;
         const subject = translation ? translation.subject : email.subject;
         let html = translation ? translation.html : email.html;
 
@@ -668,8 +675,9 @@ export function stripRecipientReplacementsForWebDisplay(recipient: Recipient | E
  * that already established a locale (order emails wrapped in I18n.runWithLocale, or the request
  * locale) keep working unchanged.
  */
-export function getRecipientI18n(recipient: { language?: Language | null }, organization: Organization | null, options?: { allowedLanguages?: Language[] | null }): I18n {
-    let lang = recipient.language ?? $getLanguage();
+export async function getRecipientI18n(recipient: { language?: Language | null }, organization: Organization | null, options?: { allowedLanguages?: Language[] | null }): Promise<I18n> {
+    const tenant = await TenantContext.currentOrRoot.getTenant();
+    let lang = recipient.language ?? organization?.language ?? tenant.language ?? $getLanguage();
     if (options?.allowedLanguages && options.allowedLanguages.length) {
         if (!options.allowedLanguages.includes(lang)) {
             if (options.allowedLanguages.includes($getLanguage())) {
@@ -690,8 +698,8 @@ export function getRecipientI18n(recipient: { language?: Language | null }, orga
  * content. Generate recipient replacements inside this wrapper so new replacements are localized
  * automatically, and pass the provided i18n to helpers that take an explicit locale (e.g. getAppHost).
  */
-export function runWithRecipientLocale<T>(recipient: { language?: Language | null }, organization: Organization | null, handler: (i18n: I18n) => T, options?: { allowedLanguages?: Language[] | null }): T {
-    const i18n = getRecipientI18n(recipient, organization, options);
+export async function runWithRecipientLocale<T>(recipient: { language?: Language | null }, organization: Organization | null, handler: (i18n: I18n) => T, options?: { allowedLanguages?: Language[] | null }): Promise<T> {
+    const i18n = await getRecipientI18n(recipient, organization, options);
     return I18n.runWithLocale(i18n, () => handler(i18n));
 }
 

@@ -93,6 +93,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         organization.uri = uri;
         organization.meta = request.body.organization.meta;
         organization.address = request.body.organization.address;
+        organization.language = request.body.organization.language;
         organization.privateMeta.acquisitionTypes = request.body.organization.privateMeta?.acquisitionTypes ?? [];
 
         // Delay save until after organization is saved, but do validations before the organization is saved

@@ -386,6 +386,7 @@ export class LoginHelper {
             firstName,
             lastName,
             password,
+            language: $getLanguage(),
         });
 
         // Do netwowrk request to create organization

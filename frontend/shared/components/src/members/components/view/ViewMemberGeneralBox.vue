@@ -86,6 +86,13 @@
                 </dd>
             </template>
 
+            <template v-if="showLanguage">
+                <dt>{{ $t('Taal') }}</dt>
+                <dd>
+                    {{ member.patchedMember.details.language ? LanguageHelper.getNativeName(member.patchedMember.details.language) : $t('Standaard') }}
+                </dd>
+            </template>
+
             <template v-if="member.member.createdAt">
                 <dt>{{ $t('%1Jc') }}</dt>
                 <dd>
@@ -99,11 +106,12 @@
 <script setup lang="ts">
 import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync.ts';
 import type { PlatformMember } from '@stamhoofd/structures';
-import { NationalRegisterNumberOptOut } from '@stamhoofd/structures';
+import { LanguageHelper, NationalRegisterNumberOptOut } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import EmailAddress from '../../../email/EmailAddress.vue';
 import { useCountry } from '#hooks/useCountry.ts';
+import { useShowMemberLanguage } from '../../hooks/useShowMemberLanguage';
 
 defineOptions({
     inheritAttrs: false,
@@ -114,6 +122,7 @@ const props = defineProps<{
 }>();
 
 const currentCountry = useCountry();
+const showLanguage = useShowMemberLanguage(computed(() => props.member));
 const { sgvSyncIsEnabled } = useSGVSync([props.member.member]);
 const sgvSyncDate = computed(() => props.member.patchedMember.details.lastExternalSync ? Formatter.date(props.member.patchedMember.details.lastExternalSync, true) : $t('%1Io'));
 </script>

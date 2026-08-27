@@ -213,6 +213,7 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
                 firstName: member.details.firstName,
                 lastName: member.details.lastName,
                 email,
+                language: member.details.language,
                 replacements: [
                     Replacement.create({ token: 'requesterEmail', value: Context.auth.user.email }),
                     Replacement.create({ token: 'firstNameMember', value: member.details.firstName }),

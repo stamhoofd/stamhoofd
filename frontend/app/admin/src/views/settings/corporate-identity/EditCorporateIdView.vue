@@ -13,6 +13,22 @@
 
         <ColorInput v-model="color" :validator="errors.validator" :required="false" :disallowed="['#FFFFFF']" :title="$t(`%Hb`)" :placeholder="$t(`%Hc`)" />
 
+        <template v-if="availableLanguages.length > 1 || language !== null">
+            <STInputBox :title="$t('Taal')" error-fields="language" :error-box="errors.errorBox">
+                <Dropdown v-model="language">
+                    <option :value="null">
+                        {{ $t('Meertalig') }}
+                    </option>
+                    <option v-for="l in availableLanguages" :key="l" :value="l">
+                        {{ LanguageHelper.getNativeName(l) }}
+                    </option>
+                </Dropdown>
+            </STInputBox>
+            <p class="style-description-small">
+                {{ $t('De standaardtaal van het platform. Wordt gebruikt als een vereniging, account of lid geen eigen taal heeft ingesteld. Kies meertalig als het platform meerdere talen ondersteunt.') }}
+            </p>
+        </template>
+
         <hr><h2>{{ $t('%2D') }}</h2>
         <p>{{ $t('%HV') }}</p>
 
@@ -94,6 +110,7 @@ import { usePatchPlatform } from '@stamhoofd/components/hooks/usePatchPlatform.t
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import ColorInput from '@stamhoofd/components/inputs/ColorInput.vue';
+import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import ImageInput from '@stamhoofd/components/inputs/ImageInput.vue';
 import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
@@ -103,8 +120,10 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import ImageComponent from '@stamhoofd/components/views/ImageComponent.vue';
 import LogoEditor from '@stamhoofd/components/views/LogoEditor.vue';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import type { Image } from '@stamhoofd/structures';
-import { DarkMode, Platform, PlatformConfig, ResolutionFit, ResolutionRequest } from '@stamhoofd/structures';
+import { DarkMode, LanguageHelper, Platform, PlatformConfig, ResolutionFit, ResolutionRequest } from '@stamhoofd/structures';
+import type { Language } from '@stamhoofd/types/Language';
 import { computed, ref } from 'vue';
 
 const patchPlatform = usePatchPlatform();
@@ -120,6 +139,13 @@ const title = $t(`%5d`);
 const $name = computed({
     get: () => patched.value.config.name,
     set: (value: string) => addPatch(Platform.patch({ config: PlatformConfig.patch({ name: value }) })),
+});
+
+const availableLanguages = I18nController.shared.availableLanguages;
+
+const language = computed({
+    get: () => patched.value.language,
+    set: (value: Language | null) => addPatch(Platform.patch({ language: value })),
 });
 
 const color = computed({
@@ -190,8 +216,7 @@ async function save() {
         await patchPlatform(patch.value);
         new Toast($t(`%HA`), 'success green').show();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 

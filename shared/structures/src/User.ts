@@ -1,4 +1,5 @@
 import { AutoEncoder, BooleanDecoder, DateDecoder, EmailDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Permissions } from './Permissions.js';
@@ -103,6 +104,12 @@ export class User extends AutoEncoder {
      */
     @field({ decoder: BooleanDecoder, version: 408 })
     hasTwoFactor = false;
+
+    /**
+     * Preferred language of this user. Null falls back to the default language of the platform or tenant.
+     */
+    @field({ decoder: new EnumDecoder(Language), nullable: true, version: 414 })
+    language: Language | null = null;
 
     get name() {
         if (!this.lastName) {

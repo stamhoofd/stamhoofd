@@ -8,7 +8,8 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useUser } from '#hooks/useUser.ts';
 import type { MemberResponsibility, Organization, RecordCategory, StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
-import { FilterWrapperMarker, Gender, GroupType, OrganizationRecordsConfiguration, PermissionLevel, PermissionsResourceType, UitpasSocialTariffStatus, unwrapFilter } from '@stamhoofd/structures';
+import { Language } from '@stamhoofd/types/Language';
+import { FilterWrapperMarker, Gender, GroupType, LanguageHelper, OrganizationRecordsConfiguration, PermissionLevel, PermissionsResourceType, UitpasSocialTariffStatus, unwrapFilter } from '@stamhoofd/structures';
 import type { ComputedRef, Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { DateFilterBuilder } from '../DateUIFilter';
@@ -1208,6 +1209,19 @@ export function getMemberBaseFilters(recordConfiguration?: OrganizationRecordsCo
             },
         }));
     }
+
+    all.push(new MultipleChoiceFilterBuilder({
+        name: $t('Taal'),
+        options: [
+            new MultipleChoiceUIFilterOption($t('Standaard'), null),
+            ...Object.values(Language).map(language => new MultipleChoiceUIFilterOption(LanguageHelper.getNativeName(language), language)),
+        ],
+        wrapper: {
+            language: {
+                $in: FilterWrapperMarker,
+            },
+        },
+    }));
     return all;
 }
 

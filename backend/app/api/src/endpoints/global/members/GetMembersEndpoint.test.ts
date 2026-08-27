@@ -2,9 +2,10 @@ import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { MemberWithUsersRegistrationsAndGroups, RegistrationPeriod, Token } from '@stamhoofd/models';
 import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, RecordCategoryFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import type { SortList } from '@stamhoofd/structures';
+import type { SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { AccessRight, EventMeta, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
+import { Language } from '@stamhoofd/types/Language';
 import { GetMembersEndpoint } from './GetMembersEndpoint.js';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initPlatformRecordCategory } from '../../../../tests/init/initPlatformRecordCategory.js';
@@ -1442,6 +1443,87 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 expect.objectContaining({ id: member2.id }),
                 expect.objectContaining({ id: member3.id }),
                 expect.objectContaining({ id: member4.id }),
+            ]);
+        });
+    });
+
+    describe('Language filtering', () => {
+        async function setup() {
+            const organization = await new OrganizationFactory({ period })
+                .create();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.Full,
+                }),
+            })
+                .create();
+
+            const token = await SessionService.createSession(user);
+            const group = await new GroupFactory({ organization, period }).create();
+
+            const frenchMember = await new MemberFactory({ }).create();
+            frenchMember.details.language = Language.French;
+            await frenchMember.save();
+
+            const dutchMember = await new MemberFactory({ }).create();
+            dutchMember.details.language = Language.Dutch;
+            await dutchMember.save();
+
+            const defaultMember = await new MemberFactory({ }).create();
+
+            await new RegistrationFactory({ member: frenchMember, group }).create();
+            await new RegistrationFactory({ member: dutchMember, group }).create();
+            await new RegistrationFactory({ member: defaultMember, group }).create();
+
+            return { organization, token, frenchMember, dutchMember, defaultMember };
+        }
+
+        async function fetchMembers(organization: Awaited<ReturnType<typeof setup>>['organization'], token: Token, filter: StamhoofdFilter) {
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({
+                    filter,
+                    limit: 10,
+                }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            return response.body.results.members;
+        }
+
+        test('Members can be filtered on their language', async () => {
+            const { organization, token, frenchMember } = await setup();
+
+            const members = await fetchMembers(organization, token, {
+                language: {
+                    $in: [Language.French],
+                },
+            });
+
+            expect(members).toIncludeSameMembers([
+                expect.objectContaining({ id: frenchMember.id }),
+            ]);
+        });
+
+        test('Members without a language can be filtered together with a language', async () => {
+            const { organization, token, dutchMember, defaultMember } = await setup();
+
+            const members = await fetchMembers(organization, token, {
+                language: {
+                    $in: [null, Language.Dutch],
+                },
+            });
+
+            expect(members).toIncludeSameMembers([
+                expect.objectContaining({ id: dutchMember.id }),
+                expect.objectContaining({ id: defaultMember.id }),
             ]);
         });
     });

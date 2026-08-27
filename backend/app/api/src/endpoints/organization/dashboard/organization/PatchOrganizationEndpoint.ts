@@ -94,6 +94,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 organization.website = request.body.website;
             }
 
+            if (request.body.language !== undefined) {
+                organization.language = request.body.language;
+            }
+
             if (request.body.address) {
                 organization.address = organization.address.patch(request.body.address);
             }

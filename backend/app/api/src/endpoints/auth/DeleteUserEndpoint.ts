@@ -44,6 +44,7 @@ export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             recipients: [
                 Recipient.create({
                     email: user.email,
+                    language: user.language,
                 }),
             ],
             singleBcc: bcc.replyTo || bcc.from,

@@ -138,7 +138,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             // Store the language the customer used while placing the order, so future emails to
             // this order are rendered in the same language. Fall back to the webshop's default
             // language when it can't be determined from the request.
-            const consumerLanguage = I18n.getLanguageFromRequest(request) ?? webshop.meta.defaultLanguage;
+            const consumerLanguage = I18n.getLanguageFromRequest(request) ?? webshop.meta.defaultLanguage ?? organization.language ?? $getLanguage();
             order.consumerLanguage = consumerLanguage;
 
             order.organizationId = organization.id;

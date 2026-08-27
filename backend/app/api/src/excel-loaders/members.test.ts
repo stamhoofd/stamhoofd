@@ -1,6 +1,7 @@
 import type { XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import type { PlatformMember } from '@stamhoofd/structures';
 import { EmergencyContact, MemberDetails, MembersBlob, MemberWithRegistrationsBlob, Organization, Platform, PlatformFamily } from '@stamhoofd/structures';
+import { Language } from '@stamhoofd/types/Language';
 import { getBaseMemberColumns } from './members.js';
 
 describe('Member excel export', () => {
@@ -54,6 +55,41 @@ describe('Member excel export', () => {
 
         it('returns an empty value when the member has no emergency contacts', () => {
             expect(getValue(createMember([]))).toBe('');
+        });
+    });
+
+    describe('language column', () => {
+        function createMember(language: Language | null) {
+            const organization = Organization.create({});
+            const blob = MembersBlob.create({
+                organizations: [organization],
+                members: [
+                    MemberWithRegistrationsBlob.create({
+                        details: MemberDetails.create({ firstName: 'John', lastName: 'Doe', language }),
+                    }),
+                ],
+            });
+
+            const family = PlatformFamily.create(blob, { platform: Platform.create({}), contextOrganization: organization });
+            return family.members[0];
+        }
+
+        function getValue(member: PlatformMember) {
+            const column = getBaseMemberColumns(Platform.create({})).find(c => 'id' in c && c.id === 'language') as XlsxTransformerConcreteColumn<PlatformMember> | undefined;
+
+            if (!column) {
+                throw new Error('Column language not found');
+            }
+
+            return column.getValue(member).value;
+        }
+
+        it('exports the name of the language', () => {
+            expect(getValue(createMember(Language.French))).toBe($t('%13O'));
+        });
+
+        it('exports an empty value when the member uses the default language', () => {
+            expect(getValue(createMember(null))).toBe('');
         });
     });
 });

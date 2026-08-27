@@ -81,14 +81,16 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
         })); */
 
         if (this.details.email && (subtypes === null || subtypes.includes('member'))) {
+            const user = this.users.find(u => u.email === this.details.email) ?? this.users.find(u => !!this.details.alternativeEmails.find(e => e === u.email));
             recipients.push(
                 EmailRecipient.create({
                     objectId: this.id,
                     memberId: this.id,
-                    userId: this.users.find(u => u.email === this.details.email)?.id ?? this.users.find(u => !!this.details.alternativeEmails.find(e => e === u.email))?.id ?? null,
+                    userId: user?.id ?? null,
                     firstName: this.details.firstName,
                     lastName: this.details.lastName,
                     email: this.details.email,
+                    language: user?.language ?? this.details.language,
                     replacements: [
                         ...shared,
                     ],
@@ -105,6 +107,7 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                     firstName: this.details.firstName,
                     lastName: this.details.lastName,
                     email: null,
+                    language: this.details.language,
                     replacements: [
                         ...shared,
                     ],
@@ -115,14 +118,16 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
         if (subtypes === null || subtypes.includes('parents')) {
             for (const parent of this.details.parents) {
                 if (parent.email) {
+                    const user = this.users.find(u => u.email === parent.email) ?? this.users.find(u => !!parent.alternativeEmails.find(e => e === u.email));
                     recipients.push(
                         EmailRecipient.create({
                             objectId: this.id,
                             memberId: this.id,
-                            userId: this.users.find(u => u.email === parent.email)?.id ?? this.users.find(u => !!parent.alternativeEmails.find(e => e === u.email))?.id ?? null,
+                            userId: user?.id ?? null,
                             firstName: parent.firstName,
                             lastName: parent.lastName,
                             email: parent.email,
+                            language: user?.language ?? this.details.language,
                             replacements: [
                                 ...shared,
                             ],
@@ -134,12 +139,14 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
 
         if (subtypes && subtypes.includes('unverified')) {
             for (const unverifiedEmail of this.details.unverifiedEmails) {
+                const user = this.users.find(u => u.email === unverifiedEmail);
                 recipients.push(
                     EmailRecipient.create({
                         objectId: this.id,
                         memberId: this.id,
-                        userId: this.users.find(u => u.email === unverifiedEmail)?.id ?? null,
+                        userId: user?.id ?? null,
                         email: unverifiedEmail,
+                        language: user?.language ?? this.details.language,
                         replacements: [
                             ...shared,
                         ],

@@ -6,6 +6,7 @@ import { SessionService } from '../../../services/SessionService.js';
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { TestUtils } from '@stamhoofd/test-utils';
+import { Language } from '@stamhoofd/types/Language';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { PatchPlatformEndpoint } from './PatchPlatformEnpoint.js';
 
@@ -54,6 +55,62 @@ describe('Endpoint.PatchPlatform', () => {
             // The platform row is shared by every test file
             await setPlatformRequiresTwoFactor(false);
         }
+    });
+
+    test('Should save the platform language', async () => {
+        const organization = await new OrganizationFactory({ }).create();
+
+        const admin = await new UserFactory({
+            globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+        }).create();
+        const token = await SessionService.createSession(admin);
+
+        expect((await Platform.getForEditing()).language).toBeNull();
+
+        try {
+            const response = await patchPlatform({
+                patch: PlatformStruct.patch({
+                    language: Language.French,
+                }),
+                organization,
+                token,
+            });
+
+            expect(response.body.language).toBe(Language.French);
+            expect((await Platform.getForEditing()).language).toBe(Language.French);
+
+            // Null means the platform supports multiple languages
+            const cleared = await patchPlatform({
+                patch: PlatformStruct.patch({ language: null }),
+                organization,
+                token,
+            });
+            expect(cleared.body.language).toBeNull();
+            expect((await Platform.getForEditing()).language).toBeNull();
+        } finally {
+            // The platform row is shared by every test file
+            const platform = await Platform.getForEditing();
+            platform.language = null;
+            await platform.save();
+        }
+    });
+
+    test('Should not allow organization admins to change the platform language', async () => {
+        const organization = await new OrganizationFactory({ }).create();
+        const admin = await new UserFactory({
+            organization,
+            permissions: Permissions.create({ level: PermissionLevel.Full }),
+        }).create();
+        const token = await SessionService.createSession(admin);
+
+        await expect(patchPlatform({
+            patch: PlatformStruct.patch({
+                language: Language.French,
+            }),
+            organization,
+            token,
+        })).rejects.toThrow(/permission/i);
+        expect((await Platform.getForEditing()).language).toBeNull();
     });
 
     describe('userMode organization', () => {

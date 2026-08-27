@@ -480,6 +480,15 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             // Auto link users based on data
             await MemberUserSyncer.onChangeMember(member);
 
+            if (patch.details?.language !== undefined && patch.details.language !== originalDetails.language) {
+                for (const user of member.users) {
+                    if (user.language !== member.details.language) {
+                        user.language = member.details.language;
+                        await user.save();
+                    }
+                }
+            }
+
             // Allow to remove access for certain users
             for (const id of patch.users.getDeletes()) {
                 const user = member.users.find(u => u.id === id);

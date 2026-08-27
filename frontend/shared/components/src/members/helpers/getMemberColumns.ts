@@ -1,13 +1,15 @@
 import { Column } from '#tables/classes/Column.ts';
 import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
-import type { AppType, Group, GroupCategoryTree, GroupPrice, Organization, PlatformMember, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
-import { ContinuousMembershipStatus, GroupType, MembershipStatus, PermissionLevel } from '@stamhoofd/structures';
+import type { AppType, Group, GroupCategoryTree, GroupPrice, Organization, Platform, PlatformMember, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
+import type { Language } from '@stamhoofd/types/Language';
+import { ContinuousMembershipStatus, GroupType, LanguageHelper, MembershipStatus, PermissionLevel } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 type ObjectType = PlatformMember;
 
-export function getMemberColumns({ organization, dateRange, group, groups, filterPeriodId, periodId, auth, category, app, waitingList, financialRead }: { organization: Organization | null; dateRange?: { start: Date; end: Date } | null; group?: Group | null; groups: Group[]; filterPeriodId: string; periodId?: string | null; auth: ContextPermissions; category?: GroupCategoryTree | null; app: AppType | 'auto'; waitingList: boolean | null; financialRead: boolean }) {
+export function getMemberColumns({ platform, organization, dateRange, group, groups, filterPeriodId, periodId, auth, category, app, waitingList, financialRead }: { platform: Platform; organization: Organization | null; dateRange?: { start: Date; end: Date } | null; group?: Group | null; groups: Group[]; filterPeriodId: string; periodId?: string | null; auth: ContextPermissions; category?: GroupCategoryTree | null; app: AppType | 'auto'; waitingList: boolean | null; financialRead: boolean }) {
     const isPlatform = STAMHOOFD.userMode === 'platform';
+    const showLanguage = organization ? organization.language === null : platform.language === null;
 
     const allColumns: Column<ObjectType, any>[] = [
         new Column<ObjectType, string>({
@@ -47,6 +49,20 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             minimumWidth: 50,
             recommendedWidth: 120,
         }),
+        ...(showLanguage
+            ? [
+                    new Column<ObjectType, Language | null>({
+                        id: 'language',
+                        name: $t('Taal'),
+                        getValue: member => member.member.details.language,
+                        format: language => language ? LanguageHelper.getNativeName(language) : $t('Standaard'),
+                        getStyle: language => language ? '' : 'gray',
+                        minimumWidth: 50,
+                        recommendedWidth: 120,
+                        enabled: false,
+                    }),
+                ]
+            : []),
         isPlatform
             ? new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
                     id: 'membership',

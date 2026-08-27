@@ -32,6 +32,17 @@
             </div>
         </div>
 
+        <STInputBox v-if="canEditLanguage" :title="$t('Taal')" error-fields="language" :error-box="errors.errorBox">
+            <Dropdown v-model="language">
+                <option :value="null">
+                    {{ $t('Meertalig') }}
+                </option>
+                <option v-for="l in availableLanguages" :key="l" :value="l">
+                    {{ LanguageHelper.getNativeName(l) }}
+                </option>
+            </Dropdown>
+        </STInputBox>
+
         <hr><h2>{{ $t('%1Ke') }}</h2>
         <p>{{ $t('%gC') }}</p>
 
@@ -64,26 +75,29 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import AddressInput from '#inputs/AddressInput.vue';
-import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
-import FillRecordCategoryBox from '#records/components/FillRecordCategoryBox.vue';
-import SaveView from '#navigation/SaveView.vue';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
-import STInputBox from '#inputs/STInputBox.vue';
-import UrlInput from '#inputs/UrlInput.vue';
-import { useDraggableArray } from '#hooks/useDraggableArray.ts';
 import { useErrors } from '#errors/useErrors.ts';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useDraggableArray } from '#hooks/useDraggableArray.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import { useTwoFactorEnabled } from '#hooks/useTwoFactorEnabled.ts';
+import AddressInput from '#inputs/AddressInput.vue';
+import Dropdown from '#inputs/Dropdown.vue';
+import STInputBox from '#inputs/STInputBox.vue';
+import UrlInput from '#inputs/UrlInput.vue';
+import SaveView from '#navigation/SaveView.vue';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import FillRecordCategoryBox from '#records/components/FillRecordCategoryBox.vue';
 import { useReview } from '#useReview.ts';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import type { PatchAnswers } from '@stamhoofd/structures';
-import { Company, OrganizationMetaData, OrganizationPrivateMetaData, SetupStepType } from '@stamhoofd/structures';
+import { Company, LanguageHelper, OrganizationMetaData, OrganizationPrivateMetaData, SetupStepType } from '@stamhoofd/structures';
+import type { Language } from '@stamhoofd/types/Language';
 import { computed, ref, watch } from 'vue';
 import ReviewCheckbox from '../ReviewCheckbox.vue';
 
@@ -94,6 +108,10 @@ const props = defineProps<{ isReview?: boolean }>();
 const title = computed(() => props.isReview ? $t('%4d') : $t(`%10T`));
 const organizationManager = useOrganizationManager();
 const platform = usePlatform();
+const auth = useAuth();
+
+// Not released yet: only platform admins can set the language of an organization
+const availableLanguages = I18nController.shared.availableLanguages;
 
 const errors = useErrors();
 const saving = ref(false);
@@ -149,6 +167,16 @@ const website = computed({
         });
     },
 });
+
+const language = computed({
+    get: () => patched.value.language,
+    set: (language: Language | null) => {
+        addPatch({
+            language,
+        });
+    },
+});
+const canEditLanguage = computed(() => auth.hasPlatformFullAccess() && (availableLanguages.length > 1 || availableLanguages[0] !== language.value));
 
 const recordCategories = computed(() =>
     platform.value.config.organizationLevelRecordsConfiguration.recordCategories.filter(x => x.isEnabled(patched.value)),

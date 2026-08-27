@@ -91,7 +91,7 @@ const root = new ComponentWithProperties(PromiseView, {
                 }
             }
 
-            const webshopLanguage = response.data.webshop?.meta.defaultLanguage ?? Language.Dutch;
+            const webshopLanguage = response.data.webshop?.meta.defaultLanguage ?? response.data.organization.language ?? Language.Dutch;
 
             I18nController.skipUrlPrefixForLocale = webshopLanguage + '-' + response.data.organization.address.country;
 
@@ -108,11 +108,13 @@ const root = new ComponentWithProperties(PromiseView, {
                 defaultCountry: response.data.organization.address.country,
                 defaultLanguage: webshopLanguage,
                 country: response.data.organization.address.country,
-                locales: {
-                    // For now always force the webshop's default language
-                    // if we add translations to webshops, we should add all the setup languages here
-                    [response.data.organization.address.country]: [webshopLanguage],
-                },
+                locales: (response.data.webshop?.meta.defaultLanguage ?? response.data.organization.language)
+                    ? {
+                            // For now always force the webshop's default language
+                            // if we add translations to webshops, we should add all the setup languages here
+                            [response.data.organization.address.country]: [webshopLanguage],
+                        }
+                    : undefined, // Multi lingual webshop
             });
 
             await session.checkSSO();
@@ -123,8 +125,7 @@ const root = new ComponentWithProperties(PromiseView, {
                 // config to reliably calculate its permissions: upgrade it with an authenticated
                 // request.
                 await session.fetchPlatform();
-            }
-            else if (fromCache) {
+            } else if (fromCache) {
                 // We served a platform that came from storage, so refresh it in the background.
                 session.fetchPlatform().catch(console.error);
             }

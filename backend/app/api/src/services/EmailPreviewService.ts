@@ -186,7 +186,7 @@ export class EmailPreviewService {
                 forceRefresh: true,
                 allowedLanguages: email.getLanguages(),
             });
-            runWithRecipientLocale(struct, organization, () => {
+            await runWithRecipientLocale(struct, organization, () => {
                 stripRecipientReplacementsForWebDisplay(struct, {
                     organization,
                 });

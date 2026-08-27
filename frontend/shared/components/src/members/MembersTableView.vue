@@ -246,6 +246,7 @@ const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
 const { sgvSyncOpen, sgvSyncWarning } = useSGVSync(computed(() => tableObjectFetcher.objects.map(member => member.member)));
 
 const allColumns = getMemberColumns({
+    platform: platform.value,
     dateRange: props.dateRange,
     group: props.group,
     periodId: props.periodId,

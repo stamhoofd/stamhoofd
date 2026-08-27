@@ -1,6 +1,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
+import { Language } from '@stamhoofd/types/Language';
 import { Colors, Formatter } from '@stamhoofd/utility';
 import { DefaultAgeGroup } from './DefaultAgeGroup.js';
 import { Replacement } from './endpoints/EmailRequest.js';
@@ -586,6 +587,12 @@ export class Platform extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true, version: 413 })
     domain: string | null = null;
+
+    /**
+     * Null for platforms that support multiple languages: the language of the user or organization is used instead.
+     */
+    @field({ decoder: new EnumDecoder(Language), nullable: true, version: 414 })
+    language: Language | null = null;
 
     @field({ decoder: PlatformConfig })
     config: PlatformConfig = PlatformConfig.create({});

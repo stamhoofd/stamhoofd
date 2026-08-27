@@ -131,6 +131,7 @@ import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
@@ -439,6 +440,7 @@ async function goNext() {
                 acquisitionTypes: acquisitionTypes.value,
             }),
             address: address.value,
+            language: I18nController.shared.language,
         });
 
         loading.value = false;
