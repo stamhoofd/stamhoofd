@@ -1,6 +1,10 @@
 import { Email, EmailContent } from '@stamhoofd/structures';
+import { TranslateResponse } from '@stamhoofd/structures/endpoints/TranslateRequest.js';
+import type { TranslateRequest } from '@stamhoofd/structures/endpoints/TranslateRequest.js';
+import { TestUtils } from '@stamhoofd/test-utils';
 import { Language } from '@stamhoofd/types/Language';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
+import { CenteredMessage } from '../../overlays/CenteredMessage';
 import type { Ref } from 'vue';
 import { ref } from 'vue';
 import type { EmailContentHolder, EmailContentPatch } from './useEmailContentLanguage';
@@ -363,5 +367,113 @@ describe('EmailContentPatch on the Email structure', () => {
         expect(patched.language).toBe(Language.French);
         expect(patched.subject).toBe('Sujet');
         expect(patched.translations.size).toBe(0);
+    });
+});
+
+describe('useEmailContentLanguage translateToOtherLanguages', () => {
+    function createHook(initial: Email, translate: (request: TranslateRequest) => Promise<TranslateResponse>) {
+        const email: Ref<Email> = ref(initial);
+        const hook = useEmailContentLanguage({
+            editor: () => null,
+            patched: () => email.value,
+            addPatch: (patch: EmailContentPatch) => {
+                email.value = email.value.patch(Email.patch(patch));
+            },
+            translate,
+        });
+        return { email, hook };
+    }
+
+    test('translates the edited language into every other available language', async () => {
+        TestUtils.setEnvironment('locales', { BE: [Language.Dutch, Language.French, Language.English] });
+        const requests: TranslateRequest[] = [];
+        const { email, hook } = createHook(
+            Email.create({ subject: 'Onderwerp', json: { type: 'doc', content: [] }, language: Language.Dutch }),
+            async (request) => {
+                requests.push(request);
+                return TranslateResponse.create({
+                    translations: new Map(request.targetLanguages.map(language => [language, new Map<string, any>([
+                        ['subject', `${language}: Onderwerp`],
+                        ['body', { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: language }] }] }],
+                    ])])),
+                });
+            },
+        );
+
+        await hook.translateToOtherLanguages();
+
+        expect(requests).toHaveLength(1);
+        expect(requests[0].sourceLanguage).toBe(Language.Dutch);
+        expect(requests[0].targetLanguages).toEqual([Language.French, Language.English]);
+        expect(requests[0].inputs.get('subject')).toBe('Onderwerp');
+        expect(requests[0].inputs.get('body')).toEqual({ type: 'doc', content: [] });
+
+        expect(email.value.language).toBe(Language.Dutch);
+        expect(email.value.subject).toBe('Onderwerp');
+        expect(email.value.translations.get(Language.French)!.subject).toBe('fr: Onderwerp');
+        expect(email.value.translations.get(Language.French)!.json.content[0].content[0].text).toBe('fr');
+        expect(email.value.translations.get(Language.English)!.subject).toBe('en: Onderwerp');
+        expect(hook.currentLanguage.value).toBe(Language.Dutch);
+        expect(hook.languages.value).toEqual([Language.Dutch, Language.French, Language.English]);
+    });
+
+    function createTranslatedHook(translate: (request: TranslateRequest) => Promise<TranslateResponse>) {
+        return createHook(Email.create({
+            subject: 'Onderwerp',
+            json: { type: 'doc' },
+            language: Language.Dutch,
+            translations: new Map([[Language.French, buildContent({ subject: 'Ancien sujet' })]]),
+        }), translate);
+    }
+
+    test('overwrites existing translations after confirmation', async () => {
+        TestUtils.setEnvironment('locales', { BE: [Language.Dutch, Language.French, Language.English] });
+        const confirm = vi.spyOn(CenteredMessage, 'confirm').mockResolvedValue(true);
+        const requests: TranslateRequest[] = [];
+        const { email, hook } = createTranslatedHook(async (request) => {
+            requests.push(request);
+            return TranslateResponse.create({
+                translations: new Map(request.targetLanguages.map(language => [language, new Map<string, any>([['subject', `${language}: Onderwerp`]])])),
+            });
+        });
+
+        await hook.translateToOtherLanguages();
+
+        expect(confirm).toHaveBeenCalledTimes(1);
+        expect(requests[0].targetLanguages).toEqual([Language.French, Language.English]);
+        expect(email.value.translations.get(Language.French)!.subject).toBe('fr: Onderwerp');
+        expect(email.value.translations.get(Language.English)!.subject).toBe('en: Onderwerp');
+        confirm.mockRestore();
+    });
+
+    test('keeps existing translations when overwriting is declined', async () => {
+        TestUtils.setEnvironment('locales', { BE: [Language.Dutch, Language.French, Language.English] });
+        const confirm = vi.spyOn(CenteredMessage, 'confirm').mockResolvedValue(false);
+        let called = 0;
+        const { email, hook } = createTranslatedHook(async () => {
+            called++;
+            return TranslateResponse.create({});
+        });
+
+        await hook.translateToOtherLanguages();
+
+        expect(called).toBe(0);
+        expect(email.value.translations.get(Language.French)!.subject).toBe('Ancien sujet');
+        expect(email.value.translations.has(Language.English)).toBe(false);
+        confirm.mockRestore();
+    });
+
+    test('does nothing without a language or without a translator', async () => {
+        TestUtils.setEnvironment('locales', { BE: [Language.Dutch, Language.French] });
+        let called = 0;
+        const { email, hook } = createHook(Email.create({ subject: 'Onderwerp', json: { type: 'doc' } }), async () => {
+            called++;
+            return TranslateResponse.create({});
+        });
+
+        await hook.translateToOtherLanguages();
+
+        expect(called).toBe(0);
+        expect(email.value.translations.size).toBe(0);
     });
 });

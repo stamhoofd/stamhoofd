@@ -2,7 +2,7 @@
     <LoadingViewTransition :error-box="errors.errorBox">
         <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" :email-block="patchedEmail.recipientFilter.canShowInMemberPortal" :save-icon-mobile="hasMoreSettings || !willSend ? undefined : 'send'" :save-icon="hasMoreSettings || !willSend ? undefined : 'send'" class="mail-view" :loading="sending || (!willSend && !!savingPatch)" :save-text="hasMoreSettings ? ($t('%1DC') + '…') : (willSend ? (sendAsEmail ? $t('%1DC') : $t('%1Fe')) : $t('%1Op'))" :replacements="replacements" :title="title" @save="send">
             <template #navigation-buttons>
-                <EmailLanguageButton :model-value="contentLanguage.currentLanguage.value" :languages="contentLanguage.languages.value" :default-language="contentLanguage.defaultLanguage.value" :supports-translations="supportsTranslations" :disabled="contentLanguage.switching.value" @update:model-value="contentLanguage.switchTo($event).catch(console.error)" @add="contentLanguage.addLanguage($event).catch(console.error)" @remove="contentLanguage.removeLanguage($event).catch(console.error)" @set-default="contentLanguage.setDefaultLanguage($event).catch(console.error)" />
+                <EmailLanguageButton :model-value="contentLanguage.currentLanguage.value" :languages="contentLanguage.languages.value" :default-language="contentLanguage.defaultLanguage.value" :supports-translations="supportsTranslations" :disabled="contentLanguage.switching.value" @update:model-value="contentLanguage.switchTo($event).catch(console.error)" @add="contentLanguage.addLanguage($event).catch(console.error)" @remove="contentLanguage.removeLanguage($event).catch(console.error)" @set-default="contentLanguage.setDefaultLanguage($event).catch(console.error)" @translate="contentLanguage.translateToOtherLanguages().catch(console.error)" />
             </template>
 
             <h1 class="style-navigation-title with-icons">
@@ -151,6 +151,7 @@ import { Toast } from '../overlays/Toast';
 import ProgressRing from '../icons/ProgressRing.vue';
 import EmailLanguageButton from './EmailLanguageButton.vue';
 import { confirmStaleEmailContentLanguages, useEmailContentLanguage } from './hooks/useEmailContentLanguage';
+import { useEmailTranslator } from './hooks/useEmailTranslator';
 import { useReplacementsForLanguage } from './hooks/useReplacementsForLanguage';
 
 const props = withDefaults(defineProps<{
@@ -263,6 +264,7 @@ const contentLanguage = useEmailContentLanguage({
     editor: () => editor.value,
     patched: () => patchedEmail.value ?? Email.create({}),
     addPatch,
+    translate: useEmailTranslator(),
 });
 
 // The example values are shown in the language that is being edited: the backend returns the

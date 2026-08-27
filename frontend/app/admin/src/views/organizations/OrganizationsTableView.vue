@@ -562,6 +562,7 @@ async function openMail(selection: TableActionSelection<Organization>) {
     const displayedComponent = new ComponentWithProperties(NavigationController, {
         root: AsyncComponent(() => import('@stamhoofd/components/email/EmailView.vue'), {
             recipientFilterOptions: option.options.length && STAMHOOFD.userMode === 'platform' ? [option] : [adminSelector],
+            supportsTranslations: platform.value.language === null,
         }),
     });
     await present({

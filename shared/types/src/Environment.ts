@@ -193,6 +193,9 @@ export type BackendSpecificEnvironment = {
     // SMS via gatewayapi.com
     readonly GATEWAYAPI_TOKEN?: string;
 
+    // AI translations via OpenAI
+    readonly OPENAI_API_KEY?: string;
+
     readonly HEALTH_ACCESS_KEY?: string; // Expose a health endpoint
 };
 

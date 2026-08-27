@@ -489,7 +489,7 @@ async function editEmail() {
                     editEmail: props.email,
                     // Translations are only supported when the language of the recipients is known,
                     // which is currently only the case for webshop orders
-                    supportsTranslations: STAMHOOFD.environment === 'development' || (props.email.recipientFilter.filters.length > 0 && props.email.recipientFilter.filters.every(f => f.type === EmailRecipientFilterType.Orders)),
+                    supportsTranslations: STAMHOOFD.environment === 'development' || (organization.value && organization.value.language === null) || (props.email.recipientFilter.filters.length > 0 && props.email.recipientFilter.filters.every(f => f.type === EmailRecipientFilterType.Orders)),
                 }),
             }),
         ],

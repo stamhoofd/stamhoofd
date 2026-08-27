@@ -70,6 +70,7 @@ describe('applyInternalSecrets', () => {
             'op://Localhost/UiTPAS/client_secret': 'uitpas-secret',
             'op://Localhost/UiTPAS/api_url': 'https://uitpas.example',
             'op://DevOps Development/GatewayAPI/token': 'gatewayapi-token',
+            'op://DevOps Development/OpenAI/token': 'openai-token',
         });
         // MOLLIE_SECRET is intentionally not mocked, so it resolves to '' and must be preserved.
         const env = { MOLLIE_SECRET: 'keep-me', STRIPE_SECRET_KEY: 'sk_live_existing' } as BackendEnvironment;
@@ -84,6 +85,7 @@ describe('applyInternalSecrets', () => {
         expect(result.UITPAS_API_CLIENT_SECRET).toBe('uitpas-secret');
         expect(result.UITPAS_API_URL).toBe('https://uitpas.example');
         expect(result.GATEWAYAPI_TOKEN).toBe('gatewayapi-token');
+        expect(result.OPENAI_API_KEY).toBe('openai-token');
 
         // Empty 1Password reads must not blank out existing defaults.
         expect(result.MOLLIE_SECRET).toBe('keep-me');

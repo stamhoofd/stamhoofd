@@ -13,6 +13,7 @@
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { LanguageHelper } from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';
+import { useContext } from '#hooks/useContext.ts';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { useSwitchLanguage } from '../views/hooks/useSwitchLanguage';
 import { useEmailTranslationsEnabled } from './hooks/useEmailTranslationsEnabled';
@@ -42,6 +43,7 @@ const emit = defineEmits<{
     add: [language: Language];
     remove: [language: Language];
     setDefault: [language: Language];
+    translate: [];
 }>();
 
 /**
@@ -50,6 +52,7 @@ const emit = defineEmits<{
 const modelValue = defineModel<Language | null>({ required: true });
 const { hasLanguages } = useSwitchLanguage();
 const translationsEnabled = useEmailTranslationsEnabled();
+const context = useContext();
 
 async function showMenu(event: MouseEvent) {
     const groups: ContextMenuItem[][] = [];
@@ -118,6 +121,19 @@ async function showMenu(event: MouseEvent) {
         const untranslatedLanguages = listedLanguages.filter(l => !props.languages.includes(l));
 
         const group: ContextMenuItem[] = [];
+
+        // AI translation (platform admins only) translates the edited language into every other one
+        if (canAdd && listedLanguages.some(l => l !== modelValue.value) && context.value?.auth?.hasPlatformFullAccess()) {
+            group.push(
+                new ContextMenuItem({
+                    name: $t('Automatisch vertalen naar alle talen'),
+                    icon: 'wand',
+                    action: () => {
+                        emit('translate');
+                    },
+                }),
+            );
+        }
 
         if (untranslatedLanguages.length) {
             group.push(

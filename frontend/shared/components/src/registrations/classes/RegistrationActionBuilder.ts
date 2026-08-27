@@ -795,6 +795,7 @@ export class RegistrationActionBuilder {
             root: AsyncComponent(() => import('#email/EmailView.vue'), {
                 recipientFilterOptions: options,
                 defaultSenderId: this.groups.length === 1 ? this.groups[0].privateSettings?.defaultEmailId : null,
+                supportsTranslations: this.context.organization ? (this.context.organization.language === null) : (this.context.platform.language === null),
             }),
         });
         await this.present({
