@@ -296,7 +296,9 @@ const age = computed(() => {
 });
 
 const isBelgium = computed(() => {
-    return address.value?.country === Country.Belgium;
+    return address.value
+        ? address.value.country === Country.Belgium
+        : props.member.patchedMember.details.parents.some(p => p.address && p.address.country === Country.Belgium);
 });
 
 const trackingYear = computed({
