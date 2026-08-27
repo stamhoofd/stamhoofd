@@ -147,7 +147,7 @@ const { webshop, addPatch, errors, saving, save, hasChanges, originalWebshop, sh
 const requestOwner = useRequestOwner();
 const context = useContext();
 
-const viewTitle = $t('Webshop link wijzigen');
+const viewTitle = $t('%ZoX');
 
 const present = usePresent();
 const show = useShow();
@@ -276,7 +276,7 @@ function updateUri() {
     const cleaned = Formatter.slug(uri.value);
     if (cleaned !== uri.value) {
         uri.value = cleaned;
-        new Toast($t('Een link mag geen spaties, speciale tekens of hoofdletters bevatten'), 'info').show();
+        new Toast($t('%ZpM'), 'info').show();
     }
     throttledCheckUriAvailability();
 }
@@ -440,7 +440,7 @@ async function copyLink(event: MouseEvent) {
     }
 
     const displayedComponent = new ComponentWithProperties(Tooltip, {
-        text: $t('Link gekopieerd!'),
+        text: $t('%Zoc'),
         x: event.clientX,
         y: event.clientY + 10,
     });
@@ -459,7 +459,7 @@ async function validate() {
                 code: '',
                 field: 'uri',
                 message: 'Uri is invalid or already in use',
-                human: $t('Kies een andere link, deze is ongeldig of al in gebruik.'),
+                human: $t('%ZoW'),
             });
         }
 
@@ -484,7 +484,7 @@ async function validate() {
                     code: '',
                     field: 'customUrl',
                     message: 'Root domains are not supported',
-                    human: $t('Het is niet mogelijk om een hoofddomein te gebruiken voor een webshop. Lees de documentatie hierover na voor meer informatie.'),
+                    human: $t('%Zoz'),
                 });
             }
             const subdomain = parts[0];
@@ -494,7 +494,7 @@ async function validate() {
                     code: '',
                     field: 'customUrl',
                     message: 'Reserved subdomain',
-                    human: $t("Het is momenteel niet mogelijk om 'inschrijven' te gebruiken als een subdomeinnaam voor jouw webshop. Deze is gereserveerd voor de ledenadministratie."),
+                    human: $t("%Zor"),
                 });
             }
         } catch (e) {
@@ -505,7 +505,7 @@ async function validate() {
                 code: '',
                 field: 'customUrl',
                 message: 'Invalid domain',
-                human: $t('Deze domeinnaam is ongeldig.'),
+                human: $t('%Zoy'),
             });
         }
     }

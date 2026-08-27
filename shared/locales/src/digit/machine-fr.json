@@ -1539,6 +1539,14 @@
     "original": "De standaardtaal van jouw groep. Stel dit in op de taal waarin je doorgaans communiceert. Kies enkel meertalig als emailcommunicatie actief in meerdere talen gebeurt, niet enkel voor uitzonderingen.",
     "translation": "La langue principale de votre groupe. Choisissez ici la langue dans laquelle vous communiquez habituellement. Sélectionnez uniquement l’option multilingue si la communication par e-mail se fait régulièrement dans plusieurs langues, pas seulement à titre exceptionnel."
   },
+  "%Zo0": {
+    "original": "Hou er rekening mee dat jouw webshop voorlopig nog niet bereikbaar is op de door jou gekozen link. We gebruiken intussen de standaard domeinnaam van Ravot. Wijzig eventueel de link terug tot iemand dit in orde kan brengen.",
+    "translation": "Veuillez noter que votre boutique en ligne n'est pas encore accessible via le lien que vous avez choisi. Nous utilisons pour l’instant le nom de domaine standard de Ravot. Modifiez le lien si nécessaire jusqu’à ce que quelqu’un puisse le régler."
+  },
+  "%ZoY": {
+    "original": "Je kan {paymentMethod} niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Ravot instellingen > Betaalaccounts.",
+    "translation": "Vous ne pouvez pas activer {paymentMethod} tant que vous n’avez pas créé un lien avec un prestataire de paiement via les paramètres Ravot > Comptes de paiement."
+  },
   "%Zp": {
     "original": "Oeps, deze website is enkel voor beheerders van {organization}. Ga naar ‘Mijn account’ als je je wilt inschrijven als lid.",
     "translation": "Oups, ce site web est uniquement destiné aux administrateurs de {organization}. Allez dans « Mon compte » si vous souhaitez vous inscrire comme membre."

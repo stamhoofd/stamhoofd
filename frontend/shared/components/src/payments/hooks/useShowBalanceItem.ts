@@ -21,7 +21,7 @@ export function useShowBalanceItem() {
                         limit: 1,
                     }));
                     if (balanceItems.results.length === 0) {
-                        Toast.error($t('Dit openstaand bedrag werd niet gevonden')).show();
+                        Toast.error($t('%ZoF')).show();
                         throw new Error('Balance item not found');
                     }
                     return AsyncComponent(() => import('#payments/EditBalanceItemView.vue'), {

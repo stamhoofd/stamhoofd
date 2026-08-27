@@ -19823,9 +19823,253 @@
     "original": "Deze pagina is voor administrators",
     "translation": "This page is for administrators"
   },
+  "%Zo0": {
+    "original": "Hou er rekening mee dat jouw webshop voorlopig nog niet bereikbaar is op de door jou gekozen link. We gebruiken intussen de standaard domeinnaam van Stamhoofd. Wijzig eventueel de link terug tot iemand dit in orde kan brengen.",
+    "translation": "Please note that your webshop is not yet available at the link you chose. For now, we're using the default domain name from Stamhoofd. You can change the link back later once someone can fix this."
+  },
+  "%Zo3": {
+    "original": "Per persoon",
+    "translation": "Per person"
+  },
+  "%Zo5": {
+    "original": "Meerdere artikels",
+    "translation": "Multiple items"
+  },
+  "%Zo8": {
+    "original": "Bv. T-shirts",
+    "translation": "E.g. T-shirts"
+  },
+  "%ZoA": {
+    "original": "Bv. Ruimtefestival",
+    "translation": "E.g. Space Festival"
+  },
+  "%ZoC": {
+    "original": "Nieuwe bestelling",
+    "translation": "New order"
+  },
+  "%ZoE": {
+    "original": "We konden jouw domeinnaam nog niet activeren (zie foutmeldingen bij de DNS-records). Soms kan het even duren voor de wijzigingen doorkomen, we sturen je een e-mail zodra we ze wel opmerken.",
+    "translation": "We couldn't activate your domain name yet (see the error messages with your DNS records). Sometimes changes take a while to process; we'll send you an email when we notice they're active."
+  },
+  "%ZoF": {
+    "original": "Dit openstaand bedrag werd niet gevonden",
+    "translation": "This open amount was not found"
+  },
+  "%ZoG": {
+    "original": "Sommige tickets zullen worden omgezet in gewone artikels waardoor hun locatie en datum informatie verloren gaat als je nu opslaat.",
+    "translation": "Some tickets will be converted to regular items, which means their location and date information will be lost if you save now."
+  },
+  "%ZoI": {
+    "original": "Voeg ten minste één ticket toe aan je webshop om een voorbeeld van een ticket te bekijken",
+    "translation": "Add at least one ticket to your webshop to preview what a ticket looks like"
+  },
+  "%ZoM": {
+    "original": "Je kan de bestelling nog nakijken voor je het definitief verwijdert.",
+    "translation": "You can review the order before you delete it permanently."
+  },
+  "%ZoP": {
+    "original": "Je domeinnaam is goed geconfigureerd, jouw webshop is nu bereikbaar op deze nieuwe link.",
+    "translation": "Your domain name is properly configured; your webshop is now accessible using the new link."
+  },
+  "%ZoQ": {
+    "original": "bv. Inzameling nieuw materiaal",
+    "translation": "e.g. Fundraising for new equipment"
+  },
+  "%ZoU": {
+    "original": "Notities bewerken",
+    "translation": "Edit notes"
+  },
+  "%ZoV": {
+    "original": "Quiz, wandeltocht, eetfestijn, lessen, workshop...",
+    "translation": "Quiz, walk, food event, classes, workshop..."
+  },
+  "%ZoW": {
+    "original": "Kies een andere link, deze is ongeldig of al in gebruik.",
+    "translation": "Choose a different link: this one is invalid or already taken."
+  },
+  "%ZoX": {
+    "original": "Webshop link wijzigen",
+    "translation": "Change webshop link"
+  },
+  "%ZoY": {
+    "original": "Je kan {paymentMethod} niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Stamhoofd instellingen > Betaalaccounts.",
+    "translation": "You can't activate {paymentMethod} yet. First, you need to register with a payment provider through the Stamhoofd settings > Payment accounts."
+  },
+  "%Zoa": {
+    "original": "Nieuw evenement met tickets",
+    "translation": "New event with tickets"
+  },
+  "%Zob": {
+    "original": "Sommige artikelen zullen worden omgezet in tickets waardoor je hun locatie en datum nog zal moeten invullen",
+    "translation": "Some items will be converted to tickets, which means you'll need to enter their location and date"
+  },
+  "%Zoc": {
+    "original": "Link gekopieerd!",
+    "translation": "Link copied!"
+  },
+  "%Zof": {
+    "original": "Nieuwe inschrijvingen",
+    "translation": "New registrations"
+  },
+  "%Zoh": {
+    "original": "Lange naam? Je kan de zichtbare titel straks wijzigen bij de instellingen 'Personaliseren'. Hier houd je het beter kort.",
+    "translation": "Long name? You can edit the visible title later under the 'Personalize' settings. For now, it's best to keep it short."
+  },
+  "%Zoi": {
+    "original": "Bestelling bewerken",
+    "translation": "Edit order"
+  },
+  "%Zoj": {
+    "original": "Nieuwe verkoop, inschrijvingsformulier of geldinzameling starten",
+    "translation": "Start a new sale, registration form, or fundraising"
+  },
+  "%Zok": {
+    "original": "Nieuwe inzameling",
+    "translation": "New fundraiser"
+  },
+  "%Zom": {
+    "original": "Per bestelling",
+    "translation": "Per order"
+  },
+  "%Zoo": {
+    "original": "Op",
+    "translation": "On"
+  },
+  "%Zop": {
+    "original": "Methode",
+    "translation": "Method"
+  },
+  "%Zor": {
+    "original": "Het is momenteel niet mogelijk om 'inschrijven' te gebruiken als een subdomeinnaam voor jouw webshop. Deze is gereserveerd voor de ledenadministratie.",
+    "translation": "Currently, you can't use 'register' as a subdomain name for your webshop. This is reserved for member administration."
+  },
+  "%Zos": {
+    "original": "Het laden van de tickets die bij deze bestelling horen is mislukt. Controleer je internetverbinding en probeer opnieuw.",
+    "translation": "Failed to load the tickets associated with this order. Please check your internet connection and try again."
+  },
+  "%Zot": {
+    "original": "Bv. 'Schaduwen van morgen'",
+    "translation": "E.g. 'Shadows of Tomorrow'"
+  },
+  "%Zou": {
+    "original": "Selecteer een bestand",
+    "translation": "Select a file"
+  },
+  "%Zov": {
+    "original": "vind je hoe elke betaalmethode werkt en hoe je die instelt.",
+    "translation": "find out how each payment method works and how to set it up."
+  },
+  "%Zoy": {
+    "original": "Deze domeinnaam is ongeldig.",
+    "translation": "This domain name is invalid."
+  },
+  "%Zoz": {
+    "original": "Het is niet mogelijk om een hoofddomein te gebruiken voor een webshop. Lees de documentatie hierover na voor meer informatie.",
+    "translation": "It's not possible to use a root domain for a webshop. Please consult the documentation for more information."
+  },
   "%Zp": {
     "original": "Oeps, deze website is enkel voor beheerders van {organization}. Ga naar het ledenportaal als je je wilt inschrijven als lid.",
     "translation": "Oops, this website is only for administrators of {organization}. Go to the member portal if you want to register as a member."
+  },
+  "%Zp3": {
+    "original": "Het laden van de tickets die bij deze bestelling horen is mislukt",
+    "translation": "Failed to load the tickets associated with this order"
+  },
+  "%Zp4": {
+    "original": "Webshop pagina wijzigen",
+    "translation": "Edit webshop page"
+  },
+  "%Zp5": {
+    "original": "Vul een geldige link in",
+    "translation": "Enter a valid link"
+  },
+  "%Zp9": {
+    "original": "Vul een naam in voor jouw webshop voor je doorgaat",
+    "translation": "Enter a name for your webshop before continuing"
+  },
+  "%ZpA": {
+    "original": "Ticket categorieën",
+    "translation": "Ticket categories"
+  },
+  "%ZpB": {
+    "original": "Bv. Eetfestijn",
+    "translation": "E.g. Food Event"
+  },
+  "%ZpE": {
+    "original": "Toegangscontrole",
+    "translation": "Access control"
+  },
+  "%ZpF": {
+    "original": "Nieuwe take-away of levering",
+    "translation": "New takeaway or delivery"
+  },
+  "%ZpG": {
+    "original": "bv. Wijnverkoop",
+    "translation": "e.g. Wine sale"
+  },
+  "%ZpH": {
+    "original": "De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.",
+    "translation": "The total price of the order has changed. You need to notify the buyer and follow up on the payment if necessary."
+  },
+  "%ZpJ": {
+    "original": "Ter plaatse",
+    "translation": "On site"
+  },
+  "%ZpL": {
+    "original": "Controle bij afhalen/leveren",
+    "translation": "Check at pickup/delivery"
+  },
+  "%ZpM": {
+    "original": "Een link mag geen spaties, speciale tekens of hoofdletters bevatten",
+    "translation": "A link cannot contain spaces, special characters, or uppercase letters"
+  },
+  "%ZpQ": {
+    "original": "tussen",
+    "translation": "between"
+  },
+  "%ZpS": {
+    "original": "Fuif, festival, ...",
+    "translation": "Party, festival, ..."
+  },
+  "%ZpU": {
+    "original": "Via het type van je webshop helpen we later makkelijk op weg.",
+    "translation": "By selecting the type of webshop, we'll be able to help guide you more easily later."
+  },
+  "%ZpX": {
+    "original": "Nieuwe webshop",
+    "translation": "New webshop"
+  },
+  "%Zpa": {
+    "original": "Alle afhaal- en leveringslocaties zullen worden verwijderd als je opslaat omdat deze niet ondersteund worden bij een ticketverkoop voor personen",
+    "translation": "All pickup and delivery locations will be deleted when you save because these are not supported with ticket sales for persons."
+  },
+  "%Zpd": {
+    "original": "De tickets worden verzonden naar dit e-mailadres (na betaling, of meteen als betaalmethode 'Ter plaatse' gekozen wordt). Kijk het goed na.",
+    "translation": "Tickets will be sent to this email address (after payment, or immediately if the 'On site' payment method is chosen). Please check it carefully."
+  },
+  "%Zpf": {
+    "original": "Voor bevestigingsemail",
+    "translation": "For confirmation email"
+  },
+  "%Zpi": {
+    "original": "Nieuwe zaalvoorstelling",
+    "translation": "New theatre show"
+  },
+  "%Zpl": {
+    "original": "Met tickets en vaste plaatsen",
+    "translation": "With tickets and reserved seats"
+  },
+  "%Zpm": {
+    "original": "Product categorieën",
+    "translation": "Product categories"
+  },
+  "%Zpn": {
+    "original": "Afhaal- en leveringsopties",
+    "translation": "Pickup and delivery options"
+  },
+  "%Zpr": {
+    "original": "Voor tickets",
+    "translation": "For tickets"
   },
   "%Zq": {
     "original": "Oeps, deze website is enkel voor administrators. Ga naar het ledenportaal als je je wilt inschrijven als lid.",

@@ -146,7 +146,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
 
         new Column<PrivateOrder, OrderStatus>({
             id: 'status',
-            name: $t('Status'),
+            name: $t('%1JM'),
             getValue: order => order.status,
             format: status => OrderStatusHelper.getName(status),
             compare: (a, b) => Sorter.byEnumValue(a, b, OrderStatus),
@@ -160,7 +160,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
 
         new Column<PrivateOrder, string>({
             id: 'name',
-            name: $t('Naam'),
+            name: $t('%1Os'),
             getValue: order => order.data.customer.name,
             compare: (a, b) => Sorter.byStringValue(a, b),
             minimumWidth: 100,
@@ -171,7 +171,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
 
         new Column<PrivateOrder, string>({
             id: 'email',
-            name: $t('E-mailadres'),
+            name: $t('%1FK'),
             getValue: order => order.data.customer.email,
             compare: (a, b) => Sorter.byStringValue(a, b),
             minimumWidth: 100,
@@ -186,7 +186,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
         cols.push(
             new Column<PrivateOrder, string>({
                 id: 'phone',
-                name: $t('Telefoonnummer'),
+                name: $t('%wD'),
                 getValue: order => order.data.customer.phone,
                 compare: (a, b) => Sorter.byStringValue(a, b),
                 minimumWidth: 100,
@@ -201,13 +201,13 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
     if (preview.value.meta.paymentMethods.length > 1) {
         cols.push(new Column<PrivateOrder, string[]>({
             id: 'paymentMethod',
-            name: $t('Betaalmethode'),
+            name: $t('%M7'),
             getValue: (order) => {
                 return Formatter.uniqueArray(order.balanceItems.flatMap(b => b.payments.map(p => p.payment.method))).map(m => PaymentMethodHelper.getNameCapitalized(m, order.data.checkoutMethod?.type ?? null)).sort();
             },
             format: (methods) => {
                 if (methods.length === 0) {
-                    return $t('Geen');
+                    return $t('%1FW');
                 }
 
                 return methods.join(', ');
@@ -223,11 +223,11 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
     if (preview.value.meta.checkoutMethods.length > 1) {
         cols.push(new Column<PrivateOrder, CheckoutMethod | null>({
             id: 'checkoutMethod',
-            name: $t('Methode'),
+            name: $t('%Zop'),
             getValue: order => order.data.checkoutMethod,
             format: (method: CheckoutMethod | null) => {
                 if (method === null) {
-                    return $t('Geen');
+                    return $t('%1FW');
                 }
                 return method.typeName;
             },
@@ -247,7 +247,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
     if (hasDelivery || nonDeliveryCount > 1) {
         cols.push(new Column<PrivateOrder, string | undefined>({
             id: 'location',
-            name: hasDelivery && nonDeliveryCount === 0 ? $t('Adres') : $t('Locatie'),
+            name: hasDelivery && nonDeliveryCount === 0 ? $t('%Cn') : $t('%8a'),
             enabled: true,
             getValue: order => order.data.locationName,
             compare: (a, b) => Sorter.byStringValue(a ?? '', b ?? ''),
@@ -265,12 +265,12 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
         cols.push(
             new Column<PrivateOrder, WebshopTimeSlot | undefined>({
                 id: 'timeSlotDate',
-                name: (hasDelivery && nonDeliveryCount > 0) ? $t('Afhaal/leverdatum') : (hasDelivery ? $t('Leverdatum') : $t('Afhaaldatum')),
+                name: (hasDelivery && nonDeliveryCount > 0) ? $t('%cC') : (hasDelivery ? $t('%cD') : $t('%cE')),
                 getValue: order => order.data.timeSlot ? order.data.timeSlot : undefined,
                 compare: (a, b) => !a && !b ? 0 : (a && b ? WebshopTimeSlot.sort(a, b) : (a ? 1 : -1)),
                 format: (timeSlot, width: number) => {
                     if (!timeSlot) {
-                        return $t('Geen');
+                        return $t('%1FW');
                     }
                     if (width < 120) {
                         return Formatter.dateNumber(timeSlot.date, false);
@@ -293,12 +293,12 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
         cols.push(
             new Column<PrivateOrder, WebshopTimeSlot | undefined>({
                 id: 'timeSlotTime',
-                name: $t('Tijdstip'),
+                name: $t('%1GD'),
                 getValue: order => order.data.timeSlot ? order.data.timeSlot : undefined,
                 compare: (a, b) => !a && !b ? 0 : (a && b ? a.startTime - b.startTime : (a ? 1 : -1)),
                 format: (timeSlot, width) => {
                     if (!timeSlot) {
-                        return $t('Geen');
+                        return $t('%1FW');
                     }
                     const time = timeSlot.timeRangeString();
 
@@ -319,7 +319,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
     cols.push(
         new Column<PrivateOrder, Date>({
             id: 'validAt',
-            name: $t('Besteldatum'),
+            name: $t('%cB'),
             getValue: order => order.validAt ?? new Date(1990, 0, 1),
             compare: (a, b) => Sorter.byDateValue(a, b),
             format: (date, width: number) => {
@@ -343,7 +343,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
     cols.push(
         new Column<PrivateOrder, number>({
             id: 'totalPrice',
-            name: $t('Bedrag'),
+            name: $t('%1JL'),
             enabled: false,
             getValue: order => order.data.totalPrice,
             format: price => Formatter.price(price),
@@ -358,10 +358,10 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
     cols.push(
         new Column<PrivateOrder, number>({
             id: 'openBalance',
-            name: $t('Te betalen'),
+            name: $t('%m0'),
             enabled: preview.value.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.Transfer) || preview.value.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.PointOfSale), // keep it available because should be able to enable it when payment methods are changed
             getValue: order => order.openBalance,
-            format: price => price !== 0 ? Formatter.price(price) : $t('Betaald'),
+            format: price => price !== 0 ? Formatter.price(price) : $t('%1OD'),
             compare: (a, b) => Sorter.byNumberValue(b ?? 0, a ?? 0),
             getStyle: price => (price === 0 ? 'gray' : ''),
             minimumWidth: 70,
@@ -373,7 +373,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
     if (hasTickets.value) {
         cols.push(
             new Column<PrivateOrderWithTickets, { scanned: number; total: number }>({
-                name: hasSingleTickets.value ? $t('Ticket') : $t('Tickets'),
+                name: hasSingleTickets.value ? $t('%Zee') : $t('%1AU'),
                 allowSorting: false,
                 enabled: true,
                 getValue: (order) => {
@@ -388,7 +388,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
                     }
 
                     if (hasSingleTickets.value) {
-                        return stat.scanned === stat.total ? $t('Gescand') : $t('Niet gescand');
+                        return stat.scanned === stat.total ? $t('%V1') : $t('%1MZ');
                     }
                     return stat.scanned.toString() + ' / ' + stat.total;
                 },
@@ -416,13 +416,13 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
     if (!preview.value.meta.cartEnabled) {
         cols.push(
             new Column<PrivateOrderWithTickets, string>({
-                name: $t('Artikel'),
+                name: $t('%Sc'),
                 allowSorting: false,
                 enabled: false,
                 grow: true,
                 getValue: (order) => {
                     if (order.data.cart.items.length > 1) {
-                        return $t('Meerdere artikels');
+                        return $t('%Zo5');
                     }
 
                     const item = order.data.cart.items[0];
@@ -433,13 +433,13 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
                 },
                 format: (stat) => {
                     if (!stat) {
-                        return $t('Geen');
+                        return $t('%1FW');
                     }
                     return stat.toString();
                 },
                 compare: (a, b) => Sorter.byStringValue(b, a),
                 getStyle: (stat) => {
-                    if (!stat || stat === $t('Meerdere artikels')) {
+                    if (!stat || stat === $t('%Zo5')) {
                         return 'gray';
                     }
 
@@ -453,13 +453,13 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
 
         cols.push(
             new Column<PrivateOrderWithTickets, string>({
-                name: $t('Beschrijving'),
+                name: $t('%6o'),
                 allowSorting: false,
                 enabled: false,
                 grow: true,
                 getValue: (order) => {
                     if (order.data.cart.items.length > 1) {
-                        return $t('Meerdere artikels');
+                        return $t('%Zo5');
                     }
 
                     const item = order.data.cart.items[0];
@@ -470,13 +470,13 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
                 },
                 format: (stat) => {
                     if (!stat) {
-                        return $t('Geen');
+                        return $t('%1FW');
                     }
                     return stat.toString();
                 },
                 compare: (a, b) => Sorter.byStringValue(b, a),
                 getStyle: (stat) => {
-                    if (!stat || stat === $t('Meerdere artikels')) {
+                    if (!stat || stat === $t('%Zo5')) {
                         return 'gray';
                     }
 
@@ -493,12 +493,12 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
     cols.push(
         new Column<PrivateOrderWithTickets, number>({
             id: 'amount',
-            name: $t('Aantal'),
+            name: $t('%M4'),
             enabled: false,
             getValue: order => order.data.amount,
             format: (stat) => {
                 if (!stat) {
-                    return $t('Geen');
+                    return $t('%1FW');
                 }
                 return stat.toString();
             },
@@ -530,7 +530,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
                     }
                     return answer.stringValue;
                 },
-                format: v => v ? v : $t('Leeg'),
+                format: v => v ? v : $t('%Rs'),
                 compare: (a, b) => Sorter.byStringValue(b ?? '', a ?? ''),
                 getStyle: price => price === undefined ? 'gray' : '',
                 minimumWidth: 70,

@@ -112,7 +112,7 @@ import { useEditWebshop } from './useEditWebshop';
 const props = defineProps<UseEditWebshopProps>();
 
 const present = usePresent();
-const viewTitle = $t('Kortingen');
+const viewTitle = $t('%Pm');
 
 const { webshop, addPatch, errors, saving, save, hasChanges: hasWebshopChanges, shouldNavigateAway } = useEditWebshop({
     afterSave,

@@ -1643,6 +1643,14 @@
     "original": "De standaardtaal van jouw eenheid. Stel dit in op de taal waarin je doorgaans communiceert. Kies enkel meertalig als emailcommunicatie actief in meerdere talen gebeurt, niet enkel voor uitzonderingen.",
     "translation": "The default language for your unit. Set this to the language you typically use to communicate. Only select multilingual if you actively send email communications in multiple languages, not just for rare exceptions."
   },
+  "%Zo0": {
+    "original": "Hou er rekening mee dat jouw webshop voorlopig nog niet bereikbaar is op de door jou gekozen link. We gebruiken intussen de standaard domeinnaam van Jamboree. Wijzig eventueel de link terug tot iemand dit in orde kan brengen.",
+    "translation": "Please note that your webshop is not yet available at the link you chose. For now, we're using Jamboree's default domain name. You can change the link back later once someone can fix this."
+  },
+  "%ZoY": {
+    "original": "Je kan {paymentMethod} niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Jamboree instellingen > Betaalaccounts.",
+    "translation": "You can't activate {paymentMethod} yet. First, you need to register with a payment provider through the Jamboree settings > Payment accounts."
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Jamboree. Voor Microsoft kan je",
     "translation": "Ensure that users can log in via your own account system, separately from Jamboree. For Microsoft you can"
