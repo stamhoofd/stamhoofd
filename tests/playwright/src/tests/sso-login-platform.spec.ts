@@ -10,6 +10,7 @@ import { MFARecoveryCode, MFATOTP, Platform, Token, User, UserFactory } from '@s
 import { MFATestHelper } from '@stamhoofd/backend/tests/helpers';
 import { LoginMethod, LoginMethodConfig, LoginProviderType, OpenIDClientConfiguration, PermissionLevel, Permissions, UserPermissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
+import nock from 'nock';
 import { TwoFactorFlow } from '../flows/TwoFactorFlow.js';
 import { WorkerData } from '../helpers/index.js';
 import { setPlatformRequiresTwoFactor } from '../init/setPlatformRequiresTwoFactor.js';
@@ -23,7 +24,11 @@ const PASSWORD = 'testAbc123456';
  * from an empty users table.
  */
 test.describe('SSO login', () => {
+    // nock (loaded by the mockers in @stamhoofd/backend/tests/helpers) intercepts every request of this
+    // worker process, including the OpenID discovery the in-process API sends to Keycloak. Its passthrough
+    // fails with 'read EINVAL', so the interceptor is disabled for these tests and re-enabled afterwards.
     test.beforeAll(() => {
+        nock.restore();
         TestUtils.setPermanentEnvironment('userMode', 'platform');
     });
 
@@ -34,6 +39,7 @@ test.describe('SSO login', () => {
     });
 
     test.afterAll(async () => {
+        nock.activate();
         await WorkerData.resetDatabase();
     });
 
