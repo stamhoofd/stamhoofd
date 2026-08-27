@@ -412,6 +412,8 @@ type Action = {
 );
 
 const canSetDefaultPeriod = computed(() => {
+    if (!auth.hasFullAccess()) return false;
+
     if (period.value.id === organization.value.period.id) {
         return false;
     }
@@ -423,6 +425,14 @@ const canSetDefaultPeriod = computed(() => {
         (period.value.period.startDate >= platform.value.period.startDate && !period.value.period.locked)
         && (!period.value.period.locked && (period.value.period.switchDate === null || period.value.period.switchDate < new Date()))
     );
+});
+
+console.table({
+    canSetDefaultPeriod: canSetDefaultPeriod.value,
+    props: props,
+    periodId: period.value.id,
+    organizationPeriodId: organization.value.period.id,
+    userMode: STAMHOOFD.userMode,
 });
 
 const patchOrganization = usePatchOrganization();
