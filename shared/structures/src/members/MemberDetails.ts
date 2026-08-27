@@ -230,6 +230,16 @@ export class MemberDetails extends AutoEncoder {
     reviewTimes: ReviewTimes;
 
     /**
+     * Used for fiscal documents. Minimum age is 21 ipv 14 if this is true
+     */
+    @field({
+        decoder: BooleanStatus,
+        ...NextVersion,
+        nullable: true,
+    })
+    severeDisability: BooleanStatus | null;
+
+    /**
      * Call this to clean up capitals in all the available data
      */
     cleanData() {

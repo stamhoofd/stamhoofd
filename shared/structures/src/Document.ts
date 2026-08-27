@@ -74,6 +74,13 @@ export class DocumentSettings extends AutoEncoder {
      */
     @field({ decoder: new MapDecoder(StringDecoder, new ArrayDecoder(StringDecoder)) })
     linkedFields: Map<string, string[]> = new Map();
+
+    @field({
+        decoder: IntegerDecoder,
+        nullable: true,
+        ...NextVersion,
+    })
+    maxAgeSevereDisability: number | null = null;
 }
 
 export class DocumentTemplateDefinition extends AutoEncoder {
@@ -100,6 +107,9 @@ export class DocumentTemplateDefinition extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder, nullable: true })
     defaultMaxAge: number | null = null;
+
+    @field({ decoder: IntegerDecoder, nullable: true })
+    defaultMaxAgeSevereDisability: number | null = null;
 
     @field({ decoder: IntegerDecoder, nullable: true })
     @field({ ...upgradePriceFrom2To4DecimalPlaces, nullable: true })
