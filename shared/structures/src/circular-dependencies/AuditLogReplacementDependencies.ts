@@ -4,6 +4,7 @@ import { AccessRight, AccessRightHelper } from '../AccessRight.js';
 import { CountryHelper } from '../addresses/CountryDecoder.js';
 import { AuditLogReplacementDependencies, registerAuditLogEnum } from '../AuditLogReplacement.js';
 import { LanguageHelper } from '../Language.js';
+import { BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getVATExcemptReasonName, VATExcemptReason } from '../BalanceItem.js';
 import { STPackageType, STPackageTypeHelper } from '../billing/STPackage.js';
 import { DocumentStatus, DocumentStatusHelper } from '../Document.js';
 import { EmailTemplate, EmailTemplateType } from '../email/EmailTemplate.js';
@@ -38,6 +39,10 @@ registerAuditLogEnum('EmailTemplateType', EmailTemplateType, EmailTemplate.getTy
 registerAuditLogEnum('EventNotificationStatus', EventNotificationStatus, EventNotificationStatusHelper.getName);
 registerAuditLogEnum('Language', Language, LanguageHelper.getName);
 registerAuditLogEnum('MFAMethodType', MFAMethodType, getMFAMethodTypeName);
+registerAuditLogEnum('BalanceItemStatus', BalanceItemStatus, getBalanceItemStatusName);
+registerAuditLogEnum('BalanceItemType', BalanceItemType, getBalanceItemTypeName);
+registerAuditLogEnum('BalanceItemRelationType', BalanceItemRelationType, getBalanceItemRelationTypeName);
+registerAuditLogEnum('VATExcemptReason', VATExcemptReason, getVATExcemptReasonName);
 
 // AuditLogReplacementDependencies.uuidToName is deliberately not registered here: resolving a uuid
 // to a name needs a platform, and this module runs on import of @stamhoofd/structures, where there

@@ -16,6 +16,9 @@ describe('AuditLogReplacement', () => {
     test('It registers typed enum helpers for legacy enum replacements', () => {
         expect(getRegisteredAuditLogEnums().map(({ type }) => type).sort()).toEqual([
             'AccessRight',
+            'BalanceItemRelationType',
+            'BalanceItemStatus',
+            'BalanceItemType',
             'CheckoutMethodType',
             'Country',
             'DocumentStatus',
@@ -33,12 +36,13 @@ describe('AuditLogReplacement', () => {
             'STPackageType',
             'SetupStepType',
             'UmbrellaOrganization',
+            'VATExcemptReason',
         ]);
 
         expect(getAuditLogPatchKeyName(PaymentStatus.Pending)).toBe('%mu');
         expect(AuditLogReplacement.create({ value: PaymentStatus.Pending, type: AuditLogReplacementType.Key }).toString()).toBe('%mu');
-        // EventNotificationStatus, Language and MFAMethodType are not registered as legacy enums
-        expect(AuditLogReplacementDependencies.enumHelpers).toHaveLength(getRegisteredAuditLogEnums().length - 3);
+        // EventNotificationStatus, Language, MFAMethodType and the BalanceItem/VAT enums are not registered as legacy enums
+        expect(AuditLogReplacementDependencies.enumHelpers).toHaveLength(getRegisteredAuditLogEnums().length - 7);
         expect(AuditLogReplacement.enum('EventNotificationStatus', EventNotificationStatus.Accepted)?.toString()).toBe('%B1');
     });
 

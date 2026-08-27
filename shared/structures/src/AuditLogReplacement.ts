@@ -158,6 +158,7 @@ export enum AuditLogReplacementType {
     Webshop = 'Webshop',
     Order = 'Order',
     Payment = 'Payment',
+    BalanceItem = 'BalanceItem',
     PlatformMembershipType = 'PlatformMembershipType',
     MemberResponsibility = 'MemberResponsibility',
     DocumentTemplate = 'DocumentTemplate',

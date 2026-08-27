@@ -11,6 +11,7 @@ import type { usePaymentsObjectFetcher } from '#fetchers/usePaymentsObjectFetche
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useShowMember } from '#members/hooks/useShowMember.ts';
 import { Toast } from '#overlays/Toast.ts';
+import { useShowBalanceItem } from '#payments/hooks/useShowBalanceItem.ts';
 import { useShowPayment } from '#payments/hooks/useShowPayment.ts';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import PromiseView from '#containers/PromiseView.vue';
@@ -86,6 +87,15 @@ export function renderAny(obj: unknown, customRenderers?: AuditLogCustomRenderer
             return () => h('button', {
                 class: 'style-inline-resource button simple',
                 onClick: () => showPayment(obj.id!),
+                type: 'button',
+            }, obj.value);
+        }
+
+        if (obj.type === AuditLogReplacementType.BalanceItem && obj.id) {
+            const showBalanceItem = useShowBalanceItem();
+            return () => h('button', {
+                class: 'style-inline-resource button simple',
+                onClick: () => showBalanceItem(obj.id!),
                 type: 'button',
             }, obj.value);
         }
