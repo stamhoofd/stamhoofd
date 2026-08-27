@@ -1,7 +1,7 @@
 <template>
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
-        <p>{{ $t('Op') }} <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-webshops-instellen')" target="_blank">{{ $t('deze pagina') }}</a> {{ $t('vind je hoe elke betaalmethode werkt en hoe je die instelt.') }}</p>
+        <p>{{ $t('%Zoo') }} <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-webshops-instellen')" target="_blank">{{ $t('%OH') }}</a> {{ $t('%Zov') }}</p>
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <EditPaymentMethodsBox type="webshop" :organization="organization" :config="config" :private-config="privateConfig" :validator="errors.validator" @patch:config="patchConfig($event)" @patch:private-config="patchPrivateConfig($event)" />
@@ -28,7 +28,7 @@ const { webshop, addPatch, errors, saving, save, hasChanges, shouldNavigateAway 
     getProps: () => props,
 });
 
-const viewTitle = $t('Betaalmethodes');
+const viewTitle = $t('%O7');
 const config = computed(() => webshop.value.meta.paymentConfiguration);
 const privateConfig = computed(() => webshop.value.privateMeta.paymentConfiguration);
 

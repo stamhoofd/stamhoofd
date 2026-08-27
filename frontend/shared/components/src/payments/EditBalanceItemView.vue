@@ -1,7 +1,7 @@
 <template>
     <SaveView :title="title" :disabled="!hasChanges && !isNew" class="edit-balance-item-view" :loading="loading" @save="save">
         <template v-if="!isNew && auth.hasFullAccess()" #buttons>
-            <button v-tooltip="$t('Toon geschiedenis')" type="button" class="button icon history" @click="viewAudit" />
+            <button v-tooltip="$t('%1KS')" type="button" class="button icon history" @click="viewAudit" />
         </template>
         <h1>
             {{ title }}
