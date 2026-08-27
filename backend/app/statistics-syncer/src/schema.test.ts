@@ -168,6 +168,19 @@ describe('migration.platform-statistics-schema', () => {
         expect(typeOf('_organizations_organization_tags', 'periodId')).toBe('varchar(36)');
     });
 
+    /**
+     * `locked` is copied from the administration and says what it holds now; `lockedAt` says the sync
+     * has acted on it. Both are needed: the row keeps following the administration while the period is
+     * locked, which is the only way an unlock reaches this database.
+     */
+    it('records when a locked period stopped being followed, next to the lock itself', async () => {
+        const columns = await getColumns();
+        const periodColumn = (columnName: string) => columns.find(column => column.tableName === 'registration_periods' && column.columnName === columnName)?.dataType;
+
+        expect(periodColumn('locked')).toBe('tinyint');
+        expect(periodColumn('lockedAt')).toBe('datetime');
+    });
+
     it('holds no personally identifiable information in any table', async () => {
         const offending = (await getColumns()).filter((column) => {
             if (allowedPersonalDataColumns.has(`${column.tableName}.${column.columnName}`)) {

@@ -30,3 +30,8 @@ elsewhere once a night between 03:00 and 05:00 (see `src/crons.ts`).
 
 `STAMHOOFD.IMPORTED_UNTIL` marks how far back the numbers come from an external import instead of from
 this administration; periods ending before it are frozen and left to that import.
+
+A period the administration has locked stops being synced as well, one run later: the run that first
+sees the lock still writes the changes and the deletions of that day, and settles the period at the
+end if it came through in full. Unlocking a period brings it back into the sync, unless it ended more
+than a year ago.

@@ -2,7 +2,7 @@ import type { Organization, Registration, RegistrationPeriod } from '@stamhoofd/
 import { GroupFactory, Member, MemberFactory, MemberPlatformMembership, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
 import { BooleanStatus, DefaultAgeGroup, FinancialSupportSettings, Gender, PlatformMembershipType } from '@stamhoofd/structures';
 import { getStatisticsConnection } from './database.js';
-import { syncStatistics, syncStatisticsDeletes } from './sync.js';
+import { runStatisticsCycle, syncStatistics, syncStatisticsDeletes } from './sync.js';
 import { readSyncState } from './sync-state.js';
 
 async function statisticsRows(table: string, id?: string): Promise<Record<string, any>[]> {
@@ -138,7 +138,7 @@ describe('statistics sync', () => {
     it('writes the platform configuration against every period that is still open', async () => {
         const now = new Date();
         const periods = await statisticsRows('registration_periods');
-        const open = new Set(periods.filter(row => row.cutoffAt === null || row.cutoffAt > now).map(row => row.id));
+        const open = new Set(periods.filter(row => (row.cutoffAt === null || row.cutoffAt > now) && row.lockedAt === null).map(row => row.id));
         const written = new Set((await statisticsRows('default_age_groups', ageGroup.id)).map(row => row.periodId));
 
         expect(open.size).toBeGreaterThan(0);
@@ -284,13 +284,11 @@ describe('statistics sync', () => {
         });
 
         it('is not rewritten by the sync when the source changes', async () => {
-            const before = (await statisticsRows('registrations', frozenRegistration.id))[0];
-
-            frozenRegistration.waitingList = !before.waitingList;
+            frozenRegistration.deactivatedAt = new Date(2025, 0, 15);
             await frozenRegistration.save();
             await syncStatistics();
 
-            expect((await statisticsRows('registrations', frozenRegistration.id))[0].waitingList).toBe(before.waitingList);
+            expect((await statisticsRows('registrations', frozenRegistration.id))[0].deactivatedAt).toBeNull();
         });
 
         it('keeps its rows when the source is deleted, so the settled numbers stay', async () => {
@@ -300,6 +298,136 @@ describe('statistics sync', () => {
             await syncStatisticsDeletes();
 
             expect(await statisticsRows('registrations', frozenRegistration.id)).toHaveLength(1);
+        });
+    });
+
+    /**
+     * Locking a period in the administration says its year is done. The sync keeps writing it for one
+     * more run -- the changes and the deletions of the day it was locked have to land somewhere -- and
+     * leaves it alone from the run after that.
+     */
+    describe('a period the administration locked', () => {
+        const day = 24 * 60 * 60 * 1000;
+
+        async function periodRow(period: RegistrationPeriod): Promise<Record<string, any>> {
+            return (await statisticsRows('registration_periods', period.id))[0];
+        }
+
+        /**
+         * A year with a registration in it, synced and then locked: the state the sync finds on the
+         * night it first sees the lock. Ends in a month unless told otherwise, so unlocking it again
+         * falls inside the window that reopens a period.
+         */
+        async function lockedYear(endDate = new Date(Date.now() + 30 * day)): Promise<{ period: RegistrationPeriod; registration: Registration }> {
+            const period = await new RegistrationPeriodFactory({ startDate: new Date(endDate.getTime() - 365 * day), endDate }).create();
+            const group = await new GroupFactory({ organization }).create();
+            group.periodId = period.id;
+            await group.save();
+            const registration = await new RegistrationFactory({ member, group }).create();
+            registration.periodId = period.id;
+            await registration.save();
+
+            await runStatisticsCycle();
+
+            period.locked = true;
+            await period.save();
+
+            return { period, registration };
+        }
+
+        async function deactivate(registration: Registration, at: Date | null): Promise<void> {
+            registration.deactivatedAt = at;
+            await registration.save();
+        }
+
+        async function deactivatedAt(registration: Registration): Promise<Date | null> {
+            return (await statisticsRows('registrations', registration.id))[0].deactivatedAt;
+        }
+
+        it('still writes what changed on the day it was locked', async () => {
+            const { period, registration } = await lockedYear();
+            const changed = new Date(2025, 5, 1);
+
+            await deactivate(registration, changed);
+            await runStatisticsCycle();
+
+            expect(await deactivatedAt(registration)).toEqual(changed);
+            expect((await periodRow(period)).lockedAt).toBeInstanceOf(Date);
+        });
+
+        /**
+         * Deletes are noticed by the reconciliation and nothing else, so a registration removed on the
+         * day of the lock is only taken out if that pass runs before the period is settled.
+         */
+        it('still removes what was deleted on the day it was locked', async () => {
+            const { registration } = await lockedYear();
+            const deletedId = registration.id;
+
+            await registration.delete();
+            await runStatisticsCycle();
+
+            expect(await statisticsRows('registrations', deletedId)).toHaveLength(0);
+        });
+
+        it('is left alone from the run after that', async () => {
+            const { registration } = await lockedYear();
+            await runStatisticsCycle();
+
+            await deactivate(registration, new Date(2025, 5, 2));
+            await runStatisticsCycle();
+
+            expect(await deactivatedAt(registration)).toBeNull();
+        });
+
+        /**
+         * A run that threw never settles the period, so the night it was locked is repeated until one
+         * comes through in full rather than skipped.
+         */
+        it('is written again by the next run when a run did not come through', async () => {
+            const { period, registration } = await lockedYear();
+            const changed = new Date(2025, 5, 3);
+
+            // The incremental pass came through and the reconciliation after it threw.
+            await syncStatistics();
+            expect((await periodRow(period)).lockedAt).toBeNull();
+
+            await deactivate(registration, changed);
+            await runStatisticsCycle();
+
+            expect(await deactivatedAt(registration)).toEqual(changed);
+            expect((await periodRow(period)).lockedAt).toBeInstanceOf(Date);
+        });
+
+        it('is followed again from the same run it is unlocked in', async () => {
+            const { period, registration } = await lockedYear();
+            await runStatisticsCycle();
+            const changed = new Date(2025, 5, 4);
+
+            period.locked = false;
+            await period.save();
+            await deactivate(registration, changed);
+            await runStatisticsCycle();
+
+            expect(await deactivatedAt(registration)).toEqual(changed);
+            expect((await periodRow(period)).lockedAt).toBeNull();
+            expect((await periodRow(period)).locked).toBe(0);
+        });
+
+        /**
+         * Unlocking a year that is long over is not a correction to make in the reports: what its rows
+         * would be written from is the administration of today, which no longer describes that year.
+         */
+        it('stays settled when a year that ended long ago is unlocked', async () => {
+            const { period, registration } = await lockedYear(new Date(Date.now() - 2 * 365 * day));
+            await runStatisticsCycle();
+
+            period.locked = false;
+            await period.save();
+            await deactivate(registration, new Date(2025, 5, 5));
+            await runStatisticsCycle();
+
+            expect(await deactivatedAt(registration)).toBeNull();
+            expect((await periodRow(period)).lockedAt).toBeInstanceOf(Date);
         });
     });
 

@@ -1,5 +1,5 @@
 import { registerCron } from '@stamhoofd/crons';
-import { syncStatistics, syncStatisticsDeletes } from './sync.js';
+import { runStatisticsCycle } from './sync.js';
 
 registerCron('syncPlatformStatistics', syncPlatformStatistics);
 
@@ -27,12 +27,7 @@ async function syncPlatformStatistics() {
         return;
     }
 
-    await syncStatistics();
-
-    // After the incremental pass, never next to it: reconciling first would see a row the sync is
-    // about to write back and one that was deleted since the sync read it as equally present,
-    // leaving the deleted one behind for a full day.
-    await syncStatisticsDeletes();
+    await runStatisticsCycle();
 
     lastRun = new Date();
 }

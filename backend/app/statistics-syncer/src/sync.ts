@@ -2,7 +2,7 @@ import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, Platform, Registration, RegistrationPeriod } from '@stamhoofd/models';
 import { SQL, SQLSelect, SQLWhereSign } from '@stamhoofd/sql';
 import { getStatisticsConnection } from './database.js';
-import { applyImportedCutoff, getImportedUntil, isFrozen, loadFrozenPeriodIds } from './periods.js';
+import { applyImportedCutoff, getImportedUntil, isFrozen, loadFrozenPeriodIds, loadSettledPeriodIds, releaseUnlockedPeriods, settleLockedPeriods } from './periods.js';
 import type { StatisticsRow } from './rows.js';
 import { flattenDefaultAgeGroup, flattenGroup, flattenMember, flattenMembership, flattenNamedConfig, flattenOrganization, flattenPlatform, flattenRegistration, flattenRegistrationPeriod, flattenResponsibilityRecord } from './rows.js';
 import { syncSource } from './sources.js';
@@ -529,13 +529,18 @@ export function reconciledTables(): string[] {
  */
 export async function syncStatistics(): Promise<void> {
     await applyImportedCutoff(getImportedUntil());
-    const frozen = await loadFrozenPeriodIds();
 
     // The periods before anything else, and the configuration before the rows that group by it: every
     // table here is written per period, so a period that is not in yet is a period nothing can be
     // written against.
-    await syncIncrementalTable(periodsTable(), frozen);
+    //
+    // Only a settled year leaves its own row alone as well. A locked period keeps following the
+    // administration, because that row is where `locked` arrives: freezing it would freeze the one
+    // field an unlock has to come through.
+    await syncIncrementalTable(periodsTable(), await loadSettledPeriodIds());
+    await releaseUnlockedPeriods();
 
+    const frozen = await loadFrozenPeriodIds();
     const openPeriodIds = await loadOpenPeriodIds(frozen);
     await syncPlatformConfig(openPeriodIds);
 
@@ -578,4 +583,25 @@ export async function syncStatisticsDeletes(): Promise<void> {
         await deleteRows('member_responsibility_records', ids.filter(id => !existing.has(id)));
     }
     await writeSyncState('member_responsibility_records', { lastReconciledAt: new Date() });
+}
+
+/**
+ * One whole run of the sync: everything that changed, then the rows whose source is gone, then the
+ * periods the administration has locked since.
+ *
+ * The order is what makes each of the three sound, so they are run from here rather than from the
+ * cron that schedules them.
+ */
+export async function runStatisticsCycle(): Promise<void> {
+    await syncStatistics();
+
+    // After the incremental pass, never next to it: reconciling first would see a row the sync is
+    // about to write back and one that was deleted since the sync read it as equally present,
+    // leaving the deleted one behind for a full day.
+    await syncStatisticsDeletes();
+
+    // Last, and only when both passes came through: a locked period has had the changes and the
+    // deletions of the day it was locked written by now, so its numbers are final. A pass that threw
+    // never gets here, which leaves the period to be read again by the next run.
+    await settleLockedPeriods();
 }

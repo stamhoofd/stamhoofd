@@ -12,7 +12,7 @@
 -- registration already gives, and a gender, they are enough to single out a person. This database is
 -- therefore not anonymous — treat who can reach it as part of protecting it, not only what is in it.
 --
--- Two columns are not copies of anything in the source:
+-- Three columns are not copies of anything in the source:
 --
 --   * `source` says which pipeline wrote a row. The nightly reconciliation checks rows against the
 --     main database, and rows that came from an import have no counterpart there — without this it
@@ -22,6 +22,16 @@
 --     in the administration no longer move them. It is per period because the boundary differs per
 --     platform and per year, and it is what makes room for data imported from a client's own
 --     statistics database: those years are frozen, so nothing overwrites them.
+--   * `registration_periods`.`lockedAt` freezes a period the administration has locked. `locked` is
+--     copied from there and says what is true now; this says the sync has acted on it. It is filled
+--     at the end of a run that came through in full, the incremental pass and the delete
+--     reconciliation both, so the changes and the deletions of the day the lock was set are written
+--     before the period stops being followed -- a run that failed halfway leaves it empty, and the
+--     next one reads that period again. Clearing it follows the administration back: a period
+--     unlocked to correct something is followed once more, unless it ended more than a year ago (see
+--     `releaseWindow` in `src/periods.ts`). Unlike a cutoff it leaves the period's own row alone,
+--     which keeps following the administration: that row carries `locked`, so freezing it would
+--     freeze the one field an unlock has to arrive through.
 --
 -- Freezing only holds if every row belongs to a period. The source keeps no history of its own: a
 -- unit, a tak, a netwerk and a functie are all just what they are called today, and a name read now
@@ -48,13 +58,15 @@ CREATE TABLE `registration_periods` (
   `updatedAt` datetime NOT NULL,
   `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
   `cutoffAt` datetime DEFAULT NULL COMMENT 'From when this period is frozen: the sync stops writing rows belonging to it. Null means it is still live.',
+  `lockedAt` datetime DEFAULT NULL COMMENT 'When the sync settled this period after the administration locked it: from then on nothing belonging to it is written. Null means it is still followed.',
   PRIMARY KEY (`id`),
   KEY `organizationId` (`organizationId`),
   KEY `previousPeriodId` (`previousPeriodId`),
   KEY `startDate` (`startDate`),
   KEY `name` (`name`),
   KEY `source` (`source`),
-  KEY `cutoffAt` (`cutoffAt`)
+  KEY `cutoffAt` (`cutoffAt`),
+  KEY `lockedAt` (`lockedAt`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- An organization is a legal entity, not a natural person, so its name and where it is are not
