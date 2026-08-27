@@ -52,7 +52,10 @@ export class GetUserDetailedPayableBalanceEndpoint extends Endpoint<Params, Quer
                                         SQL.column(BalanceItem.table, 'id'),
                                     ),
                                 )
-                                .where(SQL.where('memberId', memberIds).or('userId', Context.impersonatedUserOrUser.id))
+                                .where(
+                                    SQL.where('memberId', memberIds)
+                                        .or('userId', Context.impersonatedUserOrUser.id),
+                                )
                                 .where(SQL.column(BalanceItemPayment.table, 'paymentId'), SQL.column(Payment.table, 'id')),
                         ),
                         ),
