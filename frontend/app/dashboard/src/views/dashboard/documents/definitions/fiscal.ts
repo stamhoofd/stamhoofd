@@ -4,6 +4,7 @@ export const fiscal = DocumentTemplateDefinition.create({
     type: 'fiscal',
     name: $t(`%xX`),
     defaultMaxAge: 13,
+    defaultMaxAgeSevereDisability: 21,
     defaultMinPrice: 1_00, // = 1 cent
     fieldCategories: [
         RecordCategory.create({

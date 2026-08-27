@@ -565,7 +565,12 @@ export class DocumentTemplate extends QueryableModel {
                     return false;
                 }
 
-                if (age > this.settings.maxAge) {
+                let maxAge = this.settings.maxAge;
+
+                if (this.settings.maxAgeSevereDisability && registration.member.details.severeDisability?.value) {
+                    maxAge = this.settings.maxAgeSevereDisability;
+                }
+                if (age > maxAge) {
                     return false;
                 }
             } else {
