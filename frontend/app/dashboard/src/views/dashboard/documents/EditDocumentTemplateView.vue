@@ -160,6 +160,7 @@ import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 
 import { fiscal } from './definitions/fiscal';
 import { participation } from './definitions/participation';
+import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 
 const props = withDefaults(defineProps<{
     isNew: boolean;
@@ -186,6 +187,7 @@ const fiscalDocumentYearHelper = new FiscalDocumentYearHelper();
 const recordAnswers = computed(() => {
     return patchedDocument.value.getRecordAnswers();
 });
+const getFeatureFlag = useFeatureFlag();
 
 function calculateHasBeenExported() {
     const allowedIds = new Set<string>();
@@ -350,6 +352,8 @@ function validateYearSync(value: number = year.value): SimpleError | null {
     const isFiscal = editingType.value === fiscal.type;
 
     if (isFiscal) {
+        if (getFeatureFlag('fiscal-document-always')) return null;
+
         if (value === fiscalDocumentYearHelper.year && !fiscalDocumentYearHelper.canCreateFiscalDocumentForCurrentYear) {
             return new SimpleError({
                 code: 'invalid_year',
