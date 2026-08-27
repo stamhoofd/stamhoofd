@@ -63,6 +63,10 @@ export async function dropDatabase(database: string): Promise<void> {
     await runMysqlStatement(`DROP DATABASE IF EXISTS ${escapeIdentifier(database)};`);
 }
 
+export async function openDatabaseShell(database: string): Promise<void> {
+    await docker.run(['exec', '-it', mysqlContainer, 'mysql', `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, database]);
+}
+
 export async function copyDatabase(from: string, to: string): Promise<void> {
     await createDatabase(to);
     await docker.run(['exec', mysqlContainer, 'sh', '-c', `mysqldump -h${shellQuote(localIpv4Host)} -u${shellQuote(mysqlRootUser)} -p${shellQuote(mysqlRootPassword)} --single-transaction --routines --triggers --events ${shellQuote(from)} | mysql -h${shellQuote(localIpv4Host)} -u${shellQuote(mysqlRootUser)} -p${shellQuote(mysqlRootPassword)} ${shellQuote(to)}`]);
