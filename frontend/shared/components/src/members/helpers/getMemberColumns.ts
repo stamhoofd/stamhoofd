@@ -55,7 +55,7 @@ export function getMemberColumns({ platform, organization, dateRange, group, gro
                         id: 'language',
                         name: $t('Taal'),
                         getValue: member => member.member.details.language,
-                        format: language => language ? LanguageHelper.getNativeName(language) : $t('Standaard'),
+                        format: language => language ? LanguageHelper.getNativeName(language) : $t('Geen voorkeur'),
                         getStyle: language => language ? '' : 'gray',
                         minimumWidth: 50,
                         recommendedWidth: 120,

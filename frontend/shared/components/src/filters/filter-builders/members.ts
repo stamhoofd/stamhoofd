@@ -1213,7 +1213,7 @@ export function getMemberBaseFilters(recordConfiguration?: OrganizationRecordsCo
     all.push(new MultipleChoiceFilterBuilder({
         name: $t('Taal'),
         options: [
-            new MultipleChoiceUIFilterOption($t('Standaard'), null),
+            new MultipleChoiceUIFilterOption($t('Geen voorkeur'), null),
             ...Object.values(Language).map(language => new MultipleChoiceUIFilterOption(LanguageHelper.getNativeName(language), language)),
         ],
         wrapper: {

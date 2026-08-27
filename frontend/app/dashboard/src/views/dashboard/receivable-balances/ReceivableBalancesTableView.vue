@@ -459,6 +459,7 @@ async function openMail(selection: TableActionSelection<ObjectType>) {
     const displayedComponent = new ComponentWithProperties(NavigationController, {
         root: AsyncComponent(() => import('@stamhoofd/components/email/EmailView.vue'), {
             recipientFilterOptions: $feature('organization-receivable-balances') ? [memberOptions, organizationOption] : [memberOptions],
+            supportsTranslations: organization.value?.language === null,
         }),
     });
     await present({

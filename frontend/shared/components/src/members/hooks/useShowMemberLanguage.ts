@@ -13,7 +13,7 @@ export function useShowMemberLanguage(member: Ref<PlatformMember>) {
     const contextOrganization = useOrganization();
 
     return computed(() => {
-        const organization = contextOrganization.value ?? member.value.organizations[0] ?? null;
+        const organization = contextOrganization.value ?? null;
         const organizationLanguage = organization?.language ?? null;
 
         if (organization ? (organizationLanguage === null) : (platform.value.language === null)) {

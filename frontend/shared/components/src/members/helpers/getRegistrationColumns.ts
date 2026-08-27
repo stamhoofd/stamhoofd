@@ -58,7 +58,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
                         id: 'member.language',
                         name: $t('Taal'),
                         getValue: registration => registration.member.member.details.language,
-                        format: language => language ? LanguageHelper.getNativeName(language) : $t('Standaard'),
+                        format: language => language ? LanguageHelper.getNativeName(language) : $t('Geen voorkeur'),
                         getStyle: language => language ? '' : 'gray',
                         minimumWidth: 50,
                         recommendedWidth: 120,

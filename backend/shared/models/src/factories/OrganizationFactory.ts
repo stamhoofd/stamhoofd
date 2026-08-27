@@ -8,6 +8,7 @@ import type { RegistrationPeriod } from '../models/RegistrationPeriod.js';
 import { RegistrationPeriodFactory } from './RegistrationPeriodFactory.js';
 import { Country } from '@stamhoofd/types/Country';
 import { STPackageFactory } from './STPackageFactory.js';
+import { Language } from '@stamhoofd/types/Language';
 
 class Options {
     uri?: string;
@@ -42,6 +43,7 @@ export class OrganizationFactory extends Factory<Options, Organization> {
             postalCode: '9000',
             country: Country.Belgium,
         });
+        organization.language = Language.Dutch;
 
         let period: RegistrationPeriod;
 

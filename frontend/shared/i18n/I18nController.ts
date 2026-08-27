@@ -319,10 +319,12 @@ export class I18nController {
         }
 
         // 0. A signed-in user's preferred language wins over storage, url and browser
-        const userLanguage = $context?.user?.language;
-        if (userLanguage && this.isValidLanguage(userLanguage)) {
-            console.info('[I18n] Using language of user', userLanguage);
-            language = userLanguage;
+        if (!$context?.user?.impersonatedBy) {
+            const userLanguage = $context?.user?.language;
+            if (userLanguage && this.isValidLanguage(userLanguage)) {
+                console.info('[I18n] Using language of user', userLanguage);
+                language = userLanguage;
+            }
         }
 
         // 1. Get by storage (always preferred)

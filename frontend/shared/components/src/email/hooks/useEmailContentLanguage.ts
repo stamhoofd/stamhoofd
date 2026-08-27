@@ -1,6 +1,9 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { encodeObject, PatchMap } from '@simonbackx/simple-encoding';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { EmailContent, LanguageHelper } from '@stamhoofd/structures';
+import { isTipTapDocument, TranslateRequest } from '@stamhoofd/structures/endpoints/TranslateRequest.js';
+import type { TranslatableValue } from '@stamhoofd/structures/endpoints/TranslateRequest.js';
 import type { Language } from '@stamhoofd/types/Language';
 import type { Editor, JSONContent } from '@tiptap/core';
 import type { Ref } from 'vue';
@@ -8,6 +11,7 @@ import { computed, ref, watch } from 'vue';
 import { EmailStyler } from '../../editor/EmailStyler';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { Toast } from '#overlays/Toast.ts';
+import type { EmailTranslator } from './useEmailTranslator';
 
 /**
  * The fields shared by the Email and EmailTemplate structures that make up the translatable content.
@@ -123,6 +127,10 @@ export function useEmailContentLanguage(options: {
     editor: () => Editor | null | undefined;
     patched: () => EmailContentHolder;
     addPatch: (patch: EmailContentPatch) => void;
+    /**
+     * Required for translateToOtherLanguages
+     */
+    translate?: EmailTranslator;
 }) {
     /**
      * The language that is being edited. null when no language is set on the content (untranslated).
@@ -367,6 +375,101 @@ export function useEmailContentLanguage(options: {
     }
 
     /**
+     * Derive the html/text of content that is not loaded in the editor by loading it temporarily.
+     * The caller restores the editor afterwards (loadEditor).
+     */
+    async function deriveContent(subject: string, json: any): Promise<EmailContent> {
+        const editor = options.editor();
+        if (!editor) {
+            return EmailContent.create({ subject, json });
+        }
+        suppressUpdate = true;
+        try {
+            editor.commands.setContent(json as JSONContent);
+        } finally {
+            suppressUpdate = false;
+        }
+        return EmailContent.create({
+            subject,
+            json,
+            ...await EmailStyler.format(editor.getHTML(), subject),
+        });
+    }
+
+    /**
+     * Translate the language that is being edited into every other available language using AI.
+     * Existing translations are overwritten (after confirmation), the edited language stays the same.
+     */
+    async function translateToOtherLanguages() {
+        const source = currentLanguage.value;
+        const translate = options.translate;
+        if (switching.value || source === null || !translate) {
+            return;
+        }
+        const targetLanguages = I18nController.shared.availableLanguages.filter(language => language !== source);
+        if (targetLanguages.length === 0) {
+            return;
+        }
+
+        const existing = targetLanguages.filter(language => languages.value.includes(language));
+        if (existing.length > 0 && !await CenteredMessage.confirm({
+            title: $t('Bestaande vertalingen overschrijven?'),
+            description: $t('De vertalingen voor {languages} bestaan al en worden vervangen door de automatische vertaling.', { languages: existing.map(l => LanguageHelper.getName(l)).join(', ') }),
+            confirmText: $t('Overschrijven'),
+            destructive: true,
+        })) {
+            return;
+        }
+
+        switching.value = true;
+        const toast = new Toast($t('Vertalen...'), 'spinner').setHide(null).show();
+        try {
+            await flush();
+            const content = contentFor(source);
+
+            const inputs = new Map<string, TranslatableValue>();
+            if (content.subject) {
+                inputs.set('subject', content.subject);
+            }
+            if (isTipTapDocument(content.json)) {
+                inputs.set('body', content.json);
+            }
+            if (inputs.size === 0) {
+                return;
+            }
+
+            const response = await translate(TranslateRequest.create({
+                inputs,
+                sourceLanguage: source,
+                targetLanguages,
+            }));
+
+            for (const language of targetLanguages) {
+                const translated = response.translations.get(language);
+                if (!translated) {
+                    continue;
+                }
+                const subject = translated.get('subject');
+                const json = translated.get('body');
+                const translatedContent = await deriveContent(
+                    typeof subject === 'string' ? subject : content.subject,
+                    json ?? content.json,
+                );
+                options.addPatch({ translations: new PatchMap([[language, translatedContent]]) });
+            }
+
+            seeded = null;
+            Toast.success($t('Vertaald naar {languages}', { languages: targetLanguages.map(l => LanguageHelper.getName(l)).join(', ') })).show();
+        } catch (e) {
+            Toast.fromError(e).show();
+        } finally {
+            loadEditor(source);
+            toast.hide();
+            switching.value = false;
+        }
+    }
+
+    /**
      * Keep the json of the currently edited language in the patch on every editor change (used for
      * auto-saving). The html/text are not derived here because that is async and expensive: use
      * flush() or patchDerivedContent() before actually using them.
@@ -419,6 +522,7 @@ export function useEmailContentLanguage(options: {
         addLanguage,
         removeLanguage,
         setDefaultLanguage,
+        translateToOtherLanguages,
         patchDerivedContent,
     };
 }

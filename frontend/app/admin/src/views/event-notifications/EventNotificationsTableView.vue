@@ -205,6 +205,7 @@ async function openMail(selection: TableActionSelection<EventNotification>) {
     const displayedComponent = new ComponentWithProperties(NavigationController, {
         root: AsyncComponent(() => import('@stamhoofd/components/email/EmailView.vue'), {
             recipientFilterOptions: [],
+            supportsTranslations: platform.value.language === null,
         }),
     });
     await present({

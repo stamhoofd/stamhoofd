@@ -25,7 +25,7 @@
                 </Dropdown>
             </STInputBox>
             <p class="style-description-small">
-                {{ $t('De standaardtaal van het platform. Wordt gebruikt als een vereniging, account of lid geen eigen taal heeft ingesteld. Kies meertalig als het platform meerdere talen ondersteunt.') }}
+                {{ $t('De standaardtaal van het platform. Stel dit in op de taal waarin je doorgaans communiceert. Kies enkel meertalig als emailcommunicatie actief in meerdere talen gebeurt, niet enkel voor uitzonderingen.') }}
             </p>
         </template>
 

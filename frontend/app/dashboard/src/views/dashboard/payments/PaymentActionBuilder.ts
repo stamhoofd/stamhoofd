@@ -493,6 +493,7 @@ export class PaymentActionBuilder {
         const displayedComponent = new ComponentWithProperties(NavigationController, {
             root: AsyncComponent(() => import('@stamhoofd/components/email/EmailView.vue'), {
                 recipientFilterOptions: options,
+                supportsTranslations: this.organization?.language === null,
             }),
         });
         await this.present({

@@ -72,13 +72,15 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             }
         }
 
-        if (request.body.language !== undefined && request.body.language !== editUser.language) {
-            editUser.language = request.body.language;
+        if (!Context.isImpersonating) {
+            if (request.body.language !== undefined && request.body.language !== editUser.language) {
+                editUser.language = request.body.language;
 
-            if (editUser.language !== null) {
-                for (const member of await Member.getMembersForUser(editUser)) {
-                    member.details.language = editUser.language;
-                    await member.save();
+                if (editUser.language !== null) {
+                    for (const member of await Member.getMembersForUser(editUser)) {
+                        member.details.language = editUser.language;
+                        await member.save();
+                    }
                 }
             }
         }

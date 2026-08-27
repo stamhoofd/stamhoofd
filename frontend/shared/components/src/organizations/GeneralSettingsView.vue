@@ -32,16 +32,21 @@
             </div>
         </div>
 
-        <STInputBox v-if="canEditLanguage" :title="$t('Taal')" error-fields="language" :error-box="errors.errorBox">
-            <Dropdown v-model="language">
-                <option :value="null">
-                    {{ $t('Meertalig') }}
-                </option>
-                <option v-for="l in availableLanguages" :key="l" :value="l">
-                    {{ LanguageHelper.getNativeName(l) }}
-                </option>
-            </Dropdown>
-        </STInputBox>
+        <template v-if="canEditLanguage">
+            <STInputBox :title="$t('Taal')" error-fields="language" :error-box="errors.errorBox">
+                <Dropdown v-model="language">
+                    <option :value="null">
+                        {{ $t('Meertalig') }}
+                    </option>
+                    <option v-for="l in availableLanguages" :key="l" :value="l">
+                        {{ LanguageHelper.getNativeName(l) }}
+                    </option>
+                </Dropdown>
+            </STInputBox>
+            <p class="style-description-small">
+                {{ $t('De standaardtaal van jouw vereniging. Stel dit in op de taal waarin je doorgaans communiceert. Kies enkel meertalig als emailcommunicatie actief in meerdere talen gebeurt, niet enkel voor uitzonderingen.') }}
+            </p>
+        </template>
 
         <hr><h2>{{ $t('%1Ke') }}</h2>
         <p>{{ $t('%gC') }}</p>
