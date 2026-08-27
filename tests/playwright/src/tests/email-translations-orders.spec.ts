@@ -185,8 +185,7 @@ test.describe('Translated emails to webshop orders @translated-order-email', () 
             await setEditorContent(page, 'Nederlandse inhoud {{orderTable}} {{unsubscribeUrl}}');
 
             // Selecting the first language marks the existing content as Dutch
-            // Webshop language is Dutch, no need to set it here again
-            // await setFirstLanguage(page, 'Nederlands');
+            await setFirstLanguage(page, 'Nederlands');
             await expect(subject).toHaveValue('Nederlands onderwerp');
 
             await addTranslation(page, 'Frans');
@@ -267,8 +266,7 @@ test.describe('Translated emails to webshop orders @translated-order-email', () 
             await editor.pressSequentially('Inhoud {{greeting}}');
             const chip = page.locator('.ProseMirror span[data-type="smartVariable"]');
 
-            // webshop language is Dutch by default, no need to set it here
-            // await setFirstLanguage(page, 'Nederlands');
+            await setFirstLanguage(page, 'Nederlands');
             await expect(chip).toContainText('Dag');
 
             // The French translation shows the French example values, even though the example
