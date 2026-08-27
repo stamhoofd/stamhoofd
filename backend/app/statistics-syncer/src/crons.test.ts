@@ -1,7 +1,16 @@
 import { TestUtils } from '@stamhoofd/test-utils';
-import { shouldRunStatisticsSync } from './crons.js';
+import { shouldRunStatisticsSync, statisticsCronOptions } from './crons.js';
 
 describe('Cron.platform-statistics-sync', () => {
+    describe('statisticsCronOptions', () => {
+        it('keeps running where the main database is read-only', () => {
+            // The syncer is deployed on a replica, whose MySQL is read_only. The cron loop checks
+            // that flag against the main database and stops before scheduling anything, so this
+            // being false means the sync never runs in production.
+            expect(statisticsCronOptions.allowReadOnly).toBe(true);
+        });
+    });
+
     describe('shouldRunStatisticsSync', () => {
         it('only runs at night', () => {
             TestUtils.setEnvironment('environment', 'production');

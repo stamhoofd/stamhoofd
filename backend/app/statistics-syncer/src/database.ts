@@ -25,6 +25,15 @@ export function getStatisticsDatabaseConfig(): StatisticsDatabaseConfig {
 }
 
 /**
+ * Whether the statistics database is on a different machine than the process reading the
+ * administration. It is wherever this is deployed -- the schema lives next to Metabase -- and it is
+ * not in development or in the tests, which put both on the same MySQL.
+ */
+function isOnAnotherServer(config: StatisticsDatabaseConfig): boolean {
+    return config.DB_HOST !== STAMHOOFD.stamhoofdDatabase?.DB_HOST;
+}
+
+/**
  * The port of a statistics database that does not name one. Undefined follows the port the process
  * connects to the main database on, which is only the same server in development and in tests: on
  * another server that port means nothing, so there it falls back to the MySQL default instead of
@@ -35,14 +44,14 @@ function getStatisticsPort(config: StatisticsDatabaseConfig): number | undefined
         return config.DB_PORT;
     }
 
-    return config.DB_HOST === STAMHOOFD.stamhoofdDatabase?.DB_HOST ? undefined : defaultMysqlPort;
+    return isOnAnotherServer(config) ? defaultMysqlPort : undefined;
 }
 
 /**
  * Where to reach the statistics database. It lives next to Metabase rather than on the server this
  * runs on, so every connection detail is spelled out instead of inherited from the main database.
  */
-export function getStatisticsPoolOptions(): { host: string; user: string; password: string; port: number | undefined } {
+export function getStatisticsPoolOptions(): { host: string; user: string; password: string; port: number | undefined; useSSL: boolean } {
     const config = getStatisticsDatabaseConfig();
 
     return {
@@ -50,6 +59,12 @@ export function getStatisticsPoolOptions(): { host: string; user: string; passwo
         user: config.DB_USER,
         password: config.DB_PASS,
         port: getStatisticsPort(config),
+
+        // The connection leaves the machine, so it is encrypted: the login it connects with is
+        // created with REQUIRE SSL, and MySQL refuses it in plaintext. No CA is shipped here, so
+        // this buys encryption and not proof of which server answered. Left off where both databases
+        // are on the same MySQL, which is development and the tests.
+        useSSL: isOnAnotherServer(config),
     };
 }
 

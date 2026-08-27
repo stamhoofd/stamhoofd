@@ -47,4 +47,18 @@ describe('getStatisticsPoolOptions', () => {
 
         expect(getStatisticsPoolOptions().port).toBe(3399);
     });
+
+    it('encrypts the connection to another server, whose login is created with REQUIRE SSL', () => {
+        // The devops grant pins `REQUIRE SSL` on this user, and MySQL refuses it in plaintext: the
+        // two have to stay switched on together or the sync cannot connect at all.
+        TestUtils.setEnvironment('statisticsDatabase', { ...STAMHOOFD.statisticsDatabase, DB_HOST: 'statistics.example' });
+
+        expect(getStatisticsPoolOptions().useSSL).toBe(true);
+    });
+
+    it('does not ask for TLS while both databases are on one MySQL', () => {
+        expect(STAMHOOFD.statisticsDatabase.DB_HOST).toBe(STAMHOOFD.stamhoofdDatabase.DB_HOST);
+
+        expect(getStatisticsPoolOptions().useSSL).toBe(false);
+    });
 });

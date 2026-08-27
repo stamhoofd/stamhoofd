@@ -72,11 +72,10 @@ const start = async () => {
         });
     });
 
-    await import('./crons.js');
+    const { statisticsCronOptions } = await import('./crons.js');
 
-    // This service runs no seeds of its own, and the sync writes, so a read-only replica has to
-    // keep it switched off.
-    startCrons({ allowReadOnly: false, allowBeforeSeeds: true });
+    // This service runs no seeds of its own.
+    startCrons(statisticsCronOptions);
 };
 
 start().catch((error) => {
