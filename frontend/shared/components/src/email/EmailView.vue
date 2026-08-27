@@ -417,8 +417,13 @@ const sendAsEmail = computed({
     },
 });
 
+/**
+ * Set while sending: an auto save would race with the send PATCH (last writer wins on the server)
+ */
+const autoSaveSuspended = ref(false);
+
 const autoSaveEnabled = computed(() => {
-    return !(props.editEmail && props.editEmail.status !== EmailStatus.Draft);
+    return !autoSaveSuspended.value && !(props.editEmail && props.editEmail.status !== EmailStatus.Draft);
 });
 
 watch(patch, (newValue, oldValue) => {
@@ -505,7 +510,7 @@ async function patchEmail(async = false) {
     if (savingPatch.value || !patch.value) {
         return;
     }
-    if (sending.value) {
+    if (sending.value || (async && !autoSaveEnabled.value)) {
         return;
     }
 
@@ -526,15 +531,10 @@ async function patchEmail(async = false) {
         console.error('failed to set text and html', e);
     }
 
+    let changedMeanwhile = false;
     try {
         await doPatchEmail(email.value, _savingPatch);
-        savingPatch.value = null;
-
-        // changed meanwhile
-        if (patch.value && async) {
-            // do again
-            patchEmail().catch(console.error);
-        }
+        changedMeanwhile = !!patch.value && async;
     } catch (e) {
         console.error(e);
         Toast.fromError(e).setHide(20000).show();
@@ -549,6 +549,11 @@ async function patchEmail(async = false) {
         }
     } finally {
         savingPatch.value = null;
+    }
+
+    // Must run after savingPatch is cleared: the next call claims into savingPatch synchronously
+    if (changedMeanwhile) {
+        patchEmail().catch(console.error);
     }
 }
 
@@ -609,8 +614,20 @@ async function confirmStaleTranslations(): Promise<boolean> {
 }
 
 async function send() {
+    autoSaveSuspended.value = true;
+    let done = false;
+    try {
+        done = await doSend();
+    } finally {
+        if (!done) {
+            autoSaveSuspended.value = false;
+        }
+    }
+}
+
+async function doSend(): Promise<boolean> {
     if (sending.value) {
-        return;
+        return false;
     }
 
     if (!willSend.value) {
@@ -618,31 +635,32 @@ async function send() {
         try {
             await patchEmail(false);
             await pop({ force: true });
+            return true;
         } catch (e) {
             errors.errorBox = new ErrorBox(e);
         }
-        return;
+        return false;
     }
     await waitForSave();
 
     if (savingPatch.value) {
         Toast.info($t(`%vH`)).show();
-        return;
+        return false;
     }
 
     if (!email.value) {
-        return;
+        return false;
     }
 
     if ((patchedEmail.value?.subject ?? '').trim().length === 0) {
         // The default (untranslated) subject is required, translations are optional
         Toast.error($t(`%1Ft`)).show();
-        return;
+        return false;
     }
 
     // Check before the (possible) hand-off to EmailSendSettingsView, which sends without this check
     if (!await confirmStaleTranslations()) {
-        return;
+        return false;
     }
 
     if (hasMoreSettings.value) {
@@ -651,7 +669,7 @@ async function send() {
             await patchEmail(false);
         } catch (e) {
             errors.errorBox = new ErrorBox(e);
-            return;
+            return false;
         }
 
         // Make sure patchedEmail is up to date
@@ -666,12 +684,12 @@ async function send() {
                 }),
             ],
         });
-        return;
+        return false;
     }
 
     if (!sendAsEmail.value && !showInMemberPortal.value) {
         Toast.info($t(`%1Fu`)).show();
-        return;
+        return false;
     }
 
     const emailRecipientsCount = email.value.emailRecipientsCount;
@@ -687,7 +705,7 @@ async function send() {
 
     const isConfirm = await CenteredMessage.confirm(confirmText, sendAsEmail.value ? $t(`%1DC`) : $t('%1Fe'));
 
-    if (!isConfirm) return;
+    if (!isConfirm) return false;
 
     sending.value = true;
 
@@ -726,11 +744,14 @@ async function send() {
 
         // Mark review moment
         AppManager.shared.markReviewMoment(context.value);
+        sending.value = false;
+        return true;
     } catch (e) {
         console.error(e);
         errors.errorBox = new ErrorBox(e);
     }
     sending.value = false;
+    return false;
 }
 
 function getContextMenuForOption(option: RecipientChooseOneOption | RecipientMultipleChoiceOption, index: number): ContextMenuItem[] {
