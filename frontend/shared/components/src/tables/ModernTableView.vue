@@ -12,7 +12,7 @@
                     </template>
                 </button>
                 <BackButton v-else-if="canPop" @click="pop">
-                    {{ backHint || 'Terug' }}
+                    {{ backHint || $t('%Vz') }}
                 </BackButton>
             </template>
             <template #right>
