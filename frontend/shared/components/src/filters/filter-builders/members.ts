@@ -1211,9 +1211,9 @@ export function getMemberBaseFilters(recordConfiguration?: OrganizationRecordsCo
     }
 
     all.push(new MultipleChoiceFilterBuilder({
-        name: $t('Taal'),
+        name: $t('%14T'),
         options: [
-            new MultipleChoiceUIFilterOption($t('Geen voorkeur'), null),
+            new MultipleChoiceUIFilterOption($t('%Zni'), null),
             ...Object.values(Language).map(language => new MultipleChoiceUIFilterOption(LanguageHelper.getNativeName(language), language)),
         ],
         wrapper: {

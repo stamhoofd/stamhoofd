@@ -60,7 +60,7 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
         }),
         new SelectableColumn({
             id: 'language',
-            name: $t('Taal'),
+            name: $t('%14T'),
             enabled: false,
         }),
         new SelectableColumn({

@@ -34,7 +34,7 @@ export class TranslationService {
             throw new SimpleError({
                 code: 'translation_not_configured',
                 message: 'OpenAI is not configured',
-                human: $t('Automatische vertalingen zijn niet geconfigureerd op deze server'),
+                human: $t('%Znd'),
             });
         }
         return new OpenAI({ apiKey });
@@ -80,7 +80,7 @@ export class TranslationService {
             throw new SimpleError({
                 code: 'translation_failed',
                 message: 'Translation request to OpenAI failed',
-                human: $t('De vertaling is mislukt. Probeer het later opnieuw.'),
+                human: $t('%Znh'),
             });
         }
 
@@ -146,7 +146,7 @@ export class TranslationService {
         return new SimpleError({
             code: 'translation_invalid_output',
             message,
-            human: $t('De vertaling is mislukt. Probeer het later opnieuw.'),
+            human: $t('%Znh'),
         });
     }
 }

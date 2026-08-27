@@ -15,8 +15,8 @@
                 <option :value="null">
                     {{
                         $organization.language
-                            ? ($t('Standaardtaal') + ' ('+LanguageHelper.getNativeName($organization.language) + ')')
-                            : $t('Standaardtaal (meertalig)')
+                            ? ($t('%Znr') + ' ('+LanguageHelper.getNativeName($organization.language) + ')')
+                            : $t('%Zns')
                     }}
                 </option>
                 <option v-for="language in languages" :key="language" :value="language">

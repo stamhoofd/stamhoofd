@@ -102,7 +102,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         }),
         new SelectableColumn({
             id: 'member.language',
-            name: $t('Taal'),
+            name: $t('%14T'),
             enabled: false,
         }),
         new SelectableColumn({

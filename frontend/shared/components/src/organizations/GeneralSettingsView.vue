@@ -33,10 +33,10 @@
         </div>
 
         <template v-if="canEditLanguage">
-            <STInputBox :title="$t('Taal')" error-fields="language" :error-box="errors.errorBox">
+            <STInputBox :title="$t('%14T')" error-fields="language" :error-box="errors.errorBox">
                 <Dropdown v-model="language">
                     <option :value="null">
-                        {{ $t('Meertalig') }}
+                        {{ $t('%Zno') }}
                     </option>
                     <option v-for="l in availableLanguages" :key="l" :value="l">
                         {{ LanguageHelper.getNativeName(l) }}
@@ -44,7 +44,7 @@
                 </Dropdown>
             </STInputBox>
             <p class="style-description-small">
-                {{ $t('De standaardtaal van jouw vereniging. Stel dit in op de taal waarin je doorgaans communiceert. Kies enkel meertalig als emailcommunicatie actief in meerdere talen gebeurt, niet enkel voor uitzonderingen.') }}
+                {{ $t('%Znp') }}
             </p>
         </template>
 

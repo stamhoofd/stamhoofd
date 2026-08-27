@@ -39,7 +39,7 @@ export class TranslateEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'At least one input is required',
-                human: $t('Er is niets om te vertalen'),
+                human: $t('%Znx'),
                 field: 'inputs',
             });
         }
@@ -48,7 +48,7 @@ export class TranslateEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'At least one target language is required',
-                human: $t('Kies minstens één taal om naar te vertalen'),
+                human: $t('%Znt'),
                 field: 'targetLanguages',
             });
         }

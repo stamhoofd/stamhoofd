@@ -1535,6 +1535,10 @@
     "original": "Hoofdbeheerders van deze groep kunnen via een link inloggen als één van hun gebruikers, om te zien wat die gebruiker ziet.",
     "translation": "Les administrateurs principaux de ce groupe peuvent, via un lien, se connecter en tant qu'un de leurs utilisateurs pour voir l'application sous le même angle que cet utilisateur."
   },
+  "%Znp": {
+    "original": "De standaardtaal van jouw groep. Stel dit in op de taal waarin je doorgaans communiceert. Kies enkel meertalig als emailcommunicatie actief in meerdere talen gebeurt, niet enkel voor uitzonderingen.",
+    "translation": "La langue principale de votre groupe. Choisissez ici la langue dans laquelle vous communiquez habituellement. Sélectionnez uniquement l’option multilingue si la communication par e-mail se fait régulièrement dans plusieurs langues, pas seulement à titre exceptionnel."
+  },
   "%Zp": {
     "original": "Oeps, deze website is enkel voor beheerders van {organization}. Ga naar ‘Mijn account’ als je je wilt inschrijven als lid.",
     "translation": "Oups, ce site web est uniquement destiné aux administrateurs de {organization}. Allez dans « Mon compte » si vous souhaitez vous inscrire comme membre."

@@ -413,16 +413,16 @@ export function useEmailContentLanguage(options: {
 
         const existing = targetLanguages.filter(language => languages.value.includes(language));
         if (existing.length > 0 && !await CenteredMessage.confirm({
-            title: $t('Bestaande vertalingen overschrijven?'),
-            description: $t('De vertalingen voor {languages} bestaan al en worden vervangen door de automatische vertaling.', { languages: existing.map(l => LanguageHelper.getName(l)).join(', ') }),
-            confirmText: $t('Overschrijven'),
+            title: $t('%Znj'),
+            description: $t('%Znz', { languages: existing.map(l => LanguageHelper.getName(l)).join(', ') }),
+            confirmText: $t('%ko'),
             destructive: true,
         })) {
             return;
         }
 
         switching.value = true;
-        const toast = new Toast($t('Vertalen...'), 'spinner').setHide(null).show();
+        const toast = new Toast($t('%Znw'), 'spinner').setHide(null).show();
         try {
             await flush();
             const content = contentFor(source);
@@ -459,7 +459,7 @@ export function useEmailContentLanguage(options: {
             }
 
             seeded = null;
-            Toast.success($t('Vertaald naar {languages}', { languages: targetLanguages.map(l => LanguageHelper.getName(l)).join(', ') })).show();
+            Toast.success($t('%Znk', { languages: targetLanguages.map(l => LanguageHelper.getName(l)).join(', ') })).show();
         } catch (e) {
             Toast.fromError(e).show();
         } finally {

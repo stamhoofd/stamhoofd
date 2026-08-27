@@ -14,10 +14,10 @@
         <ColorInput v-model="color" :validator="errors.validator" :required="false" :disallowed="['#FFFFFF']" :title="$t(`%Hb`)" :placeholder="$t(`%Hc`)" />
 
         <template v-if="availableLanguages.length > 1 || language !== null">
-            <STInputBox :title="$t('Taal')" error-fields="language" :error-box="errors.errorBox">
+            <STInputBox :title="$t('%14T')" error-fields="language" :error-box="errors.errorBox">
                 <Dropdown v-model="language">
                     <option :value="null">
-                        {{ $t('Meertalig') }}
+                        {{ $t('%Zno') }}
                     </option>
                     <option v-for="l in availableLanguages" :key="l" :value="l">
                         {{ LanguageHelper.getNativeName(l) }}
@@ -25,7 +25,7 @@
                 </Dropdown>
             </STInputBox>
             <p class="style-description-small">
-                {{ $t('De standaardtaal van het platform. Stel dit in op de taal waarin je doorgaans communiceert. Kies enkel meertalig als emailcommunicatie actief in meerdere talen gebeurt, niet enkel voor uitzonderingen.') }}
+                {{ $t('%Znu') }}
             </p>
         </template>
 

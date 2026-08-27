@@ -1238,10 +1238,10 @@ export async function presentDeleteMembers({ members, present, platformFamilyMan
     await present({
         components: [
             AsyncComponent(() => import('../../views/DeleteView.vue'), {
-                title: isBulk ? $t('{count} leden definitief verwijderen?', { count }) : $t('%15Y', { name }),
-                description: isBulk ? $t('Ben je 100% zeker dat je deze {count} leden wilt verwijderen? Vul dan het aantal leden in ter bevestiging. De volledige geschiedenis gaat verloren.', { count }) : $t(`%15X`, { name }),
+                title: isBulk ? $t('%Zne', { count }) : $t('%15Y', { name }),
+                description: isBulk ? $t('%Znl', { count }) : $t(`%15X`, { name }),
                 confirmationTitle: $t(`%eu`),
-                confirmationPlaceholder: isBulk ? $t('Aantal leden') : $t(`%10H`),
+                confirmationPlaceholder: isBulk ? $t('%ZgB') : $t(`%10H`),
                 confirmationCode: isBulk ? count.toString() : name,
                 checkboxText: $t(`%6P`),
                 onDelete: async () => {

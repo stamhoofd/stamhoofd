@@ -1655,6 +1655,10 @@
     "original": "Hoofdbeheerders van deze eenheid kunnen via een link inloggen als één van hun gebruikers, om te zien wat die gebruiker ziet.",
     "translation": "Les administrateurs principaux de cette unité peuvent utiliser un lien pour se connecter comme l'un de leurs utilisateurs, afin de voir ce que cet utilisateur voit."
   },
+  "%Znp": {
+    "original": "De standaardtaal van jouw eenheid. Stel dit in op de taal waarin je doorgaans communiceert. Kies enkel meertalig als emailcommunicatie actief in meerdere talen gebeurt, niet enkel voor uitzonderingen.",
+    "translation": "La langue par défaut de ton unité. Choisis la langue dans laquelle tu communiques habituellement. Ne sélectionne 'multilingue' que si les e-mails sont envoyés activement en plusieurs langues, pas juste pour des cas exceptionnels."
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Jamboree. Voor Microsoft kan je",
     "translation": "Assurez-vous que les utilisateurs peuvent se connecter via votre propre système de compte, séparément de Jamboree. Pour Microsoft, vous pouvez"

@@ -19743,6 +19743,82 @@
     "original": "Negeren",
     "translation": "Ignore"
   },
+  "%Znd": {
+    "original": "Automatische vertalingen zijn niet geconfigureerd op deze server",
+    "translation": "Automatic translations are not set up on this server."
+  },
+  "%Zne": {
+    "original": "{count} leden definitief verwijderen?",
+    "translation": "Permanently delete {count} members?"
+  },
+  "%Znh": {
+    "original": "De vertaling is mislukt. Probeer het later opnieuw.",
+    "translation": "The translation failed. Please try again later."
+  },
+  "%Zni": {
+    "original": "Geen voorkeur",
+    "translation": "No preference"
+  },
+  "%Znj": {
+    "original": "Bestaande vertalingen overschrijven?",
+    "translation": "Overwrite existing translations?"
+  },
+  "%Znk": {
+    "original": "Vertaald naar {languages}",
+    "translation": "Translated into {languages}"
+  },
+  "%Znl": {
+    "original": "Ben je 100% zeker dat je deze {count} leden wilt verwijderen? Vul dan het aantal leden in ter bevestiging. De volledige geschiedenis gaat verloren.",
+    "translation": "Are you absolutely sure you want to delete these {count} members? Enter the number of members to confirm. All history will be lost."
+  },
+  "%Znm": {
+    "original": "Standaardtaal wijzigen",
+    "translation": "Change default language"
+  },
+  "%Znn": {
+    "original": "De taal waarin dit lid en de accounts van dit lid e-mails ontvangen. Wijzigingen worden ook toegepast op alle accounts van dit lid.",
+    "translation": "The language this member and their accounts will receive emails in. Changes will also be applied to all accounts for this member."
+  },
+  "%Zno": {
+    "original": "Meertalig",
+    "translation": "Multilingual"
+  },
+  "%Znp": {
+    "original": "De standaardtaal van jouw vereniging. Stel dit in op de taal waarin je doorgaans communiceert. Kies enkel meertalig als emailcommunicatie actief in meerdere talen gebeurt, niet enkel voor uitzonderingen.",
+    "translation": "The default language for your association. Set this to the language you usually communicate in. Only choose multilingual if you actively send email communications in multiple languages, not just for rare exceptions."
+  },
+  "%Znr": {
+    "original": "Standaardtaal",
+    "translation": "Default language"
+  },
+  "%Zns": {
+    "original": "Standaardtaal (meertalig)",
+    "translation": "Default language (multilingual)"
+  },
+  "%Znt": {
+    "original": "Kies minstens één taal om naar te vertalen",
+    "translation": "Please select at least one language to translate into."
+  },
+  "%Znu": {
+    "original": "De standaardtaal van het platform. Stel dit in op de taal waarin je doorgaans communiceert. Kies enkel meertalig als emailcommunicatie actief in meerdere talen gebeurt, niet enkel voor uitzonderingen.",
+    "translation": "The platform's default language. Set this to the language you usually use for communication. Only choose multilingual if emails are routinely sent in several languages, not just for occasional cases."
+  },
+  "%Znv": {
+    "original": "Automatisch vertalen naar alle talen",
+    "translation": "Translate automatically into all languages"
+  },
+  "%Znw": {
+    "original": "Vertalen...",
+    "translation": "Translating..."
+  },
+  "%Znx": {
+    "original": "Er is niets om te vertalen",
+    "translation": "There's nothing to translate"
+  },
+  "%Znz": {
+    "original": "De vertalingen voor {languages} bestaan al en worden vervangen door de automatische vertaling.",
+    "translation": "The translations for {languages} already exist and will be replaced by the automatic translation."
+  },
   "%Zo": {
     "original": "Deze pagina is voor administrators",
     "translation": "This page is for administrators"

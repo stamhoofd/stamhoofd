@@ -54,7 +54,7 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({
         if (currentGroup) {
             if (currentGroup.settings.prices.length > 1) {
                 all.push(new MultipleChoiceFilterBuilder({
-                    name: $t('Tarief'),
+                    name: $t('%62'),
                     options: currentGroup.settings.prices.map(p => ({
                         name: p.name.toString(),
                         value: p.id,
