@@ -1,4 +1,5 @@
 import { AuditLogService, modelLogDefinitions } from '../services/AuditLogService.js';
+import { BalanceItemLogger } from './BalanceItemLogger.js';
 import { DocumentTemplateLogger } from './DocumentTemplateLogger.js';
 import { EmailAddressLogger } from './EmailAddressLogger.js';
 import { EmailLogger } from './EmailLogger.js';
@@ -34,6 +35,7 @@ modelLogDefinitions.set(MemberLogger.model, MemberLogger);
 modelLogDefinitions.set(WebshopLogger.model, WebshopLogger);
 modelLogDefinitions.set(OrderLogger.model, OrderLogger);
 modelLogDefinitions.set(PaymentLogger.model, PaymentLogger);
+modelLogDefinitions.set(BalanceItemLogger.model, BalanceItemLogger);
 modelLogDefinitions.set(MemberPlatformMembershipLogger.model, MemberPlatformMembershipLogger);
 modelLogDefinitions.set(MemberResponsibilityRecordLogger.model, MemberResponsibilityRecordLogger);
 modelLogDefinitions.set(DocumentTemplateLogger.model, DocumentTemplateLogger);

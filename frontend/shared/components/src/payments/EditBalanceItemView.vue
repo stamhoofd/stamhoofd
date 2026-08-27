@@ -1,5 +1,8 @@
 <template>
     <SaveView :title="title" :disabled="!hasChanges && !isNew" class="edit-balance-item-view" :loading="loading" @save="save">
+        <template v-if="!isNew && auth.hasFullAccess()" #buttons>
+            <button v-tooltip="$t('Toon geschiedenis')" type="button" class="button icon history" @click="viewAudit" />
+        </template>
         <h1>
             {{ title }}
         </h1>
@@ -249,7 +252,7 @@ import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { usePop, useShow } from '@simonbackx/vue-app-navigation';
+import { usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { BalanceItemRelation, Invoice } from '@stamhoofd/structures';
@@ -293,6 +296,7 @@ const loadingPayments = ref(false);
 const now = new Date();
 const auth = useAuth();
 const show = useShow();
+const present = usePresent();
 const invoicesObjectFetcher = useInvoicesObjectFetcher();
 const invoices = ref([]) as Ref<Invoice[]>;
 
@@ -416,6 +420,17 @@ const balanceItemActions = computed<ActionButton[]>(() => {
         },
     ];
 });
+
+async function viewAudit() {
+    await present({
+        components: [
+            AsyncComponent(() => import('#audit-logs/AuditLogsView.vue'), {
+                objectIds: [balanceItem.value.id],
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
 
 async function toggleVATExcempt(event: MouseEvent) {
     const menu = new ContextMenu([

@@ -1,6 +1,5 @@
 import { column, Database } from '@simonbackx/simple-database';
-import type { VATExcemptReason } from '@stamhoofd/structures';
-import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItem as BalanceItemStruct, BalanceItemType, BalanceItemWithPayments, BalanceItemWithPrivatePayments, Payment as PaymentStruct, PrivatePayment } from '@stamhoofd/structures';
+import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItem as BalanceItemStruct, BalanceItemType, BalanceItemWithPayments, BalanceItemWithPrivatePayments, Payment as PaymentStruct, PrivatePayment, VATExcemptReason } from '@stamhoofd/structures';
 import { Formatter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -64,7 +63,7 @@ export class BalanceItem extends QueryableModel {
     @column({ type: 'string', nullable: true })
     dependingBalanceItemId: string | null = null;
 
-    @column({ type: 'string' })
+    @column({ type: 'string', decoder: new EnumDecoder(BalanceItemType) })
     type = BalanceItemType.Other;
 
     @column({ decoder: new MapDecoder(new EnumDecoder(BalanceItemRelationType), BalanceItemRelation), type: 'json' })
@@ -125,7 +124,7 @@ export class BalanceItem extends QueryableModel {
      * Note: keep the original VAT in these cases. On time of payment or invoicing, the VAT excemption will be revalidated.
      * If that fails, we can still charge the VAT.
      */
-    @column({ type: 'string', nullable: true })
+    @column({ type: 'string', nullable: true, decoder: new EnumDecoder(VATExcemptReason) })
     VATExcempt: VATExcemptReason | null = null;
 
     /**
@@ -197,7 +196,7 @@ export class BalanceItem extends QueryableModel {
      * todo: deprecate ('pending' and 'paid') + 'hidden' status and replace with 'due' + 'hidden'
      * -> maybe add 'due' (due if dueAt is null or <= now), 'hidden' (never due), 'future' (= not due until dueAt - but not possible to pay earlier)
      */
-    @column({ type: 'string' })
+    @column({ type: 'string', decoder: new EnumDecoder(BalanceItemStatus) })
     status = BalanceItemStatus.Due;
 
     /**

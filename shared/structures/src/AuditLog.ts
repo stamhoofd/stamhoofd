@@ -78,6 +78,11 @@ export enum AuditLogType {
     PaymentEdited = 'PaymentEdited',
     PaymentDeleted = 'PaymentDeleted',
 
+    // Balance items
+    BalanceItemAdded = 'BalanceItemAdded',
+    BalanceItemEdited = 'BalanceItemEdited',
+    BalanceItemDeleted = 'BalanceItemDeleted',
+
     // Document templates
     DocumentTemplateAdded = 'DocumentTemplateAdded',
     DocumentTemplateEdited = 'DocumentTemplateEdited',
@@ -208,6 +213,12 @@ export function getAuditLogTypeName(type: AuditLogType): string {
             return `Wijzigingen aan betalingen`;
         case AuditLogType.PaymentDeleted:
             return `Verwijderde betalingen`;
+        case AuditLogType.BalanceItemAdded:
+            return `Nieuwe openstaande bedragen`;
+        case AuditLogType.BalanceItemEdited:
+            return `Wijzigingen aan openstaande bedragen`;
+        case AuditLogType.BalanceItemDeleted:
+            return `Verwijderde openstaande bedragen`;
         case AuditLogType.DocumentTemplateAdded:
             return `Nieuwe document`;
         case AuditLogType.DocumentTemplateEdited:
@@ -373,6 +384,13 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
             return [`card`, `edit stroke`];
         case AuditLogType.PaymentDeleted:
             return [`card`, `trash red stroke`];
+
+        case AuditLogType.BalanceItemAdded:
+            return [`calculator`, `add green`];
+        case AuditLogType.BalanceItemEdited:
+            return [`calculator`, `edit stroke`];
+        case AuditLogType.BalanceItemDeleted:
+            return [`calculator`, `trash red stroke`];
 
         case AuditLogType.DocumentTemplateAdded:
             return [`file`, `add green`];
@@ -550,6 +568,13 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
         case AuditLogType.PaymentDeleted:
             return `{{capitalizeFirstLetter p}} werd verwijderd`;
 
+        case AuditLogType.BalanceItemAdded:
+            return `Openstaand bedrag {{b}} van {{payer}} werd aangemaakt`;
+        case AuditLogType.BalanceItemEdited:
+            return `Openstaand bedrag {{b}} van {{payer}} werd gewijzigd`;
+        case AuditLogType.BalanceItemDeleted:
+            return `Openstaand bedrag {{b}} van {{payer}} werd verwijderd`;
+
         case AuditLogType.DocumentTemplateAdded:
             return `Document {{d}}{{if org " (" org ")"}} werd aangemaakt`;
         case AuditLogType.DocumentTemplateEdited:
@@ -724,6 +749,11 @@ export function getAuditLogTypeReplacements(type: AuditLogType): string[] {
         case AuditLogType.PaymentEdited:
         case AuditLogType.PaymentDeleted:
             return ['p'];
+
+        case AuditLogType.BalanceItemAdded:
+        case AuditLogType.BalanceItemEdited:
+        case AuditLogType.BalanceItemDeleted:
+            return ['b', 'payer'];
 
         case AuditLogType.DocumentTemplateAdded:
         case AuditLogType.DocumentTemplateEdited:
