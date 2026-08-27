@@ -98,6 +98,20 @@
 
             <div v-if="!member.isNew">
                 <SelectionAddressInput v-if="address || isPropertyEnabled('address')" v-model="address" :addresses="availableAddresses" :required="isPropertyRequired('address')" :title="$t(`%Cn`) + lidSuffix + (isPropertyRequired('address') ? '' : ' ' + $t(`%br`))" :validator="validator" />
+
+                <STInputBox v-if="isAdmin && !member.isNew && showLanguage" error-fields="language" :error-box="errors.errorBox" :title="$t('Taal')">
+                    <Dropdown v-model="language">
+                        <option :value="null">
+                            {{ $t('Geen voorkeur') }}
+                        </option>
+                        <option v-for="l in availableLanguages" :key="l" :value="l">
+                            {{ LanguageHelper.getNativeName(l) }}
+                        </option>
+                    </Dropdown>
+                </STInputBox>
+                <p v-if="isAdmin && !member.isNew && showLanguage" class="style-description-small">
+                    {{ $t('De taal waarin dit lid en de accounts van dit lid e-mails ontvangen. Wijzigingen worden ook toegepast op alle accounts van dit lid.') }}
+                </p>
             </div>
         </div>
 
@@ -118,7 +132,8 @@
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import type { PlatformMember } from '@stamhoofd/structures';
-import { Gender, NationalRegisterNumberOptOut } from '@stamhoofd/structures';
+import { Gender, LanguageHelper, NationalRegisterNumberOptOut } from '@stamhoofd/structures';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
@@ -126,6 +141,7 @@ import type { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
 import { useValidation } from '../../../errors/useValidation';
 import BirthDayInput from '../../../inputs/BirthDayInput.vue';
+import Dropdown from '../../../inputs/Dropdown.vue';
 import EmailInput from '../../../inputs/EmailInput.vue';
 import NRNInput from '../../../inputs/NRNInput.vue';
 import PhoneInput from '../../../inputs/PhoneInput.vue';
@@ -134,6 +150,7 @@ import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
 import TrackingYearInput from '../../../inputs/TrackingYearInput.vue';
 import { ContextMenu, ContextMenuItem } from '../../../overlays/ContextMenu';
 import { useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
+import { useShowMemberLanguage } from '../../hooks/useShowMemberLanguage';
 import Title from './Title.vue';
 
 defineOptions({
@@ -155,6 +172,13 @@ const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), tru
 const errors = useErrors({ validator: props.validator });
 const app = useAppContext();
 const isAdmin = app === 'dashboard' || app === 'admin';
+const showLanguage = useShowMemberLanguage(computed(() => props.member));
+const availableLanguages = I18nController.shared.availableLanguages;
+
+const language = computed({
+    get: () => props.member.patchedMember.details.language,
+    set: language => props.member.addDetailsPatch({ language }),
+});
 
 const title = computed(() => {
     if (props.member.isNew) {

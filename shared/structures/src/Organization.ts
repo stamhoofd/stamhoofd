@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Language } from '@stamhoofd/types/Language';
@@ -51,6 +51,12 @@ export class BaseOrganization extends AutoEncoder {
 
     @field({ decoder: DateDecoder, version: 259 })
     createdAt = new Date();
+
+    /**
+     * Null falls back to the language of the platform.
+     */
+    @field({ decoder: new EnumDecoder(Language), nullable: true, version: 414 })
+    language: Language | null = null;
 
     /**
      * Return default locale confiruation

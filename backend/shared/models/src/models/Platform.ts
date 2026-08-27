@@ -4,6 +4,7 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel } from '@stamhoofd/sql';
 import { AuditLogReplacementDependencies, PlatformConfig, PlatformPrivateConfig, PlatformServerConfig, Platform as PlatformStruct } from '@stamhoofd/structures';
 import { uuidToName } from '@stamhoofd/structures/helpers/uuidToName.js';
+import type { Language } from '@stamhoofd/types/Language';
 import { deepFreeze } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { RegistrationPeriod } from './RegistrationPeriod.js';
@@ -47,6 +48,10 @@ export class Platform extends QueryableModel {
 
     @column({ type: 'string', nullable: true })
     domain: string | null = null;
+
+    /** Null for multi-language platforms. */
+    @column({ type: 'string', nullable: true })
+    language: Language | null = null;
 
     @column({ type: 'json', decoder: PlatformConfig })
     config: PlatformConfig = PlatformConfig.create({});

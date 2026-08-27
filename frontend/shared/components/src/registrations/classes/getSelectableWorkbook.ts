@@ -101,6 +101,11 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             enabled: false,
         }),
         new SelectableColumn({
+            id: 'member.language',
+            name: $t('Taal'),
+            enabled: false,
+        }),
+        new SelectableColumn({
             id: 'member.phone',
             name: $t(`%wD`),
             enabled: false,

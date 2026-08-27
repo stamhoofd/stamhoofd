@@ -1,5 +1,6 @@
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import type { PlatformFamily, PlatformMember } from '@stamhoofd/structures';
 import { markRaw, reactive } from 'vue';
 import EditMemberGeneralBox from '#members/components/edit/EditMemberGeneralBox.vue';
@@ -22,6 +23,7 @@ export function useAddMember() {
         // We clone the family, so we can cancel the new member that was added to the family
         const clonedFamily = family.clone();
         const member = reactive(clonedFamily.newMember() as any) as PlatformMember;
+        member.member.details.language = I18nController.shared.language;
 
         if (STAMHOOFD.userMode === 'organization') {
             if (!organization.value) {

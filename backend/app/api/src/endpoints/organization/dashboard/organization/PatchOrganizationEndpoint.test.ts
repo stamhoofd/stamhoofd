@@ -8,6 +8,7 @@ import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonback
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
+import { Language } from '@stamhoofd/types/Language';
 import nock from 'nock';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { PatchOrganizationEndpoint } from './PatchOrganizationEndpoint.js';
@@ -25,6 +26,33 @@ describe('Endpoint.PatchOrganization', () => {
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test(endpoint, request);
     };
+
+    test('Change the language of the organization', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+        const token = await SessionService.createSession(user);
+
+        expect(organization.language).toBeNull();
+
+        const response = await patchOrganization({
+            patch: OrganizationStruct.patch({ id: organization.id, language: Language.French }),
+            organization,
+            token,
+        });
+        expect(response.body.language).toBe(Language.French);
+        await organization.refresh();
+        expect(organization.language).toBe(Language.French);
+
+        // Back to the platform default
+        const cleared = await patchOrganization({
+            patch: OrganizationStruct.patch({ id: organization.id, language: null }),
+            organization,
+            token,
+        });
+        expect(cleared.body.language).toBeNull();
+        await organization.refresh();
+        expect(organization.language).toBeNull();
+    });
 
     test('Change the name of the organization', async () => {
         const organization = await new OrganizationFactory({}).create();

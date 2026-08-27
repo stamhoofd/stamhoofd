@@ -36,7 +36,7 @@ Email.recipientLoaders.set(EmailRecipientFilterType.Orders, {
 
         for (const order of result.results) {
             const webshopPreview = webshopPreviewMap.get(order.webshopId)!;
-            runWithRecipientLocale({ language: order.consumerLanguage }, organization, (i18n) => {
+            await runWithRecipientLocale({ language: order.consumerLanguage }, organization, (i18n) => {
                 const r = order.getEmailRecipient(organizationStruct, webshopPreview);
                 r.language = i18n.language;
                 recipients.push(r);

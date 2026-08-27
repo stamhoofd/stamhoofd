@@ -234,6 +234,7 @@ async function getUserRecipients(ids: { userId: string; payment: PaymentGeneral 
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
+                language: user.language,
                 replacements: getEmailReplacementsForPayment(payment, replacementOptions),
             }));
         }
@@ -324,6 +325,7 @@ async function getOrganizationRecipients(ids: { organizationId: string; payment:
                     firstName: user.firstName,
                     lastName: user.lastName,
                     email: user.email,
+                    language: user.language,
                     replacements,
                 }));
             }
@@ -353,6 +355,7 @@ async function getOrganizationRecipients(ids: { organizationId: string; payment:
                             firstName: member.details.firstName,
                             lastName: member.details.lastName,
                             email,
+                            language: member.details.language,
                             replacements,
                         }));
                     }

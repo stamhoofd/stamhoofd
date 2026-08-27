@@ -32,14 +32,14 @@ describe('Endpoint.GetWebshop', () => {
         expect((response.body as any).privateMeta).toBeUndefined();
     });
 
-    test('Webshop defaults to Dutch as its default language', async () => {
+    test('Webshop defaults to null as its default language', async () => {
         const organization = await new OrganizationFactory({}).create();
         const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
 
         const r = Request.buildJson('GET', '/webshop/' + webshop.id, organization.getApiHost());
 
         const response = await testServer.test(endpoint, r);
-        expect(response.body.meta.defaultLanguage).toBe(Language.Dutch);
+        expect(response.body.meta.defaultLanguage).toBe(null);
     });
 
     test('Allow access without organization scope', async () => {

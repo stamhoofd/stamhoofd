@@ -1,13 +1,15 @@
 import { Column } from '#tables/classes/Column.ts';
 import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
 import type { AppType, Group, GroupCategoryTree, Organization, Platform, PlatformRegistration, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
-import { ContinuousMembershipStatus, getGroupTypeName, GroupType, MembershipStatus, PermissionLevel } from '@stamhoofd/structures';
+import type { Language } from '@stamhoofd/types/Language';
+import { ContinuousMembershipStatus, getGroupTypeName, GroupType, LanguageHelper, MembershipStatus, PermissionLevel } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 type ObjectType = PlatformRegistration;
 
 export function getRegistrationColumns({ platform, organization, dateRange, group, groups, filterPeriodId, auth, category, app, waitingList, financialRead }: { platform: Platform; organization: Organization | null; dateRange?: { start: Date; end: Date } | null; group?: Group | null; groups: Group[]; filterPeriodId: string; periodId?: string | null; auth: ContextPermissions; category?: GroupCategoryTree | null; app: AppType | 'auto'; waitingList: boolean | null; financialRead: boolean }) {
     const isPlatform = STAMHOOFD.userMode === 'platform';
+    const showLanguage = organization ? organization.language === null : platform.language === null;
 
     const allColumns: (Column<ObjectType, any> | null)[] = [
         new Column<ObjectType, string>({
@@ -50,6 +52,20 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
             recommendedWidth: 120,
             enabled: false,
         }),
+        ...(showLanguage
+            ? [
+                    new Column<ObjectType, Language | null>({
+                        id: 'member.language',
+                        name: $t('Taal'),
+                        getValue: registration => registration.member.member.details.language,
+                        format: language => language ? LanguageHelper.getNativeName(language) : $t('Standaard'),
+                        getStyle: language => language ? '' : 'gray',
+                        minimumWidth: 50,
+                        recommendedWidth: 120,
+                        enabled: false,
+                    }),
+                ]
+            : []),
 
         isPlatform
             ? new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({

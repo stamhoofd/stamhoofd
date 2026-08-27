@@ -4,6 +4,7 @@ import { QueryableModel, SQL, SQLJSONNull } from '@stamhoofd/sql';
 import type { LoginProviderType, NewUser } from '@stamhoofd/structures';
 import { Permissions, Recipient, Replacement, UserMeta, UserPermissions, User as UserStruct } from '@stamhoofd/structures';
 import argon2 from 'argon2';
+import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -39,6 +40,10 @@ export class User extends QueryableModel {
 
     @column({ type: 'string', nullable: true })
     lastName: string | null = null;
+
+    /** Preferred language. Null falls back to the default language of the platform or tenant. */
+    @column({ type: 'string', nullable: true })
+    language: Language | null = null;
 
     @column({ type: 'string' })
     email: string;
@@ -113,6 +118,7 @@ export class User extends QueryableModel {
             firstName: this.firstName,
             lastName: this.lastName,
             email: this.email,
+            language: this.language,
             replacements: [
                 ...replacements,
                 Replacement.create({
@@ -440,7 +446,7 @@ export class User extends QueryableModel {
 
     static async createInvited(
         organization: Organization | null,
-        data: { firstName: string | null; lastName: string | null; email: string; allowPlatform?: boolean },
+        data: { firstName: string | null; lastName: string | null; email: string; language?: Language | null; allowPlatform?: boolean },
     ): Promise<User | undefined> {
         const {
             email,
@@ -459,6 +465,7 @@ export class User extends QueryableModel {
         user.verified = false;
         user.firstName = firstName;
         user.lastName = lastName;
+        user.language = data.language ?? null;
 
         try {
             await user.save();
@@ -507,6 +514,7 @@ export class User extends QueryableModel {
         user.verified = false;
         user.firstName = firstName;
         user.lastName = lastName;
+        user.language = data.language;
 
         try {
             await user.save();
@@ -630,6 +638,7 @@ export class User extends QueryableModel {
             memberId: this.memberId,
             organizationId: this.organizationId,
             lastActiveAt: this.lastActiveAt,
+            language: this.language,
         });
     }
 

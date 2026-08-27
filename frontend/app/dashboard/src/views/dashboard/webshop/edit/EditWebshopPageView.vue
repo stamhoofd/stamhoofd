@@ -12,6 +12,13 @@
 
         <STInputBox error-fields="meta.defaultLanguage" :error-box="errors.errorBox" :title="$t(`%14T`)">
             <Dropdown v-model="defaultLanguage">
+                <option :value="null">
+                    {{
+                        $organization.language
+                            ? ($t('Standaardtaal') + ' ('+LanguageHelper.getNativeName($organization.language) + ')')
+                            : $t('Standaardtaal (meertalig)')
+                    }}
+                </option>
                 <option v-for="language in languages" :key="language" :value="language">
                     {{ LanguageHelper.getNativeName(language) }}
                 </option>

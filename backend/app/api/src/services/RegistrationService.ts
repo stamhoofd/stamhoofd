@@ -158,6 +158,7 @@ export const RegistrationService = {
             lastName: user.lastName,
             email: user.email,
             userId: user.id,
+            language: user.language ?? member.details.language,
             replacements: [
                 Replacement.create({
                     token: 'firstNameMember',

@@ -2,7 +2,7 @@ import type { XlsxTransformerColumn, XlsxTransformerSheet } from '@stamhoofd/exc
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { Platform } from '@stamhoofd/models';
 import type { LimitedFilteredRequest, PlatformMember, Platform as PlatformStruct } from '@stamhoofd/structures';
-import { ExcelExportType, Gender, GroupType, MembershipStatus, PlatformFamily, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
+import { ExcelExportType, Gender, GroupType, LanguageHelper, MembershipStatus, PlatformFamily, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetMembersEndpoint } from '../endpoints/global/members/GetMembersEndpoint.js';
@@ -75,6 +75,14 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
                 value: formatGender(gender),
             });
         },
+    },
+    {
+        id: 'language',
+        name: $t('Taal'),
+        width: 20,
+        getValue: ({ patchedMember: object }: PlatformMember) => ({
+            value: object.details.language ? LanguageHelper.getName(object.details.language) : '',
+        }),
     },
     {
         id: 'phone',

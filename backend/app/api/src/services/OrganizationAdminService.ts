@@ -80,6 +80,7 @@ export class OrganizationAdminService {
                 firstName: f.firstName,
                 lastName: f.lastName,
                 email: f.email,
+                language: f.language,
                 replacements: [],
             });
         });

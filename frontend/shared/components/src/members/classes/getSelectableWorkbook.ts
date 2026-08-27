@@ -59,6 +59,11 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
             name: $t(`%19i`),
         }),
         new SelectableColumn({
+            id: 'language',
+            name: $t('Taal'),
+            enabled: false,
+        }),
+        new SelectableColumn({
             id: 'phone',
             name: $t(`%wD`),
         }),

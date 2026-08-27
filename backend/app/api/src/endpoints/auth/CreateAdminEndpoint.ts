@@ -134,6 +134,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     firstName: admin.firstName,
                     lastName: admin.lastName,
                     email,
+                    language: admin.language,
                     replacements: [
                         Replacement.create({
                             token: 'resetUrl',

@@ -153,6 +153,7 @@ const organization = useOrganization();
 const present = usePresent();
 const pop = usePop();
 const saving = ref(false);
+const platform = usePlatform();
 
 loadTemplates().catch(console.error);
 
@@ -222,11 +223,22 @@ const editableList = computed(() => {
                 // and add translations explicitly in the editor.
                 const seeded = EmailTemplate.create({});
                 if (defaultTemplate) {
-                    const content = defaultTemplate.getContentForLanguage(I18nController.shared.language);
-                    seeded.subject = content.subject;
-                    seeded.html = content.html;
-                    seeded.text = content.text;
-                    seeded.json = content.json;
+                    if (organization.value ? (organization.value.language === null) : (platform.value.language === null)) {
+                        // Multi lingual
+                        seeded.subject = defaultTemplate.subject;
+                        seeded.html = defaultTemplate.html;
+                        seeded.text = defaultTemplate.text;
+                        seeded.json = defaultTemplate.json;
+                        seeded.translations = defaultTemplate.translations;
+                        seeded.language = defaultTemplate.language;
+                    } else {
+                        // Single language: use the right language
+                        const content = defaultTemplate.getContentForLanguage(organization.value?.language ?? platform.value.language ?? I18nController.shared.language);
+                        seeded.subject = content.subject;
+                        seeded.html = content.html;
+                        seeded.text = content.text;
+                        seeded.json = content.json;
+                    }
                 }
                 seeded.id = ''; // clear
                 seeded.organizationId = organization.value?.id ?? null;

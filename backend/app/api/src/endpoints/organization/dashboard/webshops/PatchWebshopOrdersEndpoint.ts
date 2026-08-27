@@ -127,7 +127,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
                 // Manually created orders have no customer request language, so use the webshop's
                 // default language for any future emails to this order.
-                model.consumerLanguage = webshop.meta.defaultLanguage;
+                model.consumerLanguage = webshop.meta.defaultLanguage ?? organization.language ?? $getLanguage();
 
                 // For now, we don't invalidate tickets, because they will get invalidated at scan time (the order status is checked)
                 // This allows you to revalidate a ticket without needing to generate a new one (e.g. when accidentally canceling an order)

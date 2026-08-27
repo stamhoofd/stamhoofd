@@ -92,6 +92,10 @@ export class PatchPlatformEndpoint extends Endpoint<
             }
         }
 
+        if (request.body.language !== undefined) {
+            platform.language = request.body.language;
+        }
+
         let shouldUpdateSetupSteps = false;
         let shouldMoveToPeriod: RegistrationPeriod | null = null;
         let shouldUpdateMemberships = false;

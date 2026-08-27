@@ -647,8 +647,9 @@ export class WebshopMetaData extends AutoEncoder {
     /**
      * The default language used when loading the webshop (instead of the hardcoded Dutch default).
      */
-    @field({ decoder: new EnumDecoder(Language), version: 404 })
-    defaultLanguage: Language = Language.Dutch;
+    @field({ decoder: new EnumDecoder(Language), version: 404, defaultValue: () => Language.Dutch })
+    @field({ decoder: new EnumDecoder(Language), nullable: true, version: 414, upgrade: d => d, downgrade: d => d === null ? Language.Dutch : d, defaultValue: () => null })
+    defaultLanguage: Language | null;
 
     /**
      * Enables crowdfunding: publicly shows the (goal and) progress of the total revenue of this webshop.

@@ -3,12 +3,13 @@ import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
-import { GroupFactory, Member, MemberFactory, MemberPlatformMembership, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import { GroupFactory, Member, MemberFactory, MemberPlatformMembership, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import type { PatchAnswers } from '@stamhoofd/structures';
 import { Address, EmergencyContact, MemberDetails, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PermissionLevel, Permissions, PermissionsResourceType, PlatformMembershipType, PlatformMembershipTypeConfig, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
+import { Language } from '@stamhoofd/types/Language';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initUitpasApi } from '../../../../tests/init/index.js';
 import { UniqueMemberNumberService } from '../../../services/UniqueMemberNumberService.js';
@@ -484,6 +485,83 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const response = await testServer.test(endpoint, request);
             expect(response.body.members[0].details.memberNumber).toEqual('LID-100');
+        });
+    });
+
+    describe('Language', () => {
+        test('Changing the language of a member also changes the language of its users', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const admin = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization,
+            }).create();
+
+            const memberUser = await new UserFactory({ organization }).create();
+            memberUser.language = Language.Dutch;
+            await memberUser.save();
+
+            const member = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+                user: memberUser,
+            }).create();
+            await new RegistrationFactory({ member, organization }).create();
+
+            const token = await SessionService.createSession(admin);
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ language: Language.French }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+            expect(response.body.members[0].details.language).toBe(Language.French);
+
+            const updatedUser = await User.getByID(memberUser.id);
+            expect(updatedUser!.language).toBe(Language.French);
+
+            // Admin is not a user of the member, so it keeps its own language
+            const updatedAdmin = await User.getByID(admin.id);
+            expect(updatedAdmin!.language).toBeNull();
+        });
+
+        test('Patching other details does not change the language of users', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const admin = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization,
+            }).create();
+
+            const memberUser = await new UserFactory({ organization }).create();
+            memberUser.language = Language.English;
+            await memberUser.save();
+
+            const member = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+                user: memberUser,
+            }).create();
+            await new RegistrationFactory({ member, organization }).create();
+
+            const token = await SessionService.createSession(admin);
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ firstName: 'Changed' }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await testServer.test(endpoint, request);
+
+            const updatedUser = await User.getByID(memberUser.id);
+            expect(updatedUser!.language).toBe(Language.English);
         });
     });
 

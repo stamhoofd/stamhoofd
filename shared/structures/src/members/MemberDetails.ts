@@ -2,6 +2,7 @@ import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonback
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, PatchableArray, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
 import { DataValidator, Formatter, Sorter, StringCompare } from '@stamhoofd/utility';
 
+import { Language } from '@stamhoofd/types/Language';
 import { Address } from '../addresses/Address.js';
 import { Replacement } from '../endpoints/EmailRequest.js';
 
@@ -107,6 +108,12 @@ export class MemberDetails extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 304 })
     unverifiedPhones: string[];
+
+    /**
+     * Preferred language of this member. Null falls back to the default language of the platform or tenant.
+     */
+    @field({ decoder: new EnumDecoder(Language), nullable: true, version: 414 })
+    language: Language | null = null;
 
     @field({ decoder: new ArrayDecoder(Address), version: 304 })
     unverifiedAddresses: Address[];

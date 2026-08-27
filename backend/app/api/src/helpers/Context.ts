@@ -50,7 +50,16 @@ export class ContextInstance {
     queries: { query: string; time?: number }[] = [];
     timers: Map<string, number> = new Map();
 
-    user?: User;
+    #user?: User;
+
+    get user(): User | undefined {
+        return this.#user;
+    }
+
+    set user(user: User | undefined) {
+        this.#user = user;
+        this.resetI18n();
+    }
 
     /**
      * Set when the session is impersonating: `user` stays the administrator that is really
@@ -59,7 +68,16 @@ export class ContextInstance {
      */
     impersonatedUser?: User;
 
-    organization?: Organization;
+    #organization?: Organization;
+
+    get organization(): Organization | undefined {
+        return this.#organization;
+    }
+
+    set organization(organization: Organization | undefined) {
+        this.#organization = organization;
+        this.resetI18n();
+    }
 
     #i18n: I18n | null = null;
     #auth: AdminPermissionChecker | null = null;
@@ -135,9 +153,19 @@ export class ContextInstance {
 
     get i18n() {
         if (!this.#i18n) {
-            this.#i18n = I18n.fromRequest(this.request);
+            this.#i18n = I18n.fromRequest(this.request, {
+                // Todo: default to platform/tenant language as soon as we have a tenant context
+                defaultLanguage: this.user?.language ?? this.organization?.language ?? undefined,
+                defaultCountry: this.organization?.address?.country ?? undefined,
+            });
         }
         return this.#i18n;
+    }
+
+    /** The i18n defaults depend on the user and organization, so it is rebuilt on the next access after either changes. */
+    private resetI18n() {
+        this.#i18n = null;
+        (this.request as any)._cached_i18n = undefined;
     }
 
     get auth() {

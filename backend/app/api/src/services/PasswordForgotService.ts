@@ -32,6 +32,7 @@ export class PasswordForgotService {
                     firstName: user.firstName,
                     lastName: user.lastName,
                     email: user.email,
+                    language: user.language,
                     replacements: [
                         Replacement.create({
                             token: 'resetUrl',

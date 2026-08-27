@@ -1,9 +1,11 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { OrganizationFactory, UserFactory } from '@stamhoofd/models';
+import { Member, MemberFactory, OrganizationFactory, UserFactory } from '@stamhoofd/models';
 
 import { NewUser, PermissionRole, Permissions, UserPermissions } from '@stamhoofd/structures';
+import { Language } from '@stamhoofd/types/Language';
 import { testServer } from '../../../tests/helpers/TestServer.js';
 import { initAdmin } from '../../../tests/init/initAdmin.js';
+import { SessionService } from '../../services/SessionService.js';
 import { PatchUserEndpoint } from './PatchUserEndpoint.js';
 
 describe('Endpoint.PatchUser', () => {
@@ -52,5 +54,55 @@ describe('Endpoint.PatchUser', () => {
         expect(user.permissions?.organizationPermissions.get(organization.id)).toBeDefined();
         expect(user.permissions?.organizationPermissions.get(organization.id)?.roles.length).toEqual(1);
         expect(user.permissions?.organizationPermissions.get(organization.id)?.roles[0].id).toEqual('test');
+    });
+
+    test('a user can change and clear its preferred language', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({ organization, password: 'test-password-1234' }).create();
+        const token = await SessionService.createSession(user);
+
+        const patch = async (language: Language | null) => {
+            const response = await testServer.test(endpoint, Request.patch({
+                path: `/user/${user.id}`,
+                host: organization.getApiHost(),
+                headers: { authorization: 'Bearer ' + token.accessToken },
+                body: NewUser.patch({ id: user.id, language }),
+            }));
+            expect(response.status).toBe(200);
+            await user.refresh();
+            return response.body.language;
+        };
+
+        expect(await patch(Language.French)).toBe(Language.French);
+        expect(user.language).toBe(Language.French);
+
+        expect(await patch(null)).toBeNull();
+        expect(user.language).toBeNull();
+    });
+
+    test('changing the user language also changes the language of its members', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({ organization, password: 'test-password-1234' }).create();
+        const member = await new MemberFactory({ organization, user }).create();
+        const unrelatedMember = await new MemberFactory({ organization }).create();
+        const token = await SessionService.createSession(user);
+
+        const patch = async (language: Language | null) => {
+            const response = await testServer.test(endpoint, Request.patch({
+                path: `/user/${user.id}`,
+                host: organization.getApiHost(),
+                headers: { authorization: 'Bearer ' + token.accessToken },
+                body: NewUser.patch({ id: user.id, language }),
+            }));
+            expect(response.status).toBe(200);
+        };
+
+        await patch(Language.French);
+        expect((await Member.getByID(member.id))?.details.language).toBe(Language.French);
+        expect((await Member.getByID(unrelatedMember.id))?.details.language).toBeNull();
+
+        // Clearing the user language leaves the members untouched
+        await patch(null);
+        expect((await Member.getByID(member.id))?.details.language).toBe(Language.French);
     });
 });

@@ -318,6 +318,13 @@ export class I18nController {
             country = undefined;
         }
 
+        // 0. A signed-in user's preferred language wins over storage, url and browser
+        const userLanguage = $context?.user?.language;
+        if (userLanguage && this.isValidLanguage(userLanguage)) {
+            console.info('[I18n] Using language of user', userLanguage);
+            language = userLanguage;
+        }
+
         // 1. Get by storage (always preferred)
         const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 
@@ -372,7 +379,24 @@ export class I18nController {
             }
         }
 
-        // 3. Get country by referrer TLD
+        // 3. By organization
+        if ($context?.organization) {
+            if (!language && $context.organization.language) {
+                language = $context.organization.language;
+            }
+            if (!country) {
+                country = $context.organization.address.country;
+            }
+        }
+
+        // 4. By tenant/platform
+        if ($context?.platform) {
+            if (!language && $context.platform.language) {
+                language = $context.platform.language;
+            }
+        }
+
+        // 5. Get country by referrer TLD
         if (!country && document.referrer && typeof document.referrer === 'string' && document.referrer.length > 0) {
             try {
                 const referrerUrl = new URL(document.referrer);

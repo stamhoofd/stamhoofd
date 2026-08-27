@@ -1,7 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import { EmailTemplateFactory, OrganizationFactory, PasswordToken, UserFactory } from '@stamhoofd/models';
-import { EmailTemplateType } from '@stamhoofd/structures';
+import { EmailContent, EmailTemplateType } from '@stamhoofd/structures';
+import { Language } from '@stamhoofd/types/Language';
 
 import { testServer } from '../../../tests/helpers/TestServer.js';
 import { ForgotPasswordEndpoint } from './ForgotPasswordEndpoint.js';
@@ -41,5 +42,28 @@ describe('Endpoint.ForgotPassword', () => {
         const emails = await EmailMocker.transactional.getSucceededEmails();
         expect(emails).toHaveLength(1);
         expect(emails[0].to).toContain('nobody@example.com');
+    });
+
+    test('the email is sent in the preferred language of the user', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        await new EmailTemplateFactory({
+            organization,
+            type: EmailTemplateType.ForgotPassword,
+            subject: 'Dutch subject',
+            html: '<p>Dutch {{resetUrl}}</p>',
+            language: Language.Dutch,
+            translations: new Map([[Language.French, EmailContent.create({ subject: 'French subject', html: '<p>French {{resetUrl}}</p>', text: 'French' })]]),
+        }).create();
+
+        const user = await new UserFactory({ organization, password: 'test-password-1234' }).create();
+        user.language = Language.French;
+        await user.save();
+
+        await testServer.test(endpoint, request(organization.getApiHost(), user.email));
+
+        const emails = await EmailMocker.transactional.getSucceededEmails();
+        expect(emails).toHaveLength(1);
+        expect(emails[0].subject).toBe('French subject');
+        expect(emails[0].html).toContain('French https://');
     });
 });

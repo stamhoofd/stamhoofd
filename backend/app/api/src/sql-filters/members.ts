@@ -54,6 +54,11 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.JSONString,
         nullable: false,
     }),
+    'language': createColumnFilter({
+        expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.language'),
+        type: SQLValueType.JSONString,
+        nullable: true,
+    }),
     'birthDay': createColumnFilter({
         // todo: check normalization of date
         expression: SQL.column(membersTable, 'birthDay'),

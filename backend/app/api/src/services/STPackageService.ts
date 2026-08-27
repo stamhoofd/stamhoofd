@@ -343,6 +343,7 @@ export class STPackageService {
                 firstName: admin.firstName,
                 lastName: admin.lastName,
                 email: admin.email,
+                language: admin.language,
                 replacements: [
                     Replacement.create({
                         token: 'organizationName',

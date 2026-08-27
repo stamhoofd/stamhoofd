@@ -228,13 +228,13 @@ export class I18n {
         return this.localeFromRequestHeaders(request).language;
     }
 
-    static fromRequest(request: Request | DecodedRequest<any, any, any>): I18n {
+    static fromRequest(request: Request | DecodedRequest<any, any, any>, options?: { defaultLanguage?: Language; defaultCountry?: Country }): I18n {
         if ((request as any)._cached_i18n) {
             return (request as any)._cached_i18n;
         }
 
         const { language, country } = this.localeFromRequestHeaders(request);
-        const i18n = new I18n(language ?? this.defaultLanguage, country ?? this.defaultCountry);
+        const i18n = new I18n(language ?? options?.defaultLanguage ?? this.defaultLanguage, country ?? options?.defaultCountry ?? this.defaultCountry);
         (request as any)._cached_i18n = i18n;
         return i18n;
     }

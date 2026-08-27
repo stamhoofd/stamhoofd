@@ -59,6 +59,7 @@ export class EventNotificationService {
                     firstName: member.details.firstName,
                     lastName: member.details.lastName,
                     email: member.details.email,
+                    language: member.details.language,
                 }));
             }
         }
@@ -73,6 +74,7 @@ export class EventNotificationService {
                         firstName: user.firstName,
                         lastName: user.lastName,
                         email: user.email,
+                        language: user.language,
                     }));
                 }
             }
@@ -88,6 +90,7 @@ export class EventNotificationService {
                         firstName: user.firstName,
                         lastName: user.lastName,
                         email: user.email,
+                        language: user.language,
                     }));
                 }
             }
@@ -120,6 +123,7 @@ export class EventNotificationService {
                     firstName: user.firstName,
                     lastName: user.lastName,
                     email: user.email,
+                    language: user.language,
                 }));
             }
         }

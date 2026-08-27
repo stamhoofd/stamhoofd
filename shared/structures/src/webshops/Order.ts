@@ -385,7 +385,7 @@ export class Order extends AutoEncoder {
             lastName: customer.lastName,
             email,
             replacements: this.getRecipientReplacements(organization, webshop),
-            language: this.consumerLanguage ?? webshop.meta.defaultLanguage,
+            language: this.consumerLanguage ?? webshop.meta.defaultLanguage ?? organization.language,
         });
     }
 
@@ -398,7 +398,7 @@ export class Order extends AutoEncoder {
             lastName: order.data.customer.lastName,
             email,
             replacements: this.getRecipientReplacements(organization, webshop, payment ? [payment] : order.payments),
-            language: this.consumerLanguage ?? webshop.meta.defaultLanguage,
+            language: this.consumerLanguage ?? webshop.meta.defaultLanguage ?? organization.language,
         });
     }
 

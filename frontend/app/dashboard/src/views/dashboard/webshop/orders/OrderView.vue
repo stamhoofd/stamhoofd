@@ -256,7 +256,7 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="webshop && order.consumerLanguage !== webshop.meta.defaultLanguage">
+                <STListItem v-if="webshop && order.consumerLanguage !== (webshop.meta.defaultLanguage ?? $organization?.language)">
                     <h3 class="style-definition-label">
                         {{ $t('%14T') }}
                     </h3>

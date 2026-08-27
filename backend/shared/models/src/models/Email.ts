@@ -16,7 +16,7 @@ import { QueryableModel, readDynamicSQLExpression, SQL, SQLAlias, SQLCount, SQLS
 import { errorToSimpleErrors } from '../helpers/errorToSimpleErrors.js';
 import { EmailRecipient } from './EmailRecipient.js';
 import { EmailTemplate } from './EmailTemplate.js';
-import { Organization } from './Organization.js';
+import type { Organization } from './Organization.js';
 
 export type RecipientLoader<BeforeFetchAllResult = any> = {
     /**
@@ -429,7 +429,7 @@ export class Email extends QueryableModel {
         };
     }
 
-    async setFromTemplate(type: EmailTemplateType) {
+    async setFromTemplate(type: EmailTemplateType, options?: { language?: Language; keepTranslations?: boolean }) {
         // Most specific template: for specific group
         let templates = (await EmailTemplate.where({ type, organizationId: this.organizationId, groupId: null, webshopId: null }));
 
@@ -448,13 +448,30 @@ export class Email extends QueryableModel {
         this.subject = defaultTemplate.subject;
         this.json = defaultTemplate.json;
 
-        if (this.language !== null && this.language !== defaultTemplate.language) {
-            const content = defaultTemplate.translations.get(this.language);
-            if (content) {
-                this.html = content.html;
-                this.text = content.text;
-                this.subject = content.subject;
-                this.json = content.json;
+        if (options?.keepTranslations) {
+            this.translations = defaultTemplate.translations;
+            this.language = defaultTemplate.language;
+        } else {
+            if (options?.language) {
+                if (options.language !== defaultTemplate.language) {
+                    const content = defaultTemplate.translations.get(options.language);
+                    if (content) {
+                        this.html = content.html;
+                        this.text = content.text;
+                        this.subject = content.subject;
+                        this.json = content.json;
+                    }
+                }
+            } else {
+                if (this.language !== null && this.language !== defaultTemplate.language) {
+                    const content = defaultTemplate.translations.get(this.language);
+                    if (content) {
+                        this.html = content.html;
+                        this.text = content.text;
+                        this.subject = content.subject;
+                        this.json = content.json;
+                    }
+                }
             }
         }
 

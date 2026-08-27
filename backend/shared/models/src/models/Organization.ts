@@ -44,6 +44,10 @@ export class Organization extends QueryableModel {
     @column({ type: 'string', nullable: true })
     website: string | null = null;
 
+    /** Null falls back to the language of the platform. */
+    @column({ type: 'string', nullable: true })
+    language: Language | null = null;
+
     /// A custom domain name that is used to host the register application (should be unique)
     // E.g. inschrijven.scoutswetteren.be
     @column({ type: 'string', nullable: true })
@@ -337,6 +341,7 @@ export class Organization extends QueryableModel {
             registerDomain: this.registerDomain,
             uri: this.uri,
             website: this.website,
+            language: this.language,
             createdAt: this.createdAt,
             hasFutureEvents: this.hasFutureEvents,
         });
@@ -353,6 +358,7 @@ export class Organization extends QueryableModel {
             registerDomain: this.registerDomain,
             uri: this.uri,
             website: this.website,
+            language: this.language,
             createdAt: this.createdAt,
             hasFutureEvents: this.hasFutureEvents,
         });

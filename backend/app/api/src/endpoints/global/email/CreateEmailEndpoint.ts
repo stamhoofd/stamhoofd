@@ -9,6 +9,7 @@ import { Context } from '../../../helpers/Context.js';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailPreviewService } from '../../../services/EmailPreviewService.js';
 import { EmailSendService } from '../../../services/EmailSendService.js';
+import { TenantContext } from '../../../helpers/TenantContext.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -130,7 +131,8 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         if (JSON.stringify(model.json).length < 3 && model.recipientFilter.filters[0].type && EmailTemplateStruct.getDefaultForRecipient(model.recipientFilter.filters[0].type)) {
             const type = EmailTemplateStruct.getDefaultForRecipient(model.recipientFilter.filters[0].type);
             if (type) {
-                await model.setFromTemplate(type);
+                const tenant = await TenantContext.currentOrRoot.getTenant();
+                await model.setFromTemplate(type, { language: model.language ?? organization?.language ?? tenant.language ?? $getLanguage(), keepTranslations: organization ? organization.language === null : tenant.language === null });
             }
         }
 
