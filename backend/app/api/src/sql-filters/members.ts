@@ -105,6 +105,9 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.nationalRegisterNumber'),
         type: SQLValueType.JSONString,
         nullable: true,
+        checkPermission: async () => {
+            await throwIfNoNRNReadAccess();
+        },
     }),
     'email': createColumnFilter({
         expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.email'),
@@ -578,6 +581,31 @@ async function throwIfNoFinancialReadAccess() {
         throw new SimpleError({
             code: 'permission_denied',
             message: 'No permissions for financial support filter (organization scope).',
+            human: $t(`%G2`),
+            statusCode: 400,
+        });
+    }
+}
+
+async function throwIfNoNRNReadAccess() {
+    const organization = Context.organization;
+    if (!organization) {
+        if (!Context.auth.hasPlatformFullAccess()) {
+            throw new SimpleError({
+                code: 'permission_denied',
+                message: 'No permissions for national registration number support filter.',
+                human: $t(`%G2`),
+                statusCode: 400,
+            });
+        }
+        return;
+    }
+
+    const permissions = await Context.auth.getOrganizationPermissions(organization);
+    if (!permissions || !permissions?.hasAccessRight(AccessRight.MemberManageNRN)) {
+        throw new SimpleError({
+            code: 'permission_denied',
+            message: 'No permissions for national registration number support filter (organization scope).',
             human: $t(`%G2`),
             statusCode: 400,
         });
