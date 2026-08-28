@@ -269,9 +269,21 @@ function deleteCode(code: DiscountCode) {
     addPatch({ data: patchedData });
 }
 async function applyCode(code: string) {
-    if (patchedOrder.value.data?.discountCodes.some(d => d.code === code)) {
-        new Toast($t('Deze kortingscode is al toegevoegd aan de bestelling'), 'red error').setHide(10 * 1000).show();
-        return false;
+    // if (patchedOrder.value.data?.discountCodes.some(d => d.code === code)) {
+    //     new Toast($t('Deze kortingscode is al toegevoegd aan de bestelling'), 'red error').setHide(10 * 1000).show();
+    //     return false;
+    // }
+
+    const existingDiscountCode = order.data.discountCodes.find(d => d.code === code && d.maximumUsage === 1);
+    if (existingDiscountCode) {
+        const patchedData = OrderData.patch({});
+        patchedData.discountCodes.addPut(existingDiscountCode);
+
+        addPatch({ data: patchedData });
+
+        new Toast($t(`%Xd`), 'success primary').setHide(10 * 1000).show();
+
+        return true;
     }
 
     const response = await context.value.optionalAuthenticatedServer.request({
@@ -319,7 +331,7 @@ const emailPlaceholder = computed(() => {
 
 const emailDescription = computed(() => {
     if (webshop.meta.ticketType !== WebshopTicketType.None) {
-        return $t("%Zpd");
+        return $t('%Zpd');
     }
     return null;
 });
