@@ -427,14 +427,6 @@ const canSetDefaultPeriod = computed(() => {
     );
 });
 
-console.table({
-    canSetDefaultPeriod: canSetDefaultPeriod.value,
-    props: props,
-    periodId: period.value.id,
-    organizationPeriodId: organization.value.period.id,
-    userMode: STAMHOOFD.userMode,
-});
-
 const patchOrganization = usePatchOrganization();
 const pop = usePop();
 async function setDefaultPeriod() {
