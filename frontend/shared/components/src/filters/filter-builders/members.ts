@@ -852,6 +852,13 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
                     'details.emergencyContacts.length': 0,
                 },
             },
+            {
+                name: $t('Rijksregisternummer'),
+                value: 'nationalRegisterNumber',
+                filter: {
+                    'details.nationalRegisterNumber': null,
+                },
+            },
         ],
     }));
 

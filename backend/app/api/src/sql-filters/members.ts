@@ -101,6 +101,11 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.JSONBoolean,
         nullable: true,
     }),
+    'details.nationalRegisterNumber': createColumnFilter({
+        expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.nationalRegisterNumber'),
+        type: SQLValueType.JSONString,
+        nullable: true,
+    }),
     'email': createColumnFilter({
         expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.email'),
         type: SQLValueType.JSONString,
