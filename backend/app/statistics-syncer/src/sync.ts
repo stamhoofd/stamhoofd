@@ -538,6 +538,10 @@ export async function syncStatistics(): Promise<void> {
     // administration, because that row is where `locked` arrives: freezing it would freeze the one
     // field an unlock has to come through.
     await syncIncrementalTable(periodsTable(), await loadSettledPeriodIds());
+
+    // Also apply the cutoff for newly added rows
+    await applyImportedCutoff(getImportedUntil());
+
     await releaseUnlockedPeriods();
 
     const frozen = await loadFrozenPeriodIds();
