@@ -249,12 +249,12 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductType, StripeAccount, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopStatus, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Sorter } from '@stamhoofd/utility';
-import { computed, nextTick, ref } from 'vue';
+import { computed, nextTick, onMounted, ref } from 'vue';
 import EditPaymentMethodsBox from '../../../../components/EditPaymentMethodsBox.vue';
 import type { UseEditWebshopProps } from './useEditWebshop';
 import { useEditWebshop } from './useEditWebshop';
 
-const props = withDefaults(defineProps<UseEditWebshopProps & { forceType: WebshopType | null }>(), { forceType: null });
+const props = withDefaults(defineProps<UseEditWebshopProps & { forceType: WebshopType | null; isCopy?: boolean }>(), { forceType: null });
 
 const { isNew, webshop, addPatch, patch: webshopPatch, originalWebshop, errors, saving, save, hasChanges, shouldNavigateAway } = useEditWebshop({
     getProps: () => props,
@@ -298,6 +298,16 @@ const viewTitle = computed(() => {
     return $t('%10T');
 });
 
+onMounted(() => {
+    if (props.isCopy) {
+        addPatch(PrivateWebshop.patch({
+            meta: WebshopMetaData.patch({
+                name: `${originalWebshop.meta.name} (kopie)`,
+            }),
+        }));
+    }
+});
+
 const name = computed({
     get: () => webshop.value.meta.name,
     set: (name: string) => addPatch(PrivateWebshop.patch({ meta: WebshopMetaData.patch({ name }) })),
@@ -306,7 +316,7 @@ const name = computed({
 const namePlaceholder = computed(() => {
     switch (type.value) {
         case WebshopType.Performance:
-            return $t("%Zot");
+            return $t('%Zot');
         case WebshopType.Event:
             return $t('%ZoA');
         case WebshopType.Registrations:

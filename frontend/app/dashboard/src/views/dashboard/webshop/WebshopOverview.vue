@@ -720,6 +720,7 @@ defineRoute({
 
         return {
             initialWebshop: duplicate,
+            isCopy: true,
             savedHandler: async (duplicateWebshop: PrivateWebshop) => {
                 // Copy over the templates
                 try {
