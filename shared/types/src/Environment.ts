@@ -50,6 +50,11 @@ export type StatisticsEnvironment = {
         readonly DB_USER: string;
         readonly DB_PASS: string;
         readonly DB_PORT?: number;
+        // Paths to PEM files. The login is created with REQUIRE X509, so the client certificate is
+        // mandatory on another server.
+        readonly DB_CA?: string;
+        readonly DB_CERT?: string;
+        readonly DB_KEY?: string;
     };
 
     readonly stamhoofdDatabase: {

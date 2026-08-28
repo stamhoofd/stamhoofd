@@ -51,8 +51,15 @@ function getStatisticsPort(config: StatisticsDatabaseConfig): number | undefined
  * Where to reach the statistics database. It lives next to Metabase rather than on the server this
  * runs on, so every connection detail is spelled out instead of inherited from the main database.
  */
-export function getStatisticsPoolOptions(): { host: string; user: string; password: string; port: number | undefined; useSSL: boolean } {
+export function getStatisticsPoolOptions(): { host: string; user: string; password: string; port: number | undefined; useSSL: boolean; ca?: string; cert?: string; key?: string } {
     const config = getStatisticsDatabaseConfig();
+    const useSSL = isOnAnotherServer(config);
+
+    // The login is created with REQUIRE X509: MySQL reports a missing client certificate as a plain
+    // "access denied", so refuse early with a message that names the actual cause.
+    if (useSSL && (!config.DB_CERT || !config.DB_KEY)) {
+        throw new Error('STAMHOOFD.statisticsDatabase.DB_CERT and DB_KEY are required to connect to a statistics database on another server');
+    }
 
     return {
         host: config.DB_HOST,
@@ -60,11 +67,11 @@ export function getStatisticsPoolOptions(): { host: string; user: string; passwo
         password: config.DB_PASS,
         port: getStatisticsPort(config),
 
-        // The connection leaves the machine, so it is encrypted: the login it connects with is
-        // created with REQUIRE SSL, and MySQL refuses it in plaintext. No CA is shipped here, so
-        // this buys encryption and not proof of which server answered. Left off where both databases
-        // are on the same MySQL, which is development and the tests.
-        useSSL: isOnAnotherServer(config),
+        // Left off where both databases are on the same MySQL, which is development and the tests.
+        useSSL,
+        ca: useSSL ? config.DB_CA : undefined,
+        cert: useSSL ? config.DB_CERT : undefined,
+        key: useSSL ? config.DB_KEY : undefined,
     };
 }
 

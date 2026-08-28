@@ -29,6 +29,8 @@ describe('getStatisticsDatabaseConfig', () => {
     });
 });
 
+const certs = { DB_CA: '/certs/ca.pem', DB_CERT: '/certs/cert.pem', DB_KEY: '/certs/key.pem' };
+
 describe('getStatisticsPoolOptions', () => {
     it('follows the port of the main database while both are on one server', () => {
         expect(STAMHOOFD.statisticsDatabase.DB_HOST).toBe(STAMHOOFD.stamhoofdDatabase.DB_HOST);
@@ -37,28 +39,32 @@ describe('getStatisticsPoolOptions', () => {
     });
 
     it('falls back to the default port on another server, whose ports are its own', () => {
-        TestUtils.setEnvironment('statisticsDatabase', { ...STAMHOOFD.statisticsDatabase, DB_HOST: 'statistics.example' });
+        TestUtils.setEnvironment('statisticsDatabase', { ...STAMHOOFD.statisticsDatabase, DB_HOST: 'statistics.example', ...certs });
 
         expect(getStatisticsPoolOptions().port).toBe(3306);
     });
 
     it('uses the port it was given', () => {
-        TestUtils.setEnvironment('statisticsDatabase', { ...STAMHOOFD.statisticsDatabase, DB_HOST: 'statistics.example', DB_PORT: 3399 });
+        TestUtils.setEnvironment('statisticsDatabase', { ...STAMHOOFD.statisticsDatabase, DB_HOST: 'statistics.example', DB_PORT: 3399, ...certs });
 
         expect(getStatisticsPoolOptions().port).toBe(3399);
     });
 
-    it('encrypts the connection to another server, whose login is created with REQUIRE SSL', () => {
-        // The devops grant pins `REQUIRE SSL` on this user, and MySQL refuses it in plaintext: the
-        // two have to stay switched on together or the sync cannot connect at all.
+    it('presents the client certificate to another server, whose login is created with REQUIRE X509', () => {
+        TestUtils.setEnvironment('statisticsDatabase', { ...STAMHOOFD.statisticsDatabase, DB_HOST: 'statistics.example', ...certs });
+
+        expect(getStatisticsPoolOptions()).toMatchObject({ useSSL: true, ca: '/certs/ca.pem', cert: '/certs/cert.pem', key: '/certs/key.pem' });
+    });
+
+    it('refuses to connect to another server without a client certificate', () => {
         TestUtils.setEnvironment('statisticsDatabase', { ...STAMHOOFD.statisticsDatabase, DB_HOST: 'statistics.example' });
 
-        expect(getStatisticsPoolOptions().useSSL).toBe(true);
+        expect(() => getStatisticsPoolOptions()).toThrow(/DB_CERT and DB_KEY/);
     });
 
     it('does not ask for TLS while both databases are on one MySQL', () => {
         expect(STAMHOOFD.statisticsDatabase.DB_HOST).toBe(STAMHOOFD.stamhoofdDatabase.DB_HOST);
 
-        expect(getStatisticsPoolOptions().useSSL).toBe(false);
+        expect(getStatisticsPoolOptions()).toMatchObject({ useSSL: false, cert: undefined, key: undefined });
     });
 });
