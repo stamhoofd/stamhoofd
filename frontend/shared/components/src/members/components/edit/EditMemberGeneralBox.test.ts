@@ -1,5 +1,5 @@
 import type { AppType } from '@stamhoofd/structures';
-import { Address, BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, Platform, PlatformFamily, PlatformMember, PropertyFilter } from '@stamhoofd/structures';
+import { Address, BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, Organization, Platform, PlatformFamily, PlatformMember, PropertyFilter } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { describe, expect, test } from 'vitest';
 import { render } from 'vitest-browser-vue';
@@ -8,6 +8,9 @@ import { Validator } from '../../../errors/Validator';
 import Radio from '../../../inputs/Radio.vue';
 import STInputBox from '../../../inputs/STInputBox.vue';
 import EditMemberGeneralBox from './EditMemberGeneralBox.vue';
+import { Language } from '@stamhoofd/types/Language';
+import Checkbox from '#inputs/Checkbox.vue';
+import STListItem from '#layout/STListItem.vue';
 
 type TestOptions = {
     app?: AppType;
@@ -20,6 +23,7 @@ type TestOptions = {
 };
 
 function createMember(options: TestOptions) {
+    const year = new Date().getFullYear();
     const platform = Platform.create({});
     platform.config.recordsConfiguration.nationalRegisterNumber = options.isNationalRegisterNumberEnabled === false
         ? null
@@ -38,18 +42,27 @@ function createMember(options: TestOptions) {
                     postalCode: '1000',
                     street: 'Wetstraat',
                 }),
-                birthDay: options.isOlderThan21 ? new Date(2000, 0, 1) : new Date(2010, 0, 1),
+                birthDay: options.isOlderThan21 ? new Date(year - 25, 0, 1) : new Date(year - 10, 0, 1),
                 firstName: 'Jan',
                 lastName: 'Peeters',
                 severeDisability: BooleanStatus.create({ value: options.severeDisability ?? false }),
+                nationalRegisterNumber: options.isNationalRegisterNumberEnabled === false ? null : '06.01.01-001.34',
             }),
         }),
     });
     family.add(member);
+
     return member;
 }
 
 function renderBox(options: TestOptions = {}) {
+    const organization = Organization.create({});
+    organization.language = Language.Dutch;
+
+    if (options.isBelgium === false) {
+        organization.address.country = Country.Netherlands;
+    }
+
     return render(EditMemberGeneralBox, {
         props: {
             member: createMember(options),
@@ -58,8 +71,10 @@ function renderBox(options: TestOptions = {}) {
         global: {
             components: {
                 Radio,
+                Checkbox,
                 STErrorsDefault,
                 STInputBox,
+                STListItem,
             },
             provide: {
                 $context: {
@@ -67,7 +82,7 @@ function renderBox(options: TestOptions = {}) {
                         canAccessPlatformMember: () => true,
                         hasFullAccess: () => options.hasFullAccess ?? true,
                     },
-                    organization: null,
+                    organization,
                     user: null,
                 },
                 stamhoofd_app: options.app ?? 'dashboard',
@@ -80,15 +95,14 @@ function renderBox(options: TestOptions = {}) {
             },
             directives: {
                 'format-input': {},
-                tooltip: {},
+                'tooltip': {},
             },
         },
     });
 }
 
 function severeDisabilityCheckbox(): HTMLInputElement | undefined {
-    const label = Array.from(document.querySelectorAll('label')).find(element => element.textContent?.includes('zware beperking'));
-    return label?.querySelector<HTMLInputElement>('input[type="checkbox"]') ?? undefined;
+    return document.querySelector<HTMLInputElement>('[data-testid="severe-disability-input"] input[type="checkbox"]') ?? undefined;
 }
 
 test('shows the severe disability checkbox to eligible full administrators', () => {
@@ -100,7 +114,6 @@ test('shows the severe disability checkbox to eligible full administrators', () 
 test('shows a saved severe disability value to full administrators regardless of the eligibility requirements', () => {
     renderBox({
         isBelgium: false,
-        isNationalRegisterNumberEnabled: false,
         isOlderThan21: true,
         severeDisability: true,
     });

@@ -129,7 +129,7 @@
             </p>
 
             <STList v-if="!member.isNew && isAdmin && isFullAdmin && ((isBelgium && age <= 21 && nationalRegisterNumber && nationalRegisterNumber !== NationalRegisterNumberOptOut) || severeDisability)">
-                <CheckboxListItem v-model="severeDisability" :label="$t('Fiscaal attest uitreiken tot hogere leeftijd van 21 jaar', {firstName: firstName})">
+                <CheckboxListItem v-model="severeDisability" :label="$t('Fiscaal attest uitreiken tot hogere leeftijd van 21 jaar', {firstName: firstName})" data-testid="severe-disability-input">
                     <p class="style-description-small">
                         <I18nComponent :t="$t('Enkel voor leden met een attest van zware handicap. <button>Meer info</button>')">
                             <template #button="{content}">
@@ -167,7 +167,6 @@ import TrackingYearInput from '../../../inputs/TrackingYearInput.vue';
 import { ContextMenu, ContextMenuItem } from '../../../overlays/ContextMenu';
 import { useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import Title from './Title.vue';
-import Checkbox from '#inputs/Checkbox.vue';
 import { useAuth } from '#hooks/useAuth.ts';
 import { Country } from '@stamhoofd/types/Country';
 import { useShowMemberLanguage } from '#members/hooks/useShowMemberLanguage.ts';
