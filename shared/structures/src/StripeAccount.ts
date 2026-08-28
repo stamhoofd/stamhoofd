@@ -242,9 +242,9 @@ export class StripeAccount extends AutoEncoder {
 
             return {
                 text: $t('Je moet gegevens aanvullen om te voorkomen dat uitbetalingen en betalingen worden stopgezet. Dit moet gebeuren voor {date}. Ga naar je Stripe dashboard om dit in orde te brengen.', { date: Formatter.date(new Date(this.meta.requirements.current_deadline * 1000)) })
-                    + missing
-                    ? `${m} ${missing}`
-                    : '' + '.',
+                    + (missing
+                        ? `${m} ${missing}`
+                        : '' + '.'),
                 type: 'error',
             };
         }
@@ -276,9 +276,9 @@ export class StripeAccount extends AutoEncoder {
                 text: $t('Je moet gegevens aanvullen om te voorkomen dat uitbetalingen en betalingen worden stopgezet. Dit moet gebeuren voor {date}. Ga naar je Stripe dashboard om dit in orde te brengen.',
                     { date: Formatter.date(d) },
                 )
-                + missing
+                + (missing
                     ? `${m} ${missing}`
-                    : '' + '.',
+                    : '.'),
                 // Error if needed within one month
                 type: d < new Date(Date.now() + 24 * 60 * 60 * 1000 * 30) ? 'error' : 'warning',
             };
