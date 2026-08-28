@@ -9,16 +9,18 @@
 </template>
 
 <script setup lang="ts">
+import { useAuth } from '#hooks/useAuth.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { StripeAccount } from '@stamhoofd/structures';
+import { AccessRight, StripeAccount } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import type { Ref } from 'vue';
 
 const context = useContext();
 const owner = useRequestOwner();
+const auth = useAuth();
 
 const stripeAccounts = ref([]) as Ref<StripeAccount[]>;
 const loadingStripeAccounts = ref(false);
@@ -29,6 +31,8 @@ const stripeWarnings = computed(() => {
 loadStripeAccounts(null).catch(console.error);
 
 async function loadStripeAccounts(recheckStripeAccount: string | null) {
+    if (!auth.hasFullAccess() || !auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)) return;
+
     try {
         loadingStripeAccounts.value = true;
         if (recheckStripeAccount) {
