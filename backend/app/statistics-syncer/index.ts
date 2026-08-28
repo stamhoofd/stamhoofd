@@ -5,7 +5,16 @@ backendEnv.load({ service: 'statistics-syncer' }).catch((error) => {
     console.error('Failed to load environment:', error);
     process.exit(1);
 }).then(async () => {
-    await import('./src/boot.js');
+    if (STAMHOOFD.environment === 'development') {
+        const { run } = await import('./src/migrate.js');
+        await run();
+    }
+    const { boot } = await import('./src/boot.js');
+
+    boot({ killProcess: true }).catch((error) => {
+        console.error('unhandledRejection', error);
+        process.exit(1);
+    });
 }).catch((error) => {
     console.error('Failed to start the statistics service:', error);
     process.exit(1);

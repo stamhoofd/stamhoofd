@@ -310,7 +310,7 @@ function baseDatabase(env: string): string {
  * its own, so a dashboard built against `platform-statistics-keeo` never reads Ravot numbers.
  */
 function basePlatformStatisticsDatabase(env: string): string {
-    return `platform-statistics-${environmentLabel(env)}`;
+    return `statistics-${environmentLabel(env)}`;
 }
 
 function environmentPreset(env: string): EnvironmentPreset {

@@ -34,27 +34,30 @@ function loadGlobalTranslateFunction() {
     (global as any).$getCountry = () => 'BE';
 }
 
-const shutdown = async () => {
-    console.log('Shutting down...');
-    stopCrons();
-    await waitForCrons();
-
-    try {
-        await endStatisticsConnection();
-        await Database.end();
-    } catch (error) {
-        console.error('Failed to close the database connections:');
-        console.error(error);
-    }
-
-    process.exit(0);
-};
-
-const start = async () => {
+export const boot = async (options: { killProcess: boolean }) => {
     console.log('Started Statistics.');
     loadLogger();
 
     loadGlobalTranslateFunction();
+
+    const shutdown = async () => {
+        console.log('Shutting down...');
+        stopCrons();
+        await waitForCrons();
+
+        try {
+            await endStatisticsConnection();
+            await Database.end();
+        } catch (error) {
+            console.error('Failed to close the database connections:');
+            console.error(error);
+        }
+
+        // Should not be needed, but added for security as sometimes a promise hangs somewhere
+        if (options.killProcess) {
+            process.exit(0);
+        }
+    };
 
     process.on('SIGTERM', () => {
         console.info('SIGTERM signal received.');
@@ -76,9 +79,6 @@ const start = async () => {
 
     // This service runs no seeds of its own.
     startCrons(statisticsCronOptions);
-};
 
-start().catch((error) => {
-    console.error('unhandledRejection', error);
-    process.exit(1);
-});
+    return { shutdown };
+};

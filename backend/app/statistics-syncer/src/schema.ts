@@ -18,8 +18,7 @@ export async function runStatisticsMigrations(): Promise<void> {
 
     try {
         await globalDatabase.statement(`CREATE DATABASE IF NOT EXISTS ${globalDatabase.escapeId(database)} DEFAULT CHARACTER SET = \`utf8mb4\` DEFAULT COLLATE = \`utf8mb4_0900_ai_ci\``);
-    }
-    finally {
+    } finally {
         await globalDatabase.end();
     }
 
