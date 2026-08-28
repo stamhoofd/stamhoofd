@@ -379,6 +379,7 @@ export async function buildCaddyConfig(context: CliContext, options: { setup?: b
         route([domains.files, `*.${domains.files}`], ports.rustfs, proxyHost),
         route([domains.filesConsole], ports.rustfsConsole, proxyHost),
         route([domains.sso], ports.sso, proxyHost),
+        route([domains.metabase], ports.metabase, proxyHost),
     ];
     const subjects = [...new Set([
         domains.mail,
@@ -386,6 +387,7 @@ export async function buildCaddyConfig(context: CliContext, options: { setup?: b
         `*.${domains.files}`,
         domains.filesConsole,
         domains.sso,
+        domains.metabase,
         ...activeManifests.flatMap(manifest => manifest.caddy.tlsSubjects),
     ])];
 

@@ -2360,10 +2360,10 @@
     "@sigstore/core" "^3.2.1"
     "@sigstore/protobuf-specs" "^0.5.0"
 
-"@simonbackx/simple-database@1.37.1":
-  version "1.37.1"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.37.1.tgz#da8f556891e311d0d14c30cd58ee2b53376e89d0"
-  integrity sha512-lhQOgBiGtERHm9QmNpF1HZtuJ8QBlqA2L794KVJy9kj7AlCMwDuvwtYg6Qr5xqdUz8On4RPGn4C0zcNL7+iqdA==
+"@simonbackx/simple-database@1.39.0":
+  version "1.39.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.39.0.tgz#0b3793c06299620d01bb9015028ead931561c167"
+  integrity sha512-4ZkD6EDSkaf7Y1lTpJxEgMXq2tpJ/GmdT64D9Xrjob12z7J8nyfo1vxYLEzHeWp/nEBbhn4WnLCBqA5tKe/2Mw==
   dependencies:
     "@simonbackx/simple-logging" "^1.0.0"
     mysql2 "3.14.1"

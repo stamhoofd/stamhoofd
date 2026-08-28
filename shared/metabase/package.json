@@ -1,0 +1,32 @@
+{
+    "name": "@stamhoofd/metabase",
+    "version": "2.147.0",
+    "type": "module",
+    "sideEffects": false,
+    "exports": {
+        "./*": {
+            "types": "./dist/*.d.ts",
+            "import": "./dist/*.js",
+            "require": "./dist/*.js"
+        }
+    },
+    "files": [
+        "dist",
+        "report"
+    ],
+    "scripts": {
+        "build": "tsc --build tsconfig.build.json",
+        "lint": "eslint",
+        "typecheck": "tsc --build tsconfig.test.json",
+        "test": "vitest",
+        "test:coverage": "vitest --coverage"
+    },
+    "devDependencies": {
+        "@stamhoofd/test-utils": "2.147.0",
+        "vitest": "4.1.10"
+    },
+    "license": "UNLICENCED",
+    "publishConfig": {
+        "access": "public"
+    }
+}

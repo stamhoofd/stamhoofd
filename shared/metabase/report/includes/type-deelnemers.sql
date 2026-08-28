@@ -1,0 +1,14 @@
+-- What a deelnemer of a lokale groep is delivered as on the aanlevering: leiding, leden, or neither.
+--
+-- Read from `tak_category`, what the takken were recorded as, on a registration of
+-- `all_registrations` as `f`. Only the two words the template allows are delivered: a tak recorded as
+-- volwassenen is neither, and a tak nobody has categorised delivers nobody rather than being guessed
+-- at.
+--
+-- The numbers rank rather than label -- leiding beats leden, and leden beats a tak that is neither --
+-- so the MAX over a member's registrations picks the strongest thing any of them says.
+--
+-- Not every platform delivers the same people as leiding: ravot counts its ondersteunende leden
+-- among them, in `ravot/type-deelnemers.sql`, which is what `@include type-deelnemers` expands to
+-- there.
+CASE WHEN f.tak_category = 'leader' THEN 2 WHEN f.tak_category = 'child' THEN 1 ELSE 0 END

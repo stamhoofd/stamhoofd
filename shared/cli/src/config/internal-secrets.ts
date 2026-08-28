@@ -1,9 +1,8 @@
-import type { SharedEnvironment } from '@stamhoofd/types/Environment';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { CliContext } from '../context/create-context.js';
 import { read1PasswordCli } from '../runtime/one-password.js';
-import type { AppService } from './development-config.js';
+import type { AppEnvironment, AppService } from './development-config.js';
 
 /**
  * Internal contributors mark their checkout with a `.internal-contributor` file at the
@@ -13,7 +12,7 @@ import type { AppService } from './development-config.js';
  * External contributors never have the marker file, so this is a no-op for them and no
  * 1Password calls are made.
  */
-export async function applyInternalSecrets(context: CliContext, service: AppService, env: SharedEnvironment): Promise<SharedEnvironment> {
+export async function applyInternalSecrets(context: CliContext, service: AppService, env: AppEnvironment): Promise<AppEnvironment> {
     if (!await isInternalContributor(context.rootDir)) {
         return env;
     }
@@ -64,12 +63,12 @@ async function isInternalContributor(rootDir: string): Promise<boolean> {
  * Merge resolved secrets into the environment, skipping empty values so an optional
  * 1Password miss never blanks out an existing default.
  */
-function withSecrets(env: SharedEnvironment, secrets: Record<string, string>): SharedEnvironment {
+function withSecrets(env: AppEnvironment, secrets: Record<string, string>): AppEnvironment {
     const overrides: Record<string, string> = {};
     for (const [key, value] of Object.entries(secrets)) {
         if (value) {
             overrides[key] = value;
         }
     }
-    return { ...env, ...overrides } as SharedEnvironment;
+    return { ...env, ...overrides } as AppEnvironment;
 }

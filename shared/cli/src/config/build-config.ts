@@ -5,6 +5,10 @@ export function buildDomains(context: CliContext) {
     return buildDevelopmentConfig(context).domains;
 }
 
+export function buildDatabases(context: CliContext) {
+    return buildDevelopmentConfig(context).databases;
+}
+
 export function buildBackendEnv(context: CliContext): NodeJS.ProcessEnv {
     return buildDevelopmentConfig(context).backendEnv;
 }

@@ -1,4 +1,4 @@
-import type { BackendEnvironment, FrontendEnvironment, SharedEnvironment } from '@stamhoofd/types/Environment';
+import type { BackendEnvironment, FrontendEnvironment, SharedEnvironment, StatisticsEnvironment } from '@stamhoofd/types/Environment';
 import type { StamhoofdDomains } from '@stamhoofd/types/StamhoofdDomains';
 import { MemberNumberAlgorithm } from '@stamhoofd/types/MemberNumberAlgorithm';
 import path from 'node:path';
@@ -18,6 +18,7 @@ export enum BackendApp {
     Renderer = 'renderer',
     Redirecter = 'redirecter',
     Backup = 'backup',
+    StatisticsSyncer = 'statistics-syncer',
 }
 
 export enum FrontendApp {
@@ -34,13 +35,21 @@ export type BackendAppService = { backend: BackendAppName };
 export type FrontendAppService = { frontend: FrontendAppName };
 
 export type DevelopmentDomains = ReturnType<typeof buildDevelopmentDomains>;
+export type DevelopmentDatabases = ReturnType<typeof buildDevelopmentDatabases>;
 
 export type DevelopmentConfig = {
     domains: DevelopmentDomains;
+    databases: DevelopmentDatabases;
     ports: ReturnType<typeof buildPorts>;
     backendEnv: NodeJS.ProcessEnv;
-    appEnv: SharedEnvironment;
+    appEnv: AppEnvironment;
 };
+
+/**
+ * The statistics syncer is the one service that runs on none of the platform configuration: it moves
+ * rows between two databases and needs nothing else.
+ */
+export type AppEnvironment = SharedEnvironment | StatisticsEnvironment;
 
 type EnvironmentPreset = {
     userMode: SharedEnvironment['userMode'];
@@ -53,6 +62,7 @@ type EnvironmentPreset = {
     memberNumberAlgorithm?: BackendEnvironment['MEMBER_NUMBER_ALGORITHM'];
     memberNumberAlgorithmLength?: number;
     documentation?: string;
+    statisticsImportedUntil?: string;
 };
 
 const fileSigningPublicKey = { kty: 'EC', x: 'LZPou8JKNPoxgc1FXqLW_dqAYrv3_3ZoFHACwCiiunw', y: 'kBSKvtDVpa29J2mh5pICQD12dKO25fU3Bz-JItNAgEE', crv: 'P-256' };
@@ -60,9 +70,9 @@ const fileSigningPrivateKey = { ...fileSigningPublicKey, d: 'C0xuuMOMKeIDP6YPOz2
 
 export function buildDevelopmentConfig(context: CliContext, service: AppService = { backend: BackendApp.Api }): DevelopmentConfig {
     const domains = buildDevelopmentDomains(context);
+    const databases = buildDevelopmentDatabases(context);
     const ports = buildPorts(context);
-    const database = baseDatabase(context.env);
-    const instanceDatabase = process.env.DB_NAME ?? (context.instance.primary ? database : `${database}-${context.instance.name}`);
+    const instanceDatabase = databases.main;
     const bucket = context.instance.name === 'stamhoofd' ? localPrimaryBucket : `${localPrimaryBucket}-${context.instance.name}`;
     const backendEnv = {
         STAMHOOFD_ENV: context.env,
@@ -83,15 +93,30 @@ export function buildDevelopmentConfig(context: CliContext, service: AppService 
 
     return {
         domains,
+        databases,
         ports,
         backendEnv,
-        appEnv: buildAppEnvironment(context, domains, ports, backendEnv, service),
+        appEnv: buildAppEnvironment(context, domains, databases, ports, backendEnv, service),
     };
 }
 
+/**
+ * Every database this instance owns. Secondary instances suffix their own name, so worktrees never
+ * share data, exactly like the main development database.
+ */
+function buildDevelopmentDatabases(context: CliContext) {
+    const forInstance = (database: string) => context.instance.primary ? database : `${database}-${context.instance.name}`;
+
+    return {
+        main: process.env.DB_NAME ?? forInstance(baseDatabase(context.env)),
+        platformStatistics: forInstance(basePlatformStatisticsDatabase(context.env)),
+    };
+}
+
+export async function buildDevelopmentEnvironment(env: string, service: { backend: 'statistics-syncer' }): Promise<StatisticsEnvironment>;
 export async function buildDevelopmentEnvironment(env: string, service: BackendAppService): Promise<BackendEnvironment>;
 export async function buildDevelopmentEnvironment(env: string, service: FrontendAppService): Promise<FrontendEnvironment>;
-export async function buildDevelopmentEnvironment(env: string, service: AppService): Promise<SharedEnvironment> {
+export async function buildDevelopmentEnvironment(env: string, service: AppService): Promise<AppEnvironment> {
     const context = await createContext({ env, verbose: false });
     const appEnv = buildDevelopmentConfig(context, service).appEnv;
     return await applyInternalSecrets(context, service, appEnv);
@@ -121,11 +146,17 @@ function buildDevelopmentDomains(context: CliContext) {
         filesConsole: `files-console.${domain}`,
         sso: appDomain('sso'),
         mysql: `mysql.${domain}`,
+        metabase: `metabase.${domain}`,
     };
 }
 
-function buildAppEnvironment(context: CliContext, domains: DevelopmentDomains, ports: ReturnType<typeof buildPorts>, backendEnv: NodeJS.ProcessEnv, service: AppService): SharedEnvironment {
+function buildAppEnvironment(context: CliContext, domains: DevelopmentDomains, databases: DevelopmentDatabases, ports: ReturnType<typeof buildPorts>, backendEnv: NodeJS.ProcessEnv, service: AppService): AppEnvironment {
     const preset = environmentPreset(context.env);
+
+    if ('backend' in service && (service.backend as BackendApp) === BackendApp.StatisticsSyncer) {
+        return buildStatisticsEnvironment(databases, ports, backendEnv, preset);
+    }
+
     const stamhoofdDomains = buildStamhoofdDomains(domains, preset);
     const shared = {
         environment: 'development',
@@ -196,6 +227,27 @@ function buildAppEnvironment(context: CliContext, domains: DevelopmentDomains, p
     } as BackendEnvironment;
 }
 
+/**
+ * Both databases sit on the one development MySQL, where production keeps the statistics database on
+ * the Metabase server: same credentials and port, only the name differs.
+ */
+function buildStatisticsEnvironment(databases: DevelopmentDatabases, ports: ReturnType<typeof buildPorts>, backendEnv: NodeJS.ProcessEnv, preset: EnvironmentPreset): StatisticsEnvironment {
+    const connection = {
+        DB_HOST: backendEnv.DB_HOST!,
+        DB_USER: backendEnv.DB_USER!,
+        DB_PASS: backendEnv.DB_PASS!,
+        DB_PORT: Number.parseInt(backendEnv.DB_PORT ?? String(mysqlInternalPort), 10),
+    };
+
+    return {
+        environment: 'development',
+        PORT: ports.api,
+        statisticsDatabase: { ...connection, DB_DATABASE: databases.platformStatistics },
+        stamhoofdDatabase: { ...connection, DB_DATABASE: databases.main },
+        IMPORTED_UNTIL: preset.statisticsImportedUntil,
+    };
+}
+
 function frontendPort(service: FrontendAppService['frontend'], ports: ReturnType<typeof buildPorts>): number | undefined {
     // Keep the public API string-compatible while using enum values internally for comparisons.
     const app = service as FrontendApp;
@@ -235,14 +287,30 @@ function backendPort(service: BackendAppService['backend'], ports: ReturnType<ty
     return ports.api;
 }
 
-function baseDatabase(env: string): string {
+/**
+ * The label an environment uses in the names of the resources it owns. Two environments predate the
+ * convention and keep their historical label.
+ */
+function environmentLabel(env: string): string {
     if (env === 'stamhoofd') {
-        return 'stamhoofd-development';
+        return 'development';
     }
     if (env === 'jambo') {
-        return 'stamhoofd-jamboree';
+        return 'jamboree';
     }
-    return `stamhoofd-${env}`;
+    return env;
+}
+
+function baseDatabase(env: string): string {
+    return `stamhoofd-${environmentLabel(env)}`;
+}
+
+/**
+ * The database the platform statistics live in, which Metabase reports on. Every environment gets
+ * its own, so a dashboard built against `platform-statistics-keeo` never reads Ravot numbers.
+ */
+function basePlatformStatisticsDatabase(env: string): string {
+    return `statistics-${environmentLabel(env)}`;
 }
 
 function environmentPreset(env: string): EnvironmentPreset {
@@ -256,6 +324,9 @@ function environmentPreset(env: string): EnvironmentPreset {
             memberNumberAlgorithm: MemberNumberAlgorithm.Incremental,
             memberNumberAlgorithmLength: 10,
             documentation: 'docs.keeo.fos.be',
+            // External statistics cover everything up to the 2024-2025 period, which is the first
+            // one this administration has complete data for.
+            statisticsImportedUntil: '2024-09-01',
         };
     }
     if (env === 'ravot') {

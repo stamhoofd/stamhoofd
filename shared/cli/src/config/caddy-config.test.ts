@@ -46,6 +46,14 @@ describe('Caddy config', () => {
         expect(subjects).toContain('*.files.stamhoofd');
     });
 
+    it('routes the shared Metabase host with TLS coverage', async () => {
+        const config = await writeCaddyConfig(context(rootDir));
+        const caddyConfig = JSON.parse(await fs.readFile(config, 'utf8'));
+
+        expect(routeHosts(caddyConfig)).toContain('metabase.stamhoofd');
+        expect(caddyConfig.apps.tls.automation.policies[0].subjects).toContain('metabase.stamhoofd');
+    });
+
     it('keeps WebSockets alive across reloads by setting stream_close_delay on every reverse_proxy', async () => {
         const config = await writeCaddyConfig(context(rootDir));
         const caddyConfig = JSON.parse(await fs.readFile(config, 'utf8'));

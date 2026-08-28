@@ -1,0 +1,382 @@
+-- The platform statistics database: a de-identified copy of the member administration that Metabase
+-- reports on. Rows are kept at their source grain and every figure is aggregated at query time, so
+-- the tables mirror the main database: same table names, same column names, same column types.
+--
+-- What is left out is everything that identifies a natural person by name or lets you contact them:
+-- `members` carries no name, no email address and no phone number, and every json column of the
+-- source is dropped, since `details` and `recordAnswers` hold exactly that. Keep that property when
+-- adding tables here.
+--
+-- Two fields on `members` are deliberate exceptions, both because a report needs them and nothing
+-- coarser will do: the date of birth and the postal code. Together with the unit and tak a
+-- registration already gives, and a gender, they are enough to single out a person. This database is
+-- therefore not anonymous — treat who can reach it as part of protecting it, not only what is in it.
+--
+-- Three columns are not copies of anything in the source:
+--
+--   * `source` says which pipeline wrote a row. The nightly reconciliation checks rows against the
+--     main database, and rows that came from an import have no counterpart there — without this it
+--     would delete every one of them on the first night.
+--   * `registration_periods`.`cutoffAt` freezes a period. Once it has passed, the sync stops writing
+--     anything belonging to that period, so the numbers for that year are settled and later changes
+--     in the administration no longer move them. It is per period because the boundary differs per
+--     platform and per year, and it is what makes room for data imported from a client's own
+--     statistics database: those years are frozen, so nothing overwrites them.
+--   * `registration_periods`.`lockedAt` freezes a period the administration has locked. `locked` is
+--     copied from there and says what is true now; this says the sync has acted on it. It is filled
+--     at the end of a run that came through in full, the incremental pass and the delete
+--     reconciliation both, so the changes and the deletions of the day the lock was set are written
+--     before the period stops being followed -- a run that failed halfway leaves it empty, and the
+--     next one reads that period again. Clearing it follows the administration back: a period
+--     unlocked to correct something is followed once more, unless it ended more than a year ago (see
+--     `releaseWindow` in `src/periods.ts`). Unlike a cutoff it leaves the period's own row alone,
+--     which keeps following the administration: that row carries `locked`, so freezing it would
+--     freeze the one field an unlock has to arrive through.
+--
+-- Freezing only holds if every row belongs to a period. The source keeps no history of its own: a
+-- unit, a tak, a netwerk and a functie are all just what they are called today, and a name read now
+-- would be the name printed against every year that unit or tak was ever counted in. So each of them
+-- is keyed on its own id *and* a period -- one row per year, saying what that thing was in that year
+-- -- and the sync writes them for the years still open only.
+--
+-- The price is that nothing can point at those tables with a foreign key: `id` no longer identifies a
+-- row, and the period a fact belongs to is not always the period its dimension row would be found
+-- under. The reports join them explicitly on both columns instead. Every foreign key that remains
+-- points at `registration_periods`, which is the one table keyed on `id` alone.
+
+CREATE TABLE `registration_periods` (
+  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
+  `startDate` datetime NOT NULL,
+  `endDate` datetime NOT NULL,
+  `locked` tinyint NOT NULL DEFAULT '0',
+  `organizationId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `previousPeriodId` varchar(36) DEFAULT NULL,
+  `nextPeriodId` varchar(36) DEFAULT NULL,
+  `customName` varchar(200) DEFAULT NULL,
+  `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT 'The label the reports show for this period, e.g. "2024 - 2025". Derived from customName or the dates, because a Metabase filter can only offer the values of a real column.',
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
+  `cutoffAt` datetime DEFAULT NULL COMMENT 'From when this period is frozen: the sync stops writing rows belonging to it. Null means it is still live.',
+  `lockedAt` datetime DEFAULT NULL COMMENT 'When the sync settled this period after the administration locked it: from then on nothing belonging to it is written. Null means it is still followed.',
+  PRIMARY KEY (`id`),
+  KEY `organizationId` (`organizationId`),
+  KEY `previousPeriodId` (`previousPeriodId`),
+  KEY `startDate` (`startDate`),
+  KEY `name` (`name`),
+  KEY `source` (`source`),
+  KEY `cutoffAt` (`cutoffAt`),
+  KEY `lockedAt` (`lockedAt`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- An organization is a legal entity, not a natural person, so its name and where it is are not
+-- personal data. `postalCode` and `city` are flattened out of the source `address` json: the report
+-- maps units by postal code and lists them by city. The rest of the address is left behind.
+CREATE TABLE `organizations` (
+  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `uri` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `postalCode` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `city` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT '1',
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
+  PRIMARY KEY (`id`,`periodId`),
+  -- The uri is unique per year rather than outright, for the same reason the primary key is.
+  UNIQUE KEY `uri` (`uri`,`periodId`) USING BTREE,
+  KEY `periodId` (`periodId`),
+  KEY `name` (`name`),
+  KEY `postalCode` (`postalCode`),
+  KEY `city` (`city`),
+  KEY `source` (`source`),
+  CONSTRAINT `organizations_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Where a postal code is, so the reports can put members and units on a map.
+--
+-- Metabase plots a map from latitude and longitude columns, and nothing in Stamhoofd holds those:
+-- neither the postal codes it stores nor the addresses on its members. This table is therefore not a
+-- copy of anything and the sync never writes it — it is loaded once from a list of postal code
+-- centres. Until it is, the map cards simply have nothing to plot.
+--
+-- A centre point rather than an address: two members in the same postal code get the same
+-- coordinates, so this adds nothing to what the postal code already says about where someone lives.
+CREATE TABLE `postal_codes` (
+  `postalCode` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `city` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `latitude` decimal(9,6) NOT NULL,
+  `longitude` decimal(9,6) NOT NULL,
+  PRIMARY KEY (`postalCode`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- The platform this database holds the statistics of.
+--
+-- `membershipOrganizationId` points at the organization the platform runs itself, the one that is not
+-- a local group: the jeugdbewegingen report delivers it as the only bovenlokale
+-- ondersteuningsstructuur. Only the pointer is kept, because what that sheet prints -- the name of
+-- that organization in a given werkjaar -- is already in `organizations`. No foreign key on it for
+-- the reason given above: `organizations` is keyed on an id and a period.
+--
+-- `reducedPriceName` is what this platform calls its lower lidgeld -- SOMkort, kansentarief -- which
+-- is a label the platform sets and nothing else in here knows. It is the one every report prints
+-- beside `standaardtarief`, so a member paying the lower one is named the way the koepel names it
+-- rather than in words of this database's own.
+--
+-- Keyed on the id alone rather than per period, unlike the configuration below. Nothing is reported
+-- per year out of this row: it says which platform this is, which organization is its own and what it
+-- calls its lower tarief. Renaming that tarief therefore renames it in the settled years too, which
+-- is a label moving rather than a figure changing.
+CREATE TABLE `platform` (
+  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `membershipOrganizationId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `reducedPriceName` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'What this platform calls its verlaagd lidgeld, e.g. SOMkort. Null means it names none, and the reports fall back to their own wording.',
+  PRIMARY KEY (`id`),
+  KEY `membershipOrganizationId` (`membershipOrganizationId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Platform configuration that lives in json on the platform record in the main database. It is
+-- flattened into tables here so Metabase can join and group on it.
+CREATE TABLE `organization_tags` (
+  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  PRIMARY KEY (`id`,`periodId`),
+  KEY `periodId` (`periodId`),
+  KEY `name` (`name`),
+  CONSTRAINT `organization_tags_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Which netwerk an organization belongs to, per period. The source only knows the tags it carries
+-- now, so the sync records them against the period the organization is in; a settled year keeps the
+-- netwerk it was recorded with while it was live, instead of moving along with the organization.
+CREATE TABLE `_organizations_organization_tags` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `organizationsId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `organizationTagsId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
+  PRIMARY KEY (`id`),
+  -- The period before the tag, though the three together are what is unique: the netwerk cards look a
+  -- unit up per year, and a column in between would leave the year unusable to that lookup.
+  UNIQUE KEY `organizationsId,periodId,organizationTagsId` (`organizationsId`,`periodId`,`organizationTagsId`) USING BTREE,
+  KEY `organizationTagsId` (`organizationTagsId`),
+  KEY `periodId` (`periodId`),
+  KEY `source` (`source`),
+  CONSTRAINT `_organizations_organization_tags_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- The takken every organization's groups map onto.
+--
+-- Set it once per tak. The sync writes a row per tak per period so a new werkjaar inherits it rather than
+-- arriving empty. Only blanks are filled, so a correction stays in the year it was made.
+CREATE TABLE `default_age_groups` (
+  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `minAge` int DEFAULT NULL,
+  `maxAge` int DEFAULT NULL,
+  PRIMARY KEY (`id`,`periodId`),
+  KEY `periodId` (`periodId`),
+  KEY `minAge` (`minAge`),
+  CONSTRAINT `default_age_groups_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `platform_membership_types` (
+  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  PRIMARY KEY (`id`,`periodId`),
+  KEY `periodId` (`periodId`),
+  KEY `name` (`name`),
+  CONSTRAINT `platform_membership_types_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Which functie a member holds. This is what separates leiding from the members they lead.
+CREATE TABLE `responsibilities` (
+  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  PRIMARY KEY (`id`,`periodId`),
+  KEY `periodId` (`periodId`),
+  KEY `name` (`name`),
+  CONSTRAINT `responsibilities_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- `name` is flattened out of the source `settings` json, which also holds descriptions and prices
+-- that the reports have no use for.
+CREATE TABLE `groups` (
+  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `type` varchar(36) NOT NULL DEFAULT 'Membership',
+  `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `organizationId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `defaultAgeGroupId` varchar(36) DEFAULT NULL,
+  `status` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'Open',
+  `deletedAt` datetime DEFAULT NULL,
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
+  PRIMARY KEY (`id`),
+  KEY `organizationId` (`organizationId`),
+  KEY `periodId` (`periodId`),
+  KEY `defaultAgeGroupId` (`defaultAgeGroupId`),
+  KEY `source` (`source`),
+  CONSTRAINT `groups_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- One row per member per period, carrying only what the reports group by: what was true of this
+-- member in that year.
+--
+-- A gender, a postal code and even a birth date are answers as they stand today, and they change --
+-- someone moves, or fills in a gender the year after. Keyed on the member alone, one year's answer
+-- would stand in for every year that member was ever counted in, and a correction made now would
+-- reach back into years that were settled long ago. The period is also what lets the sync leave a
+-- settled year alone, the same way it does for every other table here.
+--
+-- `birthDate` and `postalCode` are the two fields here that describe a natural person. The report
+-- charts members by age and by birth year and maps them by postal code, and an age is only exact
+-- with the date behind it. Stored as a real date rather than the source's `varchar(10)`, so age is a
+-- date calculation instead of string arithmetic.
+--
+-- Those two together with the unit and tak a registration already gives, plus a gender, are enough to
+-- single out a person in a small tak. This database is therefore not anonymous: treat who can reach
+-- it as part of protecting it, not only what is in it.
+--
+-- Members are never deleted from here, even when their source row is gone: their row is what the
+-- facts of a settled year join to for demographics, and without it every registration it carried
+-- drops out of that year's numbers.
+CREATE TABLE `members` (
+  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `birthDate` date DEFAULT NULL,
+  `gender` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `postalCode` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `organizationId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  `lastRegisteredAt` datetime DEFAULT NULL,
+  `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
+  -- The member first: the reports look one up across the years, which reads the key left to right.
+  PRIMARY KEY (`id`,`periodId`),
+  KEY `periodId` (`periodId`),
+  KEY `organizationId` (`organizationId`),
+  KEY `birthDate` (`birthDate`),
+  KEY `gender` (`gender`),
+  KEY `postalCode` (`postalCode`),
+  KEY `source` (`source`),
+  -- Restrict, like the registrations: dropping a period would take the member rows of a settled year with it.
+  CONSTRAINT `members_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- One row per member per group, so a member registered for several groups keeps one row per group.
+-- Retention is answered by comparing these rows across periods, which is why they are kept at this
+-- grain instead of being counted up front.
+CREATE TABLE `registrations` (
+  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `organizationId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `memberId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `groupId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `registeredAt` datetime DEFAULT NULL COMMENT 'Date of the registration or renewal. This is null if the registration is not yet active (e.g. during payment)',
+  `startDate` datetime DEFAULT NULL,
+  `endDate` datetime DEFAULT NULL,
+  `trialUntil` datetime DEFAULT NULL,
+  `deactivatedAt` datetime DEFAULT NULL COMMENT 'Set if the registration was canceled or deactivated during the group cycle. Keep this null at the end of the group cycle.',
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
+  PRIMARY KEY (`id`),
+  -- Every figure in the report starts here, at `report/includes/facts.sql`: the live registrations of
+  -- one year, and the member, groep and eenheid each of them points at. Those six columns are the
+  -- whole of what that reads, so the scan is answered from this index without touching a row. It
+  -- leads on the period because that is what the scoutsjaar filter fixes, and it stands in for a
+  -- plain index on `periodId`.
+  KEY `facts` (`periodId`,`deactivatedAt`,`registeredAt`,`memberId`,`groupId`,`organizationId`),
+  KEY `memberId` (`memberId`) USING BTREE,
+  KEY `groupId` (`groupId`),
+  KEY `organizationId` (`organizationId`),
+  KEY `registeredAt` (`registeredAt`),
+  KEY `source` (`source`),
+  CONSTRAINT `registrations_ibfk_1` FOREIGN KEY (`groupId`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `registrations_ibfk_2` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Which lidgeld a member holds in a period. The price columns of the source are dropped: these
+-- reports count members, not money.
+--
+-- `reducedPrice` is the exception, and it is a tarief rather than a price: whether this lidgeld was
+-- charged at the platform's lower tarief instead of the standard one. That is what the reports split
+-- the lidgelden by -- the aansluiting a member holds says what they are aangesloten for, and says
+-- nothing about what they paid for it.
+--
+-- Nothing in the source records it per lidgeld: the price is worked out from whether the member has
+-- financiële ondersteuning or an active UITPAS at the moment it is calculated, and only the resulting
+-- amount is stored. The sync therefore reads that same status off the member, which is the input the
+-- price was made from. It is a status about a person and a sensitive one at that, kept here as a
+-- single flag and no more -- see the note at the top of this file on who may reach this database.
+CREATE TABLE `member_platform_memberships` (
+  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
+  `memberId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `membershipTypeId` varchar(36) NOT NULL,
+  `reducedPrice` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Whether this lidgeld was charged at the platform reduced tarief rather than the standard one',
+  `organizationId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `startDate` datetime NOT NULL,
+  `endDate` datetime NOT NULL,
+  `expireDate` datetime DEFAULT NULL,
+  `trialUntil` datetime DEFAULT NULL,
+  `deletedAt` datetime DEFAULT NULL,
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
+  PRIMARY KEY (`id`),
+  KEY `memberId` (`memberId`),
+  KEY `membershipTypeId` (`membershipTypeId`),
+  KEY `organizationId` (`organizationId`),
+  -- The lidgeld cards ask for the memberships of one year held by a set of members, in that order.
+  KEY `periodId,memberId` (`periodId`,`memberId`),
+  KEY `source` (`source`),
+  CONSTRAINT `member_platform_memberships_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- One row per period a record runs through, which is what makes "wie had deze functie in dit jaar"
+-- answerable: a record carries a date range rather than a year, and a functie held for three years
+-- is held in each of them.
+CREATE TABLE `member_responsibility_records` (
+  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
+  `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `memberId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `groupId` varchar(36) DEFAULT NULL,
+  `organizationId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `responsibilityId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `startDate` datetime NOT NULL,
+  `endDate` datetime DEFAULT NULL,
+  `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
+  PRIMARY KEY (`id`,`periodId`),
+  KEY `memberId,organizationId` (`memberId`,`organizationId`) USING BTREE,
+  KEY `responsibilityId` (`responsibilityId`) USING BTREE,
+  KEY `periodId` (`periodId`),
+  KEY `organizationId` (`organizationId`),
+  KEY `groupId` (`groupId`),
+  KEY `source` (`source`),
+  CONSTRAINT `member_responsibility_records_ibfk_1` FOREIGN KEY (`groupId`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `member_responsibility_records_ibfk_2` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Bookkeeping for the sync job. One row per synced table, so every table advances on its own and a
+-- table that fails keeps retrying from where it got to without holding up the others.
+--
+-- `watermark` is the highest `updatedAt` of the source rows that made it in. The next run reads from
+-- slightly before it (see the overlap in the sync), which is what makes a crashed or half-finished
+-- run harmless: rows are written again rather than skipped.
+CREATE TABLE `stats_sync_state` (
+  `tableName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `watermark` datetime DEFAULT NULL COMMENT 'Highest updatedAt of the source rows synced so far. Null means nothing was synced yet, which is also how a full backfill starts.',
+  `lastSucceededAt` datetime DEFAULT NULL COMMENT 'End of the last incremental run that completed without an error',
+  `lastReconciledAt` datetime DEFAULT NULL COMMENT 'End of the last run that reconciled deletes against the source table',
+  `updatedAt` datetime NOT NULL,
+  PRIMARY KEY (`tableName`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

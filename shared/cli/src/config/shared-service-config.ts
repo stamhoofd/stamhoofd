@@ -13,11 +13,13 @@ export const maildevContainer = 'stamhoofd-maildev';
 export const rustfsContainer = 'stamhoofd-rustfs';
 export const corednsContainer = 'stamhoofd-coredns';
 export const caddyContainer = 'stamhoofd-caddy';
+export const metabaseContainer = 'stamhoofd-metabase';
 
 export const mysqlImage = 'docker.io/library/mysql:8.4';
 export const maildevImage = 'docker.io/maildev/maildev:2.2.1';
 export const rustfsImage = 'docker.io/rustfs/rustfs:latest';
 export const corednsImage = 'docker.io/coredns/coredns:1.11.3';
+export const metabaseImage = 'docker.io/metabase/metabase:v0.63.3';
 
 /**
  * The local SSO server. Kept in sync with the image the Playwright CI job pre-pulls
@@ -44,6 +46,15 @@ export const maildevPassword = 'password';
 export const localFilesAccessKey = 'stamhoofd-local';
 export const localFilesSecretKey = 'stamhoofd-local-secret';
 export const localPrimaryBucket = 'stamhoofd-local';
+
+/**
+ * Metabase keeps its own state (questions, dashboards, users) in an "application database",
+ * separate from the databases it reports on. It gets its own database on the shared MySQL
+ * container, so it survives `stam clean db` and container restarts. Metabase ships with an
+ * embedded H2 database instead, but that one is explicitly unsupported for anything but a
+ * throwaway trial and cannot be migrated in place later.
+ */
+export const metabaseAppDatabase = 'stamhoofd-metabase';
 
 export const defaultMysqlInnodbBufferPoolSize = '4G';
 export const defaultInnodbBufferPoolInstances = '4';
@@ -75,6 +86,7 @@ export const maildevInternalHttpPort = 1080;
 export const rustfsInternalApiPort = 9000;
 export const rustfsInternalConsolePort = 9001;
 export const ssoInternalPort = 8080;
+export const metabaseInternalPort = 3000;
 
 export const corednsPort = 53;
 export const corednsUnprivilegedHostPort = 1053;
