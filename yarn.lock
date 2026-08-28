@@ -1406,6 +1406,15 @@
     zod "^3.25.0 || ^4.0.0"
     zod-to-json-schema "^3.24.1"
 
+"@mollie/api-client@4.6.0":
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/@mollie/api-client/-/api-client-4.6.0.tgz#ced7fba08689179abc09cc9f8f414477c6292153"
+  integrity sha512-7G3Ya3Yf+Z3q7aNhtlStxWp4p7FEgmWPyoq23crTcjmrYmos6hMjCweMKCPRj/aW7Z3UX7yark/lTgZRQvF4Cw==
+  dependencies:
+    "@types/node-fetch" "^2.6.13"
+    node-fetch "^2.7.0"
+    ruply "^1.0.1"
+
 "@mswjs/interceptors@^0.41.0":
   version "0.41.9"
   resolved "https://registry.yarnpkg.com/@mswjs/interceptors/-/interceptors-0.41.9.tgz#9d90bbd60d1ddc30dbcbb827a9bb2e470493530d"
@@ -2360,6 +2369,14 @@
     "@sigstore/core" "^3.2.1"
     "@sigstore/protobuf-specs" "^0.5.0"
 
+"@simonbackx/simple-database@1.37.1":
+  version "1.37.1"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.37.1.tgz#da8f556891e311d0d14c30cd58ee2b53376e89d0"
+  integrity sha512-lhQOgBiGtERHm9QmNpF1HZtuJ8QBlqA2L794KVJy9kj7AlCMwDuvwtYg6Qr5xqdUz8On4RPGn4C0zcNL7+iqdA==
+  dependencies:
+    "@simonbackx/simple-logging" "^1.0.0"
+    mysql2 "3.14.1"
+
 "@simonbackx/simple-database@1.39.0":
   version "1.39.0"
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.39.0.tgz#0b3793c06299620d01bb9015028ead931561c167"
@@ -2523,6 +2540,11 @@
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@stablelib/base64/-/base64-1.0.1.tgz#bdfc1c6d3a62d7a3b7bbc65b6cce1bb4561641be"
   integrity sha512-1bnPQqSxSuc3Ii6MhBysoWCg58j97aUjuCSZrGSmDxNqtytIi0k8utUenAwTZN4V5mXXYGsVUI9zeBqy+jBOSQ==
+
+"@stamhoofd/test-utils@2.140.0":
+  version "2.140.0"
+  resolved "https://registry.yarnpkg.com/@stamhoofd/test-utils/-/test-utils-2.140.0.tgz#cbd4164e6581b0ff949ecfaf8a8c0c776699718d"
+  integrity sha512-PVEXFjBb/wdaKXvc2O7uikIhBIQ3ypqdGdYyfIZDrDUl4/CPUyE1z6+z51awAsWKHwVbhGWWQplQMzSWTsgRPQ==
 
 "@standard-schema/spec@^1.1.0":
   version "1.1.0"
@@ -3000,7 +3022,7 @@
   resolved "https://registry.yarnpkg.com/@types/minimist/-/minimist-1.2.5.tgz#ec10755e871497bcd83efe927e43ec46e8c0747e"
   integrity sha512-hov8bUuiLiyFPGyFPE1lwWhmzYbirOXQNNo40+y3zow8aFVTeyn3VWL0VFFfdNddA8S4Vf0Tc062rzyNr7Paag==
 
-"@types/node-fetch@^2.6.4":
+"@types/node-fetch@^2.6.13", "@types/node-fetch@^2.6.4":
   version "2.6.13"
   resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.6.13.tgz#e0c9b7b5edbdb1b50ce32c127e85e880872d56ee"
   integrity sha512-QGpRVpzSaUs30JBSGPjOg4Uveu384erbHBoT1zeONvyCfwQxIkUshLAOqN/k9EjGviPRmWTTe6aH2qySWKTVSw==
@@ -8552,7 +8574,7 @@ node-exports-info@^1.6.0:
     object.entries "^1.1.9"
     semver "^6.3.1"
 
-node-fetch@2.7.0, node-fetch@^2.6.7:
+node-fetch@2.7.0, node-fetch@^2.6.7, node-fetch@^2.7.0:
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.7.0.tgz#d0f0fa6e3e2dc1d27efcd8ad99d550bda94d187d"
   integrity sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==
@@ -10247,6 +10269,11 @@ run-async@^4.0.5:
   version "4.0.6"
   resolved "https://registry.yarnpkg.com/run-async/-/run-async-4.0.6.tgz#d53b86acb71f42650fe23de2b3c1b6b6b34b9294"
   integrity sha512-IoDlSLTs3Yq593mb3ZoKWKXMNu3UpObxhgA/Xuid5p4bbfi2jdY1Hj0m1K+0/tEuQTxIGMhQDqGjKb7RuxGpAQ==
+
+ruply@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/ruply/-/ruply-1.0.1.tgz#9f54177232500b88d249e2f0af7bb5c63f883fa4"
+  integrity sha512-p39LnaaJyuucPGlgaB0KiyifpcuOkn24+Hq5y0ejAD/LlH+mRAbkHn2tckCLgHir+S+nis1WYG+TYEC4zHX0WQ==
 
 rxjs@7.8.2, rxjs@^7.8.2:
   version "7.8.2"

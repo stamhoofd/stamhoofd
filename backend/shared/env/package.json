@@ -17,7 +17,7 @@
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "2.147.0",
-        "@stamhoofd/types": "2.140.0"
+        "@stamhoofd/types": "2.147.0"
     },
     "peerDependencies": {
         "@stamhoofd/cli": "*"

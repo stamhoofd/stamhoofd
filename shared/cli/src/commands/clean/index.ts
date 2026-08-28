@@ -8,6 +8,7 @@ import { showHelp } from '../../runtime/show-help.js';
 import { confirm, warning } from '../../runtime/ux.js';
 import { metabaseService } from '../../services/definitions/metabase-service.js';
 import { ssoService } from '../../services/definitions/sso-service.js';
+import * as docker from '../../services/docker.js';
 import { deleteSharedServicesData, stopSharedServices } from '../../services/shared-services.js';
 
 export enum CleanTarget {
