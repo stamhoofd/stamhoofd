@@ -78,7 +78,7 @@ export class DocumentSettings extends AutoEncoder {
     @field({
         decoder: IntegerDecoder,
         nullable: true,
-        ...NextVersion,
+        version: 415,
     })
     maxAgeSevereDisability: number | null = null;
 }

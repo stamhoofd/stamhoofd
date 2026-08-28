@@ -234,7 +234,7 @@ export class MemberDetails extends AutoEncoder {
      */
     @field({
         decoder: BooleanStatus,
-        ...NextVersion,
+        version: 415,
         nullable: true,
     })
     severeDisability: BooleanStatus | null;
