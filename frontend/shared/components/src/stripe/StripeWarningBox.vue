@@ -31,7 +31,7 @@ const stripeWarnings = computed(() => {
 loadStripeAccounts(null).catch(console.error);
 
 async function loadStripeAccounts(recheckStripeAccount: string | null) {
-    if (!auth.hasFullAccess() || !auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)) return;
+    if (!auth.hasFullAccess()) return;
 
     try {
         loadingStripeAccounts.value = true;
