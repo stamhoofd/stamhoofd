@@ -1,7 +1,7 @@
 import { Args } from '@oclif/core';
 import { BaseCommand } from '../../base-command.js';
 import { dryRunFlag, yesFlag } from '../../command-flags.js';
-import { localIpv4Host, metabaseAppDatabase, mysqlContainer, mysqlRootPassword, mysqlRootUser } from '../../config/shared-service-config.js';
+import { metabaseAppDatabase } from '../../config/shared-service-config.js';
 import { currentDatabase, dropDatabase } from '../../runtime/database-command-helpers.js';
 import { cleanBuild } from '../../runtime/monorepo-runner.js';
 import { showHelp } from '../../runtime/show-help.js';
@@ -168,7 +168,7 @@ export default class Clean extends BaseCommand {
     }
 
     private async dropMetabaseDatabase(): Promise<void> {
-        await docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-e', `DROP DATABASE IF EXISTS \`${metabaseAppDatabase.replaceAll('`', '``')}\`;`], { allowFailure: true });
+        await dropDatabase(metabaseAppDatabase);
     }
 
     private validateTargetFlags(target: CleanTarget, flags: { env?: string; name?: string }): void {
