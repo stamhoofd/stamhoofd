@@ -19,6 +19,7 @@
                 {{ $t('%Gm') }}
             </p>
             <BillingWarningBox />
+            <StripeWarningBox />
 
             <p v-if="$isPlatform">
                 <a :href="$domains.getDocs('stappenplan-opstart-werkjaar')" target="_blank" class="button text selected">
@@ -41,9 +42,9 @@ import { useDashboardQuickActions } from '@stamhoofd/components/quick-actions/ho
 import QuickActionsBox from '@stamhoofd/components/quick-actions/QuickActionsBox.vue';
 import BillingWarningBox from '../dashboard/settings/packages/BillingWarningBox.vue';
 import SetupStepsView from './SetupStepsView.vue';
+import StripeWarningBox from '@stamhoofd/components/stripe/StripeWarningBox.vue';
 
 const auth = useAuth();
 const quickActions = useDashboardQuickActions();
 const organization = useRequiredOrganization();
-
 </script>

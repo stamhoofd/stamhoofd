@@ -9,13 +9,7 @@
 
             <BillingWarningBox />
 
-            <p v-for="(stripeWarning, index) of stripeWarnings" :key="'stripe-warning-'+index" :class="stripeWarning.type + '-box'">
-                {{ stripeWarning.text }}
-
-                <a :href="$domains.getDocs('documenten-stripe-afgekeurd')" target="_blank" class="button text">
-                    {{ $t('%19t') }}
-                </a>
-            </p>
+            <StripeWarningBox />
 
             <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.General)">
@@ -303,17 +297,16 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import StripeWarningBox from '@stamhoofd/components/stripe/StripeWarningBox.vue';
 
 import type { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { LoginMethodConfig } from '@stamhoofd/structures';
-import { DataPermissionsSettings, DetailedPayableBalance, EmailTemplate, EmailTemplateType, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, LoginMethod, LoginProviderType, Organization, OrganizationMetaData, StripeAccount } from '@stamhoofd/structures';
-import type { Ref } from 'vue';
-import { computed, ref } from 'vue';
+import { DataPermissionsSettings, DetailedPayableBalance, EmailTemplate, EmailTemplateType, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, LoginMethod, LoginProviderType, Organization, OrganizationMetaData } from '@stamhoofd/structures';
+import { computed } from 'vue';
 
 import { usePatchOrganization } from '@stamhoofd/components/organizations/usePatchOrganization.ts';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
@@ -515,17 +508,11 @@ defineRoutes([
 ]);
 
 const $navigate = useNavigate();
-const stripeAccounts = ref([]) as Ref<StripeAccount[]>;
-const loadingStripeAccounts = ref(false);
 const context = useContext();
 const owner = useRequestOwner();
-const stripeWarnings = computed(() => {
-    return stripeAccounts.value.flatMap(a => a.warning ? [a.warning] : []);
-});
 
 const salesDisabled = useSalesDisabled();
 const membersPackage = useMembersPackage();
-loadStripeAccounts(null).catch(console.error);
 
 const isShowPremises = computed(() => {
     if (platform.value.config.premiseTypes.length > 0) {
@@ -548,49 +535,4 @@ async function loadPayableBalance() {
 
     return response.data;
 }
-
-async function loadStripeAccounts(recheckStripeAccount: string | null) {
-    try {
-        loadingStripeAccounts.value = true;
-        if (recheckStripeAccount) {
-            try {
-                await context.value.authenticatedServer.request({
-                    method: 'POST',
-                    path: '/stripe/accounts/' + encodeURIComponent(recheckStripeAccount),
-                    decoder: StripeAccount as Decoder<StripeAccount>,
-                    owner,
-                });
-            } catch (e) {
-                console.error(e);
-            }
-        }
-        const response = await context.value.authenticatedServer.request({
-            method: 'GET',
-            path: '/stripe/accounts',
-            decoder: new ArrayDecoder(StripeAccount as Decoder<StripeAccount>),
-            owner,
-        });
-        stripeAccounts.value = response.data;
-
-        if (!recheckStripeAccount) {
-            for (const account of stripeAccounts.value) {
-                try {
-                    const response = await context.value.authenticatedServer.request({
-                        method: 'POST',
-                        path: '/stripe/accounts/' + encodeURIComponent(account.id),
-                        decoder: StripeAccount as Decoder<StripeAccount>,
-                        owner,
-                    });
-                    account.deepSet(response.data);
-                } catch (e) {
-                    console.error(e);
-                }
-            }
-        }
-    } catch (e) {
-        console.error(e);
-    }
-    loadingStripeAccounts.value = false;
-}
-
 </script>
