@@ -2169,10 +2169,10 @@
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@plausible-analytics/tracker@0.4.5":
-  version "0.4.5"
-  resolved "https://registry.yarnpkg.com/@plausible-analytics/tracker/-/tracker-0.4.5.tgz#9f0cbebc945a0ac59e27f57540da984d82def449"
-  integrity sha512-6BfAGejXY+YA3Cw6LYT2Zpn4hTxDtPQAawFsYUsQCOg78wIS5C4deAGXTfJffa5VleMWITv5lpJ/EYuQBl1tPA==
+"@plausible-analytics/tracker@0.4.6":
+  version "0.4.6"
+  resolved "https://registry.yarnpkg.com/@plausible-analytics/tracker/-/tracker-0.4.6.tgz#e77a2043fb8dee65508b568de7d6e7cfbcddd7d2"
+  integrity sha512-nbu6xGgSP6jeYuoVklZBzucUnIpo75tVu3Kr+R0EDycVKaMC/jF5Q/YCaM/8gR4fPZ1IDcXt6FdBJFZ1uZwEPA==
 
 "@playwright/test@1.60.0":
   version "1.60.0"
