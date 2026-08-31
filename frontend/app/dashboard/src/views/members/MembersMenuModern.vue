@@ -412,6 +412,8 @@ type Action = {
 );
 
 const canSetDefaultPeriod = computed(() => {
+    if (!auth.hasFullAccess()) return false;
+
     if (period.value.id === organization.value.period.id) {
         return false;
     }
