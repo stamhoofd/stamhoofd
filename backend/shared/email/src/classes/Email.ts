@@ -497,7 +497,7 @@ class EmailStatic {
     getWebmasterToEmail() {
         return {
             name: 'Stamhoofd',
-            email: 'hallo@stamhoofd.be',
+            email: 'webmaster@stamhoofd.be',
         };
     }
 
