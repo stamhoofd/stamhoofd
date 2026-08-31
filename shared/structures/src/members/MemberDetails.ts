@@ -41,7 +41,7 @@ export class BooleanStatus extends AutoEncoder {
     }
 }
 
-export type MemberProperty = 'birthDay' | 'gender' | 'address' | 'parents' | 'emailAddress' | 'phone' | 'emergencyContacts' | 'dataPermission' | 'financialSupport' | 'uitpasNumber' | 'nationalRegisterNumber' | 'parents.nationalRegisterNumber';
+export type MemberProperty = 'birthDay' | 'gender' | 'address' | 'parents' | 'emailAddress' | 'phone' | 'emergencyContacts' | 'dataPermission' | 'financialSupport' | 'uitpasNumber' | 'nationalRegisterNumber' | 'parents.nationalRegisterNumber' | 'taxDependent' | 'parents.taxDependent';
 export type MemberPropertyWithFilter = Exclude<MemberProperty, 'dataPermission' | 'financialSupport' | 'parents.nationalRegisterNumber'>;
 /**
  * This full model is always encrypted before sending it to the server. It is never processed on the server - only in encrypted form.

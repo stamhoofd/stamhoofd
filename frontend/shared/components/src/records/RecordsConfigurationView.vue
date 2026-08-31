@@ -150,8 +150,7 @@ async function save() {
     try {
         await props.saveHandler(patch.value);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 
