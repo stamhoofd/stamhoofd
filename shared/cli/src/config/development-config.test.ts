@@ -105,10 +105,10 @@ describe('buildDevelopmentConfig', () => {
         const databaseFor = (env: string) => buildDevelopmentConfig(context({ env })).databases.platformStatistics;
 
         expect(databaseFor('stamhoofd')).toBe('statistics-development');
-        expect(databaseFor('keeo')).toBe('platform-statistics-keeo');
-        expect(databaseFor('ravot')).toBe('platform-statistics-ravot');
+        expect(databaseFor('keeo')).toBe('statistics-keeo');
+        expect(databaseFor('ravot')).toBe('statistics-ravot');
         // Historical label, kept in step with the main database of the same environment.
-        expect(databaseFor('jambo')).toBe('platform-statistics-jamboree');
+        expect(databaseFor('jambo')).toBe('statistics-jamboree');
     });
 
     it('keeps the platform statistics database of a secondary instance separate', () => {
@@ -122,14 +122,14 @@ describe('buildDevelopmentConfig', () => {
             },
         }));
 
-        expect(config.databases.platformStatistics).toBe('platform-statistics-keeo-keeo-feature');
+        expect(config.databases.platformStatistics).toBe('statistics-keeo-keeo-feature');
         expect(config.databases.main).toBe(config.backendEnv.DB_DATABASE);
     });
 
     it('gives the syncer both databases, which it moves rows between', () => {
         const config = buildDevelopmentConfig(context({ env: 'ravot' }), { backend: 'statistics-syncer' });
 
-        expect(config.appEnv).toHaveProperty('statisticsDatabase.DB_DATABASE', 'platform-statistics-ravot');
+        expect(config.appEnv).toHaveProperty('statisticsDatabase.DB_DATABASE', 'statistics-ravot');
         expect(config.appEnv).toHaveProperty('stamhoofdDatabase.DB_DATABASE', config.backendEnv.DB_DATABASE);
         // Both sit on the one development MySQL, so the syncer reaches them the same way.
         const port = Number.parseInt(config.backendEnv.DB_PORT!, 10);

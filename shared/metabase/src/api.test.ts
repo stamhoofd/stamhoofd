@@ -70,7 +70,7 @@ describe('MetabaseApi.authenticate', () => {
 });
 
 describe('MetabaseApi.ensureDatabase', () => {
-    const input = { name: 'Platform statistics (keeo)', host: 'host.docker.internal', port: 3307, database: 'platform-statistics-keeo', user: 'root', password: 'root' };
+    const input = { name: 'Platform statistics (keeo)', host: 'host.docker.internal', port: 3307, database: 'statistics-keeo', user: 'root', password: 'root' };
 
     it('registers the database when it is not registered yet', async () => {
         const calls = mockFetch({

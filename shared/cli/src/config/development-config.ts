@@ -307,7 +307,7 @@ function baseDatabase(env: string): string {
 
 /**
  * The database the platform statistics live in, which Metabase reports on. Every environment gets
- * its own, so a dashboard built against `platform-statistics-keeo` never reads Ravot numbers.
+ * its own, so a dashboard built against `statistics-keeo` never reads Ravot numbers.
  */
 function basePlatformStatisticsDatabase(env: string): string {
     return `statistics-${environmentLabel(env)}`;

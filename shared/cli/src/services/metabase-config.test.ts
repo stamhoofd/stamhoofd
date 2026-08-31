@@ -6,7 +6,7 @@ import { buildMetabaseConfigOutput } from './metabase-config.js';
 describe('buildMetabaseConfigOutput', () => {
     const output = buildMetabaseConfigOutput(
         { metabase: 'metabase.stamhoofd' } as DevelopmentDomains,
-        { name: 'Platform statistics (keeo)', database: 'platform-statistics-keeo', mysqlPort: 3307 },
+        { name: 'Platform statistics (keeo)', database: 'statistics-keeo', mysqlPort: 3307 },
     );
 
     it('prints the proxied Metabase URL', () => {
@@ -16,7 +16,7 @@ describe('buildMetabaseConfigOutput', () => {
     it('prints data source settings that resolve from inside the container', () => {
         expect(output).toContain(`Host:          ${dockerHostGateway}`);
         expect(output).toContain('Port:          3307');
-        expect(output).toContain('Database name: platform-statistics-keeo');
+        expect(output).toContain('Database name: statistics-keeo');
         expect(output).toContain('Name:          Platform statistics (keeo)');
     });
 });
