@@ -276,6 +276,8 @@ export class DocumentTemplate extends QueryableModel {
         const hasDebtor = allRecords.find(s => s.id.startsWith('debtor.'));
 
         if (hasDebtor) {
+            const hasTaxDependentParents = registration.member.details.parents.filter(p => p.taxDependent === true);
+
             const parentsWithNRN = registration.member.details.parents.filter(p => p.nationalRegisterNumber !== NationalRegisterNumberOptOut && p.nationalRegisterNumber);
             let debtor: Parent | undefined = parentsWithNRN[0] ?? registration.member.details.parents[0];
             if (parentsWithNRN.length > 1) {

@@ -1,4 +1,4 @@
-import type { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
 
 import { AccessRight } from '../AccessRight.js';
@@ -10,7 +10,7 @@ import { PermissionLevel } from '../PermissionLevel.js';
 import { PermissionsResourceType } from '../PermissionsResourceType.js';
 
 import type { Document as DocumentStruct } from '../Document.js';
-import { Platform } from '../Platform.js';
+import type { Platform } from '../Platform.js';
 import type { UserWithMembers } from '../UserWithMembers.js';
 import type { Address } from '../addresses/Address.js';
 import type { PropertyFilter } from '../filters/PropertyFilter.js';
@@ -842,7 +842,18 @@ export class PlatformMember implements ObjectWithRecords {
             property = 'nationalRegisterNumber';
         }
 
+        if (property === 'parents.taxDependent') {
+            property = 'taxDependent';
+        }
+
         const def = this.platformRecordsConfiguration?.[property];
+
+        if (property === 'taxDependent') {
+            console.log('[isPropertyPlatformEnabled]: taxDependent');
+            console.log(this.platformRecordsConfiguration);
+            console.log(def);
+        }
+
         if (def === null || def === undefined) {
             return false;
         }
@@ -855,6 +866,9 @@ export class PlatformMember implements ObjectWithRecords {
                 return false;
             }
             property = 'nationalRegisterNumber';
+        }
+        if (property === 'parents.taxDependent') {
+            property = 'taxDependent';
         }
         if ((property === 'financialSupport' || property === 'uitpasNumber')
             && this.patchedMember.details.dataPermissions?.value === false) {
