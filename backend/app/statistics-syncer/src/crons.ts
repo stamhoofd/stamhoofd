@@ -12,6 +12,11 @@ export function shouldRunStatisticsSync({ now, lastRun }: { now: Date; lastRun: 
         return true;
     }
 
+    if (lastRun === null) {
+        // Run right away
+        return true;
+    }
+
     const hour = now.getHours();
     if (hour < 3 || hour > 5) {
         return false;
