@@ -34,7 +34,7 @@
                     <p v-if="getPaymentMethod(method) && getSettingsDescription(method)" class="style-description-small pre-wrap" v-text="getSettingsDescription(method)" />
 
                     <template v-if="!canEnablePaymentMethod(method)" #right>
-                        <button class="button text selected" type="button" @click.stop="openPaymentSettings">
+                        <button class="button text selected" type="button" @click.stop="navigate(Routes.Settings)">
                             <span>{{ $t('%1Lx') }}</span>
                             <span class="icon arrow-right-small" />
                         </button>
@@ -87,7 +87,7 @@
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { defineRoute, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
 import LoadingBoxTransition from '@stamhoofd/components/containers/LoadingBoxTransition.vue';
@@ -143,6 +143,7 @@ const emit = defineEmits<{
 const country = useCountry();
 const errors = useErrors({ validator: props.validator });
 const present = usePresent();
+const navigate = useNavigate();
 
 loadStripeAccounts().catch(console.error);
 
@@ -180,6 +181,17 @@ function patchConfig(patch: AutoEncoderPatchType<PaymentConfiguration>) {
     emit('patch:config', patch);
 }
 
+enum Routes {
+    Settings = 'instellingen',
+}
+
+defineRoute({
+    url: '/instellingen',
+    name: Routes.Settings,
+    component: async () => (await import('../views/dashboard/settings/PaymentSettingsView.vue')).default,
+    present: 'popup',
+});
+
 async function editPaymentMethodSettings(paymentMethod: PaymentMethod) {
     await present({
         components: [
@@ -190,18 +202,6 @@ async function editPaymentMethodSettings(paymentMethod: PaymentMethod) {
                 saveHandler: async (configuration: AutoEncoderPatchType<PaymentConfiguration>) => {
                     patchConfig(configuration);
                 },
-            }),
-        ],
-        modalDisplayStyle: 'popup',
-    });
-}
-
-async function openPaymentSettings() {
-    await present({
-        components: [
-            // todo: test
-            new ComponentWithProperties(NavigationController, {
-                root: AsyncComponent(() => import('../views/dashboard/settings/PaymentSettingsView.vue'), {}),
             }),
         ],
         modalDisplayStyle: 'popup',
@@ -430,7 +430,7 @@ function setPaymentMethod(method: PaymentMethod, enabled: boolean, force = false
             const toast = new Toast(errorMessage, 'error red');
 
             toast.setButton(new ToastButton('Open instellingen', () => {
-                openPaymentSettings().catch(console.error);
+                navigate(Routes.Settings).catch(console.error);
             }, 'settings'));
 
             toast.setHide(15 * 1000).show();
