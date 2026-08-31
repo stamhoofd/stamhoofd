@@ -567,7 +567,7 @@ async function linkMollie() {
     const bytes = crypto.getRandomValues(new Uint8Array(64));
     const state = btoa(String.fromCharCode(...bytes));
     await Storage.keyValue.setItem('mollie-saved-state', state);
-    // Make sure we redirect teh fixed /oauth/mollie to the correct organization url
+    // Save the current url to redirect to after the /oauth/mollie
     const realRedirectUrl = new URL(window.location.href);
     realRedirectUrl.pathname = realRedirectUrl.pathname + '/oauth/mollie';
     await Storage.keyValue.setItem('mollie-saved-redirect-url', realRedirectUrl.pathname);
