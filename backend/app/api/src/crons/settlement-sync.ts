@@ -10,6 +10,9 @@ import { Formatter } from '@stamhoofd/utility';
 
 import { SettlementSyncRunner } from '../helpers/SettlementSyncRunner.js';
 import { isApplicationFeeInvoicingEnabled } from './stripe-invoices.js';
+import { Platform } from '@stamhoofd/models';
+import { TenantContext } from '../helpers/TenantContext.js';
+import { OrganizationAdminService } from '../services/OrganizationAdminService.js';
 
 registerCron('settlement-sync', syncSettlements);
 
@@ -75,16 +78,26 @@ export async function syncSettlements() {
  * Exported for tests only.
  */
 export async function reportProblemSettlements() {
+    const platform = await Platform.getShared();
+
+    if (!platform.membershipOrganizationId) {
+        return;
+    }
+
     // Only payouts that actually arrived: money that failed or was canceled holds no transactions
     // to reconcile
     const unexplained = await Settlement.select()
         .where('status', SettlementStatus.Paid)
+        .where('provider', PaymentProvider.Stripe) // Mollie is always inaccurate atm
+        .where('organizationId', platform.membershipOrganizationId)
         .where('unexplainedAmount', '!=', 0)
         .limit(50)
         .fetch();
 
     const unsynced = await Settlement.select()
         .where('status', SettlementStatus.Paid)
+        .where('organizationId', platform.membershipOrganizationId)
+        .where('unexplainedAmount', '!=', 0)
         .where('syncedAt', null)
         .limit(50)
         .fetch();
