@@ -238,9 +238,13 @@ export class StripeAccount extends AutoEncoder {
     get warning(): { text: string; type: 'warning' | 'error' } | undefined {
         if (this.meta.requirements.current_deadline) {
             const missing = this.missingData;
+            const m = $t(`%Zg4`);
 
             return {
-                text: $t(`%ng`, { date: Formatter.date(new Date(this.meta.requirements.current_deadline * 1000)) }) + ' ' + missing + '.',
+                text: $t('Je moet gegevens aanvullen om te voorkomen dat uitbetalingen en betalingen worden stopgezet. Dit moet gebeuren voor {date}. Ga naar je Stripe dashboard om dit in orde te brengen.', { date: Formatter.date(new Date(this.meta.requirements.current_deadline * 1000)) })
+                    + (missing
+                        ? `${m} ${missing}`
+                        : '' + '.'),
                 type: 'error',
             };
         }
@@ -266,8 +270,15 @@ export class StripeAccount extends AutoEncoder {
         if (this.meta.future_requirements.current_deadline) {
             const missing = this.missingData;
             const d = new Date(this.meta.future_requirements.current_deadline * 1000);
+            const m = $t(`%Zg4`);
+
             return {
-                text: $t(`%ng`, { date: Formatter.date(d) }) + ' ' + missing + '.',
+                text: $t('Je moet gegevens aanvullen om te voorkomen dat uitbetalingen en betalingen worden stopgezet. Dit moet gebeuren voor {date}. Ga naar je Stripe dashboard om dit in orde te brengen.',
+                    { date: Formatter.date(d) },
+                )
+                + (missing
+                    ? `${m} ${missing}`
+                    : '.'),
                 // Error if needed within one month
                 type: d < new Date(Date.now() + 24 * 60 * 60 * 1000 * 30) ? 'error' : 'warning',
             };
