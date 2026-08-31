@@ -6,9 +6,13 @@
 -- another is counted as both -- in the omkaderingscijfer as a kind and as the leider they are
 -- divided by at once -- and the GTP index weighs such a member in two of its terms. This picks the
 -- one registration that says what they are, the way `jeugdbewegingen.sql` picks it for the
--- aanlevering: leiding beats lid, and between two takken the oldest one wins, since that is the one a
--- member has grown into. The name of the tak breaks a tie no age can, so that two runs of the same
--- query cannot pick differently.
+-- aanlevering: a registration that still stands beats one that was cancelled, leiding beats lid, and
+-- between two takken the oldest one wins, since that is the one a member has grown into. The name of
+-- the tak breaks a tie no age can, so that two runs of the same query cannot pick differently.
+--
+-- A cancelled registration says someone was there, not what they were, which is why it sorts last:
+-- a lid put in Leiding by mistake and taken out again would otherwise be leiding for the rest of the
+-- werkjaar, while the registration they really hold says what they are.
 --
 -- What a member is comes from `tak_category`, what the tak was recorded as, and never from
 -- `effective_category`, which falls back to the member's own age. That fallback cannot tell leiding
@@ -35,6 +39,7 @@
             ROW_NUMBER() OVER (
                 PARTITION BY f.organization_id, f.`Scoutsjaar`, f.member_id
                 ORDER BY
+                    (f.deactivated_at IS NULL) DESC,
                     CASE f.tak_category WHEN 'leader' THEN 3 WHEN 'child' THEN 2 WHEN 'adult' THEN 1 ELSE 0 END DESC,
                     CASE f.effective_category WHEN 'leader' THEN 3 WHEN 'child' THEN 2 WHEN 'adult' THEN 1 ELSE 0 END DESC,
                     f.tak_min_age DESC,

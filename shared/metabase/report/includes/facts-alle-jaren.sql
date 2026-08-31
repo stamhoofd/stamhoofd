@@ -7,6 +7,7 @@ facts AS (
     SELECT
         r.memberId AS member_id,
         r.organizationId AS organization_id,
+        o.uri AS organization_uri,
         o.name AS `Eenheid`,
         o.postalCode AS eenheid_postcode,
         o.city AS eenheid_gemeente,
@@ -32,7 +33,8 @@ facts AS (
         END AS `Geslacht`,
         m.birthDate AS birth_date,
         TIMESTAMPDIFF(YEAR, m.birthDate, p.startDate) AS leeftijd,
-        m.postalCode AS postcode
+        m.postalCode AS postcode,
+        r.deactivatedAt AS deactivated_at
     FROM registrations r
     JOIN registration_periods p ON p.id = r.periodId
     JOIN `groups` g ON g.id = r.groupId AND g.deletedAt IS NULL
@@ -42,8 +44,7 @@ facts AS (
     LEFT JOIN takken dag ON dag.id = g.defaultAgeGroupId AND dag.periodId = r.periodId
     JOIN members m ON m.id = r.memberId AND m.periodId = r.periodId
     JOIN organizations o ON o.id = r.organizationId AND o.periodId = r.periodId AND o.active = 1
-    WHERE r.deactivatedAt IS NULL
-      AND r.registeredAt IS NOT NULL
+    WHERE r.registeredAt IS NOT NULL
       -- Not the koepel's own organization: it is the national body rather than an eenheid, and the
       -- ledenstatistieken count none of its structuurvrijwilligers. See `facts.sql`.
       AND NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = r.organizationId)

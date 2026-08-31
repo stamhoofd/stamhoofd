@@ -16,7 +16,7 @@
 -- types the reader picked and disappears when they pick none. This is a condition of the sheets
 -- themselves and always holds.
 --
--- Belongs in a WHERE clause on rows of `all_registrations`, `all_facts` or `facts` aliased as `f`.
+-- Belongs in a WHERE clause on rows of `all_registrations` or `facts` aliased as `f`.
 EXISTS (
     SELECT 1
     FROM member_platform_memberships mpm

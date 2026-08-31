@@ -114,6 +114,22 @@ describe('report', () => {
             }
         });
 
+        /**
+         * `leden.sql` sits on either grain, so a column one of them selects and the other does not is
+         * a card that fails on the database rather than a test that fails here -- the fragments are
+         * checked for shape and never run. `deactivated_at` was such a column: only `facts.sql`
+         * carried it, and every card reading the years at once broke the moment the ranking read it.
+         */
+        it('gives both grains the same columns, since one fragment reads either', async () => {
+            const aliases = async (name: string) => {
+                const sql = (await fs.readFile(path.join(getReportDirectory(), 'includes', name), 'utf-8')).replaceAll(/--[^\n]*/g, '');
+                const end = sql.indexOf('FROM registrations r');
+                return [...sql.slice(sql.lastIndexOf('SELECT', end), end).matchAll(/AS `?(\w+)`?/g)].map(match => match[1]);
+            };
+
+            expect(await aliases('facts-alle-jaren.sql')).toEqual(await aliases('facts.sql'));
+        });
+
         it('names every column a chart plots', () => {
             for (const dashboard of dashboards) {
                 for (const card of dashboard.cards.filter(card => ['bar', 'line', 'combo', 'pie', 'map'].includes(card.display))) {
@@ -269,18 +285,25 @@ describe('report', () => {
         });
 
         /**
-         * Someone who stopped in november was a deelnemer of that werkjaar: the metadatafiche counts
-         * everyone who was registered at some point between september and august. The
-         * ledenstatistieken count what is still standing, so the two read a different set of rows --
-         * which is the whole reason `all_facts` is a step of its own.
+         * Someone who stopped in november was a lid of that werkjaar, and both dashboards count them:
+         * a figure is about the year, not about the day it is read on. Nothing narrows the rows to
+         * what is still standing -- the one thing `facts` drops is the koepel's own organization.
          */
-        it('delivers the deelnemers who left during the werkjaar, which the ledenstatistieken drop', () => {
-            // Every card carries the line the fragment reads it by; what counts is the card's own FROM.
-            const own = (sql: string) => sql.replace('SELECT f.* FROM all_registrations f WHERE f.deactivated_at IS NULL', '');
-            const cards = dashboards.flatMap(dashboard => dashboard.cards.filter(card => own(card.sql).includes('FROM all_registrations f')));
+        it('counts the members who left during the werkjaar on both dashboards', () => {
+            for (const dashboard of dashboards.filter(dashboard => !dashboard.hidden)) {
+                for (const card of dashboard.cards.filter(card => card.snippets.includes('facts') || card.snippets.includes('facts-alle-jaren'))) {
+                    const sql = expressionOf(card.sql);
 
-            expect(cards.map(card => card.key)).toEqual(['deelnemers-bovenlokaal', 'deelnemers-lokale-groep']);
-            expect(cards[0].sql.replaceAll(/\s+/g, ' ')).toContain('all_facts AS ( SELECT f.* FROM all_registrations f WHERE f.deactivated_at IS NULL )');
+                    // The two forms the three filters were written in. `deactivated_at` still stands
+                    // in the select list and in the ranking, where it decides rather than drops.
+                    expect(`${card.key}: ${sql.includes('deactivatedAt IS NULL')}`).toEqual(`${card.key}: false`);
+                    expect(`${card.key}: ${sql.includes('all_facts')}`).toEqual(`${card.key}: false`);
+                }
+            }
+
+            // `facts` is `all_registrations` less the koepel, and nothing else.
+            expect(expressionOf(cardOf(dashboards, 'nationaal', 'totaal-leden').sql))
+                .toContain('facts AS ( SELECT f.* FROM all_registrations f WHERE NOT EXISTS');
         });
 
         /**
@@ -625,15 +648,18 @@ describe('report', () => {
         });
 
         /**
-         * Which registration of a member speaks for them. Leiding beats lid, so someone leiding in one
-         * tak and lid in another is leiding and nothing else; between two takken the oldest wins; and
-         * the name of the tak settles what neither can, so two runs of the same query cannot pick
-         * differently and report two different numbers.
+         * Which registration of a member speaks for them. One that still stands beats one that was
+         * cancelled -- a cancelled registration says someone was there, not what they were, so a lid
+         * put in Leiding by mistake and taken out again is not leiding for the rest of the werkjaar.
+         * Then leiding beats lid, so someone leiding in one tak and lid in another is leiding and
+         * nothing else; between two takken the oldest wins; and the name of the tak settles what
+         * neither can, so two runs of the same query cannot pick differently.
          */
         it('lets the strongest registration of a member say what they are', () => {
             const sql = cardOf(dashboards, 'eenheden', 'eenheid-gtp').sql.replaceAll(/\s+/g, ' ');
 
             expect(sql).toContain('ROW_NUMBER() OVER ( PARTITION BY f.organization_id, f.`Scoutsjaar`, f.member_id ORDER BY '
+                + '(f.deactivated_at IS NULL) DESC, '
                 + "CASE f.tak_category WHEN 'leader' THEN 3 WHEN 'child' THEN 2 WHEN 'adult' THEN 1 ELSE 0 END DESC, "
                 + "CASE f.effective_category WHEN 'leader' THEN 3 WHEN 'child' THEN 2 WHEN 'adult' THEN 1 ELSE 0 END DESC, "
                 + 'f.tak_min_age DESC, f.`Tak` ) AS rang');

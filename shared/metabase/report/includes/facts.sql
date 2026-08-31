@@ -29,12 +29,11 @@
 -- towards the total while showing up in none of the three categories. The handful of adults among
 -- them stay null, because nothing here tells leiding from volwassenen.
 --
--- Three names for the same rows, each one dropping something the one before it keeps:
+-- Two names for the same rows, the second dropping what the first keeps:
 --
 --   * `all_registrations` is every registration of the werkjaar, the ones that were cancelled during
---     it included. Only the aanlevering reads it: the department counts everyone who was registered
---     at some point between september and august, not who was still registered in august.
---   * `all_facts` keeps the ones that are still active, which is what the report means by a lid.
+--     it included. Someone who stopped in november was a lid of that werkjaar, and both dashboards
+--     count them as one: the year is what a figure is about, not the day it is read on.
 --   * `facts` is that without the koepel's own organization. Every figure of the ledenstatistieken
 --     is counted from it, through `leden.sql`, which narrows it to one row per member.
 WITH
@@ -86,18 +85,12 @@ all_registrations AS (
       [[AND o.name = {{eenheid}}]]
       -- @include inschrijvingen
 ),
--- Where a registration that was cancelled during the year drops out. It stays a registration of that
--- werkjaar -- someone who left in november was a lid of that year -- but it is no longer one of the
--- registrations the ledenstatistieken count, which are the ones that are still standing.
-all_facts AS (
-    SELECT f.* FROM all_registrations f WHERE f.deactivated_at IS NULL
-),
 -- The koepel's own organization is not an eenheid: it is the national body, and the client's report
 -- counts the structuurvrijwilligers of its ploegen as nobody's leden and nobody's leiding. Which
 -- organization it is comes from `platform.membershipOrganizationId`, the only thing that says so --
 -- the import writes the koepel under that same id, so the years it owns drop out here exactly as the
 -- synced ones do.
 facts AS (
-    SELECT f.* FROM all_facts f
+    SELECT f.* FROM all_registrations f
     WHERE NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = f.organization_id)
 )
