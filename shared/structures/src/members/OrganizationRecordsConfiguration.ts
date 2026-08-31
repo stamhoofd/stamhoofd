@@ -223,6 +223,9 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     @field({ decoder: PropertyFilter, nullable: true, version: 348 })
     nationalRegisterNumber: PropertyFilter | null = null;
 
+    @field({ decoder: PropertyFilter, nullable: true, ...NextVersion })
+    taxDependent: PropertyFilter | null = null;
+
     @field({ decoder: new ArrayDecoder(RecordCategory as Decoder<RecordCategory>), version: 117 })
     recordCategories: RecordCategory[] = [];
 
