@@ -40,7 +40,8 @@ ORDER BY name
 -- ze elke kaart op nul zetten.
 SELECT o.name AS `Eenheid`
 FROM organizations o
-WHERE NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = o.id)
+WHERE o.active = 1
+  AND NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = o.id)
 GROUP BY o.name
 ORDER BY o.name
 

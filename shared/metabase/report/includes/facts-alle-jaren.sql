@@ -41,7 +41,7 @@ facts AS (
     -- happened in, not every year they were ever counted in.
     LEFT JOIN takken dag ON dag.id = g.defaultAgeGroupId AND dag.periodId = r.periodId
     JOIN members m ON m.id = r.memberId AND m.periodId = r.periodId
-    JOIN organizations o ON o.id = r.organizationId AND o.periodId = r.periodId
+    JOIN organizations o ON o.id = r.organizationId AND o.periodId = r.periodId AND o.active = 1
     WHERE r.deactivatedAt IS NULL
       AND r.registeredAt IS NOT NULL
       -- Not the koepel's own organization: it is the national body rather than an eenheid, and the

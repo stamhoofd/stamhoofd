@@ -80,6 +80,7 @@ all_registrations AS (
     LEFT JOIN takken dag ON dag.id = g.defaultAgeGroupId AND dag.periodId = r.periodId
     JOIN members m ON m.id = r.memberId AND m.periodId = r.periodId
     JOIN organizations o ON o.id = r.organizationId AND o.periodId = r.periodId
+        AND o.active = 1
     WHERE r.registeredAt IS NOT NULL
       [[AND p.name = {{scoutsjaar}}]]
       [[AND o.name = {{eenheid}}]]

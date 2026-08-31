@@ -99,6 +99,21 @@ describe('report', () => {
             }
         });
 
+        /**
+         * An eenheid that has stopped is counted by nothing, so every read of the table has to say so
+         * -- a card that joins it and forgets counts units the card beside it does not, and the two
+         * disagree without either being visibly wrong.
+         */
+        it('leaves the units that stopped out of every card that reads them', () => {
+            for (const dashboard of [...dashboards, ...ravotDashboards]) {
+                for (const card of dashboard.cards.filter(card => card.sql.includes('organizations o'))) {
+                    const sql = card.sql.replaceAll(/\s+/g, ' ');
+
+                    expect(`${dashboard.key}/${card.key}: ${sql.includes('o.active = 1')}`).toEqual(`${dashboard.key}/${card.key}: true`);
+                }
+            }
+        });
+
         it('names every column a chart plots', () => {
             for (const dashboard of dashboards) {
                 for (const card of dashboard.cards.filter(card => ['bar', 'line', 'combo', 'pie', 'map'].includes(card.display))) {
@@ -342,7 +357,7 @@ describe('report', () => {
                 .map(key => cardOf(dashboards, 'jeugdbewegingen', key).sql.replaceAll(/\s+/g, ' '));
 
             expect(bovenlokaal).toContain('JOIN platform pf ON pf.membershipOrganizationId = o.id');
-            expect(lokaal).toContain('WHERE NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = o.id)');
+            expect(lokaal).toContain('NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = o.id)');
         });
 
         /**
@@ -368,8 +383,10 @@ describe('report', () => {
 
             for (const card of exported) {
                 // The card's own SELECT, which is the last one that starts a line: the query fragments
-                // it includes name columns of their own, and those do not reach the sheet.
-                const query = card.sql.slice(card.sql.lastIndexOf('\nSELECT'));
+                // it includes name columns of their own, and those do not reach the sheet. A card
+                // that includes no fragment opens on its SELECT, with no newline in front of it.
+                const start = card.sql.lastIndexOf('\nSELECT');
+                const query = card.sql.slice(start === -1 ? 0 : start);
                 const selected = [...query.matchAll(/AS `([^`]+)`/g)].map(match => match[1]);
 
                 expect(`${card.key}: ${selected.join(', ')}`).toEqual(`${card.key}: ${card.columns.join(', ')}`);
