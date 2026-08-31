@@ -37,7 +37,7 @@
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*",
         "@stamhoofd/verify-email": "*",
-        "@plausible-analytics/tracker": "0.4.5",
+        "@plausible-analytics/tracker": "0.4.6",
         "qr-scanner": "1.4.2",
         "vue": "3.5.40"
     },
