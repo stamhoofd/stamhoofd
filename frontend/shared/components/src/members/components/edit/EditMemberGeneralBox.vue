@@ -50,7 +50,7 @@
 
                 <PhoneInput v-if="!member.isNew && (isPropertyEnabled('phone') || phone)" v-model="phone" error-fields="phone" :error-box="errors.errorBox" :title="$t('%2k') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? $t(`%fP`): $t(`%fQ`)" />
                 <EmailInput v-if="!(member.isNew) && (isPropertyEnabled('emailAddress') || email) && (!isPropertyEnabled('birthDay') || birthDay)" v-model="email" :required="isPropertyRequired('emailAddress')" :title="$t(`%1FK`) + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? $t(`%fP`): $t(`%fQ`)" :validator="validator">
-                    <template #right>
+                    <template v-if="canAddAlternativeEmails" #right>
                         <button v-tooltip="$t('%fI')" class="button icon add small gray" type="button" @click="addEmail" />
                     </template>
                 </EmailInput>
@@ -174,6 +174,7 @@ import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import CheckboxListItem from '#inputs/CheckboxListItem.vue';
 import STList from '#layout/STList.vue';
 import { useOrganization } from '#hooks/useOrganization.ts';
+import { useUser } from '#hooks/useUser.ts';
 
 defineOptions({
     inheritAttrs: false,
@@ -198,6 +199,11 @@ const auth = useAuth();
 const isFullAdmin = auth.hasFullAccess();
 const showLanguage = useShowMemberLanguage(computed(() => props.member));
 const availableLanguages = I18nController.shared.availableLanguages;
+
+const user = useUser();
+const canAddAlternativeEmails = computed(() => {
+    return isFullAdmin || user.value?.memberId === props.member.id;
+});
 
 const language = computed({
     get: () => props.member.patchedMember.details.language,
