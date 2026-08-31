@@ -84,8 +84,7 @@ all_registrations AS (
     WHERE r.registeredAt IS NOT NULL
       [[AND p.name = {{scoutsjaar}}]]
       [[AND o.name = {{eenheid}}]]
-      -- @include aansluiting
-      -- @include ingeschreven-voor
+      -- @include inschrijvingen
 ),
 -- Where a registration that was cancelled during the year drops out. It stays a registration of that
 -- werkjaar -- someone who left in november was a lid of that year -- but it is no longer one of the

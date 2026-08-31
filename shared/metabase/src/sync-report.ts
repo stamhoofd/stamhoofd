@@ -29,11 +29,9 @@ import type { ReportCard, ReportCardBest, ReportSnippet, ReportTab } from './rep
  * variable is single-select unless told otherwise, and a second value would land beside the `=` of
  * the others as sql they cannot parse.
  *
- * `start` is what a filter is set to when a dashboard is opened. Only one filter has any: the others
- * count every member while nothing is chosen, and a value to start from would show whoever does not
- * read the filter bar a slice of the platform. "Ingeschreven voor" is the other way round -- empty
- * counts the wachtlijsten and the activiteiten along with the leden -- so it opens on the
- * leeftijdsgroepen, which is what the ledenstatistieken are read as.
+ * `start` is what a filter is set to when a dashboard is opened. None of them carries one: empty
+ * counts every member, and a value to start from would show whoever does not read the filter bar a
+ * slice of the platform. It is kept for a filter that would read the other way round.
  */
 export type ReportFilter = {
     name: string;
@@ -48,8 +46,6 @@ export type ReportFilter = {
 export const reportFilters: readonly ReportFilter[] = [
     { name: 'scoutsjaar', title: 'Scoutsjaar', valuesFrom: 'scoutsjaar', column: 'Scoutsjaar', keepOrder: false, multiple: false },
     { name: 'eenheid', title: 'Eenheid', valuesFrom: 'eenheid', column: 'Eenheid', keepOrder: false, multiple: false },
-    { name: 'aansluiting', title: 'Aansluiting', valuesFrom: 'aansluiting', column: 'Aansluiting', keepOrder: false, multiple: true },
-    { name: 'ingeschreven_voor', title: 'Ingeschreven voor', valuesFrom: 'ingeschreven-voor', column: 'Ingeschreven voor', keepOrder: true, multiple: true, start: ['Leeftijdsgroepen'] },
 ];
 
 /**

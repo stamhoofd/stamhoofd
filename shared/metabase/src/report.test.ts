@@ -71,7 +71,7 @@ describe('report', () => {
          */
         it('takes the parameters a card uses from its sql, so the two cannot drift', () => {
             expect(cardOf(dashboards, 'nationaal', 'totaal-leden').parameters).toContain('scoutsjaar');
-            expect(cardOf(dashboards, 'eenheden', 'eenheid-totaal-leden').parameters).toEqual(['scoutsjaar', 'eenheid', 'aansluiting', 'ingeschreven_voor']);
+            expect(cardOf(dashboards, 'eenheden', 'eenheid-totaal-leden').parameters).toEqual(['scoutsjaar', 'eenheid']);
 
             for (const key of ['leden-per-scoutsjaar', 'percentage-blijvers-per-eenheid']) {
                 expect(`${key}: ${cardOf(dashboards, 'nationaal', key).sql.includes('p.name = {{scoutsjaar}}')}`).toEqual(`${key}: false`);
@@ -302,17 +302,25 @@ describe('report', () => {
 
         /**
          * A registration is not an aansluiting: a group can register someone it never aansluit, and
-         * the dataset is about the deelnemers a koepel is aangesloten for. Both deelnemers sheets ask
-         * for one, the aanlevering being the only thing here that does -- the ledenstatistieken count
-         * every active registration.
+         * neither dashboard counts such a person. Both ask, and each asks its own list -- the report
+         * the koepel reads and the dataset it files with the department answer to different people,
+         * so neither starts counting differently because the other did.
          */
-        it('delivers only the deelnemers with an aansluiting in that werkjaar', () => {
-            // Every card reads the aansluiting filter through `facts`, which asks about the
-            // registration as `r`; the condition of the sheets themselves asks about a fact as `f`.
-            const asked = /EXISTS \( SELECT 1 FROM member_platform_memberships mpm WHERE mpm\.memberId = f\.member_id AND mpm\.periodId = f\.period_id AND mpm\.deletedAt IS NULL/;
-            const cards = dashboards.flatMap(dashboard => dashboard.cards.filter(card => asked.test(card.sql.replaceAll(/\s+/g, ' '))));
+        it('gives the aanlevering and the report a list of aansluitingen each', () => {
+            for (const dashboard of dashboards.filter(dashboard => !dashboard.hidden)) {
+                for (const card of dashboard.cards.filter(card => card.snippets.length > 0)) {
+                    const aanlevering = dashboard.key === 'jeugdbewegingen';
+                    const read = card.snippets.filter(snippet => snippet.endsWith('-aansluitingen'));
 
-            expect(cards.map(card => card.key)).toEqual(['deelnemers-bovenlokaal', 'deelnemers-lokale-groep']);
+                    // The organisatie sheets count no member and read neither.
+                    if (read.length === 0) {
+                        expect(`${dashboard.key}/${card.key}`).toMatch(/organisatie-/);
+                        continue;
+                    }
+                    expect(`${dashboard.key}/${card.key}: ${read.join(',')}`)
+                        .toEqual(`${dashboard.key}/${card.key}: ${aanlevering ? 'aanlevering' : 'ledenstatistieken'}-aansluitingen`);
+                }
+            }
         });
 
         /**
@@ -329,9 +337,10 @@ describe('report', () => {
             expect(keeo).toContain("mpm.membershipTypeId IN ( '5d66134e-21b6-41f4-b791-f99779bec8c5', 'i-mtype-volledig-scoutsjaar', 'f2ffdcb2-5cb3-41ce-be5a-b39bf01570fa' )");
             expect(ravot).toContain("mpm.membershipTypeId IN ( 'adb9882e-6b50-467a-b89f-0727c6aa9065', '41632f5f-23e5-4dec-b7b5-b16202d3d95f' )");
 
-            // The ledenstatistieken count every active registration, whatever it was aangesloten
-            // under: the list belongs to the aanlevering, not to what the report means by a lid.
-            expect(expressionOf(cardOf(dashboards, 'nationaal', 'totaal-leden').sql)).not.toContain('5d66134e-21b6-41f4-b791-f99779bec8c5');
+            // The report reads a list of its own, kept in a file of its own even where it holds the
+            // same ids: one may change without dragging the other along.
+            expect(cardOf(dashboards, 'nationaal', 'totaal-leden').snippets).toContain('ledenstatistieken-aansluitingen');
+            expect(cardOf(dashboards, 'nationaal', 'totaal-leden').snippets).not.toContain('aanlevering-aansluitingen');
         });
 
         /**
@@ -934,99 +943,52 @@ describe('report', () => {
         });
 
         it('gives the unit filter to the eenheden tab only, as the report does', () => {
-            expect(dashboards.find(dashboard => dashboard.key === 'eenheden')!.filters).toEqual(['scoutsjaar', 'eenheid', 'aansluiting', 'ingeschreven_voor']);
+            expect(dashboards.find(dashboard => dashboard.key === 'eenheden')!.filters).toEqual(['scoutsjaar', 'eenheid']);
 
             for (const key of ['nationaal', 'netwerk', 'varia']) {
-                expect(`${key}: ${dashboards.find(dashboard => dashboard.key === key)!.filters.join(',')}`).toEqual(`${key}: scoutsjaar,aansluiting,ingeschreven_voor`);
+                expect(`${key}: ${dashboards.find(dashboard => dashboard.key === key)!.filters.join(',')}`).toEqual(`${key}: scoutsjaar`);
             }
         });
 
         /**
-         * The aansluiting filter stands above every page of the ledenstatistieken, so two of them read
-         * side by side always count the same members, and it reaches every card that counts them,
-         * which the shared fragments see to. What is left are the two sheets of the aanlevering that
-         * list which groups existed in the werkjaar, a question about organizations, not members.
-         *
-         * The aanlevering is offered none of it. Which lidgelden say someone is a deelnemer is what
-         * the koepel files under rather than what a reader picks, so those sheets name the
-         * aansluitingen themselves and the dashboard shows no filter for them.
+         * Neither filter is offered any more. Which lidgelden say someone is a lid, and which kinds of
+         * registration count as being one, are what the koepel reports under rather than what a reader
+         * picks: a reader who narrowed either would read a figure nobody else on the platform reads,
+         * and two pages open side by side could disagree about who a lid is.
          */
-        it('offers the aansluiting filter on every page of the report and not to the aanlevering', () => {
-            const pages = dashboards.filter(dashboard => !dashboard.hidden);
-
-            for (const dashboard of pages) {
-                const offered = dashboard.key !== 'jeugdbewegingen';
-                expect(`${dashboard.key}: ${dashboard.filters.includes('aansluiting')}`).toEqual(`${dashboard.key}: ${offered}`);
+        it('offers no filter for the aansluiting or the kind of registration', () => {
+            for (const dashboard of dashboards) {
+                for (const gone of ['aansluiting', 'ingeschreven_voor']) {
+                    expect(`${dashboard.key}: ${dashboard.filters.includes(gone)}`).toEqual(`${dashboard.key}: false`);
+                }
             }
 
-            const without = pages.flatMap(dashboard => dashboard.cards
-                .filter(card => !card.parameters.includes('aansluiting'))
-                .map(card => `${dashboard.key}/${card.key}`));
-
-            expect(without).toEqual(['jeugdbewegingen/organisatie-bovenlokaal', 'jeugdbewegingen/organisatie-lokale-groep']);
-        });
-
-        /**
-         * Several types at once, which is why every card takes the filter in an `IN`: Metabase writes
-         * a multi-value filter out as its values, comma separated, and beside an `=` the second one
-         * is a syntax error rather than a wrong figure.
-         *
-         * Choosing none counts every member, including everyone holding no aansluiting at all, which
-         * what the dashboards open on -- so the clause is optional and disappears with the filter.
-         */
-        it('takes several aansluitingen at once and counts every member while none is chosen', () => {
-            const cards = dashboards.flatMap(dashboard => dashboard.cards.filter(card => card.parameters.includes('aansluiting')));
-            expect(cards.length).toBeGreaterThan(0);
-
-            for (const card of cards) {
-                const chosen = resolveSql(card.sql, { aansluiting: 'Volledig scoutsjaar' }).replaceAll(/\s+/g, ' ');
-
-                expect(`${card.key}: ${resolveSql(card.sql, {}).includes('mt.name IN')}`).toEqual(`${card.key}: false`);
-                expect(`${card.key}: ${chosen.includes("mt.name IN ('Volledig scoutsjaar')")}`).toEqual(`${card.key}: true`);
-            }
+            expect(dashboards.flatMap(dashboard => dashboard.cards).flatMap(card => card.parameters))
+                .toEqual(expect.not.arrayContaining(['aansluiting', 'ingeschreven_voor']));
         });
 
         /**
          * A registration at an eenheid is not the same thing as being a lid of it: someone can be
-         * waiting for a place, or have come to a single activiteit. Which of the three the figures
-         * count is the reader's, on every page of the ledenstatistieken so that two read side by side
-         * count the same people.
+         * waiting for a place. The wachtlijsten are the one kind that counts as nobody's lid, and the
+         * rule stands in one fragment so that changing what a lid is means changing one line.
          */
-        it('offers the ingeschreven voor filter on the ledenstatistieken and to every card that counts members', () => {
-            const pages = dashboards.filter(dashboard => dashboard.dashboard === undefined && !dashboard.hidden);
+        it('counts the leeftijdsgroepen and the activiteiten as being a lid, and the wachtlijsten as nobody', () => {
+            for (const dashboard of dashboards.filter(dashboard => !dashboard.hidden)) {
+                for (const card of dashboard.cards.filter(card => card.snippets.includes('inschrijvingen'))) {
+                    const sql = expressionOf(card.sql);
 
-            for (const dashboard of pages) {
-                expect(`${dashboard.key}: ${dashboard.filters.includes('ingeschreven_voor')}`).toEqual(`${dashboard.key}: true`);
-
-                for (const card of dashboard.cards) {
-                    expect(`${dashboard.key}/${card.key}: ${card.parameters.includes('ingeschreven_voor')}`).toEqual(`${dashboard.key}/${card.key}: true`);
+                    expect(`${card.key}: ${sql.includes("g.type IN ('Membership', 'EventRegistration')")}`).toEqual(`${card.key}: true`);
+                    expect(`${card.key}: ${sql.includes('WaitingList')}`).toEqual(`${card.key}: false`);
                 }
             }
-        });
 
-        /**
-         * The three options, each counting the group type it names and no other. Written out here
-         * because the filter offers words a reader picks from while the column holds the names the
-         * administration uses, and nothing else in the report puts the two beside each other.
-         *
-         * Choosing none counts every registration, the way the aansluiting filter does. No dashboard
-         * opens on that -- the filter starts on the leeftijdsgroepen -- so it is what a reader who
-         * empties the filter asked for.
-         */
-        it('counts each kind of group under the name the filter offers it', () => {
-            const options = { Leeftijdsgroepen: 'Membership', Activiteiten: 'EventRegistration', Wachtlijsten: 'WaitingList' };
-            const offered = cardOf(dashboards, 'filters', 'ingeschreven-voor').sql;
-            const card = cardOf(dashboards, 'eenheden', 'eenheid-totaal-leden');
+            // Every card that reads a grain reads it: what counts as a lid is decided once, and a
+            // card that got its rows from somewhere else would count a different set of people.
+            const without = dashboards.flatMap(dashboard => dashboard.cards
+                .filter(card => (card.snippets.includes('facts') || card.snippets.includes('facts-alle-jaren')) && !card.snippets.includes('inschrijvingen'))
+                .map(card => card.key));
 
-            for (const [option, type] of Object.entries(options)) {
-                expect(`${option}: ${offered.includes(`'${option}'`)}`).toEqual(`${option}: true`);
-                expect(`${option}: ${card.sql.includes(`WHEN '${type}' THEN '${option}'`)}`).toEqual(`${option}: true`);
-            }
-
-            const chosen = resolveSql(card.sql, { ingeschreven_voor: 'Leeftijdsgroepen' }).replaceAll(/\s+/g, ' ');
-
-            expect(chosen).toContain("END IN ('Leeftijdsgroepen')");
-            expect(resolveSql(card.sql, {})).not.toContain('CASE g.type');
+            expect(without).toEqual([]);
         });
 
         /**
@@ -1035,14 +997,12 @@ describe('report', () => {
          * at a single activiteit is a deelnemer of that activiteit. Its dashboard shows the filter
          * nowhere, and an unconnected filter counts every registration -- so both sheets say it.
          */
-        it('delivers the leeftijdsgroepen to the department and never asks which to count', () => {
-            expect(dashboards.find(dashboard => dashboard.key === 'jeugdbewegingen')!.filters).not.toContain('ingeschreven_voor');
-
+        it('delivers the leeftijdsgroepen to the department and never the activiteiten', () => {
             for (const key of ['deelnemers-bovenlokaal', 'deelnemers-lokale-groep']) {
                 const sql = cardOf(dashboards, 'jeugdbewegingen', key).sql;
 
-                for (const chosen of [{}, { ingeschreven_voor: 'Wachtlijsten' }] as Record<string, string>[]) {
-                    expect(`${key}: ${resolveSql(sql, chosen).includes("f.group_type = 'Membership'")}`).toEqual(`${key}: true`);
+                {
+                    expect(`${key}: ${resolveSql(sql, {}).includes("f.group_type = 'Membership'")}`).toEqual(`${key}: true`);
                 }
             }
         });

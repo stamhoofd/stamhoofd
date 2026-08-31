@@ -8,10 +8,11 @@
 -- Bewust niet uit `facts` gehaald: die is gefilterd op de gekozen eenheid, en dan zou een lid dat
 -- verhuist juist wel als vertrekker tellen.
 --
--- Op één filter na. Waar iemand lid is doet er niet toe, wat voor inschrijving het is wel: als de
--- teller enkel leeftijdsgroepen telt en de noemer elke inschrijving, dan is wie vertrokken is maar
--- het jaar erna één activiteit meedoet een blijver. `ingeschreven-voor.sql` staat daarom aan beide
--- kanten van de breuk, zodat "is nog lid" hetzelfde betekent als "was lid".
+-- Op wat lid zijn is na. Waar iemand lid is doet er niet toe, wat voor inschrijving het is en
+-- waarvoor die aangesloten is wel: telt de noemer enkel wie aangesloten is en de teller elke
+-- inschrijving, dan is wie vertrokken is maar het jaar erna één activiteit meedoet een blijver.
+-- Dezelfde twee regels staan daarom aan beide kanten van de breuk, zodat "is nog lid" hetzelfde
+-- betekent als "was lid".
 , leden_per_jaar AS (
     SELECT DISTINCT
         r.memberId AS member_id,
@@ -25,5 +26,13 @@
       -- dezelfde organisatie die `facts` weglaat, en een cijfer dat hier wel meetelt en daar niet zou
       -- een ledenbehoud boven de leden zetten waar het over gaat.
       AND NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = r.organizationId)
-      -- @include ingeschreven-voor
+      -- @include inschrijvingen
+      AND EXISTS (
+          SELECT 1
+          FROM member_platform_memberships mpm
+          WHERE mpm.memberId = r.memberId
+            AND mpm.periodId = r.periodId
+            AND mpm.deletedAt IS NULL
+            -- @include ledenstatistieken-aansluitingen
+      )
 )

@@ -502,44 +502,28 @@ describe('buildParameters', () => {
 
     /**
      * Metabase leaves a filter that drives a query variable on a single value unless the parameter
-     * says otherwise, so this is what lets several aansluitingen be picked at once. It is written for
-     * every filter rather than only that one: a second scoutsjaar would land beside the `=` its cards
-     * take it with, which is sql they cannot parse.
+     * says otherwise, and both filters the report still shows are taken with an `=`: a second value
+     * would land beside it as sql the card cannot parse. `multiple` is what a filter taken with an
+     * `IN` would say instead.
      */
-    it('lets several aansluitingen be picked at once and holds the other filters to one value', () => {
-        const entry = [tab({ filters: ['scoutsjaar', 'aansluiting'], cards: [card({ parameters: ['scoutsjaar', 'aansluiting'] })] })];
+    it('holds both filters to one value, which is what their cards take', () => {
+        const entry = [tab({ filters: ['scoutsjaar', 'eenheid'], cards: [card({ parameters: ['scoutsjaar', 'eenheid'] })] })];
 
         const parameters = buildParameters(entry, new Map());
 
-        expect(parameters.map(parameter => [parameter.slug, parameter.isMultiSelect])).toEqual([['scoutsjaar', false], ['aansluiting', true]]);
+        expect(parameters.map(parameter => [parameter.slug, parameter.isMultiSelect])).toEqual([['scoutsjaar', false], ['eenheid', false]]);
     });
 
     /**
-     * Nothing chosen is what counts every member, including everyone holding no aansluiting at all, so
-     * those filters open empty: a default would leave the dashboards showing a slice of the platform
-     * to whoever does not look at the filter bar.
+     * Nothing chosen is what counts every member, so the filters open empty: a default would leave the
+     * dashboards showing a slice of the platform to whoever does not look at the filter bar.
      */
     it('gives no filter a value to start from where empty counts everyone', () => {
-        const entry = [tab({ filters: ['scoutsjaar', 'eenheid', 'aansluiting'], cards: [card({ parameters: ['scoutsjaar', 'eenheid', 'aansluiting'] })] })];
+        const entry = [tab({ filters: ['scoutsjaar', 'eenheid'], cards: [card({ parameters: ['scoutsjaar', 'eenheid'] })] })];
 
         const started = buildParameters(entry, new Map()).filter(parameter => parameter.default !== undefined);
 
         expect(started.map(parameter => parameter.slug)).toEqual([]);
-    });
-
-    /**
-     * The one filter that reads the other way round: empty counts the wachtlijsten and the
-     * activiteiten along with the leden, so leaving it empty is what would show a figure nobody asked
-     * for. As a list, because a multi-select filter hands its cards every value it holds and a bare
-     * string is read as a filter holding none.
-     */
-    it('opens the ingeschreven voor filter on the leeftijdsgroepen', () => {
-        const entry = [tab({ filters: ['ingeschreven_voor'], cards: [card({ parameters: ['ingeschreven_voor'] })] })];
-
-        const parameters = buildParameters(entry, new Map());
-
-        expect(parameters.map(parameter => [parameter.slug, parameter.default, parameter.isMultiSelect]))
-            .toEqual([['ingeschreven_voor', ['Leeftijdsgroepen'], true]]);
     });
 
     it('falls back to the question when the values could not be read', () => {

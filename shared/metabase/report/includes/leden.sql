@@ -20,6 +20,13 @@
 -- columns: a card that counts kinderen the way the totals do goes on reading `effective_category`
 -- here, and only counts a member once now.
 --
+-- Where the aansluitingen the report counts a lid under are applied, in
+-- `ledenstatistieken-aansluitingen.sql`. Here rather than in either grain, because the aanlevering
+-- reads a grain and never this: the two dashboards say for themselves what they count a lid as.
+--
+-- Before the ranking, not after: a registration that is not aangesloten may not be the one that
+-- speaks for a member, or someone would be dropped over the very row that does not count.
+--
 -- Belongs after `facts` or `facts-alle-jaren`, whichever grain the card reads.
 , leden AS (
     SELECT g.* FROM (
@@ -34,6 +41,14 @@
                     f.`Tak`
             ) AS rang
         FROM facts f
+        WHERE EXISTS (
+            SELECT 1
+            FROM member_platform_memberships mpm
+            WHERE mpm.memberId = f.member_id
+              AND mpm.periodId = f.period_id
+              AND mpm.deletedAt IS NULL
+              -- @include ledenstatistieken-aansluitingen
+        )
     ) g
     WHERE g.rang = 1
 )

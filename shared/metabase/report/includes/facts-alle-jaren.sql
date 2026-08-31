@@ -48,6 +48,5 @@ facts AS (
       -- ledenstatistieken count none of its structuurvrijwilligers. See `facts.sql`.
       AND NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = r.organizationId)
       [[AND o.name = {{eenheid}}]]
-      -- @include aansluiting
-      -- @include ingeschreven-voor
+      -- @include inschrijvingen
 )

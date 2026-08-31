@@ -1,0 +1,1 @@
+-- Welke aansluitingen meetellen als leden voor de ledenstatistieken.

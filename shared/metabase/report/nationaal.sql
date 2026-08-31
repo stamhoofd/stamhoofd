@@ -1,7 +1,7 @@
 -- @tab nationaal
 -- title: Nationaal
 -- description: Ledenaantallen over het hele platform voor het gekozen scoutsjaar.
--- filters: scoutsjaar, aansluiting, ingeschreven_voor
+-- filters: scoutsjaar
 
 -- @card aantal-eenheden
 -- title: Aantal eenheden
@@ -169,16 +169,11 @@ FROM member_platform_memberships mpm
 -- telt -- een lidgeld uit een jaar waarin dat lid geen lid was, hoort er niet bij.
 JOIN (SELECT DISTINCT member_id, period_id FROM leden) l
     ON l.member_id = mpm.memberId AND l.period_id = mpm.periodId
--- Enkel nog om op de aansluiting te kunnen filteren: waar de taart op splitst is het tarief, en dat
--- staat op het lidgeld zelf.
-JOIN platform_membership_types mt ON mt.id = mpm.membershipTypeId AND mt.periodId = mpm.periodId
 WHERE mpm.deletedAt IS NULL
   -- Geen lidmaatschap bij de koepel zelf: `facts` laat die organisatie weg, en wie naast een eenheid
   -- ook in een nationale ploeg zit zou het tarief daarvan anders in deze grafiek zetten.
   AND NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = mpm.organizationId)
-  -- Alleen de gekozen aansluitingen: `facts` houdt de leden over die er een van hebben, en zonder
-  -- dit zou de taart daarnaast ook de andere aansluitingen van net die leden tonen.
-  [[AND mt.name IN ({{aansluiting}})]]
+  -- @include ledenstatistieken-aansluitingen
 GROUP BY mpm.reducedPrice
 ORDER BY `Aantal leden` DESC
 
