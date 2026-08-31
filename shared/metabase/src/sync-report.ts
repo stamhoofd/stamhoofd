@@ -1,6 +1,6 @@
 import type { MetabaseApi } from './api.js';
 import { isLegacyReportCollectionName } from './naming.js';
-import type { ReportCard, ReportCardBest, ReportTab } from './report.js';
+import type { ReportCard, ReportCardBest, ReportSnippet, ReportTab } from './report.js';
 
 /**
  * Turns the report definition of `report.ts` into one Metabase dashboard, with a tab per page of the
@@ -199,8 +199,43 @@ export function templateTagId(cardKey: string, parameter: string): string {
     return `${hex}-0000-4000-8000-${hex}00000000`.slice(0, 36);
 }
 
-export function buildTemplateTags(card: ReportCard): Record<string, unknown> {
+/**
+ * What a fragment is called where a question refers to it. Metabase writes the reference as
+ * `{{snippet: leden}}` and keys the template tag by everything between the braces, so the tag of a
+ * snippet carries the word as well as the name.
+ */
+export function snippetTagName(snippet: string): string {
+    return `snippet: ${snippet}`;
+}
+
+/**
+ * The tags a question declares: one per fragment it reads and one per filter it takes.
+ *
+ * A snippet is pointed at by id, which is why the fragments have to be written before the questions
+ * that read them. Every fragment the card reaches is declared, the ones it only reaches through
+ * another one included: Metabase resolves a nested reference against the tags of the question it is
+ * running, so a fragment left out here is a parameter it cannot find rather than one it looks up in
+ * the snippet that refers to it.
+ */
+export function buildTemplateTags(card: ReportCard, snippetIds: Map<string, number>): Record<string, unknown> {
     const tags: Record<string, unknown> = {};
+
+    for (const snippet of card.snippets) {
+        const snippetId = snippetIds.get(snippet);
+        if (snippetId === undefined) {
+            throw new Error(`Card "${card.key}" reads the fragment "${snippet}", which was not written as a snippet`);
+        }
+
+        const name = snippetTagName(snippet);
+        tags[name] = {
+            id: templateTagId(card.key, name),
+            name,
+            'display-name': snippet,
+            type: 'snippet',
+            'snippet-name': snippet,
+            'snippet-id': snippetId,
+        };
+    }
 
     for (const parameter of card.parameters) {
         const filter = reportFilters.find(entry => entry.name === parameter);
@@ -616,6 +651,8 @@ export type ReportSyncResult = {
     renamedCollection: string | undefined;
     dashboards: ReportSyncDashboard[];
     cards: number;
+    /** The shared fragments written as snippets, which the questions read instead of copying. */
+    snippets: number;
     /** Map cards drawn as a bar chart because no postal code coordinates are loaded yet. */
     mapsWithoutCoordinates: string[];
 };
@@ -651,14 +688,36 @@ export function groupByDashboard(tabs: ReportTab[], dashboardName: string): { na
 }
 
 /**
+ * Write the shared fragments as the snippets the questions refer to, and say which id each ended up
+ * under. Matched by name and updated in place, so a fragment keeps the id the questions point at.
+ *
+ * Snippets live in the instance rather than in a collection, which is what makes them worth writing:
+ * the definition of a lid stands in one place there as well, and whoever changes it changes every
+ * question that counts one. That also means they are not this collection's to clear away -- a
+ * fragment the report no longer has keeps its snippet, since anything the client has since built on
+ * it would break with it.
+ */
+export async function syncSnippets(api: MetabaseApi, snippets: readonly ReportSnippet[]): Promise<Map<string, number>> {
+    const existing = new Map((await api.listSnippets()).map(snippet => [snippet.name, snippet.id]));
+    const ids = new Map<string, number>();
+
+    for (const snippet of snippets) {
+        ids.set(snippet.name, await api.saveSnippet({ name: snippet.name, content: snippet.sql }, existing.get(snippet.name)));
+    }
+
+    return ids;
+}
+
+/**
  * Write the whole report to Metabase: a dashboard with a tab per page, and one per tab that asked for
- * its own. Cards first, because a dashboard can only point at cards that exist, and the filter
- * dropdowns point at cards too.
+ * its own. Snippets first, because a question points at a fragment by id, then the cards, because a
+ * dashboard can only point at cards that exist, and the filter dropdowns point at cards too.
  *
  * `env` is the platform being written, the same name the report was loaded for. It says which colors
  * a chart falls back to; without it they are Metabase's.
  */
-export async function syncReport(api: MetabaseApi, databaseId: number, tabs: ReportTab[], collection: string, dashboardName: string, hasCoordinates = false, env?: string): Promise<ReportSyncResult> {
+export async function syncReport(api: MetabaseApi, databaseId: number, tabs: ReportTab[], snippets: readonly ReportSnippet[], collection: string, dashboardName: string, hasCoordinates = false, env?: string): Promise<ReportSyncResult> {
+    const snippetIds = await syncSnippets(api, snippets);
     const renamedCollection = await renameLegacyCollection(api, collection);
     const { id: collectionId, created: createdCollection } = await api.ensureCollection(collection);
 
@@ -673,8 +732,8 @@ export async function syncReport(api: MetabaseApi, databaseId: number, tabs: Rep
                 description: card.description,
                 display: effectiveDisplay(card, hasCoordinates),
                 databaseId,
-                query: card.sql,
-                templateTags: buildTemplateTags(card),
+                query: card.snippetSql,
+                templateTags: buildTemplateTags(card, snippetIds),
                 visualizationSettings: buildVisualizationSettings(card, hasCoordinates, env),
                 collectionId,
             }, existingCards.get(cardName(card, tab)));
@@ -724,7 +783,7 @@ export async function syncReport(api: MetabaseApi, databaseId: number, tabs: Rep
         .filter(card => card.display === 'map' && !hasCoordinates)
         .map(card => card.title))];
 
-    return { collection, collectionId, createdCollection, renamedCollection, dashboards: written, cards: cardIds.size, mapsWithoutCoordinates };
+    return { collection, collectionId, createdCollection, renamedCollection, dashboards: written, cards: cardIds.size, snippets: snippetIds.size, mapsWithoutCoordinates };
 }
 
 /**

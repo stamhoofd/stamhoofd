@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import type { ReportCard, ReportTab } from './report.js';
-import { getReportDirectory, loadReport, parseTab, parameterNames, resolveSql } from './report.js';
+import { getReportDirectory, loadReport, loadSnippets, parseTab, parameterNames, resolveSql } from './report.js';
 import { buildVisualizationSettings, columnPalettes, layoutCards } from './sync-report.js';
 
 /**
@@ -1108,6 +1108,68 @@ describe('report', () => {
      * The mechanism itself, on a report written for the test: the real one only varies the GTP index,
      * and what breaks here is the resolving rather than the formula.
      */
+    /**
+     * What a card is written as rather than what it counts: the fragments stay where they are, as the
+     * references Metabase resolves against its snippets, so the definition of a lid stands in one
+     * place there too and an edit to it reaches every question that reads one.
+     */
+    describe('snippets', () => {
+        let snippets: Map<string, string>;
+
+        beforeAll(async () => {
+            snippets = new Map((await loadSnippets('keeo')).map(snippet => [snippet.name, snippet.sql]));
+        });
+
+        it('offers every shared fragment as a snippet of its own', () => {
+            expect([...snippets.keys()]).toContain('facts');
+            expect([...snippets.keys()]).toContain('leden');
+
+            for (const [name, sql] of snippets) {
+                expect(`${name}: ${/^[ \t]*--[ \t]*@include\b/m.test(sql)}`).toEqual(`${name}: false`);
+            }
+        });
+
+        /** A fragment refers to the fragments it reads the way a card does, so neither holds a copy. */
+        it('leaves a fragment inside a fragment as a reference', () => {
+            expect(snippets.get('facts')).toContain('{{snippet: takken}}');
+            expect(snippets.get('facts')).not.toContain('takken AS (');
+        });
+
+        it('gives a fragment the variant of the environment it was loaded for', async () => {
+            const ravot = new Map((await loadSnippets('ravot')).map(snippet => [snippet.name, snippet.sql]));
+
+            expect(ravot.get('gtp')).toContain('as ravot weighs it');
+            expect(snippets.get('gtp')).not.toContain('as ravot weighs it');
+        });
+
+        it('writes a card as the fragments it reads rather than a copy of them', () => {
+            const card = cardOf(dashboards, 'nationaal', 'totaal-leden');
+
+            expect(card.snippetSql).toContain('{{snippet: facts}}');
+            expect(card.snippetSql).toContain('{{snippet: leden}}');
+            expect(card.snippetSql).not.toContain('all_registrations AS (');
+        });
+
+        /**
+         * Metabase looks a nested reference up among the tags of the question it is running, so a
+         * fragment the card only reaches through another one has to be named by the card as well.
+         */
+        it('names the fragments a card only reaches through another one', () => {
+            const card = cardOf(dashboards, 'nationaal', 'totaal-leden');
+
+            expect(card.snippets[0]).toEqual('facts');
+            expect(card.snippets).toEqual(expect.arrayContaining(['facts', 'leden', 'takken', 'tak-categorie']));
+        });
+
+        /** The tags of a question are read off the expanded query, so a filter inside a fragment counts. */
+        it('keeps a filter that only a fragment uses on the card that reads it', () => {
+            const card = cardOf(dashboards, 'nationaal', 'totaal-leden');
+
+            expect(card.snippetSql).not.toContain('{{scoutsjaar}}');
+            expect(card.parameters).toContain('scoutsjaar');
+        });
+    });
+
     describe('environment variants', () => {
         const fixtures: string[] = [];
 

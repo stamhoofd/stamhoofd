@@ -4,16 +4,19 @@ import { MetabaseApi, MetabaseApiError } from './api.js';
 type Route = { status?: number; body: unknown };
 
 /**
- * Answer each `METHOD /path` with a canned response and record what was sent.
+ * Answer each `METHOD /path` with a canned response and record what was sent. A route may name the
+ * query string as well, which is what tells the two snippet listings apart; without one it answers
+ * whatever the path was asked with.
  */
 function mockFetch(routes: Record<string, Route>) {
     const calls: { key: string; body: any; headers: Record<string, string> }[] = [];
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
-        const key = `${init?.method ?? 'GET'} ${new URL(url).pathname}`;
-        const route = routes[key];
+        const target = new URL(url);
+        const key = `${init?.method ?? 'GET'} ${target.pathname}`;
+        const route = routes[`${key}${target.search}`] ?? routes[key];
         if (!route) {
-            throw new Error(`Unexpected request ${key}`);
+            throw new Error(`Unexpected request ${key}${target.search}`);
         }
         const body = typeof init?.body === 'string' ? init.body : undefined;
         calls.push({ key, body: body === undefined ? undefined : JSON.parse(body), headers: (init?.headers ?? {}) as Record<string, string> });
@@ -231,6 +234,44 @@ describe('MetabaseApi.requireDatabaseByName', () => {
 
         await expect(new MetabaseApi('https://metabase.example').requireDatabaseByName('Platform statistics (keeo)'))
             .rejects.toThrow('only: Platform statistics (ravot)');
+    });
+});
+
+describe('MetabaseApi snippets', () => {
+    /**
+     * A name is held by an archived snippet as much as by a live one, and Metabase deletes neither,
+     * so the one in the trash has to be found rather than written a second time under a taken name.
+     */
+    it('lists the archived fragments beside the live ones', async () => {
+        mockFetch({
+            'GET /api/native-query-snippet': { body: [{ id: 1, name: 'facts', content: 'SELECT 1' }] },
+            'GET /api/native-query-snippet?archived=true': { body: [{ id: 2, name: 'leden', content: 'SELECT 2' }] },
+        });
+
+        const snippets = await new MetabaseApi('http://127.0.0.1:3030').listSnippets();
+
+        expect(snippets.map(snippet => snippet.name)).toEqual(['facts', 'leden']);
+    });
+
+    it('creates a fragment that is not there yet', async () => {
+        const calls = mockFetch({ 'POST /api/native-query-snippet': { body: { id: 7 } } });
+
+        const id = await new MetabaseApi('http://127.0.0.1:3030').saveSnippet({ name: 'facts', content: 'SELECT 1' });
+
+        expect(id).toBe(7);
+        expect(calls[0].body).toEqual({ name: 'facts', content: 'SELECT 1' });
+    });
+
+    /** Updating in place keeps the id every question points at, and brings an archived one back. */
+    it('updates a fragment that is, and unarchives it', async () => {
+        const calls = mockFetch({ 'PUT /api/native-query-snippet/7': { body: { id: 7 } } });
+
+        const id = await new MetabaseApi('http://127.0.0.1:3030').saveSnippet({ name: 'facts', content: 'SELECT 2' }, 7);
+
+        expect(id).toBe(7);
+        // Metabase applies a description it is handed, so leaving it out is what keeps the one the
+        // snippet sidebar shows rather than emptying it on every run.
+        expect(calls[0].body).toEqual({ name: 'facts', content: 'SELECT 2', archived: false });
     });
 });
 

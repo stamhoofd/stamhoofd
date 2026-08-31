@@ -26,6 +26,12 @@ import { fileURLToPath } from 'url';
  * several values can be chosen for is written `IN ({{name}})`, since Metabase replaces it with all of
  * them, comma separated.
  *
+ * A card is read twice over. `sql` is the query with every fragment expanded, which is the whole of
+ * what it counts and what the tests check. `snippetSql` leaves the fragments where they stand, as the
+ * `{{snippet: leden}}` references Metabase understands, and is what Metabase is given: a fragment is
+ * written there as a snippet of its own, so what a lid is stands in one place and an edit to it
+ * reaches every question that reads it.
+ *
  * The same report is written for every platform, which do not all count the same thing the same way.
  * Where they differ, the environment says which variant a card gets: `includes/<env>/<name>.sql`
  * replaces the fragment of that name, and a setting written `-- description@<env>:` replaces the
@@ -89,6 +95,25 @@ export type ReportCard = {
     xLabels?: ReportCardXLabels;
     /** Parameters the query takes, read from the `{{...}}` in the sql. */
     parameters: string[];
+    /**
+     * The fragments this card reads, the ones those fragments read included. Metabase resolves a
+     * snippet against the tags of the question it stands in and not against the snippet that refers
+     * to it, so a card has to name the fragments it only reaches through another one as well.
+     */
+    snippets: string[];
+    sql: string;
+    /** The same query with the fragments left as references, which is the form Metabase is given. */
+    snippetSql: string;
+};
+
+/**
+ * A shared fragment as Metabase holds it: one snippet, referred to by every question that reads it.
+ *
+ * The fragments it includes itself stay references, so `facts` holds `{{snippet: takken}}` rather
+ * than a second copy of the takken -- the same nesting the `.sql` files are written in.
+ */
+export type ReportSnippet = {
+    name: string;
     sql: string;
 };
 
@@ -147,6 +172,22 @@ export async function loadReport(env: string, directory = getReportDirectory()):
     }));
 
     return tabs.sort((a, b) => orderOf(a.key) - orderOf(b.key));
+}
+
+/**
+ * The shared fragments of an environment, each one as the snippet Metabase holds it in.
+ *
+ * Written beside the questions so the definitions live in one place there as well: a question refers
+ * to `{{snippet: leden}}`, and whoever changes what a lid is changes it once instead of in every
+ * card that counts one. Which variant a fragment has is settled here, the same way it is for a card,
+ * so a snippet carries what this platform counts without saying which platform that is.
+ */
+export async function loadSnippets(env: string, directory = getReportDirectory()): Promise<ReportSnippet[]> {
+    const includes = await loadIncludes(path.join(directory, 'includes'), env);
+
+    return [...includes]
+        .map(([name, sql]) => ({ name, sql: referenceIncludes(sql) }))
+        .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function orderOf(key: string): number {
@@ -353,7 +394,9 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
         best,
         xLabels: xLabels as ReportCardXLabels | undefined,
         parameters: parameterNames(sql),
+        snippets: collectIncludes(section.body, includes),
         sql,
+        snippetSql: referenceIncludes(section.body).trim(),
     };
 }
 
@@ -413,9 +456,12 @@ function parseRanges(section: Section, file: string, display: string): { segment
     return { segments, best: best as ReportCardBest };
 }
 
+/** The line a fragment is asked for on, which is either expanded or turned into a reference. */
+const includeDirective = /^([ \t]*)--[ \t]*@include[ \t]+(\S+)[ \t]*$/gm;
+
 /** A fragment may include another, which is how the two grains of `facts` share their filters. */
 function expandIncludes(body: string, includes: Map<string, string>, file: string, card: string, chain: string[] = []): string {
-    return body.replaceAll(/^([ \t]*)--[ \t]*@include[ \t]+(\S+)[ \t]*$/gm, (_match, indent: string, name: string) => {
+    return body.replaceAll(includeDirective, (_match, indent: string, name: string) => {
         const include = includes.get(name);
         if (include === undefined) {
             throw new Error(`${file}: card "${card}" includes "${name}", which has no report/includes/${name}.sql`);
@@ -427,6 +473,32 @@ function expandIncludes(body: string, includes: Map<string, string>, file: strin
         return expandIncludes(include, includes, file, card, [...chain, name])
             .split('\n').map(line => indent + line).join('\n');
     });
+}
+
+/**
+ * The same body with each fragment left where it stands, as the reference Metabase resolves against
+ * its snippets. Nothing is checked here: `expandIncludes` has already refused a fragment that is not
+ * there and one that includes itself.
+ */
+function referenceIncludes(body: string): string {
+    return body.replaceAll(includeDirective, (_match, indent: string, name: string) => `${indent}{{snippet: ${name}}}`);
+}
+
+/**
+ * Every fragment a body reads, in the order it reaches them, the ones its fragments read included.
+ * A question has to name those too: Metabase looks a nested `{{snippet: takken}}` up among the tags
+ * of the question rather than among those of the fragment that refers to it.
+ */
+function collectIncludes(body: string, includes: Map<string, string>, found: string[] = []): string[] {
+    for (const [, , name] of body.matchAll(includeDirective)) {
+        if (found.includes(name)) {
+            continue;
+        }
+        found.push(name);
+        collectIncludes(includes.get(name) ?? '', includes, found);
+    }
+
+    return found;
 }
 
 /** The `{{name}}` parameters a query uses, in the order they first appear. */

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import type { MetabaseApi } from './api.js';
 import type { ReportCard, ReportTab } from './report.js';
-import { buildDashcards, buildParameters, buildTabs, buildTemplateTags, buildVisualizationSettings, chartColors, collectionToRename, columnPalettes, dashcardKey, environmentColors, groupByDashboard, layoutCards, segmentColors, templateTagId } from './sync-report.js';
+import { buildDashcards, buildParameters, buildTabs, buildTemplateTags, buildVisualizationSettings, chartColors, collectionToRename, columnPalettes, dashcardKey, environmentColors, groupByDashboard, layoutCards, segmentColors, snippetTagName, syncSnippets, templateTagId } from './sync-report.js';
 
 function card(overrides: Partial<ReportCard> = {}): ReportCard {
     return {
@@ -15,7 +16,9 @@ function card(overrides: Partial<ReportCard> = {}): ReportCard {
         best: 'high',
         span: 1,
         parameters: [],
+        snippets: [],
         sql: 'SELECT 1',
+        snippetSql: 'SELECT 1',
         ...overrides,
     };
 }
@@ -396,9 +399,29 @@ describe('buildVisualizationSettings', () => {
 
 describe('buildTemplateTags', () => {
     it('declares a tag for every parameter the query uses', () => {
-        const tags = buildTemplateTags(card({ parameters: ['scoutsjaar'] })) as Record<string, { name: string; type: string; 'display-name': string }>;
+        const tags = buildTemplateTags(card({ parameters: ['scoutsjaar'] }), new Map()) as Record<string, { name: string; type: string; 'display-name': string }>;
 
         expect(tags.scoutsjaar).toMatchObject({ name: 'scoutsjaar', type: 'text', 'display-name': 'Scoutsjaar' });
+    });
+
+    /**
+     * A nested fragment is looked up among the tags of the question that is running, not among those
+     * of the fragment referring to it, so the card declares what it only reaches through another one.
+     */
+    it('points a tag at every fragment the card reads, the nested ones included', () => {
+        const tags = buildTemplateTags(card({ snippets: ['facts', 'takken'] }), new Map([['facts', 7], ['takken', 9]])) as Record<string, unknown>;
+
+        expect(Object.keys(tags)).toEqual(['snippet: facts', 'snippet: takken']);
+        expect(tags['snippet: takken']).toMatchObject({ name: 'snippet: takken', type: 'snippet', 'snippet-name': 'takken', 'snippet-id': 9 });
+    });
+
+    /** A tag pointing at no snippet is a parameter Metabase cannot find, halfway through the report. */
+    it('refuses a card whose fragment was not written as a snippet', () => {
+        expect(() => buildTemplateTags(card({ snippets: ['facts'] }), new Map())).toThrow('reads the fragment "facts"');
+    });
+
+    it('names a snippet tag the way Metabase writes the reference', () => {
+        expect(snippetTagName('ingeschreven-voor')).toEqual('snippet: ingeschreven-voor');
     });
 
     /**
@@ -408,6 +431,32 @@ describe('buildTemplateTags', () => {
     it('gives a tag the same id on every run', () => {
         expect(templateTagId('totaal-leden', 'scoutsjaar')).toEqual(templateTagId('totaal-leden', 'scoutsjaar'));
         expect(templateTagId('totaal-leden', 'scoutsjaar')).not.toEqual(templateTagId('aantal-leiding', 'scoutsjaar'));
+    });
+});
+
+describe('syncSnippets', () => {
+    function stubApi(existing: { id: number; name: string }[]) {
+        const written: { name: string; existingId: number | undefined }[] = [];
+        const api = {
+            listSnippets: async () => existing.map(snippet => ({ ...snippet, content: '' })),
+            saveSnippet: async (input: { name: string }, existingId?: number) => {
+                written.push({ name: input.name, existingId });
+                return existingId ?? 100 + written.length;
+            },
+        };
+
+        return { api: api as unknown as MetabaseApi, written };
+    }
+
+    /** A fragment keeps the id its questions point at, so an edit reaches them instead of orphaning them. */
+    it('updates a fragment that is already there and creates the rest', async () => {
+        const { api, written } = stubApi([{ id: 4, name: 'facts' }]);
+
+        const ids = await syncSnippets(api, [{ name: 'facts', sql: 'SELECT 1' }, { name: 'leden', sql: 'SELECT 2' }]);
+
+        expect(written).toEqual([{ name: 'facts', existingId: 4 }, { name: 'leden', existingId: undefined }]);
+        expect(ids.get('facts')).toBe(4);
+        expect(ids.get('leden')).toBe(102);
     });
 });
 

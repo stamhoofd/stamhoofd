@@ -50,6 +50,19 @@ export type MetabaseCard = {
     name: string;
 };
 
+/** A shared query fragment, which questions refer to as `{{snippet: <name>}}`. */
+export type MetabaseSnippet = {
+    id: number;
+    name: string;
+    content: string;
+    archived?: boolean;
+};
+
+export type MetabaseSnippetInput = {
+    name: string;
+    content: string;
+};
+
 export type MetabaseDashboard = {
     id: number;
     name: string;
@@ -308,6 +321,37 @@ export class MetabaseApi {
      */
     async renameCollection(id: number, name: string): Promise<void> {
         await this.request('PUT', `/api/collection/${id}`, { name });
+    }
+
+    /**
+     * The snippets of the instance, the archived ones included. A name is held by an archived snippet
+     * just as much as by a live one -- Metabase has no way to delete either -- so a fragment whose
+     * snippet was thrown away has to be found and revived rather than written a second time under a
+     * name that is already taken.
+     */
+    async listSnippets(): Promise<MetabaseSnippet[]> {
+        const live = await this.request<MetabaseSnippet[]>('GET', '/api/native-query-snippet');
+        const archived = await this.request<MetabaseSnippet[]>('GET', '/api/native-query-snippet?archived=true');
+
+        return [...live, ...archived];
+    }
+
+    /**
+     * Write a shared fragment. Updating an existing one rather than replacing it keeps its id, and
+     * with it every question already pointing at it, so a fragment that changed reaches all of them
+     * at once. An archived one is brought back: its name was never given up.
+     *
+     * The description is Metabase's own and is never written: it is what the snippet sidebar lists a
+     * fragment under, and the only thing about one that nothing here has an answer for.
+     */
+    async saveSnippet(input: MetabaseSnippetInput, existingId?: number): Promise<number> {
+        const body = { name: input.name, content: input.content };
+
+        if (existingId !== undefined) {
+            await this.request('PUT', `/api/native-query-snippet/${existingId}`, { ...body, archived: false });
+            return existingId;
+        }
+        return (await this.request<{ id: number }>('POST', '/api/native-query-snippet', body)).id;
     }
 
     async listCards(collectionId: number): Promise<MetabaseCard[]> {

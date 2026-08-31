@@ -37,6 +37,31 @@ the people waiting for a place among the leden. The aanlevering is not offered i
 the leeftijdsgroepen: an unconnected filter counts everything, which is the wrong way for a sheet
 delivered to a department to fail.
 
+## One definition, in Metabase too
+
+`@include` puts a fragment in one place in git. Snippets put it in one place in Metabase: every
+`includes/*.sql` is written as a snippet of its own, and a question refers to it -- `{{snippet: leden}}`
+where the file says `-- @include leden`, with `facts` itself referring to `{{snippet: takken}}` rather
+than holding a second copy of the takken. A card is then the handful of lines that say what it counts
+instead of the two hundred that say what a lid is, and whoever changes what a lid is changes it once
+for the forty-odd questions that count one -- the questions the client writes themselves included,
+which can open on `{{snippet: leden}}` instead of on a copy pasted out of a card.
+
+A question declares a tag for every fragment it reads, the ones it only reaches through another
+fragment included: Metabase resolves a nested `{{snippet: takken}}` against the tags of the question
+it is running and not against those of the fragment that refers to it, so naming `facts` is not enough
+to reach what `facts` reads. A snippet is also pointed at by id, which is why the fragments are
+written before the questions that read them.
+
+Nothing here ever clears a fragment away. Metabase cannot delete a snippet, only archive it, and the
+name stays taken either way -- so a snippet is matched by name and updated in place, an archived one
+is brought back rather than written a second time, and one the report no longer has is left alone,
+since whatever has been built on it since would break with it.
+
+The fragments are still expanded as well. `card.sql` is the whole query, which is what the tests read
+and what says whether the sql itself is right; `card.snippetSql` is that query with the fragments left
+as references, and is what Metabase is given.
+
 ## One report, several platforms
 
 The same report is written for every platform, and they do not all count every figure the same way:
