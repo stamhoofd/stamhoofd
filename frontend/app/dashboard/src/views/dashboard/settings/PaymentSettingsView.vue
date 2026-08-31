@@ -598,8 +598,6 @@ async function disconnectMollie() {
 }
 
 async function doLinkMollie(code: string, state: string) {
-    console.log('[PaymentSettingsView] doLinkMollie called');
-
     const toast = new Toast('Koppelen...', 'spinner').setHide(null).show();
 
     try {
@@ -640,9 +638,6 @@ let lastAddedStripeAccount: string | null = null;
 
 onMounted(() => {
     const urlParams = UrlHelper.shared.getSearchParams();
-
-    console.log('[PaymentSettingsView] MOUNTED');
-    console.log(urlParams);
 
     const mollieMatch = url.match('/oauth/mollie');
     if (mollieMatch) {

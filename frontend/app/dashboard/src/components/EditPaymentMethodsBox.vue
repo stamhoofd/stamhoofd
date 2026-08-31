@@ -186,7 +186,7 @@ enum Routes {
 }
 
 defineRoute({
-    url: '/instellingen',
+    url: 'instellingen',
     name: Routes.Settings,
     component: async () => (await import('../views/dashboard/settings/PaymentSettingsView.vue')).default,
     present: 'popup',
