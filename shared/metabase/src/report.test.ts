@@ -294,10 +294,42 @@ describe('report', () => {
         it('delivers only the deelnemers with an aansluiting in that werkjaar', () => {
             // Every card reads the aansluiting filter through `facts`, which asks about the
             // registration as `r`; the condition of the sheets themselves asks about a fact as `f`.
-            const asked = /EXISTS \( SELECT 1 FROM member_platform_memberships mpm WHERE mpm\.memberId = f\.member_id AND mpm\.periodId = f\.period_id AND mpm\.deletedAt IS NULL \)/;
+            const asked = /EXISTS \( SELECT 1 FROM member_platform_memberships mpm WHERE mpm\.memberId = f\.member_id AND mpm\.periodId = f\.period_id AND mpm\.deletedAt IS NULL/;
             const cards = dashboards.flatMap(dashboard => dashboard.cards.filter(card => asked.test(card.sql.replaceAll(/\s+/g, ' '))));
 
             expect(cards.map(card => card.key)).toEqual(['deelnemers-bovenlokaal', 'deelnemers-lokale-groep']);
+        });
+
+        /**
+         * A koepel charges lidgelden that are not the engagement the department counts -- an
+         * occasionele vrijwilliger helps out at a weekend -- and nothing in the administration tells
+         * them apart, so each platform names the ones it files under. Read by id: a type holds a row
+         * per year under one id, and a rename would drop it out of the delivery in the year it
+         * happened.
+         */
+        it('delivers the aansluitingen the platform files under, and no other', () => {
+            const keeo = expressionOf(cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql);
+            const ravot = expressionOf(cardOf(ravotDashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql);
+
+            expect(keeo).toContain("mpm.membershipTypeId IN ( '5d66134e-21b6-41f4-b791-f99779bec8c5', 'i-mtype-volledig-scoutsjaar', 'f2ffdcb2-5cb3-41ce-be5a-b39bf01570fa' )");
+            expect(ravot).toContain("mpm.membershipTypeId IN ( 'adb9882e-6b50-467a-b89f-0727c6aa9065', '41632f5f-23e5-4dec-b7b5-b16202d3d95f' )");
+
+            // The ledenstatistieken count every active registration, whatever it was aangesloten
+            // under: the list belongs to the aanlevering, not to what the report means by a lid.
+            expect(expressionOf(cardOf(dashboards, 'nationaal', 'totaal-leden').sql)).not.toContain('5d66134e-21b6-41f4-b791-f99779bec8c5');
+        });
+
+        /**
+         * A delivery is filed over one werkjaar, so every werkjaar at once is not one. The filter that
+         * picks it is the only one of the report that has to be answered: without it the sheets would
+         * hand the department the sum of every year the statistics hold, which is the wrong way for a
+         * delivery to fail.
+         */
+        it('makes the werkjaar the one filter the aanlevering cannot be read without', () => {
+            for (const dashboard of dashboards) {
+                const expected = dashboard.key === 'jeugdbewegingen' ? 'scoutsjaar' : '';
+                expect(`${dashboard.key}: ${dashboard.required.join(',')}`).toEqual(`${dashboard.key}: ${expected}`);
+            }
         });
 
         /**
@@ -893,16 +925,21 @@ describe('report', () => {
         });
 
         /**
-         * The aansluiting filter stands above every dashboard, so two pages read side by side always
-         * count the same members. It reaches every card that counts them, which the shared fragments
-         * see to; what is left are the two sheets of the aanlevering that list which groups existed
-         * in the werkjaar, a question about organizations rather than about members.
+         * The aansluiting filter stands above every page of the ledenstatistieken, so two of them read
+         * side by side always count the same members, and it reaches every card that counts them,
+         * which the shared fragments see to. What is left are the two sheets of the aanlevering that
+         * list which groups existed in the werkjaar, a question about organizations, not members.
+         *
+         * The aanlevering is offered none of it. Which lidgelden say someone is a deelnemer is what
+         * the koepel files under rather than what a reader picks, so those sheets name the
+         * aansluitingen themselves and the dashboard shows no filter for them.
          */
-        it('offers the aansluiting filter on every dashboard and to every card that counts members', () => {
+        it('offers the aansluiting filter on every page of the report and not to the aanlevering', () => {
             const pages = dashboards.filter(dashboard => !dashboard.hidden);
 
             for (const dashboard of pages) {
-                expect(`${dashboard.key}: ${dashboard.filters.includes('aansluiting')}`).toEqual(`${dashboard.key}: true`);
+                const offered = dashboard.key !== 'jeugdbewegingen';
+                expect(`${dashboard.key}: ${dashboard.filters.includes('aansluiting')}`).toEqual(`${dashboard.key}: ${offered}`);
             }
 
             const without = pages.flatMap(dashboard => dashboard.cards

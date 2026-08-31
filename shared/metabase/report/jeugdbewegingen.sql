@@ -2,7 +2,8 @@
 -- title: Jeugdbewegingen
 -- dashboard: Groepen en Deelnemers - Departement Jeugd
 -- description: De jaarlijkse aanlevering 'Groepen en Deelnemers Jeugdbewegingen' aan het Departement Cultuur, Jeugd en Media. Eén kaart per tabblad van het sjabloon: download ze via het pijltje rechtsonder op de kaart als .xlsx en plak ze in het aanleversjabloon.
--- filters: scoutsjaar, aansluiting
+-- filters: scoutsjaar
+-- required: scoutsjaar
 --
 -- The dataset a koepel delivers every september, over the werkjaar that ended in august. One card per
 -- sheet of the delivery template, holding the columns the koepel fills in, in the order and under the
@@ -15,12 +16,15 @@
 --
 -- A werkjaar runs september to august, which is what a period spans here, so the scoutsjaar filter is
 -- what picks one. No sheet carries it as a column, since the department fills that in itself, but it
--- decides which organisations and which deelnemers each of them holds.
+-- decides which organisations and which deelnemers each of them holds, which is why it is the one
+-- filter of this report that has to be answered: a delivery is filed over one werkjaar, and every
+-- werkjaar at once is not one. Every sheet therefore refuses to run until a scoutsjaar is picked,
+-- rather than quietly handing the department the sum of every year the statistics hold.
 --
--- The aansluiting filter reaches the two deelnemers sheets and neither of the organisatie ones:
--- those list which groups existed in the werkjaar, which is not a question about members. Delivering
--- under a chosen aansluiting therefore hands the department groups whose deelnemers were counted
--- under it only -- the aanlevering itself is filed with the filter empty.
+-- The aansluiting filter is not offered, the way "Ingeschreven voor" is not. Which lidgelden say
+-- someone is a deelnemer is not a reader's to pick here -- the koepel delivers the aansluitingen it
+-- files under, and a reader who narrowed them would file a delivery short of the deelnemers it left
+-- out. The two deelnemers sheets pin them in `aanlevering-aansluitingen.sql` instead, per platform.
 --
 -- What the ledenstatistieken offer as "Ingeschreven voor" is not offered here. The department counts
 -- the deelnemers of a jeugdbeweging: someone waiting for a place has not joined one, and someone who

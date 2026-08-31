@@ -24,7 +24,7 @@ function card(overrides: Partial<ReportCard> = {}): ReportCard {
 }
 
 function tab(overrides: Partial<ReportTab> = {}): ReportTab {
-    return { key: 'nationaal', title: 'Nationaal', filters: [], hidden: false, cards: [], ...overrides };
+    return { key: 'nationaal', title: 'Nationaal', filters: [], required: [], hidden: false, cards: [], ...overrides };
 }
 
 describe('layoutCards', () => {
@@ -399,7 +399,7 @@ describe('buildVisualizationSettings', () => {
 
 describe('buildTemplateTags', () => {
     it('declares a tag for every parameter the query uses', () => {
-        const tags = buildTemplateTags(card({ parameters: ['scoutsjaar'] }), new Map()) as Record<string, { name: string; type: string; 'display-name': string }>;
+        const tags = buildTemplateTags(card({ parameters: ['scoutsjaar'] }), new Map(), []) as Record<string, { name: string; type: string; 'display-name': string }>;
 
         expect(tags.scoutsjaar).toMatchObject({ name: 'scoutsjaar', type: 'text', 'display-name': 'Scoutsjaar' });
     });
@@ -409,7 +409,7 @@ describe('buildTemplateTags', () => {
      * of the fragment referring to it, so the card declares what it only reaches through another one.
      */
     it('points a tag at every fragment the card reads, the nested ones included', () => {
-        const tags = buildTemplateTags(card({ snippets: ['facts', 'takken'] }), new Map([['facts', 7], ['takken', 9]])) as Record<string, unknown>;
+        const tags = buildTemplateTags(card({ snippets: ['facts', 'takken'] }), new Map([['facts', 7], ['takken', 9]]), []) as Record<string, unknown>;
 
         expect(Object.keys(tags)).toEqual(['snippet: facts', 'snippet: takken']);
         expect(tags['snippet: takken']).toMatchObject({ name: 'snippet: takken', type: 'snippet', 'snippet-name': 'takken', 'snippet-id': 9 });
@@ -417,7 +417,7 @@ describe('buildTemplateTags', () => {
 
     /** A tag pointing at no snippet is a parameter Metabase cannot find, halfway through the report. */
     it('refuses a card whose fragment was not written as a snippet', () => {
-        expect(() => buildTemplateTags(card({ snippets: ['facts'] }), new Map())).toThrow('reads the fragment "facts"');
+        expect(() => buildTemplateTags(card({ snippets: ['facts'] }), new Map(), [])).toThrow('reads the fragment "facts"');
     });
 
     it('names a snippet tag the way Metabase writes the reference', () => {
