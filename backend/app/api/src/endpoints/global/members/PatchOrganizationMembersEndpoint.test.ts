@@ -3,7 +3,7 @@ import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
-import { GroupFactory, Member, MemberFactory, MemberPlatformMembership, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
+import { GroupFactory, Member, MemberFactory, MemberPlatformMembership, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, RegistrationPeriodFactory, User, UserFactory } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import type { PatchAnswers } from '@stamhoofd/structures';
 import { Address, EmergencyContact, MemberDetails, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PermissionLevel, Permissions, PermissionsResourceType, PlatformMembershipType, PlatformMembershipTypeConfig, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, Version } from '@stamhoofd/structures';
@@ -948,6 +948,155 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             expect(response.status).toBe(200);
             expect(response.body.members[0].details.firstName).toBe('Michael');
             expect(response.body.members[0].details.birthDay?.getFullYear()).toBe(base.getFullYear() + 5);
+        });
+    });
+
+    describe('Email changes', () => {
+        test('A non-full admin cannot change the email of a member with a function', async () => {
+            const organization = await new OrganizationFactory({}).create();
+
+            const group = await new GroupFactory({ organization }).create();
+            const resources = new Map();
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    group.id,
+                    ResourcePermissions.create({ level: PermissionLevel.Write }),
+                ]]),
+            );
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.None, resources }),
+                organization,
+            }).create();
+
+            const memberUser = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.None, resources }),
+                organization,
+            }).create();
+
+            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false, user: memberUser }).create();
+            await new RegistrationFactory({ member, group }).create();
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ email: 'test@stamhoofd.be' }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, request))
+                .rejects
+                .toThrow(STExpect.errorWithCode('permission_denied'));
+        });
+
+        test('A full admin can change the email of a member with a function', async () => {
+            const organization = await new OrganizationFactory({}).create();
+
+            const group = await new GroupFactory({ organization }).create();
+            const resources = new Map();
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    group.id,
+                    ResourcePermissions.create({ level: PermissionLevel.Write }),
+                ]]),
+            );
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization,
+            }).create();
+
+            const memberUser = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.None, resources }),
+                organization,
+            }).create();
+
+            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false, user: memberUser }).create();
+            await new RegistrationFactory({ member, group }).create();
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ email: 'test@stamhoofd.be' }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            expect(response.status).toBe(200);
+            expect(response.body.members[0].details.email).toBe('test@stamhoofd.be');
+        });
+
+        test('A non-full platform admin cannot change the email of a member with with global permissions', async () => {
+            const organization = await new OrganizationFactory({}).create();
+
+            const group = await new GroupFactory({ organization }).create();
+
+            const user = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Write }),
+                organization,
+            }).create();
+
+            const memberUser = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization,
+            }).create();
+
+            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false, user: memberUser }).create();
+            await new RegistrationFactory({ member, group }).create();
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ email: 'test@stamhoofd.be' }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, request))
+                .rejects
+                .toThrow(STExpect.errorWithCode('permission_denied'));
+        });
+
+        test('A full platform admin can change the email of a member with global permissions', async () => {
+            const organization = await new OrganizationFactory({}).create();
+
+            const group = await new GroupFactory({ organization }).create();
+            const user = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization,
+            }).create();
+
+            const memberUser = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Write }),
+                organization,
+            }).create();
+
+            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false, user: memberUser }).create();
+            await new RegistrationFactory({ member, group }).create();
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ email: 'test@stamhoofd.be' }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            expect(response.status).toBe(200);
+            expect(response.body.members[0].details.email).toBe('test@stamhoofd.be');
         });
     });
 
