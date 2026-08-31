@@ -989,6 +989,33 @@ export class AdminPermissionChecker {
         return this.canEditUserName(user);
     }
 
+    async canEditMemberEmailAddresses(member: MemberWithUsersRegistrationsAndGroups) {
+        if (member.users.some(u => u.id === this.user.id)) return true;
+
+        if (member.users.some(u => u.permissions)) {
+            const organizationPermissions = new Map(...member.users.filter(u => u.permissions).map(u => u.permissions!.organizationPermissions));
+            const globalPermissions = member.users.filter(u => u.permissions).map(u => u.permissions!.globalPermissions);
+
+            for (const permission of globalPermissions) {
+                if (permission) {
+                    if (permission.level !== PermissionLevel.Full) continue;
+
+                    if (!this.hasPlatformFullAccess()) {
+                        return false;
+                    }
+                }
+            }
+
+            for (const [organizationId] of organizationPermissions) {
+                if (!await this.hasFullAccess(organizationId)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     async canAccessEmailTemplate(template: EmailTemplate, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
         if (level === PermissionLevel.Read && !EmailTemplateStruct.isSavedEmail(template.type)) {
             if (template.organizationId === null) {
@@ -1891,6 +1918,16 @@ export class AdminPermissionChecker {
             } else {
                 // if uitpas number did not change
                 data.details.uitpasNumberDetails.socialTariff = member.details.uitpasNumberDetails?.socialTariff;
+            }
+        }
+
+        if (data.details.email || data.details.alternativeEmails) {
+            if (!await this.canEditMemberEmailAddresses(member)) {
+                throw new SimpleError({
+                    code: 'permission_denied',
+                    message: $t('Je hebt geen toegangsrechten om de emailadressen van deze gebruiker aan te passen'),
+                    statusCode: 400,
+                });
             }
         }
 
