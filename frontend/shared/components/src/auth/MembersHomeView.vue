@@ -69,6 +69,7 @@ import LegalFooter from '#navigation/LegalFooter.vue';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { PaymentMethod, PaymentMethodHelper } from '@stamhoofd/structures';
 import { computed } from 'vue';
+import { MetaKey, useMetaInfo } from '#helpers/useMetaInfo.ts';
 
 enum Routes {
     Login = 'login',
@@ -106,6 +107,55 @@ const hasOnlinePaymentMethod = organization.value.meta.registrationPaymentConfig
 const hasTransfer = organization.value.meta.registrationPaymentConfiguration.paymentMethods.find(p => p === PaymentMethod.Transfer);
 const customDomain = computed(() => {
     return window.location.hostname !== STAMHOOFD.domains.dashboard;
+});
+
+const bannerImage = computed(() => organization.value.meta.horizontalLogo?.getResolutionForSize(Math.min(document.documentElement.clientWidth - 30, 900), undefined));
+const bannerImageSrc = computed(() => bannerImage.value?.file.getPublicPath());
+const bannerImageWidth = computed(() => bannerImage.value?.width);
+const bannerImageHeight = computed(() => bannerImage.value?.height);
+
+useMetaInfo({
+    title: $t('%1W0', { organization: organization.value.name }),
+    options: {
+        key: MetaKey.Routing,
+    },
+    meta: [
+        {
+            id: 'description',
+            name: 'description',
+            content: $t('%1W0', { organization: organization.value.name }),
+        },
+        {
+            id: 'og:site_name',
+            name: 'og:site_name',
+            content: organization.value.name,
+        },
+        {
+            id: 'og:title',
+            name: 'og:title',
+            content: $t('%1W0', { organization: organization.value.name }),
+        },
+        {
+            id: 'og:image',
+            name: 'og:image',
+            content: bannerImageSrc,
+        },
+        {
+            id: 'og:image:width',
+            name: 'og:image:width',
+            content: bannerImageWidth,
+        },
+        {
+            id: 'og:image:height',
+            name: 'og:image:height',
+            content: bannerImageHeight,
+        },
+        {
+            id: 'og:image:type',
+            name: 'og:image:type',
+            content: computed(() => bannerImageSrc.value === undefined ? undefined : bannerImageSrc.value.endsWith('.png') ? 'image/png' : 'image/jpeg'),
+        },
+    ],
 });
 
 const isTrial = computed(() => organization.value.meta.packages.isMembersTrial);
