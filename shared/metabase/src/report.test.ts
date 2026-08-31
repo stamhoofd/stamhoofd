@@ -214,7 +214,7 @@ describe('report', () => {
             const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql.replaceAll(/\s+/g, ' ');
 
             expect(sql).toContain("CASE WHEN f.tak_category = 'leader' THEN 2 WHEN f.tak_category = 'child' THEN 1 ELSE 0 END AS type_number");
-            expect(sql).toContain('GROUP BY i.organization_id, i.member_id )');
+            expect(sql).toContain('GROUP BY i.organization_uri, i.member_id )');
             expect(sql).toContain("CASE WHEN d.type_number = 2 THEN 'leiding' ELSE 'leden' END");
         });
 

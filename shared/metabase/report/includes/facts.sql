@@ -43,6 +43,7 @@ all_registrations AS (
     SELECT
         r.memberId AS member_id,
         r.organizationId AS organization_id,
+        o.uri AS organization_uri,
         o.name AS `Eenheid`,
         o.postalCode AS eenheid_postcode,
         o.city AS eenheid_gemeente,

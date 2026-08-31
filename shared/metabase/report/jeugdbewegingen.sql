@@ -45,12 +45,12 @@
 -- A werkjaar the koepel's own organization holds no row for -- one it had no registrations in --
 -- delivers nothing rather than a name from another year.
 SELECT
-    o.id AS `ID_Organisatie`,
+    o.uri AS `ID_Organisatie`,
     o.name AS `Naam_Organisatie`
 FROM organizations o
 JOIN platform pf ON pf.membershipOrganizationId = o.id
 JOIN registration_periods p ON p.id = o.periodId [[AND p.name = {{scoutsjaar}}]]
-GROUP BY o.id, o.name
+GROUP BY o.uri, o.name
 ORDER BY o.name
 
 -- @card deelnemers-bovenlokaal
@@ -81,7 +81,7 @@ ORDER BY o.name
 -- year, and the aansluiting the koepel charged them says so.
 -- @include facts
 SELECT
-    f.organization_id AS `ID_Organisatie`,
+    f.organization_uri AS `ID_Organisatie`,
     YEAR(f.birth_date) AS `Geboortejaar_deelnemers`,
     CASE f.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' ELSE NULL END AS `Gender_deelnemers`,
     COUNT(DISTINCT f.member_id) AS `Aantal_deelnemers`
@@ -118,7 +118,7 @@ ORDER BY `Geboortejaar_deelnemers`, `Gender_deelnemers`
 -- digits leaves the cell empty -- a required field the koepel can see and fill in -- rather than
 -- delivering a number that is wrong.
 SELECT
-    o.id AS `ID_Organisatie`,
+    o.uri AS `ID_Organisatie`,
     o.name AS `Naam_Organisatie`,
     CASE WHEN o.postalCode REGEXP '^[0-9]{4}$' THEN CAST(o.postalCode AS UNSIGNED) END AS `Postcode`
 FROM organizations o
@@ -179,7 +179,7 @@ ORDER BY `Naam_Organisatie`
 -- @include facts
 , inschrijvingen AS (
     SELECT
-        f.organization_id,
+        f.organization_uri,
         f.member_id,
         f.birth_date,
         f.`Geslacht`,
@@ -198,7 +198,7 @@ ORDER BY `Naam_Organisatie`
 ),
 deelnemers AS (
     SELECT
-        i.organization_id,
+        i.organization_uri,
         i.member_id,
         MAX(i.birth_date) AS birth_date,
         MAX(i.`Geslacht`) AS `Geslacht`,
@@ -207,10 +207,10 @@ deelnemers AS (
             MAX(i.type_number)
         ) AS type_number
     FROM inschrijvingen i
-    GROUP BY i.organization_id, i.member_id
+    GROUP BY i.organization_uri, i.member_id
 )
 SELECT
-    d.organization_id AS `ID_Organisatie`,
+    d.organization_uri AS `ID_Organisatie`,
     CASE WHEN d.type_number = 2 THEN 'leiding' ELSE 'leden' END AS `Type_deelnemers`,
     YEAR(d.birth_date) AS `Geboortejaar_deelnemers`,
     CASE d.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' ELSE NULL END AS `Gender_deelnemers`,
