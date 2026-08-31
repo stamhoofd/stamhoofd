@@ -63,7 +63,27 @@
                     </template>
                 </p>
 
-                <template v-if="(isPropertyEnabled('parents.nationalRegisterNumber') || nationalRegisterNumber)">
+                <template v-if="isPropertyEnabled('parents.taxDependent')">
+                    <Checkbox v-model="taxDependent">
+                        <p>
+                            {{ $t('{lid} is fiscaal ten laste van {name} (enkel voor gezinshoofd of fiscaal co-ouderschap)', {
+                                lid: props.member?.member.details.firstName ?? 'lid',
+                                name: firstName || 'deze ouder'
+                            }) }}
+                        </p>
+                        <p class="style-description-small">
+                            <I18nComponent :t="$t('Fiscale attesten \'Kinderopvang\' worden opgemaakt op naam van deze ouder. Enkel het gezinshoofd mag de kinderen ten laste aangeven als aan de voorwaarden voldaan is. Er is maar één gezinshoofd. Bij gescheiden ouders met fiscaal co-ouderschap kan je het bij beide ouders aanvinken, en wordt het attest in twee verdeeld. Duid hier de juiste persoon aan, anders loop je belastingvoordeel mis en staan de fiscale attesten op naam van de foute ouder. <button>Meer info</button>')">
+                                <template #button="{content}">
+                                    <a class="inline-link" href="https://fin.belgium.be/nl/particulieren/belastingaangifte/persoonlijke-situatie/personen-ten-laste/kinderen" target="_blank">
+                                        {{ content }}
+                                    </a>
+                                </template>
+                            </I18nComponent>
+                        </p>
+                    </Checkbox>
+                </template>
+
+                <template v-if="(isPropertyEnabled('parents.taxDependent') && taxDependent && isPropertyEnabled('parents.nationalRegisterNumber')) || (!isPropertyEnabled('parents.taxDependent') && isPropertyEnabled('parents.nationalRegisterNumber') || nationalRegisterNumber)">
                     <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`)" :required="isNRNRequiredForThisParent" :nullable="true" :validator="errors.validator" />
                     <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
                         {{ $t('%fa') }} <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
@@ -111,7 +131,7 @@ import NRNInput from '../../../inputs/NRNInput.vue';
 import PhoneInput from '../../../inputs/PhoneInput.vue';
 import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
 import { CenteredMessage } from '../../../overlays/CenteredMessage';
-import type { NavigationActions} from '../../../types/NavigationActions';
+import type { NavigationActions } from '../../../types/NavigationActions';
 import { useNavigationActions } from '../../../types/NavigationActions';
 import { useIsAllOptional, useIsPropertyEnabled, useIsPropertyRequired } from '#members/hooks/useIsPropertyRequired.ts';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
@@ -209,6 +229,11 @@ const alternativeEmails = computed({
 const nationalRegisterNumber = computed({
     get: () => patched.value.nationalRegisterNumber,
     set: nationalRegisterNumber => addPatch({ nationalRegisterNumber }),
+});
+
+const taxDependent = computed({
+    get: () => patched.value.taxDependent,
+    set: taxDependent => addPatch({ taxDependent }),
 });
 
 const availableAddresses = computed(() => {
@@ -320,31 +345,26 @@ async function save() {
                 $t(`%zT`),
                 false)) {
                 props.member.addParent(patched.value);
-            }
-            else {
+            } else {
                 props.member.addParent(patched.value);
                 for (const member of minorMembers) {
                     member.addParent(patched.value);
                 }
             }
-        }
-        else {
+        } else {
             if (props.member) {
                 props.member.patchParent(patch.value);
-            }
-            else if (props.family) {
+            } else if (props.family) {
                 props.family.patchParent(patch.value);
             }
         }
 
         if (props.saveHandler) {
             await props.saveHandler(navigate);
-        }
-        else {
+        } else {
             await pop({ force: true });
         }
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;
