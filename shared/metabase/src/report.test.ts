@@ -78,6 +78,27 @@ describe('report', () => {
             }
         });
 
+        /**
+         * MySQL builds a CTE again for every place that reads it and hash-joins the copies against
+         * each other, on a row estimate taken before any of them was built. Both lidgeld cards read
+         * `leden` twice, through an IN-subquery per column, and stopped loading at all once the
+         * statistics held a few years: 165k registrations timed out past two minutes where reading it
+         * once, as a join on the pair, answers in three seconds.
+         */
+        it('reads a shared fragment once per card, which is what keeps it answerable', () => {
+            for (const dashboard of dashboards) {
+                for (const card of dashboard.cards) {
+                    // The card's own query: what the fragments themselves read is their business.
+                    const body = card.snippetSql.split('\n').filter(line => !line.startsWith('{{snippet:')).join('\n');
+
+                    for (const fragment of card.snippets) {
+                        const reads = body.match(new RegExp(`\\b(?:FROM|JOIN)\\s+${fragment}\\b`, 'g')) ?? [];
+                        expect(`${card.key} reads ${fragment} ${reads.length} times`).toEqual(`${card.key} reads ${fragment} ${Math.min(reads.length, 1)} times`);
+                    }
+                }
+            }
+        });
+
         it('names every column a chart plots', () => {
             for (const dashboard of dashboards) {
                 for (const card of dashboard.cards.filter(card => ['bar', 'line', 'combo', 'pie', 'map'].includes(card.display))) {
