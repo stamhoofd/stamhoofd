@@ -9,7 +9,7 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import { useUser } from '#hooks/useUser.ts';
 import type { MemberResponsibility, Organization, RecordCategory, StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';
-import { FilterWrapperMarker, Gender, GroupType, LanguageHelper, OrganizationRecordsConfiguration, PermissionLevel, PermissionsResourceType, UitpasSocialTariffStatus, unwrapFilter } from '@stamhoofd/structures';
+import { AccessRight, FilterWrapperMarker, Gender, GroupType, LanguageHelper, OrganizationRecordsConfiguration, PermissionLevel, PermissionsResourceType, UitpasSocialTariffStatus, unwrapFilter } from '@stamhoofd/structures';
 import type { ComputedRef, Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { DateFilterBuilder } from '../DateUIFilter';
@@ -794,65 +794,77 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
         },
     }));
 
+    const missingDataOptions: { name: string; value: string; filter: StamhoofdFilter }[] = [
+        {
+            name: $t('%17w'),
+            value: 'birthDay',
+            filter: {
+                birthDay: null,
+            },
+        },
+
+        {
+            name: $t('%Cn'),
+            value: 'address',
+            filter: {
+                'details.address': {
+                    value: null,
+                },
+            },
+        },
+        {
+            name: $t('%wD'),
+            value: 'phone',
+            filter: {
+                phone: null,
+            },
+        },
+        {
+            name: $t('%1FK'),
+            value: 'email',
+            filter: {
+                email: null,
+            },
+        },
+        {
+            name: $t('%XH'),
+            value: 'parents',
+            filter: {
+                'details.parents.length': 0,
+            },
+        },
+        {
+            name: $t('%17x'),
+            value: 'secondParent',
+            filter: {
+                'details.parents.length': 1,
+            },
+        },
+        {
+            name: $t('%17y'),
+            value: 'emergencyContacts',
+            filter: {
+                'details.emergencyContacts.length': 0,
+            },
+        },
+    ];
+
+    if (auth.hasAccessRight(AccessRight.MemberManageNRN)) {
+        missingDataOptions.push({
+            name: $t('Rijksregisternummer'),
+            value: 'nationalRegisterNumber',
+            filter: {
+                'details.nationalRegisterNumber': null,
+            },
+        });
+    }
+
     // missing data
     all.push(simpleMultipleChoiceFilterFactory({
         name: $t(`%17z`),
         description: $t('%1MR'),
         filterMode: MultipleChoiceUIFilterMode.Or,
-        options: [
-            {
-                name: $t('%17w'),
-                value: 'birthDay',
-                filter: {
-                    birthDay: null,
-                },
-            },
-
-            {
-                name: $t('%Cn'),
-                value: 'address',
-                filter: {
-                    'details.address': {
-                        value: null,
-                    },
-                },
-            },
-            {
-                name: $t('%wD'),
-                value: 'phone',
-                filter: {
-                    phone: null,
-                },
-            },
-            {
-                name: $t('%1FK'),
-                value: 'email',
-                filter: {
-                    email: null,
-                },
-            },
-            {
-                name: $t('%XH'),
-                value: 'parents',
-                filter: {
-                    'details.parents.length': 0,
-                },
-            },
-            {
-                name: $t('%17x'),
-                value: 'secondParent',
-                filter: {
-                    'details.parents.length': 1,
-                },
-            },
-            {
-                name: $t('%17y'),
-                value: 'emergencyContacts',
-                filter: {
-                    'details.emergencyContacts.length': 0,
-                },
-            },
-        ],
+        options: missingDataOptions,
     }));
 
     if (recordCategoriesFilterBuilders.length > 0) {
