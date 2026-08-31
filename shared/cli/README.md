@@ -200,12 +200,12 @@ Each environment reports on its own **platform statistics database**, so a dashb
 Keeo never reads Ravot numbers. `stam platform-report start` creates and migrates that database, and
 registers it as a data source named after the environment:
 
-| Command                                 | Data source                       | MySQL database                    |
-| --------------------------------------- | --------------------------------- | --------------------------------- |
-| `stam platform-report start`            | `Platform statistics (stamhoofd)` | `platform-statistics-development` |
-| `stam platform-report start --env keeo` | `Platform statistics (keeo)`      | `platform-statistics-keeo`        |
-| `stam platform-report start --env ravot`| `Platform statistics (ravot)`     | `platform-statistics-ravot`       |
-| `stam platform-report start --env jambo`| `Platform statistics (jambo)`     | `platform-statistics-jamboree`    |
+| Command                                 | MySQL database                    |
+| --------------------------------------- | --------------------------------- |
+| `stam platform-report start`            | `statistics-development` |
+| `stam platform-report start --env keeo` | `statistics-keeo`        |
+| `stam platform-report start --env ravot`| `statistics-ravot`       |
+| `stam platform-report start --env jambo`| `statistics-jamboree`    |
 
 The names come from `databases.platformStatistics` in `src/config/development-config.ts`, which
 follows the same rules as the main development database: environments keep their historical label

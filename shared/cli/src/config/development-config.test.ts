@@ -104,7 +104,7 @@ describe('buildDevelopmentConfig', () => {
     it('gives every environment its own platform statistics database', () => {
         const databaseFor = (env: string) => buildDevelopmentConfig(context({ env })).databases.platformStatistics;
 
-        expect(databaseFor('stamhoofd')).toBe('platform-statistics-development');
+        expect(databaseFor('stamhoofd')).toBe('statistics-development');
         expect(databaseFor('keeo')).toBe('platform-statistics-keeo');
         expect(databaseFor('ravot')).toBe('platform-statistics-ravot');
         // Historical label, kept in step with the main database of the same environment.

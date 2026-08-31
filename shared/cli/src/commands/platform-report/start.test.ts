@@ -57,7 +57,7 @@ describe('Platform report start command', () => {
         vi.clearAllMocks();
         vi.mocked(allRunning).mockResolvedValue(true);
         vi.mocked(metabaseService.provision).mockResolvedValue({
-            database: 'platform-statistics-development',
+            database: 'statistics-development',
             dataSource: 'Platform statistics (stamhoofd)',
             created: true,
             removedSampleDatabase: false,
@@ -72,7 +72,7 @@ describe('Platform report start command', () => {
             dashboards: [{ name: 'Ledenstatistieken', id: 2, tabs: ['Ledenaantallen'], bookmarked: true }],
             cards: 24,
             mapsWithoutCoordinates: [],
-            database: 'platform-statistics-development',
+            database: 'statistics-development',
             dataSource: 'Platform statistics (stamhoofd)',
             tableCount: 12,
             postalCodeCount: 1149,
@@ -112,7 +112,7 @@ describe('Platform report start command', () => {
             dashboards: [],
             cards: 24,
             mapsWithoutCoordinates: ['Leden per postcode'],
-            database: 'platform-statistics-development',
+            database: 'statistics-development',
             dataSource: 'Platform statistics (stamhoofd)',
             tableCount: 12,
             postalCodeCount: 0,
@@ -132,7 +132,7 @@ describe('Platform report start command', () => {
             dashboards: [],
             cards: 24,
             mapsWithoutCoordinates: [],
-            database: 'platform-statistics-development',
+            database: 'statistics-development',
             dataSource: 'Platform statistics (stamhoofd)',
             tableCount: 12,
             postalCodeCount: 1149,
@@ -146,7 +146,7 @@ describe('Platform report start command', () => {
 
     it('warns when the statistics database is still empty after migrating', async () => {
         vi.mocked(metabaseService.provision).mockResolvedValue({
-            database: 'platform-statistics-development',
+            database: 'statistics-development',
             dataSource: 'Platform statistics (stamhoofd)',
             created: true,
             removedSampleDatabase: false,
