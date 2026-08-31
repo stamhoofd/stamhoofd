@@ -216,8 +216,13 @@ export function snippetTagName(snippet: string): string {
  * another one included: Metabase resolves a nested reference against the tags of the question it is
  * running, so a fragment left out here is a parameter it cannot find rather than one it looks up in
  * the snippet that refers to it.
+ *
+ * `required` are the filters the tab cannot be read without. Said on the tag rather than only on the
+ * dashboard filter, because that is the half Metabase enforces: a required filter with nothing chosen
+ * leaves the widget empty, and a card whose tag does not say so answers for every scoutsjaar at once
+ * instead of refusing.
  */
-export function buildTemplateTags(card: ReportCard, snippetIds: Map<string, number>): Record<string, unknown> {
+export function buildTemplateTags(card: ReportCard, snippetIds: Map<string, number>, required: readonly string[]): Record<string, unknown> {
     const tags: Record<string, unknown> = {};
 
     for (const snippet of card.snippets) {
@@ -244,6 +249,7 @@ export function buildTemplateTags(card: ReportCard, snippetIds: Map<string, numb
             name: parameter,
             'display-name': filter?.title ?? parameter,
             type: 'text',
+            ...(required.includes(parameter) ? { required: true } : {}),
         };
     }
 
@@ -527,6 +533,7 @@ export function buildVisualizationSettings(card: ReportCard, hasCoordinates = tr
  */
 export function buildParameters(tabs: ReportTab[], filterCardIds: Map<string, number>, orderedValues: Map<string, string[]> = new Map()): Record<string, unknown>[] {
     const wanted = new Set(tabs.flatMap(tab => tab.filters));
+    const required = new Set(tabs.flatMap(tab => tab.required));
 
     return reportFilters
         .filter(filter => wanted.has(filter.name))
@@ -541,6 +548,7 @@ export function buildParameters(tabs: ReportTab[], filterCardIds: Map<string, nu
                 type: 'string/=',
                 sectionId: 'string',
                 isMultiSelect: filter.multiple,
+                ...(required.has(filter.name) ? { required: true } : {}),
                 // Without this the widget is a plain text box, however well the values source is
                 // configured: it is what picks the dropdown over an input box.
                 values_query_type: 'list',
@@ -733,7 +741,7 @@ export async function syncReport(api: MetabaseApi, databaseId: number, tabs: Rep
                 display: effectiveDisplay(card, hasCoordinates),
                 databaseId,
                 query: card.snippetSql,
-                templateTags: buildTemplateTags(card, snippetIds),
+                templateTags: buildTemplateTags(card, snippetIds, tab.required),
                 visualizationSettings: buildVisualizationSettings(card, hasCoordinates, env),
                 collectionId,
             }, existingCards.get(cardName(card, tab)));

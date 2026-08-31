@@ -5,9 +5,12 @@
 -- a koepel delivers the deelnemers it aansluit, and a registration that never became an aansluiting
 -- is a member of the group rather than of the jeugdbeweging.
 --
--- Not deleted is the whole of what makes it count. A lidgeld whose expireDate has passed, or one that
--- never left its proefperiode, still says the member was aangesloten during that werkjaar, which is
--- the question the dataset asks -- not whether the koepel still holds them today.
+-- Not deleted is the whole of what makes a lidgeld count. One whose expireDate has passed, or one
+-- that never left its proefperiode, still says the member was aangesloten during that werkjaar, which
+-- is the question the dataset asks -- not whether the koepel still holds them today.
+--
+-- Which kinds of lidgeld say it at all is the platform's, in `aanlevering-aansluitingen.sql`: a
+-- koepel charges some that are not an engagement the department counts.
 --
 -- Not to be confused with `aansluiting.sql`, the filter above the dashboards: that one narrows to the
 -- types the reader picked and disappears when they pick none. This is a condition of the sheets
@@ -20,4 +23,5 @@ EXISTS (
     WHERE mpm.memberId = f.member_id
       AND mpm.periodId = f.period_id
       AND mpm.deletedAt IS NULL
+      -- @include aanlevering-aansluitingen
 )

@@ -135,6 +135,16 @@ export type ReportTab = {
      * any tab is visible everywhere; this is what decides which cards it actually reaches.
      */
     filters: string[];
+    /**
+     * The filters of this tab that have to be answered before its cards say anything. Metabase marks
+     * such a filter on the dashboard and refuses to run a card that has no value for it, which is
+     * what a tab whose cards are wrong rather than broad without one asks for: the aanlevering
+     * delivers one werkjaar, and every werkjaar at once is not a delivery anyone can file.
+     *
+     * Named per tab rather than with the filter, since the same filter is read both ways: the
+     * ledenstatistieken count every scoutsjaar until a reader picks one.
+     */
+    required: string[];
     /** Cards that only feed the filter dropdowns. They live in the collection but on no tab. */
     hidden: boolean;
     cards: ReportCard[];
@@ -267,12 +277,21 @@ export function parseTab(contents: string, file: string, includes: Map<string, s
         throw new Error(`${file}: filter "${unused[0]}" is declared but no card uses {{${unused[0]}}}`);
     }
 
+    // A filter the dashboard does not show is one nobody can answer, so requiring it would leave
+    // every card of the tab refusing to run with nothing on screen to say why.
+    const requiredFilters = splitList(header.attributes.get('required'));
+    const unshown = requiredFilters.filter(filter => !filters.includes(filter));
+    if (unshown.length > 0) {
+        throw new Error(`${file}: filter "${unshown[0]}" is required but not among the filters of the tab`);
+    }
+
     return {
         key: header.key,
         title: required(header.attributes, 'title', file, header.key),
         description: header.attributes.get('description'),
         dashboard: header.attributes.get('dashboard'),
         filters,
+        required: requiredFilters,
         hidden: header.attributes.get('hidden') === 'true',
         cards,
     };
@@ -285,7 +304,7 @@ type Section = { kind: 'tab' | 'card'; key: string; attributes: Map<string, stri
  * slipped down rather than a comment, and would otherwise be dropped without a word: writing a
  * comment above `-- size:` is enough to make the whole block below it stop counting.
  */
-const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'columns', 'stacked', 'segments', 'best', 'xlabels', 'height', 'span', 'latitude', 'longitude', 'filters', 'hidden', 'dashboard']);
+const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'columns', 'stacked', 'segments', 'best', 'xlabels', 'height', 'span', 'latitude', 'longitude', 'filters', 'required', 'hidden', 'dashboard']);
 
 function splitSections(contents: string, file: string, env?: string): Section[] {
     const sections: Section[] = [];
