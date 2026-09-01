@@ -35,11 +35,7 @@
             <STList v-if="createBalanceItem">
                 <STListItem :selectable="true" element-name="button" @click="createBalanceItem">
                     <template #left>
-                        <IconContainer icon="box">
-                            <template #aside>
-                                <span class="icon add small primary" />
-                            </template>
-                        </IconContainer>
+                        <IconContainer icon="box" aside-icon="add" />
                     </template>
                     <h3 class="style-title-list">
                         {{ $t('%gx') }}

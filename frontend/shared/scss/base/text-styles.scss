@@ -1114,6 +1114,45 @@
     grid-template-columns: auto 1fr;
     grid-template-columns: fit-content(40%) 1fr;
     gap: 10px 25px;
+    padding: 10px 0;
+
+    &:not(:empty) {
+        + .st-list, + .st-grid {
+            margin-top: 20px;
+        }
+
+        // Same but stacked in divs:
+        + div {
+            .st-list:first-child, .st-grid:first-child {
+                margin-top: 20px;
+            }
+        }
+
+        + div > div:first-child {
+            .st-list:first-child, .st-grid:first-child {
+                margin-top: 20px;
+            }
+        }
+        
+        + div > div:first-child > div:first-child {
+            .st-list:first-child, .st-grid:first-child {
+                margin-top: 20px;
+            }
+        }
+    }
+
+    &:empty {
+        padding: 0;
+        display: none;
+    }
+
+    &:last-child {
+        padding-bottom: 0;
+    }
+
+    hr + & {
+        padding-top: 0;
+    }
 
     &.small {
         grid-template-columns: 150px 1fr;
@@ -1136,7 +1175,11 @@
         position: relative;
         z-index: 1;
 
-        transition: color 0.2s;
+        transition: color 0.2s;    
+
+        > p.style-description:first-child {
+            color: $color-dark;
+        }
     }
 
     dd:before {

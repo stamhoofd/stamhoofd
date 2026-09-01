@@ -7,11 +7,7 @@
         <STList>
             <STListItem v-for="(action, index) in enabledActions" :key="index" :selectable="true" :class="action.listItemClass" :data-testid="action.testId" @click="action.action">
                 <template #left>
-                    <IconContainer :icon="action.icon" :class="action.iconClass">
-                        <template v-if="action.asideIcon" #aside>
-                            <span :class="'icon ' + action.asideIcon" />
-                        </template>
-                    </IconContainer>
+                    <IconContainer :icon="action.icon" :class="action.iconClass" :aside-icon="action.asideIcon" />
                 </template>
 
                 <h3 class="style-title-list">

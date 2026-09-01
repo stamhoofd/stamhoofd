@@ -1,15 +1,11 @@
 <template>
     <STListItem :selectable="true" :class="'right-stack ' + (invoice.theme ?? '')" @click="navigate(Route)">
         <template #left>
-            <IconContainer icon="receipt" class="gray" />
+            <IconContainer icon="receipt" :aside-icon="invoice.type === InvoiceType.CreditNote ? 'undo' : undefined" />
         </template>
 
-        <p class="style-title-prefix-list">
-            <span>{{ InvoiceTypeHelper.getName(invoice.type) }}</span>
-        </p>
-
         <h3 class="style-title-list">
-            {{ invoice.number ?? invoice.id }}
+            {{ capitalizeFirstLetter(InvoiceTypeHelper.getName(invoice.type)) }} {{ invoice.number ?? invoice.id }}
         </h3>
 
         <p v-if="invoice.invoicedAt" class="style-description-small">
@@ -28,7 +24,7 @@
 <script setup lang="ts">
 import { defineRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import type { Invoice } from '@stamhoofd/structures';
-import { InvoiceTypeHelper } from '@stamhoofd/structures';
+import { InvoiceType, InvoiceTypeHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import IconContainer from '../../icons/IconContainer.vue';

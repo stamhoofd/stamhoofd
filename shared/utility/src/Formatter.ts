@@ -2,7 +2,7 @@ import type { StringLike } from '@stamhoofd/types/StringLike';
 import { friendlyFormatIBAN } from 'ibantools';
 import { DateTime } from 'luxon';
 import { Sorter } from './Sorter.js';
-
+import jsvat from 'jsvat-next';
 export class Formatter {
     static timezone = 'Europe/Brussels';
 
@@ -32,6 +32,30 @@ export class Formatter {
             console.error('Invalid IBAN', ibanRaw, e);
             return ibanRaw.trim().replaceAll('*', '•').replace(/(?:••••\s)+/, '•••• ');
         }
+    }
+
+    static VATNumber(vatNumber: string) {
+        const vat = vatNumber
+            .toUpperCase()
+            .replace(/[\s.-]/g, '');
+
+        // Belgium: BE + 10 digits
+        if (vat.startsWith('BE')) {
+            const belgian = vat.match(/^BE(\d{4})(\d{3})(\d{3})$/);
+            if (belgian) {
+                return `BE${belgian[1]}.${belgian[2]}.${belgian[3]}`;
+            }
+        }
+
+        // Netherlands: NL + 9 digits + B + 2 digits
+        if (vat.startsWith('NL')) {
+            const dutch = vat.match(/^NL(\d{3})(\d{3})(\d{3})(B\d{2})$/);
+            if (dutch) {
+                return `NL${dutch[1]}.${dutch[2]}.${dutch[3]}.${dutch[4]}`;
+            }
+        }
+
+        return vatNumber;
     }
 
     /**

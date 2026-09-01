@@ -1,6 +1,7 @@
 <template>
     <div class="hover-box container">
-        <hr><dl class="details-grid">
+        <hr>
+        <dl class="details-grid">
             <template v-if="member.patchedMember.details.name">
                 <dt>{{ $t('%1Os') }}</dt>
                 <dd>

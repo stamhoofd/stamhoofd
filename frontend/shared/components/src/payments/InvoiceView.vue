@@ -12,12 +12,13 @@
 
         <main>
             <p :class="'style-title-prefix ' + invoice.theme">
-                <span>{{ capitalizeFirstLetter(InvoiceTypeHelper.getName(invoice.type)) }}</span>
+                {{ capitalizeFirstLetter(InvoiceTypeHelper.getName(invoice.type)) }} <span v-copyable class="style-copyable">{{ title }}</span>
             </p>
 
             <h1 class="style-navigation-title with-icons">
-                <span class="icon-spacer">{{ title }}</span>
+                {{ invoice.customer?.dynamicName }}
             </h1>
+
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <p v-if="invoice.number && !invoice.pdf" class="error-box selectable with-button">
@@ -28,119 +29,51 @@
                 </LoadingButton>
             </p>
 
-            <STList class="info">
-                <STListItem v-if="invoice.invoicedAt">
-                    <h3 class="style-definition-label">
-                        {{ $t('%1J6') }}
-                    </h3>
-                    <p class="style-definition-text">
-                        {{ formatDate(invoice.invoicedAt) }}
-                    </p>
-                    <p class="style-description-small">
-                        {{ $t('%hI', {time: formatTime(invoice.invoicedAt)}) }}
-                    </p>
-                </STListItem>
+            <dl class="details-grid">
+                <template v-if="invoice.invoicedAt">
+                    <dt>{{ $t('Datum') }}</dt>
+                    <dd>
+                        <span v-copyable class="style-copyable">{{ formatDate(invoice.invoicedAt) }}</span>
+                    </dd>
+                </template>
+                <template v-if="invoice.dueAt">
+                    <dt>{{ $t('Vervaldatum') }}</dt>
+                    <dd>
+                        <span v-copyable class="style-copyable">{{ formatDate(invoice.dueAt) }}</span>
+                    </dd>
+                </template>
 
-                <STListItem v-if="invoice.dueAt">
-                    <h3 class="style-definition-label">
-                        {{ $t('%1J7') }}
-                    </h3>
-                    <p class="style-definition-text">
-                        {{ formatDate(invoice.dueAt) }}
-                    </p>
-                </STListItem>
-            </STList>
+                <template v-if="invoice.customer">
+                    <dt>{{ $t('Klant') }}</dt>
+                    <dd>
+                        <p v-copyable class="style-description style-copyable">
+                            {{ invoice.customer.dynamicName }}
+                        </p>
 
-            <hr>
-            <h2>{{ $t('%1J1') }}</h2>
-
-            <STList v-if="invoice.customer.company" class="info">
-                <STListItem>
-                    <h3 class="style-definition-label">
-                        {{ $t('%1JI') }}
-                    </h3>
-                    <p v-copyable class="style-definition-text style-copyable">
-                        {{ invoice.customer.company.name }}
-                    </p>
-                    <p v-if="!invoice.customer.company.VATNumber && !invoice.customer.company.companyNumber" class="style-description">
-                        {{ $t('%1CH') }}
-                    </p>
-                </STListItem>
-
-                <STListItem v-if="invoice.customer.company.VATNumber">
-                    <h3 class="style-definition-label">
-                        {{ $t('%1CK') }}
-                    </h3>
-                    <p v-copyable class="style-definition-text style-copyable">
-                        {{ invoice.customer.company.VATNumber }}
-                    </p>
-                </STListItem>
-
-                <STListItem v-if="invoice.customer.company.companyNumber && (!invoice.customer.company.VATNumber || (invoice.customer.company.companyNumber !== invoice.customer.company.VATNumber && invoice.customer.company.companyNumber !== invoice.customer.company.VATNumber.slice(2)))">
-                    <h3 class="style-definition-label">
-                        {{ $t('%wa') }}
-                    </h3>
-                    <p v-copyable class="style-definition-text style-copyable">
-                        {{ invoice.customer.company.companyNumber }}
-                    </p>
-                </STListItem>
-
-                <STListItem v-if="invoice.customer.company.address">
-                    <h3 class="style-definition-label">
-                        {{ $t('%Cn') }}
-                    </h3>
-                    <p v-copyable class="style-definition-text style-copyable">
-                        {{ invoice.customer.company.address.toString() }}
-                    </p>
-                </STListItem>
-
-                <STListItem v-if="invoice.customer.company.administrationEmail">
-                    <h3 class="style-definition-label">
-                        {{ $t('%1FK') }}
-                    </h3>
-                    <p v-copyable class="style-definition-text style-copyable">
-                        {{ invoice.customer.company.administrationEmail }}
-                    </p>
-                </STListItem>
-
-                <STListItem v-if="invoice.customer.company.customPeppolEndpointId">
-                    <h3 class="style-definition-label">
-                        {{ $t('%Zce') }}
-                    </h3>
-                    <p v-copyable class="style-definition-text style-copyable">
-                        {{ invoice.customer.company.customPeppolEndpointId.getShortLabel() }}
-                    </p>
-                </STListItem>
-
-                <STListItem v-if="invoice.customer.name">
-                    <h3 class="style-definition-label">
-                        {{ $t('%1Kl') }}
-                    </h3>
-                    <p v-copyable class="style-definition-text style-copyable">
-                        {{ invoice.customer.name }}
-                    </p>
-                    <p v-if="invoice.customer.email" v-copyable class="style-description style-copyable">
-                        {{ invoice.customer.email }}
-                    </p>
-                </STListItem>
-            </STList>
-
-            <STList v-else class="info">
-                <STListItem>
-                    <h3 class="style-definition-label">
-                        {{ $t('%1J8') }}
-                    </h3>
-                    <p v-copyable class="style-definition-text style-copyable">
-                        {{ invoice.customer.name || $t('%CL') }}
-                    </p>
-                    <p v-if="invoice.customer.email" v-copyable class="style-description style-copyable">
-                        {{ invoice.customer.email }}
-                    </p>
-                </STListItem>
-            </STList>
-
-            <hr>
-            <h2>{{ $t('%YI') }}</h2>
+                        <p v-if="invoice.customer?.company?.VATNumber" v-copyable class="style-description-small style-copyable">
+                            {{ Formatter.VATNumber(invoice.customer.company.VATNumber) }}
+                        </p>
+                        <p v-else-if="invoice.customer?.company?.companyNumber" v-copyable class="style-description-small style-copyable">
+                            {{ invoice.customer.company.companyNumber }}
+                        </p>
+                        <p v-if="invoice.customer?.company?.administrationEmail" class="style-description-small">
+                            <EmailAddress :email="invoice.customer.company.administrationEmail" />
+                        </p>
+                        <p v-if="invoice.customer?.company?.customPeppolEndpointId" v-copyable class="style-description-small style-copyable">
+                            {{ invoice.customer.company.customPeppolEndpointId.getShortLabel() }}
+                        </p>
+                        <p v-if="invoice.customer?.email" class="style-description-small">
+                            <EmailAddress :email="invoice.customer.email" />
+                        </p>
+                        <p v-if="invoice.customer?.phone" v-copyable class="style-description-small style-copyable">
+                            {{ invoice.customer.phone }}
+                        </p>
+                        <p v-if="invoice.customer?.company?.address" v-copyable class="style-description-small style-copyable">
+                            {{ invoice.customer?.company?.address }}
+                        </p>
+                    </dd>
+                </template>
+            </dl>
 
             <InvoiceItemsBox :invoice="invoice" />
 
@@ -190,7 +123,7 @@ import STNavigationBar from '#navigation/STNavigationBar.vue';
 import { Invoice } from '@stamhoofd/structures';
 import { InvoiceTypeHelper } from '@stamhoofd/structures';
 
-import { Sorter } from '@stamhoofd/utility';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import InvoiceItemsBox from './InvoiceItemsBox.vue';
 import PaymentRow from '#payments/components/PaymentRow.vue';
@@ -202,6 +135,7 @@ import { ArrayDecoder, deepSetArray, PatchableArray } from '@simonbackx/simple-e
 import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import LoadingButton from '#navigation/LoadingButton.vue';
 import { Toast } from '#overlays/Toast.ts';
+import EmailAddress from '#email/EmailAddress.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -225,8 +159,7 @@ const invoiceSettlements = computed(() => {
             const existing = grouped.get(line.settlement.id);
             if (existing) {
                 existing.amount += line.amount;
-            }
-            else {
+            } else {
                 grouped.set(line.settlement.id, { settlement: line.settlement, amount: line.amount });
             }
         }

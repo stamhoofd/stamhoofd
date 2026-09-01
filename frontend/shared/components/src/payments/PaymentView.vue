@@ -50,19 +50,13 @@
             <p v-if="payment.pendingRefundAmount" class="warning-box">
                 {{ $t('%Zai', {price: formatPrice(-payment.pendingRefundAmount)}) }}
             </p>
+            <p v-if="!payment.customer" class="info-box">
+                {{ $t('%hO') }}
+            </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <STList class="info">
-                <STListItem v-if="payment.price">
-                    <h3 class="style-definition-label">
-                        {{ $t('%hF') }}
-                    </h3>
-                    <p class="style-definition-text">
-                        {{ formatPrice(payment.price) }}
-                    </p>
-                </STListItem>
-
                 <STListItem v-if="payment.method === 'Transfer'">
                     <h3 class="style-definition-label">
                         {{ $t('%J8') }}
@@ -84,18 +78,6 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="isManualMethod || !(payment.paidAt && (payment.type === PaymentType.Payment || payment.type === PaymentType.Refund))">
-                    <h3 class="style-definition-label">
-                        {{ $t('%1JJ') }}
-                    </h3>
-                    <p class="style-definition-text">
-                        {{ formatDate(payment.createdAt) }}
-                    </p>
-                    <p class="style-description-small">
-                        {{ $t('%hI', {time: formatTime(payment.createdAt)}) }}
-                    </p>
-                </STListItem>
-
                 <STListItem v-if="payment.paidAt && (payment.type === PaymentType.Payment || payment.type === PaymentType.Refund)">
                     <h3 v-if="payment.price == 0" class="style-definition-label">
                         {{ $t('%16v') }}
@@ -107,10 +89,22 @@
                         {{ $t('%h1') }}
                     </h3>
                     <p class="style-definition-text">
-                        {{ formatDate(payment.paidAt) }}
+                        {{ formatDateTime(payment.paidAt) }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('%hI', {time: formatTime(payment.paidAt)}) }}
+                        {{ $t('%1JJ') }} {{ formatDateTime(payment.createdAt) }}
+                    </p>
+                </STListItem>
+
+                <STListItem v-else-if="isManualMethod || !(payment.paidAt && (payment.type === PaymentType.Payment || payment.type === PaymentType.Refund))">
+                    <h3 class="style-definition-label">
+                        {{ $t('%1JJ') }}
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ formatDateTime(payment.createdAt) }}
+                    </p>
+                    <p class="style-description-small">
+                        {{ $t('%hI', {time: formatTime(payment.createdAt)}) }}
                     </p>
                 </STListItem>
 
@@ -219,17 +213,10 @@
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
-            </STList>
 
-            <hr><h2>{{ $t('%1Ke') }}</h2>
-
-            <p v-if="!payment.customer" class="info-box">
-                {{ $t('%hO') }}
-            </p>
-            <STList v-else class="info">
                 <STListItem v-if="payment.payingOrganization">
                     <h3 class="style-definition-label">
-                        {{ $t('%1Kj') }}
+                        {{ $t('Vereniging') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ payment.payingOrganization.name }}
@@ -243,91 +230,63 @@
                     </template>
                 </STListItem>
 
-                <template v-if="payment.customer.company">
-                    <STListItem>
-                        <h3 class="style-definition-label">
-                            {{ $t('%1JI') }}
-                        </h3>
-                        <p v-copyable class="style-definition-text style-copyable">
-                            {{ payment.customer.company.name }}
-                        </p>
-                        <p v-if="!payment.customer.company.VATNumber && !payment.customer.company.companyNumber" class="style-description">
-                            {{ $t('%1CH') }}
-                        </p>
-                    </STListItem>
-
-                    <STListItem v-if="payment.customer.company.VATNumber">
-                        <h3 class="style-definition-label">
-                            {{ $t('%1CK') }}
-                        </h3>
-                        <p v-copyable class="style-definition-text style-copyable">
-                            {{ payment.customer.company.VATNumber || 'Niet BTW-plichtig' }}
-                        </p>
-                    </STListItem>
-
-                    <STListItem v-if="payment.customer.company.companyNumber && (!payment.customer.company.VATNumber || (payment.customer.company.companyNumber !== payment.customer.company.VATNumber && payment.customer.company.companyNumber !== payment.customer.company.VATNumber.slice(2)))">
-                        <h3 class="style-definition-label">
-                            {{ $t('%wa') }}
-                        </h3>
-                        <p v-copyable class="style-definition-text style-copyable">
-                            {{ payment.customer.company.companyNumber || 'Niet BTW-plichtig' }}
-                        </p>
-                    </STListItem>
-
-                    <STListItem v-if="payment.customer.company.address">
-                        <h3 class="style-definition-label">
-                            {{ $t('%Cn') }}
-                        </h3>
-                        <p v-copyable class="style-definition-text style-copyable">
-                            {{ payment.customer.company.address.toString() }}
-                        </p>
-                    </STListItem>
-
-                    <STListItem v-if="payment.customer.company.administrationEmail">
-                        <h3 class="style-definition-label">
-                            {{ $t('%1FK') }}
-                        </h3>
-                        <p class="style-definition-text">
-                            <EmailAddress :email="payment.customer.company.administrationEmail" />
-                        </p>
-                    </STListItem>
-
-                    <STListItem v-if="payment.customer.company.customPeppolEndpointId">
-                        <h3 class="style-definition-label">
-                            {{ $t('%Zce') }}
-                        </h3>
-                        <p class="style-definition-text">
-                            {{ payment.customer.company.customPeppolEndpointId.getShortLabel() }}
-                        </p>
-                    </STListItem>
-                </template>
-
-                <STListItem v-if="!payment.customer.company || payment.customer.name">
+                <STListItem v-if="payment.customer">
                     <h3 class="style-definition-label">
-                        {{ $t('%1Kl') }}
+                        {{ $t('Facturatiegegevens') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
-                        {{ payment.customer.name || $t('%CL') }}
+                        {{ payment.customer?.dynamicName }}
                     </p>
-                    <p v-if="payment.customer.email" v-copyable class="style-description">
+                    <p v-if="payment.customer?.company?.VATNumber" v-copyable class="style-description-small style-copyable">
+                        {{ Formatter.VATNumber(payment.customer.company.VATNumber) }}
+                    </p>
+                    <p v-else-if="payment.customer?.company?.companyNumber" v-copyable class="style-description-small style-copyable">
+                        {{ payment.customer.company.companyNumber }}
+                    </p>
+                    <p v-if="payment.customer?.company?.administrationEmail" class="style-description-small">
+                        <EmailAddress :email="payment.customer.company.administrationEmail" />
+                    </p>
+                    <p v-if="payment.customer?.company?.customPeppolEndpointId" v-copyable class="style-description-small style-copyable">
+                        {{ payment.customer.company.customPeppolEndpointId.getShortLabel() }}
+                    </p>
+                    <p v-if="payment.customer?.email" class="style-description-small">
                         <EmailAddress :email="payment.customer.email" />
                     </p>
-                    <p v-if="payment.customer.phone" v-copyable class="style-description style-copyable">
+                    <p v-if="payment.customer?.phone" v-copyable class="style-description-small style-copyable">
                         {{ payment.customer.phone }}
+                    </p>
+                    <p v-if="payment.customer?.company?.address" v-copyable class="style-description-small style-copyable">
+                        {{ payment.customer?.company?.address }}
                     </p>
                 </STListItem>
             </STList>
 
-            <ActionButtonsBox :title="$t('%16X')" :actions="paymentActions" />
+            <p><br></p>
 
-            <template v-if="payment.balanceItemPayments.length">
-                <hr><h2>{{ $t('%YI') }}</h2>
-                <p v-if="organization?.meta.invoicesEnabled">
-                    {{ $t('%1K4') }}
-                </p>
+            <PaymentItemsBox v-if="payment.balanceItemPayments.length" :payment="payment" :can-write="canWrite" />
 
-                <PaymentItemsBox :payment="payment" :can-write="canWrite" />
+            <template v-if="receivableBalances.length">
+                <hr>
+                <h2>{{ $t('Openstaande bedragen') }}</h2>
+                <STList>
+                    <STListItem v-for="balance in receivableBalances" :key="balance.objectType + '/' + balance.objectId" :selectable="true" @click="openReceivableBalance(balance)">
+                        <template #left>
+                            <IconContainer :icon="balance.objectType === ReceivableBalanceType.organization ? 'company' : 'user'" />
+                        </template>
+                        <h3 class="style-title-list">
+                            {{ balance.name }}
+                        </h3>
+                        <p class="style-description-small">
+                            {{ capitalizeFirstLetter(getReceivableBalanceTypeName(balance.objectType)) }}
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+                </STList>
             </template>
+
+            <ActionButtonsBox :title="$t('%16X')" :actions="paymentActions" />
         </main>
     </div>
 </template>
@@ -335,7 +294,6 @@
 <script lang="ts" setup>
 
 import { useAppContext } from '#context/appContext.ts';
-import EmailAddress from '#email/EmailAddress.vue';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
 import { useErrors } from '#errors/useErrors.ts';
 import { GlobalEventBus } from '#EventBus.ts';
@@ -352,20 +310,23 @@ import { Toast } from '#overlays/Toast.ts';
 import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import type { BalanceItem } from '@stamhoofd/structures';
-import { BalanceItemPaymentDetailed, Company, Invoice, LimitedFilteredRequest, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel } from '@stamhoofd/structures';
+import { AccessRight, BalanceItemPaymentDetailed, BalanceItemRelationType, Company, DetailedReceivableBalance, getReceivableBalanceTypeName, Invoice, LimitedFilteredRequest, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel, ReceivableBalanceType } from '@stamhoofd/structures';
 
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import PromiseView from '#containers/PromiseView.vue';
+import { useInvoicesObjectFetcher } from '#fetchers/useInvoicesObjectFetcher.ts';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import OrganizationAvatar from '../context/OrganizationAvatar.vue';
-import { useInvoicesObjectFetcher } from '#fetchers/useInvoicesObjectFetcher.ts';
 
-import PaymentItemsBox from './PaymentItemsBox.vue';
-import ActionButtonsBox from './components/ActionButtonsBox.vue';
+import IconContainer from '#icons/IconContainer.vue';
 import type { ActionButton } from './components/ActionButtonsBox.vue';
+import ActionButtonsBox from './components/ActionButtonsBox.vue';
+import PaymentItemsBox from './PaymentItemsBox.vue';
+import EmailAddress from '#email/EmailAddress.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -647,6 +608,68 @@ async function createInvoice() {
         Toast.fromError(e).show();
     }
 }
+type ReceivableBalanceRef = {
+    objectType: ReceivableBalanceType;
+    objectId: string;
+    name: string;
+};
+
+const receivableBalances = computed<ReceivableBalanceRef[]>(() => {
+    const payment = props.payment;
+    if (app !== 'dashboard' || !auth.hasAccessRight(AccessRight.OrganizationFinanceDirector) || payment.organizationId !== organization.value?.id) {
+        return [];
+    }
+
+    const map = new Map<string, ReceivableBalanceRef>();
+    const add = (objectType: ReceivableBalanceType, objectId: string, name: string | null) => {
+        const key = objectType + '/' + objectId;
+        if (!map.has(key)) {
+            map.set(key, { objectType, objectId, name: name || Formatter.capitalizeFirstLetter(getReceivableBalanceTypeName(objectType)) });
+        }
+    };
+
+    if (payment.payingOrganizationId) {
+        add(ReceivableBalanceType.organization, payment.payingOrganizationId, payment.payingOrganization?.name ?? null);
+    }
+
+    for (const { balanceItem } of payment.balanceItemPayments) {
+        if (balanceItem.payingOrganizationId) {
+            add(ReceivableBalanceType.organization, balanceItem.payingOrganizationId, balanceItem.payingOrganizationId === payment.payingOrganizationId ? (payment.payingOrganization?.name ?? null) : null);
+        } else if (balanceItem.memberId) {
+            add(ReceivableBalanceType.member, balanceItem.memberId, balanceItem.relations.get(BalanceItemRelationType.Member)?.name.toString() ?? null);
+        } else if (balanceItem.userId) {
+            add(ReceivableBalanceType.userWithoutMembers, balanceItem.userId, balanceItem.userId === payment.payingUserId ? (payment.customer?.name ?? null) : null);
+        }
+    }
+
+    return [...map.values()];
+});
+
+async function openReceivableBalance(balance: ReceivableBalanceRef) {
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(PromiseView, {
+                    promise: async () => {
+                        const response = await context.value.authenticatedServer.request({
+                            method: 'GET',
+                            path: `/receivable-balances/${balance.objectType}/${balance.objectId}`,
+                            decoder: DetailedReceivableBalance as Decoder<DetailedReceivableBalance>,
+                            owner,
+                        });
+                        return AsyncComponent(() => import('./ReceivableBalanceView.vue'), {
+                            item: response.data,
+                            getNext: () => null,
+                            getPrevious: () => null,
+                        });
+                    },
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
+
 const fetchInvoice = useInvoicesObjectFetcher();
 async function openInvoice() {
     if (!props.payment.invoiceId) {

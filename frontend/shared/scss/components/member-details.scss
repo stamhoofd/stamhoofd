@@ -36,6 +36,10 @@
     > div:first-child > .container:first-child {
         > hr:first-child {
             display: none;
+
+             + h2 {
+                    margin-top: 0;
+                }
         }
     }
 
@@ -43,6 +47,10 @@
         > div:last-child > .container:first-child {
             > hr:first-child {
                 display: none;
+
+                + h2 {
+                    margin-top: 0;
+                }
             }
         }
     }

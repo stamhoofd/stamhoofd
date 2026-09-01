@@ -2,7 +2,7 @@
     <LoadingBoxTransition :error-box="errors.errorBox">
         <div v-if="detailedItem" class="container">
             <template v-if="detailedItem.filteredBalanceItems.length">
-                <SegmentedControl v-if="!hideSegmentedControl" v-model="selectedTab" :items="['grouped', 'individual']" :labels="[$t(`%10j`), $t(`%10i`)]" />
+                <SegmentedControl v-if="(!hideSegmentedControl && detailedItem.filteredBalanceItems.length > 4) || selectedTab !== 'individual'" v-model="selectedTab" :items="['grouped', 'individual']" :labels="[$t(`%10j`), $t(`%10i`)]" />
                 <ReceivableBalanceList v-if="selectedTab === 'individual'" :item="detailedItem" :has-write="hasWrite" />
                 <GroupedBalanceList v-else :item="detailedItem" />
                 <BalancePriceBreakdown :item="detailedItem" />
@@ -14,14 +14,10 @@
             <STList v-if="hasWrite">
                 <STListItem :selectable="true" element-name="button" @click="createBalanceItem">
                     <template #left>
-                        <IconContainer icon="box">
-                            <template #aside>
-                                <span class="icon add small primary" />
-                            </template>
-                        </IconContainer>
+                        <IconContainer icon="box" aside-icon="add" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('%gx') }}
+                        {{ $t('Aanrekening toevoegen') }}
                     </h3>
                     <p class="style-description-small">
                         {{ $t('%gy') }}
@@ -34,18 +30,14 @@
 
                 <STListItem v-if="detailedItem.amountOpen >= 0 && detailedItem.filteredBalanceItems.length" :selectable="true" element-name="button" @click="createPayment(PaymentType.Payment)">
                     <template #left>
-                        <IconContainer icon="receive">
-                            <template #aside>
-                                <span class="icon add small primary" />
-                            </template>
-                        </IconContainer>
+                        <IconContainer icon="receive" aside-icon="add" />
                     </template>
 
                     <h3 class="style-title-list">
                         {{ $t('%hY') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ PaymentTypeHelper.getDescription(PaymentType.Payment) }}
+                        {{ $t('Markeer manueel aanrekeningen als betaald in plaats van via het ledenportaal.') }}
                     </p>
 
                     <template #right>
@@ -55,18 +47,14 @@
 
                 <STListItem v-else-if="detailedItem.amountOpen < 0 && detailedItem.filteredBalanceItems.length" :selectable="true" element-name="button" class="theme-error" @click="createPayment(PaymentType.Refund)">
                     <template #left>
-                        <IconContainer icon="undo">
-                            <template #aside>
-                                <span class="icon add small primary" />
-                            </template>
-                        </IconContainer>
+                        <IconContainer icon="undo" aside-icon="add" />
                     </template>
 
                     <h3 class="style-title-list">
                         {{ $t('%hZ') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ PaymentTypeHelper.getDescription(PaymentType.Refund) }}
+                        {{ $t('Markeer manueel een tegoed als terugbetaald') }}
                     </p>
 
                     <template #right>
@@ -76,11 +64,7 @@
 
                 <STListItem v-if="invoicesEnabled && invoiceablePayments.length" :selectable="true" element-name="button" @click="createInvoice">
                     <template #left>
-                        <IconContainer icon="receipt">
-                            <template #aside>
-                                <span class="icon add small primary" />
-                            </template>
-                        </IconContainer>
+                        <IconContainer icon="receipt" aside-icon="add" />
                     </template>
 
                     <h3 class="style-title-list">
@@ -97,11 +81,7 @@
 
                 <STListItem v-if="showBalanceSettelment" :selectable="true" element-name="button" class="theme-secundary" @click="createPayment(PaymentType.Reallocation)">
                     <template #left>
-                        <IconContainer icon="wand">
-                            <template #aside>
-                                <span class="icon add small primary" />
-                            </template>
-                        </IconContainer>
+                        <IconContainer icon="wand" aside-icon="add" />
                     </template>
                     <h3 class="style-title-list">
                         {{ $t('%16w') }}

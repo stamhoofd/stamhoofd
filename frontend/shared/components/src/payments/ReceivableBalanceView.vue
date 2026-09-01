@@ -3,120 +3,63 @@
         <div v-if="!loadingPayingOrganization" class="st-view">
             <STNavigationBar :title="title">
                 <template #right>
+                    <a v-tooltip="$t('Documentatie bekijken')" :href="LocalizedDomains.getDocs('boekhoudingsmodule')" class="icon button help" target="_blank" />
+
                     <button v-if="hasPrevious || hasNext" v-tooltip="$t('%hg')" type="button" class="button icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
                     <button v-if="hasNext || hasPrevious" v-tooltip="$t('%hh')" type="button" class="button icon arrow-down" :disabled="!hasNext" @click="goForward" />
                 </template>
             </STNavigationBar>
 
             <main>
-                <h1 class="style-navigation-title">
+                <p :class="'style-title-prefix'">
                     {{ title }}
-                </h1>
-                <p v-if="item.objectType === ReceivableBalanceType.member || item.objectType === ReceivableBalanceType.user">
-                    {{ $t("%hf") }}
                 </p>
+
+                <h1 class="style-navigation-title" @click="onClick">
+                    {{ item.object.name }} <span v-if="canClick" class="icon arrow-right-small gray" />
+                </h1>
 
                 <p v-if="item.objectType === ReceivableBalanceType.userWithoutMembers" class="info-box">
                     {{ $t("%1HP") }}
                 </p>
 
-                <STList class="info">
-                    <STListItem v-if="payingOrganization" :selectable="canClick" @click="onClick">
-                        <h3 class="style-definition-label">
-                            {{ capitalizeFirstLetter(getReceivableBalanceTypeName(item.objectType)) }}
-                        </h3>
-                        <p v-copyable class="style-definition-text style-copyable">
-                            {{ payingOrganization.name }}
-                        </p>
+                <dl class="details-grid">
+                    <template v-if="item.object.uri">
+                        <dt>{{ $t('%5') }}</dt>
+                        <dd>
+                            <span v-copyable class="style-copyable">{{ item.object.uri }}</span>
+                        </dd>
+                    </template>
+                    <template v-if="(item.objectType === ReceivableBalanceType.userWithoutMembers || item.objectType === ReceivableBalanceType.user) && item.object.contacts.length === 1 && item.object.contacts[0].emails.length === 1">
+                        <dt>{{ $t('E-mailadres') }}</dt>
+                        <dd>
+                            <EmailAddress :email="item.object.contacts[0].emails[0]" />
+                        </dd>
+                    </template>
+                    <template v-if="payingOrganization && payingOrganization.address">
+                        <dt>{{ $t('Adres') }}</dt>
+                        <dd>
+                            <span v-copyable class="style-copyable">{{ payingOrganization.address }}</span>
+                        </dd>
+                    </template>
 
-                        <p v-if="(item.objectType === ReceivableBalanceType.userWithoutMembers || item.objectType === ReceivableBalanceType.user) && item.object.contacts.length === 1 && item.object.contacts[0].emails.length === 1" v-copyable class="style-description-small style-copyable">
-                            {{ item.object.contacts[0].emails[0] }}
-                        </p>
+                    <template v-if="organization && organization.privateMeta?.balanceNotificationSettings?.enabled && item.amountOpen > 0 && (item.objectType === ReceivableBalanceType.organization || item.objectType === ReceivableBalanceType.user)">
+                        <dt>{{ $t('Herinneringsmail') }}</dt>
+                        <dd>
+                            <p>{{ item.lastReminderEmail && item.reminderEmailCount > 0 ? formatDateTime(item.lastReminderEmail, true) : $t('%hm') }}</p>
+                            <p v-if="item.lastReminderEmail && item.reminderEmailCount > 1" class="style-description-small">
+                                {{ $t('%hn', {count: item.reminderEmailCount.toString()}) }}
+                            </p>
+                            <p v-if="item.lastReminderEmail && item.reminderEmailCount && item.lastReminderAmountOpen !== item.amountOpen" class="style-description-small">
+                                {{ $t('%ho', {amount: formatPrice(item.lastReminderAmountOpen)}) }}
+                            </p>
+                            <p v-if="!item.lastReminderEmail || item.reminderEmailCount === 0" class="style-description-small">
+                                {{ $t('De eerste e-mail wordt morgenvroeg verzonden.') }}
+                            </p>
+                        </dd>
+                    </template>
+                </dl>
 
-                        <p v-if="payingOrganization.uri" v-copyable class="style-description-small style-copyable">
-                            {{ payingOrganization.uri }}
-                        </p>
-
-                        <p v-if="payingOrganization.address" v-copyable class="style-description-small style-copyable">
-                            {{ payingOrganization.address }}
-                        </p>
-
-                        <template #right>
-                            <OrganizationAvatar :organization="payingOrganization" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-else :selectable="canClick" @click="onClick">
-                        <h3 class="style-definition-label">
-                            {{ capitalizeFirstLetter(getReceivableBalanceTypeName(item.objectType)) }}
-                        </h3>
-                        <p v-copyable class="style-definition-text style-copyable">
-                            {{ item.object.name }}
-                        </p>
-
-                        <p v-if="(item.objectType === ReceivableBalanceType.userWithoutMembers || item.objectType === ReceivableBalanceType.user) && item.object.contacts.length === 1 && item.object.contacts[0].emails.length === 1" v-copyable class="style-description-small style-copyable">
-                            {{ item.object.contacts[0].emails[0] }}
-                        </p>
-
-                        <p v-if="item.object.uri" v-copyable class="style-description-small style-copyable">
-                            {{ item.object.uri }}
-                        </p>
-
-                        <template v-if="canClick" #right>
-                            <span class="icon user gray" />
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-if="item.amountOpen >= 0">
-                        <h3 class="style-definition-label">
-                            {{ $t('%76') }}
-                        </h3>
-                        <p class="style-definition-text">
-                            {{ formatPrice(item.amountOpen + Math.max(0, item.amountPending)) }}
-                        </p>
-                        <p v-if="item.amountPending > 0" class="style-description-small">
-                            {{ $t('%hi', {amount: formatPrice(item.amountPending)}) }}
-                        </p>
-                        <p v-if="item.amountPending < 0" class="style-description-small">
-                            {{ $t('%hj', {amount: formatPrice(-item.amountPending)}) }}
-                        </p>
-                    </STListItem>
-
-                    <STListItem v-else>
-                        <h3 class="style-definition-label">
-                            {{ $t('%10b') }}
-                        </h3>
-                        <p class="style-definition-text error">
-                            {{ formatPrice(-item.amountOpen + Math.max(0, -item.amountPending)) }}
-                        </p>
-                        <p v-if="item.amountPending > 0" class="style-description-small">
-                            {{ $t('%hk', {amount: formatPrice(item.amountPending)}) }}
-                        </p><p v-if="item.amountPending < 0" class="style-description-small">
-                            {{ $t('%hl', {amount: formatPrice(-item.amountPending)}) }}
-                        </p>
-                    </STListItem>
-
-                    <STListItem v-if="item.amountOpen > 0 && (item.objectType === ReceivableBalanceType.organization || item.objectType === ReceivableBalanceType.user)">
-                        <h3 class="style-definition-label">
-                            {{ $t('%88') }}
-                        </h3>
-                        <p class="style-definition-text">
-                            {{ item.lastReminderEmail && item.reminderEmailCount > 0 ? formatDateTime(item.lastReminderEmail, true) : $t('%hm') }}
-                        </p>
-                        <p v-if="item.lastReminderEmail && item.reminderEmailCount > 1" class="style-description-small">
-                            {{ $t('%hn', {count: item.reminderEmailCount.toString()}) }}
-                        </p>
-                        <p v-if="item.lastReminderEmail && item.reminderEmailCount && item.lastReminderAmountOpen !== item.amountOpen" class="style-description-small">
-                            {{ $t('%ho', {amount: formatPrice(item.lastReminderAmountOpen)}) }}
-                        </p>
-                        <p v-if="!item.lastReminderEmail || item.reminderEmailCount === 0" class="style-description-small">
-                            {{ $t('%hp') }}
-                        </p>
-                    </STListItem>
-                </STList>
-
-                <hr>
                 <ReceivableBalanceBox :item="item" :member="member" :hide-segmented-control="item.objectType !== ReceivableBalanceType.organization" :paying-organization="payingOrganization" />
             </main>
         </div>
@@ -124,21 +67,22 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 
-import PromiseView from '#containers/PromiseView.vue';
-import { Toast } from '#overlays/Toast.ts';
-import { useBackForward } from '#hooks/useBackForward.ts';
-import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
-import { useMembersObjectFetcher } from '#fetchers/useMembersObjectFetcher.ts';
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
-import OrganizationLogo from '#context/OrganizationLogo.vue';
-import OrganizationAvatar from '#context/OrganizationAvatar.vue';
+import PromiseView from '#containers/PromiseView.vue';
+import EmailAddress from '#email/EmailAddress.vue';
+import { useMembersObjectFetcher } from '#fetchers/useMembersObjectFetcher.ts';
+import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
+import { useBackForward } from '#hooks/useBackForward.ts';
+import { Toast } from '#overlays/Toast.ts';
 import type { PlatformMember, ReceivableBalance } from '@stamhoofd/structures';
-import { getReceivableBalanceTypeName, LimitedFilteredRequest, ReceivableBalanceType } from '@stamhoofd/structures';
+import { LimitedFilteredRequest, ReceivableBalanceType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import ReceivableBalanceBox from './ReceivableBalanceBox.vue';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 
 const props = withDefaults(
     defineProps<{
@@ -158,6 +102,7 @@ const payingOrganizationId = computed(() => {
     return props.item.objectType === ReceivableBalanceType.organization ? props.item.object.id : null;
 });
 const { externalOrganization: payingOrganization, loading: loadingPayingOrganization } = useExternalOrganization(payingOrganizationId);
+const organization = useOrganization();
 
 const title = computed(() => {
     return $t('%76');
@@ -172,6 +117,8 @@ async function onClick() {
         await showMember(props.item.object.id);
     }
 }
+
+const helpText = props.item.objectType === ReceivableBalanceType.member || props.item.objectType === ReceivableBalanceType.user || props.item.objectType === ReceivableBalanceType.userWithoutMembers ? $t('%hf') : null;
 
 async function showMember(memberId: string) {
     const component = new ComponentWithProperties(NavigationController, {
