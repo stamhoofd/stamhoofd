@@ -340,7 +340,7 @@ export class AdminPermissionChecker {
 
         // Check parent categories
         if (group.type === GroupType.Membership) {
-            const organizationPeriod = await this.getOrganizationPeriod(organization, organization.periodId);
+            const organizationPeriod = await this.getOrganizationPeriod(organization, group.periodId);
             const parentCategories = organizationPeriod ? group.getParentCategories(organizationPeriod.settings.categories) : [];
             for (const category of parentCategories) {
                 if (organizationPermissions.hasResourceAccess(PermissionsResourceType.GroupCategories, category.id, permissionLevel)) {
