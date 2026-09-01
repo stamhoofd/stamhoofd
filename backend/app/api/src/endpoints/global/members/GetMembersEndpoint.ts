@@ -96,8 +96,9 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         };
                     }
                 } else {
-                    // Check which normal membership groups we have access to and filter on those
-                    const groups = await Group.getAll(organization.id, organization.periodId, true, [GroupType.Membership, GroupType.WaitingList]);
+                    // Check which groups we have access to and filter on those. Groups of every period are
+                    // checked: a role can be granted a group of a period the organization already left.
+                    const groups = await Group.getAll(organization.id, null, true, [GroupType.Membership, GroupType.WaitingList]);
                     Context.auth.cacheGroups(groups);
                     const groupIds: string[] = [];
 

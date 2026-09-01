@@ -94,7 +94,9 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
                         };
                     }
                 } else {
-                    const groups = await Group.getAll(organization.id, organization.periodId, true, [GroupType.Membership, GroupType.EventRegistration]);
+                    // Groups of every period are checked: a role can be granted a group of a period the
+                    // organization already left.
+                    const groups = await Group.getAll(organization.id, null, true, [GroupType.Membership, GroupType.EventRegistration]);
                     Context.auth.cacheGroups(groups);
                     const groupIds: string[] = [];
 
