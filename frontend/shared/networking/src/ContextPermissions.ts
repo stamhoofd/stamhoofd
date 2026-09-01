@@ -1,4 +1,4 @@
-import type { EmailPreview, Event, Group, GroupCategory, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationTag, PaymentGeneral, Permissions, Platform, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
+import type { EmailPreview, Event, Group, GroupCategory, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationRegistrationPeriod, OrganizationTag, PaymentGeneral, Permissions, Platform, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
 import { AccessRight, EventPermissionChecker, GroupType, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { toRaw, unref } from 'vue';
@@ -154,7 +154,7 @@ export class ContextPermissions {
         return this.hasAccessRight(AccessRight.ManageEmailTemplates);
     }
 
-    canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read, organization?: Organization | null) {
+    canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read, organization?: Organization | null, organizationPeriod?: OrganizationRegistrationPeriod | null) {
         if (organization === undefined || (organization === null && this.organization)) {
             organization = this.organization;
         }
@@ -174,7 +174,8 @@ export class ContextPermissions {
 
         // Check parent categories
         if (group.type === GroupType.Membership) {
-            const parentCategories = group.getParentCategories(organization.period.settings.categories);
+            const period = organizationPeriod ?? (group.periodId === organization.period.period.id ? organization.period : null);
+            const parentCategories = period ? group.getParentCategories(period.settings.categories) : [];
             for (const category of parentCategories) {
                 if (permissions.hasResourceAccess(PermissionsResourceType.GroupCategories, category.id, permissionLevel)) {
                     return true;

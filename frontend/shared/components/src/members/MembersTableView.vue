@@ -285,7 +285,7 @@ const isLimitedGroup = computed(() => {
     if (organization.value && props.group.organizationId !== organization.value.id) {
         return true;
     }
-    if (!auth.canAccessGroup(props.group)) {
+    if (!auth.canAccessGroup(props.group, undefined, undefined, organizationRegistrationPeriod.value)) {
         return true;
     }
     return false;
