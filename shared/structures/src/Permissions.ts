@@ -3,7 +3,7 @@ import { ArrayDecoder, AutoEncoder, EnumDecoder, field, MapDecoder, StringDecode
 import { MemberResponsibilityRecordBase } from './members/MemberResponsibilityRecord.js';
 import { getPermissionLevelNumber, PermissionLevel } from './PermissionLevel.js';
 import { PermissionRole } from './PermissionRole.js';
-import { PermissionsResourceType } from './PermissionsResourceType.js';
+import { downgradeResourceKeys, PermissionsResourceType, upgradeResourceKeys } from './PermissionsResourceType.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 
 export function getUnlistedResources(resourceType: PermissionsResourceType, permissions: { resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> }, listedResources: { id: string }[]): { id: string; name: string; type: PermissionsResourceType }[] {
@@ -48,6 +48,19 @@ export class Permissions extends AutoEncoder {
             ),
         ),
         version: 249,
+    })
+    @field({
+        decoder: new MapDecoder(
+            new EnumDecoder(PermissionsResourceType),
+            new MapDecoder(
+                // ID
+                StringDecoder,
+                ResourcePermissions,
+            ),
+        ),
+        version: 416,
+        upgrade: upgradeResourceKeys,
+        downgrade: downgradeResourceKeys,
     })
     resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = new Map();
 
