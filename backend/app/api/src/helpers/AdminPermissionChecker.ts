@@ -1260,11 +1260,15 @@ export class AdminPermissionChecker {
         return true;
     }
 
-    async canCreateGroupInCategory(organizationId: string, category: GroupCategory) {
-        const organizationPermissions = await this.getOrganizationPermissions(organizationId);
+    async canCreateGroupInCategory(organizationId: string, category: GroupCategory, organizationPeriod: OrganizationRegistrationPeriod) {
+        let organizationPermissions = await this.getOrganizationPermissions(organizationId);
 
         if (!organizationPermissions) {
             return false;
+        }
+
+        if (!await this.canAccessGroupsInPeriod(organizationPeriod.periodId, organizationId)) {
+            organizationPermissions = organizationPermissions.onlyExplicitResources();
         }
 
         if (organizationPermissions.hasResourceAccessRight(PermissionsResourceType.GroupCategories, category.id, AccessRight.OrganizationCreateGroups)) {
@@ -1272,9 +1276,7 @@ export class AdminPermissionChecker {
         }
 
         // Check parents
-        const organization = await this.getOrganization(organizationId);
-        const organizationPeriod = await this.getOrganizationPeriod(organization, organization.periodId);
-        const parentCategories = organizationPeriod ? category.getParentCategories(organizationPeriod.settings.categories) : [];
+        const parentCategories = category.getParentCategories(organizationPeriod.settings.categories);
 
         for (const parentCategory of parentCategories) {
             if (organizationPermissions.hasResourceAccessRight(PermissionsResourceType.GroupCategories, parentCategory.id, AccessRight.OrganizationCreateGroups)) {

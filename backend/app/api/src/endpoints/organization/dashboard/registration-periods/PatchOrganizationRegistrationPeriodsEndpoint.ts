@@ -127,7 +127,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                                 continue;
                             }
 
-                            if (!await Context.auth.canCreateGroupInCategory(organization.id, category)) {
+                            if (!await Context.auth.canCreateGroupInCategory(organization.id, category, organizationPeriod)) {
                                 throw Context.auth.error($t(`%Ez`));
                             }
 
