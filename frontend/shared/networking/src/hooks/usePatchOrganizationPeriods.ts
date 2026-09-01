@@ -4,7 +4,7 @@ import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { useRequestOwner } from './useRequestOwner';
-import { clearOrganizationPeriodsCache } from './useFetchOrganizationRegistrationPeriods.js';
+import { clearOrganizationPeriodsCache } from '../organizationPeriodsCache.js';
 
 export function usePatchOrganizationPeriods() {
     const context = useContext();

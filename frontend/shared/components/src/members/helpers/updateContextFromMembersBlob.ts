@@ -1,6 +1,6 @@
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { MembersBlob, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import { getCachedOrganizationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
+import { getCachedOrganizationPeriods } from '@stamhoofd/networking/organizationPeriodsCache';
 
 /**
  * Call this method when we receive a fresh blob from the backend.

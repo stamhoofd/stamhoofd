@@ -2,7 +2,8 @@ import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts'
 import type { Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import type { MaybeRefOrGetter, Ref } from 'vue';
 import { computed, toValue, watch } from 'vue';
-import { getCachedOrganizationPeriods, useFetchOrganizationRegistrationPeriods } from './useFetchOrganizationRegistrationPeriods.js';
+import { getCachedOrganizationPeriods } from '../organizationPeriodsCache.js';
+import { useFetchOrganizationRegistrationPeriods } from './useFetchOrganizationRegistrationPeriods.js';
 
 /**
  * The organization period a period id belongs to. The periods are only fetched when the id is not the

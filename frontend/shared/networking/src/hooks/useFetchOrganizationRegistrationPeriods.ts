@@ -7,20 +7,9 @@ import { LimitedFilteredRequest, OrganizationRegistrationPeriod, PaginatedRespon
 import { Sorter } from '@stamhoofd/utility';
 import { useFetchRegistrationPeriods } from './useFetchRegistrationPeriods';
 import { useRequestOwner } from './useRequestOwner';
-import { reactive, shallowReactive } from 'vue';
+import { getCachedOrganizationPeriods, setCachedOrganizationPeriods } from '../organizationPeriodsCache.js';
+import { reactive } from 'vue';
 import type { Ref } from 'vue';
-
-// Reactive so a synchronous read re-evaluates once the periods are fetched. Shallow: the lists themselves
-// are made reactive when they are stored.
-const periodsCache = shallowReactive(new Map<string, unknown>()) as unknown as Map<string, RegistrationPeriodList>;
-
-export function clearOrganizationPeriodsCache() {
-    periodsCache.clear();
-}
-
-export function getCachedOrganizationPeriods(organizationId: string): RegistrationPeriodList | undefined {
-    return periodsCache.get(organizationId);
-}
 
 export function useFetchOrganizationRegistrationPeriods({ organization }: { organization?: Ref<Organization> } = {}) {
     const context = useContext();
@@ -29,7 +18,7 @@ export function useFetchOrganizationRegistrationPeriods({ organization }: { orga
     organization = organization ?? useRequiredOrganization();
 
     return async function ({ shouldRetry, force }: { shouldRetry?: boolean; force?: boolean }) {
-        const cache = periodsCache.get(organization.value.id);
+        const cache = getCachedOrganizationPeriods(organization.value.id);
         if (!force && cache) {
             return cache;
         }
@@ -83,7 +72,7 @@ export function useFetchOrganizationRegistrationPeriods({ organization }: { orga
         if (!cache) {
             // Using 'reactive' is required when the periods are not immediately used in vue and not made reactive automatically
             // it prevents issues where computed properties won't update because they are not using the reactive version of an organization period
-            periodsCache.set(organization.value.id, reactive(list) as unknown as RegistrationPeriodList);
+            setCachedOrganizationPeriods(organization.value.id, reactive(list) as unknown as RegistrationPeriodList);
         } else {
             cache.deepSet(list);
         }

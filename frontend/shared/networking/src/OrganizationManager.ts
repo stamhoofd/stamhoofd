@@ -7,7 +7,7 @@ import type { Ref } from 'vue';
 import { inject, toRef } from 'vue';
 import type { SessionContext } from './SessionContext';
 import { SessionManager } from './SessionManager';
-import { clearOrganizationPeriodsCache } from './hooks/useFetchOrganizationRegistrationPeriods.js';
+import { clearOrganizationPeriodsCache } from './organizationPeriodsCache.js';
 
 export function useOrganizationManager(): Ref<OrganizationManager> {
     return toRef(inject<OrganizationManager>('$organizationManager')) as any as Ref<OrganizationManager>;

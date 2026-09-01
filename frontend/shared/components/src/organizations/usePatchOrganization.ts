@@ -5,7 +5,7 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Organization } from '@stamhoofd/structures';
 import { GlobalEventBus } from '../EventBus';
 import { useContext } from '../hooks/useContext';
-import { clearOrganizationPeriodsCache } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
+import { clearOrganizationPeriodsCache } from '@stamhoofd/networking/organizationPeriodsCache';
 
 export function usePatchOrganization() {
     const organization = useOrganization();
