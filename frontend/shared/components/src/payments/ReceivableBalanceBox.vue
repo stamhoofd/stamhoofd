@@ -246,7 +246,7 @@ const invoices = computed(() => {
 const invoicesEnabled = computed(() => app === 'dashboard' && (organization.value?.meta.invoicesEnabled ?? false));
 
 const invoiceablePayments = computed(() => {
-    return detailedItem.value?.payments.filter(p => !p.invoiceId && !p.isFailed && p.price !== 0) ?? [];
+    return detailedItem.value?.payments.filter(p => !p.invoiceId && !p.isFailed && (p.price !== 0 || p.roundingAmount !== 0)) ?? [];
 });
 
 // Online payments that can still be (partially) refunded via the payment provider (only Mollie for now),
