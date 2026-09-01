@@ -8,7 +8,7 @@
                     <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
                 </form>
             </div>
-            <div v-if="isPeriodScoped">
+            <div>
                 <button type="button" class="button text" @click="switchPeriod">
                     <span>{{ period.period.name }}</span>
                     <span class="icon arrow-down-small" />
@@ -18,11 +18,7 @@
 
         <p v-if="filteredResources.length === 0" class="info-box">
             {{
-                searchQuery
-                    ? $t('%1AX')
-                    : isPeriodScoped
-                        ? $t('Er zijn geen {resourceType} in werkjaar {period}.', { resourceType: getPermissionResourceTypeName(props.type, true), period: period.period.name })
-                        : $t('Er zijn geen {resourceType}.', { resourceType: getPermissionResourceTypeName(props.type, true) })
+                searchQuery ? $t('%1AX') : $t('Er zijn geen {resourceType} in {periodName}.', { resourceType: getPermissionResourceTypeName(props.type, true), periodName: period.period.nameShort })
             }}
         </p>
         <STList v-else>
@@ -37,8 +33,8 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import { usePatch } from '#hooks/usePatch.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { useSwitchablePeriod } from '#hooks/useSwitchablePeriod.ts';
-import type { AccessRight, OrganizationRegistrationPeriod, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType } from '@stamhoofd/structures';
-import { getPermissionResourceTypeName, isPeriodScopedResourceType } from '@stamhoofd/structures';
+import type { AccessRight, PermissionRoleDetailed, PermissionRoleForResponsibility } from '@stamhoofd/structures';
+import { getGroupTypeName, GroupType, PermissionsResourceType, getPermissionResourceTypeName } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
 
@@ -47,10 +43,9 @@ const props = withDefaults(
         title: string;
         role: PermissionRoleDetailed | PermissionRoleForResponsibility;
         inheritedRoles?: (PermissionRoleDetailed | PermissionRoleForResponsibility)[];
-        type: PermissionsResourceType;
+        type: PermissionsResourceType.Groups | PermissionsResourceType.GroupCategories;
         configurableAccessRights?: AccessRight[] | null;
         saveHandler: (patch: AutoEncoderPatchType<PermissionRoleDetailed | PermissionRoleForResponsibility>) => void;
-        getResources: (period: OrganizationRegistrationPeriod | null) => { id: string; name: string; type: PermissionsResourceType; description?: string }[];
     }>(), {
         inheritedRoles: () => [],
         configurableAccessRights: null,
@@ -59,12 +54,29 @@ const props = withDefaults(
 
 const pop = usePop();
 const { patched, addPatch, patch, hasChanges } = usePatch(props.role);
-const isPeriodScoped = isPeriodScopedResourceType(props.type);
 const { period, switchPeriod } = useSwitchablePeriod();
 
 const searchQuery = ref('');
 
-const resources = computed(() => props.getResources(isPeriodScoped ? period.value : null));
+const resources = computed(() => {
+    if (props.type === PermissionsResourceType.Groups) {
+        return [
+            ...period.value.adminCategoryTree.getAllGroups(),
+            ...period.value.waitingLists,
+        ].map(group => ({
+            id: group.id,
+            name: group.settings.getNameWithPeriod(),
+            type: props.type,
+            description: group.type === GroupType.WaitingList ? getGroupTypeName(group.type) : undefined,
+        }));
+    }
+
+    return period.value.adminCategoryTree.getAllCategories().map(category => ({
+        id: category.id,
+        name: category.getName(period.value) + ' (' + period.value.period.nameShort + ')',
+        type: props.type,
+    }));
+});
 
 const filteredResources = computed(() => {
     const query = searchQuery.value.toLowerCase().trim();
@@ -87,10 +99,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm({
-        title: $t(`%A0`),
-        confirmText: $t(`%4X`),
-    });
+    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
 };
 
 defineExpose({
