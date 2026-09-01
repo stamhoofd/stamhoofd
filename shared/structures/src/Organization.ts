@@ -16,7 +16,6 @@ import type { RecordSettings } from './members/records/RecordSettings.js';
 import { OrganizationMetaData } from './OrganizationMetaData.js';
 import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData.js';
 import { OrganizationType } from './OrganizationType.js';
-import type { RegistrationPeriodList } from './RegistrationPeriod.js';
 import { OrganizationRegistrationPeriod, RegistrationPeriod } from './RegistrationPeriod.js';
 import { UmbrellaOrganization } from './UmbrellaOrganization.js';
 import { Webshop, WebshopPreview } from './webshops/Webshop.js';
@@ -216,12 +215,6 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
     webshops: WebshopPreview[] = [];
 
     /**
-     * @deprecated
-     * This way of caching is discouraged and unstable because it gets overriden easily using deepSet
-     */
-    periods?: RegistrationPeriodList;
-
-    /**
      * Whether internal administrators (members with responsibilities/functions) are relevant for this organization.
      * In platform mode this is always the case. In organization mode it only makes sense when the members package is used.
      */
@@ -263,13 +256,6 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
 
     updatePeriods(periods: OrganizationRegistrationPeriod[]) {
         // Update in memory
-        for (const period of this.periods?.organizationPeriods ?? []) {
-            const updated = periods.find(p => p.id === period.id);
-            if (updated) {
-                period.deepSet(updated);
-            }
-        }
-
         const updated = periods.find(p => p.id === this.period.id);
         if (updated) {
             this.period.deepSet(updated);

@@ -31,8 +31,7 @@
 import LoadingBoxTransition from '#containers/LoadingBoxTransition.vue';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
 import { GroupType, NamedObject, RegistrationPeriodList } from '@stamhoofd/structures';
 import type { Ref} from 'vue';
 import { computed, ref, watch, watchEffect } from 'vue';
@@ -50,8 +49,7 @@ const props = withDefaults(
 
 const model = defineModel<NamedObject[] | null>({ required: true });
 const organization = useOrganization();
-const organizationManager = useOrganizationManager();
-const owner = useRequestOwner();
+const fetchPeriods = useFetchOrganizationRegistrationPeriods();
 const platform = usePlatform();
 
 const lastCachedValue = ref<NamedObject[] | null>(null);
@@ -130,7 +128,7 @@ watch(enabledOptions, (options) => {
     }
 }, { immediate: true });
 
-organizationManager.value.loadPeriods(false, true, owner).then((p) => {
+fetchPeriods({ shouldRetry: true }).then((p) => {
     periods.value = p;
     loading.value = false;
 }).catch(console.error);

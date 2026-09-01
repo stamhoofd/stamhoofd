@@ -62,7 +62,7 @@ import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { clearOrganizationPeriodsCache } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
+import { clearOrganizationPeriodsCache } from '@stamhoofd/networking/organizationPeriodsCache';
 import { clearRegistrationPeriodsCache, useFetchRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Organization, RegistrationPeriod } from '@stamhoofd/structures';
