@@ -2,7 +2,6 @@
 WITH non_platform_registrations AS (
     -- @include all-non-platform-registrations
 )
--- Identical to `deduplicated-non-platform-registrations-all-years.sql` apart from the grain it reads; a test keeps the two in step.
 SELECT deduplicated.* FROM (
     SELECT
         non_platform_registrations.*,
