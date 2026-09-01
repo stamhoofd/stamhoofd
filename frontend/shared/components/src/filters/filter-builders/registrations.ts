@@ -3,7 +3,7 @@ import { useRegistrationPeriodsRelationFetcher } from '#filters/relation-fetcher
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useUser } from '#hooks/useUser.ts';
-import { FilterWrapperMarker, GroupType } from '@stamhoofd/structures';
+import { FilterWrapperMarker, getGroupTypeName, GroupType } from '@stamhoofd/structures';
 import type { ComputedRef } from 'vue';
 import { computed, ref } from 'vue';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
@@ -73,6 +73,27 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
                 wrapper: {
                     organization: {
                         tags: {
+                            $in: FilterWrapperMarker,
+                        },
+                    },
+                },
+            }),
+        );
+
+        all.push(
+            new MultipleChoiceFilterBuilder({
+                name: $t('Type'),
+                multipleChoiceConfiguration: {
+                    isSubjectPlural: true,
+                },
+                options: [
+                    new MultipleChoiceUIFilterOption(getGroupTypeName(GroupType.Membership), GroupType.Membership),
+                    new MultipleChoiceUIFilterOption(getGroupTypeName(GroupType.EventRegistration), GroupType.EventRegistration),
+                    new MultipleChoiceUIFilterOption(getGroupTypeName(GroupType.WaitingList), GroupType.WaitingList),
+                ],
+                wrapper: {
+                    group: {
+                        type: {
                             $in: FilterWrapperMarker,
                         },
                     },
