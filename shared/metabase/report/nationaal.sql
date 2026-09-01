@@ -101,7 +101,7 @@ SELECT
     COUNT(DISTINCT CASE WHEN leden.`Werkjaar` = gekozen.vorig THEN leden.member_id END) AS `Aantal leden vorig jaar`
 FROM leden
 CROSS JOIN gekozen
-WHERE leden.`Werkjaar` IN (gekozen.name, gekozen.vorig)
+WHERE leden.`Werkjaar` IN (gekozen.name, gekozen.vorig) and age_group_id is not null
 GROUP BY leden.`Leeftijdsgroep`
 ORDER BY MIN(COALESCE(leden.age_group_min_age, 99)), leden.`Leeftijdsgroep`
 
