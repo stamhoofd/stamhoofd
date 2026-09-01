@@ -1934,7 +1934,7 @@ export class AdminPermissionChecker {
         }
 
         if (
-            (data.details.email !== undefined)
+            data.details.email !== undefined
             || Array.isArray(data.details.alternativeEmails)
             || data.details.alternativeEmails.changes.length > 0
         ) {

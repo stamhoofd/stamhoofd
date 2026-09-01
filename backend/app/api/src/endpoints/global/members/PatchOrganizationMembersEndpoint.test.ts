@@ -1085,12 +1085,12 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
-            // arr.addPatch(MemberWithRegistrationsBlob.patch({
-            //     id: member.id,
-            //     details: MemberDetails.patch({
-            //         alternativeEmails: [],
-            //     }),
-            // }));
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({
+                    alternativeEmails: [] as any,
+                }),
+            }));
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
