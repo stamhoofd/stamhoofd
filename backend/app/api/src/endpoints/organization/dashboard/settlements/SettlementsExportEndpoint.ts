@@ -109,6 +109,9 @@ export class SettlementsExportEndpoint extends Endpoint<Params, Query, Body, Res
             });
         }
 
+        // Resolved before scheduling: the request context is gone once the queue runs
+        const includeSyncErrors = Context.auth.hasPlatformFullAccess();
+
         // Serialized so concurrent exports can't compete for memory; the result arrives by email
         QueueHandler.schedule('settlements-export', async () => {
             const exporter = new SettlementExporter({
@@ -117,6 +120,7 @@ export class SettlementsExportEndpoint extends Endpoint<Params, Query, Body, Res
                 provider,
                 organization,
                 sellingOrganization: membershipOrganization,
+                includeSyncErrors,
             });
 
             await exporter.sendEmail({

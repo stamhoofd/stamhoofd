@@ -1,7 +1,7 @@
-import type { CellValue } from '@stamhoofd/excel-writer';
-import { ArchiverWriterAdapter, XlsxBuiltInNumberFormat, XlsxWriter } from '@stamhoofd/excel-writer';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { Email } from '@stamhoofd/email';
+import type { CellValue } from '@stamhoofd/excel-writer';
+import { ArchiverWriterAdapter, XlsxBuiltInNumberFormat, XlsxWriter } from '@stamhoofd/excel-writer';
 import type { Organization } from '@stamhoofd/models';
 import { BalanceItemPayment, Invoice, Payment } from '@stamhoofd/models';
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
@@ -10,8 +10,8 @@ import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
 import { SQL } from '@stamhoofd/sql';
 import type { PaymentProvider } from '@stamhoofd/structures';
-import { PaymentMethod } from '@stamhoofd/structures';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
+import type { SettlementSyncError } from '@stamhoofd/structures/settlements/SettlementSyncError.js';
 import { Formatter } from '@stamhoofd/utility';
 import { Writable } from 'node:stream';
 
@@ -100,6 +100,12 @@ export class SettlementExporter {
     sellingOrganization: Organization;
 
     /**
+     * Whether the stored sync errors get their own column. Only for full platform admins: the
+     * errors describe our sync internals, not something an organization can act on.
+     */
+    includeSyncErrors: boolean;
+
+    /**
      * Called per processed settlement, to report progress.
      */
     callback: (() => void) | null = null;
@@ -121,12 +127,18 @@ export class SettlementExporter {
      */
     private hasUncollectibleFees = false;
 
-    constructor({ start, end, provider, organization, sellingOrganization }: { start: Date; end: Date; provider?: PaymentProvider | null; organization: Organization; sellingOrganization: Organization }) {
+    /**
+     * Same for the sync errors: an error-free export doesn't need the column.
+     */
+    private hasSyncErrors = false;
+
+    constructor({ start, end, provider, organization, sellingOrganization, includeSyncErrors = false }: { start: Date; end: Date; provider?: PaymentProvider | null; organization: Organization; sellingOrganization: Organization; includeSyncErrors?: boolean }) {
         this.start = start;
         this.end = end;
         this.provider = provider ?? null;
         this.organization = organization;
         this.sellingOrganization = sellingOrganization;
+        this.includeSyncErrors = includeSyncErrors;
     }
 
     private selectSettlements() {
@@ -195,6 +207,7 @@ export class SettlementExporter {
         // else the columns would be empty
         this.hasPendingFees = settlements.some(settlement => settlement.pendingFees !== 0);
         this.hasUncollectibleFees = settlements.some(settlement => settlement.uncollectibleFees !== 0);
+        this.hasSyncErrors = this.includeSyncErrors && settlements.some(settlement => settlement.syncErrors !== null);
 
         await writer.addRow(sheets.settlementsSheet, [
             textCell('Provider', 10),
@@ -211,6 +224,7 @@ export class SettlementExporter {
             ...(this.hasPendingFees ? [textCell('Niet-gefactureerde kosten', 22)] : []),
             ...(this.hasUncollectibleFees ? [textCell('Niet-aanrekenbare kosten', 22)] : []),
             textCell('Check', 20),
+            ...(this.hasSyncErrors ? [textCell('Sync fouten', 60)] : []),
         ]);
 
         await writer.addRow(sheets.paymentsSheet, [
@@ -281,7 +295,17 @@ export class SettlementExporter {
             ...(this.hasPendingFees ? [currencyCell(settlement.pendingFees)] : []),
             ...(this.hasUncollectibleFees ? [currencyCell(settlement.uncollectibleFees)] : []),
             textCell(SettlementExporter.getSettlementCheck(settlement, { linesTotal, chargesTotal })),
+            ...(this.hasSyncErrors ? [textCell(SettlementExporter.formatSyncErrors(settlement.syncErrors))] : []),
         ]);
+    }
+
+    /**
+     * One line per stored error of the last sync attempt.
+     */
+    static formatSyncErrors(errors: SettlementSyncError[] | null): string {
+        return (errors ?? [])
+            .map(error => (error.code ?? 'error') + (error.transactionId ? ' (' + error.transactionId + ')' : '') + ': ' + error.message)
+            .join('\n');
     }
 
     /**

@@ -6,8 +6,10 @@ import type { Settlement as SettlementModel } from '@stamhoofd/models/models/Set
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
 import { BalanceItemStatus, BalanceItemType, PaymentMethod, PaymentProvider, PaymentStatus, SettlementReference } from '@stamhoofd/structures';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
+import { SettlementSyncError } from '@stamhoofd/structures/settlements/SettlementSyncError.js';
 import { v4 as uuidv4 } from 'uuid';
 import { SettlementService } from './SettlementService.js';
 
@@ -435,6 +437,56 @@ describe('SettlementService', () => {
             expect(settlement.pendingFees).toBe(1_00_00);
             expect(settlement.uncollectibleFees).toBe(2_00_00);
             expect(settlement.unexplainedAmount).toBe(0);
+        });
+
+        test('a sync with errors stores them, stays unsynced and counts the attempt', async () => {
+            const settlement = await SettlementService.upsertSettlement(settlementData({ amount: 1_00_00 }));
+
+            await SettlementService.finishSync(settlement, {
+                transactionCount: 3,
+                errors: [SettlementSyncError.create({ code: 'payment_not_found', message: 'No payment found', transactionId: 'txn_1' })],
+            });
+
+            expect(settlement.syncedAt).toBeNull();
+            expect(settlement.syncFailureCount).toBe(1);
+            expect(settlement.transactionCount).toBe(3);
+
+            // The totals are still cached: what did store is worth reconciling
+            expect(settlement.unexplainedAmount).toBe(1_00_00);
+
+            const stored = await Settlement.getByID(settlement.id);
+            expect(stored!.syncErrors).toHaveLength(1);
+            expect(stored!.syncErrors![0]).toMatchObject({ code: 'payment_not_found', message: 'No payment found', transactionId: 'txn_1' });
+
+            // A later error-free sync clears the queue
+            await SettlementService.finishSync(settlement, { transactionCount: 3 });
+            expect(settlement.syncErrors).toBeNull();
+            expect(settlement.syncedAt).not.toBeNull();
+            expect(settlement.syncFailureCount).toBe(0);
+        });
+
+        test('stored sync errors are capped at 50', async () => {
+            const settlement = await SettlementService.upsertSettlement(settlementData());
+            const errors = Array.from({ length: 60 }, (_, i) => SettlementSyncError.create({ message: 'Error ' + i, transactionId: 'txn_' + i }));
+
+            await SettlementService.finishSync(settlement, { transactionCount: 60, errors });
+
+            const stored = await Settlement.getByID(settlement.id);
+            expect(stored!.syncErrors).toHaveLength(50);
+            expect(stored!.syncErrors![0].message).toBe('Error 0');
+        });
+
+        test('markSyncFailed stores what broke the attempt and keeps it without new information', async () => {
+            const settlement = await SettlementService.upsertSettlement(settlementData());
+            await SettlementService.markSyncFailed(settlement, [SettlementSyncError.fromError(new SimpleError({ code: 'unsupported_payout', message: 'Manual payout' }))]);
+
+            expect(settlement.syncErrors).toHaveLength(1);
+            expect(settlement.syncErrors![0]).toMatchObject({ code: 'unsupported_payout', message: 'Manual payout', transactionId: null });
+
+            // Without errors the stored ones stay: the last known cause beats no information
+            await SettlementService.markSyncFailed(settlement);
+            expect(settlement.syncErrors).toHaveLength(1);
+            expect(settlement.syncFailureCount).toBe(2);
         });
     });
 

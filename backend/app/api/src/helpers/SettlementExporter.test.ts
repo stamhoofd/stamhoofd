@@ -5,6 +5,7 @@ import type { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { BalanceItemStatus, BalanceItemType, PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
 import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
+import { SettlementSyncError } from '@stamhoofd/structures/settlements/SettlementSyncError.js';
 import { v4 as uuidv4 } from 'uuid';
 
 import { initMembershipOrganization } from '../../tests/init/initMembershipOrganization.js';
@@ -92,6 +93,40 @@ describe('SettlementExporter', () => {
         await exporter.build();
 
         expect(count).toBe(1);
+    });
+
+    test('stored sync errors export when enabled', async () => {
+        const { organization, settlement } = await createSettledPayment();
+        await SettlementService.finishSync(settlement, {
+            transactionCount: 3,
+            errors: [SettlementSyncError.create({ code: 'payment_not_found', message: 'No payment found', transactionId: 'txn_1' })],
+        });
+
+        const exporter = new SettlementExporter({
+            start: new Date(2026, 0, 1),
+            end: new Date(2026, 1, 1),
+            organization,
+            sellingOrganization: membershipOrganization,
+            includeSyncErrors: true,
+        });
+        let count = 0;
+        exporter.callback = () => count++;
+        await exporter.build();
+
+        expect(count).toBe(1);
+    });
+
+    describe('formatSyncErrors', () => {
+        test('one line per error, with its code and transaction', () => {
+            expect(SettlementExporter.formatSyncErrors([
+                SettlementSyncError.create({ code: 'payment_not_found', message: 'No payment found', transactionId: 'txn_1' }),
+                SettlementSyncError.create({ message: 'Something broke' }),
+            ])).toBe('payment_not_found (txn_1): No payment found\nerror: Something broke');
+        });
+
+        test('no stored errors is an empty cell', () => {
+            expect(SettlementExporter.formatSyncErrors(null)).toBe('');
+        });
     });
 
     test('a platform payout is included in its owning organization\'s export', async () => {

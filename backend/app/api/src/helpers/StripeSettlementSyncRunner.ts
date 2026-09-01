@@ -3,6 +3,7 @@ import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { AbortSignal } from '@stamhoofd/queues';
 import { PaymentProvider } from '@stamhoofd/structures';
 import { SettlementStatus } from '@stamhoofd/structures/settlements/SettlementStatus.js';
+import { SettlementSyncError } from '@stamhoofd/structures/settlements/SettlementSyncError.js';
 
 import { SettlementService } from '../services/SettlementService.js';
 import type { ProviderSettlementSyncRunner, ProviderSyncRunOptions } from './ProviderSettlementSyncRunner.js';
@@ -169,7 +170,7 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
                 // markSyncFailed: count them here or the retry cap never triggers
                 const fresh = await Settlement.getByID(settlement.id);
                 if (fresh && fresh.syncFailureCount === failureCountBefore) {
-                    await SettlementService.markSyncFailed(fresh);
+                    await SettlementService.markSyncFailed(fresh, [SettlementSyncError.fromError(e)]);
                 }
             }
         }

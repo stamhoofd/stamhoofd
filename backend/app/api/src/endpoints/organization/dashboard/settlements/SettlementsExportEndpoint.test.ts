@@ -7,10 +7,12 @@ import { PaymentMethod, PaymentProvider, PaymentStatus, PermissionLevel, Permiss
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { STExpect } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
+import { vi } from 'vitest';
 
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { initMembershipOrganization } from '../../../../../tests/init/initMembershipOrganization.js';
 import { initPlatformAdmin } from '../../../../../tests/init/initPlatformAdmin.js';
+import { SettlementExporter } from '../../../../helpers/SettlementExporter.js';
 import { SessionService } from '../../../../services/SessionService.js';
 import { SettlementService } from '../../../../services/SettlementService.js';
 import { SettlementsExportEndpoint } from './SettlementsExportEndpoint.js';
@@ -139,6 +141,30 @@ describe('Endpoint.SettlementsExport', () => {
         const reportEmail = emails.filter(e => e.subject.startsWith('Uitbetalingen export')).at(-1);
         expect(reportEmail).toBeDefined();
         expect(reportEmail!.to).toContain(user.email);
+    });
+
+    test('Only a full platform admin gets the sync errors in the export', async () => {
+        const captured: boolean[] = [];
+        const spy = vi.spyOn(SettlementExporter.prototype, 'sendEmail').mockImplementation(async function (this: SettlementExporter) {
+            captured.push(this.includeSyncErrors);
+        });
+
+        try {
+            const response = await post(membershipOrganization, adminToken);
+            expect(response.status).toBe(200);
+
+            const { organization } = await createSettledPayment();
+            organization.privateMeta.featureFlags = ['settlements'];
+            await organization.save();
+            const { token } = await createFinanceAdmin(organization);
+            await post(organization, token);
+
+            await QueueHandler.awaitAll();
+        } finally {
+            spy.mockRestore();
+        }
+
+        expect(captured).toEqual([true, false]);
     });
 
     test('Without the feature flag the export is not available', async () => {

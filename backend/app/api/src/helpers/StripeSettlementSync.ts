@@ -9,6 +9,7 @@ import { PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
 import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { SettlementStatus } from '@stamhoofd/structures/settlements/SettlementStatus.js';
+import { SettlementSyncError } from '@stamhoofd/structures/settlements/SettlementSyncError.js';
 import Stripe from 'stripe';
 
 import { ApplicationFeeService } from '../services/ApplicationFeeService.js';
@@ -46,8 +47,10 @@ type ApplicationFeePayer = {
  * account's payouts. The platform instance also ingests application fees before any payout
  * contains them (syncFees).
  *
- * Fail loudly: a transaction that can't be attributed or an unknown transaction type fails the
- * whole payout. The settlement stays unsynced (`syncedAt IS NULL`) and is retried later.
+ * Fail loudly, but walk everything: a transaction that can't be attributed or an unknown
+ * transaction type doesn't stop the walk, so the payout stores everything that does resolve. The
+ * errors are stored on the settlement (`syncErrors`), it stays unsynced (`syncedAt IS NULL`) and is
+ * retried later.
  */
 export class StripeSettlementSync {
     private stripe: Stripe;
@@ -130,21 +133,21 @@ export class StripeSettlementSync {
             abort?.throwIfAborted();
 
             try {
-                const { skipped } = await this.syncPayout(payout, { force, abort });
+                const { skipped, errors } = await this.syncPayout(payout, { force, abort });
                 if (skipped) {
                     result.skipped += 1;
+                } else if (errors.length > 0) {
+                    result.failed += 1;
                 } else {
                     result.synced += 1;
                 }
             } catch (e) {
-                // An interrupted payout is not a failing payout: counting or reporting it would
-                // turn every restart into a wave of problems to look into
+                // An interrupted payout is not a failing payout: counting it would turn every
+                // restart into a wave of problems to look into
                 abort?.throwIfAborted();
 
                 console.error('Failed to sync Stripe payout ' + payout.id, e);
                 result.failed += 1;
-
-                WebmasterReport.report('Synchroniseren Stripe uitbetaling ' + payout.id + (this.stripeAccount ? (' van account ' + this.stripeAccount.accountId) : '') + ' mislukt', e);
             }
         }
 
@@ -156,7 +159,7 @@ export class StripeSettlementSync {
     /**
      * Re-sync one payout by its id, e.g. to retry a settlement that stayed unsynced.
      */
-    async syncPayoutById(externalId: string, options: { force?: boolean; abort?: AbortSignal } = {}): Promise<{ settlement: Settlement; skipped: boolean }> {
+    async syncPayoutById(externalId: string, options: { force?: boolean; abort?: AbortSignal } = {}): Promise<{ settlement: Settlement; skipped: boolean; errors: SettlementSyncError[] }> {
         const payout = await this.stripe.payouts.retrieve(externalId);
         return await this.syncPayout(payout, options);
     }
@@ -401,7 +404,7 @@ export class StripeSettlementSync {
         return this.#organizationId;
     }
 
-    async syncPayout(payout: Stripe.Payout, { force = false, abort }: { force?: boolean; abort?: AbortSignal } = {}): Promise<{ settlement: Settlement; skipped: boolean }> {
+    async syncPayout(payout: Stripe.Payout, { force = false, abort }: { force?: boolean; abort?: AbortSignal } = {}): Promise<{ settlement: Settlement; skipped: boolean; errors: SettlementSyncError[] }> {
         // All amounts are stored in the same unit: a payout in another currency would be stored as
         // a plausible but wrong number
         if (payout.currency && payout.currency.toUpperCase() !== 'EUR') {
@@ -427,46 +430,51 @@ export class StripeSettlementSync {
             // Money that never arrived holds no transactions to walk. The status above is still
             // refreshed, so a payout that flips to failed stops claiming it was paid out
             if (payout.status !== 'paid') {
-                return { settlement, skipped: true };
-            }
-
-            // Stripe only lists the transactions of a payout once it finished reconciling it, and
-            // never for manual payouts. Walking anyway would store an empty payout and mark it
-            // synced, which no later run would ever revisit
-            if (payout.reconciliation_status !== 'completed') {
-                if (payout.reconciliation_status === 'not_applicable') {
-                    throw new SimpleError({
-                        code: 'unsupported_payout',
-                        message: 'Stripe does not report the transactions of payout ' + payout.id + ' (' + payout.reconciliation_status + '), which only happens for manual payouts',
-                    });
-                }
-                // Still reconciling at Stripe: it stays unsynced and the next run picks it up
-                return { settlement, skipped: true };
-            }
-
-            if (settlement.syncedAt && !force) {
-                return { settlement, skipped: true };
+                return { settlement, skipped: true, errors: [] };
             }
 
             try {
-                await this.#walkPayout(payout, settlement, signal);
+                // Stripe only lists the transactions of a payout once it finished reconciling it,
+                // and never for manual payouts. Walking anyway would store an empty payout and mark
+                // it synced, which no later run would ever revisit
+                if (payout.reconciliation_status !== 'completed') {
+                    if (payout.reconciliation_status === 'not_applicable') {
+                        throw new SimpleError({
+                            code: 'unsupported_payout',
+                            message: 'Stripe does not report the transactions of payout ' + payout.id + ' (' + payout.reconciliation_status + '), which only happens for manual payouts',
+                        });
+                    }
+                    // Still reconciling at Stripe: it stays unsynced and the next run picks it up
+                    return { settlement, skipped: true, errors: [] };
+                }
+
+                if (settlement.syncedAt && !force) {
+                    return { settlement, skipped: true, errors: [] };
+                }
+
+                const errors = await this.#walkPayout(payout, settlement, signal);
+                return { settlement, skipped: false, errors };
             } catch (e) {
                 // A walk that was interrupted stored only part of the payout: it has to be walked
                 // again, but it didn't fail
                 if (signal.isAborted) {
                     await SettlementService.markSyncInterrupted(settlement);
                 } else {
-                    await SettlementService.markSyncFailed(settlement);
+                    await SettlementService.markSyncFailed(settlement, [SettlementSyncError.fromError(e)]);
                 }
                 throw e;
             }
-
-            return { settlement, skipped: false };
         }, { abort });
     }
 
-    async #walkPayout(payout: Stripe.Payout, settlement: Settlement, abort: AbortSignal) {
+    /**
+     * Walks every balance transaction of the payout and returns the errors of the transactions
+     * that could not be stored: one broken transaction may not hide the rest of the payout. Only
+     * an abort (or the walk itself breaking, e.g. the listing call) still throws.
+     */
+    async #walkPayout(payout: Stripe.Payout, settlement: Settlement, abort: AbortSignal): Promise<SettlementSyncError[]> {
         let transactionCount = 0;
+        const errors: SettlementSyncError[] = [];
 
         // Keep track of all balance items linked to (settled) application fees that are created or updated.
         // So we can update the settlement status of the associated payments
@@ -483,14 +491,22 @@ export class StripeSettlementSync {
                 abort.throwIfAborted();
 
                 transactionCount += 1;
-                await this.#handleTransaction(transaction, settlement, settledApplicationFeeBalanceItems);
+                try {
+                    await this.#handleTransaction(transaction, settlement, settledApplicationFeeBalanceItems);
+                } catch (e) {
+                    // An interrupted transaction is not a broken one: the walk stops as a whole
+                    abort.throwIfAborted();
+
+                    console.error('Failed to sync balance transaction ' + transaction.id + ' of Stripe payout ' + payout.id, e);
+                    errors.push(SettlementSyncError.fromError(e, { transactionId: transaction.id }));
+                }
             }
 
             if (transactionCount === 0 && settlement.amount !== 0) {
-                throw new SimpleError({
+                errors.push(SettlementSyncError.create({
                     code: 'empty_payout',
                     message: 'Payout ' + payout.id + ' of ' + settlement.amount + ' has no balance transactions',
-                });
+                }));
             }
         } catch (e) {
             // The fee payments still follow the fees this walk linked before it broke (a fee may
@@ -501,7 +517,8 @@ export class StripeSettlementSync {
         }
 
         await SettlementService.updatePaymentSettlementsForApplicationFeeBalanceItems([...settledApplicationFeeBalanceItems]);
-        await SettlementService.finishSync(settlement, { transactionCount });
+        await SettlementService.finishSync(settlement, { transactionCount, errors });
+        return errors;
     }
 
     async #handleTransaction(transaction: Stripe.BalanceTransaction, settlement: Settlement, settledApplicationFeeBalanceItems: Set<string>) {

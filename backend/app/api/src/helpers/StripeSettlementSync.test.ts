@@ -281,6 +281,8 @@ describe('StripeSettlementSync', () => {
         const settlement = await getSettlement(payout);
         expect(settlement.syncedAt).toBeNull();
         expect(settlement.syncFailureCount).toBe(1);
+        expect(settlement.syncErrors).toHaveLength(1);
+        expect(settlement.syncErrors![0].code).toBe('reversing_payment_not_found');
         expect(await PaymentSettlement.select().where('settlementId', settlement.id).count()).toBe(0);
     });
 
@@ -390,7 +392,14 @@ describe('StripeSettlementSync', () => {
         const payout = stripeMocker.createPayout({ amount: 1000, arrivalDate, reconciliation_status: 'not_applicable' });
 
         expect(await createSync().syncPayouts({ start })).toEqual({ synced: 0, skipped: 0, failed: 1 });
-        expect((await getSettlement(payout)).syncedAt).toBeNull();
+
+        // An error before the walk is stored too: it counts as an attempt, so the retry cap and
+        // the error queue see it like any other failure
+        const settlement = await getSettlement(payout);
+        expect(settlement.syncedAt).toBeNull();
+        expect(settlement.syncFailureCount).toBe(1);
+        expect(settlement.syncErrors).toHaveLength(1);
+        expect(settlement.syncErrors![0].code).toBe('unsupported_payout');
     });
 
     test('a payout without transactions is not stored as a complete sync', async () => {
@@ -400,7 +409,7 @@ describe('StripeSettlementSync', () => {
         expect((await getSettlement(payout)).syncedAt).toBeNull();
     });
 
-    test('failing payouts are reported in one email', async () => {
+    test('failing payouts store their errors instead of emailing them', async () => {
         const first = stripeMocker.createPayout({ amount: 1000, arrivalDate });
         const second = stripeMocker.createPayout({ amount: 2000, arrivalDate });
 
@@ -408,11 +417,63 @@ describe('StripeSettlementSync', () => {
             expect(await createSync().syncPayouts({ start })).toEqual({ synced: 0, skipped: 0, failed: 2 });
         });
 
-        // Emails of the other tests in this file can still be in the queue: only this group counts
+        // The database is the error queue: nothing here is worth an email anymore
+        for (const payout of [first, second]) {
+            const settlement = await getSettlement(payout);
+            expect(settlement.syncErrors).toHaveLength(1);
+            expect(settlement.syncErrors![0]).toMatchObject({ code: 'empty_payout', transactionId: null });
+        }
+
         const emails = (await EmailMocker.transactional.getSucceededEmails()).filter(e => e.subject.startsWith('Synchroniseren uitbetalingen'));
-        expect(emails).toHaveLength(1);
-        expect(emails[0].html).toContain(first.id);
-        expect(emails[0].html).toContain(second.id);
+        expect(emails).toHaveLength(0);
+    });
+
+    test('a failing transaction does not stop the rest of the payout from syncing', async () => {
+        const payout = stripeMocker.createPayout({ amount: -3000, arrivalDate });
+        const broken = stripeMocker.createBalanceTransaction({
+            type: 'issuing_authorization_hold',
+            amount: -1000,
+            created,
+            payout: payout.id,
+            source: null,
+        });
+        stripeMocker.createBalanceTransaction({
+            type: 'stripe_fee',
+            amount: -2000,
+            description: 'Billing - Usage Fee',
+            created,
+            payout: payout.id,
+            source: null,
+        });
+
+        expect(await createSync().syncPayouts({ start })).toEqual({ synced: 0, skipped: 0, failed: 1 });
+
+        // Everything that does resolve is stored: the broken transaction is the only hole left
+        const settlement = await getSettlement(payout);
+        const charges = await SettlementCharge.select().where('settlementId', settlement.id).fetch();
+        expect(charges).toHaveLength(1);
+        expect(charges[0]).toMatchObject({ type: SettlementChargeType.ProviderAccountFee, amount: -20_00_00 });
+
+        expect(settlement.syncedAt).toBeNull();
+        expect(settlement.syncFailureCount).toBe(1);
+        expect(settlement.transactionCount).toBe(2);
+        expect(settlement.unexplainedAmount).toBe(-10_00_00);
+        expect(settlement.syncErrors).toHaveLength(1);
+        expect(settlement.syncErrors![0]).toMatchObject({
+            code: 'unknown_balance_transaction_type',
+            transactionId: broken.id,
+        });
+
+        // Once the cause is fixed, the payout is still unsynced so the next run walks it again and
+        // clears the error queue
+        broken.type = 'stripe_fee';
+        expect(await createSync().syncPayouts({ start })).toEqual({ synced: 1, skipped: 0, failed: 0 });
+
+        const fixed = await getSettlement(payout);
+        expect(fixed.syncErrors).toBeNull();
+        expect(fixed.syncedAt).not.toBeNull();
+        expect(fixed.syncFailureCount).toBe(0);
+        expect(fixed.unexplainedAmount).toBe(0);
     });
 
     test('a walk that fails still updates the fee payments of what it stored', async () => {

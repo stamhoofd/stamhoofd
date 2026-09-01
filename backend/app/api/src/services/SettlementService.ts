@@ -11,6 +11,7 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { SQL } from '@stamhoofd/sql';
 import type { PaymentProvider } from '@stamhoofd/structures';
 import { PaymentMethod, SettlementReference } from '@stamhoofd/structures';
+import type { SettlementSyncError } from '@stamhoofd/structures/settlements/SettlementSyncError.js';
 import type { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import type { SettlementStatus } from '@stamhoofd/structures/settlements/SettlementStatus.js';
 import { Formatter } from '@stamhoofd/utility';
@@ -67,6 +68,12 @@ const CHARGE_UPDATE_BATCH_SIZE = 500;
  * Fees read per batch when a whole organization's fees are walked.
  */
 const FEE_BATCH_SIZE = 500;
+
+/**
+ * Sync errors stored per settlement. More than this is one cause repeated per transaction, so
+ * listing them all adds nothing.
+ */
+const MAXIMUM_SYNC_ERRORS = 50;
 
 /**
  * All writes to the settlements tables go through this service. Every write is an upsert on the
@@ -371,17 +378,26 @@ export class SettlementService {
     }
 
     /**
-     * Marks a complete, error-free sync: caches the reconciliation delta and sets syncedAt.
+     * Marks a completed walk: caches the reconciliation delta, and stores the errors of this
+     * attempt. A walk with errors stored everything else, but may not claim it is synced: syncedAt
+     * stays NULL so the next run retries it, and the attempt counts towards the retry cap.
      */
-    static async finishSync(settlement: Settlement, { transactionCount }: { transactionCount: number }): Promise<Settlement> {
+    static async finishSync(settlement: Settlement, { transactionCount, errors = [] }: { transactionCount: number; errors?: SettlementSyncError[] }): Promise<Settlement> {
         await this.applyTotals(settlement);
 
         settlement.transactionCount = transactionCount;
-        settlement.syncFailureCount = 0;
+        settlement.syncErrors = errors.length > 0 ? errors.slice(0, MAXIMUM_SYNC_ERRORS) : null;
 
-        const syncedAt = new Date();
-        syncedAt.setMilliseconds(0);
-        settlement.syncedAt = syncedAt;
+        if (errors.length > 0) {
+            settlement.syncedAt = null;
+            settlement.syncFailureCount += 1;
+        } else {
+            settlement.syncFailureCount = 0;
+
+            const syncedAt = new Date();
+            syncedAt.setMilliseconds(0);
+            settlement.syncedAt = syncedAt;
+        }
 
         await settlement.save();
         return settlement;
@@ -491,11 +507,15 @@ export class SettlementService {
     }
 
     /**
-     * A failed sync leaves syncedAt NULL: that is the whole error queue.
+     * A failed sync leaves syncedAt NULL: that is the whole error queue. Callers that know what
+     * broke pass it along, so the stored errors always describe the last attempt.
      */
-    static async markSyncFailed(settlement: Settlement): Promise<Settlement> {
+    static async markSyncFailed(settlement: Settlement, errors?: SettlementSyncError[]): Promise<Settlement> {
         settlement.syncedAt = null;
         settlement.syncFailureCount += 1;
+        if (errors !== undefined) {
+            settlement.syncErrors = errors.length > 0 ? errors.slice(0, MAXIMUM_SYNC_ERRORS) : null;
+        }
         await settlement.save();
         return settlement;
     }

@@ -1,7 +1,9 @@
 import { column } from '@simonbackx/simple-database';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { PaymentProvider } from '@stamhoofd/structures';
 import { SettlementStatus } from '@stamhoofd/structures/settlements/SettlementStatus.js';
+import { SettlementSyncError } from '@stamhoofd/structures/settlements/SettlementSyncError.js';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -63,6 +65,13 @@ export class Settlement extends QueryableModel {
 
     @column({ type: 'integer' })
     syncFailureCount = 0;
+
+    /**
+     * Errors of the last sync attempt; NULL when it completed without errors. The queryable error
+     * queue: `syncErrors IS NOT NULL` lists every payout that needs a look.
+     */
+    @column({ type: 'json', decoder: new ArrayDecoder(SettlementSyncError), nullable: true })
+    syncErrors: SettlementSyncError[] | null = null;
 
     /**
      * amount minus the sum of all stored payment lines, charges and pending fees, cached after
