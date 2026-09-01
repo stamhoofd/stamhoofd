@@ -233,7 +233,21 @@ const nationalRegisterNumber = computed({
 
 const taxDependent = computed({
     get: () => patched.value.taxDependent,
-    set: taxDependent => addPatch({ taxDependent }),
+    set: (taxDependent) => {
+        const hasOtherTaxDependentParent = props.member?.patchedMember.details.parents.find(p => p.id !== props.parent.id && p.taxDependent);
+
+        if (hasOtherTaxDependentParent && taxDependent) {
+            CenteredMessage.confirm({
+                title: $t('Ben je zeker dat er sprake is van fiscaal co-ouderschap?'),
+                description: $t('Dit is enkel nodig als beide ouders gescheiden zijn'),
+                confirmText: 'Ik ben zeker',
+            }).then((isSure) => {
+                if (isSure) addPatch({ taxDependent });
+            }).catch(console.error);
+        } else {
+            addPatch({ taxDependent });
+        }
+    },
 });
 
 const availableAddresses = computed(() => {
