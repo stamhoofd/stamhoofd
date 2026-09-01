@@ -1252,7 +1252,7 @@ export class AdminPermissionChecker {
         return true;
     }
 
-    async canCreateGroupInCategory(organizationId: string, category: GroupCategory) {
+    async canCreateGroupInCategory(organizationId: string, category: GroupCategory, allCategories: GroupCategory[]) {
         const organizationPermissions = await this.getOrganizationPermissions(organizationId);
 
         if (!organizationPermissions) {
@@ -1264,9 +1264,7 @@ export class AdminPermissionChecker {
         }
 
         // Check parents
-        const organization = await this.getOrganization(organizationId);
-        const organizationPeriod = await this.getOrganizationPeriod(organization, organization.periodId);
-        const parentCategories = organizationPeriod ? category.getParentCategories(organizationPeriod.settings.categories) : [];
+        const parentCategories = category.getParentCategories(allCategories);
 
         for (const parentCategory of parentCategories) {
             if (organizationPermissions.hasResourceAccessRight(PermissionsResourceType.GroupCategories, parentCategory.id, AccessRight.OrganizationCreateGroups)) {
