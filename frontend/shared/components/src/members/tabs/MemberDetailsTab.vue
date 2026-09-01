@@ -16,7 +16,7 @@
             <ViewMemberWarningsBox v-if="!isMobile" :member="member" />
             <ViewMemberAccountsBox :member="member" />
             <ViewMemberFamilyBox :member="member" />
-            <ViewMemberSecurityCodeBox :member="member" />
+            <ViewMemberSecurityCodeBox v-if="canSeeSecurityCode" :member="member" />
         </div>
     </div>
 </template>
@@ -38,6 +38,9 @@ import ViewMemberSecurityCodeBox from '#members/components/view/ViewMemberSecuri
 import ViewMemberUnverifiedBox from '#members/components/view/ViewMemberUnverifiedBox.vue';
 import ViewMemberWarningsBox from '#members/components/view/ViewMemberWarningsBox.vue';
 import ViewMemberResponsibilitiesBox from '../components/view/ViewMemberResponsibilitiesBox.vue';
+import { computed } from 'vue';
+import { useUser } from '#hooks/useUser.ts';
+import { useAuth } from '#hooks/useAuth.ts';
 
 const isMobile = useIsMobile();
 
@@ -46,8 +49,29 @@ const props = defineProps<{
 }>();
 
 const loadFamily = useLoadFamily();
+const user = useUser();
+const auth = useAuth();
 
 onMounted(() => {
     loadFamily(props.member, { shouldRetry: true }).catch(console.error);
+});
+
+const canSeeSecurityCode = computed(() => {
+    const isUserMember = user.value?.memberId === props.member.id;
+    const responsibilities = props.member.getResponsibilities();
+
+    const responsibilitiesFullAdmin = responsibilities.every((r) => {
+        if (r.organizationId === null) {
+            return auth.hasPlatformFullAccess();
+        }
+        return auth.hasFullAccess();
+    });
+
+    return isUserMember
+        || responsibilities.length === 0
+        || (responsibilities.length > 0
+            && responsibilitiesFullAdmin
+        )
+    ;
 });
 </script>
