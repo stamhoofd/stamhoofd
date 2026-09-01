@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/models",
-    "version": "2.149.0",
+    "version": "2.150.0",
     "type": "module",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
@@ -44,7 +44,7 @@
     },
     "devDependencies": {
         "@simonbackx/simple-database": "1.40.0",
-        "@stamhoofd/test-utils": "2.149.0",
+        "@stamhoofd/test-utils": "2.150.0",
         "@types/luxon": "3.7.2",
         "@types/uuid": "8.3.4",
         "vitest": "4.1.10"
