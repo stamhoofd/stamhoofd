@@ -234,7 +234,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             expect(await EmailMocker.transactional.getSucceededEmails()).toEqual([
                 expect.objectContaining({
-                    to: '"Stamhoofd" <hallo@stamhoofd.be>',
+                    to: '"Stamhoofd" <webmaster@stamhoofd.be>',
                     from: '"Ravot" <webmaster@stamhoofd.be>',
                     subject: '[Limiet] Limiet bereikt voor aantal inschrijvingen',
                 }),

@@ -216,7 +216,7 @@ describe('ForwardHandler', () => {
         });
         expect(options).toMatchObject({
             to: [{
-                email: 'hallo@stamhoofd.be',
+                email: 'webmaster@stamhoofd.be',
                 name: 'Stamhoofd',
             }],
             subject: 'E-mail unsubscribe mislukt',
