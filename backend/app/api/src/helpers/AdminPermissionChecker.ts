@@ -309,19 +309,24 @@ export class AdminPermissionChecker {
             // return false;
         }
 
-        if (!await this.canAccessGroupsInPeriod(group.periodId, group.organizationId)) {
-            return false;
-        }
         const organization = await this.getOrganization(group.organizationId);
 
         if (group.deletedAt || group.status === GroupStatus.Archived) {
             return await this.canAccessArchivedGroups(group.organizationId);
         }
 
-        const organizationPermissions = await this.getOrganizationPermissions(group.organizationId);
+        let organizationPermissions = await this.getOrganizationPermissions(group.organizationId);
 
         if (!organizationPermissions) {
             return false;
+        }
+
+        const isUsedPeriod = await this.canAccessGroupsInPeriod(group.periodId, group.organizationId);
+
+        if (!isUsedPeriod) {
+            // Outside the period the organization is using, only grants that name this group or one of
+            // its categories still apply
+            organizationPermissions = organizationPermissions.onlyExplicitResources();
         }
 
         // Check global level permissions for this user
@@ -329,7 +334,7 @@ export class AdminPermissionChecker {
             return true;
         }
 
-        if (group.type === GroupType.EventRegistration) {
+        if (isUsedPeriod && group.type === GroupType.EventRegistration) {
             // Check if we can access the event
             const event = await Event.select().where('groupId', group.id).first(false);
 
@@ -349,7 +354,7 @@ export class AdminPermissionChecker {
             }
         }
 
-        if (group.type === GroupType.WaitingList) {
+        if (isUsedPeriod && group.type === GroupType.WaitingList) {
             // Check if this is a waiting list for an event
             const parentGroup = await Group.select()
                 .where('type', GroupType.EventRegistration)
