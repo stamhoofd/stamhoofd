@@ -22,7 +22,8 @@
     },
     "dependencies": {
         "@stamhoofd/types": "2.149.0",
-        "ibantools": "4.5.4"
+        "ibantools": "4.5.4",
+        "jsvat-next": "3.0.4"
     },
     "devDependencies": {
         "@types/luxon": "3.7.2",
