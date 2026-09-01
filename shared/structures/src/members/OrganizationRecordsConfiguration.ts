@@ -345,6 +345,14 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
             }
         }
 
+        if (parent.taxDependent !== null) {
+            if (clone.taxDependent) {
+                clone.taxDependent = clone.taxDependent.merge(parent.taxDependent);
+            } else {
+                clone.taxDependent = parent.taxDependent;
+            }
+        }
+
         if (parent.emailAddress !== null) {
             if (clone.emailAddress) {
                 clone.emailAddress = clone.emailAddress.merge(parent.emailAddress);
