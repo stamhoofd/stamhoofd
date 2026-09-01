@@ -403,6 +403,24 @@ export class ContextPermissions {
         return !!this.permissions && !this.permissions.isEmpty;
     }
 
+    hasSomeAccessInPeriod(period: OrganizationRegistrationPeriod): boolean {
+        if (this.hasFullAccess()) {
+            return true;
+        }
+
+        let permissions = this.permissions;
+        const organization = this.organization;
+        if (!permissions || !organization) {
+            return false;
+        }
+
+        if (!this.canAccessGroupsInPeriod(period.period.id, organization)) {
+            permissions = permissions.onlyExplicitResources();
+        }
+
+        return period.groups.some(g => g.hasReadAccess(permissions, period.settings.categories));
+    }
+
     hasPlatformFullAccess(): boolean {
         return !!this.platformPermissions && !!this.platformPermissions.hasFullAccess();
     }
