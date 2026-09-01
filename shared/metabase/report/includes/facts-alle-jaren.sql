@@ -1,6 +1,3 @@
--- The same grain as `facts`, but never filtered by scoutsjaar: the cards that draw a line across the
--- years need every year regardless of which one the dashboard filter has selected. Keep the two in
--- step when changing what counts as an active registration.
 WITH
 -- @include takken
 facts AS (

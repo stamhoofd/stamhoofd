@@ -1,18 +1,1 @@
--- What a tak counts as -- kinderen, leiding or volwassenen -- for the platform reading the report.
---
--- Nothing in the administration knows it. The platform configuration has no such field, and the ages
--- do not answer it, since leiding and stam carry no age range and a tak of kinderen need not carry
--- one either. The statistics database does not hold it either: it kept a hand-filled `category`
--- column on `default_age_groups` until the reports began naming their takken themselves, and that
--- column is dropped.
---
--- So a platform says which of its takken are which here, in `includes/<env>/tak-categorie.sql`, which
--- is what `@include tak-categorie` expands to there. This unqualified one is what a platform that has
--- not is left with: nothing. That is not a failure -- the reports count a tak nobody has categorised
--- separately rather than guessing at it, and `effective_category` still reads the ages behind it so
--- that no kind drops out of a total -- but every figure dividing leiding from kinderen stays empty
--- until the list is written.
---
--- Belongs in the select list of the `takken` fragment, which has the row of `default_age_groups` as
--- `dag`. It is the column the rest of the report reads as `dag.category`.
 CAST(NULL AS CHAR(16)) AS category

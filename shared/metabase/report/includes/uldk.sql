@@ -1,11 +1,3 @@
--- The ULDK figures per eenheid: the kinderen and the leiding of every eenheid split by geslacht, one
--- row per eenheid.
---
--- Shared because the totals under the table are the same figures added up. Counted again in a query
--- of their own they would be a second reading of the same thing, and a total that is not the sum of
--- the column above it reads as a mistake in either of the two.
---
--- Belongs after `leden`.
 , uldk AS (
     SELECT
         `Eenheid` AS `Name`,

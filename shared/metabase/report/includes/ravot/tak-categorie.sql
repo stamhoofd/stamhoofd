@@ -1,17 +1,3 @@
--- The takken of ravot, by the id they carry in the platform configuration.
---
--- Said here rather than in a hand-filled column of the statistics database, for the reasons
--- `../tak-categorie.sql` gives. This is the whole answer, so a tak of ravot that is missing here
--- counts as nothing at all, and a tak added to the platform configuration has to be added here too.
---
--- The ondersteunende leden are volwassenen and may not be categorised as leiding: the
--- omkaderingscijfer and the GTP index would then read them as leiding that the kinderen of an eenheid
--- are looked after by. The aanlevering, which does deliver them among the leiding because the
--- department has no third word for them, names the tak itself instead -- see `type-deelnemers.sql`.
---
--- The two oldest takken of kinderen carry members of seventeen and over, which is what
--- `omkaderingscijfer.sql` means when it says the totals beside it hold those as well. They weigh in
--- no term of the GTP index, which stops at sixteen.
 CASE dag.id
     -- Kinderen
     WHEN 'bd63a6ef-d4a1-497d-87a5-d7c36b4ad220' THEN 'child'   -- Leeuwkes, Kabouters of Sloebers (6-8)

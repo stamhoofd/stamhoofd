@@ -1,16 +1,3 @@
--- The takken of keeo, by the id they carry in the platform configuration.
---
--- Said here rather than in a hand-filled column of the statistics database, so that the answer lives
--- with the report instead of in a database nobody can read back: such a column survives no rebuild,
--- and setting it again means an UPDATE nothing records. Written out in the query, it also stands in
--- front of whoever opens the question in Metabase, who can correct a tak there and tell us after.
---
--- The id rather than the name: a tak holds a row per year, and a rename would silently drop it out of
--- the list in the year it happened. Ordered as the report divides them.
---
--- This is the whole answer, so a tak of keeo that is missing here counts as nothing at all: it is
--- held by the totals but by none of the three categories, and by no figure that divides leiding from
--- kinderen. A tak added to the platform configuration has to be added here as well.
 CASE dag.id
     -- Kinderen
     WHEN 'f274a949-9318-4c2b-ae35-e50114efe686' THEN 'child'   -- Bevers of Zeehonden
