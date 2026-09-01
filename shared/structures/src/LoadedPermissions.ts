@@ -191,6 +191,34 @@ export class LoadedPermissions {
         return false;
     }
 
+    /**
+     * The permissions that keep applying outside the period the organization is currently using: only
+     * grants that name a specific resource. The base level, the '' wildcards and the access rights that
+     * were granted for the whole organization are dropped.
+     */
+    onlyExplicitResources(): LoadedPermissions {
+        const permissions = LoadedPermissions.create({
+            level: PermissionLevel.None,
+            accessRights: [],
+            resources: new Map(),
+        });
+
+        for (const [type, resources] of this.resources) {
+            for (const [id, resource] of resources) {
+                if (id === '') {
+                    continue;
+                }
+
+                if (!permissions.resources.has(type)) {
+                    permissions.resources.set(type, new Map());
+                }
+                permissions.resources.get(type)!.set(id, resource.clone());
+            }
+        }
+
+        return permissions;
+    }
+
     hasResourceAccess(type: PermissionsResourceType, id: string, level: PermissionLevel): boolean {
         if (this.hasAccess(level)) {
             return true;

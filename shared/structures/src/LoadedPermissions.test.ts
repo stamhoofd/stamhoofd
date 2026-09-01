@@ -9,6 +9,45 @@ import { PermissionsResourceType } from './PermissionsResourceType.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 
 describe('Unit.LoadedPermissions', () => {
+    describe('onlyExplicitResources', () => {
+        function createPermissions() {
+            return LoadedPermissions.create({
+                level: PermissionLevel.Write,
+                accessRights: [AccessRight.OrganizationCreateGroups],
+                resources: new Map([[
+                    PermissionsResourceType.Groups,
+                    new Map([
+                        ['', LoadedPermissions.fromResource(ResourcePermissions.create({ level: PermissionLevel.Write }))],
+                        ['group-1', LoadedPermissions.fromResource(ResourcePermissions.create({ level: PermissionLevel.Read }))],
+                    ]),
+                ]]),
+            });
+        }
+
+        test('Keeps grants that name a specific resource', () => {
+            const permissions = createPermissions().onlyExplicitResources();
+
+            expect(permissions.hasResourceAccess(PermissionsResourceType.Groups, 'group-1', PermissionLevel.Read)).toBe(true);
+        });
+
+        test('Drops the base level, the wildcard and the organization access rights', () => {
+            const permissions = createPermissions().onlyExplicitResources();
+
+            expect(permissions.hasAccess(PermissionLevel.Read)).toBe(false);
+            expect(permissions.hasAccessRight(AccessRight.OrganizationCreateGroups)).toBe(false);
+            expect(permissions.hasResourceAccess(PermissionsResourceType.Groups, 'group-2', PermissionLevel.Read)).toBe(false);
+            expect(permissions.hasResourceAccess(PermissionsResourceType.Groups, 'group-1', PermissionLevel.Write)).toBe(false);
+        });
+
+        test('Does not alter the original permissions', () => {
+            const original = createPermissions();
+            original.onlyExplicitResources();
+
+            expect(original.hasAccess(PermissionLevel.Write)).toBe(true);
+            expect(original.hasResourceAccess(PermissionsResourceType.Groups, 'group-2', PermissionLevel.Write)).toBe(true);
+        });
+    });
+
     describe('LoadedPermissions.from', () => {
         test('[Regression] Does not alter the original responsibilities', () => {
             const allTags = ResourcePermissions.create({
