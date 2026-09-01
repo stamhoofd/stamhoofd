@@ -1,6 +1,6 @@
 import { Flags } from '@oclif/core';
 import { BaseCommand } from '../../base-command.js';
-import { currentDatabase, dropDatabase, resolveDatabaseOption } from '../../runtime/database-command-helpers.js';
+import { currentDatabase, dropDatabase, ensureMysqlRunning, resolveDatabaseOption } from '../../runtime/database-command-helpers.js';
 
 export default class DbRemove extends BaseCommand {
     static aliases = ['db rm'];
@@ -18,6 +18,7 @@ export default class DbRemove extends BaseCommand {
     async run(): Promise<void> {
         const { flags } = await this.parse(DbRemove);
         const context = await this.createContext(flags);
+        await ensureMysqlRunning(context);
         const current = currentDatabase(context);
         const from = await resolveDatabaseOption({ flag: flags.from, message: 'Select the database to remove', current, includeCurrent: false });
 

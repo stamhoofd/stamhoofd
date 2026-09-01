@@ -1,10 +1,23 @@
 import { input, select } from '@inquirer/prompts';
 import { buildBackendEnv } from '../config/build-config.js';
 import { localIpv4Host, mysqlContainer, mysqlRootPassword, mysqlRootUser } from '../config/shared-service-config.js';
+import { mysqlService } from '../services/definitions/mysql-service.js';
 import * as docker from '../services/docker.js';
+import { step } from './ux.js';
 import type { BaseCommand } from '../base-command.js';
 
 type CommandContext = Awaited<ReturnType<BaseCommand['createContext']>>;
+
+/**
+ * Database commands are used outside `stam dev`, so the shared MySQL container is often not running:
+ * without this every `docker exec` below fails with "No such container: stamhoofd-mysql".
+ */
+export async function ensureMysqlRunning(context: CommandContext): Promise<void> {
+    if ((await mysqlService.status(context)).running) {
+        return;
+    }
+    await step(`Starting ${mysqlService.name}`, () => mysqlService.start(context, undefined));
+}
 
 export function currentDatabase(context: CommandContext): string {
     return buildBackendEnv(context).DB_DATABASE ?? 'stamhoofd-development';

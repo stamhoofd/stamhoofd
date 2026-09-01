@@ -50,8 +50,9 @@ describe('database management commands', () => {
         expect(select).not.toHaveBeenCalled();
         expect(run).toHaveBeenNthCalledWith(1, 'podman', ['--version'], { capture: true, allowFailure: true });
         expect(run).toHaveBeenNthCalledWith(2, 'podman', ['info'], { quiet: true });
-        expect(run).toHaveBeenNthCalledWith(3, 'podman', ['exec', 'stamhoofd-mysql', 'mysql', '-h127.0.0.1', '-uroot', '-proot', '-e', 'CREATE DATABASE IF NOT EXISTS `target-db` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;'], expect.anything());
-        expect(run).toHaveBeenNthCalledWith(4, 'podman', ['exec', 'stamhoofd-mysql', 'sh', '-c', "mysqldump -h'127.0.0.1' -u'root' -p'root' --single-transaction --routines --triggers --events 'source-db' | mysql -h'127.0.0.1' -u'root' -p'root' 'target-db'"], expect.anything());
+        expect(run).toHaveBeenNthCalledWith(3, 'podman', ['inspect', '-f', '{{.State.Running}}', 'stamhoofd-mysql'], expect.anything());
+        expect(run).toHaveBeenNthCalledWith(4, 'podman', ['exec', 'stamhoofd-mysql', 'mysql', '-h127.0.0.1', '-uroot', '-proot', '-e', 'CREATE DATABASE IF NOT EXISTS `target-db` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;'], expect.anything());
+        expect(run).toHaveBeenNthCalledWith(5, 'podman', ['exec', 'stamhoofd-mysql', 'sh', '-c', "mysqldump -h'127.0.0.1' -u'root' -p'root' --single-transaction --routines --triggers --events 'source-db' | mysql -h'127.0.0.1' -u'root' -p'root' 'target-db'"], expect.anything());
     });
 
     it('moves a database by copying and dropping the source', async () => {

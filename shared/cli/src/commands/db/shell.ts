@@ -1,5 +1,5 @@
 import { BaseCommand } from '../../base-command.js';
-import { currentDatabase, openDatabaseShell } from '../../runtime/database-command-helpers.js';
+import { currentDatabase, ensureMysqlRunning, openDatabaseShell } from '../../runtime/database-command-helpers.js';
 
 export default class DbShell extends BaseCommand {
     static summary = 'Open a MySQL shell for the selected database';
@@ -13,6 +13,7 @@ export default class DbShell extends BaseCommand {
     async run(): Promise<void> {
         const { flags } = await this.parse(DbShell);
         const context = await this.createContext(flags);
+        await ensureMysqlRunning(context);
         await openDatabaseShell(currentDatabase(context));
     }
 }

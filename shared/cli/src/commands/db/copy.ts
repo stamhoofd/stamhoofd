@@ -1,6 +1,6 @@
 import { Flags } from '@oclif/core';
 import { BaseCommand } from '../../base-command.js';
-import { copyDatabase, currentDatabase, resolveDatabaseOption } from '../../runtime/database-command-helpers.js';
+import { copyDatabase, currentDatabase, ensureMysqlRunning, resolveDatabaseOption } from '../../runtime/database-command-helpers.js';
 
 export default class DbCopy extends BaseCommand {
     static aliases = ['db cp'];
@@ -19,6 +19,7 @@ export default class DbCopy extends BaseCommand {
     async run(): Promise<void> {
         const { flags } = await this.parse(DbCopy);
         const context = await this.createContext(flags);
+        await ensureMysqlRunning(context);
         const current = currentDatabase(context);
         const from = await resolveDatabaseOption({ flag: flags.from, message: 'Select the database to copy from', current, includeCurrent: false });
         const to = await resolveDatabaseOption({ flag: flags.to, message: 'Select the database to copy to', current, includeCurrent: true, customInput: true });

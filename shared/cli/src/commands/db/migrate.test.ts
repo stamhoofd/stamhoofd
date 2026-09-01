@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import DbMigrate from './migrate.js';
+import { ensureMysqlRunning } from '../../runtime/database-command-helpers.js';
 import { migrate } from '../../runtime/monorepo-runner.js';
+
+vi.mock('../../runtime/database-command-helpers.js', () => ({
+    ensureMysqlRunning: vi.fn(),
+}));
 
 vi.mock('../../runtime/monorepo-runner.js', () => ({
     migrate: vi.fn(),
@@ -33,5 +38,7 @@ describe('DbMigrate command', () => {
         await command.run();
 
         expect(migrate).toHaveBeenCalledWith(context);
+        expect(ensureMysqlRunning).toHaveBeenCalledWith(context);
+        expect(vi.mocked(ensureMysqlRunning).mock.invocationCallOrder[0]).toBeLessThan(vi.mocked(migrate).mock.invocationCallOrder[0]);
     });
 });
