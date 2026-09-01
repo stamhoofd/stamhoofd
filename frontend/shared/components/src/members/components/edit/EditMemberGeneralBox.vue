@@ -102,7 +102,7 @@
 
         <div v-if="!member.isNew && (nationalRegisterNumber || isPropertyEnabled('nationalRegisterNumber') )" class="container">
             <hr>
-            <h2>{{ $t('Fiscale attesten') }}</h2>
+            <h2>{{ $t('%ZqD') }}</h2>
 
             <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`) + lidSuffix + (!isPropertyRequired('nationalRegisterNumber') ? ' ('+$t('%1GF')+')' : '')" :required="isPropertyRequired('nationalRegisterNumber')" :nullable="true" :validator="validator" :birth-day="birthDay">
                 <template v-if="!isPropertyEnabled('nationalRegisterNumber')" #right>
@@ -129,9 +129,9 @@
             </p>
 
             <STList v-if="!member.isNew && isAdmin && isFullAdmin && ((isBelgium && age <= 21 && nationalRegisterNumber && nationalRegisterNumber !== NationalRegisterNumberOptOut) || severeDisability)">
-                <CheckboxListItem v-model="severeDisability" :label="$t('Fiscaal attest uitreiken tot hogere leeftijd van 21 jaar', {firstName: firstName})" data-testid="severe-disability-input">
+                <CheckboxListItem v-model="severeDisability" :label="$t('%Zq2', {firstName: firstName})" data-testid="severe-disability-input">
                     <p class="style-description-small">
-                        <I18nComponent :t="$t('Enkel voor leden met een attest van zware handicap. <button>Meer info</button>')">
+                        <I18nComponent :t="$t('%Zq8')">
                             <template #button="{content}">
                                 <a class="inline-link" href="https://fin.belgium.be/nl/particulieren/belastingvoordelen/kinderopvang/belastingvermindering" target="_blank">
                                     {{ content }}

@@ -216,7 +216,7 @@
 
                 <STListItem v-if="payment.payingOrganization">
                     <h3 class="style-definition-label">
-                        {{ $t('Vereniging') }}
+                        {{ $t('%1PI') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ payment.payingOrganization.name }}
@@ -232,7 +232,7 @@
 
                 <STListItem v-if="payment.customer">
                     <h3 class="style-definition-label">
-                        {{ $t('Facturatiegegevens') }}
+                        {{ $t('%1Ke') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ payment.customer?.dynamicName }}
@@ -267,7 +267,7 @@
 
             <template v-if="receivableBalances.length">
                 <hr>
-                <h2>{{ $t('Openstaande bedragen') }}</h2>
+                <h2>{{ $t('%1aB') }}</h2>
                 <STList>
                     <STListItem v-for="balance in receivableBalances" :key="balance.objectType + '/' + balance.objectId" :selectable="true" @click="openReceivableBalance(balance)">
                         <template #left>

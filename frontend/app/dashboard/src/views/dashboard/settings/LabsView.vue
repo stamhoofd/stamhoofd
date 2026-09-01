@@ -254,10 +254,10 @@
                             <Checkbox :model-value="getFeatureFlag('fiscal-document-always')" @update:model-value="setFeatureFlag('fiscal-document-always', !!$event)" />
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('Fiscale documenten op elk moment aanmaken') }}
+                            {{ $t('%Zpt') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('Fiscale documenten kunnen op elk moment worden aangemaakt') }}
+                            {{ $t('%Zq0') }}
                         </p>
                     </STListItem>
                 </template>

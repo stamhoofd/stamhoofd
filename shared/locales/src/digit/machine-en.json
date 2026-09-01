@@ -223,10 +223,6 @@
     "original": "Deze betaling is niet gekoppeld aan een groep",
     "translation": "This payment is not linked to a group"
   },
-  "%1Kj": {
-    "original": "Bijhorende groep",
-    "translation": "Associated group"
-  },
   "%1L7": {
     "original": "Vul de naam van je groep in",
     "translation": "Enter your group name"
@@ -1386,6 +1382,10 @@
   "%Zq": {
     "original": "Oeps, deze website is enkel voor administrators. Ga naar ‘Mijn account’ als je je wilt inschrijven als lid.",
     "translation": "Oops, this website is only for administrators. Go to 'My account' if you want to register as a member."
+  },
+  "%Zq6": {
+    "original": "Markeer manueel aanrekeningen als betaald in plaats van via ‘Mijn account’.",
+    "translation": "Manually mark invoices as paid instead of through 'My account'."
   },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Ravot. Voor Microsoft kan je",

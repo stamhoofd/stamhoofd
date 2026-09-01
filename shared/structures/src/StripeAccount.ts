@@ -241,7 +241,7 @@ export class StripeAccount extends AutoEncoder {
             const m = $t(`%Zg4`);
 
             return {
-                text: $t('Je moet gegevens aanvullen om te voorkomen dat uitbetalingen en betalingen worden stopgezet. Dit moet gebeuren voor {date}. Ga naar je Stripe dashboard om dit in orde te brengen.', { date: Formatter.date(new Date(this.meta.requirements.current_deadline * 1000)) })
+                text: $t('%Zq7', { date: Formatter.date(new Date(this.meta.requirements.current_deadline * 1000)) })
                     + (missing
                         ? `${m} ${missing}`
                         : '' + '.'),
@@ -273,7 +273,7 @@ export class StripeAccount extends AutoEncoder {
             const m = $t(`%Zg4`);
 
             return {
-                text: $t('Je moet gegevens aanvullen om te voorkomen dat uitbetalingen en betalingen worden stopgezet. Dit moet gebeuren voor {date}. Ga naar je Stripe dashboard om dit in orde te brengen.',
+                text: $t('%Zq7',
                     { date: Formatter.date(d) },
                 )
                 + (missing

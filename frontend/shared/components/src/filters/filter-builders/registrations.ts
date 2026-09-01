@@ -82,7 +82,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
 
         all.push(
             new MultipleChoiceFilterBuilder({
-                name: $t('Type'),
+                name: $t('%1LP'),
                 multipleChoiceConfiguration: {
                     isSubjectPlural: true,
                 },

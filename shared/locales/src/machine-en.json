@@ -4843,10 +4843,6 @@
     "original": "Maak een factuur voor deze betaling aan.",
     "translation": "Create an invoice for this payment."
   },
-  "%1K4": {
-    "original": "Alle prijzen zijn inclusief btw.",
-    "translation": "All prices include VAT."
-  },
   "%1K5": {
     "original": "Betaling als betaald markeren?",
     "translation": "Mark payment as received?"
@@ -5002,10 +4998,6 @@
   "%1Ki": {
     "original": "Wijzigen",
     "translation": "Change"
-  },
-  "%1Kj": {
-    "original": "Bijhorende vereniging",
-    "translation": "Associated association"
   },
   "%1Kk": {
     "original": "Contactpersoon verwijderen",
@@ -10358,10 +10350,6 @@
   "%87": {
     "original": "Beperk leeftijdsgroepen",
     "translation": "Limit age groups"
-  },
-  "%88": {
-    "original": "Laatste automatische herinneringsmail",
-    "translation": "Last automatic reminder email"
   },
   "%89": {
     "original": "Gegevens van verenigingen",
@@ -20071,9 +20059,57 @@
     "original": "Voor tickets",
     "translation": "For tickets"
   },
+  "%Zps": {
+    "original": "Markeer manueel een tegoed als terugbetaald",
+    "translation": "Manually mark a credit as refunded"
+  },
+  "%Zpt": {
+    "original": "Fiscale documenten op elk moment aanmaken",
+    "translation": "Generate tax documents at any time"
+  },
+  "%Zpw": {
+    "original": "Documentatie bekijken",
+    "translation": "View documentation"
+  },
+  "%Zpy": {
+    "original": "Heeft recht op een fiscaal attest kinderopvang tot 21 jaar",
+    "translation": "Eligible for a tax certificate for childcare up to 21 years old"
+  },
+  "%Zpz": {
+    "original": "De eerste e-mail wordt morgenvroeg verzonden.",
+    "translation": "The first email will be sent tomorrow morning."
+  },
   "%Zq": {
     "original": "Oeps, deze website is enkel voor administrators. Ga naar het ledenportaal als je je wilt inschrijven als lid.",
     "translation": "Oops, this website is only for administrators. Go to the member portal if you want to register as a member."
+  },
+  "%Zq0": {
+    "original": "Fiscale documenten kunnen op elk moment worden aangemaakt",
+    "translation": "Tax documents can be generated at any time"
+  },
+  "%Zq2": {
+    "original": "Fiscaal attest uitreiken tot hogere leeftijd van 21 jaar",
+    "translation": "Issue tax certificates for children up to the higher age limit of 21"
+  },
+  "%Zq6": {
+    "original": "Markeer manueel aanrekeningen als betaald in plaats van via het ledenportaal.",
+    "translation": "Manually mark invoices as paid instead of using the member portal."
+  },
+  "%Zq7": {
+    "original": "Je moet gegevens aanvullen om te voorkomen dat uitbetalingen en betalingen worden stopgezet. Dit moet gebeuren voor {date}. Ga naar je Stripe dashboard om dit in orde te brengen.",
+    "translation": "You need to complete your data to avoid suspension of payouts and payments. This must be done by {date}. Visit your Stripe dashboard to complete this."
+  },
+  "%Zq8": {
+    "original": "Enkel voor leden met een attest van zware handicap. <button>Meer info</button>",
+    "translation": "Only for members with a certificate of severe disability. <button>More info</button>"
+  },
+  "%Zq9": {
+    "original": "Herinneringsmail",
+    "translation": "Reminder email"
+  },
+  "%ZqD": {
+    "original": "Fiscale attesten",
+    "translation": "Tax certificates"
   },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Stamhoofd. Voor Microsoft kan je",
@@ -21911,22 +21947,6 @@
     "original": "Ga naar volgende",
     "translation": "Go to next"
   },
-  "%hi": {
-    "original": "waarvan {amount} in verwerking",
-    "translation": "of which {amount} in process"
-  },
-  "%hj": {
-    "original": "een terugbetaling van {amount} is nog in verwerking",
-    "translation": "a refund of {amount} is still in process"
-  },
-  "%hk": {
-    "original": "een betaling in verwerking van {amount} dient geannuleerd te worden",
-    "translation": "a payment in process of {amount} needs to be cancelled"
-  },
-  "%hl": {
-    "original": "waarvan een terugbetaling van {amount} nog in verwerking",
-    "translation": "of which a refund of {amount} is still being processed"
-  },
   "%hm": {
     "original": "Nog niet verstuurd",
     "translation": "Not yet sent"
@@ -21938,10 +21958,6 @@
   "%ho": {
     "original": "Bedrag was toen {amount}",
     "translation": "Amount was then {amount}"
-  },
-  "%hp": {
-    "original": "Als automatische e-mails zijn ingeschakeld wordt de eerste e-mail morgenvroeg verzonden.",
-    "translation": "If automatic emails are enabled, the first email will be sent tomorrow morning."
   },
   "%hq": {
     "original": "Aangemaakt op {date}",
@@ -23362,10 +23378,6 @@
   "%nf": {
     "original": "website van je vereniging",
     "translation": "website of your association"
-  },
-  "%ng": {
-    "original": "Je moet gegevens aanvullen om te voorkomen dat uitbetalingen en betalingen worden stopgezet. Dit moet gebeuren voor {date}. Ga naar je Stripe dashboard om dit in orde te brengen. Volgende zaken zouden ontbreken:",
-    "translation": "You must complete your details to prevent payouts and payments from being stopped. This must be done before {date}. Go to your Stripe dashboard to sort this out. The following items may be missing:"
   },
   "%nh": {
     "original": "De betaalmethode {method} werd nog niet door Stripe geactiveerd. Kijk na of alle informatie in je Stripe dashboard volledig ingevuld werd.",

@@ -31,20 +31,20 @@
 
             <dl class="details-grid">
                 <template v-if="invoice.invoicedAt">
-                    <dt>{{ $t('Datum') }}</dt>
+                    <dt>{{ $t('%7R') }}</dt>
                     <dd>
                         <span v-copyable class="style-copyable">{{ formatDate(invoice.invoicedAt) }}</span>
                     </dd>
                 </template>
                 <template v-if="invoice.dueAt">
-                    <dt>{{ $t('Vervaldatum') }}</dt>
+                    <dt>{{ $t('%1J7') }}</dt>
                     <dd>
                         <span v-copyable class="style-copyable">{{ formatDate(invoice.dueAt) }}</span>
                     </dd>
                 </template>
 
                 <template v-if="invoice.customer">
-                    <dt>{{ $t('Klant') }}</dt>
+                    <dt>{{ $t('%1J1') }}</dt>
                     <dd>
                         <p v-copyable class="style-description style-copyable">
                             {{ invoice.customer.dynamicName }}

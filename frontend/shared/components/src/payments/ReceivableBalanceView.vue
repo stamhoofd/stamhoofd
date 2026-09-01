@@ -3,7 +3,7 @@
         <div v-if="!loadingPayingOrganization" class="st-view">
             <STNavigationBar :title="title">
                 <template #right>
-                    <a v-tooltip="$t('Documentatie bekijken')" :href="LocalizedDomains.getDocs('boekhoudingsmodule')" class="icon button help" target="_blank" />
+                    <a v-tooltip="$t('%Zpw')" :href="LocalizedDomains.getDocs('boekhoudingsmodule')" class="icon button help" target="_blank" />
 
                     <button v-if="hasPrevious || hasNext" v-tooltip="$t('%hg')" type="button" class="button icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
                     <button v-if="hasNext || hasPrevious" v-tooltip="$t('%hh')" type="button" class="button icon arrow-down" :disabled="!hasNext" @click="goForward" />
@@ -31,20 +31,20 @@
                         </dd>
                     </template>
                     <template v-if="(item.objectType === ReceivableBalanceType.userWithoutMembers || item.objectType === ReceivableBalanceType.user) && item.object.contacts.length === 1 && item.object.contacts[0].emails.length === 1">
-                        <dt>{{ $t('E-mailadres') }}</dt>
+                        <dt>{{ $t('%1FK') }}</dt>
                         <dd>
                             <EmailAddress :email="item.object.contacts[0].emails[0]" />
                         </dd>
                     </template>
                     <template v-if="payingOrganization && payingOrganization.address">
-                        <dt>{{ $t('Adres') }}</dt>
+                        <dt>{{ $t('%Cn') }}</dt>
                         <dd>
                             <span v-copyable class="style-copyable">{{ payingOrganization.address }}</span>
                         </dd>
                     </template>
 
                     <template v-if="organization && organization.privateMeta?.balanceNotificationSettings?.enabled && item.amountOpen > 0 && (item.objectType === ReceivableBalanceType.organization || item.objectType === ReceivableBalanceType.user)">
-                        <dt>{{ $t('Herinneringsmail') }}</dt>
+                        <dt>{{ $t('%Zq9') }}</dt>
                         <dd>
                             <p>{{ item.lastReminderEmail && item.reminderEmailCount > 0 ? formatDateTime(item.lastReminderEmail, true) : $t('%hm') }}</p>
                             <p v-if="item.lastReminderEmail && item.reminderEmailCount > 1" class="style-description-small">
@@ -54,7 +54,7 @@
                                 {{ $t('%ho', {amount: formatPrice(item.lastReminderAmountOpen)}) }}
                             </p>
                             <p v-if="!item.lastReminderEmail || item.reminderEmailCount === 0" class="style-description-small">
-                                {{ $t('De eerste e-mail wordt morgenvroeg verzonden.') }}
+                                {{ $t('%Zpz') }}
                             </p>
                         </dd>
                     </template>

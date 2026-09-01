@@ -95,7 +95,7 @@ const warnings = computed(() => {
     if (isPropertyEnabled('nationalRegisterNumber')) {
         if (props.member.patchedMember.details.severeDisability && props.member.patchedMember.details.age && props.member.patchedMember.details.age <= 21) {
             warnings.push(RecordWarning.create({
-                text: TranslatedString.create($t('Heeft recht op een fiscaal attest kinderopvang tot 21 jaar')),
+                text: TranslatedString.create($t('%Zpy')),
                 type: RecordWarningType.Info,
             }));
         }

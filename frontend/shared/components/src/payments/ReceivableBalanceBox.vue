@@ -17,7 +17,7 @@
                         <IconContainer icon="box" aside-icon="add" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Aanrekening toevoegen') }}
+                        {{ $t('%1Mj') }}
                     </h3>
                     <p class="style-description-small">
                         {{ $t('%gy') }}
@@ -37,7 +37,7 @@
                         {{ $t('%hY') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Markeer manueel aanrekeningen als betaald in plaats van via het ledenportaal.') }}
+                        {{ $t('%Zq6') }}
                     </p>
 
                     <template #right>
@@ -54,7 +54,7 @@
                         {{ $t('%hZ') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Markeer manueel een tegoed als terugbetaald') }}
+                        {{ $t('%Zps') }}
                     </p>
 
                     <template #right>

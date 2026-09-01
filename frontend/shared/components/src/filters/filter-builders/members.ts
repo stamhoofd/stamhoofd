@@ -851,7 +851,7 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
 
     if (auth.hasAccessRight(AccessRight.MemberManageNRN)) {
         missingDataOptions.push({
-            name: $t('Rijksregisternummer'),
+            name: $t('%wK'),
             value: 'nationalRegisterNumber',
             filter: {
                 'details.nationalRegisterNumber': null,
