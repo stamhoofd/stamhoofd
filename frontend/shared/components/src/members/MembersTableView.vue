@@ -55,6 +55,7 @@ import { useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '../filte
 import { useRegistrationInvitationEventListener } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
 import { useDirectMemberActions } from './classes/MemberActionBuilder';
 import { getMemberColumns } from '#members/helpers/getMemberColumns.ts';
+import { useOrganizationRegistrationPeriod } from '@stamhoofd/networking/hooks/useOrganizationRegistrationPeriod';
 
 type ObjectType = PlatformMember;
 
@@ -129,11 +130,7 @@ const defaultFilter = isPlatform && app === 'admin' && !props.group && !props.cu
         }
     : null;
 
-const organizationRegistrationPeriod = computed(() => {
-    const periodId = filterPeriodId;
-
-    return organization.value?.periods?.organizationPeriods?.find(p => p.period.id === periodId);
-});
+const organizationRegistrationPeriod = useOrganizationRegistrationPeriod(filterPeriodId);
 
 useGlobalEventListener('members-deleted', async () => {
     tableObjectFetcher.reset(true, true);
