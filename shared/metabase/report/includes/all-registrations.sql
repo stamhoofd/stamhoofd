@@ -46,7 +46,7 @@ JOIN members ON members.id = registrations.memberId AND members.periodId = regis
 JOIN organizations ON organizations.id = registrations.organizationId AND organizations.periodId = registrations.periodId
     AND organizations.active = 1
 WHERE registrations.registeredAt IS NOT NULL
-  [[AND registration_periods.name = {{werkjaar}}]]
+  AND registration_periods.name = {{werkjaar}}
   [[AND organizations.name = {{eenheid}}]]
   AND (
       -- @include filter-registration-types
