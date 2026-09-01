@@ -848,12 +848,6 @@ export class PlatformMember implements ObjectWithRecords {
 
         const def = this.platformRecordsConfiguration?.[property];
 
-        if (property === 'taxDependent') {
-            console.log('[isPropertyPlatformEnabled]: taxDependent');
-            console.log(this.platformRecordsConfiguration);
-            console.log(def);
-        }
-
         if (def === null || def === undefined) {
             return false;
         }
@@ -920,6 +914,11 @@ export class PlatformMember implements ObjectWithRecords {
             previousPeriod: options?.scopeGroups ? undefined : true,
             groups: options?.scopeGroups,
         });
+
+        if (property === 'taxDependent') {
+            console.log('[isPropertyEnabled]: taxDependent');
+            console.log(recordsConfigurations);
+        }
 
         for (const recordsConfiguration of recordsConfigurations) {
             if (property === 'dataPermission' || property === 'financialSupport') {
@@ -1198,6 +1197,9 @@ export class PlatformMember implements ObjectWithRecords {
         const groups = this.filterGroups({ ...filters, includePending: true });
         const configurations: OrganizationRecordsConfiguration[] = [];
 
+        console.log('[filterRecordsConfigurations]: organizationId: ');
+        console.log(this.patchedMember);
+
         if (this.patchedMember.organizationId) {
             configurations.push(
                 OrganizationRecordsConfiguration.build({
@@ -1205,6 +1207,8 @@ export class PlatformMember implements ObjectWithRecords {
                     organization: this.family.getOrganization(this.patchedMember.organizationId),
                 }),
             );
+            console.log('[filterRecordsConfigurations]: From organization: ');
+            console.log(configurations);
         }
 
         for (const group of groups) {
@@ -1224,6 +1228,8 @@ export class PlatformMember implements ObjectWithRecords {
             configurations.push(
                 c,
             );
+            console.log('[filterRecordsConfigurations]: From group: ');
+            console.log(c);
         }
 
         if (configurations.length === 0) {
