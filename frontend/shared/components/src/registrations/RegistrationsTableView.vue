@@ -59,6 +59,7 @@ import { useRegistrationsObjectFetcher } from '../fetchers/useRegistrationsObjec
 import { useAdvancedRegistrationWithMemberUIFilterBuilders } from '../filters/filter-builders/registrations-with-member';
 import { getRegistrationColumns } from '../members/helpers/getRegistrationColumns';
 import { useDirectRegistrationActions } from './classes/RegistrationActionBuilder';
+import { useOrganizationRegistrationPeriod } from '@stamhoofd/networking/hooks/useOrganizationRegistrationPeriod';
 
 type ObjectType = PlatformRegistration;
 
@@ -182,11 +183,7 @@ function getDefaultFilter(): StamhoofdFilter {
     return null;
 }
 
-const organizationRegistrationPeriod = computed(() => {
-    const periodId = filterPeriodId;
-
-    return props.organization?.periods?.organizationPeriods?.find(p => p.period.id === periodId);
-});
+const organizationRegistrationPeriod = useOrganizationRegistrationPeriod(filterPeriodId, { organization: computed(() => props.organization) });
 
 useGlobalEventListener('members-deleted', async () => {
     tableObjectFetcher.reset(true, true);

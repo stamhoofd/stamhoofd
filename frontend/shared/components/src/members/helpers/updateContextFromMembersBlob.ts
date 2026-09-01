@@ -1,5 +1,6 @@
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { MembersBlob, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import { getCachedOrganizationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
 
 /**
  * Call this method when we receive a fresh blob from the backend.
@@ -55,7 +56,7 @@ export function updateContextFromMembersBlob(context: SessionContext, blob: Memb
                     let period: OrganizationRegistrationPeriod | undefined = context.organization.period;
 
                     if (context.organization.period.period.id !== periodId) {
-                        period = context.organization.periods?.organizationPeriods.find(p => p.period.id === periodId);
+                        period = getCachedOrganizationPeriods(context.organization.id)?.organizationPeriods.find(p => p.period.id === periodId);
                     }
 
                     const originalGroup = period?.groups.find(g => g.id === registration.groupId) ?? period?.waitingLists.find(g => g.id === registration.groupId);
