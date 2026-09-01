@@ -128,15 +128,15 @@ export class RegistrationActionBuilder {
         const organization = this.organizations[0];
         const fallback = [selectedOrganizationRegistrationPeriod ?? organization.period];
 
-        // Only the context organization's periods can be fetched, and only full-access users may switch periods.
-        if (!this.context.auth.hasFullAccess() || !this.fetchOrganizationPeriods || this.context.organization?.id !== organization.id) {
+        // Only the context organization's periods can be fetched
+        if (!this.fetchOrganizationPeriods || this.context.organization?.id !== organization.id) {
             this.resolvedPeriods = fallback;
             return;
         }
 
         try {
             const list = await this.fetchOrganizationPeriods({ shouldRetry: true });
-            const periods = list.organizationPeriods.filter(p => !p.period.locked);
+            const periods = list.organizationPeriods.filter(p => !p.period.locked && this.context.auth.hasSomeAccessInPeriod(p));
             this.resolvedPeriods = periods.length > 0 ? periods : fallback;
         } catch (e) {
             console.error('Failed to load organization registration periods', e);
