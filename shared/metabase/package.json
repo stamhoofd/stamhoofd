@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/metabase",
-    "version": "2.148.0",
+    "version": "2.149.0",
     "type": "module",
     "sideEffects": false,
     "exports": {
@@ -22,7 +22,7 @@
         "test:coverage": "vitest --coverage"
     },
     "devDependencies": {
-        "@stamhoofd/test-utils": "2.148.0",
+        "@stamhoofd/test-utils": "2.149.0",
         "vitest": "4.1.10"
     },
     "license": "UNLICENCED",
