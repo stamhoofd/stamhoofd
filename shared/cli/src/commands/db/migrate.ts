@@ -1,4 +1,5 @@
 import { BaseCommand } from '../../base-command.js';
+import { ensureMysqlRunning } from '../../runtime/database-command-helpers.js';
 import { migrate } from '../../runtime/monorepo-runner.js';
 
 export default class DbMigrate extends BaseCommand {
@@ -12,6 +13,8 @@ export default class DbMigrate extends BaseCommand {
 
     async run(): Promise<void> {
         const { flags } = await this.parse(DbMigrate);
-        await migrate(await this.createContext(flags));
+        const context = await this.createContext(flags);
+        await ensureMysqlRunning(context);
+        await migrate(context);
     }
 }
