@@ -364,7 +364,7 @@ describe('report', () => {
             const keeo = expressionOf(cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql);
             const ravot = expressionOf(cardOf(ravotDashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql);
 
-            expect(keeo).toContain("member_platform_memberships.membershipTypeId IN ( '5d66134e-21b6-41f4-b791-f99779bec8c5', 'i-mtype-volledig-werkjaar', 'f2ffdcb2-5cb3-41ce-be5a-b39bf01570fa' )");
+            expect(keeo).toContain("member_platform_memberships.membershipTypeId IN ( '5d66134e-21b6-41f4-b791-f99779bec8c5', 'i-mtype-volledig-scoutsjaar', 'f2ffdcb2-5cb3-41ce-be5a-b39bf01570fa' )");
             expect(ravot).toContain("member_platform_memberships.membershipTypeId IN ( 'adb9882e-6b50-467a-b89f-0727c6aa9065', '41632f5f-23e5-4dec-b7b5-b16202d3d95f' )");
 
             // The report reads a list of its own, kept in a file of its own even where it holds the

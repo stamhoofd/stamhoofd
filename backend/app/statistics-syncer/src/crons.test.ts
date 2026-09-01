@@ -12,15 +12,21 @@ describe('Cron.platform-statistics-sync', () => {
     });
 
     describe('shouldRunStatisticsSync', () => {
+        it('only runs at boot', () => {
+            TestUtils.setEnvironment('environment', 'production');
+
+            expect(shouldRunStatisticsSync({ now: new Date(2026, 0, 5, 13, 30), lastRun: null })).toBe(true);
+        });
+
         it('only runs at night', () => {
             TestUtils.setEnvironment('environment', 'production');
 
             for (const hour of [0, 2, 6, 12, 23]) {
-                expect(shouldRunStatisticsSync({ now: new Date(2026, 0, 5, hour, 30), lastRun: null })).toBe(false);
+                expect(shouldRunStatisticsSync({ now: new Date(2026, 0, 5, hour, 30), lastRun: new Date(2023, 0, 5, hour, 30) })).toBe(false);
             }
 
             for (const hour of [3, 4, 5]) {
-                expect(shouldRunStatisticsSync({ now: new Date(2026, 0, 5, hour, 30), lastRun: null })).toBe(true);
+                expect(shouldRunStatisticsSync({ now: new Date(2026, 0, 5, hour, 30), lastRun: new Date(2023, 0, 5, hour, 30) })).toBe(true);
             }
         });
 
