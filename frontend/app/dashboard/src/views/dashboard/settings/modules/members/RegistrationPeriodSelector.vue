@@ -13,30 +13,26 @@
 
 <script setup lang="ts">
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
+import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
 import type { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import { computed } from 'vue';
+import type { Ref } from 'vue';
+import { computed, ref } from 'vue';
 const props = withDefaults(defineProps<{ modelValue: OrganizationRegistrationPeriod; shouldDisableLockedPeriods?: boolean }>(), {
     shouldDisableLockedPeriods: false,
 });
 
 const emit = defineEmits<{ (e: 'update:modelValue', value: OrganizationRegistrationPeriod | null): void }>();
 
-const organizationManager = useOrganizationManager();
-const owner = useRequestOwner();
+const organization = useRequiredOrganization();
+const fetchPeriods = useFetchOrganizationRegistrationPeriods();
+const fetchedPeriods = ref(null) as Ref<OrganizationRegistrationPeriod[] | null>;
 
-// Load groups
-organizationManager.value.loadPeriods(false, false, owner).catch(console.error);
+fetchPeriods({ shouldRetry: false }).then((list) => {
+    fetchedPeriods.value = list.organizationPeriods;
+}).catch(console.error);
 
-const periods = computed(() => {
-    const periods = organizationManager.value.organization.periods?.organizationPeriods;
-    if (periods === undefined) {
-        return [organizationManager.value.organization.period];
-    }
-
-    return [...periods];
-});
+const periods = computed(() => fetchedPeriods.value ?? [organization.value.period]);
 
 const isSinglePeriod = computed(() => periods.value.length === 1);
 

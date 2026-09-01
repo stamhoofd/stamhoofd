@@ -5,6 +5,7 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Organization } from '@stamhoofd/structures';
 import { GlobalEventBus } from '../EventBus';
 import { useContext } from '../hooks/useContext';
+import { clearOrganizationPeriodsCache } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
 
 export function usePatchOrganization() {
     const organization = useOrganization();
@@ -35,7 +36,7 @@ export function usePatchOrganization() {
 
         if (patch.period) {
             // Clear cached periods
-            organization.value.periods = undefined;
+            clearOrganizationPeriodsCache();
         }
 
         await GlobalEventBus.sendEvent('organization-updated', organization.value);

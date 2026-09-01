@@ -2,12 +2,12 @@ import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
 import { ArrayDecoder, deepSetArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus';
-import { Group, LimitedFilteredRequest, Organization, OrganizationAdmins, OrganizationRegistrationPeriod, PaginatedResponseDecoder, RegistrationPeriod, RegistrationPeriodList, SortItemDirection } from '@stamhoofd/structures';
-import { Sorter } from '@stamhoofd/utility';
+import { Group, Organization, OrganizationAdmins } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { inject, toRef } from 'vue';
 import type { SessionContext } from './SessionContext';
 import { SessionManager } from './SessionManager';
+import { clearOrganizationPeriodsCache } from './hooks/useFetchOrganizationRegistrationPeriods.js';
 
 export function useOrganizationManager(): Ref<OrganizationManager> {
     return toRef(inject<OrganizationManager>('$organizationManager')) as any as Ref<OrganizationManager>;
@@ -82,7 +82,7 @@ export class OrganizationManager {
 
         if (patch.period) {
             // Clear cached periods
-            this.$context.organization.periods = undefined;
+            clearOrganizationPeriodsCache();
 
             // There is something fishy going on with the period that doesn't get set using deepSet (updateOrganization) - can't explain why atm
             // this fixes it for now
@@ -97,101 +97,6 @@ export class OrganizationManager {
         this.save().catch(console.error);
 
         await GlobalEventBus.sendEvent('organization-updated', this.$context.organization);
-    }
-
-    /**
-     * @deprecated
-     * useFetchRegistrationPeriods
-     */
-    async loadPeriods(force = false, shouldRetry?: boolean, owner?: any) {
-        if (!force && this.organization.periods) {
-            return this.organization.periods;
-        }
-
-        // Load last 5 years
-        const startDate = new Date();
-        startDate.setFullYear(startDate.getFullYear() - 6);
-
-        // Improve http caching
-        startDate.setDate(1);
-        startDate.setMonth(0);
-        startDate.setHours(0, 0, 0, 0);
-
-        // Load periods
-        const periodsResponse = await this.$context.authenticatedServer.request({
-            method: 'GET',
-            path: '/registration-periods',
-            query: new LimitedFilteredRequest({
-                filter: {
-                    startDate: {
-                        $gt: startDate,
-                    },
-                },
-                limit: 10,
-                sort: [
-                    {
-                        key: 'startDate',
-                        order: SortItemDirection.DESC,
-                    },
-                    {
-                        key: 'id',
-                        order: SortItemDirection.ASC,
-                    },
-                ],
-            }),
-            decoder: new PaginatedResponseDecoder(
-                new ArrayDecoder(RegistrationPeriod as Decoder<RegistrationPeriod>),
-                LimitedFilteredRequest,
-            ),
-            owner,
-            shouldRetry: shouldRetry ?? false,
-        });
-
-        const periods = periodsResponse.data.results;
-        let organizationPeriods: OrganizationRegistrationPeriod[] = [];
-
-        if (periods.length !== 0) {
-            const response = await this.$context.authenticatedServer.request({
-                method: 'GET',
-                path: '/organization/registration-periods',
-                query: new LimitedFilteredRequest({
-                    filter: {
-                        periodId: {
-                            $in: periods.map(p => p.id),
-                        },
-                    },
-                    limit: 20,
-                    sort: [
-                        {
-                            key: 'id',
-                            order: SortItemDirection.ASC,
-                        },
-                    ],
-                }),
-                decoder: new PaginatedResponseDecoder(
-                    new ArrayDecoder(OrganizationRegistrationPeriod as Decoder<OrganizationRegistrationPeriod>),
-                    LimitedFilteredRequest,
-                ),
-                owner,
-                shouldRetry: shouldRetry ?? false,
-            });
-            organizationPeriods = response.data.results;
-        }
-
-        organizationPeriods.sort((a, b) => Sorter.byDateValue(a.period.startDate, b.period.startDate));
-
-        const list = RegistrationPeriodList.create({
-            organizationPeriods: organizationPeriods,
-            periods: periods,
-        });
-
-        if (this.organization.periods) {
-            this.organization.periods?.deepSet(list);
-        } else {
-            this.organization.periods = list;
-        }
-
-        return list;
     }
 
     async loadArchivedGroups({ owner }: { owner?: any }) {

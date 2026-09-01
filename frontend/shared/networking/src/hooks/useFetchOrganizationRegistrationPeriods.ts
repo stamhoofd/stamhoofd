@@ -7,13 +7,19 @@ import { LimitedFilteredRequest, OrganizationRegistrationPeriod, PaginatedRespon
 import { Sorter } from '@stamhoofd/utility';
 import { useFetchRegistrationPeriods } from './useFetchRegistrationPeriods';
 import { useRequestOwner } from './useRequestOwner';
-import { reactive } from 'vue';
+import { reactive, shallowReactive } from 'vue';
 import type { Ref } from 'vue';
 
-const periodsCache = new Map<string, RegistrationPeriodList>();
+// Reactive so a synchronous read re-evaluates once the periods are fetched. Shallow: the lists themselves
+// are made reactive when they are stored.
+const periodsCache = shallowReactive(new Map<string, unknown>()) as unknown as Map<string, RegistrationPeriodList>;
 
 export function clearOrganizationPeriodsCache() {
     periodsCache.clear();
+}
+
+export function getCachedOrganizationPeriods(organizationId: string): RegistrationPeriodList | undefined {
+    return periodsCache.get(organizationId);
 }
 
 export function useFetchOrganizationRegistrationPeriods({ organization }: { organization?: Ref<Organization> } = {}) {

@@ -4,6 +4,7 @@ import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { useRequestOwner } from './useRequestOwner';
+import { clearOrganizationPeriodsCache } from './useFetchOrganizationRegistrationPeriods.js';
 
 export function usePatchOrganizationPeriods() {
     const context = useContext();
@@ -23,10 +24,8 @@ export function usePatchOrganizationPeriods() {
         // If current organization in scope, make sure the in-memory version is updated
         organization.value?.updatePeriods(response.data);
 
-        if (organization.value) {
-            // We need to clear because there could be new periods
-            organization.value.periods = undefined;
-        }
+        // We need to clear because there could be new periods
+        clearOrganizationPeriodsCache();
 
         if (options.periods) {
             for (const period of options.periods ?? []) {
