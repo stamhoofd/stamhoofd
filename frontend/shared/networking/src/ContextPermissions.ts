@@ -2,6 +2,7 @@ import type { EmailPreview, Event, Group, GroupCategory, LoadedPermissions, Orga
 import { AccessRight, EventPermissionChecker, GroupType, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { toRaw, unref } from 'vue';
+import { getCachedOrganizationPeriods } from './organizationPeriodsCache.js';
 
 export class ContextPermissions {
     reactiveUser: UserWithMembers | null | Ref<UserWithMembers | null>;
@@ -154,6 +155,14 @@ export class ContextPermissions {
         return this.hasAccessRight(AccessRight.ManageEmailTemplates);
     }
 
+    private getPeriodOfGroup(group: Group, organization: Organization): OrganizationRegistrationPeriod | null {
+        if (group.periodId === organization.period.period.id) {
+            return organization.period;
+        }
+
+        return getCachedOrganizationPeriods(organization.id)?.organizationPeriods.find(p => p.period.id === group.periodId) ?? null;
+    }
+
     canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read, organization?: Organization | null, organizationPeriod?: OrganizationRegistrationPeriod | null) {
         if (organization === undefined || (organization === null && this.organization)) {
             organization = this.organization;
@@ -174,7 +183,7 @@ export class ContextPermissions {
 
         // Check parent categories
         if (group.type === GroupType.Membership) {
-            const period = organizationPeriod ?? (group.periodId === organization.period.period.id ? organization.period : null);
+            const period = organizationPeriod ?? this.getPeriodOfGroup(group, organization);
             const parentCategories = period ? group.getParentCategories(period.settings.categories) : [];
             for (const category of parentCategories) {
                 if (permissions.hasResourceAccess(PermissionsResourceType.GroupCategories, category.id, permissionLevel)) {
@@ -220,7 +229,7 @@ export class ContextPermissions {
         return category.canCreate(this.permissions, this.organization.period.settings.categories);
     }
 
-    canAccessRegistration(registration: Registration, organization: Organization, permissionLevel: PermissionLevel = PermissionLevel.Read, organizationPeriod?: OrganizationRegistrationPeriod | null) {
+    canAccessRegistration(registration: Registration, organization: Organization, permissionLevel: PermissionLevel = PermissionLevel.Read) {
         const organizationPermissions = this.getPermissionsForOrganization(organization);
 
         if (!organizationPermissions) {
@@ -237,7 +246,7 @@ export class ContextPermissions {
             return false;
         }
 
-        if (this.canAccessGroup(registration.group, permissionLevel, organization, organizationPeriod)) {
+        if (this.canAccessGroup(registration.group, permissionLevel, organization)) {
             return true;
         }
         return false;
