@@ -1,7 +1,8 @@
-import type { EmailPreview, Event, Group, GroupCategory, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationTag, PaymentGeneral, Permissions, Platform, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
+import type { EmailPreview, Event, Group, GroupCategory, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationRegistrationPeriod, OrganizationTag, PaymentGeneral, Permissions, Platform, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
 import { AccessRight, EventPermissionChecker, GroupType, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { toRaw, unref } from 'vue';
+import { getCachedOrganizationPeriods } from './organizationPeriodsCache.js';
 
 export class ContextPermissions {
     reactiveUser: UserWithMembers | null | Ref<UserWithMembers | null>;
@@ -154,6 +155,25 @@ export class ContextPermissions {
         return this.hasAccessRight(AccessRight.ManageEmailTemplates);
     }
 
+    canAccessGroupsInPeriod(periodId: string, organization: Organization) {
+        if (periodId !== organization.period.period.id) {
+            if (STAMHOOFD.userMode === 'organization' || periodId !== this.platform.period.id) {
+                if (!this.hasFullAccess()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private getPeriodOfGroup(group: Group, organization: Organization): OrganizationRegistrationPeriod | null {
+        if (group.periodId === organization.period.period.id) {
+            return organization.period;
+        }
+
+        return getCachedOrganizationPeriods(organization.id)?.organizationPeriods.find(p => p.period.id === group.periodId) ?? null;
+    }
+
     canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read, organization?: Organization | null) {
         if (organization === undefined || (organization === null && this.organization)) {
             organization = this.organization;
@@ -163,17 +183,17 @@ export class ContextPermissions {
             return this.hasFullPlatformAccess();
         }
 
-        if (group.periodId !== organization.period.period.id) {
-            if (STAMHOOFD.userMode === 'organization' || group.periodId !== this.platform.period.id) {
-                if (!this.hasFullAccess()) {
-                    return false;
-                }
-            }
-        }
-
-        const permissions = this.getPermissionsForOrganization(organization);
+        let permissions = this.getPermissionsForOrganization(organization);
         if (!permissions) {
             return false;
+        }
+
+        const isUsedPeriod = this.canAccessGroupsInPeriod(group.periodId, organization);
+
+        if (!isUsedPeriod) {
+            // Outside the period the organization is using, only grants that name this group or one of
+            // its categories still apply
+            permissions = permissions.onlyExplicitResources();
         }
 
         if (permissions.hasResourceAccess(PermissionsResourceType.Groups, group.id, permissionLevel)) {
@@ -182,7 +202,8 @@ export class ContextPermissions {
 
         // Check parent categories
         if (group.type === GroupType.Membership) {
-            const parentCategories = group.getParentCategories(organization.period.settings.categories);
+            const period = this.getPeriodOfGroup(group, organization);
+            const parentCategories = period ? group.getParentCategories(period.settings.categories) : [];
             for (const category of parentCategories) {
                 if (permissions.hasResourceAccess(PermissionsResourceType.GroupCategories, category.id, permissionLevel)) {
                     return true;
@@ -190,12 +211,12 @@ export class ContextPermissions {
             }
         }
 
-        if (group.type === GroupType.EventRegistration && group.event && group.event.organizationId === organization.id) {
+        if (isUsedPeriod && group.type === GroupType.EventRegistration && group.event && group.event.organizationId === organization.id) {
             // we'll need to check the event permissions
             return this.canWriteEventForOrganization(group.event, organization);
         }
 
-        if (group.type === GroupType.WaitingList && group.parentGroup && group.parentGroup.type === GroupType.EventRegistration && group.parentGroup.event && group.parentGroup.event.organizationId === organization.id) {
+        if (isUsedPeriod && group.type === GroupType.WaitingList && group.parentGroup && group.parentGroup.type === GroupType.EventRegistration && group.parentGroup.event && group.parentGroup.event.organizationId === organization.id) {
             // we'll need to check the event permissions
             return this.canWriteEventForOrganization(group.parentGroup.event, organization);
         }
