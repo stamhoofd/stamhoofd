@@ -911,7 +911,17 @@ export class MemberDetails extends AutoEncoder {
                 group.push({
                     object: object,
                     setObject(object: T) {
-                        member[type][index] = object;
+                        const previous = member[type][index];
+
+                        if (type === 'parents' && (previous as Parent).taxDependent !== (object as Parent).taxDependent) {
+                            const parent = (object as Parent).clone();
+                            parent.taxDependent = (previous as Parent).taxDependent;
+                            member.parents[index] = parent;
+
+                            return;
+                        }
+
+                        member[type][index] = object.clone();
                     },
                     reviewDate: object.updatedAt ?? member.reviewTimes.getLastReview(type) ?? object.createdAt,
                     createdAt: object.createdAt,
@@ -966,15 +976,17 @@ export class MemberDetails extends AutoEncoder {
                 mergeTo.createdAt = oldestParent.createdAt;
 
                 for (const { object, setObject } of parents) {
-                    if (object.id !== mergeTo.id) {
+                    const keepOld = setObject(mergeTo);
+                    if (object.id !== mergeTo.id || keepOld) {
                         mergeIdMap.set(object.id, mergeTo.id);
                     }
-                    setObject(mergeTo);
                 }
 
                 // Remove duplicate parents by id for each member
                 for (const member of members) {
-                    member[type] = member[type].filter((p, i, self) => self.findIndex(p2 => p2.id === p.id) === i) as any;
+                    member[type] = member[type].filter((p, i, self) =>
+                        self.findIndex(p2 => p2.id === p.id) === i,
+                    ) as any;
                 }
             }
         }
