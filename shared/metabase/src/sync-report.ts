@@ -20,7 +20,7 @@ import type { ReportCard, ReportCardBest, ReportSnippet, ReportTab } from './rep
  * `keepOrder` says the order of that card matters. Metabase sorts a dropdown fed by a question
  * alphabetically whatever the question's ORDER BY says, so the scoutsjaren would run oldest first.
  * Those filters get the values written out as a fixed list instead, which Metabase leaves alone —
- * at the cost of being a snapshot, so a new scoutsjaar appears once the report is written again.
+ * at the cost of being a snapshot, so a new werkjaar appears once the report is written again.
  * Unit names read fine alphabetically and stay on the live question.
  *
  * `multiple` is whether several values can be picked at once. Metabase writes those out comma
@@ -29,23 +29,34 @@ import type { ReportCard, ReportCardBest, ReportSnippet, ReportTab } from './rep
  * variable is single-select unless told otherwise, and a second value would land beside the `=` of
  * the others as sql they cannot parse.
  *
- * `start` is what a filter is set to when a dashboard is opened. None of them carries one: empty
- * counts every member, and a value to start from would show whoever does not read the filter bar a
- * slice of the platform. It is kept for a filter that would read the other way round.
+ * `start` is what a filter is set to when a dashboard is opened. `first` takes the first value from
+ * the ordered filter question, which is how the werkjaar filter opens on the latest year. The
+ * boolean filter starts false to preserve the report's default population.
  */
-export type ReportFilter = {
+type StringReportFilter = {
+    type: 'string';
     name: string;
     title: string;
     valuesFrom: string;
     column: string;
     keepOrder: boolean;
     multiple: boolean;
-    start?: string[];
+    start?: string[] | 'first';
 };
 
+type BooleanReportFilter = {
+    type: 'boolean';
+    name: string;
+    title: string;
+    start: boolean;
+};
+
+export type ReportFilter = StringReportFilter | BooleanReportFilter;
+
 export const reportFilters: readonly ReportFilter[] = [
-    { name: 'scoutsjaar', title: 'Scoutsjaar', valuesFrom: 'scoutsjaar', column: 'Scoutsjaar', keepOrder: false, multiple: false },
-    { name: 'eenheid', title: 'Eenheid', valuesFrom: 'eenheid', column: 'Eenheid', keepOrder: false, multiple: false },
+    { type: 'string', name: 'werkjaar', title: 'Werkjaar', valuesFrom: 'werkjaar', column: 'Werkjaar', keepOrder: true, multiple: false, start: 'first' },
+    { type: 'string', name: 'eenheid', title: 'Eenheid', valuesFrom: 'eenheid', column: 'Eenheid', keepOrder: false, multiple: false },
+    { type: 'boolean', name: 'platformleden_opnemen', title: 'Leden van de koepelorganisatie opnemen', start: false },
 ];
 
 /**
@@ -215,7 +226,7 @@ export function snippetTagName(snippet: string): string {
  *
  * `required` are the filters the tab cannot be read without. Said on the tag rather than only on the
  * dashboard filter, because that is the half Metabase enforces: a required filter with nothing chosen
- * leaves the widget empty, and a card whose tag does not say so answers for every scoutsjaar at once
+ * leaves the widget empty, and a card whose tag does not say so answers for every werkjaar at once
  * instead of refusing.
  */
 export function buildTemplateTags(card: ReportCard, snippetIds: Map<string, number>, required: readonly string[]): Record<string, unknown> {
@@ -244,7 +255,8 @@ export function buildTemplateTags(card: ReportCard, snippetIds: Map<string, numb
             id: templateTagId(card.key, parameter),
             name: parameter,
             'display-name': filter?.title ?? parameter,
-            type: 'text',
+            type: filter?.type === 'boolean' ? 'boolean' : 'text',
+            ...(filter?.type === 'boolean' ? { default: filter.start } : {}),
             ...(required.includes(parameter) ? { required: true } : {}),
         };
     }
@@ -376,7 +388,7 @@ const chartColorCount = 12;
  * The platform's colors, and after them the same ones lightened and darkened.
  *
  * A chart with more series than the platform has colors has to get them from somewhere: repeating
- * one draws two takken as if they were one, and stopping after three leaves the rest of the legend in
+ * one draws two leeftijdsgroepen as if they were one, and stopping after three leaves the rest of the legend in
  * Metabase's palette, which reads as a chart drawn in two sets of colors. Shades of the three stay
  * the platform's own.
  */
@@ -534,8 +546,22 @@ export function buildParameters(tabs: ReportTab[], filterCardIds: Map<string, nu
     return reportFilters
         .filter(filter => wanted.has(filter.name))
         .map((filter) => {
+            if (filter.type === 'boolean') {
+                return {
+                    id: templateTagId('dashboard', filter.name).slice(0, 8),
+                    name: filter.title,
+                    slug: filter.name,
+                    type: 'boolean/=',
+                    sectionId: 'boolean',
+                    default: filter.start,
+                };
+            }
+
             const cardId = filterCardIds.get(filter.valuesFrom);
             const values = filter.keepOrder ? orderedValues.get(filter.valuesFrom) : undefined;
+            const start = filter.start === 'first'
+                ? (values?.[0] === undefined ? undefined : [values[0]])
+                : filter.start;
 
             return {
                 id: templateTagId('dashboard', filter.name).slice(0, 8),
@@ -550,7 +576,7 @@ export function buildParameters(tabs: ReportTab[], filterCardIds: Map<string, nu
                 values_query_type: 'list',
                 // A list even where one value is chosen: a multi-select filter hands its cards every
                 // value it holds, and a bare string is read as a filter holding none.
-                ...(filter.start === undefined ? {} : { default: filter.start }),
+                ...(start === undefined ? {} : { default: start }),
                 ...buildValuesSource(filter.column, cardId, values),
             };
         });
@@ -706,7 +732,7 @@ export async function syncSnippets(api: MetabaseApi, snippets: readonly ReportSn
     const ids = new Map<string, number>();
 
     for (const snippet of snippets) {
-        ids.set(snippet.name, await api.saveSnippet({ name: snippet.name, content: snippet.sql }, existing.get(snippet.name)));
+        ids.set(snippet.name, await api.saveSnippet({ name: snippet.name, content: snippet.sql, description: snippet.description }, existing.get(snippet.name)));
     }
 
     return ids;
@@ -866,7 +892,7 @@ async function archiveSupersededDashboards(api: MetabaseApi, existing: { id: num
 async function readOrderedValues(api: MetabaseApi, filterCardIds: Map<string, number>): Promise<Map<string, string[]>> {
     const values = new Map<string, string[]>();
 
-    for (const filter of reportFilters.filter(filter => filter.keepOrder)) {
+    for (const filter of reportFilters.filter((filter): filter is StringReportFilter => filter.type === 'string' && filter.keepOrder)) {
         const cardId = filterCardIds.get(filter.valuesFrom);
         if (cardId === undefined) {
             continue;

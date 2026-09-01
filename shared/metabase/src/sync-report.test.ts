@@ -76,7 +76,7 @@ describe('layoutCards', () => {
     });
 
     /**
-     * A row chart holds a bar per scoutsjaar, and Metabase gives each of them 24 pixels: the ones
+     * A row chart holds a bar per werkjaar, and Metabase gives each of them 24 pixels: the ones
      * that no longer fit in the card are dropped rather than squeezed, so a row chart the height of
      * a normal chart would quietly lose the oldest years as they pile up.
      */
@@ -159,9 +159,9 @@ describe('layoutCards', () => {
 
 describe('buildVisualizationSettings', () => {
     it('names the columns a chart puts on each axis', () => {
-        const settings = buildVisualizationSettings(card({ display: 'bar', dimensions: ['Tak'], metrics: ['Aantal leden dit jaar', 'Aantal leden vorig jaar'] }));
+        const settings = buildVisualizationSettings(card({ display: 'bar', dimensions: ['Leeftijdsgroep'], metrics: ['Aantal leden dit jaar', 'Aantal leden vorig jaar'] }));
 
-        expect(settings['graph.dimensions']).toEqual(['Tak']);
+        expect(settings['graph.dimensions']).toEqual(['Leeftijdsgroep']);
         expect(settings['graph.metrics']).toEqual(['Aantal leden dit jaar', 'Aantal leden vorig jaar']);
     });
 
@@ -196,7 +196,7 @@ describe('buildVisualizationSettings', () => {
     });
 
     it('stacks a ratio chart to full width', () => {
-        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Scoutsjaar'], metrics: ['Jong', 'Oud'], stacked: 'normalized' }))['stackable.stack_type']).toEqual('normalized');
+        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Werkjaar'], metrics: ['Jong', 'Oud'], stacked: 'normalized' }))['stackable.stack_type']).toEqual('normalized');
     });
 
     /**
@@ -210,12 +210,12 @@ describe('buildVisualizationSettings', () => {
     });
 
     it('says nothing about the x-axis for a card that does not ask, so Metabase keeps deciding', () => {
-        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Scoutsjaar'], metrics: ['Jong'] }))).not.toHaveProperty('graph.x_axis.axis_enabled');
+        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Werkjaar'], metrics: ['Jong'] }))).not.toHaveProperty('graph.x_axis.axis_enabled');
     });
 
     it('turns the report\'s own words for the x-axis into the ones Metabase uses', () => {
-        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Tak'], metrics: ['A'], xLabels: 'hide' }))['graph.x_axis.axis_enabled']).toEqual(false);
-        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Tak'], metrics: ['A'], xLabels: 'show' }))['graph.x_axis.axis_enabled']).toEqual(true);
+        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Leeftijdsgroep'], metrics: ['A'], xLabels: 'hide' }))['graph.x_axis.axis_enabled']).toEqual(false);
+        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Leeftijdsgroep'], metrics: ['A'], xLabels: 'show' }))['graph.x_axis.axis_enabled']).toEqual(true);
     });
 
     /**
@@ -328,7 +328,7 @@ describe('buildVisualizationSettings', () => {
         const colors = columnPalettes.get('Geslacht')!;
 
         expect(buildVisualizationSettings(card({ display: 'pie', dimensions: ['Geslacht'], metrics: ['Aantal leden'] }))['pie.colors']).toEqual(colors);
-        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Scoutsjaar', 'Geslacht'], metrics: ['Aantal leden'] }))['series_settings'])
+        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Werkjaar', 'Geslacht'], metrics: ['Aantal leden'] }))['series_settings'])
             .toEqual({ Man: { color: colors.Man }, Vrouw: { color: colors.Vrouw }, Andere: { color: colors.Andere }, Onbekend: { color: colors.Onbekend } });
     });
 
@@ -338,7 +338,7 @@ describe('buildVisualizationSettings', () => {
      * -- the only colors a row chart reads.
      */
     it('draws a chart in the colors of the platform it is written for', () => {
-        const chart = card({ display: 'bar', dimensions: ['Scoutsjaar'], metrics: ['Aantal kinderen', 'Aantal leiding'] });
+        const chart = card({ display: 'bar', dimensions: ['Werkjaar'], metrics: ['Aantal kinderen', 'Aantal leiding'] });
 
         const keeo = buildVisualizationSettings(chart, true, 'keeo');
         expect((keeo['graph.colors'] as string[]).slice(0, 3)).toEqual(['#00549E', '#C7DD06', '#FF5797']);
@@ -350,8 +350,8 @@ describe('buildVisualizationSettings', () => {
 
     /** A platform the report is not written for has no colors of its own to fall back to. */
     it('leaves a chart of an unknown platform in Metabase\'s colors', () => {
-        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Tak'], metrics: ['A'] }), true, 'ergens')).not.toHaveProperty('graph.colors');
-        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Tak'], metrics: ['A'] }))).not.toHaveProperty('graph.colors');
+        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Leeftijdsgroep'], metrics: ['A'] }), true, 'ergens')).not.toHaveProperty('graph.colors');
+        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Leeftijdsgroep'], metrics: ['A'] }))).not.toHaveProperty('graph.colors');
     });
 
     /**
@@ -360,7 +360,7 @@ describe('buildVisualizationSettings', () => {
      * series, and the metrics of a chart that splits on a column are not its series at all.
      */
     it('keeps the colors a card already names over the ones of the platform', () => {
-        const settings = buildVisualizationSettings(card({ display: 'bar', dimensions: ['Scoutsjaar', 'Geslacht'], metrics: ['Aantal kinderen'] }), true, 'keeo');
+        const settings = buildVisualizationSettings(card({ display: 'bar', dimensions: ['Werkjaar', 'Geslacht'], metrics: ['Aantal kinderen'] }), true, 'keeo');
         const colors = columnPalettes.get('Geslacht')!;
 
         expect(settings['series_settings']).toEqual({
@@ -381,13 +381,13 @@ describe('buildVisualizationSettings', () => {
     });
 
     it('leaves a card that splits on something the palette says nothing about to Metabase', () => {
-        expect(buildVisualizationSettings(card({ display: 'pie', dimensions: ['Tak'], metrics: ['Aantal leden'] }))).not.toHaveProperty('pie.colors');
-        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Scoutsjaar', 'Tak'], metrics: ['Aantal leden'] }))).not.toHaveProperty('series_settings');
+        expect(buildVisualizationSettings(card({ display: 'pie', dimensions: ['Leeftijdsgroep'], metrics: ['Aantal leden'] }))).not.toHaveProperty('pie.colors');
+        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Werkjaar', 'Leeftijdsgroep'], metrics: ['Aantal leden'] }))).not.toHaveProperty('series_settings');
     });
 
     /** The one chart that splits on both: the shapes it needs cannot cost it the colors it needs. */
     it('gives a combo chart its shapes and its colors at once', () => {
-        const settings = buildVisualizationSettings(card({ display: 'combo', dimensions: ['Scoutsjaar', 'Geslacht'], metrics: ['Aantal leden', 'GTP index'] }));
+        const settings = buildVisualizationSettings(card({ display: 'combo', dimensions: ['Werkjaar', 'Geslacht'], metrics: ['Aantal leden', 'GTP index'] }));
 
         expect(settings['series_settings']).toMatchObject({
             Man: { color: columnPalettes.get('Geslacht')!.Man },
@@ -399,9 +399,26 @@ describe('buildVisualizationSettings', () => {
 
 describe('buildTemplateTags', () => {
     it('declares a tag for every parameter the query uses', () => {
-        const tags = buildTemplateTags(card({ parameters: ['scoutsjaar'] }), new Map(), []) as Record<string, { name: string; type: string; 'display-name': string }>;
+        const tags = buildTemplateTags(card({ parameters: ['werkjaar'] }), new Map(), []) as Record<string, { name: string; type: string; 'display-name': string }>;
 
-        expect(tags.scoutsjaar).toMatchObject({ name: 'scoutsjaar', type: 'text', 'display-name': 'Scoutsjaar' });
+        expect(tags.werkjaar).toMatchObject({ name: 'werkjaar', type: 'text', 'display-name': 'Werkjaar' });
+    });
+
+    it('marks the werkjaar tag as required when its tab requires it', () => {
+        const tags = buildTemplateTags(card({ parameters: ['werkjaar'] }), new Map(), ['werkjaar']) as Record<string, unknown>;
+
+        expect(tags.werkjaar).toMatchObject({ required: true });
+    });
+
+    it('declares the platform-members switch as a boolean that excludes them by default', () => {
+        const tags = buildTemplateTags(card({ parameters: ['platformleden_opnemen'] }), new Map(), []) as Record<string, unknown>;
+
+        expect(tags.platformleden_opnemen).toMatchObject({
+            name: 'platformleden_opnemen',
+            type: 'boolean',
+            'display-name': 'Leden van de koepelorganisatie opnemen',
+            default: false,
+        });
     });
 
     /**
@@ -409,10 +426,10 @@ describe('buildTemplateTags', () => {
      * of the fragment referring to it, so the card declares what it only reaches through another one.
      */
     it('points a tag at every fragment the card reads, the nested ones included', () => {
-        const tags = buildTemplateTags(card({ snippets: ['facts', 'takken'] }), new Map([['facts', 7], ['takken', 9]]), []) as Record<string, unknown>;
+        const tags = buildTemplateTags(card({ snippets: ['facts', 'leeftijdsgroepen'] }), new Map([['facts', 7], ['leeftijdsgroepen', 9]]), []) as Record<string, unknown>;
 
-        expect(Object.keys(tags)).toEqual(['snippet: facts', 'snippet: takken']);
-        expect(tags['snippet: takken']).toMatchObject({ name: 'snippet: takken', type: 'snippet', 'snippet-name': 'takken', 'snippet-id': 9 });
+        expect(Object.keys(tags)).toEqual(['snippet: facts', 'snippet: leeftijdsgroepen']);
+        expect(tags['snippet: leeftijdsgroepen']).toMatchObject({ name: 'snippet: leeftijdsgroepen', type: 'snippet', 'snippet-name': 'leeftijdsgroepen', 'snippet-id': 9 });
     });
 
     /** A tag pointing at no snippet is a parameter Metabase cannot find, halfway through the report. */
@@ -429,8 +446,8 @@ describe('buildTemplateTags', () => {
      * has to produce the same ids.
      */
     it('gives a tag the same id on every run', () => {
-        expect(templateTagId('totaal-leden', 'scoutsjaar')).toEqual(templateTagId('totaal-leden', 'scoutsjaar'));
-        expect(templateTagId('totaal-leden', 'scoutsjaar')).not.toEqual(templateTagId('aantal-leiding', 'scoutsjaar'));
+        expect(templateTagId('totaal-leden', 'werkjaar')).toEqual(templateTagId('totaal-leden', 'werkjaar'));
+        expect(templateTagId('totaal-leden', 'werkjaar')).not.toEqual(templateTagId('aantal-leiding', 'werkjaar'));
     });
 });
 
@@ -462,42 +479,63 @@ describe('syncSnippets', () => {
 
 describe('buildParameters', () => {
     it('shows only the filters the dashboard declares, not every one its cards accept', () => {
-        const parameters = buildParameters([tab({ filters: ['scoutsjaar'], cards: [card({ parameters: ['scoutsjaar', 'eenheid'] })] })], new Map());
+        const parameters = buildParameters([tab({ filters: ['werkjaar'], cards: [card({ parameters: ['werkjaar', 'eenheid'] })] })], new Map());
 
-        expect(parameters.map(parameter => parameter.slug)).toEqual(['scoutsjaar']);
+        expect(parameters.map(parameter => parameter.slug)).toEqual(['werkjaar']);
+    });
+
+    it('builds a boolean dashboard filter that excludes platform members by default', () => {
+        const parameters = buildParameters([tab({ filters: ['platformleden_opnemen'], cards: [card({ parameters: ['platformleden_opnemen'] })] })], new Map());
+
+        expect(parameters).toEqual([expect.objectContaining({
+            name: 'Leden van de koepelorganisatie opnemen',
+            slug: 'platformleden_opnemen',
+            type: 'boolean/=',
+            sectionId: 'boolean',
+            default: false,
+        })]);
     });
 
     it('fills a dropdown from the card that lists the values', () => {
-        const parameters = buildParameters([tab({ filters: ['scoutsjaar'], cards: [card({ parameters: ['scoutsjaar'] })] })], new Map([['scoutsjaar', 42]]));
+        const parameters = buildParameters([tab({ filters: ['werkjaar'], cards: [card({ parameters: ['werkjaar'] })] })], new Map([['werkjaar', 42]]));
 
         expect(parameters[0].values_source_type).toEqual('card');
-        expect(parameters[0].values_source_config).toEqual({ card_id: 42, value_field: ['field', 'Scoutsjaar', { 'base-type': 'type/Text' }] });
+        expect(parameters[0].values_source_config).toEqual({ card_id: 42, value_field: ['field', 'Werkjaar', { 'base-type': 'type/Text' }] });
     });
 
     /**
      * The values source alone still leaves a text box; this is the setting that makes the widget a
-     * dropdown, so nobody has to type a scoutsjaar by hand.
+     * dropdown, so nobody has to type a werkjaar by hand.
      */
     it('asks for a dropdown rather than an input box', () => {
-        const parameters = buildParameters([tab({ filters: ['scoutsjaar', 'eenheid'], cards: [card({ parameters: ['scoutsjaar', 'eenheid'] })] })], new Map([['scoutsjaar', 42], ['eenheid', 43]]));
+        const parameters = buildParameters([tab({ filters: ['werkjaar', 'eenheid'], cards: [card({ parameters: ['werkjaar', 'eenheid'] })] })], new Map([['werkjaar', 42], ['eenheid', 43]]));
 
         expect(parameters.map(parameter => parameter.values_query_type)).toEqual(['list', 'list']);
     });
 
     /**
      * Metabase sorts a dropdown fed by a question alphabetically, which would put the oldest
-     * scoutsjaar first. A fixed list is the only source it leaves in the given order.
+     * werkjaar first. A fixed list is the only source it leaves in the given order.
      */
-    it('writes the scoutsjaren out as a list, newest first', () => {
+    it('writes the werkjaren out as a list, newest first', () => {
         const years = ['2024 - 2025', '2023 - 2024', '2013 - 2014'];
-        const entry = [tab({ filters: ['scoutsjaar', 'eenheid'], cards: [card({ parameters: ['scoutsjaar', 'eenheid'] })] })];
+        const entry = [tab({ filters: ['werkjaar', 'eenheid'], cards: [card({ parameters: ['werkjaar', 'eenheid'] })] })];
 
-        const parameters = buildParameters(entry, new Map([['scoutsjaar', 42], ['eenheid', 43]]), new Map([['scoutsjaar', years]]));
+        const parameters = buildParameters(entry, new Map([['werkjaar', 42], ['eenheid', 43]]), new Map([['werkjaar', years]]));
 
         expect(parameters[0].values_source_type).toEqual('static-list');
         expect(parameters[0].values_source_config).toEqual({ values: years });
         // Unit names read fine alphabetically, so they stay on the question and keep updating.
         expect(parameters[1].values_source_type).toEqual('card');
+    });
+
+    it('requires the werkjaar and starts on the latest one', () => {
+        const years = ['2024 - 2025', '2023 - 2024'];
+        const entry = [tab({ filters: ['werkjaar'], required: ['werkjaar'], cards: [card({ parameters: ['werkjaar'] })] })];
+
+        const [parameter] = buildParameters(entry, new Map([['werkjaar', 42]]), new Map([['werkjaar', years]]));
+
+        expect(parameter).toMatchObject({ slug: 'werkjaar', required: true, default: ['2024 - 2025'] });
     });
 
     /**
@@ -507,19 +545,15 @@ describe('buildParameters', () => {
      * `IN` would say instead.
      */
     it('holds both filters to one value, which is what their cards take', () => {
-        const entry = [tab({ filters: ['scoutsjaar', 'eenheid'], cards: [card({ parameters: ['scoutsjaar', 'eenheid'] })] })];
+        const entry = [tab({ filters: ['werkjaar', 'eenheid'], cards: [card({ parameters: ['werkjaar', 'eenheid'] })] })];
 
         const parameters = buildParameters(entry, new Map());
 
-        expect(parameters.map(parameter => [parameter.slug, parameter.isMultiSelect])).toEqual([['scoutsjaar', false], ['eenheid', false]]);
+        expect(parameters.map(parameter => [parameter.slug, parameter.isMultiSelect])).toEqual([['werkjaar', false], ['eenheid', false]]);
     });
 
-    /**
-     * Nothing chosen is what counts every member, so the filters open empty: a default would leave the
-     * dashboards showing a slice of the platform to whoever does not look at the filter bar.
-     */
-    it('gives no filter a value to start from where empty counts everyone', () => {
-        const entry = [tab({ filters: ['scoutsjaar', 'eenheid'], cards: [card({ parameters: ['scoutsjaar', 'eenheid'] })] })];
+    it('does not invent a default when no werkjaar values could be read', () => {
+        const entry = [tab({ filters: ['werkjaar', 'eenheid'], cards: [card({ parameters: ['werkjaar', 'eenheid'] })] })];
 
         const started = buildParameters(entry, new Map()).filter(parameter => parameter.default !== undefined);
 
@@ -527,10 +561,10 @@ describe('buildParameters', () => {
     });
 
     it('falls back to the question when the values could not be read', () => {
-        const entry = [tab({ filters: ['scoutsjaar'], cards: [card({ parameters: ['scoutsjaar'] })] })];
+        const entry = [tab({ filters: ['werkjaar'], cards: [card({ parameters: ['werkjaar'] })] })];
 
-        for (const values of [new Map(), new Map([['scoutsjaar', []]])]) {
-            expect(buildParameters(entry, new Map([['scoutsjaar', 42]]), values as Map<string, string[]>)[0].values_source_type).toEqual('card');
+        for (const values of [new Map(), new Map([['werkjaar', []]])]) {
+            expect(buildParameters(entry, new Map([['werkjaar', 42]]), values as Map<string, string[]>)[0].values_source_type).toEqual('card');
         }
     });
 });
@@ -549,15 +583,15 @@ describe('buildTabs', () => {
 
 describe('buildDashcards', () => {
     it('connects a filter only to the cards whose query takes it', () => {
-        const filtered = card({ key: 'a', parameters: ['scoutsjaar'] });
+        const filtered = card({ key: 'a', parameters: ['werkjaar'] });
         const unfiltered = card({ key: 'b', parameters: [] });
-        const entry = [tab({ filters: ['scoutsjaar'], cards: [filtered, unfiltered] })];
+        const entry = [tab({ filters: ['werkjaar'], cards: [filtered, unfiltered] })];
         const parameters = buildParameters(entry, new Map());
 
         const dashcards = buildDashcards(entry, new Map([['a', 1], ['b', 2]]), parameters, new Map([['Nationaal', 1]]));
 
         expect((dashcards[0].parameter_mappings as unknown[]).length).toEqual(1);
-        expect(dashcards[0].parameter_mappings).toMatchObject([{ card_id: 1, target: ['variable', ['template-tag', 'scoutsjaar']] }]);
+        expect(dashcards[0].parameter_mappings).toMatchObject([{ card_id: 1, target: ['variable', ['template-tag', 'werkjaar']] }]);
         expect(dashcards[1].parameter_mappings).toEqual([]);
     });
 
@@ -607,8 +641,8 @@ describe('buildDashcards', () => {
      */
     it('leaves a card alone when its own tab does not use the filter', () => {
         const tabs = [
-            tab({ key: 'nationaal', title: 'Nationaal', filters: ['scoutsjaar'], cards: [card({ key: 'a', parameters: ['scoutsjaar', 'eenheid'] })] }),
-            tab({ key: 'eenheden', title: 'Eenheden', filters: ['scoutsjaar', 'eenheid'], cards: [card({ key: 'b', parameters: ['scoutsjaar', 'eenheid'] })] }),
+            tab({ key: 'nationaal', title: 'Nationaal', filters: ['werkjaar'], cards: [card({ key: 'a', parameters: ['werkjaar', 'eenheid'] })] }),
+            tab({ key: 'eenheden', title: 'Eenheden', filters: ['werkjaar', 'eenheid'], cards: [card({ key: 'b', parameters: ['werkjaar', 'eenheid'] })] }),
         ];
         const parameters = buildParameters(tabs, new Map());
 

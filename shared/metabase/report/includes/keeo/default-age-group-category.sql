@@ -1,4 +1,4 @@
-CASE dag.id
+CASE default_age_groups.id
     -- Kinderen
     WHEN 'f274a949-9318-4c2b-ae35-e50114efe686' THEN 'child'   -- Bevers of Zeehonden
     WHEN '316ea554-675a-493e-a152-365012851ae3' THEN 'child'   -- Welpen
@@ -14,4 +14,4 @@ CASE dag.id
     WHEN 'd4bb14bf-4a52-44e4-a014-3333c5ebb36a' THEN 'adult'   -- Nationaal vrijwilligers, rechtstreeks aan FOS
     WHEN '8d42d2df-7787-4959-995d-c5a85d0e48c9' THEN 'adult'   -- Ereleden
     WHEN 'ac8848e9-9868-44a1-a057-2a189cce68ea' THEN 'adult'   -- Ondersteunende leden, VZW, Steuncomité of Helpende handen
-END AS category
+END

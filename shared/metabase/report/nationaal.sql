@@ -1,46 +1,52 @@
 -- @tab nationaal
 -- title: Nationaal
--- description: Ledenaantallen over het hele platform voor het gekozen scoutsjaar.
--- filters: scoutsjaar
+-- description: Ledenaantallen over het hele platform voor het gekozen werkjaar.
+-- filters: werkjaar, platformleden_opnemen
+-- required: werkjaar
 
 -- @card aantal-eenheden
 -- title: Aantal eenheden
 -- display: scalar
 -- size: sixth
--- @include facts
--- @include leden
+WITH leden AS (
+    -- @include deduplicated-non-platform-registrations
+)
 SELECT COUNT(DISTINCT organization_id) AS `Aantal eenheden` FROM leden
 
 -- @card totaal-leden
 -- title: Totaal leden
 -- display: scalar
 -- size: sixth
--- @include facts
--- @include leden
+WITH leden AS (
+    -- @include deduplicated-non-platform-registrations
+)
 SELECT COUNT(DISTINCT member_id) AS `Totaal leden` FROM leden
 
 -- @card aantal-kinderen
 -- title: Aantal kinderen
 -- display: scalar
 -- size: sixth
--- @include facts
--- @include leden
+WITH leden AS (
+    -- @include deduplicated-non-platform-registrations
+)
 SELECT COUNT(DISTINCT member_id) AS `Aantal kinderen` FROM leden WHERE effective_category = 'child'
 
 -- @card aantal-leiding
 -- title: Aantal leiding
 -- display: scalar
 -- size: sixth
--- @include facts
--- @include leden
+WITH leden AS (
+    -- @include deduplicated-non-platform-registrations
+)
 SELECT COUNT(DISTINCT member_id) AS `Aantal leiding` FROM leden WHERE effective_category = 'leader'
 
 -- @card aantal-volwassenen
 -- title: Aantal volwassenen
 -- display: scalar
 -- size: sixth
--- @include facts
--- @include leden
+WITH leden AS (
+    -- @include deduplicated-non-platform-registrations
+)
 SELECT COUNT(DISTINCT member_id) AS `Aantal volwassenen` FROM leden WHERE effective_category = 'adult'
 
 -- @card leden-per-eenheid
@@ -53,8 +59,9 @@ SELECT COUNT(DISTINCT member_id) AS `Aantal volwassenen` FROM leden WHERE effect
 -- description: GTP staat voor Gezond Toekomst Perspectief. Idealiter scoort een eenheid 100 of meer.
 -- Rechtop, niet schuin: Metabase laat een label vallen zodra het het vorige raakt, en schuin heeft
 -- een naam per eenheid daar net te weinig plaats voor.
--- @include facts
--- @include leden
+WITH leden AS (
+    -- @include deduplicated-non-platform-registrations
+)
 SELECT
     `Eenheid`,
     COUNT(DISTINCT member_id) AS `Aantal leden`,
@@ -64,38 +71,39 @@ FROM leden
 GROUP BY `Eenheid`
 ORDER BY `Aantal leden` DESC
 
--- @card leden-per-tak-vergelijking
--- title: Vergelijking aantal leden per tak met vorig scoutsjaar
+-- @card leden-per-leeftijdsgroep-vergelijking
+-- title: Vergelijking aantal leden per leeftijdsgroep met vorig werkjaar
 -- display: bar
 -- size: half
--- dimensions: Tak
+-- dimensions: Leeftijdsgroep
 -- metrics: Aantal leden dit jaar, Aantal leden vorig jaar
 -- xlabels: rotate-45
--- @include facts-alle-jaren
--- @include leden
--- Zie `includes/jaren.sql`: het scoutsjaar is de naam, niet het id. Hier tellen ook de jaren zonder
+WITH leden AS (
+    -- @include deduplicated-non-platform-registrations-all-years
+),
+-- Zie `includes/years-with-members.sql`: het werkjaar is de naam, niet het id. Hier tellen ook de jaren zonder
 -- leden mee, want een vergelijking met een leeg jaar is nog steeds een geldige vergelijking.
-, jaren AS (
+jaren AS (
     SELECT name, MIN(startDate) AS startDate, LAG(name) OVER (ORDER BY MIN(startDate)) AS vorig
     FROM registration_periods
     GROUP BY name
-)
+),
 -- The selected year, or the most recent one when the filter is empty, plus the year before it.
-, gekozen AS (
+gekozen AS (
     SELECT name, vorig FROM jaren
-    WHERE 1 = 1 [[AND name = {{scoutsjaar}}]]
+    WHERE 1 = 1 [[AND name = {{werkjaar}}]]
     ORDER BY startDate DESC
     LIMIT 1
 )
 SELECT
-    f.`Tak`,
-    COUNT(DISTINCT CASE WHEN f.`Scoutsjaar` = g.name THEN f.member_id END) AS `Aantal leden dit jaar`,
-    COUNT(DISTINCT CASE WHEN f.`Scoutsjaar` = g.vorig THEN f.member_id END) AS `Aantal leden vorig jaar`
-FROM leden f
-CROSS JOIN gekozen g
-WHERE f.`Scoutsjaar` IN (g.name, g.vorig)
-GROUP BY f.`Tak`
-ORDER BY MIN(COALESCE(f.tak_min_age, 99)), f.`Tak`
+    leden.`Leeftijdsgroep`,
+    COUNT(DISTINCT CASE WHEN leden.`Werkjaar` = gekozen.name THEN leden.member_id END) AS `Aantal leden dit jaar`,
+    COUNT(DISTINCT CASE WHEN leden.`Werkjaar` = gekozen.vorig THEN leden.member_id END) AS `Aantal leden vorig jaar`
+FROM leden
+CROSS JOIN gekozen
+WHERE leden.`Werkjaar` IN (gekozen.name, gekozen.vorig)
+GROUP BY leden.`Leeftijdsgroep`
+ORDER BY MIN(COALESCE(leden.age_group_min_age, 99)), leden.`Leeftijdsgroep`
 
 -- @card leden-per-geslacht
 -- title: Aantal leden per geslacht
@@ -103,8 +111,9 @@ ORDER BY MIN(COALESCE(f.tak_min_age, 99)), f.`Tak`
 -- size: half
 -- dimensions: Geslacht
 -- metrics: Aantal leden
--- @include facts
--- @include leden
+WITH leden AS (
+    -- @include deduplicated-non-platform-registrations
+)
 SELECT `Geslacht`, COUNT(DISTINCT member_id) AS `Aantal leden`
 FROM leden
 GROUP BY `Geslacht`
@@ -119,17 +128,20 @@ ORDER BY `Aantal leden` DESC
 -- dimensions: Postcode
 -- metrics: Aantal leden
 -- description: Een punt per postcode. Een postcode zonder coordinaat in `postal_codes` telt wel mee, maar staat niet op de kaart.
--- @include facts
--- @include leden
--- @include postcode-coordinaten
+WITH leden AS (
+    -- @include deduplicated-non-platform-registrations
+),
+postcode_coordinaten AS (
+    -- @include postal-code-coordinates
+)
 SELECT
-    f.postcode AS `Postcode`,
-    c.latitude AS `Breedtegraad`,
-    c.longitude AS `Lengtegraad`,
-    COUNT(DISTINCT f.member_id) AS `Aantal leden`
-FROM leden f
-LEFT JOIN postcode_coordinaten c ON c.postalCode = f.postcode
-GROUP BY f.postcode, c.latitude, c.longitude
+    leden.postcode AS `Postcode`,
+    postcode_coordinaten.latitude AS `Breedtegraad`,
+    postcode_coordinaten.longitude AS `Lengtegraad`,
+    COUNT(DISTINCT leden.member_id) AS `Aantal leden`
+FROM leden
+LEFT JOIN postcode_coordinaten ON postcode_coordinaten.postalCode = leden.postcode
+GROUP BY leden.postcode, postcode_coordinaten.latitude, postcode_coordinaten.longitude
 ORDER BY `Aantal leden` DESC
 
 -- @card leden-per-geboortejaar
@@ -138,8 +150,9 @@ ORDER BY `Aantal leden` DESC
 -- size: half
 -- dimensions: Geboortejaar
 -- metrics: Aantal kinderen, Aantal leiding, Aantal volwassenen
--- @include facts
--- @include leden
+WITH leden AS (
+    -- @include deduplicated-non-platform-registrations
+)
 SELECT
     YEAR(birth_date) AS `Geboortejaar`,
     COUNT(DISTINCT CASE WHEN effective_category = 'child' THEN member_id END) AS `Aantal kinderen`,
@@ -156,43 +169,50 @@ ORDER BY `Geboortejaar`
 -- size: half
 -- dimensions: Type lidgeld
 -- metrics: Aantal leden
--- @include facts
--- @include leden
+WITH leden AS (
+    -- @include deduplicated-non-platform-registrations
+)
 SELECT
-    -- @include tarief
+    -- @include membership-fee-type
         AS `Type lidgeld`,
-    COUNT(DISTINCT mpm.memberId) AS `Aantal leden`
-FROM member_platform_memberships mpm
+    COUNT(DISTINCT member_platform_memberships.memberId) AS `Aantal leden`
+FROM member_platform_memberships
 -- Het lidgeld van een lid in het jaar waarin het lid was, als één join op het paar. Niet als een
 -- IN-subquery per kolom: `leden` wordt dan per subquery opnieuw opgebouwd en MySQL hasht die twee
 -- resultaten tegen elkaar, waarmee de kaart niet meer laadt. Het paar is meteen ook wat de kaart
 -- telt -- een lidgeld uit een jaar waarin dat lid geen lid was, hoort er niet bij.
-JOIN (SELECT DISTINCT member_id, period_id FROM leden) l
-    ON l.member_id = mpm.memberId AND l.period_id = mpm.periodId
-WHERE mpm.deletedAt IS NULL
-  -- Geen lidmaatschap bij de koepel zelf: `facts` laat die organisatie weg, en wie naast een eenheid
-  -- ook in een nationale ploeg zit zou het tarief daarvan anders in deze grafiek zetten.
-  AND NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = mpm.organizationId)
-  -- @include ledenstatistieken-aansluitingen
-GROUP BY mpm.reducedPrice
+JOIN (SELECT DISTINCT member_id, period_id FROM leden) leden_periodes
+    ON leden_periodes.member_id = member_platform_memberships.memberId
+    AND leden_periodes.period_id = member_platform_memberships.periodId
+WHERE member_platform_memberships.deletedAt IS NULL
+  -- Geen lidmaatschap bij de koepel zelf zolang de dashboardfilter die organisatie weglaat.
+  AND (
+      {{platformleden_opnemen}}
+      OR NOT EXISTS (SELECT 1 FROM platform WHERE platform.membershipOrganizationId = member_platform_memberships.organizationId)
+  )
+  AND (
+      -- @include filter-statistics-memberships
+  )
+GROUP BY member_platform_memberships.reducedPrice
 ORDER BY `Aantal leden` DESC
 
--- @card leden-per-scoutsjaar
--- title: Aantal leden per scoutsjaar
+-- @card leden-per-werkjaar
+-- title: Aantal leden per werkjaar
 -- display: line
 -- size: full
--- dimensions: Scoutsjaar
+-- dimensions: Werkjaar
 -- metrics: Totaal leden, Aantal kinderen, Aantal leiding, Aantal volwassenen
--- @include facts-alle-jaren
--- @include leden
+WITH leden AS (
+    -- @include deduplicated-non-platform-registrations-all-years
+)
 SELECT
-    `Scoutsjaar`,
+    `Werkjaar`,
     COUNT(DISTINCT member_id) AS `Totaal leden`,
     COUNT(DISTINCT CASE WHEN effective_category = 'child' THEN member_id END) AS `Aantal kinderen`,
     COUNT(DISTINCT CASE WHEN effective_category = 'leader' THEN member_id END) AS `Aantal leiding`,
     COUNT(DISTINCT CASE WHEN effective_category = 'adult' THEN member_id END) AS `Aantal volwassenen`
 FROM leden
-GROUP BY `Scoutsjaar`
+GROUP BY `Werkjaar`
 ORDER BY MIN(period_start)
 
 -- @card percentage-blijvers-per-eenheid
@@ -202,15 +222,20 @@ ORDER BY MIN(period_start)
 -- dimensions: Eenheid
 -- metrics: Percentage blijvers
 -- xlabels: rotate-90
--- description: Van de leden in het gekozen scoutsjaar, het percentage dat het scoutsjaar erna nog lid is, per eenheid waar ze in het gekozen jaar zaten. Links = laagste ledenbehoud. Het laatste scoutsjaar staat er niet bij: het jaar erna moet eerst bestaan.
+-- description: Van de leden in het gekozen werkjaar, het percentage dat het werkjaar erna nog lid is, per eenheid waar ze in het gekozen jaar zaten. Links = laagste ledenbehoud. Het laatste werkjaar staat er niet bij: het jaar erna moet eerst bestaan.
 -- Rechtop, om dezelfde reden als bij de grafiek met het aantal leden per eenheid.
--- @include facts-alle-jaren
--- @include leden
--- @include leden-per-jaar
--- @include jaren
-, gekozen AS (
+WITH leden AS (
+    -- @include deduplicated-non-platform-registrations-all-years
+),
+leden_per_jaar AS (
+    -- @include members-per-year
+),
+jaren AS (
+    -- @include years-with-members
+),
+gekozen AS (
     SELECT name, volgend FROM jaren
-    WHERE volgend IS NOT NULL [[AND name = {{scoutsjaar}}]]
+    WHERE volgend IS NOT NULL [[AND name = {{werkjaar}}]]
     ORDER BY startDate DESC
     LIMIT 1
 )
@@ -219,10 +244,10 @@ ORDER BY MIN(period_start)
 SELECT
     huidig.`Eenheid`,
     ROUND(100 * COUNT(DISTINCT gebleven.member_id) / COUNT(DISTINCT huidig.member_id), 1) AS `Percentage blijvers`
-FROM gekozen g
-JOIN leden huidig ON huidig.`Scoutsjaar` = g.name
+FROM gekozen
+JOIN leden huidig ON huidig.`Werkjaar` = gekozen.name
 LEFT JOIN leden_per_jaar gebleven
-    ON gebleven.`Scoutsjaar` = g.volgend
+    ON gebleven.`Werkjaar` = gekozen.volgend
     AND gebleven.member_id = huidig.member_id
 GROUP BY huidig.`Eenheid`
 ORDER BY `Percentage blijvers`

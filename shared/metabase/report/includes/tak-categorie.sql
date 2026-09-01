@@ -1,1 +1,0 @@
-CAST(NULL AS CHAR(16)) AS category

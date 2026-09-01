@@ -61,6 +61,7 @@ export type MetabaseSnippet = {
 export type MetabaseSnippetInput = {
     name: string;
     content: string;
+    description?: string;
 };
 
 export type MetabaseDashboard = {
@@ -341,11 +342,11 @@ export class MetabaseApi {
      * with it every question already pointing at it, so a fragment that changed reaches all of them
      * at once. An archived one is brought back: its name was never given up.
      *
-     * The description is Metabase's own and is never written: it is what the snippet sidebar lists a
-     * fragment under, and the only thing about one that nothing here has an answer for.
+     * The description is written along, cleared when the fragment no longer has one: the sidebar
+     * would otherwise keep showing words the report stopped saying.
      */
     async saveSnippet(input: MetabaseSnippetInput, existingId?: number): Promise<number> {
-        const body = { name: input.name, content: input.content };
+        const body = { name: input.name, content: input.content, description: input.description ?? null };
 
         if (existingId !== undefined) {
             await this.request('PUT', `/api/native-query-snippet/${existingId}`, { ...body, archived: false });

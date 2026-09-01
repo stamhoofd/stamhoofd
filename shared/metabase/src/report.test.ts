@@ -7,7 +7,7 @@ import { buildVisualizationSettings, columnPalettes, layoutCards } from './sync-
 
 /**
  * A card's sql as one line. The comments go first: a term of an expression carries the name of the
- * tak it weighs behind `--`, and collapsing the newlines would otherwise run that name into the term
+ * leeftijdsgroep it weighs behind `--`, and collapsing the newlines would otherwise run that name into the term
  * below it -- commenting the rest of the expression out of the string being asserted on.
  */
 function expressionOf(sql: string): string {
@@ -60,7 +60,7 @@ describe('report', () => {
             expect(card.display).toEqual('scalar');
             expect(card.sql).toContain('all_registrations AS (');
             // A fragment the fragment above it includes, so this also says the nesting was resolved.
-            expect(card.sql).toContain('takken AS (');
+            expect(card.sql).toContain('default_age_groups_with_category AS (');
             expect(card.sql).not.toContain('@include');
         });
 
@@ -70,11 +70,11 @@ describe('report', () => {
          * filter can reach: it would collapse to the single year the filter selected.
          */
         it('takes the parameters a card uses from its sql, so the two cannot drift', () => {
-            expect(cardOf(dashboards, 'nationaal', 'totaal-leden').parameters).toContain('scoutsjaar');
-            expect(cardOf(dashboards, 'eenheden', 'eenheid-totaal-leden').parameters).toEqual(['scoutsjaar', 'eenheid']);
+            expect(cardOf(dashboards, 'nationaal', 'totaal-leden').parameters).toContain('werkjaar');
+            expect(cardOf(dashboards, 'eenheden', 'eenheid-totaal-leden').parameters).toEqual(['werkjaar', 'eenheid', 'platformleden_opnemen']);
 
-            for (const key of ['leden-per-scoutsjaar', 'percentage-blijvers-per-eenheid']) {
-                expect(`${key}: ${cardOf(dashboards, 'nationaal', key).sql.includes('p.name = {{scoutsjaar}}')}`).toEqual(`${key}: false`);
+            for (const key of ['leden-per-werkjaar', 'percentage-blijvers-per-eenheid']) {
+                expect(`${key}: ${cardOf(dashboards, 'nationaal', key).sql.includes('p.name = {{werkjaar}}')}`).toEqual(`${key}: false`);
             }
         });
 
@@ -123,11 +123,24 @@ describe('report', () => {
         it('gives both grains the same columns, since one fragment reads either', async () => {
             const aliases = async (name: string) => {
                 const sql = (await fs.readFile(path.join(getReportDirectory(), 'includes', name), 'utf-8')).replaceAll(/--[^\n]*/g, '');
-                const end = sql.indexOf('FROM registrations r');
+                const end = sql.indexOf('\nFROM registrations');
                 return [...sql.slice(sql.lastIndexOf('SELECT', end), end).matchAll(/AS `?(\w+)`?/g)].map(match => match[1]);
             };
 
-            expect(await aliases('facts-alle-jaren.sql')).toEqual(await aliases('facts.sql'));
+            expect(await aliases('all-non-platform-registrations-all-years.sql')).toEqual(await aliases('all-registrations.sql'));
+        });
+
+        /**
+         * `leden-alle-jaren.sql` is `leden.sql` over the other grain: the same ranking, reading
+         * the registrations of every werkjaar instead of the chosen one. Written out twice so each fragment stands on its
+         * own; what is left to drift is the ranking itself, so the sql outside the comments -- where
+         * the two name the grain they read -- has to stay identical.
+         */
+        it('picks the registration that speaks for a member the same way on both grains', async () => {
+            const body = async (name: string) => (await fs.readFile(path.join(getReportDirectory(), 'includes', name), 'utf-8'))
+                .split('\n').filter(line => !line.trim().startsWith('--')).join('\n');
+
+            expect(await body('deduplicated-non-platform-registrations-all-years.sql')).toEqual(await body('deduplicated-non-platform-registrations.sql'));
         });
 
         it('names every column a chart plots', () => {
@@ -155,25 +168,19 @@ describe('report', () => {
             }
         });
 
-        /**
-         * The koepel's own organization is not an eenheid and its structuurvrijwilligers are nobody's
-         * leden, so the ledenstatistieken leave it out wherever they count: every card of that
-         * dashboard drops `platform.membershipOrganizationId`, and so does the eenheid filter, which
-         * would otherwise offer a unit that empties every card on the page.
-         *
-         * Kept here because a card that forgets it reads as a plausible figure: the koepel is one
-         * organization among dozens, and the import writes it under that same id, so it would go
-         * unnoticed in the years the client checks against their own pdf as well.
-         */
-        it('leaves the koepel out of every card of the ledenstatistieken', () => {
-            const drops = (sql: string) => /NOT EXISTS \(SELECT 1 FROM platform pf WHERE pf\.membershipOrganizationId = /.test(sql);
+        it('lets every card of the ledenstatistieken include the koepel on request', () => {
+            const drops = (sql: string) => /NOT EXISTS \(SELECT 1 FROM platform WHERE platform\.membershipOrganizationId = /.test(sql);
             const pages = dashboards.filter(dashboard => dashboard.dashboard === undefined && !dashboard.hidden);
 
             expect(pages.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'netwerk', 'varia']);
 
             for (const dashboard of pages) {
+                expect(dashboard.filters).toContain('platformleden_opnemen');
+
                 for (const card of dashboard.cards) {
                     expect(`${dashboard.key}/${card.key}: ${drops(card.sql)}`).toEqual(`${dashboard.key}/${card.key}: true`);
+                    expect(`${dashboard.key}/${card.key}: ${card.parameters.includes('platformleden_opnemen')}`).toEqual(`${dashboard.key}/${card.key}: true`);
+                    expect(`${dashboard.key}/${card.key}: ${card.sql.includes('{{platformleden_opnemen}}')}`).toEqual(`${dashboard.key}/${card.key}: true`);
                 }
             }
 
@@ -187,8 +194,8 @@ describe('report', () => {
         it('delivers the koepel itself in the aanlevering', () => {
             const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-bovenlokaal').sql;
 
-            expect(sql).toContain('FROM all_registrations f\nJOIN platform pf ON pf.membershipOrganizationId = f.organization_id');
-            expect(/FROM facts\b/.test(sql)).toBe(false);
+            expect(sql).toContain('FROM all_registrations\nJOIN platform ON platform.membershipOrganizationId = all_registrations.organization_id');
+            expect(/FROM non_platform_registrations\b/.test(sql)).toBe(false);
         });
 
         /**
@@ -210,7 +217,7 @@ describe('report', () => {
                 expect(`${key}: ${card.title}`).toEqual(`${key}: ${title}`);
                 expect(card.columns).toEqual([...columns]);
                 expect(`${key}: ${card.display}`).toEqual(`${key}: table`);
-                expect(`${key} takes the werkjaar: ${card.parameters.includes('scoutsjaar')}`).toEqual(`${key} takes the werkjaar: true`);
+                expect(`${key} takes the werkjaar: ${card.parameters.includes('werkjaar')}`).toEqual(`${key} takes the werkjaar: true`);
             }
 
             expect(dashboards.find(tab => tab.key === 'jeugdbewegingen')!.cards.map(card => card.key)).toEqual(sheets.map(([key]) => key));
@@ -233,46 +240,46 @@ describe('report', () => {
         });
 
         /**
-         * Someone can be a lid in one tak of a unit and leiding in another. The metadatafiche is
+         * Someone can be a lid in one leeftijdsgroep of a unit and leiding in another. The metadatafiche is
          * explicit that they are leiding there and not a lid, so the two are decided per member per
          * group before anything is counted -- off the registrations they would be one person
          * delivered in both rows, and the group would report more deelnemers than it has.
          *
          * The same grain answers what a deelnemer is: inschrijvingen rather than unique inschrijvers
-         * means someone registered at two groups counts at both, not that two takken count twice.
+         * means someone registered at two groups counts at both, not that two leeftijdsgroepen count twice.
          */
         it('counts a member of a group once, as leiding when they are leiding anywhere in it', () => {
             const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql.replaceAll(/\s+/g, ' ');
 
-            expect(sql).toContain("CASE WHEN f.tak_category = 'leader' THEN 2 WHEN f.tak_category = 'child' THEN 1 ELSE 0 END AS type_number");
-            expect(sql).toContain('GROUP BY i.organization_uri, i.member_id )');
-            expect(sql).toContain("CASE WHEN d.type_number = 2 THEN 'leiding' ELSE 'leden' END");
+            expect(sql).toContain("CASE WHEN all_registrations.age_group_category = 'leader' THEN 2 WHEN all_registrations.age_group_category = 'child' THEN 1 ELSE 0 END AS type_number");
+            expect(sql).toContain('GROUP BY inschrijvingen.organization_uri, inschrijvingen.member_id )');
+            expect(sql).toContain("CASE WHEN deelnemers.type_number = 2 THEN 'leiding' ELSE 'leden' END");
         });
 
         /**
          * The metadatafiche has no third word for the volwassenen who carry a group, and counts them
-         * as leiding. Ravot holds them in a tak of its own that the categories may not say this of --
+         * as leiding. Ravot holds them in a leeftijdsgroep of its own that the categories may not say this of --
          * categorised as leiding it would land in the omkaderingscijfer and the GTP index, which
          * weigh the leiding an eenheid looks after its kinderen with -- so the aanlevering names the
-         * tak, there and nowhere else.
+         * leeftijdsgroep, there and nowhere else.
          */
-        it('delivers the ondersteunende leden of ravot as leiding, and names that tak in no other environment', () => {
-            // The condition rather than the prose: the fragments mention the tak in their comments too.
+        it('delivers the ondersteunende leden of ravot as leiding, and names that leeftijdsgroep in no other environment', () => {
+            // The condition rather than the prose: the fragments mention the leeftijdsgroep in their comments too.
             const namesTheTak = (tabs: ReportTab[]) => tabs.flatMap(tab => tab.cards)
-                .filter(card => expressionOf(card.sql).includes("f.tak_id = 'a28d290c-af71-4282-92cc-2224a18d3091'"))
+                .filter(card => expressionOf(card.sql).includes("all_registrations.age_group_id = 'a28d290c-af71-4282-92cc-2224a18d3091'"))
                 .map(card => card.key);
             const sql = expressionOf(cardOf(ravotDashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql);
 
-            // By the id of the tak rather than by its name, which the years need not agree on.
-            expect(sql).toContain("CASE WHEN f.tak_category = 'leader' THEN 2 WHEN f.tak_id = 'a28d290c-af71-4282-92cc-2224a18d3091' THEN 2 WHEN f.tak_category = 'child' THEN 1 ELSE 0 END AS type_number");
-            expect(sql).not.toContain("`Tak` = 'Ondersteunende leden'");
+            // By the id of the leeftijdsgroep rather than by its name, which the years need not agree on.
+            expect(sql).toContain("CASE WHEN all_registrations.age_group_category = 'leader' THEN 2 WHEN all_registrations.age_group_id = 'a28d290c-af71-4282-92cc-2224a18d3091' THEN 2 WHEN all_registrations.age_group_category = 'child' THEN 1 ELSE 0 END AS type_number");
+            expect(sql).not.toContain("`Leeftijdsgroep` = 'Ondersteunende leden'");
             expect(namesTheTak(ravotDashboards)).toEqual(['deelnemers-lokale-groep']);
             expect(namesTheTak(dashboards)).toEqual([]);
         });
 
         /**
          * A cancelled registration says someone was there, not what they were. An administrator who
-         * puts a lid in the Leiding tak by mistake and undoes it would otherwise leave them leiding
+         * puts a lid in the Leiding leeftijdsgroep by mistake and undoes it would otherwise leave them leiding
          * for the rest of the werkjaar, while the registration they really hold says what they are.
          *
          * Only a member whose registrations at the group were all cancelled -- someone who left
@@ -281,7 +288,7 @@ describe('report', () => {
         it('lets the registrations that still stand decide what someone is', () => {
             const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql.replaceAll(/\s+/g, ' ');
 
-            expect(sql).toContain('COALESCE( MAX(CASE WHEN i.deactivated_at IS NULL THEN i.type_number END), MAX(i.type_number) ) AS type_number');
+            expect(sql).toContain('COALESCE( MAX(CASE WHEN inschrijvingen.deactivated_at IS NULL THEN inschrijvingen.type_number END), MAX(inschrijvingen.type_number) ) AS type_number');
         });
 
         /**
@@ -291,7 +298,7 @@ describe('report', () => {
          */
         it('counts the members who left during the werkjaar on both dashboards', () => {
             for (const dashboard of dashboards.filter(dashboard => !dashboard.hidden)) {
-                for (const card of dashboard.cards.filter(card => card.snippets.includes('facts') || card.snippets.includes('facts-alle-jaren'))) {
+                for (const card of dashboard.cards.filter(card => card.snippets.includes('all-non-platform-registrations') || card.snippets.includes('all-non-platform-registrations-all-years'))) {
                     const sql = expressionOf(card.sql);
 
                     // The two forms the three filters were written in. `deactivated_at` still stands
@@ -301,25 +308,25 @@ describe('report', () => {
                 }
             }
 
-            // `facts` is `all_registrations` less the koepel, and nothing else.
+            // `facts` is `all_registrations`, conditionally less the koepel, and nothing else.
             expect(expressionOf(cardOf(dashboards, 'nationaal', 'totaal-leden').sql))
-                .toContain('facts AS ( SELECT f.* FROM all_registrations f WHERE NOT EXISTS');
+                .toContain('SELECT all_registrations.* FROM all_registrations WHERE {{platformleden_opnemen}} OR NOT EXISTS');
         });
 
         /**
          * The two categories answer different questions, and the sheet may only read one of them.
          * `effective_category` falls back to the ages so that nobody drops out of a total, which is
          * what the ledenstatistieken want; the ages cannot tell leiding from anything, so reading it
-         * here would deliver a leider of seventeen as a lid. A tak nobody has categorised delivers
+         * here would deliver a leider of seventeen as a lid. A leeftijdsgroep nobody has categorised delivers
          * nobody instead, which is missing rather than wrong.
          */
-        it('splits the sheet by what the takken were recorded as, never by what the ages suggest', () => {
+        it('splits the sheet by what the leeftijdsgroepen were recorded as, never by what the ages suggest', () => {
             const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql;
             // The card's own query: `effective_category` is a column of the fragment it includes, and
             // being selected there says nothing about what the sheet splits by.
-            const query = sql.slice(sql.indexOf('\n, inschrijvingen AS ('));
+            const query = sql.slice(sql.indexOf('\ninschrijvingen AS ('));
 
-            expect(query).toContain('f.tak_category');
+            expect(query).toContain('all_registrations.age_group_category');
             expect(`reads the fallback: ${query.includes('effective_category')}`).toEqual('reads the fallback: false');
         });
 
@@ -333,7 +340,7 @@ describe('report', () => {
             for (const dashboard of dashboards.filter(dashboard => !dashboard.hidden)) {
                 for (const card of dashboard.cards.filter(card => card.snippets.length > 0)) {
                     const aanlevering = dashboard.key === 'jeugdbewegingen';
-                    const read = card.snippets.filter(snippet => snippet.endsWith('-aansluitingen'));
+                    const read = card.snippets.filter(snippet => snippet.endsWith('-memberships'));
 
                     // The organisatie sheets count no member and read neither.
                     if (read.length === 0) {
@@ -341,7 +348,7 @@ describe('report', () => {
                         continue;
                     }
                     expect(`${dashboard.key}/${card.key}: ${read.join(',')}`)
-                        .toEqual(`${dashboard.key}/${card.key}: ${aanlevering ? 'aanlevering' : 'ledenstatistieken'}-aansluitingen`);
+                        .toEqual(`${dashboard.key}/${card.key}: filter-${aanlevering ? 'delivery' : 'statistics'}-memberships`);
                 }
             }
         });
@@ -357,24 +364,18 @@ describe('report', () => {
             const keeo = expressionOf(cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql);
             const ravot = expressionOf(cardOf(ravotDashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql);
 
-            expect(keeo).toContain("mpm.membershipTypeId IN ( '5d66134e-21b6-41f4-b791-f99779bec8c5', 'i-mtype-volledig-scoutsjaar', 'f2ffdcb2-5cb3-41ce-be5a-b39bf01570fa' )");
-            expect(ravot).toContain("mpm.membershipTypeId IN ( 'adb9882e-6b50-467a-b89f-0727c6aa9065', '41632f5f-23e5-4dec-b7b5-b16202d3d95f' )");
+            expect(keeo).toContain("member_platform_memberships.membershipTypeId IN ( '5d66134e-21b6-41f4-b791-f99779bec8c5', 'i-mtype-volledig-werkjaar', 'f2ffdcb2-5cb3-41ce-be5a-b39bf01570fa' )");
+            expect(ravot).toContain("member_platform_memberships.membershipTypeId IN ( 'adb9882e-6b50-467a-b89f-0727c6aa9065', '41632f5f-23e5-4dec-b7b5-b16202d3d95f' )");
 
             // The report reads a list of its own, kept in a file of its own even where it holds the
             // same ids: one may change without dragging the other along.
-            expect(cardOf(dashboards, 'nationaal', 'totaal-leden').snippets).toContain('ledenstatistieken-aansluitingen');
-            expect(cardOf(dashboards, 'nationaal', 'totaal-leden').snippets).not.toContain('aanlevering-aansluitingen');
+            expect(cardOf(dashboards, 'nationaal', 'totaal-leden').snippets).toContain('filter-statistics-memberships');
+            expect(cardOf(dashboards, 'nationaal', 'totaal-leden').snippets).not.toContain('filter-delivery-memberships');
         });
 
-        /**
-         * A delivery is filed over one werkjaar, so every werkjaar at once is not one. The filter that
-         * picks it is the only one of the report that has to be answered: without it the sheets would
-         * hand the department the sum of every year the statistics hold, which is the wrong way for a
-         * delivery to fail.
-         */
-        it('makes the werkjaar the one filter the aanlevering cannot be read without', () => {
+        it('requires a werkjaar on both the ledenstatistieken and the aanlevering', () => {
             for (const dashboard of dashboards) {
-                const expected = dashboard.key === 'jeugdbewegingen' ? 'scoutsjaar' : '';
+                const expected = dashboard.hidden ? '' : 'werkjaar';
                 expect(`${dashboard.key}: ${dashboard.required.join(',')}`).toEqual(`${dashboard.key}: ${expected}`);
             }
         });
@@ -388,8 +389,8 @@ describe('report', () => {
             const [bovenlokaal, lokaal] = ['organisatie-bovenlokaal', 'organisatie-lokale-groep']
                 .map(key => cardOf(dashboards, 'jeugdbewegingen', key).sql.replaceAll(/\s+/g, ' '));
 
-            expect(bovenlokaal).toContain('JOIN platform pf ON pf.membershipOrganizationId = o.id');
-            expect(lokaal).toContain('NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = o.id)');
+            expect(bovenlokaal).toContain('JOIN platform ON platform.membershipOrganizationId = organizations.id');
+            expect(lokaal).toContain('NOT EXISTS (SELECT 1 FROM platform WHERE platform.membershipOrganizationId = organizations.id)');
         });
 
         /**
@@ -400,7 +401,7 @@ describe('report', () => {
         it('delivers a postcode as the number the template asks for, and nothing when it is not one', () => {
             const sql = cardOf(dashboards, 'jeugdbewegingen', 'organisatie-lokale-groep').sql.replaceAll(/\s+/g, ' ');
 
-            expect(sql).toContain("CASE WHEN o.postalCode REGEXP '^[0-9]{4}$' THEN CAST(o.postalCode AS UNSIGNED) END");
+            expect(sql).toContain("CASE WHEN organizations.postalCode REGEXP '^[0-9]{4}$' THEN CAST(organizations.postalCode AS UNSIGNED) END");
         });
 
         /**
@@ -441,55 +442,55 @@ describe('report', () => {
             for (const card of cards) {
                 const sql = card.sql.replaceAll(/\s+/g, ' ');
 
-                expect(`${card.key}: ${sql.includes('CASE WHEN mpm.reducedPrice = 1')}`).toEqual(`${card.key}: true`);
+                expect(`${card.key}: ${sql.includes('CASE WHEN member_platform_memberships.reducedPrice = 1')}`).toEqual(`${card.key}: true`);
                 expect(`${card.key}: ${sql.includes("ELSE 'Standaardtarief' END AS `Type lidgeld`")}`).toEqual(`${card.key}: true`);
-                expect(`${card.key}: ${sql.includes('SELECT pf.reducedPriceName FROM platform pf')}`).toEqual(`${card.key}: true`);
-                expect(`${card.key}: ${sql.includes("COALESCE((SELECT pf.reducedPriceName FROM platform pf WHERE pf.reducedPriceName IS NOT NULL LIMIT 1), 'Verlaagd tarief')")}`).toEqual(`${card.key}: true`);
+                expect(`${card.key}: ${sql.includes('SELECT platform.reducedPriceName FROM platform')}`).toEqual(`${card.key}: true`);
+                expect(`${card.key}: ${sql.includes("COALESCE((SELECT platform.reducedPriceName FROM platform WHERE platform.reducedPriceName IS NOT NULL LIMIT 1), 'Verlaagd tarief')")}`).toEqual(`${card.key}: true`);
                 expect(`${card.key}: ${sql.includes('mt.name AS `Type lidgeld`')}`).toEqual(`${card.key}: false`);
             }
 
             // One expression, so the two cards cannot start naming the same tarief differently.
-            expect(new Set(cards.map(card => card.sql.replaceAll(/\s+/g, ' ').match(/CASE WHEN mpm\.reducedPrice.*?END/)?.[0])).size).toBe(1);
+            expect(new Set(cards.map(card => card.sql.replaceAll(/\s+/g, ' ').match(/CASE WHEN member_platform_memberships\.reducedPrice.*?END/)?.[0])).size).toBe(1);
         });
 
         /**
          * The weights of the index, kept here because nothing else checks them: a wrong weight, or a
-         * tak weighed under an id that is not the one the platform holds it under, is a plausible
+         * leeftijdsgroep weighed under an id that is not the one the platform holds it under, is a plausible
          * number rather than a failure.
          *
-         * The ids rather than the names, which is what the takken were matched on until a name turned
+         * The ids rather than the names, which is what the leeftijdsgroepen were matched on until a name turned
          * out to say different things in different years: the import writes `Bevers of Zeehonden`
          * where the sync writes what the platform configuration spells today, and the client's own
-         * formula spells them a third way again. Every one of these is a tak of
-         * `keeo/tak-categorie.sql`, so the two lists have to keep saying the same ids.
+         * formula spells them a third way again. Every one of these is a leeftijdsgroep of
+         * `keeo/default-age-group-category.sql`, so the two lists have to keep saying the same ids.
          */
-        it('weighs each tak of the GTP index as the formula does', () => {
+        it('weighs each leeftijdsgroep of the GTP index as the formula does', () => {
             const sql = expressionOf(cardOf(dashboards, 'eenheden', 'eenheid-gtp').sql);
             const categories = cardOf(dashboards, 'eenheden', 'eenheid-gtp').sql;
 
-            for (const [tak, term] of [
-                ['Bevers, Zeehonden, Eekhoorns en Welpen', "( COUNT(DISTINCT CASE WHEN tak_id = 'f274a949-9318-4c2b-ae35-e50114efe686' THEN member_id END) + COUNT(DISTINCT CASE WHEN tak_id = '316ea554-675a-493e-a152-365012851ae3' THEN member_id END) ) / 3"],
-                ['Wolven', "+ COUNT(DISTINCT CASE WHEN tak_id = '01d62f7d-c3fa-4314-a33a-21da526a35ff' THEN member_id END)"],
-                ['JVG/JG-A', "+ COUNT(DISTINCT CASE WHEN tak_id = '57143f32-e4d2-46a7-96e2-9bf82f121e1c' THEN member_id END)"],
-                ['VG/G-J', "+ 2 * COUNT(DISTINCT CASE WHEN tak_id = '0eacf56f-3a1d-4e15-bebc-2bc66fc74c7a' THEN member_id END)"],
-                ['Seniors', "+ 3 * COUNT(DISTINCT CASE WHEN tak_id = 'b2275ec6-04ad-4232-bfe3-0eefed97f83b' THEN member_id END)"],
-                ['Leiding', "+ COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END)"],
-                ['omkaderingscijfer', "- 2 * COUNT(DISTINCT CASE WHEN tak_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END), 0)"],
+            for (const [leeftijdsgroep, term] of [
+                ['Bevers, Zeehonden, Eekhoorns en Welpen', "( COUNT(DISTINCT CASE WHEN age_group_id = 'f274a949-9318-4c2b-ae35-e50114efe686' THEN member_id END) + COUNT(DISTINCT CASE WHEN age_group_id = '316ea554-675a-493e-a152-365012851ae3' THEN member_id END) ) / 3"],
+                ['Wolven', "+ COUNT(DISTINCT CASE WHEN age_group_id = '01d62f7d-c3fa-4314-a33a-21da526a35ff' THEN member_id END)"],
+                ['JVG/JG-A', "+ COUNT(DISTINCT CASE WHEN age_group_id = '57143f32-e4d2-46a7-96e2-9bf82f121e1c' THEN member_id END)"],
+                ['VG/G-J', "+ 2 * COUNT(DISTINCT CASE WHEN age_group_id = '0eacf56f-3a1d-4e15-bebc-2bc66fc74c7a' THEN member_id END)"],
+                ['Seniors', "+ 3 * COUNT(DISTINCT CASE WHEN age_group_id = 'b2275ec6-04ad-4232-bfe3-0eefed97f83b' THEN member_id END)"],
+                ['Leiding', "+ COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END)"],
+                ['omkaderingscijfer', "- 2 * COUNT(DISTINCT CASE WHEN age_group_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END), 0)"],
             ]) {
-                expect(`${tak}: ${sql.includes(term)}`).toEqual(`${tak}: true`);
+                expect(`${leeftijdsgroep}: ${sql.includes(term)}`).toEqual(`${leeftijdsgroep}: true`);
             }
 
-            // No tak is weighed by a name any more, and every id it weighs is one the categories name
+            // No leeftijdsgroep is weighed by a name any more, and every id it weighs is one the categories name
             // as kinderen -- the index has no term for anything else.
-            expect(sql).not.toContain('`Tak` =');
-            for (const [, term] of [...sql.matchAll(/tak_id = '([0-9a-f-]{36})'/g)].map(match => [match[0], match[1]])) {
+            expect(sql).not.toContain('`Leeftijdsgroep` =');
+            for (const [, term] of [...sql.matchAll(/age_group_id = '([0-9a-f-]{36})'/g)].map(match => [match[0], match[1]])) {
                 expect(`${term} is kinderen: ${new RegExp(`WHEN '${term}' THEN 'child'`).test(categories)}`).toEqual(`${term} is kinderen: true`);
             }
         });
 
         /**
          * Ravot weighs the same index by the age a lid reaches in the werkjaar rather than by their
-         * tak, counts a leider as one and a half, and subtracts an omkaderingscijfer over the
+         * leeftijdsgroep, counts a leider as one and a half, and subtracts an omkaderingscijfer over the
          * kinderen under seventeen alone. Kept here for the same reason as the weights above: a
          * wrong one is a plausible number rather than a failure.
          */
@@ -497,33 +498,33 @@ describe('report', () => {
             const sql = cardOf(ravotDashboards, 'eenheden', 'eenheid-gtp').sql.replaceAll(/\s+/g, ' ');
 
             for (const [bucket, term] of [
-                ['jonger dan 10', "ROUND( COUNT(DISTINCT CASE WHEN tak_category = 'child' AND leeftijd < 10 THEN member_id END) / 3"],
-                ['10 tot 13', "+ COUNT(DISTINCT CASE WHEN tak_category = 'child' AND leeftijd BETWEEN 10 AND 13 THEN member_id END)"],
-                ['14 tot 15', "+ 2 * COUNT(DISTINCT CASE WHEN tak_category = 'child' AND leeftijd BETWEEN 14 AND 15 THEN member_id END)"],
-                ['16', "+ 3 * COUNT(DISTINCT CASE WHEN tak_category = 'child' AND leeftijd = 16 THEN member_id END)"],
-                ['Leiding', "+ 1.5 * COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END)"],
-                ['omkaderingscijfer', "- 2 * COUNT(DISTINCT CASE WHEN tak_category = 'child' AND leeftijd < 17 THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END), 0)"],
+                ['jonger dan 10', "ROUND( COUNT(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd < 10 THEN member_id END) / 3"],
+                ['10 tot 13', "+ COUNT(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd BETWEEN 10 AND 13 THEN member_id END)"],
+                ['14 tot 15', "+ 2 * COUNT(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd BETWEEN 14 AND 15 THEN member_id END)"],
+                ['16', "+ 3 * COUNT(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd = 16 THEN member_id END)"],
+                ['Leiding', "+ 1.5 * COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END)"],
+                ['omkaderingscijfer', "- 2 * COUNT(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd < 17 THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END), 0)"],
             ]) {
                 expect(`${bucket}: ${sql.includes(term)}`).toEqual(`${bucket}: true`);
             }
 
             // The age says which bucket a kind falls in, never whether they are one: a leider of
-            // sixteen is leiding here, and the tak weighs nothing at all.
-            expect(sql).not.toContain('`Tak` =');
+            // sixteen is leiding here, and the leeftijdsgroep weighs nothing at all.
+            expect(sql).not.toContain('`Leeftijdsgroep` =');
         });
 
         /**
-         * What a tak counts as is the one thing about it that nothing in the administration knows,
+         * What a leeftijdsgroep counts as is the one thing about it that nothing in the administration knows,
          * and nothing in the statistics database holds either: this list is the whole answer.
          *
-         * Kept here for the same reason as the weights above. A tak that falls out of the list is a
+         * Kept here for the same reason as the weights above. A leeftijdsgroep that falls out of the list is a
          * plausible number rather than a failure: it is still counted in the totals, and in none of
          * the three categories, so the report goes on adding up while quietly saying less.
          */
-        it('names every tak of keeo in the query, which is the whole answer', () => {
+        it('names every leeftijdsgroep of keeo in the query, which is the whole answer', () => {
             const sql = cardOf(dashboards, 'nationaal', 'totaal-leden').sql;
 
-            for (const [tak, term] of [
+            for (const [leeftijdsgroep, term] of [
                 ['Bevers en Zeehonden', "WHEN 'f274a949-9318-4c2b-ae35-e50114efe686' THEN 'child'"],
                 ['Welpen', "WHEN '316ea554-675a-493e-a152-365012851ae3' THEN 'child'"],
                 ['Wolven', "WHEN '01d62f7d-c3fa-4314-a33a-21da526a35ff' THEN 'child'"],
@@ -537,28 +538,28 @@ describe('report', () => {
                 ['Ereleden', "WHEN '8d42d2df-7787-4959-995d-c5a85d0e48c9' THEN 'adult'"],
                 ['Ondersteunende leden', "WHEN 'ac8848e9-9868-44a1-a057-2a189cce68ea' THEN 'adult'"],
             ]) {
-                expect(`${tak}: ${sql.includes(term)}`).toEqual(`${tak}: true`);
+                expect(`${leeftijdsgroep}: ${sql.includes(term)}`).toEqual(`${leeftijdsgroep}: true`);
             }
 
-            // Every tak of the platform and no more: a second row for one of them would sit under the
+            // Every leeftijdsgroep of the platform and no more: a second row for one of them would sit under the
             // first and say nothing, which reads as a correction that was never applied.
             expect(sql.match(/WHEN '[0-9a-f-]{36}' THEN/g)!.length).toBe(12);
-            // Nothing behind the list: the statistics database holds no category of its own, so a tak
+            // Nothing behind the list: the statistics database holds no category of its own, so a leeftijdsgroep
             // missing here is counted as nothing rather than falling back to something.
-            expect(sql).not.toContain('ELSE dag.category');
+            expect(sql).not.toContain('ELSE default_age_groups.category');
         });
 
         /**
-         * The same for ravot, whose takken divide differently: the ondersteunende leden are
+         * The same for ravot, whose leeftijdsgroepen divide differently: the ondersteunende leden are
          * volwassenen and may not be categorised as leiding, since the omkaderingscijfer and the GTP
          * index would then read them as leiding the kinderen of an eenheid are looked after by. The
-         * aanlevering delivers them among the leiding all the same, by naming the tak itself in
+         * aanlevering delivers them among the leiding all the same, by naming the leeftijdsgroep itself in
          * `ravot/type-deelnemers.sql`, which only works while the category does not say it.
          */
-        it('names every tak of ravot in the query, with the ondersteunende leden apart from the leiding', () => {
+        it('names every leeftijdsgroep of ravot in the query, with the ondersteunende leden apart from the leiding', () => {
             const sql = cardOf(ravotDashboards, 'nationaal', 'totaal-leden').sql;
 
-            for (const [tak, term] of [
+            for (const [leeftijdsgroep, term] of [
                 ['Leeuwkes, Kabouters en Sloebers', "WHEN 'bd63a6ef-d4a1-497d-87a5-d7c36b4ad220' THEN 'child'"],
                 ['Springers en Pagadders', "WHEN '23607074-624b-472f-926f-c719bb44e314' THEN 'child'"],
                 ['Jongknapen, Roodkapjes en Joro\'s', "WHEN '5730f613-fb72-465b-b902-45b281a0e8b8' THEN 'child'"],
@@ -569,37 +570,37 @@ describe('report', () => {
                 ['Leiding', "WHEN 'e3ec8d48-0d10-4f5d-9e50-dd3151c6666b' THEN 'leader'"],
                 ['Ondersteunende leden', "WHEN 'a28d290c-af71-4282-92cc-2224a18d3091' THEN 'adult'"],
             ]) {
-                expect(`${tak}: ${sql.includes(term)}`).toEqual(`${tak}: true`);
+                expect(`${leeftijdsgroep}: ${sql.includes(term)}`).toEqual(`${leeftijdsgroep}: true`);
             }
 
             expect(sql.match(/WHEN '[0-9a-f-]{36}' THEN/g)!.length).toBe(9);
-            expect(sql).not.toContain('ELSE dag.category');
+            expect(sql).not.toContain('ELSE default_age_groups.category');
         });
 
         /**
-         * A platform that names none of its takken has no answer at all -- nothing else in the
+         * A platform that names none of its leeftijdsgroepen has no answer at all -- nothing else in the
          * statistics database holds one. The report still runs and still counts its members; every
          * figure that divides leiding from kinderen is simply empty until the list is written. Both
          * platforms with a report of their own name theirs, so this reads an environment that
          * overrides nothing.
          */
-        it('has no category at all in an environment that names no takken', async () => {
+        it('has no category at all in an environment that names no leeftijdsgroepen', async () => {
             const sql = cardOf(await loadReport('development'), 'nationaal', 'totaal-leden').sql;
 
-            expect(sql).toContain('CAST(NULL AS CHAR(16)) AS category');
-            expect(`names takken by id: ${/WHEN '[0-9a-f-]{36}' THEN/.test(sql)}`).toEqual('names takken by id: false');
+            expect(sql.replaceAll(/\s+/g, ' ')).toContain('CAST(NULL AS CHAR(16)) AS category');
+            expect(`names leeftijdsgroepen by id: ${/WHEN '[0-9a-f-]{36}' THEN/.test(sql)}`).toEqual('names leeftijdsgroepen by id: false');
         });
 
         /**
-         * Both grains of `facts` read the takken through the fragment that decides the category, and
-         * a card reaching for `default_age_groups` beside it would count an uncategorised tak while
+         * Both grains of `facts` read the leeftijdsgroepen through the fragment that decides the category, and
+         * a card reaching for `default_age_groups` beside it would count an uncategorised leeftijdsgroep while
          * the rest of the report has it categorised. Nothing about a card says which it does.
          */
-        it('reads every tak through the fragment that decides its category', () => {
+        it('reads every leeftijdsgroep through the fragment that decides its category', () => {
             for (const [env, tabs] of [['keeo', dashboards], ['ravot', ravotDashboards]] as const) {
                 for (const card of tabs.flatMap(tab => tab.cards)) {
                     const reads = [...card.sql.matchAll(/\b(?:FROM|JOIN) default_age_groups\b/g)].map(match => match[0]);
-                    const expected = card.sql.includes('takken AS (') ? ['FROM default_age_groups'] : [];
+                    const expected = card.sql.includes('default_age_groups_with_category AS (') ? ['FROM default_age_groups'] : [];
 
                     expect(`${env}/${card.key}: ${reads.join(' + ')}`).toEqual(`${env}/${card.key}: ${expected.join(' + ')}`);
                 }
@@ -608,8 +609,8 @@ describe('report', () => {
 
         /**
          * Both formulas weigh members rather than registrations, and only the fragment below them
-         * makes that true: a member in two takken stands in `facts` twice, and every term of the
-         * index would weigh them twice over -- as leiding and as a lid, or in two takken at once.
+         * makes that true: a member in two leeftijdsgroepen stands in `facts` twice, and every term of the
+         * index would weigh them twice over -- as leiding and as a lid, or in two leeftijdsgroepen at once.
          * Nothing about a card says which of the two it reads, so it is checked here.
          */
         it('counts every card of the ledenstatistieken over members rather than over their registrations', () => {
@@ -617,17 +618,17 @@ describe('report', () => {
                 for (const tab of tabs.filter(tab => tab.dashboard === undefined)) {
                     for (const card of tab.cards) {
                         const sql = card.sql.replaceAll(/\s+/g, ' ');
-                        if (!sql.includes('facts AS (')) {
+                        if (!sql.includes('non_platform_registrations AS (')) {
                             continue;
                         }
 
                         // What the card itself selects, past the fragments it opens with. The last of
                         // them reads `facts` to build `leden` out of it, which the card may not.
-                        const query = sql.slice(sql.indexOf('WHERE g.rang = 1 )'));
+                        const query = sql.slice(sql.indexOf('WHERE deduplicated.rang = 1 )'));
                         const where = `${env} ${tab.key}/${card.key}`;
 
-                        expect(`${where}: ${sql.includes(', leden AS (')}`).toEqual(`${where}: true`);
-                        expect(`${where}: ${/\b(?:FROM|JOIN) facts\b/.test(query)}`).toEqual(`${where}: false`);
+                        expect(`${where}: ${sql.includes('WITH leden AS (')}`).toEqual(`${where}: true`);
+                        expect(`${where}: ${/\b(?:FROM|JOIN) non_platform_registrations\b/.test(query)}`).toEqual(`${where}: false`);
                     }
                 }
             }
@@ -643,7 +644,7 @@ describe('report', () => {
             expect(tabs.map(tab => tab.key)).toEqual(['jeugdbewegingen']);
 
             for (const card of tabs[0].cards) {
-                expect(`${card.key}: ${card.sql.includes(', leden AS (')}`).toEqual(`${card.key}: false`);
+                expect(`${card.key}: ${card.sql.includes('leden AS (')}`).toEqual(`${card.key}: false`);
             }
         });
 
@@ -651,19 +652,19 @@ describe('report', () => {
          * Which registration of a member speaks for them. One that still stands beats one that was
          * cancelled -- a cancelled registration says someone was there, not what they were, so a lid
          * put in Leiding by mistake and taken out again is not leiding for the rest of the werkjaar.
-         * Then leiding beats lid, so someone leiding in one tak and lid in another is leiding and
-         * nothing else; between two takken the oldest wins; and the name of the tak settles what
+         * Then leiding beats lid, so someone leiding in one leeftijdsgroep and lid in another is leiding and
+         * nothing else; between two leeftijdsgroepen the oldest wins; and the name of the leeftijdsgroep settles what
          * neither can, so two runs of the same query cannot pick differently.
          */
         it('lets the strongest registration of a member say what they are', () => {
             const sql = cardOf(dashboards, 'eenheden', 'eenheid-gtp').sql.replaceAll(/\s+/g, ' ');
 
-            expect(sql).toContain('ROW_NUMBER() OVER ( PARTITION BY f.organization_id, f.`Scoutsjaar`, f.member_id ORDER BY '
-                + '(f.deactivated_at IS NULL) DESC, '
-                + "CASE f.tak_category WHEN 'leader' THEN 3 WHEN 'child' THEN 2 WHEN 'adult' THEN 1 ELSE 0 END DESC, "
-                + "CASE f.effective_category WHEN 'leader' THEN 3 WHEN 'child' THEN 2 WHEN 'adult' THEN 1 ELSE 0 END DESC, "
-                + 'f.tak_min_age DESC, f.`Tak` ) AS rang');
-            expect(sql).toContain('WHERE g.rang = 1');
+            expect(sql).toContain('ROW_NUMBER() OVER ( PARTITION BY non_platform_registrations.organization_id, non_platform_registrations.`Werkjaar`, non_platform_registrations.member_id ORDER BY '
+                + '(non_platform_registrations.deactivated_at IS NULL) DESC, '
+                + "CASE non_platform_registrations.age_group_category WHEN 'leader' THEN 3 WHEN 'child' THEN 2 WHEN 'adult' THEN 1 ELSE 0 END DESC, "
+                + "CASE non_platform_registrations.effective_category WHEN 'leader' THEN 3 WHEN 'child' THEN 2 WHEN 'adult' THEN 1 ELSE 0 END DESC, "
+                + 'non_platform_registrations.age_group_min_age DESC, non_platform_registrations.`Leeftijdsgroep` ) AS rang');
+            expect(sql).toContain('WHERE deduplicated.rang = 1');
         });
 
         /**
@@ -674,10 +675,10 @@ describe('report', () => {
          */
         it('subtracts the same omkaderingscijfer it puts on the screen', () => {
             for (const [env, tabs, pattern, divisie] of [
-                ['keeo', dashboards, /ROUND\( \( COUNT\(DISTINCT CASE WHEN tak_id.*?, 2\)/,
-                    "COUNT(DISTINCT CASE WHEN tak_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END), 0)"],
-                ['ravot', ravotDashboards, /ROUND\( COUNT\(DISTINCT CASE WHEN tak_category.*?, 2\)/,
-                    "COUNT(DISTINCT CASE WHEN tak_category = 'child' AND leeftijd < 17 THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END), 0)"],
+                ['keeo', dashboards, /ROUND\( \( COUNT\(DISTINCT CASE WHEN age_group_id.*?, 2\)/,
+                    "COUNT(DISTINCT CASE WHEN age_group_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END), 0)"],
+                ['ravot', ravotDashboards, /ROUND\( COUNT\(DISTINCT CASE WHEN age_group_category.*?, 2\)/,
+                    "COUNT(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd < 17 THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END), 0)"],
             ] as const) {
                 const index = cardOf(tabs, 'eenheden', 'eenheid-gtp').sql.replaceAll(/\s+/g, ' ').match(pattern)?.[0];
                 const cijfer = cardOf(tabs, 'eenheden', 'eenheid-omkaderingscijfer').sql.replaceAll(/\s+/g, ' ');
@@ -695,10 +696,10 @@ describe('report', () => {
          */
         it('computes the GTP index from one expression wherever it is shown', () => {
             for (const [env, tabs, pattern] of [
-                ['keeo', dashboards, /ROUND\( \( COUNT\(DISTINCT CASE WHEN tak_id = 'f274a949-9318-4c2b-ae35-e50114efe686'.*?, 2\)/],
-                ['ravot', ravotDashboards, /ROUND\( COUNT\(DISTINCT CASE WHEN tak_category = 'child' AND leeftijd < 10.*?, 2\)/],
+                ['keeo', dashboards, /ROUND\( \( COUNT\(DISTINCT CASE WHEN age_group_id = 'f274a949-9318-4c2b-ae35-e50114efe686'.*?, 2\)/],
+                ['ravot', ravotDashboards, /ROUND\( COUNT\(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd < 10.*?, 2\)/],
             ] as const) {
-                const expressions = [['nationaal', 'leden-per-eenheid'], ['eenheden', 'eenheid-gtp'], ['eenheden', 'eenheid-gtp-meter'], ['eenheden', 'eenheid-gtp-per-scoutsjaar']]
+                const expressions = [['nationaal', 'leden-per-eenheid'], ['eenheden', 'eenheid-gtp'], ['eenheden', 'eenheid-gtp-meter'], ['eenheden', 'eenheid-gtp-per-werkjaar']]
                     .map(([tab, key]) => cardOf(tabs, tab, key).sql.replaceAll(/\s+/g, ' ').match(pattern)?.[0]);
 
                 expect(`${env}: ${expressions.filter(expression => expression !== undefined).length}`).toEqual(`${env}: 4`);
@@ -718,12 +719,12 @@ describe('report', () => {
         });
 
         /**
-         * The three ratio charts of the page are read per scoutsjaar rather than as a trend, which
+         * The three ratio charts of the page are read per werkjaar rather than as a trend, which
          * is what a row chart draws: one bar per year, the year beside it. Metabase draws the first
          * row it is given at the top, so the sql of each of them has to come back the other way
-         * round from every other card over the years -- the most recent scoutsjaar first.
+         * round from every other card over the years -- the most recent werkjaar first.
          */
-        it('gives the ratio charts their most recent scoutsjaar on top', () => {
+        it('gives the ratio charts their most recent werkjaar on top', () => {
             for (const key of ['eenheid-jong-versus-oud', 'eenheid-geslacht-kinderen-per-jaar', 'eenheid-geslacht-leiding-per-jaar']) {
                 const card = cardOf(dashboards, 'eenheden', key);
 
@@ -760,7 +761,7 @@ describe('report', () => {
          */
         it('colors every geslacht the facts can hold', () => {
             for (const key of ['eenheid-leden-per-geslacht', 'eenheid-geslacht-kinderen-per-jaar']) {
-                const written = /CASE m\.gender([\s\S]*?)END AS `Geslacht`/.exec(cardOf(dashboards, 'eenheden', key).sql);
+                const written = /CASE members\.gender([\s\S]*?)END AS `Geslacht`/.exec(cardOf(dashboards, 'eenheden', key).sql);
                 const values = [...(written?.[1] ?? '').matchAll(/(?:THEN|ELSE) '([^']+)'/g)].map(match => match[1]);
 
                 expect(`${key}: ${values.sort().join(',')}`).toEqual(`${key}: ${Object.keys(columnPalettes.get('Geslacht')!).sort().join(',')}`);
@@ -857,10 +858,10 @@ describe('report', () => {
          */
         it('counts the omkaderingscijfer the same way wherever it is shown', () => {
             for (const [env, tabs, expression] of [
-                ['keeo', dashboards, "ROUND( COUNT(DISTINCT CASE WHEN tak_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END), 0), 2)"],
-                ['ravot', ravotDashboards, "ROUND( COUNT(DISTINCT CASE WHEN tak_category = 'child' AND leeftijd < 17 THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN tak_category = 'leader' THEN member_id END), 0), 2)"],
+                ['keeo', dashboards, "ROUND( COUNT(DISTINCT CASE WHEN age_group_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END), 0), 2)"],
+                ['ravot', ravotDashboards, "ROUND( COUNT(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd < 17 THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END), 0), 2)"],
             ] as const) {
-                for (const key of ['eenheid-omkaderingscijfer', 'eenheid-omkaderingscijfer-meter', 'eenheid-omkaderingscijfer-per-scoutsjaar']) {
+                for (const key of ['eenheid-omkaderingscijfer', 'eenheid-omkaderingscijfer-meter', 'eenheid-omkaderingscijfer-per-werkjaar']) {
                     const sql = cardOf(tabs, 'eenheden', key).sql.replaceAll(/\s+/g, ' ');
 
                     expect(`${env} ${key}: ${sql.includes(expression)}`).toEqual(`${env} ${key}: true`);
@@ -869,13 +870,13 @@ describe('report', () => {
         });
 
         /**
-         * Ledenbehoud counts forward: next to scoutsjaar N stands the share of N's own members that
+         * Ledenbehoud counts forward: next to werkjaar N stands the share of N's own members that
          * was still registered in N+1, the way the client's report reads it. Turned around it is the
          * same figure shifted a year -- a plausible number rather than a failure -- so every card
          * that measures it is checked here. The last year has no year after it and drops out; left
          * in, it would read as 0% ledenbehoud instead of as missing.
          */
-        it('measures ledenbehoud from the scoutsjaar it labels into the year after it', () => {
+        it('measures ledenbehoud from the werkjaar it labels into the year after it', () => {
             const cards = dashboards.flatMap(dashboard => dashboard.cards
                 .filter(card => card.sql.includes('LEAD(name)'))
                 .map(card => [dashboard.key, card] as const));
@@ -883,15 +884,15 @@ describe('report', () => {
             expect(cards.map(([dashboard, card]) => `${dashboard}/${card.key}`)).toEqual([
                 'nationaal/percentage-blijvers-per-eenheid',
                 'eenheden/eenheid-ledenbehoud',
-                'eenheden/eenheid-ledenbehoud-per-tak',
+                'eenheden/eenheid-ledenbehoud-per-leeftijdsgroep',
                 'eenheden/eenheid-evolutie-ledenbehoud',
-                'eenheden/eenheid-evolutie-blijvers-per-tak',
+                'eenheden/eenheid-evolutie-blijvers-per-leeftijdsgroep',
             ]);
 
             for (const [, card] of cards) {
                 const sql = card.sql.replaceAll(/\s+/g, ' ');
-                const cohort = /JOIN leden huidig ON huidig\.`Scoutsjaar` = \w+\.name/.test(sql);
-                const blijvers = /gebleven\.`Scoutsjaar` = \w+\.volgend/.test(sql);
+                const cohort = /JOIN leden huidig ON huidig\.`Werkjaar` = \w+\.name/.test(sql);
+                const blijvers = /gebleven\.`Werkjaar` = \w+\.volgend/.test(sql);
 
                 expect(`${card.key}: cohort ${cohort}, blijvers ${blijvers}, laatste jaar weg ${sql.includes('volgend IS NOT NULL')}`)
                     .toEqual(`${card.key}: cohort true, blijvers true, laatste jaar weg true`);
@@ -912,8 +913,8 @@ describe('report', () => {
                 'eenheid-totaal-leden', 'eenheid-aantal-kinderen', 'eenheid-aantal-leiding',
                 'eenheid-aantal-volwassenen', 'eenheid-gtp', 'eenheid-omkaderingscijfer',
             ]);
-            expect(rowWith('eenheid-gtp-meter')).toEqual(['eenheid-gtp-meter', 'eenheid-gtp-per-scoutsjaar']);
-            expect(rowWith('eenheid-omkaderingscijfer-meter')).toEqual(['eenheid-omkaderingscijfer-meter', 'eenheid-omkaderingscijfer-per-scoutsjaar']);
+            expect(rowWith('eenheid-gtp-meter')).toEqual(['eenheid-gtp-meter', 'eenheid-gtp-per-werkjaar']);
+            expect(rowWith('eenheid-omkaderingscijfer-meter')).toEqual(['eenheid-omkaderingscijfer-meter', 'eenheid-omkaderingscijfer-per-werkjaar']);
             expect(rowWith('eenheid-kinderen-per-geslacht')).toEqual(['eenheid-geslacht-kinderen-per-jaar', 'eenheid-kinderen-per-geslacht']);
             expect(rowWith('eenheid-leiding-per-geslacht')).toEqual(['eenheid-geslacht-leiding-per-jaar', 'eenheid-leiding-per-geslacht']);
             expect(rows.filter(row => row.heights.length !== 1)).toEqual([]);
@@ -969,10 +970,10 @@ describe('report', () => {
         });
 
         it('gives the unit filter to the eenheden tab only, as the report does', () => {
-            expect(dashboards.find(dashboard => dashboard.key === 'eenheden')!.filters).toEqual(['scoutsjaar', 'eenheid']);
+            expect(dashboards.find(dashboard => dashboard.key === 'eenheden')!.filters).toEqual(['werkjaar', 'eenheid', 'platformleden_opnemen']);
 
             for (const key of ['nationaal', 'netwerk', 'varia']) {
-                expect(`${key}: ${dashboards.find(dashboard => dashboard.key === key)!.filters.join(',')}`).toEqual(`${key}: scoutsjaar`);
+                expect(`${key}: ${dashboards.find(dashboard => dashboard.key === key)!.filters.join(',')}`).toEqual(`${key}: werkjaar,platformleden_opnemen`);
             }
         });
 
@@ -1000,10 +1001,10 @@ describe('report', () => {
          */
         it('counts the leeftijdsgroepen and the activiteiten as being a lid, and the wachtlijsten as nobody', () => {
             for (const dashboard of dashboards.filter(dashboard => !dashboard.hidden)) {
-                for (const card of dashboard.cards.filter(card => card.snippets.includes('inschrijvingen'))) {
+                for (const card of dashboard.cards.filter(card => card.snippets.includes('filter-registration-types'))) {
                     const sql = expressionOf(card.sql);
 
-                    expect(`${card.key}: ${sql.includes("g.type IN ('Membership', 'EventRegistration')")}`).toEqual(`${card.key}: true`);
+                    expect(`${card.key}: ${sql.includes("`groups`.type IN ('Membership', 'EventRegistration')")}`).toEqual(`${card.key}: true`);
                     expect(`${card.key}: ${sql.includes('WaitingList')}`).toEqual(`${card.key}: false`);
                 }
             }
@@ -1011,7 +1012,7 @@ describe('report', () => {
             // Every card that reads a grain reads it: what counts as a lid is decided once, and a
             // card that got its rows from somewhere else would count a different set of people.
             const without = dashboards.flatMap(dashboard => dashboard.cards
-                .filter(card => (card.snippets.includes('facts') || card.snippets.includes('facts-alle-jaren')) && !card.snippets.includes('inschrijvingen'))
+                .filter(card => (card.snippets.includes('all-non-platform-registrations') || card.snippets.includes('all-non-platform-registrations-all-years')) && !card.snippets.includes('filter-registration-types'))
                 .map(card => card.key));
 
             expect(without).toEqual([]);
@@ -1028,7 +1029,7 @@ describe('report', () => {
                 const sql = cardOf(dashboards, 'jeugdbewegingen', key).sql;
 
                 {
-                    expect(`${key}: ${resolveSql(sql, {}).includes("f.group_type = 'Membership'")}`).toEqual(`${key}: true`);
+                    expect(`${key}: ${resolveSql(sql, {}).includes("all_registrations.group_type = 'Membership'")}`).toEqual(`${key}: true`);
                 }
             }
         });
@@ -1042,7 +1043,7 @@ describe('report', () => {
             // the ones that touch, so those two stand upright.
             expect(cardOf(dashboards, 'nationaal', 'leden-per-eenheid').xLabels).toEqual('rotate-90');
             expect(cardOf(dashboards, 'nationaal', 'percentage-blijvers-per-eenheid').xLabels).toEqual('rotate-90');
-            expect(cardOf(dashboards, 'nationaal', 'leden-per-tak-vergelijking').xLabels).toEqual('rotate-45');
+            expect(cardOf(dashboards, 'nationaal', 'leden-per-leeftijdsgroep-vergelijking').xLabels).toEqual('rotate-45');
             expect(cardOf(dashboards, 'nationaal', 'leden-per-geboortejaar').xLabels).toBeUndefined();
         });
 
@@ -1182,8 +1183,8 @@ describe('report', () => {
         });
 
         it('offers every shared fragment as a snippet of its own', () => {
-            expect([...snippets.keys()]).toContain('facts');
-            expect([...snippets.keys()]).toContain('leden');
+            expect([...snippets.keys()]).toContain('all-non-platform-registrations');
+            expect([...snippets.keys()]).toContain('deduplicated-non-platform-registrations');
 
             for (const [name, sql] of snippets) {
                 expect(`${name}: ${/^[ \t]*--[ \t]*@include\b/m.test(sql)}`).toEqual(`${name}: false`);
@@ -1192,22 +1193,38 @@ describe('report', () => {
 
         /** A fragment refers to the fragments it reads the way a card does, so neither holds a copy. */
         it('leaves a fragment inside a fragment as a reference', () => {
-            expect(snippets.get('facts')).toContain('{{snippet: takken}}');
-            expect(snippets.get('facts')).not.toContain('takken AS (');
+            expect(snippets.get('all-non-platform-registrations')).toContain('{{snippet: all-registrations}}');
+            expect(snippets.get('all-registrations')).toContain('{{snippet: default-age-groups-with-category}}');
+            expect(snippets.get('all-non-platform-registrations')).not.toContain('FROM registrations r');
         });
 
         it('gives a fragment the variant of the environment it was loaded for', async () => {
             const ravot = new Map((await loadSnippets('ravot')).map(snippet => [snippet.name, snippet.sql]));
 
-            expect(ravot.get('gtp')).toContain('as ravot weighs it');
-            expect(snippets.get('gtp')).not.toContain('as ravot weighs it');
+            expect(ravot.get('gtp')).toContain('leeftijd < 10');
+            expect(snippets.get('gtp')).not.toContain('leeftijd < 10');
+        });
+
+        /**
+         * A fragment says what it is in its description rather than in a comment: the sidebar shows
+         * it next to the name, where a comment is only read after opening the fragment.
+         */
+        it('lifts the description line out of the sql and into the snippet', async () => {
+            const described = new Map((await loadSnippets('keeo')).map(snippet => [snippet.name, snippet]));
+
+            expect(described.get('deduplicated-non-platform-registrations')!.description).toContain('de inschrijving die voor het lid spreekt');
+            expect(described.get('deduplicated-non-platform-registrations')!.sql).not.toContain('description:');
+            // keeo names its aansluitingen without describing them, so the base fragment's words hold.
+            expect(described.get('filter-statistics-memberships')!.description).toContain('Zonder lijst telt elke aansluiting mee');
         });
 
         it('writes a card as the fragments it reads rather than a copy of them', () => {
             const card = cardOf(dashboards, 'nationaal', 'totaal-leden');
 
-            expect(card.snippetSql).toContain('{{snippet: facts}}');
-            expect(card.snippetSql).toContain('{{snippet: leden}}');
+            expect(card.snippetSql).toContain('{{snippet: deduplicated-non-platform-registrations}}');
+            // What `leden` reads is its own business: the card names it in a WITH of its own and
+            // never spells out what a lid is, nor which fragments that answer is built from.
+            expect(card.snippetSql).not.toContain('{{snippet: facts}}');
             expect(card.snippetSql).not.toContain('all_registrations AS (');
         });
 
@@ -1218,16 +1235,18 @@ describe('report', () => {
         it('names the fragments a card only reaches through another one', () => {
             const card = cardOf(dashboards, 'nationaal', 'totaal-leden');
 
-            expect(card.snippets[0]).toEqual('facts');
-            expect(card.snippets).toEqual(expect.arrayContaining(['facts', 'leden', 'takken', 'tak-categorie']));
+            expect(card.snippets[0]).toEqual('deduplicated-non-platform-registrations');
+            expect(card.snippets).toEqual(expect.arrayContaining(['deduplicated-non-platform-registrations', 'all-non-platform-registrations', 'all-registrations', 'default-age-groups-with-category', 'default-age-group-category']));
         });
 
         /** The tags of a question are read off the expanded query, so a filter inside a fragment counts. */
         it('keeps a filter that only a fragment uses on the card that reads it', () => {
             const card = cardOf(dashboards, 'nationaal', 'totaal-leden');
 
-            expect(card.snippetSql).not.toContain('{{scoutsjaar}}');
-            expect(card.parameters).toContain('scoutsjaar');
+            expect(card.snippetSql).not.toContain('{{werkjaar}}');
+            expect(card.parameters).toContain('werkjaar');
+            expect(card.snippetSql).not.toContain('{{platformleden_opnemen}}');
+            expect(card.parameters).toContain('platformleden_opnemen');
         });
     });
 
@@ -1297,11 +1316,11 @@ describe('report', () => {
 
     describe('resolveSql', () => {
         it('keeps an optional clause when its parameter has a value', () => {
-            expect(resolveSql('SELECT 1 [[AND name = {{scoutsjaar}}]]', { scoutsjaar: '2024 - 2025' })).toEqual("SELECT 1 AND name = '2024 - 2025'");
+            expect(resolveSql('SELECT 1 [[AND name = {{werkjaar}}]]', { werkjaar: '2024 - 2025' })).toEqual("SELECT 1 AND name = '2024 - 2025'");
         });
 
         it('drops an optional clause when it has none, which is what Metabase does', () => {
-            expect(resolveSql('SELECT 1 [[AND name = {{scoutsjaar}}]]', {})).toEqual('SELECT 1 ');
+            expect(resolveSql('SELECT 1 [[AND name = {{werkjaar}}]]', {})).toEqual('SELECT 1 ');
         });
 
         it('escapes a quote rather than ending the string', () => {

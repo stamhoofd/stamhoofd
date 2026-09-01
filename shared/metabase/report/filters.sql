@@ -3,11 +3,11 @@
 -- hidden: true
 -- description: Deze vragen vullen de keuzelijsten van de filters bovenaan de dashboards. Ze staan zelf niet op een dashboard.
 --
--- Elke kaart hier hoort bij een filter met dezelfde naam: de dashboardfilter `scoutsjaar` haalt zijn
--- waarden uit de kaart `scoutsjaar`.
+-- Elke kaart hier hoort bij een filter met dezelfde naam: de dashboardfilter `werkjaar` haalt zijn
+-- waarden uit de kaart `werkjaar`.
 
--- @card scoutsjaar
--- title: Scoutsjaren
+-- @card werkjaar
+-- title: Werkjaren
 -- display: table
 -- size: half
 -- Elke eenheid houdt een eigen periode-rij voor hetzelfde jaar, dus hier staan alle rijen: precies de
@@ -16,7 +16,7 @@
 --
 -- Nieuwste jaar eerst. Metabase sorteert een keuzelijst die uit een vraag komt zelf alfabetisch; de
 -- CLI neemt deze volgorde daarom over in een vaste lijst.
-SELECT name AS `Scoutsjaar`
+SELECT name AS `Werkjaar`
 FROM registration_periods
 GROUP BY name
 ORDER BY MAX(startDate) DESC
@@ -27,9 +27,9 @@ ORDER BY MAX(startDate) DESC
 -- size: half
 -- Zonder de eigen organisatie van de koepel: de dashboards tellen die nergens mee, dus als filter zou
 -- ze elke kaart op nul zetten.
-SELECT o.name AS `Eenheid`
-FROM organizations o
-WHERE o.active = 1
-  AND NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = o.id)
-GROUP BY o.name
-ORDER BY o.name
+SELECT organizations.name AS `Eenheid`
+FROM organizations
+WHERE organizations.active = 1
+  AND NOT EXISTS (SELECT 1 FROM platform WHERE platform.membershipOrganizationId = organizations.id)
+GROUP BY organizations.name
+ORDER BY organizations.name

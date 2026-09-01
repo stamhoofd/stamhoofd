@@ -1,16 +1,19 @@
 -- @tab varia
 -- title: Varia
 -- description: Kinderen en leiding per eenheid, uitgesplitst naar geslacht.
--- filters: scoutsjaar
+-- filters: werkjaar, platformleden_opnemen
+-- required: werkjaar
 
 -- @card uldk
 -- title: ULDK
 -- display: table
 -- size: full
--- @include facts
--- @include leden
--- @include uldk
-SELECT * FROM uldk ORDER BY `Name`
+-- De tabel is het fragment zelf, enkel gesorteerd: wie het los van de kaart wil bekijken, opent de
+-- snippet en draait ze zoals ze is.
+SELECT * FROM (
+    -- @include uldk
+) uldk
+ORDER BY `Name`
 
 -- @card uldk-totaal
 -- title: ULDK (totaal)
@@ -18,9 +21,6 @@ SELECT * FROM uldk ORDER BY `Name`
 -- size: full
 -- height: 4
 -- description: De som van de kolommen in de tabel hierboven. Staat in een eigen kaart omdat een tabel in Metabase enkel rijen bovenaan kan vastzetten: als laatste rij van de tabel zou het totaal pas na het doorscrollen van alle eenheden te zien zijn.
--- @include facts
--- @include leden
--- @include uldk
 SELECT
     'Totaal' AS `Name`,
     '' AS `City`,
@@ -32,4 +32,6 @@ SELECT
     COALESCE(SUM(`Aantal leiding/Vrouw`), 0) AS `Aantal leiding/Vrouw`,
     COALESCE(SUM(`Aantal leiding/Andere`), 0) AS `Aantal leiding/Andere`,
     COALESCE(SUM(`Aantal leiding/Onbekend`), 0) AS `Aantal leiding/Onbekend`
-FROM uldk
+FROM (
+    -- @include uldk
+) uldk

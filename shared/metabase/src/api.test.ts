@@ -256,10 +256,10 @@ describe('MetabaseApi snippets', () => {
     it('creates a fragment that is not there yet', async () => {
         const calls = mockFetch({ 'POST /api/native-query-snippet': { body: { id: 7 } } });
 
-        const id = await new MetabaseApi('http://127.0.0.1:3030').saveSnippet({ name: 'facts', content: 'SELECT 1' });
+        const id = await new MetabaseApi('http://127.0.0.1:3030').saveSnippet({ name: 'facts', content: 'SELECT 1', description: 'Eén rij per inschrijving.' });
 
         expect(id).toBe(7);
-        expect(calls[0].body).toEqual({ name: 'facts', content: 'SELECT 1' });
+        expect(calls[0].body).toEqual({ name: 'facts', content: 'SELECT 1', description: 'Eén rij per inschrijving.' });
     });
 
     /** Updating in place keeps the id every question points at, and brings an archived one back. */
@@ -269,9 +269,9 @@ describe('MetabaseApi snippets', () => {
         const id = await new MetabaseApi('http://127.0.0.1:3030').saveSnippet({ name: 'facts', content: 'SELECT 2' }, 7);
 
         expect(id).toBe(7);
-        // Metabase applies a description it is handed, so leaving it out is what keeps the one the
-        // snippet sidebar shows rather than emptying it on every run.
-        expect(calls[0].body).toEqual({ name: 'facts', content: 'SELECT 2', archived: false });
+        // The description is cleared rather than left out: the sidebar would otherwise keep showing
+        // words the report stopped saying.
+        expect(calls[0].body).toEqual({ name: 'facts', content: 'SELECT 2', description: null, archived: false });
     });
 });
 

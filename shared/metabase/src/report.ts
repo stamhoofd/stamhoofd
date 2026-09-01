@@ -17,8 +17,10 @@ import { fileURLToPath } from 'url';
  *     -- @card totaal-leden
  *     -- title: Totaal leden
  *     -- display: scalar
- *     -- @include facts
- *     SELECT COUNT(DISTINCT member_id) AS `Totaal leden` FROM facts
+ *     WITH leden AS (
+ *         -- @include deduplicated-non-platform-registrations
+ *     )
+ *     SELECT COUNT(DISTINCT member_id) AS `Totaal leden` FROM leden
  *
  * `@include <name>` is replaced by `includes/<name>.sql`, which is how every card counts members the
  * same way, and a fragment may include another. `{{name}}` marks a query parameter, the same syntax
@@ -28,7 +30,7 @@ import { fileURLToPath } from 'url';
  *
  * A card is read twice over. `sql` is the query with every fragment expanded, which is the whole of
  * what it counts and what the tests check. `snippetSql` leaves the fragments where they stand, as the
- * `{{snippet: leden}}` references Metabase understands, and is what Metabase is given: a fragment is
+ * `{{snippet: ...}}` references Metabase understands, and is what Metabase is given: a fragment is
  * written there as a snippet of its own, so what a lid is stands in one place and an edit to it
  * reaches every question that reads it.
  *
@@ -90,7 +92,7 @@ export type ReportCard = {
     best: ReportCardBest;
     /**
      * How the labels along the x-axis are drawn. Absent lets the chart decide, which drops them
-     * entirely when too many do not fit -- an eenheid or tak chart needs a rotation to keep them.
+     * entirely when too many do not fit -- an eenheid or leeftijdsgroep chart needs a rotation to keep them.
      */
     xLabels?: ReportCardXLabels;
     /** Parameters the query takes, read from the `{{...}}` in the sql. */
@@ -109,12 +111,14 @@ export type ReportCard = {
 /**
  * A shared fragment as Metabase holds it: one snippet, referred to by every question that reads it.
  *
- * The fragments it includes itself stay references, so `facts` holds `{{snippet: takken}}` rather
- * than a second copy of the takken -- the same nesting the `.sql` files are written in.
+ * The fragments it includes itself stay references, so a fragment holds `{{snippet: all-registrations}}`
+ * rather than a second copy of those rows -- the same nesting the `.sql` files are written in.
  */
 export type ReportSnippet = {
     name: string;
     sql: string;
+    /** What the snippet sidebar lists the fragment under: a `-- description:` first line in its file. */
+    description?: string;
 };
 
 export type ReportTab = {
@@ -142,7 +146,7 @@ export type ReportTab = {
      * delivers one werkjaar, and every werkjaar at once is not a delivery anyone can file.
      *
      * Named per tab rather than with the filter, since the same filter is read both ways: the
-     * ledenstatistieken count every scoutsjaar until a reader picks one.
+     * ledenstatistieken count every werkjaar until a reader picks one.
      */
     required: string[];
     /** Cards that only feed the filter dropdowns. They live in the collection but on no tab. */
@@ -169,16 +173,17 @@ export function getReportDirectory(): string {
 /**
  * The report as one environment counts it.
  *
- * Not every figure is counted the same everywhere -- the GTP index weighs takken for keeo and ages
+ * Not every figure is counted the same everywhere -- the GTP index weighs leeftijdsgroepen for keeo and ages
  * for ravot -- and a statistics database holds one platform, so which variant a card gets is decided
  * here rather than in the queries. `env` is the same name the data source carries.
  */
 export async function loadReport(env: string, directory = getReportDirectory()): Promise<ReportTab[]> {
     const includes = await loadIncludes(path.join(directory, 'includes'), env);
+    const sql = new Map([...includes].map(([name, include]) => [name, include.sql]));
     const files = (await fs.readdir(directory)).filter(file => file.endsWith('.sql')).sort();
 
     const tabs = await Promise.all(files.map(async (file) => {
-        return parseTab(await fs.readFile(path.join(directory, file), 'utf-8'), file, includes, env);
+        return parseTab(await fs.readFile(path.join(directory, file), 'utf-8'), file, sql, env);
     }));
 
     return tabs.sort((a, b) => orderOf(a.key) - orderOf(b.key));
@@ -188,7 +193,7 @@ export async function loadReport(env: string, directory = getReportDirectory()):
  * The shared fragments of an environment, each one as the snippet Metabase holds it in.
  *
  * Written beside the questions so the definitions live in one place there as well: a question refers
- * to `{{snippet: leden}}`, and whoever changes what a lid is changes it once instead of in every
+ * to `{{snippet: deduplicated-non-platform-registrations}}`, and whoever changes what a lid is changes it once instead of in every
  * card that counts one. Which variant a fragment has is settled here, the same way it is for a card,
  * so a snippet carries what this platform counts without saying which platform that is.
  */
@@ -196,7 +201,7 @@ export async function loadSnippets(env: string, directory = getReportDirectory()
     const includes = await loadIncludes(path.join(directory, 'includes'), env);
 
     return [...includes]
-        .map(([name, sql]) => ({ name, sql: referenceIncludes(sql) }))
+        .map(([name, include]) => ({ name, sql: referenceIncludes(include.sql), description: include.description }))
         .sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -213,21 +218,25 @@ function orderOf(key: string): number {
  * An override of a name no fragment carries is a mistake rather than a fragment only one environment
  * has: nothing includes it, so a misspelled file would change nothing and say nothing.
  */
-async function loadIncludes(directory: string, env: string): Promise<Map<string, string>> {
+type Include = { sql: string; description?: string };
+
+async function loadIncludes(directory: string, env: string): Promise<Map<string, Include>> {
     const includes = await readIncludes(directory);
 
-    for (const [name, sql] of await readIncludes(path.join(directory, env))) {
-        if (!includes.has(name)) {
+    for (const [name, include] of await readIncludes(path.join(directory, env))) {
+        const base = includes.get(name);
+        if (base === undefined) {
             throw new Error(`includes/${env}/${name}.sql overrides "${name}", which has no includes/${name}.sql`);
         }
-        includes.set(name, sql);
+        // A variant that says nothing about itself keeps the words of the fragment it replaces.
+        includes.set(name, { sql: include.sql, description: include.description ?? base.description });
     }
 
     return includes;
 }
 
 /** The `.sql` files of a directory by name. An environment that overrides nothing has no directory. */
-async function readIncludes(directory: string): Promise<Map<string, string>> {
+async function readIncludes(directory: string): Promise<Map<string, Include>> {
     let entries: string[];
     try {
         entries = await fs.readdir(directory);
@@ -239,11 +248,26 @@ async function readIncludes(directory: string): Promise<Map<string, string>> {
         throw error;
     }
 
-    const includes = new Map<string, string>();
+    const includes = new Map<string, Include>();
     for (const file of entries.filter(entry => entry.endsWith('.sql'))) {
-        includes.set(path.basename(file, '.sql'), (await fs.readFile(path.join(directory, file), 'utf-8')).trim());
+        includes.set(path.basename(file, '.sql'), parseInclude((await fs.readFile(path.join(directory, file), 'utf-8')).trim()));
     }
     return includes;
+}
+
+/**
+ * A fragment may open on a `-- description:` line, which becomes the snippet's description in
+ * Metabase rather than a comment in its sql -- the sidebar shows it next to the name, where a
+ * comment would only be read after opening the fragment.
+ */
+function parseInclude(contents: string): Include {
+    // The value keeps its leading spaces here and is trimmed below: two adjacent quantifiers could
+    // split one run of spaces many ways.
+    const description = /^--[ \t]*description:(.*)\r?\n/.exec(contents);
+    if (!description) {
+        return { sql: contents };
+    }
+    return { description: description[1].trim(), sql: contents.slice(description[0].length).trim() };
 }
 
 /**
@@ -478,7 +502,7 @@ function parseRanges(section: Section, file: string, display: string): { segment
 /** The line a fragment is asked for on, which is either expanded or turned into a reference. */
 const includeDirective = /^([ \t]*)--[ \t]*@include[ \t]+(\S+)[ \t]*$/gm;
 
-/** A fragment may include another, which is how the two grains of `facts` share their filters. */
+/** A fragment may include another, which is how the two registration grains share their filters. */
 function expandIncludes(body: string, includes: Map<string, string>, file: string, card: string, chain: string[] = []): string {
     return body.replaceAll(includeDirective, (_match, indent: string, name: string) => {
         const include = includes.get(name);
@@ -505,7 +529,7 @@ function referenceIncludes(body: string): string {
 
 /**
  * Every fragment a body reads, in the order it reaches them, the ones its fragments read included.
- * A question has to name those too: Metabase looks a nested `{{snippet: takken}}` up among the tags
+ * A question has to name those too: Metabase looks a nested `{{snippet: all-registrations}}` up among the tags
  * of the question rather than among those of the fragment that refers to it.
  */
 function collectIncludes(body: string, includes: Map<string, string>, found: string[] = []): string[] {

@@ -1,4 +1,5 @@
-CASE dag.id
+-- description: Wat elke leeftijdsgroep telt als: child, leader of adult. De ondersteunende leden zijn volwassenen en mogen niet als leiding gecategoriseerd worden: het omkaderingscijfer en de GTP-index zouden hen anders meetellen als leiding die voor de kinderen zorgt.
+CASE default_age_groups.id
     -- Kinderen
     WHEN 'bd63a6ef-d4a1-497d-87a5-d7c36b4ad220' THEN 'child'   -- Leeuwkes, Kabouters of Sloebers (6-8)
     WHEN '23607074-624b-472f-926f-c719bb44e314' THEN 'child'   -- Springers of Pagadders (8-10)
@@ -11,4 +12,4 @@ CASE dag.id
     WHEN 'e3ec8d48-0d10-4f5d-9e50-dd3151c6666b' THEN 'leader'  -- Leiding
     -- Volwassenen
     WHEN 'a28d290c-af71-4282-92cc-2224a18d3091' THEN 'adult'   -- Ondersteunende leden
-END AS category
+END
