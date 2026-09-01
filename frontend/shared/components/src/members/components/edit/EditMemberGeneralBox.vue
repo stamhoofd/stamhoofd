@@ -49,8 +49,8 @@
                 </STInputBox>
 
                 <PhoneInput v-if="!member.isNew && (isPropertyEnabled('phone') || phone)" v-model="phone" error-fields="phone" :error-box="errors.errorBox" :title="$t('%2k') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? $t(`%fP`): $t(`%fQ`)" />
-                <EmailInput v-if="!(member.isNew) && (isPropertyEnabled('emailAddress') || email) && (!isPropertyEnabled('birthDay') || birthDay)" v-model="email" :required="isPropertyRequired('emailAddress')" :title="$t(`%1FK`) + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? $t(`%fP`): $t(`%fQ`)" :validator="validator">
-                    <template v-if="canAddAlternativeEmails" #right>
+                <EmailInput v-if="!(member.isNew) && (isPropertyEnabled('emailAddress') || email) && (!isPropertyEnabled('birthDay') || birthDay)" v-model="email" :required="isPropertyRequired('emailAddress')" :title="$t(`%1FK`) + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? $t(`%fP`): $t(`%fQ`)" :validator="validator" :disabled="!canEditEmails">
+                    <template v-if="canEditEmails" #right>
                         <button v-tooltip="$t('%fI')" class="button icon add small gray" type="button" @click="addEmail" />
                     </template>
                 </EmailInput>
@@ -201,8 +201,23 @@ const showLanguage = useShowMemberLanguage(computed(() => props.member));
 const availableLanguages = I18nController.shared.availableLanguages;
 
 const user = useUser();
-const canAddAlternativeEmails = computed(() => {
-    return isFullAdmin || user.value?.memberId === props.member.id;
+const canEditEmails = computed(() => {
+    const isUserMember = user.value?.memberId === props.member.id;
+    const responsibilities = props.member.getResponsibilities();
+
+    const responsibilitiesFullAdmin = responsibilities.every((r) => {
+        if (r.organizationId === null) {
+            return auth.hasPlatformFullAccess();
+        }
+        return auth.hasFullAccess();
+    });
+
+    return isUserMember
+        || responsibilities.length === 0
+        || (responsibilities.length > 0
+            && responsibilitiesFullAdmin
+        )
+    ;
 });
 
 const language = computed({
