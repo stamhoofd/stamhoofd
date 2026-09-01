@@ -3,7 +3,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { AccessRight, AccessRightHelper } from './AccessRight.js';
 import { PermissionLevel, getPermissionLevelNumber } from './PermissionLevel.js';
-import { PermissionsResourceType } from './PermissionsResourceType.js';
+import { downgradeResourceKeys, PermissionsResourceType, upgradeResourceKeys } from './PermissionsResourceType.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 
 export class PermissionRole extends AutoEncoder {
@@ -52,6 +52,19 @@ export class PermissionRoleDetailed extends PermissionRole {
             ),
         ),
         version: 248,
+    })
+    @field({
+        decoder: new MapDecoder(
+            new EnumDecoder(PermissionsResourceType),
+            new MapDecoder(
+                // ID
+                StringDecoder,
+                ResourcePermissions,
+            ),
+        ),
+        version: 416,
+        upgrade: upgradeResourceKeys,
+        downgrade: downgradeResourceKeys,
     })
     resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = new Map();
 

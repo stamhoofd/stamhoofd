@@ -17,6 +17,87 @@ export enum PermissionsResourceType {
     Senders = 'Senders',
 }
 
+export const PermissionsResourceKey = {
+    All: '~all',
+    CurrentPeriod: '~currentPeriod',
+} as const;
+
+export type PermissionsResourceKey = typeof PermissionsResourceKey[keyof typeof PermissionsResourceKey];
+
+export function isPeriodScopedResourceType(type: PermissionsResourceType): boolean {
+    switch (type) {
+        case PermissionsResourceType.Groups:
+        case PermissionsResourceType.GroupCategories:
+            return true;
+        case PermissionsResourceType.Webshops:
+        case PermissionsResourceType.OrganizationTags:
+        case PermissionsResourceType.RecordCategories:
+        case PermissionsResourceType.Senders:
+            return false;
+        default: {
+            const t: never = type;
+            throw new Error('Unknown resource type ' + (t as string));
+        }
+    }
+}
+
+/**
+ * old key '' (meaning all resources) is replaced with:
+ *  - '~currentPeriod' for period scoped resource types and
+ *  - '~all' for non-period scoped resource types.
+ */
+export function upgradeResourceKeys<T>(resources: Map<PermissionsResourceType, Map<string, T>>): Map<PermissionsResourceType, Map<string, T>> {
+    const upgraded = new Map<PermissionsResourceType, Map<string, T>>();
+
+    for (const [type, values] of resources) {
+        const upgradedValues = new Map<string, T>();
+
+        for (const [id, value] of values) {
+            if (id === '') {
+                upgradedValues.set(isPeriodScopedResourceType(type) ? PermissionsResourceKey.CurrentPeriod : PermissionsResourceKey.All, value);
+                continue;
+            }
+            upgradedValues.set(id, value);
+        }
+
+        upgraded.set(type, upgradedValues);
+    }
+
+    return upgraded;
+}
+
+/**
+ * Clients before version 416 only know one wildcard: '' (meaning all resources).
+ */
+export function downgradeResourceKeys<T>(resources: Map<PermissionsResourceType, Map<string, T>>): Map<PermissionsResourceType, Map<string, T>> {
+    const downgraded = new Map<PermissionsResourceType, Map<string, T>>();
+
+    for (const [type, values] of resources) {
+        const downgradedValues = new Map<string, T>();
+
+        for (const [id, value] of values) {
+            if (id === PermissionsResourceKey.All) {
+                downgradedValues.set('', value);
+                continue;
+            }
+
+            if (id === PermissionsResourceKey.CurrentPeriod) {
+                // when both the current period and the all value are set, only keep the all value
+                if (!values.has(PermissionsResourceKey.All)) {
+                    downgradedValues.set('', value);
+                }
+                continue;
+            }
+
+            downgradedValues.set(id, value);
+        }
+
+        downgraded.set(type, downgradedValues);
+    }
+
+    return downgraded;
+}
+
 export function getPermissionResourceTypeName(type: PermissionsResourceType, plural = true): string {
     switch (type) {
         case PermissionsResourceType.Webshops: return plural ? 'webshops' : 'webshop';
