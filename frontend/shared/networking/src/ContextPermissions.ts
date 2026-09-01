@@ -394,7 +394,7 @@ export class ContextPermissions {
             return false;
         }
 
-        return period.getCategoryTree({ permissions }).getAllGroups().length > 0;
+        return period.groups.some(g => g.hasReadAccess(permissions, period.settings.categories));
     }
 
     hasPlatformFullAccess(): boolean {
