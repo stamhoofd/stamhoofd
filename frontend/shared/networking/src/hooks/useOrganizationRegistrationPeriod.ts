@@ -1,7 +1,7 @@
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import type { Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import type { MaybeRefOrGetter, Ref } from 'vue';
-import { computed, toValue, watch } from 'vue';
+import type { Ref } from 'vue';
+import { computed, watch } from 'vue';
 import { getCachedOrganizationPeriods } from '../organizationPeriodsCache.js';
 import { useFetchOrganizationRegistrationPeriods } from './useFetchOrganizationRegistrationPeriods.js';
 
@@ -9,30 +9,29 @@ import { useFetchOrganizationRegistrationPeriods } from './useFetchOrganizationR
  * The organization period a period id belongs to. The periods are only fetched when the id is not the
  * period the organization is currently using.
  */
-export function useOrganizationRegistrationPeriod(periodId: MaybeRefOrGetter<string | null | undefined>, options?: { organization?: Ref<Organization | null> }) {
+export function useOrganizationRegistrationPeriod(periodId: string | null | undefined, options?: { organization?: Ref<Organization | null> }) {
     const contextOrganization = useOrganization();
     const organization = options?.organization ?? contextOrganization;
     const fetchPeriods = useFetchOrganizationRegistrationPeriods({ organization: organization as Ref<Organization> });
 
-    watch([() => toValue(periodId), organization], ([id, org]) => {
-        if (!org || !id || org.period.period.id === id || getCachedOrganizationPeriods(org.id)) {
+    watch(organization, (org) => {
+        if (!org || !periodId || org.period.period.id === periodId || getCachedOrganizationPeriods(org.id)) {
             return;
         }
         fetchPeriods({ shouldRetry: false }).catch(console.error);
     }, { immediate: true });
 
     return computed((): OrganizationRegistrationPeriod | undefined => {
-        const id = toValue(periodId);
         const org = organization.value;
 
-        if (!org || !id) {
+        if (!org || !periodId) {
             return undefined;
         }
 
-        if (org.period.period.id === id) {
+        if (org.period.period.id === periodId) {
             return org.period;
         }
 
-        return getCachedOrganizationPeriods(org.id)?.organizationPeriods.find(p => p.period.id === id);
+        return getCachedOrganizationPeriods(org.id)?.organizationPeriods.find(p => p.period.id === periodId);
     });
 }
