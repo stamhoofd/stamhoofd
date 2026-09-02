@@ -60,12 +60,19 @@ export class InvoiceCounter {
         return null;
     }
 
-    static formatNumber(settings: OrganizationInvoiceSettings, int: number, invoicedAt: Date) {
+    /**
+     * Receipts use their own series with a fixed 'BON-' prefix instead of the organization prefix, which keeps them apart from invoice numbers (unique per organization)
+     */
+    static formatNumber(settings: OrganizationInvoiceSettings, int: number, invoicedAt: Date, options?: { isReceipt?: boolean }) {
         let str = int.toFixed(0).padStart(settings.padZeroLength, '0');
 
         if (settings.prefixYear) {
             const year = Formatter.luxon(invoicedAt).year;
             str = year + str;
+        }
+
+        if (options?.isReceipt) {
+            return 'BON-' + str;
         }
 
         if (settings.fixedPrefix) {
@@ -82,11 +89,13 @@ export class InvoiceCounter {
 
     static async assignNextNumber(invoice: Invoice, settings: OrganizationInvoiceSettings): Promise<void> {
         const organizationId = invoice.organizationId;
+        const isReceipt = invoice.isReceipt;
+        const cacheKey = organizationId + (isReceipt ? '-receipt' : '');
         return await QueueHandler.schedule('invoice/numbers-' + organizationId, async () => {
             // Invoice date should be inside the queue to ensure it is chronologically generated
             const invoicedAt = new Date();
 
-            const c = this.numberCache.get(organizationId);
+            const c = this.numberCache.get(cacheKey);
             if (c !== undefined) {
                 const lastNumber = c.lastNumber;
 
@@ -94,12 +103,12 @@ export class InvoiceCounter {
                 if (!this.shouldStartNewSeries(settings, c.date, invoicedAt)) {
                     // Set and save.
                     // we do this here because it assures we'll not increase the next number if the save fails
-                    invoice.number = this.formatNumber(settings, lastNumber + 1, invoicedAt);
+                    invoice.number = this.formatNumber(settings, lastNumber + 1, invoicedAt, { isReceipt });
                     invoice.invoicedAt = invoicedAt;
                     await invoice.save();
 
                     // If save succeeds, increase cache:
-                    this.numberCache.set(organizationId, {
+                    this.numberCache.set(cacheKey, {
                         lastNumber: lastNumber + 1,
                         date: new Date(invoicedAt),
                     });
@@ -109,6 +118,7 @@ export class InvoiceCounter {
 
             const lastInvoice = await Invoice.select()
                 .where('organizationId', organizationId)
+                .where('isReceipt', isReceipt)
                 .where('number', '!=', null)
                 .where('invoicedAt', '!=', null)
                 .orderBy('invoicedAt', 'DESC')
@@ -121,11 +131,11 @@ export class InvoiceCounter {
                     const lastNumber = this.parseNumber(settings, lastInvoice.number);
 
                     if (lastNumber) {
-                        invoice.number = this.formatNumber(settings, lastNumber + 1, invoicedAt);
+                        invoice.number = this.formatNumber(settings, lastNumber + 1, invoicedAt, { isReceipt });
                         invoice.invoicedAt = invoicedAt;
                         await invoice.save();
 
-                        this.numberCache.set(organizationId, {
+                        this.numberCache.set(cacheKey, {
                             lastNumber: lastNumber + 1,
                             date: new Date(invoicedAt),
                         });
@@ -135,11 +145,11 @@ export class InvoiceCounter {
             }
 
             // Start new
-            invoice.number = this.formatNumber(settings, 1, invoicedAt);
+            invoice.number = this.formatNumber(settings, 1, invoicedAt, { isReceipt });
             invoice.invoicedAt = invoicedAt;
             await invoice.save();
 
-            this.numberCache.set(organizationId, {
+            this.numberCache.set(cacheKey, {
                 lastNumber: 1,
                 date: new Date(invoicedAt),
             });
@@ -152,6 +162,7 @@ export class InvoiceCounter {
         // The queue can only run one at a time for the same webshop (so multiple webshops at the same time are allowed)
         return await QueueHandler.schedule('invoice/numbers-' + organizationId, async () => {
             this.numberCache.delete(organizationId);
+            this.numberCache.delete(organizationId + '-receipt');
             return Promise.resolve();
         });
     }

@@ -89,6 +89,15 @@ export class Invoice extends QueryableModel {
     @column({ type: 'string', nullable: true })
     reference: string | null = null;
 
+    @column({ type: 'string', nullable: true })
+    comments: string | null = null;
+
+    /**
+     * Receipts (aankoopbewijs) are not invoices: separate numbering, no XML, never sent via PEPPOL.
+     */
+    @column({ type: 'boolean' })
+    isReceipt = false;
+
     @column({ type: 'json', decoder: File, nullable: true })
     pdf: File | null = null;
 
@@ -159,7 +168,7 @@ export class Invoice extends QueryableModel {
         if (!this.number || !this.invoicedAt) {
             return this.id + '.' + ext;
         }
-        const date = this.invoicedAt
-        return Formatter.dateIso(date) + ' - ' + (this.totalWithVAT < 0 ? $t('%1aE') : $t('%1Zw')) + ' ' + this.number + ' - ' + Formatter.fileSlug(this.seller.name) + '.' + ext;
+        const date = this.invoicedAt;
+        return Formatter.dateIso(date) + ' - ' + (this.isReceipt ? (this.totalWithVAT < 0 ? $t('Terugbetalingsbewijs') : $t('Aankoopbewijs')) : (this.totalWithVAT < 0 ? $t('%1aE') : $t('%1Zw'))) + ' ' + this.number + ' - ' + Formatter.fileSlug(this.seller.name) + '.' + ext;
     }
 }

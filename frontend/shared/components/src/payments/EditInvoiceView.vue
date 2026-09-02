@@ -60,6 +60,32 @@
             </p>
         </CategorizedBox>
 
+        <CategorizedBox v-if="isNew" icon="file" :title="$t('Type document')">
+            <template #summary>
+                <p class="style-description-small">
+                    {{ capitalizeFirstLetter(InvoiceTypeHelper.getName(patched.type)) }}
+                </p>
+            </template>
+
+            <STList>
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Checkbox v-model="isReceipt" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('Aankoopbewijs (geen factuur)') }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ $t('Voor verkopen die niet gefactureerd worden, maar wel geboekt moeten worden. Kan niet aangemaakt worden voor een klant met een ondernemingsnummer of BTW-nummer.') }}
+                    </p>
+                </STListItem>
+            </STList>
+
+            <STInputBox error-fields="comments" :error-box="errors.errorBox" :title="$t('Opmerkingen')" class="max">
+                <textarea v-model="comments" class="input" :placeholder="$t('Optioneel. Wordt afgedrukt op het document.')" />
+            </STInputBox>
+        </CategorizedBox>
+
         <CategorizedBox icon="user" :title="$t('%1Ke')">
             <template v-if="customer" #summary>
                 <template v-if="customer.company">
@@ -138,7 +164,7 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import PaymentCustomerSelectionBox from '#payments/components/PaymentCustomerSelectionBox.vue';
 import type { Company, PaymentCustomer } from '@stamhoofd/structures';
-import { Invoice } from '@stamhoofd/structures';
+import { Invoice, InvoiceTypeHelper } from '@stamhoofd/structures';
 
 import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
@@ -180,6 +206,20 @@ const seller = computed({
     get: () => patched.value.seller,
     set: (seller: Company) => {
         addPatch({ seller });
+    },
+});
+
+const isReceipt = computed({
+    get: () => patched.value.isReceipt,
+    set: (isReceipt: boolean) => {
+        addPatch({ isReceipt });
+    },
+});
+
+const comments = computed({
+    get: () => patched.value.comments ?? '',
+    set: (comments: string) => {
+        addPatch({ comments: comments || null });
     },
 });
 

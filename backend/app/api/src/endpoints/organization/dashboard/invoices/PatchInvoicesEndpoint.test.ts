@@ -3,11 +3,13 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, User } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemFactory, Invoice, InvoicedBalanceItem, OrganizationFactory, Payment, Token, UserFactory } from '@stamhoofd/models';
-import type { InvoiceStruct } from '@stamhoofd/structures';
-import { PaymentMethod, PaymentStatus, PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
+import { Company, InvoicedBalanceItem as InvoicedBalanceItemStruct, InvoiceStruct, InvoiceType, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PermissionLevel, Permissions } from '@stamhoofd/structures';
 import { STExpect } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { PatchInvoicesEndpoint } from './PatchInvoicesEndpoint.js';
+import { InvoicePdfService } from '../../../../services/InvoicePdfService.js';
+import { InvoiceService } from '../../../../services/InvoiceService.js';
 import { SessionService } from '../../../../services/SessionService.js';
 
 describe('Endpoint.PatchInvoicesEndpoint', () => {
@@ -62,6 +64,124 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test<InvoiceStruct[]>(endpoint, request);
     };
+
+    /**
+     * Builds an invoice struct (PUT body) for one new, unlinked payment of 10 euro on a fresh balance item
+     */
+    const buildNewInvoice = async ({ organization, customer, isReceipt = false, comments = null }: { organization: Organization; customer: PaymentCustomer; isReceipt?: boolean; comments?: string | null }) => {
+        const balanceItem = await createBalanceItem({ organization });
+        balanceItem.VATPercentage = 0;
+        await balanceItem.save();
+
+        const payment = new Payment();
+        payment.organizationId = organization.id;
+        payment.method = PaymentMethod.PointOfSale;
+        payment.status = PaymentStatus.Succeeded;
+        payment.price = 10_00;
+        await payment.save();
+
+        const struct = InvoiceStruct.create({
+            organizationId: organization.id,
+            seller: Company.create({ name: 'Seller' }),
+            customer,
+            isReceipt,
+            comments,
+            payments: [PaymentGeneral.create({ id: payment.id, method: payment.method, status: payment.status, price: payment.price })],
+        });
+        struct.addItem(InvoicedBalanceItemStruct.createFor(balanceItem.getStructure(), 10_00));
+        return struct;
+    };
+
+    describe('Creating receipts', () => {
+        beforeEach(() => {
+            InvoiceCounter.clearAll();
+        });
+
+        test('a receipt gets its own number series, no XML and keeps its comments', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const anonymous = PaymentCustomer.create({});
+
+            const invoiceBody = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
+            invoiceBody.addPut(await buildNewInvoice({ organization, customer: anonymous }));
+            const [invoice] = (await patchInvoices({ body: invoiceBody, organization, user })).body;
+            expect(invoice.number).toBe('000001');
+            expect(invoice.type).toBe(InvoiceType.Invoice);
+
+            const receiptBody = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
+            receiptBody.addPut(await buildNewInvoice({ organization, customer: anonymous, isReceipt: true, comments: '  Verkoop op de bar  ' }));
+            const [receipt] = (await patchInvoices({ body: receiptBody, organization, user })).body;
+
+            expect(receipt.number).toBe('BON-000001');
+            expect(receipt.type).toBe(InvoiceType.Receipt);
+            expect(receipt.isReceipt).toBe(true);
+            expect(receipt.comments).toBe('Verkoop op de bar');
+            expect(receipt.pdf).not.toBeNull();
+            expect(receipt.xml).toBeNull();
+            expect(receipt.didSendPeppol).toBe(false);
+
+            const model = await Invoice.getByID(receipt.id);
+            expect(model!.generateCustomerFilename('pdf')).toContain('Aankoopbewijs BON-000001');
+
+            const html = await InvoicePdfService.generateHtml(model!);
+            expect(html).toContain('Aankoopbewijs');
+            expect(html).toContain('Verkoop op de bar');
+            expect(html).toContain('Dit is geen factuur');
+            expect(html).not.toContain('Factuur');
+
+            // The invoice series continues independently
+            const secondInvoiceBody = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
+            secondInvoiceBody.addPut(await buildNewInvoice({ organization, customer: anonymous, comments: 'Opmerking' }));
+            const [secondInvoice] = (await patchInvoices({ body: secondInvoiceBody, organization, user })).body;
+            expect(secondInvoice.number).toBe('000002');
+            expect(secondInvoice.comments).toBe('Opmerking');
+
+            const invoiceHtml = await InvoicePdfService.generateHtml((await Invoice.getByID(secondInvoice.id))!);
+            expect(invoiceHtml).toContain('Factuur');
+            expect(invoiceHtml).toContain('Opmerking');
+            expect(invoiceHtml).not.toContain('Aankoopbewijs');
+            expect(invoiceHtml).not.toContain('Dit is geen factuur');
+        });
+
+        test('a receipt cannot be created for a customer with a company or VAT number', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            for (const company of [
+                Company.create({ name: 'BTW-plichtig', VATNumber: 'BE0123456749' }),
+                Company.create({ name: 'VZW', companyNumber: '0123456749' }),
+            ]) {
+                const body = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
+                body.addPut(await buildNewInvoice({ organization, customer: PaymentCustomer.create({ company }), isReceipt: true }));
+
+                await expect(patchInvoices({ body, organization, user })).rejects.toThrow(STExpect.errorWithCode('receipt_not_allowed'));
+            }
+
+            // A company without numbers is fine
+            const body = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
+            body.addPut(await buildNewInvoice({ organization, customer: PaymentCustomer.create({ company: Company.create({ name: 'Feitelijke vereniging' }) }), isReceipt: true }));
+            const [receipt] = (await patchInvoices({ body, organization, user })).body;
+            expect(receipt.number).toBe('BON-000001');
+        });
+
+        test('a receipt cannot be created for a paying organization with a company or VAT number', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const payingOrganization = await new OrganizationFactory({}).create();
+            payingOrganization.meta.companies = [Company.create({ name: 'Paying VZW', companyNumber: '0123456749' })];
+            await payingOrganization.save();
+
+            const struct = await buildNewInvoice({ organization, customer: PaymentCustomer.create({}), isReceipt: true });
+            struct.payingOrganizationId = payingOrganization.id;
+
+            await expect(InvoiceService.createFrom(organization, struct)).rejects.toThrow(STExpect.errorWithCode('receipt_not_allowed'));
+        });
+    });
 
     describe('Deleting invoices', () => {
         test('deletes the invoice, its invoiced balance items and unlinks the payments', async () => {

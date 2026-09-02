@@ -201,6 +201,43 @@ describe('InvoiceCounter.assignNextNumber', () => {
         expect(invoice.number).toBe('000001');
     });
 
+    it('receipts use their own series, independent from invoices', async () => {
+        const org = await new OrganizationFactory({}).create();
+        const settings = makeSettings({});
+
+        const invoice1 = new Invoice();
+        invoice1.organizationId = org.id;
+        await InvoiceCounter.assignNextNumber(invoice1, settings);
+        expect(invoice1.number).toBe('000001');
+
+        const receipt1 = new Invoice();
+        receipt1.organizationId = org.id;
+        receipt1.isReceipt = true;
+        await InvoiceCounter.assignNextNumber(receipt1, settings);
+        expect(receipt1.number).toBe('BON-000001');
+
+        const invoice2 = new Invoice();
+        invoice2.organizationId = org.id;
+        await InvoiceCounter.assignNextNumber(invoice2, settings);
+        expect(invoice2.number).toBe('000002');
+
+        // Continue the receipt series from the DB after a cache reset
+        await InvoiceCounter.resetNumbers(org.id);
+
+        const receipt2 = new Invoice();
+        receipt2.organizationId = org.id;
+        receipt2.isReceipt = true;
+        await InvoiceCounter.assignNextNumber(receipt2, settings);
+        expect(receipt2.number).toBe('BON-000002');
+    });
+
+    it('formats receipt numbers with the year but without the organization prefix', async () => {
+        const settings = makeSettings({ fixedPrefix: 'STA', prefixYear: true });
+        const number = InvoiceCounter.formatNumber(settings, 7, new Date('2025-06-15T12:00:00Z'), { isReceipt: true });
+        expect(number).toBe('BON-2025000007');
+        expect(InvoiceCounter.parseNumber(settings, number)).toBe(7);
+    });
+
     it('reads from DB after resetNumbers clears the cache', async () => {
         const org = await new OrganizationFactory({}).create();
         const settings = makeSettings({});

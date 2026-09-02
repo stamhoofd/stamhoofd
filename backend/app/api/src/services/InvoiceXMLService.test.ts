@@ -36,7 +36,7 @@ describe('InvoiceXMlService', () => {
      * Builds and persists a minimal, valid invoice for the given customer company, with one
      * invoiced line, so that InvoiceXMlService.buildXml can generate the UBL.
      */
-    const buildInvoiceFor = async (company: Company) => {
+    const buildInvoiceFor = async (company: Company, options?: { comments?: string | null; isReceipt?: boolean }) => {
         const organization = await new OrganizationFactory({}).create();
 
         const invoice = new Invoice();
@@ -46,6 +46,8 @@ describe('InvoiceXMlService', () => {
         invoice.pdf = new File({ id: uuidv4(), server: 'https://files.example.com', path: 'test.pdf', size: 100, name: 'invoice', contentType: 'application/pdf' });
         invoice.customer = PaymentCustomer.create({ company });
         invoice.seller = seller();
+        invoice.comments = options?.comments ?? null;
+        invoice.isReceipt = options?.isReceipt ?? false;
         invoice.totalWithVAT = 12_10;
         invoice.totalWithoutVAT = 10_00;
         invoice.VATTotalAmount = 2_10;
@@ -157,5 +159,47 @@ describe('InvoiceXMlService', () => {
         // The legal entity company id (peppolCompanyId) requires a VAT or company number,
         // so a custom endpoint id alone is not enough.
         await expect(InvoiceXMlService.buildXml(invoice)).rejects.toThrow('Missing customer peppol id');
+    });
+
+    test('writes the comments as a note and escapes them', async () => {
+        const company = Company.create({
+            name: 'Customer BV',
+            VATNumber: 'BE0123456749',
+            companyNumber: '0123456749',
+            address: belgianAddress(),
+        });
+        const invoice = await buildInvoiceFor(company, { comments: 'Correctie <test> & co' });
+
+        const xml = await InvoiceXMlService.buildXml(invoice);
+
+        expect(xml).toContain('<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode><cbc:Note>Correctie &lt;test&gt; &amp; co</cbc:Note>');
+    });
+
+    test('does not write a note without comments', async () => {
+        const company = Company.create({
+            name: 'Customer BV',
+            VATNumber: 'BE0123456749',
+            companyNumber: '0123456749',
+            address: belgianAddress(),
+        });
+        const invoice = await buildInvoiceFor(company);
+
+        const xml = await InvoiceXMlService.buildXml(invoice);
+        expect(xml).not.toContain('<cbc:Note>');
+    });
+
+    test('never generates XML for a receipt', async () => {
+        const company = Company.create({
+            name: 'Customer BV',
+            VATNumber: 'BE0123456749',
+            companyNumber: '0123456749',
+            address: belgianAddress(),
+        });
+        const invoice = await buildInvoiceFor(company, { isReceipt: true });
+
+        await expect(InvoiceXMlService.buildXml(invoice)).rejects.toThrow('Cannot generate UBL for a receipt');
+
+        await InvoiceXMlService.generateXml(invoice);
+        expect(invoice.xml).toBeNull();
     });
 });

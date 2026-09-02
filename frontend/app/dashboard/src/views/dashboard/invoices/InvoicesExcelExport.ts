@@ -1,5 +1,5 @@
 import type { InvoiceStruct, PaymentGeneral } from '@stamhoofd/structures';
-import { PaymentMethod, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
+import { InvoiceTypeHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import XLSX from 'xlsx';
 import type { RowValue } from '../../../classes/ExcelHelper';
@@ -31,7 +31,8 @@ export class InvoicesExcelExport {
         // Columns
         const wsData: RowValue[][] = [
             [
-                'Factuur',
+                'Type',
+                'Nummer',
                 'Datum',
                 'Klant',
                 'Ondernemingsnummer',
@@ -52,6 +53,7 @@ export class InvoicesExcelExport {
 
         for (const invoice of invoices) {
             const invoiceColumns: RowValue[] = [
+                Formatter.capitalizeFirstLetter(InvoiceTypeHelper.getName(invoice.type)),
                 (invoice.number ?? '/') + '',
                 invoice.invoicedAt ? Formatter.dateIso(invoice.invoicedAt) : '/',
                 invoice.customer.dynamicName,

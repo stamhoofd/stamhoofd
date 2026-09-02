@@ -19,6 +19,10 @@ export class InvoiceXMlService {
             throw new Error('Cannot generate UBL for invoice without pdf');
         }
 
+        if (invoice.isReceipt) {
+            throw new Error('Cannot generate UBL for a receipt');
+        }
+
         const company = invoice.customer.company;
 
         if (!company || !company.address) {
@@ -101,6 +105,10 @@ export class InvoiceXMlService {
             ubl += `<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>`;
         } else {
             ubl += `<cbc:CreditNoteTypeCode>381</cbc:CreditNoteTypeCode>`;
+        }
+
+        if (invoice.comments) {
+            ubl += `<cbc:Note>${esc(invoice.comments)}</cbc:Note>`;
         }
 
         ubl += `<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>`;
@@ -394,7 +402,7 @@ export class InvoiceXMlService {
     }
 
     static async generateXml(invoice: Invoice) {
-        if (invoice.didSendPeppol) {
+        if (invoice.isReceipt || invoice.didSendPeppol) {
             // Can't update if already generated/sent
             return;
         }

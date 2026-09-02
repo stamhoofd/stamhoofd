@@ -5,12 +5,21 @@ import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { NumberFilterBuilder } from '../NumberUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
 import type { UIFilterBuilders } from '../UIFilter';
+import { simpleBooleanFilterFactory } from './helpers';
 
 export function getInvoicesUIFilterBuilders() {
     const builders: UIFilterBuilders = [
         new StringFilterBuilder({
             name: $t(`%1YZ`),
             key: 'number',
+        }),
+        simpleBooleanFilterFactory({
+            name: $t('Type'),
+            optionNames: {
+                true: $t('Aankoopbewijs'),
+                false: $t('Factuur of creditnota'),
+            },
+            filterIfTrue: { isReceipt: true },
         }),
         new DateFilterBuilder({
             name: $t(`%1J6`),

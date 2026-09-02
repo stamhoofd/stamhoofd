@@ -3,8 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>{{#if invoice.number}}{{#if isCreditNote}}{{$t "Creditnota"}}{{else}}{{$t "Factuur"}}{{/if}}
-        {{invoice.number}}{{else}}{{#if isCreditNote}}{{$t "Pro-forma creditnota"}}{{else}}{{$t "Pro-forma
+    <title>{{#if invoice.number}}{{#if isReceipt}}{{$t "Aankoopbewijs"}}{{else if isRefundReceipt}}{{$t "Terugbetalingsbewijs"}}{{else if isCreditNote}}{{$t "Creditnota"}}{{else}}{{$t "Factuur"}}{{/if}}
+        {{invoice.number}}{{else}}{{#if isReceipt}}{{$t "Pro-forma aankoopbewijs"}}{{else if isRefundReceipt}}{{$t "Pro-forma terugbetalingsbewijs"}}{{else if isCreditNote}}{{$t "Pro-forma creditnota"}}{{else}}{{$t "Pro-forma
         factuur"}}{{/if}}{{/if}}</title>
     <style>
         @font-face {
@@ -398,6 +398,23 @@ where the rule starts at x = 28 mm (skipping the # column). */
             text-box-trim: trim-both;
         }
 
+        .comments {
+            margin-top: 10mm;
+            font-size: 9.9pt;
+            line-height: 1.5;
+        }
+
+        .comments-label {
+            font-weight: 600;
+            margin-bottom: 1.5mm;
+        }
+
+        .comments-text {
+            margin: 0;
+            color: var(--color-gray-dark);
+            white-space: pre-wrap;
+        }
+
         /* Messages block (archive notice + payment status) */
         .messages {
             margin-top: 14mm;
@@ -422,6 +439,12 @@ where the rule starts at x = 28 mm (skipping the # column). */
             width: 16px;
             height: 16px;
             fill: var(--color-gray-dark);
+        }
+
+        .not-invoice {
+            margin: 0;
+            font-size: 8.5pt;
+            color: var(--color-gray-dark);
         }
 
         .message.paid {
@@ -451,9 +474,9 @@ where the rule starts at x = 28 mm (skipping the # column). */
                     <div class="invoice-title-row">
                         <span class="label">
                             {{#if invoice.number}}
-                            {{#if isCreditNote}}{{$t "Creditnota"}}{{else}}{{$t "Factuur"}}{{/if}}
+                            {{#if isReceipt}}{{$t "Aankoopbewijs"}}{{else if isRefundReceipt}}{{$t "Terugbetalingsbewijs"}}{{else if isCreditNote}}{{$t "Creditnota"}}{{else}}{{$t "Factuur"}}{{/if}}
                             {{else}}
-                            {{#if isCreditNote}}{{$t "Pro-forma creditnota"}}{{else}}{{$t "Pro-forma
+                            {{#if isReceipt}}{{$t "Pro-forma aankoopbewijs"}}{{else if isRefundReceipt}}{{$t "Pro-forma terugbetalingsbewijs"}}{{else if isCreditNote}}{{$t "Pro-forma creditnota"}}{{else}}{{$t "Pro-forma
                             factuur"}}{{/if}}
                             {{/if}}
                         </span>
@@ -484,7 +507,7 @@ where the rule starts at x = 28 mm (skipping the # column). */
 
                     <div class="customer-label">
                         {{#if invoice.number}}
-                        {{#if isCreditNote}}{{$t "Voor"}}{{else}}{{$t "Factuur voor"}}{{/if}}
+                        {{#if isCreditNote}}{{$t "Voor"}}{{else if isReceipt}}{{$t "Voor"}}{{else if isRefundReceipt}}{{$t "Voor"}}{{else}}{{$t "Factuur voor"}}{{/if}}
                         {{else}}
                         {{$t "Voor"}}
                         {{/if}}
@@ -617,6 +640,13 @@ where the rule starts at x = 28 mm (skipping the # column). */
                 </div>
             </div>
 
+            {{#if invoice.comments}}
+            <div class="comments">
+                <div class="comments-label">{{$t "Opmerkingen"}}</div>
+                <p class="comments-text">{{invoice.comments}}</p>
+            </div>
+            {{/if}}
+
             <div class="messages">
 
                 {{!-- Always-visible archive notice (varies by document type) --}}
@@ -627,9 +657,19 @@ where the rule starts at x = 28 mm (skipping the # column). */
                     </svg>
                     <span class="text">
                         {{#unless invoice.number}}
-                        {{$t "Druk dit document niet af. Dit is nog geen officiële factuur"}}
+                        {{#if isReceipt}}
+                        {{$t "Druk dit document niet af. Dit is nog geen officieel aankoopbewijs"}}
+                        {{else if isRefundReceipt}}
+                        {{$t "Druk dit document niet af. Dit is nog geen officieel terugbetalingsbewijs"}}
                         {{else}}
-                        {{#if isCreditNote}}
+                        {{$t "Druk dit document niet af. Dit is nog geen officiële factuur"}}
+                        {{/if}}
+                        {{else}}
+                        {{#if isReceipt}}
+                        {{$t "Hou dit aankoopbewijs bij voorkeur digitaal bij"}}
+                        {{else if isRefundReceipt}}
+                        {{$t "Hou dit terugbetalingsbewijs bij voorkeur digitaal bij"}}
+                        {{else if isCreditNote}}
                         {{$t "Hou deze creditnota bij voorkeur digitaal bij"}}
                         {{else}}
                         {{$t "Hou deze factuur bij voorkeur digitaal bij"}}
@@ -645,7 +685,7 @@ where the rule starts at x = 28 mm (skipping the # column). */
                         <path fill-rule="evenodd" clip-rule="evenodd"
                             d="M6 12C9.31371 12 12 9.31371 12 6C12 2.68629 9.31371 0 6 0C2.68629 0 0 2.68629 0 6C0 9.31371 2.68629 12 6 12ZM8.88815 4.54879C9.08076 4.27914 9.0183 3.90441 8.74865 3.71181C8.479 3.5192 8.10427 3.58165 7.91167 3.8513L5.3881 7.3843L4.07991 5.64005C3.88109 5.37495 3.50501 5.32122 3.23991 5.52005C2.97481 5.71887 2.92109 6.09495 3.11991 6.36005L4.91991 8.76005C5.0347 8.91309 5.21559 9.00223 5.40689 9C5.59818 8.99778 5.77695 8.90446 5.88815 8.74879L8.88815 4.54879Z" />
                     </svg>
-                    <span class="text">{{$t "Deze factuur werd al betaald via"}} {{payment.methodName}}</span>
+                    <span class="text">{{#if isReceipt}}{{$t "Dit aankoopbewijs werd al betaald via"}}{{else}}{{$t "Deze factuur werd al betaald via"}}{{/if}} {{payment.methodName}}</span>
                 </div>
                 {{/if}}
 
@@ -679,6 +719,9 @@ where the rule starts at x = 28 mm (skipping the # column). */
                 </div>
                 {{/if}}
 
+                {{#if (or isReceipt isRefundReceipt)}}
+                <p class="not-invoice">{{$t "Dit is geen factuur"}}</p>
+                {{/if}}
             </div>
         </footer>
 

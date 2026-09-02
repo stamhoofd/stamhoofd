@@ -33,6 +33,12 @@ export class InvoiceService {
 
         const model = new Invoice();
         model.customer = struct.customer;
+        model.isReceipt = struct.isReceipt;
+        model.comments = struct.comments?.trim() || null;
+
+        if (model.isReceipt) {
+            await this.assertReceiptAllowed(struct);
+        }
 
         if (model.customer.company) {
             await ViesService.checkCompany(model.customer.company, null, { forceValidation: true });
@@ -294,10 +300,14 @@ export class InvoiceService {
 
             // Create PDF
             await InvoicePdfService.generatePdf(model);
-            await InvoiceXMlService.generateXml(model);
 
-            if (!await this.forwardInvoice(model, organization)) {
-                await this.sendCustomerEmail(model, organization);
+            // Receipts are not invoices: no XML, no PEPPOL and no (invoice) email
+            if (!model.isReceipt) {
+                await InvoiceXMlService.generateXml(model);
+
+                if (!await this.forwardInvoice(model, organization)) {
+                    await this.sendCustomerEmail(model, organization);
+                }
             }
         } catch (e) {
             try {
@@ -321,11 +331,38 @@ export class InvoiceService {
         return model;
     }
 
+    /**
+     * Receipts can only be created for customers that are not a registered company (no company or VAT number)
+     */
+    private static async assertReceiptAllowed(struct: InvoiceStruct) {
+        const error = new SimpleError({
+            code: 'receipt_not_allowed',
+            message: 'Receipts cannot be created for a customer with a company number or VAT number',
+            human: $t('Een aankoopbewijs kan niet aangemaakt worden voor een klant met een ondernemingsnummer of BTW-nummer. Maak in dat geval een factuur aan.'),
+            field: 'customer',
+        });
+
+        if (struct.customer.company && (struct.customer.company.companyNumber || struct.customer.company.VATNumber)) {
+            throw error;
+        }
+
+        if (struct.payingOrganizationId) {
+            const payingOrganization = await Organization.getByID(struct.payingOrganizationId);
+            if (payingOrganization && payingOrganization.meta.companies.some(c => c.companyNumber || c.VATNumber)) {
+                throw error;
+            }
+        }
+    }
+
     static async retryInvoiceGenerationAndSending(model: Invoice) {
         const hadPdf = !!model.pdf;
         if (!model.pdf) {
             // Create PDF
             await InvoicePdfService.generatePdf(model);
+        }
+
+        if (model.isReceipt) {
+            return;
         }
 
         if (!model.xml) {
@@ -370,7 +407,7 @@ export class InvoiceService {
     }
 
     private static shouldForwardInvoice(invoice: Invoice, organization: Organization) {
-        if (invoice.didSendPeppol) {
+        if (invoice.isReceipt || invoice.didSendPeppol) {
             return {
                 value: false,
             };

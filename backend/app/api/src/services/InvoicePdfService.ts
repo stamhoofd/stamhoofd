@@ -37,7 +37,9 @@ export class InvoicePdfService {
         };
 
         const totalPrice = invoice.totalWithVAT;
-        const isCreditNote = totalPrice < 0;
+        const isReceipt = invoice.isReceipt && totalPrice >= 0;
+        const isRefundReceipt = invoice.isReceipt && totalPrice < 0;
+        const isCreditNote = !invoice.isReceipt && totalPrice < 0;
 
         const date = invoice.invoicedAt ?? invoice.createdAt;
         const isPaid = payment?.status === PaymentStatus.Succeeded;
@@ -73,7 +75,7 @@ export class InvoicePdfService {
         const showCompanyNumber = !!company?.companyNumber
             && (!company?.VATNumber || company.companyNumber.replace(/\D+/g, '') !== trimmedVATNumber);
 
-        const showDueDate = !!invoice.number && totalPrice >= 0;
+        const showDueDate = !!invoice.number && totalPrice >= 0 && !invoice.isReceipt;
         const hasRoundingAmount = invoice.payableRoundingAmount !== 0;
 
         const showPaidMessage = !!payment && payment.method !== null && payment.status === PaymentStatus.Succeeded && totalPrice >= 0;
@@ -106,6 +108,7 @@ export class InvoicePdfService {
             invoice: {
                 id: invoice.id,
                 number: invoice.number,
+                comments: invoice.comments,
                 meta: {
                     date,
                     items: invoicedItems.map(item => ({
@@ -142,6 +145,8 @@ export class InvoicePdfService {
                 : null,
 
             isCreditNote,
+            isReceipt,
+            isRefundReceipt,
             showDueDate,
             dueDate,
             showCompanyNumber,

@@ -42,6 +42,12 @@
                         <span v-copyable class="style-copyable">{{ formatDate(invoice.dueAt) }}</span>
                     </dd>
                 </template>
+                <template v-if="invoice.comments">
+                    <dt>{{ $t('Opmerkingen') }}</dt>
+                    <dd class="pre-wrap">
+                        {{ invoice.comments }}
+                    </dd>
+                </template>
 
                 <template v-if="invoice.customer">
                     <dt>{{ $t('%1J1') }}</dt>

@@ -19,9 +19,10 @@ describe('Endpoint.GetInvoicesEndpoint', () => {
         }).create();
     };
 
-    const createInvoice = async ({ organization, balanceItemIds }: { organization: Organization; balanceItemIds: string[] }) => {
+    const createInvoice = async ({ organization, balanceItemIds, isReceipt = false }: { organization: Organization; balanceItemIds: string[]; isReceipt?: boolean }) => {
         const invoice = new Invoice();
         invoice.organizationId = organization.id;
+        invoice.isReceipt = isReceipt;
         await invoice.save();
 
         for (const balanceItemId of balanceItemIds) {
@@ -128,6 +129,25 @@ describe('Endpoint.GetInvoicesEndpoint', () => {
 
             expect(response.status).toBe(200);
             expect(response.body.results).toHaveLength(0);
+        });
+    });
+
+    describe('Filtering on receipts', () => {
+        test('filters receipts and invoices apart', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            const invoice = await createInvoice({ organization, balanceItemIds: [] });
+            const receipt = await createInvoice({ organization, balanceItemIds: [], isReceipt: true });
+
+            const receipts = await getInvoices({ filter: { isReceipt: true }, organization, user });
+            expect(receipts.body.results.map(r => r.id)).toEqual([receipt.id]);
+
+            const invoices = await getInvoices({ filter: { $not: { isReceipt: true } }, organization, user });
+            expect(invoices.body.results.map(r => r.id)).toEqual([invoice.id]);
         });
     });
 

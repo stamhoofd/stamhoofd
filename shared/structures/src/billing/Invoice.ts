@@ -38,6 +38,14 @@ export class VATSubtotal extends AutoEncoder {
 export enum InvoiceType {
     Invoice = 'Invoice',
     CreditNote = 'CreditNote',
+    /**
+     * A sales document for sales that are not invoiced but still need to be booked. Uses its own numbering, is never sent via PEPPOL and has no XML.
+     */
+    Receipt = 'Receipt',
+    /**
+     * A receipt with a negative total
+     */
+    RefundReceipt = 'RefundReceipt',
 }
 
 export class InvoiceTypeHelper {
@@ -45,6 +53,8 @@ export class InvoiceTypeHelper {
         switch (type) {
             case InvoiceType.Invoice: return $t('%1KG');
             case InvoiceType.CreditNote: return $t('%1KH');
+            case InvoiceType.Receipt: return $t('aankoopbewijs');
+            case InvoiceType.RefundReceipt: return $t('terugbetalingsbewijs');
         }
     }
 }
@@ -182,6 +192,18 @@ export class Invoice extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     reference: string | null = null;
 
+    /**
+     * Free text printed on the PDF (and XML). E.g. to explain why a receipt was created.
+     */
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    comments: string | null = null;
+
+    /**
+     * Receipts (aankoopbewijs) are not invoices: separate numbering, no XML, never sent via PEPPOL.
+     */
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    isReceipt = false;
+
     @field({ decoder: File, nullable: true })
     pdf: File | null = null;
 
@@ -263,6 +285,9 @@ export class Invoice extends AutoEncoder {
     }
 
     get type() {
+        if (this.isReceipt) {
+            return this.totalWithVAT < 0 ? InvoiceType.RefundReceipt : InvoiceType.Receipt;
+        }
         if (this.totalWithVAT < 0) {
             return InvoiceType.CreditNote;
         }
@@ -270,7 +295,7 @@ export class Invoice extends AutoEncoder {
     }
 
     get theme() {
-        if (this.type === InvoiceType.CreditNote) {
+        if (this.type === InvoiceType.CreditNote || this.type === InvoiceType.RefundReceipt) {
             return 'theme-error';
         }
     }

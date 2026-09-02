@@ -24,6 +24,12 @@ export const invoiceFilterCompilers: SQLFilterDefinitions = {
         nullable: true,
     }),
 
+    isReceipt: createColumnFilter({
+        expression: SQL.column('isReceipt'),
+        type: SQLValueType.Boolean,
+        nullable: false,
+    }),
+
     totalWithVAT: createColumnFilter({
         expression: SQL.column('totalWithVAT'),
         type: SQLValueType.Number,
