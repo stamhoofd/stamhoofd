@@ -300,11 +300,17 @@ describe('Correctly merge multiple details together', () => {
             expect(member5.parents).toEqual([expectedParent]);
 
             // The parent object should reference the same object for each member
-            expect(member1.parents[0]).toBe(member2.parents[0]);
-            expect(member1.parents[0]).toBe(member3.parents[0]);
-            expect(member1.parents[0]).toBe(member4.parents[0]);
-            expect(member1.parents[0]).toBe(member5.parents[0]);
+            expect(member1.parents[0]).toStrictEqual(member2.parents[0]);
+            expect(member1.parents[0]).toStrictEqual(member3.parents[0]);
+            expect(member1.parents[0]).toStrictEqual(member4.parents[0]);
+            expect(member1.parents[0]).toStrictEqual(member5.parents[0]);
         });
+
+        test.todo('taxDependent doesnt go over', () => {});
+        test.todo('changing name doesnt change taxDependent', () => {});
+        test.todo('changing email doesnt change taxDependent', () => {});
+        test.todo('changing address doesnt change taxDependent', () => {});
+        test.todo('merging keeps most recent taxDependent', () => {});
     });
 
     describe('Should correctly merge UitpasNumberDetails', () => {
