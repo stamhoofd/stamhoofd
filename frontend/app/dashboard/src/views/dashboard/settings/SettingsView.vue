@@ -11,6 +11,8 @@
 
             <StripeWarningBox />
 
+            <MollieWarningBox @reconnect="$navigate(Routes.PaymentAccounts)" />
+
             <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.General)">
                     <template #left>
@@ -297,6 +299,7 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import MollieWarningBox from '@stamhoofd/components/mollie/MollieWarningBox.vue';
 import StripeWarningBox from '@stamhoofd/components/stripe/StripeWarningBox.vue';
 
 import type { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder } from '@simonbackx/simple-encoding';

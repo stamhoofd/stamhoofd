@@ -49,11 +49,25 @@ type MollieBalanceTransaction = {
 };
 
 /**
- * A transaction occurs before the settlement that pays it out: up to a month (Mollie settles
- * daily, weekly or monthly) plus a few days of payout delay. The fee walk looks this much further
- * back than the settlement window.
+ * A transaction is paid out in the first settlement that closes after its funds became available,
+ * so it can occur before the previous settlement was paid out: by the payout delay plus the
+ * settlement delay of some payment methods (a few business days). The fee walk looks this much
+ * further back than the previous payout.
  */
-const TRANSACTION_FEE_LOOKBACK_MS = 45 * 24 * 60 * 60 * 1000;
+const TRANSACTION_FEE_LOOKBACK_MS = 14 * 24 * 60 * 60 * 1000;
+
+/**
+ * The payouts one settlement walk stored: the only ones that have lines to attach fees to.
+ */
+type WalkedSettlementRange = {
+    newestSettledAt: Date;
+
+    /**
+     * Payout of the settlement before the oldest walked one, null when that was the account's
+     * first. Its transactions are the newest that cannot belong to a walked settlement.
+     */
+    previousSettledAt: Date | null;
+};
 
 /**
  * Everything one settlement walk needs to share between the resource pages.
@@ -96,8 +110,10 @@ type MollieSettlementEntryJSON = {
 /**
  * Walks the settlements of one Mollie account: payments, refunds and chargebacks become
  * payment_settlements rows, and the legacy blob is written in the same pass. A second walk over
- * the balance transactions stores the fee Mollie deducted per transaction as a settlement_charges
- * row. Every row written belongs to the organization that owns the token's account.
+ * the balance transactions of the same period stores the fee Mollie deducted per transaction as a
+ * settlement_charges row (the balance API has no date or settlement filter, so the walk pages
+ * newest-first from now down to that period). Every row written belongs to the organization that
+ * owns the token's account.
  */
 export class MollieSettlementSync {
     private token: MollieToken;
@@ -113,20 +129,25 @@ export class MollieSettlementSync {
         abort?: AbortSignal;
     }): Promise<void> {
         // Fees attach to the settlement lines the first walk stores
-        await this.#walkSettlements({ start, end, summary, abort });
-        await this.#syncTransactionFees({ start, end, abort });
+        const range = await this.#walkSettlements({ start, end, summary, abort });
+        if (!range) {
+            return;
+        }
+        await this.#syncTransactionFees({ range, abort });
     }
 
     /**
-     * Walk the settlements newest first, until they settle before `start`.
+     * Walk the settlements newest first, until they settle before `start`. Returns the payouts
+     * that were walked, null when none settled in the window.
      */
     async #walkSettlements({ start, end, summary, abort }: {
         start: Date;
         end: Date;
         summary?: SettlementSyncSummary;
         abort?: AbortSignal;
-    }): Promise<void> {
+    }): Promise<WalkedSettlementRange | null> {
         let url: string | null = 'https://api.mollie.com/v2/settlements?limit=250';
+        let range: WalkedSettlementRange | null = null;
 
         while (url) {
             abort?.throwIfAborted();
@@ -136,13 +157,13 @@ export class MollieSettlementSync {
             if (request.status !== 200) {
                 console.error('Failed to fetch settlements');
                 console.error(request.data);
-                return;
+                return range;
             }
 
             const settlements = request.data._embedded?.settlements as MollieSettlement[] | undefined;
             if (!settlements) {
                 console.error('Unreadable settlements');
-                return;
+                return range;
             }
 
             for (const settlement of settlements) {
@@ -166,7 +187,14 @@ export class MollieSettlementSync {
 
                 if (settledAt.getTime() < start.getTime()) {
                     // The list is newest-first: everything from here on settled before the window
-                    return;
+                    if (range) {
+                        range.previousSettledAt = settledAt;
+                    }
+                    return range;
+                }
+
+                if (!range) {
+                    range = { newestSettledAt: settledAt, previousSettledAt: null };
                 }
 
                 try {
@@ -188,6 +216,8 @@ export class MollieSettlementSync {
             const next = request.data._links?.next?.href as string | undefined;
             url = (settlements.length > 0 && next) ? next : null;
         }
+
+        return range;
     }
 
     /**
@@ -251,11 +281,11 @@ export class MollieSettlementSync {
      * Stores the fee of every settled payment, refund and chargeback, then recounts the
      * settlements that gained charges: their finishSync ran before the fees existed.
      */
-    async #syncTransactionFees({ start, end, abort }: { start: Date; end: Date; abort?: AbortSignal }): Promise<void> {
+    async #syncTransactionFees({ range, abort }: { range: WalkedSettlementRange; abort?: AbortSignal }): Promise<void> {
         const touchedSettlementIds = new Set<string>();
 
         try {
-            await this.#walkTransactionFees({ start, end, abort }, touchedSettlementIds);
+            await this.#walkTransactionFees({ range, abort }, touchedSettlementIds);
         } catch (e) {
             // Recount what was stored before the walk broke, without hiding what broke it
             await SettlementService.refreshTotalsForIds([...touchedSettlementIds]).catch(console.error);
@@ -266,11 +296,12 @@ export class MollieSettlementSync {
     }
 
     /**
-     * Walk the balance transactions newest first, until they occur before the window minus the
-     * lookback.
+     * Walk the balance transactions newest first, skipping those after the newest walked payout
+     * (they belong to the open settlement), until they occur before the previous payout minus the
+     * lookback. Without a previous payout the walk reaches the end of the list.
      */
-    async #walkTransactionFees({ start, end, abort }: { start: Date; end: Date; abort?: AbortSignal }, touchedSettlementIds: Set<string>): Promise<void> {
-        const oldest = new Date(start.getTime() - TRANSACTION_FEE_LOOKBACK_MS);
+    async #walkTransactionFees({ range, abort }: { range: WalkedSettlementRange; abort?: AbortSignal }, touchedSettlementIds: Set<string>): Promise<void> {
+        const oldest = range.previousSettledAt ? new Date(range.previousSettledAt.getTime() - TRANSACTION_FEE_LOOKBACK_MS) : null;
         let url: string | null = 'https://api.mollie.com/v2/balances/primary/transactions?limit=250';
 
         while (url) {
@@ -300,12 +331,12 @@ export class MollieSettlementSync {
                     continue;
                 }
 
-                if (createdAt.getTime() > end.getTime()) {
+                if (createdAt.getTime() > range.newestSettledAt.getTime()) {
                     continue;
                 }
 
-                if (createdAt.getTime() < oldest.getTime()) {
-                    // The list is newest-first: everything from here on occurred before the window
+                if (oldest && createdAt.getTime() < oldest.getTime()) {
+                    // The list is newest-first: everything from here on was paid out before the walked settlements
                     return;
                 }
 

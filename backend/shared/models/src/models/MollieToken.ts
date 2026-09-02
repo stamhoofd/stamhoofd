@@ -1,7 +1,9 @@
 import { column } from '@simonbackx/simple-database';
 import type { PlainObject } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel } from '@stamhoofd/sql';
+import { MollieRequiredScopes } from '@stamhoofd/structures/MollieScopes.js';
 import type { IncomingMessage } from 'http';
 import https from 'https';
 
@@ -33,6 +35,12 @@ export class MollieToken extends QueryableModel {
 
     @column({ type: 'datetime' })
     expiresOn: Date;
+
+    /**
+     * The OAuth permissions Mollie granted this token, null when unknown.
+     */
+    @column({ type: 'json', decoder: new ArrayDecoder(StringDecoder), nullable: true })
+    scopes: string[] | null = null;
 
     @column({
         type: 'datetime', beforeSave(old?: any) {
@@ -66,6 +74,24 @@ export class MollieToken extends QueryableModel {
     async delete() {
         await super.delete();
         MollieToken.knownTokens.delete(this.organizationId);
+    }
+
+    /**
+     * Required permissions this token was not granted. An unknown scope counts as missing.
+     */
+    get missingScopes(): string[] {
+        const granted = this.scopes ?? [];
+        return MollieRequiredScopes.filter(scope => !granted.includes(scope));
+    }
+
+    /**
+     * Mollie reports the granted permissions as a space separated `scope` string.
+     */
+    private static parseScopes(scope: unknown): string[] | null {
+        if (typeof scope !== 'string') {
+            return null;
+        }
+        return scope.split(' ').filter(s => s.length > 0);
     }
 
     private static objectToQueryString(obj: Record<string, string>) {
@@ -242,6 +268,7 @@ export class MollieToken extends QueryableModel {
                 // Delete token if exisitng
                 this.refreshToken = data.refresh_token;
                 this.accessToken = data.access_token;
+                this.scopes = MollieToken.parseScopes(data.scope) ?? this.scopes;
                 this.expiresOn = new Date(new Date().getTime() + 3600 * 1000 - 60 * 1000);
                 await this.save();
 
@@ -298,6 +325,7 @@ export class MollieToken extends QueryableModel {
             token.organizationId = organization.id;
             token.refreshToken = data.refresh_token;
             token.accessToken = data.access_token;
+            token.scopes = MollieToken.parseScopes(data.scope);
             token.expiresOn = new Date(new Date().getTime() + 3600 * 1000 - 60 * 1000);
             await token.save();
 

@@ -208,6 +208,7 @@
                 <p v-if="!organization.privateMeta.mollieOnboarding.canReceiveSettlements" class="warning-box">
                     {{ $t('%Nx') }}
                 </p>
+                <MollieWarningBox @reconnect="linkMollie" />
 
                 <p v-if="organization.privateMeta.mollieOnboarding.status === 'NeedsData'" class="style-description-block">
                     {{ $t('%Ny') }}
@@ -355,7 +356,9 @@ import { Storage } from '@stamhoofd/networking/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import type { MollieProfile } from '@stamhoofd/structures';
 import { BuckarooSettings, CheckMollieResponse, Organization, OrganizationPrivateMetaData, PayconiqAccount, PaymentMethod, StripeAccount } from '@stamhoofd/structures';
+import MollieWarningBox from '@stamhoofd/components/mollie/MollieWarningBox.vue';
 import { GetMollieDashboardResponse } from '@stamhoofd/structures/endpoints/GetMollieDashboardResponse.js';
+import { MollieRequiredScopes } from '@stamhoofd/structures/MollieScopes.js';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
@@ -572,7 +575,7 @@ async function linkMollie() {
     realRedirectUrl.pathname = realRedirectUrl.pathname + '/oauth/mollie';
     await Storage.keyValue.setItem('mollie-saved-redirect-url', realRedirectUrl.pathname);
 
-    const scope = 'payments.read payments.write refunds.read refunds.write organizations.read organizations.write onboarding.read onboarding.write profiles.read profiles.write subscriptions.read subscriptions.write mandates.read mandates.write settlements.read orders.read orders.write customers.read customers.write webhooks.read webhooks.write';
+    const scope = MollieRequiredScopes.join(' ');
     const url = 'https://www.mollie.com/oauth2/authorize?client_id=' + encodeURIComponent(client_id) + '&state=' + encodeURIComponent(state) + '&scope=' + encodeURIComponent(scope) + '&response_type=code&approval_prompt=force&locale=nl_BE';
 
     window.location.href = url;

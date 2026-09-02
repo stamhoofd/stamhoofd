@@ -356,10 +356,13 @@ describe('Helper.MollieSettlementSync', () => {
         expect(await Settlement.select().where('externalId', beforeWindow.id).count()).toBe(0);
     });
 
-    test('The fee walk follows pagination and stops before the window', async () => {
+    test('The fee walk follows pagination and stops before the previous payout', async () => {
         const { organization, token, payment, mockPayment, mockRefund } = await init();
         const { mockChargeback } = await addChargeback(organization.id, payment, mockPayment);
         mollieMocker.balanceTransactionsPageSize = 2;
+
+        // Paid out before the window: the walked settlement's period starts here
+        mollieMocker.createSettlement({ value: '0.00', settledAt: new Date(2019, 5, 1) });
 
         const settlement = mollieMocker.createSettlement({
             payments: [mockPayment],
@@ -373,7 +376,7 @@ describe('Helper.MollieSettlementSync', () => {
         mollieMocker.createBalanceTransaction({ type: 'refund', entryId: mockRefund.id, fee: '0.06', createdAt: new Date(2026, 2, 2) });
         mollieMocker.createBalanceTransaction({ type: 'chargeback', entryId: mockChargeback.id, fee: '0.25', createdAt: new Date(2026, 2, 1) });
 
-        // Before the window (minus the lookback): the walk may not reach this one
+        // Before the previous payout (minus the lookback): the walk may not reach this one
         const beforeWindow = mollieMocker.createBalanceTransaction({ type: 'payment', entryId: mockPayment.id, fee: '9.99', createdAt: new Date(2019, 0, 1) });
 
         await runCron(token);
@@ -382,6 +385,39 @@ describe('Helper.MollieSettlementSync', () => {
         const charges = await SettlementCharge.select().where('settlementId', row.id).fetch();
         expect(charges.map(c => c.amount).sort((a, b) => a - b)).toEqual([-30_00, -25_00, -6_00]);
         expect(charges.map(c => c.externalId)).not.toContain(beforeWindow.id);
+        expect(mollieMocker.balanceTransactionRequests).toBe(2);
+    });
+
+    test('The fee walk covers the walked payouts only', async () => {
+        const { token, payment, mockPayment } = await init();
+        const previousPayout = new Date(2020, 5, 1);
+        mollieMocker.createSettlement({ value: '0.00', settledAt: previousPayout });
+        const payout = new Date(2020, 6, 1);
+        mollieMocker.createSettlement({ payments: [mockPayment], value: '49.70', settledAt: payout });
+
+        // After the payout: belongs to the open settlement
+        const afterPayout = mollieMocker.createBalanceTransaction({ type: 'payment', entryId: mockPayment.id, fee: '0.01', createdAt: new Date(2020, 6, 2) });
+        const inPeriod = mollieMocker.createBalanceTransaction({ type: 'payment', entryId: mockPayment.id, fee: '0.30', createdAt: new Date(2020, 5, 15) });
+        // A few days before the previous payout: the payout delay is covered by the lookback
+        const beforePreviousPayout = mollieMocker.createBalanceTransaction({ type: 'payment', entryId: mockPayment.id, fee: '0.02', createdAt: new Date(2020, 4, 25) });
+        const longBefore = mollieMocker.createBalanceTransaction({ type: 'payment', entryId: mockPayment.id, fee: '0.03', createdAt: new Date(2020, 0, 1) });
+
+        await runCron(token, { start: new Date(2020, 5, 15), end: new Date(2020, 7, 1) });
+
+        const charges = await SettlementCharge.select().where('paymentId', payment.id).fetch();
+        expect(charges.map(c => c.externalId).sort()).toEqual([inPeriod.id, beforePreviousPayout.id].sort());
+        expect(charges.map(c => c.externalId)).not.toContain(afterPayout.id);
+        expect(charges.map(c => c.externalId)).not.toContain(longBefore.id);
+    });
+
+    test('No balance transactions are fetched when no settlement was walked', async () => {
+        const { token, mockPayment } = await init();
+        mollieMocker.createSettlement({ payments: [mockPayment], value: '49.70', settledAt: new Date(2019, 0, 1) });
+        mollieMocker.createBalanceTransaction({ type: 'payment', entryId: mockPayment.id, fee: '0.30' });
+
+        await runCron(token);
+
+        expect(mollieMocker.balanceTransactionRequests).toBe(0);
     });
 
     test('The summary counts synced settlements', async () => {

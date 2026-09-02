@@ -21,6 +21,7 @@
                     {{ $t('%19t') }}
                 </a>
             </p>
+            <MollieWarningBox v-if="stripeAccountObject === null" @reconnect="navigate(Routes.Settings)" />
 
             <STList>
                 <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label" :class="{'left-center': !(getPaymentMethod(method) && (getDescription(method) || getSettingsDescription(method)))}" @click="canEnablePaymentMethod(method) ? undefined : setPaymentMethod(method, true)">
@@ -109,6 +110,7 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
 import { Toast, ToastButton } from '@stamhoofd/components/overlays/Toast.ts';
+import MollieWarningBox from '@stamhoofd/components/mollie/MollieWarningBox.vue';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { AdministrationFeeSettings, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';

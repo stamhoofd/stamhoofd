@@ -96,6 +96,12 @@ export class MollieOnboarding extends AutoEncoder {
 
     @field({ decoder: new EnumDecoder(MollieStatus) })
     status: MollieStatus;
+
+    /**
+     * Permissions the connected token lacks: the account has to be reconnected to grant them.
+     */
+    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    missingScopes: string[] = [];
 }
 
 export class BuckarooSettings extends AutoEncoder {

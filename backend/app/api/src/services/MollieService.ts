@@ -16,9 +16,11 @@ export class MollieService {
     client: Client;
     sellingOrganization: Organization;
     createdAt: Date;
+    missingScopes: string[];
 
-    private constructor({ sellingOrganization, accessToken }: { sellingOrganization: Organization; accessToken: string }) {
+    private constructor({ sellingOrganization, accessToken, missingScopes }: { sellingOrganization: Organization; accessToken: string; missingScopes: string[] }) {
         this.sellingOrganization = sellingOrganization;
+        this.missingScopes = missingScopes;
         this.client = new Client({
             security: { advancedAccessToken: accessToken },
             testmode: this.testMode,
@@ -47,9 +49,16 @@ export class MollieService {
             }
             return null;
         }
-        const service = new MollieService({ sellingOrganization, accessToken: await token.getAccessToken() });
+        const service = new MollieService({ sellingOrganization, accessToken: await token.getAccessToken(), missingScopes: token.missingScopes });
         this.#cachedServices.set(sellingOrganization.id, service);
         return service;
+    }
+
+    /**
+     * Forget the cached service of an organization: its token was replaced.
+     */
+    static clearCache(organizationId: string) {
+        this.#cachedServices.delete(organizationId);
     }
 
     /**
@@ -324,6 +333,7 @@ export class MollieService {
                 canReceivePayments: !!response.canReceivePayments,
                 canReceiveSettlements: !!response.canReceiveSettlements,
                 status: response.status === 'needs-data' ? MollieStatus.NeedsData : (response.status === 'in-review' ? MollieStatus.InReview : (MollieStatus.Completed)),
+                missingScopes: this.missingScopes,
             });
         } catch (e) {
             console.error('Error when requesting Mollie onboarding status:');

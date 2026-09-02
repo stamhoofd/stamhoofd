@@ -48,6 +48,7 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
         }
 
         const mollieToken = await MollieToken.create(organization, request.body.code);
+        MollieService.clearCache(organization.id);
         const service = await MollieService.create({ sellingOrganization: organization });
         if (service) {
             await service.setupOnboarding();

@@ -2,6 +2,7 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization } from '@stamhoofd/models';
 import { MollieToken } from '@stamhoofd/models';
 import { Version } from '@stamhoofd/structures';
+import { MollieRequiredScopes } from '@stamhoofd/structures/MollieScopes.js';
 import nock from 'nock';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -116,6 +117,16 @@ export class MollieMocker {
      */
     balanceTransactionsPageSize: number | null = null;
 
+    /**
+     * Pages of the balance transactions list served since the last reset.
+     */
+    balanceTransactionRequests = 0;
+
+    /**
+     * Permissions granted by the OAuth authorization code exchange.
+     */
+    oauthScopes: string[] = [...MollieRequiredScopes];
+
     #forceFailure = false;
 
     // The SDK validates responses with zod: these links are required on most resources
@@ -145,6 +156,8 @@ export class MollieMocker {
         this.balanceTransactions = [];
         this.settlementsPageSize = null;
         this.balanceTransactionsPageSize = null;
+        this.balanceTransactionRequests = 0;
+        this.oauthScopes = [...MollieRequiredScopes];
         this.#forceFailure = false;
     }
 
@@ -163,7 +176,7 @@ export class MollieMocker {
      * Create a Mollie OAuth token for the selling organization so MollieService.create() works.
      * Without a token, MollieService.create() returns null and no Mollie request is ever made.
      */
-    async setupToken(organization: Organization) {
+    async setupToken(organization: Organization, options: { scopes?: string[] | null } = {}) {
         // Drop any cached token for this organization (the cache survives between tests within a worker)
         MollieToken.knownTokens.delete(organization.id);
 
@@ -172,6 +185,7 @@ export class MollieMocker {
         token.organizationId = organization.id;
         token.accessToken = 'access_test_' + uuidv4().replaceAll('-', '');
         token.refreshToken = 'refresh_test_' + uuidv4().replaceAll('-', '');
+        token.scopes = options.scopes === undefined ? [...MollieRequiredScopes] : options.scopes;
         // Far in the future so getAccessToken() never tries to refresh (which would hit the real Mollie OAuth API)
         token.expiresOn = new Date(Date.now() + 1000 * 60 * 60 * 24 * 365);
         await token.save();
@@ -199,6 +213,24 @@ export class MollieMocker {
             const [status, responseBody] = this.#handle('DELETE', uri, body);
             return [status, responseBody, { 'content-type': 'application/hal+json' }];
         });
+
+        interceptor.post('/oauth2/tokens').reply(() => {
+            return [200, this.#oauthTokens(), { 'content-type': 'application/json' }];
+        });
+    }
+
+    /**
+     * The token exchange of the OAuth connect flow (an authorization code or a refresh token),
+     * granting `oauthScopes`.
+     */
+    #oauthTokens() {
+        return {
+            access_token: 'access_test_' + uuidv4().replaceAll('-', ''),
+            refresh_token: 'refresh_test_' + uuidv4().replaceAll('-', ''),
+            expires_in: 3600,
+            token_type: 'bearer',
+            scope: this.oauthScopes.join(' '),
+        };
     }
 
     stop() {
@@ -745,6 +777,7 @@ export class MollieMocker {
      * Mollie lists balance transactions newest-first, paginated like the settlements list.
      */
     #listBalanceTransactions(uri: string): [number, unknown] {
+        this.balanceTransactionRequests += 1;
         const query = new URLSearchParams(uri.split('?')[1] ?? '');
 
         const sorted = this.balanceTransactions.slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
