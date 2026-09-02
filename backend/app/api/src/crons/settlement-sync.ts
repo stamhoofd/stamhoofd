@@ -8,18 +8,16 @@ import { PaymentProvider } from '@stamhoofd/structures';
 import { SettlementStatus } from '@stamhoofd/structures/settlements/SettlementStatus.js';
 import { Formatter } from '@stamhoofd/utility';
 
+import { Platform } from '@stamhoofd/models';
 import { SettlementSyncRunner } from '../helpers/SettlementSyncRunner.js';
 import { isApplicationFeeInvoicingEnabled } from './stripe-invoices.js';
-import { Platform } from '@stamhoofd/models';
-import { TenantContext } from '../helpers/TenantContext.js';
-import { OrganizationAdminService } from '../services/OrganizationAdminService.js';
 
 registerCron('settlement-sync', syncSettlements);
 
 /**
  * How many days of settlements the nightly run re-walks.
  */
-const SYNC_WINDOW_DAYS = 30;
+const SYNC_WINDOW_DAYS = 14;
 
 /**
  * Fees received in a platform payout are billed by the monthly invoicer, so pendingFees taking a
