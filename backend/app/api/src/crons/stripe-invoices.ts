@@ -16,8 +16,8 @@ let lastStripeInvoice: Date | null = null;
  * The settlements feature is not released yet: allow production at go-live.
  */
 export function isApplicationFeeInvoicingEnabled(): boolean {
-    return STAMHOOFD.userMode !== 'platform'
-        && STAMHOOFD.STRIPE_CONNECT_METHOD !== 'standard';
+    return STAMHOOFD.userMode === 'organization'
+        && STAMHOOFD.STRIPE_CONNECT_METHOD === 'express';
 }
 
 async function createStripeInvoices() {
