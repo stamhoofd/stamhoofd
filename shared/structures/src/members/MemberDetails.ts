@@ -880,7 +880,7 @@ export class MemberDetails extends AutoEncoder {
 
     private static mergeRelations(members: MemberDetails[], type: 'parents' | 'emergencyContacts', allowOverrides = true) {
         type T = Parent | EmergencyContact;
-        type RelationGroup = { object: T; reviewDate?: Date; createdAt: Date; setObject: (object: T) => void }[];
+        type RelationGroup = { member: MemberDetails; object: T; reviewDate?: Date; createdAt: Date; setObject: (object: T) => void }[];
 
         const allGroups: RelationGroup[] = [];
         const parentsGroupByName: Map<string, RelationGroup> = new Map();
@@ -909,6 +909,7 @@ export class MemberDetails extends AutoEncoder {
                 }
 
                 group.push({
+                    member,
                     object: object,
                     setObject(object: T) {
                         const previous = member[type][index];
@@ -942,6 +943,13 @@ export class MemberDetails extends AutoEncoder {
 
                 // Sort from oldest reviewed to latest reviewed
                 parents.sort((a, b) => Sorter.byDateValue(b.reviewDate ?? new Date(0), a.reviewDate ?? new Date(0)));
+
+                const latestTaxDependentByMember = new Map<MemberDetails, boolean | null>();
+                if (type === 'parents') {
+                    for (const { member, object } of parents) {
+                        latestTaxDependentByMember.set(member, (object as Parent).taxDependent);
+                    }
+                }
 
                 // Parents with the same id override each other, while parents with different ids merge while maintaining as much data as possible
                 // this happens in groups
@@ -987,6 +995,13 @@ export class MemberDetails extends AutoEncoder {
                     member[type] = member[type].filter((p, i, self) =>
                         self.findIndex(p2 => p2.id === p.id) === i,
                     ) as any;
+
+                    if (type === 'parents' && latestTaxDependentByMember.has(member)) {
+                        const parent = member.parents.find(parent => parent.id === mergeTo.id);
+                        if (parent) {
+                            parent.taxDependent = latestTaxDependentByMember.get(member)!;
+                        }
+                    }
                 }
             }
         }
