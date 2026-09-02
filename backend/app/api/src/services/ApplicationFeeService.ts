@@ -17,6 +17,12 @@ export const LEGACY_FEE_PAYMENT_REFERENCE_PREFIX = 'stripe-fees-';
 export const FEE_PAYMENT_REFERENCE_PREFIX = 'application-fees-';
 
 /**
+ * Fees without a payer (their organization or Stripe account was deleted) wait this long before
+ * they are billed without one, in case the missing data is restored.
+ */
+export const ORPHANED_FEE_DELAY_DAYS = 14;
+
+/**
  * Fees read per batch when a whole invoice is stamped at once.
  */
 const FEE_BATCH_SIZE = 500;
@@ -128,7 +134,7 @@ export class ApplicationFeeService {
         if (payment === null) {
             return;
         }
-        await this.stampProviderInvoiceId(fee, { payment });
+        await this.setProviderInvoiceIdForSettlementChargeOfApplicationFee(fee, { payment });
     }
 
     /**
@@ -255,9 +261,9 @@ export class ApplicationFeeService {
     /**
      * Stamps the Stamhoofd invoice number that bills this fee on the payer's deduction charge, so
      * the payer can link the cost in their settlement export to our invoice. No invoice (yet) means
-     * no stamp: stampInvoicedPayments runs when the invoice is created later.
+     * no stamp: setProviderInvoiceIdsForSettlementCharges runs when the invoice is created later.
      */
-    private static async stampProviderInvoiceId(fee: ApplicationFee, { payment }: { payment?: Payment } = {}) {
+    private static async setProviderInvoiceIdForSettlementChargeOfApplicationFee(fee: ApplicationFee, { payment }: { payment?: Payment } = {}) {
         if (!fee.settlementChargeId) {
             return;
         }
@@ -292,7 +298,7 @@ export class ApplicationFeeService {
      * null): stamps or clears the invoice number on the deduction charges of every application fee
      * the payments billed. A no-op for invoices without fee payments.
      */
-    static async stampInvoicedPayments(payments: Payment[], invoice: Invoice | null) {
+    static async setProviderInvoiceIdsForSettlementCharges(payments: Payment[], invoice: Invoice | null) {
         if (payments.length === 0) {
             return;
         }

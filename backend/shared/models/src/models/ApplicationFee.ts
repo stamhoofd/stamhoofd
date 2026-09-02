@@ -46,8 +46,7 @@ export class ApplicationFee extends QueryableModel {
 
     /**
      * The paying organization: the connected organization whose payout the fee was deducted from.
-     * NULL when that organization no longer exists: the fee stays as income of the receiving
-     * organization, but can never be invoiced anymore.
+     * NULL when that organization no longer exists: the fee is then billed without a payer.
      */
     @column({ type: 'string', nullable: true })
     payingOrganizationId: string | null = null;

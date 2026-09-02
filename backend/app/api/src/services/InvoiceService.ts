@@ -322,7 +322,7 @@ export class InvoiceService {
             // The deduction charges of application fees billed by these payments now link to a
             // numbered invoice. Only after the try/catch: a stamping error must never delete an
             // invoice that was already sent
-            await ApplicationFeeService.stampInvoicedPayments(payments, model);
+            await ApplicationFeeService.setProviderInvoiceIdsForSettlementCharges(payments, model);
         } catch (e) {
             console.error('Failed to stamp application fee charges for invoice ' + model.id, e);
             WebmasterReport.report('Factuurnummer op applicatiekosten zetten mislukt voor factuur ' + (model.number ?? model.id) + ' (de factuur zelf is wel verstuurd)', e);
@@ -403,7 +403,7 @@ export class InvoiceService {
         await BalanceItemService.updateInvoiced(balanceItemIds);
 
         // The invoice number stamped on application fee deduction charges no longer exists
-        await ApplicationFeeService.stampInvoicedPayments(payments, null);
+        await ApplicationFeeService.setProviderInvoiceIdsForSettlementCharges(payments, null);
     }
 
     private static shouldForwardInvoice(invoice: Invoice, organization: Organization) {

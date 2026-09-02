@@ -1,12 +1,14 @@
+import { Database } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, BalanceItemPayment, Organization, Payment, StripeAccount, User } from '@stamhoofd/models';
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { QueueHandler } from '@stamhoofd/queues';
+import { SQL } from '@stamhoofd/sql';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getPaymentProviderName, PaymentCustomer, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, TranslatedString } from '@stamhoofd/structures';
 import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { Formatter, sleep } from '@stamhoofd/utility';
 
-import { ApplicationFeeService, FEE_PAYMENT_REFERENCE_PREFIX } from '../services/ApplicationFeeService.js';
+import { ApplicationFeeService, FEE_PAYMENT_REFERENCE_PREFIX, ORPHANED_FEE_DELAY_DAYS } from '../services/ApplicationFeeService.js';
 import { PaymentService } from '../services/PaymentService.js';
 import { SettlementService } from '../services/SettlementService.js';
 import { VATService } from '../services/VATService.js';
@@ -20,6 +22,10 @@ const FEE_BATCH_SIZE = 500;
  * never billed, instead of every run walking further and further back.
  */
 const MAXIMUM_INVOICE_MONTHS = 12;
+
+function orphanedFeeCutoff(): Date {
+    return new Date(Date.now() - ORPHANED_FEE_DELAY_DAYS * 24 * 60 * 60 * 1000);
+}
 
 // UTC days match Stripe's payout cutoffs
 function startOfUtcDay(date: Date): Date {
@@ -49,17 +55,19 @@ async function nextSecondBoundary(): Promise<Date> {
 }
 
 type AccountTotals = {
-    payingOrganizationId: string;
+    payingOrganizationId: string | null;
+    payingStripeAccountId: string | null;
     amountPerType: Map<ApplicationFeeType, number>;
 };
 
 /**
- * Bills uninvoiced application fees per (paying account, UTC day): one ServiceFee/TransferFee
- * balance item pair paid by one AccountDeductions payment. A fee with a balanceItemId is billed.
+ * Bills uninvoiced application fees per (paying organization, paying account, UTC day): one
+ * ServiceFee/TransferFee balance item pair paid by one AccountDeductions payment. A fee with a
+ * balanceItemId is billed. Fees whose payer was deleted are billed without one, so they can be
+ * receipted manually.
  */
 export class ApplicationFeeInvoicer {
     readonly #secretKey: string;
-    readonly #reportedLegacyMonths = new Set<string>();
 
     constructor({ secretKey }: { secretKey: string }) {
         this.#secretKey = secretKey;
@@ -116,7 +124,7 @@ export class ApplicationFeeInvoicer {
             const nextDay = nextUtcDay(day);
 
             try {
-                await platformSync.syncFees({ start: day, end: new Date(nextDay.getTime() - 1000) });
+                await platformSync.syncFees({ start: day, end: nextDay });
                 await this.generateInvoicesForDay(sellingOrganization, day);
             } catch (e) {
                 console.error('Invoicing application fees failed for day ' + utcDateIso(day), e);
@@ -127,109 +135,94 @@ export class ApplicationFeeInvoicer {
         }
     }
 
-    async generateInvoicesForDay(sellingOrganization: Organization, day: Date, snapshot?: Date): Promise<void> {
+    async generateInvoicesForDay(sellingOrganization: Organization, day: Date): Promise<void> {
         // Excludes fees stored during this run, so totals and stamped fees can't drift apart
-        snapshot ??= await nextSecondBoundary();
+        const snapshot = await nextSecondBoundary();
+        const orphanedBefore = orphanedFeeCutoff();
         const periodStart = startOfUtcDay(day);
         const nextPeriodStart = nextUtcDay(periodStart);
         const reference = ApplicationFeeInvoicer.reference(periodStart);
 
         await QueueHandler.schedule(reference, async () => {
-            const totalsPerAccount = new Map<string, AccountTotals>();
+            const totalsPerPayer = new Map<string, AccountTotals>();
 
-            // Both ids are non-null: #selectUninvoicedFees only returns fees that can be billed
-            for await (const fee of this.#selectUninvoicedFees(sellingOrganization, periodStart, nextPeriodStart, snapshot).all()) {
-                const totals = totalsPerAccount.get(fee.payingStripeAccountId!) ?? {
-                    payingOrganizationId: fee.payingOrganizationId!,
+            for await (const fee of this.#selectUninvoicedFees(sellingOrganization, periodStart, nextPeriodStart, snapshot, orphanedBefore).all()) {
+                const key = (fee.payingOrganizationId ?? '') + ':' + (fee.payingStripeAccountId ?? '');
+                const totals = totalsPerPayer.get(key) ?? {
+                    payingOrganizationId: fee.payingOrganizationId,
+                    payingStripeAccountId: fee.payingStripeAccountId,
                     amountPerType: new Map<ApplicationFeeType, number>(),
                 };
                 totals.amountPerType.set(fee.type, (totals.amountPerType.get(fee.type) ?? 0) + fee.amount);
-                totalsPerAccount.set(fee.payingStripeAccountId!, totals);
+                totalsPerPayer.set(key, totals);
             }
 
-            for (const [payingStripeAccountId, totals] of totalsPerAccount) {
+            for (const [key, totals] of totalsPerPayer) {
                 try {
-                    await this.#invoiceGroup({ sellingOrganization, payingStripeAccountId, totals, periodStart, nextPeriodStart, snapshot });
+                    await this.#invoiceGroup({ sellingOrganization, totals, periodStart, nextPeriodStart, snapshot, orphanedBefore });
                 } catch (e) {
-                    console.error('Invoicing application fees failed for account ' + payingStripeAccountId + ' - ' + reference, e);
-                    WebmasterReport.report('Aanrekenen applicatiekosten voor ' + payingStripeAccountId + ' - ' + reference + ' mislukt', e);
+                    console.error('Invoicing application fees failed for payer ' + key + ' - ' + reference, e);
+                    WebmasterReport.report('Aanrekenen applicatiekosten voor ' + key + ' - ' + reference + ' mislukt', e);
                 }
             }
         });
     }
 
-    #selectUninvoicedFees(sellingOrganization: Organization, periodStart: Date, nextPeriodStart: Date, snapshot?: Date) {
-        const query = this.#selectBillableFees(sellingOrganization)
+    #selectUninvoicedFees(sellingOrganization: Organization, periodStart: Date, nextPeriodStart: Date, snapshot: Date, orphanedBefore: Date) {
+        return this.#selectBillableFees(sellingOrganization, orphanedBefore)
             .where('occurredAt', '>=', periodStart)
             .where('occurredAt', '<', nextPeriodStart)
+            .where('createdAt', '<', snapshot)
             .limit(FEE_BATCH_SIZE);
-        return snapshot ? query.where('createdAt', '<', snapshot) : query;
     }
 
-    #selectBillableFees(sellingOrganization: Organization) {
+    #selectBillableFees(sellingOrganization: Organization, orphanedBefore = orphanedFeeCutoff()) {
         return ApplicationFee.select()
             .where('organizationId', sellingOrganization.id)
             .where('balanceItemId', null)
-            .where('payingOrganizationId', '!=', null)
-            .where('payingStripeAccountId', '!=', null);
+            .where(
+                SQL.where('payingOrganizationId', '!=', null)
+                    .and('payingStripeAccountId', '!=', null)
+                    .or('occurredAt', '<', orphanedBefore),
+            );
     }
 
-    async #invoiceGroup({ sellingOrganization, payingStripeAccountId, totals, periodStart, nextPeriodStart, snapshot }: {
+    async #invoiceGroup({ sellingOrganization, totals, periodStart, nextPeriodStart, snapshot, orphanedBefore }: {
         sellingOrganization: Organization;
-        payingStripeAccountId: string;
         totals: AccountTotals;
         periodStart: Date;
         nextPeriodStart: Date;
         snapshot: Date;
+        orphanedBefore: Date;
     }): Promise<void> {
         const seller = sellingOrganization.meta.companies[0];
         if (!seller) {
             return;
         }
 
-        const stripeAccount = await StripeAccount.getByID(payingStripeAccountId);
-        if (!stripeAccount) {
+        const stripeAccount = (totals.payingStripeAccountId ? await StripeAccount.getByID(totals.payingStripeAccountId) : null) ?? null;
+        if (totals.payingStripeAccountId && !stripeAccount) {
             throw new SimpleError({
                 code: 'stripe_account_not_found',
-                message: 'Stripe account ' + payingStripeAccountId + ' of uninvoiced application fees does not exist',
+                message: 'Stripe account ' + totals.payingStripeAccountId + ' of uninvoiced application fees does not exist',
             });
         }
 
-        const organization = await Organization.getByID(totals.payingOrganizationId);
-        if (!organization) {
+        const organization = (totals.payingOrganizationId ? await Organization.getByID(totals.payingOrganizationId) : null) ?? null;
+        if (totals.payingOrganizationId && !organization) {
             throw new SimpleError({
                 code: 'organization_not_found',
-                message: 'No organization found for Stripe account ' + stripeAccount.accountId,
+                message: 'Organization ' + totals.payingOrganizationId + ' of uninvoiced application fees does not exist',
             });
         }
 
-        // Uninvoiced fees in a legacy-billed month mean linking failed: never bill them twice
-        const legacyMonthStart = new Date(Date.UTC(periodStart.getUTCFullYear(), periodStart.getUTCMonth(), 1));
-        const legacyPayments = await ApplicationFeeService.findLegacyFeePayments({
-            organizationId: sellingOrganization.id,
-            payingOrganizationId: organization.id,
-            payingStripeAccountId: stripeAccount.id,
-            periodStart: legacyMonthStart,
-        });
-        if (legacyPayments.length > 0) {
-            const key = stripeAccount.id + ':' + utcDateIso(legacyMonthStart);
-            if (this.#reportedLegacyMonths.has(key)) {
-                return;
-            }
-            this.#reportedLegacyMonths.add(key);
-            throw new SimpleError({
-                code: 'legacy_month_not_linked',
-                message: 'Month ' + Formatter.dateIso(legacyMonthStart) + ' was billed by the legacy invoicer but has uninvoiced fees: linking failed, not billing them again',
-            });
-        }
+        const customer = organization
+            ? PaymentCustomer.create({
+                    company: organization.defaultCompanies[0],
+                })
+            : null;
 
-        await this.#assertNoOrphanedBalanceItems(sellingOrganization, stripeAccount.id, periodStart, nextPeriodStart);
-
-        const customer = PaymentCustomer.create({
-            company: organization.defaultCompanies[0],
-        });
-
-        if (customer.company!.isSameEntity(seller)) {
+        if (customer?.company?.isSameEntity(seller)) {
             throw new SimpleError({
                 code: 'same_customer',
                 message: 'Cannot invoice self',
@@ -241,132 +234,98 @@ export class ApplicationFeeInvoicer {
             return;
         }
 
-        const dayEnd = new Date(nextPeriodStart.getTime() - 1000);
-        const itemPerType = new Map<ApplicationFeeType, BalanceItem>();
+        const payment = await Database.beginTransaction(async () => {
+            const dayEnd = new Date(nextPeriodStart.getTime() - 1000);
+            const itemPerType = new Map<ApplicationFeeType, BalanceItem>();
 
-        for (const type of [ApplicationFeeType.Service, ApplicationFeeType.Transfer]) {
-            const amount = totals.amountPerType.get(type) ?? 0;
-            if (amount === 0) {
-                continue;
-            }
-            itemPerType.set(type, await this.#createBalanceItem({ sellingOrganization, organization, type, amount, periodStart, dayEnd }));
-        }
-
-        const balanceItems = [...itemPerType.values()];
-        let total = 0;
-        for (const balanceItem of balanceItems) {
-            total += balanceItem.priceWithVAT;
-        }
-        if (total !== totalAmount) {
-            throw new SimpleError({
-                code: 'price_mismatched',
-                message: 'The charged amount does not match the total application fee for the payment',
-            });
-        }
-
-        // Stamp before creating the payment: a crash in between leaves detectable unpaid items
-        // (see #assertNoOrphanedBalanceItems), never fees that get billed twice
-        let stampedAmount = 0;
-        for await (const fees of this.#selectUninvoicedFees(sellingOrganization, periodStart, nextPeriodStart, snapshot)
-            .where('payingStripeAccountId', stripeAccount.id)
-            .allBatched()) {
-            for (const fee of fees) {
-                const item = itemPerType.get(fee.type);
-                if (!item) {
-                    throw new SimpleError({
-                        code: 'missing_balance_item',
-                        message: 'No ' + fee.type + ' balance item was created for fee ' + fee.externalId,
-                    });
+            for (const type of [ApplicationFeeType.Service, ApplicationFeeType.Transfer]) {
+                const amount = totals.amountPerType.get(type) ?? 0;
+                if (amount === 0) {
+                    continue;
                 }
-                await ApplicationFeeService.markInvoiced(fee, item.id, { payment: null });
-                stampedAmount += fee.amount;
+                itemPerType.set(type, await this.#createBalanceItem({ sellingOrganization, organization, type, amount, periodStart, dayEnd }));
             }
-        }
 
-        if (stampedAmount !== totalAmount) {
-            throw new SimpleError({
-                code: 'price_mismatched',
-                message: 'Stamped ' + stampedAmount + ' of application fees but billed ' + totalAmount,
-            });
-        }
+            const balanceItems = [...itemPerType.values()];
+            let total = 0;
+            for (const balanceItem of balanceItems) {
+                total += balanceItem.priceWithVAT;
+            }
+            if (total !== totalAmount) {
+                throw new SimpleError({
+                    code: 'price_mismatched',
+                    message: 'The charged amount does not match the total application fee for the payment',
+                });
+            }
 
-        const systemUser = await User.getSystem();
+            let stampedAmount = 0;
+            for await (const fees of this.#selectUninvoicedFees(sellingOrganization, periodStart, nextPeriodStart, snapshot, orphanedBefore)
+                .where('payingOrganizationId', totals.payingOrganizationId)
+                .where('payingStripeAccountId', totals.payingStripeAccountId)
+                .allBatched()) {
+                for (const fee of fees) {
+                    const item = itemPerType.get(fee.type);
+                    if (!item) {
+                        throw new SimpleError({
+                            code: 'missing_balance_item',
+                            message: 'No ' + fee.type + ' balance item was created for fee ' + fee.externalId,
+                        });
+                    }
+                    await ApplicationFeeService.markInvoiced(fee, item.id, { payment: null });
+                    stampedAmount += fee.amount;
+                }
+            }
 
-        const payment = new Payment();
-        payment.adminUserId = systemUser.id;
+            if (stampedAmount !== totalAmount) {
+                throw new SimpleError({
+                    code: 'price_mismatched',
+                    message: 'Stamped ' + stampedAmount + ' of application fees but billed ' + totalAmount,
+                });
+            }
 
-        // The receiver of the fees
-        payment.organizationId = sellingOrganization.id;
+            const systemUser = await User.getSystem();
 
-        // The payer
-        payment.payingOrganizationId = organization.id;
-        payment.customer = customer;
+            const payment = new Payment();
+            payment.adminUserId = systemUser.id;
 
-        payment.status = PaymentStatus.Pending;
-        payment.price = totalAmount;
-        payment.roundingAmount = 0;
-        payment.method = PaymentMethod.AccountDeductions;
-        payment.type = PaymentType.Payment;
-        payment.createMandate = null;
-        payment.reference = ApplicationFeeInvoicer.reference(periodStart);
+            // The receiver of the fees
+            payment.organizationId = sellingOrganization.id;
 
-        payment.provider = PaymentProvider.Stripe;
-        payment.stripeAccountId = stripeAccount.id;
-        await payment.save();
+            // The payer, unless deleted
+            payment.payingOrganizationId = organization?.id ?? null;
+            payment.customer = customer;
 
-        for (const balanceItem of balanceItems) {
-            const balanceItemPayment = new BalanceItemPayment();
-            balanceItemPayment.balanceItemId = balanceItem.id;
-            balanceItemPayment.paymentId = payment.id;
-            balanceItemPayment.organizationId = payment.organizationId;
-            balanceItemPayment.price = balanceItem.priceWithVAT;
-            await balanceItemPayment.save();
-        }
+            payment.status = PaymentStatus.Pending;
+            payment.price = totalAmount;
+            payment.roundingAmount = 0;
+            payment.method = PaymentMethod.AccountDeductions;
+            payment.type = PaymentType.Payment;
+            payment.createMandate = null;
+            payment.reference = ApplicationFeeInvoicer.reference(periodStart);
+
+            payment.provider = PaymentProvider.Stripe;
+            payment.stripeAccountId = stripeAccount?.id ?? null;
+            await payment.save();
+
+            for (const balanceItem of balanceItems) {
+                const balanceItemPayment = new BalanceItemPayment();
+                balanceItemPayment.balanceItemId = balanceItem.id;
+                balanceItemPayment.paymentId = payment.id;
+                balanceItemPayment.organizationId = payment.organizationId;
+                balanceItemPayment.price = balanceItem.priceWithVAT;
+                await balanceItemPayment.save();
+            }
+
+            return payment;
+        });
 
         await PaymentService.handlePaymentStatusUpdate(payment, sellingOrganization, PaymentStatus.Succeeded, new Date());
         await SettlementService.updatePaymentSettlementsForApplicationFeePayment(payment);
     }
 
-    /**
-     * A crash between stamping the fees and creating the payment leaves balance items without a
-     * payment. Never bill on top of that: the totals of a new payment would no longer match the
-     * items, someone has to repair first.
-     */
-    async #assertNoOrphanedBalanceItems(sellingOrganization: Organization, payingStripeAccountId: string, periodStart: Date, nextPeriodStart: Date): Promise<void> {
-        const checked = new Set<string>();
-
-        for await (const fees of ApplicationFee.select()
-            .where('organizationId', sellingOrganization.id)
-            .where('payingStripeAccountId', payingStripeAccountId)
-            .where('balanceItemId', '!=', null)
-            .where('occurredAt', '>=', periodStart)
-            .where('occurredAt', '<', nextPeriodStart)
-            .limit(FEE_BATCH_SIZE)
-            .allBatched()) {
-            const balanceItemIds = Formatter.uniqueArray(fees.map(fee => fee.balanceItemId!)).filter(id => !checked.has(id));
-            if (balanceItemIds.length === 0) {
-                continue;
-            }
-            balanceItemIds.forEach(id => checked.add(id));
-
-            const balanceItemPayments = await BalanceItemPayment.select()
-                .where('balanceItemId', balanceItemIds)
-                .fetch();
-            const paidItemIds = new Set(balanceItemPayments.map(b => b.balanceItemId));
-
-            const orphaned = balanceItemIds.filter(id => !paidItemIds.has(id));
-            if (orphaned.length > 0) {
-                throw new SimpleError({
-                    code: 'orphaned_balance_items',
-                    message: 'Balance items ' + orphaned.join(', ') + ' bill application fees but have no payment: repair before invoicing more fees of this day',
-                });
-            }
-        }
-    }
-
     async #createBalanceItem({ sellingOrganization, organization, type, amount, periodStart, dayEnd }: {
         sellingOrganization: Organization;
-        organization: Organization;
+        organization: Organization | null;
         type: ApplicationFeeType;
         amount: number;
         periodStart: Date;
@@ -383,11 +342,11 @@ export class ApplicationFeeInvoicer {
             id: PaymentProvider.Stripe,
             name: TranslatedString.create(getPaymentProviderName(PaymentProvider.Stripe)),
         }));
-        item.payingOrganizationId = organization.id;
+        item.payingOrganizationId = organization?.id ?? null;
         item.organizationId = sellingOrganization.id;
         item.VATPercentage = 21;
         item.VATExcempt = VATService.getVATExcempt({
-            company: organization.defaultCompanies[0] ?? null,
+            company: organization?.defaultCompanies[0] ?? null,
             sellingOrganization,
             type: 'services',
         });
