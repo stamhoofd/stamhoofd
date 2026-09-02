@@ -56,7 +56,7 @@
             </STListItem>
         </STList>
 
-        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t('%6o')" class="max">
+        <STInputBox v-if="balanceItem.relations.size === 0 && !balanceItem.startDate" error-fields="description" :error-box="errors.errorBox" :title="$t('%6o')" class="max">
             <textarea v-model="description" class="input" :placeholder="$t('%14p')" />
         </STInputBox>
 
