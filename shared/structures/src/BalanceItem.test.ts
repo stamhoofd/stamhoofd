@@ -1,5 +1,7 @@
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { ObjectData } from '@simonbackx/simple-encoding';
 import { TestUtils } from '@stamhoofd/test-utils';
-import { BalanceItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, DESCRIPTION_TITLED_BALANCE_ITEM_TYPES, getApplicableBalanceItemRelationTypes, getApplicableBalanceItemTypes, GroupedBalanceItems, VATExcemptReason } from './BalanceItem.js';
+import { BalanceItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, NAME_TITLED_BALANCE_ITEM_TYPES, getApplicableBalanceItemRelationTypes, getApplicableBalanceItemTypes, GroupedBalanceItems, VATExcemptReason } from './BalanceItem.js';
 import type { InMemoryFilterDefinitions } from './filters/InMemoryFilter.js';
 import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler } from './filters/InMemoryFilter.js';
 import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
@@ -7,15 +9,16 @@ import { TranslatedString } from './TranslatedString.js';
 import { DetailedPayableBalance } from './endpoints/PayableBalanceCollection.js';
 import { BaseOrganization, Organization } from './Organization.js';
 import { Platform } from './Platform.js';
+import { Version } from './Version.js';
 
 /**
  * Helper to create a payable (Due) balance item with an exclusive VAT rate.
  * unitPrice is in the internal integer format (1 euro = 10000).
  */
-function createItem(overrides: Partial<{ unitPrice: number; amount: number; VATPercentage: number | null; VATIncluded: boolean; VATExcempt: VATExcemptReason | null; type: BalanceItemType; description: string }> = {}) {
+function createItem(overrides: Partial<{ unitPrice: number; amount: number; VATPercentage: number | null; VATIncluded: boolean; VATExcempt: VATExcemptReason | null; type: BalanceItemType; name: string }> = {}) {
     return BalanceItemWithPayments.create({
         type: overrides.type ?? BalanceItemType.Other,
-        description: overrides.description ?? 'Test item',
+        name: overrides.name ?? 'Test item',
         amount: overrides.amount ?? 1,
         unitPrice: overrides.unitPrice ?? 4_13_00,
         VATPercentage: overrides.VATPercentage === undefined ? 21 : overrides.VATPercentage,
@@ -272,10 +275,10 @@ describe('BalanceItem.categoryFilter / articleFilter', () => {
         TestUtils.setEnvironment('platformName', 'stamhoofd');
     });
 
-    function createItem(type: BalanceItemType, relations: [BalanceItemRelationType, string][] = [], description = '') {
+    function createItem(type: BalanceItemType, relations: [BalanceItemRelationType, string][] = [], name = '') {
         return BalanceItem.create({
             type,
-            description,
+            name,
             relations: new Map(relations.map(([relationType, id]) => [
                 relationType,
                 BalanceItemRelation.create({ id, name: new TranslatedString(id) }),
@@ -290,7 +293,7 @@ describe('BalanceItem.categoryFilter / articleFilter', () => {
     const balanceItemFilterCompilers: InMemoryFilterDefinitions = {
         ...baseInMemoryFilterCompilers,
         type: createInMemoryFilterCompiler('type'),
-        description: createInMemoryFilterCompiler('description'),
+        name: createInMemoryFilterCompiler('name'),
         relations: {
             ...baseInMemoryFilterCompilers,
             ...Object.fromEntries(
@@ -340,7 +343,7 @@ describe('BalanceItem.categoryFilter / articleFilter', () => {
     });
 
     describe('articleFilter selects exactly the items with the same articleCode', () => {
-        test('an administration fee with a description is a different article than one without', () => {
+        test('an administration fee with a name is a different article than one without', () => {
             const named = createItem(BalanceItemType.AdministrationFee, [], 'Kosten');
             const unnamed = createItem(BalanceItemType.AdministrationFee);
 
@@ -349,7 +352,7 @@ describe('BalanceItem.categoryFilter / articleFilter', () => {
             expect(matches(unnamed.articleFilter, named)).toBe(false);
         });
 
-        test('a registration is not told apart by its description', () => {
+        test('a registration is not told apart by its name', () => {
             const first = createItem(BalanceItemType.Registration, [[BalanceItemRelationType.Group, 'group-a']], 'Inschrijving Kapoenen');
             const second = createItem(BalanceItemType.Registration, [[BalanceItemRelationType.Group, 'group-a']], 'Inschrijving Kapoenen 2026');
 
@@ -358,13 +361,30 @@ describe('BalanceItem.categoryFilter / articleFilter', () => {
         });
     });
 
-    test('DESCRIPTION_TITLED_BALANCE_ITEM_TYPES lists exactly the types whose itemTitle is their description', () => {
-        const description = 'A description no itemTitle would ever build on its own';
+    test('old clients read and write the name as description', () => {
+        const item = BalanceItem.create({ name: 'Kampgeld', description: 'Weekend aan zee' });
+        const oldVersion = Version - 1;
+
+        const encoded = JSON.parse(JSON.stringify(item.encode({ version: oldVersion }))) as Record<string, unknown>;
+        expect(encoded.description).toBe('Kampgeld');
+        expect(encoded.name).toBeUndefined();
+
+        const decoded = new ObjectData(encoded, { version: oldVersion }).decode(BalanceItem as Decoder<BalanceItem>);
+        expect(decoded.name).toBe('Kampgeld');
+        expect(decoded.description).toBeNull();
+
+        const patch = new ObjectData({ id: item.id, description: 'Weekendgeld' }, { version: oldVersion }).decode(BalanceItem.patchType() as Decoder<AutoEncoderPatchType<BalanceItem>>);
+        expect(patch.name).toBe('Weekendgeld');
+        expect(patch.description).toBeUndefined();
+    });
+
+    test('NAME_TITLED_BALANCE_ITEM_TYPES lists exactly the types whose itemTitle is their name', () => {
+        const name = 'A name no itemTitle would ever build on its own';
 
         for (const type of Object.values(BalanceItemType)) {
-            const usesDescription = BalanceItem.create({ type, description }).itemTitle === description;
+            const usesName = BalanceItem.create({ type, name }).itemTitle === name;
 
-            expect([type, DESCRIPTION_TITLED_BALANCE_ITEM_TYPES.has(type)]).toEqual([type, usesDescription]);
+            expect([type, NAME_TITLED_BALANCE_ITEM_TYPES.has(type)]).toEqual([type, usesName]);
         }
     });
 });

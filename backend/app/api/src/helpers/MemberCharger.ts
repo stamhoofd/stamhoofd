@@ -33,7 +33,7 @@ export class MemberCharger {
         const balanceItem = new BalanceItem();
         balanceItem.unitPrice = price;
         balanceItem.amount = amount ?? 1;
-        balanceItem.description = description;
+        balanceItem.name = description;
         balanceItem.type = BalanceItemType.Other;
         balanceItem.memberId = memberBeingCharged.id;
         balanceItem.organizationId = chargingOrganizationId;

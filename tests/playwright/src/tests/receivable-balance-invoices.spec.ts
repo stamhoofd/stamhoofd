@@ -89,7 +89,7 @@ test.describe('Receivable balance invoices', () => {
             memberId: member.id,
             amount: 1,
             unitPrice: 40_00_00,
-            description: 'Kampinschrijving',
+            name: 'Kampinschrijving',
         }).create();
 
         // A VAT percentage is required to invoice a balance item

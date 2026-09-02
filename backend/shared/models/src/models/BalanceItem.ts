@@ -70,7 +70,10 @@ export class BalanceItem extends QueryableModel {
     relations: Map<BalanceItemRelationType, BalanceItemRelation> = new Map();
 
     @column({ type: 'string' })
-    description = '';
+    name = '';
+
+    @column({ type: 'string', nullable: true })
+    description: string | null = null;
 
     /**
      * In case this balance item is associated with an item that was charged for a certain period, the startDate is saved here.
@@ -422,6 +425,7 @@ export class BalanceItem extends QueryableModel {
 
         item.type = BalanceItemType.CancellationFee;
         item.relations = this.relations;
+        item.name = this.name;
         item.description = this.description;
         item.amount = 1;
         item.unitPrice = fee;

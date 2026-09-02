@@ -233,7 +233,7 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
         if (totalPrice < minimumAmount) {
             const item = new BalanceItem();
             item.type = BalanceItemType.AdministrationFee;
-            item.description = $t('%1Q4');
+            item.name = $t('%1Q4');
             item.payingOrganizationId = organization.id;
             item.organizationId = sellingOrganization.id;
             item.VATPercentage = 21;

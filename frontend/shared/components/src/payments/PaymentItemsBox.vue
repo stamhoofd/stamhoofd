@@ -51,7 +51,7 @@ const sortedItems = computed(() => {
     return props.payment.balanceItemPayments.slice().sort((a, b) => {
         return Sorter.stack(
             Sorter.byNumberValue(a.price, b.price),
-            Sorter.byStringValue(a.itemDescription ?? a.balanceItem.description, b.itemDescription ?? b.balanceItem.description),
+            Sorter.byStringValue(a.itemDescription ?? a.balanceItem.name, b.itemDescription ?? b.balanceItem.name),
         );
     });
 });

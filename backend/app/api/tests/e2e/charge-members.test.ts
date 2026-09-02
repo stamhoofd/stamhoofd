@@ -192,7 +192,7 @@ describe('E2E.ChargeMembers', () => {
             expect(balanceItem1.unitPrice).toEqual(3_00);
             expect(balanceItem1.priceWithVAT).toEqual(12_00);
             expect(balanceItem1.amount).toEqual(body.amount);
-            expect(balanceItem1.description).toEqual(body.description);
+            expect(balanceItem1.name).toEqual(body.description);
             expect(balanceItem1.organizationId).toEqual(organization.id);
             // const dueAt = balanceItem1.dueAt!;
             expect(balanceItem1.dueAt).toEqual(body.dueAt);
@@ -372,7 +372,7 @@ describe('E2E.ChargeMembers', () => {
                 expect(balanceItem1.unitPrice).toEqual(3_00);
                 expect(balanceItem1.priceWithVAT).toEqual(12_00);
                 expect(balanceItem1.amount).toEqual(4);
-                expect(balanceItem1.description).toEqual('test description');
+                expect(balanceItem1.name).toEqual('test description');
                 expect(balanceItem1.organizationId).toEqual(organization.id);
                 expect(balanceItem1.dueAt).toEqual(new Date(2023, 0, 10));
                 expect(balanceItem1.createdAt).toEqual(body.createdAt);

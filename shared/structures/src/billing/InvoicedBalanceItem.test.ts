@@ -1,11 +1,68 @@
-import { BalanceItem, VATExcemptReason } from '../BalanceItem.js';
+import { BalanceItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemType, VATExcemptReason } from '../BalanceItem.js';
+import { TranslatedString } from '../TranslatedString.js';
 import { InvoicedBalanceItem } from './InvoicedBalanceItem.js';
 
 describe('InvoicedBalanceItem', () => {
     describe('createFor', () => {
+        function createBalanceItem(overrides: Partial<{ name: string; description: string | null; type: BalanceItemType; relations: Map<BalanceItemRelationType, BalanceItemRelation> }> = {}) {
+            return BalanceItem.create({
+                unitPrice: 5_00_00,
+                amount: 1,
+                VATPercentage: 21,
+                VATIncluded: true,
+                ...overrides,
+            });
+        }
+
+        test('copies the name and description of an item without relations', () => {
+            const invoicedItem = InvoicedBalanceItem.createFor(createBalanceItem({ name: 'Kampgeld', description: 'Weekend aan zee' }), 5_00_00);
+
+            expect(invoicedItem.name).toBe('Kampgeld');
+            expect(invoicedItem.description).toBe('Weekend aan zee');
+        });
+
+        test('an item without relations and without description is invoiced with an empty description', () => {
+            const invoicedItem = InvoicedBalanceItem.createFor(createBalanceItem({ name: 'Kampgeld', description: null }), 5_00_00);
+
+            expect(invoicedItem.name).toBe('Kampgeld');
+            expect(invoicedItem.description).toBe('');
+        });
+
+        test('an item with relations and without description uses the generated title and description', () => {
+            const balanceItem = createBalanceItem({
+                type: BalanceItemType.Registration,
+                name: 'Jan bij Kapoenen',
+                description: null,
+                relations: new Map([
+                    [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: 'group-1', name: new TranslatedString('Kapoenen') })],
+                    [BalanceItemRelationType.Member, BalanceItemRelation.create({ id: 'member-1', name: new TranslatedString('Jan Janssens') })],
+                ]),
+            });
+            const invoicedItem = InvoicedBalanceItem.createFor(balanceItem, 5_00_00);
+
+            expect(invoicedItem.name).toBe(balanceItem.itemTitle);
+            expect(invoicedItem.description).toBe(balanceItem.itemDescription);
+            expect(invoicedItem.name).not.toBe('Jan bij Kapoenen');
+        });
+
+        test('an item with relations and a description uses its own name and description', () => {
+            const balanceItem = createBalanceItem({
+                type: BalanceItemType.Registration,
+                name: 'Jan bij Kapoenen',
+                description: 'Inclusief kampvuur',
+                relations: new Map([
+                    [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: 'group-1', name: new TranslatedString('Kapoenen') })],
+                ]),
+            });
+            const invoicedItem = InvoicedBalanceItem.createFor(balanceItem, 5_00_00);
+
+            expect(invoicedItem.name).toBe('Jan bij Kapoenen');
+            expect(invoicedItem.description).toBe('Inclusief kampvuur');
+        });
+
         test('Create an invoice item for a balance item including VAT with quantity of 1', () => {
             const balanceItem = new BalanceItem();
-            balanceItem.description = 'Test Item';
+            balanceItem.name = 'Test Item';
             balanceItem.unitPrice = 5_00_00; // 5 euro, including VAT
             balanceItem.quantity = 1;
             balanceItem.VATPercentage = 21;
@@ -29,7 +86,7 @@ describe('InvoicedBalanceItem', () => {
 
         test('Create an invoice item for a balance item including VAT with quantity of 3', () => {
             const balanceItem = new BalanceItem();
-            balanceItem.description = 'Test Item';
+            balanceItem.name = 'Test Item';
             balanceItem.unitPrice = 5_00_00; // 5 euro, including VAT
             balanceItem.quantity = 3;
             balanceItem.VATPercentage = 21;
@@ -107,7 +164,7 @@ describe('InvoicedBalanceItem', () => {
 
         test('Create an invoice item for a balance item excluding VAT with quantity of 1', () => {
             const balanceItem = new BalanceItem();
-            balanceItem.description = 'Test Item';
+            balanceItem.name = 'Test Item';
             balanceItem.unitPrice = 20_00; // 0,20 euro, excluding VAT
             balanceItem.quantity = 1;
             balanceItem.VATPercentage = 21;
@@ -131,7 +188,7 @@ describe('InvoicedBalanceItem', () => {
 
         test('Create an invoice item for a balance item excluding 0% VAT with quantity of 1', () => {
             const balanceItem = new BalanceItem();
-            balanceItem.description = 'Test Item';
+            balanceItem.name = 'Test Item';
             balanceItem.unitPrice = 20_00; // 0,20 euro, excluding VAT
             balanceItem.quantity = 1;
             balanceItem.VATPercentage = 0;
@@ -155,7 +212,7 @@ describe('InvoicedBalanceItem', () => {
 
         test('Create an invoice item for a balance item including 0% VAT with quantity of 1', () => {
             const balanceItem = new BalanceItem();
-            balanceItem.description = 'Test Item';
+            balanceItem.name = 'Test Item';
             balanceItem.unitPrice = 20_00; // 0,20 euro, excluding VAT
             balanceItem.quantity = 1;
             balanceItem.VATPercentage = 0;
@@ -179,7 +236,7 @@ describe('InvoicedBalanceItem', () => {
 
         test('Create an invoice item for a balance item excluding VAT with quantity of 1 that is excempt VAT', () => {
             const balanceItem = new BalanceItem();
-            balanceItem.description = 'Test Item';
+            balanceItem.name = 'Test Item';
             balanceItem.unitPrice = 20_00; // 0,20 euro, excluding VAT
             balanceItem.quantity = 1;
             balanceItem.VATPercentage = 21;
@@ -203,7 +260,7 @@ describe('InvoicedBalanceItem', () => {
 
         test('Create an invoice item for a balance item including VAT with quantity of 1 that is excempt VAT', () => {
             const balanceItem = new BalanceItem();
-            balanceItem.description = 'Test Item';
+            balanceItem.name = 'Test Item';
             balanceItem.unitPrice = 24_20; // 0,242 euro, including VAT
             balanceItem.quantity = 1;
             balanceItem.VATPercentage = 21;
@@ -227,7 +284,7 @@ describe('InvoicedBalanceItem', () => {
 
         test('Paying 1/3 of a balance item causes 33.33% quantity', () => {
             const balanceItem = new BalanceItem();
-            balanceItem.description = 'Test Item';
+            balanceItem.name = 'Test Item';
             balanceItem.unitPrice = 30_00; // = 0,30 euro
             balanceItem.quantity = 1;
             balanceItem.VATPercentage = 21;

@@ -200,12 +200,12 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
         expect(exported.body.balanceItemCount).toBe(1);
     });
 
-    test('items without relations are a category per description, and export as one', async () => {
+    test('items without relations are a category per name, and export as one', async () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await createFinanceUser(organization);
 
-        await new BalanceItemFactory({ organizationId: organization.id, type: BalanceItemType.Other, amount: 1, unitPrice: 30_00, description: 'Kampinschrijving' }).create();
-        await new BalanceItemFactory({ organizationId: organization.id, type: BalanceItemType.Other, amount: 1, unitPrice: 12_00, description: 'Drankkaart' }).create();
+        await new BalanceItemFactory({ organizationId: organization.id, type: BalanceItemType.Other, amount: 1, unitPrice: 30_00, name: 'Kampinschrijving' }).create();
+        await new BalanceItemFactory({ organizationId: organization.id, type: BalanceItemType.Other, amount: 1, unitPrice: 12_00, name: 'Drankkaart' }).create();
 
         const all = await getBreakdown({ organization, user });
         expect(all.body.byCategory.map(g => g.name.toString())).toEqual(['Kampinschrijving', 'Drankkaart']);

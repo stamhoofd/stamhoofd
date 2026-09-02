@@ -197,7 +197,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         balanceItem.orderId = order.id;
                         balanceItem.type = BalanceItemType.Order;
                         balanceItem.unitPrice = totalPrice;
-                        balanceItem.description = webshop.meta.name;
+                        balanceItem.name = webshop.meta.name;
                         balanceItem.pricePaid = 0;
                         balanceItem.organizationId = organization.id;
                         balanceItem.status = BalanceItemStatus.Due;
@@ -233,7 +233,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                             throw new Error('Unsupported payment method');
                         }
 
-                        balanceItem.description = order.generateBalanceDescription(webshop);
+                        balanceItem.name = order.generateBalanceDescription(webshop);
                         await balanceItem.save();
 
                         // Update the cached pricePending of the balance item, so the unresolved payment is visible
@@ -329,7 +329,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         } else {
                             paidItem.status = BalanceItemStatus.Canceled;
                         }
-                        paidItem.description = model.generateBalanceDescription(webshop);
+                        paidItem.name = model.generateBalanceDescription(webshop);
                         await paidItem.save();
 
                         // Zero out the other items
@@ -343,7 +343,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         balanceItem.unitPrice = model.data.totalPrice;
                         balanceItem.amount = 1;
                         balanceItem.status = BalanceItemStatus.Due;
-                        balanceItem.description = model.generateBalanceDescription(webshop);
+                        balanceItem.name = model.generateBalanceDescription(webshop);
                         balanceItem.pricePaid = 0;
                         balanceItem.organizationId = organization.id;
                         await balanceItem.save();

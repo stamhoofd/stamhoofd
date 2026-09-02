@@ -274,7 +274,7 @@ export class InvoiceService {
 
                 invoiced.totalWithoutVAT = item.totalWithoutVAT;
 
-                invoiced.name = item.name || balanceItem.description;
+                invoiced.name = item.name || balanceItem.name;
                 invoiced.description = item.description;
 
                 await invoiced.save();

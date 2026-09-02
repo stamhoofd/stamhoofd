@@ -130,10 +130,16 @@ export const balanceItemFilterCompilers: SQLFilterDefinitions = {
         nullable: false,
     }),
 
+    name: createColumnFilter({
+        expression: SQL.column('balance_items', 'name'),
+        type: SQLValueType.String,
+        nullable: false,
+    }),
+
     description: createColumnFilter({
         expression: SQL.column('balance_items', 'description'),
         type: SQLValueType.String,
-        nullable: false,
+        nullable: true,
     }),
 
     priceWithVAT: createColumnFilter({

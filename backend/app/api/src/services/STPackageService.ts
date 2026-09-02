@@ -162,7 +162,7 @@ export class STPackageService {
 
         const item = new BalanceItem();
         item.type = BalanceItemType.STPackage;
-        item.description = pack.meta.name + ' ' + (
+        item.name = pack.meta.name + ' ' + (
             pack.endDate
                 ? $t('%1LM', { startDate: Formatter.startDate(now, false, true), endDate: Formatter.endDate(pack.endDate, false, true) })
                 : $t('%1LN', { startDate: Formatter.startDate(pack.meta.startDate, false, true) })

@@ -66,7 +66,7 @@ export class GetBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Respo
         if (q.search) {
             let searchFilter: StamhoofdFilter | null = null;
             searchFilter = {
-                description: {
+                name: {
                     $contains: q.search,
                 },
             };

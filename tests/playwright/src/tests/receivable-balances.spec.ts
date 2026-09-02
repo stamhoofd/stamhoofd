@@ -286,7 +286,7 @@ test.describe('Balance items (organization mode) @balance-items', () => {
 
         const member = await new MemberFactory({ organization, firstName: 'Dupli', lastName: 'Cate' }).create();
 
-        const description = `Duplicate Test Item ${WorkerData.id}`;
+        const name = `Duplicate Test Item ${WorkerData.id}`;
 
         // A single manual (Other) balance item of 25 euro that is due
         await new BalanceItemFactory({
@@ -296,7 +296,7 @@ test.describe('Balance items (organization mode) @balance-items', () => {
             status: BalanceItemStatus.Due,
             amount: 1,
             unitPrice: 25_0000,
-            description,
+            name,
         }).create();
 
         // Make sure the member shows up in the receivable balances table
@@ -317,7 +317,7 @@ test.describe('Balance items (organization mode) @balance-items', () => {
         await table.getRow('Dupli Cate').click();
 
         // The manual balance item is shown in the individual list
-        const itemRow = page.getByText(description).first();
+        const itemRow = page.getByText(name).first();
         await expect(itemRow).toBeVisible();
 
         // Right-clicking an individual item shows a context menu with Edit + Duplicate
@@ -337,11 +337,11 @@ test.describe('Balance items (organization mode) @balance-items', () => {
         // The organization now has two identical balance items (original + duplicate)
         await expect.poll(async () => {
             const items = await BalanceItem.select().where('organizationId', organization.id).fetch();
-            return items.filter(i => i.description === description).length;
+            return items.filter(i => i.name === name).length;
         }).toBe(2);
 
         const items = await BalanceItem.select().where('organizationId', organization.id).fetch();
-        const duplicates = items.filter(i => i.description === description);
+        const duplicates = items.filter(i => i.name === name);
         expect(duplicates).toHaveLength(2);
 
         // Both are fresh, fully payable items with the same price and no paid amount
@@ -364,7 +364,7 @@ test.describe('Balance items (organization mode) @balance-items', () => {
 
         const member = await new MemberFactory({ organization, firstName: 'Dele', lastName: 'Table' }).create();
 
-        const description = `Delete Test Item ${WorkerData.id}`;
+        const name = `Delete Test Item ${WorkerData.id}`;
 
         // A single manual (Other) balance item of 40 euro that is due and unpaid
         const item = await new BalanceItemFactory({
@@ -374,7 +374,7 @@ test.describe('Balance items (organization mode) @balance-items', () => {
             status: BalanceItemStatus.Due,
             amount: 1,
             unitPrice: 40_0000,
-            description,
+            name,
         }).create();
 
         // Make sure the member shows up in the receivable balances table
@@ -394,7 +394,7 @@ test.describe('Balance items (organization mode) @balance-items', () => {
         await table.waitForFirstRow();
         await table.getRow('Dele Table').click();
 
-        const itemRow = page.getByText(description).first();
+        const itemRow = page.getByText(name).first();
         await expect(itemRow).toBeVisible();
 
         // An unpaid item offers Delete (and not Cancel, which is reserved for (partially) paid items)
@@ -413,7 +413,7 @@ test.describe('Balance items (organization mode) @balance-items', () => {
             return updated?.status ?? null;
         }).toBe(BalanceItemStatus.Hidden);
 
-        await expect(page.getByText(description)).toHaveCount(0);
+        await expect(page.getByText(name)).toHaveCount(0);
         await expect(page.getByText('Geen openstaand bedrag')).toBeVisible();
     });
 });

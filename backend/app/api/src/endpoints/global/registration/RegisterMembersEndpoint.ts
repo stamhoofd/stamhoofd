@@ -540,7 +540,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             return relation;
         }
 
-        async function createBalanceItem({ registration, periodId, skipZero, amount, unitPrice, description, type, relations }: { amount?: number; skipZero?: boolean; registration: { id: string; payingOrganizationId: string | null; memberId: string; trialUntil: Date | null }; periodId: string; unitPrice: number; description: string; relations: Map<BalanceItemRelationType, BalanceItemRelation>; type: BalanceItemType }) {
+        async function createBalanceItem({ registration, periodId, skipZero, amount, unitPrice, name, type, relations }: { amount?: number; skipZero?: boolean; registration: { id: string; payingOrganizationId: string | null; memberId: string; trialUntil: Date | null }; periodId: string; unitPrice: number; name: string; relations: Map<BalanceItemRelationType, BalanceItemRelation>; type: BalanceItemType }) {
             // NOTE: We also need to save zero-price balance items because for online payments, we need to know which registrations to activate after payment
             if (skipZero === true) {
                 if (unitPrice === 0 || amount === 0) {
@@ -559,7 +559,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             balanceItem.registrationId = registration.id;
             balanceItem.unitPrice = unitPrice;
             balanceItem.amount = amount ?? 1;
-            balanceItem.description = description;
+            balanceItem.name = name;
             balanceItem.relations = relations;
             balanceItem.type = type;
 
@@ -642,7 +642,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 unitPrice: item.groupPrice.price.forMember(item.member),
                 type: BalanceItemType.Registration,
                 skipZero: false, // Always create at least one balance item for each registration - even when the price is zero
-                description: `${item.member.patchedMember.name} bij ${item.group.settings.name.toString()}`,
+                name: `${item.member.patchedMember.name} bij ${item.group.settings.name.toString()}`,
                 relations: new Map([
                     ...sharedRelations,
                 ]),
@@ -657,7 +657,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     unitPrice: option.option.price.forMember(item.member),
                     skipZero: true, // Do not create for zero option prices
                     type: BalanceItemType.Registration,
-                    description: `${option.optionMenu.name}: ${option.option.name}`,
+                    name: `${option.optionMenu.name}: ${option.option.name}`,
                     relations: new Map([
                         ...sharedRelations,
                         [
@@ -689,7 +689,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                         periodId: item.group.periodId,
                         unitPrice: -discountValue,
                         type: BalanceItemType.RegistrationBundleDiscount,
-                        description: discount.name,
+                        name: discount.name,
                         relations: new Map([
                             ...sharedRelations,
                             [
@@ -758,7 +758,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     periodId: registration.group.periodId,
                     unitPrice: -difference,
                     type: BalanceItemType.RegistrationBundleDiscount,
-                    description: discount.name,
+                    name: discount.name,
                     relations: new Map([
                         ...sharedRelations,
                         [
@@ -779,7 +779,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             const balanceItem = new BalanceItem();
             balanceItem.type = BalanceItemType.FreeContribution;
             balanceItem.unitPrice = checkout.freeContribution;
-            balanceItem.description = `Vrije bijdrage`;
+            balanceItem.name = `Vrije bijdrage`;
             balanceItem.pricePaid = 0;
             balanceItem.userId = user.id;
             balanceItem.organizationId = organization.id;
@@ -799,7 +799,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             const balanceItem = new BalanceItem();
             balanceItem.type = BalanceItemType.AdministrationFee;
             balanceItem.unitPrice = checkout.administrationFee;
-            balanceItem.description = `Administratiekosten`;
+            balanceItem.name = `Administratiekosten`;
             balanceItem.pricePaid = 0;
             balanceItem.organizationId = organization.id;
 

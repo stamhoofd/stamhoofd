@@ -616,7 +616,7 @@ test.describe('Registration', () => {
                     organizationId: creditOrganization.id,
                     memberId: member.id,
                     type: BalanceItemType.Other,
-                    description: creditName,
+                    name: creditName,
                     amount: 1,
                     unitPrice: -40_0000,
                 }).create();

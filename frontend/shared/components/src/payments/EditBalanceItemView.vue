@@ -17,8 +17,8 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox v-if="balanceItem.relations.size === 0 && !balanceItem.startDate" error-fields="description" :error-box="errors.errorBox" :title="$t(`%6o`)" class="max">
-            <input ref="firstInput" v-model="description" class="input" type="text" autocomplete="off" :disabled="!!balanceItem.relations.size" :placeholder="$t(`%gp`)">
+        <STInputBox v-if="balanceItem.relations.size === 0 && !balanceItem.startDate" error-fields="name" :error-box="errors.errorBox" :title="$t('Naam')" class="max">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :disabled="!!balanceItem.relations.size" :placeholder="$t(`%gp`)">
         </STInputBox>
         <STList v-else>
             <STListItem>
@@ -55,6 +55,10 @@
                 </template>
             </STListItem>
         </STList>
+
+        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t('Beschrijving')" class="max">
+            <textarea v-model="description" class="input" :placeholder="$t('Optioneel')" />
+        </STInputBox>
 
         <div class="split-inputs">
             <div>
@@ -324,9 +328,14 @@ const status = computed({
     set: value => addPatch({ status: value }),
 });
 
+const name = computed({
+    get: () => patchedBalanceItem.value.name,
+    set: value => addPatch({ name: value }),
+});
+
 const description = computed({
-    get: () => patchedBalanceItem.value.description,
-    set: value => addPatch({ description: value }),
+    get: () => patchedBalanceItem.value.description ?? '',
+    set: value => addPatch({ description: value.trim() ? value : null }),
 });
 
 const unitPrice = computed({
@@ -484,12 +493,12 @@ async function save() {
             loading.value = false;
             return;
         }
-        if (patchedBalanceItem.value.description.length === 0 && patchedBalanceItem.value.relations.size === 0) {
+        if (patchedBalanceItem.value.name.length === 0 && patchedBalanceItem.value.relations.size === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                field: 'description',
-                message: 'description cannot be empty',
-                human: $t('%1Hz'),
+                field: 'name',
+                message: 'name cannot be empty',
+                human: $t('Vul een naam in'),
             });
         }
         if (patchedBalanceItem.value.unitPrice === 0) {

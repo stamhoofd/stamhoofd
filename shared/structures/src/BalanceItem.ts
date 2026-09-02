@@ -302,20 +302,20 @@ function isArticleRelationType(item: BalanceItem, relationType: BalanceItemRelat
 }
 
 /**
- * The types whose itemTitle is their description, which is then the only thing that tells two of their
+ * The types whose itemTitle is their name, which is then the only thing that tells two of their
  * articles apart. Kept in sync with itemTitle by a test.
  *
  * Decided per type instead of per item: two items of the same type have to agree on what makes them the
  * same article, otherwise no filter can select exactly one of those articles.
  */
-export const DESCRIPTION_TITLED_BALANCE_ITEM_TYPES: ReadonlySet<BalanceItemType> = new Set([
+export const NAME_TITLED_BALANCE_ITEM_TYPES: ReadonlySet<BalanceItemType> = new Set([
     BalanceItemType.AdministrationFee,
     BalanceItemType.Other,
     BalanceItemType.ReferralDiscount,
 ]);
 
-function getArticleDescriptionCode(item: BalanceItem): string {
-    return DESCRIPTION_TITLED_BALANCE_ITEM_TYPES.has(item.type) ? '-description-' + item.description : '';
+function getArticleNameCode(item: BalanceItem): string {
+    return NAME_TITLED_BALANCE_ITEM_TYPES.has(item.type) ? '-name-' + item.name : '';
 }
 
 export function doBalanceItemRelationsMatch(a: Map<BalanceItemRelationType, BalanceItemRelation>, b: Map<BalanceItemRelationType, BalanceItemRelation>, allowedDifference = 0) {
@@ -382,8 +382,15 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: new MapDecoder(new EnumDecoder(BalanceItemRelationType), BalanceItemRelation), version: 307 })
     relations: Map<BalanceItemRelationType, BalanceItemRelation> = new Map();
 
-    @field({ decoder: StringDecoder })
-    description = '';
+    @field({ decoder: StringDecoder, field: 'description' })
+    @field({ decoder: StringDecoder, field: 'name', ...NextVersion })
+    name = '';
+
+    /**
+     * Optional extra text for the item, shown below the name (e.g. on invoices)
+     */
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    description: string | null = null;
 
     /**
      * quantity, should be renamed to quantity in the future
@@ -794,7 +801,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.AdministrationFee: return $t(`%lq`);
             case BalanceItemType.FreeContribution: return $t(`%lr`);
             case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() || $t(`%ls`);
-            case BalanceItemType.Other: return this.description;
+            case BalanceItemType.Other: return this.name;
             case BalanceItemType.PlatformMembership: return $t(`%lt`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t(`%lu`);
             case BalanceItemType.STPackage: return this.itemTitle;
             case BalanceItemType.ServiceFee: return $t('%1dA');
@@ -819,7 +826,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.AdministrationFee: return $t(`%lq`);
             case BalanceItemType.FreeContribution: return $t(`%lr`);
             case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() ?? $t(`%ls`);
-            case BalanceItemType.Other: return this.description;
+            case BalanceItemType.Other: return this.name;
             case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t(`%BV`);
             case BalanceItemType.STPackage: return $t('%1Mu');
             case BalanceItemType.ServiceFee: return $t('%1dA');
@@ -873,8 +880,8 @@ export class BalanceItem extends AutoEncoder {
         }
 
         if (this.type === BalanceItemType.Other) {
-            // These have no relations: the description is the only thing that distinguishes them
-            return this.type + ':' + this.description;
+            // These have no relations: the name is the only thing that distinguishes them
+            return this.type + ':' + this.name;
         }
 
         // Everything else is one category per type
@@ -901,8 +908,8 @@ export class BalanceItem extends AutoEncoder {
         }
 
         if (this.type === BalanceItemType.Other) {
-            // These have no relations: the description is the only thing that distinguishes them
-            filters.push({ description: this.description });
+            // These have no relations: the name is the only thing that distinguishes them
+            filters.push({ name: this.name });
         }
 
         return { $and: filters };
@@ -926,7 +933,7 @@ export class BalanceItem extends AutoEncoder {
             .sort();
 
         return 'type-' + this.type
-            + getArticleDescriptionCode(this)
+            + getArticleNameCode(this)
             + '-relations-' + relations.join('-');
     }
 
@@ -947,8 +954,8 @@ export class BalanceItem extends AutoEncoder {
             filters.push({ relations: { [relationType]: { id: this.relations.get(relationType)?.id ?? null } } });
         }
 
-        if (DESCRIPTION_TITLED_BALANCE_ITEM_TYPES.has(this.type)) {
-            filters.push({ description: this.description });
+        if (NAME_TITLED_BALANCE_ITEM_TYPES.has(this.type)) {
+            filters.push({ name: this.name });
         }
 
         return { $and: filters };
@@ -1030,7 +1037,7 @@ export class BalanceItem extends AutoEncoder {
                 + '-vat-percentage-' + this.VATPercentage
                 + '-vat-included-' + this.VATIncluded
                 + '-vat-excempt-' + this.VATExcempt
-                + '-description-' + this.description
+                + '-name-' + this.name
                 + '-due-date-' + (this.dueAt ? Formatter.dateIso(this.dueAt) : 'null');
         }
 
@@ -1073,11 +1080,11 @@ export class BalanceItem extends AutoEncoder {
             }
             case BalanceItemType.CancellationFee: return $t(`%17G`);
             case BalanceItemType.AdministrationFee: {
-                return this.description || $t(`%xK`);
+                return this.name || $t(`%xK`);
             }
             case BalanceItemType.FreeContribution: return $t(`%Ot`);
             case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() || $t(`%m2`);
-            case BalanceItemType.Other: return this.description;
+            case BalanceItemType.Other: return this.name;
             case BalanceItemType.PlatformMembership: return $t(`%m3`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() || $t(`%m4`);
             case BalanceItemType.STPackage: {
                 const pack = this.relations.get(BalanceItemRelationType.STPackage);
@@ -1086,7 +1093,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.ServiceFee: return this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`%1Z1`, { startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true) }) : $t(`%1cJ`, { date: Formatter.date(this.startDate, true) })) : $t('%1UX');
             case BalanceItemType.TransferFee: return this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`%1bd`, { startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true) }) : $t(`%1Yq`, { date: Formatter.date(this.startDate, true) })) : $t('%wZ');
         }
-        return this.description;
+        return this.name;
     }
 
     /**

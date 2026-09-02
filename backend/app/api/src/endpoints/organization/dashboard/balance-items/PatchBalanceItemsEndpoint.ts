@@ -52,6 +52,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
             for (const { put } of request.body.getPuts()) {
                 // Create a new balance item
                 const model = new BalanceItem();
+                model.name = put.name;
                 model.description = put.description;
                 model.amount = put.amount;
                 model.type = BalanceItemType.Other;
@@ -183,7 +184,8 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                     }
                 }
 
-                model.description = patch.description ?? model.description;
+                model.name = patch.name ?? model.name;
+                model.description = patch.description === undefined ? model.description : patch.description;
                 model.unitPrice = patch.unitPrice ?? model.unitPrice;
                 model.amount = patch.amount ?? model.amount;
                 model.dueAt = patch.dueAt === undefined ? model.dueAt : patch.dueAt;

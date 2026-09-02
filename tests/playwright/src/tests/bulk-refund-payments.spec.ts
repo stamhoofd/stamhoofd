@@ -93,7 +93,7 @@ test.describe('Bulk refund payments @bulk-refund-payments', () => {
 
         const balanceItem = await new BalanceItemFactory({
             organizationId: organization.id,
-            description,
+            name: description,
             amount: 1,
             unitPrice: price,
             pricePaid: succeeded ? price : 0,

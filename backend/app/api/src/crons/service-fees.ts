@@ -100,7 +100,7 @@ async function chargeServiceFees() {
 
                 const item = new BalanceItem();
                 item.type = BalanceItemType.ServiceFee;
-                item.description = $t('%1cJ', { date: day });
+                item.name = $t('%1cJ', { date: day });
                 item.payingOrganizationId = organization.id;
                 item.organizationId = membershipOrganizationId;
                 item.VATPercentage = 21;

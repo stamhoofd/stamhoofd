@@ -215,7 +215,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 balanceItem.type = BalanceItemType.Order;
                 balanceItem.orderId = order.id;
                 balanceItem.unitPrice = totalPrice;
-                balanceItem.description = webshop.meta.name;
+                balanceItem.name = webshop.meta.name;
                 balanceItem.pricePaid = 0;
                 balanceItem.organizationId = organization.id;
                 balanceItem.status = BalanceItemStatus.Hidden;
@@ -246,7 +246,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     await OrderService.markValid(order, payment, []);
 
                     if (order.number) {
-                        balanceItem.description = order.generateBalanceDescription(webshop);
+                        balanceItem.name = order.generateBalanceDescription(webshop);
                     }
 
                     balanceItem.status = BalanceItemStatus.Due;
@@ -257,7 +257,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     await OrderService.markPaid(order, payment, organization, webshop);
 
                     if (order.number) {
-                        balanceItem.description = order.generateBalanceDescription(webshop);
+                        balanceItem.name = order.generateBalanceDescription(webshop);
                     }
 
                     balanceItem.status = BalanceItemStatus.Due;
