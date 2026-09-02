@@ -4,7 +4,7 @@ import { PaymentSettlementDetailed } from '@stamhoofd/structures/settlements/Pay
 import { Settlement as SettlementStruct } from '@stamhoofd/structures/settlements/Settlement.js';
 import type { PaymentSettlement as PaymentSettlementModel } from './PaymentSettlement.js';
 import type { Settlement as SettlementModel } from './Settlement.js';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
@@ -265,7 +265,7 @@ export class Payment extends QueryableModel {
     }
 
     static roundPrice(price: number) {
-        return Math.round(price / 100) * 100;
+        return STMath.round(price / 100) * 100;
     }
 
     static async getGeneralStructure(payments: Payment[], includeSettlements = false): Promise<PaymentGeneral[]> {

@@ -16,7 +16,7 @@
             </template>
 
             <template #right>
-                <span class="style-price-base" :class="{negative: item.price < 0}">{{ item.price === 0 ? $t('%1Mn') : formatPrice(item.price) }}</span>
+                <span class="style-price-base" :class="{negative: item.price < 0}">{{ item.price === 0 ? $t('%1Mn') : formatPrice(item.price, {maximumFractionDigits: 4}) }}</span>
             </template>
         </STGridItem>
     </STGrid>
@@ -40,13 +40,13 @@ import BalanceItemTitleBox from './BalanceItemTitleBox.vue';
 const props = withDefaults(
     defineProps<{
         payment: PaymentGeneral;
-        canWrite?: boolean
+        canWrite?: boolean;
     }>(), {
-        canWrite: false
+        canWrite: false,
     },
 );
 
-const present = usePresent()
+const present = usePresent();
 const sortedItems = computed(() => {
     return props.payment.balanceItemPayments.slice().sort((a, b) => {
         return Sorter.stack(
@@ -62,7 +62,7 @@ async function editBalanceItem(balanceItem: BalanceItem) {
     }
     const component = AsyncComponent(() => import('#payments/EditBalanceItemView.vue'), {
         balanceItem,
-        isNew: false
+        isNew: false,
     });
     await present({
         components: [
@@ -73,6 +73,5 @@ async function editBalanceItem(balanceItem: BalanceItem) {
         modalDisplayStyle: 'popup',
     });
 }
-
 
 </script>

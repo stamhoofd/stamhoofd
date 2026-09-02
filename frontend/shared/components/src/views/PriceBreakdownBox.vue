@@ -12,7 +12,7 @@
             </div>
 
             <div class="right" :class="{negative: item.price < 0}">
-                {{ formatPrice(item.price, {maximumFractionDigits: Math.abs(item.price) < 10 ? 4 : 2}) }}
+                {{ formatPrice(item.price, {maximumFractionDigits: Math.abs(item.price) < 100 ? 4 : 2}) }}
             </div>
         </template>
     </div>

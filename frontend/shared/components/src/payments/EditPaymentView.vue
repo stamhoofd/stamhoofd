@@ -271,7 +271,7 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import type { BalanceItem, Organization, Payment, PrivatePayment } from '@stamhoofd/structures';
 import { BalanceItemRelationType, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, TransferSettings } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, STMath } from '@stamhoofd/utility';
 import { computed, onMounted, ref } from 'vue';
 import PaymentCustomerSelectionBox from './components/PaymentCustomerSelectionBox.vue';
 import SelectBalanceItemsList from './SelectBalanceItemsList.vue';
@@ -581,7 +581,7 @@ async function validateOnlineRefund(): Promise<boolean> {
         });
     }
 
-    if (-total.value > getRemainingAmount(sourcePayment)) {
+    if (-STMath.round(total.value) > getRemainingAmount(sourcePayment)) {
         throw new SimpleError({
             code: 'refund_amount_too_high',
             message: $t('%ZaH', {

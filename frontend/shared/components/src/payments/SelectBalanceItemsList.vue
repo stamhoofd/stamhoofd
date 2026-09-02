@@ -38,7 +38,8 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
 import PriceInput from '#inputs/PriceInput.vue';
 import STInputBox from '#inputs/STInputBox.vue';
-import { BalanceItem, BalanceItemPaymentDetailed, RegisterCheckout } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemPaymentDetailed, Payment, RegisterCheckout } from '@stamhoofd/structures';
+import type { PriceBreakdown } from '@stamhoofd/structures';
 import { computed, nextTick, onMounted, ref } from 'vue';
 import BalanceItemTitleBox from './BalanceItemTitleBox.vue';
 
@@ -134,28 +135,41 @@ const automaticDiscount = computed(() => {
 });
 
 const priceBreakdown = computed(() => {
+    const { price, roundingAmount } = Payment.round(total.value - automaticDiscount.value);
+
+    let list: PriceBreakdown;
     if (automaticDiscount.value === 0) {
-        return [
+        list = [
             {
                 name: $t(`%xL`),
+                price: price,
+            },
+        ];
+    } else {
+        list = [
+            {
+                name: $t('%xJ'),
                 price: total.value,
+            },
+            {
+                name: $t('%1Xl'),
+                price: -automaticDiscount.value,
+            },
+            {
+                name: $t(`%xL`),
+                price: price,
             },
         ];
     }
-    return [
-        {
-            name: $t('%xJ'),
-            price: total.value,
-        },
-        {
-            name: $t('%1Xl'),
-            price: -automaticDiscount.value,
-        },
-        {
-            name: $t(`%xL`),
-            price: total.value - automaticDiscount.value,
-        },
-    ];
+
+    if (roundingAmount !== 0) {
+        list.unshift({
+            name: $t('%1b6'),
+            price: roundingAmount,
+        });
+    }
+
+    return list;
 });
 
 function toggleCustomizeItemValue(item: BalanceItem) {

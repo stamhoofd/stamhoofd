@@ -1,5 +1,5 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { PaymentCustomer } from '../PaymentCustomer.js';
@@ -209,6 +209,31 @@ export class Payment extends AutoEncoder {
             });
         }
         return breakdown;
+    }
+
+    static roundPrice(price: number) {
+        return STMath.round(price / 100) * 100;
+    }
+
+    static round(amount: number) {
+        const rounded = Payment.roundPrice(amount);
+        const difference = rounded - amount;
+
+        if (difference === 0) {
+            return {
+                price: amount,
+                roundingAmount: 0,
+            };
+        }
+
+        if (difference > 100 || difference < -100) {
+            throw new Error('Unexpected rounding difference of ' + difference + ' for price ' + amount.toString());
+        }
+
+        return {
+            price: amount + difference,
+            roundingAmount: difference,
+        };
     }
 }
 

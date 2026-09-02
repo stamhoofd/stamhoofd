@@ -8,7 +8,7 @@ import { AuditLogSource, BalanceItemPaymentDetailed, BalanceItemType, EmailTempl
 import type { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
 import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
 import { PaymentMandateStatus, PaymentMandateType } from '@stamhoofd/structures/PaymentMandate.js';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, STMath } from '@stamhoofd/utility';
 import { buildReplacementOptions, getEmailReplacementsForPayment } from '../email-replacements/getEmailReplacementsForPayment.js';
 import { BuckarooHelper } from '../helpers/BuckarooHelper.js';
 import { Context } from '../helpers/Context.js';
