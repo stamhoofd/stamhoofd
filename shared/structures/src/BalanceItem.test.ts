@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ObjectData } from '@simonbackx/simple-encoding';
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -386,5 +387,32 @@ describe('BalanceItem.categoryFilter / articleFilter', () => {
 
             expect([type, NAME_TITLED_BALANCE_ITEM_TYPES.has(type)]).toEqual([type, usesName]);
         }
+    });
+});
+
+describe('BalanceItem.itemTitle', () => {
+    // $t is a key-returning stub in these tests: the month name of July is %tU
+    const t = vi.fn((key: string) => key);
+
+    beforeEach(() => {
+        vi.stubGlobal('$t', t);
+        t.mockClear();
+    });
+
+    afterAll(() => {
+        vi.unstubAllGlobals();
+    });
+
+    test.each([
+        [BalanceItemType.ServiceFee, '%1cJ'],
+        [BalanceItemType.TransferFee, '%1Yq'],
+    ])('%s item spanning one day in UTC or in the display timezone is titled with that day', (type, key) => {
+        expect(BalanceItem.create({ type, startDate: new Date('2024-07-10T00:00:00.000Z'), endDate: new Date('2024-07-10T23:59:59.000Z') }).itemTitle).toBe(key);
+        expect(t).toHaveBeenLastCalledWith(key, { date: '10 %tU 2024' });
+
+        expect(BalanceItem.create({ type, startDate: new Date('2024-07-09T22:00:00.000Z'), endDate: new Date('2024-07-10T21:59:59.000Z') }).itemTitle).toBe(key);
+        expect(t).toHaveBeenLastCalledWith(key, { date: '10 %tU 2024' });
+
+        expect(BalanceItem.create({ type, startDate: new Date('2024-07-01T00:00:00.000Z'), endDate: new Date('2024-07-31T23:59:59.000Z') }).itemTitle).not.toBe(key);
     });
 });

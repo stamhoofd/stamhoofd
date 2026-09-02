@@ -100,10 +100,6 @@ export class SettlementService {
         });
     }
 
-    /**
-     * Month bucket of a charge, in server-local time: the same boundaries as
-     * getMonthUnixStartEnd, which drive the monthly invoice grouping.
-     */
     static getPeriodStart(date: Date): Date {
         return new Date(date.getFullYear(), date.getMonth(), 1);
     }

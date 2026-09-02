@@ -87,9 +87,6 @@ export class ApplicationFee extends QueryableModel {
     @column({ type: 'string', nullable: true })
     balanceItemId: string | null = null;
 
-    /**
-     * When the provider created the fee. Drives the monthly invoice grouping.
-     */
     @column({ type: 'datetime' })
     occurredAt: Date;
 

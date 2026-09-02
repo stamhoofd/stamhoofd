@@ -13,10 +13,6 @@ import { VATService } from '../services/VATService.js';
 import { StripeSettlementSync } from './StripeSettlementSync.js';
 import { WebmasterReport } from './WebmasterReport.js';
 
-/**
- * A month can hold hundreds of thousands of fees, so they are never all loaded at once: every pass
- * iterates them in batches of this size.
- */
 const FEE_BATCH_SIZE = 500;
 
 /**
@@ -24,6 +20,19 @@ const FEE_BATCH_SIZE = 500;
  * never billed, instead of every run walking further and further back.
  */
 const MAXIMUM_INVOICE_MONTHS = 12;
+
+// UTC days match Stripe's payout cutoffs
+function startOfUtcDay(date: Date): Date {
+    return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+}
+
+function nextUtcDay(day: Date): Date {
+    return new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate() + 1));
+}
+
+function utcDateIso(date: Date): string {
+    return date.toISOString().slice(0, 10);
+}
 
 /**
  * Stored timestamps have no milliseconds, so a boundary compared against them may not either: a
@@ -39,51 +48,41 @@ async function nextSecondBoundary(): Promise<Date> {
     return boundary;
 }
 
-/**
- * What one paying Stripe account owes for one month.
- */
 type AccountTotals = {
     payingOrganizationId: string;
     amountPerType: Map<ApplicationFeeType, number>;
 };
 
 /**
- * Bills the stored application fees to the paying organizations: per (account, month) with
- * uninvoiced fees, one ServiceFee/TransferFee balance item pair paid by one AccountDeductions
- * payment (the fees were already deducted from the account's payouts).
- *
- * Idempotency is per fee: a fee with a balanceItemId is billed, everything else still needs
- * billing. A fee that arrives after its month was billed simply lands in an extra payment on the
- * next run. The payment reference is informational only.
+ * Bills uninvoiced application fees per (paying account, UTC day): one ServiceFee/TransferFee
+ * balance item pair paid by one AccountDeductions payment. A fee with a balanceItemId is billed.
  */
 export class ApplicationFeeInvoicer {
     readonly #secretKey: string;
+    readonly #reportedLegacyMonths = new Set<string>();
 
     constructor({ secretKey }: { secretKey: string }) {
         this.#secretKey = secretKey;
     }
 
-    static reference(periodStart: Date): string {
-        return FEE_PAYMENT_REFERENCE_PREFIX + Formatter.dateIso(periodStart);
+    static reference(day: Date): string {
+        return FEE_PAYMENT_REFERENCE_PREFIX + utcDateIso(day);
     }
 
-    /**
-     * Bills every uninvoiced fee of the months before the current one.
-     */
     async generateInvoices(sellingOrganization: Organization): Promise<void> {
         if (!sellingOrganization.meta.companies[0]) {
             return;
         }
 
         await WebmasterReport.group('Aanrekenen applicatiekosten', async () => {
-            await this.#billUninvoicedMonths(sellingOrganization);
+            await this.#billUninvoicedDays(sellingOrganization);
         });
     }
 
-    async #billUninvoicedMonths(sellingOrganization: Organization): Promise<void> {
-        const currentPeriodStart = SettlementService.getPeriodStart(new Date());
+    async #billUninvoicedDays(sellingOrganization: Organization): Promise<void> {
+        const today = startOfUtcDay(new Date());
         const oldest = await this.#selectBillableFees(sellingOrganization)
-            .where('occurredAt', '<', currentPeriodStart)
+            .where('occurredAt', '<', today)
             .orderBy('occurredAt', 'ASC')
             .first(false);
 
@@ -91,60 +90,48 @@ export class ApplicationFeeInvoicer {
             return;
         }
 
-        // A month that can't be billed (its data needs repair first) stays uninvoiced, so without a
-        // window every following run would walk it again, forever
-        const windowStart = new Date(currentPeriodStart.getFullYear(), currentPeriodStart.getMonth() - MAXIMUM_INVOICE_MONTHS, 1);
-        const oldestMonth = SettlementService.getPeriodStart(oldest.occurredAt);
+        const windowStart = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - MAXIMUM_INVOICE_MONTHS, 1));
+        const oldestDay = startOfUtcDay(oldest.occurredAt);
 
-        if (oldestMonth < windowStart) {
+        if (oldestDay < windowStart) {
             WebmasterReport.report(
-                'Applicatiekosten van voor ' + Formatter.dateIso(windowStart) + ' worden niet meer aangerekend',
-                'Er staan nog niet-aangerekende applicatiekosten van ' + Formatter.dateIso(oldestMonth) + '. Die maand valt buiten het venster van ' + MAXIMUM_INVOICE_MONTHS + ' maanden en wordt niet meer automatisch aangerekend.',
+                'Applicatiekosten van voor ' + utcDateIso(windowStart) + ' worden niet meer aangerekend',
+                'Er staan nog niet-aangerekende applicatiekosten van ' + utcDateIso(oldestDay) + '. Die dag valt buiten het venster van ' + MAXIMUM_INVOICE_MONTHS + ' maanden en wordt niet meer automatisch aangerekend.',
             );
         }
 
         const platformSync = new StripeSettlementSync({ secretKey: this.#secretKey });
-        let month = oldestMonth < windowStart ? windowStart : oldestMonth;
+        let day = oldestDay < windowStart ? windowStart : oldestDay;
 
-        while (month < currentPeriodStart) {
-            const nextMonth = new Date(month.getFullYear(), month.getMonth() + 1, 1);
-
-            // Walking a month at Stripe is expensive: only months that still owe us something
-            if (!await this.#hasUninvoicedFees(sellingOrganization, month, nextMonth)) {
-                month = nextMonth;
-                continue;
+        while (day < today) {
+            const next = await this.#selectBillableFees(sellingOrganization)
+                .where('occurredAt', '>=', day)
+                .where('occurredAt', '<', today)
+                .orderBy('occurredAt', 'ASC')
+                .first(false);
+            if (!next) {
+                break;
             }
+            day = startOfUtcDay(next.occurredAt);
+            const nextDay = nextUtcDay(day);
 
-            // Only a complete, error-free fee walk may invoice the month: a missing fee means the
-            // month waits (and someone gets an email), never a short invoice
-            const { start, end } = SettlementService.getMonthUnixStartEnd(month);
             try {
-                await platformSync.syncFees({ start: new Date(start * 1000), end: new Date(end * 1000) });
-                await this.generateInvoicesForMonth(sellingOrganization, month);
+                await platformSync.syncFees({ start: day, end: new Date(nextDay.getTime() - 1000) });
+                await this.generateInvoicesForDay(sellingOrganization, day);
             } catch (e) {
-                console.error('Invoicing application fees failed for month ' + Formatter.dateIso(month), e);
-                WebmasterReport.report('Aanmaken kosten-facturatie voor ' + Formatter.dateIso(month) + ' overgeslagen', e);
+                console.error('Invoicing application fees failed for day ' + utcDateIso(day), e);
+                WebmasterReport.report('Aanmaken kosten-facturatie voor ' + utcDateIso(day) + ' overgeslagen', e);
             }
 
-            month = new Date(month.getFullYear(), month.getMonth() + 1, 1);
+            day = nextDay;
         }
     }
 
-    async #hasUninvoicedFees(sellingOrganization: Organization, periodStart: Date, nextPeriodStart: Date): Promise<boolean> {
-        return !!await this.#selectUninvoicedFees(sellingOrganization, periodStart, nextPeriodStart).first(false);
-    }
-
-    /**
-     * Bills the uninvoiced fees of one month, one payment per paying account. An error for one
-     * account never affects the other accounts.
-     */
-    async generateInvoicesForMonth(sellingOrganization: Organization, month: Date, snapshot?: Date): Promise<void> {
-        // Fees stored while this month is billed are excluded from every pass, so the totals a
-        // balance item is created for and the fees stamped with it can't drift apart. Taken after
-        // the month's Stripe sync, or the fees it just stored would wait for the next run
+    async generateInvoicesForDay(sellingOrganization: Organization, day: Date, snapshot?: Date): Promise<void> {
+        // Excludes fees stored during this run, so totals and stamped fees can't drift apart
         snapshot ??= await nextSecondBoundary();
-        const periodStart = SettlementService.getPeriodStart(month);
-        const nextPeriodStart = new Date(periodStart.getFullYear(), periodStart.getMonth() + 1, 1);
+        const periodStart = startOfUtcDay(day);
+        const nextPeriodStart = nextUtcDay(periodStart);
         const reference = ApplicationFeeInvoicer.reference(periodStart);
 
         await QueueHandler.schedule(reference, async () => {
@@ -171,13 +158,6 @@ export class ApplicationFeeInvoicer {
         });
     }
 
-    /**
-     * A fee this invoicer cannot bill is left out everywhere, or every run would walk its month at
-     * Stripe and report it again: without a paying organization there is nobody left to bill, and
-     * without its Stripe account a month cannot be checked against what the legacy invoicer billed
-     * per account — billing it anyway risks charging it twice. Both are reported by the sync that
-     * stored them (StripeSettlementSync.reportUnattributedFee).
-     */
     #selectUninvoicedFees(sellingOrganization: Organization, periodStart: Date, nextPeriodStart: Date, snapshot?: Date) {
         const query = this.#selectBillableFees(sellingOrganization)
             .where('occurredAt', '>=', periodStart)
@@ -223,18 +203,23 @@ export class ApplicationFeeInvoicer {
             });
         }
 
-        // Uninvoiced fees in a month the legacy invoicer billed mean the inline legacy linking
-        // failed (and already emailed): billing them again would charge the account twice
+        // Uninvoiced fees in a legacy-billed month mean linking failed: never bill them twice
+        const legacyMonthStart = new Date(Date.UTC(periodStart.getUTCFullYear(), periodStart.getUTCMonth(), 1));
         const legacyPayments = await ApplicationFeeService.findLegacyFeePayments({
             organizationId: sellingOrganization.id,
             payingOrganizationId: organization.id,
             payingStripeAccountId: stripeAccount.id,
-            periodStart,
+            periodStart: legacyMonthStart,
         });
         if (legacyPayments.length > 0) {
+            const key = stripeAccount.id + ':' + utcDateIso(legacyMonthStart);
+            if (this.#reportedLegacyMonths.has(key)) {
+                return;
+            }
+            this.#reportedLegacyMonths.add(key);
             throw new SimpleError({
                 code: 'legacy_month_not_linked',
-                message: 'Month ' + Formatter.dateIso(periodStart) + ' was billed by the legacy invoicer but has uninvoiced fees: linking failed, not billing them again',
+                message: 'Month ' + Formatter.dateIso(legacyMonthStart) + ' was billed by the legacy invoicer but has uninvoiced fees: linking failed, not billing them again',
             });
         }
 
@@ -256,7 +241,7 @@ export class ApplicationFeeInvoicer {
             return;
         }
 
-        const monthEnd = new Date(nextPeriodStart.getTime() - 1000);
+        const dayEnd = new Date(nextPeriodStart.getTime() - 1000);
         const itemPerType = new Map<ApplicationFeeType, BalanceItem>();
 
         for (const type of [ApplicationFeeType.Service, ApplicationFeeType.Transfer]) {
@@ -264,7 +249,7 @@ export class ApplicationFeeInvoicer {
             if (amount === 0) {
                 continue;
             }
-            itemPerType.set(type, await this.#createBalanceItem({ sellingOrganization, organization, type, amount, periodStart, monthEnd }));
+            itemPerType.set(type, await this.#createBalanceItem({ sellingOrganization, organization, type, amount, periodStart, dayEnd }));
         }
 
         const balanceItems = [...itemPerType.values()];
@@ -338,8 +323,6 @@ export class ApplicationFeeInvoicer {
             await balanceItemPayment.save();
         }
 
-        // Paid now, not in the billed month: the invoices cron only picks up recent payments, so a
-        // month that is billed late would otherwise never end up on an invoice
         await PaymentService.handlePaymentStatusUpdate(payment, sellingOrganization, PaymentStatus.Succeeded, new Date());
         await SettlementService.updatePaymentSettlementsForApplicationFeePayment(payment);
     }
@@ -375,31 +358,27 @@ export class ApplicationFeeInvoicer {
             if (orphaned.length > 0) {
                 throw new SimpleError({
                     code: 'orphaned_balance_items',
-                    message: 'Balance items ' + orphaned.join(', ') + ' bill application fees but have no payment: repair before invoicing more fees of this month',
+                    message: 'Balance items ' + orphaned.join(', ') + ' bill application fees but have no payment: repair before invoicing more fees of this day',
                 });
             }
         }
     }
 
-    async #createBalanceItem({ sellingOrganization, organization, type, amount, periodStart, monthEnd }: {
+    async #createBalanceItem({ sellingOrganization, organization, type, amount, periodStart, dayEnd }: {
         sellingOrganization: Organization;
         organization: Organization;
         type: ApplicationFeeType;
         amount: number;
         periodStart: Date;
-        monthEnd: Date;
+        dayEnd: Date;
     }): Promise<BalanceItem> {
         const item = new BalanceItem();
         item.type = type === ApplicationFeeType.Service ? BalanceItemType.ServiceFee : BalanceItemType.TransferFee;
+        const date = Formatter.date(periodStart, true, { timezone: 'UTC' });
         item.name = type === ApplicationFeeType.Service
-            ? $t('%1Wd', {
-                    startDate: Formatter.startDate(periodStart, false, true),
-                    endDate: Formatter.endDate(monthEnd, false, true),
-                })
-            : $t('%1Xx', {
-                    startDate: Formatter.startDate(periodStart, false, true),
-                    endDate: Formatter.endDate(monthEnd, false, true),
-                });
+            ? $t('Servicekosten op {date}', { date })
+            : $t('Transactiekosten op {date}', { date });
+        item.description = $t('Ingehouden via Stripe op {date} (UTC)', { date });
         item.relations.set(BalanceItemRelationType.PaymentProvider, BalanceItemRelation.create({
             id: PaymentProvider.Stripe,
             name: TranslatedString.create(getPaymentProviderName(PaymentProvider.Stripe)),
@@ -418,7 +397,7 @@ export class ApplicationFeeInvoicer {
         item.createdAt = new Date();
         item.status = BalanceItemStatus.Hidden;
         item.startDate = periodStart;
-        item.endDate = monthEnd;
+        item.endDate = dayEnd;
         await item.save();
         return item;
     }
