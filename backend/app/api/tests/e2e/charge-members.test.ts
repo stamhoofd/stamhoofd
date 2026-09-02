@@ -2,7 +2,7 @@ import { Request, Response } from '@simonbackx/simple-endpoints';
 import type { Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
 import { GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import type { BalanceItemWithPayments, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, ChargeRequest, LimitedFilteredRequest, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
+import { AccessRight, ChargeRequest, LimitedFilteredRequest, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, VATExcemptReason, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { ChargeMembersEndpoint } from '../../src/endpoints/admin/members/ChargeMembersEndpoint.js';
 import { testServer } from '../helpers/TestServer.js';
@@ -203,6 +203,36 @@ describe('E2E.ChargeMembers', () => {
 
         testBalanceResponse(await getBalance(member1.id, organization, financialDirectorToken));
         testBalanceResponse(await getBalance(member2.id, organization, financialDirectorToken));
+    });
+
+    test('Should store VAT settings on created balance items', async () => {
+        const member = await new MemberFactory({ }).create();
+        await new RegistrationFactory({ member, organization }).create();
+
+        const filter: StamhoofdFilter = {
+            id: member.id,
+        };
+
+        const body = ChargeRequest.create({
+            name: 'test name',
+            price: 10_00,
+            amount: 2,
+            VATPercentage: 21,
+            VATIncluded: false,
+            VATExcempt: VATExcemptReason.IntraCommunityServices,
+        });
+
+        await postCharge(filter, organization, body, financialDirectorToken);
+
+        const response = await getBalance(member.id, organization, financialDirectorToken);
+        expect(response.length).toBe(1);
+        const balanceItem = response[0];
+        expect(balanceItem.VATPercentage).toBe(21);
+        expect(balanceItem.VATIncluded).toBe(false);
+        expect(balanceItem.VATExcempt).toBe(VATExcemptReason.IntraCommunityServices);
+        expect(balanceItem.priceWithoutVAT).toBe(20_00);
+        // VAT is kept at zero while the exemption applies
+        expect(balanceItem.priceWithVAT).toBe(20_00);
     });
 
     test('Should not charge members of other organization', async () => {
