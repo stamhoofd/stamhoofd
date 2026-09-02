@@ -2555,10 +2555,10 @@
     picocolors "1.1.1"
     pretty-format "^27.0.2"
 
-"@tiptap/core@3.28.0", "@tiptap/core@^3.28.0":
-  version "3.28.0"
-  resolved "https://registry.yarnpkg.com/@tiptap/core/-/core-3.28.0.tgz#be8b23f6727ee411895b45b68f261fdfd5c714b3"
-  integrity sha512-gUuD5WAYfbDxNSSJya/emh2KSzXZXLUYKW4fEnc1AQ5FE2twzh4LJ9UlKFIawigrUCAksWI5Fy1hRbv+5m4ZdQ==
+"@tiptap/core@3.30.4", "@tiptap/core@^3.28.0":
+  version "3.30.4"
+  resolved "https://registry.yarnpkg.com/@tiptap/core/-/core-3.30.4.tgz#9e0847c5f4dd53750ae3accc6b83223e37f693b3"
+  integrity sha512-V9yKuUfV8qC9WBrnVxkFWmYLBomc3d1CwXoFSjED5DRu5q2oyxv07F+jOJSRogJAY+feHjuxvjhixwxeHm2DXQ==
 
 "@tiptap/extension-blockquote@^3.28.0":
   version "3.28.0"
