@@ -14,6 +14,7 @@ import { BalanceItemService } from '../../../../services/BalanceItemService.js';
 import { OrderService } from '../../../../services/OrderService.js';
 import { PaymentService } from '../../../../services/PaymentService.js';
 import { shouldReserveUitpasNumbers, UitpasService } from '../../../../services/uitpas/UitpasService.js';
+import { Formatter } from '@stamhoofd/utility';
 
 type Params = { id: string };
 type Query = undefined;
@@ -85,7 +86,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
             body = request.body;
         }
 
-        if (body.changes.length == 0) {
+        if (body.changes.length === 0) {
             return new Response([]);
         }
 
@@ -247,7 +248,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
             }
 
             for (const patch of body.getPatches()) {
-                const model = orders.find(p => p.id == patch.id);
+                const model = orders.find(p => p.id === patch.id);
                 if (!model) {
                     throw new SimpleError({
                         code: 'not_found',
@@ -270,6 +271,18 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 if (patch.data) {
                     model.data.patchOrPut(patch.data);
                     if (model.status !== OrderStatus.Deleted) {
+                        const usedCodes = model.data.discountCodes.map(c => c.code);
+                        const uniqueCodes = Formatter.uniqueArray(usedCodes);
+                        if (uniqueCodes.length !== usedCodes.length) {
+                            // Duplicate code usage is not allowed
+                            throw new SimpleError({
+                                code: 'duplicate_codes',
+                                message: 'Duplicate usage of discount codes',
+                                human: $t(`%w7`),
+                                field: 'cart.discountCodes',
+                            });
+                        }
+
                         // Make sure all data is up to date and validated (= possible corrections happen here too)
                         model.data.validate(webshopGetter.struct, organization.meta, request.i18n, true);
                     }
