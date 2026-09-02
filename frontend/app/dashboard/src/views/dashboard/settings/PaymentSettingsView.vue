@@ -188,7 +188,7 @@
                 </p>
 
                 <div class="style-button-bar">
-                    <button type="button" class="button primary" @click="linkMollie">
+                    <button type="button" class="button primary" @click="linkMollie(false)">
                         <span>{{ $t('%1Nr') }}</span>
                     </button>
 
@@ -208,7 +208,7 @@
                 <p v-if="!organization.privateMeta.mollieOnboarding.canReceiveSettlements" class="warning-box">
                     {{ $t('%Nx') }}
                 </p>
-                <MollieWarningBox @reconnect="linkMollie" />
+                <MollieWarningBox @reconnect="linkMollie(true)" />
 
                 <p v-if="organization.privateMeta.mollieOnboarding.status === 'NeedsData'" class="style-description-block">
                     {{ $t('%Ny') }}
@@ -550,15 +550,17 @@ async function shouldNavigateAway() {
     });
 }
 
-async function linkMollie() {
-    if (!await CenteredMessage.confirm({
-        title: $t('%1Pe'),
-        confirmText: $t('%1Oj'),
-        description: $t('%1PR'),
-        requireCheckbox: $t('%ZmN'),
-        availabilityDelay: 2_000,
-    })) {
-        return;
+async function linkMollie(skipWarning = false) {
+    if (!skipWarning) {
+        if (!await CenteredMessage.confirm({
+            title: $t('%1Pe'),
+            confirmText: $t('%1Oj'),
+            description: $t('%1PR'),
+            requireCheckbox: $t('%ZmN'),
+            availabilityDelay: 2_000,
+        })) {
+            return;
+        }
     }
 
     // Start oauth flow
