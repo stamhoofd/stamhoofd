@@ -195,13 +195,13 @@ export class Invoice extends AutoEncoder {
     /**
      * Free text printed on the PDF (and XML). E.g. to explain why a receipt was created.
      */
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 416 })
     comments: string | null = null;
 
     /**
      * Receipts (aankoopbewijs) are not invoices: separate numbering, no XML, never sent via PEPPOL.
      */
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 416 })
     isReceipt = false;
 
     @field({ decoder: File, nullable: true })

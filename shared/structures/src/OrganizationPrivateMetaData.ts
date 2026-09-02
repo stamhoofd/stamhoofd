@@ -100,7 +100,7 @@ export class MollieOnboarding extends AutoEncoder {
     /**
      * Permissions the connected token lacks: the account has to be reconnected to grant them.
      */
-    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 416 })
     missingScopes: string[] = [];
 }
 

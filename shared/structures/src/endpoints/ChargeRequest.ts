@@ -5,10 +5,10 @@ import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 
 export class ChargeRequest extends AutoEncoder {
     @field({ decoder: StringDecoder, field: 'description' })
-    @field({ decoder: StringDecoder, field: 'name', ...NextVersion })
+    @field({ decoder: StringDecoder, field: 'name', version: 416 })
     name: string;
 
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 416 })
     description: string | null = null;
 
     @field({ decoder: NumberDecoder })
@@ -17,13 +17,13 @@ export class ChargeRequest extends AutoEncoder {
     @field({ decoder: NumberDecoder, nullable: true })
     amount: number | null;
 
-    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: IntegerDecoder, nullable: true, version: 416 })
     VATPercentage: number | null = null;
 
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 416 })
     VATIncluded = true;
 
-    @field({ decoder: new EnumDecoder(VATExcemptReason), nullable: true, ...NextVersion })
+    @field({ decoder: new EnumDecoder(VATExcemptReason), nullable: true, version: 416 })
     VATExcempt: VATExcemptReason | null = null;
 
     @field({ decoder: DateDecoder, nullable: true })

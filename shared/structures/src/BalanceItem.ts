@@ -397,13 +397,13 @@ export class BalanceItem extends AutoEncoder {
     relations: Map<BalanceItemRelationType, BalanceItemRelation> = new Map();
 
     @field({ decoder: StringDecoder, field: 'description' })
-    @field({ decoder: StringDecoder, field: 'name', ...NextVersion })
+    @field({ decoder: StringDecoder, field: 'name', version: 416 })
     name = '';
 
     /**
      * Optional extra text for the item, shown below the name (e.g. on invoices)
      */
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 416 })
     description: string | null = null;
 
     /**
