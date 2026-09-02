@@ -4,7 +4,7 @@ import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { QueueHandler } from '@stamhoofd/queues';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getPaymentProviderName, PaymentCustomer, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, TranslatedString } from '@stamhoofd/structures';
 import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, sleep } from '@stamhoofd/utility';
 
 import { ApplicationFeeService, FEE_PAYMENT_REFERENCE_PREFIX } from '../services/ApplicationFeeService.js';
 import { PaymentService } from '../services/PaymentService.js';
@@ -26,12 +26,17 @@ const FEE_BATCH_SIZE = 500;
 const MAXIMUM_INVOICE_MONTHS = 12;
 
 /**
- * Stored timestamps have no milliseconds, so a boundary compared against them may not either.
+ * Stored timestamps have no milliseconds, so a boundary compared against them may not either: a
+ * boundary in the current second would miss what was stored earlier in it. Waits for the next
+ * second, so everything stored before now lies before the boundary and everything stored after it
+ * lies behind it.
  */
-function truncateToSecond(date: Date): Date {
-    const truncated = new Date(date);
-    truncated.setMilliseconds(0);
-    return truncated;
+async function nextSecondBoundary(): Promise<Date> {
+    const boundary = new Date();
+    boundary.setMilliseconds(0);
+    boundary.setSeconds(boundary.getSeconds() + 1);
+    await sleep(boundary.getTime() - Date.now());
+    return boundary;
 }
 
 /**
@@ -70,23 +75,15 @@ export class ApplicationFeeInvoicer {
             return;
         }
 
-        // A month that can't be billed usually can't be billed for any of its accounts either:
-        // report all of them in one email instead of one per month per account
         await WebmasterReport.group('Aanrekenen applicatiekosten', async () => {
             await this.#billUninvoicedMonths(sellingOrganization);
         });
     }
 
     async #billUninvoicedMonths(sellingOrganization: Organization): Promise<void> {
-        // Fees stored while this run is walking are excluded from every pass, so the totals a
-        // balance item is created for and the fees stamped with it can't drift apart. Stored
-        // createdAt has no milliseconds, so neither may this boundary
-        const snapshot = truncateToSecond(new Date());
-
         const currentPeriodStart = SettlementService.getPeriodStart(new Date());
         const oldest = await this.#selectBillableFees(sellingOrganization)
             .where('occurredAt', '<', currentPeriodStart)
-            .where('createdAt', '<', snapshot)
             .orderBy('occurredAt', 'ASC')
             .first(false);
 
@@ -113,7 +110,7 @@ export class ApplicationFeeInvoicer {
             const nextMonth = new Date(month.getFullYear(), month.getMonth() + 1, 1);
 
             // Walking a month at Stripe is expensive: only months that still owe us something
-            if (!await this.#hasUninvoicedFees(sellingOrganization, month, nextMonth, snapshot)) {
+            if (!await this.#hasUninvoicedFees(sellingOrganization, month, nextMonth)) {
                 month = nextMonth;
                 continue;
             }
@@ -123,7 +120,7 @@ export class ApplicationFeeInvoicer {
             const { start, end } = SettlementService.getMonthUnixStartEnd(month);
             try {
                 await platformSync.syncFees({ start: new Date(start * 1000), end: new Date(end * 1000) });
-                await this.generateInvoicesForMonth(sellingOrganization, month, snapshot);
+                await this.generateInvoicesForMonth(sellingOrganization, month);
             } catch (e) {
                 console.error('Invoicing application fees failed for month ' + Formatter.dateIso(month), e);
                 WebmasterReport.report('Aanmaken kosten-facturatie voor ' + Formatter.dateIso(month) + ' overgeslagen', e);
@@ -133,15 +130,19 @@ export class ApplicationFeeInvoicer {
         }
     }
 
-    async #hasUninvoicedFees(sellingOrganization: Organization, periodStart: Date, nextPeriodStart: Date, snapshot: Date): Promise<boolean> {
-        return !!await this.#selectUninvoicedFees(sellingOrganization, periodStart, nextPeriodStart, snapshot).first(false);
+    async #hasUninvoicedFees(sellingOrganization: Organization, periodStart: Date, nextPeriodStart: Date): Promise<boolean> {
+        return !!await this.#selectUninvoicedFees(sellingOrganization, periodStart, nextPeriodStart).first(false);
     }
 
     /**
      * Bills the uninvoiced fees of one month, one payment per paying account. An error for one
      * account never affects the other accounts.
      */
-    async generateInvoicesForMonth(sellingOrganization: Organization, month: Date, snapshot: Date = truncateToSecond(new Date())): Promise<void> {
+    async generateInvoicesForMonth(sellingOrganization: Organization, month: Date, snapshot?: Date): Promise<void> {
+        // Fees stored while this month is billed are excluded from every pass, so the totals a
+        // balance item is created for and the fees stamped with it can't drift apart. Taken after
+        // the month's Stripe sync, or the fees it just stored would wait for the next run
+        snapshot ??= await nextSecondBoundary();
         const periodStart = SettlementService.getPeriodStart(month);
         const nextPeriodStart = new Date(periodStart.getFullYear(), periodStart.getMonth() + 1, 1);
         const reference = ApplicationFeeInvoicer.reference(periodStart);
@@ -177,12 +178,12 @@ export class ApplicationFeeInvoicer {
      * per account — billing it anyway risks charging it twice. Both are reported by the sync that
      * stored them (StripeSettlementSync.reportUnattributedFee).
      */
-    #selectUninvoicedFees(sellingOrganization: Organization, periodStart: Date, nextPeriodStart: Date, snapshot: Date) {
-        return this.#selectBillableFees(sellingOrganization)
+    #selectUninvoicedFees(sellingOrganization: Organization, periodStart: Date, nextPeriodStart: Date, snapshot?: Date) {
+        const query = this.#selectBillableFees(sellingOrganization)
             .where('occurredAt', '>=', periodStart)
             .where('occurredAt', '<', nextPeriodStart)
-            .where('createdAt', '<', snapshot)
             .limit(FEE_BATCH_SIZE);
+        return snapshot ? query.where('createdAt', '<', snapshot) : query;
     }
 
     #selectBillableFees(sellingOrganization: Organization) {

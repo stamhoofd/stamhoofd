@@ -194,6 +194,45 @@ describe('ApplicationFeeInvoicer', () => {
         expect((await ApplicationFee.getByID(late.id))!.balanceItemId).not.toBeNull();
     });
 
+    test('a fee the month\'s Stripe sync stores is billed in the same run', async () => {
+        const { organization, stripeAccount } = await init();
+
+        // Only months inside the invoicing window are walked at Stripe
+        const now = new Date();
+        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 10);
+        const stored = await createFee(organization, stripeAccount, { amount: 30_00, when: lastMonth });
+
+        const payment = new Payment();
+        payment.organizationId = organization.id;
+        payment.stripeAccountId = stripeAccount.id;
+        payment.method = PaymentMethod.Bancontact;
+        payment.provider = PaymentProvider.Stripe;
+        payment.status = PaymentStatus.Succeeded;
+        payment.price = 100_00_00;
+        payment.paidAt = lastMonth;
+        await payment.save();
+
+        const stripeFee = stripeMocker.createApplicationFee({
+            amount: 5,
+            account: stripeAccount.accountId,
+            originatingTransaction: stripeMocker.createChargeObject({ metadata: { payment: payment.id, serviceFee: '5' } }),
+        });
+        stripeMocker.createBalanceTransaction({ type: 'application_fee', amount: 5, created: lastMonth, source: stripeFee });
+
+        await createInvoicer().generateInvoices(membershipOrganization);
+
+        const payments = await Payment.select()
+            .where('payingOrganizationId', organization.id)
+            .where('method', PaymentMethod.AccountDeductions)
+            .fetch();
+        expect(payments).toHaveLength(1);
+        expect(payments[0].price).toBe(35_00);
+
+        const synced = await ApplicationFee.select().where('externalId', stripeFee.id).first(true);
+        expect(synced.balanceItemId).not.toBeNull();
+        expect((await ApplicationFee.getByID(stored.id))!.balanceItemId).toBe(synced.balanceItemId);
+    });
+
     test('the fee payment is settled by the payouts that contained its fees', async () => {
         const { organization, stripeAccount } = await init();
         const payout = await SettlementService.upsertSettlement({
