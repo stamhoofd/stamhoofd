@@ -285,7 +285,7 @@ function createSyntheticBalanceItemPayment({
             ...source.balanceItem,
             type: BalanceItemType.Order,
             relations: new Map(source.balanceItem.relations),
-            description,
+            name: description,
             amount,
             unitPrice: amount === 0 ? 0 : price / amount,
         }),
@@ -363,7 +363,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
             name: $t(`%6o`),
             width: 50,
             getValue: (object: PaymentWithItem) => ({
-                value: object.balanceItemPayment.balanceItem.itemDescription || object.balanceItemPayment.balanceItem.description,
+                value: object.balanceItemPayment.balanceItem.itemDescription || object.balanceItemPayment.balanceItem.name,
                 style: {
                     alignment: {
                         wrapText: true,

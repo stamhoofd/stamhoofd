@@ -391,7 +391,7 @@ export class ApplicationFeeInvoicer {
     }): Promise<BalanceItem> {
         const item = new BalanceItem();
         item.type = type === ApplicationFeeType.Service ? BalanceItemType.ServiceFee : BalanceItemType.TransferFee;
-        item.description = type === ApplicationFeeType.Service
+        item.name = type === ApplicationFeeType.Service
             ? $t('%1Wd', {
                     startDate: Formatter.startDate(periodStart, false, true),
                     endDate: Formatter.endDate(monthEnd, false, true),

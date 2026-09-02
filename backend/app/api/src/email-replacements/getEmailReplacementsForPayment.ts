@@ -305,7 +305,7 @@ function unboxBalanceItemPayments({ balanceItemPayments }: PaymentGeneral, order
                 itemTitle: cartItem.product.name,
                 itemDescription: cartItem.description,
                 balanceItem: {
-                    description: cartItem.description,
+                    name: cartItem.description,
                 },
                 quantity,
                 unitPrice,

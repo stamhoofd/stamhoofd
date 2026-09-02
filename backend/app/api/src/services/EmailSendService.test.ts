@@ -894,7 +894,7 @@ describe('EmailSendService', () => {
                     type: BalanceItemType.Other,
                     amount: 2,
                     unitPrice: 12_99_00,
-                    description: 'Test balance item',
+                    name: 'Test balance item',
                 }).create();
                 await CachedBalance.updateForUsers(organization.id, [existingUser.id]);
 

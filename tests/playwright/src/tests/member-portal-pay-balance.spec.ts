@@ -43,7 +43,7 @@ test.describe('Member portal - pay outstanding balance @member-portal-pay-balanc
             organizationId: organization.id,
             memberId: member.id,
             type: BalanceItemType.Other,
-            description: 'Kamp',
+            name: 'Kamp',
             amount: 1,
             unitPrice: 30_0000,
         }).create();
@@ -52,7 +52,7 @@ test.describe('Member portal - pay outstanding balance @member-portal-pay-balanc
             organizationId: organization.id,
             memberId: member.id,
             type: BalanceItemType.Other,
-            description: 'Uniform',
+            name: 'Uniform',
             amount: 1,
             unitPrice: 20_0000,
         }).create();
@@ -61,7 +61,7 @@ test.describe('Member portal - pay outstanding balance @member-portal-pay-balanc
             organizationId: organization.id,
             memberId: member.id,
             type: BalanceItemType.Other,
-            description: 'Terugbetaling weekend',
+            name: 'Terugbetaling weekend',
             amount: 1,
             unitPrice: -10_0000,
         }).create();

@@ -1298,12 +1298,12 @@ describe('Breakdown builders', () => {
 
     describe('Keeping the number of rows readable', () => {
         /**
-         * A one-off correction has no relations, so every description is a category of its own.
+         * A one-off correction has no relations, so every name is a category of its own.
          */
         function createCorrection(index: number) {
             return BalanceItem.create({
                 type: BalanceItemType.Other,
-                description: 'Correctie ' + index,
+                name: 'Correctie ' + index,
                 amount: 1,
                 unitPrice: (200 - index) * 100,
             });

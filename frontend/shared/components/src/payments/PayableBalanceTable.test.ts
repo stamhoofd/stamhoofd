@@ -5,10 +5,10 @@ import { render } from 'vitest-browser-vue';
 import { userEvent } from 'vitest/browser';
 import PayableBalanceTable from './PayableBalanceTable.vue';
 
-function createItem(overrides: Partial<{ unitPrice: number; amount: number; VATPercentage: number | null; VATIncluded: boolean; description: string }> = {}) {
+function createItem(overrides: Partial<{ unitPrice: number; amount: number; VATPercentage: number | null; VATIncluded: boolean; name: string }> = {}) {
     return BalanceItemWithPayments.create({
         type: BalanceItemType.Other,
-        description: overrides.description ?? 'Test item',
+        name: overrides.name ?? 'Test item',
         amount: overrides.amount ?? 1,
         unitPrice: overrides.unitPrice ?? 4_13_00,
         VATPercentage: overrides.VATPercentage === undefined ? 21 : overrides.VATPercentage,
@@ -107,7 +107,7 @@ test('VAT-inclusive items in the same basket also show unit prices excluding VAT
     // (2 x 12,10 incl. 21% VAT) must then show its unit price excluding VAT (10,00) too
     renderTable(createBalance([
         createItem({ unitPrice: 4_13_00, amount: 1, VATPercentage: 21, VATIncluded: false }),
-        createItem({ unitPrice: 12_10_00, amount: 2, VATPercentage: 21, VATIncluded: true, description: 'Inclusive item' }),
+        createItem({ unitPrice: 12_10_00, amount: 2, VATPercentage: 21, VATIncluded: true, name: 'Inclusive item' }),
     ]));
 
     const itemList = document.querySelector('.st-grid')!;

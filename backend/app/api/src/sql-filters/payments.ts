@@ -284,7 +284,7 @@ export function getPaymentSearchFilter(search: string): StamhoofdFilter {
         $or: [
             { customer: { name: { $contains: search } } },
             { customer: { company: { name: { $contains: search } } } },
-            { balanceItemPayments: { $elemMatch: { balanceItem: { description: { $contains: search } } } } },
+            { balanceItemPayments: { $elemMatch: { balanceItem: { name: { $contains: search } } } } },
             { transferDescription: { $contains: search } },
         ],
     };

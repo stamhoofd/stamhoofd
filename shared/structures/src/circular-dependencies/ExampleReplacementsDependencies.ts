@@ -124,11 +124,11 @@ function fillReplacements(replacements: Replacement[]) {
     }));
 
     const balance1 = BalanceItem.create({
-        description: $t(`%13U`),
+        name: $t(`%13U`),
         unitPrice: 1234_00,
     });
     const balance2 = BalanceItem.create({
-        description: $t(`%13V`),
+        name: $t(`%13V`),
         unitPrice: 1234_00,
         amount: 2,
     });

@@ -56,13 +56,13 @@ function getReplacements() {
     const textPlaceholder = $t(`%13X`);
 
     const exampleBalanceItem = BalanceItem.create({
-        description: $t('%Ze8'),
+        name: $t('%Ze8'),
         amount: 3,
         unitPrice: 80000,
     });
 
     const exampleBalanceItem2 = BalanceItem.create({
-        description: $t('%Ze7'),
+        name: $t('%Ze7'),
         amount: 1,
         unitPrice: 150000,
     });

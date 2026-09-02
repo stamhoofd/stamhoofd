@@ -164,12 +164,12 @@ export class PaymentGeneral extends PrivatePayment {
     }
 }
 
-export type BalanceItemPaymentsHtmlTableItem = { price: number; itemDescription: string | null; balanceItem: { description: string }; itemTitle: string; quantity: number; unitPrice: number };
+export type BalanceItemPaymentsHtmlTableItem = { price: number; itemDescription: string | null; balanceItem: { name: string }; itemTitle: string; quantity: number; unitPrice: number };
 export function getBalanceItemPaymentsHtmlTable(balanceItemPayments: BalanceItemPaymentsHtmlTableItem[]) {
     const payments = balanceItemPayments.slice().sort((a, b) => {
         return Sorter.stack(
             Sorter.byNumberValue(a.price, b.price),
-            Sorter.byStringValue(a.itemDescription ?? a.balanceItem.description, b.itemDescription ?? b.balanceItem.description),
+            Sorter.byStringValue(a.itemDescription ?? a.balanceItem.name, b.itemDescription ?? b.balanceItem.name),
         );
     });
 

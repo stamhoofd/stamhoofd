@@ -127,8 +127,13 @@ export class InvoicedBalanceItem extends AutoEncoder {
         const item = new InvoicedBalanceItem();
         item.type = balanceItem.type;
         item.balanceItemId = balanceItem.id;
-        item.name = balanceItem.itemTitle;
-        item.description = balanceItem.itemDescription ?? '';
+        if (balanceItem.relations.size > 0 && !balanceItem.description) {
+            item.name = balanceItem.itemTitle;
+            item.description = balanceItem.itemDescription ?? '';
+        } else {
+            item.name = balanceItem.name || balanceItem.itemTitle;
+            item.description = balanceItem.description ?? '';
+        }
         item.balanceInvoicedAmount = amount;
         item.VATPercentage = balanceItem.VATPercentage;
         item.VATExcempt = balanceItem.VATExcempt;

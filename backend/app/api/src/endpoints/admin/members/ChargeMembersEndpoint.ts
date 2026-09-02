@@ -32,12 +32,12 @@ export class ChargeMembersEndpoint extends Endpoint<Params, Query, Body, Respons
     }
 
     static throwIfInvalidBody(body: Body) {
-        if (!body.description?.trim()?.length) {
+        if (!body.name?.trim()?.length) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Invalid description',
+                message: 'Invalid name',
                 human: $t(`%Cr`),
-                field: 'description',
+                field: 'name',
             });
         }
 
@@ -96,6 +96,7 @@ export class ChargeMembersEndpoint extends Endpoint<Params, Query, Body, Respons
                     membersToCharge: data.members,
                     price: body.price,
                     amount: body.amount ?? 1,
+                    name: body.name,
                     description: body.description,
                     dueAt: body.dueAt,
                     createdAt: body.createdAt,

@@ -109,7 +109,7 @@ describe('E2E.ChargeMembers', () => {
         };
 
         const body = ChargeRequest.create({
-            description: 'test description',
+            name: 'test name',
             price: 3_00,
             amount: 4,
             dueAt: new Date(2023, 0, 10),
@@ -173,6 +173,7 @@ describe('E2E.ChargeMembers', () => {
         };
 
         const body = ChargeRequest.create({
+            name: 'test name',
             description: 'test description',
             price: 3_00,
             amount: 4,
@@ -192,7 +193,8 @@ describe('E2E.ChargeMembers', () => {
             expect(balanceItem1.unitPrice).toEqual(3_00);
             expect(balanceItem1.priceWithVAT).toEqual(12_00);
             expect(balanceItem1.amount).toEqual(body.amount);
-            expect(balanceItem1.description).toEqual(body.description);
+            expect(balanceItem1.name).toEqual(body.name);
+            expect(balanceItem1.description).toEqual('test description');
             expect(balanceItem1.organizationId).toEqual(organization.id);
             // const dueAt = balanceItem1.dueAt!;
             expect(balanceItem1.dueAt).toEqual(body.dueAt);
@@ -238,7 +240,7 @@ describe('E2E.ChargeMembers', () => {
         const otherFinancialDirectorToken = await SessionService.createSession(otherFinancialDirector);
 
         const body = ChargeRequest.create({
-            description: 'test description',
+            name: 'test name',
             price: 3_00,
             amount: 4,
             dueAt: new Date(2023, 0, 10),
@@ -275,18 +277,18 @@ describe('E2E.ChargeMembers', () => {
         };
 
         const testCases: [body: ChargeRequest, expectedErrorMessage: string][] = [
-            // empty description
+            // empty name
             [ChargeRequest.create({
-                description: ' ',
+                name: ' ',
                 price: 3_00,
                 amount: 4,
                 dueAt: new Date(2023, 0, 10),
                 createdAt: new Date(2023, 0, 4),
-            }), 'Invalid description'],
+            }), 'Invalid name'],
 
             // price 0
             [ChargeRequest.create({
-                description: 'test description',
+                name: 'test name',
                 price: 0,
                 amount: 4,
                 dueAt: new Date(2023, 0, 10),
@@ -295,7 +297,7 @@ describe('E2E.ChargeMembers', () => {
 
             // amount 0
             [ChargeRequest.create({
-                description: 'test description',
+                name: 'test name',
                 price: 3_00,
                 amount: 0,
                 dueAt: new Date(2023, 0, 10),
@@ -353,7 +355,7 @@ describe('E2E.ChargeMembers', () => {
             };
 
             const body = ChargeRequest.create({
-                description: 'test description',
+                name: 'test name',
                 price: 3_00,
                 amount: 4,
                 dueAt: new Date(2023, 0, 10),
@@ -372,7 +374,7 @@ describe('E2E.ChargeMembers', () => {
                 expect(balanceItem1.unitPrice).toEqual(3_00);
                 expect(balanceItem1.priceWithVAT).toEqual(12_00);
                 expect(balanceItem1.amount).toEqual(4);
-                expect(balanceItem1.description).toEqual('test description');
+                expect(balanceItem1.name).toEqual('test name');
                 expect(balanceItem1.organizationId).toEqual(organization.id);
                 expect(balanceItem1.dueAt).toEqual(new Date(2023, 0, 10));
                 expect(balanceItem1.createdAt).toEqual(body.createdAt);
@@ -423,7 +425,7 @@ describe('E2E.ChargeMembers', () => {
             };
 
             const body = ChargeRequest.create({
-                description: 'test description',
+                name: 'test name',
                 price: 3_00,
                 amount: 4,
                 dueAt: new Date(2023, 0, 10),

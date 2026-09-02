@@ -53,7 +53,7 @@ export class ReferralService {
         if (code.value > 0) {
             credit = new BalanceItem();
             credit.type = BalanceItemType.ReferralDiscount;
-            credit.description = otherOrganization ? ('Tegoed gekregen van ' + otherOrganization.name) : code.description;
+            credit.name = otherOrganization ? ('Tegoed gekregen van ' + otherOrganization.name) : code.description;
             credit.payingOrganizationId = organization.id;
             credit.organizationId = membershipOrganization.id;
             credit.VATPercentage = 21;
@@ -151,7 +151,7 @@ export class ReferralService {
 
         const credit = new BalanceItem();
         credit.type = BalanceItemType.ReferralDiscount;
-        credit.description = $t('%1ZE', { 'organization-name': organization.name });
+        credit.name = $t('%1ZE', { 'organization-name': organization.name });
         credit.payingOrganizationId = code.organizationId;
         credit.organizationId = (await Platform.getShared()).membershipOrganizationId!; // where do we get this discount from
         credit.VATPercentage = 21;
@@ -180,7 +180,7 @@ export class ReferralService {
             // The receiving organization is invoiced instead of the organization for the usage of Stamhoofd.
             const item = new BalanceItem();
             item.type = BalanceItemType.Other;
-            item.description = 'Aankoop Stamhoofd voor ' + organization.name;
+            item.name = 'Aankoop Stamhoofd voor ' + organization.name;
             item.payingOrganizationId = receivingOrganization.id;
             item.organizationId = membershipOrganizationId;
             item.VATPercentage = 21;

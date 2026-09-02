@@ -47,8 +47,8 @@ export function getSelectableWorkbook(organization: Organization | null, platfor
                     }),
 
                     new SelectableColumn({
-                        id: 'description',
-                        name: $t(`%6o`),
+                        id: 'name',
+                        name: $t('Naam'),
                     }),
 
                     new SelectableColumn({

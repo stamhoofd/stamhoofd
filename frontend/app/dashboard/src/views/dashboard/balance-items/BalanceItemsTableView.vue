@@ -248,9 +248,9 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
 
     new Column<ObjectType, string>({
-        id: 'description',
-        name: $t('%6o'),
-        getValue: object => object.description,
+        id: 'name',
+        name: $t('Naam'),
+        getValue: object => object.name,
         minimumWidth: 100,
         recommendedWidth: 300,
         enabled: false,

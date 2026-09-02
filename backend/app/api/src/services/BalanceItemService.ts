@@ -248,7 +248,7 @@ export class BalanceItemService {
                     const webshop = await Webshop.getByID(order.webshopId);
 
                     if (webshop) {
-                        balanceItem.description = order.generateBalanceDescription(webshop);
+                        balanceItem.name = order.generateBalanceDescription(webshop);
                         await balanceItem.save();
                     }
                 }

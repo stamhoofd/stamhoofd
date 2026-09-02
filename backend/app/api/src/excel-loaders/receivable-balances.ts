@@ -85,11 +85,11 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
             },
         },
         {
-            id: 'description',
-            name: $t(`%6o`),
+            id: 'name',
+            name: $t('Naam'),
             width: 40,
             getValue: (object: ReceivableBalanceWithItem) => ({
-                value: object.balanceItem.description,
+                value: object.balanceItem.name,
             }),
         },
         {
