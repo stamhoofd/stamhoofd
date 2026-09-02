@@ -49,7 +49,7 @@ export class PatchInvoicesEndpoint extends Endpoint<Params, Query, Body, Respons
         for (const { put } of request.body.getPuts()) {
             if (put.payingOrganizationId) {
                 if (!await Context.auth.hasFullAccess(put.payingOrganizationId)) {
-                    Context.auth.error($t('%1Xw'));
+                    throw Context.auth.error($t('%1Xw'));
                 }
             }
 
