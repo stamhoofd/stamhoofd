@@ -16,13 +16,25 @@
                 <OrganizationSelect v-model="selectedOrganization" />
             </STInputBox>
 
-            <STInputBox :title="$t('%6o')" error-fields="name" :error-box="errors.errorBox">
-                <input v-model="description" class="input" type="text" :placeholder="$t('%6p')" autocomplete="given-name">
+            <STInputBox :title="$t('Naam')" error-fields="name" :error-box="errors.errorBox">
+                <input v-model="name" class="input" type="text" :placeholder="$t('Naam van de aanrekening')" autocomplete="off">
             </STInputBox>
         </div>
 
+        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t('Beschrijving')" class="max">
+            <textarea v-model="description" class="input" :placeholder="$t('Optioneel')" />
+        </STInputBox>
+
         <div class="split-inputs">
-            <PriceInputBox v-model="price" :title="$t('%6q')" error-fields="price" :error-box="errors.errorBox" :placeholder="formatPrice(0)" :required="true" :min="null" :validator="errors.validator" />
+            <div>
+                <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t('%6q')">
+                    <PriceInput v-model="price" :min="null" :placeholder="formatPrice(0)" />
+
+                    <template #right>
+                        <VATIncludedToggle v-model="VATIncluded" :invoices-enabled="invoicesEnabled" />
+                    </template>
+                </STInputBox>
+            </div>
             <NumberInputBox v-model="amount" :title="$t('%M4')" error-fields="amount" :error-box="errors.errorBox" :validator="errors.validator" :min="1" :stepper="true" />
         </div>
 
@@ -39,7 +51,9 @@
             </div>
         </div>
 
-        <PriceBreakdownBox :price-breakdown="priceBreakdown" />
+        <VATPercentageInput v-model:percentage="VATPercentage" v-model:excempt="VATExcempt" :invoices-enabled="invoicesEnabled" :error-box="errors.errorBox" />
+
+        <PriceBreakdownBox :price-breakdown="balanceItem.priceBreakown" />
     </SaveView>
 </template>
 
@@ -53,19 +67,21 @@ import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import DateSelection from '#inputs/DateSelection.vue';
+import PriceInput from '#inputs/PriceInput.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
+import VATIncludedToggle from '#payments/components/VATIncludedToggle.vue';
+import VATPercentageInput from '#payments/components/VATPercentageInput.vue';
 import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { Organization, StamhoofdFilter } from '@stamhoofd/structures';
-import { ChargeRequest } from '@stamhoofd/structures';
+import type { Organization, StamhoofdFilter, VATExcemptReason } from '@stamhoofd/structures';
+import { BalanceItem, ChargeRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref, watch } from 'vue';
 import NumberInputBox from '../inputs/NumberInputBox.vue';
-import PriceInputBox from '../inputs/PriceInputBox.vue';
 import OrganizationSelect from '../organizations/components/OrganizationSelect.vue';
 import { useChargeCount } from './hooks/useChargeCount';
 
@@ -98,21 +114,27 @@ count(props.filter)
 const selectionCount = ref<number | null>(null);
 const organization = useOrganization();
 const selectedOrganization = ref<Organization | null>(organization.value) as Ref<Organization | null>;
+const name = ref('');
 const description = ref('');
 const price = ref(0);
 const amount = ref(1);
-const hasChanges = computed(() => description.value !== '' || price.value !== 0);
-const total = computed(() => price.value * amount.value);
+const VATPercentage = ref<number | null>(null);
+const VATIncluded = ref(true);
+const VATExcempt = ref<VATExcemptReason | null>(null);
+const invoicesEnabled = computed(() => selectedOrganization.value?.meta.invoicesEnabled ?? false);
+const hasChanges = computed(() => name.value !== '' || description.value !== '' || price.value !== 0);
 
 const createdAt = ref(new Date());
 const dueAt = ref(null);
 
-const priceBreakdown = computed(() => {
-    return [{
-        name: $t(`%xL`),
-        price: total.value,
-    }];
-});
+const balanceItem = computed(() => BalanceItem.create({
+    unitPrice: price.value,
+    amount: amount.value,
+    VATPercentage: VATPercentage.value,
+    VATIncluded: VATIncluded.value,
+    VATExcempt: VATExcempt.value,
+}));
+const total = computed(() => balanceItem.value.priceWithVAT);
 
 const chargeViewDescription = computed(() => {
     if (selectionCount.value === null) {
@@ -146,9 +168,7 @@ useValidation(errors.validator, () => {
         }));
     }
 
-    const descriptionNormalized = description.value.trim();
-
-    if (descriptionNormalized.length === 0) {
+    if (name.value.trim().length === 0) {
         se.addError(new SimpleError({
             code: 'invalid_field',
             message: $t(`%Cr`),
@@ -197,8 +217,12 @@ async function save() {
     try {
         const body = ChargeRequest.create({
             price: price.value,
-            name: description.value,
+            name: name.value,
+            description: description.value.trim() || null,
             amount: amount.value,
+            VATPercentage: VATPercentage.value,
+            VATIncluded: VATIncluded.value,
+            VATExcempt: VATExcempt.value,
             dueAt: dueAt.value,
             createdAt: createdAt.value,
             filter: props.filter,

@@ -78,6 +78,9 @@ export class ChargeRegistrationsEndpoint extends Endpoint<Params, Query, Body, R
                             amount: body.amount ?? 1,
                             name: body.name,
                             description: body.description,
+                            VATPercentage: body.VATPercentage,
+                            VATIncluded: body.VATIncluded,
+                            VATExcempt: body.VATExcempt,
                             dueAt: body.dueAt,
                             createdAt: body.createdAt,
                         });

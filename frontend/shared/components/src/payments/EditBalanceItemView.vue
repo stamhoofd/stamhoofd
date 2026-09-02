@@ -65,12 +65,8 @@
                 <STInputBox error-fields="unitPrice" :error-box="errors.errorBox" :title="$t(`%6q`)">
                     <PriceInput v-model="unitPrice" :min="null" :placeholder="$t(`%1Mn`)" />
 
-                    <template v-if="organization?.meta.invoicesEnabled || !VATIncluded" #right>
-                        <button class="button text small" type="button" @click="VATIncluded = !VATIncluded">
-                            <span v-if="VATIncluded">{{ $t('%1Hs') }}</span>
-                            <span v-else>{{ $t('%1Ht') }}</span>
-                            <span class="icon arrow-swap small" />
-                        </button>
+                    <template #right>
+                        <VATIncludedToggle v-model="VATIncluded" :invoices-enabled="invoicesEnabled" />
                     </template>
 
                     <p v-if="patchedBalanceItem.status === BalanceItemStatus.Canceled && (patchedBalanceItem.unitPrice !== balanceItem.unitPrice || patchedBalanceItem.amount !== balanceItem.amount)" class="warning-box small">
@@ -99,65 +95,7 @@
             </div>
         </div>
 
-        <STInputBox v-if="organization?.meta.invoicesEnabled || VATPercentage !== null" error-fields="VATPercentage" :error-box="errors.errorBox" :title="$t('%1Hu')" class="max">
-            <template #right>
-                <button v-if="!VATExcempt" class="button text small" type="button" @click="toggleVATExcempt">
-                    <span>Verleggen</span>
-                    <span class="icon arrow-down-small small" />
-                </button>
-            </template>
-
-            <STList>
-                <STListItem :selectable="true" element-name="label">
-                    <template #left>
-                        <Radio v-model="VATPercentage" :value="null" autocomplete="off" name="VATPercentage" />
-                    </template>
-                    <h4 class="style-list-title">
-                        {{ $t('%1Hv') }}
-                        <span v-if="VATPercentage === null && VATExcempt" class="style-tag inline-first">{{ $t('%1Hw') }}</span>
-                    </h4>
-                </STListItem>
-
-                <STListItem :selectable="true" element-name="label">
-                    <template #left>
-                        <Radio v-model="VATPercentage" :value="21" autocomplete="off" name="VATPercentage" />
-                    </template>
-                    <h4 class="style-list-title">
-                        21%
-                        <span v-if="VATPercentage === 21 && VATExcempt" class="style-tag inline-first">{{ $t('%1Hw') }}</span>
-                    </h4>
-                </STListItem>
-
-                <STListItem :selectable="true" element-name="label">
-                    <template #left>
-                        <Radio v-model="VATPercentage" :value="12" autocomplete="off" name="VATPercentage" />
-                    </template>
-                    <h4 class="style-list-title">
-                        12%
-                        <span v-if="VATPercentage === 12 && VATExcempt" class="style-tag inline-first">{{ $t('%1Hw') }}</span>
-                    </h4>
-                </STListItem>
-
-                <STListItem :selectable="true" element-name="label">
-                    <template #left>
-                        <Radio v-model="VATPercentage" :value="6" autocomplete="off" name="VATPercentage" />
-                    </template>
-                    <h4 class="style-list-title">
-                        6%
-                        <span v-if="VATPercentage === 6 && VATExcempt" class="style-tag inline-first">{{ $t('%1Hw') }}</span>
-                    </h4>
-                </STListItem>
-            </STList>
-        </STInputBox>
-        <p v-if="VATExcempt" class="style-description-small">
-            <I18nComponent :t="$t('%1Hx', {reden: getVATExcemptReasonName(VATExcempt)})">
-                <template #button="{content}">
-                    <button class="inline-link" type="button" @click="toggleVATExcempt">
-                        {{ content }}
-                    </button>
-                </template>
-            </I18nComponent>
-        </p>
+        <VATPercentageInput v-model:percentage="VATPercentage" v-model:excempt="VATExcempt" :invoices-enabled="invoicesEnabled" :error-box="errors.errorBox" />
 
         <PriceBreakdownBox :price-breakdown="patchedBalanceItem.priceBreakown" />
 
@@ -250,17 +188,15 @@ import DateSelection from '#inputs/DateSelection.vue';
 import PriceInput from '#inputs/PriceInput.vue';
 import { useShowMember } from '#members/hooks/useShowMember.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
 import { Toast } from '#overlays/Toast.ts';
 import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { BalanceItemRelation, Invoice } from '@stamhoofd/structures';
-import { AccessRight, BalanceItem, BalanceItemRelationType, BalanceItemStatus, BalanceItemWithPayments, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName, getVATExcemptReasonName, InvoiceTypeHelper, LimitedFilteredRequest, PlatformFamily, SortItemDirection, UserWithMembers, VATExcemptReason } from '@stamhoofd/structures';
+import { AccessRight, BalanceItem, BalanceItemRelationType, BalanceItemStatus, BalanceItemWithPayments, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName, InvoiceTypeHelper, LimitedFilteredRequest, PlatformFamily, SortItemDirection, UserWithMembers } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref } from 'vue';
@@ -273,6 +209,8 @@ import { useLoadFamilyFromId } from '../members/hooks/useLoadFamily';
 import ActionButtonsBox from './components/ActionButtonsBox.vue';
 import type { ActionButton } from './components/ActionButtonsBox.vue';
 import PaymentRow from './components/PaymentRow.vue';
+import VATIncludedToggle from './components/VATIncludedToggle.vue';
+import VATPercentageInput from './components/VATPercentageInput.vue';
 
 const props = withDefaults(defineProps<{
     balanceItem: BalanceItemWithPayments | BalanceItem;
@@ -303,6 +241,7 @@ const show = useShow();
 const present = usePresent();
 const invoicesObjectFetcher = useInvoicesObjectFetcher();
 const invoices = ref([]) as Ref<Invoice[]>;
+const invoicesEnabled = computed(() => organization.value?.meta.invoicesEnabled ?? false);
 
 // Load mmeber on load
 loadMember().catch(console.error);
@@ -439,35 +378,6 @@ async function viewAudit() {
         ],
         modalDisplayStyle: 'popup',
     });
-}
-
-async function toggleVATExcempt(event: MouseEvent) {
-    const menu = new ContextMenu([
-        [
-            new ContextMenuItem({
-                name: $t('%1Hy'),
-                selected: VATExcempt.value === null,
-                action: () => {
-                    VATExcempt.value = null;
-                },
-            }),
-            new ContextMenuItem({
-                name: getVATExcemptReasonName(VATExcemptReason.IntraCommunityServices),
-                selected: VATExcempt.value === VATExcemptReason.IntraCommunityServices,
-                action: () => {
-                    VATExcempt.value = VATExcemptReason.IntraCommunityServices;
-                },
-            }),
-            new ContextMenuItem({
-                name: getVATExcemptReasonName(VATExcemptReason.IntraCommunityGoods),
-                selected: VATExcempt.value === VATExcemptReason.IntraCommunityGoods,
-                action: () => {
-                    VATExcempt.value = VATExcemptReason.IntraCommunityGoods;
-                },
-            }),
-        ],
-    ]);
-    await menu.show({ clickEvent: event });
 }
 
 onMounted(() => {
