@@ -147,7 +147,7 @@
                     </p>
 
                     <p class="style-description-small">
-                        {{ $t('%ZaY', {price: formatPrice(getRemainingAmount(candidate))}) }}
+                        {{ $t('%ZaY', {price: formatPrice(getRemainingRefundableAmount(candidate))}) }}
                     </p>
 
                     <template #right>
@@ -271,9 +271,10 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import type { BalanceItem, Organization, Payment, PrivatePayment } from '@stamhoofd/structures';
 import { BalanceItemRelationType, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, TransferSettings } from '@stamhoofd/structures';
-import { Formatter, STMath } from '@stamhoofd/utility';
+import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, ref } from 'vue';
 import PaymentCustomerSelectionBox from './components/PaymentCustomerSelectionBox.vue';
+import { exceedsRemainingRefundableAmount, getRemainingRefundableAmount } from './refundAmount';
 import SelectBalanceItemsList from './SelectBalanceItemsList.vue';
 
 const props = withDefaults(
@@ -561,14 +562,6 @@ const displayedCustomer = computed(() => {
 });
 
 /**
- * The amount that can still be refunded via this payment
- * (note: refundedAmount and pendingRefundAmount are negative)
- */
-function getRemainingAmount(payment: Payment) {
-    return payment.price + payment.refundedAmount + payment.pendingRefundAmount;
-}
-
-/**
  * Validate the online refund and ask for confirmation (creating a refund at the payment
  * provider cannot be undone). Returns false when the user cancelled.
  */
@@ -581,12 +574,12 @@ async function validateOnlineRefund(): Promise<boolean> {
         });
     }
 
-    if (-STMath.round(total.value) > getRemainingAmount(sourcePayment)) {
+    if (exceedsRemainingRefundableAmount(total.value, sourcePayment)) {
         throw new SimpleError({
             code: 'refund_amount_too_high',
             message: $t('%ZaH', {
                 amount: Formatter.price(-total.value),
-                remaining: Formatter.price(getRemainingAmount(sourcePayment)),
+                remaining: Formatter.price(getRemainingRefundableAmount(sourcePayment)),
             }),
         });
     }
