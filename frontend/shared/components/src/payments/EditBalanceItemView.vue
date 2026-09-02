@@ -335,7 +335,7 @@ const name = computed({
 
 const description = computed({
     get: () => patchedBalanceItem.value.description ?? '',
-    set: value => addPatch({ description: value.trim() ? value : null }),
+    set: value => addPatch({ description: value ? value : null }),
 });
 
 const unitPrice = computed({

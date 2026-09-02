@@ -16,7 +16,7 @@
                 <OrganizationSelect v-model="selectedOrganization" />
             </STInputBox>
 
-            <STInputBox :title="$t('%6o')" error-fields="description" :error-box="errors.errorBox">
+            <STInputBox :title="$t('%6o')" error-fields="name" :error-box="errors.errorBox">
                 <input v-model="description" class="input" type="text" :placeholder="$t('%6p')" autocomplete="given-name">
             </STInputBox>
         </div>
@@ -152,7 +152,7 @@ useValidation(errors.validator, () => {
         se.addError(new SimpleError({
             code: 'invalid_field',
             message: $t(`%Cr`),
-            field: 'description',
+            field: 'name',
         }));
     }
 
@@ -197,7 +197,7 @@ async function save() {
     try {
         const body = ChargeRequest.create({
             price: price.value,
-            description: description.value,
+            name: description.value,
             amount: amount.value,
             dueAt: dueAt.value,
             createdAt: createdAt.value,

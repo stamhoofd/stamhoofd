@@ -76,6 +76,7 @@ export class ChargeRegistrationsEndpoint extends Endpoint<Params, Query, Body, R
                             memberToCharge: registration.member,
                             price: body.price,
                             amount: body.amount ?? 1,
+                            name: body.name,
                             description: body.description,
                             dueAt: body.dueAt,
                             createdAt: body.createdAt,

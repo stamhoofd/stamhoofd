@@ -67,6 +67,7 @@ export class ChargeOrganizationsEndpoint extends Endpoint<Params, Query, Body, R
                     organizationsToCharge: data,
                     price: body.price,
                     amount: body.amount ?? 1,
+                    name: body.name,
                     description: body.description,
                     dueAt: body.dueAt,
                     createdAt: body.createdAt,

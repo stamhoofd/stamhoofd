@@ -3,8 +3,12 @@ import { StamhoofdFilterDecoder } from '../filters/FilteredRequest.js';
 import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 
 export class ChargeRequest extends AutoEncoder {
-    @field({ decoder: StringDecoder })
-    description: string;
+    @field({ decoder: StringDecoder, field: 'description' })
+    @field({ decoder: StringDecoder, field: 'name', ...NextVersion })
+    name: string;
+
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    description: string | null = null;
 
     @field({ decoder: NumberDecoder })
     price: number;

@@ -3,10 +3,11 @@ import type { Organization as OrganizationStruct } from '@stamhoofd/structures';
 import { BalanceItemType } from '@stamhoofd/structures';
 
 export class OrganizationCharger {
-    static async chargeMany({ chargingOrganizationId, organizationsToCharge, price, amount, description, dueAt, createdAt }: { chargingOrganizationId: string; organizationsToCharge: OrganizationStruct[]; price: number; amount?: number; description: string; dueAt: Date | null; createdAt: Date | null }) {
+    static async chargeMany({ chargingOrganizationId, organizationsToCharge, price, amount, name, description, dueAt, createdAt }: { chargingOrganizationId: string; organizationsToCharge: OrganizationStruct[]; price: number; amount?: number; name: string; description: string | null; dueAt: Date | null; createdAt: Date | null }) {
         const balanceItems = organizationsToCharge.map(organizationBeingCharged => OrganizationCharger.createBalanceItem({
             price,
             amount,
+            name,
             description,
             chargingOrganizationId,
             organizationBeingCharged,
@@ -17,11 +18,12 @@ export class OrganizationCharger {
         await Promise.all(balanceItems.map(balanceItem => balanceItem.save()));
     }
 
-    private static createBalanceItem({ price, amount, description, chargingOrganizationId, organizationBeingCharged, dueAt, createdAt }: { price: number; amount?: number; description: string; chargingOrganizationId: string; organizationBeingCharged: OrganizationStruct; dueAt: Date | null; createdAt: Date | null }): BalanceItem {
+    private static createBalanceItem({ price, amount, name, description, chargingOrganizationId, organizationBeingCharged, dueAt, createdAt }: { price: number; amount?: number; name: string; description: string | null; chargingOrganizationId: string; organizationBeingCharged: OrganizationStruct; dueAt: Date | null; createdAt: Date | null }): BalanceItem {
         const balanceItem = new BalanceItem();
         balanceItem.unitPrice = price;
         balanceItem.amount = amount ?? 1;
-        balanceItem.name = description;
+        balanceItem.name = name;
+        balanceItem.description = description;
         balanceItem.type = BalanceItemType.Other;
         balanceItem.payingOrganizationId = organizationBeingCharged.id;
         balanceItem.organizationId = chargingOrganizationId;
