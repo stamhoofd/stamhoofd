@@ -11,9 +11,18 @@
         <main>
             <h1>{{ cartItem.product.name }}</h1>
 
-            <figure v-if="imageSrc" class="image-box">
-                <div>
-                    <img :src="imageSrc" :width="image.width" :height="image.height">
+            <figure v-if="imagesSrc.length > 0" class="images-box">
+                <div
+                    v-for="src, index in imagesSrc"
+                    :key="index"
+                    class="image-box"
+                >
+                    <img
+
+                        :src="src"
+                        :width="images[index].width"
+                        :height="images[index].height"
+                    >
                 </div>
             </figure>
             <p v-if="cartItem.product.description" class="description" v-text="cartItem.product.description" />
@@ -441,6 +450,10 @@ const suffix = computed(() => {
 
 const image = computed(() => props.cartItem.product.images[0]?.getResolutionForSize(600, undefined));
 const imageSrc = computed(() => image.value?.file?.getPublicPath());
+
+const images = computed(() => props.cartItem.product.images.map(i => i.getResolutionForSize(600, undefined)));
+const imagesSrc = computed(() => images.value.map(i => i.file.getPublicPath()));
+
 const product = computed(() => props.cartItem.product);
 const remainingReduced = computed(() => {
     if (props.cartItem.productPrice.discountPrice === null) {
@@ -579,24 +592,39 @@ defineExpose({
        --st-horizontal-padding: 25px;
     }
 
-    .image-box {
+    .images-box {
         position: relative;
         overflow: hidden;
-        border-radius: $border-radius;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
 
-        > div {
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-        }
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        gap: 15px;
+        width: 100%;
 
-        img {
-            height: auto;
-            max-width: 100%;
+        .image-box {
+            min-width: 100%;
+            overflow: hidden;
             border-radius: $border-radius;
-            object-fit: cover;
+            scroll-snap-align: center;
+
+            > div {
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+            }
+
+            img {
+                height: auto;
+                max-width: 100%;
+                border-radius: $border-radius;
+                object-fit: cover;
+            }
         }
     }
+
     .image {
         width: 100%;
         border-radius: $border-radius;
