@@ -11,20 +11,48 @@
         <main>
             <h1>{{ cartItem.product.name }}</h1>
 
-            <figure v-if="imagesSrc.length > 0" class="images-box">
-                <div
-                    v-for="src, index in imagesSrc"
-                    :key="index"
-                    class="image-box"
-                >
-                    <img
-
-                        :src="src"
-                        :width="images[index].width"
-                        :height="images[index].height"
+            <div v-if="imagesSrc.length > 0" class="images-box">
+                <div ref="imagesContainer" class="images-box-images">
+                    <figure
+                        v-for="src, index in imagesSrc"
+                        :key="index"
+                        ref="imageBoxes"
+                        class="image-box"
                     >
+                        <img
+                            :src="src"
+                            :width="images[index].width"
+                            :height="images[index].height"
+                        >
+                    </figure>
                 </div>
-            </figure>
+                <div v-if="imagesSrc.length > 1" class="images-box-actions">
+                    <button
+                        type="button"
+                        :class="['button icon arrow-left', currentImage === 0 ? 'hide' : '']"
+                        @click="currentImage--"
+                    />
+
+                    <div class="thumbnails">
+                        <div
+                            v-for="_, index in imagesSrc"
+                            :key="index"
+                            :class="['thumbnail', currentImage === index ? 'active' : '']"
+                            @click="currentImage = index"
+                        >
+                            <img
+                                :src="imagesSrc[index]"
+                            >
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        :class="['button icon arrow-right', currentImage === imagesSrc.length - 1 ? 'hide' : '']"
+                        @click="currentImage++"
+                    />
+                </div>
+            </div>
             <p v-if="cartItem.product.description" class="description" v-text="cartItem.product.description" />
 
             <p v-if="oldItem && oldItem.cartError" class="error-box small">
@@ -450,6 +478,19 @@ const suffix = computed(() => {
 
 const images = computed(() => props.cartItem.product.images.map(i => i.getResolutionForSize(600, undefined)));
 const imagesSrc = computed(() => images.value.map(i => i.file.getPublicPath()));
+const currentImage = ref(0);
+const imagesContainer = ref<HTMLElement>();
+const imageBoxes = ref<HTMLElement[]>();
+
+watch(currentImage, () => {
+    if (imageBoxes.value && imagesContainer.value) {
+        const offset = imageBoxes.value[currentImage.value]?.offsetLeft ?? 0;
+        imagesContainer.value.scroll({
+            left: offset,
+            behavior: 'smooth',
+        });
+    }
+});
 
 const product = computed(() => props.cartItem.product);
 const remainingReduced = computed(() => {
@@ -590,36 +631,90 @@ defineExpose({
     }
 
     .images-box {
-        position: relative;
-        overflow: hidden;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-
-        display: flex;
-        align-items: center;
-        flex-direction: row;
-        gap: 15px;
-        width: 100%;
-
-        .image-box {
-            min-width: 100%;
+        .images-box-images {
+            position: relative;
             overflow: hidden;
-            border-radius: $border-radius;
-            scroll-snap-align: center;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
 
-            > div {
-                display: flex;
-                flex-direction: row;
-                justify-content: center;
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+            gap: 15px;
+            width: 100%;
+
+            &::-webkit-scrollbar {
+                display: none;
             }
 
-            img {
-                height: auto;
-                max-width: 100%;
+            .image-box {
+                min-width: 100%;
+                overflow: hidden;
                 border-radius: $border-radius;
-                object-fit: cover;
+                scroll-snap-align: center;
+
+                > div {
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: center;
+                }
+
+                img {
+                    height: auto;
+                    max-width: 100%;
+                    border-radius: $border-radius;
+                    object-fit: cover;
+                }
             }
         }
+
+        .images-box-actions {
+            margin-top: 15px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            .button {
+                transition: opacity .2s ease-out;
+
+                &.hide {
+                    opacity: 0;
+                    pointer-events: none;
+                }
+            }
+
+            .thumbnails {
+                display: flex;
+                gap: 5px;
+
+                .thumbnail {
+                    border-radius: $border-radius;
+                    border: 2px solid $color-border;
+                    width: 32px;
+                    height: 32px;
+                    cursor: pointer;
+
+                    transition: border-color .2s ease-out;
+
+                    &:hover {
+                        border-color: $color-border-shade-darker;
+                    }
+
+                    &.active {
+                        border-color: $color-primary;
+                    }
+
+                    img {
+                        object-fit: cover;
+                        width: 100%;
+                        height: 100%;
+                        border-radius: $border-radius;
+                    }
+                }
+            }
+        }
+
     }
 
     .image {
