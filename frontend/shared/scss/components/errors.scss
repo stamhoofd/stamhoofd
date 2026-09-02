@@ -148,12 +148,15 @@
     }
 
     @media (min-width: 401px){
+        &:has(> .button) {
+            gap: 15px;
+        }
+
         > .button {
             flex-shrink: 0;
             margin: -15px 0;
             padding: 0;
             justify-self: stretch;
-            margin-left: 15px;
             margin-left: auto;
         }
     }
