@@ -1647,6 +1647,10 @@
     "original": "Je kan {paymentMethod} niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Keeo instellingen > Betaalaccounts.",
     "translation": "You can't activate {paymentMethod} yet. First, you need to register with a payment provider through the Keeo settings > Payment accounts."
   },
+  "%Zqd": {
+    "original": "Keeo heeft extra toegang nodig tot jouw Mollie-account om de transactiekosten van uitbetalingen op te halen. Koppel Mollie opnieuw om dit in orde te brengen.",
+    "translation": "Keeo requires additional access to your Mollie account to retrieve the transaction fees for payouts. Please reconnect Mollie to resolve this."
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Keeo. Voor Microsoft kan je",
     "translation": "Ensure that users can log in via your own account system, separate from Keeo. For Microsoft you can"

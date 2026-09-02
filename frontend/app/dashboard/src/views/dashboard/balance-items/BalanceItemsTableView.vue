@@ -249,7 +249,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'name',
-        name: $t('Naam'),
+        name: $t('%1Os'),
         getValue: object => object.name,
         minimumWidth: 100,
         recommendedWidth: 300,

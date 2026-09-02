@@ -2,7 +2,7 @@
     <STInputBox v-if="invoicesEnabled || percentage !== null" error-fields="VATPercentage" :error-box="errorBox" :title="$t('%1Hu')" class="max">
         <template #right>
             <button v-if="!excempt" class="button text small" type="button" @click="toggleVATExcempt">
-                <span>{{ $t('Verleggen') }}</span>
+                <span>{{ $t('%ZqO') }}</span>
                 <span class="icon arrow-down-small small" />
             </button>
         </template>

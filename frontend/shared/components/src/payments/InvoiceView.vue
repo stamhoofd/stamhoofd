@@ -43,7 +43,7 @@
                     </dd>
                 </template>
                 <template v-if="invoice.comments">
-                    <dt>{{ $t('Opmerkingen') }}</dt>
+                    <dt>{{ $t('%YT') }}</dt>
                     <dd class="pre-wrap">
                         {{ invoice.comments }}
                     </dd>

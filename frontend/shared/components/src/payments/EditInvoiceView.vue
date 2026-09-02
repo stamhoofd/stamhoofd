@@ -60,7 +60,7 @@
             </p>
         </CategorizedBox>
 
-        <CategorizedBox v-if="isNew" icon="file" :title="$t('Type document')">
+        <CategorizedBox v-if="isNew" icon="file" :title="$t('%Kz')">
             <template #summary>
                 <p class="style-description-small">
                     {{ capitalizeFirstLetter(InvoiceTypeHelper.getName(patched.type)) }}
@@ -73,16 +73,16 @@
                         <Checkbox v-model="isReceipt" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Aankoopbewijs (geen factuur)') }}
+                        {{ $t('%ZqG') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Voor verkopen die niet gefactureerd worden, maar wel geboekt moeten worden. Kan niet aangemaakt worden voor een klant met een ondernemingsnummer of BTW-nummer.') }}
+                        {{ $t('%ZqQ') }}
                     </p>
                 </STListItem>
             </STList>
 
-            <STInputBox error-fields="comments" :error-box="errors.errorBox" :title="$t('Opmerkingen')" class="max">
-                <textarea v-model="comments" class="input" :placeholder="$t('Optioneel. Wordt afgedrukt op het document.')" />
+            <STInputBox error-fields="comments" :error-box="errors.errorBox" :title="$t('%YT')" class="max">
+                <textarea v-model="comments" class="input" :placeholder="$t('%ZqR')" />
             </STInputBox>
         </CategorizedBox>
 

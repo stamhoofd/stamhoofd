@@ -59,10 +59,10 @@ export function getPermissionLevelName(level: PermissionLevel, resourceType: Per
     }
     if (resourceType === 'base') {
         switch (level) {
-            case PermissionLevel.None: return $t('Geen');
-            case PermissionLevel.Read: return $t('Alles lezen');
-            case PermissionLevel.Write: return $t('Alles lezen en bewerken');
-            case PermissionLevel.Full: return $t('Volledige toegang');
+            case PermissionLevel.None: return $t('%1FW');
+            case PermissionLevel.Read: return $t('%1eW');
+            case PermissionLevel.Write: return $t('%1eL');
+            case PermissionLevel.Full: return $t('%Z1');
         }
     }
     switch (level) {

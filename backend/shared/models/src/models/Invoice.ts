@@ -169,6 +169,6 @@ export class Invoice extends QueryableModel {
             return this.id + '.' + ext;
         }
         const date = this.invoicedAt;
-        return Formatter.dateIso(date) + ' - ' + (this.isReceipt ? (this.totalWithVAT < 0 ? $t('Terugbetalingsbewijs') : $t('Aankoopbewijs')) : (this.totalWithVAT < 0 ? $t('%1aE') : $t('%1Zw'))) + ' ' + this.number + ' - ' + Formatter.fileSlug(this.seller.name) + '.' + ext;
+        return Formatter.dateIso(date) + ' - ' + (this.isReceipt ? (this.totalWithVAT < 0 ? $t('%ZqP') : $t('%ZqH')) : (this.totalWithVAT < 0 ? $t('%1aE') : $t('%1Zw'))) + ' ' + this.number + ' - ' + Formatter.fileSlug(this.seller.name) + '.' + ext;
     }
 }

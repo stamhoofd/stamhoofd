@@ -338,7 +338,7 @@ export class InvoiceService {
         const error = new SimpleError({
             code: 'receipt_not_allowed',
             message: 'Receipts cannot be created for a customer with a company number or VAT number',
-            human: $t('Een aankoopbewijs kan niet aangemaakt worden voor een klant met een ondernemingsnummer of BTW-nummer. Maak in dat geval een factuur aan.'),
+            human: $t('%ZqE'),
             field: 'customer',
         });
 

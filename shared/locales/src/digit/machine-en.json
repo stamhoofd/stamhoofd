@@ -1387,6 +1387,10 @@
     "original": "Markeer manueel aanrekeningen als betaald in plaats van via ‘Mijn account’.",
     "translation": "Manually mark invoices as paid instead of through 'My account'."
   },
+  "%Zqd": {
+    "original": "Ravot heeft extra toegang nodig tot jouw Mollie-account om de transactiekosten van uitbetalingen op te halen. Koppel Mollie opnieuw om dit in orde te brengen.",
+    "translation": "Ravot requires additional access to your Mollie account to retrieve the transaction fees for payouts. Please reconnect Mollie to fix this."
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Ravot. Voor Microsoft kan je",
     "translation": "Make sure users can log in via your own account system, separate from Ravot. For Microsoft you can"

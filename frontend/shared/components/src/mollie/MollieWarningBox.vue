@@ -1,9 +1,9 @@
 <template>
     <p v-if="missingScopes.length > 0" class="warning-box with-button selectable" @click="emit('reconnect')">
-        {{ $t('Stamhoofd heeft extra toegang nodig tot jouw Mollie-account om de transactiekosten van uitbetalingen op te halen. Koppel Mollie opnieuw om dit in orde te brengen.') }}
+        {{ $t('%Zqd') }}
 
         <button class="button text" type="button">
-            {{ $t('Opnieuw koppelen') }}
+            {{ $t('%ZqJ') }}
         </button>
     </p>
 </template>

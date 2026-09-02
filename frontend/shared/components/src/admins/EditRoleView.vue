@@ -2,7 +2,7 @@
     <CategorizedView :title="title" :loading="saving" :deleting="deleting" :disabled="!hasChanges" @save="save" v-on="canDelete ? {delete: doDelete} : {}">
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <CategorizedBox v-if="!isForResponsibility" icon="settings" :title="$t('Algemeen')">
+        <CategorizedBox v-if="!isForResponsibility" icon="settings" :title="$t('%Lb')">
             <template #summary>
                 <p class="style-description-small">
                     {{ name }}

@@ -1555,6 +1555,10 @@
     "original": "Markeer manueel aanrekeningen als betaald in plaats van via ‘Mijn account’.",
     "translation": "Marquez manuellement les factures comme payées au lieu de passer par « Mon compte »."
   },
+  "%Zqd": {
+    "original": "Ravot heeft extra toegang nodig tot jouw Mollie-account om de transactiekosten van uitbetalingen op te halen. Koppel Mollie opnieuw om dit in orde te brengen.",
+    "translation": "Ravot a besoin d'un accès supplémentaire à votre compte Mollie pour récupérer les frais de transaction sur les paiements. Reconnectez Mollie afin de régler cela."
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Ravot. Voor Microsoft kan je",
     "translation": "Assurez-vous que les utilisateurs peuvent se connecter via votre propre système de compte, séparément de Ravot. Pour Microsoft, vous pouvez"

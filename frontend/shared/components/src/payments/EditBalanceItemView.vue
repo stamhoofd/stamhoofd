@@ -17,7 +17,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox v-if="balanceItem.relations.size === 0 && !balanceItem.startDate" error-fields="name" :error-box="errors.errorBox" :title="$t('Naam')" class="max">
+        <STInputBox v-if="balanceItem.relations.size === 0 && !balanceItem.startDate" error-fields="name" :error-box="errors.errorBox" :title="$t('%1Os')" class="max">
             <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :disabled="!!balanceItem.relations.size" :placeholder="$t(`%gp`)">
         </STInputBox>
         <STList v-else>
@@ -56,8 +56,8 @@
             </STListItem>
         </STList>
 
-        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t('Beschrijving')" class="max">
-            <textarea v-model="description" class="input" :placeholder="$t('Optioneel')" />
+        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t('%6o')" class="max">
+            <textarea v-model="description" class="input" :placeholder="$t('%14p')" />
         </STInputBox>
 
         <div class="split-inputs">
@@ -408,7 +408,7 @@ async function save() {
                 code: 'invalid_field',
                 field: 'name',
                 message: 'name cannot be empty',
-                human: $t('Vul een naam in'),
+                human: $t('%11M'),
             });
         }
         if (patchedBalanceItem.value.unitPrice === 0) {

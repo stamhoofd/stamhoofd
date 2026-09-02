@@ -1655,6 +1655,10 @@
     "original": "Je kan {paymentMethod} niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Keeo instellingen > Betaalaccounts.",
     "translation": "Vous ne pouvez pas activer {paymentMethod} tant que vous n’avez pas créé un lien avec un prestataire de paiement via les paramètres Keeo > Comptes de paiement."
   },
+  "%Zqd": {
+    "original": "Keeo heeft extra toegang nodig tot jouw Mollie-account om de transactiekosten van uitbetalingen op te halen. Koppel Mollie opnieuw om dit in orde te brengen.",
+    "translation": "Keeo a besoin d'un accès supplémentaire à votre compte Mollie pour récupérer les frais de transaction sur les paiements. Reconnectez Mollie afin de régler cela."
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Keeo. Voor Microsoft kan je",
     "translation": "Assurez-vous que les utilisateurs puissent se connecter via votre propre système de compte, séparément de Keeo. Pour Microsoft, vous pouvez"

@@ -16,13 +16,13 @@
                 <OrganizationSelect v-model="selectedOrganization" />
             </STInputBox>
 
-            <STInputBox :title="$t('Naam')" error-fields="name" :error-box="errors.errorBox">
-                <input v-model="name" class="input" type="text" :placeholder="$t('Naam van de aanrekening')" autocomplete="off">
+            <STInputBox :title="$t('%1Os')" error-fields="name" :error-box="errors.errorBox">
+                <input v-model="name" class="input" type="text" :placeholder="$t('%ZqX')" autocomplete="off">
             </STInputBox>
         </div>
 
-        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t('Beschrijving')" class="max">
-            <textarea v-model="description" class="input" :placeholder="$t('Optioneel')" />
+        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t('%6o')" class="max">
+            <textarea v-model="description" class="input" :placeholder="$t('%14p')" />
         </STInputBox>
 
         <div class="split-inputs">

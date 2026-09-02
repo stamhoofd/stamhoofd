@@ -4375,10 +4375,6 @@
     "original": "Niet verlegd",
     "translation": "Non autoliquidé"
   },
-  "%1Hz": {
-    "original": "Vul een beschrijving in",
-    "translation": "Veuillez saisir une description"
-  },
   "%1I0": {
     "original": "De eenheidsprijs kan niet 0 euro zijn",
     "translation": "Le prix unitaire ne peut pas être de 0 euro"
@@ -7515,10 +7511,6 @@
     "original": "transactiekosten",
     "translation": "frais de transaction"
   },
-  "%1Wd": {
-    "original": "Servicekosten ingehouden via Stripe tussen {startDate} en {endDate}",
-    "translation": "Frais de service prélevés via Stripe entre {startDate} et {endDate}"
-  },
   "%1We": {
     "original": "Zorg dat bestellers via iDEAL of creditcard kunnen betalen.",
     "translation": "Permettez aux acheteurs de payer via iDEAL ou carte de crédit."
@@ -7778,10 +7770,6 @@
   "%1Xw": {
     "original": "Geen toegang om facturen te schrijven aan deze organisatie",
     "translation": "Aucun accès pour générer des factures pour cette organisation"
-  },
-  "%1Xx": {
-    "original": "Transactiekosten ingehouden via Stripe tussen {startDate} en {endDate}",
-    "translation": "Frais de transaction retenus via Stripe entre {startDate} et {endDate}"
   },
   "%1Xy": {
     "original": "Verschillend",
@@ -10162,10 +10150,6 @@
   "%6o": {
     "original": "Beschrijving",
     "translation": "Description"
-  },
-  "%6p": {
-    "original": "Beschrijving van de aanrekening",
-    "translation": "Description de la facturation"
   },
   "%6q": {
     "original": "Eenheidsprijs",
@@ -16943,14 +16927,6 @@
     "original": "Standaard heeft elke beheerder die een lid kan bekijken of bewerken, toegang tot de algemene informatie van dat lid (naam, geboortedatum, gender, adres, ouders, noodcontactpersonen). Je kan bepaalde beheerders ook toegang geven tot meer gegevens hieronder.",
     "translation": "Par défaut, chaque administrateur qui peut voir ou modifier un membre a accès aux informations générales de ce membre (nom, date de naissance, sexe, adresse, parents, contacts d'urgence). Vous pouvez également donner à certains administrateurs l'accès à plus de données ci-dessous."
   },
-  "%ZB": {
-    "original": "Verwijder gekoppelde rechten",
-    "translation": "Supprimer les droits associés"
-  },
-  "%ZC": {
-    "original": "Verwijder deze rol",
-    "translation": "Supprimer ce rôle"
-  },
   "%ZD": {
     "original": "Beheerders met deze rol",
     "translation": "Administrateurs ayant ce rôle"
@@ -20294,6 +20270,62 @@
   "%ZqD": {
     "original": "Fiscale attesten",
     "translation": "Attestations fiscales"
+  },
+  "%ZqE": {
+    "original": "Een aankoopbewijs kan niet aangemaakt worden voor een klant met een ondernemingsnummer of BTW-nummer. Maak in dat geval een factuur aan.",
+    "translation": "Un reçu d'achat ne peut pas être créé pour un client possédant un numéro d’entreprise ou un numéro de TVA. Dans ce cas, veuillez établir une facture."
+  },
+  "%ZqF": {
+    "original": "aankoopbewijs",
+    "translation": "reçu d'achat"
+  },
+  "%ZqG": {
+    "original": "Aankoopbewijs (geen factuur)",
+    "translation": "Reçu d'achat (pas une facture)"
+  },
+  "%ZqH": {
+    "original": "Aankoopbewijs",
+    "translation": "Reçu d'achat"
+  },
+  "%ZqJ": {
+    "original": "Opnieuw koppelen",
+    "translation": "Reconnecter"
+  },
+  "%ZqK": {
+    "original": "Factuur of creditnota",
+    "translation": "Facture ou note de crédit"
+  },
+  "%ZqO": {
+    "original": "Verleggen",
+    "translation": "Transférer"
+  },
+  "%ZqP": {
+    "original": "Terugbetalingsbewijs",
+    "translation": "Justificatif de remboursement"
+  },
+  "%ZqQ": {
+    "original": "Voor verkopen die niet gefactureerd worden, maar wel geboekt moeten worden. Kan niet aangemaakt worden voor een klant met een ondernemingsnummer of BTW-nummer.",
+    "translation": "Pour les ventes qui ne sont pas facturées mais qui doivent être comptabilisées. Ne peut pas être créé pour un client avec un numéro d'entreprise ou un numéro de TVA."
+  },
+  "%ZqR": {
+    "original": "Optioneel. Wordt afgedrukt op het document.",
+    "translation": "Optionnel. Sera imprimé sur le document."
+  },
+  "%ZqS": {
+    "original": "terugbetalingsbewijs",
+    "translation": "justificatif de remboursement"
+  },
+  "%ZqV": {
+    "original": "Ingehouden via Stripe op {date} (UTC)",
+    "translation": "Retenu via Stripe le {date} (UTC)"
+  },
+  "%ZqX": {
+    "original": "Naam van de aanrekening",
+    "translation": "Nom de la charge"
+  },
+  "%Zqd": {
+    "original": "Stamhoofd heeft extra toegang nodig tot jouw Mollie-account om de transactiekosten van uitbetalingen op te halen. Koppel Mollie opnieuw om dit in orde te brengen.",
+    "translation": "Stamhoofd a besoin d'un accès supplémentaire à votre compte Mollie pour récupérer les frais de transaction sur les paiements. Reconnectez Mollie afin de régler cela."
   },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Stamhoofd. Voor Microsoft kan je",

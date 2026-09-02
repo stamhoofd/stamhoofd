@@ -62,7 +62,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
         },
         {
             id: 'name',
-            name: $t('Naam'),
+            name: $t('%1Os'),
             width: 40,
             getValue: (object: BalanceItemWithPayments) => ({
                 value: object.name,

@@ -67,7 +67,7 @@ export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>, $feat
 
                     new SelectableColumn({
                         id: 'name',
-                        name: $t('Naam'),
+                        name: $t('%1Os'),
                     }),
 
                     ...Object.values(BalanceItemRelationType).map(relationType => new SelectableColumn({

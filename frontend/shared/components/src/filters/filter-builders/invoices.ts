@@ -14,10 +14,10 @@ export function getInvoicesUIFilterBuilders() {
             key: 'number',
         }),
         simpleBooleanFilterFactory({
-            name: $t('Type'),
+            name: $t('%1LP'),
             optionNames: {
-                true: $t('Aankoopbewijs'),
-                false: $t('Factuur of creditnota'),
+                true: $t('%ZqH'),
+                false: $t('%ZqK'),
             },
             filterIfTrue: { isReceipt: true },
         }),

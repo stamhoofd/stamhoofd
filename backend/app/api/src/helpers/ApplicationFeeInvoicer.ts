@@ -335,9 +335,9 @@ export class ApplicationFeeInvoicer {
         item.type = type === ApplicationFeeType.Service ? BalanceItemType.ServiceFee : BalanceItemType.TransferFee;
         const date = Formatter.date(periodStart, true, { timezone: 'UTC' });
         item.name = type === ApplicationFeeType.Service
-            ? $t('Servicekosten op {date}', { date })
-            : $t('Transactiekosten op {date}', { date });
-        item.description = $t('Ingehouden via Stripe op {date} (UTC)', { date });
+            ? $t('%1cJ', { date })
+            : $t('%1Yq', { date });
+        item.description = $t('%ZqV', { date });
         item.relations.set(BalanceItemRelationType.PaymentProvider, BalanceItemRelation.create({
             id: PaymentProvider.Stripe,
             name: TranslatedString.create(getPaymentProviderName(PaymentProvider.Stripe)),

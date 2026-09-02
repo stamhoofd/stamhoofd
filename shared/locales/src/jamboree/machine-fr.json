@@ -1663,6 +1663,10 @@
     "original": "Je kan {paymentMethod} niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Jamboree instellingen > Betaalaccounts.",
     "translation": "Vous ne pouvez pas activer {paymentMethod} tant que vous n’avez pas créé un lien avec un prestataire de paiement via les paramètres Jamboree > Comptes de paiement."
   },
+  "%Zqd": {
+    "original": "Jamboree heeft extra toegang nodig tot jouw Mollie-account om de transactiekosten van uitbetalingen op te halen. Koppel Mollie opnieuw om dit in orde te brengen.",
+    "translation": "Jamboree a besoin d'un accès supplémentaire à votre compte Mollie pour pouvoir récupérer les frais de transaction sur les paiements. Reconnectez Mollie pour régler cela."
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Jamboree. Voor Microsoft kan je",
     "translation": "Assurez-vous que les utilisateurs peuvent se connecter via votre propre système de compte, séparément de Jamboree. Pour Microsoft, vous pouvez"

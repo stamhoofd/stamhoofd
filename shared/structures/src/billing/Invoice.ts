@@ -53,8 +53,8 @@ export class InvoiceTypeHelper {
         switch (type) {
             case InvoiceType.Invoice: return $t('%1KG');
             case InvoiceType.CreditNote: return $t('%1KH');
-            case InvoiceType.Receipt: return $t('aankoopbewijs');
-            case InvoiceType.RefundReceipt: return $t('terugbetalingsbewijs');
+            case InvoiceType.Receipt: return $t('%ZqF');
+            case InvoiceType.RefundReceipt: return $t('%ZqS');
         }
     }
 }
