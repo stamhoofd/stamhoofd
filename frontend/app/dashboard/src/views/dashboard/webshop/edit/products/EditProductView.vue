@@ -877,21 +877,6 @@ const images = computed<Image[]>({
     },
 });
 
-const editImage = (index: number) => computed({
-    get: () => patchedProduct.value.images[index] ?? null,
-    set: (image: Image | null) => {
-        if (image) {
-            const p = Product.patch({});
-
-            const originalImage = patchedProduct.value.images[index];
-            if (originalImage) {
-                p.images.addDelete(originalImage.id);
-                p.images.addPut(image);
-            }
-        }
-    },
-});
-
 const newImage = computed({
     get: () => null,
     set: (image: Image | null) => {
@@ -907,30 +892,6 @@ const newImage = computed({
 const getImageSrc = (image: Image) => {
     return image.getPathForSize(140, undefined);
 };
-
-// const image = computed<Image | null>({
-//     get: () => patchedProduct.value.images[0] ?? null,
-//     set: (image: Image | null) => {
-//         const p = Product.patch({ });
-
-//         for (const i of patchedProduct.value.images) {
-//             p.images.addDelete(i.id);
-//         }
-
-//         if (image) {
-//             p.images.addPut(image);
-//         }
-
-//         addProductPatch(p);
-//     },
-// });
-
-// const imageSrc = computed(() => {
-//     if (!image.value) {
-//         return null;
-//     }
-//     return image.value.getPathForSize(140, undefined);
-// });
 
 function addOptionMenu() {
     const optionMenu = OptionMenu.create({
