@@ -100,10 +100,6 @@ export class SettlementService {
         });
     }
 
-    /**
-     * Month bucket of a charge, in server-local time: the same boundaries as
-     * getMonthUnixStartEnd, which drive the monthly invoice grouping.
-     */
     static getPeriodStart(date: Date): Date {
         return new Date(date.getFullYear(), date.getMonth(), 1);
     }
@@ -326,8 +322,8 @@ export class SettlementService {
             .where('payingStripeAccountId', '!=', null)
             .sum(SQL.column('amount')) ?? 0;
 
-        // The negation of what the invoicer bills (ApplicationFeeInvoicer#selectBillableFees), so
-        // every uninvoiced fee sits in exactly one of the two sums
+        // Fees without a payer: billed later without one. Every uninvoiced fee sits in exactly
+        // one of the two sums
         const uncollectibleFees = await ApplicationFee.select()
             .where('settlementId', settlement.id)
             .where('balanceItemId', null)

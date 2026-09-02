@@ -372,6 +372,20 @@ export type BalanceItemVATSubtotal = {
     VAT: number;
 };
 
+/**
+ * Fee days are cut in the display timezone (Mollie) or in UTC (Stripe): formatted date when the
+ * period is one day in either, null otherwise.
+ */
+function getFeeDay(startDate: Date, endDate: Date): string | null {
+    if (Formatter.dateIso(startDate) === Formatter.dateIso(endDate)) {
+        return Formatter.date(startDate, true);
+    }
+    if (startDate.toISOString().slice(0, 10) === endDate.toISOString().slice(0, 10)) {
+        return Formatter.date(startDate, true, { timezone: 'UTC' });
+    }
+    return null;
+}
+
 export class BalanceItem extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
@@ -1090,8 +1104,20 @@ export class BalanceItem extends AutoEncoder {
                 const pack = this.relations.get(BalanceItemRelationType.STPackage);
                 return pack?.name.toString() || getBalanceItemTypeName(BalanceItemType.STPackage);
             }
-            case BalanceItemType.ServiceFee: return this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`%1Z1`, { startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true) }) : $t(`%1cJ`, { date: Formatter.date(this.startDate, true) })) : $t('%1UX');
-            case BalanceItemType.TransferFee: return this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`%1bd`, { startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true) }) : $t(`%1Yq`, { date: Formatter.date(this.startDate, true) })) : $t('%wZ');
+            case BalanceItemType.ServiceFee: {
+                if (!this.startDate || !this.endDate) {
+                    return $t('%1UX');
+                }
+                const day = getFeeDay(this.startDate, this.endDate);
+                return day ? $t(`%1cJ`, { date: day }) : $t(`%1Z1`, { startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true) });
+            }
+            case BalanceItemType.TransferFee: {
+                if (!this.startDate || !this.endDate) {
+                    return $t('%wZ');
+                }
+                const day = getFeeDay(this.startDate, this.endDate);
+                return day ? $t(`%1Yq`, { date: day }) : $t(`%1bd`, { startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true) });
+            }
         }
         return this.name;
     }

@@ -1,6 +1,5 @@
-import { EmailMocker } from '@stamhoofd/email';
-import type { StripeAccount } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemPayment, Organization, OrganizationFactory, Payment } from '@stamhoofd/models';
+import type { StripeAccount, Organization } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, OrganizationFactory, Payment } from '@stamhoofd/models';
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
 import type { Settlement } from '@stamhoofd/models/models/Settlement.js';
@@ -13,19 +12,17 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { StripeMocker } from '../../tests/helpers/StripeMocker.js';
 import { initMembershipOrganization } from '../../tests/init/initMembershipOrganization.js';
-import { ApplicationFeeService, LEGACY_FEE_PAYMENT_REFERENCE_PREFIX } from '../services/ApplicationFeeService.js';
+import { ApplicationFeeService } from '../services/ApplicationFeeService.js';
 import { SettlementService } from '../services/SettlementService.js';
 import { ApplicationFeeInvoicer } from './ApplicationFeeInvoicer.js';
-import { WebmasterReport } from './WebmasterReport.js';
 
 describe('ApplicationFeeInvoicer', () => {
     const stripeMocker = new StripeMocker();
     let membershipOrganization: Organization;
 
-    // A month in the past that no other test writes fee rows in
-    const month = new Date(2024, 6, 1);
-    const occurredAt = new Date(2024, 6, 10);
-    const reference = 'application-fees-2024-07-01';
+    const day = new Date(Date.UTC(2024, 6, 10));
+    const occurredAt = new Date(Date.UTC(2024, 6, 10, 12));
+    const reference = 'application-fees-2024-07-10';
 
     const belgianAddress = () => Address.create({
         street: 'Teststraat',
@@ -58,10 +55,12 @@ describe('ApplicationFeeInvoicer', () => {
         stripeMocker.clear();
         ApplicationFeeService.resetWarnings();
 
-        // The test database persists across runs: leftover fees of this month would be billed again
+        // The test database persists across runs: leftover fees would be billed again
         await ApplicationFee.delete()
-            .where('occurredAt', '>=', month)
-            .where('occurredAt', '<', new Date(2024, 7, 1));
+            .where('occurredAt', '>=', new Date(Date.UTC(2024, 6, 1)))
+            .where('occurredAt', '<', new Date(Date.UTC(2024, 7, 1)));
+        await ApplicationFee.delete()
+            .where('payingStripeAccountId', null);
     });
 
     const init = async () => {
@@ -105,30 +104,27 @@ describe('ApplicationFeeInvoicer', () => {
         });
     };
 
-    const getFeePayments = async (organization: Organization) => {
+    const getFeePayments = async (organization: Organization, paymentReference = reference) => {
         return await Payment.select()
             .where('payingOrganizationId', organization.id)
-            .where('reference', reference)
+            .where('reference', paymentReference)
             .where('method', PaymentMethod.AccountDeductions)
             .fetch();
     };
 
     const createInvoicer = () => new ApplicationFeeInvoicer({ secretKey: STAMHOOFD.STRIPE_SECRET_KEY! });
+    const startOfUtcDay = (date: Date) => new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 
-    /**
-     * Bills the month as if the run started a second from now: fees stored in the current second
-     * are deliberately left for the next run, and a test stores them right before billing.
-     */
-    const invoiceMonth = async () => {
-        await createInvoicer().generateInvoicesForMonth(membershipOrganization, month, new Date(Date.now() + 1000));
+    const invoiceDay = async (when = day) => {
+        await createInvoicer().generateInvoicesForDay(membershipOrganization, when);
     };
 
-    test('a month is billed per paying account, and every fee carries its balance item', async () => {
+    test('a day is billed per paying account, and every fee carries its balance item', async () => {
         const { organization, stripeAccount } = await init();
         const serviceFee = await createFee(organization, stripeAccount, { type: ApplicationFeeType.Service, amount: 30_00 });
         const transferFee = await createFee(organization, stripeAccount, { type: ApplicationFeeType.Transfer, amount: 2_20_00 });
 
-        await invoiceMonth();
+        await invoiceDay();
 
         const payments = await getFeePayments(organization);
         expect(payments).toHaveLength(1);
@@ -149,6 +145,11 @@ describe('ApplicationFeeInvoicer', () => {
         expect(transferItem.unitPrice).toBe(2_20_00);
         expect(serviceItem.organizationId).toBe(membershipOrganization.id);
         expect(serviceItem.payingOrganizationId).toBe(organization.id);
+        expect(serviceItem.startDate).toEqual(new Date(Date.UTC(2024, 6, 10)));
+        expect(serviceItem.endDate).toEqual(new Date(Date.UTC(2024, 6, 10, 23, 59, 59)));
+        expect(serviceItem.name).toBe('Servicekosten op 10 juli 2024');
+        expect(serviceItem.description).toBe('Ingehouden via Stripe op 10 juli 2024 (UTC)');
+        expect(transferItem.name).toBe('Transactiekosten op 10 juli 2024');
 
         expect((await ApplicationFee.getByID(serviceFee.id))!.balanceItemId).toBe(serviceItem.id);
         expect((await ApplicationFee.getByID(transferFee.id))!.balanceItemId).toBe(transferItem.id);
@@ -161,7 +162,7 @@ describe('ApplicationFeeInvoicer', () => {
         await createFee(organization, stripeAccount, { amount: 30_00 });
         await createFee(organization, second, { amount: 40_00 });
 
-        await invoiceMonth();
+        await invoiceDay();
 
         const payments = await getFeePayments(organization);
         expect(payments).toHaveLength(2);
@@ -169,24 +170,66 @@ describe('ApplicationFeeInvoicer', () => {
         expect(payments.map(p => p.stripeAccountId).sort()).toEqual([stripeAccount.id, second.id].sort());
     });
 
+    test('days are cut at UTC midnight, one payment per day', async () => {
+        const { organization, stripeAccount } = await init();
+        const lastOfDay = await createFee(organization, stripeAccount, { amount: 30_00, when: new Date(Date.UTC(2024, 6, 10, 23, 59, 59)) });
+        const firstOfNextDay = await createFee(organization, stripeAccount, { amount: 5_00, when: new Date(Date.UTC(2024, 6, 11, 0, 0, 0)) });
+
+        await invoiceDay(new Date(Date.UTC(2024, 6, 10)));
+        await invoiceDay(new Date(Date.UTC(2024, 6, 11)));
+
+        const payments = await getFeePayments(organization);
+        expect(payments).toHaveLength(1);
+        expect(payments[0].price).toBe(30_00);
+
+        const nextDayPayments = await getFeePayments(organization, 'application-fees-2024-07-11');
+        expect(nextDayPayments).toHaveLength(1);
+        expect(nextDayPayments[0].price).toBe(5_00);
+
+        expect((await ApplicationFee.getByID(lastOfDay.id))!.balanceItemId).not.toBe((await ApplicationFee.getByID(firstOfNextDay.id))!.balanceItemId);
+    });
+
+    test('generateInvoices bills every past day separately', async () => {
+        const { organization, stripeAccount } = await init();
+
+        vitest.useFakeTimers({ shouldAdvanceTime: true, toFake: ['Date'] }).setSystemTime(new Date(Date.UTC(2024, 6, 20, 12)));
+        try {
+            await createFee(organization, stripeAccount, { amount: 30_00, when: new Date(Date.UTC(2024, 6, 10, 12)) });
+            await createFee(organization, stripeAccount, { amount: 5_00, when: new Date(Date.UTC(2024, 6, 12, 12)) });
+
+            await createInvoicer().generateInvoices(membershipOrganization);
+        } finally {
+            vitest.useRealTimers();
+        }
+
+        const payments = await Payment.select()
+            .where('payingOrganizationId', organization.id)
+            .where('method', PaymentMethod.AccountDeductions)
+            .fetch();
+        expect(payments.map(p => [p.reference, p.price]).sort()).toEqual([
+            ['application-fees-2024-07-10', 30_00],
+            ['application-fees-2024-07-12', 5_00],
+        ]);
+    });
+
     test('re-running bills nothing more', async () => {
         const { organization, stripeAccount } = await init();
         await createFee(organization, stripeAccount);
 
-        await invoiceMonth();
-        await invoiceMonth();
+        await invoiceDay();
+        await invoiceDay();
 
         expect(await getFeePayments(organization)).toHaveLength(1);
     });
 
-    test('a fee that arrives after its month was billed lands in an extra payment', async () => {
+    test('a fee that arrives after its day was billed lands in an extra payment', async () => {
         const { organization, stripeAccount } = await init();
         await createFee(organization, stripeAccount, { amount: 30_00 });
 
-        await invoiceMonth();
+        await invoiceDay();
 
         const late = await createFee(organization, stripeAccount, { amount: 5_00 });
-        await invoiceMonth();
+        await invoiceDay();
 
         const payments = await getFeePayments(organization);
         expect(payments).toHaveLength(2);
@@ -194,12 +237,11 @@ describe('ApplicationFeeInvoicer', () => {
         expect((await ApplicationFee.getByID(late.id))!.balanceItemId).not.toBeNull();
     });
 
-    test('a fee the month\'s Stripe sync stores is billed in the same run', async () => {
+    test('a fee the day\'s Stripe sync stores is billed in the same run', async () => {
         const { organization, stripeAccount } = await init();
 
-        // Only months inside the invoicing window are walked at Stripe
         const now = new Date();
-        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 10);
+        const lastMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 10, 12));
         const stored = await createFee(organization, stripeAccount, { amount: 30_00, when: lastMonth });
 
         const payment = new Payment();
@@ -241,11 +283,11 @@ describe('ApplicationFeeInvoicer', () => {
             stripeAccountId: null,
             organizationId: membershipOrganization.id,
             amount: 30_00,
-            settledAt: new Date(2024, 6, 20),
+            settledAt: new Date(Date.UTC(2024, 6, 20)),
         });
         await createFee(organization, stripeAccount, { amount: 30_00, settlement: payout });
 
-        await invoiceMonth();
+        await invoiceDay();
 
         const payment = (await getFeePayments(organization))[0];
         const lines = await PaymentSettlement.select().where('paymentId', payment.id).fetch();
@@ -256,36 +298,10 @@ describe('ApplicationFeeInvoicer', () => {
         expect(lines.reduce((total, line) => total + line.amount, 0)).toBe(payment.price);
     });
 
-    test('a month the legacy invoicer billed is never billed again', async () => {
-        const { organization, stripeAccount } = await init();
-
-        // A legacy payment without balance items: the inline linking can't reach it, so the fee
-        // stays uninvoiced and the invoicer may not bill it either
-        const legacy = new Payment();
-        legacy.organizationId = membershipOrganization.id;
-        legacy.payingOrganizationId = organization.id;
-        legacy.stripeAccountId = stripeAccount.id;
-        legacy.method = PaymentMethod.AccountDeductions;
-        legacy.provider = PaymentProvider.Stripe;
-        legacy.status = PaymentStatus.Succeeded;
-        legacy.reference = LEGACY_FEE_PAYMENT_REFERENCE_PREFIX + '2024-07-01';
-        legacy.price = 30_00;
-        legacy.paidAt = occurredAt;
-        await legacy.save();
-
-        const fee = await createFee(organization, stripeAccount, { amount: 30_00 });
-        expect(fee.balanceItemId).toBeNull();
-
-        await invoiceMonth();
-
-        expect(await getFeePayments(organization)).toHaveLength(0);
-        expect((await ApplicationFee.getByID(fee.id))!.balanceItemId).toBeNull();
-    });
-
-    test('fees of the current month are not billed yet', async () => {
+    test('fees of the current UTC day are not billed yet', async () => {
         const { organization, stripeAccount } = await init();
         const now = new Date();
-        await createFee(organization, stripeAccount, { when: new Date(now.getFullYear(), now.getMonth(), 1, 12) });
+        await createFee(organization, stripeAccount, { when: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())) });
 
         await createInvoicer().generateInvoices(membershipOrganization);
 
@@ -296,71 +312,93 @@ describe('ApplicationFeeInvoicer', () => {
         expect(payments).toHaveLength(0);
     });
 
-    test('a broken account does not block the other accounts', async () => {
+    test('a broken payer does not block the other payers', async () => {
         const { organization, stripeAccount } = await init();
-        const broken = await stripeMocker.createStripeAccount(organization.id);
+        const { organization: self, stripeAccount: selfAccount } = await init();
+
+        // Billing the platform's own company throws for that group
+        self.meta.companies = membershipOrganization.meta.companies;
+        await self.save();
 
         await createFee(organization, stripeAccount, { amount: 30_00 });
-        await createFee(organization, broken, { amount: 40_00 });
+        await createFee(self, selfAccount, { amount: 40_00 });
 
-        // A month the legacy invoicer billed may never be billed again: that group throws
-        const legacy = new Payment();
-        legacy.organizationId = membershipOrganization.id;
-        legacy.payingOrganizationId = organization.id;
-        legacy.stripeAccountId = broken.id;
-        legacy.method = PaymentMethod.AccountDeductions;
-        legacy.provider = PaymentProvider.Stripe;
-        legacy.status = PaymentStatus.Succeeded;
-        legacy.reference = LEGACY_FEE_PAYMENT_REFERENCE_PREFIX + '2024-07-01';
-        legacy.price = 40_00;
-        legacy.paidAt = occurredAt;
-        await legacy.save();
-
-        await invoiceMonth();
+        await invoiceDay();
 
         const payments = await getFeePayments(organization);
         expect(payments).toHaveLength(1);
         expect(payments[0].price).toBe(30_00);
+        expect(await getFeePayments(self)).toHaveLength(0);
     });
 
-    test('fees without the Stripe account they were deducted from are skipped, not retried forever', async () => {
+    test('fees without the Stripe account they were deducted from are billed without one after 14 days', async () => {
         const { organization, stripeAccount } = await init();
         const removed = await stripeMocker.createStripeAccount(organization.id);
 
         await createFee(organization, stripeAccount, { amount: 30_00 });
         const orphaned = await createFee(organization, removed, { amount: 40_00 });
 
-        // Deleting the account row clears payingStripeAccountId: that fee can no longer be checked
-        // against what the legacy invoicer billed per account, so it is not billed at all
+        // Deleting the account row clears payingStripeAccountId
         await removed.delete();
 
-        await WebmasterReport.group('Overslaan applicatiekosten', async () => {
-            await invoiceMonth();
-        });
+        await invoiceDay();
 
         const payments = await getFeePayments(organization);
+        expect(payments.map(p => [p.price, p.stripeAccountId]).sort()).toEqual([[30_00, stripeAccount.id], [40_00, null]]);
+        expect((await ApplicationFee.getByID(orphaned.id))!.balanceItemId).not.toBeNull();
+    });
+
+    test('fees without a payer wait 14 days before they are billed', async () => {
+        const { organization, stripeAccount } = await init();
+        const removed = await stripeMocker.createStripeAccount(organization.id);
+        const recentDay = startOfUtcDay(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000));
+        const recentReference = 'application-fees-' + recentDay.toISOString().slice(0, 10);
+
+        await createFee(organization, stripeAccount, { amount: 30_00, when: new Date(recentDay.getTime() + 12 * 60 * 60 * 1000) });
+        const orphaned = await createFee(organization, removed, { amount: 40_00, when: new Date(recentDay.getTime() + 12 * 60 * 60 * 1000) });
+        await removed.delete();
+
+        await invoiceDay(recentDay);
+
+        const payments = await getFeePayments(organization, recentReference);
         expect(payments).toHaveLength(1);
         expect(payments[0].price).toBe(30_00);
         expect((await ApplicationFee.getByID(orphaned.id))!.balanceItemId).toBeNull();
+    });
 
-        // Skipping is silent here: the sync that stored the fee already reported it, and this run
-        // repeats every night
-        const emails = (await EmailMocker.transactional.getSucceededEmails()).filter(e => e.subject.startsWith('Overslaan applicatiekosten'));
-        expect(emails).toHaveLength(0);
+    test('a failure while stamping rolls back the balance items and stamps of that payer', async () => {
+        const { organization, stripeAccount } = await init();
+        const first = await createFee(organization, stripeAccount, { type: ApplicationFeeType.Service, amount: 30_00 });
+        const second = await createFee(organization, stripeAccount, { type: ApplicationFeeType.Transfer, amount: 40_00 });
+
+        const markInvoiced = ApplicationFeeService.markInvoiced.bind(ApplicationFeeService);
+        const spy = vi.spyOn(ApplicationFeeService, 'markInvoiced').mockImplementationOnce(markInvoiced).mockImplementationOnce(() => {
+            throw new Error('Simulated failure');
+        });
+        try {
+            await invoiceDay();
+        } finally {
+            spy.mockRestore();
+        }
+
+        expect(await getFeePayments(organization)).toHaveLength(0);
+        expect((await ApplicationFee.getByID(first.id))!.balanceItemId).toBeNull();
+        expect((await ApplicationFee.getByID(second.id))!.balanceItemId).toBeNull();
+        expect(await BalanceItem.select().where('payingOrganizationId', organization.id).fetch()).toHaveLength(0);
     });
 
     test('charges of a billed fee keep pointing at the deduction row', async () => {
         const { organization, stripeAccount } = await init();
         const fee = await createFee(organization, stripeAccount);
 
-        await invoiceMonth();
+        await invoiceDay();
 
         const charge = await SettlementCharge.getByID(fee.settlementChargeId!);
         expect(charge).toBeDefined();
         expect(charge!.amount).toBe(-30_00);
     });
 
-    test('fees of a deleted organization are never billed, and do not block the other accounts', async () => {
+    test('fees of a deleted organization are billed without a payer after 14 days', async () => {
         const { organization, stripeAccount } = await init();
         const { organization: other, stripeAccount: otherAccount } = await init();
 
@@ -370,16 +408,31 @@ describe('ApplicationFeeInvoicer', () => {
         // Takes the Stripe account and the deduction charge with it, but not our income
         await organization.delete();
 
-        await invoiceMonth();
+        await invoiceDay();
 
-        const payments = await getFeePayments(other);
-        expect(payments).toHaveLength(1);
-        expect(payments[0].price).toBe(40_00);
+        const otherPayments = await getFeePayments(other);
+        expect(otherPayments).toHaveLength(1);
+        expect(otherPayments[0].price).toBe(40_00);
 
-        const stored = await ApplicationFee.getByID(orphaned.id);
-        expect(stored).toBeDefined();
-        expect(stored!.payingOrganizationId).toBeNull();
-        expect(stored!.settlementChargeId).toBeNull();
-        expect(stored!.balanceItemId).toBeNull();
+        const stored = (await ApplicationFee.getByID(orphaned.id))!;
+        expect(stored.payingOrganizationId).toBeNull();
+        expect(stored.settlementChargeId).toBeNull();
+        expect(stored.balanceItemId).not.toBeNull();
+
+        const balanceItem = (await BalanceItem.getByID(stored.balanceItemId!))!;
+        expect(balanceItem.payingOrganizationId).toBeNull();
+        expect(balanceItem.unitPrice).toBe(30_00);
+
+        const balanceItemPayment = (await BalanceItemPayment.select().where('balanceItemId', balanceItem.id).first(true));
+        const payment = (await Payment.getByID(balanceItemPayment.paymentId))!;
+        expect(payment).toMatchObject({
+            price: 30_00,
+            status: PaymentStatus.Succeeded,
+            reference,
+            organizationId: membershipOrganization.id,
+            payingOrganizationId: null,
+            stripeAccountId: null,
+            customer: null,
+        });
     });
 });

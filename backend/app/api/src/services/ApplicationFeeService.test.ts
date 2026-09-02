@@ -206,17 +206,17 @@ describe('ApplicationFeeService', () => {
             expect((await SettlementCharge.getByID(charge.id))!.providerInvoiceId).toBeNull();
         });
 
-        test('stampInvoicedPayments stamps and clears the charges of an invoice', async () => {
+        test('setProviderInvoiceIdsForSettlementCharges stamps and clears the charges of an invoice', async () => {
             const { organization, stripeAccount } = await init();
             const { payment } = await createLegacyFeePayment(organization, stripeAccount);
             const { charge, fee } = await upsertFee(organization, stripeAccount);
             expect(fee.balanceItemId).not.toBeNull();
 
             const invoice = await createInvoice(payment, '2025042');
-            await ApplicationFeeService.stampInvoicedPayments([payment], invoice);
+            await ApplicationFeeService.setProviderInvoiceIdsForSettlementCharges([payment], invoice);
             expect((await SettlementCharge.getByID(charge.id))!.providerInvoiceId).toBe('2025042');
 
-            await ApplicationFeeService.stampInvoicedPayments([payment], null);
+            await ApplicationFeeService.setProviderInvoiceIdsForSettlementCharges([payment], null);
             expect((await SettlementCharge.getByID(charge.id))!.providerInvoiceId).toBeNull();
         });
 
@@ -230,7 +230,7 @@ describe('ApplicationFeeService', () => {
             payment.price = 10_00;
             await payment.save();
 
-            await expect(ApplicationFeeService.stampInvoicedPayments([payment], null)).resolves.toBeUndefined();
+            await expect(ApplicationFeeService.setProviderInvoiceIdsForSettlementCharges([payment], null)).resolves.toBeUndefined();
         });
     });
 

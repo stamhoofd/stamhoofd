@@ -12,7 +12,7 @@ import { SettlementStatus } from '@stamhoofd/structures/settlements/SettlementSt
 import { SettlementSyncError } from '@stamhoofd/structures/settlements/SettlementSyncError.js';
 import Stripe from 'stripe';
 
-import { ApplicationFeeService } from '../services/ApplicationFeeService.js';
+import { ApplicationFeeService, ORPHANED_FEE_DELAY_DAYS } from '../services/ApplicationFeeService.js';
 import { SettlementService } from '../services/SettlementService.js';
 import { ApplicationFeeDetails } from './ApplicationFeeDetails.js';
 import { getPaymentIdForStripeCharge } from './getPaymentIdForStripeCharge.js';
@@ -76,9 +76,9 @@ export class StripeSettlementSync {
     }
 
     /**
-     * A fee we can't fully attribute is stored anyway (it is our income), so it would otherwise
-     * only exist as a number nobody looks at: the invoicer skips it, and no payout of the payer
-     * links it. Reported once per account, so someone decides whether to repair or write it off.
+     * A fee we can't fully attribute is stored anyway (it is our income). The invoicer bills it
+     * without a payer after a delay, and no payout of the payer links it. Reported once per
+     * account, so someone can repair the data before then.
      */
     static reportUnattributedFee(payingAccountId: string, payer: ApplicationFeePayer | null) {
         if (this.#reportedUnattributedAccounts.has(payingAccountId)) {
@@ -87,10 +87,10 @@ export class StripeSettlementSync {
         this.#reportedUnattributedAccounts.add(payingAccountId);
 
         WebmasterReport.report(
-            'Applicatiekosten van Stripe account ' + payingAccountId + ' worden niet aangerekend',
+            'Applicatiekosten van Stripe account ' + payingAccountId + ' hebben geen betaler',
             payer
-                ? 'Dat account staat niet meer in onze database. De kosten zijn wel opgeslagen op vereniging ' + payer.organizationId + ', maar worden niet automatisch gefactureerd.'
-                : 'Dat account en de vereniging erachter staan niet meer in onze database. De kosten zijn opgeslagen als niet-aanrekenbare inkomsten.',
+                ? 'Dat account staat niet meer in onze database. De kosten zijn opgeslagen op vereniging ' + payer.organizationId + ' en worden na ' + ORPHANED_FEE_DELAY_DAYS + ' dagen aangerekend zonder Stripe account.'
+                : 'Dat account en de vereniging erachter staan niet meer in onze database. De kosten worden na ' + ORPHANED_FEE_DELAY_DAYS + ' dagen aangerekend zonder betaler, zodat er handmatig een ontvangstbewijs voor kan worden gemaakt.',
         );
     }
 

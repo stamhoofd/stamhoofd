@@ -147,14 +147,15 @@ export class Formatter {
     /**
      * 1 januari (2020). Year only in different year and in the future, if withYear is null (default)
      */
-    static date(date: Date, withYear: boolean | null = null): string {
+    static date(date: Date, withYear: boolean | null = null, options?: { timezone?: string }): string {
         if (!date) {
             // Crash protection in case undefined get passed
             return '?';
         }
-        const currentYear = DateTime.now().setZone(this.timezone).year;
+        const timezone = options?.timezone ?? this.timezone;
+        const currentYear = DateTime.now().setZone(timezone).year;
 
-        const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
+        const datetime = DateTime.fromJSDate(date).setZone(timezone);
         const year = datetime.year;
         return datetime.day + ' ' + this.month(datetime.month) + (withYear !== false && (currentYear !== year || withYear === true || date < new Date()) ? (' ' + year) : '');
     }
