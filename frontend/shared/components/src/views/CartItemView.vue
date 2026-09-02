@@ -448,9 +448,6 @@ const suffix = computed(() => {
     return props.cartItem.product.type === ProductType.Person ? $t(`%12R`) : $t(`%12S`);
 });
 
-const image = computed(() => props.cartItem.product.images[0]?.getResolutionForSize(600, undefined));
-const imageSrc = computed(() => image.value?.file?.getPublicPath());
-
 const images = computed(() => props.cartItem.product.images.map(i => i.getResolutionForSize(600, undefined)));
 const imagesSrc = computed(() => images.value.map(i => i.file.getPublicPath()));
 
