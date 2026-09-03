@@ -72,7 +72,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Sorter } from '@stamhoofd/utility';
+import { realThrottle, Sorter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, defineComponent, getCurrentInstance, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue';
 import { ViewportHelper } from '../../ViewportHelper';
@@ -195,36 +195,7 @@ function updateVisible() {
     });
 }
 
-/**
- * This is a real throttle. The throttle method in utility is a debounce.
- */
-function throttle(mainFunction: (...args: unknown[]) => unknown, delay: number) {
-    let timerFlag: ReturnType<typeof setTimeout> | null = null; // Variable to keep track of the timer
-    let runAtEnd = false;
-
-    // Returning a throttled version
-    return (...args: unknown[]) => {
-        if (timerFlag === null) { // If there is no timer currently running
-            requestAnimationFrame(() => {
-                mainFunction(...args); // Execute the main function
-            });
-            runAtEnd = false;
-            timerFlag = setTimeout(() => { // Set a timer to clear the timerFlag after the specified delay
-                requestAnimationFrame(() => {
-                    timerFlag = null; // Clear the timerFlag to allow the main function to be executed again
-                    if (runAtEnd) {
-                        mainFunction(...args);
-                    }
-                });
-            }, delay);
-        } else {
-            // Make sure to run at the end of current period
-            runAtEnd = true;
-        }
-    };
-}
-
-const throttledUpdateVisible = throttle(updateVisible, 80);
+const throttledUpdateVisible = realThrottle(updateVisible, 80);
 
 function getScrollElement() {
     return scrollColumn.value?.querySelector('main');

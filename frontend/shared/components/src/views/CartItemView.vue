@@ -11,11 +11,7 @@
         <main>
             <h1>{{ cartItem.product.name }}</h1>
 
-            <figure v-if="imageSrc" class="image-box">
-                <div>
-                    <img :src="imageSrc" :width="image.width" :height="image.height">
-                </div>
-            </figure>
+            <ImageGallery :images="images" />
             <p v-if="cartItem.product.description" class="description" v-text="cartItem.product.description" />
 
             <p v-if="oldItem && oldItem.cartError" class="error-box small">
@@ -176,13 +172,14 @@
 </template>
 
 <script lang="ts" setup>
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { Request } from '@simonbackx/simple-networking';
 import { useCanDismiss, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { CartItem, Checkout, ProductDateRange, Webshop } from '@stamhoofd/structures';
 import { CartStockHelper, ProductPrice, ProductType, UitpasNumberAndPrice, UitpasPriceCheckRequest, UitpasPriceCheckResponse } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
+import { useContext } from '#hooks/useContext.ts';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
@@ -191,7 +188,6 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
 import { useErrors } from '../errors/useErrors';
-import { useContext } from '#hooks/useContext.ts';
 import NumberInput from '../inputs/NumberInput.vue';
 import Radio from '../inputs/Radio.vue';
 import UitpasNumberInput from '../inputs/UitpasNumberInput.vue';
@@ -201,10 +197,11 @@ import STNavigationBar from '../navigation/STNavigationBar.vue';
 import STToolbar from '../navigation/STToolbar.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 
+import PriceInputBox from '#inputs/PriceInputBox.vue';
 import FieldBox from './FieldBox.vue';
 import OptionMenuBox from './OptionMenuBox.vue';
 import PriceBreakdownBox from './PriceBreakdownBox.vue';
-import PriceInputBox from '#inputs/PriceInputBox.vue';
+import ImageGallery from '#images/ImageGallery.vue';
 
 const props = withDefaults(defineProps<{
     admin?: boolean;
@@ -439,8 +436,7 @@ const suffix = computed(() => {
     return props.cartItem.product.type === ProductType.Person ? $t(`%12R`) : $t(`%12S`);
 });
 
-const image = computed(() => props.cartItem.product.images[0]?.getResolutionForSize(600, undefined));
-const imageSrc = computed(() => image.value?.file?.getPublicPath());
+const images = computed(() => props.cartItem.product.images);
 const product = computed(() => props.cartItem.product);
 const remainingReduced = computed(() => {
     if (props.cartItem.productPrice.discountPrice === null) {
@@ -577,29 +573,6 @@ defineExpose({
 .cart-item-view {
     .sheet & {
        --st-horizontal-padding: 25px;
-    }
-
-    .image-box {
-        position: relative;
-        overflow: hidden;
-        border-radius: $border-radius;
-
-        > div {
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-        }
-
-        img {
-            height: auto;
-            max-width: 100%;
-            border-radius: $border-radius;
-            object-fit: cover;
-        }
-    }
-    .image {
-        width: 100%;
-        border-radius: $border-radius;
     }
 
     .description {

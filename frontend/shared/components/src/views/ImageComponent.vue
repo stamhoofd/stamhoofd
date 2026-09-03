@@ -18,6 +18,7 @@
                 :width="imgWidth"
                 :height="imgHeight"
                 :alt="alt"
+                :loading="loading ?? undefined"
                 @error="failed = true"
             >
         </picture>
@@ -36,12 +37,14 @@ const props = withDefaults(defineProps<{
     darkMode?: DarkMode;
     autoHeight?: boolean;
     maxHeight?: number | null;
+    loading?: 'lazy' | null;
 }>(), {
     alt: '',
     imageDark: null,
     darkMode: DarkMode.Auto,
     autoHeight: false,
     maxHeight: null,
+    loading: null,
 });
 
 const el = useTemplateRef<HTMLElement>('el');
@@ -89,8 +92,7 @@ onMounted(() => {
             updateSize();
         });
         resizeObserver.observe(el.value);
-    }
-    catch (e) {
+    } catch (e) {
         updateSize();
     }
 });

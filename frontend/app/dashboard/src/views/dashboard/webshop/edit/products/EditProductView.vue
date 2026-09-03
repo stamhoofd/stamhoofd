@@ -210,12 +210,12 @@
                 </p>
             </STListItem>
 
-            <STListItem v-if="!image" :selectable="true" element-name="label" class="button">
+            <STListItem v-if="images.length === 0" :selectable="true" element-name="label" class="button">
                 <template #left>
                     <span class="icon camera gray" />
                 </template>
 
-                <UploadButton v-model="image" :resolutions="resolutions" element-name="div">
+                <UploadButton v-model="newImage" :resolutions="resolutions" element-name="div">
                     <h3 class="style-title-list">
                         {{ $t('%Tf') }}
                     </h3>
@@ -226,20 +226,32 @@
             </STListItem>
         </STList>
 
-        <template v-if="image">
-            <hr><h2 class="style-with-button">
-                <div>{{ $t('%Tg') }}</div>
+        <template v-if="images.length > 0">
+            <hr>
+            <h2 class="style-with-button">
+                <div>{{ $t('Foto\'s') }}</div>
                 <div>
-                    <button v-if="image" type="button" class="button text only-icon-smartphone" @click="image = null">
+                    <button type="button" class="button text only-icon-smartphone" @click="images = []">
                         <span class="icon trash" />
-                        <span>{{ $t('%CJ') }}</span>
+                        <span>{{ $t('Allemaal verwijderen') }}</span>
                     </button>
-                    <UploadButton v-model="image" :text="image ? $t(`%He`) : $t(`%Hf`)" :resolutions="resolutions" />
+
+                    <UploadButton v-model="newImage" :text="$t(`Extra uploaden`)" :resolutions="resolutions" />
                 </div>
             </h2>
+            <p>{{ $t('De eerste foto zal gebruikt worden als omslagfoto van dit product.') }}</p>
 
-            <div class="image-box">
-                <img v-if="image" :src="imageSrc ?? undefined" class="image">
+            <div class="images-box">
+                <div v-for="image, index in images" :key="image.id" class="image-box">
+                    <img :src="getImageSrc(image)" class="image">
+
+                    <div class="image-box-actions">
+                        <button type="button" class="button text only-icon-smartphone" @click="images.splice(index, 1)">
+                            <span class="icon trash" />
+                            <span>{{ $t('Verwijderen') }}</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </template>
 
@@ -441,7 +453,7 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import type { Image, ProductDateRange, ProductLocation } from '@stamhoofd/structures';
-import { OptionMenu, PrivateWebshop, Product, ProductPrice, ProductType, ResolutionRequest, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, Version, WebshopField, WebshopTicketType } from '@stamhoofd/structures';
+import { OptionMenu, PrivateWebshop, Product, ProductPrice, ProductType, ResolutionFit, ResolutionRequest, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, Version, WebshopField, WebshopTicketType } from '@stamhoofd/structures';
 
 import { useGoToUitpasConfiguration } from './useGoToUitpasConfiguration.ts';
 import { useSetUitpasEvent } from '@stamhoofd/components/uitpas/useSetUitpasEvent.ts';
@@ -846,29 +858,40 @@ const resolutions = computed(() => [
     }),
 ]);
 
-const image = computed<Image | null>({
-    get: () => patchedProduct.value.images[0] ?? null,
-    set: (image: Image | null) => {
-        const p = Product.patch({ });
+const images = computed<Image[]>({
+    get: () => patchedProduct.value.images,
+    set: (images: Image[]) => {
+        const p = Product.patch({});
 
         for (const i of patchedProduct.value.images) {
             p.images.addDelete(i.id);
         }
 
-        if (image) {
-            p.images.addPut(image);
+        if (images.length > 0) {
+            for (const image of images) {
+                p.images.addPut(image);
+            }
         }
 
         addProductPatch(p);
     },
 });
 
-const imageSrc = computed(() => {
-    if (!image.value) {
-        return null;
-    }
-    return image.value.getPathForSize(140, undefined);
+const newImage = computed({
+    get: () => null,
+    set: (image: Image | null) => {
+        if (image) {
+            const p = Product.patch({});
+            p.images.addPut(image);
+
+            addProductPatch(p);
+        }
+    },
 });
+
+const getImageSrc = (image: Image) => {
+    return image.getPathForSize(140, undefined);
+};
 
 function addOptionMenu() {
     const optionMenu = OptionMenu.create({
@@ -1070,21 +1093,55 @@ defineExpose({ shouldNavigateAway });
 @use "@stamhoofd/scss/base/variables.scss" as *;
 
 .product-edit-view {
-    .image-box {
-        margin: 0 -5px;
+    .images-box {
         display: flex;
-        flex-direction: row;
         flex-wrap: wrap;
-        overflow: hidden;
+        gap: 15px;
 
-        img.image {
-            margin: 5px;
-            max-height: 140px;
-            max-width: 100%;
-            border-radius: $border-radius;
-            align-self: flex-start;
+        .image-box {
+            position: relative;
+            margin: 0 -5px;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            overflow: hidden;
+
+            img.image {
+                margin: 5px;
+                max-height: 140px;
+                max-width: 100%;
+                border-radius: $border-radius;
+                align-self: flex-start;
+            }
+
+            .image-box-actions {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+
+                background-color: rgba(0, 0, 0, .75);
+                border-radius: $border-radius;
+
+                opacity: 0;
+                pointer-events: none;
+
+                transition: opacity .2s ease-out;
+            }
+
+            &:hover{
+                .image-box-actions {
+                    opacity: 1;
+                    pointer-events: all;
+                }
+            }
         }
     }
-
 }
 </style>
