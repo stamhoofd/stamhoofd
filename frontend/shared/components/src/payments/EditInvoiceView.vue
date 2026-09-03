@@ -75,7 +75,10 @@
                     <h3 class="style-title-list">
                         {{ $t('%ZqG') }}
                     </h3>
-                    <p class="style-description-small">
+                    <p v-if="patched.totalWithVAT === 0" class="style-description-small">
+                        {{ $t('Voor betalingen die elkaar opheffen en samen 0 euro bedragen. Zo worden ze als geboekt gemarkeerd, ook voor een klant met een ondernemingsnummer of BTW-nummer.') }}
+                    </p>
+                    <p v-else class="style-description-small">
                         {{ $t('%ZqQ') }}
                     </p>
                 </STListItem>

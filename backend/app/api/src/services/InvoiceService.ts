@@ -24,19 +24,43 @@ export class InvoiceService {
             });
         }
 
-        if (struct.items.length === 0) {
+        const model = new Invoice();
+        model.customer = struct.customer;
+        model.isReceipt = struct.isReceipt;
+        model.comments = struct.comments?.trim() || null;
+
+        struct.updatePrices();
+        struct.validateVATRates();
+
+        // A zero receipt marks payments that cancel each other out as booked. Its balance items can cancel
+        // each other out completely, leaving no items at all.
+        const isZeroReceipt = model.isReceipt && struct.totalWithVAT === 0;
+
+        if (struct.totalWithVAT === 0 && !model.isReceipt) {
+            throw new SimpleError({
+                code: 'invalid_invoiced_amount',
+                message: 'Cannot invoice zero',
+                human: $t('Een factuur van 0 euro kan niet aangemaakt worden. Maak in dat geval een aankoopbewijs aan.'),
+                statusCode: 400,
+            });
+        }
+
+        if (struct.items.length === 0 && !isZeroReceipt) {
             throw new SimpleError({
                 code: 'missing_items',
                 message: 'Cannot create invoice without items',
             });
         }
 
-        const model = new Invoice();
-        model.customer = struct.customer;
-        model.isReceipt = struct.isReceipt;
-        model.comments = struct.comments?.trim() || null;
+        if (isZeroReceipt && struct.payments.length === 0) {
+            throw new SimpleError({
+                code: 'missing_payments',
+                message: 'Cannot create a zero receipt without payments',
+                human: $t('Een aankoopbewijs van 0 euro kan enkel aangemaakt worden voor betalingen.'),
+            });
+        }
 
-        if (model.isReceipt) {
+        if (model.isReceipt && !isZeroReceipt) {
             await this.assertReceiptAllowed(struct);
         }
 
@@ -44,10 +68,7 @@ export class InvoiceService {
             await ViesService.checkCompany(model.customer.company, null, { forceValidation: true });
         }
 
-        struct.updatePrices();
-        struct.validateVATRates();
-
-        if (struct.totalBalanceInvoicedAmount === 0) {
+        if (struct.totalBalanceInvoicedAmount === 0 && !isZeroReceipt) {
             throw new SimpleError({
                 code: 'invalid_invoiced_amount',
                 message: 'Unexpected 0 totalBalanceInvoicedAmount',
@@ -60,14 +81,6 @@ export class InvoiceService {
                 code: 'invalid_price_decimals',
                 message: 'Unexpected invoice total price with more than two decimals',
                 statusCode: 500,
-            });
-        }
-
-        if (struct.totalWithVAT === 0) {
-            throw new SimpleError({
-                code: 'invalid_invoiced_amount',
-                message: 'Cannot invoice zero',
-                statusCode: 400,
             });
         }
 

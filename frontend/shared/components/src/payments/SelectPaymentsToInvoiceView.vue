@@ -142,6 +142,11 @@ async function goNext() {
         });
         invoice.buildFromPayments();
 
+        // Payments that cancel each other out can only be booked with a receipt
+        if (invoice.totalWithVAT === 0) {
+            invoice.isReceipt = true;
+        }
+
         await show({
             components: [
                 AsyncComponent(() => import('./EditInvoiceView.vue'), {
