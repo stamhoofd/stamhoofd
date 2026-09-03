@@ -4,7 +4,7 @@ import { AuditLogReplacement, AuditLogReplacementType, AuditLogType } from '@sta
 
 export const MemberLogger = new ModelLogger(Member, {
     // Skip repeated auto generated fields
-    skipKeys: ['firstName', 'lastName', 'birthDay', 'memberNumber', 'lastExternalSync'],
+    skipKeys: ['firstName', 'lastName', 'birthDay', 'memberNumber', 'details.lastExternalSync'],
 
     optionsGenerator: getDefaultGenerator({
         created: AuditLogType.MemberAdded,
