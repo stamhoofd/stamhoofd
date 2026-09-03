@@ -93,6 +93,11 @@ export class PaymentService {
                     }
                 }
 
+                await this.unblockMandateIfNeeded({
+                    payment,
+                    sellingOrganization: organization,
+                });
+
                 // It is possible the mandate succeeds immediately, in which case we might
                 // need to save it as the default payment method
                 await this.saveMandateIfNeeded({
@@ -236,6 +241,31 @@ export class PaymentService {
             return;
         }
 
+        if (payment.mandateId) {
+            try {
+                await PaymentMandateService.registerChargeback({
+                    mandateId: payment.mandateId,
+                    sellingOrganization: organization,
+                    payingOrganizationId: payment.payingOrganizationId,
+                    date: payment.paidAt ?? new Date(),
+                });
+            } catch (e) {
+                console.error('Failed to register chargeback count for mandate ' + payment.mandateId, e);
+            }
+
+            // Prevents an endless loop of automatic charges and chargebacks on the same mandate
+            try {
+                await PaymentMandateService.blockMandate({
+                    mandateId: payment.mandateId,
+                    sellingOrganization: organization,
+                    payingOrganizationId: payment.payingOrganizationId,
+                    paymentId: payment.id,
+                });
+            } catch (e) {
+                console.error('Failed to block mandate ' + payment.mandateId + ' after chargeback ' + payment.id, e);
+            }
+        }
+
         const payingOrganization = await Organization.getByID(payment.payingOrganizationId, true);
 
         await sendEmailTemplate(organization, {
@@ -304,6 +334,26 @@ export class PaymentService {
             if (payingOrganizationId && organization.id === platform.membershipOrganizationId) {
                 await STPackageService.markFailedPayment(payingOrganizationId);
             }
+        }
+    }
+
+    /**
+     * A succeeded payment that created a mandate validated the card or bank account again, so an earlier
+     * block (e.g. after a chargeback) is lifted.
+     */
+    static async unblockMandateIfNeeded({ payment, sellingOrganization }: { payment: Payment; sellingOrganization: Organization }) {
+        if (!payment.createMandate || !payment.mandateId || !payment.payingOrganizationId || payment.status !== PaymentStatus.Succeeded) {
+            return;
+        }
+
+        try {
+            await PaymentMandateService.unblockMandate({
+                mandateId: payment.mandateId,
+                sellingOrganization,
+                payingOrganizationId: payment.payingOrganizationId,
+            });
+        } catch (e) {
+            console.error('Failed to unblock mandate ' + payment.mandateId + ' after payment ' + payment.id, e);
         }
     }
 
@@ -1603,6 +1653,15 @@ export class PaymentService {
                 code: 'mandate_not_valid',
                 message: 'Mandate not valid',
                 human: $t('%1QA'),
+                field: 'mandateId',
+            });
+        }
+
+        if (existingMandate.isBlocked) {
+            throw new SimpleError({
+                code: 'mandate_blocked',
+                message: 'Mandate is blocked',
+                human: $t('Deze betaalmethode is geblokkeerd en kan niet meer gebruikt worden. Voeg een nieuwe betaalmethode toe.'),
                 field: 'mandateId',
             });
         }

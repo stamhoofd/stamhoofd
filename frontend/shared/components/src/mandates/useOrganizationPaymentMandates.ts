@@ -1,7 +1,7 @@
 import { ErrorBox } from '#errors/ErrorBox';
 import { useContext } from '#hooks/useContext.ts';
 import { Toast } from '#overlays/Toast';
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
@@ -78,7 +78,8 @@ export function useOrganizationPaymentMandates({
         }
     }
 
-    async function setDefaultMandate(mandateId: string) {
+    async function patchMandate(patch: AutoEncoderPatchType<PaymentMandate>, successMessage: string) {
+        const mandateId = patch.id;
         if (updatingMandates.has(mandateId)) {
             return;
         }
@@ -86,10 +87,7 @@ export function useOrganizationPaymentMandates({
 
         try {
             const arr = new PatchableArray();
-            arr.addPatch(PaymentMandate.patch({
-                id: mandateId,
-                isDefault: true
-            }))
+            arr.addPatch(patch)
 
             const response = await (payingOrganizationId ? context.value.getAuthenticatedServerForOrganization(payingOrganizationId) : context.value.authenticatedServer).request({
                 method: 'PATCH',
@@ -106,7 +104,7 @@ export function useOrganizationPaymentMandates({
                 mandates.value = response.data;
             }
 
-            Toast.success($t('%1QZ')).show()
+            Toast.success(successMessage).show()
         } catch (e) {
             Toast.fromError(e).show()
         } finally {
@@ -114,10 +112,28 @@ export function useOrganizationPaymentMandates({
         }
     }
 
+    async function setDefaultMandate(mandateId: string) {
+        await patchMandate(PaymentMandate.patch({
+            id: mandateId,
+            isDefault: true
+        }), $t('%1QZ'))
+    }
+
+    /**
+     * Block or unblock a mandate (only allowed for the selling organization)
+     */
+    async function setMandateBlocked(mandateId: string, blocked: boolean) {
+        await patchMandate(PaymentMandate.patch({
+            id: mandateId,
+            blockedAt: blocked ? new Date() : null
+        }), blocked ? $t('De betaalmethode is geblokkeerd') : $t('De betaalmethode is gedeblokkeerd'))
+    }
+
     return {
         loading,
         deleteMandate,
         setDefaultMandate,
+        setMandateBlocked,
         updatingMandates,
         mandates
     };

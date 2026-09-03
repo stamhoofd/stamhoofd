@@ -30,13 +30,19 @@ import { Toast } from '#overlays/Toast';
 const props = withDefaults(defineProps<{
     payingOrganizationId?: string | null;
     sellingOrganizationId: string;
+
+    /**
+     * Whether the viewer is an admin of the selling organization and may block or unblock mandates
+     */
+    canBlock?: boolean;
 }>(), {
     payingOrganizationId: null,
+    canBlock: false,
 });
 
 const errors = useErrors();
 
-const { mandates, deleteMandate: doDeleteMandate, updatingMandates, setDefaultMandate } = useOrganizationPaymentMandates({
+const { mandates, deleteMandate: doDeleteMandate, updatingMandates, setDefaultMandate, setMandateBlocked } = useOrganizationPaymentMandates({
     payingOrganizationId: props.payingOrganizationId,
     sellingOrganizationId: props.sellingOrganizationId,
     errors,
@@ -52,11 +58,30 @@ async function showContextMenu(event: MouseEvent, mandateId: string) {
             new ContextMenuItem({
                 name: $t(`%1Tc`),
                 icon: 'success',
-                disabled: isDefault,
+                disabled: isDefault || mandate?.isBlocked,
                 action: async () => {
                     await setDefaultMandate(mandateId);
                 },
             }),
+            ...(props.canBlock
+                ? [
+                        mandate?.isBlocked
+                            ? new ContextMenuItem({
+                                    name: $t('Deblokkeren'),
+                                    icon: 'unlock',
+                                    action: async () => {
+                                        await setMandateBlocked(mandateId, false);
+                                    },
+                                })
+                            : new ContextMenuItem({
+                                    name: $t('Blokkeren'),
+                                    icon: 'lock',
+                                    action: async () => {
+                                        await blockMandate(mandateId);
+                                    },
+                                }),
+                    ]
+                : []),
 
             new ContextMenuItem({
                 name: $t(`%CJ`),
@@ -69,6 +94,20 @@ async function showContextMenu(event: MouseEvent, mandateId: string) {
         ],
     ]);
     await menu.show({ clickEvent: event });
+}
+
+async function blockMandate(mandateId: string) {
+    const mandate = mandates.value?.find(m => m.id === mandateId);
+
+    if (!await CenteredMessage.confirm({
+        title: $t('Ben je zeker dat je {cardNumber} wilt blokkeren?', { cardNumber: mandate?.name ?? $t('%ZgC') }),
+        description: $t('Deze betaalmethode kan dan niet meer gebruikt worden voor nieuwe betalingen, tot ze opnieuw toegevoegd of gedeblokkeerd wordt.'),
+        confirmText: $t('Blokkeren'),
+        destructive: true,
+    })) {
+        return;
+    }
+    await setMandateBlocked(mandateId, true);
 }
 
 async function deleteMandate(mandateId: string) {

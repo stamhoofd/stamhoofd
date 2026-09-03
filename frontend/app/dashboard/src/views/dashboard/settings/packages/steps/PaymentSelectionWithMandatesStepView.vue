@@ -208,13 +208,13 @@ const { mandates } = props.model.forceNewMandate || !props.model.sellingOrganiza
 watch(mandates, (n, old) => {
     if (old === null && n !== null && n.length) {
         // Select default mandate
-        mandateId.value = n[0].id;
+        mandateId.value = n.find(m => !m.isBlocked)?.id ?? null;
     }
 
     if (n && mandateId.value) {
-        if (!n.find(pp => pp.id === mandateId.value)) {
-            // Mandate became invalid: reset
-            mandateId.value = n[0]?.id ?? null;
+        if (!n.find(pp => pp.id === mandateId.value && !pp.isBlocked)) {
+            // Mandate became invalid or blocked: reset
+            mandateId.value = n.find(m => !m.isBlocked)?.id ?? null;
         }
     }
 });

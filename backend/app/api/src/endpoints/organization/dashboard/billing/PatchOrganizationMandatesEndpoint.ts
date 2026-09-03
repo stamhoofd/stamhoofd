@@ -13,7 +13,7 @@ type Query = undefined;
 type Body = PatchableArrayAutoEncoder<PaymentMandate>;
 type ResponseBody = PaymentMandate[];
 
-export class DeleteOrganizationMandateEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class PatchOrganizationMandatesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = new PatchableArrayDecoder(
         PaymentMandate as Decoder<PaymentMandate>,
         PaymentMandate.patchType() as Decoder<AutoEncoderPatchType<PaymentMandate>>,
@@ -73,7 +73,39 @@ export class DeleteOrganizationMandateEndpoint extends Endpoint<Params, Query, B
                 });
             }
 
+            if (patch.blockedAt !== undefined) {
+                // Only the seller can block or unblock
+                if (!await Context.auth.canManagePayments(sellingOrganization.id)) {
+                    throw Context.auth.error();
+                }
+
+                if (patch.blockedAt) {
+                    await PaymentMandateService.blockMandate({
+                        mandateId: mandate.id,
+                        sellingOrganization,
+                        payingOrganizationId: payingOrganization.id,
+                        paymentId: null,
+                    });
+                    mandate.blockedAt = patch.blockedAt;
+                } else {
+                    await PaymentMandateService.unblockMandate({
+                        mandateId: mandate.id,
+                        sellingOrganization,
+                        payingOrganizationId: payingOrganization.id,
+                    });
+                    mandate.blockedAt = null;
+                }
+            }
+
             if (patch.isDefault === true) {
+                if (mandate.isBlocked) {
+                    throw new SimpleError({
+                        code: 'mandate_blocked',
+                        message: 'Cannot set a blocked mandate as default',
+                        human: $t('Een geblokkeerde betaalmethode kan niet als standaard ingesteld worden.'),
+                    });
+                }
+
                 await PaymentMandateService.setDefaultMandate({
                     mandateId: mandate.id,
                     sellingOrganizationId: sellingOrganization.id,
@@ -83,10 +115,11 @@ export class DeleteOrganizationMandateEndpoint extends Endpoint<Params, Query, B
             }
         }
 
+        // serverMeta was modified on a separate instance: reload before reading blocks and the default
         const updatedMandates = await PaymentMandateService.getMandates({
             sellingOrganization,
             user,
-            payingOrganization,
+            payingOrganization: await Organization.getByID(payingOrganization.id, true),
         });
 
         return new Response(PaymentMandateService.groupByMandate(updatedMandates).mandates);

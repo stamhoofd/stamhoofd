@@ -114,11 +114,17 @@ export class ChargeReceivableBalancesEndpoint extends Endpoint<Params, Query, Bo
                     payingOrganization,
                 });
 
-                const mandate = mandates.find(m => m.isDefault);
+                if (!mandates.find(m => m.isDefault)) {
+                    // Not possible
+                    console.error('No mandates found for', cachedBalance.id);
+                    continue;
+                }
+
+                // The default if usable, otherwise the most recent usable one
+                const mandate = PaymentMandateService.groupByMandate(mandates).mandates.find(m => !m.isBlocked);
 
                 if (!mandate) {
-                // Not possible
-                    console.error('No mandates found for', cachedBalance.id);
+                    console.error('No usable mandate found for', cachedBalance.id);
                     continue;
                 }
 
