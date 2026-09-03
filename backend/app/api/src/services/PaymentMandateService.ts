@@ -255,7 +255,7 @@ export class PaymentMandateService {
                 throw new SimpleError({
                     code: 'not_allowed',
                     message: 'You cannot delete the last usable mandate',
-                    human: $t('Je kan de laatste bruikbare betaalmethode niet verwijderen. Voeg eerst een nieuwe betaalmethode toe.'),
+                    human: $t('%Zqk'),
                 });
             }
         }

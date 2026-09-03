@@ -67,14 +67,14 @@ async function showContextMenu(event: MouseEvent, mandateId: string) {
                 ? [
                         mandate?.isBlocked
                             ? new ContextMenuItem({
-                                    name: $t('Deblokkeren'),
+                                    name: $t('%Zqs'),
                                     icon: 'unlock',
                                     action: async () => {
                                         await setMandateBlocked(mandateId, false);
                                     },
                                 })
                             : new ContextMenuItem({
-                                    name: $t('Blokkeren'),
+                                    name: $t('%Zqi'),
                                     icon: 'lock',
                                     action: async () => {
                                         await blockMandate(mandateId);
@@ -100,9 +100,9 @@ async function blockMandate(mandateId: string) {
     const mandate = mandates.value?.find(m => m.id === mandateId);
 
     if (!await CenteredMessage.confirm({
-        title: $t('Ben je zeker dat je {cardNumber} wilt blokkeren?', { cardNumber: mandate?.name ?? $t('%ZgC') }),
-        description: $t('Deze betaalmethode kan dan niet meer gebruikt worden voor nieuwe betalingen, tot ze opnieuw toegevoegd of gedeblokkeerd wordt.'),
-        confirmText: $t('Blokkeren'),
+        title: $t('%Zqq', { cardNumber: mandate?.name ?? $t('%ZgC') }),
+        description: $t('%Zqo'),
+        confirmText: $t('%Zqi'),
         destructive: true,
     })) {
         return;

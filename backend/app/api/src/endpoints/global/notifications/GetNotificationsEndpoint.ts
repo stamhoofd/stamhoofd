@@ -71,7 +71,7 @@ export class GetNotificationsEndpoint extends Endpoint<Params, Query, Body, Resp
             throw new SimpleError({
                 code: 'not_supported',
                 message: 'Search is not possible in notifications',
-                human: $t('Zoeken is niet mogelijk in meldingen'),
+                human: $t('%Zqm'),
             });
         }
 

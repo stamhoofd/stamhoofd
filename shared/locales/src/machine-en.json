@@ -6191,10 +6191,6 @@
     "original": "Ben je zeker dat je dit wilt aanrekenen?",
     "translation": "Are you sure you want to charge this?"
   },
-  "%1Q7": {
-    "original": "Je kan de laatste bankkaart niet verwijderen. Voeg eerst een andere bankkaart toe waarmee je het wilt vervangen en verwijder daarna deze bankkaart.",
-    "translation": "You cannot remove the last bank card. First add another card to replace it, then remove this card."
-  },
   "%1Q8": {
     "original": "Dit maakt reeds opgeslagen betaalmethodes of automatische aanrekeningen onbruikbaar in het systeem.",
     "translation": "This will make already saved payment methods or automatic charges unusable in the system."
@@ -15475,10 +15471,6 @@
     "original": "Foto toevoegen",
     "translation": "Add photo"
   },
-  "%Tg": {
-    "original": "Foto",
-    "translation": "Photo"
-  },
   "%Th": {
     "original": "nog",
     "translation": "more"
@@ -20142,6 +20134,70 @@
   "%Zqd": {
     "original": "Stamhoofd heeft extra toegang nodig tot jouw Mollie-account om de transactiekosten van uitbetalingen op te halen. Koppel Mollie opnieuw om dit in orde te brengen.",
     "translation": "Stamhoofd requires additional access to your Mollie account to retrieve the transaction fees for payouts. Please reconnect Mollie to resolve this."
+  },
+  "%Zqe": {
+    "original": "Allemaal verwijderen",
+    "translation": "Delete all"
+  },
+  "%Zqf": {
+    "original": "Een geblokkeerde betaalmethode kan niet als standaard ingesteld worden.",
+    "translation": "A blocked payment method cannot be set as default."
+  },
+  "%Zqg": {
+    "original": "Deze betaalmethode is geblokkeerd (bv. na een terugvordering) en kan niet meer gebruikt worden. Voeg ze opnieuw toe om ze te deblokkeren.",
+    "translation": "This payment method is blocked (for example, after a refund) and can no longer be used. Add it again to unblock it."
+  },
+  "%Zqi": {
+    "original": "Blokkeren",
+    "translation": "Block"
+  },
+  "%Zqk": {
+    "original": "Je kan de laatste bruikbare betaalmethode niet verwijderen. Voeg eerst een nieuwe betaalmethode toe.",
+    "translation": "You cannot delete your last usable payment method. Please add a new payment method first."
+  },
+  "%Zql": {
+    "original": "De betaalmethode is gedeblokkeerd",
+    "translation": "The payment method has been unblocked"
+  },
+  "%Zqm": {
+    "original": "Zoeken is niet mogelijk in meldingen",
+    "translation": "Searching is not possible in notifications"
+  },
+  "%Zqn": {
+    "original": "Extra uploaden",
+    "translation": "Upload extra"
+  },
+  "%Zqo": {
+    "original": "Deze betaalmethode kan dan niet meer gebruikt worden voor nieuwe betalingen, tot ze opnieuw toegevoegd of gedeblokkeerd wordt.",
+    "translation": "This payment method cannot be used for new payments until it is added again or unblocked."
+  },
+  "%Zqp": {
+    "original": "Nieuwe inschrijving",
+    "translation": "New registration"
+  },
+  "%Zqq": {
+    "original": "Ben je zeker dat je {cardNumber} wilt blokkeren?",
+    "translation": "Are you sure you want to block {cardNumber}?"
+  },
+  "%Zqr": {
+    "original": "De betaalmethode is geblokkeerd",
+    "translation": "The payment method is blocked"
+  },
+  "%Zqs": {
+    "original": "Deblokkeren",
+    "translation": "Unblock"
+  },
+  "%Zqt": {
+    "original": "Foto {number}",
+    "translation": "Photo {number}"
+  },
+  "%Zqu": {
+    "original": "De eerste foto zal gebruikt worden als omslagfoto van dit product.",
+    "translation": "The first photo will be used as the cover photo for this product."
+  },
+  "%Zqv": {
+    "original": "Deze betaalmethode is geblokkeerd en kan niet meer gebruikt worden. Voeg een nieuwe betaalmethode toe.",
+    "translation": "This payment method is blocked and can no longer be used. Please add a new payment method."
   },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Stamhoofd. Voor Microsoft kan je",

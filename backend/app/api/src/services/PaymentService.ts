@@ -1661,7 +1661,7 @@ export class PaymentService {
             throw new SimpleError({
                 code: 'mandate_blocked',
                 message: 'Mandate is blocked',
-                human: $t('Deze betaalmethode is geblokkeerd en kan niet meer gebruikt worden. Voeg een nieuwe betaalmethode toe.'),
+                human: $t('%Zqv'),
                 field: 'mandateId',
             });
         }

@@ -9,7 +9,7 @@ export class NotificationTypeHelper {
     static getName(type: NotificationType): string {
         switch (type) {
             case NotificationType.RegistrationCreated:
-                return $t('Nieuwe inschrijving');
+                return $t('%Zqp');
         }
     }
 }

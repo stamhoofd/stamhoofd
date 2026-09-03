@@ -126,7 +126,7 @@ export function useOrganizationPaymentMandates({
         await patchMandate(PaymentMandate.patch({
             id: mandateId,
             blockedAt: blocked ? new Date() : null
-        }), blocked ? $t('De betaalmethode is geblokkeerd') : $t('De betaalmethode is gedeblokkeerd'))
+        }), blocked ? $t('%Zqr') : $t('%Zql'))
     }
 
     return {

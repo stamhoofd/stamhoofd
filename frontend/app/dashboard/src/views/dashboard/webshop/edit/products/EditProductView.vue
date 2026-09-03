@@ -233,13 +233,13 @@
                 <div>
                     <button type="button" class="button text only-icon-smartphone" @click="images = []">
                         <span class="icon trash" />
-                        <span>{{ $t('Allemaal verwijderen') }}</span>
+                        <span>{{ $t('%Zqe') }}</span>
                     </button>
 
-                    <UploadButton v-model="newImage" :text="$t(`Extra uploaden`)" :resolutions="resolutions" />
+                    <UploadButton v-model="newImage" :text="$t(`%Zqn`)" :resolutions="resolutions" />
                 </div>
             </h2>
-            <p>{{ $t('De eerste foto zal gebruikt worden als omslagfoto van dit product.') }}</p>
+            <p>{{ $t('%Zqu') }}</p>
 
             <STList v-model="images" :draggable="true">
                 <template #item="{item: image, index}">
@@ -251,7 +251,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ index === 0 ? $t('Omslagfoto') : $t('Foto {number}', { number: index + 1 }) }}
+                            {{ index === 0 ? $t('%7M') : $t('%Zqt', { number: index + 1 }) }}
                         </h3>
 
                         <template #right>

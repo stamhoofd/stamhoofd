@@ -102,7 +102,7 @@ export class PatchOrganizationMandatesEndpoint extends Endpoint<Params, Query, B
                     throw new SimpleError({
                         code: 'mandate_blocked',
                         message: 'Cannot set a blocked mandate as default',
-                        human: $t('Een geblokkeerde betaalmethode kan niet als standaard ingesteld worden.'),
+                        human: $t('%Zqf'),
                     });
                 }
 

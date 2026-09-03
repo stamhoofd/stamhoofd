@@ -6227,10 +6227,6 @@
     "original": "Ben je zeker dat je dit wilt aanrekenen?",
     "translation": "Es-tu certain de vouloir facturer ceci ?"
   },
-  "%1Q7": {
-    "original": "Je kan de laatste bankkaart niet verwijderen. Voeg eerst een andere bankkaart toe waarmee je het wilt vervangen en verwijder daarna deze bankkaart.",
-    "translation": "Tu ne peux pas supprimer la dernière carte bancaire. Ajoute d'abord une autre carte bancaire pour la remplacer, puis supprime celle-ci."
-  },
   "%1Q8": {
     "original": "Dit maakt reeds opgeslagen betaalmethodes of automatische aanrekeningen onbruikbaar in het systeem.",
     "translation": "Cela rendra les modes de paiement enregistrés ou les prélèvements automatiques inutilisables dans le système."
@@ -15647,10 +15643,6 @@
     "original": "Foto toevoegen",
     "translation": "Ajouter une photo"
   },
-  "%Tg": {
-    "original": "Foto",
-    "translation": "Photo"
-  },
   "%Th": {
     "original": "nog",
     "translation": "encore"
@@ -20326,6 +20318,70 @@
   "%Zqd": {
     "original": "Stamhoofd heeft extra toegang nodig tot jouw Mollie-account om de transactiekosten van uitbetalingen op te halen. Koppel Mollie opnieuw om dit in orde te brengen.",
     "translation": "Stamhoofd a besoin d'un accès supplémentaire à votre compte Mollie pour récupérer les frais de transaction sur les paiements. Reconnectez Mollie afin de régler cela."
+  },
+  "%Zqe": {
+    "original": "Allemaal verwijderen",
+    "translation": "Tout supprimer"
+  },
+  "%Zqf": {
+    "original": "Een geblokkeerde betaalmethode kan niet als standaard ingesteld worden.",
+    "translation": "Un mode de paiement bloqué ne peut pas être défini par défaut."
+  },
+  "%Zqg": {
+    "original": "Deze betaalmethode is geblokkeerd (bv. na een terugvordering) en kan niet meer gebruikt worden. Voeg ze opnieuw toe om ze te deblokkeren.",
+    "translation": "Ce mode de paiement est bloqué (par exemple après un remboursement) et ne peut plus être utilisé. Ajoutez-le à nouveau pour le débloquer."
+  },
+  "%Zqi": {
+    "original": "Blokkeren",
+    "translation": "Bloquer"
+  },
+  "%Zqk": {
+    "original": "Je kan de laatste bruikbare betaalmethode niet verwijderen. Voeg eerst een nieuwe betaalmethode toe.",
+    "translation": "Vous ne pouvez pas supprimer le dernier mode de paiement utilisable. Ajoutez d'abord un nouveau mode de paiement."
+  },
+  "%Zql": {
+    "original": "De betaalmethode is gedeblokkeerd",
+    "translation": "Le mode de paiement a été débloqué"
+  },
+  "%Zqm": {
+    "original": "Zoeken is niet mogelijk in meldingen",
+    "translation": "La recherche n'est pas possible dans les notifications"
+  },
+  "%Zqn": {
+    "original": "Extra uploaden",
+    "translation": "Ajouter un fichier supplémentaire"
+  },
+  "%Zqo": {
+    "original": "Deze betaalmethode kan dan niet meer gebruikt worden voor nieuwe betalingen, tot ze opnieuw toegevoegd of gedeblokkeerd wordt.",
+    "translation": "Ce mode de paiement ne pourra plus être utilisé pour de nouveaux paiements tant qu'il n'est pas réajouté ou débloqué."
+  },
+  "%Zqp": {
+    "original": "Nieuwe inschrijving",
+    "translation": "Nouvelle inscription"
+  },
+  "%Zqq": {
+    "original": "Ben je zeker dat je {cardNumber} wilt blokkeren?",
+    "translation": "Êtes-vous sûr de vouloir bloquer {cardNumber} ?"
+  },
+  "%Zqr": {
+    "original": "De betaalmethode is geblokkeerd",
+    "translation": "Le mode de paiement est bloqué"
+  },
+  "%Zqs": {
+    "original": "Deblokkeren",
+    "translation": "Débloquer"
+  },
+  "%Zqt": {
+    "original": "Foto {number}",
+    "translation": "Photo {number}"
+  },
+  "%Zqu": {
+    "original": "De eerste foto zal gebruikt worden als omslagfoto van dit product.",
+    "translation": "La première photo sera utilisée comme image de couverture de ce produit."
+  },
+  "%Zqv": {
+    "original": "Deze betaalmethode is geblokkeerd en kan niet meer gebruikt worden. Voeg een nieuwe betaalmethode toe.",
+    "translation": "Ce mode de paiement est bloqué et ne peut plus être utilisé. Veuillez ajouter un nouveau mode de paiement."
   },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Stamhoofd. Voor Microsoft kan je",
