@@ -495,8 +495,8 @@ export class Invoice extends AutoEncoder {
             });
         }
 
-        // Keep the sum of all balance items.
-        const balanceItemsMap: Map<string, { balanceItem: BalanceItem; amount: number }> = new Map();
+        // Keep the sum of all balance items, split by sign so a payment and its refund can be shown as two rows
+        const balanceItemsMap: Map<string, { balanceItem: BalanceItem; positive: number; negative: number }> = new Map();
 
         for (const payment of this.payments) {
             for (const item of payment.balanceItemPayments) {
@@ -504,11 +504,16 @@ export class Invoice extends AutoEncoder {
                 if (!data) {
                     data = {
                         balanceItem: item.balanceItem,
-                        amount: 0,
+                        positive: 0,
+                        negative: 0,
                     };
                     balanceItemsMap.set(item.balanceItem.id, data);
                 }
-                data.amount += item.price;
+                if (item.price > 0) {
+                    data.positive += item.price;
+                } else {
+                    data.negative += item.price;
+                }
             }
 
             if (payment.payingOrganizationId) {
@@ -526,17 +531,24 @@ export class Invoice extends AutoEncoder {
         const invoicedItems: InvoicedBalanceItem[] = [];
 
         for (const item of balanceItemsMap.values()) {
-            if (item.amount === 0) {
-                // Remove zero invoicedItems
-                continue;
-            }
-            const invoiced = InvoicedBalanceItem.createFor(item.balanceItem, item.amount);
+            const sum = item.positive + item.negative;
 
-            // Remove zero invoicedItems if they were for a package (activation of a free package should not be invoiced)
-            if (invoiced.totalWithoutVAT === 0 && item.balanceItem.type === BalanceItemType.STPackage) {
-                continue;
+            // Amounts that cancel each other out (e.g. a payment and its refund) stay visible as two rows
+            const amounts = sum === 0 && item.positive !== 0 ? [item.positive, item.negative] : [sum];
+
+            for (const amount of amounts) {
+                if (amount === 0) {
+                    // Remove zero invoicedItems
+                    continue;
+                }
+                const invoiced = InvoicedBalanceItem.createFor(item.balanceItem, amount);
+
+                // Remove zero invoicedItems if they were for a package (activation of a free package should not be invoiced)
+                if (invoiced.totalWithoutVAT === 0 && item.balanceItem.type === BalanceItemType.STPackage) {
+                    continue;
+                }
+                invoicedItems.push(invoiced);
             }
-            invoicedItems.push(invoiced);
         }
 
         invoicedItems.sort((a, b) => {

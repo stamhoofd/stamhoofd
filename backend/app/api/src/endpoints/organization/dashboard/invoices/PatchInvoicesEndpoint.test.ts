@@ -94,7 +94,7 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
 
     /**
      * Builds an invoice struct (PUT body) for two unlinked payments of 10 and -10 euro that cancel each other out.
-     * Both payments get their own balance item, unless `sameBalanceItem` is set: then the items cancel each other out too and the struct has no items.
+     * Both payments get their own balance item, unless `sameBalanceItem` is set: then both rows are for one balance item of 10 euro (a payment and its refund).
      */
     const buildZeroInvoice = async ({ organization, customer, isReceipt = false, sameBalanceItem = false }: { organization: Organization; customer: PaymentCustomer; isReceipt?: boolean; sameBalanceItem?: boolean }) => {
         const struct = InvoiceStruct.create({
@@ -103,6 +103,12 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
             customer,
             isReceipt,
         });
+
+        const sharedBalanceItem = sameBalanceItem ? await createBalanceItem({ organization }) : null;
+        if (sharedBalanceItem) {
+            sharedBalanceItem.VATPercentage = 0;
+            await sharedBalanceItem.save();
+        }
 
         for (const price of [10_00, -10_00]) {
             const payment = new Payment();
@@ -113,7 +119,9 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
             await payment.save();
             struct.payments.push(PaymentGeneral.create({ id: payment.id, method: payment.method, status: payment.status, price: payment.price }));
 
-            if (!sameBalanceItem) {
+            if (sharedBalanceItem) {
+                struct.addItem(InvoicedBalanceItemStruct.createFor(sharedBalanceItem.getStructure(), price));
+            } else {
                 const balanceItem = await createBalanceItem({ organization, unitPrice: price });
                 balanceItem.VATPercentage = 0;
                 await balanceItem.save();
@@ -158,7 +166,7 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
             expect(html).toContain('Dit is geen factuur');
         });
 
-        test('a zero receipt can be created without items when the balance items cancel each other out', async () => {
+        test('a payment and its refund on the same balance item are two rows on a zero receipt', async () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({
                 organization,
@@ -167,19 +175,55 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
 
             const body = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
             const struct = await buildZeroInvoice({ organization, customer: PaymentCustomer.create({}), isReceipt: true, sameBalanceItem: true });
-            expect(struct.items.length).toBe(0);
             body.addPut(struct);
             const [receipt] = (await patchInvoices({ body, organization, user })).body;
 
             expect(receipt.number).toBe('BON-000001');
             expect(receipt.totalWithVAT).toBe(0);
-            expect(receipt.items.length).toBe(0);
+            expect(receipt.items.map(i => i.balanceInvoicedAmount).sort((a, b) => a - b)).toEqual([-10_00, 10_00]);
             expect(receipt.pdf).not.toBeNull();
+
+            const balanceItem = await BalanceItem.getByID(struct.items[0].balanceItemId);
+            expect(balanceItem!.priceInvoiced).toBe(0);
 
             for (const p of struct.payments) {
                 const payment = await Payment.getByID(p.id);
                 expect(payment!.invoiceId).toBe(receipt.id);
             }
+        });
+
+        test('multiple rows on one balance item are validated on their sum', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            const balanceItem = await createBalanceItem({ organization });
+            balanceItem.VATPercentage = 0;
+            await balanceItem.save();
+
+            const payment = new Payment();
+            payment.organizationId = organization.id;
+            payment.method = PaymentMethod.PointOfSale;
+            payment.status = PaymentStatus.Succeeded;
+            payment.price = 20_00;
+            await payment.save();
+
+            const struct = InvoiceStruct.create({
+                organizationId: organization.id,
+                seller: Company.create({ name: 'Seller' }),
+                customer: PaymentCustomer.create({}),
+                payments: [PaymentGeneral.create({ id: payment.id, method: payment.method, status: payment.status, price: payment.price })],
+            });
+
+            // Two rows of 10 euro each on a balance item of 10 euro: each row fits on its own, the sum does not
+            struct.addItem(InvoicedBalanceItemStruct.createFor(balanceItem.getStructure(), 10_00));
+            struct.addItem(InvoicedBalanceItemStruct.createFor(balanceItem.getStructure(), 10_00));
+
+            const body = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
+            body.addPut(struct);
+            await expect(patchInvoices({ body, organization, user })).rejects.toThrow(STExpect.errorWithCode('cannot_invoice_balance_item'));
         });
 
         test('a zero invoice is still rejected', async () => {

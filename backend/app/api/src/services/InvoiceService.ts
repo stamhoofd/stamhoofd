@@ -32,8 +32,7 @@ export class InvoiceService {
         struct.updatePrices();
         struct.validateVATRates();
 
-        // A zero receipt marks payments that cancel each other out as booked. Its balance items can cancel
-        // each other out completely, leaving no items at all.
+        // A zero receipt marks payments that cancel each other out as booked
         const isZeroReceipt = model.isReceipt && struct.totalWithVAT === 0;
 
         if (struct.totalWithVAT === 0 && !model.isReceipt) {
@@ -45,18 +44,18 @@ export class InvoiceService {
             });
         }
 
-        if (struct.items.length === 0 && !isZeroReceipt) {
-            throw new SimpleError({
-                code: 'missing_items',
-                message: 'Cannot create invoice without items',
-            });
-        }
-
         if (isZeroReceipt && struct.payments.length === 0) {
             throw new SimpleError({
                 code: 'missing_payments',
                 message: 'Cannot create a zero receipt without payments',
                 human: $t('Een aankoopbewijs van 0 euro kan enkel aangemaakt worden voor betalingen.'),
+            });
+        }
+
+        if (struct.items.length === 0) {
+            throw new SimpleError({
+                code: 'missing_items',
+                message: 'Cannot create invoice without items',
             });
         }
 
@@ -170,23 +169,7 @@ export class InvoiceService {
         await model.save();
 
         try {
-            // Create balances
             for (const item of struct.items) {
-                const balanceItem = balanceItems.find(b => b.id === item.balanceItemId);
-                if (!balanceItem || balanceItem.organizationId !== model.organizationId) {
-                    throw new SimpleError({
-                        statusCode: 404,
-                        code: 'not_found',
-                        message: 'Balance item not found',
-                    });
-                }
-
-                // Todo: check we are not invoicing more than maximum invoiceable for these items
-                const maximumInvoiceable = balanceItem.priceDue; // € - 10
-                const alreadyInvoiced = balanceItem.priceInvoiced; // € 5
-                const left = maximumInvoiceable - alreadyInvoiced; // € -15
-                const goingToInvoice = item.balanceInvoicedAmount;
-
                 if (item.quantity === 0) {
                     // should not be saved!
                     throw new SimpleError({
@@ -196,6 +179,23 @@ export class InvoiceService {
                         human: $t('%1RZ'),
                     });
                 }
+            }
+
+            // Validate per balance item: the same balance item can appear in multiple rows (e.g. a payment and its refund)
+            for (const balanceItemId of balanceItemIds) {
+                const balanceItem = balanceItems.find(b => b.id === balanceItemId);
+                if (!balanceItem || balanceItem.organizationId !== model.organizationId) {
+                    throw new SimpleError({
+                        statusCode: 404,
+                        code: 'not_found',
+                        message: 'Balance item not found',
+                    });
+                }
+
+                const maximumInvoiceable = balanceItem.priceDue; // € - 10
+                const alreadyInvoiced = balanceItem.priceInvoiced; // € 5
+                const left = maximumInvoiceable - alreadyInvoiced; // € -15
+                const goingToInvoice = struct.items.filter(i => i.balanceItemId === balanceItemId).reduce((sum, i) => sum + i.balanceInvoicedAmount, 0);
 
                 // We do allow to credit something that was wrongfully invoiced (possible on wrong invoice details).
                 // but only manually, not automatic.
@@ -276,6 +276,11 @@ export class InvoiceService {
                         }
                     }
                 }
+            }
+
+            // Create balances
+            for (const item of struct.items) {
+                const balanceItem = balanceItems.find(b => b.id === item.balanceItemId)!;
 
                 const invoiced = new InvoicedBalanceItem();
                 invoiced.invoiceId = model.id;
