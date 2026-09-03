@@ -19,3 +19,32 @@ export const throttle = <T extends any[]>(func: (...args: T) => unknown | Promis
         }, limit - (Date.now() - lastRan));
     };
 };
+
+/**
+ * This is a real throttle. The throttle method in utility is a debounce.
+ */
+export function realThrottle(mainFunction: (...args: unknown[]) => unknown, delay: number) {
+    let timerFlag: ReturnType<typeof setTimeout> | null = null; // Variable to keep track of the timer
+    let runAtEnd = false;
+
+    // Returning a throttled version
+    return (...args: unknown[]) => {
+        if (timerFlag === null) { // If there is no timer currently running
+            requestAnimationFrame(() => {
+                mainFunction(...args); // Execute the main function
+            });
+            runAtEnd = false;
+            timerFlag = setTimeout(() => { // Set a timer to clear the timerFlag after the specified delay
+                requestAnimationFrame(() => {
+                    timerFlag = null; // Clear the timerFlag to allow the main function to be executed again
+                    if (runAtEnd) {
+                        mainFunction(...args);
+                    }
+                });
+            }, delay);
+        } else {
+            // Make sure to run at the end of current period
+            runAtEnd = true;
+        }
+    };
+}
