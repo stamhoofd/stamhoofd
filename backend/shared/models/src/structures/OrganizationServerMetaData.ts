@@ -107,10 +107,10 @@ export class OrganizationServerMetaData extends AutoEncoder {
     /**
      * Mandates that can no longer be used to pay, even if they are still valid at the provider
      */
-    @field({ decoder: new ArrayDecoder(BlockedPaymentMandate), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(BlockedPaymentMandate), version: 417 })
     blockedMandates: BlockedPaymentMandate[] = [];
 
-    @field({ decoder: new ArrayDecoder(PaymentMandateChargebacks), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(PaymentMandateChargebacks), version: 417 })
     mandateChargebacks: PaymentMandateChargebacks[] = [];
 
     @field({ decoder: OpenIDClientConfiguration, nullable: true, version: 189 })
