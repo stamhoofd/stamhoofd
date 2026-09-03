@@ -40,7 +40,7 @@ export class QueryableModel extends Model {
         };
 
         const select = new SQLSelect(transformer, ...(columns.length === 0 ? [SQL.wildcard()] : columns));
-        return select.from(SQL.table(this.table));
+        return select.from(SQL.table(this.table)).primaryKey(this.primary.name);
     }
 
     static delete(): SQLDelete {

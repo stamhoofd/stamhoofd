@@ -22,7 +22,7 @@ export class SeedTools {
         return new BatchProcessor(options);
     }
 
-    static async loop<T extends { id: string }>(options: BatchProcessorArgs<T> & { query: SQLSelect<T> }) {
+    static async loop<T extends object>(options: BatchProcessorArgs<T> & { query: SQLSelect<T> }) {
         const batchProcessor = SeedTools.createBatchProcessor(options);
 
         const progressLogger = await LoggingTools.createProgressLoggerFromQuery(options.query.clone());
@@ -38,7 +38,7 @@ export class SeedTools {
         };
     }
 
-    static async loopBatched<T extends { id: string }>(options: { batchSize: number; batchAction: (items: T[]) => Promise<void>; query: SQLSelect<T> }) {
+    static async loopBatched<T extends object>(options: { batchSize: number; batchAction: (items: T[]) => Promise<void>; query: SQLSelect<T> }) {
         const progressLogger = await LoggingTools.createProgressLoggerFromQuery(options.query.clone());
 
         for await (const batch of options.query.limit(options.batchSize).allBatched()) {
