@@ -1,7 +1,8 @@
 import type { MemberWithUsersRegistrationsAndGroups } from '@stamhoofd/models';
 import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
-import { SQL, SQLOrderBy } from '@stamhoofd/sql';
+import { SQL, SQLIfNull, SQLOrderBy } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
+import { memberCachedBalanceForMemberOrganizationJoin } from '../helpers/outstandingBalanceJoin.js';
 
 export const memberSorters: SQLSortDefinitions<MemberWithUsersRegistrationsAndGroups> = {
     // WARNING! TEST NEW SORTERS THOROUGHLY!
@@ -88,5 +89,18 @@ export const memberSorters: SQLSortDefinitions<MemberWithUsersRegistrationsAndGr
                 direction,
             });
         },
+    },
+    amountOpen: {
+        getValue(a) {
+            return 0;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: new SQLIfNull(SQL.column('memberCachedBalance', 'amountOpen'), 0),
+                direction,
+            });
+        },
+        join: memberCachedBalanceForMemberOrganizationJoin,
+        select: [SQL.column('memberCachedBalance', 'amountOpen')],
     },
 };
