@@ -691,9 +691,9 @@ defineExpose({
                 .thumbnail {
                     border-radius: $border-radius;
                     border: 2px solid $color-border;
-                    width: 32px;
-                    height: 32px;
                     cursor: pointer;
+                    display: grid;
+                    place-content: center;
 
                     transition: border-color .2s ease-out;
 
@@ -706,10 +706,10 @@ defineExpose({
                     }
 
                     img {
-                        object-fit: cover;
-                        width: 100%;
-                        height: 100%;
-                        border-radius: $border-radius;
+                        object-fit: fill;
+                        height: 48px;
+                        border-radius: $border-radius / 2;
+                        margin: 2px;
                     }
                 }
             }
