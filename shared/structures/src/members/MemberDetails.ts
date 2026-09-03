@@ -888,7 +888,7 @@ export class MemberDetails extends AutoEncoder {
         const mergeIdMap: Map<string, string> = new Map();
 
         for (const member of members) {
-            for (const [index, object] of (member[type] as T[]).entries()) {
+            for (const object of member[type] as T[]) {
                 if (object.name.length <= 3) {
                     continue;
                 }
@@ -911,18 +911,23 @@ export class MemberDetails extends AutoEncoder {
                 group.push({
                     member,
                     object: object,
-                    setObject(object: T) {
-                        const previous = member[type][index];
+                    setObject(mergedObject: T) {
+                        const currentIndex = member[type].findIndex(current => current === object);
+                        if (currentIndex === -1) {
+                            return;
+                        }
 
-                        if (type === 'parents' && (previous as Parent).taxDependent !== (object as Parent).taxDependent) {
-                            const parent = (object as Parent).clone();
+                        const previous = member[type][currentIndex];
+
+                        if (type === 'parents' && (previous as Parent).taxDependent !== (mergedObject as Parent).taxDependent) {
+                            const parent = (mergedObject as Parent).clone();
                             parent.taxDependent = (previous as Parent).taxDependent;
-                            member.parents[index] = parent;
+                            member.parents[currentIndex] = parent;
 
                             return;
                         }
 
-                        member[type][index] = object.clone();
+                        member[type][currentIndex] = mergedObject.clone();
                     },
                     reviewDate: object.updatedAt ?? member.reviewTimes.getLastReview(type) ?? object.createdAt,
                     createdAt: object.createdAt,
