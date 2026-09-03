@@ -76,6 +76,17 @@ export class PaymentMandate extends AutoEncoder {
     @field({ decoder: DateDecoder })
     createdAt: Date;
 
+    /**
+     * Set when the mandate was blocked on our side (e.g. after a chargeback). The mandate can still be valid at
+     * the provider, but it can no longer be used for new payments.
+     */
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    blockedAt: Date | null = null;
+
+    get isBlocked() {
+        return this.blockedAt !== null;
+    }
+
     get identifier() {
         if (this.details.iban) {
             return Formatter.iban(this.details.iban);

@@ -1,5 +1,5 @@
 import type { User } from '@stamhoofd/models';
-import { Organization } from '@stamhoofd/models';
+import { BlockedPaymentMandate, Organization, PaymentMandateChargebacks } from '@stamhoofd/models';
 import { Platform } from '@stamhoofd/models';
 import { PaymentMandateStatus } from '@stamhoofd/structures/PaymentMandate.js';
 import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
@@ -38,7 +38,172 @@ export class PaymentMandateService {
             return [];
         }
 
-        return await mollieService.getMandates({ payingOrganization, user });
+        const mandates = await mollieService.getMandates({ payingOrganization, user });
+        this.applyBlockedMandates(mandates, payingOrganization);
+        return mandates;
+    }
+
+    /**
+     * A block applies to every mandate for the same card or bank account (also ones created after the block),
+     * so re-adding the same card does not make it usable again.
+     */
+    static applyBlockedMandates(mandates: PaymentMandate[], payingOrganization: Organization) {
+        const blockedIdentifiers = new Map<string, Date>();
+
+        for (const blocked of payingOrganization.serverMeta.blockedMandates) {
+            if (blocked.identifier) {
+                const existing = blockedIdentifiers.get(blocked.identifier);
+                if (!existing || existing > blocked.blockedAt) {
+                    blockedIdentifiers.set(blocked.identifier, blocked.blockedAt);
+                }
+            }
+        }
+
+        for (const mandate of mandates) {
+            const blocked = payingOrganization.serverMeta.blockedMandates.find(b => b.id === mandate.id);
+            if (blocked) {
+                mandate.blockedAt = blocked.blockedAt;
+
+                // Blocks stored without identifier
+                if (mandate.identifier) {
+                    const existing = blockedIdentifiers.get(mandate.identifier);
+                    if (!existing || existing > blocked.blockedAt) {
+                        blockedIdentifiers.set(mandate.identifier, blocked.blockedAt);
+                    }
+                }
+            }
+        }
+
+        for (const mandate of mandates) {
+            if (!mandate.blockedAt && mandate.identifier) {
+                mandate.blockedAt = blockedIdentifiers.get(mandate.identifier) ?? null;
+            }
+        }
+    }
+
+    /**
+     * Block a mandate on our side only (it stays valid at the provider), so it can no longer be used for
+     * new payments. Other mandates for the same card or bank account are blocked too.
+     */
+    static async blockMandate({ mandateId, sellingOrganization, payingOrganizationId, paymentId }: {
+        mandateId: string;
+        sellingOrganization: Organization;
+        payingOrganizationId: string;
+        paymentId: string | null;
+    }) {
+        const payingOrganization = await Organization.getByID(payingOrganizationId, true);
+
+        const mandates = await PaymentMandateService.getMandates({
+            sellingOrganization,
+            user: null,
+            payingOrganization,
+        });
+        const match = mandates.find(m => m.id === mandateId);
+        const identifier = match?.identifier ?? null;
+        const ids = new Set([mandateId]);
+
+        if (identifier) {
+            for (const mandate of mandates) {
+                if (mandate.identifier === identifier) {
+                    ids.add(mandate.id);
+                }
+            }
+        }
+
+        let changed = false;
+        for (const id of ids) {
+            if (payingOrganization.serverMeta.blockedMandates.find(b => b.id === id)) {
+                continue;
+            }
+            console.log('Blocking mandate ' + id + ' for organization ' + payingOrganization.id + ' ' + payingOrganization.name);
+            payingOrganization.serverMeta.blockedMandates.push(BlockedPaymentMandate.create({ id, identifier, paymentId }));
+            changed = true;
+        }
+
+        if (payingOrganization.serverMeta.mollieMandateId && ids.has(payingOrganization.serverMeta.mollieMandateId)) {
+            // Move the default to the first usable mandate
+            this.applyBlockedMandates(mandates, payingOrganization);
+            const replacement = this.groupByMandate(mandates).mandates.find(m => !m.isBlocked);
+            if (replacement) {
+                console.log('Changing default mandate to ' + replacement.id + ' for organization ' + payingOrganization.id);
+                payingOrganization.serverMeta.mollieMandateId = replacement.id;
+                changed = true;
+            }
+        }
+
+        if (changed) {
+            await payingOrganization.save();
+        }
+    }
+
+    /**
+     * Keep the most recent chargebacks per mandate (last 12 months, at most 5)
+     */
+    static async registerChargeback({ mandateId, sellingOrganization, payingOrganizationId, date }: {
+        mandateId: string;
+        sellingOrganization: Organization;
+        payingOrganizationId: string;
+        date: Date;
+    }) {
+        const payingOrganization = await Organization.getByID(payingOrganizationId, true);
+        let entry = payingOrganization.serverMeta.mandateChargebacks.find(c => c.id === mandateId);
+
+        if (!entry) {
+            const mandates = await PaymentMandateService.getMandates({
+                sellingOrganization,
+                user: null,
+                payingOrganization,
+            });
+            entry = PaymentMandateChargebacks.create({
+                id: mandateId,
+                identifier: mandates.find(m => m.id === mandateId)?.identifier ?? null,
+            });
+            payingOrganization.serverMeta.mandateChargebacks.push(entry);
+        }
+
+        entry.add(date);
+        await payingOrganization.save();
+    }
+
+    /**
+     * Lift the block of a mandate and of all mandates for the same card or bank account. Used when the
+     * card or account is validated again with a new payment, or when a seller unblocks it manually.
+     */
+    static async unblockMandate({ mandateId, sellingOrganization, payingOrganizationId }: {
+        mandateId: string;
+        sellingOrganization: Organization;
+        payingOrganizationId: string;
+    }) {
+        const payingOrganization = await Organization.getByID(payingOrganizationId, true);
+        if (payingOrganization.serverMeta.blockedMandates.length === 0) {
+            return;
+        }
+
+        const mandates = await PaymentMandateService.getMandates({
+            sellingOrganization,
+            user: null,
+            payingOrganization,
+        });
+        const match = mandates.find(m => m.id === mandateId);
+        const identifier = match?.identifier ?? payingOrganization.serverMeta.blockedMandates.find(b => b.id === mandateId)?.identifier ?? null;
+        const ids = new Set([mandateId]);
+
+        if (identifier) {
+            for (const mandate of mandates) {
+                if (mandate.identifier === identifier) {
+                    ids.add(mandate.id);
+                }
+            }
+        }
+
+        const remaining = payingOrganization.serverMeta.blockedMandates.filter(b => !ids.has(b.id) && !(identifier && b.identifier === identifier));
+        if (remaining.length === payingOrganization.serverMeta.blockedMandates.length) {
+            return;
+        }
+
+        console.log('Unblocking mandate ' + mandateId + ' for organization ' + payingOrganization.id + ' ' + payingOrganization.name);
+        payingOrganization.serverMeta.blockedMandates = remaining;
+        await payingOrganization.save();
     }
 
     static async deleteMandate({ mandateId, sellingOrganization, user, payingOrganization }: {
@@ -84,12 +249,13 @@ export class PaymentMandateService {
             }
         }
 
-        if (grouped.size <= 1) {
+        const usableGroups = [...grouped.values()].filter(group => group.some(m => m.status === PaymentMandateStatus.Valid && !m.isBlocked));
+        if (!match.isBlocked && usableGroups.length <= 1) {
             if (!Context.optionalAuth?.hasPlatformFullAccess()) {
                 throw new SimpleError({
                     code: 'not_allowed',
-                    message: 'You cannot delete the last mandate',
-                    human: $t('%1Q7'),
+                    message: 'You cannot delete the last usable mandate',
+                    human: $t('Je kan de laatste bruikbare betaalmethode niet verwijderen. Voeg eerst een nieuwe betaalmethode toe.'),
                 });
             }
         }
@@ -173,6 +339,8 @@ export class PaymentMandateService {
         base.sort((a, b) => {
             if (a.status === PaymentMandateStatus.Valid && b.status !== PaymentMandateStatus.Valid) return -1;
             if (a.status !== PaymentMandateStatus.Valid && b.status === PaymentMandateStatus.Valid) return 1;
+            if (!a.isBlocked && b.isBlocked) return -1;
+            if (a.isBlocked && !b.isBlocked) return 1;
             if (a.isDefault && !b.isDefault) return -1;
             if (!a.isDefault && b.isDefault) return 1;
             return b.createdAt.getTime() - a.createdAt.getTime();
@@ -201,6 +369,8 @@ export class PaymentMandateService {
         cleaned.sort((a, b) => {
             if (a.status === PaymentMandateStatus.Valid && b.status !== PaymentMandateStatus.Valid) return -1;
             if (a.status !== PaymentMandateStatus.Valid && b.status === PaymentMandateStatus.Valid) return 1;
+            if (!a.isBlocked && b.isBlocked) return -1;
+            if (a.isBlocked && !b.isBlocked) return 1;
             if (a.isDefault && !b.isDefault) return -1;
             if (!a.isDefault && b.isDefault) return 1;
             return b.createdAt.getTime() - a.createdAt.getTime();

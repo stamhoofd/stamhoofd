@@ -1,6 +1,6 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Token } from '@stamhoofd/models';
-import { BalanceItem, GroupFactory, MemberFactory, Organization, OrganizationFactory, RegistrationFactory, STPackage, STPackageFactory } from '@stamhoofd/models';
+import { BalanceItem, BlockedPaymentMandate, GroupFactory, MemberFactory, Organization, OrganizationFactory, RegistrationFactory, STPackage, STPackageFactory } from '@stamhoofd/models';
 import {
     Address,
     BalanceItemStatus,
@@ -759,6 +759,30 @@ describe('Endpoint.OrganizationCheckoutEndpoint', () => {
             await renewed.refresh();
             expect(renewed.validAt).not.toBeNull();
             expectStartsAtEndOfCurrent(renewed, current);
+        });
+
+        test('Members renewal with a blocked mandate is refused', async () => {
+            freezeDate();
+            const { organization, token, customerCompany } = await createBuyer();
+            const mandate = await setupExistingMandate(organization);
+
+            const fresh = (await Organization.getByID(organization.id))!;
+            fresh.serverMeta.blockedMandates.push(BlockedPaymentMandate.create({ id: mandate.id }));
+            await fresh.save();
+
+            const current = await createActivePackage(organization, {
+                bundle: STPackageBundle.Members,
+                validUntil: new Date(Date.now() + 30 * DAY),
+            });
+
+            const checkout = buildRenewalCheckout({
+                customerCompany,
+                renewPackageIds: [current.id],
+                mandate,
+            });
+
+            await expect(post(membershipOrganization.id, checkout, organization, token)).rejects.toMatchObject({ code: 'mandate_blocked' });
+            expect(mollieMocker.payments).toHaveLength(0);
         });
 
         test('Members renewal via package bundles starts at the end of the current package (existing mandate)', async () => {

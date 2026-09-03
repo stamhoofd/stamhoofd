@@ -101,7 +101,7 @@
                 <h2 class="style-with-button">
                     <div>{{ $t('%1UB') }}</div>
                 </h2>
-                <PaymentMandatesBox :paying-organization-id="detailedItem.object.id" :selling-organization-id="detailedItem.organizationId" />
+                <PaymentMandatesBox :paying-organization-id="detailedItem.object.id" :selling-organization-id="detailedItem.organizationId" :can-block="auth.canManagePayments()" />
             </div>
 
             <template v-if="pendingPayments.length > 0">

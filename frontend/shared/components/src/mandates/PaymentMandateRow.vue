@@ -6,11 +6,16 @@
         
         <h3 class="style-title-list">
             <span>{{ mandate.name }}</span>
-            <span v-if="mandate.isDefault" class="style-tag success">{{ $t('%v6') }}</span>
+            <span v-if="mandate.isBlocked" class="style-tag error">{{ $t('Geblokkeerd') }}</span>
+            <span v-else-if="mandate.isDefault" class="style-tag success">{{ $t('%v6') }}</span>
         </h3>
 
         <p v-if="mandate.description" class="style-description-small">
             {{ mandate.description }}
+        </p>
+
+        <p v-if="mandate.isBlocked" class="style-description-small">
+            {{ $t('Deze betaalmethode is geblokkeerd (bv. na een terugvordering) en kan niet meer gebruikt worden. Voeg ze opnieuw toe om ze te deblokkeren.') }}
         </p>
 
         <p v-if="mandate.bankName" class="style-description-small">

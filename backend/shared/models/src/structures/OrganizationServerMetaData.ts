@@ -9,6 +9,58 @@ export class DripEmail extends AutoEncoder {
     date = new Date();
 }
 
+export class BlockedPaymentMandate extends AutoEncoder {
+    /**
+     * External mandate id of the provider
+     */
+    @field({ decoder: StringDecoder })
+    id: string;
+
+    @field({ decoder: DateDecoder })
+    blockedAt = new Date();
+
+    /**
+     * Card number or IBAN (PaymentMandate.identifier) of the blocked mandate, so newer mandates for the same
+     * card or account stay blocked even when this mandate is revoked at the provider
+     */
+    @field({ decoder: StringDecoder, nullable: true })
+    identifier: string | null = null;
+
+    /**
+     * The (chargeback) payment that caused the block, null when blocked manually
+     */
+    @field({ decoder: StringDecoder, nullable: true })
+    paymentId: string | null = null;
+}
+
+export class PaymentMandateChargebacks extends AutoEncoder {
+    /**
+     * External mandate id of the provider
+     */
+    @field({ decoder: StringDecoder })
+    id: string;
+
+    @field({ decoder: StringDecoder, nullable: true })
+    identifier: string | null = null;
+
+    /**
+     * Dates of the most recent chargebacks (last 12 months, at most 5)
+     */
+    @field({ decoder: new ArrayDecoder(DateDecoder) })
+    dates: Date[] = [];
+
+    static readonly maxDates = 5;
+    static readonly maxAge = 1000 * 60 * 60 * 24 * 365;
+
+    add(date: Date) {
+        const minimum = new Date(date.getTime() - PaymentMandateChargebacks.maxAge);
+        this.dates = [...this.dates, date]
+            .filter(d => d >= minimum)
+            .sort((a, b) => b.getTime() - a.getTime())
+            .slice(0, PaymentMandateChargebacks.maxDates);
+    }
+}
+
 export class OrganizationServerMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder, optional: true })
     privateDKIMKey?: string;
@@ -51,6 +103,15 @@ export class OrganizationServerMetaData extends AutoEncoder {
 
     @field({ decoder: StringDecoder, optional: true, nullable: true })
     mollieMandateId: string | null = null;
+
+    /**
+     * Mandates that can no longer be used to pay, even if they are still valid at the provider
+     */
+    @field({ decoder: new ArrayDecoder(BlockedPaymentMandate), ...NextVersion })
+    blockedMandates: BlockedPaymentMandate[] = [];
+
+    @field({ decoder: new ArrayDecoder(PaymentMandateChargebacks), ...NextVersion })
+    mandateChargebacks: PaymentMandateChargebacks[] = [];
 
     @field({ decoder: OpenIDClientConfiguration, nullable: true, version: 189 })
     ssoConfiguration: OpenIDClientConfiguration | null = null;

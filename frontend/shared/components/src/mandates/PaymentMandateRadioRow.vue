@@ -1,15 +1,20 @@
 <template>
-    <STGridItem :selectable="true" element-name="label" class="right-stack left-center">
+    <STGridItem :selectable="!mandate.isBlocked" element-name="label" class="right-stack left-center">
         <template #left>
-            <Radio v-model="model" name="choose-mandate" :value="mandate.id" />
+            <Radio v-model="model" name="choose-mandate" :value="mandate.id" :disabled="mandate.isBlocked" />
         </template>
 
         <h3 class="style-title-list">
             <span>{{ mandate.name }}</span>
-            <span v-if="mandate.isDefault && model === mandate.id" class="style-tag success">{{ $t('%v6') }}</span>
+            <span v-if="mandate.isBlocked" class="style-tag error">{{ $t('Geblokkeerd') }}</span>
+            <span v-else-if="mandate.isDefault && model === mandate.id" class="style-tag success">{{ $t('%v6') }}</span>
         </h3>
         <p v-if="mandate.description" class="style-description-small">
             {{ mandate.description }}
+        </p>
+
+        <p v-if="mandate.isBlocked" class="style-description-small">
+            {{ $t('Deze betaalmethode is geblokkeerd (bv. na een terugvordering) en kan niet meer gebruikt worden. Voeg ze opnieuw toe om ze te deblokkeren.') }}
         </p>
 
         <p v-if="mandate.bankName" class="style-description-small">
