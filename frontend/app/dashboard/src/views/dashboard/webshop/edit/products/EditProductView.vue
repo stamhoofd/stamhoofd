@@ -241,18 +241,26 @@
             </h2>
             <p>{{ $t('De eerste foto zal gebruikt worden als omslagfoto van dit product.') }}</p>
 
-            <div class="images-box">
-                <div v-for="image, index in images" :key="image.id" class="image-box">
-                    <img :src="getImageSrc(image)" class="image">
+            <STList v-model="images" :draggable="true">
+                <template #item="{item: image, index}">
+                    <STListItem class="right-stack">
+                        <template #left>
+                            <div class="product-image-preview">
+                                <ImageComponent :image="image" :auto-height="true" :max-height="125" />
+                            </div>
+                        </template>
 
-                    <div class="image-box-actions">
-                        <button type="button" class="button text only-icon-smartphone" @click="images.splice(index, 1)">
-                            <span class="icon trash" />
-                            <span>{{ $t('Verwijderen') }}</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
+                        <h3 class="style-title-list">
+                            {{ index === 0 ? $t('Omslagfoto') : $t('Foto {number}', { number: index + 1 }) }}
+                        </h3>
+
+                        <template #right>
+                            <button type="button" class="button icon trash gray" @click="removeImage(image)" />
+                            <span v-if="images.length > 1" class="button icon drag gray" @click.stop @contextmenu.stop />
+                        </template>
+                    </STListItem>
+                </template>
+            </STList>
         </template>
 
         <hr><h2>
@@ -446,6 +454,7 @@ import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';
 import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';
+import ImageComponent from '@stamhoofd/components/views/ImageComponent.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
@@ -861,21 +870,13 @@ const resolutions = computed(() => [
 const images = computed<Image[]>({
     get: () => patchedProduct.value.images,
     set: (images: Image[]) => {
-        const p = Product.patch({});
-
-        for (const i of patchedProduct.value.images) {
-            p.images.addDelete(i.id);
-        }
-
-        if (images.length > 0) {
-            for (const image of images) {
-                p.images.addPut(image);
-            }
-        }
-
-        addProductPatch(p);
+        addProductPatch(Product.patch({ images: images as any }));
     },
 });
+
+const removeImage = (image: Image) => {
+    images.value = images.value.filter(i => i.id !== image.id);
+};
 
 const newImage = computed({
     get: () => null,
@@ -888,10 +889,6 @@ const newImage = computed({
         }
     },
 });
-
-const getImageSrc = (image: Image) => {
-    return image.getPathForSize(140, undefined);
-};
 
 function addOptionMenu() {
     const optionMenu = OptionMenu.create({
@@ -1093,54 +1090,16 @@ defineExpose({ shouldNavigateAway });
 @use "@stamhoofd/scss/base/variables.scss" as *;
 
 .product-edit-view {
-    .images-box {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 15px;
+    .product-image-preview .image-component {
+        width: 80px;
+        margin: -5px 0;
 
-        .image-box {
-            position: relative;
-            margin: 0 -5px;
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            overflow: hidden;
+        img {
+            border-radius: $border-radius;
+        }
 
-            img.image {
-                margin: 5px;
-                max-height: 140px;
-                max-width: 100%;
-                border-radius: $border-radius;
-                align-self: flex-start;
-            }
-
-            .image-box-actions {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                flex-direction: column;
-
-                background-color: rgba(0, 0, 0, .75);
-                border-radius: $border-radius;
-
-                opacity: 0;
-                pointer-events: none;
-
-                transition: opacity .2s ease-out;
-            }
-
-            &:hover{
-                .image-box-actions {
-                    opacity: 1;
-                    pointer-events: all;
-                }
-            }
+        @media (max-width: 550px) {
+            width: 50px;
         }
     }
 }
