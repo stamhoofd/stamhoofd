@@ -100,6 +100,24 @@
                 </STList>
             </CategorizedBox>
 
+            <CategorizedBox v-if="(app !== 'admin' || scope === 'organization') && organization?.meta.packages.useMembers" icon="privacy" :title="$t('%Z9')">
+                <p>{{ $t('%ZA') }}</p>
+
+                <STList>
+                    <AccessRightPermissionRow :access-right="AccessRight.MemberReadFinancialData" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
+
+                    <AccessRightPermissionRow :access-right="AccessRight.MemberWriteFinancialData" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
+
+                    <AccessRightPermissionRow :access-right="AccessRight.MemberManageNRN" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
+
+                    <ResourcePermissionRow :role="patched" :resource="{id: '', name: $t('%1eC'), type: PermissionsResourceType.RecordCategories }" :inherited-roles="inheritedRoles" :configurable-access-rights="[]" type="resource" @patch:role="addPatch" />
+
+                    <ResourcePermissionRow v-for="{recordCategory, organization: recordCategoryOrganization} in recordCategories" :key="recordCategory.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: recordCategory.id, name: recordCategory.name.toString(), type: PermissionsResourceType.RecordCategories, description: !recordCategoryOrganization ? $t('%CS') : $t('%CT') }" :configurable-access-rights="[]" type="resource" @patch:role="addPatch" />
+
+                    <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.RecordCategories, patched, recordCategories.map(r => r.recordCategory))" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[]" type="resource" :unlisted="true" @patch:role="addPatch" />
+                </STList>
+            </CategorizedBox>
+
             <CategorizedBox v-if="senders.length" icon="email" :title="$t('%1DK')">
                 <p>{{ $t('%1D6') }}</p>
 
@@ -143,24 +161,6 @@
                     <ResourcePermissionRow :role="patched" :inherited-roles="inheritedRoles" :resource="{id: '', name: $t('%1AW'), type: PermissionsResourceType.Webshops }" :configurable-access-rights="[]" type="resource" @patch:role="addPatch" />
                     <ResourcePermissionRow v-for="webshop in webshops" :key="webshop.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: webshop.id, name: webshop.meta.name, type: PermissionsResourceType.Webshops }" :configurable-access-rights="webshop.hasTickets ? [AccessRight.WebshopScanTickets] : []" type="resource" @patch:role="addPatch" />
                     <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.Webshops, patched, webshops)" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.WebshopScanTickets]" type="resource" :unlisted="true" @patch:role="addPatch" />
-                </STList>
-            </CategorizedBox>
-
-            <CategorizedBox v-if="(app !== 'admin' || scope === 'organization') && organization?.meta.packages.useMembers" icon="privacy" :title="$t('%Z9')">
-                <p>{{ $t('%ZA') }}</p>
-
-                <STList>
-                    <AccessRightPermissionRow :access-right="AccessRight.MemberReadFinancialData" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
-
-                    <AccessRightPermissionRow :access-right="AccessRight.MemberWriteFinancialData" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
-
-                    <AccessRightPermissionRow :access-right="AccessRight.MemberManageNRN" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
-
-                    <ResourcePermissionRow :role="patched" :resource="{id: '', name: $t('%1eC'), type: PermissionsResourceType.RecordCategories }" :inherited-roles="inheritedRoles" :configurable-access-rights="[]" type="resource" @patch:role="addPatch" />
-
-                    <ResourcePermissionRow v-for="{recordCategory, organization: recordCategoryOrganization} in recordCategories" :key="recordCategory.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: recordCategory.id, name: recordCategory.name.toString(), type: PermissionsResourceType.RecordCategories, description: !recordCategoryOrganization ? $t('%CS') : $t('%CT') }" :configurable-access-rights="[]" type="resource" @patch:role="addPatch" />
-
-                    <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.RecordCategories, patched, recordCategories.map(r => r.recordCategory))" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[]" type="resource" :unlisted="true" @patch:role="addPatch" />
                 </STList>
             </CategorizedBox>
 
