@@ -1,11 +1,13 @@
 import type { ManyToOneRelation } from '@simonbackx/simple-database';
 import { column } from '@simonbackx/simple-database';
+import { EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
 import type {Invoice} from './Invoice.js';
 import type {BalanceItem} from './BalanceItem.js';
 import type { VATExcemptReason } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType } from '@stamhoofd/structures';
 
 /**
  * Keeps track of all the created invoices of a balance item, which contains how many balance was invoiced (including VAT)
@@ -30,11 +32,26 @@ export class InvoicedBalanceItem extends QueryableModel {
     @column({ type: 'string' })
     balanceItemId: string;
 
+    @column({ type: 'string', decoder: new EnumDecoder(BalanceItemType) })
+    type = BalanceItemType.Other;
+
     @column({ type: 'string' })
     name = '';
 
     @column({ type: 'string' })
     description = '';
+
+    /**
+     * Copied from the balance item at the time of invoicing, so invoices can be ordered and grouped without loading the balance items.
+     */
+    @column({ decoder: new MapDecoder(new EnumDecoder(BalanceItemRelationType), BalanceItemRelation), type: 'json' })
+    relations: Map<BalanceItemRelationType, BalanceItemRelation> = new Map();
+
+    @column({ type: 'datetime', nullable: true })
+    startDate: Date | null = null;
+
+    @column({ type: 'datetime', nullable: true })
+    endDate: Date | null = null;
 
     /**
      * Price of the balance that was actually invoiced. Always includes VAT.

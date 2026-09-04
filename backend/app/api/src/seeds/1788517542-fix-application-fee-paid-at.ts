@@ -26,8 +26,7 @@ export default new Migration(async () => {
         query: Payment.select()
             .where('method', PaymentMethod.AccountDeductions)
             .where('status', PaymentStatus.Succeeded)
-            .where(new SQLWhereLike(SQL.column(Payment.table, 'reference'), scalarToSQLExpression(FEE_PAYMENT_REFERENCE_PREFIX + '%')))
-            .orderBy('id', 'ASC'),
+            .where(new SQLWhereLike(SQL.column(Payment.table, 'reference'), scalarToSQLExpression(FEE_PAYMENT_REFERENCE_PREFIX + '%'))),
         batchSize: 100,
         batchAction: async (payments: Payment[]) => {
             const { balanceItemPayments, balanceItems } = await Payment.loadBalanceItems(payments);

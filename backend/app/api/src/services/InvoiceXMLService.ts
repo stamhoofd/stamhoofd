@@ -2,7 +2,7 @@ import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { Invoice } from '@stamhoofd/models';
 import { Image, InvoicedBalanceItem, Organization, Payment } from '@stamhoofd/models';
-import { File, getPeppolCategoryCode, getVATExcemptInvoiceNote, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
+import { File, getPeppolCategoryCode, getVATExcemptInvoiceNote, InvoicedBalanceItem as InvoicedBalanceItemStruct, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -301,7 +301,7 @@ export class InvoiceXMlService {
         </cac:LegalMonetaryTotal>`;
 
         // Invoice lines
-        const invoicedItems = await InvoicedBalanceItem.select().where('invoiceId', invoice.id).fetch();
+        const invoicedItems = InvoicedBalanceItemStruct.sort(await InvoicedBalanceItem.select().where('invoiceId', invoice.id).fetch());
 
         for (const item of invoicedItems) {
             // We need to show prices exluding VAT and round here if needed

@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { Company, File, PaymentCustomer, VATSubtotal } from '@stamhoofd/structures';
+import { Company, File, InvoicedBalanceItem as InvoicedBalanceItemStruct, PaymentCustomer, VATSubtotal } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
@@ -160,7 +160,7 @@ export class Invoice extends QueryableModel {
             return { invoicedBalanceItems: [] };
         }
         // Load all the related models from the database so we can build the structures
-        const invoicedBalanceItems = await InvoicedBalanceItem.select().where('invoiceId', invoices.map(i => i.id)).fetch();
+        const invoicedBalanceItems = InvoicedBalanceItemStruct.sort(await InvoicedBalanceItem.select().where('invoiceId', invoices.map(i => i.id)).fetch());
         return { invoicedBalanceItems };
     }
 

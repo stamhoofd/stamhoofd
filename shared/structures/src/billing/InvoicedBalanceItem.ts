@@ -1,9 +1,9 @@
-import { AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { STMath } from '@stamhoofd/utility';
+import { Sorter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import type { BalanceItem } from '../BalanceItem.js';
-import { BalanceItemType, getVATExcemptPeppolTaxCategoryCode, VATExcemptReason } from '../BalanceItem.js';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, getVATExcemptPeppolTaxCategoryCode, VATExcemptReason } from '../BalanceItem.js';
 
 export function getPeppolCategoryCode(data: { VATPercentage: number; VATExcempt: VATExcemptReason | null }) {
     if (data.VATExcempt) {
@@ -25,6 +25,18 @@ export class InvoicedBalanceItem extends AutoEncoder {
 
     @field({ decoder: new EnumDecoder(BalanceItemType), version: 398 })
     type = BalanceItemType.Other;
+
+    /**
+     * Copied from the balance item at the time of invoicing, so invoices can be ordered and grouped without loading the balance items.
+     */
+    @field({ decoder: new MapDecoder(new EnumDecoder(BalanceItemRelationType), BalanceItemRelation), ...NextVersion })
+    relations: Map<BalanceItemRelationType, BalanceItemRelation> = new Map();
+
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    startDate: Date | null = null;
+
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    endDate: Date | null = null;
 
     @field({ decoder: StringDecoder })
     name = '';
@@ -127,6 +139,9 @@ export class InvoicedBalanceItem extends AutoEncoder {
         const item = new InvoicedBalanceItem();
         item.type = balanceItem.type;
         item.balanceItemId = balanceItem.id;
+        item.relations = new Map(balanceItem.relations);
+        item.startDate = balanceItem.startDate;
+        item.endDate = balanceItem.endDate;
         if (balanceItem.relations.size > 0 && !balanceItem.description) {
             item.name = balanceItem.itemTitle;
             item.description = balanceItem.itemDescription ?? '';
@@ -187,6 +202,32 @@ export class InvoicedBalanceItem extends AutoEncoder {
                 this.unitPrice = recalculated;
             }
         }
+    }
+
+    /**
+     * Orders invoice lines: items with a start date first (oldest first), then items without one.
+     * Within the same date, the highest price comes first.
+     */
+    static sort<T extends { startDate: Date | null; totalWithoutVAT: number; name: string; description: string }>(items: T[]): T[] {
+        return items.sort((a, b) => {
+            if (a.startDate && b.startDate) {
+                return Sorter.stack(
+                    Sorter.byDateValue(b.startDate, a.startDate),
+                    Sorter.byNumberValue(a.totalWithoutVAT, b.totalWithoutVAT),
+                    Sorter.byStringValue(a.name || a.description, b.name || b.description),
+                );
+            }
+            if (a.startDate) {
+                return -1;
+            }
+            if (b.startDate) {
+                return 1;
+            }
+            return Sorter.stack(
+                Sorter.byNumberValue(a.totalWithoutVAT, b.totalWithoutVAT),
+                Sorter.byStringValue(a.name || a.description, b.name || b.description),
+            );
+        });
     }
 
     /**

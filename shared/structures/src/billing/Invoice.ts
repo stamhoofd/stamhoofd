@@ -1,6 +1,6 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Formatter, Sorter, STMath } from '@stamhoofd/utility';
+import { Formatter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import type { BalanceItem } from '../BalanceItem.js';
 import { BalanceItemType, getVATExcemptInvoiceNote, VATExcemptReason } from '../BalanceItem.js';
@@ -457,6 +457,9 @@ export class Invoice extends AutoEncoder {
                         VATExcempt: items[0].VATExcempt,
                         name: items[0].name,
                         description: $t('%1UT'),
+                        relations: new Map(items[0].relations),
+                        startDate: items[0].startDate,
+                        endDate: items[0].endDate,
                     });
                     this.addItem(add);
                 } }
@@ -539,14 +542,7 @@ export class Invoice extends AutoEncoder {
             invoicedItems.push(invoiced);
         }
 
-        invoicedItems.sort((a, b) => {
-            return Sorter.stack(
-                Sorter.byNumberValue(a.totalWithoutVAT, b.totalWithoutVAT),
-                Sorter.byStringValue(a.name || a.description, b.name || b.description),
-            );
-        });
-
-        this.items = invoicedItems;
+        this.items = InvoicedBalanceItem.sort(invoicedItems);
         this.updatePrices();
     }
 }

@@ -5,7 +5,7 @@ import type { Invoice } from '@stamhoofd/models';
 import { Image, InvoicedBalanceItem, Organization, Payment, Platform } from '@stamhoofd/models';
 import { render } from '@stamhoofd/models/helpers/Handlebars.js';
 import type { Address } from '@stamhoofd/structures';
-import { CountryHelper, File, getVATExcemptInvoiceNote, getVATExcemptReasonName, PaymentMethod, PaymentMethodHelper, PaymentStatus, Version } from '@stamhoofd/structures';
+import { CountryHelper, File, getVATExcemptInvoiceNote, getVATExcemptReasonName, InvoicedBalanceItem as InvoicedBalanceItemStruct, PaymentMethod, PaymentMethodHelper, PaymentStatus, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import fs from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';
@@ -17,7 +17,7 @@ export class InvoicePdfService {
         const payments = await Payment.select().where('invoiceId', invoice.id).orderBy('createdAt').fetch();
         const payment = payments[0] ?? null;
 
-        const invoicedItems = await InvoicedBalanceItem.select().where('invoiceId', invoice.id).fetch();
+        const invoicedItems = InvoicedBalanceItemStruct.sort(await InvoicedBalanceItem.select().where('invoiceId', invoice.id).fetch());
 
         // Without items no goods or services moved: list the payments that cancel each other out instead
         const showPayments = invoicedItems.length === 0;

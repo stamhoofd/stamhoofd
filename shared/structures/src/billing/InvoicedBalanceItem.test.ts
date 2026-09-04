@@ -305,4 +305,59 @@ describe('InvoicedBalanceItem', () => {
             expect(invoicedItem.totalWithoutVAT).toBe(10_00); // rounded
         });
     });
+
+    describe('createFor details', () => {
+        test('copies relations, startDate and endDate from the balance item', () => {
+            const relations = new Map([
+                [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: 'group-1', name: new TranslatedString('Kapoenen') })],
+            ]);
+            const balanceItem = BalanceItem.create({
+                unitPrice: 5_00_00,
+                amount: 1,
+                VATPercentage: 21,
+                VATIncluded: true,
+                relations,
+                startDate: new Date('2025-09-01T00:00:00.000Z'),
+                endDate: new Date('2026-08-31T00:00:00.000Z'),
+            });
+
+            const invoicedItem = InvoicedBalanceItem.createFor(balanceItem, 5_00_00);
+
+            expect(invoicedItem.relations.get(BalanceItemRelationType.Group)?.id).toBe('group-1');
+            expect(invoicedItem.relations).not.toBe(relations);
+            expect(invoicedItem.startDate).toEqual(new Date('2025-09-01T00:00:00.000Z'));
+            expect(invoicedItem.endDate).toEqual(new Date('2026-08-31T00:00:00.000Z'));
+        });
+    });
+
+    describe('sort', () => {
+        function item(name: string, totalWithoutVAT: number, startDate: Date | null) {
+            return InvoicedBalanceItem.create({ name, unitPrice: totalWithoutVAT * 100, quantity: 1_00_00, startDate });
+        }
+
+        test('dated items come first from old to new, then undated items, both from high to low price', () => {
+            const items = [
+                item('undated cheap', 5_00, null),
+                item('new cheap', 1_00, new Date('2026-01-01')),
+                item('undated expensive', 50_00, null),
+                item('old', 10_00, new Date('2025-01-01')),
+                item('new expensive', 20_00, new Date('2026-01-01')),
+            ];
+
+            expect(InvoicedBalanceItem.sort(items).map(i => i.name)).toEqual([
+                'old',
+                'new expensive',
+                'new cheap',
+                'undated expensive',
+                'undated cheap',
+            ]);
+        });
+
+        test('same date and price falls back to the name', () => {
+            const date = new Date('2025-01-01');
+            const items = [item('B', 10_00, date), item('A', 10_00, date)];
+
+            expect(InvoicedBalanceItem.sort(items).map(i => i.name)).toEqual(['A', 'B']);
+        });
+    });
 });
