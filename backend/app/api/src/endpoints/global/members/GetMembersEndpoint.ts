@@ -157,7 +157,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            applySQLSorter(query, q.sort, sorters);
+            applySQLSorter(query, q.sort, sorters(organization?.id ?? null));
             query.limit(q.limit);
         }
 
@@ -255,6 +255,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     }
 
     static async buildData(requestQuery: LimitedFilteredRequest, permissionLevel = PermissionLevel.Read) {
+        const organization = Context.organization;
         const query = await GetMembersEndpoint.buildQuery(requestQuery, permissionLevel);
         let data: Member[];
 
@@ -284,7 +285,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
         if (members.length >= requestQuery.limit) {
             const lastObject = members[members.length - 1];
-            const nextFilter = getSortFilter(lastObject, sorters, requestQuery.sort);
+            const nextFilter = getSortFilter(lastObject, sorters(organization?.id ?? null), requestQuery.sort);
 
             next = new LimitedFilteredRequest({
                 filter: requestQuery.filter,

@@ -4,7 +4,7 @@ import { SQL, SQLIfNull, SQLOrderBy } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 import { memberCachedBalanceForMemberOrganizationJoin } from '../helpers/outstandingBalanceJoin.js';
 
-export const memberSorters: SQLSortDefinitions<MemberWithUsersRegistrationsAndGroups> = {
+export const memberSorters = (organizationId: string | null): SQLSortDefinitions<MemberWithUsersRegistrationsAndGroups> => ({
     // WARNING! TEST NEW SORTERS THOROUGHLY!
     // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
     // An example: sorting on 'name' is not a good idea, because it is a concatenation of two fields.
@@ -100,7 +100,8 @@ export const memberSorters: SQLSortDefinitions<MemberWithUsersRegistrationsAndGr
                 direction,
             });
         },
-        join: memberCachedBalanceForMemberOrganizationJoin,
+        join: memberCachedBalanceForMemberOrganizationJoin(organizationId),
         select: [SQL.column('memberCachedBalance', 'amountOpen')],
     },
-};
+}
+);
