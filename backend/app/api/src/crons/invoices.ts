@@ -49,7 +49,7 @@ async function invoices() {
     });
 }
 
-async function createInvoicesFor(organization: Organization) {
+export async function createInvoicesFor(organization: Organization) {
     const seller = organization.meta.companies[0];
     if (!seller) {
         return;
@@ -59,6 +59,10 @@ async function createInvoicesFor(organization: Organization) {
     const today = Formatter.luxon();
     const startDate = today.day <= 15 ? today.minus({ month: 3 }).startOf('month') : today.minus({ month: 2 }).startOf('month');
 
+    // Wait at least 24 hours before invoicing: a refund or chargeback shortly after a payment then cancels it
+    // out into a zero receipt, instead of an invoice followed by a credit note
+    const endDate = today.minus({ day: 1 });
+
     // Don't invoice below 4 euro - unless we reached the timeout date for invoices (end of month + 15 days - 5 days margin) OR + 15 day offset
     const invoiceLimit = STAMHOOFD.environment === 'development' ? 0 : 4_0000;
     function getPaymentTimeoutDate(p: Payment) {
@@ -67,12 +71,13 @@ async function createInvoicesFor(organization: Organization) {
         return new Date(Math.min(a.getTime(), b.getTime()));
     }
 
-    console.log('Fetching all payments between ' + Formatter.dateTime(startDate.toJSDate()) + ' and now for ' + organization.name);
+    console.log('Fetching all payments between ' + Formatter.dateTime(startDate.toJSDate()) + ' and ' + Formatter.dateTime(endDate.toJSDate()) + ' for ' + organization.name);
 
     const payments = await Payment.select()
         .where('organizationId', organization.id)
         .where('status', PaymentStatus.Succeeded)
         .where('paidAt', '>=', startDate.toJSDate())
+        .where('paidAt', '<=', endDate.toJSDate())
         .where('invoiceId', null)
         .where('customer', '!=', null)
         .where('payingOrganizationId', '!=', null)
@@ -107,7 +112,7 @@ async function createInvoicesFor(organization: Organization) {
     const invoices: Invoice[] = [];
     let skipped = 0;
 
-    for (const [_, payments] of groups) {
+    for (const payments of groups.values()) {
         // Group from last to newest (so we use the last customer details if the address changed during the month)
         payments.sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt));
         const customer = payments[0].customer!.dynamicName;
@@ -121,7 +126,10 @@ async function createInvoicesFor(organization: Organization) {
             });
             invoice.buildFromPayments();
 
-            if (invoice.totalWithVAT >= 0 && invoice.totalWithVAT < invoiceLimit) {
+            // Payments that cancel each other out are booked with a receipt: nothing was sold
+            if (invoice.totalWithVAT === 0) {
+                invoice.isReceipt = true;
+            } else if (invoice.totalWithVAT >= 0 && invoice.totalWithVAT < invoiceLimit) {
                 const first = new Date(Math.min(...payments.map(p => getPaymentTimeoutDate(p).getTime())));
                 if (first > new Date()) {
                     console.log('Delaying invoicing ' + customer + ' at ' + organization.id + ' until ' + Formatter.dateIso(first));
