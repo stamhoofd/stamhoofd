@@ -20,7 +20,7 @@
                 <span class="style-discount-old-price">{{ cartItem.getFormattedPriceWithoutDiscount() }}</span>
                 <span class="style-discount-price">{{ cartItem.getFormattedPriceWithDiscount() }}</span>
             </p>
-            <div @click.stop>
+            <div class="actions" @click.stop>
                 <span v-if="cartItem.formattedAmount" class="amount">{{ cartItem.formattedAmount }}</span>
                 <StepperInput v-if="editable && !cartItem.cartError && cartItem.seats.length === 0 && (maximumRemaining === null || maximumRemaining > 1) && cartItem.productPrice.uitpasBaseProductPriceId === null" v-model="amount" :min="1" :max="maximumRemaining" @click.stop />
                 <button v-if="editable" class="button icon trash" type="button" @click="deleteItem()" />
@@ -102,6 +102,12 @@ const maximumRemaining = computed(() => props.cartItem.getMaximumRemaining(props
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .cart-item-row {
+    .actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
     h3 {
         padding-top: 5px;
         @extend %style-title-2;
@@ -127,7 +133,6 @@ const maximumRemaining = computed(() => props.cartItem.getMaximumRemaining(props
         font-size: 14px;
         line-height: 1.4;
         font-weight: 600;
-        margin-right: 15px;
     }
 
     .discount-tags {
