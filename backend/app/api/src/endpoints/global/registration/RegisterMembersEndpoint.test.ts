@@ -2,8 +2,8 @@ import { PatchMap } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import type { MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemFactory, Group, GroupFactory, Member, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import { AccessRight, BalanceItemCartItem, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, PermissionsResourceType, ReduceablePrice, RegisterItemOption, ResourcePermissions, STPackageStatus, STPackageType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, UserPermissions, Version } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemFactory, EventFactory, Group, GroupFactory, Member, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import { AccessRight, BalanceItemCartItem, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, Company, EventMeta, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, PermissionsResourceType, ReduceablePrice, RegisterItemOption, ResourcePermissions, GroupType, STPackageStatus, STPackageType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, UserPermissions, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { assertBalances } from '../../../../tests/assertions/assertBalances.js';
@@ -1722,6 +1722,113 @@ describe('Endpoint.RegisterMembers', () => {
                 expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual('0900011354829');
                 expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Unknown);
             });
+        });
+    });
+
+    describe('Register for events', () => {
+        const defaultAgeGroupId = 'default-age-group-q';
+
+        /**
+         * Organization is in period A, which ends within a week. Period B is the next period.
+         * The event group lives in period B and requires the default age group.
+         */
+        async function initEventData({ registerInAgeGroup }: { registerInAgeGroup: boolean }) {
+            vitest.useFakeTimers({ shouldAdvanceTime: true, toFake: ['Date'] }).setSystemTime(new Date('2025-12-26T10:00:00Z'));
+
+            const periodA = await new RegistrationPeriodFactory({
+                startDate: new Date(2025, 0, 1),
+                endDate: new Date(2025, 11, 31),
+            }).create();
+
+            const periodB = await new RegistrationPeriodFactory({
+                startDate: new Date(2026, 0, 1),
+                endDate: new Date(2026, 11, 31),
+                previousPeriodId: periodA.id,
+            }).create();
+
+            periodA.nextPeriodId = periodB.id;
+            await periodA.save();
+
+            const organization = await new OrganizationFactory({ period: periodA }).create();
+            await new OrganizationRegistrationPeriodFactory({ organization, period: periodA }).create();
+            await new OrganizationRegistrationPeriodFactory({ organization, period: periodB }).create();
+
+            const organizationB = await new OrganizationFactory({ period: periodA }).create();
+            await new OrganizationRegistrationPeriodFactory({ organization: organizationB, period: periodA }).create();
+            await new OrganizationRegistrationPeriodFactory({ organization: organizationB, period: periodB }).create();
+
+            const user = await new UserFactory({ organization }).create();
+            const token = await SessionService.createSession(user);
+            const member = await new MemberFactory({ organization, user }).create();
+
+            const ageGroup = await new GroupFactory({ organization: organizationB, period: periodA, price: 0 }).create();
+            ageGroup.defaultAgeGroupId = defaultAgeGroupId;
+            await ageGroup.save();
+
+            if (registerInAgeGroup) {
+                await new RegistrationFactory({ member, group: ageGroup }).create();
+            }
+
+            const eventGroup = await new GroupFactory({
+                organization,
+                period: periodB,
+                type: GroupType.EventRegistration,
+                price: 10_0000,
+            }).create();
+
+            await new EventFactory({
+                organization,
+                group: eventGroup,
+                meta: EventMeta.create({
+                    defaultAgeGroupIds: [defaultAgeGroupId],
+                }),
+            }).create();
+
+            await eventGroup.refresh();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice: eventGroup.settings.prices[0],
+                            organizationId: organization.id,
+                            groupId: eventGroup.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 10_0000,
+                customer: null,
+            });
+
+            return { organization, token, member, eventGroup, body };
+        }
+
+        test('Can register for event in next period when registered in required default age group in current period', async () => {
+            const { organization, token, member, eventGroup, body } = await initEventData({ registerInAgeGroup: true });
+
+            const response = await post(body, organization, token);
+            expect(response.body.registrations.length).toBe(1);
+            expect(response.body.registrations[0]).toMatchObject({
+                memberId: member.id,
+                groupId: eventGroup.id,
+            });
+        });
+
+        test('Cannot register for event in next period without registration in required default age group', async () => {
+            const { organization, token, body } = await initEventData({ registerInAgeGroup: false });
+
+            await expect(post(body, organization, token))
+                .rejects
+                .toThrow(STExpect.simpleError({ code: 'not_matching', message: 'Not matching: requireDefaultAgeGroupIds' }));
         });
     });
 
