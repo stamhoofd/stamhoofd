@@ -1,13 +1,13 @@
 import fs from 'fs';
 import { validate as uuidValidate, v4 as uuidv4 } from 'uuid';
-import { getFilesToSearch } from '../shared/get-files-to-search.js';
+import { getFilesToSearch, translatableFileTypes } from '../shared/get-files-to-search.js';
 import { getDefaultTranslations } from './get-translations-with-path.js';
-import { replaceOccurrences } from './replace-keys-with-uuid.js';
+import { findTranslationKeyUsages, replaceOccurrences } from './replace-keys-with-uuid.js';
 import { writeTranslation } from './write-translations.js';
 import { isBase62 } from './compress-uuids.js';
 
 /**
- * Adds all usages of `$t(key)` in the code base - where they key is not present in the default translation file, to the default translation file (with a newly generated uuid).
+ * Adds all usages of `$t(key)` (TypeScript / Vue) and `{{$t "key"}}` (Handlebars) in the code base - where they key is not present in the default translation file, to the default translation file (with a newly generated uuid).
  * It also replaces the keys with the generated uuids in the files.
  *
  * 1. So for `$t("Hello world")` this adds an entry in nl.json:
@@ -95,42 +95,19 @@ function getMissingKeys(translations: Record<string, string>): {
     missingKeys: Set<string>;
     filesWithMissingKeys: Set<string>;
 } {
-    // todo: use cache or pass with argument?
-    const filesToSearch = getFilesToSearch(['typescript', 'vue']);
-
-    const regexes = [
-        // Regex to match $t('value')
-        /\$t\('([^']+)'(,.+)?\)/g,
-        // Regex to match $t("value")
-        /\$t\("([^"]+)"(,.+)?\)/g,
-        // Regex to match $t(`value`)
-        /\$t\(`([^`]+)`(,.+)?\)/g,
-        // Regex to match $t('value',
-        /\$t\('([^']+)'(,.+)?,/g,
-        // Regex to match $t("value")
-        /\$t\("([^"]+)"(,.+)?,/g,
-        // Regex to match $t(`value`)
-        /\$t\(`([^`]+)`(,.+)?,/g,
-    ];
+    const filesToSearch = getFilesToSearch(translatableFileTypes);
 
     const missingKeys = new Set<string>();
     const filesWithMissingKeys = new Set<string>();
 
     for (const filePath of filesToSearch) {
         const fileContent = fs.readFileSync(filePath, 'utf8');
-
-        let matches: RegExpExecArray | null;
         let hasMissingKey = false;
 
-        // Extract all matches
-        for (const regex of regexes) {
-            while ((matches = regex.exec(fileContent)) !== null) {
-                const key = matches[1];
-
-                if (!translations[key]) {
-                    missingKeys.add(key);
-                    hasMissingKey = true;
-                }
+        for (const key of findTranslationKeyUsages(fileContent)) {
+            if (!translations[key]) {
+                missingKeys.add(key);
+                hasMissingKey = true;
             }
         }
 

@@ -24,6 +24,8 @@ Search untranslated text in Vue templates and replaces them with a translation f
 ### replace-keys
 Search translation keys, replace the key with an uuid key and add the key to the translations.
 
+Supports `$t('key')` in TypeScript and Vue files, and `{{$t "key"}}` in Handlebars templates (`.hbs`, `.hbs.html`).
+
 ### auto-translate
 Finds missing or changed translations and translate with an Ai-model.
 

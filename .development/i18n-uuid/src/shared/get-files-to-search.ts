@@ -2,7 +2,14 @@ import fs from 'fs';
 import path from 'path';
 import { globals } from './globals.js';
 
-export function getFilesToSearch(types: ('vue' | 'typescript' | 'eslint')[]): string[] {
+export type FileTypeToSearch = 'vue' | 'typescript' | 'handlebars' | 'eslint';
+
+/**
+ * File types that can contain `$t(...)` or `{{$t "..."}}` usages.
+ */
+export const translatableFileTypes: FileTypeToSearch[] = ['typescript', 'vue', 'handlebars'];
+
+export function getFilesToSearch(types: FileTypeToSearch[]): string[] {
     const root = globals.I18NUUID_ROOT;
 
     const includes: RegExp[] = [];
@@ -13,6 +20,10 @@ export function getFilesToSearch(types: ('vue' | 'typescript' | 'eslint')[]): st
 
     if (types.includes('typescript')) {
         includes.push(/\.ts$/);
+    }
+
+    if (types.includes('handlebars')) {
+        includes.push(/\.hbs(\.html)?$/);
     }
 
     if (types.includes('eslint')) {

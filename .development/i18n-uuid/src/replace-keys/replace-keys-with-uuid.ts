@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { v4 as uuidv4, validate as uuidValidate } from 'uuid';
-import { getFilesToSearch } from '../shared/get-files-to-search.js';
+import { getFilesToSearch, translatableFileTypes } from '../shared/get-files-to-search.js';
 import { getTranslationsWithPath } from './get-translations-with-path.js';
 import { writeTranslation } from './write-translations.js';
 import { isBase62 } from './compress-uuids.js';
@@ -115,23 +115,65 @@ function isUuid(key: string) {
     return uuidValidate(key);
 }
 
-export function replaceOccurrences(replacedKeys: Map<string, string>, files: string[] = getFilesToSearch(['typescript', 'vue'])) {
+/**
+ * Regexes matching a translation key usage in source files. The key is the first capture group.
+ * - TypeScript / Vue: `$t('key')`, `$t("key")`, `$t(`key`)`, optionally followed by arguments
+ * - Handlebars: `{{$t "key"}}`, `{{$t 'key'}}`
+ */
+const keyUsageRegexes: RegExp[] = [
+    /\$t\('([^']+)'(,.+)?[),]/g,
+    /\$t\("([^"]+)"(,.+)?[),]/g,
+    /\$t\(`([^`]+)`(,.+)?[),]/g,
+    /\$t\s+'([^']+)'/g,
+    /\$t\s+"([^"]+)"/g,
+];
+
+/**
+ * Returns all keys used in `$t(...)` (TypeScript / Vue) or `{{$t "..."}}` (Handlebars) in the given file content.
+ */
+export function findTranslationKeyUsages(fileContent: string): Set<string> {
+    const keys = new Set<string>();
+    for (const regex of keyUsageRegexes) {
+        regex.lastIndex = 0;
+        let matches: RegExpExecArray | null;
+        while ((matches = regex.exec(fileContent)) !== null) {
+            keys.add(matches[1]);
+        }
+    }
+    return keys;
+}
+
+function createKeyPatterns(key: string): { searchValue: RegExp; replaceValue: (newKey: string) => string }[] {
+    const escapedKey = escapeRegExp(key);
+    return [
+        { searchValue: createRegexPattern(`$t('${key}'`), replaceValue: newKey => `$t('${newKey}'` },
+        { searchValue: createRegexPattern(`$t("${key}"`), replaceValue: newKey => `$t("${newKey}"` },
+        { searchValue: createRegexPattern(`$t(\`${key}\``), replaceValue: newKey => `$t(\`${newKey}\`` },
+        { searchValue: new RegExp(`\\$t(\\s+)'${escapedKey}'`, 'g'), replaceValue: newKey => `$t$1'${newKey}'` },
+        { searchValue: new RegExp(`\\$t(\\s+)"${escapedKey}"`, 'g'), replaceValue: newKey => `$t$1"${newKey}"` },
+    ];
+}
+
+/**
+ * Replaces every usage of the old keys with the new keys in the given content.
+ */
+export function replaceOccurrencesInContent(content: string, replacedKeys: Map<string, string>): string {
+    let newContent = content;
+
+    for (const [oldKey, newKey] of replacedKeys.entries()) {
+        for (const { searchValue, replaceValue } of createKeyPatterns(oldKey)) {
+            newContent = newContent.replace(searchValue, replaceValue(newKey));
+        }
+    }
+
+    return newContent;
+}
+
+export function replaceOccurrences(replacedKeys: Map<string, string>, files: string[] = getFilesToSearch(translatableFileTypes)) {
     if (replacedKeys.size === 0) return;
     for (const file of files) {
         const fileContent = fs.readFileSync(file, 'utf8');
-        let newContent = fileContent;
-
-        for (const [oldKey, newKey] of replacedKeys.entries()) {
-            const toReplace: { searchValue: RegExp; replaceValue: string }[] = [
-                { searchValue: createRegexPattern(`$t('${oldKey}'`), replaceValue: `$t('${newKey}'` },
-                { searchValue: createRegexPattern(`$t("${oldKey}"`), replaceValue: `$t("${newKey}"` },
-                { searchValue: createRegexPattern(`$t(\`${oldKey}\``), replaceValue: `$t(\`${newKey}\`` },
-            ];
-
-            for (const { searchValue, replaceValue } of toReplace) {
-                newContent = newContent.replace(searchValue, replaceValue);
-            }
-        }
+        const newContent = replaceOccurrencesInContent(fileContent, replacedKeys);
 
         if (fileContent !== newContent) {
             console.log('Replaced keys in ' + file);
@@ -140,27 +182,17 @@ export function replaceOccurrences(replacedKeys: Map<string, string>, files: str
     }
 }
 
-export function findUnusedTranslationKeys(keys: Set<string>, files: string[] = getFilesToSearch(['typescript', 'vue'])) {
+export function findUnusedTranslationKeys(keys: Set<string>, files: string[] = getFilesToSearch(translatableFileTypes)) {
     if (keys.size === 0) return new Set<string>();
 
     const remaining = new Set<string>(keys);
     for (const file of files) {
         const fileContent = fs.readFileSync(file, 'utf8');
-        const newContent = fileContent;
 
         for (const key of remaining.values()) {
-            const toReplace: { searchValue: RegExp }[] = [
-                { searchValue: createRegexPattern(`$t('${key}'`) },
-                { searchValue: createRegexPattern(`$t("${key}"`) },
-                { searchValue: createRegexPattern(`$t(\`${key}\``) },
-            ];
-
-            for (const { searchValue } of toReplace) {
-                const didMatch = newContent.match(searchValue);
-                if (didMatch) {
-                    remaining.delete(key);
-                    break;
-                }
+            const isUsed = createKeyPatterns(key).some(({ searchValue }) => searchValue.test(fileContent));
+            if (isUsed) {
+                remaining.delete(key);
             }
         }
 
