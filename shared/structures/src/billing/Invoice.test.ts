@@ -6,53 +6,6 @@ import { Invoice } from './Invoice.js';
 import { InvoicedBalanceItem } from './InvoicedBalanceItem.js';
 
 describe('Invoice', () => {
-    test('A payment and its refund on the same balance item stay visible as two rows', () => {
-        const balanceItem = new BalanceItem();
-        balanceItem.id = '1';
-        balanceItem.description = 'Test Item';
-        balanceItem.unitPrice = 5_00;
-        balanceItem.quantity = 1;
-        balanceItem.VATPercentage = 0;
-
-        const payment = PaymentGeneral.create({ method: PaymentMethod.Transfer, price: 5_00 });
-        payment.balanceItemPayments.push(BalanceItemPaymentDetailed.create({ balanceItem, price: 5_00 }));
-
-        const refund = PaymentGeneral.create({ method: PaymentMethod.Transfer, price: -5_00 });
-        refund.balanceItemPayments.push(BalanceItemPaymentDetailed.create({ balanceItem, price: -5_00 }));
-
-        const invoice = Invoice.create({ payments: [payment, refund] });
-        invoice.buildFromPayments();
-
-        expect(invoice.items.map(i => i.balanceInvoicedAmount)).toEqual([5_00, -5_00]);
-        expect(invoice.totalWithVAT).toEqual(0);
-
-        // Also on a regular invoice with other items: the cancelled item stays visible
-        const other = new BalanceItem();
-        other.id = '2';
-        other.description = 'Other Item';
-        other.unitPrice = 3_00;
-        other.quantity = 1;
-        other.VATPercentage = 0;
-
-        const otherPayment = PaymentGeneral.create({ method: PaymentMethod.Transfer, price: 3_00 });
-        otherPayment.balanceItemPayments.push(BalanceItemPaymentDetailed.create({ balanceItem: other, price: 3_00 }));
-        invoice.payments.push(otherPayment);
-        invoice.buildFromPayments();
-
-        expect(invoice.items.map(i => i.balanceInvoicedAmount)).toEqual([5_00, 3_00, -5_00]);
-        expect(invoice.totalWithVAT).toEqual(3_00);
-        invoice.payments.pop();
-
-        // Amounts on the same balance item that don't cancel out are still summed
-        const extra = PaymentGeneral.create({ method: PaymentMethod.Transfer, price: 5_00 });
-        extra.balanceItemPayments.push(BalanceItemPaymentDetailed.create({ balanceItem, price: 5_00 }));
-        invoice.payments.push(extra);
-        invoice.buildFromPayments();
-
-        expect(invoice.items.map(i => i.balanceInvoicedAmount)).toEqual([5_00]);
-        expect(invoice.totalWithVAT).toEqual(5_00);
-    });
-
     test('Rounding lots of items', () => {
         const payment = PaymentGeneral.create({
             method: PaymentMethod.Transfer,

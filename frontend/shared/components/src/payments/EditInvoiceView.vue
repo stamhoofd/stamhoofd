@@ -145,6 +145,9 @@
             <p v-if="patched.didChangeUnitPricesToCorrectRounding" class="warning-box">
                 {{ $t('%1Lk') }}
             </p>
+            <p v-if="patched.items.length === 0 && patched.totalWithVAT === 0" class="info-box">
+                {{ $t('De betalingen heffen elkaar volledig op, dus er werden geen goederen of diensten geleverd. Het aankoopbewijs bevat geen items, maar vermeldt de betalingen.') }}
+            </p>
             <InvoiceItemsBox :invoice="patched" />
         </CategorizedBox>
     </CategorizedView>

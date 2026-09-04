@@ -14,10 +14,13 @@ export class InvoicePdfService {
     static async generateHtml(invoice: Invoice) {
         const organization = await Organization.getByID(invoice.organizationId, true);
         const platform = await Platform.getShared();
-        const payments = await Payment.select().where('invoiceId', invoice.id).fetch();
+        const payments = await Payment.select().where('invoiceId', invoice.id).orderBy('createdAt').fetch();
         const payment = payments[0] ?? null;
 
         const invoicedItems = await InvoicedBalanceItem.select().where('invoiceId', invoice.id).fetch();
+
+        // Without items no goods or services moved: list the payments that cancel each other out instead
+        const showPayments = invoicedItems.length === 0;
 
         const seller = invoice.seller;
         const customer = invoice.customer;
@@ -78,10 +81,10 @@ export class InvoicePdfService {
         const showDueDate = !!invoice.number && totalPrice >= 0 && !invoice.isReceipt;
         const hasRoundingAmount = invoice.payableRoundingAmount !== 0;
 
-        const showPaidMessage = !!payment && payment.method !== null && payment.status === PaymentStatus.Succeeded && totalPrice >= 0;
-        const showTransferMessage = !!payment && payment.method === PaymentMethod.Transfer && payment.status !== PaymentStatus.Succeeded && totalPrice >= 0;
-        const showDirectDebitMessage = !!payment && payment.method === PaymentMethod.DirectDebit && payment.status !== PaymentStatus.Succeeded && totalPrice >= 0;
-        const showStripeMessage = !payment && !!invoice.stripeAccountId && totalPrice >= 0;
+        const showPaidMessage = !showPayments && !!payment && payment.method !== null && payment.status === PaymentStatus.Succeeded && totalPrice >= 0;
+        const showTransferMessage = !showPayments && !!payment && payment.method === PaymentMethod.Transfer && payment.status !== PaymentStatus.Succeeded && totalPrice >= 0;
+        const showDirectDebitMessage = !showPayments && !!payment && payment.method === PaymentMethod.DirectDebit && payment.status !== PaymentStatus.Succeeded && totalPrice >= 0;
+        const showStripeMessage = !showPayments && !payment && !!invoice.stripeAccountId && totalPrice >= 0;
 
         const customerName = customer.firstName && customer.lastName
             ? `${customer.firstName} ${customer.lastName}`
@@ -143,6 +146,16 @@ export class InvoicePdfService {
                         transferDescription: payment.transferDescription ?? '',
                     }
                 : null,
+
+            showPayments,
+            payments: showPayments
+                ? payments.map(p => ({
+                        date: p.paidAt ?? p.createdAt,
+                        methodName: p.method ? PaymentMethodHelper.getName(p.method) : '',
+                        transferDescription: p.transferDescription ?? '',
+                        price: p.price,
+                    }))
+                : [],
 
             isCreditNote,
             isReceipt,

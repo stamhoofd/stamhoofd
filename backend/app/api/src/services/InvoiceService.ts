@@ -32,7 +32,8 @@ export class InvoiceService {
         struct.updatePrices();
         struct.validateVATRates();
 
-        // A zero receipt marks payments that cancel each other out as booked
+        // A zero receipt marks payments that cancel each other out as booked. Its balance items can cancel
+        // each other out completely: no goods or services moved, so the receipt has no items and lists the payments instead.
         const isZeroReceipt = model.isReceipt && struct.totalWithVAT === 0;
 
         if (struct.totalWithVAT === 0 && !model.isReceipt) {
@@ -52,7 +53,7 @@ export class InvoiceService {
             });
         }
 
-        if (struct.items.length === 0) {
+        if (struct.items.length === 0 && !isZeroReceipt) {
             throw new SimpleError({
                 code: 'missing_items',
                 message: 'Cannot create invoice without items',
