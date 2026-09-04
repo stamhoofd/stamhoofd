@@ -364,7 +364,7 @@ describe('BalanceItem.categoryFilter / articleFilter', () => {
 
     test('old clients read and write the name as description', () => {
         const item = BalanceItem.create({ name: 'Kampgeld', description: 'Weekend aan zee' });
-        const oldVersion = Version - 1;
+        const oldVersion = 415;
 
         const encoded = JSON.parse(JSON.stringify(item.encode({ version: oldVersion }))) as Record<string, unknown>;
         expect(encoded.description).toBe('Kampgeld');
