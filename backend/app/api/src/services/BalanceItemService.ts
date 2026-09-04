@@ -287,7 +287,7 @@ export class BalanceItemService {
             }
         }
 
-        balanceItem.paidAt = new Date();
+        balanceItem.paidAt = payment?.paidAt ?? new Date();
         await balanceItem.save();
     }
 

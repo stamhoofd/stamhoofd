@@ -147,6 +147,11 @@ describe('ApplicationFeeInvoicer', () => {
         expect(serviceItem.payingOrganizationId).toBe(organization.id);
         expect(serviceItem.startDate).toEqual(new Date(Date.UTC(2024, 6, 10)));
         expect(serviceItem.endDate).toEqual(new Date(Date.UTC(2024, 6, 10, 23, 59, 59)));
+        // Local (CEST) midnight of the billed date, not UTC midnight nor the run time
+        const paidAt = new Date('2024-07-09T22:00:00.000Z');
+        expect(payments[0].paidAt).toEqual(paidAt);
+        expect(serviceItem.paidAt).toEqual(paidAt);
+        expect(transferItem.paidAt).toEqual(paidAt);
         expect(serviceItem.name).toBe('Servicekosten op 10 juli 2024');
         expect(serviceItem.description).toBe('Ingehouden via Stripe op 10 juli 2024 (UTC)');
         expect(transferItem.name).toBe('Transactiekosten op 10 juli 2024');

@@ -7,6 +7,7 @@ import { SQL } from '@stamhoofd/sql';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getPaymentProviderName, PaymentCustomer, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, TranslatedString } from '@stamhoofd/structures';
 import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { Formatter, sleep } from '@stamhoofd/utility';
+import { DateTime } from 'luxon';
 
 import { ApplicationFeeService, FEE_PAYMENT_REFERENCE_PREFIX, ORPHANED_FEE_DELAY_DAYS } from '../services/ApplicationFeeService.js';
 import { PaymentService } from '../services/PaymentService.js';
@@ -75,6 +76,17 @@ export class ApplicationFeeInvoicer {
 
     static reference(day: Date): string {
         return FEE_PAYMENT_REFERENCE_PREFIX + utcDateIso(day);
+    }
+
+    /**
+     * The fees of a UTC day are booked at local midnight of that calendar date, so they land in the
+     * same period as invoices and reports that use the platform timezone.
+     */
+    static paidAt(day: Date): Date {
+        return DateTime.fromObject(
+            { year: day.getUTCFullYear(), month: day.getUTCMonth() + 1, day: day.getUTCDate() },
+            { zone: Formatter.timezone },
+        ).toJSDate();
     }
 
     async generateInvoices(sellingOrganization: Organization): Promise<void> {
@@ -319,7 +331,7 @@ export class ApplicationFeeInvoicer {
             return payment;
         });
 
-        await PaymentService.handlePaymentStatusUpdate(payment, sellingOrganization, PaymentStatus.Succeeded, new Date());
+        await PaymentService.handlePaymentStatusUpdate(payment, sellingOrganization, PaymentStatus.Succeeded, ApplicationFeeInvoicer.paidAt(periodStart));
         await SettlementService.updatePaymentSettlementsForApplicationFeePayment(payment);
     }
 
