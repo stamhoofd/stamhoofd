@@ -1,17 +1,18 @@
 import { Database } from '@simonbackx/simple-database';
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
-import { GroupFactory, Member, MemberFactory, OrganizationFactory, Platform, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
+import { GroupFactory, Member, MemberFactory, OrganizationFactory, Platform, RegistrationFactory, UserFactory } from '@stamhoofd/models';
 import type { PatchAnswers } from '@stamhoofd/structures';
-import { MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PermissionLevel, RecordCategory, RecordSettings, RecordTextAnswer, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
+import { Address, MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, ParentType, PermissionLevel, RecordCategory, RecordSettings, RecordTextAnswer, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initUitpasApi } from '../../../../tests/init/index.js';
 import { PatchUserMembersEndpoint } from './PatchUserMembersEndpoint.js';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer.js';
 import { SessionService } from '../../../services/SessionService.js';
+import { Country } from '@stamhoofd/types/Country';
 
 const baseUrl = `/members`;
 const endpoint = new PatchUserMembersEndpoint();
@@ -1265,6 +1266,436 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             const response = await patchMember(organization, token, member.id, MemberDetails.patch({ birthDay: newBirthDay }));
             expect(response.status).toBe(200);
             expect(response.body.members[0].details.birthDay?.getFullYear()).toBe(base.getFullYear() + 1);
+        });
+    });
+
+    describe('Parents', () => {
+        test('Updating taxDependent for one parent doesn\'t change it for the whole family', async () => {
+            const user = await new UserFactory({}).create();
+
+            const parent1 = Parent.create({
+                firstName: 'Linda',
+                lastName: 'Doe',
+                email: 'linda@example.com',
+                alternativeEmails: ['linda@work.com'],
+                phone: '+32412345678',
+                address: Address.create({
+                    street: 'Main street 1',
+                    postalCode: '1000',
+                    city: 'Brussels',
+                    country: Country.Belgium,
+                }),
+                nationalRegisterNumber: '93042012345',
+                updatedAt: new Date(0),
+            });
+
+            const member1 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    parents: [parent1],
+                }),
+            }).create();
+
+            const member2 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'Jane',
+                    lastName: 'Doe',
+                    parents: [parent1],
+                }),
+            }).create();
+
+            // Parent3 was reviewed last, so has priority
+            const member3 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'Bob',
+                    lastName: 'Doe',
+                    parents: [parent1],
+                }),
+            }).create();
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            const d = new Date();
+            const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+            parentsPatch.addPatch(
+                Parent.patch({
+                    id: parent1.id,
+                    updatedAt: d,
+                    taxDependent: true,
+                }),
+            );
+
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: member1.id,
+                details: MemberDetails.patch({
+                    parents: parentsPatch,
+                }),
+            });
+            arr.addPatch(patch);
+
+            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            // Check returned
+            expect(response.status).toBe(200);
+            expect(response.body.members.length).toBe(3);
+
+            // Load parents again
+            await member1.refresh();
+            await member2.refresh();
+            await member3.refresh();
+
+            // Check all parents equal
+            const expectedParent = (taxDependent: boolean | null = null) => Parent.create({
+                ...parent1,
+                taxDependent,
+                updatedAt: d,
+            });
+
+            expect(member1.details.parents).toEqual([expectedParent(true)]);
+            expect(member2.details.parents).toEqual([expectedParent()]);
+            expect(member3.details.parents).toEqual([expectedParent()]);
+        });
+
+        test('Updating taxDependent for another parent doesn\'t change it for the whole family', async () => {
+            const user = await new UserFactory({}).create();
+            const token = await SessionService.createSession(user);
+            const d = new Date();
+
+            const parent1 = Parent.create({
+                firstName: 'Linda',
+                lastName: 'Doe',
+                email: 'linda@example.com',
+                alternativeEmails: ['linda@work.com'],
+                phone: '+32412345678',
+                address: Address.create({
+                    street: 'Main street 1',
+                    postalCode: '1000',
+                    city: 'Brussels',
+                    country: Country.Belgium,
+                }),
+                nationalRegisterNumber: '93042012345',
+                updatedAt: new Date(0),
+                type: ParentType.Mother,
+            });
+            const parent2 = Parent.create({
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'john@example.com',
+                alternativeEmails: ['john@work.com'],
+                phone: '+32487654321',
+                address: Address.create({
+                    street: 'Main street 1',
+                    postalCode: '1000',
+                    city: 'Brussels',
+                    country: Country.Belgium,
+                }),
+                nationalRegisterNumber: '93042017297',
+                updatedAt: new Date(10),
+                type: ParentType.Father,
+            });
+
+            const member1 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    parents: [parent1, parent2],
+                }),
+            }).create();
+
+            const member2 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'Jane',
+                    lastName: 'Doe',
+                    parents: [parent1, parent2],
+                }),
+            }).create();
+
+            let arr: Body = new PatchableArray();
+            let parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+            parentsPatch.addPatch(
+                Parent.patch({
+                    id: parent1.id,
+                    updatedAt: d,
+                    taxDependent: true,
+                }),
+            );
+
+            let patch = MemberWithRegistrationsBlob.patch({
+                id: member1.id,
+                details: MemberDetails.patch({
+                    parents: parentsPatch,
+                }),
+            });
+            arr.addPatch(patch);
+
+            let request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            let response = await testServer.test(endpoint, request);
+
+            // Check returned
+            expect(response.status).toBe(200);
+            expect(response.body.members.length).toBe(2);
+
+            // Load parents again
+            await member1.refresh();
+            await member2.refresh();
+
+            // Check all parents equal
+            const expectedParent = (parent: Parent, taxDependent: boolean | null = null, updatedAt: Date | null = null) => Parent.create({
+                ...parent,
+                taxDependent,
+                updatedAt: updatedAt ? updatedAt : parent.updatedAt,
+            });
+
+            expect(member1.details.parents).toHaveLength(2);
+            expect(member1.details.parents).toEqual([expectedParent(parent1, true, d), expectedParent(parent2)]);
+
+            expect(member2.details.parents).toHaveLength(2);
+            expect(member2.details.parents).toEqual([expectedParent(parent1, null, d), expectedParent(parent2)]);
+
+            // Now change taxDependent for member2 with parent2
+            arr = new PatchableArray();
+            parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+            parentsPatch.addPatch(
+                Parent.patch({
+                    id: parent2.id,
+                    updatedAt: d,
+                    taxDependent: true,
+                }),
+            );
+
+            patch = MemberWithRegistrationsBlob.patch({
+                id: member2.id,
+                details: MemberDetails.patch({
+                    parents: parentsPatch,
+                }),
+            });
+            arr.addPatch(patch);
+
+            request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            response = await testServer.test(endpoint, request);
+
+            // Check returned
+            expect(response.status).toBe(200);
+            expect(response.body.members.length).toBe(2);
+
+            await member1.refresh();
+            await member2.refresh();
+
+            expect(member1.details.parents).toHaveLength(2);
+            expect(member1.details.parents).toEqual([expectedParent(parent1, true, d), expectedParent(parent2, null, d)]);
+
+            expect(member2.details.parents).toHaveLength(2);
+            expect(member2.details.parents).toEqual([expectedParent(parent1, null, d), expectedParent(parent2, true, d)]);
+        });
+
+        test.each([
+            [true, true],
+            [true, false],
+            [true, null],
+            [false, true],
+            [false, false],
+            [false, null],
+            [null, null],
+        ])('Adding member to family doesn\'t copy taxDependent (%s : %s)', async (isOriginalTaxDependent, isNewTaxDependent) => {
+            const user = await new UserFactory({}).create();
+            const token = await SessionService.createSession(user);
+
+            const parent1 = Parent.create({
+                firstName: 'Linda',
+                lastName: 'Doe',
+                email: 'linda@example.com',
+                alternativeEmails: ['linda@work.com'],
+                taxDependent: isOriginalTaxDependent,
+                phone: '+32412345678',
+                address: Address.create({
+                    street: 'Main street 1',
+                    postalCode: '1000',
+                    city: 'Brussels',
+                    country: Country.Belgium,
+                }),
+                nationalRegisterNumber: '93042012345',
+                updatedAt: new Date(0),
+                type: ParentType.Mother,
+            });
+
+            const member1 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    parents: [parent1],
+                }),
+            }).create();
+
+            const member2 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'Jane',
+                    lastName: 'Doe',
+                }),
+            }).create();
+
+            const arr: Body = new PatchableArray();
+            const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+            const createdParent = Parent.create({
+                firstName: 'Linda',
+                lastName: 'Doe',
+                updatedAt: new Date(0),
+                email: 'linda@example.com',
+                phone: '+32412345678',
+                taxDependent: isNewTaxDependent,
+            });
+            parentsPatch.addPut(createdParent);
+
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: member2.id,
+                details: MemberDetails.patch({
+                    parents: parentsPatch,
+                }),
+            });
+            arr.addPatch(patch);
+
+            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            // Check returned
+            expect(response.status).toBe(200);
+            expect(response.body.members.length).toBe(2);
+
+            // Load parents again
+            await member1.refresh();
+            await member2.refresh();
+
+            // Check all parents equal
+            const expectedParent = (parent: Parent, taxDependent: boolean | null = null) => Parent.create({
+                ...parent,
+                taxDependent,
+            });
+
+            expect(member1.details.parents).toHaveLength(1);
+            expect(member1.details.parents).toEqual([expectedParent(parent1, isOriginalTaxDependent)]);
+
+            expect(member2.details.parents).toHaveLength(1);
+            expect(member2.details.parents).toEqual([expectedParent(parent1, isNewTaxDependent)]);
+        });
+
+        test.each([
+            [true, true],
+            [true, false],
+            [true, null],
+            [false, true],
+            [false, false],
+            [false, null],
+            [null, null],
+        ])('Merging families keeps original taxDependent (%s : %s)', async (parent1TaxDependent, parent2TaxDepentent) => {
+            const user = await new UserFactory({}).create();
+
+            const parent1 = Parent.create({
+                firstName: 'Linda',
+                lastName: 'Doe',
+                email: 'linda@example.com',
+                phone: '+32412345678',
+                taxDependent: parent1TaxDependent,
+                createdAt: new Date(0),
+            });
+            const parent2 = Parent.create({
+                firstName: 'Linda',
+                lastName: 'Doe',
+                email: 'peter@example.com',
+                phone: '+32412345678',
+                taxDependent: parent2TaxDepentent,
+                createdAt: new Date(1000),
+            });
+
+            const member1 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    parents: [parent1],
+                    reviewTimes: ReviewTimes.create({
+                        times: [
+                            ReviewTime.create({
+                                name: 'parents',
+                                reviewedAt: new Date(0),
+                            }),
+                        ],
+                    }),
+                }),
+            }).create();
+
+            const member2 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'Jane',
+                    lastName: 'Doe',
+                    parents: [parent2],
+                    reviewTimes: ReviewTimes.create({
+                        times: [
+                            ReviewTime.create({
+                                name: 'parents',
+                                reviewedAt: new Date(1000),
+                            }),
+                        ],
+                    }),
+                }),
+            }).create();
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            const d = new Date();
+            const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+            parentsPatch.addPatch(
+                Parent.patch({
+                    id: parent2.id,
+                    email: 'linda@example.com',
+                    updatedAt: d,
+                }),
+            );
+
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: member2.id,
+                details: MemberDetails.patch({
+                    parents: parentsPatch,
+                }),
+            });
+            arr.addPatch(patch);
+
+            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            // Check returned
+            expect(response.status).toBe(200);
+            expect(response.body.members.length).toBe(2);
+
+            // Load parents again
+            await member1.refresh();
+            await member2.refresh();
+
+            // Check all parents equal
+            const expectedParent = (taxDependent: boolean | null = null) => Parent.create({
+                ...parent1,
+                id: parent1.id,
+                taxDependent,
+                updatedAt: d,
+            });
+
+            expect(member1.details.parents).toEqual([expectedParent(parent1TaxDependent)]);
+            expect(member2.details.parents).toEqual([expectedParent(parent2TaxDepentent)]);
         });
     });
 });
