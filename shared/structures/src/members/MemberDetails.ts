@@ -41,8 +41,8 @@ export class BooleanStatus extends AutoEncoder {
     }
 }
 
-export type MemberProperty = 'birthDay' | 'gender' | 'address' | 'parents' | 'emailAddress' | 'phone' | 'emergencyContacts' | 'dataPermission' | 'financialSupport' | 'uitpasNumber' | 'nationalRegisterNumber' | 'parents.nationalRegisterNumber';
-export type MemberPropertyWithFilter = Exclude<MemberProperty, 'dataPermission' | 'financialSupport' | 'parents.nationalRegisterNumber'>;
+export type MemberProperty = 'birthDay' | 'gender' | 'address' | 'parents' | 'emailAddress' | 'phone' | 'emergencyContacts' | 'dataPermission' | 'financialSupport' | 'uitpasNumber' | 'nationalRegisterNumber' | 'parents.nationalRegisterNumber' | 'taxDependent' | 'parents.taxDependent';
+export type MemberPropertyWithFilter = Exclude<MemberProperty, 'dataPermission' | 'financialSupport' | 'parents.nationalRegisterNumber' | 'parents.taxDependent'>;
 /**
  * This full model is always encrypted before sending it to the server. It is never processed on the server - only in encrypted form.
  * The public key of the member is stored in the member model, the private key is stored in the keychain for the 'owner' users. The organization has a copy that is encrypted with the organization's public key.
@@ -880,7 +880,7 @@ export class MemberDetails extends AutoEncoder {
 
     private static mergeRelations(members: MemberDetails[], type: 'parents' | 'emergencyContacts', allowOverrides = true) {
         type T = Parent | EmergencyContact;
-        type RelationGroup = { object: T; reviewDate?: Date; createdAt: Date; setObject: (object: T) => void }[];
+        type RelationGroup = { member: MemberDetails; object: T; reviewDate?: Date; createdAt: Date; setObject: (object: T) => void }[];
 
         const allGroups: RelationGroup[] = [];
         const parentsGroupByName: Map<string, RelationGroup> = new Map();
@@ -888,7 +888,7 @@ export class MemberDetails extends AutoEncoder {
         const mergeIdMap: Map<string, string> = new Map();
 
         for (const member of members) {
-            for (const [index, object] of (member[type] as T[]).entries()) {
+            for (const object of member[type] as T[]) {
                 if (object.name.length <= 3) {
                     continue;
                 }
@@ -909,9 +909,25 @@ export class MemberDetails extends AutoEncoder {
                 }
 
                 group.push({
+                    member,
                     object: object,
-                    setObject(object: T) {
-                        member[type][index] = object;
+                    setObject(mergedObject: T) {
+                        const currentIndex = member[type].findIndex(current => current === object);
+                        if (currentIndex === -1) {
+                            return;
+                        }
+
+                        const previous = member[type][currentIndex];
+
+                        if (type === 'parents' && (previous as Parent).taxDependent !== (mergedObject as Parent).taxDependent) {
+                            const parent = (mergedObject as Parent).clone();
+                            parent.taxDependent = (previous as Parent).taxDependent;
+                            member.parents[currentIndex] = parent;
+
+                            return;
+                        }
+
+                        member[type][currentIndex] = mergedObject.clone();
                     },
                     reviewDate: object.updatedAt ?? member.reviewTimes.getLastReview(type) ?? object.createdAt,
                     createdAt: object.createdAt,
@@ -932,6 +948,13 @@ export class MemberDetails extends AutoEncoder {
 
                 // Sort from oldest reviewed to latest reviewed
                 parents.sort((a, b) => Sorter.byDateValue(b.reviewDate ?? new Date(0), a.reviewDate ?? new Date(0)));
+
+                const latestTaxDependentByMember = new Map<MemberDetails, boolean | null>();
+                if (type === 'parents') {
+                    for (const { member, object } of parents) {
+                        latestTaxDependentByMember.set(member, (object as Parent).taxDependent);
+                    }
+                }
 
                 // Parents with the same id override each other, while parents with different ids merge while maintaining as much data as possible
                 // this happens in groups
@@ -966,15 +989,24 @@ export class MemberDetails extends AutoEncoder {
                 mergeTo.createdAt = oldestParent.createdAt;
 
                 for (const { object, setObject } of parents) {
-                    if (object.id !== mergeTo.id) {
+                    const keepOld = setObject(mergeTo);
+                    if (object.id !== mergeTo.id || keepOld) {
                         mergeIdMap.set(object.id, mergeTo.id);
                     }
-                    setObject(mergeTo);
                 }
 
                 // Remove duplicate parents by id for each member
                 for (const member of members) {
-                    member[type] = member[type].filter((p, i, self) => self.findIndex(p2 => p2.id === p.id) === i) as any;
+                    member[type] = member[type].filter((p, i, self) =>
+                        self.findIndex(p2 => p2.id === p.id) === i,
+                    ) as any;
+
+                    if (type === 'parents' && latestTaxDependentByMember.has(member)) {
+                        const parent = member.parents.find(parent => parent.id === mergeTo.id);
+                        if (parent) {
+                            parent.taxDependent = latestTaxDependentByMember.get(member)!;
+                        }
+                    }
                 }
             }
         }

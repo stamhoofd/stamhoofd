@@ -75,7 +75,7 @@
 
 <script setup lang="ts">
 import { PatchMap } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 
@@ -87,7 +87,7 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import type { MemberPropertyWithFilter, Organization, OrganizationRecordsConfiguration, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
 import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, PlatformFamily, PlatformMember, PropertyFilter } from '@stamhoofd/structures';
-import { computed, ref, watchEffect } from 'vue';
+import { computed, ref } from 'vue';
 import { getMemberFilterBuildersForInheritedRecords } from '../../filters/filter-builders/members';
 
 import { RecordEditorSettings, RecordEditorType } from '../RecordEditorSettings';
@@ -156,6 +156,9 @@ const properties = [
     ),
     buildPropertyRefs('parents', $t(`%11P`), {
         description: $t(`%11Q`),
+    }),
+    buildPropertyRefs('taxDependent', $t('Fiscaal ten laste'), {
+        description: $t('Vraag bij de oudergegevens of ze het lid fiscaal ten laste hebben.'),
     }),
     buildPropertyRefs('phone', $t('%2k') + ' ' + $t(`%11R`), {
         description: $t(`%11S`),

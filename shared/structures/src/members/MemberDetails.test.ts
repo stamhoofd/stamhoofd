@@ -1,4 +1,5 @@
 import { ObjectData } from '@simonbackx/simple-encoding';
+import { Address } from '../addresses/Address.js';
 import { MemberDetails } from './MemberDetails.js';
 import { Parent } from './Parent.js';
 import { UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from './UitpasNumberDetails.js';
@@ -300,10 +301,561 @@ describe('Correctly merge multiple details together', () => {
             expect(member5.parents).toEqual([expectedParent]);
 
             // The parent object should reference the same object for each member
-            expect(member1.parents[0]).toBe(member2.parents[0]);
-            expect(member1.parents[0]).toBe(member3.parents[0]);
-            expect(member1.parents[0]).toBe(member4.parents[0]);
-            expect(member1.parents[0]).toBe(member5.parents[0]);
+            expect(member1.parents[0]).toStrictEqual(member2.parents[0]);
+            expect(member1.parents[0]).toStrictEqual(member3.parents[0]);
+            expect(member1.parents[0]).toStrictEqual(member4.parents[0]);
+            expect(member1.parents[0]).toStrictEqual(member5.parents[0]);
+        });
+    });
+
+    describe('taxDependent', () => {
+        test('taxDependent doesnt change on both family members', () => {
+            const parent1 = Parent.create({
+                firstName: 'Gekke',
+                lastName: 'Test',
+                updatedAt: new Date(1000),
+                email: 'parent1@gmail.com',
+                taxDependent: true,
+                createdAt: new Date(500),
+            });
+
+            const parent2 = Parent.create({
+                firstName: 'Gekke',
+                lastName: 'Test',
+                updatedAt: new Date(2000),
+                email: 'parent2@gmail.com',
+                createdAt: new Date(1500),
+            });
+
+            const member1 = MemberDetails.create({
+                firstName: 'Member 1',
+                parents: [
+                    parent1,
+                ],
+            });
+
+            const member2 = MemberDetails.create({
+                firstName: 'Member 2',
+                parents: [
+                    parent2,
+                ],
+            });
+
+            MemberDetails.mergeParents([member1, member2]);
+
+            expect(member1.parents[0].taxDependent).toBe(true);
+            expect(member2.parents[0].taxDependent).toBeNull();
+        });
+
+        test('changing name doesnt change taxDependent', () => {
+            const parent1 = Parent.create({
+                firstName: 'Gekke',
+                lastName: 'Test',
+                updatedAt: new Date(1000),
+                taxDependent: true,
+                createdAt: new Date(500),
+            });
+
+            const parent2 = Parent.create({
+                id: parent1.id,
+                firstName: 'Gewijzigde',
+                lastName: 'Naam',
+                updatedAt: new Date(2000),
+                taxDependent: false,
+                createdAt: new Date(500),
+            });
+
+            const member1 = MemberDetails.create({
+                firstName: 'Member 1',
+                parents: [parent1],
+            });
+            const member2 = MemberDetails.create({
+                firstName: 'Member 2',
+                parents: [parent2],
+            });
+
+            MemberDetails.mergeParents([member1, member2]);
+
+            expect(member1.parents[0].name).toBe('Gewijzigde Naam');
+            expect(member2.parents[0].name).toBe('Gewijzigde Naam');
+            expect(member1.parents[0].taxDependent).toBe(true);
+            expect(member2.parents[0].taxDependent).toBe(false);
+        });
+
+        test('changing email doesnt change taxDependent', () => {
+            const parent1 = Parent.create({
+                firstName: 'Gekke',
+                lastName: 'Test',
+                updatedAt: new Date(1000),
+                email: 'old@example.com',
+                taxDependent: true,
+                createdAt: new Date(500),
+            });
+
+            const parent2 = Parent.create({
+                id: parent1.id,
+                firstName: 'Gekke',
+                lastName: 'Test',
+                updatedAt: new Date(2000),
+                email: 'new@example.com',
+                taxDependent: false,
+                createdAt: new Date(500),
+            });
+
+            const member1 = MemberDetails.create({
+                firstName: 'Member 1',
+                parents: [parent1],
+            });
+            const member2 = MemberDetails.create({
+                firstName: 'Member 2',
+                parents: [parent2],
+            });
+
+            MemberDetails.mergeParents([member1, member2]);
+
+            expect(member1.parents[0].email).toBe('new@example.com');
+            expect(member2.parents[0].email).toBe('new@example.com');
+            expect(member1.parents[0].taxDependent).toBe(true);
+            expect(member2.parents[0].taxDependent).toBe(false);
+        });
+
+        test('changing address doesnt change taxDependent', () => {
+            const oldAddress = Address.create({
+                street: 'Old street',
+                number: '1',
+                postalCode: '1000',
+                city: 'Brussels',
+            });
+            const newAddress = Address.create({
+                street: 'New street',
+                number: '2',
+                postalCode: '9000',
+                city: 'Ghent',
+            });
+            const parent1 = Parent.create({
+                firstName: 'Gekke',
+                lastName: 'Test',
+                updatedAt: new Date(1000),
+                address: oldAddress,
+                taxDependent: true,
+                createdAt: new Date(500),
+            });
+
+            const parent2 = Parent.create({
+                id: parent1.id,
+                firstName: 'Gekke',
+                lastName: 'Test',
+                updatedAt: new Date(2000),
+                address: newAddress,
+                taxDependent: false,
+                createdAt: new Date(500),
+            });
+
+            const member1 = MemberDetails.create({
+                firstName: 'Member 1',
+                parents: [parent1],
+            });
+            const member2 = MemberDetails.create({
+                firstName: 'Member 2',
+                parents: [parent2],
+            });
+
+            MemberDetails.mergeParents([member1, member2]);
+
+            expect(member1.parents[0].address).toEqual(newAddress);
+            expect(member2.parents[0].address).toEqual(newAddress);
+            expect(member1.parents[0].taxDependent).toBe(true);
+            expect(member2.parents[0].taxDependent).toBe(false);
+        });
+
+        test('merging keeps most recent taxDependent', () => {
+            const parent1 = Parent.create({
+                firstName: 'Gekke',
+                lastName: 'Test',
+                updatedAt: new Date(1000),
+                taxDependent: false,
+                createdAt: new Date(500),
+            });
+            const parent2 = Parent.create({
+                id: parent1.id,
+                firstName: 'Gekke',
+                lastName: 'Test',
+                updatedAt: new Date(2000),
+                taxDependent: true,
+                createdAt: new Date(500),
+            });
+            const member = MemberDetails.create({
+                firstName: 'Member',
+                parents: [parent1, parent2],
+            });
+
+            MemberDetails.mergeParents([member]);
+
+            expect(member.parents).toHaveLength(1);
+            expect(member.parents[0].taxDependent).toBe(true);
+        });
+
+        test('keeps each family member taxDependent when one member has duplicate parents', () => {
+            const original = Parent.create({
+                firstName: 'Gekke',
+                lastName: 'Test',
+                updatedAt: new Date(1000),
+                email: 'old@example.com',
+                taxDependent: true,
+                createdAt: new Date(500),
+            });
+            const duplicate = Parent.create({
+                id: original.id,
+                firstName: 'Gekke',
+                lastName: 'Test',
+                updatedAt: new Date(3000),
+                email: 'new@example.com',
+                taxDependent: false,
+                createdAt: new Date(500),
+            });
+            const otherMemberParent = Parent.create({
+                id: original.id,
+                firstName: 'Gekke',
+                lastName: 'Test',
+                updatedAt: new Date(2000),
+                email: 'intermediate@example.com',
+                taxDependent: true,
+                createdAt: new Date(500),
+            });
+            const member1 = MemberDetails.create({
+                firstName: 'Member 1',
+                parents: [original, duplicate],
+            });
+            const member2 = MemberDetails.create({
+                firstName: 'Member 2',
+                parents: [otherMemberParent],
+            });
+
+            MemberDetails.mergeParents([member1, member2]);
+
+            expect(member1.parents).toHaveLength(1);
+            expect(member2.parents).toHaveLength(1);
+            expect(member1.parents[0].email).toBe('new@example.com');
+            expect(member2.parents[0].email).toBe('new@example.com');
+            expect(member1.parents[0].taxDependent).toBe(false);
+            expect(member2.parents[0].taxDependent).toBe(true);
+        });
+
+        test('keeps taxDependent through name and id changes', () => {
+            const parent1 = Parent.create({
+                firstName: 'Original',
+                lastName: 'Name',
+                updatedAt: new Date(1000),
+                taxDependent: true,
+                createdAt: new Date(500),
+            });
+            const parent2 = Parent.create({
+                firstName: 'Original',
+                lastName: 'Name',
+                updatedAt: new Date(2000),
+                taxDependent: false,
+                createdAt: new Date(1500),
+            });
+            const parent3 = Parent.create({
+                id: parent2.id,
+                firstName: 'Updated',
+                lastName: 'Name',
+                updatedAt: new Date(3000),
+                taxDependent: null,
+                createdAt: new Date(1500),
+            });
+            const member1 = MemberDetails.create({ firstName: 'Member 1', parents: [parent1] });
+            const member2 = MemberDetails.create({ firstName: 'Member 2', parents: [parent2] });
+            const member3 = MemberDetails.create({ firstName: 'Member 3', parents: [parent3] });
+
+            MemberDetails.mergeParents([member1, member2, member3]);
+
+            expect(member1.parents[0].name).toBe('Updated Name');
+            expect(member2.parents[0].name).toBe('Updated Name');
+            expect(member3.parents[0].name).toBe('Updated Name');
+            expect(member1.parents[0].taxDependent).toBe(true);
+            expect(member2.parents[0].taxDependent).toBe(false);
+            expect(member3.parents[0].taxDependent).toBeNull();
+        });
+
+        test('does not mix taxDependent between different parents', () => {
+            const sharedParent1 = Parent.create({
+                firstName: 'Shared',
+                lastName: 'Parent',
+                updatedAt: new Date(1000),
+                taxDependent: true,
+                createdAt: new Date(500),
+            });
+            const sharedParent2 = Parent.create({
+                id: sharedParent1.id,
+                firstName: 'Updated shared',
+                lastName: 'Parent',
+                updatedAt: new Date(2000),
+                taxDependent: false,
+                createdAt: new Date(500),
+            });
+            const unrelatedParent = Parent.create({
+                firstName: 'Unrelated',
+                lastName: 'Parent',
+                updatedAt: new Date(3000),
+                taxDependent: null,
+                createdAt: new Date(2500),
+            });
+            const member1 = MemberDetails.create({
+                firstName: 'Member 1',
+                parents: [sharedParent1, unrelatedParent],
+            });
+            const member2 = MemberDetails.create({
+                firstName: 'Member 2',
+                parents: [sharedParent2],
+            });
+
+            MemberDetails.mergeParents([member1, member2]);
+
+            expect(member1.parents).toHaveLength(2);
+            expect(member1.parents[0].name).toBe('Updated shared Parent');
+            expect(member1.parents[0].taxDependent).toBe(true);
+            expect(member1.parents[1]).toEqual(unrelatedParent);
+            expect(member2.parents[0].taxDependent).toBe(false);
+        });
+
+        test.each([
+            [true, true],
+            [true, false],
+            [true, null],
+            [false, true],
+            [false, false],
+            [false, null],
+            [null, true],
+            [null, false],
+            [null, null],
+        ] as const)('keeps taxDependent %s and %s isolated between family members', (taxDependent1, taxDependent2) => {
+            const parent1 = Parent.create({
+                firstName: 'Shared',
+                lastName: 'Parent',
+                updatedAt: new Date(1000),
+                email: 'old@example.com',
+                taxDependent: taxDependent1,
+                createdAt: new Date(500),
+            });
+            const parent2 = Parent.create({
+                id: parent1.id,
+                firstName: 'Shared',
+                lastName: 'Parent',
+                updatedAt: new Date(2000),
+                email: 'new@example.com',
+                taxDependent: taxDependent2,
+                createdAt: new Date(500),
+            });
+            const member1 = MemberDetails.create({ firstName: 'Member 1', parents: [parent1] });
+            const member2 = MemberDetails.create({ firstName: 'Member 2', parents: [parent2] });
+
+            MemberDetails.mergeParents([member1, member2]);
+
+            expect(member1.parents[0].email).toBe('new@example.com');
+            expect(member2.parents[0].email).toBe('new@example.com');
+            expect(member1.parents[0].taxDependent).toBe(taxDependent1);
+            expect(member2.parents[0].taxDependent).toBe(taxDependent2);
+        });
+
+        test('does not transfer taxDependent to a family member when duplicate parents with different ids merge', () => {
+            const duplicate1 = Parent.create({
+                firstName: 'Shared',
+                lastName: 'Parent',
+                updatedAt: new Date(1000),
+                email: 'old@example.com',
+                taxDependent: null,
+                createdAt: new Date(500),
+            });
+            const duplicate2 = Parent.create({
+                firstName: 'Shared',
+                lastName: 'Parent',
+                updatedAt: new Date(2000),
+                email: 'duplicate@example.com',
+                taxDependent: true,
+                createdAt: new Date(1500),
+            });
+            const familyMemberParent = Parent.create({
+                id: duplicate2.id,
+                firstName: 'Shared',
+                lastName: 'Parent',
+                updatedAt: new Date(3000),
+                email: 'latest@example.com',
+                taxDependent: false,
+                createdAt: new Date(1500),
+            });
+            const memberWithDuplicates = MemberDetails.create({
+                firstName: 'Member with duplicates',
+                parents: [duplicate1, duplicate2],
+            });
+            const familyMember = MemberDetails.create({
+                firstName: 'Family member',
+                parents: [familyMemberParent],
+            });
+
+            MemberDetails.mergeParents([memberWithDuplicates, familyMember]);
+
+            expect(memberWithDuplicates.parents).toHaveLength(1);
+            expect(familyMember.parents).toHaveLength(1);
+            expect(memberWithDuplicates.parents[0].email).toBe('latest@example.com');
+            expect(familyMember.parents[0].email).toBe('latest@example.com');
+            expect(memberWithDuplicates.parents[0].taxDependent).toBe(true);
+            expect(familyMember.parents[0].taxDependent).toBe(false);
+        });
+
+        test('selects the most recently reviewed duplicate regardless of array order', () => {
+            const parent = Parent.create({
+                firstName: 'Duplicate',
+                lastName: 'Parent',
+                updatedAt: new Date(3000),
+                taxDependent: null,
+                createdAt: new Date(500),
+            });
+            const oldestDuplicate = Parent.create({
+                id: parent.id,
+                firstName: 'Duplicate',
+                lastName: 'Parent',
+                updatedAt: new Date(1000),
+                taxDependent: true,
+                createdAt: new Date(500),
+            });
+            const middleDuplicate = Parent.create({
+                id: parent.id,
+                firstName: 'Duplicate',
+                lastName: 'Parent',
+                updatedAt: new Date(2000),
+                taxDependent: false,
+                createdAt: new Date(500),
+            });
+            const member = MemberDetails.create({
+                firstName: 'Member',
+                parents: [parent, oldestDuplicate, middleDuplicate],
+            });
+
+            MemberDetails.mergeParents([member]);
+
+            expect(member.parents).toHaveLength(1);
+            expect(member.parents[0].taxDependent).toBeNull();
+        });
+
+        test('keeps taxDependent isolated for multiple duplicate parent groups', () => {
+            const mother1 = Parent.create({
+                firstName: 'Mother',
+                lastName: 'Parent',
+                updatedAt: new Date(1000),
+                taxDependent: true,
+                createdAt: new Date(500),
+            });
+            const mother2 = Parent.create({
+                id: mother1.id,
+                firstName: 'Mother',
+                lastName: 'Parent',
+                updatedAt: new Date(3000),
+                taxDependent: false,
+                createdAt: new Date(500),
+            });
+            const father1 = Parent.create({
+                firstName: 'Father',
+                lastName: 'Parent',
+                updatedAt: new Date(1000),
+                taxDependent: false,
+                createdAt: new Date(500),
+            });
+            const father2 = Parent.create({
+                firstName: 'Father',
+                lastName: 'Parent',
+                updatedAt: new Date(3000),
+                taxDependent: true,
+                createdAt: new Date(1500),
+            });
+            const familyMother = Parent.create({
+                id: mother1.id,
+                firstName: 'Mother',
+                lastName: 'Parent',
+                updatedAt: new Date(2000),
+                taxDependent: true,
+                createdAt: new Date(500),
+            });
+            const familyFather = Parent.create({
+                id: father1.id,
+                firstName: 'Father',
+                lastName: 'Parent',
+                updatedAt: new Date(2000),
+                taxDependent: null,
+                createdAt: new Date(500),
+            });
+            const memberWithDuplicates = MemberDetails.create({
+                firstName: 'Member with duplicates',
+                parents: [mother1, mother2, father1, father2],
+            });
+            const familyMember = MemberDetails.create({
+                firstName: 'Family member',
+                parents: [familyMother, familyFather],
+            });
+
+            MemberDetails.mergeParents([memberWithDuplicates, familyMember]);
+
+            expect(memberWithDuplicates.parents).toHaveLength(2);
+            expect(familyMember.parents).toHaveLength(2);
+            expect(memberWithDuplicates.parents.find(parent => parent.firstName === 'Mother')?.taxDependent).toBe(false);
+            expect(memberWithDuplicates.parents.find(parent => parent.firstName === 'Father')?.taxDependent).toBe(true);
+            expect(familyMember.parents.find(parent => parent.firstName === 'Mother')?.taxDependent).toBe(true);
+            expect(familyMember.parents.find(parent => parent.firstName === 'Father')?.taxDependent).toBeNull();
+        });
+
+        test('keeps merged parents as independent objects between family members', () => {
+            const parent1 = Parent.create({
+                firstName: 'Shared',
+                lastName: 'Parent',
+                updatedAt: new Date(1000),
+                taxDependent: true,
+                createdAt: new Date(500),
+            });
+            const parent2 = Parent.create({
+                id: parent1.id,
+                firstName: 'Updated',
+                lastName: 'Parent',
+                updatedAt: new Date(2000),
+                taxDependent: false,
+                createdAt: new Date(500),
+            });
+            const member1 = MemberDetails.create({ firstName: 'Member 1', parents: [parent1] });
+            const member2 = MemberDetails.create({ firstName: 'Member 2', parents: [parent2] });
+
+            MemberDetails.mergeParents([member1, member2]);
+
+            expect(member1.parents[0]).not.toBe(member2.parents[0]);
+            member1.parents[0].firstName = 'Only member 1';
+            member1.parents[0].taxDependent = null;
+            expect(member2.parents[0].firstName).toBe('Updated');
+            expect(member2.parents[0].taxDependent).toBe(false);
+        });
+
+        test('keeps taxDependent isolated when parent overrides are disabled', () => {
+            const parent1 = Parent.create({
+                firstName: 'Shared',
+                lastName: 'Parent',
+                updatedAt: new Date(1000),
+                email: 'old@example.com',
+                taxDependent: true,
+                createdAt: new Date(500),
+            });
+            const parent2 = Parent.create({
+                id: parent1.id,
+                firstName: 'Shared',
+                lastName: 'Parent',
+                updatedAt: new Date(2000),
+                email: 'new@example.com',
+                taxDependent: null,
+                createdAt: new Date(500),
+            });
+            const member1 = MemberDetails.create({ firstName: 'Member 1', parents: [parent1] });
+            const member2 = MemberDetails.create({ firstName: 'Member 2', parents: [parent2] });
+
+            MemberDetails.mergeParents([member1, member2], false);
+
+            expect(member1.parents[0].taxDependent).toBe(true);
+            expect(member2.parents[0].taxDependent).toBeNull();
         });
     });
 
