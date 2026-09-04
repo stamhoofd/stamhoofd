@@ -6,10 +6,12 @@ export const AutofocusDirective: ObjectDirective<HTMLInputElement, boolean | nul
         if (!binding.value) {
             return;
         }
+        const isMobile = document.documentElement.clientWidth <= 550 || document.documentElement.clientHeight <= 400;
 
         setTimeout(() => {
-            if (el.isConnected) {
+            if (el.isConnected && !isMobile) {
                 const view = el.closest('.st-view');
+
                 if (!document.activeElement || !view || !view.contains(document.activeElement)) {
                     // only focus if the user isn't typing already (causes flaky playwright tests)
                     el.focus();
