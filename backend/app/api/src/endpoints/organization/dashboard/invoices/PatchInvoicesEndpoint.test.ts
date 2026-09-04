@@ -2,10 +2,11 @@ import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, User } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemFactory, Invoice, InvoicedBalanceItem, OrganizationFactory, Payment, Token, UserFactory } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemFactory, Invoice, InvoicedBalanceItem, OrganizationFactory, Payment, UserFactory } from '@stamhoofd/models';
 import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
-import { Company, InvoicedBalanceItem as InvoicedBalanceItemStruct, InvoiceStruct, InvoiceType, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { Company, InvoicedBalanceItem as InvoicedBalanceItemStruct, InvoiceStruct, InvoiceType, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, Permissions } from '@stamhoofd/structures';
 import { STExpect } from '@stamhoofd/test-utils';
+import { Formatter } from '@stamhoofd/utility';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { PatchInvoicesEndpoint } from './PatchInvoicesEndpoint.js';
 import { InvoicePdfService } from '../../../../services/InvoicePdfService.js';
@@ -91,6 +92,177 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
         struct.addItem(InvoicedBalanceItemStruct.createFor(balanceItem.getStructure(), 10_00));
         return struct;
     };
+
+    /**
+     * Builds an invoice struct (PUT body) for two unlinked payments of 10 and -10 euro that cancel each other out.
+     * Both payments get their own balance item, unless `withoutItems` is set: then the balance items cancelled each other out and the struct has no items.
+     */
+    const buildZeroInvoice = async ({ organization, customer, isReceipt = false, withoutItems = false }: { organization: Organization; customer: PaymentCustomer; isReceipt?: boolean; withoutItems?: boolean }) => {
+        const struct = InvoiceStruct.create({
+            organizationId: organization.id,
+            seller: Company.create({ name: 'Seller' }),
+            customer,
+            isReceipt,
+        });
+
+        for (const price of [10_00, -10_00]) {
+            const payment = new Payment();
+            payment.organizationId = organization.id;
+            payment.method = PaymentMethod.PointOfSale;
+            payment.status = PaymentStatus.Succeeded;
+            payment.price = price;
+            await payment.save();
+            struct.payments.push(PaymentGeneral.create({ id: payment.id, method: payment.method, status: payment.status, price: payment.price }));
+
+            if (!withoutItems) {
+                const balanceItem = await createBalanceItem({ organization, unitPrice: price });
+                balanceItem.VATPercentage = 0;
+                await balanceItem.save();
+                struct.addItem(InvoicedBalanceItemStruct.createFor(balanceItem.getStructure(), price));
+            }
+        }
+        return struct;
+    };
+
+    describe('Creating zero receipts', () => {
+        beforeEach(() => {
+            InvoiceCounter.clearAll();
+        });
+
+        test('a zero receipt marks payments that cancel each other out as booked, also for a company customer', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const company = PaymentCustomer.create({ company: Company.create({ name: 'BTW-plichtig', VATNumber: 'BE0123456749' }) });
+
+            const body = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
+            const struct = await buildZeroInvoice({ organization, customer: company, isReceipt: true, withoutItems: true });
+            body.addPut(struct);
+            const [receipt] = (await patchInvoices({ body, organization, user })).body;
+
+            expect(receipt.number).toBe('BON-000001');
+            expect(receipt.type).toBe(InvoiceType.Receipt);
+            expect(receipt.totalWithVAT).toBe(0);
+            expect(receipt.items.length).toBe(0);
+            expect(receipt.pdf).not.toBeNull();
+            expect(receipt.xml).toBeNull();
+
+            for (const p of struct.payments) {
+                const payment = await Payment.getByID(p.id);
+                expect(payment!.invoiceId).toBe(receipt.id);
+            }
+
+            const html = await InvoicePdfService.generateHtml((await Invoice.getByID(receipt.id))!);
+            expect(html).toContain('Aankoopbewijs');
+            expect(html).toContain('Dit is geen factuur');
+        });
+
+        test('a zero receipt with items is rejected: goods moved, so an invoice is required', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            const body = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
+            body.addPut(await buildZeroInvoice({ organization, customer: PaymentCustomer.create({}), isReceipt: true }));
+            await expect(patchInvoices({ body, organization, user })).rejects.toThrow(STExpect.errorWithCode('invalid_invoiced_amount'));
+        });
+
+        test('a zero receipt without items lists its payments on the PDF', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            const body = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
+            const struct = await buildZeroInvoice({ organization, customer: PaymentCustomer.create({}), isReceipt: true, withoutItems: true });
+            expect(struct.items.length).toBe(0);
+            body.addPut(struct);
+            const [receipt] = (await patchInvoices({ body, organization, user })).body;
+
+            expect(receipt.number).toBe('BON-000001');
+            expect(receipt.totalWithVAT).toBe(0);
+            expect(receipt.items.length).toBe(0);
+            expect(receipt.pdf).not.toBeNull();
+
+            for (const p of struct.payments) {
+                const payment = await Payment.getByID(p.id);
+                expect(payment!.invoiceId).toBe(receipt.id);
+            }
+
+            const html = await InvoicePdfService.generateHtml((await Invoice.getByID(receipt.id))!);
+            expect(html).toContain('Er werden geen goederen of diensten geleverd');
+            expect(html).toContain(PaymentMethodHelper.getName(PaymentMethod.PointOfSale));
+            expect(html).toContain(Formatter.price(10_00));
+            expect(html).toContain(Formatter.price(-10_00));
+            expect(html).not.toContain('BTW ()');
+            expect(html).not.toContain('werd al betaald via');
+        });
+
+        test('multiple rows on one balance item are validated on their sum', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            const balanceItem = await createBalanceItem({ organization });
+            balanceItem.VATPercentage = 0;
+            await balanceItem.save();
+
+            const payment = new Payment();
+            payment.organizationId = organization.id;
+            payment.method = PaymentMethod.PointOfSale;
+            payment.status = PaymentStatus.Succeeded;
+            payment.price = 20_00;
+            await payment.save();
+
+            const struct = InvoiceStruct.create({
+                organizationId: organization.id,
+                seller: Company.create({ name: 'Seller' }),
+                customer: PaymentCustomer.create({}),
+                payments: [PaymentGeneral.create({ id: payment.id, method: payment.method, status: payment.status, price: payment.price })],
+            });
+
+            // Two rows of 10 euro each on a balance item of 10 euro: each row fits on its own, the sum does not
+            struct.addItem(InvoicedBalanceItemStruct.createFor(balanceItem.getStructure(), 10_00));
+            struct.addItem(InvoicedBalanceItemStruct.createFor(balanceItem.getStructure(), 10_00));
+
+            const body = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
+            body.addPut(struct);
+            await expect(patchInvoices({ body, organization, user })).rejects.toThrow(STExpect.errorWithCode('cannot_invoice_balance_item'));
+        });
+
+        test('a zero invoice is still rejected', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            for (const withoutItems of [false, true]) {
+                const body = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
+                body.addPut(await buildZeroInvoice({ organization, customer: PaymentCustomer.create({}), withoutItems }));
+                await expect(patchInvoices({ body, organization, user })).rejects.toThrow(STExpect.errorWithCode('invalid_invoiced_amount'));
+            }
+        });
+
+        test('a zero receipt without payments is rejected', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const struct = InvoiceStruct.create({
+                organizationId: organization.id,
+                seller: Company.create({ name: 'Seller' }),
+                customer: PaymentCustomer.create({}),
+                isReceipt: true,
+            });
+
+            await expect(InvoiceService.createFrom(organization, struct)).rejects.toThrow(STExpect.errorWithCode('missing_payments'));
+        });
+    });
 
     describe('Creating receipts', () => {
         beforeEach(() => {

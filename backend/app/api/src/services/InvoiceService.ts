@@ -24,19 +24,46 @@ export class InvoiceService {
             });
         }
 
-        if (struct.items.length === 0) {
+        const model = new Invoice();
+        model.customer = struct.customer;
+        model.isReceipt = struct.isReceipt;
+        model.comments = struct.comments?.trim() || null;
+
+        struct.updatePrices();
+        struct.validateVATRates();
+
+        // A zero receipt marks payments that cancel each other out as booked. Its balance items cancelled
+        // each other out completely: no goods or services moved, so the receipt has no items and lists the payments instead.
+        // With items left, goods did move and a (zero) invoice is required, which is not supported yet.
+        const isZeroReceipt = model.isReceipt && struct.totalWithVAT === 0 && struct.items.length === 0;
+
+        if (struct.totalWithVAT === 0 && !isZeroReceipt) {
+            throw new SimpleError({
+                code: 'invalid_invoiced_amount',
+                message: 'Cannot invoice zero',
+                human: struct.items.length === 0
+                    ? $t('Een factuur van 0 euro kan niet aangemaakt worden. Maak in dat geval een aankoopbewijs aan.')
+                    : $t('Een factuur of aankoopbewijs van 0 euro met items kan nog niet aangemaakt worden.'),
+                statusCode: 400,
+            });
+        }
+
+        if (isZeroReceipt && struct.payments.length === 0) {
+            throw new SimpleError({
+                code: 'missing_payments',
+                message: 'Cannot create a zero receipt without payments',
+                human: $t('Een aankoopbewijs van 0 euro kan enkel aangemaakt worden voor betalingen.'),
+            });
+        }
+
+        if (struct.items.length === 0 && !isZeroReceipt) {
             throw new SimpleError({
                 code: 'missing_items',
                 message: 'Cannot create invoice without items',
             });
         }
 
-        const model = new Invoice();
-        model.customer = struct.customer;
-        model.isReceipt = struct.isReceipt;
-        model.comments = struct.comments?.trim() || null;
-
-        if (model.isReceipt) {
+        if (model.isReceipt && !isZeroReceipt) {
             await this.assertReceiptAllowed(struct);
         }
 
@@ -44,10 +71,7 @@ export class InvoiceService {
             await ViesService.checkCompany(model.customer.company, null, { forceValidation: true });
         }
 
-        struct.updatePrices();
-        struct.validateVATRates();
-
-        if (struct.totalBalanceInvoicedAmount === 0) {
+        if (struct.totalBalanceInvoicedAmount === 0 && !isZeroReceipt) {
             throw new SimpleError({
                 code: 'invalid_invoiced_amount',
                 message: 'Unexpected 0 totalBalanceInvoicedAmount',
@@ -60,14 +84,6 @@ export class InvoiceService {
                 code: 'invalid_price_decimals',
                 message: 'Unexpected invoice total price with more than two decimals',
                 statusCode: 500,
-            });
-        }
-
-        if (struct.totalWithVAT === 0) {
-            throw new SimpleError({
-                code: 'invalid_invoiced_amount',
-                message: 'Cannot invoice zero',
-                statusCode: 400,
             });
         }
 
@@ -157,23 +173,7 @@ export class InvoiceService {
         await model.save();
 
         try {
-            // Create balances
             for (const item of struct.items) {
-                const balanceItem = balanceItems.find(b => b.id === item.balanceItemId);
-                if (!balanceItem || balanceItem.organizationId !== model.organizationId) {
-                    throw new SimpleError({
-                        statusCode: 404,
-                        code: 'not_found',
-                        message: 'Balance item not found',
-                    });
-                }
-
-                // Todo: check we are not invoicing more than maximum invoiceable for these items
-                const maximumInvoiceable = balanceItem.priceDue; // € - 10
-                const alreadyInvoiced = balanceItem.priceInvoiced; // € 5
-                const left = maximumInvoiceable - alreadyInvoiced; // € -15
-                const goingToInvoice = item.balanceInvoicedAmount;
-
                 if (item.quantity === 0) {
                     // should not be saved!
                     throw new SimpleError({
@@ -183,6 +183,23 @@ export class InvoiceService {
                         human: $t('%1RZ'),
                     });
                 }
+            }
+
+            // Validate per balance item: the same balance item can appear in multiple rows (e.g. a payment and its refund)
+            for (const balanceItemId of balanceItemIds) {
+                const balanceItem = balanceItems.find(b => b.id === balanceItemId);
+                if (!balanceItem || balanceItem.organizationId !== model.organizationId) {
+                    throw new SimpleError({
+                        statusCode: 404,
+                        code: 'not_found',
+                        message: 'Balance item not found',
+                    });
+                }
+
+                const maximumInvoiceable = balanceItem.priceDue; // € - 10
+                const alreadyInvoiced = balanceItem.priceInvoiced; // € 5
+                const left = maximumInvoiceable - alreadyInvoiced; // € -15
+                const goingToInvoice = struct.items.filter(i => i.balanceItemId === balanceItemId).reduce((sum, i) => sum + i.balanceInvoicedAmount, 0);
 
                 // We do allow to credit something that was wrongfully invoiced (possible on wrong invoice details).
                 // but only manually, not automatic.
@@ -263,6 +280,11 @@ export class InvoiceService {
                         }
                     }
                 }
+            }
+
+            // Create balances
+            for (const item of struct.items) {
+                const balanceItem = balanceItems.find(b => b.id === item.balanceItemId)!;
 
                 const invoiced = new InvoicedBalanceItem();
                 invoiced.invoiceId = model.id;

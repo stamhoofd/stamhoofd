@@ -213,6 +213,10 @@
             width: 12mm;
         }
 
+        .items-table col.c-date {
+            width: 24mm;
+        }
+
         .items-table col.c-vat {
             width: 20mm;
         }
@@ -536,6 +540,37 @@ where the rule starts at x = 28 mm (skipping the # column). */
         {{!-- Items table — flows naturally across pages --}}
         {{!-- ============================================================== --}}
         <main class="invoice-body">
+            {{#if showPayments}}
+            <p class="item-desc">{{$t "Er werden geen goederen of diensten geleverd. Dit document boekt de volgende betalingen, die elkaar opheffen."}}</p>
+            <table class="items-table">
+                <colgroup>
+                    <col class="c-date">
+                    <col class="c-desc">
+                    <col class="c-total">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class="col-date">{{$t "Datum"}}</th>
+                        <th class="col-desc">{{$t "Betaling"}}</th>
+                        <th class="col-total">{{$t "Bedrag"}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each payments}}
+                    <tr>
+                        <td class="col-date">{{formatDate date}}</td>
+                        <td class="col-desc">
+                            <div class="item-name">{{methodName}}</div>
+                            {{#if transferDescription}}
+                            <div class="item-desc">{{transferDescription}}</div>
+                            {{/if}}
+                        </td>
+                        <td class="col-total">{{formatPrice price}}</td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+            {{else}}
             <table class="items-table">
                 <colgroup>
                     <col class="c-num">
@@ -576,6 +611,7 @@ where the rule starts at x = 28 mm (skipping the # column). */
                     {{/each}}
                 </tbody>
             </table>
+            {{/if}}
         </main>
 
         {{!-- ============================================================== --}}
@@ -610,7 +646,8 @@ where the rule starts at x = 28 mm (skipping the # column). */
                         <span class="label">{{$t "Totaal excl. btw"}}</span>
                         <span class="value">{{formatPrice invoice.meta.priceWithoutVAT}}</span>
                     </div>
-                    {{#if invoice.meta.hasMultipleVATRates}}
+                    {{#if showPayments}}
+                    {{else if invoice.meta.hasMultipleVATRates}}
                         <div class="row">
                             <span class="label">{{$t "BTW"}}</span>
                             <span class="value">{{formatPrice invoice.meta.VAT}}</span>

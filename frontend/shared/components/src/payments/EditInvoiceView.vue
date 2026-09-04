@@ -75,7 +75,10 @@
                     <h3 class="style-title-list">
                         {{ $t('%ZqG') }}
                     </h3>
-                    <p class="style-description-small">
+                    <p v-if="patched.totalWithVAT === 0 && patched.items.length === 0" class="style-description-small">
+                        {{ $t('Voor betalingen die elkaar opheffen en samen 0 euro bedragen. Zo worden ze als geboekt gemarkeerd, ook voor een klant met een ondernemingsnummer of BTW-nummer.') }}
+                    </p>
+                    <p v-else class="style-description-small">
                         {{ $t('%ZqQ') }}
                     </p>
                 </STListItem>
@@ -141,6 +144,9 @@
 
             <p v-if="patched.didChangeUnitPricesToCorrectRounding" class="warning-box">
                 {{ $t('%1Lk') }}
+            </p>
+            <p v-if="patched.items.length === 0 && patched.totalWithVAT === 0" class="info-box">
+                {{ $t('De betalingen heffen elkaar volledig op, dus er werden geen goederen of diensten geleverd. Het aankoopbewijs bevat geen items, maar vermeldt de betalingen.') }}
             </p>
             <InvoiceItemsBox :invoice="patched" />
         </CategorizedBox>
