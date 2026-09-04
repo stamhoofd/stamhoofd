@@ -20,23 +20,30 @@ export const memberCachedBalanceForOrganizationJoin = SQL.leftJoin(
     .where(SQL.column('objectId'), SQL.column(Registration.table, 'memberId'))
     .andWhere(SQL.column('organizationId'), SQL.column(Registration.table, 'organizationId'));
 
-export const memberCachedBalanceForMemberOrganizationJoin = SQL.leftJoin(
-    SQL.select('objectId', 'organizationId',
-        new SQLSelectAs(
-            new SQLSum(
-                SQL.column('amountOpen'),
+export const memberCachedBalanceForMemberOrganizationJoin = (organizationId: string | null) => {
+    const query = SQL.leftJoin(
+        SQL.select('objectId', 'organizationId',
+            new SQLSelectAs(
+                new SQLSum(
+                    SQL.column('amountOpen'),
+                ),
+                new SQLAlias('amountOpen'),
             ),
-            new SQLAlias('amountOpen'),
-        ),
+        )
+            .from(CachedBalance.table)
+            .where(SQL.column(CachedBalance.table, 'objectType'), 'member')
+            .groupBy(SQL.column(CachedBalance.table, 'objectId'), SQL.column(CachedBalance.table, 'organizationId'))
+            .as('memberCachedBalance') as SQLNamedExpression,
+        'memberCachedBalance',
     )
-        .from(CachedBalance.table)
-        .where(SQL.column(CachedBalance.table, 'objectType'), 'member')
-        .groupBy(SQL.column(CachedBalance.table, 'objectId'), SQL.column(CachedBalance.table, 'organizationId'))
-        .as('memberCachedBalance') as SQLNamedExpression,
-    'memberCachedBalance',
-)
-    .where(SQL.column('objectId'), SQL.column(Member.table, 'id'));
-    // .andWhere(SQL.column('organizationId'), SQL.column(Registration.table, 'organizationId'));
+        .where(SQL.column('objectId'), SQL.column(Member.table, 'id'));
+
+    if (organizationId) {
+        return query.andWhere(SQL.column('organizationId'), organizationId);
+    }
+
+    return query;
+};
 
 export const registrationCachedBalanceJoin = SQL.leftJoin(
     SQL.select('objectId', 'organizationId',
