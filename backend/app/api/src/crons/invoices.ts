@@ -82,7 +82,7 @@ export async function createInvoicesFor(organization: Organization) {
         .where('customer', '!=', null)
         .where('payingOrganizationId', '!=', null)
         .where('price', '!=', 0)
-        .limit(1_000)
+        .limit(5_000)
         .orderBy('payingOrganizationId')
         .fetch();
 
