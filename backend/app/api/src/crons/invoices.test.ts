@@ -1,5 +1,6 @@
 import type { BalanceItem, Organization } from '@stamhoofd/models';
 import { BalanceItemFactory, BalanceItemPayment, Invoice, OrganizationFactory, Payment } from '@stamhoofd/models';
+import { EmailMocker } from '@stamhoofd/email';
 import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
 import { Company, PaymentCustomer, PaymentMethod, PaymentStatus, PaymentType } from '@stamhoofd/structures';
 import { createInvoicesFor } from './invoices.js';
@@ -96,24 +97,23 @@ describe('Cron.invoices', () => {
         expect(creditNote.totalWithVAT).toBe(-10_0000);
     });
 
-    test('payments on different balance items that sum to zero are booked with a receipt that keeps its items', async () => {
-        const context = await init();
-        const refundedItem = await createBalanceItem(context.organization, -10_0000);
-        const payment = await createPayment({ ...context, price: 10_0000, paidAt: twoDaysAgo() });
-        const refund = await createPayment({ ...context, balanceItem: refundedItem, price: -10_0000, paidAt: twoDaysAgo(), type: PaymentType.Refund });
+    test('payments on different balance items that sum to zero are skipped without an error', async () => {
+        // Also after the timeout date that forces low totals to be invoiced
+        for (const paidAt of [twoDaysAgo(), new Date(Date.now() - 20 * 24 * 60 * 60 * 1000)]) {
+            const context = await init();
+            const refundedItem = await createBalanceItem(context.organization, -10_0000);
+            const payment = await createPayment({ ...context, price: 10_0000, paidAt });
+            const refund = await createPayment({ ...context, balanceItem: refundedItem, price: -10_0000, paidAt, type: PaymentType.Refund });
 
-        await createInvoicesFor(context.organization);
+            const emailsBefore = (await EmailMocker.transactional.getSucceededEmails()).length;
+            await createInvoicesFor(context.organization);
 
-        const invoiceId = (await Payment.getByID(payment.id))!.invoiceId;
-        expect(invoiceId).not.toBeNull();
-        expect((await Payment.getByID(refund.id))!.invoiceId).toBe(invoiceId);
-
-        const receipt = (await Invoice.getByID(invoiceId!))!;
-        expect(receipt.isReceipt).toBe(true);
-        expect(receipt.totalWithVAT).toBe(0);
-
-        const { invoicedBalanceItems } = await Invoice.loadBalanceItems([receipt]);
-        expect(invoicedBalanceItems.map(i => i.balanceInvoicedAmount).sort((a, b) => a - b)).toEqual([-10_0000, 10_0000]);
+            // Goods moved, so this needs a zero invoice, which is not supported yet
+            expect((await Payment.getByID(payment.id))!.invoiceId).toBeNull();
+            expect((await Payment.getByID(refund.id))!.invoiceId).toBeNull();
+            expect((await Invoice.select().where('organizationId', context.organization.id).fetch()).length).toBe(0);
+            expect((await EmailMocker.transactional.getSucceededEmails()).length).toBe(emailsBefore);
+        }
     });
 
     test('a payment and its refund are booked with a zero receipt instead of an invoice and a credit note', async () => {

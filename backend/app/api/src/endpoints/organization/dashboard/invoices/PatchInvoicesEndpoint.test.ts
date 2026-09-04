@@ -138,14 +138,14 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
             const company = PaymentCustomer.create({ company: Company.create({ name: 'BTW-plichtig', VATNumber: 'BE0123456749' }) });
 
             const body = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
-            const struct = await buildZeroInvoice({ organization, customer: company, isReceipt: true });
+            const struct = await buildZeroInvoice({ organization, customer: company, isReceipt: true, withoutItems: true });
             body.addPut(struct);
             const [receipt] = (await patchInvoices({ body, organization, user })).body;
 
             expect(receipt.number).toBe('BON-000001');
             expect(receipt.type).toBe(InvoiceType.Receipt);
             expect(receipt.totalWithVAT).toBe(0);
-            expect(receipt.items.length).toBe(2);
+            expect(receipt.items.length).toBe(0);
             expect(receipt.pdf).not.toBeNull();
             expect(receipt.xml).toBeNull();
 
@@ -157,7 +157,18 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
             const html = await InvoicePdfService.generateHtml((await Invoice.getByID(receipt.id))!);
             expect(html).toContain('Aankoopbewijs');
             expect(html).toContain('Dit is geen factuur');
-            expect(html).not.toContain('Er werden geen goederen of diensten geleverd');
+        });
+
+        test('a zero receipt with items is rejected: goods moved, so an invoice is required', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            const body = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
+            body.addPut(await buildZeroInvoice({ organization, customer: PaymentCustomer.create({}), isReceipt: true }));
+            await expect(patchInvoices({ body, organization, user })).rejects.toThrow(STExpect.errorWithCode('invalid_invoiced_amount'));
         });
 
         test('a zero receipt without items lists its payments on the PDF', async () => {

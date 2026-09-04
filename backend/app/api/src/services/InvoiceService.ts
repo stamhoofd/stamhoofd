@@ -32,15 +32,18 @@ export class InvoiceService {
         struct.updatePrices();
         struct.validateVATRates();
 
-        // A zero receipt marks payments that cancel each other out as booked. Its balance items can cancel
+        // A zero receipt marks payments that cancel each other out as booked. Its balance items cancelled
         // each other out completely: no goods or services moved, so the receipt has no items and lists the payments instead.
-        const isZeroReceipt = model.isReceipt && struct.totalWithVAT === 0;
+        // With items left, goods did move and a (zero) invoice is required, which is not supported yet.
+        const isZeroReceipt = model.isReceipt && struct.totalWithVAT === 0 && struct.items.length === 0;
 
-        if (struct.totalWithVAT === 0 && !model.isReceipt) {
+        if (struct.totalWithVAT === 0 && !isZeroReceipt) {
             throw new SimpleError({
                 code: 'invalid_invoiced_amount',
                 message: 'Cannot invoice zero',
-                human: $t('Een factuur van 0 euro kan niet aangemaakt worden. Maak in dat geval een aankoopbewijs aan.'),
+                human: struct.items.length === 0
+                    ? $t('Een factuur van 0 euro kan niet aangemaakt worden. Maak in dat geval een aankoopbewijs aan.')
+                    : $t('Een factuur of aankoopbewijs van 0 euro met items kan nog niet aangemaakt worden.'),
                 statusCode: 400,
             });
         }

@@ -126,9 +126,14 @@ export async function createInvoicesFor(organization: Organization) {
             });
             invoice.buildFromPayments();
 
-            // Payments that cancel each other out are booked with a receipt: nothing was sold
-            if (invoice.totalWithVAT === 0) {
+            // Payments that cancel each other out completely are booked with a receipt: nothing was sold
+            if (invoice.totalWithVAT === 0 && invoice.items.length === 0) {
                 invoice.isReceipt = true;
+            } else if (invoice.totalWithVAT === 0) {
+                // Goods did move (e.g. a swap), which needs a zero invoice: not supported yet
+                console.log('Skipping zero total with items for ' + customer + ' at ' + organization.id);
+                skipped += 1;
+                continue;
             } else if (invoice.totalWithVAT >= 0 && invoice.totalWithVAT < invoiceLimit) {
                 const first = new Date(Math.min(...payments.map(p => getPaymentTimeoutDate(p).getTime())));
                 if (first > new Date()) {
