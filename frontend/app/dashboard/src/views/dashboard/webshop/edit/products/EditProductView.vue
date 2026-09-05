@@ -624,7 +624,7 @@ const seatingWarning = computed(() => {
 
     for (const p of patchedWebshop.value.products) {
         if (p.id !== props.product.id && p.seatingPlanId === patchedProduct.value.seatingPlanId && p.dateRange && p.dateRange.toString() === patchedProduct.value.dateRange.toString()) {
-            return $t('%1Od');
+            return $t(`Er bestaat al een ander ticket met hetzelfde zaalplan en hetzelfde tijdstip. Dit zal niet werken omdat de gereserveerde plaatsen tussen beide tickets niet gedeeld zijn. Gebruik in plaats daarvan keuzemenu's in hetzelfde ticket (bv. volwassenen, kinderen, vrijwilligers). Lees de documentatie rond zetelselectie goed door voor meer informatie.`);
         }
     }
 
