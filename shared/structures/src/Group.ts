@@ -294,6 +294,34 @@ export class Group extends AutoEncoder {
         return this.hasAccess(permissions, allCategories, PermissionLevel.Full);
     }
 
+    /**
+     * True when the user has any grant relevant to this group — a level, an access right, or a grant on a parent category.
+     * Used for coarse gates like "does this user have any reason to reach this group at all?".
+     */
+    hasSomeAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | null, allCategories: GroupCategory[]): boolean {
+        if (!permissions) {
+            return false;
+        }
+
+        if (permissions.level !== PermissionLevel.None || permissions.accessRights.length > 0) {
+            return true;
+        }
+
+        const groupPerm = permissions.getResourcePermissions(PermissionsResourceType.Groups, this.id);
+        if (groupPerm && !groupPerm.isEmpty) {
+            return true;
+        }
+
+        for (const category of this.getParentCategories(allCategories)) {
+            const categoryPerm = permissions.getResourcePermissions(PermissionsResourceType.GroupCategories, category.id);
+            if (categoryPerm && !categoryPerm.isEmpty) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     get squareImage() {
         return this.settings.squarePhoto ?? this.settings.coverPhoto;
     }
