@@ -1,4 +1,4 @@
-import type { EmailPreview, Event, Group, GroupCategory, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationTag, PaymentGeneral, Permissions, Platform, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
+import type { EmailPreview, Event, Group, GroupCategory, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationRegistrationPeriod, OrganizationTag, PaymentGeneral, Permissions, Platform, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
 import { AccessRight, EventPermissionChecker, GroupType, PermissionLevel, PermissionsResourceKey, PermissionsResourceType } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { toRaw, unref } from 'vue';
@@ -385,6 +385,36 @@ export class ContextPermissions {
 
     hasSomeAccess(): boolean {
         return !!this.permissions && !this.permissions.isEmpty;
+    }
+
+    hasSomeAccessInPeriod(period: OrganizationRegistrationPeriod): boolean {
+        const organization = this.organization;
+        const permissions = this.permissions;
+
+        if (!organization || !permissions) {
+            return false;
+        }
+
+        if (permissions.hasFullAccess()) {
+            return true;
+        }
+
+        const scoped = permissions.forPeriod(this.isPeriodInUse(period.period.id, organization));
+
+        // Grants that apply irrespective of a specific group: base grants and $all / $currentPeriod entries.
+        if (scoped.level !== PermissionLevel.None || scoped.accessRights.length > 0) {
+            return true;
+        }
+        for (const type of [PermissionsResourceType.Groups, PermissionsResourceType.GroupCategories]) {
+            for (const key of [PermissionsResourceKey.All, PermissionsResourceKey.CurrentPeriod]) {
+                const r = scoped.resources.get(type)?.get(key);
+                if (r && !r.isEmpty) {
+                    return true;
+                }
+            }
+        }
+
+        return period.groups.some(group => group.hasSomeAccess(scoped, period.settings.categories));
     }
 
     hasPlatformFullAccess(): boolean {
