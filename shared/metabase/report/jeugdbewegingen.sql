@@ -69,7 +69,9 @@ ORDER BY `Naam_Organisatie`
 -- display: table
 -- size: full
 -- columns: ID_Organisatie, Type_deelnemers, Geboortejaar_deelnemers, Gender_deelnemers, Aantal_deelnemers
+-- columns@keeo: ID_Organisatie, Type_deelnemers, Geboortejaar_deelnemers, Gender_deelnemers, Aantal_deelnemers, Waarvan Stam, Waarvan Ondersteunende leden
 -- description: Tabblad 'Deelnemers_Lokale_groep': de leden en de leiding van elke lokale groep, per geboortejaar en geslacht, met een aansluiting in dat werkjaar. Wie leiding is in de ene leeftijdsgroep en lid in de andere, telt enkel als leiding. Leeftijdsgroepen zonder categorie leveren niemand: vul die eerst aan.
+-- description@keeo: Tabblad 'Deelnemers_Lokale_groep': de leden en de leiding van elke lokale groep, per geboortejaar en geslacht, met een aansluiting in dat werkjaar. De stam telt hier mee bij de leden en de ondersteunende leden bij de leiding; de twee laatste kolommen zeggen hoeveel van de rij ze zijn en horen niet in het sjabloon. Wie leiding is in de ene leeftijdsgroep en lid in de andere, telt enkel als leiding. Leeftijdsgroepen zonder categorie leveren niemand: vul die eerst aan.
 -- description@ravot: Tabblad 'Deelnemers_Lokale_groep': de leden en de leiding van elke lokale groep, per geboortejaar en geslacht, met een aansluiting in dat werkjaar. De leeftijdsgroep 'Ondersteunende leden' telt hier mee als leiding. Wie leiding is in de ene leeftijdsgroep en lid in de andere, telt enkel als leiding. Leeftijdsgroepen zonder categorie leveren niemand: vul die eerst aan.
 WITH all_registrations AS (
     -- @include all-registrations
@@ -82,7 +84,9 @@ inschrijvingen AS (
         all_registrations.`Geslacht`,
         all_registrations.deactivated_at,
         -- @include participant-type
-            AS type_number
+            AS type_number,
+        -- @include participant-subgroup
+            AS subgroup
     FROM all_registrations
     WHERE
         -- @include filter-has-delivery-membership
@@ -98,7 +102,11 @@ deelnemers AS (
         COALESCE(
             MAX(CASE WHEN inschrijvingen.deactivated_at IS NULL THEN inschrijvingen.type_number END),
             MAX(inschrijvingen.type_number)
-        ) AS type_number
+        ) AS type_number,
+        COALESCE(
+            MIN(CASE WHEN inschrijvingen.deactivated_at IS NULL THEN inschrijvingen.subgroup END),
+            MIN(inschrijvingen.subgroup)
+        ) AS subgroup
     FROM inschrijvingen
     GROUP BY inschrijvingen.organization_uri, inschrijvingen.member_id
 )
@@ -107,7 +115,7 @@ SELECT
     CASE WHEN deelnemers.type_number = 2 THEN 'leiding' ELSE 'leden' END AS `Type_deelnemers`,
     YEAR(deelnemers.birth_date) AS `Geboortejaar_deelnemers`,
     CASE deelnemers.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' ELSE NULL END AS `Gender_deelnemers`,
-    COUNT(DISTINCT deelnemers.member_id) AS `Aantal_deelnemers`
+    -- @include participant-counts
 FROM deelnemers
 WHERE deelnemers.type_number > 0
 GROUP BY `ID_Organisatie`, `Type_deelnemers`, `Geboortejaar_deelnemers`, `Gender_deelnemers`
