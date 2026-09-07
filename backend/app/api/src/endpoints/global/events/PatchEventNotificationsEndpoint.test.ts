@@ -4,7 +4,7 @@ import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import type { User } from '@stamhoofd/models';
 import { AuditLog, EmailTemplateFactory, EventFactory, EventNotification, EventNotificationFactory, EventNotificationTypeFactory, Organization, OrganizationFactory, Platform, RecordAnswerFactory, RecordCategoryFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { AccessRight, AuditLogReplacementType, AuditLogType, BaseOrganization, EmailTemplateType, Event, EventNotificationStatus, EventNotification as EventNotificationStruct, Permissions, PermissionsResourceType, RecordType, ResourcePermissions } from '@stamhoofd/structures';
+import { AccessRight, AuditLogReplacementType, AuditLogType, BaseOrganization, EmailTemplateType, Event, EventNotification as EventNotificationStruct, EventNotificationStatus, Permissions, PermissionsResourceKey, PermissionsResourceType, RecordType, ResourcePermissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import '../../../audit-logs/init.js';
@@ -20,7 +20,7 @@ type Body = EndpointType extends Endpoint<any, any, infer B, any> ? B : never;
 const minimumUserPermissions = Permissions.create({
     resources: new Map([
         [PermissionsResourceType.Groups, new Map([
-            ['', ResourcePermissions.create({
+            [PermissionsResourceKey.CurrentPeriod, ResourcePermissions.create({
                 accessRights: [AccessRight.EventWrite],
             })],
         ])],
@@ -78,7 +78,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             globalPermissions: Permissions.create({
                 resources: new Map([
                     [PermissionsResourceType.OrganizationTags, new Map([
-                        ['', ResourcePermissions.create({
+                        [PermissionsResourceKey.All, ResourcePermissions.create({
                             accessRights: [
                                 AccessRight.OrganizationEventNotificationReviewer,
                             ],

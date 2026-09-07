@@ -2,7 +2,7 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { Registration, RegistrationPeriod, Token } from '@stamhoofd/models';
 import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import type { SortList } from '@stamhoofd/structures';
-import { AccessRight, EventMeta, GroupPrice, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, SortItemDirection, TranslatedString } from '@stamhoofd/structures';
+import { AccessRight, EventMeta, GroupPrice, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, SortItemDirection, TranslatedString } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { GetRegistrationsEndpoint } from './GetRegistrationsEndpoint.js';
@@ -977,7 +977,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             // Give permission to all groups
             resources.set(
                 PermissionsResourceType.Groups, new Map([[
-                    '',
+                    PermissionsResourceKey.CurrentPeriod,
                     ResourcePermissions.create({
                         level: PermissionLevel.Read,
                     }),
