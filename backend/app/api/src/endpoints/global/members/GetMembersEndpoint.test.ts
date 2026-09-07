@@ -3,7 +3,7 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { MemberWithUsersRegistrationsAndGroups, RegistrationPeriod, Token } from '@stamhoofd/models';
 import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, RecordCategoryFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import type { SortList, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, EventMeta, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
+import { AccessRight, EventMeta, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Language } from '@stamhoofd/types/Language';
 import { GetMembersEndpoint } from './GetMembersEndpoint.js';
@@ -1131,7 +1131,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             resources.set(
                 PermissionsResourceType.OrganizationTags, new Map([[
-                    '',
+                    PermissionsResourceKey.All,
                     ResourcePermissions.create({
                         level: PermissionLevel.Full,
                         accessRights: [],
@@ -1206,7 +1206,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     level: PermissionLevel.None,
                     resources: new Map([[
                         PermissionsResourceType.Groups, new Map([[
-                            '',
+                            PermissionsResourceKey.CurrentPeriod,
                             ResourcePermissions.create({
                                 level: PermissionLevel.Full,
                                 accessRights: [],
@@ -1407,7 +1407,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             // Give permission to all groups
             resources.set(
                 PermissionsResourceType.Groups, new Map([[
-                    '',
+                    PermissionsResourceKey.CurrentPeriod,
                     ResourcePermissions.create({
                         level: PermissionLevel.Read,
                     }),

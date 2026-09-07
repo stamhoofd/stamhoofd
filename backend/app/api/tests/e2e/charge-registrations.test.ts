@@ -1,7 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
 import { BalanceItem, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import { AccessRight, ChargeRequest, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, VATExcemptReason, Version } from '@stamhoofd/structures';
+import { AccessRight, ChargeRequest, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, VATExcemptReason, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { ChargeRegistrationsEndpoint } from '../../src/endpoints/admin/registrations/ChargeRegistrationsEndpoint.js';
 import { SessionService } from '../../src/services/SessionService.js';
@@ -46,7 +46,7 @@ describe('E2E.ChargeRegistrations', () => {
                 level: PermissionLevel.None,
                 roles: [role],
                 resources: new Map([[PermissionsResourceType.Groups, new Map([[
-                    '',
+                    PermissionsResourceKey.CurrentPeriod,
                     ResourcePermissions.create({ level: PermissionLevel.Write }),
                 ]])]]),
             }),
