@@ -4,7 +4,7 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, OrganizationRegistrationPeriod, User } from '@stamhoofd/models';
 import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, Organization, Payment, Registration, Webshop } from '@stamhoofd/models';
 import type { GroupCategory, MemberWithRegistrationsBlob, Platform as PlatformStruct, RecordAnswer, RecordSettings, ResourcePermissions } from '@stamhoofd/structures';
-import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPermissionChecker, FinancialSupportSettings, GroupStatus, GroupType, PermissionLevel, PermissionsResourceType, ReceivableBalanceType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
+import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPermissionChecker, FinancialSupportSettings, GroupStatus, GroupType, PermissionLevel, PermissionsResourceKey, PermissionsResourceType, ReceivableBalanceType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { RecordCacheEntry } from '../services/MemberRecordStore.js';
 import { MemberRecordStore } from '../services/MemberRecordStore.js';
@@ -1180,7 +1180,7 @@ export class AdminPermissionChecker {
         return this.platformPermissions?.hasAccessForSomeResourceOfType(PermissionsResourceType.Senders, PermissionLevel.Read) ?? false;
     }
 
-    async canReadAllEmails(organizationId: Organization | string | null, senderId = ''): Promise<boolean> {
+    async canReadAllEmails(organizationId: Organization | string | null, senderId: string = PermissionsResourceKey.All): Promise<boolean> {
         if (organizationId) {
             return (await this.getOrganizationPermissions(organizationId))?.hasResourceAccess(PermissionsResourceType.Senders, senderId, PermissionLevel.Read) ?? false;
         }
@@ -1208,7 +1208,7 @@ export class AdminPermissionChecker {
                 return false;
             }
             if (!email.senderId) {
-                return organizationPermissions.hasResourceAccess(PermissionsResourceType.Senders, '', level);
+                return organizationPermissions.hasResourceAccess(PermissionsResourceType.Senders, PermissionsResourceKey.All, level);
             }
             return organizationPermissions.hasResourceAccess(PermissionsResourceType.Senders, email.senderId, level);
         }
@@ -1219,7 +1219,7 @@ export class AdminPermissionChecker {
             return false;
         }
         if (!email.senderId) {
-            return platformPermissions.hasResourceAccess(PermissionsResourceType.Senders, '', level);
+            return platformPermissions.hasResourceAccess(PermissionsResourceType.Senders, PermissionsResourceKey.All, level);
         }
         return platformPermissions.hasResourceAccess(PermissionsResourceType.Senders, email.senderId, level);
     }
@@ -1754,7 +1754,7 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        return permissions.hasResourceAccess(PermissionsResourceType.Groups, '', level);
+        return permissions.hasResourceAccess(PermissionsResourceType.Groups, PermissionsResourceKey.CurrentPeriod, level);
     }
 
     /**
@@ -2055,7 +2055,7 @@ export class AdminPermissionChecker {
             return 'all';
         }
 
-        if (this.platformPermissions?.hasResourceAccess(PermissionsResourceType.OrganizationTags, '', level)) {
+        if (this.platformPermissions?.hasResourceAccess(PermissionsResourceType.OrganizationTags, PermissionsResourceKey.All, level)) {
             return 'all';
         }
 
@@ -2084,7 +2084,7 @@ export class AdminPermissionChecker {
             return 'all';
         }
 
-        if (this.platformPermissions?.hasResourceAccessRight(PermissionsResourceType.OrganizationTags, '', right)) {
+        if (this.platformPermissions?.hasResourceAccessRight(PermissionsResourceType.OrganizationTags, PermissionsResourceKey.All, right)) {
             return 'all';
         }
 
