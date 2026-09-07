@@ -1,7 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
 import { EmailTemplate, GroupFactory, OrganizationFactory, Platform, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import { EmailTemplateType, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
+import { EmailTemplateType, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { GetEmailTemplatesEndpoint } from './GetEmailTemplatesEndpoint.js';
@@ -41,7 +41,7 @@ describe('Endpoint.GetEmailTemplatesEndpoint', () => {
         const role = PermissionRoleDetailed.create({
             name: 'Beroepsmedewerker',
             resources: new Map([[PermissionsResourceType.OrganizationTags, new Map([[
-                '',
+                PermissionsResourceKey.All,
                 ResourcePermissions.create({
                     level: PermissionLevel.Full,
                 }),
