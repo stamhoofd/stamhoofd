@@ -1,5 +1,5 @@
 import type { EmailPreview, Event, Group, GroupCategory, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationTag, PaymentGeneral, Permissions, Platform, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
-import { AccessRight, EventPermissionChecker, GroupType, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
+import { AccessRight, EventPermissionChecker, GroupType, PermissionLevel, PermissionsResourceKey, PermissionsResourceType } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { toRaw, unref } from 'vue';
 
@@ -395,7 +395,7 @@ export class ContextPermissions {
             return 'all';
         }
 
-        if (this.platformPermissions?.hasResourceAccess(PermissionsResourceType.OrganizationTags, '', level)) {
+        if (this.platformPermissions?.hasResourceAccess(PermissionsResourceType.OrganizationTags, PermissionsResourceKey.All, level)) {
             return 'all';
         }
 
