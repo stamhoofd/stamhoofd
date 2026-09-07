@@ -53,11 +53,11 @@
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
   },
   "devDependencies": {
-    "@capacitor/cli": "8.4.2",
+    "@capacitor/cli": "8.5.1",
     "@stamhoofd/vite-config": "*",
     "@trapezedev/configure": "7.1.4",
     "eslint-plugin-stamhoofd": "*",
     "sharp": "0.35.3",
-    "vite": "8.1.5"
+    "vite": "8.2.2"
   }
 }
