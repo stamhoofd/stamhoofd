@@ -1,8 +1,8 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, OrganizationRegistrationPeriod, User } from '@stamhoofd/models';
-import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, Organization, Payment, Registration, Webshop } from '@stamhoofd/models';
+import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, User } from '@stamhoofd/models';
+import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, Organization, OrganizationRegistrationPeriod, Payment, Registration, Webshop } from '@stamhoofd/models';
 import type { GroupCategory, MemberWithRegistrationsBlob, Platform as PlatformStruct, RecordAnswer, RecordSettings, ResourcePermissions } from '@stamhoofd/structures';
 import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPermissionChecker, FinancialSupportSettings, GroupStatus, GroupType, PermissionLevel, PermissionsResourceKey, PermissionsResourceType, ReceivableBalanceType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -28,6 +28,7 @@ export class AdminPermissionChecker {
     organizationCache: Map<string, Organization | Promise<Organization | undefined>> = new Map();
     groupsCache: Map<string, Group | null | Promise<Group | null>> = new Map();
     webshopsCache: Map<string, Webshop | null | Promise<Webshop | null>> = new Map();
+    organizationPeriodsCache: Map<string, OrganizationRegistrationPeriod | null | Promise<OrganizationRegistrationPeriod | null>> = new Map();
 
     constructor(user: User, platform: PlatformStruct, organization?: Organization) {
         this.user = user;
@@ -154,9 +155,28 @@ export class AdminPermissionChecker {
         }
     }
 
-    async getOrganizationCurrentPeriod(id: string | Organization): Promise<OrganizationRegistrationPeriod> {
+    async getOrganizationPeriod(id: string | Organization, periodId: string): Promise<OrganizationRegistrationPeriod | null> {
         const organization = await this.getOrganization(id);
-        return await organization.getPeriod();
+
+        if (periodId === organization.periodId) {
+            return await organization.getPeriod();
+        }
+
+        const key = organization.id + '-' + periodId;
+        const cache = this.organizationPeriodsCache.get(key);
+        if (cache !== undefined) {
+            return await cache;
+        }
+
+        const promise = OrganizationRegistrationPeriod.select()
+            .where('organizationId', organization.id)
+            .where('periodId', periodId)
+            .first(false);
+
+        this.organizationPeriodsCache.set(key, promise);
+        const organizationPeriod = await promise;
+        this.organizationPeriodsCache.set(key, organizationPeriod);
+        return organizationPeriod;
     }
 
     error(humanOrData?: string | { message: string; human?: string }): SimpleError {
@@ -271,16 +291,17 @@ export class AdminPermissionChecker {
         return true;
     }
 
+    isPeriodInUse(periodId: string, organization: Organization): boolean {
+        if (periodId === organization.periodId) {
+            return true;
+        }
+
+        return STAMHOOFD.userMode !== 'organization' && periodId === this.platform.period.id;
+    }
+
     async canAccessGroupsInPeriod(periodId: string, organizationId: string) {
         const organization = await this.getOrganization(organizationId);
-        if (periodId !== organization.periodId) {
-            if (STAMHOOFD.userMode === 'organization' || periodId !== this.platform.period.id) {
-                if (!await this.hasFullAccess(organization.id)) {
-                    return false;
-                }
-            }
-        }
-        return true;
+        return this.isPeriodInUse(periodId, organization) || await this.hasFullAccess(organization.id);
     }
 
     async canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
@@ -289,27 +310,28 @@ export class AdminPermissionChecker {
             // return false;
         }
 
-        if (!await this.canAccessGroupsInPeriod(group.periodId, group.organizationId)) {
-            return false;
-        }
         const organization = await this.getOrganization(group.organizationId);
 
         if (group.deletedAt || group.status === GroupStatus.Archived) {
             return await this.canAccessArchivedGroups(group.organizationId);
         }
 
-        const organizationPermissions = await this.getOrganizationPermissions(group.organizationId);
+        let organizationPermissions = await this.getOrganizationPermissions(group.organizationId);
 
         if (!organizationPermissions) {
             return false;
         }
+
+        const isPeriodInUse = this.isPeriodInUse(group.periodId, organization);
+        organizationPermissions = organizationPermissions.forPeriod(isPeriodInUse);
 
         // Check global level permissions for this user
         if (organizationPermissions.hasResourceAccess(PermissionsResourceType.Groups, group.id, permissionLevel)) {
             return true;
         }
 
-        if (group.type === GroupType.EventRegistration) {
+        // Skip event fallback outside the current period: canAccessEvent evaluates $currentPeriod-scoped grants and would not succeed cross-period.
+        if (isPeriodInUse && group.type === GroupType.EventRegistration) {
             // Check if we can access the event
             const event = await Event.select().where('groupId', group.id).first(false);
 
@@ -320,8 +342,8 @@ export class AdminPermissionChecker {
 
         // Check parent categories
         if (group.type === GroupType.Membership) {
-            const organizationPeriod = await this.getOrganizationCurrentPeriod(organization);
-            const parentCategories = group.getParentCategories(organizationPeriod.settings.categories);
+            const organizationPeriod = await this.getOrganizationPeriod(organization, group.periodId);
+            const parentCategories = organizationPeriod ? group.getParentCategories(organizationPeriod.settings.categories) : [];
             for (const category of parentCategories) {
                 if (organizationPermissions.hasResourceAccess(PermissionsResourceType.GroupCategories, category.id, permissionLevel)) {
                     return true;
@@ -329,7 +351,8 @@ export class AdminPermissionChecker {
             }
         }
 
-        if (group.type === GroupType.WaitingList) {
+        // Skip waiting-list-of-event fallback outside the current period: the parent event's permission check would not succeed cross-period.
+        if (isPeriodInUse && group.type === GroupType.WaitingList) {
             // Check if this is a waiting list for an event
             const parentGroup = await Group.select()
                 .where('type', GroupType.EventRegistration)
@@ -1259,8 +1282,8 @@ export class AdminPermissionChecker {
 
         // Check parents
         const organization = await this.getOrganization(organizationId);
-        const organizationPeriod = await this.getOrganizationCurrentPeriod(organization);
-        const parentCategories = category.getParentCategories(organizationPeriod.settings.categories);
+        const organizationPeriod = await this.getOrganizationPeriod(organization, organization.periodId);
+        const parentCategories = organizationPeriod ? category.getParentCategories(organizationPeriod.settings.categories) : [];
 
         for (const parentCategory of parentCategories) {
             if (organizationPermissions.hasResourceAccessRight(PermissionsResourceType.GroupCategories, parentCategory.id, AccessRight.OrganizationCreateGroups)) {
