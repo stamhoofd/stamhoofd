@@ -36,7 +36,7 @@
         "@stamhoofd/structures": "2.152.0",
         "@stamhoofd/types": "2.152.0",
         "@stamhoofd/utility": "2.152.0",
-        "mysql2": "3.23.1"
+        "mysql2": "3.24.3"
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "2.152.0",

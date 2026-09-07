@@ -61,7 +61,7 @@
     "@stamhoofd/cli": "*",
     "argon2": "0.45.1",
     "chart.js": "3.9.1",
-    "core-js": "3.49.0",
+    "core-js": "3.50.0",
     "ibantools": "4.5.4",
     "jose": "5.10.0",
     "jsvat-next": "3.0.4",
