@@ -16,7 +16,7 @@ type Params = Record<string, never>;
 type Query = undefined;
 class Body extends AutoEncoder {
     @field({ decoder: StringDecoder, optional: true })
-    fromPeriodId?: string;
+    fromOrganizationRegistrationPeriodId?: string;
 
     @field({ decoder: StringDecoder })
     toPeriodId: string;
@@ -93,7 +93,7 @@ export class StartOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             });
         }
 
-        if (!request.body.fromPeriodId || !organization.periodId) {
+        if (!request.body.fromOrganizationRegistrationPeriodId || !organization.periodId) {
             const registrationPeriod = new OrganizationRegistrationPeriod();
             registrationPeriod.periodId = toPeriod.id;
             await registrationPeriod.save();
@@ -103,8 +103,19 @@ export class StartOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             );
         }
 
-        const fromOrganizationPeriod = await OrganizationRegistrationPeriod.getByID(request.body.fromPeriodId ?? organization.periodId);
-        if (!fromOrganizationPeriod) {
+        // Copy data
+        const newOrganizationRegistrationPeriod = await StartOrganizationRegistrationPeriodsEndpoint.duplicateOrganizationRegistrationPeriod(
+            request.body.fromOrganizationRegistrationPeriodId ?? organization.periodId,
+            toPeriod, organization);
+
+        return new Response(
+            await AuthenticatedStructures.organizationRegistrationPeriod(newOrganizationRegistrationPeriod),
+        );
+    }
+
+    static async duplicateOrganizationRegistrationPeriod(fromOrganizationRegistrationPeriodId: string, to: RegistrationPeriod, organization: Organization) {
+        const from = await OrganizationRegistrationPeriod.getByID(fromOrganizationRegistrationPeriodId);
+        if (!from) {
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Period not found',
@@ -113,21 +124,6 @@ export class StartOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             });
         }
 
-        // Copy data
-        const newOrganizationRegistrationPeriod = await this.duplicateOrganizationRegistrationPeriod(fromOrganizationPeriod, toPeriod, organization);
-
-        const groups = await Group.getAll(organization.id, newOrganizationRegistrationPeriod.periodId);
-
-        // Delete unreachable categories first
-        await newOrganizationRegistrationPeriod.cleanCategories(groups);
-        await Group.deleteUnreachable(organization.id, newOrganizationRegistrationPeriod, groups);
-
-        return new Response(
-            await AuthenticatedStructures.organizationRegistrationPeriod(newOrganizationRegistrationPeriod),
-        );
-    }
-
-    private async duplicateOrganizationRegistrationPeriod(from: OrganizationRegistrationPeriod, to: RegistrationPeriod, organization: Organization) {
         const fromPeriod = await RegistrationPeriod.getByID(from.periodId);
         const fromStruct = await AuthenticatedStructures.organizationRegistrationPeriod(from);
 
@@ -203,10 +199,17 @@ export class StartOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
         // Update root category id
         organizationPeriod.settings.rootCategoryId = categoryMap.get(fromSettingsClone.rootCategoryId)!;
+
+        const groups = await Group.getAll(organization.id, organizationPeriod.periodId);
+
+        // Delete unreachable categories first
+        await organizationPeriod.cleanCategories(groups);
+        await Group.deleteUnreachable(organization.id, organizationPeriod, groups);
+
         return organizationPeriod;
     }
 
-    private async createGroup(struct: GroupStruct, organizationId: string, period: RegistrationPeriod, yearDifference: number, discountMap: Map<string, string>, options?: { allowedIds?: string[] }): Promise<Group> {
+    static async createGroup(struct: GroupStruct, organizationId: string, period: RegistrationPeriod, yearDifference: number, discountMap: Map<string, string>, options?: { allowedIds?: string[] }): Promise<Group> {
         const allowedIds = options?.allowedIds ?? [];
 
         const model = new Group();
@@ -349,7 +352,7 @@ export class StartOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         return model;
     }
 
-    private async duplicateEmailTemplate(fromGroupId: string, toGroupId: string, organizationId: string) {
+    static async duplicateEmailTemplate(fromGroupId: string, toGroupId: string, organizationId: string) {
         const originalTemplate = await EmailTemplate.select()
             .where('organizationId', organizationId)
             .andWhere('groupId', fromGroupId)
@@ -365,7 +368,7 @@ export class StartOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         }
     }
 
-    private async validateDefaultGroupId(id: string | null): Promise<string | null> {
+    static async validateDefaultGroupId(id: string | null): Promise<string | null> {
         if (id === null) {
             return id;
         }

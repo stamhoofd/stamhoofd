@@ -155,7 +155,6 @@ import GroupAvatar from '#GroupAvatar.vue';
 import STGrid from '#layout/STGrid.vue';
 import STGridItem from '#layout/STGridItem.vue';
 import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
-import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';
 import { useSwitchOrganizationPeriods } from '@stamhoofd/networking/hooks/useSwitchOrganizationPeriods';
 import type { Group, GroupCategoryTree, RegistrationPeriod, RegistrationPeriodList, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { GroupStatus } from '@stamhoofd/structures';
@@ -259,7 +258,6 @@ const rows = computed(() => {
 });
 const errors = useErrors();
 const pop = usePop();
-const patchOrganizationPeriods = usePatchOrganizationPeriods();
 const switchOrganizationPeriods = useSwitchOrganizationPeriods();
 
 async function start() {
@@ -276,17 +274,6 @@ async function start() {
             toPeriodId: props.period.id,
         });
 
-        // let newOrganizationPeriod = OrganizationRegistrationPeriod.create({
-        //     period: props.period,
-        // });
-        // if (currentPeriod) {
-        //     newOrganizationPeriod = currentPeriod.duplicate(props.period);
-        // }
-
-        // const arr = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>;
-        // arr.addPut(newOrganizationPeriod);
-
-        // await patchOrganizationPeriods(arr);
         props.callback();
 
         if (currentPeriod && currentPeriod.id === organization.value?.period.id) {
