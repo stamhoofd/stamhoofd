@@ -521,7 +521,6 @@ export class AdminPermissionChecker {
         }
 
         if (organizationPermissions.hasAccess(PermissionLevel.Full)) {
-            // Only full permissions; because non-full doesn't have access to other periods
             return true;
         }
 
@@ -535,16 +534,6 @@ export class AdminPermissionChecker {
             // No full access: cannot access deactivated registrations
             if (permissionLevel !== PermissionLevel.Read) {
                 // Not allowed to edit registrations that are deleted
-                return false;
-            }
-        }
-
-        const organization = await this.getOrganization(registration.organizationId);
-
-        if (registration.periodId !== organization.periodId) {
-            if (STAMHOOFD.userMode === 'organization' || registration.periodId !== this.platform.period.id) {
-                // We already checked for full permissions - and we don't have full permissions
-                // so that also means no permissions for registrations in other periods
                 return false;
             }
         }
@@ -1778,6 +1767,15 @@ export class AdminPermissionChecker {
         }
 
         return permissions.hasResourceAccess(PermissionsResourceType.Groups, PermissionsResourceKey.CurrentPeriod, level);
+    }
+
+    async canAccessAllMembersInEveryPeriod(organizationId: string, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
+        const permissions = await this.getOrganizationPermissions(organizationId);
+        if (!permissions) {
+            return false;
+        }
+
+        return permissions.hasResourceAccess(PermissionsResourceType.Groups, PermissionsResourceKey.All, level);
     }
 
     /**
