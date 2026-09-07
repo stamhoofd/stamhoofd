@@ -22,6 +22,36 @@ export const recordAnswersFilterCompilers: InMemoryFilterDefinitions = {
     recordAnswers: createInMemoryFilterCompiler('recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers)),
 };
 
+export const optionItemFilterCompilers: InMemoryFilterDefinitions = {
+    ...baseInMemoryFilterCompilers,
+    option: {
+        ...baseInMemoryFilterCompilers,
+        id: createInMemoryFilterCompiler('id'),
+    },
+    optionMenu: {
+        ...baseInMemoryFilterCompilers,
+        id: createInMemoryFilterCompiler('id'),
+    },
+};
+
+export const optionsFilterCompilers: InMemoryFilterDefinitions = {
+    options: createInMemoryFilterCompiler('options', createInMemoryWildcardCompilerSelector(optionItemFilterCompilers)),
+};
+
+export const fieldAnswerItemFilterCompilers: InMemoryFilterDefinitions = {
+    ...baseInMemoryFilterCompilers,
+    field: {
+        ...baseInMemoryFilterCompilers,
+        id: createInMemoryFilterCompiler('id'),
+    },
+    answer: createInMemoryFilterCompiler('answer'),
+};
+
+export const fieldAnswersFilterCompilers: InMemoryFilterDefinitions = {
+    ...baseInMemoryFilterCompilers,
+    fieldAnswers: createInMemoryFilterCompiler('fieldAnswers', createInMemoryWildcardCompilerSelector(fieldAnswerItemFilterCompilers)),
+};
+
 export const registrationInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
     groupId: createInMemoryFilterCompiler('groupId'),
@@ -168,6 +198,8 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
             ...baseInMemoryFilterCompilers,
             id: createInMemoryFilterCompiler('id'),
         }),
+        options: createInMemoryFilterCompiler('options', createInMemoryWildcardCompilerSelector(optionsFilterCompilers)),
+        fieldAnswers: createInMemoryFilterCompiler('fieldAnswers', createInMemoryWildcardCompilerSelector(fieldAnswersFilterCompilers)),
     }),
     recordAnswers: createInMemoryFilterCompiler('data.recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers)),
     amountToPay: createInMemoryFilterCompiler('amountToPay'),

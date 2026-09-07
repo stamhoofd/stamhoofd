@@ -42,9 +42,6 @@ export function getCartFilterBuilder(webshop: Webshop) {
                             return new MultipleChoiceUIFilterOption(price.name, price.id);
                         }),
                         wrapper: {
-                            product: {
-                                id: product.id,
-                            },
                             productPrice: {
                                 id: {
                                     $in: FilterWrapperMarker,
@@ -62,7 +59,19 @@ export function getCartFilterBuilder(webshop: Webshop) {
                     for (const customField of product.customFields) {
                         filters.push(new StringFilterBuilder({
                             name: customField.name,
-                            key: customField.id,
+                            key: 'answer',
+                            wrapper: {
+                                fieldAnswers: {
+                                    $and: [
+                                        {
+                                            field: {
+                                                id: customField.id,
+                                            },
+                                        },
+                                        FilterWrapperMarker,
+                                    ],
+                                },
+                            },
                         }));
                     }
                 }
@@ -74,6 +83,7 @@ export function getCartFilterBuilder(webshop: Webshop) {
                         $and: [
                             {
                                 product: {
+
                                     id: product.id,
                                 },
                             },

@@ -388,6 +388,7 @@ export class OrdersStore {
             let compiledFilter: InMemoryFilterRunner | undefined;
 
             if (filter) {
+                console.log(filter)
                 try {
                     compiledFilter = compileToInMemoryFilter(filter, privateOrderWithTicketsFilterCompilers);
                 } catch (e: any) {
