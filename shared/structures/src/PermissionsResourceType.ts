@@ -18,8 +18,8 @@ export enum PermissionsResourceType {
 }
 
 export const PermissionsResourceKey = {
-    All: '~all',
-    CurrentPeriod: '~currentPeriod',
+    All: '$all',
+    CurrentPeriod: '$currentPeriod',
 } as const;
 
 export type PermissionsResourceKey = typeof PermissionsResourceKey[keyof typeof PermissionsResourceKey];
