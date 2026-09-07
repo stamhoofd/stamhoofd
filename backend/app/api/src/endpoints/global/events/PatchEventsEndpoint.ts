@@ -54,7 +54,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             putGroup.organizationId = event.organizationId;
         }
 
-        if (!await Context.auth.canAccessGroupsInPeriod(period.id, putGroup.organizationId)) {
+        if (!await Context.auth.hasSomeAccessInPeriod(period.id, putGroup.organizationId)) {
             throw Context.auth.error($t(`%1HQ`));
         }
 

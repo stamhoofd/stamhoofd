@@ -1,4 +1,4 @@
-import type { EmailPreview, Event, Group, GroupCategory, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationTag, PaymentGeneral, Permissions, Platform, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
+import type { EmailPreview, Event, Group, GroupCategory, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationRegistrationPeriod, OrganizationTag, PaymentGeneral, Permissions, Platform, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
 import { AccessRight, EventPermissionChecker, GroupType, PermissionLevel, PermissionsResourceKey, PermissionsResourceType } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { toRaw, unref } from 'vue';
@@ -385,6 +385,22 @@ export class ContextPermissions {
 
     hasSomeAccess(): boolean {
         return !!this.permissions && !this.permissions.isEmpty;
+    }
+
+    hasSomeAccessInPeriod(period: OrganizationRegistrationPeriod): boolean {
+        const organization = this.organization;
+        const permissions = this.permissions;
+
+        if (!organization || !permissions) {
+            return false;
+        }
+
+        if (permissions.hasFullAccess()) {
+            return true;
+        }
+
+        const scoped = permissions.forPeriod(this.isPeriodInUse(period.period.id, organization));
+        return period.groups.some(group => group.hasReadAccess(scoped, period.settings.categories));
     }
 
     hasPlatformFullAccess(): boolean {
