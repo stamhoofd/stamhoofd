@@ -97,8 +97,7 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
             if (organization) {
                 // Add organization scope filter
                 if (await Context.auth.canAccessAllMembers(organization.id, permissionLevel)) {
-                    if (await Context.auth.hasFullAccess(organization.id, permissionLevel)) {
-                        // Can access full history for now
+                    if (await Context.auth.canAccessAllMembersInEveryPeriod(organization.id, permissionLevel)) {
                         scopeFilter = {
                             member: {
                                 registrations: {
@@ -109,7 +108,6 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
                             },
                         };
                     } else {
-                        // Can only access current period
                         scopeFilter = {
                             member: {
                                 registrations: {
@@ -123,7 +121,7 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
                     }
                 } else {
                     // Check which normal membership groups we have access to and filter on those
-                    const groups = await Group.getAll(organization.id, organization.periodId, true, [GroupType.Membership, GroupType.WaitingList]);
+                    const groups = await Group.getAll(organization.id, null, true, [GroupType.Membership, GroupType.WaitingList]);
                     Context.auth.cacheGroups(groups);
                     const groupIds: string[] = [];
 
