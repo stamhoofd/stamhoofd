@@ -4,7 +4,7 @@ import { AccessRight, AccessRightHelper } from './AccessRight.js';
 import { PermissionLevel, getPermissionLevelNumber } from './PermissionLevel.js';
 import type { PermissionRoleDetailed } from './PermissionRole.js';
 import type { PermissionsResourceType } from './PermissionsResourceType.js';
-import { getPermissionResourceTypeName } from './PermissionsResourceType.js';
+import { getPermissionResourceTypeName, PermissionsResourceKey } from './PermissionsResourceType.js';
 import { Formatter } from '@stamhoofd/utility';
 
 type ResourceLike = { accessRights: AccessRight[]; level: PermissionLevel; isEmpty: boolean; resourceName?: string };
@@ -124,13 +124,19 @@ export class ResourcePermissions extends AutoEncoder {
         };
 
         for (const [type, resources] of map) {
-            const all = resources.get('');
-            let allDescription: string | null = null;
+            const allDescriptions: string[] = [];
 
-            if (all && !all.isEmpty) {
+            for (const key of [PermissionsResourceKey.All, PermissionsResourceKey.CurrentPeriod]) {
+                const all = resources.get(key);
+
+                if (!all || all.isEmpty) {
+                    continue;
+                }
+
+                const name = getPermissionResourceTypeName(type, true) + (key === PermissionsResourceKey.CurrentPeriod ? ' ' + $t('van dit werkjaar') : '');
                 const accessRights = all.accessRights.map(a => AccessRightHelper.getDescription(a));
                 if (all.level === PermissionLevel.None) {
-                    stack.push($t(`%nF`) + ' ' + getPermissionResourceTypeName(type, true) + ': ' + Formatter.joinLast(accessRights, ', ', ' ' + $t(`%M1`) + ' '));
+                    stack.push($t(`%nF`) + ' ' + name + ': ' + Formatter.joinLast(accessRights, ', ', ' ' + $t(`%M1`) + ' '));
                 }
 
                 let prefix = $t(`%nF`) + ' ';
@@ -143,16 +149,20 @@ export class ResourcePermissions extends AutoEncoder {
                     suffix = '';
                 }
 
-                stack.push(prefix + getPermissionResourceTypeName(type, true) + suffix + (accessRights.length > 0 ? ' ' + $t(`%nE`) + ' ' + Formatter.joinLast(accessRights, ', ', ' ' + $t(`%M1`) + ' ') : ''));
-                allDescription = resourceDescription(all);
+                stack.push(prefix + name + suffix + (accessRights.length > 0 ? ' ' + $t(`%nE`) + ' ' + Formatter.joinLast(accessRights, ', ', ' ' + $t(`%M1`) + ' ') : ''));
+                allDescriptions.push(resourceDescription(all));
             }
 
             const countsPer = new Map<string, { count: number; firstName: string | null }>();
 
-            for (const resource of resources.values()) {
+            for (const [id, resource] of resources) {
+                if (id === PermissionsResourceKey.All || id === PermissionsResourceKey.CurrentPeriod) {
+                    continue;
+                }
+
                 if (!resource.isEmpty) {
                     const description = resourceDescription(resource);
-                    if (description === allDescription) {
+                    if (allDescriptions.includes(description)) {
                         continue;
                     }
                     if (!countsPer.has(description)) {

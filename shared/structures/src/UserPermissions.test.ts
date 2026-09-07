@@ -4,7 +4,7 @@ import { MemberResponsibilityRecordBase } from './members/MemberResponsibilityRe
 import { PermissionLevel } from './PermissionLevel.js';
 import { PermissionRole, PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole.js';
 import { Permissions } from './Permissions.js';
-import { PermissionsResourceType } from './PermissionsResourceType.js';
+import { PermissionsResourceKey, PermissionsResourceType } from './PermissionsResourceType.js';
 import { Platform, PlatformConfig, PlatformPrivateConfig } from './Platform.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 import type { OrganizationForPermissionCalculation } from './UserPermissions.js';
@@ -154,10 +154,9 @@ describe('Unit.UserPermissions', () => {
             ).toBeNull();
         });
 
-        test('applies platform permissions granted on the empty tag to an organization without tags', () => {
+        test('applies platform permissions granted on all tags to an organization without tags', () => {
             const userPermissions = createUserWithTagPermissions({
-                // The empty string means 'all organization tags'
-                '': ResourcePermissions.create({
+                [PermissionsResourceKey.All]: ResourcePermissions.create({
                     level: PermissionLevel.Read,
                 }),
             });
