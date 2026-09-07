@@ -6,10 +6,11 @@ import type { PlatformMember } from './PlatformMember.js';
 import type { Registration } from './Registration.js';
 import { AuditLogReplacement } from '../AuditLogReplacement.js';
 
-/**
- * A member keeps a responsibility for 14 days after their last registration ends (grace period).
- */
+/** A member keeps a responsibility for 14 days after their last registration ends, unless we just started a new period. */
 export const AUTO_REMOVE_GRACE_MS = 1000 * 60 * 60 * 24 * 14;
+
+/** In the 60 days after the start of a new period we never delete responsibilities. */
+export const NEW_PERIOD_GRACE_MS = 1000 * 60 * 60 * 24 * 30 * 2;
 
 export class MemberResponsibilityRecordBase extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -99,7 +100,15 @@ export class MemberResponsibilityRecordBase extends AutoEncoder {
         if (endDate === null || endDate.getTime() < currentPeriod.startDate.getTime()) {
             endDate = currentPeriod.startDate; // Rule D4: end date can be the start of the current period if no other end date was found
         }
-        return new Date(endDate.getTime() + AUTO_REMOVE_GRACE_MS);
+
+        endDate = new Date(endDate.getTime() + AUTO_REMOVE_GRACE_MS);
+
+        if (currentPeriod.startDate.getTime() <= endDate.getTime() && endDate.getTime() <= currentPeriod.startDate.getTime() + NEW_PERIOD_GRACE_MS) {
+            // Rule E: if the end date is within the grace period of a new period, extend it to the end of that grace period
+            endDate = new Date(currentPeriod.startDate.getTime() + NEW_PERIOD_GRACE_MS);
+        }
+
+        return endDate;
     }
 }
 
