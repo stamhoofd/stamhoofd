@@ -1,7 +1,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { AccessRight } from '../AccessRight.js';
 import type { NamedObject } from '../Event.js';
-import { PermissionsResourceType } from '../PermissionsResourceType.js';
+import { PermissionsResourceKey, PermissionsResourceType } from '../PermissionsResourceType.js';
 import type { Platform } from '../Platform.js';
 import type { OrganizationForPermissionCalculation, UserPermissions } from '../UserPermissions.js';
 
@@ -164,7 +164,7 @@ export class EventPermissionChecker {
             if (
                 !organizationPermissions.hasResourceAccessRight(
                     PermissionsResourceType.Groups,
-                    '',
+                    PermissionsResourceKey.CurrentPeriod,
                     accessRight,
                 )
             ) {
@@ -216,7 +216,7 @@ export class EventPermissionChecker {
             if (
                 !(platformPermissions.hasResourceAccessRight(
                     PermissionsResourceType.OrganizationTags,
-                    '',
+                    PermissionsResourceKey.All,
                     accessRight,
                 )
                 )
