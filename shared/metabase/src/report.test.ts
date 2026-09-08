@@ -62,8 +62,9 @@ describe('report', () => {
          * left to count there: a pie of the geslachten would be a single slice reading 'Onbekend'.
          * The varia page splits on nothing else, so it goes as a page.
          *
-         * The aanlevering keeps its column either way. It is the department's template rather than
-         * the koepel's own report, and the werkjaren imported from before still answer it.
+         * The aanlevering goes the same way: the two deelnemerstabbladen lose the column and the rows
+         * they were split into by it, which is what keeps a werkjaar imported from before -- where
+         * the answer is still on file -- from being delivered in more rows than the years after it.
          */
         it('leaves the geslacht out of keeo, which no longer asks its leden for one', () => {
             // A chart says so in its dimensions; the ULDK table has the geslachten as columns and
@@ -77,7 +78,10 @@ describe('report', () => {
             expect(dashboards.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'netwerk', 'jeugdbewegingen', 'filters']);
             expect(splitOnGeslacht(dashboards)).toEqual([]);
             expect(splitOnGeslacht(ravotDashboards).length).toEqual(9);
-            expect(cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').columns).toContain('Gender_deelnemers');
+            for (const key of ['deelnemers-bovenlokaal', 'deelnemers-lokale-groep']) {
+                expect(`${key}: ${cardOf(dashboards, 'jeugdbewegingen', key).columns.join(', ')}`).not.toContain('Gender_deelnemers');
+                expect(`${key}: ${cardOf(ravotDashboards, 'jeugdbewegingen', key).columns.join(', ')}`).toContain('Gender_deelnemers');
+            }
         });
 
         it('reads a card with its metadata and expands the shared fragments', () => {
@@ -245,9 +249,11 @@ describe('report', () => {
                 for (const [env, tabs] of [['keeo', dashboards], ['ravot', ravotDashboards]] as const) {
                     const card = cardOf(tabs, 'jeugdbewegingen', key);
                     const where = `${env} ${key}`;
+                    // Keeo asks its leden no geslacht, so it delivers the sheet without that column.
+                    const expected = env === 'keeo' ? columns.filter(column => column !== 'Gender_deelnemers') : columns;
 
                     expect(`${where}: ${card.title}`).toEqual(`${where}: ${title}`);
-                    expect(`${where}: ${card.columns.slice(0, columns.length).join(', ')}`).toEqual(`${where}: ${columns.join(', ')}`);
+                    expect(`${where}: ${card.columns.slice(0, expected.length).join(', ')}`).toEqual(`${where}: ${expected.join(', ')}`);
                     expect(`${where}: ${card.display}`).toEqual(`${where}: table`);
                     expect(`${where} takes the werkjaar: ${card.parameters.includes('werkjaar')}`).toEqual(`${where} takes the werkjaar: true`);
                 }
@@ -262,13 +268,30 @@ describe('report', () => {
          * own. Kept here because nothing else notices -- an unmapped value reads as a plausible row.
          */
         it('says a geslacht in the letters the metadatafiche allows, and nothing where there is no answer', () => {
-            const cards = dashboards.flatMap(dashboard => dashboard.cards.filter(card => card.columns.includes('Gender_deelnemers')));
+            const cards = ravotDashboards.flatMap(dashboard => dashboard.cards.filter(card => card.columns.includes('Gender_deelnemers')));
             expect(cards.map(card => card.key)).toEqual(['deelnemers-bovenlokaal', 'deelnemers-lokale-groep']);
 
             for (const card of cards) {
-                const letters = /CASE \w+\.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' ELSE NULL END/;
+                const letters = /CASE `Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' ELSE NULL END/;
 
                 expect(`${card.key}: ${letters.test(card.sql.replaceAll(/\s+/g, ' '))}`).toEqual(`${card.key}: true`);
+            }
+        });
+
+        /**
+         * The kenmerken a deelnemerstabblad splits its rijen into stand twice: as the columns that
+         * are selected, and as the names those rijen are grouped and ordered on. A kenmerk added to
+         * one and not the other is a sheet that refuses to run, or one delivering a row per member
+         * where the sjabloon asks for a row per combination.
+         */
+        it('groups a deelnemerstabblad on the same kenmerken it selects', async () => {
+            for (const [env, kenmerken] of [['keeo', 'Geboortejaar_deelnemers'], ['ravot', 'Geboortejaar_deelnemers, Gender_deelnemers']] as const) {
+                const snippets = new Map((await loadSnippets(env)).map(snippet => [snippet.name, snippet.sql]));
+                const selected = [...snippets.get('participant-details')!.matchAll(/AS `([^`]+)`/g)].map(match => match[1]);
+                const grouped = [...snippets.get('participant-detail-columns')!.matchAll(/`([^`]+)`/g)].map(match => match[1]);
+
+                expect(`${env}: ${selected.join(', ')}`).toEqual(`${env}: ${kenmerken}`);
+                expect(`${env}: ${grouped.join(', ')}`).toEqual(`${env}: ${kenmerken}`);
             }
         });
 
@@ -347,7 +370,7 @@ describe('report', () => {
             expect(sql).toContain('inschrijvingen.type_number DESC, inschrijvingen.subgroup_number )');
 
             // The two columns count members the row already holds, so neither may exceed it.
-            expect(card.columns).toEqual(['ID_Organisatie', 'Type_deelnemers', 'Geboortejaar_deelnemers', 'Gender_deelnemers', 'Aantal_deelnemers', 'Waarvan Stam', 'Waarvan Ondersteunende leden']);
+            expect(card.columns).toEqual(['ID_Organisatie', 'Type_deelnemers', 'Geboortejaar_deelnemers', 'Aantal_deelnemers', 'Waarvan Stam', 'Waarvan Ondersteunende leden']);
             expect(cardOf(ravotDashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').columns)
                 .toEqual(['ID_Organisatie', 'Type_deelnemers', 'Geboortejaar_deelnemers', 'Gender_deelnemers', 'Aantal_deelnemers']);
             expect(namesTheGroups(dashboards)).toEqual(['deelnemers-lokale-groep']);

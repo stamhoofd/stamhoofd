@@ -99,9 +99,18 @@ alone on a row by this takes the row: `-- size@keeo: full` on the lidgeldverdeli
 page and on the leeftijdsgroepenvergelijking of the nationale page, each of which stood beside a
 geslachtenverdeling.
 
-The aanlevering keeps its `Gender_deelnemers` column either way. That sheet is the department's
-template rather than the koepel's own report, and the werkjaren imported from the client's own
-statistics still answer it; where nobody was asked, the column comes back empty.
+The aanlevering follows, and is where this cannot be said with `except`: a sheet is one card, so the
+column goes rather than the card. `includes/participant-details.sql` is the kenmerken a
+deelnemerstabblad splits its rijen into and `includes/participant-detail-columns.sql` the same ones
+as the names it groups and orders on — keeo's variants of the two name the geboortejaar alone. Both
+are read by both deelnemerstabbladen, and a test keeps them naming the same kenmerken: a column
+selected but not grouped on is a sheet that refuses to run.
+
+Not grouping on it is the point rather than a consequence. A werkjaar imported from the client's own
+statistics still has the answer on file, so a sheet that kept the column would deliver those years
+split into more rows than the years after them. The rows the CTEs are built from still carry the
+`Geslacht` — they are the registrations as they stand, and every other page reads them — but nothing
+in the sheet reads it.
 
 What an environment leaves out is still read once, by `loadRetiredReport(env)`. A question is stored
 in Metabase under its card and its tab, so the questions of a card that stopped being written are
