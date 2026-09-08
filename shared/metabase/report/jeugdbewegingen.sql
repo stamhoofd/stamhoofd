@@ -26,15 +26,16 @@ ORDER BY organizations.name
 -- display: table
 -- size: full
 -- columns: ID_Organisatie, Geboortejaar_deelnemers, Gender_deelnemers, Aantal_deelnemers
+-- columns@keeo: ID_Organisatie, Geboortejaar_deelnemers, Aantal_deelnemers
 -- description: Tabblad 'Deelnemers_Bovenlokaal': de structuurvrijwilligers van de koepel, per geboortejaar en geslacht, met een aansluiting in dat werkjaar. Unieke personen, geen inschrijvingen: zo vraagt de metadatafiche het voor de nationale ploegen.
+-- description@keeo: Tabblad 'Deelnemers_Bovenlokaal': de structuurvrijwilligers van de koepel, per geboortejaar, met een aansluiting in dat werkjaar. Unieke personen, geen inschrijvingen: zo vraagt de metadatafiche het voor de nationale ploegen.
 -- The rows before the koepel is dropped: this sheet is about nothing else.
 WITH all_registrations AS (
     -- @include all-registrations
 )
 SELECT
     all_registrations.organization_uri AS `ID_Organisatie`,
-    YEAR(all_registrations.birth_date) AS `Geboortejaar_deelnemers`,
-    CASE all_registrations.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' ELSE NULL END AS `Gender_deelnemers`,
+    -- @inline participant-details
     COUNT(DISTINCT all_registrations.member_id) AS `Aantal_deelnemers`
 FROM all_registrations
 JOIN platform ON platform.membershipOrganizationId = all_registrations.organization_id
@@ -44,8 +45,10 @@ WHERE
   -- are open to the deelnemers of every group, and counted here every one of them would be delivered
   -- as a structuurvrijwilliger of the bovenlokale structuur.
   AND all_registrations.group_type = 'Membership'
-GROUP BY `ID_Organisatie`, `Geboortejaar_deelnemers`, `Gender_deelnemers`
-ORDER BY `Geboortejaar_deelnemers`, `Gender_deelnemers`
+GROUP BY `ID_Organisatie`,
+    -- @inline participant-detail-columns
+ORDER BY
+    -- @inline participant-detail-columns
 
 -- @card organisatie-lokale-groep
 -- title: Organisatie_Lokale_groep
@@ -69,9 +72,9 @@ ORDER BY `Naam_Organisatie`
 -- display: table
 -- size: full
 -- columns: ID_Organisatie, Type_deelnemers, Geboortejaar_deelnemers, Gender_deelnemers, Aantal_deelnemers
--- columns@keeo: ID_Organisatie, Type_deelnemers, Geboortejaar_deelnemers, Gender_deelnemers, Aantal_deelnemers, Waarvan Stam, Waarvan Ondersteunende leden
+-- columns@keeo: ID_Organisatie, Type_deelnemers, Geboortejaar_deelnemers, Aantal_deelnemers, Waarvan Stam, Waarvan Ondersteunende leden
 -- description: Tabblad 'Deelnemers_Lokale_groep': de leden en de leiding van elke lokale groep, per geboortejaar en geslacht, met een aansluiting in dat werkjaar. Wie leiding is in de ene leeftijdsgroep en lid in de andere, telt enkel als leiding. Leeftijdsgroepen zonder categorie leveren niemand: vul die eerst aan.
--- description@keeo: Tabblad 'Deelnemers_Lokale_groep': de leden en de leiding van elke lokale groep, per geboortejaar en geslacht, met een aansluiting in dat werkjaar. De stam telt hier mee bij de leden en de ondersteunende leden bij de leiding; de twee laatste kolommen zeggen hoeveel van de rij daaronder geleverd worden en horen niet in het sjabloon. Wie leiding is in de ene leeftijdsgroep en lid in de andere, telt enkel als leiding. Leeftijdsgroepen zonder categorie leveren niemand: vul die eerst aan.
+-- description@keeo: Tabblad 'Deelnemers_Lokale_groep': de leden en de leiding van elke lokale groep, per geboortejaar, met een aansluiting in dat werkjaar. De stam telt hier mee bij de leden en de ondersteunende leden bij de leiding; de twee laatste kolommen zeggen hoeveel van de rij daaronder geleverd worden en horen niet in het sjabloon. Wie leiding is in de ene leeftijdsgroep en lid in de andere, telt enkel als leiding. Leeftijdsgroepen zonder categorie leveren niemand: vul die eerst aan.
 -- description@ravot: Tabblad 'Deelnemers_Lokale_groep': de leden en de leiding van elke lokale groep, per geboortejaar en geslacht, met een aansluiting in dat werkjaar. De leeftijdsgroep 'Ondersteunende leden' telt hier mee als leiding. Wie leiding is in de ene leeftijdsgroep en lid in de andere, telt enkel als leiding. Leeftijdsgroepen zonder categorie leveren niemand: vul die eerst aan.
 WITH all_registrations AS (
     -- @include all-registrations
@@ -120,10 +123,11 @@ deelnemers AS (
 SELECT
     deelnemers.organization_uri AS `ID_Organisatie`,
     CASE WHEN deelnemers.type_number = 2 THEN 'leiding' ELSE 'leden' END AS `Type_deelnemers`,
-    YEAR(deelnemers.birth_date) AS `Geboortejaar_deelnemers`,
-    CASE deelnemers.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' ELSE NULL END AS `Gender_deelnemers`,
+    -- @inline participant-details
     -- @include participant-counts
 FROM deelnemers
 WHERE deelnemers.type_number > 0
-GROUP BY `ID_Organisatie`, `Type_deelnemers`, `Geboortejaar_deelnemers`, `Gender_deelnemers`
-ORDER BY `ID_Organisatie`, `Type_deelnemers`, `Geboortejaar_deelnemers`, `Gender_deelnemers`
+GROUP BY `ID_Organisatie`, `Type_deelnemers`,
+    -- @inline participant-detail-columns
+ORDER BY `ID_Organisatie`, `Type_deelnemers`,
+    -- @inline participant-detail-columns

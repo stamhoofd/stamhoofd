@@ -181,6 +181,7 @@ ORDER BY MIN(period_start)
 
 -- @card eenheid-leden-per-geslacht
 -- title: Aantal leden per geslacht
+-- except: keeo
 -- display: pie
 -- size: half
 -- dimensions: Geslacht
@@ -197,6 +198,7 @@ ORDER BY `Aantal leden` DESC
 -- title: Aantal leden per type lidgeld
 -- display: pie
 -- size: half
+-- size@keeo: full
 -- dimensions: Type lidgeld
 -- metrics: Aantal leden
 WITH leden AS (
@@ -262,6 +264,7 @@ ORDER BY MIN(period_start) DESC
 
 -- @card eenheid-geslacht-kinderen-per-jaar
 -- title: Verhouding tussen de geslachten: kinderen
+-- except: keeo
 -- display: row
 -- size: two-thirds
 -- dimensions: Werkjaar, Geslacht
@@ -282,6 +285,7 @@ ORDER BY MIN(period_start) DESC
 
 -- @card eenheid-kinderen-per-geslacht
 -- title: Aantal kinderen per geslacht
+-- except: keeo
 -- display: pie
 -- size: third
 -- dimensions: Geslacht
@@ -297,6 +301,7 @@ ORDER BY `Aantal kinderen` DESC
 
 -- @card eenheid-geslacht-leiding-per-jaar
 -- title: Verhouding tussen de geslachten: leiding
+-- except: keeo
 -- display: row
 -- size: two-thirds
 -- dimensions: Werkjaar, Geslacht
@@ -317,6 +322,7 @@ ORDER BY MIN(period_start) DESC
 
 -- @card eenheid-leiding-per-geslacht
 -- title: Aantal leiding per geslacht
+-- except: keeo
 -- display: pie
 -- size: third
 -- dimensions: Geslacht
@@ -348,12 +354,17 @@ WHERE birth_date IS NOT NULL
 GROUP BY YEAR(birth_date)
 ORDER BY `Geboortejaar`
 
+-- The leeftijdsverdeling, in the two shapes it is read in. Exactly one environment writes each of
+-- them: the split is what a platform that asks its leden no geslacht cannot draw.
 -- @card eenheid-leeftijd-en-geslacht
 -- title: Aantal leden per Leeftijd en Geslacht
+-- except: keeo
 -- display: bar
 -- size: full
 -- dimensions: Leeftijd, Geslacht
 -- metrics: Aantal leden
+-- xscale: ordinal
+-- xlabels: rotate-45
 WITH leden AS (
     -- @include deduplicated-non-platform-registrations
 )
@@ -364,6 +375,26 @@ SELECT
 FROM leden
 WHERE birth_date IS NOT NULL
 GROUP BY leeftijd, `Geslacht`
+ORDER BY leeftijd
+
+-- @card eenheid-leden-per-leeftijd
+-- title: Aantal leden per leeftijd
+-- only: keeo
+-- display: bar
+-- size: full
+-- dimensions: Leeftijd
+-- metrics: Aantal leden
+-- xscale: ordinal
+-- xlabels: rotate-45
+WITH leden AS (
+    -- @include deduplicated-non-platform-registrations
+)
+SELECT
+    leeftijd AS `Leeftijd`,
+    COUNT(DISTINCT member_id) AS `Aantal leden`
+FROM leden
+WHERE birth_date IS NOT NULL
+GROUP BY leeftijd
 ORDER BY leeftijd
 
 -- @card eenheid-gemiddelde-leeftijd-leiding

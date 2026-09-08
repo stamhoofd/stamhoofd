@@ -75,6 +75,7 @@ ORDER BY `Aantal leden` DESC
 -- title: Vergelijking aantal leden per leeftijdsgroep met vorig werkjaar
 -- display: bar
 -- size: half
+-- size@keeo: full
 -- dimensions: Leeftijdsgroep
 -- metrics: Aantal leden dit jaar, Aantal leden vorig jaar
 -- xlabels: rotate-45
@@ -107,6 +108,7 @@ ORDER BY MIN(COALESCE(leden.age_group_min_age, 99)), leden.`Leeftijdsgroep`
 
 -- @card leden-per-geslacht
 -- title: Aantal leden per geslacht
+-- except: keeo
 -- display: pie
 -- size: half
 -- dimensions: Geslacht

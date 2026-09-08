@@ -16,6 +16,8 @@ function card(overrides: Partial<ReportCard> = {}): ReportCard {
         best: 'high',
         span: 1,
         parameters: [],
+        except: [],
+        only: [],
         snippets: [],
         sql: 'SELECT 1',
         snippetSql: 'SELECT 1',
@@ -24,7 +26,7 @@ function card(overrides: Partial<ReportCard> = {}): ReportCard {
 }
 
 function tab(overrides: Partial<ReportTab> = {}): ReportTab {
-    return { key: 'nationaal', title: 'Nationaal', filters: [], required: [], hidden: false, cards: [], ...overrides };
+    return { key: 'nationaal', title: 'Nationaal', filters: [], required: [], hidden: false, except: [], cards: [], ...overrides };
 }
 
 describe('layoutCards', () => {

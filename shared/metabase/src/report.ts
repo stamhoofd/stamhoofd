@@ -23,21 +23,28 @@ import { fileURLToPath } from 'url';
  *     SELECT COUNT(DISTINCT member_id) AS `Totaal leden` FROM leden
  *
  * `@include <name>` is replaced by `includes/<name>.sql`, which is how every card counts members the
- * same way, and a fragment may include another. `{{name}}` marks a query parameter, the same syntax
- * Metabase uses, and `[[...]]` around a clause drops it when that parameter is empty. A parameter
- * several values can be chosen for is written `IN ({{name}})`, since Metabase replaces it with all of
- * them, comma separated.
+ * same way, and a fragment may include another. `@inline <name>` reads the same file and writes it
+ * out where it stands instead of referring to it, for a fragment that only exists so an environment
+ * can say a piece of a query its own way and is not a definition anyone would open on its own.
+ * `{{name}}` marks a query parameter, the same syntax Metabase uses, and `[[...]]` around a clause
+ * drops it when that parameter is empty. A parameter several values can be chosen for is written
+ * `IN ({{name}})`, since Metabase replaces it with all of them, comma separated.
  *
  * A card is read twice over. `sql` is the query with every fragment expanded, which is the whole of
- * what it counts and what the tests check. `snippetSql` leaves the fragments where they stand, as the
- * `{{snippet: ...}}` references Metabase understands, and is what Metabase is given: a fragment is
- * written there as a snippet of its own, so what a lid is stands in one place and an edit to it
- * reaches every question that reads it.
+ * what it counts and what the tests check. `snippetSql` leaves the included fragments where they
+ * stand, as the `{{snippet: ...}}` references Metabase understands, and is what Metabase is given: a
+ * fragment is written there as a snippet of its own, so what a lid is stands in one place and an edit
+ * to it reaches every question that reads it. An inlined one is expanded in both.
  *
  * The same report is written for every platform, which do not all count the same thing the same way.
  * Where they differ, the environment says which variant a card gets: `includes/<env>/<name>.sql`
  * replaces the fragment of that name, and a setting written `-- description@<env>:` replaces the
  * unqualified one. Neither is visible to a card, which keeps saying `@include gtp`.
+ *
+ * A figure a platform does not record at all is the one thing no variant can say: `-- except: keeo`
+ * on a tab or a card leaves it out there, and the report is written without it. `-- only: keeo` is
+ * the other way round and is what a figure drawn two ways needs -- a card cannot be two shapes, so
+ * the second is a card of its own, written where the first is not and nowhere else.
  */
 
 export type ReportCard = {
@@ -95,8 +102,27 @@ export type ReportCard = {
      * entirely when too many do not fit -- an eenheid or leeftijdsgroep chart needs a rotation to keep them.
      */
     xLabels?: ReportCardXLabels;
+    /**
+     * How the x-axis reads the values it is given. Absent leaves it to Metabase, which reads a column
+     * of numbers as a `linear` axis and ticks it at round numbers -- a leeftijdenchart labelled 10,
+     * 20, 30 rather than per bar. `ordinal` makes every value a category of its own, which is what a
+     * chart with a bar per value wants, and what a column of text already gets.
+     */
+    xScale?: ReportCardXScale;
     /** Parameters the query takes, read from the `{{...}}` in the sql. */
     parameters: string[];
+    /**
+     * The environments this card is not written for. A platform that does not record what the card
+     * counts has no variant of it to be given, only an empty one, so it is left out there instead.
+     */
+    except: string[];
+    /**
+     * The environments this card is written for, and no others. Empty is every one of them, which is
+     * what nearly every card is. It is the second shape of a figure that says one: the card it stands
+     * in for leaves out the same environments this names, so exactly one of the two is ever written
+     * -- where `except` alone would give a platform that named neither both of them.
+     */
+    only: string[];
     /**
      * The fragments this card reads, the ones those fragments read included. Metabase resolves a
      * snippet against the tags of the question it stands in and not against the snippet that refers
@@ -104,7 +130,7 @@ export type ReportCard = {
      */
     snippets: string[];
     sql: string;
-    /** The same query with the fragments left as references, which is the form Metabase is given. */
+    /** The same query with the included fragments left as references, which is what Metabase is given. */
     snippetSql: string;
 };
 
@@ -151,6 +177,11 @@ export type ReportTab = {
     required: string[];
     /** Cards that only feed the filter dropdowns. They live in the collection but on no tab. */
     hidden: boolean;
+    /**
+     * The environments this tab is not written for, which is where every card of it is left out:
+     * a tab whose cards are all about a figure the platform does not record has nothing to show.
+     */
+    except: string[];
     cards: ReportCard[];
 };
 
@@ -159,6 +190,9 @@ export type ReportCardSize = typeof reportCardSizes[number];
 
 export const reportCardXLabels = ['show', 'hide', 'compact', 'rotate-45', 'rotate-90'] as const;
 export type ReportCardXLabels = typeof reportCardXLabels[number];
+
+export const reportCardXScales = ['ordinal', 'linear'] as const;
+export type ReportCardXScale = typeof reportCardXScales[number];
 
 export const reportCardBest = ['low', 'high'] as const;
 export type ReportCardBest = typeof reportCardBest[number];
@@ -178,15 +212,48 @@ export function getReportDirectory(): string {
  * here rather than in the queries. `env` is the same name the data source carries.
  */
 export async function loadReport(env: string, directory = getReportDirectory()): Promise<ReportTab[]> {
+    const written = (await readTabs(env, directory))
+        .filter(tab => !tab.except.includes(env))
+        .map(tab => ({ ...tab, cards: tab.cards.filter(card => isWrittenIn(card, env)) }));
+
+    // A tab is written as a page whether or not it has anything left to put on it, so a tab that
+    // lost every card to the environment has to be left out as a tab instead of card by card.
+    const empty = written.find(tab => tab.cards.length === 0);
+    if (empty) {
+        throw new Error(`Tab "${empty.key}" has every card left out of ${env}, which would write the page empty. Leave the tab out instead: "-- except: ${env}".`);
+    }
+
+    return written.sort((a, b) => orderOf(a.key) - orderOf(b.key));
+}
+
+/**
+ * What this environment leaves out, as the tabs holding it: a tab it does not write, with every card
+ * of it, and a tab it does write, with only the cards it leaves out.
+ *
+ * A question is stored under its card and its tab both, so clearing away one an earlier run wrote
+ * needs the two of them -- and the report this environment loads no longer holds either.
+ */
+export async function loadRetiredReport(env: string, directory = getReportDirectory()): Promise<ReportTab[]> {
+    return (await readTabs(env, directory))
+        .map(tab => tab.except.includes(env) ? tab : { ...tab, cards: tab.cards.filter(card => !isWrittenIn(card, env)) })
+        .filter(tab => tab.cards.length > 0)
+        .sort((a, b) => orderOf(a.key) - orderOf(b.key));
+}
+
+/** Whether this environment writes the card: it is not left out, and not left to other environments. */
+function isWrittenIn(card: ReportCard, env: string): boolean {
+    return !card.except.includes(env) && (card.only.length === 0 || card.only.includes(env));
+}
+
+/** Every tab the report declares, read for this environment but with nothing left out yet. */
+async function readTabs(env: string, directory: string): Promise<ReportTab[]> {
     const includes = await loadIncludes(path.join(directory, 'includes'), env);
     const sql = new Map([...includes].map(([name, include]) => [name, include.sql]));
     const files = (await fs.readdir(directory)).filter(file => file.endsWith('.sql')).sort();
 
-    const tabs = await Promise.all(files.map(async (file) => {
+    return await Promise.all(files.map(async (file) => {
         return parseTab(await fs.readFile(path.join(directory, file), 'utf-8'), file, sql, env);
     }));
-
-    return tabs.sort((a, b) => orderOf(a.key) - orderOf(b.key));
 }
 
 /**
@@ -199,9 +266,16 @@ export async function loadReport(env: string, directory = getReportDirectory()):
  */
 export async function loadSnippets(env: string, directory = getReportDirectory()): Promise<ReportSnippet[]> {
     const includes = await loadIncludes(path.join(directory, 'includes'), env);
+    const sql = new Map([...includes].map(([name, include]) => [name, include.sql]));
+
+    // A fragment is a snippet because a question refers to it. One that is only ever inlined is
+    // written out wherever it is read, so a snippet of it would stand in the sidebar unreferred to --
+    // and it is a line of sql rather than a definition anyone would open.
+    const referred = new Set((await readTabs(env, directory)).flatMap(tab => tab.cards.flatMap(card => card.snippets)));
 
     return [...includes]
-        .map(([name, include]) => ({ name, sql: referenceIncludes(include.sql), description: include.description }))
+        .filter(([name]) => referred.has(name))
+        .map(([name, include]) => ({ name, sql: referenceIncludes(include.sql, sql), description: include.description }))
         .sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -288,8 +362,10 @@ export function parseTab(contents: string, file: string, includes: Map<string, s
     }
 
     // A question is stored under its title, so two cards sharing one on the same tab would end up as
-    // the same question: whichever is written last decides what both show.
-    const duplicate = cards.find((card, index) => cards.findIndex(other => other.title === card.title) !== index);
+    // the same question: whichever is written last decides what both show. Read among the cards this
+    // environment writes, since two shapes of one figure that leave each other out are never both.
+    const written = env === undefined ? cards : cards.filter(card => isWrittenIn(card, env));
+    const duplicate = written.find((card, index) => written.findIndex(other => other.title === card.title) !== index);
     if (duplicate) {
         throw new Error(`${file}: two cards are titled "${duplicate.title}", which would store them as one question`);
     }
@@ -317,6 +393,7 @@ export function parseTab(contents: string, file: string, includes: Map<string, s
         filters,
         required: requiredFilters,
         hidden: header.attributes.get('hidden') === 'true',
+        except: splitList(header.attributes.get('except')),
         cards,
     };
 }
@@ -328,7 +405,7 @@ type Section = { kind: 'tab' | 'card'; key: string; attributes: Map<string, stri
  * slipped down rather than a comment, and would otherwise be dropped without a word: writing a
  * comment above `-- size:` is enough to make the whole block below it stop counting.
  */
-const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'columns', 'stacked', 'segments', 'best', 'xlabels', 'height', 'span', 'latitude', 'longitude', 'filters', 'required', 'hidden', 'dashboard']);
+const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'columns', 'stacked', 'segments', 'best', 'xlabels', 'height', 'span', 'latitude', 'longitude', 'filters', 'required', 'hidden', 'dashboard', 'except', 'only', 'xscale']);
 
 function splitSections(contents: string, file: string, env?: string): Section[] {
     const sections: Section[] = [];
@@ -400,6 +477,11 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
         throw new Error(`${file}: card "${section.key}" has xlabels "${xLabels}", expected one of ${reportCardXLabels.join(', ')}`);
     }
 
+    const xScale = section.attributes.get('xscale');
+    if (xScale !== undefined && !(reportCardXScales as readonly string[]).includes(xScale)) {
+        throw new Error(`${file}: card "${section.key}" has xscale "${xScale}", expected one of ${reportCardXScales.join(', ')}`);
+    }
+
     const display = required(section.attributes, 'display', file, section.key);
     const latitude = section.attributes.get('latitude');
     const longitude = section.attributes.get('longitude');
@@ -436,10 +518,13 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
         segments,
         best,
         xLabels: xLabels as ReportCardXLabels | undefined,
+        xScale: xScale as ReportCardXScale | undefined,
         parameters: parameterNames(sql),
+        except: splitList(section.attributes.get('except')),
+        only: splitList(section.attributes.get('only')),
         snippets: collectIncludes(section.body, includes),
         sql,
-        snippetSql: referenceIncludes(section.body).trim(),
+        snippetSql: referenceIncludes(section.body, includes).trim(),
     };
 }
 
@@ -499,18 +584,26 @@ function parseRanges(section: Section, file: string, display: string): { segment
     return { segments, best: best as ReportCardBest };
 }
 
-/** The line a fragment is asked for on, which is either expanded or turned into a reference. */
-const includeDirective = /^([ \t]*)--[ \t]*@include[ \t]+(\S+)[ \t]*$/gm;
+/** The line a fragment is asked for on: `@include` refers to a snippet, `@inline` is written out. */
+const fragmentDirective = /^([ \t]*)--[ \t]*@(include|inline)[ \t]+(\S+)[ \t]*$/gm;
+
+/** The same line, for asking whether a body holds one at all. */
+const holdsFragment = /^[ \t]*--[ \t]*@(?:include|inline)[ \t]+\S+[ \t]*$/m;
 
 /** A fragment may include another, which is how the two registration grains share their filters. */
 function expandIncludes(body: string, includes: Map<string, string>, file: string, card: string, chain: string[] = []): string {
-    return body.replaceAll(includeDirective, (_match, indent: string, name: string) => {
+    return body.replaceAll(fragmentDirective, (_match, indent: string, kind: string, name: string) => {
         const include = includes.get(name);
         if (include === undefined) {
-            throw new Error(`${file}: card "${card}" includes "${name}", which has no report/includes/${name}.sql`);
+            throw new Error(`${file}: card "${card}" ${kind}s "${name}", which has no report/includes/${name}.sql`);
         }
         if (chain.includes(name)) {
             throw new Error(`${file}: card "${card}" includes "${name}" from within itself: ${[...chain, name].join(' -> ')}`);
+        }
+        // An inlined fragment is written out rather than referred to, so a fragment it read would
+        // reach Metabase as a snippet nothing declared a tag for, and the question would not run.
+        if (kind === 'inline' && holdsFragment.test(include)) {
+            throw new Error(`${file}: card "${card}" inlines "${name}", which reads a fragment of its own. An inlined fragment stands on its own.`);
         }
 
         return expandIncludes(include, includes, file, card, [...chain, name])
@@ -519,22 +612,28 @@ function expandIncludes(body: string, includes: Map<string, string>, file: strin
 }
 
 /**
- * The same body with each fragment left where it stands, as the reference Metabase resolves against
- * its snippets. Nothing is checked here: `expandIncludes` has already refused a fragment that is not
- * there and one that includes itself.
+ * The same body with each included fragment left where it stands, as the reference Metabase resolves
+ * against its snippets, and each inlined one written out. Nothing is checked here: `expandIncludes`
+ * has already refused a fragment that is not there and one that includes itself.
  */
-function referenceIncludes(body: string): string {
-    return body.replaceAll(includeDirective, (_match, indent: string, name: string) => `${indent}{{snippet: ${name}}}`);
+function referenceIncludes(body: string, includes: Map<string, string>): string {
+    return body.replaceAll(fragmentDirective, (_match, indent: string, kind: string, name: string) => {
+        if (kind === 'include') {
+            return `${indent}{{snippet: ${name}}}`;
+        }
+        return (includes.get(name) ?? '').split('\n').map(line => indent + line).join('\n');
+    });
 }
 
 /**
- * Every fragment a body reads, in the order it reaches them, the ones its fragments read included.
- * A question has to name those too: Metabase looks a nested `{{snippet: all-registrations}}` up among the tags
- * of the question rather than among those of the fragment that refers to it.
+ * Every fragment a body refers to as a snippet, in the order it reaches them, the ones its fragments
+ * refer to included. A question has to name those too: Metabase looks a nested
+ * `{{snippet: all-registrations}}` up among the tags of the question rather than among those of the
+ * fragment that refers to it. An inlined fragment is no snippet and needs no tag.
  */
 function collectIncludes(body: string, includes: Map<string, string>, found: string[] = []): string[] {
-    for (const [, , name] of body.matchAll(includeDirective)) {
-        if (found.includes(name)) {
+    for (const [, , kind, name] of body.matchAll(fragmentDirective)) {
+        if (kind === 'inline' || found.includes(name)) {
             continue;
         }
         found.push(name);

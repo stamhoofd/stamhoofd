@@ -52,7 +52,7 @@ aanlevering pins itself further to the leeftijdsgroepen alone in `jeugdbeweginge
 ## One definition, in Metabase too
 
 `@include` puts a fragment in one place in git. Snippets put it in one place in Metabase: every
-`includes/*.sql` is written as a snippet of its own, and a question refers to it -- `{{snippet: deduplicated-non-platform-registrations}}`
+fragment a question refers to is written as a snippet of its own, and a question refers to it -- `{{snippet: deduplicated-non-platform-registrations}}`
 where the file says `-- @include deduplicated-non-platform-registrations`, with it referring to
 `{{snippet: all-non-platform-registrations}}` rather than holding a second copy of those rows. A card is then the handful of lines that say what it counts
 instead of the two hundred that say what a lid is, and whoever changes what a lid is changes it once
@@ -74,6 +74,14 @@ The fragments are still expanded as well. `card.sql` is the whole query, which i
 and what says whether the sql itself is right; `card.snippetSql` is that query with the fragments left
 as references, and is what Metabase is given.
 
+`-- @inline <name>` is the other way to read the same file: it is written out where it stands in both,
+so Metabase is given the sql rather than a reference, and no snippet is offered for it. It is for a
+fragment that exists only so an environment can say a piece of a query its own way -- the kenmerken a
+sheet splits its rijen into, the kolomnamen it groups them on -- where a snippet would stand in the
+sidebar as a piece of syntax nobody would open, with nothing referring to it. An inlined fragment reads no fragment of its own: written
+out, a nested `{{snippet: ...}}` would reach Metabase against tags the question never declared, and
+it is refused rather than left to fail there.
+
 ## One report, several platforms
 
 The same report is written for every platform, and they do not all count every figure the same way:
@@ -85,10 +93,52 @@ report is loaded — `loadReport(env)` takes the environment, the same name the 
 |---|---|
 | `report/includes/<env>/gtp.sql` | what `@include gtp` expands to in that environment |
 | `-- description@ravot:` | what a card's `-- description:` says there |
+| `-- except: keeo` | the tab or card is not written there at all |
+| `-- only: keeo` | the card is written there and nowhere else |
 
-A card names neither and keeps saying `@include gtp`, which is what keeps one report from quietly
-becoming two. An override of a name no fragment carries is refused rather than ignored: nothing
-includes it, so a misspelled file would change nothing and say nothing.
+A card names the first two and keeps saying `@include gtp`, which is what keeps one report from
+quietly becoming two. An override of a name no fragment carries is refused rather than ignored:
+nothing includes it, so a misspelled file would change nothing and say nothing.
+
+`except` is the one that leaves something out rather than saying it differently, for the figure a
+platform records nothing about. Keeo no longer asks its leden for a geslacht, so the seven cards that
+split on one are not written there. A card left alone on a row by this takes the row:
+`-- size@keeo: full` on the lidgeldverdeling of the eenheden page and on the
+leeftijdsgroepenvergelijking of the nationale page, each of which stood beside a geslachtenverdeling.
+
+Where the figure is worth reading without the split, it is drawn two ways rather than dropped. A card
+cannot be two shapes, so it is two cards, and `only` is what keeps them from both being written:
+
+| | drawn everywhere but keeo | drawn there |
+|---|---|---|
+| de leeftijdsverdeling van een eenheid | `eenheid-leeftijd-en-geslacht` | `eenheid-leden-per-leeftijd` |
+| de ULDK-tabel en haar totalen | `uldk`, `uldk-totaal` | `uldk-zonder-geslacht`, `uldk-zonder-geslacht-totaal` |
+
+`except: keeo` on the first and `only: keeo` on the second, which is the whole of the pairing:
+`except` on both would hand a platform naming neither of them both shapes of one figure. The ULDK
+pair says why that matters — both tables are titled `ULDK`, as the page names them, so a platform
+given the two would store them as one question. Two cards of a tab may share a title exactly because
+no environment writes both, and that is checked per environment rather than over the file.
+
+The aanlevering follows, and is where this cannot be said with `except`: a sheet is one card, so the
+column goes rather than the card. `includes/participant-details.sql` is the kenmerken a
+deelnemerstabblad splits its rijen into and `includes/participant-detail-columns.sql` the same ones
+as the names it groups and orders on — keeo's variants of the two name the geboortejaar alone. Both
+are read by both deelnemerstabbladen, and a test keeps them naming the same kenmerken: a column
+selected but not grouped on is a sheet that refuses to run. Both are inlined: what they hold is the
+columns of one sheet rather than a definition the report counts by, and neither is read anywhere but
+in those two cards.
+
+Not grouping on it is the point rather than a consequence. A werkjaar imported from the client's own
+statistics still has the answer on file, so a sheet that kept the column would deliver those years
+split into more rows than the years after them. The rows the CTEs are built from still carry the
+`Geslacht` — they are the registrations as they stand, and every other page reads them — but nothing
+in the sheet reads it.
+
+What an environment leaves out is still read once, by `loadRetiredReport(env)`. A question is stored
+in Metabase under its card and its tab, so the questions of a card that stopped being written are
+only recognisable from the report that no longer holds it — and without them they would be archived
+as something the client wrote themselves, which is to say not at all.
 
 ## What a leeftijdsgroep counts as
 
