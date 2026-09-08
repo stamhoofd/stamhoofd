@@ -128,8 +128,9 @@ a `dashboard:` of its own, which writes it as a second dashboard in the collecti
 page of the ledenstatistieken. That is also why those cards name their columns -- Metabase writes the
 header of an export from the column's title, and a sheet read by a government department has to keep
 the names the template gives it. A figure the koepel wants out of the same sheet for itself stands
-behind those, in a column the template has no cell for: keeo reads how many of a row are the stam
-and the ondersteunende leden it delivers among the leden and the leiding.
+behind those, in a column the template has no cell for: keeo reads how many of a row hold a
+registration with the stam or with the ondersteunende leden it delivers among the leden and the
+leiding.
 
 The koepel's own organization is treated the other way around by the two. The ledenstatistieken leave
 it out by default -- it is the national body, not an eenheid, and the client's own report normally

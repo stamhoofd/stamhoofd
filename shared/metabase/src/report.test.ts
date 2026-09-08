@@ -294,6 +294,12 @@ describe('report', () => {
          * The koepel reads the sheet as well as files it, and counts a group's stam and
          * ondersteunende leden apart from the leden and the leiding they are delivered among: two
          * columns of its own, behind the ones the sjabloon reads.
+         *
+         * A member is counted in a column by holding a registration in that leeftijdsgroep, not by
+         * being delivered under it: someone who is leiding and stam both stands among the leiding,
+         * and the kolom still says the group has a stam member of that geboortejaar. Read off the
+         * registration their type was decided by, they would drop out of a column they belong in --
+         * which is why the member carries every aparte leeftijdsgroep they stand in.
          */
         it('delivers the stam of keeo as leden and its ondersteunende leden as leiding, each counted apart', () => {
             const namesTheGroups = (tabs: ReportTab[]) => tabs.flatMap(tab => tab.cards)
@@ -304,9 +310,13 @@ describe('report', () => {
 
             // By the id of the leeftijdsgroep rather than by its name, which the years need not agree on.
             expect(sql).toContain("CASE WHEN all_registrations.age_group_category = 'leader' THEN 2 WHEN all_registrations.age_group_id = 'ac8848e9-9868-44a1-a057-2a189cce68ea' THEN 2 WHEN all_registrations.age_group_category = 'child' THEN 1 WHEN all_registrations.age_group_id = '6fc0775e-2851-4fe1-90cd-af9c74243ccd' THEN 1 ELSE 0 END AS type_number");
-            expect(sql).toContain("CASE all_registrations.age_group_id WHEN '6fc0775e-2851-4fe1-90cd-af9c74243ccd' THEN 'stam' WHEN 'ac8848e9-9868-44a1-a057-2a189cce68ea' THEN 'ondersteunende leden' ELSE '' END AS subgroup");
-            expect(sql).toContain("COUNT(DISTINCT CASE WHEN deelnemers.type_number = 1 AND deelnemers.subgroup = 'stam' THEN deelnemers.member_id END) AS `Waarvan Stam`");
-            expect(sql).toContain("COUNT(DISTINCT CASE WHEN deelnemers.type_number = 2 AND deelnemers.subgroup = 'ondersteunende leden' THEN deelnemers.member_id END) AS `Waarvan Ondersteunende leden`");
+            expect(sql).toContain("CASE all_registrations.age_group_id WHEN '6fc0775e-2851-4fe1-90cd-af9c74243ccd' THEN 'stam' WHEN 'ac8848e9-9868-44a1-a057-2a189cce68ea' THEN 'ondersteunende leden' END AS subgroup");
+            expect(sql).toContain("COUNT(DISTINCT CASE WHEN FIND_IN_SET('stam', deelnemers.subgroups) > 0 THEN deelnemers.member_id END) AS `Waarvan Stam`");
+            expect(sql).toContain("COUNT(DISTINCT CASE WHEN FIND_IN_SET('ondersteunende leden', deelnemers.subgroups) > 0 THEN deelnemers.member_id END) AS `Waarvan Ondersteunende leden`");
+
+            // Neither column reads the type the member was delivered under, which would drop the
+            // ones an ordinary registration decided.
+            expect(`counts by type: ${/FIND_IN_SET\([^)]*\) > 0 AND deelnemers\.type_number/.test(sql)}`).toEqual('counts by type: false');
 
             // The two columns count members the row already holds, so neither may exceed it.
             expect(card.columns).toEqual(['ID_Organisatie', 'Type_deelnemers', 'Geboortejaar_deelnemers', 'Gender_deelnemers', 'Aantal_deelnemers', 'Waarvan Stam', 'Waarvan Ondersteunende leden']);
@@ -328,7 +338,7 @@ describe('report', () => {
             const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql.replaceAll(/\s+/g, ' ');
 
             expect(sql).toContain('COALESCE( MAX(CASE WHEN inschrijvingen.deactivated_at IS NULL THEN inschrijvingen.type_number END), MAX(inschrijvingen.type_number) ) AS type_number');
-            expect(sql).toContain('COALESCE( MIN(CASE WHEN inschrijvingen.deactivated_at IS NULL THEN inschrijvingen.subgroup END), MIN(inschrijvingen.subgroup) ) AS subgroup');
+            expect(sql).toContain('CASE WHEN MAX(inschrijvingen.deactivated_at IS NULL) = 1 THEN GROUP_CONCAT(DISTINCT CASE WHEN inschrijvingen.deactivated_at IS NULL THEN inschrijvingen.subgroup END) ELSE GROUP_CONCAT(DISTINCT inschrijvingen.subgroup) END AS subgroups');
         });
 
         /**
