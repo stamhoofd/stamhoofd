@@ -71,7 +71,7 @@ ORDER BY `Naam_Organisatie`
 -- columns: ID_Organisatie, Type_deelnemers, Geboortejaar_deelnemers, Gender_deelnemers, Aantal_deelnemers
 -- columns@keeo: ID_Organisatie, Type_deelnemers, Geboortejaar_deelnemers, Gender_deelnemers, Aantal_deelnemers, Waarvan Stam, Waarvan Ondersteunende leden
 -- description: Tabblad 'Deelnemers_Lokale_groep': de leden en de leiding van elke lokale groep, per geboortejaar en geslacht, met een aansluiting in dat werkjaar. Wie leiding is in de ene leeftijdsgroep en lid in de andere, telt enkel als leiding. Leeftijdsgroepen zonder categorie leveren niemand: vul die eerst aan.
--- description@keeo: Tabblad 'Deelnemers_Lokale_groep': de leden en de leiding van elke lokale groep, per geboortejaar en geslacht, met een aansluiting in dat werkjaar. De stam telt hier mee bij de leden en de ondersteunende leden bij de leiding; de twee laatste kolommen zeggen hoeveel van de rij een inschrijving in die leeftijdsgroep hebben en horen niet in het sjabloon. Wie leiding is in de ene leeftijdsgroep en lid in de andere, telt enkel als leiding. Leeftijdsgroepen zonder categorie leveren niemand: vul die eerst aan.
+-- description@keeo: Tabblad 'Deelnemers_Lokale_groep': de leden en de leiding van elke lokale groep, per geboortejaar en geslacht, met een aansluiting in dat werkjaar. De stam telt hier mee bij de leden en de ondersteunende leden bij de leiding; de twee laatste kolommen zeggen hoeveel van de rij daaronder geleverd worden en horen niet in het sjabloon. Wie leiding is in de ene leeftijdsgroep en lid in de andere, telt enkel als leiding. Leeftijdsgroepen zonder categorie leveren niemand: vul die eerst aan.
 -- description@ravot: Tabblad 'Deelnemers_Lokale_groep': de leden en de leiding van elke lokale groep, per geboortejaar en geslacht, met een aansluiting in dat werkjaar. De leeftijdsgroep 'Ondersteunende leden' telt hier mee als leiding. Wie leiding is in de ene leeftijdsgroep en lid in de andere, telt enkel als leiding. Leeftijdsgroepen zonder categorie leveren niemand: vul die eerst aan.
 WITH all_registrations AS (
     -- @include all-registrations
@@ -86,7 +86,7 @@ inschrijvingen AS (
         -- @include participant-type
             AS type_number,
         -- @include participant-subgroup
-            AS subgroup
+            AS subgroup_number
     FROM all_registrations
     WHERE
         -- @include filter-has-delivery-membership
@@ -94,24 +94,28 @@ inschrijvingen AS (
       AND NOT EXISTS (SELECT 1 FROM platform WHERE platform.membershipOrganizationId = all_registrations.organization_id)
 ),
 deelnemers AS (
-    SELECT
-        inschrijvingen.organization_uri,
-        inschrijvingen.member_id,
-        MAX(inschrijvingen.birth_date) AS birth_date,
-        MAX(inschrijvingen.`Geslacht`) AS `Geslacht`,
-        COALESCE(
-            MAX(CASE WHEN inschrijvingen.deactivated_at IS NULL THEN inschrijvingen.type_number END),
-            MAX(inschrijvingen.type_number)
-        ) AS type_number,
-        -- Every aparte leeftijdsgroep the member stands in, not the one their type was read from: a
-        -- lid of the stam who is leiding as well is delivered among the leiding and counted in the
-        -- kolom all the same.
-        CASE WHEN MAX(inschrijvingen.deactivated_at IS NULL) = 1
-            THEN GROUP_CONCAT(DISTINCT CASE WHEN inschrijvingen.deactivated_at IS NULL THEN inschrijvingen.subgroup END)
-            ELSE GROUP_CONCAT(DISTINCT inschrijvingen.subgroup)
-        END AS subgroups
-    FROM inschrijvingen
-    GROUP BY inschrijvingen.organization_uri, inschrijvingen.member_id
+    -- The registration that speaks for the member, which says both what they are delivered as and
+    -- which aparte leeftijdsgroep that came from. One that still stands beats one that was
+    -- cancelled, leiding beats lid, and a gewone leeftijdsgroep beats an aparte one that delivers
+    -- the same type: someone leiding beside the ondersteunende leden is leiding, not ondersteunend.
+    SELECT gekozen.* FROM (
+        SELECT
+            inschrijvingen.organization_uri,
+            inschrijvingen.member_id,
+            inschrijvingen.birth_date,
+            inschrijvingen.`Geslacht`,
+            inschrijvingen.type_number,
+            inschrijvingen.subgroup_number,
+            ROW_NUMBER() OVER (
+                PARTITION BY inschrijvingen.organization_uri, inschrijvingen.member_id
+                ORDER BY
+                    (inschrijvingen.deactivated_at IS NULL) DESC,
+                    inschrijvingen.type_number DESC,
+                    inschrijvingen.subgroup_number
+            ) AS rang
+        FROM inschrijvingen
+    ) gekozen
+    WHERE gekozen.rang = 1
 )
 SELECT
     deelnemers.organization_uri AS `ID_Organisatie`,

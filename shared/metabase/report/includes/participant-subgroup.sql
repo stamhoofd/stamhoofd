@@ -1,2 +1,2 @@
--- description: De leeftijdsgroep die de koepel apart wil zien in de aanlevering, naast het type waaronder ze meetelt. Niets voor een gewone leeftijdsgroep. Zonder lijst staat niemand apart.
-CAST(NULL AS CHAR(32))
+-- description: De aparte leeftijdsgroep die de koepel naast het type wil zien in de aanlevering, als nummer: 0 voor een gewone leeftijdsgroep, die van elke aparte wint. Zonder lijst staat niemand apart.
+0
