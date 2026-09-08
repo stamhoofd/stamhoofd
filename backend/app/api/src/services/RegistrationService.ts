@@ -2,7 +2,7 @@ import { ManyToOneRelation } from '@simonbackx/simple-database';
 import { encodeObject } from '@simonbackx/simple-encoding';
 import { BalanceItem, Document, Group, Member, Organization, Platform, Registration, RegistrationInvitation } from '@stamhoofd/models';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
-import { QueueHandler } from '@stamhoofd/queues';
+import { isCanceledError, QueueHandler } from '@stamhoofd/queues';
 import { AppliedRegistrationDiscount, AuditLogSource, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, EmailTemplateType, getAppHost, GroupType, Recipient, Replacement, StockReservation, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { AuditLogService } from './AuditLogService.js';
@@ -360,6 +360,11 @@ export const RegistrationService = {
 
                 await RegistrationService.unsafeStockUpdate(updated);
             });
-        }).catch(console.error);
+        }).catch((e) => {
+            // A newer update for the same registration replaced this one
+            if (!isCanceledError(e)) {
+                console.error(e);
+            }
+        });
     },
 };

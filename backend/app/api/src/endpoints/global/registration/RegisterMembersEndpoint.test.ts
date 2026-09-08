@@ -3,7 +3,8 @@ import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import type { MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemFactory, EventFactory, Group, GroupFactory, Member, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import { AccessRight, BalanceItemCartItem, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, Company, EventMeta, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, PermissionsResourceType, ReduceablePrice, RegisterItemOption, ResourcePermissions, GroupType, STPackageStatus, STPackageType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, UserPermissions, Version } from '@stamhoofd/structures';
+import { StockReservation, TranslatedString, GroupPrice, AccessRight, BalanceItemCartItem, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, Company, EventMeta, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, PermissionsResourceType, ReduceablePrice, RegisterItemOption, ResourcePermissions, GroupType, STPackageStatus, STPackageType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, UserPermissions, Version } from '@stamhoofd/structures';
+import { QueueHandler } from '@stamhoofd/queues';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { assertBalances } from '../../../../tests/assertions/assertBalances.js';
@@ -3567,6 +3568,254 @@ describe('Endpoint.RegisterMembers', () => {
             await post(body1, organization, token);
             await expect(post(body2, organization, token)).rejects.toThrow(/Cannot delete inactive registration/);
             // #endregion
+        });
+    });
+
+    describe('Maximum members under concurrent registrations', () => {
+        /**
+         * Each user has their own family with one member, like unrelated users registering at the same time.
+         */
+        async function initUsers({ organization, amount }: { organization: Organization; amount: number }) {
+            const users: { member: MemberWithUsersRegistrationsAndGroups; token: Token }[] = [];
+            for (let i = 0; i < amount; i++) {
+                const user = await new UserFactory({ organization }).create();
+                const member = await new MemberFactory({ organization, user }).create();
+                users.push({ member, token: await SessionService.createSession(user) });
+            }
+            return users;
+        }
+
+        function buildBody({ organization, group, member, paymentMethod, groupPrice = group.settings.prices[0] }: { organization: Organization; group: Group; member: MemberWithUsersRegistrationsAndGroups; paymentMethod: PaymentMethod; groupPrice?: GroupPrice }) {
+            return IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                }),
+                paymentMethod,
+                redirectUrl: new URL('https://www.example.com'),
+                cancelUrl: new URL('https://www.example.com'),
+                totalPrice: groupPrice.price.price,
+            });
+        }
+
+        /**
+         * A group without a maximum, but with a limited and an unlimited price: only the limited price can sell out.
+         */
+        async function initGroupWithLimitedPrice({ organization, stock, price }: { organization: Organization; stock: number; price: number }) {
+            const group = await new GroupFactory({ organization, price, stock }).create();
+            group.settings.prices.push(GroupPrice.create({
+                name: new TranslatedString('Unlimited'),
+                price: ReduceablePrice.create({ price }),
+            }));
+            await group.save();
+            return { group, limitedPrice: group.settings.prices[0] };
+        }
+
+        test('A pending online payment reserves the spot for the next registration', async () => {
+            const { organization } = await initOrganization();
+            await initPayconiq({ organization });
+            const group = await new GroupFactory({ organization, price: 1500, maxMembers: 1 }).create();
+            const [first, second] = await initUsers({ organization, amount: 2 });
+
+            const response = await post(buildBody({ organization, group, member: first.member, paymentMethod: PaymentMethod.Payconiq }), organization, first.token);
+            expect(response.body.paymentUrl).toMatch(/payconiq-checkout\.test/);
+            expect(response.body.registrations[0].reservedUntil).toEqual(expect.any(Date));
+
+            // The first user did not pay yet, but their spot is taken until the reservation expires
+            await expect(post(buildBody({ organization, group, member: second.member, paymentMethod: PaymentMethod.Payconiq }), organization, second.token))
+                .rejects.toThrow(STExpect.errorWithCode('maximum_reached'));
+
+            await QueueHandler.awaitAll();
+            await group.refresh();
+            expect(group.settings.registeredMembers).toBe(0);
+            expect(group.settings.reservedMembers).toBe(1);
+        });
+
+        test('A pending online payment reserves the stock of a limited price', async () => {
+            const { organization } = await initOrganization();
+            await initPayconiq({ organization });
+            const { group, limitedPrice } = await initGroupWithLimitedPrice({ organization, stock: 1, price: 1500 });
+            const [first, second] = await initUsers({ organization, amount: 2 });
+
+            const response = await post(buildBody({ organization, group, groupPrice: limitedPrice, member: first.member, paymentMethod: PaymentMethod.Payconiq }), organization, first.token);
+            expect(response.body.paymentUrl).toMatch(/payconiq-checkout\.test/);
+            expect(response.body.registrations[0].reservedUntil).toEqual(expect.any(Date));
+
+            await expect(post(buildBody({ organization, group, groupPrice: limitedPrice, member: second.member, paymentMethod: PaymentMethod.Payconiq }), organization, second.token))
+                .rejects.toThrow(STExpect.errorWithCode('stock_empty'));
+
+            await QueueHandler.awaitAll();
+            await group.refresh();
+            expect(group.settings.reservedMembers).toBe(1);
+            expect(StockReservation.getAmount('GroupPrice', limitedPrice.id, group.stockReservations)).toBe(limitedPrice.stock);
+        });
+
+        test('A pending online payment reserves the stock of a limited option', async () => {
+            const { organization } = await initOrganization();
+            await initPayconiq({ organization });
+            const group = await new GroupFactory({ organization, price: 1500 }).create();
+            const option = GroupOption.create({ name: 'option 1', stock: 1, price: ReduceablePrice.create({ price: 0 }) });
+            const optionMenu = GroupOptionMenu.create({ name: 'option menu 1', multipleChoice: true, options: [option] });
+            group.settings.optionMenus = [optionMenu];
+            await group.save();
+            const [first, second] = await initUsers({ organization, amount: 2 });
+
+            const withOption = (member: MemberWithUsersRegistrationsAndGroups) => {
+                const body = buildBody({ organization, group, member, paymentMethod: PaymentMethod.Payconiq });
+                body.cart.items[0].options = [RegisterItemOption.create({ option, optionMenu, amount: 1 })];
+                return body;
+            };
+
+            const response = await post(withOption(first.member), organization, first.token);
+            expect(response.body.paymentUrl).toMatch(/payconiq-checkout\.test/);
+            expect(response.body.registrations[0].reservedUntil).toEqual(expect.any(Date));
+
+            await expect(post(withOption(second.member), organization, second.token))
+                .rejects.toThrow(STExpect.errorWithCode('stock_empty'));
+
+            await QueueHandler.awaitAll();
+            await group.refresh();
+            expect(group.settings.reservedMembers).toBe(1);
+            expect(StockReservation.getAmount('GroupOption', option.id, group.stockReservations)).toBe(1);
+        });
+
+        test('A pending online payment does not reserve a spot in a group without limits', async () => {
+            const { organization } = await initOrganization();
+            await initPayconiq({ organization });
+            const group = await new GroupFactory({ organization, price: 1500 }).create();
+            const [first] = await initUsers({ organization, amount: 1 });
+
+            const response = await post(buildBody({ organization, group, member: first.member, paymentMethod: PaymentMethod.Payconiq }), organization, first.token);
+            expect(response.body.paymentUrl).toMatch(/payconiq-checkout\.test/);
+            expect(response.body.registrations[0].reservedUntil).toBeNull();
+
+            await QueueHandler.awaitAll();
+            await group.refresh();
+            expect(group.settings.reservedMembers).toBe(0);
+            expect(group.stockReservations.length).toBe(0);
+        });
+
+        test('Concurrent free registrations never exceed the maximum', async () => {
+            const { organization } = await initOrganization();
+            const group = await new GroupFactory({ organization, price: 0, maxMembers: 2 }).create();
+            const users = await initUsers({ organization, amount: 6 });
+
+            const results = await Promise.allSettled(
+                users.map(({ member, token }) => post(buildBody({ organization, group, member, paymentMethod: PaymentMethod.PointOfSale }), organization, token)),
+            );
+
+            const fulfilled = results.filter(r => r.status === 'fulfilled');
+            const rejected = results.filter(r => r.status === 'rejected');
+            expect(fulfilled.length).toBe(2);
+            expect(rejected.length).toBe(4);
+            for (const result of rejected) {
+                expect(() => {
+                    throw result.reason;
+                }).toThrow(STExpect.errorWithCode('maximum_reached'));
+            }
+
+            await QueueHandler.awaitAll();
+
+            const registrations = await Registration.where({ groupId: group.id, registeredAt: { sign: '!=', value: null }, deactivatedAt: null });
+            expect(registrations.length).toBe(2);
+
+            await group.refresh();
+            expect(group.settings.registeredMembers).toBe(2);
+            expect(group.settings.reservedMembers).toBe(0);
+        });
+
+        test('Concurrent online payments never reserve more than the maximum', async () => {
+            const { organization } = await initOrganization();
+            await initPayconiq({ organization });
+            const group = await new GroupFactory({ organization, price: 1500, maxMembers: 2 }).create();
+            const users = await initUsers({ organization, amount: 6 });
+
+            const results = await Promise.allSettled(
+                users.map(({ member, token }) => post(buildBody({ organization, group, member, paymentMethod: PaymentMethod.Payconiq }), organization, token)),
+            );
+
+            const fulfilled = results.filter(r => r.status === 'fulfilled');
+            const rejected = results.filter(r => r.status === 'rejected');
+            expect(fulfilled.length).toBe(2);
+            expect(rejected.length).toBe(4);
+            for (const result of fulfilled) {
+                expect(result.value.body.paymentUrl).toMatch(/payconiq-checkout\.test/);
+            }
+            for (const result of rejected) {
+                expect(() => {
+                    throw result.reason;
+                }).toThrow(STExpect.errorWithCode('maximum_reached'));
+            }
+
+            await QueueHandler.awaitAll();
+
+            const reserved = await Registration.where({ groupId: group.id, registeredAt: null, reservedUntil: { sign: '>', value: new Date() } });
+            expect(reserved.length).toBe(2);
+
+            await group.refresh();
+            expect(group.settings.registeredMembers).toBe(0);
+            expect(group.settings.reservedMembers).toBe(2);
+        });
+
+        test('Concurrent free registrations never exceed the stock of a limited price', async () => {
+            const { organization } = await initOrganization();
+            const { group, limitedPrice } = await initGroupWithLimitedPrice({ organization, stock: 2, price: 0 });
+            const users = await initUsers({ organization, amount: 6 });
+
+            const results = await Promise.allSettled(
+                users.map(({ member, token }) => post(buildBody({ organization, group, groupPrice: limitedPrice, member, paymentMethod: PaymentMethod.PointOfSale }), organization, token)),
+            );
+
+            expect(results.filter(r => r.status === 'fulfilled').length).toBe(2);
+            const rejected = results.filter(r => r.status === 'rejected');
+            expect(rejected.length).toBe(4);
+            for (const result of rejected) {
+                expect(() => {
+                    throw result.reason;
+                }).toThrow(STExpect.errorWithCode('stock_empty'));
+            }
+
+            await QueueHandler.awaitAll();
+            await group.refresh();
+            expect(group.settings.registeredMembers).toBe(2);
+            expect(StockReservation.getAmount('GroupPrice', limitedPrice.id, group.stockReservations)).toBe(limitedPrice.stock);
+        });
+
+        test('Concurrent online payments never reserve more than the stock of a limited price', async () => {
+            const { organization } = await initOrganization();
+            await initPayconiq({ organization });
+            const { group, limitedPrice } = await initGroupWithLimitedPrice({ organization, stock: 2, price: 1500 });
+            const users = await initUsers({ organization, amount: 6 });
+
+            const results = await Promise.allSettled(
+                users.map(({ member, token }) => post(buildBody({ organization, group, groupPrice: limitedPrice, member, paymentMethod: PaymentMethod.Payconiq }), organization, token)),
+            );
+
+            expect(results.filter(r => r.status === 'fulfilled').length).toBe(2);
+            const rejected = results.filter(r => r.status === 'rejected');
+            expect(rejected.length).toBe(4);
+            for (const result of rejected) {
+                expect(() => {
+                    throw result.reason;
+                }).toThrow(STExpect.errorWithCode('stock_empty'));
+            }
+
+            await QueueHandler.awaitAll();
+
+            const reserved = await Registration.where({ groupId: group.id, registeredAt: null, reservedUntil: { sign: '>', value: new Date() } });
+            expect(reserved.length).toBe(2);
+
+            await group.refresh();
+            expect(group.settings.registeredMembers).toBe(0);
+            expect(group.settings.reservedMembers).toBe(2);
+            expect(StockReservation.getAmount('GroupPrice', limitedPrice.id, group.stockReservations)).toBe(limitedPrice.stock);
         });
     });
 });
