@@ -202,6 +202,8 @@ describe('report', () => {
          * The sheets of Bijlage B of the aanleveringsovereenkomst, under the names the tabs of that
          * template carry: a sheet is pasted into one of them and read by its headers. Werkjaar,
          * Type_organisatie and NIS-code are not among them -- the department fills those in itself.
+         * A column a koepel delivers for itself stands behind them, where the sjabloon has no cell
+         * to read it in.
          */
         it('delivers every sheet as the aanleversjabloon defines it', () => {
             const sheets = [
@@ -212,12 +214,15 @@ describe('report', () => {
             ] as const;
 
             for (const [key, title, columns] of sheets) {
-                const card = cardOf(dashboards, 'jeugdbewegingen', key);
+                for (const [env, tabs] of [['keeo', dashboards], ['ravot', ravotDashboards]] as const) {
+                    const card = cardOf(tabs, 'jeugdbewegingen', key);
+                    const where = `${env} ${key}`;
 
-                expect(`${key}: ${card.title}`).toEqual(`${key}: ${title}`);
-                expect(card.columns).toEqual([...columns]);
-                expect(`${key}: ${card.display}`).toEqual(`${key}: table`);
-                expect(`${key} takes the werkjaar: ${card.parameters.includes('werkjaar')}`).toEqual(`${key} takes the werkjaar: true`);
+                    expect(`${where}: ${card.title}`).toEqual(`${where}: ${title}`);
+                    expect(`${where}: ${card.columns.slice(0, columns.length).join(', ')}`).toEqual(`${where}: ${columns.join(', ')}`);
+                    expect(`${where}: ${card.display}`).toEqual(`${where}: table`);
+                    expect(`${where} takes the werkjaar: ${card.parameters.includes('werkjaar')}`).toEqual(`${where} takes the werkjaar: true`);
+                }
             }
 
             expect(dashboards.find(tab => tab.key === 'jeugdbewegingen')!.cards.map(card => card.key)).toEqual(sheets.map(([key]) => key));
@@ -249,11 +254,13 @@ describe('report', () => {
          * means someone registered at two groups counts at both, not that two leeftijdsgroepen count twice.
          */
         it('counts a member of a group once, as leiding when they are leiding anywhere in it', () => {
-            const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql.replaceAll(/\s+/g, ' ');
+            for (const [env, tabs] of [['keeo', dashboards], ['ravot', ravotDashboards]] as const) {
+                const sql = expressionOf(cardOf(tabs, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql);
 
-            expect(sql).toContain("CASE WHEN all_registrations.age_group_category = 'leader' THEN 2 WHEN all_registrations.age_group_category = 'child' THEN 1 ELSE 0 END AS type_number");
-            expect(sql).toContain('GROUP BY inschrijvingen.organization_uri, inschrijvingen.member_id )');
-            expect(sql).toContain("CASE WHEN deelnemers.type_number = 2 THEN 'leiding' ELSE 'leden' END");
+                expect(`${env}: ${sql.includes("CASE WHEN all_registrations.age_group_category = 'leader' THEN 2")}`).toEqual(`${env}: true`);
+                expect(`${env}: ${sql.includes('PARTITION BY inschrijvingen.organization_uri, inschrijvingen.member_id')}`).toEqual(`${env}: true`);
+                expect(`${env}: ${sql.includes("CASE WHEN deelnemers.type_number = 2 THEN 'leiding' ELSE 'leden' END")}`).toEqual(`${env}: true`);
+            }
         });
 
         /**
@@ -278,6 +285,48 @@ describe('report', () => {
         });
 
         /**
+         * Keeo delivers its stam among the leden and the ondersteunende leden who paid a lidgeld
+         * among the leiding, for the same reason: the metadatafiche has no third word for either,
+         * and the aansluiting the delivery reads is what says the lidgeld was paid. Both are
+         * volwassenen in the categories and have to stay that way, so the aanlevering names the two
+         * leeftijdsgroepen itself.
+         *
+         * The koepel reads the sheet as well as files it, and counts a group's stam and
+         * ondersteunende leden apart from the leden and the leiding they are delivered among: two
+         * columns of its own, behind the ones the sjabloon reads.
+         *
+         * A column counts the members delivered under that leeftijdsgroep, so the two follow the same
+         * precedence the type does: someone in the stam who sits in the Steuncomité as well is
+         * ondersteunend and not stam, and someone who is leiding beside either is neither. That
+         * keeps a column from claiming a member the row next to it delivers under another word, and
+         * keeps the two of them from summing past the row.
+         */
+        it('delivers the stam of keeo as leden and its ondersteunende leden as leiding, each counted apart', () => {
+            const namesTheGroups = (tabs: ReportTab[]) => tabs.flatMap(tab => tab.cards)
+                .filter(card => expressionOf(card.sql).includes("all_registrations.age_group_id = '6fc0775e-2851-4fe1-90cd-af9c74243ccd'"))
+                .map(card => card.key);
+            const card = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep');
+            const sql = expressionOf(card.sql);
+
+            // By the id of the leeftijdsgroep rather than by its name, which the years need not agree on.
+            expect(sql).toContain("CASE WHEN all_registrations.age_group_category = 'leader' THEN 2 WHEN all_registrations.age_group_id = 'ac8848e9-9868-44a1-a057-2a189cce68ea' THEN 2 WHEN all_registrations.age_group_category = 'child' THEN 1 WHEN all_registrations.age_group_id = '6fc0775e-2851-4fe1-90cd-af9c74243ccd' THEN 1 ELSE 0 END AS type_number");
+            expect(sql).toContain("CASE all_registrations.age_group_id WHEN '6fc0775e-2851-4fe1-90cd-af9c74243ccd' THEN 1 WHEN 'ac8848e9-9868-44a1-a057-2a189cce68ea' THEN 2 ELSE 0 END AS subgroup_number");
+            expect(sql).toContain('COUNT(DISTINCT CASE WHEN deelnemers.subgroup_number = 1 THEN deelnemers.member_id END) AS `Waarvan Stam`');
+            expect(sql).toContain('COUNT(DISTINCT CASE WHEN deelnemers.subgroup_number = 2 THEN deelnemers.member_id END) AS `Waarvan Ondersteunende leden`');
+
+            // The columns read the number the fragment gives a leeftijdsgroep, so the two files have
+            // to keep agreeing on it -- a swapped pair is a plausible sheet rather than a failure.
+            expect(sql).toContain('inschrijvingen.type_number DESC, inschrijvingen.subgroup_number )');
+
+            // The two columns count members the row already holds, so neither may exceed it.
+            expect(card.columns).toEqual(['ID_Organisatie', 'Type_deelnemers', 'Geboortejaar_deelnemers', 'Gender_deelnemers', 'Aantal_deelnemers', 'Waarvan Stam', 'Waarvan Ondersteunende leden']);
+            expect(cardOf(ravotDashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').columns)
+                .toEqual(['ID_Organisatie', 'Type_deelnemers', 'Geboortejaar_deelnemers', 'Gender_deelnemers', 'Aantal_deelnemers']);
+            expect(namesTheGroups(dashboards)).toEqual(['deelnemers-lokale-groep']);
+            expect(namesTheGroups(ravotDashboards)).toEqual([]);
+        });
+
+        /**
          * A cancelled registration says someone was there, not what they were. An administrator who
          * puts a lid in the Leiding leeftijdsgroep by mistake and undoes it would otherwise leave them leiding
          * for the rest of the werkjaar, while the registration they really hold says what they are.
@@ -288,7 +337,11 @@ describe('report', () => {
         it('lets the registrations that still stand decide what someone is', () => {
             const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql.replaceAll(/\s+/g, ' ');
 
-            expect(sql).toContain('COALESCE( MAX(CASE WHEN inschrijvingen.deactivated_at IS NULL THEN inschrijvingen.type_number END), MAX(inschrijvingen.type_number) ) AS type_number');
+            expect(sql).toContain('ORDER BY (inschrijvingen.deactivated_at IS NULL) DESC, inschrijvingen.type_number DESC');
+
+            // A gewone leeftijdsgroep is 0 and sorts ahead of every aparte one, so it decides what a
+            // member is delivered as whenever the two say the same type.
+            expect(sql).toContain('inschrijvingen.type_number DESC, inschrijvingen.subgroup_number )');
         });
 
         /**
@@ -849,7 +902,7 @@ describe('report', () => {
             }
 
             expect(entries.filter(entry => entry.isDirectory()).map(entry => entry.name).sort()).toEqual(['keeo', 'ravot']);
-            expect([...qualifiers].sort()).toEqual(['ravot']);
+            expect([...qualifiers].sort()).toEqual(['keeo', 'ravot']);
         });
 
         /**

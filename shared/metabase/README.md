@@ -113,7 +113,9 @@ Ravot's list is the one to read before changing either. Its ondersteunende leden
 may not be categorised as leiding: the omkaderingscijfer and the GTP index would then count them as
 leiding the kinderen of an eenheid are looked after by. The aanlevering delivers them among the
 leiding anyway — the department has no third word for them — by naming the leeftijdsgroep itself in
-`ravot/type-deelnemers.sql`, which only works for as long as the category does not say it.
+`ravot/participant-type.sql`, which only works for as long as the category does not say it. Keeo
+names two there: its stam is delivered among the leden and its ondersteunende leden among the
+leiding, and both stay volwassenen everywhere else.
 
 Standing in front of the reader only holds until the next `yarn metabase report`, which rewrites every
 card from these files — an edit made in Metabase is a correction to bring back here, not a place to
@@ -125,7 +127,9 @@ delivery template: tables to download as .xlsx and paste into it rather than cha
 a `dashboard:` of its own, which writes it as a second dashboard in the collection instead of as a
 page of the ledenstatistieken. That is also why those cards name their columns -- Metabase writes the
 header of an export from the column's title, and a sheet read by a government department has to keep
-the names the template gives it.
+the names the template gives it. A figure the koepel wants out of the same sheet for itself stands
+behind those, in a column the template has no cell for: keeo reads how many of a row are the stam
+and the ondersteunende leden it delivers among the leden and the leiding.
 
 The koepel's own organization is treated the other way around by the two. The ledenstatistieken leave
 it out by default -- it is the national body, not an eenheid, and the client's own report normally
