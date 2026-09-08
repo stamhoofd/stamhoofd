@@ -1,12 +1,12 @@
 import type { SQLColumnExpression, SQLExpression, SQLExpressionOptions, SQLQuery } from '@stamhoofd/sql';
 import { SQLTranslatedStringHelper } from '@stamhoofd/sql';
-import { Language } from '@stamhoofd/types/Language';
 
 export class SQLTranslatedString implements SQLExpression {
     private helper: SQLTranslatedStringHelper;
 
     constructor(columnExpression: SQLColumnExpression, path: string) {
-        this.helper = new SQLTranslatedStringHelper(columnExpression, path, () => Language.English);
+        // Has to resolve to the same value as TranslatedString.toString(), because pagination compares against that value
+        this.helper = new SQLTranslatedStringHelper(columnExpression, path, () => $getLanguage());
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
