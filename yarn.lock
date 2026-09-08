@@ -8646,9 +8646,9 @@ node-rsa@2.0.0:
     "@noble/hashes" "^2.2.0"
 
 nodemailer@9.0.0, nodemailer@9.0.3, nodemailer@9.1.1, nodemailer@^6.9.14:
-  version "9.0.3"
-  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-9.0.3.tgz#ce84f8046977b616847ad56130aa30bdb3c67c1f"
-  integrity sha512-n+YP+NKwR5zRWa60k3GiQ6Q3B4KXCoAw40dAKeCtYn020iNN74aWK2liXIC3ZEATeGql7we3tE3t8QwhY0eskw==
+  version "9.1.1"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-9.1.1.tgz#fb991992723657f34dbe1d829139aa66be008e96"
+  integrity sha512-izw9mVKFix6YSnC9eLgV6g1opl9DUlRio9ZNcq+Wu9Ujn2UwF+8Nl0B8nz22kEC+CTZCvinkxwJ0DeFbb6NwcQ==
 
 nodemon@3.1.14:
   version "3.1.14"
