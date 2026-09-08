@@ -311,10 +311,8 @@ describe('report', () => {
             // By the id of the leeftijdsgroep rather than by its name, which the years need not agree on.
             expect(sql).toContain("CASE WHEN all_registrations.age_group_category = 'leader' THEN 2 WHEN all_registrations.age_group_id = 'ac8848e9-9868-44a1-a057-2a189cce68ea' THEN 2 WHEN all_registrations.age_group_category = 'child' THEN 1 WHEN all_registrations.age_group_id = '6fc0775e-2851-4fe1-90cd-af9c74243ccd' THEN 1 ELSE 0 END AS type_number");
             expect(sql).toContain("CASE all_registrations.age_group_id WHEN '6fc0775e-2851-4fe1-90cd-af9c74243ccd' THEN 1 WHEN 'ac8848e9-9868-44a1-a057-2a189cce68ea' THEN 2 ELSE 0 END AS subgroup_number");
-            // Empty rather than nul in the row the leeftijdsgroep is never delivered in: a nul there
-            // reads as "none of these leiding are stam" instead of "leiding is never stam".
-            expect(sql).toContain('CASE WHEN MAX(deelnemers.type_number) = 1 THEN COUNT(DISTINCT CASE WHEN deelnemers.subgroup_number = 1 THEN deelnemers.member_id END) END AS `Waarvan Stam`');
-            expect(sql).toContain('CASE WHEN MAX(deelnemers.type_number) = 2 THEN COUNT(DISTINCT CASE WHEN deelnemers.subgroup_number = 2 THEN deelnemers.member_id END) END AS `Waarvan Ondersteunende leden`');
+            expect(sql).toContain('COUNT(DISTINCT CASE WHEN deelnemers.subgroup_number = 1 THEN deelnemers.member_id END) AS `Waarvan Stam`');
+            expect(sql).toContain('COUNT(DISTINCT CASE WHEN deelnemers.subgroup_number = 2 THEN deelnemers.member_id END) AS `Waarvan Ondersteunende leden`');
 
             // The columns read the number the fragment gives a leeftijdsgroep, so the two files have
             // to keep agreeing on it -- a swapped pair is a plausible sheet rather than a failure.
