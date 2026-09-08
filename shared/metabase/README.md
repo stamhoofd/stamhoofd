@@ -107,6 +107,12 @@ alone on a row by this takes the row: `-- size@keeo: full` on the lidgeldverdeli
 page and on the leeftijdsgroepenvergelijking of the nationale page, each of which stood beside a
 geslachtenverdeling.
 
+One figure is drawn two ways rather than dropped. The leeftijdsverdeling of an eenheid is worth
+reading whether or not the bars can be split, and a card cannot be two shapes, so it is two cards
+that leave each other out: `eenheid-leeftijd-en-geslacht` everywhere but keeo, `eenheid-leden-per-leeftijd`
+there. A test keeps exactly one of them per environment — neither is a page missing its
+leeftijdsverdeling, both is the same bars drawn twice under two titles.
+
 The aanlevering follows, and is where this cannot be said with `except`: a sheet is one card, so the
 column goes rather than the card. `includes/participant-details.sql` is the kenmerken a
 deelnemerstabblad splits its rijen into and `includes/participant-detail-columns.sql` the same ones

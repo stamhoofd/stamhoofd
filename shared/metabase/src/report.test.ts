@@ -933,14 +933,14 @@ describe('report', () => {
          * An environment says a figure in words of its own and leaves out what its platform does not
          * record; it does not get a report of its own. Two platforms reading pages that differ for
          * any other reason is a report that has quietly forked, which is what the shared definition
-         * exists to prevent -- so what one leaves out is named here rather than only in the sql.
+         * exists to prevent -- so what either leaves out is named here rather than only in the sql.
          *
          * A card left alone on a row by that takes the width of the row, which is why the size is
          * read apart from the rest of the shape.
          */
         it('varies what a card counts, never which cards the report holds beyond what it leaves out', async () => {
-            const retired = await loadRetiredReport('keeo');
-            const goneTabs = retired.filter(tab => tab.except.includes('keeo')).map(tab => tab.key);
+            const retired = [...await loadRetiredReport('keeo'), ...await loadRetiredReport('ravot')];
+            const goneTabs = retired.filter(tab => tab.except.length > 0).map(tab => tab.key);
             const goneCards = retired.flatMap(tab => tab.cards.map(card => card.key));
 
             const shapeOf = (tabs: ReportTab[]) => tabs
@@ -960,8 +960,28 @@ describe('report', () => {
                 'eenheid-leden-per-geslacht', 'eenheid-geslacht-kinderen-per-jaar', 'eenheid-kinderen-per-geslacht',
                 'eenheid-geslacht-leiding-per-jaar', 'eenheid-leiding-per-geslacht', 'eenheid-leeftijd-en-geslacht',
                 'uldk', 'uldk-totaal',
+                'eenheid-leden-per-leeftijd',
             ]);
             expect(shapeOf(ravotDashboards)).toEqual(shapeOf(dashboards));
+        });
+
+        /**
+         * The leeftijdsverdeling is one figure drawn two ways, and a card cannot be two shapes: the
+         * split one is what a platform asking no geslacht cannot draw, the plain one what it reads
+         * instead. Exactly one of them per environment -- neither is a page missing its
+         * leeftijdsverdeling, both is the same bars drawn twice under two titles.
+         */
+        it('draws the leeftijdsverdeling once, split by geslacht only where there is one', () => {
+            for (const [env, tabs, expected] of [
+                ['keeo', dashboards, 'eenheid-leden-per-leeftijd'],
+                ['ravot', ravotDashboards, 'eenheid-leeftijd-en-geslacht'],
+            ] as const) {
+                const drawn = tabs.find(tab => tab.key === 'eenheden')!.cards
+                    .filter(card => card.dimensions.includes('Leeftijd'))
+                    .map(card => card.key);
+
+                expect(`${env}: ${drawn.join(', ')}`).toEqual(`${env}: ${expected}`);
+            }
         });
 
         /**
