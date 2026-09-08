@@ -94,6 +94,7 @@ report is loaded — `loadReport(env)` takes the environment, the same name the 
 | `report/includes/<env>/gtp.sql` | what `@include gtp` expands to in that environment |
 | `-- description@ravot:` | what a card's `-- description:` says there |
 | `-- except: keeo` | the tab or card is not written there at all |
+| `-- only: keeo` | the card is written there and nowhere else |
 
 A card names the first two and keeps saying `@include gtp`, which is what keeps one report from
 quietly becoming two. An override of a name no fragment carries is refused rather than ignored:
@@ -101,17 +102,23 @@ nothing includes it, so a misspelled file would change nothing and say nothing.
 
 `except` is the one that leaves something out rather than saying it differently, for the figure a
 platform records nothing about. Keeo no longer asks its leden for a geslacht, so the seven cards that
-split on one are not written there — nor is the varia page, which is the ULDK-tabel and nothing else,
-and a tab written as a page with no cards on it would be an empty page rather than none. A card left
-alone on a row by this takes the row: `-- size@keeo: full` on the lidgeldverdeling of the eenheden
-page and on the leeftijdsgroepenvergelijking of the nationale page, each of which stood beside a
-geslachtenverdeling.
+split on one are not written there. A card left alone on a row by this takes the row:
+`-- size@keeo: full` on the lidgeldverdeling of the eenheden page and on the
+leeftijdsgroepenvergelijking of the nationale page, each of which stood beside a geslachtenverdeling.
 
-One figure is drawn two ways rather than dropped. The leeftijdsverdeling of an eenheid is worth
-reading whether or not the bars can be split, and a card cannot be two shapes, so it is two cards
-that leave each other out: `eenheid-leeftijd-en-geslacht` everywhere but keeo, `eenheid-leden-per-leeftijd`
-there. A test keeps exactly one of them per environment — neither is a page missing its
-leeftijdsverdeling, both is the same bars drawn twice under two titles.
+Where the figure is worth reading without the split, it is drawn two ways rather than dropped. A card
+cannot be two shapes, so it is two cards, and `only` is what keeps them from both being written:
+
+| | drawn everywhere but keeo | drawn there |
+|---|---|---|
+| de leeftijdsverdeling van een eenheid | `eenheid-leeftijd-en-geslacht` | `eenheid-leden-per-leeftijd` |
+| de ULDK-tabel en haar totalen | `uldk`, `uldk-totaal` | `uldk-zonder-geslacht`, `uldk-zonder-geslacht-totaal` |
+
+`except: keeo` on the first and `only: keeo` on the second, which is the whole of the pairing:
+`except` on both would hand a platform naming neither of them both shapes of one figure. The ULDK
+pair says why that matters — both tables are titled `ULDK`, as the page names them, so a platform
+given the two would store them as one question. Two cards of a tab may share a title exactly because
+no environment writes both, and that is checked per environment rather than over the file.
 
 The aanlevering follows, and is where this cannot be said with `except`: a sheet is one card, so the
 column goes rather than the card. `includes/participant-details.sql` is the kenmerken a

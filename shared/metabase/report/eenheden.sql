@@ -379,7 +379,7 @@ ORDER BY leeftijd
 
 -- @card eenheid-leden-per-leeftijd
 -- title: Aantal leden per leeftijd
--- except: ravot
+-- only: keeo
 -- display: bar
 -- size: full
 -- dimensions: Leeftijd

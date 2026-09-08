@@ -17,6 +17,7 @@ function card(overrides: Partial<ReportCard> = {}): ReportCard {
         span: 1,
         parameters: [],
         except: [],
+        only: [],
         snippets: [],
         sql: 'SELECT 1',
         snippetSql: 'SELECT 1',

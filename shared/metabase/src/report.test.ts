@@ -60,7 +60,8 @@ describe('report', () => {
         /**
          * Keeo stopped asking its leden for a geslacht, so the cards that split on one have nothing
          * left to count there: a pie of the geslachten would be a single slice reading 'Onbekend'.
-         * The varia page splits on nothing else, so it goes as a page.
+         * Where the figure is worth reading without the split -- the leeftijdsverdeling, the
+         * ULDK-tabel -- a card of its own is written there instead, so no page loses its subject.
          *
          * The aanlevering goes the same way: the two deelnemerstabbladen lose the column and the rows
          * they were split into by it, which is what keeps a werkjaar imported from before -- where
@@ -75,7 +76,7 @@ describe('report', () => {
                 .filter(card => card.dimensions.includes('Geslacht') || card.snippets.includes('uldk'))
                 .map(card => card.key);
 
-            expect(dashboards.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'netwerk', 'jeugdbewegingen', 'filters']);
+            expect(dashboards.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'netwerk', 'varia', 'jeugdbewegingen', 'filters']);
             expect(splitOnGeslacht(dashboards)).toEqual([]);
             expect(splitOnGeslacht(ravotDashboards).length).toEqual(9);
             for (const key of ['deelnemers-bovenlokaal', 'deelnemers-lokale-groep']) {
@@ -954,13 +955,14 @@ describe('report', () => {
                         .map(card => ({ key: card.key, title: card.title, display: card.display, parameters: card.parameters })),
                 }));
 
-            expect(goneTabs).toEqual(['varia']);
+            expect(goneTabs).toEqual([]);
             expect(goneCards).toEqual([
                 'leden-per-geslacht',
                 'eenheid-leden-per-geslacht', 'eenheid-geslacht-kinderen-per-jaar', 'eenheid-kinderen-per-geslacht',
                 'eenheid-geslacht-leiding-per-jaar', 'eenheid-leiding-per-geslacht', 'eenheid-leeftijd-en-geslacht',
                 'uldk', 'uldk-totaal',
                 'eenheid-leden-per-leeftijd',
+                'uldk-zonder-geslacht', 'uldk-zonder-geslacht-totaal',
             ]);
             expect(shapeOf(ravotDashboards)).toEqual(shapeOf(dashboards));
         });
@@ -971,10 +973,12 @@ describe('report', () => {
          * instead. Exactly one of them per environment -- neither is a page missing its
          * leeftijdsverdeling, both is the same bars drawn twice under two titles.
          */
-        it('draws the leeftijdsverdeling once, split by geslacht only where there is one', () => {
+        it('draws the leeftijdsverdeling once, split by geslacht only where there is one', async () => {
             for (const [env, tabs, expected] of [
                 ['keeo', dashboards, 'eenheid-leden-per-leeftijd'],
                 ['ravot', ravotDashboards, 'eenheid-leeftijd-en-geslacht'],
+                // A platform that names neither reads the report as it stands, which is the split one.
+                ['development', await loadReport('development'), 'eenheid-leeftijd-en-geslacht'],
             ] as const) {
                 const drawn = tabs.find(tab => tab.key === 'eenheden')!.cards
                     .filter(card => card.dimensions.includes('Leeftijd'))
@@ -985,10 +989,28 @@ describe('report', () => {
         });
 
         /**
+         * The same for the ULDK-tabel, which is a page rather than a card: two tables and two totals,
+         * of which an environment writes one pair. Both pairs are titled as the page names them, so
+         * what keeps them apart is that no environment is ever given the two.
+         */
+        it('draws the ULDK-tabel once, split by geslacht only where there is one', async () => {
+            for (const [env, tabs, expected] of [
+                ['keeo', dashboards, 'uldk-zonder-geslacht, uldk-zonder-geslacht-totaal'],
+                ['ravot', ravotDashboards, 'uldk, uldk-totaal'],
+                ['development', await loadReport('development'), 'uldk, uldk-totaal'],
+            ] as const) {
+                const page = tabs.find(tab => tab.key === 'varia')!;
+
+                expect(`${env}: ${page.cards.map(card => card.key).join(', ')}`).toEqual(`${env}: ${expected}`);
+                expect(`${env}: ${page.cards.map(card => card.title).join(', ')}`).toEqual(`${env}: ULDK, ULDK (totaal)`);
+            }
+        });
+
+        /**
          * Which environments the report is written differently for, read from the report itself. An
-         * override directory, a `@` qualifier or an `except:` naming an environment nobody loads is
-         * read by nothing and changes nothing, which a misspelling looks exactly like. Extend this
-         * when a third platform starts counting something its own way.
+         * override directory, a `@` qualifier, an `except:` or an `only:` naming an environment nobody
+         * loads is read by nothing and changes nothing, which a misspelling looks exactly like.
+         * Extend this when a third platform starts counting something its own way.
          */
         it('varies for the environments it names and no others', async () => {
             const directory = getReportDirectory();
@@ -1001,7 +1023,7 @@ describe('report', () => {
                 for (const match of contents.matchAll(/^--[ \t]*[a-z]+@([a-z0-9-]+):/gm)) {
                     qualifiers.add(match[1]);
                 }
-                for (const match of contents.matchAll(/^--[ \t]*except:(.*)$/gm)) {
+                for (const match of contents.matchAll(/^--[ \t]*(?:except|only):(.*)$/gm)) {
                     match[1].split(',').forEach(name => qualifiers.add(name.trim()));
                 }
             }
@@ -1099,12 +1121,19 @@ describe('report', () => {
          * card of its own instead, which stays where it is however far the table is scrolled.
          */
         it('stands the ULDK totals under the table, in the same columns', () => {
-            const placed = layoutCards(ravotDashboards.find(dashboard => dashboard.key === 'varia')!.cards);
-            const [table, totals] = placed;
+            for (const [env, tabs, keys] of [
+                ['keeo', dashboards, ['uldk-zonder-geslacht', 'uldk-zonder-geslacht-totaal']],
+                ['ravot', ravotDashboards, ['uldk', 'uldk-totaal']],
+            ] as const) {
+                const placed = layoutCards(tabs.find(dashboard => dashboard.key === 'varia')!.cards);
+                const [table, totals] = placed;
 
-            expect(placed.map(entry => entry.card.key)).toEqual(['uldk', 'uldk-totaal']);
-            expect(totals.row).toEqual(table.row + table.sizeY);
-            expect(`${totals.sizeX} wide, ${table.sizeX} wide`).toEqual('24 wide, 24 wide');
+                expect(`${env}: ${placed.map(entry => entry.card.key).join(', ')}`).toEqual(`${env}: ${keys.join(', ')}`);
+                // Both are titled as the page names them, since an environment writes only one pair.
+                expect(`${env}: ${placed.map(entry => entry.card.title).join(', ')}`).toEqual(`${env}: ULDK, ULDK (totaal)`);
+                expect(totals.row).toEqual(table.row + table.sizeY);
+                expect(`${env}: ${totals.sizeX} wide, ${table.sizeX} wide`).toEqual(`${env}: 24 wide, 24 wide`);
+            }
         });
 
         /**
@@ -1114,12 +1143,17 @@ describe('report', () => {
          * does not add up.
          */
         it('adds up every column the ULDK table holds', async () => {
-            const fragment = await fs.readFile(path.join(getReportDirectory(), 'includes', 'uldk.sql'), 'utf-8');
-            const columns = [...fragment.matchAll(/AS `([^`]+)`/g)].map(match => match[1]).filter(column => !['Name', 'City'].includes(column));
-            const summed = [...cardOf(ravotDashboards, 'varia', 'uldk-totaal').sql.matchAll(/SUM\(`([^`]+)`\)/g)].map(match => match[1]);
+            for (const [fragment, tabs, key, held] of [
+                ['uldk', ravotDashboards, 'uldk-totaal', 8],
+                ['uldk-zonder-geslacht', dashboards, 'uldk-zonder-geslacht-totaal', 2],
+            ] as const) {
+                const contents = await fs.readFile(path.join(getReportDirectory(), 'includes', `${fragment}.sql`), 'utf-8');
+                const columns = [...contents.matchAll(/AS `([^`]+)`/g)].map(match => match[1]).filter(column => !['Name', 'City'].includes(column));
+                const summed = [...cardOf(tabs, 'varia', key).sql.matchAll(/SUM\(`([^`]+)`\)/g)].map(match => match[1]);
 
-            expect(summed).toEqual(columns);
-            expect(`${columns.length} columns`).toEqual('8 columns');
+                expect(`${fragment}: ${summed.join(', ')}`).toEqual(`${fragment}: ${columns.join(', ')}`);
+                expect(`${fragment}: ${columns.length} columns`).toEqual(`${fragment}: ${held} columns`);
+            }
         });
 
         /**
@@ -1567,6 +1601,63 @@ describe('report', () => {
 
             await expect(loadReport('keeo', directory)).rejects.toThrow('Tab "nationaal" has every card left out of keeo');
             await expect(loadReport('ravot', directory)).resolves.toHaveLength(1);
+        });
+
+        /**
+         * The other half of leaving a card out: the card that stands in for it, which no environment
+         * but the one it names is given. Written with `except` alone, a platform naming neither would
+         * be handed both shapes of one figure -- and under one title, both as the same question.
+         */
+        it('writes a card that names an environment there and nowhere else', async () => {
+            const directory = await writeReport({
+                'nationaal.sql': [
+                    tab,
+                    '',
+                    '-- @card leeftijd-en-geslacht',
+                    '-- title: Leeftijd',
+                    '-- except: keeo',
+                    '-- display: bar',
+                    'SELECT 1',
+                    '',
+                    '-- @card leeftijd',
+                    '-- title: Leeftijd',
+                    '-- only: keeo',
+                    '-- display: bar',
+                    'SELECT 2',
+                ].join('\n'),
+                'includes/telling.sql': 'COUNT(*)',
+            });
+
+            const drawnIn = async (env: string) => (await loadReport(env, directory))[0].cards.map(card => card.key);
+
+            expect(await drawnIn('keeo')).toEqual(['leden', 'leeftijd']);
+            expect(await drawnIn('ravot')).toEqual(['leden', 'leeftijd-en-geslacht']);
+            expect(await drawnIn('development')).toEqual(['leden', 'leeftijd-en-geslacht']);
+        });
+
+        /** Two shapes of one figure share a title; two cards an environment writes both of cannot. */
+        it('rejects two cards an environment writes under the same title', async () => {
+            const directory = await writeReport({
+                'nationaal.sql': [
+                    tab,
+                    '',
+                    '-- @card leeftijd-en-geslacht',
+                    '-- title: Leeftijd',
+                    '-- except: keeo',
+                    '-- display: bar',
+                    'SELECT 1',
+                    '',
+                    '-- @card leeftijd',
+                    '-- title: Leeftijd',
+                    '-- except: ravot',
+                    '-- display: bar',
+                    'SELECT 2',
+                ].join('\n'),
+                'includes/telling.sql': 'COUNT(*)',
+            });
+
+            await expect(loadReport('keeo', directory)).resolves.toHaveLength(1);
+            await expect(loadReport('development', directory)).rejects.toThrow('two cards are titled "Leeftijd"');
         });
 
         /**

@@ -42,7 +42,9 @@ import { fileURLToPath } from 'url';
  * unqualified one. Neither is visible to a card, which keeps saying `@include gtp`.
  *
  * A figure a platform does not record at all is the one thing no variant can say: `-- except: keeo`
- * on a tab or a card leaves it out there, and the report is written without it.
+ * on a tab or a card leaves it out there, and the report is written without it. `-- only: keeo` is
+ * the other way round and is what a figure drawn two ways needs -- a card cannot be two shapes, so
+ * the second is a card of its own, written where the first is not and nowhere else.
  */
 
 export type ReportCard = {
@@ -114,6 +116,13 @@ export type ReportCard = {
      * counts has no variant of it to be given, only an empty one, so it is left out there instead.
      */
     except: string[];
+    /**
+     * The environments this card is written for, and no others. Empty is every one of them, which is
+     * what nearly every card is. It is the second shape of a figure that says one: the card it stands
+     * in for leaves out the same environments this names, so exactly one of the two is ever written
+     * -- where `except` alone would give a platform that named neither both of them.
+     */
+    only: string[];
     /**
      * The fragments this card reads, the ones those fragments read included. Metabase resolves a
      * snippet against the tags of the question it stands in and not against the snippet that refers
@@ -205,7 +214,7 @@ export function getReportDirectory(): string {
 export async function loadReport(env: string, directory = getReportDirectory()): Promise<ReportTab[]> {
     const written = (await readTabs(env, directory))
         .filter(tab => !tab.except.includes(env))
-        .map(tab => ({ ...tab, cards: tab.cards.filter(card => !card.except.includes(env)) }));
+        .map(tab => ({ ...tab, cards: tab.cards.filter(card => isWrittenIn(card, env)) }));
 
     // A tab is written as a page whether or not it has anything left to put on it, so a tab that
     // lost every card to the environment has to be left out as a tab instead of card by card.
@@ -226,9 +235,14 @@ export async function loadReport(env: string, directory = getReportDirectory()):
  */
 export async function loadRetiredReport(env: string, directory = getReportDirectory()): Promise<ReportTab[]> {
     return (await readTabs(env, directory))
-        .map(tab => tab.except.includes(env) ? tab : { ...tab, cards: tab.cards.filter(card => card.except.includes(env)) })
+        .map(tab => tab.except.includes(env) ? tab : { ...tab, cards: tab.cards.filter(card => !isWrittenIn(card, env)) })
         .filter(tab => tab.cards.length > 0)
         .sort((a, b) => orderOf(a.key) - orderOf(b.key));
+}
+
+/** Whether this environment writes the card: it is not left out, and not left to other environments. */
+function isWrittenIn(card: ReportCard, env: string): boolean {
+    return !card.except.includes(env) && (card.only.length === 0 || card.only.includes(env));
 }
 
 /** Every tab the report declares, read for this environment but with nothing left out yet. */
@@ -348,8 +362,10 @@ export function parseTab(contents: string, file: string, includes: Map<string, s
     }
 
     // A question is stored under its title, so two cards sharing one on the same tab would end up as
-    // the same question: whichever is written last decides what both show.
-    const duplicate = cards.find((card, index) => cards.findIndex(other => other.title === card.title) !== index);
+    // the same question: whichever is written last decides what both show. Read among the cards this
+    // environment writes, since two shapes of one figure that leave each other out are never both.
+    const written = env === undefined ? cards : cards.filter(card => isWrittenIn(card, env));
+    const duplicate = written.find((card, index) => written.findIndex(other => other.title === card.title) !== index);
     if (duplicate) {
         throw new Error(`${file}: two cards are titled "${duplicate.title}", which would store them as one question`);
     }
@@ -389,7 +405,7 @@ type Section = { kind: 'tab' | 'card'; key: string; attributes: Map<string, stri
  * slipped down rather than a comment, and would otherwise be dropped without a word: writing a
  * comment above `-- size:` is enough to make the whole block below it stop counting.
  */
-const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'columns', 'stacked', 'segments', 'best', 'xlabels', 'height', 'span', 'latitude', 'longitude', 'filters', 'required', 'hidden', 'dashboard', 'except', 'xscale']);
+const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'columns', 'stacked', 'segments', 'best', 'xlabels', 'height', 'span', 'latitude', 'longitude', 'filters', 'required', 'hidden', 'dashboard', 'except', 'only', 'xscale']);
 
 function splitSections(contents: string, file: string, env?: string): Section[] {
     const sections: Section[] = [];
@@ -505,6 +521,7 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
         xScale: xScale as ReportCardXScale | undefined,
         parameters: parameterNames(sql),
         except: splitList(section.attributes.get('except')),
+        only: splitList(section.attributes.get('only')),
         snippets: collectIncludes(section.body, includes),
         sql,
         snippetSql: referenceIncludes(section.body, includes).trim(),
