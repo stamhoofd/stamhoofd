@@ -57,6 +57,13 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
         expression: new SQLTranslatedString(SQL.column('groupPrice'), '$.value.name'),
         type: SQLValueType.String,
         nullable: true,
+    }, {
+        ...baseSQLFilterCompilers,
+        id: createColumnFilter({
+            expression: SQL.jsonExtract(SQL.column('groupPrice'), '$.value.id'),
+            type: SQLValueType.JSONString,
+            nullable: false,
+        }),
     }),
     canRegister: createColumnFilter({
         expression: SQL.column('canRegister'),

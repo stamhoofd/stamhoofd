@@ -1,7 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { RegistrationPeriod } from '@stamhoofd/models';
-import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { AccessRight, EventMeta, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
+import type { Registration, RegistrationPeriod, Token } from '@stamhoofd/models';
+import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import type { SortList } from '@stamhoofd/structures';
+import { AccessRight, EventMeta, GroupPrice, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, SortItemDirection, TranslatedString } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { GetRegistrationsEndpoint } from './GetRegistrationsEndpoint.js';
@@ -1012,6 +1013,177 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
                 expect.objectContaining({ id: registration2.id }),
                 expect.objectContaining({ id: registration3.id }),
                 expect.objectContaining({ id: registration4.id }),
+            ]);
+        });
+    });
+
+    describe('Sorting', () => {
+        /**
+         * Creates one event registration per passed price name, all in the same event group,
+         * and returns an admin with full access to that organization.
+         */
+        async function setupEventRegistrations(priceNames: string[]) {
+            const organization = await new OrganizationFactory({ period }).create();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.Full,
+                }),
+            }).create();
+
+            const token = await SessionService.createSession(user);
+            const group = await new GroupFactory({ organization, period, type: GroupType.EventRegistration }).create();
+
+            group.settings.prices = [...new Set(priceNames)].map(name => GroupPrice.create({
+                name: new TranslatedString(name),
+            }));
+            await group.save();
+
+            const registrations: Registration[] = [];
+
+            for (const priceName of priceNames) {
+                const member = await new MemberFactory({}).create();
+                const groupPrice = group.settings.prices.find(p => p.name.toString() === priceName)!;
+                registrations.push(await new RegistrationFactory({ member, group, groupPrice }).create());
+            }
+
+            return { host: organization.getApiHost(), token, group, registrations };
+        }
+
+        /**
+         * Requests every page by following the 'next' request the endpoint returns, exactly like the frontend does.
+         * That next request is built from the sorter's getValue, so this covers the full sort + pagination flow:
+         * getValue -> page filter -> encoded in the query -> decoded -> compiled back to SQL.
+         *
+         * Returns the ids of all registrations across all pages, in the order they were received.
+         */
+        async function fetchAllPages({ host, token, groupId, sort, limit }: { host: string; token: Token; groupId: string; sort: SortList; limit: number }) {
+            const ids: string[] = [];
+            let query: LimitedFilteredRequest | undefined = new LimitedFilteredRequest({ filter: { groupId }, sort, limit });
+            let pages = 0;
+
+            while (query) {
+                const request = Request.get({
+                    path: baseUrl,
+                    host,
+                    query,
+                    headers: {
+                        authorization: 'Bearer ' + token.accessToken,
+                    },
+                });
+
+                const response = await testServer.test(endpoint, request);
+                expect(response.status).toBe(200);
+
+                ids.push(...response.body.results.registrations.map(r => r.id));
+                query = response.body.next;
+                pages += 1;
+
+                if (pages > 10) {
+                    throw new Error('Pagination did not terminate');
+                }
+            }
+
+            return ids;
+        }
+
+        test('Registrations are sorted by group price ascending across all pages', async () => {
+            // Deliberately not in alphabetical order, so a passing test cannot be explained by insertion order
+            const { host, token, group, registrations } = await setupEventRegistrations(['Weekend', 'Dagtarief', 'Kampprijs', 'Broer of zus', 'Dagtarief']);
+            const [weekend, day1, camp, sibling, day2] = registrations;
+
+            // A limit lower than the total forces the endpoint to build a next page filter from getValue
+            const ids = await fetchAllPages({
+                host,
+                token,
+                groupId: group.id,
+                sort: [{ key: 'groupPrice', order: SortItemDirection.ASC }],
+                limit: 2,
+            });
+
+            expect(ids).toEqual([
+                sibling.id,
+                ...[day1.id, day2.id].sort(),
+                camp.id,
+                weekend.id,
+            ]);
+        });
+
+        test('Registrations are sorted by group price descending across all pages', async () => {
+            const { host, token, group, registrations } = await setupEventRegistrations(['Weekend', 'Dagtarief', 'Kampprijs', 'Broer of zus', 'Dagtarief']);
+            const [weekend, day1, camp, sibling, day2] = registrations;
+
+            const ids = await fetchAllPages({
+                host,
+                token,
+                groupId: group.id,
+                sort: [{ key: 'groupPrice', order: SortItemDirection.DESC }],
+                limit: 2,
+            });
+
+            expect(ids).toEqual([
+                weekend.id,
+                camp.id,
+                ...[day1.id, day2.id].sort().reverse(),
+                sibling.id,
+            ]);
+        });
+
+        test('Registrations are sorted by the group price name in the language of the request', async () => {
+            const { host, token, group, registrations } = await setupEventRegistrations(['Beta', 'Mango', 'Zebra']);
+            const [beta, mango, zebra] = registrations;
+
+            // A translated name has to be sorted (and paginated) on the value the requester sees, not on another language
+            const translated = new TranslatedString({ nl: 'Aap', en: 'Zulu' });
+            group.settings.prices[2].name = translated;
+            await group.save();
+
+            zebra.groupPrice = zebra.groupPrice.patch({ name: translated });
+            await zebra.save();
+
+            const ids = await fetchAllPages({
+                host,
+                token,
+                groupId: group.id,
+                sort: [{ key: 'groupPrice', order: SortItemDirection.ASC }],
+                limit: 1,
+            });
+
+            expect(ids).toEqual([
+                zebra.id,
+                beta.id,
+                mango.id,
+            ]);
+        });
+
+        test('Filtering on a group price id keeps working', async () => {
+            const { host, token, group, registrations } = await setupEventRegistrations(['Weekend', 'Dagtarief', 'Kampprijs']);
+            const [, dayRegistration] = registrations;
+
+            const request = Request.get({
+                path: baseUrl,
+                host,
+                query: new LimitedFilteredRequest({
+                    filter: {
+                        groupId: group.id,
+                        groupPrice: {
+                            id: {
+                                $in: [dayRegistration.groupPrice.id],
+                            },
+                        },
+                    },
+                    limit: 10,
+                }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.results.registrations).toIncludeSameMembers([
+                expect.objectContaining({ id: dayRegistration.id }),
             ]);
         });
     });
