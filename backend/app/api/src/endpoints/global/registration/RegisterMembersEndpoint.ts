@@ -4,8 +4,9 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
-import type { MemberWithUsersRegistrationsAndGroups, Organization, Payment } from '@stamhoofd/models';
+import type { MemberWithUsersRegistrationsAndGroups, Organization, Payment, User } from '@stamhoofd/models';
 import { BalanceItem, CachedBalance, Group, Member, Platform, RateLimiter, Registration, RegistrationPeriod } from '@stamhoofd/models';
+import { QueueHandler } from '@stamhoofd/queues';
 import type { BalanceItem as BalanceItemStruct, PlatformMember, RegisterItem } from '@stamhoofd/structures';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, IDRegisterCheckout, Payment as PaymentStruct, PermissionLevel, PlatformFamily, ReceivableBalanceType, RegisterResponse, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -37,6 +38,12 @@ export const demoLimiter = new RateLimiter({
 });
 
 export type RegistrationWithMemberAndGroup = Registration & { member: Member } & { group: Group };
+
+function hasStockLimit(group: Group) {
+    return group.settings.maxMembers !== null
+        || group.settings.prices.some(p => p.stock !== null)
+        || group.settings.optionMenus.some(m => m.options.some(o => o.stock !== null));
+}
 
 /**
  * Allow to add, patch and delete multiple members simultaneously, which is needed in order to sync relational data that is saved encrypted in multiple members (e.g. parents)
@@ -126,6 +133,14 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
+        // Checkouts of the same organization are handled one at a time, so the stock a cart is
+        // validated against already includes the registrations and reservations made just before it
+        return await QueueHandler.schedule('register-members-' + organization.id, async () => {
+            return await this.register(request, { organization, user, whoWillPayNow });
+        });
+    }
+
+    private async register(request: DecodedRequest<Params, Query, Body>, { organization, user, whoWillPayNow }: { organization: Organization; user: User; whoWillPayNow: 'member' | 'organization' | 'nobody' }) {
         // Update balances before we start
         await BalanceItemService.flushCaches(organization.id);
 
@@ -273,7 +288,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         const registrations: RegistrationWithMemberAndGroup[] = [];
         const payRegistrations: { registration: RegistrationWithMemberAndGroup; item: RegisterItem }[] = [];
-        const deactivatedRegistrationGroupIds: string[] = [];
+        const deactivatedRegistrations: Registration[] = [];
 
         if (checkout.cart.isEmpty) {
             throw new SimpleError({
@@ -518,7 +533,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             const member = members.find(m => m.id === existingRegistration.memberId);
 
             await RegistrationService.deactivate(existingRegistration, group, member);
-            deactivatedRegistrationGroupIds.push(existingRegistration.groupId);
+            deactivatedRegistrations.push(existingRegistration);
         }
 
         // Cache the registration period relation per periodId, so we only load each period once.
@@ -597,7 +612,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             // Reserve registration for 30 minutes (if needed)
             const group = groups.find(g => g.id === registration.groupId);
 
-            if (group && group.settings.maxMembers !== null && whoWillPayNow !== 'nobody') {
+            if (group && hasStockLimit(group) && whoWillPayNow !== 'nobody') {
                 registration.reservedUntil = new Date(new Date().getTime() + 1000 * 60 * 30);
             }
 
@@ -901,9 +916,15 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
+        // Apply the stock changes before the next queued checkout is validated: the updates
+        // scheduled while activating or deactivating are asynchronous and would land too late
+        for (const registration of [...registrations, ...deactivatedRegistrations]) {
+            await RegistrationService.scheduleStockUpdateAsync(registration.id);
+        }
+
         // Update occupancy
         for (const group of groups) {
-            if (registrations.some(r => r.groupId === group.id) || deactivatedRegistrationGroupIds.some(id => id === group.id)) {
+            if ([...registrations, ...deactivatedRegistrations].some(r => r.groupId === group.id)) {
                 await group.updateOccupancy();
                 await group.save();
             }
