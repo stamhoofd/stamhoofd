@@ -52,7 +52,7 @@ aanlevering pins itself further to the leeftijdsgroepen alone in `jeugdbeweginge
 ## One definition, in Metabase too
 
 `@include` puts a fragment in one place in git. Snippets put it in one place in Metabase: every
-`includes/*.sql` is written as a snippet of its own, and a question refers to it -- `{{snippet: deduplicated-non-platform-registrations}}`
+fragment a question refers to is written as a snippet of its own, and a question refers to it -- `{{snippet: deduplicated-non-platform-registrations}}`
 where the file says `-- @include deduplicated-non-platform-registrations`, with it referring to
 `{{snippet: all-non-platform-registrations}}` rather than holding a second copy of those rows. A card is then the handful of lines that say what it counts
 instead of the two hundred that say what a lid is, and whoever changes what a lid is changes it once
@@ -73,6 +73,14 @@ since whatever has been built on it since would break with it.
 The fragments are still expanded as well. `card.sql` is the whole query, which is what the tests read
 and what says whether the sql itself is right; `card.snippetSql` is that query with the fragments left
 as references, and is what Metabase is given.
+
+`-- @inline <name>` is the other way to read the same file: it is written out where it stands in both,
+so Metabase is given the sql rather than a reference, and no snippet is offered for it. It is for a
+fragment that exists only so an environment can say a piece of a query its own way -- the kenmerken a
+sheet splits its rijen into, the kolomnamen it groups them on -- where a snippet would stand in the
+sidebar as a piece of syntax nobody would open, with nothing referring to it. An inlined fragment reads no fragment of its own: written
+out, a nested `{{snippet: ...}}` would reach Metabase against tags the question never declared, and
+it is refused rather than left to fail there.
 
 ## One report, several platforms
 
@@ -104,7 +112,9 @@ column goes rather than the card. `includes/participant-details.sql` is the kenm
 deelnemerstabblad splits its rijen into and `includes/participant-detail-columns.sql` the same ones
 as the names it groups and orders on — keeo's variants of the two name the geboortejaar alone. Both
 are read by both deelnemerstabbladen, and a test keeps them naming the same kenmerken: a column
-selected but not grouped on is a sheet that refuses to run.
+selected but not grouped on is a sheet that refuses to run. Both are inlined: what they hold is the
+columns of one sheet rather than a definition the report counts by, and neither is read anywhere but
+in those two cards.
 
 Not grouping on it is the point rather than a consequence. A werkjaar imported from the client's own
 statistics still has the answer on file, so a sheet that kept the column would deliver those years

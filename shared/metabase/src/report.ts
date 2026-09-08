@@ -23,16 +23,18 @@ import { fileURLToPath } from 'url';
  *     SELECT COUNT(DISTINCT member_id) AS `Totaal leden` FROM leden
  *
  * `@include <name>` is replaced by `includes/<name>.sql`, which is how every card counts members the
- * same way, and a fragment may include another. `{{name}}` marks a query parameter, the same syntax
- * Metabase uses, and `[[...]]` around a clause drops it when that parameter is empty. A parameter
- * several values can be chosen for is written `IN ({{name}})`, since Metabase replaces it with all of
- * them, comma separated.
+ * same way, and a fragment may include another. `@inline <name>` reads the same file and writes it
+ * out where it stands instead of referring to it, for a fragment that only exists so an environment
+ * can say a piece of a query its own way and is not a definition anyone would open on its own.
+ * `{{name}}` marks a query parameter, the same syntax Metabase uses, and `[[...]]` around a clause
+ * drops it when that parameter is empty. A parameter several values can be chosen for is written
+ * `IN ({{name}})`, since Metabase replaces it with all of them, comma separated.
  *
  * A card is read twice over. `sql` is the query with every fragment expanded, which is the whole of
- * what it counts and what the tests check. `snippetSql` leaves the fragments where they stand, as the
- * `{{snippet: ...}}` references Metabase understands, and is what Metabase is given: a fragment is
- * written there as a snippet of its own, so what a lid is stands in one place and an edit to it
- * reaches every question that reads it.
+ * what it counts and what the tests check. `snippetSql` leaves the included fragments where they
+ * stand, as the `{{snippet: ...}}` references Metabase understands, and is what Metabase is given: a
+ * fragment is written there as a snippet of its own, so what a lid is stands in one place and an edit
+ * to it reaches every question that reads it. An inlined one is expanded in both.
  *
  * The same report is written for every platform, which do not all count the same thing the same way.
  * Where they differ, the environment says which variant a card gets: `includes/<env>/<name>.sql`
@@ -112,7 +114,7 @@ export type ReportCard = {
      */
     snippets: string[];
     sql: string;
-    /** The same query with the fragments left as references, which is the form Metabase is given. */
+    /** The same query with the included fragments left as references, which is what Metabase is given. */
     snippetSql: string;
 };
 
@@ -240,9 +242,16 @@ async function readTabs(env: string, directory: string): Promise<ReportTab[]> {
  */
 export async function loadSnippets(env: string, directory = getReportDirectory()): Promise<ReportSnippet[]> {
     const includes = await loadIncludes(path.join(directory, 'includes'), env);
+    const sql = new Map([...includes].map(([name, include]) => [name, include.sql]));
+
+    // A fragment is a snippet because a question refers to it. One that is only ever inlined is
+    // written out wherever it is read, so a snippet of it would stand in the sidebar unreferred to --
+    // and it is a line of sql rather than a definition anyone would open.
+    const referred = new Set((await readTabs(env, directory)).flatMap(tab => tab.cards.flatMap(card => card.snippets)));
 
     return [...includes]
-        .map(([name, include]) => ({ name, sql: referenceIncludes(include.sql), description: include.description }))
+        .filter(([name]) => referred.has(name))
+        .map(([name, include]) => ({ name, sql: referenceIncludes(include.sql, sql), description: include.description }))
         .sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -482,7 +491,7 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
         except: splitList(section.attributes.get('except')),
         snippets: collectIncludes(section.body, includes),
         sql,
-        snippetSql: referenceIncludes(section.body).trim(),
+        snippetSql: referenceIncludes(section.body, includes).trim(),
     };
 }
 
@@ -542,18 +551,26 @@ function parseRanges(section: Section, file: string, display: string): { segment
     return { segments, best: best as ReportCardBest };
 }
 
-/** The line a fragment is asked for on, which is either expanded or turned into a reference. */
-const includeDirective = /^([ \t]*)--[ \t]*@include[ \t]+(\S+)[ \t]*$/gm;
+/** The line a fragment is asked for on: `@include` refers to a snippet, `@inline` is written out. */
+const fragmentDirective = /^([ \t]*)--[ \t]*@(include|inline)[ \t]+(\S+)[ \t]*$/gm;
+
+/** The same line, for asking whether a body holds one at all. */
+const holdsFragment = /^[ \t]*--[ \t]*@(?:include|inline)[ \t]+\S+[ \t]*$/m;
 
 /** A fragment may include another, which is how the two registration grains share their filters. */
 function expandIncludes(body: string, includes: Map<string, string>, file: string, card: string, chain: string[] = []): string {
-    return body.replaceAll(includeDirective, (_match, indent: string, name: string) => {
+    return body.replaceAll(fragmentDirective, (_match, indent: string, kind: string, name: string) => {
         const include = includes.get(name);
         if (include === undefined) {
-            throw new Error(`${file}: card "${card}" includes "${name}", which has no report/includes/${name}.sql`);
+            throw new Error(`${file}: card "${card}" ${kind}s "${name}", which has no report/includes/${name}.sql`);
         }
         if (chain.includes(name)) {
             throw new Error(`${file}: card "${card}" includes "${name}" from within itself: ${[...chain, name].join(' -> ')}`);
+        }
+        // An inlined fragment is written out rather than referred to, so a fragment it read would
+        // reach Metabase as a snippet nothing declared a tag for, and the question would not run.
+        if (kind === 'inline' && holdsFragment.test(include)) {
+            throw new Error(`${file}: card "${card}" inlines "${name}", which reads a fragment of its own. An inlined fragment stands on its own.`);
         }
 
         return expandIncludes(include, includes, file, card, [...chain, name])
@@ -562,22 +579,28 @@ function expandIncludes(body: string, includes: Map<string, string>, file: strin
 }
 
 /**
- * The same body with each fragment left where it stands, as the reference Metabase resolves against
- * its snippets. Nothing is checked here: `expandIncludes` has already refused a fragment that is not
- * there and one that includes itself.
+ * The same body with each included fragment left where it stands, as the reference Metabase resolves
+ * against its snippets, and each inlined one written out. Nothing is checked here: `expandIncludes`
+ * has already refused a fragment that is not there and one that includes itself.
  */
-function referenceIncludes(body: string): string {
-    return body.replaceAll(includeDirective, (_match, indent: string, name: string) => `${indent}{{snippet: ${name}}}`);
+function referenceIncludes(body: string, includes: Map<string, string>): string {
+    return body.replaceAll(fragmentDirective, (_match, indent: string, kind: string, name: string) => {
+        if (kind === 'include') {
+            return `${indent}{{snippet: ${name}}}`;
+        }
+        return (includes.get(name) ?? '').split('\n').map(line => indent + line).join('\n');
+    });
 }
 
 /**
- * Every fragment a body reads, in the order it reaches them, the ones its fragments read included.
- * A question has to name those too: Metabase looks a nested `{{snippet: all-registrations}}` up among the tags
- * of the question rather than among those of the fragment that refers to it.
+ * Every fragment a body refers to as a snippet, in the order it reaches them, the ones its fragments
+ * refer to included. A question has to name those too: Metabase looks a nested
+ * `{{snippet: all-registrations}}` up among the tags of the question rather than among those of the
+ * fragment that refers to it. An inlined fragment is no snippet and needs no tag.
  */
 function collectIncludes(body: string, includes: Map<string, string>, found: string[] = []): string[] {
-    for (const [, , name] of body.matchAll(includeDirective)) {
-        if (found.includes(name)) {
+    for (const [, , kind, name] of body.matchAll(fragmentDirective)) {
+        if (kind === 'inline' || found.includes(name)) {
             continue;
         }
         found.push(name);

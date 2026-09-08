@@ -279,19 +279,31 @@ describe('report', () => {
         });
 
         /**
-         * The kenmerken a deelnemerstabblad splits its rijen into stand twice: as the columns that
-         * are selected, and as the names those rijen are grouped and ordered on. A kenmerk added to
-         * one and not the other is a sheet that refuses to run, or one delivering a row per member
-         * where the sjabloon asks for a row per combination.
+         * The kenmerken a deelnemerstabblad splits its rijen into stand twice in a card: as the
+         * columns that are selected, and as the names those rijen are grouped and ordered on. Each is
+         * a fragment of its own, so an environment says both its own way -- and a kenmerk that
+         * reaches one and not the other is a sheet that refuses to run, or one delivering a row per
+         * member where the sjabloon asks for a row per combination.
          */
-        it('groups a deelnemerstabblad on the same kenmerken it selects', async () => {
-            for (const [env, kenmerken] of [['keeo', 'Geboortejaar_deelnemers'], ['ravot', 'Geboortejaar_deelnemers, Gender_deelnemers']] as const) {
-                const snippets = new Map((await loadSnippets(env)).map(snippet => [snippet.name, snippet.sql]));
-                const selected = [...snippets.get('participant-details')!.matchAll(/AS `([^`]+)`/g)].map(match => match[1]);
-                const grouped = [...snippets.get('participant-detail-columns')!.matchAll(/`([^`]+)`/g)].map(match => match[1]);
+        it('groups a deelnemerstabblad on the same kenmerken it selects', () => {
+            for (const [env, tabs, kenmerken] of [
+                ['keeo', dashboards, '`Geboortejaar_deelnemers`'],
+                ['ravot', ravotDashboards, '`Geboortejaar_deelnemers`, `Gender_deelnemers`'],
+            ] as const) {
+                for (const key of ['deelnemers-bovenlokaal', 'deelnemers-lokale-groep']) {
+                    const card = cardOf(tabs, 'jeugdbewegingen', key);
+                    const where = `${env} ${key}`;
 
-                expect(`${env}: ${selected.join(', ')}`).toEqual(`${env}: ${kenmerken}`);
-                expect(`${env}: ${grouped.join(', ')}`).toEqual(`${env}: ${kenmerken}`);
+                    // The last of each: the query that picks the registration speaking for a member
+                    // orders within a window of its own, well before the sheet is grouped.
+                    const sql = card.sql.replaceAll(/\s+/g, ' ');
+                    const grouped = sql.slice(sql.lastIndexOf('GROUP BY'), sql.lastIndexOf('ORDER BY')).trim();
+                    const ordered = sql.slice(sql.lastIndexOf('ORDER BY')).trim();
+
+                    expect(`${where}: ${grouped.endsWith(kenmerken)}, ${ordered.endsWith(kenmerken)}`).toEqual(`${where}: true, true`);
+                    expect(`${where}: ${card.columns.filter(column => kenmerken.includes(column)).join(', ')}`)
+                        .toEqual(`${where}: ${kenmerken.replaceAll('`', '')}`);
+                }
             }
         });
 
@@ -1322,13 +1334,37 @@ describe('report', () => {
             snippets = new Map((await loadSnippets('keeo')).map(snippet => [snippet.name, snippet.sql]));
         });
 
-        it('offers every shared fragment as a snippet of its own', () => {
+        it('offers every fragment a question refers to as a snippet of its own', () => {
             expect([...snippets.keys()]).toContain('all-non-platform-registrations');
             expect([...snippets.keys()]).toContain('deduplicated-non-platform-registrations');
 
             for (const [name, sql] of snippets) {
-                expect(`${name}: ${/^[ \t]*--[ \t]*@include\b/m.test(sql)}`).toEqual(`${name}: false`);
+                expect(`${name}: ${/^[ \t]*--[ \t]*@(?:include|inline)\b/m.test(sql)}`).toEqual(`${name}: false`);
             }
+        });
+
+        /**
+         * A fragment that is only ever written out where it stands is no definition anyone would open
+         * on its own, and a snippet of it would sit in the sidebar with nothing referring to it. The
+         * aanlevering has the two: the kenmerken a deelnemerstabblad splits its rijen into, and the
+         * kolomnamen it groups and orders on.
+         */
+        it('offers no snippet for a fragment that is only inlined', async () => {
+            const written = await fs.readdir(path.join(getReportDirectory(), 'includes'));
+            const fragments = written.filter(entry => entry.endsWith('.sql')).map(entry => path.basename(entry, '.sql'));
+
+            expect(fragments).toEqual(expect.arrayContaining(['participant-details', 'participant-detail-columns']));
+            expect(fragments.filter(name => !snippets.has(name)).sort()).toEqual(['participant-detail-columns', 'participant-details']);
+        });
+
+        /** Written out in both readings of the card, so Metabase is given no reference to resolve. */
+        it('writes an inlined fragment into the card rather than referring to it', () => {
+            const card = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-bovenlokaal');
+
+            expect(card.snippetSql).toContain('YEAR(`birth_date`) AS `Geboortejaar_deelnemers`');
+            expect(card.snippetSql).toContain('GROUP BY `ID_Organisatie`,\n    `Geboortejaar_deelnemers`');
+            expect(card.snippetSql).not.toContain('participant-detail');
+            expect(card.snippets).toEqual(['all-registrations', 'default-age-groups-with-category', 'default-age-group-category', 'filter-registration-types', 'filter-has-delivery-membership', 'filter-delivery-memberships']);
         });
 
         /** A fragment refers to the fragments it reads the way a card does, so neither holds a copy. */
@@ -1489,6 +1525,51 @@ describe('report', () => {
 
             await expect(loadReport('keeo', directory)).rejects.toThrow('Tab "nationaal" has every card left out of keeo');
             await expect(loadReport('ravot', directory)).resolves.toHaveLength(1);
+        });
+
+        /**
+         * The reason to inline a fragment rather than include it: an environment says a line of sql
+         * its own way, without a snippet standing in Metabase for what is a piece of syntax.
+         */
+        it('writes an inlined fragment out in the environment it was loaded for', async () => {
+            const directory = await writeReport({
+                'nationaal.sql': [
+                    '-- @tab nationaal',
+                    '-- title: Nationaal',
+                    '',
+                    '-- @card leden',
+                    '-- title: Leden',
+                    '-- display: table',
+                    'SELECT',
+                    '    -- @include telling',
+                    '        AS `Leden`',
+                    'GROUP BY',
+                    '    -- @inline kenmerken',
+                ].join('\n'),
+                'includes/telling.sql': 'COUNT(*)',
+                'includes/kenmerken.sql': '`Werkjaar`, `Geslacht`',
+                'includes/keeo/kenmerken.sql': '`Werkjaar`',
+            });
+
+            const card = cardOf(await loadReport('keeo', directory), 'nationaal', 'leden');
+
+            expect(card.sql).toContain('GROUP BY\n    `Werkjaar`');
+            expect(card.snippetSql).toContain('GROUP BY\n    `Werkjaar`');
+            expect(card.snippetSql).toContain('{{snippet: telling}}');
+            expect(card.snippets).toEqual(['telling']);
+            expect((await loadSnippets('keeo', directory)).map(snippet => snippet.name)).toEqual(['telling']);
+            expect(cardOf(await loadReport('ravot', directory), 'nationaal', 'leden').sql).toContain('GROUP BY\n    `Werkjaar`, `Geslacht`');
+        });
+
+        /** Metabase would resolve the nested reference against tags the question never declared. */
+        it('rejects an inlined fragment that reads a fragment of its own', async () => {
+            const directory = await writeReport({
+                'nationaal.sql': `${tab}\nGROUP BY\n    -- @inline kenmerken`,
+                'includes/telling.sql': 'COUNT(*)',
+                'includes/kenmerken.sql': '-- @include telling',
+            });
+
+            await expect(loadReport('keeo', directory)).rejects.toThrow('inlines "kenmerken", which reads a fragment of its own');
         });
 
         /** Nothing includes it, so a misspelled override would change nothing and say nothing. */

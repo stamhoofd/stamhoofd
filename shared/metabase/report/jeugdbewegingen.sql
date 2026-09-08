@@ -35,7 +35,7 @@ WITH all_registrations AS (
 )
 SELECT
     all_registrations.organization_uri AS `ID_Organisatie`,
-    -- @include participant-details
+    -- @inline participant-details
     COUNT(DISTINCT all_registrations.member_id) AS `Aantal_deelnemers`
 FROM all_registrations
 JOIN platform ON platform.membershipOrganizationId = all_registrations.organization_id
@@ -46,9 +46,9 @@ WHERE
   -- as a structuurvrijwilliger of the bovenlokale structuur.
   AND all_registrations.group_type = 'Membership'
 GROUP BY `ID_Organisatie`,
-    -- @include participant-detail-columns
+    -- @inline participant-detail-columns
 ORDER BY
-    -- @include participant-detail-columns
+    -- @inline participant-detail-columns
 
 -- @card organisatie-lokale-groep
 -- title: Organisatie_Lokale_groep
@@ -123,11 +123,11 @@ deelnemers AS (
 SELECT
     deelnemers.organization_uri AS `ID_Organisatie`,
     CASE WHEN deelnemers.type_number = 2 THEN 'leiding' ELSE 'leden' END AS `Type_deelnemers`,
-    -- @include participant-details
+    -- @inline participant-details
     -- @include participant-counts
 FROM deelnemers
 WHERE deelnemers.type_number > 0
 GROUP BY `ID_Organisatie`, `Type_deelnemers`,
-    -- @include participant-detail-columns
+    -- @inline participant-detail-columns
 ORDER BY `ID_Organisatie`, `Type_deelnemers`,
-    -- @include participant-detail-columns
+    -- @inline participant-detail-columns
