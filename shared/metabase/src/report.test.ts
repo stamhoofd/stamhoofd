@@ -1220,6 +1220,23 @@ describe('report', () => {
         });
 
         /**
+         * A leeftijd is a number, and Metabase reads a column of those as a linear axis: it ticks at
+         * round numbers, so the chart is labelled 10, 20, 30 rather than a label per bar. Read as
+         * categories every leeftijd carries its own, which is what the bars are. Both shapes of the
+         * figure say it, so keeo and ravot read the same axis.
+         */
+        it('labels a leeftijdenchart per bar rather than at every tenth year', () => {
+            for (const [tabs, key] of [[dashboards, 'eenheid-leden-per-leeftijd'], [ravotDashboards, 'eenheid-leeftijd-en-geslacht']] as const) {
+                const card = cardOf(tabs, 'eenheden', key);
+
+                const scale = buildVisualizationSettings(card)['graph.x_axis.scale'] as string | undefined;
+
+                expect(`${key}: ${card.xScale}, ${card.xLabels}`).toEqual(`${key}: ordinal, rotate-45`);
+                expect(`${key}: ${scale}`).toEqual(`${key}: ordinal`);
+            }
+        });
+
+        /**
          * A setting only counts above the query. One comment written above it pushes the whole
          * block below the line, and every setting under it would be dropped without a word.
          */
@@ -1242,6 +1259,11 @@ describe('report', () => {
             const tab = parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- A note.\n-- see: the note above\nSELECT 1', 'x.sql', new Map());
 
             expect(tab.cards[0].sql).toContain('-- see: the note above');
+        });
+
+        it('rejects an x-axis scale Metabase has no axis for', () => {
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- xscale: categorie\nSELECT 1', 'x.sql', new Map()))
+                .toThrow('has xscale "categorie", expected one of ordinal, linear');
         });
 
         it('rejects an x-axis setting it cannot pass on', () => {

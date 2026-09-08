@@ -100,6 +100,13 @@ export type ReportCard = {
      * entirely when too many do not fit -- an eenheid or leeftijdsgroep chart needs a rotation to keep them.
      */
     xLabels?: ReportCardXLabels;
+    /**
+     * How the x-axis reads the values it is given. Absent leaves it to Metabase, which reads a column
+     * of numbers as a `linear` axis and ticks it at round numbers -- a leeftijdenchart labelled 10,
+     * 20, 30 rather than per bar. `ordinal` makes every value a category of its own, which is what a
+     * chart with a bar per value wants, and what a column of text already gets.
+     */
+    xScale?: ReportCardXScale;
     /** Parameters the query takes, read from the `{{...}}` in the sql. */
     parameters: string[];
     /**
@@ -174,6 +181,9 @@ export type ReportCardSize = typeof reportCardSizes[number];
 
 export const reportCardXLabels = ['show', 'hide', 'compact', 'rotate-45', 'rotate-90'] as const;
 export type ReportCardXLabels = typeof reportCardXLabels[number];
+
+export const reportCardXScales = ['ordinal', 'linear'] as const;
+export type ReportCardXScale = typeof reportCardXScales[number];
 
 export const reportCardBest = ['low', 'high'] as const;
 export type ReportCardBest = typeof reportCardBest[number];
@@ -379,7 +389,7 @@ type Section = { kind: 'tab' | 'card'; key: string; attributes: Map<string, stri
  * slipped down rather than a comment, and would otherwise be dropped without a word: writing a
  * comment above `-- size:` is enough to make the whole block below it stop counting.
  */
-const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'columns', 'stacked', 'segments', 'best', 'xlabels', 'height', 'span', 'latitude', 'longitude', 'filters', 'required', 'hidden', 'dashboard', 'except']);
+const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'columns', 'stacked', 'segments', 'best', 'xlabels', 'height', 'span', 'latitude', 'longitude', 'filters', 'required', 'hidden', 'dashboard', 'except', 'xscale']);
 
 function splitSections(contents: string, file: string, env?: string): Section[] {
     const sections: Section[] = [];
@@ -451,6 +461,11 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
         throw new Error(`${file}: card "${section.key}" has xlabels "${xLabels}", expected one of ${reportCardXLabels.join(', ')}`);
     }
 
+    const xScale = section.attributes.get('xscale');
+    if (xScale !== undefined && !(reportCardXScales as readonly string[]).includes(xScale)) {
+        throw new Error(`${file}: card "${section.key}" has xscale "${xScale}", expected one of ${reportCardXScales.join(', ')}`);
+    }
+
     const display = required(section.attributes, 'display', file, section.key);
     const latitude = section.attributes.get('latitude');
     const longitude = section.attributes.get('longitude');
@@ -487,6 +502,7 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
         segments,
         best,
         xLabels: xLabels as ReportCardXLabels | undefined,
+        xScale: xScale as ReportCardXScale | undefined,
         parameters: parameterNames(sql),
         except: splitList(section.attributes.get('except')),
         snippets: collectIncludes(section.body, includes),

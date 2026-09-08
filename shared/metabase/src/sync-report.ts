@@ -484,6 +484,12 @@ export function buildVisualizationSettings(card: ReportCard, hasCoordinates = tr
             settings['graph.x_axis.axis_enabled'] = xAxisLabels[card.xLabels];
         }
 
+        // Left unset, a column of numbers is read as a linear axis and ticked at round numbers, so a
+        // chart with a bar per leeftijd is labelled 10, 20, 30 instead of per bar.
+        if (card.xScale !== undefined) {
+            settings['graph.x_axis.scale'] = card.xScale;
+        }
+
         if (card.stacked !== undefined) {
             settings['stackable.stack_type'] = card.stacked === 'normalized' ? 'normalized' : 'stacked';
         }

@@ -363,6 +363,8 @@ ORDER BY `Geboortejaar`
 -- size: full
 -- dimensions: Leeftijd, Geslacht
 -- metrics: Aantal leden
+-- xscale: ordinal
+-- xlabels: rotate-45
 WITH leden AS (
     -- @include deduplicated-non-platform-registrations
 )
@@ -382,6 +384,8 @@ ORDER BY leeftijd
 -- size: full
 -- dimensions: Leeftijd
 -- metrics: Aantal leden
+-- xscale: ordinal
+-- xlabels: rotate-45
 WITH leden AS (
     -- @include deduplicated-non-platform-registrations
 )
