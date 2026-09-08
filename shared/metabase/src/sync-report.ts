@@ -745,8 +745,12 @@ export async function syncSnippets(api: MetabaseApi, snippets: readonly ReportSn
  *
  * `env` is the platform being written, the same name the report was loaded for. It says which colors
  * a chart falls back to; without it they are Metabase's.
+ *
+ * `retired` is what that environment leaves out. Nothing is written for it -- it is there so the
+ * questions an earlier run wrote can be told apart from the ones the client wrote themselves, and
+ * cleared away rather than left standing beside the report they are no longer part of.
  */
-export async function syncReport(api: MetabaseApi, databaseId: number, tabs: ReportTab[], snippets: readonly ReportSnippet[], collection: string, dashboardName: string, hasCoordinates = false, env?: string): Promise<ReportSyncResult> {
+export async function syncReport(api: MetabaseApi, databaseId: number, tabs: ReportTab[], snippets: readonly ReportSnippet[], collection: string, dashboardName: string, hasCoordinates = false, env?: string, retired: ReportTab[] = []): Promise<ReportSyncResult> {
     const snippetIds = await syncSnippets(api, snippets);
     const renamedCollection = await renameLegacyCollection(api, collection);
     const { id: collectionId, created: createdCollection } = await api.ensureCollection(collection);
@@ -804,8 +808,8 @@ export async function syncReport(api: MetabaseApi, databaseId: number, tabs: Rep
         written.push({ name: dashboard.name, id: dashboardId, tabs: dashboard.tabs.map(tab => tab.title), bookmarked });
     }
 
-    await archiveSupersededDashboards(api, existingDashboards, visible, written.map(dashboard => dashboard.name));
-    await archiveSupersededCards(api, collectionId, tabs);
+    await archiveSupersededDashboards(api, existingDashboards, [...visible, ...retired], written.map(dashboard => dashboard.name));
+    await archiveSupersededCards(api, collectionId, tabs, retired);
 
     // Deduplicated: two tabs show a map under the same title, and naming it twice reads as an error.
     const mapsWithoutCoordinates = [...new Set(tabs
@@ -851,10 +855,14 @@ async function renameLegacyCollection(api: MetabaseApi, name: string): Promise<s
  * Only names this command could have produced are touched, so a question the client saved into the
  * collection themselves stays where it is.
  */
-async function archiveSupersededCards(api: MetabaseApi, collectionId: number, tabs: ReportTab[]): Promise<void> {
+async function archiveSupersededCards(api: MetabaseApi, collectionId: number, tabs: ReportTab[], retired: ReportTab[]): Promise<void> {
     const wanted = new Set(tabs.flatMap(tab => tab.cards.map(card => cardName(card, tab))));
-    const ours = new Set(tabs.flatMap(tab => tab.cards.map(card => card.title)));
-    const tabTitles = tabs.map(tab => tab.title);
+
+    // What the environment leaves out counts as ours as well: an earlier run wrote those questions
+    // under names the report no longer holds, so nothing else here would recognise them.
+    const written = [...tabs, ...retired];
+    const ours = new Set(written.flatMap(tab => tab.cards.map(card => card.title)));
+    const tabTitles = written.map(tab => tab.title);
 
     for (const card of await api.listCards(collectionId)) {
         if (wanted.has(card.name)) {

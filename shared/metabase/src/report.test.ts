@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import type { ReportCard, ReportTab } from './report.js';
-import { getReportDirectory, loadReport, loadSnippets, parseTab, parameterNames, resolveSql } from './report.js';
+import { getReportDirectory, loadReport, loadRetiredReport, loadSnippets, parseTab, parameterNames, resolveSql } from './report.js';
 import { buildVisualizationSettings, columnPalettes, layoutCards } from './sync-report.js';
 
 /**
@@ -38,7 +38,11 @@ function rowsOf(cards: ReportCard[]): { keys: string[]; width: number; heights: 
 }
 
 describe('report', () => {
-    /** The report as keeo counts it. What ravot counts differently is `ravotDashboards`. */
+    /**
+     * The report as keeo counts it. What ravot counts differently is `ravotDashboards`, which is
+     * also the environment that still writes every card: keeo asks no geslacht and leaves the cards
+     * that split on one out.
+     */
     let dashboards: ReportTab[];
     let ravotDashboards: ReportTab[];
 
@@ -49,8 +53,31 @@ describe('report', () => {
 
     describe('definition', () => {
         it('has the four pages of the report as tabs, plus the aanlevering and the filter values', () => {
-            expect(dashboards.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'netwerk', 'varia', 'jeugdbewegingen', 'filters']);
-            expect(dashboards.find(tab => tab.key === 'filters')!.hidden).toBe(true);
+            expect(ravotDashboards.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'netwerk', 'varia', 'jeugdbewegingen', 'filters']);
+            expect(ravotDashboards.find(tab => tab.key === 'filters')!.hidden).toBe(true);
+        });
+
+        /**
+         * Keeo stopped asking its leden for a geslacht, so the cards that split on one have nothing
+         * left to count there: a pie of the geslachten would be a single slice reading 'Onbekend'.
+         * The varia page splits on nothing else, so it goes as a page.
+         *
+         * The aanlevering keeps its column either way. It is the department's template rather than
+         * the koepel's own report, and the werkjaren imported from before still answer it.
+         */
+        it('leaves the geslacht out of keeo, which no longer asks its leden for one', () => {
+            // A chart says so in its dimensions; the ULDK table has the geslachten as columns and
+            // reads them through the fragment it is built on.
+            const splitOnGeslacht = (tabs: ReportTab[]) => tabs
+                .filter(tab => tab.dashboard === undefined && !tab.hidden)
+                .flatMap(tab => tab.cards)
+                .filter(card => card.dimensions.includes('Geslacht') || card.snippets.includes('uldk'))
+                .map(card => card.key);
+
+            expect(dashboards.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'netwerk', 'jeugdbewegingen', 'filters']);
+            expect(splitOnGeslacht(dashboards)).toEqual([]);
+            expect(splitOnGeslacht(ravotDashboards).length).toEqual(9);
+            expect(cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').columns).toContain('Gender_deelnemers');
         });
 
         it('reads a card with its metadata and expands the shared fragments', () => {
@@ -161,16 +188,17 @@ describe('report', () => {
          * it mirrors none of them, and is read once a year by whoever files it.
          */
         it('gives the aanlevering a dashboard of its own and leaves every other tab on the report', () => {
-            expect(dashboards.find(tab => tab.key === 'jeugdbewegingen')!.dashboard).toEqual('Groepen en Deelnemers - Departement Jeugd');
+            expect(ravotDashboards.find(tab => tab.key === 'jeugdbewegingen')!.dashboard).toEqual('Groepen en Deelnemers - Departement Jeugd');
 
             for (const key of ['nationaal', 'eenheden', 'netwerk', 'varia']) {
-                expect(`${key}: ${dashboards.find(tab => tab.key === key)!.dashboard}`).toEqual(`${key}: undefined`);
+                expect(`${key}: ${ravotDashboards.find(tab => tab.key === key)!.dashboard}`).toEqual(`${key}: undefined`);
             }
         });
 
+        /** Read on ravot, which is the environment that still writes every card of every page. */
         it('lets every card of the ledenstatistieken include the koepel on request', () => {
             const drops = (sql: string) => /NOT EXISTS \(SELECT 1 FROM platform WHERE platform\.membershipOrganizationId = /.test(sql);
-            const pages = dashboards.filter(dashboard => dashboard.dashboard === undefined && !dashboard.hidden);
+            const pages = ravotDashboards.filter(dashboard => dashboard.dashboard === undefined && !dashboard.hidden);
 
             expect(pages.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'netwerk', 'varia']);
 
@@ -184,7 +212,7 @@ describe('report', () => {
                 }
             }
 
-            expect(drops(cardOf(dashboards, 'filters', 'eenheid').sql)).toBe(true);
+            expect(drops(cardOf(ravotDashboards, 'filters', 'eenheid').sql)).toBe(true);
         });
 
         /**
@@ -779,7 +807,7 @@ describe('report', () => {
          */
         it('gives the ratio charts their most recent werkjaar on top', () => {
             for (const key of ['eenheid-jong-versus-oud', 'eenheid-geslacht-kinderen-per-jaar', 'eenheid-geslacht-leiding-per-jaar']) {
-                const card = cardOf(dashboards, 'eenheden', key);
+                const card = cardOf(ravotDashboards, 'eenheden', key);
 
                 expect(`${key}: ${card.display}, ${/ORDER BY MIN\(period_start\)(?: DESC)?$/.exec(card.sql)?.[0]}`)
                     .toEqual(`${key}: row, ORDER BY MIN(period_start) DESC`);
@@ -793,7 +821,7 @@ describe('report', () => {
          * same page.
          */
         it('draws the geslachten in one set of colors, on every card that splits on them', () => {
-            const cards = dashboards.flatMap(tab => tab.cards.filter(card => card.dimensions.includes('Geslacht')));
+            const cards = ravotDashboards.flatMap(tab => tab.cards.filter(card => card.dimensions.includes('Geslacht')));
             const expected = columnPalettes.get('Geslacht')!;
 
             expect(cards.map(card => card.key).length).toEqual(7);
@@ -814,7 +842,7 @@ describe('report', () => {
          */
         it('colors every geslacht the facts can hold', () => {
             for (const key of ['eenheid-leden-per-geslacht', 'eenheid-geslacht-kinderen-per-jaar']) {
-                const written = /CASE members\.gender([\s\S]*?)END AS `Geslacht`/.exec(cardOf(dashboards, 'eenheden', key).sql);
+                const written = /CASE members\.gender([\s\S]*?)END AS `Geslacht`/.exec(cardOf(ravotDashboards, 'eenheden', key).sql);
                 const values = [...(written?.[1] ?? '').matchAll(/(?:THEN|ELSE) '([^']+)'/g)].map(match => match[1]);
 
                 expect(`${key}: ${values.sort().join(',')}`).toEqual(`${key}: ${Object.keys(columnPalettes.get('Geslacht')!).sort().join(',')}`);
@@ -867,26 +895,45 @@ describe('report', () => {
         });
 
         /**
-         * An environment says a figure in words of its own; it does not get a report of its own. Two
-         * platforms reading pages that no longer hold the same cards is a report that has quietly
-         * forked, which is what the shared definition exists to prevent.
+         * An environment says a figure in words of its own and leaves out what its platform does not
+         * record; it does not get a report of its own. Two platforms reading pages that differ for
+         * any other reason is a report that has quietly forked, which is what the shared definition
+         * exists to prevent -- so what one leaves out is named here rather than only in the sql.
+         *
+         * A card left alone on a row by that takes the width of the row, which is why the size is
+         * read apart from the rest of the shape.
          */
-        it('varies what a card counts, never which cards the report holds', () => {
-            const shapeOf = (tabs: ReportTab[]) => tabs.map(tab => ({
-                key: tab.key,
-                filters: tab.filters,
-                dashboard: tab.dashboard,
-                cards: tab.cards.map(card => ({ key: card.key, title: card.title, display: card.display, size: card.size, parameters: card.parameters })),
-            }));
+        it('varies what a card counts, never which cards the report holds beyond what it leaves out', async () => {
+            const retired = await loadRetiredReport('keeo');
+            const goneTabs = retired.filter(tab => tab.except.includes('keeo')).map(tab => tab.key);
+            const goneCards = retired.flatMap(tab => tab.cards.map(card => card.key));
 
+            const shapeOf = (tabs: ReportTab[]) => tabs
+                .filter(tab => !goneTabs.includes(tab.key))
+                .map(tab => ({
+                    key: tab.key,
+                    filters: tab.filters,
+                    dashboard: tab.dashboard,
+                    cards: tab.cards
+                        .filter(card => !goneCards.includes(card.key))
+                        .map(card => ({ key: card.key, title: card.title, display: card.display, parameters: card.parameters })),
+                }));
+
+            expect(goneTabs).toEqual(['varia']);
+            expect(goneCards).toEqual([
+                'leden-per-geslacht',
+                'eenheid-leden-per-geslacht', 'eenheid-geslacht-kinderen-per-jaar', 'eenheid-kinderen-per-geslacht',
+                'eenheid-geslacht-leiding-per-jaar', 'eenheid-leiding-per-geslacht', 'eenheid-leeftijd-en-geslacht',
+                'uldk', 'uldk-totaal',
+            ]);
             expect(shapeOf(ravotDashboards)).toEqual(shapeOf(dashboards));
         });
 
         /**
          * Which environments the report is written differently for, read from the report itself. An
-         * override directory or a `@` qualifier naming an environment nobody loads is read by
-         * nothing and changes nothing, which a misspelling looks exactly like. Extend this when a
-         * third platform starts counting something its own way.
+         * override directory, a `@` qualifier or an `except:` naming an environment nobody loads is
+         * read by nothing and changes nothing, which a misspelling looks exactly like. Extend this
+         * when a third platform starts counting something its own way.
          */
         it('varies for the environments it names and no others', async () => {
             const directory = getReportDirectory();
@@ -898,6 +945,9 @@ describe('report', () => {
 
                 for (const match of contents.matchAll(/^--[ \t]*[a-z]+@([a-z0-9-]+):/gm)) {
                     qualifiers.add(match[1]);
+                }
+                for (const match of contents.matchAll(/^--[ \t]*except:(.*)$/gm)) {
+                    match[1].split(',').forEach(name => qualifiers.add(name.trim()));
                 }
             }
 
@@ -959,7 +1009,7 @@ describe('report', () => {
          * the one after it onto a row of its own.
          */
         it('lays the eenheden page out in the rows of the report it mirrors', () => {
-            const rows = rowsOf(dashboards.find(dashboard => dashboard.key === 'eenheden')!.cards);
+            const rows = rowsOf(ravotDashboards.find(dashboard => dashboard.key === 'eenheden')!.cards);
             const rowWith = (key: string) => rows.find(row => row.keys.includes(key))!.keys;
 
             expect(rows[0].keys).toEqual([
@@ -975,12 +1025,26 @@ describe('report', () => {
         });
 
         /**
+         * The cards of a row are two readings of one thing, so a row that loses one of them leaves a
+         * hole beside the one that stays. Keeo loses half of two such rows to the geslacht, and the
+         * card left over takes the width of the row: that is the whole of why either says a size of
+         * its own.
+         */
+        it('leaves no half-empty row where keeo drops the card beside one', () => {
+            const rowWith = (tab: string, key: string) => rowsOf(dashboards.find(dashboard => dashboard.key === tab)!.cards).find(row => row.keys.includes(key))!;
+
+            expect(rowWith('nationaal', 'leden-per-leeftijdsgroep-vergelijking')).toMatchObject({ keys: ['leden-per-leeftijdsgroep-vergelijking'], width: 24 });
+            expect(rowWith('eenheden', 'eenheid-leden-per-type-lidgeld')).toMatchObject({ keys: ['eenheid-leden-per-type-lidgeld'], width: 24 });
+            expect(rowsOf(dashboards.find(dashboard => dashboard.key === 'eenheden')!.cards).filter(row => row.width !== 24)).toEqual([]);
+        });
+
+        /**
          * A Metabase table can only pin rows at its top, so a total as the last row of the ULDK table
          * would only be reached after scrolling past every eenheid. It stands under the table as a
          * card of its own instead, which stays where it is however far the table is scrolled.
          */
         it('stands the ULDK totals under the table, in the same columns', () => {
-            const placed = layoutCards(dashboards.find(dashboard => dashboard.key === 'varia')!.cards);
+            const placed = layoutCards(ravotDashboards.find(dashboard => dashboard.key === 'varia')!.cards);
             const [table, totals] = placed;
 
             expect(placed.map(entry => entry.card.key)).toEqual(['uldk', 'uldk-totaal']);
@@ -997,7 +1061,7 @@ describe('report', () => {
         it('adds up every column the ULDK table holds', async () => {
             const fragment = await fs.readFile(path.join(getReportDirectory(), 'includes', 'uldk.sql'), 'utf-8');
             const columns = [...fragment.matchAll(/AS `([^`]+)`/g)].map(match => match[1]).filter(column => !['Name', 'City'].includes(column));
-            const summed = [...cardOf(dashboards, 'varia', 'uldk-totaal').sql.matchAll(/SUM\(`([^`]+)`\)/g)].map(match => match[1]);
+            const summed = [...cardOf(ravotDashboards, 'varia', 'uldk-totaal').sql.matchAll(/SUM\(`([^`]+)`\)/g)].map(match => match[1]);
 
             expect(summed).toEqual(columns);
             expect(`${columns.length} columns`).toEqual('8 columns');
@@ -1023,10 +1087,10 @@ describe('report', () => {
         });
 
         it('gives the unit filter to the eenheden tab only, as the report does', () => {
-            expect(dashboards.find(dashboard => dashboard.key === 'eenheden')!.filters).toEqual(['werkjaar', 'eenheid', 'platformleden_opnemen']);
+            expect(ravotDashboards.find(dashboard => dashboard.key === 'eenheden')!.filters).toEqual(['werkjaar', 'eenheid', 'platformleden_opnemen']);
 
             for (const key of ['nationaal', 'netwerk', 'varia']) {
-                expect(`${key}: ${dashboards.find(dashboard => dashboard.key === key)!.filters.join(',')}`).toEqual(`${key}: werkjaar,platformleden_opnemen`);
+                expect(`${key}: ${ravotDashboards.find(dashboard => dashboard.key === key)!.filters.join(',')}`).toEqual(`${key}: werkjaar,platformleden_opnemen`);
             }
         });
 
@@ -1353,6 +1417,55 @@ describe('report', () => {
 
             expect(cardOf(await loadReport('ravot', directory), 'nationaal', 'leden').description).toEqual('Zoals ravot telt');
             expect(cardOf(await loadReport('keeo', directory), 'nationaal', 'leden').description).toEqual('Zoals de rest telt');
+        });
+
+        it('leaves a card out of the environment that names it, and writes it everywhere else', async () => {
+            const directory = await writeReport({
+                'nationaal.sql': `${tab}\n\n-- @card geslacht\n-- title: Geslacht\n-- except: keeo\n-- display: pie\nSELECT 1`,
+                'includes/telling.sql': 'COUNT(*)',
+            });
+
+            expect((await loadReport('ravot', directory))[0].cards.map(card => card.key)).toEqual(['leden', 'geslacht']);
+            expect((await loadReport('keeo', directory))[0].cards.map(card => card.key)).toEqual(['leden']);
+        });
+
+        it('leaves a tab out of the environment that names it, with every card of it', async () => {
+            const directory = await writeReport({
+                'nationaal.sql': tab,
+                'varia.sql': '-- @tab varia\n-- title: Varia\n-- except: keeo\n\n-- @card geslacht\n-- title: Geslacht\n-- display: pie\nSELECT 1',
+                'includes/telling.sql': 'COUNT(*)',
+            });
+
+            expect((await loadReport('ravot', directory)).map(entry => entry.key)).toEqual(['nationaal', 'varia']);
+            expect((await loadReport('keeo', directory)).map(entry => entry.key)).toEqual(['nationaal']);
+        });
+
+        /**
+         * The questions of a card an environment stopped writing are archived rather than left in the
+         * collection, and finding them needs the card and the tab it was written under -- neither of
+         * which the report that environment loads still holds.
+         */
+        it('offers what an environment leaves out under the tab it was written on', async () => {
+            const directory = await writeReport({
+                'nationaal.sql': `${tab}\n\n-- @card geslacht\n-- title: Geslacht\n-- except: keeo\n-- display: pie\nSELECT 1`,
+                'varia.sql': '-- @tab varia\n-- title: Varia\n-- except: keeo\n\n-- @card uldk\n-- title: ULDK\n-- display: table\nSELECT 1',
+                'includes/telling.sql': 'COUNT(*)',
+            });
+
+            const retired = await loadRetiredReport('keeo', directory);
+
+            expect(retired.map(entry => `${entry.title}: ${entry.cards.map(card => card.title).join(', ')}`)).toEqual(['Nationaal: Geslacht', 'Varia: ULDK']);
+            expect(await loadRetiredReport('ravot', directory)).toEqual([]);
+        });
+
+        /** Written as a page whatever is left on it, so an empty one is a tab that had to go itself. */
+        it('rejects a tab whose every card is left out of an environment', async () => {
+            const directory = await writeReport({
+                'nationaal.sql': '-- @tab nationaal\n-- title: Nationaal\n\n-- @card geslacht\n-- title: Geslacht\n-- except: keeo\n-- display: pie\nSELECT 1',
+            });
+
+            await expect(loadReport('keeo', directory)).rejects.toThrow('Tab "nationaal" has every card left out of keeo');
+            await expect(loadReport('ravot', directory)).resolves.toHaveLength(1);
         });
 
         /** Nothing includes it, so a misspelled override would change nothing and say nothing. */

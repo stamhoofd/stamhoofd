@@ -1,5 +1,6 @@
 -- @tab varia
 -- title: Varia
+-- except: keeo
 -- description: Kinderen en leiding per eenheid, uitgesplitst naar geslacht.
 -- filters: werkjaar, platformleden_opnemen
 -- required: werkjaar

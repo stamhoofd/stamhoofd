@@ -38,6 +38,9 @@ import { fileURLToPath } from 'url';
  * Where they differ, the environment says which variant a card gets: `includes/<env>/<name>.sql`
  * replaces the fragment of that name, and a setting written `-- description@<env>:` replaces the
  * unqualified one. Neither is visible to a card, which keeps saying `@include gtp`.
+ *
+ * A figure a platform does not record at all is the one thing no variant can say: `-- except: keeo`
+ * on a tab or a card leaves it out there, and the report is written without it.
  */
 
 export type ReportCard = {
@@ -98,6 +101,11 @@ export type ReportCard = {
     /** Parameters the query takes, read from the `{{...}}` in the sql. */
     parameters: string[];
     /**
+     * The environments this card is not written for. A platform that does not record what the card
+     * counts has no variant of it to be given, only an empty one, so it is left out there instead.
+     */
+    except: string[];
+    /**
      * The fragments this card reads, the ones those fragments read included. Metabase resolves a
      * snippet against the tags of the question it stands in and not against the snippet that refers
      * to it, so a card has to name the fragments it only reaches through another one as well.
@@ -151,6 +159,11 @@ export type ReportTab = {
     required: string[];
     /** Cards that only feed the filter dropdowns. They live in the collection but on no tab. */
     hidden: boolean;
+    /**
+     * The environments this tab is not written for, which is where every card of it is left out:
+     * a tab whose cards are all about a figure the platform does not record has nothing to show.
+     */
+    except: string[];
     cards: ReportCard[];
 };
 
@@ -178,15 +191,43 @@ export function getReportDirectory(): string {
  * here rather than in the queries. `env` is the same name the data source carries.
  */
 export async function loadReport(env: string, directory = getReportDirectory()): Promise<ReportTab[]> {
+    const written = (await readTabs(env, directory))
+        .filter(tab => !tab.except.includes(env))
+        .map(tab => ({ ...tab, cards: tab.cards.filter(card => !card.except.includes(env)) }));
+
+    // A tab is written as a page whether or not it has anything left to put on it, so a tab that
+    // lost every card to the environment has to be left out as a tab instead of card by card.
+    const empty = written.find(tab => tab.cards.length === 0);
+    if (empty) {
+        throw new Error(`Tab "${empty.key}" has every card left out of ${env}, which would write the page empty. Leave the tab out instead: "-- except: ${env}".`);
+    }
+
+    return written.sort((a, b) => orderOf(a.key) - orderOf(b.key));
+}
+
+/**
+ * What this environment leaves out, as the tabs holding it: a tab it does not write, with every card
+ * of it, and a tab it does write, with only the cards it leaves out.
+ *
+ * A question is stored under its card and its tab both, so clearing away one an earlier run wrote
+ * needs the two of them -- and the report this environment loads no longer holds either.
+ */
+export async function loadRetiredReport(env: string, directory = getReportDirectory()): Promise<ReportTab[]> {
+    return (await readTabs(env, directory))
+        .map(tab => tab.except.includes(env) ? tab : { ...tab, cards: tab.cards.filter(card => card.except.includes(env)) })
+        .filter(tab => tab.cards.length > 0)
+        .sort((a, b) => orderOf(a.key) - orderOf(b.key));
+}
+
+/** Every tab the report declares, read for this environment but with nothing left out yet. */
+async function readTabs(env: string, directory: string): Promise<ReportTab[]> {
     const includes = await loadIncludes(path.join(directory, 'includes'), env);
     const sql = new Map([...includes].map(([name, include]) => [name, include.sql]));
     const files = (await fs.readdir(directory)).filter(file => file.endsWith('.sql')).sort();
 
-    const tabs = await Promise.all(files.map(async (file) => {
+    return await Promise.all(files.map(async (file) => {
         return parseTab(await fs.readFile(path.join(directory, file), 'utf-8'), file, sql, env);
     }));
-
-    return tabs.sort((a, b) => orderOf(a.key) - orderOf(b.key));
 }
 
 /**
@@ -317,6 +358,7 @@ export function parseTab(contents: string, file: string, includes: Map<string, s
         filters,
         required: requiredFilters,
         hidden: header.attributes.get('hidden') === 'true',
+        except: splitList(header.attributes.get('except')),
         cards,
     };
 }
@@ -328,7 +370,7 @@ type Section = { kind: 'tab' | 'card'; key: string; attributes: Map<string, stri
  * slipped down rather than a comment, and would otherwise be dropped without a word: writing a
  * comment above `-- size:` is enough to make the whole block below it stop counting.
  */
-const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'columns', 'stacked', 'segments', 'best', 'xlabels', 'height', 'span', 'latitude', 'longitude', 'filters', 'required', 'hidden', 'dashboard']);
+const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'columns', 'stacked', 'segments', 'best', 'xlabels', 'height', 'span', 'latitude', 'longitude', 'filters', 'required', 'hidden', 'dashboard', 'except']);
 
 function splitSections(contents: string, file: string, env?: string): Section[] {
     const sections: Section[] = [];
@@ -437,6 +479,7 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
         best,
         xLabels: xLabels as ReportCardXLabels | undefined,
         parameters: parameterNames(sql),
+        except: splitList(section.attributes.get('except')),
         snippets: collectIncludes(section.body, includes),
         sql,
         snippetSql: referenceIncludes(section.body).trim(),

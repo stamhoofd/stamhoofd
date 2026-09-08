@@ -181,6 +181,7 @@ ORDER BY MIN(period_start)
 
 -- @card eenheid-leden-per-geslacht
 -- title: Aantal leden per geslacht
+-- except: keeo
 -- display: pie
 -- size: half
 -- dimensions: Geslacht
@@ -197,6 +198,7 @@ ORDER BY `Aantal leden` DESC
 -- title: Aantal leden per type lidgeld
 -- display: pie
 -- size: half
+-- size@keeo: full
 -- dimensions: Type lidgeld
 -- metrics: Aantal leden
 WITH leden AS (
@@ -262,6 +264,7 @@ ORDER BY MIN(period_start) DESC
 
 -- @card eenheid-geslacht-kinderen-per-jaar
 -- title: Verhouding tussen de geslachten: kinderen
+-- except: keeo
 -- display: row
 -- size: two-thirds
 -- dimensions: Werkjaar, Geslacht
@@ -282,6 +285,7 @@ ORDER BY MIN(period_start) DESC
 
 -- @card eenheid-kinderen-per-geslacht
 -- title: Aantal kinderen per geslacht
+-- except: keeo
 -- display: pie
 -- size: third
 -- dimensions: Geslacht
@@ -297,6 +301,7 @@ ORDER BY `Aantal kinderen` DESC
 
 -- @card eenheid-geslacht-leiding-per-jaar
 -- title: Verhouding tussen de geslachten: leiding
+-- except: keeo
 -- display: row
 -- size: two-thirds
 -- dimensions: Werkjaar, Geslacht
@@ -317,6 +322,7 @@ ORDER BY MIN(period_start) DESC
 
 -- @card eenheid-leiding-per-geslacht
 -- title: Aantal leiding per geslacht
+-- except: keeo
 -- display: pie
 -- size: third
 -- dimensions: Geslacht
@@ -350,6 +356,7 @@ ORDER BY `Geboortejaar`
 
 -- @card eenheid-leeftijd-en-geslacht
 -- title: Aantal leden per Leeftijd en Geslacht
+-- except: keeo
 -- display: bar
 -- size: full
 -- dimensions: Leeftijd, Geslacht

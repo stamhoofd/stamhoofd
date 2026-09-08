@@ -85,10 +85,28 @@ report is loaded — `loadReport(env)` takes the environment, the same name the 
 |---|---|
 | `report/includes/<env>/gtp.sql` | what `@include gtp` expands to in that environment |
 | `-- description@ravot:` | what a card's `-- description:` says there |
+| `-- except: keeo` | the tab or card is not written there at all |
 
-A card names neither and keeps saying `@include gtp`, which is what keeps one report from quietly
-becoming two. An override of a name no fragment carries is refused rather than ignored: nothing
-includes it, so a misspelled file would change nothing and say nothing.
+A card names the first two and keeps saying `@include gtp`, which is what keeps one report from
+quietly becoming two. An override of a name no fragment carries is refused rather than ignored:
+nothing includes it, so a misspelled file would change nothing and say nothing.
+
+`except` is the one that leaves something out rather than saying it differently, for the figure a
+platform records nothing about. Keeo no longer asks its leden for a geslacht, so the seven cards that
+split on one are not written there — nor is the varia page, which is the ULDK-tabel and nothing else,
+and a tab written as a page with no cards on it would be an empty page rather than none. A card left
+alone on a row by this takes the row: `-- size@keeo: full` on the lidgeldverdeling of the eenheden
+page and on the leeftijdsgroepenvergelijking of the nationale page, each of which stood beside a
+geslachtenverdeling.
+
+The aanlevering keeps its `Gender_deelnemers` column either way. That sheet is the department's
+template rather than the koepel's own report, and the werkjaren imported from the client's own
+statistics still answer it; where nobody was asked, the column comes back empty.
+
+What an environment leaves out is still read once, by `loadRetiredReport(env)`. A question is stored
+in Metabase under its card and its tab, so the questions of a card that stopped being written are
+only recognisable from the report that no longer holds it — and without them they would be archived
+as something the client wrote themselves, which is to say not at all.
 
 ## What a leeftijdsgroep counts as
 

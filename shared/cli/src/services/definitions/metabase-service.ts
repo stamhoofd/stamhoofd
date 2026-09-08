@@ -7,7 +7,7 @@ import { SharedDockerService } from '../docker-service.js';
 import * as docker from '../docker.js';
 import { MetabaseApi, MetabaseApiError } from '@stamhoofd/metabase/api';
 import { metabaseDataSourceName, metabaseHiddenTables, metabaseReportCollectionName, metabaseReportDashboardName } from '@stamhoofd/metabase/naming';
-import { loadReport, loadSnippets } from '@stamhoofd/metabase/report';
+import { loadReport, loadRetiredReport, loadSnippets } from '@stamhoofd/metabase/report';
 import type { ReportSyncResult } from '@stamhoofd/metabase/sync-report';
 import { syncReport } from '@stamhoofd/metabase/sync-report';
 import { metabaseAdmin, metabaseAdminEmail, metabaseAdminPassword } from '../metabase-config.js';
@@ -68,16 +68,18 @@ export class MetabaseService extends SharedDockerService {
      *
      * The definition is read for that environment too. Not every platform counts every figure the
      * same way, and which variant a card carries is decided while the report is loaded. The writer
-     * is told the same environment: it says which colors a chart falls back to.
+     * is told the same environment: it says which colors a chart falls back to, and what the
+     * environment leaves out, so the questions of a card it no longer writes are cleared away.
      */
     async provisionReport(context: CliContext): Promise<ReportSyncResult & { database: string; dataSource: string; tableCount: number; postalCodeCount: number }> {
         const { api, id, database, dataSource } = await this.connectDataSource(context);
         const tabs = await loadReport(context.env);
+        const retired = await loadRetiredReport(context.env);
         const snippets = await loadSnippets(context.env);
         const tableCount = await this.countTables(context, database);
         const postalCodeCount = tableCount === 0 ? 0 : await this.countRows(context, database, 'postal_codes');
 
-        const result = await syncReport(api, id, tabs, snippets, metabaseReportCollectionName, metabaseReportDashboardName, postalCodeCount > 0, context.env);
+        const result = await syncReport(api, id, tabs, snippets, metabaseReportCollectionName, metabaseReportDashboardName, postalCodeCount > 0, context.env, retired);
 
         return { ...result, database, dataSource, tableCount, postalCodeCount };
     }
