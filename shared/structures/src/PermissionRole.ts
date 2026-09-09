@@ -62,7 +62,7 @@ export class PermissionRoleDetailed extends PermissionRole {
                 ResourcePermissions,
             ),
         ),
-        version: 416,
+        version: 418,
         upgrade: upgradeResourceKeys,
         downgrade: downgradeResourceKeys,
     })

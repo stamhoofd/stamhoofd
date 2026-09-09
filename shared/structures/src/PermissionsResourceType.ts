@@ -67,7 +67,7 @@ export function upgradeResourceKeys<T>(resources: Map<PermissionsResourceType, M
 }
 
 /**
- * Clients before version 416 only know one wildcard: '' (meaning all resources).
+ * Clients before version 418 only know one wildcard: '' (meaning all resources).
  */
 export function downgradeResourceKeys<T>(resources: Map<PermissionsResourceType, Map<string, T>>): Map<PermissionsResourceType, Map<string, T>> {
     const downgraded = new Map<PermissionsResourceType, Map<string, T>>();
