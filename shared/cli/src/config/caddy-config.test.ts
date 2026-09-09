@@ -7,6 +7,7 @@ import { writeInstanceManifest, writeRouteManifest } from '../runtime/manifest-s
 import { caddyAdminPort, localhostPort } from './shared-service-config.js';
 import { buildDomains } from './build-config.js';
 import { buildCaddyRouteOptions, cspFrontendSubroutes, writeCaddyConfig } from './caddy-config.js';
+import { buildPorts } from '../context/ports.js';
 
 describe('Caddy config', () => {
     let rootDir: string;
@@ -152,6 +153,8 @@ describe('Caddy config', () => {
         expect(registrationRoutes.map(proxyDial)).toEqual([registrationHostDial, registrationHostDial]);
         expect(webshopRoutes.map(proxyDial)).toEqual([webshopHostDial, webshopHostDial]);
         expect(registrationHostDial).not.toBe(webshopHostDial);
+    });
+
     it('routes the docs domain to the Nuxt docs server with TLS coverage', () => {
         const ctx = context(rootDir);
         const options = buildCaddyRouteOptions(ctx);
