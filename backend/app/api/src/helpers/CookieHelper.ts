@@ -1,15 +1,15 @@
 import type { Response } from '@simonbackx/simple-endpoints';
-import cookie from 'cookie';
+import * as cookie from 'cookie';
 import type http from 'http';
 
 export type ObjectWithHeaders = {
     headers: http.IncomingHttpHeaders;
 };
 
-type DecodedRequestWithCookies = ObjectWithHeaders & { cookies?: Record<string, string> };
+type DecodedRequestWithCookies = ObjectWithHeaders & { cookies?: Record<string, string | undefined> };
 
 export class CookieHelper {
-    static getCookies(request: ObjectWithHeaders): Record<string, string> {
+    static getCookies(request: ObjectWithHeaders): Record<string, string | undefined> {
         const r = request as DecodedRequestWithCookies;
         if (r.cookies) {
             return r.cookies;
@@ -22,7 +22,7 @@ export class CookieHelper {
         }
 
         // Parse
-        r.cookies = cookie.parse(header);
+        r.cookies = cookie.parseCookie(header);
         return r.cookies;
     }
 
@@ -31,8 +31,8 @@ export class CookieHelper {
         return cookies[name];
     }
 
-    static setCookie(response: Response<any>, name: string, value: string, options?: cookie.CookieSerializeOptions) {
-        const cookies = cookie.serialize(name, value, options);
+    static setCookie(response: Response<any>, name: string, value: string, options?: { httpOnly?: boolean; secure?: boolean; expires?: Date }) {
+        const cookies = cookie.stringifySetCookie({ name, value, ...options });
         let currentCookies = response.headers['set-cookie'];
         if (!currentCookies) {
             response.headers['set-cookie'] = [
