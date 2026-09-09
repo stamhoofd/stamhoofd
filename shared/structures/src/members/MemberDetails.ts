@@ -989,8 +989,8 @@ export class MemberDetails extends AutoEncoder {
                 mergeTo.createdAt = oldestParent.createdAt;
 
                 for (const { object, setObject } of parents) {
-                    const keepOld = setObject(mergeTo);
-                    if (object.id !== mergeTo.id || keepOld) {
+                    setObject(mergeTo);
+                    if (object.id !== mergeTo.id) {
                         mergeIdMap.set(object.id, mergeTo.id);
                     }
                 }

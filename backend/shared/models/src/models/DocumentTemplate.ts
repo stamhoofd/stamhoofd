@@ -278,9 +278,17 @@ export class DocumentTemplate extends QueryableModel {
         if (hasDebtor) {
             let debtor: Parent | undefined;
 
-            const taxDependentParents = registration.member.details.parents.filter(p => p.taxDependent === true && p.nationalRegisterNumber !== NationalRegisterNumberOptOut && p.nationalRegisterNumber);
+            const taxDependentParents = registration.member.details.parents.filter(p => p.taxDependent === true && p.nationalRegisterNumber !== NationalRegisterNumberOptOut);
             if (taxDependentParents.length > 0) {
-                debtor = taxDependentParents[0];
+                if (taxDependentParents.filter(p => p.nationalRegisterNumber).length === 0) {
+                    missingData = true;
+                }
+
+                if (taxDependentParents.length > 1) {
+                    // TODO: Generate multiple documents
+                } else {
+                    debtor = taxDependentParents[0];
+                }
             } else {
                 const parentsWithNRN = registration.member.details.parents.filter(p => p.nationalRegisterNumber !== NationalRegisterNumberOptOut && p.nationalRegisterNumber);
                 debtor = parentsWithNRN[0] ?? registration.member.details.parents[0];
