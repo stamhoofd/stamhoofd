@@ -446,6 +446,18 @@ function getDefaultStamhoofdFilter(): StamhoofdFilter {
         };
     }
 
+    const eventResourceFilters = eventPermissions.eventResourceFilters();
+
+    if (eventResourceFilters === null) {
+        return null;
+    }
+
+    if (eventResourceFilters.length > 0) {
+        return {
+            $or: [filter, ...eventResourceFilters],
+        };
+    }
+
     return filter;
 }
 
