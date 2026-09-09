@@ -15,10 +15,11 @@
         "lint": "eslint"
     },
     "dependencies": {
-        "@simonbackx/simple-database": "1.40.0",
+        "@simonbackx/simple-database": "1.40.1",
         "html-to-text": "10.0.0",
         "nodemailer": "9.1.1",
-        "uuid": "14.0.1"
+        "uuid": "14.0.1",
+        "mysql2": "3.24.4"
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "2.152.0",

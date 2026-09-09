@@ -43,21 +43,23 @@
         "uuid": "14.0.1"
     },
     "devDependencies": {
-        "@simonbackx/simple-database": "1.40.0",
+        "@simonbackx/simple-database": "1.40.1",
         "@stamhoofd/test-utils": "2.152.0",
         "@types/luxon": "3.7.2",
         "@types/uuid": "8.3.4",
-        "vitest": "4.1.10"
+        "vitest": "4.1.10",
+        "mysql2": "3.24.4"
     },
     "peerDependencies": {
-        "@simonbackx/simple-database": "1.40.0",
+        "@simonbackx/simple-database": "1.40.1",
         "@stamhoofd/backend-i18n": "*",
         "@stamhoofd/email": "*",
         "@stamhoofd/queues": "*",
         "@stamhoofd/sql": "*",
         "@stamhoofd/structures": "*",
         "@stamhoofd/types": "*",
-        "@stamhoofd/utility": "*"
+        "@stamhoofd/utility": "*",
+        "mysql2": "3.24.4"
     },
     "license": "UNLICENCED",
     "publishConfig": {

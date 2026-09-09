@@ -23,7 +23,7 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
-        "@simonbackx/simple-database": "1.40.0",
+        "@simonbackx/simple-database": "1.40.1",
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-logging": "1.0.1",
@@ -36,7 +36,7 @@
         "@stamhoofd/structures": "2.152.0",
         "@stamhoofd/types": "2.152.0",
         "@stamhoofd/utility": "2.152.0",
-        "mysql2": "3.24.3"
+        "mysql2": "3.24.4"
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "2.152.0",

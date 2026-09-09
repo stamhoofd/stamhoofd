@@ -22,12 +22,13 @@
         "lru-cache": "11.5.2"
     },
     "devDependencies": {
-        "@simonbackx/simple-database": "1.40.0",
+        "@simonbackx/simple-database": "1.40.1",
         "@stamhoofd/test-utils": "2.152.0",
-        "vitest": "4.1.10"
+        "vitest": "4.1.10",
+        "mysql2": "3.24.4"
     },
     "peerDependencies": {
-        "@simonbackx/simple-database": "1.40.0",
+        "@simonbackx/simple-database": "1.40.1",
         "@stamhoofd/structures": "*",
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*"
