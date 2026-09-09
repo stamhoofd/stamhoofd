@@ -36,10 +36,10 @@
         "@stamhoofd/test-utils": "*",
         "@stamhoofd/vite-config": "*",
         "@types/file-saver": "2.0.7",
-        "@vitest/browser": "4.1.10",
+        "@vitest/browser": "^4.1.11",
         "eslint-plugin-stamhoofd": "*",
         "vite": "8.2.2",
         "vitest": "4.1.11",
-        "vitest-browser-vue": "2.1.0"
+        "vitest-browser-vue": "^2.1.0"
     }
 }
