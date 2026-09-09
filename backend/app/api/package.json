@@ -91,7 +91,7 @@
         "jsonwebtoken": "9.0.3",
         "libphonenumber-js": "1.13.9",
         "luxon": "3.7.2",
-        "mailparser": "3.9.14",
+        "mailparser": "^3.9.23",
         "mockdate": "3.0.5",
         "mollie-api-typescript": "1.12.23",
         "mysql2": "3.24.4",

@@ -113,7 +113,6 @@
     "@types/node": "22.20.1",
     "axios": "1.20.0",
     "cookie": "2.0.1",
-    "elliptic": "6.6.1",
     "fast-xml-parser": "5.11.1",
     "nodemailer": "10.0.1",
     "pacote": "21.5.1",
