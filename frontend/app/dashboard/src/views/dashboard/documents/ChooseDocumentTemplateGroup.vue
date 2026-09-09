@@ -99,7 +99,7 @@ import type { UIFilter } from '@stamhoofd/components/filters/UIFilter.ts';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { useSwitchablePeriod } from '@stamhoofd/components/hooks/useSwitchablePeriod.ts';
+import { useSwitchableOrganizationPeriod } from '@stamhoofd/components/hooks/useSwitchablePeriod.ts';
 import SegmentedControl from '@stamhoofd/components/inputs/SegmentedControl.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
@@ -180,7 +180,7 @@ watchEffect(() => {
     fetcher.setFilter(filter);
 });
 
-const { period, switchPeriod: switchPeriodHelper } = useSwitchablePeriod();
+const { period, switchPeriod: switchPeriodHelper } = useSwitchableOrganizationPeriod();
 
 function switchPeriod(event: MouseEvent) {
     // disable periods outside of the selected year

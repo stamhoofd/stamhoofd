@@ -103,7 +103,7 @@ import Spinner from '#Spinner.vue';
 import InfiniteObjectFetcherEnd from '#tables/InfiniteObjectFetcherEnd.vue';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 
-import { useSwitchablePeriod } from '#hooks/useSwitchablePeriod.ts';
+import { useSwitchableOrganizationPeriod } from '#hooks/useSwitchablePeriod.ts';
 import { useAppContext } from '#context/appContext.ts';
 import { useEventsObjectFetcher } from '#fetchers/useEventsObjectFetcher.ts';
 import { useEventUIFilterBuilders } from '#filters/filterBuilders.ts';
@@ -177,7 +177,7 @@ watchEffect(() => {
     fetcher.setFilter(filter);
 });
 
-const { period, switchPeriod: switchPeriodHelper } = useSwitchablePeriod();
+const { period, switchPeriod: switchPeriodHelper } = useSwitchableOrganizationPeriod();
 
 function switchPeriod(event: MouseEvent) {
     // disable periods outside of the selected year

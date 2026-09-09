@@ -36,7 +36,7 @@ import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { usePatch } from '#hooks/usePatch.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import { useSwitchablePeriod } from '#hooks/useSwitchablePeriod.ts';
+import { useSwitchableOrganizationPeriod } from '#hooks/useSwitchablePeriod.ts';
 import type { AccessRight, OrganizationRegistrationPeriod, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType } from '@stamhoofd/structures';
 import { getPermissionResourceTypeName, isPeriodScopedResourceType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
@@ -60,7 +60,7 @@ const props = withDefaults(
 const pop = usePop();
 const { patched, addPatch, patch, hasChanges } = usePatch(props.role);
 const isPeriodScoped = isPeriodScopedResourceType(props.type);
-const switchable = isPeriodScoped ? useSwitchablePeriod() : undefined;
+const switchable = isPeriodScoped ? useSwitchableOrganizationPeriod() : undefined;
 const period = switchable?.period;
 
 async function switchPeriod(event: MouseEvent) {
