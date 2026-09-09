@@ -919,15 +919,16 @@ export class MemberDetails extends AutoEncoder {
 
                         const previous = member[type][currentIndex];
 
-                        if (type === 'parents' && (previous as Parent).taxDependent !== (mergedObject as Parent).taxDependent) {
+                        if (type === 'parents') {
                             const parent = (mergedObject as Parent).clone();
                             parent.taxDependent = (previous as Parent).taxDependent;
+                            parent.type = (previous as Parent).type;
                             member.parents[currentIndex] = parent;
 
                             return;
                         }
 
-                        member[type][currentIndex] = mergedObject.clone();
+                        (member[type][currentIndex] as T) = mergedObject.clone();
                     },
                     reviewDate: object.updatedAt ?? member.reviewTimes.getLastReview(type) ?? object.createdAt,
                     createdAt: object.createdAt,
@@ -949,10 +950,10 @@ export class MemberDetails extends AutoEncoder {
                 // Sort from oldest reviewed to latest reviewed
                 parents.sort((a, b) => Sorter.byDateValue(b.reviewDate ?? new Date(0), a.reviewDate ?? new Date(0)));
 
-                const latestTaxDependentByMember = new Map<MemberDetails, boolean | null>();
+                const latestUpdatedByMember = new Map<MemberDetails, Parent>();
                 if (type === 'parents') {
                     for (const { member, object } of parents) {
-                        latestTaxDependentByMember.set(member, (object as Parent).taxDependent);
+                        latestUpdatedByMember.set(member, (object as Parent));
                     }
                 }
 
@@ -1001,10 +1002,11 @@ export class MemberDetails extends AutoEncoder {
                         self.findIndex(p2 => p2.id === p.id) === i,
                     ) as any;
 
-                    if (type === 'parents' && latestTaxDependentByMember.has(member)) {
+                    if (type === 'parents' && latestUpdatedByMember.has(member)) {
                         const parent = member.parents.find(parent => parent.id === mergeTo.id);
                         if (parent) {
-                            parent.taxDependent = latestTaxDependentByMember.get(member)!;
+                            parent.taxDependent = latestUpdatedByMember.get(member)!.taxDependent;
+                            parent.type = latestUpdatedByMember.get(member)!.type;
                         }
                     }
                 }
