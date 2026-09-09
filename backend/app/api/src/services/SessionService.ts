@@ -127,25 +127,31 @@ export class SessionService {
         }
 
         const isSSOHandoff = this.isSSOHandoff(oldToken, session);
-        const token = await this.createToken(oldToken.user, { session });
+        const tokenId = uuidv4();
 
-        this.applyLimits({ token, session, user: oldToken.user });
-        await token.save();
+        // The session row is locked before the token is inserted, so a request that activates the
+        // previous token at the same time runs either completely before or completely after this.
+        // The insert has to come last: its foreign key check takes a shared lock on the session
+        // row, and upgrading that to the exclusive lock of the update deadlocks with a waiting activation.
+        return await Database.beginTransaction(async () => {
+            const didRotate = isSSOHandoff
+                ? await this.consumeSSOHandoff({ sessionId: session.id, handoffTokenId: oldToken.id, tokenId })
+                : await this.replaceLastUsedToken({ sessionId: session.id, previousTokenId: oldToken.id, tokenId });
+            if (!didRotate) {
+                throw this.invalidRefreshTokenError();
+            }
 
-        const didRotate = isSSOHandoff
-            ? await this.consumeSSOHandoff({ sessionId: session.id, handoffTokenId: oldToken.id, tokenId: token.id })
-            : await this.replaceLastUsedToken({ sessionId: session.id, previousTokenId: oldToken.id, tokenId: token.id });
-        if (!didRotate) {
-            await token.delete();
-            throw this.invalidRefreshTokenError();
-        }
+            const token = await this.createToken(oldToken.user, { session, tokenId });
+            this.applyLimits({ token, session, user: oldToken.user });
+            await token.save();
 
-        const metaData = this.getMetaData();
-        session.appVersion = metaData.appVersion ?? session.appVersion;
-        session.nativeAppVersion = metaData.nativeAppVersion ?? session.nativeAppVersion;
-        session.osVersion = metaData.osVersion ?? session.osVersion;
-        await session.save();
-        return token;
+            const metaData = this.getMetaData();
+            session.appVersion = metaData.appVersion ?? session.appVersion;
+            session.nativeAppVersion = metaData.nativeAppVersion ?? session.nativeAppVersion;
+            session.osVersion = metaData.osVersion ?? session.osVersion;
+            await session.save();
+            return token;
+        });
     }
 
     private static isSSOHandoff(token: Token, session: UserSession): boolean {
@@ -176,15 +182,27 @@ export class SessionService {
     }
 
     static async activateToken(token: Token): Promise<boolean> {
-        const [result] = await Database.update(
-            'UPDATE `user_sessions` SET `lastActiveTokenId` = ? WHERE `id` = ? AND `lastUsedTokenId` = ?',
-            [token.id, token.sessionId, token.id],
-        );
-        if (result.affectedRows > 0) {
-            await Database.delete('DELETE FROM `tokens` WHERE `sessionId` = ? AND `id` != ?', [token.sessionId, token.id]);
+        // Runs on every request: an active token never needs the transaction below.
+        if (await this.isActiveToken(token)) {
             return true;
         }
 
+        // Retiring the other tokens has to happen under the same session row lock as the
+        // activation, or a replacement rotated in between would be retired as well.
+        return await Database.beginTransaction(async () => {
+            const [result] = await Database.update(
+                'UPDATE `user_sessions` SET `lastActiveTokenId` = ? WHERE `id` = ? AND `lastUsedTokenId` = ?',
+                [token.id, token.sessionId, token.id],
+            );
+            if (result.affectedRows > 0) {
+                await Database.delete('DELETE FROM `tokens` WHERE `sessionId` = ? AND `id` != ?', [token.sessionId, token.id]);
+                return true;
+            }
+            return await this.isActiveToken(token);
+        });
+    }
+
+    private static async isActiveToken(token: Token): Promise<boolean> {
         const [sessions] = await Database.select('SELECT `id` FROM `user_sessions` WHERE `id` = ? AND `lastActiveTokenId` = ? LIMIT 1', [token.sessionId, token.id]);
         return sessions.length > 0;
     }

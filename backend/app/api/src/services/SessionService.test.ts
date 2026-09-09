@@ -1,3 +1,4 @@
+import { DatabaseInstance } from '@simonbackx/simple-database';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, User } from '@stamhoofd/models';
 import { OrganizationFactory, Token, UserFactory, UserSession } from '@stamhoofd/models';
@@ -218,6 +219,97 @@ describe('SessionService', () => {
             expect(retryReplacement.sessionId).toBe(original.sessionId);
             expect(await Token.getByAccessToken(lostReplacement.accessToken)).toBeUndefined();
             expect(await Token.getByAccessToken(original.accessToken)).toBeDefined();
+        });
+
+        describe('concurrent activation', () => {
+            afterEach(() => {
+                vi.restoreAllMocks();
+            });
+
+            /**
+             * Pauses the first query of `method` that starts with `prefix`, so another database
+             * operation can be interleaved at exactly that point.
+             */
+            function pauseQueryOnce(method: 'update' | 'delete', prefix: string): { reached: Promise<void>; resume: () => void } {
+                let reached!: () => void;
+                let resume!: () => void;
+                const reachedPromise = new Promise<void>(resolve => reached = resolve);
+                const resumePromise = new Promise<void>(resolve => resume = resolve);
+                const original = DatabaseInstance.prototype[method];
+                let paused = false;
+
+                vi.spyOn(DatabaseInstance.prototype, method).mockImplementation(async function (this: DatabaseInstance, ...args: Parameters<DatabaseInstance['update']>) {
+                    if (!paused && args[0].startsWith(prefix)) {
+                        paused = true;
+                        reached();
+                        await resumePromise;
+                    }
+                    return await original.call(this, ...args);
+                });
+                return { reached: reachedPromise, resume };
+            }
+
+            async function createUsedToken(): Promise<Token & { user: User }> {
+                const admin = await createAdmin();
+                const original = await SessionService.createSession(admin, { loginMethod: SessionLoginMethod.Password });
+                return await SessionService.rotateSession(original);
+            }
+
+            async function expectActiveAndReplaced(used: Token, replacement: Token) {
+                expect(await Token.getByAccessToken(replacement.accessToken)).toBeDefined();
+                expect(await Token.getByAccessToken(used.accessToken)).toBeDefined();
+                const session = await getSession(used);
+                expect(session.lastActiveTokenId).toBe(used.id);
+                expect(session.lastUsedTokenId).toBe(replacement.id);
+            }
+
+            test('a renewal during the activation of the previous token keeps the replacement', async () => {
+                const used = await createUsedToken();
+
+                // The activating request has updated the session but not yet retired the other
+                // tokens when the client renews `used` in a parallel request.
+                const retire = pauseQueryOnce('delete', 'DELETE FROM `tokens`');
+                const activation = SessionService.activateToken(used);
+                await retire.reached;
+                const rotation = SessionService.rotateSession(used);
+                // The rotation either completes now, or has to wait for the activation.
+                await Promise.race([rotation, new Promise(resolve => setTimeout(resolve, 200))]);
+                retire.resume();
+
+                expect(await activation).toBe(true);
+                await expectActiveAndReplaced(used, await rotation);
+            });
+
+            test('an activation of the previous token during a renewal keeps the replacement', async () => {
+                const used = await createUsedToken();
+
+                // The renewal is halfway when a parallel request with `used` activates it.
+                const bookkeeping = pauseQueryOnce('update', 'UPDATE `user_sessions` SET `lastUsedTokenId`');
+                const rotation = SessionService.rotateSession(used);
+                await bookkeeping.reached;
+                expect(await SessionService.activateToken(used)).toBe(true);
+                bookkeeping.resume();
+
+                await expectActiveAndReplaced(used, await rotation);
+            });
+
+            test('an activation waits for a renewal that already holds the session', async () => {
+                const used = await createUsedToken();
+
+                // The renewal holds the session row when a parallel request with `used` arrives.
+                const retire = pauseQueryOnce('delete', 'DELETE FROM `tokens`');
+                const rotation = SessionService.rotateSession(used);
+                await retire.reached;
+                const activation = SessionService.activateToken(used);
+                await Promise.race([activation, new Promise(resolve => setTimeout(resolve, 200))]);
+                retire.resume();
+
+                const replacement = await rotation;
+                // `used` was never active, so the renewal retired it: that request retries with the replacement.
+                expect(await activation).toBe(false);
+                expect(await Token.getByAccessToken(replacement.accessToken)).toBeDefined();
+                expect(await Token.getByAccessToken(used.accessToken)).toBeUndefined();
+            });
         });
 
         test('renewal updates versions but keeps stable device metadata', async () => {
