@@ -58,7 +58,7 @@ export class Permissions extends AutoEncoder {
                 ResourcePermissions,
             ),
         ),
-        version: 416,
+        version: 418,
         upgrade: upgradeResourceKeys,
         downgrade: downgradeResourceKeys,
     })
