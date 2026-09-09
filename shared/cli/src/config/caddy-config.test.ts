@@ -152,6 +152,15 @@ describe('Caddy config', () => {
         expect(registrationRoutes.map(proxyDial)).toEqual([registrationHostDial, registrationHostDial]);
         expect(webshopRoutes.map(proxyDial)).toEqual([webshopHostDial, webshopHostDial]);
         expect(registrationHostDial).not.toBe(webshopHostDial);
+    it('routes the docs domain to the Nuxt docs server with TLS coverage', () => {
+        const ctx = context(rootDir);
+        const options = buildCaddyRouteOptions(ctx);
+        const hosts = options.routes.flatMap(route => route.match.flatMap((match: any) => match.host));
+        const docsRoute = options.routes.find(route => route.match.some((match: any) => match.host?.includes('docs.stamhoofd')));
+
+        expect(hosts).toContain('docs.stamhoofd');
+        expect(options.tlsSubjects).toContain('docs.stamhoofd');
+        expect((docsRoute?.handle[0] as any).upstreams[0].dial).toContain(`:${buildPorts(ctx).docs}`);
     });
 
     it('can bind the admin API to the container interface', async () => {
