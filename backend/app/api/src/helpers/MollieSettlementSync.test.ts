@@ -245,8 +245,9 @@ describe('Helper.MollieSettlementSync', () => {
                 payments: [mockPayment],
                 chargebacks: [mockChargeback],
                 value: '-0.25',
+                settledAt: new Date(2026, 0, 10),
             });
-            mollieMocker.createBalanceTransaction({ type: 'chargeback', entryId: mockChargeback.id, fee: '0.25' });
+            mollieMocker.createBalanceTransaction({ type: 'chargeback', entryId: mockChargeback.id, fee: '0.25', createdAt: new Date(2026, 0, 5) });
 
             await runCron(token);
 
@@ -264,8 +265,8 @@ describe('Helper.MollieSettlementSync', () => {
             const { token, payment, mockPayment } = await init();
 
             // Mollie withheld 5.30: a 0.30 fee plus a 5.00 reserve, which stays unexplained
-            const settlement = mollieMocker.createSettlement({ payments: [mockPayment], value: '44.70' });
-            mollieMocker.createBalanceTransaction({ type: 'payment', entryId: mockPayment.id, fee: '0.30', deductions: '5.30' });
+            const settlement = mollieMocker.createSettlement({ payments: [mockPayment], value: '44.70', settledAt: new Date(2026, 0, 10) });
+            mollieMocker.createBalanceTransaction({ type: 'payment', entryId: mockPayment.id, fee: '0.30', deductions: '5.30', createdAt: new Date(2026, 0, 5) });
 
             await runCron(token);
 
@@ -294,8 +295,8 @@ describe('Helper.MollieSettlementSync', () => {
 
         test('re-running stores identical rows', async () => {
             const { token, mockPayment, mockRefund } = await init();
-            const settlement = mollieMocker.createSettlement({ payments: [mockPayment], refunds: [mockRefund], value: '29.70' });
-            mollieMocker.createBalanceTransaction({ type: 'payment', entryId: mockPayment.id, fee: '0.30' });
+            const settlement = mollieMocker.createSettlement({ payments: [mockPayment], refunds: [mockRefund], value: '29.70', settledAt: new Date(2026, 0, 10) });
+            mollieMocker.createBalanceTransaction({ type: 'payment', entryId: mockPayment.id, fee: '0.30', createdAt: new Date(2026, 0, 5) });
 
             await runCron(token);
             const row = await getSettlementRow(settlement.id);
