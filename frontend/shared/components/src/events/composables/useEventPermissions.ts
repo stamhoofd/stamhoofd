@@ -1,11 +1,13 @@
-import type { NamedObject, Organization, OrganizationTag} from '@stamhoofd/structures';
-import { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
+import type { NamedObject, Organization, OrganizationTag, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight, EventPeriodHelper, PermissionLevel, PermissionsResourceKey, PermissionsResourceType } from '@stamhoofd/structures';
 import { useAuth } from '#hooks/useAuth.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 
 export function useEventPermissions() {
     const auth = useAuth();
     const platform = usePlatform();
+    const organization = useOrganization();
     const permissions = auth.permissions;
 
     function canWriteSome() {
@@ -13,7 +15,49 @@ export function useEventPermissions() {
             return false;
         }
 
-        return permissions.hasAccessRightForSomeResourceOfType(PermissionsResourceType.OrganizationTags, AccessRight.EventWrite) || permissions.hasAccessRightForSomeResourceOfType(PermissionsResourceType.Groups, AccessRight.EventWrite);
+        return permissions.hasAccessRightForSomeResourceOfType(PermissionsResourceType.OrganizationTags, AccessRight.EventWrite)
+            || permissions.hasAccessRightForSomeResourceOfType(PermissionsResourceType.Groups, AccessRight.EventWrite)
+            || permissions.hasAccessForSomeResourceOfType(PermissionsResourceType.Events, PermissionLevel.Write);
+    }
+
+    /**
+     * Events that are writable because of a permission on the event itself, on top of the group and tag based access.
+     * Returns null when every event is writable this way.
+     */
+    function eventResourceFilters(): StamhoofdFilter[] | null {
+        if (!permissions) {
+            return [];
+        }
+
+        if (permissions.hasAccess(PermissionLevel.Write)) {
+            return null;
+        }
+
+        const ids: string[] = [];
+        const filters: StamhoofdFilter[] = [];
+
+        for (const [id, resource] of permissions.resources.get(PermissionsResourceType.Events) ?? []) {
+            if (!resource.hasAccess(PermissionLevel.Write)) {
+                continue;
+            }
+
+            if (id === PermissionsResourceKey.All) {
+                return null;
+            }
+
+            if (id === PermissionsResourceKey.CurrentPeriod) {
+                filters.push(...auth.getPeriodsInUse(organization.value).map(period => EventPeriodHelper.getPeriodFilter(period)));
+                continue;
+            }
+
+            ids.push(id);
+        }
+
+        if (ids.length > 0) {
+            filters.push({ id: { $in: ids } });
+        }
+
+        return filters;
     }
 
     function canWriteAllGroupEvents() {
@@ -91,5 +135,6 @@ export function useEventPermissions() {
         canAdminEventForExternalOrganization,
         tagsToFilterEventsOn,
         groupsToFilterEventsOn,
+        eventResourceFilters,
     };
 }

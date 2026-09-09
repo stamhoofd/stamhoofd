@@ -2,9 +2,9 @@ import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, User } from '@stamhoofd/models';
-import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, Organization, OrganizationRegistrationPeriod, Payment, Registration, Webshop } from '@stamhoofd/models';
-import type { GroupCategory, MemberWithRegistrationsBlob, Platform as PlatformStruct, RecordAnswer, RecordSettings, ResourcePermissions } from '@stamhoofd/structures';
-import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPermissionChecker, FinancialSupportSettings, GroupStatus, GroupType, PermissionLevel, PermissionsResourceKey, PermissionsResourceType, ReceivableBalanceType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
+import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Webshop } from '@stamhoofd/models';
+import type { GroupCategory, MemberWithRegistrationsBlob, Platform as PlatformStruct, RecordAnswer, RecordSettings, RegistrationPeriodBase, ResourcePermissions } from '@stamhoofd/structures';
+import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPeriodHelper, EventPermissionChecker, FinancialSupportSettings, GroupStatus, GroupType, PermissionLevel, PermissionsResourceKey, PermissionsResourceType, ReceivableBalanceType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { RecordCacheEntry } from '../services/MemberRecordStore.js';
 import { MemberRecordStore } from '../services/MemberRecordStore.js';
@@ -299,6 +299,32 @@ export class AdminPermissionChecker {
         return STAMHOOFD.userMode !== 'organization' && periodId === this.platform.period.id;
     }
 
+    async isEventPeriodInUse(event: Event): Promise<boolean> {
+        return EventPeriodHelper.isInAnyPeriod(event, await this.getPeriodsInUse(event.organizationId));
+    }
+
+    /**
+     * The periods an organization is working in, and the platform period when it applies.
+     */
+    async getPeriodsInUse(organizationId: string | null): Promise<RegistrationPeriodBase[]> {
+        const periods: RegistrationPeriodBase[] = [];
+
+        if (organizationId) {
+            const organization = await this.getOrganization(organizationId);
+            const period = await RegistrationPeriod.getByID(organization.periodId);
+
+            if (period) {
+                periods.push(period.getBaseStructure());
+            }
+        }
+
+        if (STAMHOOFD.userMode !== 'organization' && !periods.some(p => p.id === this.platform.period.id)) {
+            periods.push(this.platform.period);
+        }
+
+        return periods;
+    }
+
     async hasSomeAccessInPeriod(periodId: string, organizationId: string): Promise<boolean> {
         const organization = await this.getOrganization(organizationId);
         const permissions = await this.getOrganizationPermissions(organizationId);
@@ -347,13 +373,19 @@ export class AdminPermissionChecker {
             return true;
         }
 
-        // Skip event fallback outside the current period: canAccessEvent evaluates $currentPeriod-scoped grants and would not succeed cross-period.
-        if (isPeriodInUse && group.type === GroupType.EventRegistration) {
+        if (group.type === GroupType.EventRegistration) {
             // Check if we can access the event
             const event = await Event.select().where('groupId', group.id).first(false);
 
-            if (event && event.organizationId === group.organizationId && await this.canAccessEvent(event)) {
-                return true;
+            if (event && event.organizationId === group.organizationId) {
+                if (organizationPermissions.hasResourceAccess(PermissionsResourceType.Events, event.id, permissionLevel)) {
+                    return true;
+                }
+
+                // Skip canAccessEvent outside the current period: it evaluates $currentPeriod-scoped grants and would not succeed cross-period.
+                if (isPeriodInUse && await this.canAccessEvent(event)) {
+                    return true;
+                }
             }
         }
 
@@ -368,8 +400,7 @@ export class AdminPermissionChecker {
             }
         }
 
-        // Skip waiting-list-of-event fallback outside the current period: the parent event's permission check would not succeed cross-period.
-        if (isPeriodInUse && group.type === GroupType.WaitingList) {
+        if (group.type === GroupType.WaitingList) {
             // Check if this is a waiting list for an event
             const parentGroup = await Group.select()
                 .where('type', GroupType.EventRegistration)
@@ -412,6 +443,7 @@ export class AdminPermissionChecker {
             userPermissions: this.user.permissions,
             platform: this.platform,
             getOrganization: async (id: string) => await this.getOrganization(id),
+            isPeriodInUse: await this.isEventPeriodInUse(event),
         });
     }
 

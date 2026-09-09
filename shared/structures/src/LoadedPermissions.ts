@@ -259,23 +259,6 @@ export class LoadedPermissions {
         return false;
     }
 
-    hasAccessRightForSomeResourceOfType(type: PermissionsResourceType, right: AccessRight): boolean {
-        if (this.hasAccessRight(right)) {
-            return true;
-        }
-
-        const resource = this.resources.get(type);
-        if (resource) {
-            for (const r of resource.values()) {
-                if (r.hasAccessRight(right)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
     hasAccessForSomeResourceOfType(type: PermissionsResourceType, level: PermissionLevel): boolean {
         if (this.hasAccess(level)) {
             return true;
@@ -285,6 +268,23 @@ export class LoadedPermissions {
         if (resource) {
             for (const r of resource.values()) {
                 if (r.hasAccess(level)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    hasAccessRightForSomeResourceOfType(type: PermissionsResourceType, right: AccessRight): boolean {
+        if (this.hasAccessRight(right)) {
+            return true;
+        }
+
+        const resource = this.resources.get(type);
+        if (resource) {
+            for (const r of resource.values()) {
+                if (r.hasAccessRight(right)) {
                     return true;
                 }
             }

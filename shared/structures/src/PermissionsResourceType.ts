@@ -10,6 +10,7 @@ export enum PermissionsResourceType {
     GroupCategories = 'GroupCategories',
     OrganizationTags = 'OrganizationTags',
     RecordCategories = 'RecordCategory',
+    Events = 'Events',
 
     /**
      * Sending emails and other communication via a sender and viewing the history of sent messages
@@ -28,6 +29,7 @@ export function isPeriodScopedResourceType(type: PermissionsResourceType): boole
     switch (type) {
         case PermissionsResourceType.Groups:
         case PermissionsResourceType.GroupCategories:
+        case PermissionsResourceType.Events:
             return true;
         case PermissionsResourceType.Webshops:
         case PermissionsResourceType.OrganizationTags:
@@ -101,6 +103,7 @@ export function downgradeResourceKeys<T>(resources: Map<PermissionsResourceType,
 export function getPermissionResourceTypeName(type: PermissionsResourceType, plural = true): string {
     switch (type) {
         case PermissionsResourceType.Webshops: return plural ? 'webshops' : 'webshop';
+        case PermissionsResourceType.Events: return plural ? $t('activiteiten') : $t('activiteit');
         case PermissionsResourceType.Groups: return plural ? $t(`%n1`) : $t(`%14Z`);
         case PermissionsResourceType.GroupCategories: return plural ? $t(`%15H`) : $t(`%n2`);
         case PermissionsResourceType.OrganizationTags: return plural ? $t(`%2C`) : $t(`%2T`);
