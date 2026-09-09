@@ -17,6 +17,6 @@
         "postcss-discard-duplicates": "8.0.1",
         "vite": "8.2.2",
         "vite-svg-2-webfont": "8.2.0",
-        "vitest": "4.1.10"
+        "vitest": "4.1.11"
     }
 }

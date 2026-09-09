@@ -100,7 +100,7 @@
     "sass": "1.104.0",
     "terser": "5.51.2",
     "typescript": "6.0.3",
-    "vitest": "4.1.10",
+    "vitest": "4.1.11",
     "vitest-browser-vue": "2.1.0",
     "vue-tsc": "3.3.8",
     "wait-on": "9.1.0"

@@ -36,6 +36,6 @@
     "devDependencies": {
         "@vue/test-utils": "2.5.0",
         "eslint-plugin-stamhoofd": "*",
-        "vitest": "4.1.10"
+        "vitest": "4.1.11"
     }
 }

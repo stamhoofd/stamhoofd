@@ -39,7 +39,7 @@
         "@vitest/browser": "4.1.10",
         "eslint-plugin-stamhoofd": "*",
         "vite": "8.2.2",
-        "vitest": "4.1.10",
+        "vitest": "4.1.11",
         "vitest-browser-vue": "2.1.0"
     }
 }

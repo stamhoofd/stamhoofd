@@ -41,7 +41,7 @@
         "@stamhoofd/backend-i18n": "2.152.0",
         "@stamhoofd/test-utils": "2.152.0",
         "nock": "14.0.16",
-        "vitest": "4.1.10",
+        "vitest": "4.1.11",
         "mysql2": "3.24.4"
     },
     "license": "UNLICENCED",
