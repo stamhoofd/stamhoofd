@@ -3572,6 +3572,11 @@ describe('Endpoint.RegisterMembers', () => {
     });
 
     describe('Maximum members under concurrent registrations', () => {
+        beforeEach(() => {
+            defaultPermissionLevel = PermissionLevel.None;
+            defaultLinkMembersToUser = true;
+        });
+
         /**
          * Each user has their own family with one member, like unrelated users registering at the same time.
          */
