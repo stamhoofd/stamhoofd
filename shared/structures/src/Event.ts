@@ -121,6 +121,10 @@ export class Event extends AutoEncoder {
         return Formatter.dateRange(this.startDate, this.endDate);
     }
 
+    getNameWithPeriod(): string {
+        return this.name + ' (' + Formatter.year(this.startDate) + ')';
+    }
+
     static group(events: Event[]) {
         const queue: {
             title: string;

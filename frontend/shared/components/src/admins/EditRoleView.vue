@@ -123,6 +123,25 @@
                 </STList>
             </CategorizedBox>
 
+            <CategorizedBox v-if="showEventsBox" icon="calendar" :title="$t('Activiteiten')">
+                <template v-if="canAddEvents" #buttons>
+                    <button class="button text only-icon-smartphone" type="button" @click="addEvents">
+                        <span class="icon add" />
+                        <span>{{ $t('Meer toevoegen') }}</span>
+                    </button>
+                </template>
+
+                <p>{{ $t('Geef toegang tot specifieke activiteiten. Wie een activiteit kan bewerken, kan ook de inschrijvingen ervan beheren.') }}</p>
+
+                <STList>
+                    <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.Events, PermissionsResourceKey.All)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.All, name: $t('Alle activiteiten'), type: PermissionsResourceType.Events }" type="resource" @patch:role="addPatch" />
+
+                    <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.Events, PermissionsResourceKey.CurrentPeriod)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.CurrentPeriod, name: $t('Alle activiteiten van de huidige periode'), type: PermissionsResourceType.Events }" type="resource" @patch:role="addPatch" />
+
+                    <ResourcePermissionRow v-for="resource in eventResources" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" type="resource" @patch:role="addPatch" />
+                </STList>
+            </CategorizedBox>
+
             <CategorizedBox v-if="(app !== 'admin' || scope === 'organization') && organization?.meta.packages.useMembers" icon="privacy" :title="$t('%Z9')">
                 <p>{{ $t('%ZA') }}</p>
 
@@ -233,9 +252,10 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import CategorizedBox from '#layout/categorized-view/CategorizedBox.vue';
 import CategorizedView from '#layout/categorized-view/CategorizedView.vue';
 import Spinner from '#Spinner.vue';
-import type { OrganizationRegistrationPeriod, PermissionRoleDetailed, User, WebshopPreview } from '@stamhoofd/structures';
+import type { OrganizationRegistrationPeriod, PermissionRoleDetailed, RegistrationPeriod, User, WebshopPreview } from '@stamhoofd/structures';
 import { AccessRight, getGroupTypeName, getPermissionLevelName, getPermissionLevelNumber, getUnlistedResources, GroupType, maximumPermissionlevel, PermissionLevel, PermissionRoleForResponsibility, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
+import { useSearchEventsInPeriod } from '@stamhoofd/networking/hooks/useGetEvents';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import AccessRightPermissionRow from './components/AccessRightPermissionRow.vue';
@@ -280,6 +300,7 @@ const { sortedAdmins, loading, getUnloadedPermissions } = useAdmins();
 const organization = useOrganization();
 const platform = usePlatform();
 const { patched, addPatch, hasChanges, patch } = usePatch(props.role);
+const searchEventsInPeriod = useSearchEventsInPeriod();
 const webshops: Ref<WebshopPreview[]> = computed(() => organization.value?.webshops ?? []);
 const tags = computed(() => platform.value.config.tags);
 const recordCategories = computed(() => {
@@ -364,6 +385,8 @@ const groupResources = computed(() => grantedResources(PermissionsResourceType.G
 
 const categoryResources = computed(() => grantedResources(PermissionsResourceType.GroupCategories));
 
+const eventResources = computed(() => grantedResources(PermissionsResourceType.Events));
+
 const canAddGroups = computed(() => !!organization.value && canAddAccess(PermissionsResourceType.Groups, PermissionsResourceKey.CurrentPeriod));
 
 async function addGroups() {
@@ -376,9 +399,9 @@ async function addGroups() {
                     inheritedRoles: props.inheritedRoles,
                     type: PermissionsResourceType.Groups,
                     configurableAccessRights: [AccessRight.EventWrite],
-                    getResources: (period: OrganizationRegistrationPeriod) => [
-                        ...period.adminCategoryTree.getAllGroups(),
-                        ...period.waitingLists,
+                    getResources: ({ organizationPeriod }: { organizationPeriod: OrganizationRegistrationPeriod }) => [
+                        ...organizationPeriod.adminCategoryTree.getAllGroups(),
+                        ...organizationPeriod.waitingLists,
                     ].map(group => ({
                         id: group.id,
                         name: group.settings.getNameWithPeriod(),
@@ -403,11 +426,42 @@ async function addCategories() {
                     inheritedRoles: props.inheritedRoles,
                     type: PermissionsResourceType.GroupCategories,
                     configurableAccessRights: [AccessRight.OrganizationCreateGroups],
-                    getResources: (period: OrganizationRegistrationPeriod) => period.adminCategoryTree.getAllCategories().map(category => ({
+                    getResources: ({ organizationPeriod }: { organizationPeriod: OrganizationRegistrationPeriod }) => organizationPeriod.adminCategoryTree.getAllCategories().map(category => ({
                         id: category.id,
-                        name: category.getName(period) + ' (' + period.period.nameShort + ')',
+                        name: category.getName(organizationPeriod) + ' (' + organizationPeriod.period.nameShort + ')',
                         type: PermissionsResourceType.GroupCategories,
                     })),
+                    saveHandler: addPatch,
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
+
+async function addEvents() {
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: AsyncComponent(() => import('./EditResourcePermissionsView.vue'), {
+                    title: $t('Activiteiten'),
+                    role: patched.value,
+                    inheritedRoles: props.inheritedRoles,
+                    type: PermissionsResourceType.Events,
+                    getResources: async ({ period, search }: { period: RegistrationPeriod; search: string }) => {
+                        const events = await searchEventsInPeriod({
+                            period,
+                            search,
+                            // Without an organization these are platform roles, which only govern national and regional events
+                            filter: organization.value ? null : { organizationId: null },
+                        });
+                        return events.map(event => ({
+                            id: event.id,
+                            name: event.getNameWithPeriod(),
+                            type: PermissionsResourceType.Events,
+                            description: event.dateRange,
+                        }));
+                    },
                     saveHandler: addPatch,
                 }),
             }),
@@ -419,6 +473,10 @@ async function addCategories() {
 const showGroupsBox = computed(() => organization.value?.meta?.packages.useMembers || groupResources.value.length > 0);
 
 const showCategoriesBox = computed(() => organization.value?.meta?.packages.useMembers || categoryResources.value.length > 0);
+
+const showEventsBox = computed(() => app === 'admin' || !!(organization.value?.meta.packages.useMembers && organization.value.meta.enableCalendar !== false) || eventResources.value.length > 0);
+
+const canAddEvents = computed(() => canAddAccess(PermissionsResourceType.Events, PermissionsResourceKey.CurrentPeriod));
 
 const save = async () => {
     if (saving.value || deleting.value) {

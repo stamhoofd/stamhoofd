@@ -10,18 +10,19 @@
             </div>
             <div v-if="period">
                 <button type="button" class="button text" @click="switchPeriod">
-                    <span>{{ period.period.name }}</span>
+                    <span>{{ period.name }}</span>
                     <span class="icon arrow-down-small" />
                 </button>
             </div>
         </div>
 
-        <p v-if="filteredResources.length === 0" class="info-box">
+        <Spinner v-if="loading" />
+        <p v-else-if="filteredResources.length === 0" class="info-box">
             {{
                 searchQuery
                     ? $t('%1AX')
                     : period
-                        ? $t('Er zijn geen {resourceType} in werkjaar {period}.', { resourceType: getPermissionResourceTypeName(props.type, true), period: period.period.name })
+                        ? $t('Er zijn geen {resourceType} in werkjaar {period}.', { resourceType: getPermissionResourceTypeName(props.type, true), period: period.name })
                         : $t('Er zijn geen {resourceType}.', { resourceType: getPermissionResourceTypeName(props.type, true) })
             }}
         </p>
@@ -36,11 +37,17 @@ import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { usePatch } from '#hooks/usePatch.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import { useSwitchableOrganizationPeriod } from '#hooks/useSwitchablePeriod.ts';
-import type { AccessRight, OrganizationRegistrationPeriod, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType } from '@stamhoofd/structures';
+import { Toast } from '#overlays/Toast.ts';
+import Spinner from '#Spinner.vue';
+import { useSwitchablePeriod } from '#hooks/useSwitchablePeriod.ts';
+import type { AccessRight, OrganizationRegistrationPeriod, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType, RegistrationPeriod } from '@stamhoofd/structures';
 import { getPermissionResourceTypeName, isPeriodScopedResourceType } from '@stamhoofd/structures';
-import { computed, ref } from 'vue';
+import { throttle } from '@stamhoofd/utility';
+import type { Ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
+
+type Resource = { id: string; name: string; type: PermissionsResourceType; description?: string };
 
 const props = withDefaults(
     defineProps<{
@@ -50,7 +57,7 @@ const props = withDefaults(
         type: PermissionsResourceType;
         configurableAccessRights?: AccessRight[] | null;
         saveHandler: (patch: AutoEncoderPatchType<PermissionRoleDetailed | PermissionRoleForResponsibility>) => void;
-        getResources: (period: OrganizationRegistrationPeriod | null) => { id: string; name: string; type: PermissionsResourceType; description?: string }[];
+        getResources: (options: { period: RegistrationPeriod | null; organizationPeriod: OrganizationRegistrationPeriod | null; search: string }) => Resource[] | Promise<Resource[]>;
     }>(), {
         inheritedRoles: () => [],
         configurableAccessRights: null,
@@ -60,16 +67,49 @@ const props = withDefaults(
 const pop = usePop();
 const { patched, addPatch, patch, hasChanges } = usePatch(props.role);
 const isPeriodScoped = isPeriodScopedResourceType(props.type);
-const switchable = isPeriodScoped ? useSwitchableOrganizationPeriod() : undefined;
+const switchable = isPeriodScoped ? useSwitchablePeriod({ onSwitch: () => loadResources() }) : undefined;
 const period = switchable?.period;
+const organizationPeriod = switchable?.organizationPeriod;
 
 async function switchPeriod(event: MouseEvent) {
     await switchable?.switchPeriod(event);
 }
 
 const searchQuery = ref('');
+const resources = ref<Resource[]>([]) as Ref<Resource[]>;
+const loading = ref(false);
+let loadCount = 0;
 
-const resources = computed(() => props.getResources(period?.value ?? null));
+async function loadResources() {
+    const count = ++loadCount;
+    loading.value = true;
+
+    try {
+        const result = await props.getResources({
+            period: period?.value ?? null,
+            organizationPeriod: organizationPeriod?.value ?? null,
+            search: searchQuery.value.trim(),
+        });
+
+        if (count !== loadCount) {
+            // A newer request has started already
+            return;
+        }
+        resources.value = result;
+    }
+    catch (e) {
+        if (count !== loadCount) {
+            return;
+        }
+        resources.value = [];
+        Toast.fromError(e).show();
+    }
+    loading.value = false;
+}
+
+const throttledLoadResources = throttle(() => void loadResources(), 500);
+watch(searchQuery, () => throttledLoadResources());
+void loadResources();
 
 const filteredResources = computed(() => {
     const query = searchQuery.value.toLowerCase().trim();

@@ -1,11 +1,14 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { AccessRight } from '../AccessRight.js';
 import type { NamedObject } from '../Event.js';
+import type { LoadedPermissions } from '../LoadedPermissions.js';
+import { PermissionLevel } from '../PermissionLevel.js';
 import { PermissionsResourceKey, PermissionsResourceType } from '../PermissionsResourceType.js';
 import type { Platform } from '../Platform.js';
 import type { OrganizationForPermissionCalculation, UserPermissions } from '../UserPermissions.js';
 
 interface EventDataForPermission {
+    id: string;
     organizationId: string | null;
     meta: {
         defaultAgeGroupIds: string[] | null;
@@ -27,10 +30,12 @@ export class EventPermissionChecker {
             getOrganization,
             userPermissions,
             platform,
+            isPeriodInUse,
         }: {
             getOrganization: (id: string) => Promise<O>;
             userPermissions: UserPermissions | null;
             platform: Platform;
+            isPeriodInUse: boolean;
         },
     ): Promise<O | null> {
         if (!userPermissions) {
@@ -60,11 +65,12 @@ export class EventPermissionChecker {
                 organization,
                 platform,
                 userPermissions,
+                isPeriodInUse,
             );
             return organization;
         }
 
-        this.throwIfNoPermissionToWriteNationalOrRegionalEvent(event, userPermissions, platform);
+        this.throwIfNoPermissionToWriteNationalOrRegionalEvent(event, userPermissions, platform, isPeriodInUse);
         return null;
     }
 
@@ -79,10 +85,12 @@ export class EventPermissionChecker {
             organization,
             userPermissions,
             platform,
+            isPeriodInUse,
         }: {
             organization: O | null;
             userPermissions: UserPermissions | null;
             platform: Platform;
+            isPeriodInUse: boolean;
         },
     ): void {
         if (!userPermissions) {
@@ -103,9 +111,10 @@ export class EventPermissionChecker {
                 organization,
                 platform,
                 userPermissions,
+                isPeriodInUse,
             );
         } else {
-            this.throwIfNoPermissionToWriteNationalOrRegionalEvent(event, userPermissions, platform);
+            this.throwIfNoPermissionToWriteNationalOrRegionalEvent(event, userPermissions, platform, isPeriodInUse);
         }
     }
 
@@ -115,6 +124,7 @@ export class EventPermissionChecker {
             organization: O | null;
             userPermissions: UserPermissions | null;
             platform: Platform;
+            isPeriodInUse: boolean;
         },
     ): boolean {
         try {
@@ -134,6 +144,7 @@ export class EventPermissionChecker {
         organization: O,
         platform: Platform,
         userPermissions: UserPermissions,
+        isPeriodInUse: boolean,
     ): void {
         const accessRight: AccessRight = AccessRight.EventWrite;
 
@@ -158,6 +169,10 @@ export class EventPermissionChecker {
                     $t(`%qS`),
                 statusCode: 403,
             });
+        }
+
+        if (this.hasWriteAccessToEventResource(organizationPermissions, event.id, isPeriodInUse)) {
+            return;
         }
 
         if (event.meta.groups === null) {
@@ -195,10 +210,16 @@ export class EventPermissionChecker {
         }
     }
 
+    private static hasWriteAccessToEventResource(permissions: LoadedPermissions, eventId: string, isPeriodInUse: boolean): boolean {
+        return permissions.forPeriod(isPeriodInUse)
+            .hasResourceAccess(PermissionsResourceType.Events, eventId, PermissionLevel.Write);
+    }
+
     private static throwIfNoPermissionToWriteNationalOrRegionalEvent(
         event: EventDataForPermission,
         userPermissions: UserPermissions,
         platform: Platform,
+        isPeriodInUse: boolean,
     ): void {
         const accessRight: AccessRight = AccessRight.EventWrite;
         const platformPermissions = userPermissions.forPlatform(platform);
@@ -209,6 +230,10 @@ export class EventPermissionChecker {
                     $t(`%qU`),
                 statusCode: 403,
             });
+        }
+
+        if (this.hasWriteAccessToEventResource(platformPermissions, event.id, isPeriodInUse)) {
+            return;
         }
 
         // organization tags
