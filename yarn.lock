@@ -5635,7 +5635,7 @@
     "@types/node" "*"
     form-data "^4.0.4"
 
-"@types/node@*", "@types/node@22.20.1", "@types/node@>=10.0.0", "@types/node@>=8.1.0", "@types/node@^18.11.18", "@types/node@^26.4.0":
+"@types/node@*", "@types/node@22.15.34", "@types/node@22.20.1", "@types/node@>=10.0.0", "@types/node@>=8.1.0", "@types/node@^18.11.18", "@types/node@^26.4.0":
   version "22.20.1"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-22.20.1.tgz#84e7cdf63cdaa20c134aa317ccc901aa21e16f0e"
   integrity sha512-EANqOCF9QFyra+4pfxUcX9STKJpCLjMbObVzljIJomAWSnuSIEAvyzEU53GaajbXJEgdh0iEcPL+DGvpUd4k1Q==
@@ -11602,7 +11602,7 @@ jackspeak@^4.1.1:
     chalk "^4.1.2"
     pretty-format "30.5.1"
 
-jiti@^2.4.2, jiti@^2.6.1, jiti@^2.7.0:
+jiti@2.7.0, jiti@^2.4.2, jiti@^2.6.1, jiti@^2.7.0:
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/jiti/-/jiti-2.7.0.tgz#974228f2f4ca2bc21885a1797b45fea68e950c64"
   integrity sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==
