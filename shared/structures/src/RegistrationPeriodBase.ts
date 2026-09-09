@@ -80,6 +80,10 @@ export class RegistrationPeriodBase extends AutoEncoder {
         return this.name;
     }
 
+    includesDate(date: Date): boolean {
+        return date >= this.startDate && date <= this.endDate;
+    }
+
     /**
      * Earliest date an organization is allowed to switch to this period as default.
      */
