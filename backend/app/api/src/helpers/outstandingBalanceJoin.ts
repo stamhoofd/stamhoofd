@@ -20,7 +20,7 @@ export const memberCachedBalanceForOrganizationJoin = SQL.leftJoin(
     .where(SQL.column('objectId'), SQL.column(Registration.table, 'memberId'))
     .andWhere(SQL.column('organizationId'), SQL.column(Registration.table, 'organizationId'));
 
-export const memberCachedBalanceForMemberOrganizationJoin = (organizationId: string | null) => {
+export const memberCachedBalanceForMemberOrganizationJoin = (organizationId: string) => {
     const query = SQL.leftJoin(
         SQL.select('objectId', 'organizationId',
             new SQLSelectAs(
@@ -36,11 +36,8 @@ export const memberCachedBalanceForMemberOrganizationJoin = (organizationId: str
             .as('memberCachedBalance') as SQLNamedExpression,
         'memberCachedBalance',
     )
-        .where(SQL.column('objectId'), SQL.column(Member.table, 'id'));
-
-    if (organizationId) {
-        return query.andWhere(SQL.column('organizationId'), organizationId);
-    }
+        .where(SQL.column('objectId'), SQL.column(Member.table, 'id'))
+        .andWhere(SQL.column('organizationId'), organizationId);
 
     return query;
 };
