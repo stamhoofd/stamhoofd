@@ -970,6 +970,10 @@ export class PlatformMember implements ObjectWithRecords {
             property = 'nationalRegisterNumber';
         }
 
+        if (property === 'parents.taxDependent') {
+            property = 'taxDependent';
+        }
+
         if (property === 'nationalRegisterNumber' && this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
             // Not required for parents or member itself
             return false;

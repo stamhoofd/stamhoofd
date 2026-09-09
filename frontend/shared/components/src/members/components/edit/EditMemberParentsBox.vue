@@ -78,7 +78,7 @@
         </div>
 
         <p v-if="!willMarkReviewed && reviewDate && isAdmin" class="style-description-small">
-            {{ $t('%fC') }} {{ formatDate(reviewDate) }}. <button type="button" class="inline-link" v-tooltip="$t('%fD')" @click="clear">
+            {{ $t('%fC') }} {{ formatDate(reviewDate) }}. <button v-tooltip="$t('%fD')" type="button" class="inline-link" @click="clear">
                 {{ $t('%fE') }}
             </button>.
         </p>
@@ -132,11 +132,19 @@ useValidation(errors.validator, () => {
             field: 'parents',
         }));
     } else if (parents.value.length > 0 && !parents.value.some(p => !!p.nationalRegisterNumber) && isPropertyRequired('parents.nationalRegisterNumber')) {
-        se.addError(new SimpleError({
-            code: 'invalid_field',
-            message: $t(`%108`),
-            field: 'parents',
-        }));
+        if (isPropertyRequired('parents.taxDependent')) {
+            se.addError(new SimpleError({
+                code: 'invalid_field',
+                message: $t(`Zorg dat er minstens één ouder het lid fiscaal ten laste heeft. Voeg daar dan een rijksregisternummer toe.`),
+                field: 'parents',
+            }));
+        } else {
+            se.addError(new SimpleError({
+                code: 'invalid_field',
+                message: $t(`%108`),
+                field: 'parents',
+            }));
+        }
     }
 
     if (props.member.patchedMember.details.phone) {

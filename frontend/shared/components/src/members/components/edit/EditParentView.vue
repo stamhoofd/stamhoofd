@@ -63,12 +63,12 @@
                     </template>
                 </p>
 
-                <template v-if="isPropertyEnabled('parents.taxDependent')">
+                <template v-if="isTaxDependentEnabled && member">
                     <Checkbox v-model="taxDependent">
                         <p>
                             {{ $t('{lid} is fiscaal ten laste van {name} (enkel voor gezinshoofd of fiscaal co-ouderschap)', {
-                                lid: props.member?.member.details.firstName ?? 'lid',
-                                name: firstName || 'deze ouder'
+                                lid: props.member?.member.details.firstName ?? $t('lid'),
+                                name: firstName || $t('deze ouder')
                             }) }}
                         </p>
                         <p class="style-description-small">
@@ -83,7 +83,16 @@
                     </Checkbox>
                 </template>
 
-                <template v-if="(isPropertyEnabled('parents.taxDependent') && taxDependent && isPropertyEnabled('parents.nationalRegisterNumber')) || (!isPropertyEnabled('parents.taxDependent') && isPropertyEnabled('parents.nationalRegisterNumber') || nationalRegisterNumber)">
+                <template
+                    v-if="
+                        (isTaxDependentEnabled
+                            && taxDependent
+                            && isPropertyEnabled('parents.nationalRegisterNumber'))
+                            || (
+                                !isTaxDependentEnabled
+                                && isPropertyEnabled('parents.nationalRegisterNumber')
+                                || nationalRegisterNumber)"
+                >
                     <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`)" :required="isNRNRequiredForThisParent" :nullable="true" :validator="errors.validator" />
                     <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
                         {{ $t('%fa') }} <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
@@ -172,6 +181,8 @@ const isPropertyRequired = useIsPropertyRequired(relatedMembers);
 const isPropertyEnabled = useIsPropertyEnabled(relatedMembers, true);
 const isAllOptional = useIsAllOptional(relatedMembers);
 
+const isTaxDependentEnabled = computed(() => isPropertyEnabled('parents.taxDependent'));
+
 /**
  * If NRN is required, it is only required for one parent of each member
  */
@@ -240,7 +251,7 @@ const taxDependent = computed({
             CenteredMessage.confirm({
                 title: $t('Ben je zeker dat er sprake is van fiscaal co-ouderschap?'),
                 description: $t('Dit is enkel nodig als beide ouders gescheiden zijn'),
-                confirmText: 'Ik ben zeker',
+                confirmText: $t('Ik ben zeker'),
             }).then((isSure) => {
                 if (isSure) addPatch({ taxDependent });
             }).catch(console.error);
@@ -361,8 +372,13 @@ async function save() {
                 props.member.addParent(patched.value);
             } else {
                 props.member.addParent(patched.value);
+
                 for (const member of minorMembers) {
-                    member.addParent(patched.value);
+                    // Skip some fields
+                    const familyPatch = patched.value;
+                    familyPatch.taxDependent = null;
+
+                    member.addParent(familyPatch);
                 }
             }
         } else {

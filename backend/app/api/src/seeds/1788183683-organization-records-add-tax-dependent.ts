@@ -14,12 +14,12 @@ export default new Migration(async () => {
         action: async (organization) => {
             if (organization.meta.recordsConfiguration.nationalRegisterNumber) {
                 organization.meta.recordsConfiguration.taxDependent = organization.meta.recordsConfiguration.nationalRegisterNumber;
-            }
 
-            await organization.save({
-                skipMarkSaved: true,
-                skipSendEvents: true,
-            });
+                await organization.save({
+                    skipMarkSaved: true,
+                    skipSendEvents: true,
+                });
+            }
         },
     });
 

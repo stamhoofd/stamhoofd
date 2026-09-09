@@ -1506,6 +1506,8 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             [false, true],
             [false, false],
             [false, null],
+            [null, true],
+            [null, false],
             [null, null],
         ])('Adding member to family doesn\'t copy taxDependent (%s : %s)', async (isOriginalTaxDependent, isNewTaxDependent) => {
             const user = await new UserFactory({}).create();
@@ -1598,6 +1600,8 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             [false, true],
             [false, false],
             [false, null],
+            [null, true],
+            [null, false],
             [null, null],
         ])('Merging families keeps original taxDependent (%s : %s)', async (parent1TaxDependent, parent2TaxDepentent) => {
             const user = await new UserFactory({}).create();
