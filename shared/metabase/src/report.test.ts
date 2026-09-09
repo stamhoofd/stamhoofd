@@ -766,9 +766,10 @@ describe('report', () => {
         });
 
         /**
-         * Which registration of a member speaks for them. One that still stands beats one that was
-         * cancelled -- a cancelled registration says someone was there, not what they were, so a lid
-         * put in Leiding by mistake and taken out again is not leiding for the rest of the werkjaar.
+         * Which registration of a member speaks for them. A leeftijdsgroep beats an activiteit, and
+         * only then does one that still stands beat one that was cancelled -- a cancelled
+         * registration says someone was there, not what they were, so a lid put in Leiding by mistake
+         * and taken out again is not leiding for the rest of the werkjaar.
          * Then leiding beats lid, so someone leiding in one leeftijdsgroep and lid in another is leiding and
          * nothing else; between two leeftijdsgroepen the oldest wins; and the name of the leeftijdsgroep settles what
          * neither can, so two runs of the same query cannot pick differently.
@@ -777,11 +778,31 @@ describe('report', () => {
             const sql = cardOf(dashboards, 'eenheden', 'eenheid-gtp').sql.replaceAll(/\s+/g, ' ');
 
             expect(sql).toContain('ROW_NUMBER() OVER ( PARTITION BY non_platform_registrations.organization_id, non_platform_registrations.`Werkjaar`, non_platform_registrations.member_id ORDER BY '
+                + "(non_platform_registrations.group_type = 'Membership') DESC, "
                 + '(non_platform_registrations.deactivated_at IS NULL) DESC, '
                 + "CASE non_platform_registrations.age_group_category WHEN 'leader' THEN 3 WHEN 'child' THEN 2 WHEN 'adult' THEN 1 ELSE 0 END DESC, "
                 + "CASE non_platform_registrations.effective_category WHEN 'leader' THEN 3 WHEN 'child' THEN 2 WHEN 'adult' THEN 1 ELSE 0 END DESC, "
                 + 'non_platform_registrations.age_group_min_age DESC, non_platform_registrations.`Leeftijdsgroep` ) AS rang');
             expect(sql).toContain('WHERE deduplicated.rang = 1');
+        });
+
+        /**
+         * An activiteit says where someone went, not what they are: a kamp is open to the leden of
+         * every leeftijdsgroep and carries no leeftijdsgroep of its own, so the leeftijdsgroep charts
+         * read the registration in the leeftijdsgroep even after it was cancelled. Someone who left
+         * their leeftijdsgroep in november and joined a kamp in july would otherwise be counted under
+         * the kamp -- the one registration of theirs that still stands -- and drop out of the
+         * leeftijdsgroep they were a lid of, so the ranking puts the type ahead of what still stands.
+         */
+        it('reads a member from their leeftijdsgroep rather than from an activiteit they joined', async () => {
+            for (const name of ['deduplicated-non-platform-registrations.sql', 'deduplicated-non-platform-registrations-all-years.sql']) {
+                const sql = (await fs.readFile(path.join(getReportDirectory(), 'includes', name), 'utf-8')).replaceAll(/\s+/g, ' ');
+                const order = sql.slice(sql.indexOf('ORDER BY'), sql.indexOf(') AS rang'));
+                const type = order.indexOf("(non_platform_registrations.group_type = 'Membership') DESC");
+
+                expect(`${name}: ${type}`).not.toEqual(`${name}: -1`);
+                expect(`${name}: ${type < order.indexOf('(non_platform_registrations.deactivated_at IS NULL) DESC')}`).toEqual(`${name}: true`);
+            }
         });
 
         /**
