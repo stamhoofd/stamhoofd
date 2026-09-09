@@ -3572,6 +3572,11 @@ describe('Endpoint.RegisterMembers', () => {
     });
 
     describe('Maximum members under concurrent registrations', () => {
+        beforeEach(() => {
+            defaultPermissionLevel = PermissionLevel.None;
+            defaultLinkMembersToUser = true;
+        });
+
         /**
          * Each user has their own family with one member, like unrelated users registering at the same time.
          */
@@ -3700,6 +3705,31 @@ describe('Endpoint.RegisterMembers', () => {
             await group.refresh();
             expect(group.settings.reservedMembers).toBe(0);
             expect(group.stockReservations.length).toBe(0);
+        });
+
+        test('One user registering two members for the last spot is rejected as a whole', async () => {
+            const { organization, member, otherMembers, token } = await initData({ otherMemberAmount: 1 });
+            const group = await new GroupFactory({ organization, price: 0, maxMembers: 2 }).create();
+            const [taker] = await initUsers({ organization, amount: 1 });
+            await post(buildBody({ organization, group, member: taker.member, paymentMethod: PaymentMethod.PointOfSale }), organization, taker.token);
+
+            const body = buildBody({ organization, group, member, paymentMethod: PaymentMethod.PointOfSale });
+            body.cart.items.push(IDRegisterItem.create({
+                id: uuidv4(),
+                groupPrice: group.settings.prices[0],
+                organizationId: organization.id,
+                groupId: group.id,
+                memberId: otherMembers[0].id,
+            }));
+
+            await expect(post(body, organization, token)).rejects.toThrow(STExpect.errorWithCode('maximum_reached'));
+
+            await QueueHandler.awaitAll();
+            const registrations = await Registration.where({ groupId: group.id, registeredAt: { sign: '!=', value: null }, deactivatedAt: null });
+            expect(registrations.map(r => r.memberId)).toEqual([taker.member.id]);
+
+            await group.refresh();
+            expect(group.settings.registeredMembers).toBe(1);
         });
 
         test('Concurrent free registrations never exceed the maximum', async () => {
