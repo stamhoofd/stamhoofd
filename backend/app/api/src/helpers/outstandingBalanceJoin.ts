@@ -22,7 +22,7 @@ export const memberCachedBalanceForOrganizationJoin = SQL.leftJoin(
     .where(SQL.column('objectId'), SQL.column(Registration.table, 'memberId'))
     .andWhere(SQL.column('organizationId'), SQL.column(Registration.table, 'organizationId'));
 
-export const memberCachedBalanceRawJoin = (organizationId: string) => {
+export const memberCachedBalanceRawJoin = (organizationId: string): ReturnType<typeof SQL.leftJoin> => {
     const cacheId = `member_cached_balance_org_${organizationId}`;
 
     if (joinCache.has(cacheId)) {

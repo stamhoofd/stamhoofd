@@ -95,9 +95,6 @@ export const memberSorters = (organizationId: string | null): SQLSortDefinitions
     if (organizationId) {
         sorters['memberCachedBalance.amountOpen'] = {
             getValue(a) {
-                console.log('[sql-sorters/members.ts]: rawSelectedRow');
-                console.log(a.rawSelectedRow);
-
                 if (a.rawSelectedRow) {
                     if (a.rawSelectedRow?.['memberCachedBalance']?.['amountOpen']) {
                         return a.rawSelectedRow?.['memberCachedBalance']?.['amountOpen'];
