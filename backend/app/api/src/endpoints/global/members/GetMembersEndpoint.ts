@@ -138,22 +138,22 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         }
 
         if (scopeFilter) {
-            query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
+            query.where(await compileToSQLFilter(scopeFilter, filterCompilers(organization?.id)));
         }
 
         if (q.filter) {
-            query.where(await compileToSQLFilter(q.filter, filterCompilers));
+            query.where(await compileToSQLFilter(q.filter, filterCompilers(organization?.id)));
         }
 
         const searchFilter = GetMembersEndpoint.buildSearchFilter(q.search);
 
         if (searchFilter) {
-            query.where(await compileToSQLFilter(searchFilter, filterCompilers));
+            query.where(await compileToSQLFilter(searchFilter, filterCompilers(organization?.id)));
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers(organization?.id)));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
