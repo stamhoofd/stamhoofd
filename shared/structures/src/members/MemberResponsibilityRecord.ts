@@ -1,8 +1,16 @@
 import { AutoEncoder, DateDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { Group } from '../Group.js';
+import { GroupType } from '../GroupType.js';
 import type { PlatformMember } from './PlatformMember.js';
+import type { Registration } from './Registration.js';
 import { AuditLogReplacement } from '../AuditLogReplacement.js';
+
+/** A member keeps a responsibility for 14 days after their last registration ends, unless we just started a new period. */
+export const AUTO_REMOVE_GRACE_MS = 1000 * 60 * 60 * 24 * 14;
+
+/** In the 60 days after the start of a new period we never delete responsibilities. */
+export const NEW_PERIOD_GRACE_MS = 1000 * 60 * 60 * 24 * 30 * 2;
 
 export class MemberResponsibilityRecordBase extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -32,6 +40,75 @@ export class MemberResponsibilityRecordBase extends AutoEncoder {
 
     getDiffName() {
         return AuditLogReplacement.uuid(this.responsibilityId);
+    }
+
+    getAutoRemoveDate(registrations: Registration[], currentPeriod: { id: string; startDate: Date }, platformResponsibilityIds: string[]): Date | null {
+        const now = new Date();
+
+        // Rule A: Global (not organization-scoped) responsibilities are never auto-removed
+        if (this.organizationId === null) {
+            return null;
+        }
+
+        // Rule B: non-active records are never auto-removed
+        if (this.startDate >= now || (this.endDate !== null && this.endDate <= now)) {
+            return null;
+        }
+
+        const isRegistrationRelevant = (registration: Registration) => {
+            if (registration.organizationId !== this.organizationId) {
+                return false; // other org
+            }
+            if (registration.registeredAt === null) {
+                return false; // not confirmed
+            }
+            if (registration.group.type.toString() !== GroupType.Membership.toString()) {
+                return false; // not a membership group
+            }
+            if (registration.group.periodId !== currentPeriod.id) {
+                return false; // other period
+            }
+            if (STAMHOOFD.userMode === 'platform' && platformResponsibilityIds.includes(this.responsibilityId) && registration.group.defaultAgeGroupId === null) {
+                return false; // not a group tracked by platform
+            }
+            return true;
+        };
+
+        let endDate: Date | null = null;
+        for (const registration of registrations) {
+            if (!isRegistrationRelevant(registration)) {
+                continue;
+            }
+
+            if ((registration.endDate === null || registration.endDate >= now) && registration.deactivatedAt === null) {
+                if (registration.group.deletedAt === null) {
+                    return null; // Rule C: records from members with an active registration (ongoing or not yet ended) are never auto-removed
+                } else if (endDate === null || registration.group.deletedAt.getTime() > endDate.getTime()) {
+                    endDate = registration.group.deletedAt; // Rule D1: an active registration whose group was deleted, makes the group's deletion date the end date
+                }
+            }
+
+            if (registration.deactivatedAt && (endDate === null || registration.deactivatedAt.getTime() > endDate.getTime())) {
+                endDate = registration.deactivatedAt; // Rule D2: end date can be the latest registration date (via deactivatedAt)
+            }
+
+            if (registration.endDate && registration.endDate < now && (endDate === null || registration.endDate.getTime() > endDate.getTime())) {
+                endDate = registration.endDate; // Rule D3: end date can be the latest registration date (via endDate)
+            }
+        }
+
+        if (endDate === null || endDate.getTime() < currentPeriod.startDate.getTime()) {
+            endDate = currentPeriod.startDate; // Rule D4: end date can be the start of the current period if no other end date was found
+        }
+
+        endDate = new Date(endDate.getTime() + AUTO_REMOVE_GRACE_MS);
+
+        if (currentPeriod.startDate.getTime() <= endDate.getTime() && endDate.getTime() <= currentPeriod.startDate.getTime() + NEW_PERIOD_GRACE_MS) {
+            // Rule E: if the end date is within the grace period of a new period, extend it to the end of that grace period
+            endDate = new Date(currentPeriod.startDate.getTime() + NEW_PERIOD_GRACE_MS);
+        }
+
+        return endDate;
     }
 }
 
