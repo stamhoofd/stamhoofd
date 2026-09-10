@@ -1,9 +1,9 @@
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { MemberWithUsersRegistrationsAndGroups, RegistrationPeriod, Token } from '@stamhoofd/models';
-import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, RecordCategoryFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import { CachedBalance, EventFactory, GroupFactory, MemberFactory, OrganizationFactory, RecordCategoryFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import type { SortList, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, EventMeta, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
+import { AccessRight, EventMeta, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ReceivableBalanceType, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Language } from '@stamhoofd/types/Language';
 import { GetMembersEndpoint } from './GetMembersEndpoint.js';
@@ -2163,54 +2163,13 @@ describe('Endpoint.GetMembersEndpoint', () => {
     });
 
     describe('Sorting', () => {
-        // Deliberately not in chronological order, so a passing test cannot be explained by insertion order
-        const january = new Date(Date.UTC(2023, 0, 10, 8, 30, 0));
-        const february = new Date(Date.UTC(2023, 1, 1, 0, 0, 0));
-        const march = new Date(Date.UTC(2023, 2, 5, 12, 0, 0));
-        const may = new Date(Date.UTC(2023, 4, 15, 16, 45, 0));
-        const june = new Date(Date.UTC(2023, 5, 20, 22, 15, 0));
-
         /**
-         * Creates one member per passed value, all registered in the same group of a new organization,
-         * and returns an admin with full access to that organization.
-         */
-        async function setupMembers(lastRegisteredAtValues: (Date | null)[]) {
-            const organization = await new OrganizationFactory({ period }).create();
-
-            const user = await new UserFactory({
-                organization,
-                permissions: Permissions.create({
-                    level: PermissionLevel.Full,
-                }),
-            }).create();
-
-            const token = await SessionService.createSession(user);
-            const group = await new GroupFactory({ organization, period }).create();
-
-            const members: MemberWithUsersRegistrationsAndGroups[] = [];
-
-            for (const lastRegisteredAt of lastRegisteredAtValues) {
-                const member = await new MemberFactory({}).create();
-                await new RegistrationFactory({ member, group }).create();
-
-                // The registration factory does not maintain lastRegisteredAt (only RegistrationService does),
-                // so we set it explicitly to get deterministic values - including legacy members that never got one.
-                member.lastRegisteredAt = lastRegisteredAt;
-                await member.save();
-
-                members.push(member);
-            }
-
-            return { host: organization.getApiHost(), token, members };
-        }
-
-        /**
-         * Requests every page by following the 'next' request the endpoint returns, exactly like the frontend does.
-         * That next request is built from the sorter's getValue, so this covers the full sort + pagination flow:
-         * getValue -> page filter -> encoded in the query -> decoded -> compiled back to SQL.
-         *
-         * Returns the ids of all members across all pages, in the order they were received.
-         */
+             * Requests every page by following the 'next' request the endpoint returns, exactly like the frontend does.
+             * That next request is built from the sorter's getValue, so this covers the full sort + pagination flow:
+             * getValue -> page filter -> encoded in the query -> decoded -> compiled back to SQL.
+             *
+             * Returns the ids of all members across all pages, in the order they were received.
+             */
         async function fetchAllPages({ host, token, sort, limit }: { host: string; token: Token; sort: SortList; limit: number }) {
             const ids: string[] = [];
             let query: LimitedFilteredRequest | undefined = new LimitedFilteredRequest({ sort, limit });
@@ -2241,145 +2200,385 @@ describe('Endpoint.GetMembersEndpoint', () => {
             return ids;
         }
 
-        test('Members are sorted by lastRegisteredAt ascending across all pages', async () => {
-            const { host, token, members } = await setupMembers([march, january, june, february, may]);
-            const [marchMember, januaryMember, juneMember, februaryMember, mayMember] = members;
+        describe('lastRegisteredAt', () => {
+            // Deliberately not in chronological order, so a passing test cannot be explained by insertion order
+            const january = new Date(Date.UTC(2023, 0, 10, 8, 30, 0));
+            const february = new Date(Date.UTC(2023, 1, 1, 0, 0, 0));
+            const march = new Date(Date.UTC(2023, 2, 5, 12, 0, 0));
+            const may = new Date(Date.UTC(2023, 4, 15, 16, 45, 0));
+            const june = new Date(Date.UTC(2023, 5, 20, 22, 15, 0));
 
-            // A limit lower than the total forces the endpoint to build a next page filter from getValue
-            const ids = await fetchAllPages({
-                host,
-                token,
-                sort: [{ key: 'lastRegisteredAt', order: SortItemDirection.ASC }],
-                limit: 2,
+            /**
+             * Creates one member per passed value, all registered in the same group of a new organization,
+             * and returns an admin with full access to that organization.
+             */
+            async function setupMembers(lastRegisteredAtValues: (Date | null)[]) {
+                const organization = await new OrganizationFactory({ period }).create();
+
+                const user = await new UserFactory({
+                    organization,
+                    permissions: Permissions.create({
+                        level: PermissionLevel.Full,
+                    }),
+                }).create();
+
+                const token = await SessionService.createSession(user);
+                const group = await new GroupFactory({ organization, period }).create();
+
+                const members: MemberWithUsersRegistrationsAndGroups[] = [];
+
+                for (const lastRegisteredAt of lastRegisteredAtValues) {
+                    const member = await new MemberFactory({}).create();
+                    await new RegistrationFactory({ member, group }).create();
+
+                    // The registration factory does not maintain lastRegisteredAt (only RegistrationService does),
+                    // so we set it explicitly to get deterministic values - including legacy members that never got one.
+                    member.lastRegisteredAt = lastRegisteredAt;
+                    await member.save();
+
+                    members.push(member);
+                }
+
+                return { host: organization.getApiHost(), token, members };
+            }
+
+            test('Members are sorted by lastRegisteredAt ascending across all pages', async () => {
+                const { host, token, members } = await setupMembers([march, january, june, february, may]);
+                const [marchMember, januaryMember, juneMember, februaryMember, mayMember] = members;
+
+                // A limit lower than the total forces the endpoint to build a next page filter from getValue
+                const ids = await fetchAllPages({
+                    host,
+                    token,
+                    sort: [{ key: 'lastRegisteredAt', order: SortItemDirection.ASC }],
+                    limit: 2,
+                });
+
+                expect(ids).toEqual([
+                    januaryMember.id,
+                    februaryMember.id,
+                    marchMember.id,
+                    mayMember.id,
+                    juneMember.id,
+                ]);
             });
 
-            expect(ids).toEqual([
-                januaryMember.id,
-                februaryMember.id,
-                marchMember.id,
-                mayMember.id,
-                juneMember.id,
-            ]);
-        });
+            test('Members are sorted by lastRegisteredAt descending across all pages', async () => {
+                const { host, token, members } = await setupMembers([march, january, june, february, may]);
+                const [marchMember, januaryMember, juneMember, februaryMember, mayMember] = members;
 
-        test('Members are sorted by lastRegisteredAt descending across all pages', async () => {
-            const { host, token, members } = await setupMembers([march, january, june, february, may]);
-            const [marchMember, januaryMember, juneMember, februaryMember, mayMember] = members;
+                const ids = await fetchAllPages({
+                    host,
+                    token,
+                    sort: [{ key: 'lastRegisteredAt', order: SortItemDirection.DESC }],
+                    limit: 2,
+                });
 
-            const ids = await fetchAllPages({
-                host,
-                token,
-                sort: [{ key: 'lastRegisteredAt', order: SortItemDirection.DESC }],
-                limit: 2,
+                expect(ids).toEqual([
+                    juneMember.id,
+                    mayMember.id,
+                    marchMember.id,
+                    februaryMember.id,
+                    januaryMember.id,
+                ]);
             });
 
-            expect(ids).toEqual([
-                juneMember.id,
-                mayMember.id,
-                marchMember.id,
-                februaryMember.id,
-                januaryMember.id,
-            ]);
-        });
+            test('Members without a lastRegisteredAt are sorted first when ascending', async () => {
+                const { host, token, members } = await setupMembers([march, null, january]);
+                const [marchMember, neverRegisteredMember, januaryMember] = members;
 
-        test('Members without a lastRegisteredAt are sorted first when ascending', async () => {
-            const { host, token, members } = await setupMembers([march, null, january]);
-            const [marchMember, neverRegisteredMember, januaryMember] = members;
-
-            // A limit of 1 puts the page boundary right after the member without a lastRegisteredAt,
-            // so the next page filter is built from a null value.
-            const ids = await fetchAllPages({
-                host,
-                token,
-                sort: [{ key: 'lastRegisteredAt', order: SortItemDirection.ASC }],
-                limit: 1,
-            });
-
-            expect(ids).toEqual([
-                neverRegisteredMember.id,
-                januaryMember.id,
-                marchMember.id,
-            ]);
-        });
-
-        test('Members without a lastRegisteredAt are sorted last when descending', async () => {
-            const { host, token, members } = await setupMembers([march, null, january]);
-            const [marchMember, neverRegisteredMember, januaryMember] = members;
-
-            const ids = await fetchAllPages({
-                host,
-                token,
-                sort: [{ key: 'lastRegisteredAt', order: SortItemDirection.DESC }],
-                limit: 1,
-            });
-
-            expect(ids).toEqual([
-                marchMember.id,
-                januaryMember.id,
-                neverRegisteredMember.id,
-            ]);
-        });
-
-        test('The next page filter compares lastRegisteredAt as a UTC datetime string', async () => {
-            const { host, token, members } = await setupMembers([january, february]);
-            const [januaryMember] = members;
-
-            const request = Request.get({
-                path: baseUrl,
-                host,
-                query: new LimitedFilteredRequest({
+                // A limit of 1 puts the page boundary right after the member without a lastRegisteredAt,
+                // so the next page filter is built from a null value.
+                const ids = await fetchAllPages({
+                    host,
+                    token,
                     sort: [{ key: 'lastRegisteredAt', order: SortItemDirection.ASC }],
                     limit: 1,
-                }),
-                headers: {
-                    authorization: 'Bearer ' + token.accessToken,
-                },
+                });
+
+                expect(ids).toEqual([
+                    neverRegisteredMember.id,
+                    januaryMember.id,
+                    marchMember.id,
+                ]);
             });
 
-            const response = await testServer.test(endpoint, request);
-            expect(response.status).toBe(200);
-            expect(response.body.results.members).toHaveLength(1);
+            test('Members without a lastRegisteredAt are sorted last when descending', async () => {
+                const { host, token, members } = await setupMembers([march, null, january]);
+                const [marchMember, neverRegisteredMember, januaryMember] = members;
 
-            // The value has to be formatted in UTC, because that is how MySQL stores the datetime column.
-            // Comparing against a raw Date or a localized string would shift the page boundary.
-            expect(response.body.next?.pageFilter).toMatchObject({
-                $or: [
-                    { lastRegisteredAt: { $gt: '2023-01-10 08:30:00' } },
-                    {
-                        $and: [
-                            { lastRegisteredAt: '2023-01-10 08:30:00' },
-                            { id: { $gt: januaryMember.id } },
-                        ],
+                const ids = await fetchAllPages({
+                    host,
+                    token,
+                    sort: [{ key: 'lastRegisteredAt', order: SortItemDirection.DESC }],
+                    limit: 1,
+                });
+
+                expect(ids).toEqual([
+                    marchMember.id,
+                    januaryMember.id,
+                    neverRegisteredMember.id,
+                ]);
+            });
+
+            test('The next page filter compares lastRegisteredAt as a UTC datetime string', async () => {
+                const { host, token, members } = await setupMembers([january, february]);
+                const [januaryMember] = members;
+
+                const request = Request.get({
+                    path: baseUrl,
+                    host,
+                    query: new LimitedFilteredRequest({
+                        sort: [{ key: 'lastRegisteredAt', order: SortItemDirection.ASC }],
+                        limit: 1,
+                    }),
+                    headers: {
+                        authorization: 'Bearer ' + token.accessToken,
                     },
-                ],
+                });
+
+                const response = await testServer.test(endpoint, request);
+                expect(response.status).toBe(200);
+                expect(response.body.results.members).toHaveLength(1);
+
+                // The value has to be formatted in UTC, because that is how MySQL stores the datetime column.
+                // Comparing against a raw Date or a localized string would shift the page boundary.
+                expect(response.body.next?.pageFilter).toMatchObject({
+                    $or: [
+                        { lastRegisteredAt: { $gt: '2023-01-10 08:30:00' } },
+                        {
+                            $and: [
+                                { lastRegisteredAt: '2023-01-10 08:30:00' },
+                                { id: { $gt: januaryMember.id } },
+                            ],
+                        },
+                    ],
+                });
+            });
+
+            test('Members are sorted by createdAt across all pages, even if they never registered', async () => {
+                const { host, token, members } = await setupMembers([null, null, null]);
+                const [first, second, third] = members;
+
+                // createdAt keeps an explicitly set value on save
+                first.createdAt = march;
+                second.createdAt = january;
+                third.createdAt = february;
+
+                await first.save();
+                await second.save();
+                await third.save();
+
+                const ids = await fetchAllPages({
+                    host,
+                    token,
+                    sort: [{ key: 'createdAt', order: SortItemDirection.ASC }],
+                    limit: 1,
+                });
+
+                expect(ids).toEqual([
+                    second.id,
+                    third.id,
+                    first.id,
+                ]);
             });
         });
 
-        test('Members are sorted by createdAt across all pages, even if they never registered', async () => {
-            const { host, token, members } = await setupMembers([null, null, null]);
-            const [first, second, third] = members;
+        describe('memberCachedBalances.amountOpen', () => {
+            /**
+             * Creates one member per passed value, all registered in the same group of a new organization,
+             * and returns an admin with full access to that organization.
+             */
+            async function setupMembers(outstandingBalances: (number | null)[]) {
+                const organization = await new OrganizationFactory({ period }).create();
 
-            // createdAt keeps an explicitly set value on save
-            first.createdAt = march;
-            second.createdAt = january;
-            third.createdAt = february;
+                const user = await new UserFactory({
+                    organization,
+                    permissions: Permissions.create({
+                        level: PermissionLevel.Full,
+                    }),
+                }).create();
 
-            await first.save();
-            await second.save();
-            await third.save();
+                const token = await SessionService.createSession(user);
+                const group = await new GroupFactory({ organization, period }).create();
 
-            const ids = await fetchAllPages({
-                host,
-                token,
-                sort: [{ key: 'createdAt', order: SortItemDirection.ASC }],
-                limit: 1,
+                const members: MemberWithUsersRegistrationsAndGroups[] = [];
+
+                for (const outstandingBalance of outstandingBalances) {
+                    const member = await new MemberFactory({}).create();
+                    await new RegistrationFactory({ member, group }).create();
+
+                    if (outstandingBalance !== null) {
+                        const balance = new CachedBalance();
+                        balance.amountOpen = outstandingBalance;
+                        balance.objectId = member.id;
+                        balance.objectType = ReceivableBalanceType.member;
+                        balance.organizationId = organization.id;
+                        await balance.save();
+                    }
+                    await member.save();
+
+                    members.push(member);
+                }
+
+                return { host: organization.getApiHost(), token, members, organization };
+            }
+
+            test('Members are sorted by memberCachedBalance.amountOpen ascending across all pages', async () => {
+                const { host, token, members } = await setupMembers([30, 5, 7, 0, 15, 45]);
+                const [member30, member5, member7, member0, member15, member45] = members;
+
+                // A limit lower than the total forces the endpoint to build a next page filter from getValue
+                const ids = await fetchAllPages({
+                    host,
+                    token,
+                    sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.ASC }],
+                    limit: 2,
+                });
+
+                expect(ids).toEqual([
+                    member0.id,
+                    member5.id,
+                    member7.id,
+                    member15.id,
+                    member30.id,
+                    member45.id,
+                ]);
             });
 
-            expect(ids).toEqual([
-                second.id,
-                third.id,
-                first.id,
-            ]);
+            test('Members are sorted by memberCachedBalance.amountOpen descending across all pages', async () => {
+                const { host, token, members } = await setupMembers([30, 5, 7, 0, 15, 45]);
+                const [member30, member5, member7, member0, member15, member45] = members;
+
+                const ids = await fetchAllPages({
+                    host,
+                    token,
+                    sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.DESC }],
+                    limit: 2,
+                });
+
+                expect(ids).toEqual([
+                    member45.id,
+                    member30.id,
+                    member15.id,
+                    member7.id,
+                    member5.id,
+                    member0.id,
+                ]);
+            });
+
+            test('Members without a memberCachedBalance.amountOpen are sorted first when ascending', async () => {
+                const { host, token, members } = await setupMembers([30, 5, null, 9, 15, 45]);
+                const [member30, member5, memberNull, member9, member15, member45] = members;
+
+                const ids = await fetchAllPages({
+                    host,
+                    token,
+                    sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.ASC }],
+                    limit: 1,
+                });
+
+                expect(ids).toHaveLength(6);
+                expect(ids).toEqual([
+                    memberNull.id,
+                    member5.id,
+                    member9.id,
+                    member15.id,
+                    member30.id,
+                    member45.id,
+                ]);
+            });
+
+            test('Members without a memberCachedBalance.amountOpen are sorted last when descending', async () => {
+                const { host, token, members } = await setupMembers([30, 5, null, 9, 15, 45]);
+                const [member30, member5, memberNull, member9, member15, member45] = members;
+
+                const ids = await fetchAllPages({
+                    host,
+                    token,
+                    sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.DESC }],
+                    limit: 1,
+                });
+
+                expect(ids).toHaveLength(6);
+                expect(ids).toEqual([
+                    member45.id,
+                    member30.id,
+                    member15.id,
+                    member9.id,
+                    member5.id,
+                    memberNull.id,
+                ]);
+            });
+
+            test('The next page filter is the correct filter', async () => {
+                const { host, token, members } = await setupMembers([0]);
+                const [member0] = members;
+
+                const request = Request.get({
+                    path: baseUrl,
+                    host,
+                    query: new LimitedFilteredRequest({
+                        sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.ASC }],
+                        limit: 1,
+                    }),
+                    headers: {
+                        authorization: 'Bearer ' + token.accessToken,
+                    },
+                });
+
+                const response = await testServer.test(endpoint, request);
+                expect(response.status).toBe(200);
+                expect(response.body.results.members).toHaveLength(1);
+
+                // The value has to be formatted in UTC, because that is how MySQL stores the datetime column.
+                // Comparing against a raw Date or a localized string would shift the page boundary.
+                expect(response.body.next?.pageFilter).toMatchObject({
+                    $or: [
+                        { 'memberCachedBalance.amountOpen': { $gt: 0 } },
+                        {
+                            $and: [
+                                { 'memberCachedBalance.amountOpen': 0 },
+                                { id: { $gt: member0.id } },
+                            ],
+                        },
+                    ],
+                });
+            });
+
+            test('Sorting on memberCachedBalance.amountOpen doesn\'t return duplicate rows', async () => {
+                const { host, token, members } = await setupMembers([30, 5, 7, 0, 15, 45]);
+                const [member30, member5, member7, member0, member15, member45] = members;
+                const organization = await new OrganizationFactory({ period }).create();
+
+                for (const member of [member0, member45, member15]) {
+                    const balance = new CachedBalance();
+                    balance.amountOpen = 15;
+                    balance.objectId = member.id;
+                    balance.objectType = ReceivableBalanceType.member;
+                    balance.organizationId = organization.id;
+
+                    await balance.save();
+                }
+
+                // A limit lower than the total forces the endpoint to build a next page filter from getValue
+                const ids = await fetchAllPages({
+                    host,
+                    token,
+                    sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.ASC }],
+                    limit: 2,
+                });
+
+                expect(ids).toHaveLength(6);
+                expect(ids).toEqual([
+                    member0.id,
+                    member5.id,
+                    member7.id,
+                    member15.id,
+                    member30.id,
+                    member45.id,
+                ]);
+            });
         });
     });
 });
