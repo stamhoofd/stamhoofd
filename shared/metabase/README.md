@@ -113,6 +113,7 @@ cannot be two shapes, so it is two cards, and `only` is what keeps them from bot
 |---|---|---|
 | de leeftijdsverdeling van een eenheid | `eenheid-leeftijd-en-geslacht` | `eenheid-leden-per-leeftijd` |
 | de ULDK-tabel en haar totalen | `uldk`, `uldk-totaal` | `uldk-zonder-geslacht`, `uldk-zonder-geslacht-totaal` |
+| het deelnemerstabblad van de koepel | `deelnemers-bovenlokaal` | `deelnemers-bovenlokaal-werk-en-projectgroepen` |
 
 `except: keeo` on the first and `only: keeo` on the second, which is the whole of the pairing:
 `except` on both would hand a platform naming neither of them both shapes of one figure. The ULDK
@@ -120,14 +121,14 @@ pair says why that matters — both tables are titled `ULDK`, as the page names 
 given the two would store them as one question. Two cards of a tab may share a title exactly because
 no environment writes both, and that is checked per environment rather than over the file.
 
-The aanlevering follows, and is where this cannot be said with `except`: a sheet is one card, so the
-column goes rather than the card. `includes/participant-details.sql` is the kenmerken a
+The aanlevering follows, and is where this cannot be said with `except`: a sheet has to be delivered
+whole, so the column goes rather than the card. `includes/participant-details.sql` is the kenmerken a
 deelnemerstabblad splits its rijen into and `includes/participant-detail-columns.sql` the same ones
 as the names it groups and orders on — keeo's variants of the two name the geboortejaar alone. Both
 are read by both deelnemerstabbladen, and a test keeps them naming the same kenmerken: a column
 selected but not grouped on is a sheet that refuses to run. Both are inlined: what they hold is the
 columns of one sheet rather than a definition the report counts by, and neither is read anywhere but
-in those two cards.
+in the deelnemerstabbladen.
 
 Not grouping on it is the point rather than a consequence. A werkjaar imported from the client's own
 statistics still has the answer on file, so a sheet that kept the column would deliver those years
@@ -180,6 +181,16 @@ header of an export from the column's title, and a sheet read by a government de
 the names the template gives it. A figure the koepel wants out of the same sheet for itself stands
 behind those, in a column the template has no cell for: keeo reads how many of a row are the stam
 and the ondersteunende leden it delivers among the leden and the leiding.
+
+Not every ploeg of a koepel is a structuurvrijwilliger of it, and that is the third pair above: the
+deelnemerstabblad of the koepel is written once for keeo and once for everyone else, so neither card
+carries the other's conditions. Keeo's names its werkgroepen and projectgroepen, and its losse leden
+beside them, and leaves out its personeel even where that sits in a werkgroep as well -- a fact of the
+member rather than of the inschrijving being read. Named rather than read off the categories they are
+filed under, because nothing here knows those: a category lives as json on the unit's registration
+period and the statistics database holds no such thing. So the list is the whole answer, like the
+takken above it -- a ploeg it does not name delivers nobody, and one that is renamed or added in the
+administration has to be renamed or added here too.
 
 The koepel's own organization is treated the other way around by the two. The ledenstatistieken leave
 it out by default -- it is the national body, not an eenheid, and the client's own report normally
