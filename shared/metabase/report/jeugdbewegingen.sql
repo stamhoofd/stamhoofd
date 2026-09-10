@@ -30,7 +30,7 @@ ORDER BY organizations.name
 -- display: table
 -- size: full
 -- columns: ID_Organisatie, Geboortejaar_deelnemers, Gender_deelnemers, Aantal_deelnemers
--- description: Tabblad 'Deelnemers_Bovenlokaal': de structuurvrijwilligers van de koepel, per geboortejaar en geslacht, met een aansluiting in dat werkjaar. Unieke personen, geen inschrijvingen: zo vraagt de metadatafiche het voor de nationale ploegen.
+-- description: Tabblad 'Deelnemers_Bovenlokaal': de structuurvrijwilligers van de koepel van 15 jaar en ouder, per geboortejaar en geslacht, met een aansluiting in dat werkjaar. Unieke personen, geen inschrijvingen: zo vraagt de metadatafiche het voor de nationale ploegen.
 -- The rows before the koepel is dropped: this sheet is about nothing else.
 WITH all_registrations AS (
     -- @include all-registrations
@@ -47,6 +47,7 @@ WHERE
   -- are open to the deelnemers of every group, and counted here every one of them would be delivered
   -- as a structuurvrijwilliger of the bovenlokale structuur.
   AND all_registrations.group_type = 'Membership'
+  AND all_registrations.leeftijd >= 15
 GROUP BY `ID_Organisatie`,
     -- @inline participant-detail-columns
 ORDER BY
