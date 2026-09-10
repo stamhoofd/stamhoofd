@@ -579,7 +579,7 @@ export function getMemberColumns({ platform, organization, dateRange, group, gro
     if (financialRead) {
         allColumns.push(
             new Column<ObjectType, number>({
-                id: 'amountOpen',
+                id: 'memberCachedBalance.amountOpen',
                 name: $t(`%76`),
                 description: $t('%184'),
                 allowSorting: true,
