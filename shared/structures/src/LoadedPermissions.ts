@@ -52,6 +52,23 @@ export class LoadedPermissions {
         return permissions;
     }
 
+    /**
+     * Returns permissions scoped to the given period. When the period is not the
+     * current one (or a period treated as current), $currentPeriod grants are stripped
+     * so only $all and explicit resource grants apply.
+     */
+    forPeriod(isCurrentPeriod: boolean): LoadedPermissions {
+        if (isCurrentPeriod) {
+            return this;
+        }
+
+        const scoped = this.clone();
+        for (const resources of scoped.resources.values()) {
+            resources.delete(PermissionsResourceKey.CurrentPeriod);
+        }
+        return scoped;
+    }
+
     static fromRole(role: PermissionRoleDetailed) {
         const permissions = LoadedPermissions.create({
             level: role.level,
