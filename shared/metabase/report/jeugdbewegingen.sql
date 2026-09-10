@@ -21,14 +21,16 @@ WHERE organizations.active = 1
 GROUP BY organizations.uri, organizations.name
 ORDER BY organizations.name
 
+-- Het deelnemerstabblad van de koepel staat er in twee vormen, en elke omgeving schrijft er precies
+-- één van: welke ploegen van de koepel structuurvrijwilligers zijn, is het antwoord van de koepel
+-- zelf. Keeo levert er een handvol aan die het bij naam noemt, elke andere omgeving alle.
 -- @card deelnemers-bovenlokaal
 -- title: Deelnemers_Bovenlokaal
+-- except: keeo
 -- display: table
 -- size: full
 -- columns: ID_Organisatie, Geboortejaar_deelnemers, Gender_deelnemers, Aantal_deelnemers
--- columns@keeo: ID_Organisatie, Geboortejaar_deelnemers, Aantal_deelnemers
 -- description: Tabblad 'Deelnemers_Bovenlokaal': de structuurvrijwilligers van de koepel, per geboortejaar en geslacht, met een aansluiting in dat werkjaar. Unieke personen, geen inschrijvingen: zo vraagt de metadatafiche het voor de nationale ploegen.
--- description@keeo: Tabblad 'Deelnemers_Bovenlokaal': de structuurvrijwilligers van de koepel, per geboortejaar, met een aansluiting in dat werkjaar. Unieke personen, geen inschrijvingen: zo vraagt de metadatafiche het voor de nationale ploegen.
 -- The rows before the koepel is dropped: this sheet is about nothing else.
 WITH all_registrations AS (
     -- @include all-registrations
@@ -45,6 +47,55 @@ WHERE
   -- are open to the deelnemers of every group, and counted here every one of them would be delivered
   -- as a structuurvrijwilliger of the bovenlokale structuur.
   AND all_registrations.group_type = 'Membership'
+GROUP BY `ID_Organisatie`,
+    -- @inline participant-detail-columns
+ORDER BY
+    -- @inline participant-detail-columns
+
+-- @card deelnemers-bovenlokaal-werk-en-projectgroepen
+-- title: Deelnemers_Bovenlokaal
+-- only: keeo
+-- display: table
+-- size: full
+-- columns: ID_Organisatie, Geboortejaar_deelnemers, Aantal_deelnemers
+-- description: Tabblad 'Deelnemers_Bovenlokaal': de structuurvrijwilligers van de koepel, per geboortejaar, met een aansluiting in dat werkjaar: wie in een werkgroep of een projectgroep zit, plus de losse leden. Personeel telt niet mee, ook niet met een werkgroep erbij. Unieke personen, geen inschrijvingen: zo vraagt de metadatafiche het voor de nationale ploegen.
+-- The rows before the koepel is dropped: this sheet is about nothing else.
+WITH all_registrations AS (
+    -- @include all-registrations
+)
+SELECT
+    all_registrations.organization_uri AS `ID_Organisatie`,
+    -- @inline participant-details
+    COUNT(DISTINCT all_registrations.member_id) AS `Aantal_deelnemers`
+FROM all_registrations
+JOIN platform ON platform.membershipOrganizationId = all_registrations.organization_id
+WHERE
+    -- @include filter-has-delivery-membership
+  -- A ploeg of the koepel, never one of the national events it also runs its registrations for: those
+  -- are open to the deelnemers of every group, and counted here every one of them would be delivered
+  -- as a structuurvrijwilliger of the bovenlokale structuur.
+  AND all_registrations.group_type = 'Membership'
+  -- De werkgroepen en de projectgroepen bij naam, plus de losse leden. De lijst is het hele antwoord:
+  -- een ploeg die er niet in staat, levert niemand aan, dus een groep die hernoemd of bijgemaakt
+  -- wordt in de administratie, hoort hier mee te veranderen. Enkel groepen van de koepel zelf komen
+  -- hier langs, dus een gelijknamige groep van een eenheid raakt de aanlevering niet.
+  AND all_registrations.group_name IN (
+    'aan te vullen in metabase zelf vanwege privacy'
+  )
+  -- Personeel is in dienst en geen vrijwilliger, en telt ook niet mee met een werkgroep erbij: dat is
+  -- iets van het lid, niet van de inschrijving die hier gelezen wordt.
+  AND NOT EXISTS (
+      SELECT 1
+      FROM registrations AS personeel
+      JOIN `groups` AS personeel_groep
+          ON personeel_groep.id = personeel.groupId
+         AND personeel_groep.deletedAt IS NULL
+         AND personeel_groep.name = 'Personeel'
+         AND personeel_groep.organizationId = all_registrations.organization_id
+      WHERE personeel.memberId = all_registrations.member_id
+        AND personeel.periodId = all_registrations.period_id
+        AND personeel.registeredAt IS NOT NULL
+  )
 GROUP BY `ID_Organisatie`,
     -- @inline participant-detail-columns
 ORDER BY
