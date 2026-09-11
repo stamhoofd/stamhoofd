@@ -1,7 +1,7 @@
 import { Factory } from '@simonbackx/simple-database';
 import type { MemberResponsibility } from '@stamhoofd/structures';
 
-import type { Member} from '../models/index.js';
+import type { Member } from '../models/index.js';
 import { MemberResponsibilityRecord } from '../models/index.js';
 import { PlatformResponsibilityFactory } from './PlatformResponsibilityFactory.js';
 
@@ -24,9 +24,9 @@ export class MemberResponsibilityRecordFactory extends Factory<Options, MemberRe
         record.endDate = null;
         record.organizationId = this.options.organizationId ?? this.options.member.organizationId;
 
-        if (record.organizationId) {
+        if (!record.organizationId) {
             if (responsibility.organizationBased) {
-                throw new Error('This responsibility is organization based. Please also provider the organizationId option when creating the record with MemberResponsibilityRecordFactory');
+                throw new Error('This responsibility is organization based. Please also provide the organizationId option when creating the record with MemberResponsibilityRecordFactory');
             }
         }
 

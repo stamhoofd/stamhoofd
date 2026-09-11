@@ -3,7 +3,7 @@ import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
-import { GroupFactory, Member, MemberFactory, OrganizationFactory, Platform, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
+import { GroupFactory, Member, MemberFactory, OrganizationFactory, Platform, RegistrationFactory, UserFactory } from '@stamhoofd/models';
 import type { PatchAnswers } from '@stamhoofd/structures';
 import { MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PermissionLevel, RecordCategory, RecordSettings, RecordTextAnswer, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
@@ -1201,7 +1201,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
         });
     });
 
-    describe('Name and birth date changes', () => {
+    describe('Name, birth date and email changes', () => {
         async function createOwnedMember() {
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({}).create();
@@ -1265,6 +1265,13 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             const response = await patchMember(organization, token, member.id, MemberDetails.patch({ birthDay: newBirthDay }));
             expect(response.status).toBe(200);
             expect(response.body.members[0].details.birthDay?.getFullYear()).toBe(base.getFullYear() + 1);
+        });
+
+        test('A user can still change his own email', async () => {
+            const { organization, member, token } = await createOwnedMember();
+            const response = await patchMember(organization, token, member.id, MemberDetails.patch({ email: 'jon@stamhoofd.be' }));
+            expect(response.status).toBe(200);
+            expect(response.body.members[0].details.email).toBe('jon@stamhoofd.be');
         });
     });
 });

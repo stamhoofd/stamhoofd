@@ -3,10 +3,10 @@ import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
-import { GroupFactory, Member, MemberFactory, MemberPlatformMembership, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
+import { GroupFactory, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecordFactory, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, RegistrationPeriodFactory, User, UserFactory } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import type { PatchAnswers } from '@stamhoofd/structures';
-import { Address, EmergencyContact, MemberDetails, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PermissionLevel, Permissions, PermissionsResourceType, PlatformMembershipType, PlatformMembershipTypeConfig, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, Version } from '@stamhoofd/structures';
+import { Address, EmergencyContact, MemberDetails, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberResponsibility, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PermissionLevel, PermissionRoleForResponsibility, Permissions, PermissionsResourceType, PlatformMembershipType, PlatformMembershipTypeConfig, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
@@ -15,6 +15,7 @@ import { initUitpasApi } from '../../../../tests/init/index.js';
 import { UniqueMemberNumberService } from '../../../services/UniqueMemberNumberService.js';
 import { PatchOrganizationMembersEndpoint } from './PatchOrganizationMembersEndpoint.js';
 import { SessionService } from '../../../services/SessionService.js';
+import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer.js';
 
 const baseUrl = `/organization/members`;
 const endpoint = new PatchOrganizationMembersEndpoint();
@@ -574,7 +575,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 permissions: Permissions.create({
                     level: PermissionLevel.Full,
                 }),
-                organization, // since we are in platform mode, this will only set the permissions for this organization
+                organization,
             }).create();
 
             const member = await new MemberFactory({
@@ -948,6 +949,309 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             expect(response.status).toBe(200);
             expect(response.body.members[0].details.firstName).toBe('Michael');
             expect(response.body.members[0].details.birthDay?.getFullYear()).toBe(base.getFullYear() + 5);
+        });
+    });
+
+    describe('Email changes', () => {
+        const addResponsibility = async (member: Member, level: PermissionLevel, organizationId: string | undefined = undefined) => {
+            await new MemberResponsibilityRecordFactory({
+                member,
+                responsibility: MemberResponsibility.create({
+                    permissions: PermissionRoleForResponsibility.create({
+                        level,
+                    }),
+                    organizationBased: !!organizationId,
+                }),
+                organizationId,
+            }).create();
+
+            await MemberUserSyncer.onChangeMember(member);
+        };
+
+        test('A non-full admin cannot change the email of a member with a function', async () => {
+            const organization = await new OrganizationFactory({}).create();
+
+            const group = await new GroupFactory({ organization }).create();
+            const resources = new Map();
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    group.id,
+                    ResourcePermissions.create({ level: PermissionLevel.None }),
+                ]]),
+            );
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Write, resources }),
+                organization,
+            }).create();
+
+            const memberUser = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full, resources }),
+                organization,
+            }).create();
+
+            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false, user: memberUser }).create();
+            await new RegistrationFactory({ member, group }).create();
+            await addResponsibility(member, PermissionLevel.Full, organization.id);
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ email: 'test@stamhoofd.be' }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, request))
+                .rejects
+                .toThrow(STExpect.simpleError({
+                    code: 'permission_denied',
+                    statusCode: 400,
+                }));
+        });
+
+        test('A non-full admin cannot change email to empty string', async () => {
+            const organization = await new OrganizationFactory({}).create();
+
+            const group = await new GroupFactory({ organization }).create();
+            const resources = new Map();
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    group.id,
+                    ResourcePermissions.create({ level: PermissionLevel.None }),
+                ]]),
+            );
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Write, resources }),
+                organization,
+            }).create();
+
+            const memberUser = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full, resources }),
+                organization,
+            }).create();
+
+            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false, user: memberUser }).create();
+            await new RegistrationFactory({ member, group }).create();
+            await addResponsibility(member, PermissionLevel.Full, organization.id);
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ email: '' }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, request))
+                .rejects
+                .toThrow(STExpect.simpleError({
+                    code: 'permission_denied',
+                    statusCode: 400,
+                }));
+        });
+
+        test.todo('A non-full admin cannot override alternativeEmails with empty array', async () => {
+            const organization = await new OrganizationFactory({}).create();
+
+            const group = await new GroupFactory({ organization }).create();
+            const resources = new Map();
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    group.id,
+                    ResourcePermissions.create({ level: PermissionLevel.None }),
+                ]]),
+            );
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Write, resources }),
+                organization,
+            }).create();
+
+            const memberUser = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full, resources }),
+                organization,
+            }).create();
+
+            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false, user: memberUser }).create();
+            await new RegistrationFactory({ member, group }).create();
+            await addResponsibility(member, PermissionLevel.Full, organization.id);
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({
+                    alternativeEmails: [] as any,
+                }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, request))
+                .rejects
+                .toThrow(STExpect.simpleError({
+                    code: 'permission_denied',
+                    statusCode: 400,
+                }));
+        });
+
+        test('A non-full platform admin cannot change the email of a member with with global permissions', async () => {
+            const organization = await new OrganizationFactory({}).create();
+
+            const user = await new UserFactory({
+                globalPermissions: Permissions.create({
+                    level: PermissionLevel.Write,
+                }),
+                organization,
+            }).create();
+
+            const memberUser = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization,
+            }).create();
+
+            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false, user: memberUser }).create();
+            await addResponsibility(member, PermissionLevel.Full, organization.id);
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ email: 'test@stamhoofd.be' }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, request))
+                .rejects
+                .toThrow(STExpect.simpleError({
+                    code: 'permission_denied',
+                    statusCode: 400,
+                }));
+        });
+
+        test('A full admin can change the email of a member with a function', async () => {
+            const organization = await new OrganizationFactory({}).create();
+
+            const group = await new GroupFactory({ organization }).create();
+            const resources = new Map();
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    group.id,
+                    ResourcePermissions.create({ level: PermissionLevel.Write }),
+                ]]),
+            );
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization,
+            }).create();
+
+            const memberUser = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Write, resources }),
+                organization,
+            }).create();
+
+            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false, user: memberUser }).create();
+            await new RegistrationFactory({ member, group }).create();
+            await addResponsibility(member, PermissionLevel.Write, organization.id);
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ email: 'test@stamhoofd.be' }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            expect(response.status).toBe(200);
+            expect(response.body.members[0].details.email).toBe('test@stamhoofd.be');
+        });
+
+        test('A full platform admin can change the email of a member with global permissions', async () => {
+            const organization = await new OrganizationFactory({}).create();
+
+            const group = await new GroupFactory({ organization }).create();
+            const user = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization,
+            }).create();
+
+            const memberUser = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Write }),
+                organization,
+            }).create();
+
+            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false, user: memberUser }).create();
+            await new RegistrationFactory({ member, group }).create();
+            await addResponsibility(member, PermissionLevel.Write, organization.id);
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ email: 'test@stamhoofd.be' }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            expect(response.status).toBe(200);
+            expect(response.body.members[0].details.email).toBe('test@stamhoofd.be');
+        });
+        test('A non-full admin allows alternativeEmails with empty patch', async () => {
+            const organization = await new OrganizationFactory({}).create();
+
+            const group = await new GroupFactory({ organization }).create();
+            const resources = new Map();
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    group.id,
+                    ResourcePermissions.create({ level: PermissionLevel.Write }),
+                ]]),
+            );
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Write, resources }),
+                organization,
+            }).create();
+
+            const memberUser = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full, resources }),
+                organization,
+            }).create();
+
+            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false, user: memberUser }).create();
+            await new RegistrationFactory({ member, group }).create();
+            await addResponsibility(member, PermissionLevel.Full, organization.id);
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ alternativeEmails: new PatchableArray() }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.members[0].details.alternativeEmails.length).toBe(0);
         });
     });
 
