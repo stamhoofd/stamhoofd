@@ -38,7 +38,7 @@ export class MemberParentsStep implements EditMemberStep {
             return true;
         }
 
-        if (member.isPropertyRequired('nationalRegisterNumber') && !details.parents.some(p => !!p.nationalRegisterNumber)) {
+        if (member.isPropertyRequired('parents.nationalRegisterNumber') && !details.parents.some(p => !!p.nationalRegisterNumber)) {
             return true;
         }
 

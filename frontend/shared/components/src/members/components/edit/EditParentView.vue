@@ -264,8 +264,8 @@ const taxDependent = computed({
 });
 
 /**
- * We only need the national register number of the parent that has the member tax dependent.
- * When we can't ask that (see showTaxDependent), we fall back to asking every parent.
+ * We only ask the national register number of the parent that has the member tax dependent.
+ * An already stored value (or opt-out) stays visible so it can still be corrected.
  */
 const showNationalRegisterNumber = computed(() => {
     if (nationalRegisterNumber.value) {
@@ -276,7 +276,7 @@ const showNationalRegisterNumber = computed(() => {
         return false;
     }
 
-    return showTaxDependent.value ? !!taxDependent.value : true;
+    return showTaxDependent.value && !!taxDependent.value;
 });
 
 const availableAddresses = computed(() => {
