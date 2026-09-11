@@ -2497,7 +2497,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     host,
                     token,
                     sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.DESC }],
-                    limit: 6,
+                    limit: 10,
                 });
 
                 expect(ids).toHaveLength(6);
@@ -2578,6 +2578,29 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     member30.id,
                     member45.id,
                 ]);
+            });
+
+            test.each([
+                [null, SortItemDirection.ASC],
+                [null, SortItemDirection.DESC],
+                [10, SortItemDirection.ASC],
+                [10, SortItemDirection.DESC],
+            ])('Sorting on same memberCachedBalance.amountOpen (%s) sorts on id instead: %s', async (cachedBalance, sortDirection) => {
+                const { host, token, members } = await setupMembers([cachedBalance, cachedBalance, cachedBalance]);
+
+                const ids = await fetchAllPages({
+                    host,
+                    token,
+                    sort: [{ key: 'memberCachedBalance.amountOpen', order: sortDirection }],
+                    limit: 3,
+                });
+
+                const sortedIds = members.map(m => m.id).sort();
+
+                expect(ids).toHaveLength(3);
+                expect(ids).toEqual(sortDirection === SortItemDirection.ASC
+                    ? sortedIds
+                    : sortedIds.reverse());
             });
         });
     });
