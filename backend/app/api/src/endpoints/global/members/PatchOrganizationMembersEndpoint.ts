@@ -158,6 +158,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             struct.details.cleanData();
             member.details = struct.details;
 
+            PatchOrganizationMembersEndpoint.throwIfTooManyTaxDependentParents(member.details);
+
             const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, securityCode, 'put');
             if (duplicate) {
                 // Merge data
@@ -241,6 +243,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
                 const originalReviewTimes = member.details.reviewTimes;
                 const previousUitpasNumber = member.details.uitpasNumberDetails?.uitpasNumber ?? null;
+                const previousTaxDependentCount = PatchOrganizationMembersEndpoint.countTaxDependentParents(member.details);
                 member.details.patchOrPut(patch.details);
 
                 if (patch.details.uitpasNumberDetails || didUitpasReviewChange(patch.details.reviewTimes, originalReviewTimes)) {
@@ -248,6 +251,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
 
                 member.details.cleanData();
+                PatchOrganizationMembersEndpoint.throwIfTooManyTaxDependentParents(member.details, previousTaxDependentCount);
 
                 if (wasReduced !== member.details.shouldApplyReducedPrice) {
                     updateMembershipMemberIds.add(member.id);
@@ -899,6 +903,28 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
         for (const organization of organizations) {
             SetupStepUpdater.updateForOrganization(organization).catch(console.error);
+        }
+    }
+
+    static countTaxDependentParents(details: MemberDetails) {
+        return details.parents.filter(p => p.taxDependent === true).length;
+    }
+
+    /**
+     * At most two parents can have the member tax dependent: one head of the family, or two parents with fiscal co-parenting.
+     *
+     * Members that already exceed this keep being editable, as long as the change doesn't add another one.
+     */
+    static throwIfTooManyTaxDependentParents(details: MemberDetails, previousCount = 0) {
+        const count = PatchOrganizationMembersEndpoint.countTaxDependentParents(details);
+
+        if (count > 2 && count > previousCount) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: 'At most two parents can have a member tax dependent',
+                human: $t('Maximaal twee ouders kunnen een lid fiscaal ten laste hebben. Dat is enkel mogelijk bij gescheiden ouders met fiscaal co-ouderschap.'),
+                field: 'parents',
+            });
         }
     }
 

@@ -2973,6 +2973,159 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             expect(member1.details.parents).toEqual([expectedParent(parent1TaxDependent)]);
             expect(member2.details.parents).toEqual([expectedParent(parent2TaxDepentent)]);
         });
+
+        test.each([
+            [2, false],
+            [3, true],
+        ])('Marking %s parents as taxDependent throws: %s', async (taxDependentCount, shouldThrow) => {
+            const user = await new UserFactory({}).create();
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await SessionService.createSession(admin);
+
+            const parents = ['Linda', 'John', 'Ann'].map(firstName => Parent.create({
+                firstName,
+                lastName: 'Doe',
+                email: firstName.toLowerCase() + '@example.com',
+                updatedAt: new Date(0),
+            }));
+
+            const member = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'Child',
+                    lastName: 'Doe',
+                    parents,
+                }),
+            }).create();
+
+            const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+            for (const parent of parents.slice(0, taxDependentCount)) {
+                parentsPatch.addPatch(Parent.patch({
+                    id: parent.id,
+                    taxDependent: true,
+                }));
+            }
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ parents: parentsPatch }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+
+            if (shouldThrow) {
+                await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                    STExpect.simpleError({
+                        code: 'invalid_field',
+                        field: 'parents',
+                    }),
+                );
+
+                await member.refresh();
+                expect(member.details.parents.filter(p => p.taxDependent === true)).toHaveLength(0);
+                return;
+            }
+
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+
+            await member.refresh();
+            expect(member.details.parents.filter(p => p.taxDependent === true)).toHaveLength(taxDependentCount);
+        });
+
+        test('A member that already has too many taxDependent parents can still be changed', async () => {
+            const user = await new UserFactory({}).create();
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await SessionService.createSession(admin);
+
+            // Data that predates the limit
+            const parents = ['Linda', 'John', 'Ann'].map(firstName => Parent.create({
+                firstName,
+                lastName: 'Doe',
+                email: firstName.toLowerCase() + '@example.com',
+                taxDependent: true,
+                updatedAt: new Date(0),
+            }));
+
+            const member = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'Child',
+                    lastName: 'Doe',
+                    parents,
+                }),
+            }).create();
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ phone: '+32412345678' }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+
+            await member.refresh();
+            expect(member.details.phone).toBe('+32412345678');
+            expect(member.details.parents.filter(p => p.taxDependent === true)).toHaveLength(3);
+        });
+
+        test('A member that already has too many taxDependent parents cannot get another one', async () => {
+            const user = await new UserFactory({}).create();
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await SessionService.createSession(admin);
+
+            const parents = ['Linda', 'John', 'Ann', 'Bob'].map(firstName => Parent.create({
+                firstName,
+                lastName: 'Doe',
+                email: firstName.toLowerCase() + '@example.com',
+                taxDependent: firstName !== 'Bob',
+                updatedAt: new Date(0),
+            }));
+
+            const member = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'Child',
+                    lastName: 'Doe',
+                    parents,
+                }),
+            }).create();
+
+            const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+            parentsPatch.addPatch(Parent.patch({
+                id: parents[3].id,
+                taxDependent: true,
+            }));
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ parents: parentsPatch }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.simpleError({
+                    code: 'invalid_field',
+                    field: 'parents',
+                }),
+            );
+
+            await member.refresh();
+            expect(member.details.parents.filter(p => p.taxDependent === true)).toHaveLength(3);
+        });
     });
 
     describe('Emergency contacts', () => {

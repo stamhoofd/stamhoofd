@@ -239,9 +239,17 @@ const nationalRegisterNumber = computed({
 const taxDependent = computed({
     get: () => patched.value.taxDependent,
     set: (taxDependent) => {
-        const hasOtherTaxDependentParent = props.member?.patchedMember.details.parents.find(p => p.id !== props.parent.id && p.taxDependent);
+        const otherTaxDependentParents = props.member?.patchedMember.details.parents.filter(p => p.id !== props.parent.id && p.taxDependent) ?? [];
 
-        if (hasOtherTaxDependentParent && taxDependent) {
+        if (taxDependent && otherTaxDependentParents.length >= 2) {
+            new CenteredMessage(
+                $t('Maximaal twee ouders kunnen dit lid fiscaal ten laste hebben'),
+                $t('Vink het eerst uit bij een andere ouder. Twee ouders zijn enkel mogelijk bij gescheiden ouders met fiscaal co-ouderschap.'),
+            ).addCloseButton().show();
+            return;
+        }
+
+        if (otherTaxDependentParents.length > 0 && taxDependent) {
             CenteredMessage.confirm({
                 title: $t('Ben je zeker dat er sprake is van fiscaal co-ouderschap?'),
                 description: $t('Dit is enkel nodig als beide ouders gescheiden zijn'),
