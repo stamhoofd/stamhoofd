@@ -53,6 +53,18 @@
             </template>
         </STListItem>
 
+        <STListItem element-name="label" :selectable="!taxDependent.locked.value">
+            <template #left>
+                <Checkbox v-model="taxDependent.enabled.value" v-tooltip="taxDependent.locked.value ? $t('%jE') : ''" :disabled="taxDependent.locked.value" />
+            </template>
+            <p class="style-title-list">
+                {{ $t('Fiscaal ten laste') }}
+            </p>
+            <p class="style-description-small">
+                {{ $t('Vraag bij de oudergegevens wie het lid fiscaal ten laste heeft. Dat bepaalt op wiens naam de fiscale attesten komen, en welke ouder een rijksregisternummer moet invullen.') }}
+            </p>
+        </STListItem>
+
         <STListItem v-for="category of inheritedRecordsConfiguration?.recordCategories ?? []" :key="category.id" element-name="label" :selectable="!getRefForInheritedCategory(category.id).value.locked" class="right-stack">
             <template #left>
                 <Checkbox v-model="getRefForInheritedCategory(category.id).value.enabled" v-tooltip="getRefForInheritedCategory(category.id).value.locked ? $t('%jE') : ''" :disabled="getRefForInheritedCategory(category.id).value.locked" />
@@ -75,7 +87,7 @@
 
 <script setup lang="ts">
 import { PatchMap } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 
@@ -87,7 +99,7 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import type { MemberPropertyWithFilter, Organization, OrganizationRecordsConfiguration, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
 import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, PlatformFamily, PlatformMember, PropertyFilter } from '@stamhoofd/structures';
-import { computed, ref, watchEffect } from 'vue';
+import { computed, ref } from 'vue';
 import { getMemberFilterBuildersForInheritedRecords } from '../../filters/filter-builders/members';
 
 import { RecordEditorSettings, RecordEditorType } from '../RecordEditorSettings';
@@ -211,6 +223,22 @@ const financialSupport = {
                     financialSupport: false,
                 });
             }
+        },
+    }),
+};
+
+const taxDependent = {
+    locked: computed(() => !!props.inheritedRecordsConfiguration?.taxDependent && !patched.value.taxDependent),
+    enabled: computed({
+        get: () => !!props.inheritedRecordsConfiguration?.taxDependent || patched.value.taxDependent,
+        set: (value: boolean) => {
+            if (value && !getFilterConfiguration('nationalRegisterNumber')) {
+                Toast.error($t('Schakel eerst het rijksregisternummer in: dat wordt gevraagd aan de ouder die het lid fiscaal ten laste heeft')).show();
+                return;
+            }
+            addPatch({
+                taxDependent: value,
+            });
         },
     }),
 };

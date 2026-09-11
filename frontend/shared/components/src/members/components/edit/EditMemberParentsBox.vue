@@ -35,7 +35,7 @@
                 </p>
             </STListItem>
 
-            <STListItem v-for="parent in visibleParents" :key="parent.id" :selectable="true" element-name="label" class="right-stack left-center">
+            <STListItem v-for="parent in visibleParents" :key="parent.id" :selectable="true" element-name="label" class="right-stack left-center" data-testid="parent-row">
                 <template #left>
                     <Checkbox :model-value="isParentSelected(parent)" @update:model-value="setParentSelected(parent, $event)" />
                 </template>
@@ -62,7 +62,7 @@
                         <span>{{ $t('%SN') }}</span>
                     </span>
 
-                    <button v-else class="button text limit-space" type="button" @click.stop="editParent(parent)">
+                    <button v-else class="button text limit-space" type="button" data-testid="edit-parent-button" @click.stop="editParent(parent)">
                         <span class="icon edit" />
                         <span>{{ $t('%f9') }}</span>
                     </button>
@@ -71,14 +71,14 @@
         </STList>
 
         <div class="style-button-bar">
-            <button type="button" class="button text" :class="{selected: visibleParents.length <= 1}" @click="addParent()">
+            <button type="button" class="button text" :class="{selected: visibleParents.length <= 1}" data-testid="add-parent-button" @click="addParent()">
                 <span class="icon add" />
                 <span>{{ $t('%fV') }}</span>
             </button>
         </div>
 
         <p v-if="!willMarkReviewed && reviewDate && isAdmin" class="style-description-small">
-            {{ $t('%fC') }} {{ formatDate(reviewDate) }}. <button type="button" class="inline-link" v-tooltip="$t('%fD')" @click="clear">
+            {{ $t('%fC') }} {{ formatDate(reviewDate) }}. <button v-tooltip="$t('%fD')" type="button" class="inline-link" @click="clear">
                 {{ $t('%fE') }}
             </button>.
         </p>
@@ -102,7 +102,7 @@ import type { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
 import { useValidation } from '../../../errors/useValidation';
 import STList from '../../../layout/STList.vue';
-import { useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
+import { useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 
 import { useAuth } from '#hooks/useAuth.ts';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
@@ -119,6 +119,7 @@ const props = defineProps<{
 }>();
 
 const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));
+const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), true);
 const present = usePresent();
 const errors = useErrors({ validator: props.validator });
 const auth = useAuth();
@@ -132,11 +133,19 @@ useValidation(errors.validator, () => {
             field: 'parents',
         }));
     } else if (parents.value.length > 0 && !parents.value.some(p => !!p.nationalRegisterNumber) && isPropertyRequired('parents.nationalRegisterNumber')) {
-        se.addError(new SimpleError({
-            code: 'invalid_field',
-            message: $t(`%108`),
-            field: 'parents',
-        }));
+        if (isPropertyEnabled('parents.taxDependent')) {
+            se.addError(new SimpleError({
+                code: 'invalid_field',
+                message: $t(`Zorg dat er minstens één ouder het lid fiscaal ten laste heeft. Voeg daar dan een rijksregisternummer toe.`),
+                field: 'parents',
+            }));
+        } else {
+            se.addError(new SimpleError({
+                code: 'invalid_field',
+                message: $t(`%108`),
+                field: 'parents',
+            }));
+        }
     }
 
     if (props.member.patchedMember.details.phone) {

@@ -121,6 +121,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 const previousUitpasNumber = member.details.uitpasNumberDetails?.uitpasNumber ?? null;
 
                 const originalReviewTimes = member.details.reviewTimes;
+                const previousTaxDependentCount = PatchOrganizationMembersEndpoint.countTaxDependentParents(member.details);
 
                 member.details.patchOrPut(struct.details);
 
@@ -129,7 +130,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 }
 
                 member.details.cleanData();
-                this.throwIfInvalidDetails(member.details);
+                this.throwIfInvalidDetails(member.details, previousTaxDependentCount);
 
                 // give the parents access to the member they are patching if they would loose access
                 if (
@@ -205,7 +206,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
         );
     }
 
-    private throwIfInvalidDetails(details: MemberDetails) {
+    private throwIfInvalidDetails(details: MemberDetails, previousTaxDependentCount = 0) {
         if (details.firstName.length < 2) {
             throw new SimpleError({
                 code: 'invalid_field',
@@ -221,5 +222,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 field: 'lastName',
             });
         }
+
+        PatchOrganizationMembersEndpoint.throwIfTooManyTaxDependentParents(details, previousTaxDependentCount);
     }
 }

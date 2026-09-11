@@ -63,8 +63,28 @@
                     </template>
                 </p>
 
-                <template v-if="(isPropertyEnabled('parents.nationalRegisterNumber') || nationalRegisterNumber)">
-                    <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`)" :required="isNRNRequiredForThisParent" :nullable="true" :validator="errors.validator" />
+                <template v-if="showTaxDependent">
+                    <Checkbox v-model="taxDependent" data-testid="tax-dependent-checkbox">
+                        <p>
+                            {{ $t('{lid} is fiscaal ten laste van {name} (enkel voor gezinshoofd of fiscaal co-ouderschap)', {
+                                lid: props.member?.member.details.firstName ?? $t('lid'),
+                                name: firstName || $t('deze ouder')
+                            }) }}
+                        </p>
+                        <p class="style-description-small">
+                            <I18nComponent :t="$t('Fiscale attesten \'Kinderopvang\' worden opgemaakt op naam van deze ouder. Enkel het gezinshoofd mag de kinderen ten laste aangeven als aan de voorwaarden voldaan is. Er is maar één gezinshoofd. Bij gescheiden ouders met fiscaal co-ouderschap kan je het bij beide ouders aanvinken, en wordt het attest in twee verdeeld. Duid hier de juiste persoon aan, anders loop je belastingvoordeel mis en staan de fiscale attesten op naam van de foute ouder. <button>Meer info</button>')">
+                                <template #button="{content}">
+                                    <a class="inline-link" href="https://fin.belgium.be/nl/particulieren/belastingaangifte/persoonlijke-situatie/personen-ten-laste/kinderen" target="_blank">
+                                        {{ content }}
+                                    </a>
+                                </template>
+                            </I18nComponent>
+                        </p>
+                    </Checkbox>
+                </template>
+
+                <template v-if="showNationalRegisterNumber">
+                    <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`)" :required="isNRNRequiredForThisParent" :nullable="true" :validator="errors.validator" data-testid="national-register-number-input" />
                     <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
                         {{ $t('%fa') }} <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
                             {{ $t('%fb') }}
@@ -95,8 +115,11 @@
 </template>
 
 <script setup lang="ts">
+import { usePatch } from '#hooks/usePatch.ts';
+import { useIsAllOptional, useIsPropertyEnabled, useIsPropertyRequired } from '#members/hooks/useIsPropertyRequired.ts';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
+import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import type { Address, Parent, ParentType, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
 import { NationalRegisterNumberOptOut, ParentTypeHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -104,17 +127,14 @@ import { computed, nextTick, ref } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { useErrors } from '../../../errors/useErrors';
-import { usePatch } from '#hooks/usePatch.ts';
 import Dropdown from '../../../inputs/Dropdown.vue';
 import EmailInput from '../../../inputs/EmailInput.vue';
 import NRNInput from '../../../inputs/NRNInput.vue';
 import PhoneInput from '../../../inputs/PhoneInput.vue';
 import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
 import { CenteredMessage } from '../../../overlays/CenteredMessage';
-import type { NavigationActions} from '../../../types/NavigationActions';
+import type { NavigationActions } from '../../../types/NavigationActions';
 import { useNavigationActions } from '../../../types/NavigationActions';
-import { useIsAllOptional, useIsPropertyEnabled, useIsPropertyRequired } from '#members/hooks/useIsPropertyRequired.ts';
-import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 
 const props = withDefaults(defineProps<{
     member?: PlatformMember | null;
@@ -151,6 +171,11 @@ const relatedMembers = computed(() => {
 const isPropertyRequired = useIsPropertyRequired(relatedMembers);
 const isPropertyEnabled = useIsPropertyEnabled(relatedMembers, true);
 const isAllOptional = useIsAllOptional(relatedMembers);
+
+/**
+ * Tax dependency is stored per member so we can only ask it when we know which member we are editing.
+ */
+const showTaxDependent = computed(() => isPropertyEnabled('parents.taxDependent') && !!props.member);
 
 /**
  * If NRN is required, it is only required for one parent of each member
@@ -209,6 +234,49 @@ const alternativeEmails = computed({
 const nationalRegisterNumber = computed({
     get: () => patched.value.nationalRegisterNumber,
     set: nationalRegisterNumber => addPatch({ nationalRegisterNumber }),
+});
+
+const taxDependent = computed({
+    get: () => patched.value.taxDependent,
+    set: (taxDependent) => {
+        const otherTaxDependentParents = props.member?.patchedMember.details.parents.filter(p => p.id !== props.parent.id && p.taxDependent) ?? [];
+
+        if (taxDependent && otherTaxDependentParents.length >= 2) {
+            new CenteredMessage(
+                $t('Maximaal twee ouders kunnen dit lid fiscaal ten laste hebben'),
+                $t('Vink het eerst uit bij een andere ouder. Twee ouders zijn enkel mogelijk bij gescheiden ouders met fiscaal co-ouderschap.'),
+            ).addCloseButton().show();
+            return;
+        }
+
+        if (otherTaxDependentParents.length > 0 && taxDependent) {
+            CenteredMessage.confirm({
+                title: $t('Ben je zeker dat er sprake is van fiscaal co-ouderschap?'),
+                description: $t('Dit is enkel nodig als beide ouders gescheiden zijn'),
+                confirmText: $t('Ik ben zeker'),
+            }).then((isSure) => {
+                if (isSure) addPatch({ taxDependent });
+            }).catch(console.error);
+        } else {
+            addPatch({ taxDependent });
+        }
+    },
+});
+
+/**
+ * We only ask the national register number of the parent that has the member tax dependent.
+ * An already stored value (or opt-out) stays visible so it can still be corrected.
+ */
+const showNationalRegisterNumber = computed(() => {
+    if (nationalRegisterNumber.value) {
+        return true;
+    }
+
+    if (!isPropertyEnabled('parents.nationalRegisterNumber')) {
+        return false;
+    }
+
+    return showTaxDependent.value && !!taxDependent.value;
 });
 
 const availableAddresses = computed(() => {
@@ -320,31 +388,31 @@ async function save() {
                 $t(`%zT`),
                 false)) {
                 props.member.addParent(patched.value);
-            }
-            else {
+            } else {
                 props.member.addParent(patched.value);
+
+                // taxDependent is stored per member so it is never copied to the other family members
+                const familyParent = patched.value.clone();
+                familyParent.taxDependent = null;
+
                 for (const member of minorMembers) {
-                    member.addParent(patched.value);
+                    member.addParent(familyParent);
                 }
             }
-        }
-        else {
+        } else {
             if (props.member) {
                 props.member.patchParent(patch.value);
-            }
-            else if (props.family) {
+            } else if (props.family) {
                 props.family.patchParent(patch.value);
             }
         }
 
         if (props.saveHandler) {
             await props.saveHandler(navigate);
-        }
-        else {
+        } else {
             await pop({ force: true });
         }
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;

@@ -276,24 +276,40 @@ export class DocumentTemplate extends QueryableModel {
         const hasDebtor = allRecords.find(s => s.id.startsWith('debtor.'));
 
         if (hasDebtor) {
-            const parentsWithNRN = registration.member.details.parents.filter(p => p.nationalRegisterNumber !== NationalRegisterNumberOptOut && p.nationalRegisterNumber);
-            let debtor: Parent | undefined = parentsWithNRN[0] ?? registration.member.details.parents[0];
-            if (parentsWithNRN.length > 1) {
-                for (const balanceItem of balanceItems) {
-                    if (balanceItem && balanceItem.userId && balanceItem.priceOpen === 0 && balanceItem.status === BalanceItemStatus.Due) {
-                        const user = await User.getByID(balanceItem.userId);
-                        if (user) {
-                            const parent = parentsWithNRN.find(p => p.hasEmail(user.email));
+            let debtor: Parent | undefined;
 
-                            if (parent) {
-                                debtor = parent;
-                                break;
-                            }
+            const taxDependentParents = registration.member.details.parents.filter(p => p.taxDependent === true && p.nationalRegisterNumber !== NationalRegisterNumberOptOut);
+            if (taxDependentParents.length > 0) {
+                if (taxDependentParents.filter(p => p.nationalRegisterNumber).length === 0) {
+                    missingData = true;
+                }
 
-                            if (!debtor.nationalRegisterNumber) {
-                                const parent = registration.member.details.parents.find(p => p.hasEmail(user.email));
+                if (taxDependentParents.length > 1) {
+                    // TODO: Generate multiple documents
+                    debtor = taxDependentParents.find(p => p.nationalRegisterNumber) ?? taxDependentParents[0];
+                } else {
+                    debtor = taxDependentParents[0];
+                }
+            } else {
+                const parentsWithNRN = registration.member.details.parents.filter(p => p.nationalRegisterNumber !== NationalRegisterNumberOptOut && p.nationalRegisterNumber);
+                debtor = parentsWithNRN[0] ?? registration.member.details.parents[0];
+                if (parentsWithNRN.length > 1) {
+                    for (const balanceItem of balanceItems) {
+                        if (balanceItem && balanceItem.userId && balanceItem.priceOpen === 0 && balanceItem.status === BalanceItemStatus.Due) {
+                            const user = await User.getByID(balanceItem.userId);
+                            if (user) {
+                                const parent = parentsWithNRN.find(p => p.hasEmail(user.email));
+
                                 if (parent) {
                                     debtor = parent;
+                                    break;
+                                }
+
+                                if (!debtor.nationalRegisterNumber) {
+                                    const parent = registration.member.details.parents.find(p => p.hasEmail(user.email));
+                                    if (parent) {
+                                        debtor = parent;
+                                    }
                                 }
                             }
                         }
