@@ -462,7 +462,7 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import type { Image, ProductDateRange, ProductLocation } from '@stamhoofd/structures';
-import { OptionMenu, PrivateWebshop, Product, ProductPrice, ProductType, ResolutionFit, ResolutionRequest, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, Version, WebshopField, WebshopTicketType } from '@stamhoofd/structures';
+import { OptionMenu, PrivateWebshop, Product, ProductPrice, ProductType, ResolutionRequest, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, Version, WebshopField, WebshopTicketType } from '@stamhoofd/structures';
 
 import { useGoToUitpasConfiguration } from './useGoToUitpasConfiguration.ts';
 import { useSetUitpasEvent } from '@stamhoofd/components/uitpas/useSetUitpasEvent.ts';
@@ -803,6 +803,10 @@ const showStockBelow = computed({
 });
 
 const hasAnyStock = computed(() => {
+    if (seatingPlan.value) {
+        return seatingPlan.value.seatCount > 0;
+    }
+
     return patchedProduct.value.hasAnyStock;
 });
 
