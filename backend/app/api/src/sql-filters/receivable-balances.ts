@@ -85,7 +85,7 @@ export const receivableBalanceFilterCompilers: SQLFilterDefinitions = {
             ).where(
                 SQL.column('cached_outstanding_balances', 'objectType'),
                 'member'),
-        memberFilterCompilers,
+        memberFilterCompilers(),
     ),
     users: createExistsFilter(
         SQL.select()
