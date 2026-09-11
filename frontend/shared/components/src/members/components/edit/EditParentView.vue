@@ -63,7 +63,7 @@
                     </template>
                 </p>
 
-                <template v-if="isTaxDependentEnabled && member">
+                <template v-if="showTaxDependent">
                     <Checkbox v-model="taxDependent">
                         <p>
                             {{ $t('{lid} is fiscaal ten laste van {name} (enkel voor gezinshoofd of fiscaal co-ouderschap)', {
@@ -83,16 +83,7 @@
                     </Checkbox>
                 </template>
 
-                <template
-                    v-if="
-                        (isTaxDependentEnabled
-                            && taxDependent
-                            && isPropertyEnabled('parents.nationalRegisterNumber'))
-                            || (
-                                !isTaxDependentEnabled
-                                && isPropertyEnabled('parents.nationalRegisterNumber')
-                                || nationalRegisterNumber)"
-                >
+                <template v-if="showNationalRegisterNumber">
                     <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`)" :required="isNRNRequiredForThisParent" :nullable="true" :validator="errors.validator" />
                     <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
                         {{ $t('%fa') }} <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
@@ -124,8 +115,11 @@
 </template>
 
 <script setup lang="ts">
+import { usePatch } from '#hooks/usePatch.ts';
+import { useIsAllOptional, useIsPropertyEnabled, useIsPropertyRequired } from '#members/hooks/useIsPropertyRequired.ts';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
+import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import type { Address, Parent, ParentType, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
 import { NationalRegisterNumberOptOut, ParentTypeHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -133,7 +127,6 @@ import { computed, nextTick, ref } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { useErrors } from '../../../errors/useErrors';
-import { usePatch } from '#hooks/usePatch.ts';
 import Dropdown from '../../../inputs/Dropdown.vue';
 import EmailInput from '../../../inputs/EmailInput.vue';
 import NRNInput from '../../../inputs/NRNInput.vue';
@@ -142,8 +135,6 @@ import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
 import { CenteredMessage } from '../../../overlays/CenteredMessage';
 import type { NavigationActions } from '../../../types/NavigationActions';
 import { useNavigationActions } from '../../../types/NavigationActions';
-import { useIsAllOptional, useIsPropertyEnabled, useIsPropertyRequired } from '#members/hooks/useIsPropertyRequired.ts';
-import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 
 const props = withDefaults(defineProps<{
     member?: PlatformMember | null;
@@ -181,7 +172,10 @@ const isPropertyRequired = useIsPropertyRequired(relatedMembers);
 const isPropertyEnabled = useIsPropertyEnabled(relatedMembers, true);
 const isAllOptional = useIsAllOptional(relatedMembers);
 
-const isTaxDependentEnabled = computed(() => isPropertyEnabled('parents.taxDependent'));
+/**
+ * Tax dependency is stored per member so we can only ask it when we know which member we are editing.
+ */
+const showTaxDependent = computed(() => isPropertyEnabled('parents.taxDependent') && !!props.member);
 
 /**
  * If NRN is required, it is only required for one parent of each member
@@ -259,6 +253,22 @@ const taxDependent = computed({
             addPatch({ taxDependent });
         }
     },
+});
+
+/**
+ * We only need the national register number of the parent that has the member tax dependent.
+ * When we can't ask that (see showTaxDependent), we fall back to asking every parent.
+ */
+const showNationalRegisterNumber = computed(() => {
+    if (nationalRegisterNumber.value) {
+        return true;
+    }
+
+    if (!isPropertyEnabled('parents.nationalRegisterNumber')) {
+        return false;
+    }
+
+    return showTaxDependent.value ? !!taxDependent.value : true;
 });
 
 const availableAddresses = computed(() => {
