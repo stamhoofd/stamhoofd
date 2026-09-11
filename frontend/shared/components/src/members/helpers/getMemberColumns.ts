@@ -582,7 +582,7 @@ export function getMemberColumns({ platform, organization, dateRange, group, gro
                 id: 'memberCachedBalance.amountOpen',
                 name: $t(`%76`),
                 description: $t('%184'),
-                allowSorting: true,
+                allowSorting: !!organization?.id,
                 getValue: v => v.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0),
                 format: (outstandingBalance) => {
                     return Formatter.price(outstandingBalance);
