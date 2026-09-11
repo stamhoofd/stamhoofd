@@ -1701,5 +1701,65 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             expect(member1.details.parents).toEqual([expectedParent(parent1TaxDependent)]);
             expect(member2.details.parents).toEqual([expectedParent(parent2TaxDepentent)]);
         });
+
+        test.each([
+            [2, false],
+            [3, true],
+        ])('Marking %s parents as taxDependent throws: %s', async (taxDependentCount, shouldThrow) => {
+            const user = await new UserFactory({}).create();
+            const token = await SessionService.createSession(user);
+
+            const parents = ['Linda', 'John', 'Ann'].map(firstName => Parent.create({
+                firstName,
+                lastName: 'Doe',
+                email: firstName.toLowerCase() + '@example.com',
+                updatedAt: new Date(0),
+            }));
+
+            const member = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'Child',
+                    lastName: 'Doe',
+                    parents,
+                }),
+            }).create();
+
+            const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+            for (const parent of parents.slice(0, taxDependentCount)) {
+                parentsPatch.addPatch(Parent.patch({
+                    id: parent.id,
+                    taxDependent: true,
+                }));
+            }
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ parents: parentsPatch }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+
+            if (shouldThrow) {
+                await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                    STExpect.simpleError({
+                        code: 'invalid_field',
+                        field: 'parents',
+                    }),
+                );
+
+                await member.refresh();
+                expect(member.details.parents.filter(p => p.taxDependent === true)).toHaveLength(0);
+                return;
+            }
+
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+
+            await member.refresh();
+            expect(member.details.parents.filter(p => p.taxDependent === true)).toHaveLength(taxDependentCount);
+        });
     });
 });
