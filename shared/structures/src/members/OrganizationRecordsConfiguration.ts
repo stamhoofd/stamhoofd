@@ -223,8 +223,8 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     @field({ decoder: PropertyFilter, nullable: true, version: 348 })
     nationalRegisterNumber: PropertyFilter | null = null;
 
-    @field({ decoder: PropertyFilter, nullable: true, ...NextVersion })
-    taxDependent: PropertyFilter | null = null;
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    taxDependent = false;
 
     @field({ decoder: new ArrayDecoder(RecordCategory as Decoder<RecordCategory>), version: 117 })
     recordCategories: RecordCategory[] = [];
@@ -345,12 +345,8 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
             }
         }
 
-        if (parent.taxDependent !== null) {
-            if (clone.taxDependent) {
-                clone.taxDependent = clone.taxDependent.merge(parent.taxDependent);
-            } else {
-                clone.taxDependent = parent.taxDependent;
-            }
+        if (parent.taxDependent !== false) {
+            clone.taxDependent = parent.taxDependent;
         }
 
         if (parent.emailAddress !== null) {

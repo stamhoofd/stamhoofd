@@ -828,7 +828,15 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
-        if (property === 'dataPermission' || property === 'financialSupport') {
+        if (property === 'parents.taxDependent') {
+            // Only useful for the parent that has to supply a national register number
+            if (!this.isPropertyEnabledForPlatform('parents.nationalRegisterNumber')) {
+                return false;
+            }
+            property = 'taxDependent';
+        }
+
+        if (property === 'dataPermission' || property === 'financialSupport' || property === 'taxDependent') {
             if (this.platformRecordsConfiguration?.[property]) {
                 return true;
             }
@@ -842,10 +850,6 @@ export class PlatformMember implements ObjectWithRecords {
             property = 'nationalRegisterNumber';
         }
 
-        if (property === 'parents.taxDependent') {
-            property = 'taxDependent';
-        }
-
         const def = this.platformRecordsConfiguration?.[property];
 
         if (def === null || def === undefined) {
@@ -855,14 +859,18 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     isPropertyEnabled(property: MemberProperty, options?: { checkPermissions?: { user: UserWithMembers; level: PermissionLevel }; scopeGroups?: Group[] | null }) {
+        if (property === 'parents.taxDependent') {
+            // Only useful for the parent that has to supply a national register number
+            if (!this.isPropertyEnabled('parents.nationalRegisterNumber', options)) {
+                return false;
+            }
+            property = 'taxDependent';
+        }
         if (property === 'parents.nationalRegisterNumber') {
             if (this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
                 return false;
             }
             property = 'nationalRegisterNumber';
-        }
-        if (property === 'parents.taxDependent') {
-            property = 'taxDependent';
         }
         if ((property === 'financialSupport' || property === 'uitpasNumber')
             && this.patchedMember.details.dataPermissions?.value === false) {
@@ -916,7 +924,7 @@ export class PlatformMember implements ObjectWithRecords {
         });
 
         for (const recordsConfiguration of recordsConfigurations) {
-            if (property === 'dataPermission' || property === 'financialSupport') {
+            if (property === 'dataPermission' || property === 'financialSupport' || property === 'taxDependent') {
                 if (recordsConfiguration[property]) {
                     return true;
                 }
@@ -939,6 +947,11 @@ export class PlatformMember implements ObjectWithRecords {
 
     isPropertyRequiredForPlatform(property: MemberProperty) {
         if (!this.isPropertyEnabledForPlatform(property)) {
+            return false;
+        }
+
+        if (property === 'taxDependent' || property === 'parents.taxDependent') {
+            // Ticking the checkbox is always optional
             return false;
         }
 
@@ -970,8 +983,9 @@ export class PlatformMember implements ObjectWithRecords {
             property = 'nationalRegisterNumber';
         }
 
-        if (property === 'parents.taxDependent') {
-            property = 'taxDependent';
+        if (property === 'taxDependent' || property === 'parents.taxDependent') {
+            // Ticking the checkbox is always optional
+            return false;
         }
 
         if (property === 'nationalRegisterNumber' && this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
