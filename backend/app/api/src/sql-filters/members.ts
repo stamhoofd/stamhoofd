@@ -572,6 +572,9 @@ export const memberFilterCompilers = (organizationId?: string | null): SQLFilter
                     expression: SQL.column('amountOpen'),
                     type: SQLValueType.Number,
                     nullable: false,
+                    checkPermission: async () => {
+                        await throwIfNoFinancialReadAccess();
+                    },
                 }),
             },
         );
