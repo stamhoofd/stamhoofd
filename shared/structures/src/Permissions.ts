@@ -3,7 +3,7 @@ import { ArrayDecoder, AutoEncoder, EnumDecoder, field, MapDecoder, StringDecode
 import { MemberResponsibilityRecordBase } from './members/MemberResponsibilityRecord.js';
 import { getPermissionLevelNumber, PermissionLevel } from './PermissionLevel.js';
 import { PermissionRole } from './PermissionRole.js';
-import { PermissionsResourceType } from './PermissionsResourceType.js';
+import { downgradeResourceKeys, PermissionsResourceKey, PermissionsResourceType, upgradeResourceKeys } from './PermissionsResourceType.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 
 export function getUnlistedResources(resourceType: PermissionsResourceType, permissions: { resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> }, listedResources: { id: string }[]): { id: string; name: string; type: PermissionsResourceType }[] {
@@ -14,7 +14,7 @@ export function getUnlistedResources(resourceType: PermissionsResourceType, perm
 
     const result: { id: string; name: string; type: PermissionsResourceType }[] = [];
     for (const [id, resource] of resources) {
-        if (id !== '' && !listedResources.find(r => r.id === id)) {
+        if (id !== PermissionsResourceKey.All && id !== PermissionsResourceKey.CurrentPeriod && !listedResources.find(r => r.id === id)) {
             result.push({ id, name: resource.resourceName, type: resourceType });
         }
     }
@@ -48,6 +48,19 @@ export class Permissions extends AutoEncoder {
             ),
         ),
         version: 249,
+    })
+    @field({
+        decoder: new MapDecoder(
+            new EnumDecoder(PermissionsResourceType),
+            new MapDecoder(
+                // ID
+                StringDecoder,
+                ResourcePermissions,
+            ),
+        ),
+        version: 418,
+        upgrade: upgradeResourceKeys,
+        downgrade: downgradeResourceKeys,
     })
     resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = new Map();
 

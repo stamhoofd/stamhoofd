@@ -3,7 +3,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { AccessRight, AccessRightHelper } from './AccessRight.js';
 import { PermissionLevel, getPermissionLevelNumber } from './PermissionLevel.js';
-import { PermissionsResourceType } from './PermissionsResourceType.js';
+import { downgradeResourceKeys, isPeriodScopedResourceType, PermissionsResourceKey, PermissionsResourceType, upgradeResourceKeys } from './PermissionsResourceType.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 
 export class PermissionRole extends AutoEncoder {
@@ -52,6 +52,19 @@ export class PermissionRoleDetailed extends PermissionRole {
             ),
         ),
         version: 248,
+    })
+    @field({
+        decoder: new MapDecoder(
+            new EnumDecoder(PermissionsResourceType),
+            new MapDecoder(
+                // ID
+                StringDecoder,
+                ResourcePermissions,
+            ),
+        ),
+        version: 418,
+        upgrade: upgradeResourceKeys,
+        downgrade: downgradeResourceKeys,
     })
     resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = new Map();
 
@@ -138,21 +151,19 @@ export class PermissionRoleDetailed extends PermissionRole {
         if (!resource) {
             return null;
         }
-        const rInstance = resource.get(id);
-        const allInstance = resource.get('');
 
-        if (!rInstance) {
-            if (allInstance) {
-                return allInstance;
+        const keys = [id];
+        if (id !== PermissionsResourceKey.All) {
+            keys.push(PermissionsResourceKey.All);
+            if (isPeriodScopedResourceType(type) && id !== PermissionsResourceKey.CurrentPeriod) {
+                keys.push(PermissionsResourceKey.CurrentPeriod);
             }
+        }
+        const instances = keys.map(key => resource.get(key)).filter(instance => instance !== undefined) as ResourcePermissions[];
+        if (instances.length === 0) {
             return null;
         }
-
-        if (allInstance) {
-            return rInstance.merge(allInstance);
-        }
-
-        return rInstance;
+        return instances.reduce((merged, instance) => merged.merge(instance));
     }
 
     getMergedResourcePermissions(type: PermissionsResourceType, id: string): ResourcePermissions | null {

@@ -2,7 +2,7 @@ import { Request, Response } from '@simonbackx/simple-endpoints';
 import type { Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
 import { GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import type { BalanceItemWithPayments, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, ChargeRequest, LimitedFilteredRequest, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, VATExcemptReason, Version } from '@stamhoofd/structures';
+import { AccessRight, ChargeRequest, LimitedFilteredRequest, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, VATExcemptReason, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { ChargeMembersEndpoint } from '../../src/endpoints/admin/members/ChargeMembersEndpoint.js';
 import { testServer } from '../helpers/TestServer.js';
@@ -63,7 +63,7 @@ describe('E2E.ChargeMembers', () => {
                 role,
             ],
             resources: new Map([[PermissionsResourceType.Groups, new Map([[
-                '',
+                PermissionsResourceKey.CurrentPeriod,
                 ResourcePermissions.create({
                     level: PermissionLevel.Write,
                 }),
@@ -125,7 +125,7 @@ describe('E2E.ChargeMembers', () => {
                         financialDirectorRole,
                     ],
                     resources: new Map([[PermissionsResourceType.Groups, new Map([[
-                        '',
+                        PermissionsResourceKey.CurrentPeriod,
                         ResourcePermissions.create({
                             level: PermissionLevel.Read,
                         }),
@@ -137,7 +137,7 @@ describe('E2E.ChargeMembers', () => {
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
                     resources: new Map([[PermissionsResourceType.Groups, new Map([[
-                        '',
+                        PermissionsResourceKey.CurrentPeriod,
                         ResourcePermissions.create({
                             level: PermissionLevel.Write,
                         }),
@@ -258,7 +258,7 @@ describe('E2E.ChargeMembers', () => {
                     financialDirectorRoleOfOtherOrganization,
                 ],
                 resources: new Map([[PermissionsResourceType.Groups, new Map([[
-                    '',
+                    PermissionsResourceKey.CurrentPeriod,
                     ResourcePermissions.create({
                         level: PermissionLevel.Write,
                     }),
