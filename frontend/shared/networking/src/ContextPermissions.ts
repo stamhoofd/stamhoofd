@@ -1,5 +1,5 @@
-import type { EmailPreview, Event, Group, GroupCategory, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationRegistrationPeriod, OrganizationTag, PaymentGeneral, Permissions, Platform, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
-import { AccessRight, EventPermissionChecker, GroupType, PermissionLevel, PermissionsResourceKey, PermissionsResourceType } from '@stamhoofd/structures';
+import type { EmailPreview, Event, Group, GroupCategory, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationRegistrationPeriod, OrganizationTag, PaymentGeneral, Permissions, Platform, PlatformMember, Registration, RegistrationPeriodBase, UserWithMembers } from '@stamhoofd/structures';
+import { AccessRight, EventPeriodHelper, EventPermissionChecker, GroupType, PermissionLevel, PermissionsResourceKey, PermissionsResourceType } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { toRaw, unref } from 'vue';
 
@@ -193,16 +193,14 @@ export class ContextPermissions {
             }
         }
 
-        // Skip event fallback outside the current period: event access checks use $currentPeriod-scoped grants and would not succeed cross-period.
-        if (isPeriodInUse && group.type === GroupType.EventRegistration && group.event && group.event.organizationId === organization.id) {
+        if (group.type === GroupType.EventRegistration && group.event && group.event.organizationId === organization.id) {
             // we'll need to check the event permissions
-            return this.canWriteEventForOrganization(group.event, organization);
+            return this.canAccessEventForOrganization(group.event, permissions, permissionLevel, organization, isPeriodInUse);
         }
 
-        // Skip waiting-list-of-event fallback outside the current period: the parent event's permission check would not succeed cross-period.
-        if (isPeriodInUse && group.type === GroupType.WaitingList && group.parentGroup && group.parentGroup.type === GroupType.EventRegistration && group.parentGroup.event && group.parentGroup.event.organizationId === organization.id) {
+        if (group.type === GroupType.WaitingList && group.parentGroup && group.parentGroup.type === GroupType.EventRegistration && group.parentGroup.event && group.parentGroup.event.organizationId === organization.id) {
             // we'll need to check the event permissions
-            return this.canWriteEventForOrganization(group.parentGroup.event, organization);
+            return this.canAccessEventForOrganization(group.parentGroup.event, permissions, permissionLevel, organization, isPeriodInUse);
         }
 
         return false;
@@ -447,6 +445,36 @@ export class ContextPermissions {
                 userPermissions: this.userPermissions,
                 platform: this.platform,
                 organization,
+                isPeriodInUse: this.isEventPeriodInUse(event, organization),
             });
+    }
+
+    isEventPeriodInUse(event: Event, organization: Organization | null): boolean {
+        return EventPeriodHelper.isInAnyPeriod(event, this.getPeriodsInUse(organization));
+    }
+
+    /**
+     * The periods an organization is working in, and the platform period when it applies.
+     */
+    getPeriodsInUse(organization: Organization | null): RegistrationPeriodBase[] {
+        const periods: RegistrationPeriodBase[] = [];
+
+        if (organization) {
+            periods.push(organization.period.period);
+        }
+
+        if (STAMHOOFD.userMode !== 'organization' && !periods.some(p => p.id === this.platform.period.id)) {
+            periods.push(this.platform.period);
+        }
+
+        return periods;
+    }
+
+    private canAccessEventForOrganization(event: Event, permissions: LoadedPermissions, permissionLevel: PermissionLevel, organization: Organization, isPeriodInUse: boolean) {
+        if (permissions.hasResourceAccess(PermissionsResourceType.Events, event.id, permissionLevel)) {
+            return true;
+        }
+
+        return isPeriodInUse && this.canWriteEventForOrganization(event, organization);
     }
 }
