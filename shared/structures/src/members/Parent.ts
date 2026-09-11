@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
 import { DataValidator, Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -27,6 +27,9 @@ export class Parent extends AutoEncoder {
         downgrade: (n: string | typeof NationalRegisterNumberOptOut | null) => n === NationalRegisterNumberOptOut ? null : n,
     })
     nationalRegisterNumber: string | typeof NationalRegisterNumberOptOut | null;
+
+    @field({ decoder: BooleanDecoder, ...NextVersion, nullable: true })
+    taxDependent: boolean | null;
 
     @field({ decoder: StringDecoder, nullable: true })
     phone: string | null;
