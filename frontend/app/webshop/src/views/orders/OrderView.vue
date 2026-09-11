@@ -281,7 +281,7 @@
                                     </h3>
 
                                     <p class="style-definition-text">
-                                        {{ capitalizeFirstLetter(formatDate(order.data.timeSlot.date)) }}<br>
+                                        {{ capitalizeFirstLetter(order.data.timeSlot.toString()) }}<br>
                                     </p>
                                 </STListItem>
                             </template>
