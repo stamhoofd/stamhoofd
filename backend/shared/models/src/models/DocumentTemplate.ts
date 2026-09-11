@@ -286,6 +286,7 @@ export class DocumentTemplate extends QueryableModel {
 
                 if (taxDependentParents.length > 1) {
                     // TODO: Generate multiple documents
+                    debtor = taxDependentParents.find(p => p.nationalRegisterNumber) ?? taxDependentParents[0];
                 } else {
                     debtor = taxDependentParents[0];
                 }
