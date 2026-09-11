@@ -299,9 +299,26 @@ export class AdminPermissionChecker {
         return STAMHOOFD.userMode !== 'organization' && periodId === this.platform.period.id;
     }
 
-    async canAccessGroupsInPeriod(periodId: string, organizationId: string) {
+    async hasSomeAccessInPeriod(periodId: string, organizationId: string): Promise<boolean> {
         const organization = await this.getOrganization(organizationId);
-        return this.isPeriodInUse(periodId, organization) || await this.hasFullAccess(organization.id);
+        const permissions = await this.getOrganizationPermissions(organizationId);
+
+        if (!permissions) {
+            return false;
+        }
+
+        if (permissions.hasFullAccess()) {
+            return true;
+        }
+
+        const organizationPeriod = await this.getOrganizationPeriod(organization, periodId);
+        if (!organizationPeriod) {
+            return false;
+        }
+
+        const scoped = permissions.forPeriod(this.isPeriodInUse(periodId, organization));
+        const groups = await Group.getAll(organizationId, periodId, true, [GroupType.Membership, GroupType.WaitingList, GroupType.EventRegistration]);
+        return groups.some(group => group.getStructure().hasReadAccess(scoped, organizationPeriod.settings.categories));
     }
 
     async canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
