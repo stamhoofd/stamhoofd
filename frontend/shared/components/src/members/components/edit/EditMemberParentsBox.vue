@@ -102,7 +102,7 @@ import type { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
 import { useValidation } from '../../../errors/useValidation';
 import STList from '../../../layout/STList.vue';
-import { useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
+import { useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 
 import { useAuth } from '#hooks/useAuth.ts';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
@@ -119,6 +119,7 @@ const props = defineProps<{
 }>();
 
 const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));
+const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), true);
 const present = usePresent();
 const errors = useErrors({ validator: props.validator });
 const auth = useAuth();
@@ -132,7 +133,7 @@ useValidation(errors.validator, () => {
             field: 'parents',
         }));
     } else if (parents.value.length > 0 && !parents.value.some(p => !!p.nationalRegisterNumber) && isPropertyRequired('parents.nationalRegisterNumber')) {
-        if (isPropertyRequired('parents.taxDependent')) {
+        if (isPropertyEnabled('parents.taxDependent')) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
                 message: $t(`Zorg dat er minstens één ouder het lid fiscaal ten laste heeft. Voeg daar dan een rijksregisternummer toe.`),
