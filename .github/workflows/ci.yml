@@ -10,7 +10,8 @@ on:
   push:
     branches: [ main, ci-test, 'renovate/**' ]
   pull_request:
-    branches: [ main ]
+    # re-evaluate when a PR stops being a draft, gets a label or is retargeted at main
+    types: [opened, synchronize, reopened, ready_for_review, labeled, edited]
 
 # Cancel superseded runs on the same ref. We only cancel on pull_request events so
 # that pushes to main always run to completion (and keep their full check history).
@@ -18,9 +19,24 @@ on:
 #   group: ci-${{ github.workflow }}-${{ github.ref }}
 #   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' && github.event.action != 'edited' && github.event.action != 'labeled' }}
+
+
 jobs:
   job_setup:
     runs-on: ubuntu-latest
+    # IF draft AND not targeting main AND no "ready if CI succeeds" label -> don't run
+    # e.g. middle PR in a stack of PRs (gh stack)
+    if: |
+      github.event_name != 'pull_request' || (
+        (github.event.action != 'edited' || github.event.changes.base.ref.from != '') && (
+          !github.event.pull_request.draft ||
+          github.event.pull_request.base.ref == 'main' ||
+          contains(github.event.pull_request.labels.*.name, 'ready if CI succeeds')
+        )
+      )
     permissions:
       contents: read
       actions: read
@@ -682,6 +698,7 @@ jobs:
     if: |
       !cancelled() &&
       github.event_name == 'pull_request' &&
+      needs.job_setup.result == 'success' &&
       !contains(needs.*.result, 'failure') &&
       !contains(needs.*.result, 'cancelled')
     permissions:
