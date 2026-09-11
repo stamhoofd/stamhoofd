@@ -2497,7 +2497,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     host,
                     token,
                     sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.DESC }],
-                    limit: 1,
+                    limit: 6,
                 });
 
                 expect(ids).toHaveLength(6);
