@@ -64,7 +64,7 @@
                 </p>
 
                 <template v-if="showTaxDependent">
-                    <Checkbox v-model="taxDependent">
+                    <Checkbox v-model="taxDependent" data-testid="tax-dependent-checkbox">
                         <p>
                             {{ $t('{lid} is fiscaal ten laste van {name} (enkel voor gezinshoofd of fiscaal co-ouderschap)', {
                                 lid: props.member?.member.details.firstName ?? $t('lid'),
@@ -84,7 +84,7 @@
                 </template>
 
                 <template v-if="showNationalRegisterNumber">
-                    <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`)" :required="isNRNRequiredForThisParent" :nullable="true" :validator="errors.validator" />
+                    <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`)" :required="isNRNRequiredForThisParent" :nullable="true" :validator="errors.validator" data-testid="national-register-number-input" />
                     <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
                         {{ $t('%fa') }} <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
                             {{ $t('%fb') }}

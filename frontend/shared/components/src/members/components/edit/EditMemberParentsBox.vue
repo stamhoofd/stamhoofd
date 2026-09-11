@@ -35,7 +35,7 @@
                 </p>
             </STListItem>
 
-            <STListItem v-for="parent in visibleParents" :key="parent.id" :selectable="true" element-name="label" class="right-stack left-center">
+            <STListItem v-for="parent in visibleParents" :key="parent.id" :selectable="true" element-name="label" class="right-stack left-center" data-testid="parent-row">
                 <template #left>
                     <Checkbox :model-value="isParentSelected(parent)" @update:model-value="setParentSelected(parent, $event)" />
                 </template>
@@ -62,7 +62,7 @@
                         <span>{{ $t('%SN') }}</span>
                     </span>
 
-                    <button v-else class="button text limit-space" type="button" @click.stop="editParent(parent)">
+                    <button v-else class="button text limit-space" type="button" data-testid="edit-parent-button" @click.stop="editParent(parent)">
                         <span class="icon edit" />
                         <span>{{ $t('%f9') }}</span>
                     </button>
@@ -71,7 +71,7 @@
         </STList>
 
         <div class="style-button-bar">
-            <button type="button" class="button text" :class="{selected: visibleParents.length <= 1}" @click="addParent()">
+            <button type="button" class="button text" :class="{selected: visibleParents.length <= 1}" data-testid="add-parent-button" @click="addParent()">
                 <span class="icon add" />
                 <span>{{ $t('%fV') }}</span>
             </button>

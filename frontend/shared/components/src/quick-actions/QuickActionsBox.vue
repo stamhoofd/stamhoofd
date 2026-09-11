@@ -6,7 +6,7 @@
             </h2>
 
             <STList>
-                <STListItem v-for="(action, index) of actionsInList" :key="index" class="left-center right-stack" :selectable="true" @click="action.action">
+                <STListItem v-for="(action, index) of actionsInList" :key="index" class="left-center right-stack" :selectable="true" data-testid="quick-action" @click="action.action">
                     <template #left>
                         <component :is="action.leftComponent" v-bind="action.leftProps || {}" v-if="action.leftComponent" />
                         <img v-else :src="action.illustration" class="style-illustration-img">
