@@ -373,12 +373,12 @@ async function save() {
             } else {
                 props.member.addParent(patched.value);
 
-                for (const member of minorMembers) {
-                    // Skip some fields
-                    const familyPatch = patched.value;
-                    familyPatch.taxDependent = null;
+                // taxDependent is stored per member so it is never copied to the other family members
+                const familyParent = patched.value.clone();
+                familyParent.taxDependent = null;
 
-                    member.addParent(familyPatch);
+                for (const member of minorMembers) {
+                    member.addParent(familyParent);
                 }
             }
         } else {
