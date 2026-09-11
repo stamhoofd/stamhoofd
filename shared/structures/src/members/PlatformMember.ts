@@ -645,7 +645,7 @@ export class PlatformRegistration extends Registration {
         if (!details.nationalRegisterNumber && member.isPropertyRequired('nationalRegisterNumber', scope)) {
             base.push($t(`%19Q`));
         } else {
-            if (member.isPropertyRequired('parents', scope) && member.isPropertyRequired('nationalRegisterNumber', scope) && !member.patchedMember.details.parents.find(p => p.nationalRegisterNumber)) {
+            if (member.isPropertyRequired('parents', scope) && member.isPropertyRequired('parents.nationalRegisterNumber', scope) && !member.patchedMember.details.parents.find(p => p.nationalRegisterNumber)) {
                 base.push($t(`%zb`));
             }
         }
@@ -822,6 +822,39 @@ export class PlatformMember implements ObjectWithRecords {
         return this.patchedMember.organizationId ? this.family.getOrganization(this.patchedMember.organizationId)?.meta.recordsConfiguration : this.platform.config.recordsConfiguration;
     }
 
+    /**
+     * Fiscal certificates ('Kinderopvang') only cover activities for members under 14, or under 21 with a severe disability.
+     * Certificates are created a year after the fact, so registrations of the last two years still matter.
+     */
+    get needsTaxCertificate(): boolean {
+        const details = this.patchedMember.details;
+        const maxAge = details.severeDisability?.value ? 20 : 13;
+
+        const oldest = new Date();
+        oldest.setFullYear(oldest.getFullYear() - 2);
+
+        for (const registration of this.patchedMember.registrations) {
+            if (registration.registeredAt === null || registration.deactivatedAt !== null) {
+                continue;
+            }
+
+            // Same date the fiscal document uses for its own age check
+            const date = registration.startDate ?? registration.group.settings.startDate;
+
+            if (date < oldest) {
+                continue;
+            }
+
+            const age = details.ageOnDate(date);
+
+            if (age !== null && age <= maxAge) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     isPropertyEnabledForPlatform(property: MemberProperty) {
         if ((property === 'financialSupport' || property === 'uitpasNumber')
             && this.patchedMember.details.dataPermissions?.value === false) {
@@ -829,11 +862,8 @@ export class PlatformMember implements ObjectWithRecords {
         }
 
         if (property === 'parents.taxDependent') {
-            // Only useful for the parent that has to supply a national register number
-            if (!this.isPropertyEnabledForPlatform('parents.nationalRegisterNumber')) {
-                return false;
-            }
-            property = 'taxDependent';
+            // Asked together with, and only for, the parent that supplies a national register number
+            return this.isPropertyEnabledForPlatform('parents.nationalRegisterNumber');
         }
 
         if (property === 'dataPermission' || property === 'financialSupport' || property === 'taxDependent') {
@@ -845,6 +875,10 @@ export class PlatformMember implements ObjectWithRecords {
 
         if (property === 'parents.nationalRegisterNumber') {
             if (this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
+                return false;
+            }
+            // Note: the raw 'taxDependent' property, asking 'parents.taxDependent' here would loop
+            if (!this.isPropertyEnabledForPlatform('taxDependent') || !this.needsTaxCertificate) {
                 return false;
             }
             property = 'nationalRegisterNumber';
@@ -860,14 +894,15 @@ export class PlatformMember implements ObjectWithRecords {
 
     isPropertyEnabled(property: MemberProperty, options?: { checkPermissions?: { user: UserWithMembers; level: PermissionLevel }; scopeGroups?: Group[] | null }) {
         if (property === 'parents.taxDependent') {
-            // Only useful for the parent that has to supply a national register number
-            if (!this.isPropertyEnabled('parents.nationalRegisterNumber', options)) {
-                return false;
-            }
-            property = 'taxDependent';
+            // Asked together with, and only for, the parent that supplies a national register number
+            return this.isPropertyEnabled('parents.nationalRegisterNumber', options);
         }
         if (property === 'parents.nationalRegisterNumber') {
             if (this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
+                return false;
+            }
+            // Note: the raw 'taxDependent' property, asking 'parents.taxDependent' here would loop
+            if (!this.isPropertyEnabled('taxDependent', options) || !this.needsTaxCertificate) {
                 return false;
             }
             property = 'nationalRegisterNumber';
