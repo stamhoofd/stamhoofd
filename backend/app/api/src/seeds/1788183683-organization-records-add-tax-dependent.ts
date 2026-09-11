@@ -13,7 +13,7 @@ export default new Migration(async () => {
         batchSize: 100,
         action: async (organization) => {
             if (organization.meta.recordsConfiguration.nationalRegisterNumber) {
-                organization.meta.recordsConfiguration.taxDependent = organization.meta.recordsConfiguration.nationalRegisterNumber;
+                organization.meta.recordsConfiguration.taxDependent = true;
 
                 await organization.save({
                     skipMarkSaved: true,
