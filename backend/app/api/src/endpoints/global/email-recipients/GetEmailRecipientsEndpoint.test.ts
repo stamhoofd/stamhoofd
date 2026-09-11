@@ -1,6 +1,6 @@
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { GetEmailRecipientsEndpoint } from './GetEmailRecipientsEndpoint.js';
-import { AccessRight, EmailStatus, LimitedFilteredRequest, OrganizationEmail, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
+import { AccessRight, EmailStatus, LimitedFilteredRequest, OrganizationEmail, PermissionLevel, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
 import type { Organization, RegistrationPeriod, User, Token } from '@stamhoofd/models';
 import { Email, EmailRecipient, OrganizationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { Request } from '@simonbackx/simple-endpoints';
@@ -49,7 +49,7 @@ describe('Endpoint.GetEmailRecipients', () => {
             permissions: Permissions.create({
                 level: PermissionLevel.None,
                 resources: new Map([
-                    [PermissionsResourceType.Senders, new Map([['', ResourcePermissions.create({
+                    [PermissionsResourceType.Senders, new Map([[PermissionsResourceKey.All, ResourcePermissions.create({
                         resourceName: sender.name!,
                         level: PermissionLevel.Read,
                     })]])],

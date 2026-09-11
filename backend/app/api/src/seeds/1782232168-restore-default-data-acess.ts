@@ -1,6 +1,6 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Organization } from '@stamhoofd/models';
-import { AccessRight, PermissionLevel, PermissionRoleDetailed, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
+import { AccessRight, PermissionLevel, PermissionRoleDetailed, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
 import { SeedTools } from '../helpers/SeedTools.js';
 
 export default new Migration(async () => {
@@ -42,7 +42,7 @@ async function start() {
                     AccessRight.MemberManageNRN,
                 );
                 base.resources.set(PermissionsResourceType.RecordCategories, new Map([
-                    ['', ResourcePermissions.create({
+                    [PermissionsResourceKey.All, ResourcePermissions.create({
                         level: PermissionLevel.Full,
                     })],
                 ]));
@@ -50,7 +50,7 @@ async function start() {
 
             // Senders
             base.resources.set(PermissionsResourceType.Senders, new Map([
-                ['', ResourcePermissions.create({
+                [PermissionsResourceKey.All, ResourcePermissions.create({
                     level: PermissionLevel.None,
                     accessRights: [
                         AccessRight.SendMessages,
