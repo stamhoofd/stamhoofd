@@ -43,6 +43,9 @@
                     <h3 class="style-title-list">
                         {{ getPermissionLevelName(PermissionLevel.Read) }}
                     </h3>
+                    <p v-if="basePermission === PermissionLevel.Read" class="style-description-small">
+                        {{ $t('Deze toegang geldt over alle werkjaren heen.') }}
+                    </p>
                 </STListItem>
 
                 <STListItem v-if="basePermission === PermissionLevel.Write || auth.hasPlatformFullAccess()" :selectable="!isLevelLocked(PermissionLevel.Write)" :disabled="isLevelLocked(PermissionLevel.Write)" element-name="label">
@@ -52,6 +55,9 @@
                     <h3 class="style-title-list">
                         {{ getPermissionLevelName(PermissionLevel.Write) }}
                     </h3>
+                    <p v-if="basePermission === PermissionLevel.Write" class="style-description-small">
+                        {{ $t('Deze toegang geldt over alle werkjaren heen.') }}
+                    </p>
                 </STListItem>
 
                 <STListItem :selectable="!isLevelLocked(PermissionLevel.Full)" :disabled="isLevelLocked(PermissionLevel.Full)" element-name="label">
@@ -81,22 +87,39 @@
                 </STList>
             </CategorizedBox>
 
-            <CategorizedBox v-if="categories.length" icon="folder" :title="$t('%Z5')">
+            <CategorizedBox v-if="showCategoriesBox" icon="folder" :title="$t('%Z5')">
+                <template v-if="organization" #buttons>
+                    <button class="button text only-icon-smartphone" type="button" @click="addCategories">
+                        <span class="icon add" />
+                        <span>{{ $t('Meer toevoegen') }}</span>
+                    </button>
+                </template>
+
                 <p>{{ $t('%Z6') }}</p>
 
                 <STList>
-                    <ResourcePermissionRow v-for="category in categories" :key="category.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: category.id, name: category.settings.name, type: PermissionsResourceType.GroupCategories }" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.GroupCategories, PermissionsResourceKey.All)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.All, name: $t('Alle categorieën'), type: PermissionsResourceType.GroupCategories }" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="addPatch" />
 
-                    <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.GroupCategories, patched, categories)" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" :unlisted="true" @patch:role="addPatch" />
+                    <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.GroupCategories, PermissionsResourceKey.CurrentPeriod)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.CurrentPeriod, name: $t('Alle categorieën van de huidige periode'), type: PermissionsResourceType.GroupCategories }" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="addPatch" />
+
+                    <ResourcePermissionRow v-for="resource in categoryResources" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="addPatch" />
                 </STList>
             </CategorizedBox>
 
-            <CategorizedBox v-if="enableMemberModule && groups.length" icon="group" :title="$t('%Z7')">
-                <STList>
-                    <ResourcePermissionRow :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.CurrentPeriod, name: $t('%L8'), type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
-                    <ResourcePermissionRow v-for="group in groups" :key="group.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: group.id, name: group.settings.name + ' ('+(group.settings.period?.nameShort ?? '?')+')', type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
+            <CategorizedBox v-if="showGroupsBox" icon="group" :title="$t('%Z7')">
+                <template v-if="canAddGroups" #buttons>
+                    <button class="button text only-icon-smartphone" type="button" @click="addGroups">
+                        <span class="icon add" />
+                        <span>{{ $t('Meer toevoegen') }}</span>
+                    </button>
+                </template>
 
-                    <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.Groups, patched, groups)" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" :unlisted="true" @patch:role="addPatch" />
+                <STList>
+                    <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.Groups, PermissionsResourceKey.All)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.All, name: $t('%L8'), type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
+
+                    <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.Groups, PermissionsResourceKey.CurrentPeriod)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.CurrentPeriod, name: $t('Alle leden van de huidige periode'), type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
+
+                    <ResourcePermissionRow v-for="resource in groupResources" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
                 </STList>
             </CategorizedBox>
 
@@ -197,7 +220,7 @@
 <script setup lang="ts">
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
@@ -206,11 +229,13 @@ import { useAuth } from '#hooks/useAuth.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import CategorizedBox from '#layout/categorized-view/CategorizedBox.vue';
 import CategorizedView from '#layout/categorized-view/CategorizedView.vue';
 import Spinner from '#Spinner.vue';
-import type { Group, GroupCategory, PermissionRoleDetailed, User, WebshopPreview } from '@stamhoofd/structures';
-import { AccessRight, getPermissionLevelNumber, getUnlistedResources, maximumPermissionlevel, PermissionLevel, PermissionRoleForResponsibility, PermissionsResourceKey, PermissionsResourceType, getPermissionLevelName } from '@stamhoofd/structures';
+import type { OrganizationRegistrationPeriod, PermissionRoleDetailed, User, WebshopPreview } from '@stamhoofd/structures';
+import { AccessRight, getGroupTypeName, getPermissionLevelName, getPermissionLevelNumber, getUnlistedResources, GroupType, maximumPermissionlevel, PermissionLevel, PermissionRoleForResponsibility, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
+import { Sorter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import AccessRightPermissionRow from './components/AccessRightPermissionRow.vue';
@@ -239,8 +264,8 @@ const props = withDefaults(
 
 const app = useAppContext();
 const enableWebshopModule = computed(() => (organization.value?.meta?.packages.useWebshops ?? false));
-const enableMemberModule = computed(() => organization.value?.meta?.packages.useMembers ?? false);
 const pop = usePop();
+const present = usePresent();
 const isForResponsibility = props.role instanceof PermissionRoleForResponsibility;
 const canDelete = !props.isNew && !!props.deleteHandler;
 
@@ -255,12 +280,7 @@ const { sortedAdmins, loading, getUnloadedPermissions } = useAdmins();
 const organization = useOrganization();
 const platform = usePlatform();
 const { patched, addPatch, hasChanges, patch } = usePatch(props.role);
-const groups: Ref<Group[]> = computed(() => [
-    ...(organization.value?.adminAvailableGroups ?? []),
-    ...(organization.value?.period.waitingLists ?? []),
-]);
 const webshops: Ref<WebshopPreview[]> = computed(() => organization.value?.webshops ?? []);
-const categories: Ref<GroupCategory[]> = computed(() => organization.value?.getCategoryTree({ permissions: auth.permissions }).categories ?? []);
 const tags = computed(() => platform.value.config.tags);
 const recordCategories = computed(() => {
     const base = (organization.value?.meta.recordsConfiguration.recordCategories?.slice() ?? []).map(r => ({
@@ -284,6 +304,121 @@ const senders = computed(() => {
     }
     return platform.value.privateConfig?.emails ?? [];
 });
+
+const allRoles = computed(() => [patched.value, ...props.inheritedRoles]);
+
+/**
+ * The resources of a type that are explicitly granted by this role or one of the inherited roles,
+ * named after the name that was stored when the permission was added.
+ */
+function grantedResources(type: PermissionsResourceType) {
+    const rows: { id: string; name: string; type: PermissionsResourceType }[] = [];
+    const ids = new Set<string>();
+
+    for (const role of allRoles.value) {
+        for (const resource of getUnlistedResources(type, role, [])) {
+            if (ids.has(resource.id) || !resourceAddsAccess(type, resource.id)) {
+                continue;
+            }
+            ids.add(resource.id);
+            rows.push(resource);
+        }
+    }
+
+    rows.sort((a, b) => Sorter.byStringValue(a.name, b.name));
+    return rows;
+}
+
+function resourceAddsAccess(type: PermissionsResourceType, id: string) {
+    return allRoles.value.some((role) => {
+        const resource = role.resources.get(type)?.get(id);
+        return !!resource && addsAccess(resource, type);
+    });
+}
+
+/** What the role already grants for every resource of a type, in every period. */
+function getResourceCoverage(type: PermissionsResourceType, options?: { withAllResources?: boolean }) {
+    const coverage = ResourcePermissions.create({});
+
+    for (const role of allRoles.value) {
+        coverage.add(ResourcePermissions.baseline(role));
+
+        const all = (options?.withAllResources ?? true) ? role.resources.get(type)?.get(PermissionsResourceKey.All) : undefined;
+        if (all) {
+            coverage.add(all);
+        }
+    }
+
+    return coverage;
+}
+
+function addsAccess(resource: ResourcePermissions, type: PermissionsResourceType) {
+    return !resource.isCoveredBy(getResourceCoverage(type));
+}
+
+function canAddAccess(type: PermissionsResourceType, key: PermissionsResourceKey) {
+    return getResourceCoverage(type, { withAllResources: key === PermissionsResourceKey.CurrentPeriod }).level !== PermissionLevel.Full;
+}
+
+const groupResources = computed(() => grantedResources(PermissionsResourceType.Groups));
+
+const categoryResources = computed(() => grantedResources(PermissionsResourceType.GroupCategories));
+
+const canAddGroups = computed(() => !!organization.value && canAddAccess(PermissionsResourceType.Groups, PermissionsResourceKey.CurrentPeriod));
+
+async function addGroups() {
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: AsyncComponent(() => import('./EditResourcePermissionsView.vue'), {
+                    title: $t('Inschrijvingsgroepen'),
+                    role: patched.value,
+                    inheritedRoles: props.inheritedRoles,
+                    type: PermissionsResourceType.Groups,
+                    configurableAccessRights: [AccessRight.EventWrite],
+                    getResources: (period: OrganizationRegistrationPeriod) => [
+                        ...period.adminCategoryTree.getAllGroups(),
+                        ...period.waitingLists,
+                    ].map(group => ({
+                        id: group.id,
+                        name: group.settings.getNameWithPeriod(),
+                        type: PermissionsResourceType.Groups,
+                        description: group.type === GroupType.WaitingList ? getGroupTypeName(group.type) : undefined,
+                    })),
+                    saveHandler: addPatch,
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
+
+async function addCategories() {
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: AsyncComponent(() => import('./EditResourcePermissionsView.vue'), {
+                    title: $t('Inschrijvingscategorieën'),
+                    role: patched.value,
+                    inheritedRoles: props.inheritedRoles,
+                    type: PermissionsResourceType.GroupCategories,
+                    configurableAccessRights: [AccessRight.OrganizationCreateGroups],
+                    getResources: (period: OrganizationRegistrationPeriod) => period.adminCategoryTree.getAllCategories().map(category => ({
+                        id: category.id,
+                        name: category.getName(period) + ' (' + period.period.nameShort + ')',
+                        type: PermissionsResourceType.GroupCategories,
+                    })),
+                    saveHandler: addPatch,
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
+
+const showGroupsBox = computed(() => organization.value?.meta?.packages.useMembers || groupResources.value.length > 0);
+
+const showCategoriesBox = computed(() => organization.value?.meta?.packages.useMembers || categoryResources.value.length > 0);
 
 const save = async () => {
     if (saving.value || deleting.value) {
@@ -374,7 +509,10 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
+    return await CenteredMessage.confirm({
+        title: $t(`%A0`),
+        confirmText: $t(`%4X`),
+    });
 };
 
 defineExpose({
