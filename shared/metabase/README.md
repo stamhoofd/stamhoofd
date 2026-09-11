@@ -45,9 +45,16 @@ rather than inschrijvers, and reads what a member is from the cancelled registra
 `jeugdbewegingen.sql` decides it in its own `deelnemers`.
 
 Which registrations reach either of those is `includes/filter-registration-types.sql`: a registration
-stands in a leeftijdsgroep, an activiteit or a wachtlijst, and only the first two count as being a
-lid -- counting the wachtlijsten would put the people waiting for a place among the leden. The
-aanlevering pins itself further to the leeftijdsgroepen alone in `jeugdbewegingen.sql`.
+stands in a leeftijdsgroep, an activiteit or a wachtlijst. A leeftijdsgroep makes someone a lid of
+that eenheid, a wachtlijst makes them nobody's -- counting those would put the people waiting for a
+place among the leden -- and an activiteit counts only for whoever is in no leeftijdsgroep that
+werkjaar. Only for them, because a lid of one eenheid who joins the kamp of another was counted at
+both: once through their leeftijdsgroep and once through the activiteit, the second time among that
+eenheid's kinderen, where it moved its omkaderingscijfer and GTP index as well as its ledenaantal.
+Whoever still counts through an activiteit is in no leeftijdsgroep, so `all-registrations` names them
+`Activiteit` rather than naming the kamp: the charts that draw the leden per leeftijdsgroep group on
+that column, and a kamp would stand among the takken there. The aanlevering pins itself further to the
+leeftijdsgroepen alone in `jeugdbewegingen.sql`.
 
 ## One definition, in Metabase too
 

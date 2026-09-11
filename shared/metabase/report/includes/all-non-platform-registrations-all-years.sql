@@ -14,7 +14,13 @@ SELECT
     registration_periods.startDate AS period_start,
     `groups`.type AS group_type,
     `groups`.name AS group_name,
-    COALESCE(default_age_groups_with_category.name, `groups`.name) AS `Leeftijdsgroep`,
+    -- Een activiteit is geen leeftijdsgroep. Wie hier nog met zo'n inschrijving staat, zit dat
+    -- werkjaar in geen enkele leeftijdsgroep, dus de grafieken die de leden per leeftijdsgroep
+    -- tekenen zetten hem onder één noemer in plaats van onder de naam van het kamp zelf.
+    CASE
+        WHEN `groups`.type = 'EventRegistration' THEN 'Activiteit'
+        ELSE COALESCE(default_age_groups_with_category.name, `groups`.name)
+    END AS `Leeftijdsgroep`,
     default_age_groups_with_category.id AS age_group_id,
     default_age_groups_with_category.category AS age_group_category,
     default_age_groups_with_category.minAge AS age_group_min_age,
