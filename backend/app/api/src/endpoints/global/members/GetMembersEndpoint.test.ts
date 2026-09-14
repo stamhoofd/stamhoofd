@@ -2531,8 +2531,6 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 expect(response.status).toBe(200);
                 expect(response.body.results.members).toHaveLength(1);
 
-                // The value has to be formatted in UTC, because that is how MySQL stores the datetime column.
-                // Comparing against a raw Date or a localized string would shift the page boundary.
                 expect(response.body.next?.pageFilter).toMatchObject({
                     $or: [
                         { 'memberCachedBalance.amountOpen': { $gt: 0 } },
@@ -2561,7 +2559,6 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     await balance.save();
                 }
 
-                // A limit lower than the total forces the endpoint to build a next page filter from getValue
                 const ids = await fetchAllPages({
                     host,
                     token,
