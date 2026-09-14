@@ -297,6 +297,15 @@
                         {{ $t('%ZnV') }}
                     </p>
                 </STListItem>
+
+                <STListItem v-if="!platform.config.featureFlags.includes('modern-webshop')" :selectable="true" element-name="label" data-testid="modern-webshop-checkbox">
+                    <template #left>
+                        <Checkbox :model-value="getFeatureFlag('modern-webshop')" @update:model-value="setFeatureFlag('modern-webshop', !!$event)" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('Moderne webshops') }}
+                    </h3>
+                </STListItem>
             </STList>
         </div>
     </SaveView>

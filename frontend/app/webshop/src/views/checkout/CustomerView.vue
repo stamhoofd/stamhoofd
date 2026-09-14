@@ -4,6 +4,34 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
+        <template v-if="itemsWithCustomer.length > 0 && !isLoggedIn">
+            <p class="style-description-block">
+                {{ $t('Wie is de contactpersoon voor deze bestelling?') }}
+            </p>
+            <STList class="customer-selection-list" data-testid="main-customer-list">
+                <STListItem v-for="item of itemsWithCustomer" :key="item.id" :selectable="true" element-name="label" class="left-center">
+                    <template #left>
+                        <Radio :model-value="selectedItemId" :value="item.id" name="main-customer" @update:model-value="selectItemCustomer(item)" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ item.customer!.name }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ item.product.name }}
+                    </p>
+                </STListItem>
+                <STListItem :selectable="true" element-name="label" class="left-center">
+                    <template #left>
+                        <Radio :model-value="selectedItemId" value="" name="main-customer" @update:model-value="selectOtherCustomer" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('Iemand anders') }}
+                    </h3>
+                </STListItem>
+            </STList>
+            <hr>
+        </template>
+
         <CustomerInputs :customer="checkoutManager.checkout.customer" :settings="fieldSettings" :show-name="!isLoggedIn" :error-box="errors.errorBox" :validator="errors.validator" :validate-server="unscopedServer" :email-placeholder="emailPlaceholder" :email-description="emailDescription" @change="checkoutManager.saveCheckout()" />
 
         <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="checkoutManager.checkout.fieldAnswers" :error-box="errors.errorBox" />
@@ -15,11 +43,15 @@ import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import Radio from '@stamhoofd/components/inputs/Radio.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import CustomerInputs from '@stamhoofd/components/views/CustomerInputs.vue';
 import FieldBox from '@stamhoofd/components/views/FieldBox.vue';
-import { WebshopTicketType } from '@stamhoofd/structures';
+import type { CartItem } from '@stamhoofd/structures';
+import { Customer, WebshopTicketType } from '@stamhoofd/structures';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 import type { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 import { computed, ref } from 'vue';
@@ -66,6 +98,43 @@ const emailDescription = computed(() => {
 });
 
 const fields = computed(() => webshop.value.meta.customFields);
+
+const itemsWithCustomer = computed(() => checkoutManager.cart.items.filter(i => i.customer !== null));
+
+// Derived: editing the prefilled name switches back to "someone else"
+const selectedItemId = computed(() => {
+    const customer = checkoutManager.checkout.customer;
+    return itemsWithCustomer.value.find(i => i.customer!.firstName === customer.firstName && i.customer!.lastName === customer.lastName)?.id ?? '';
+});
+
+function selectItemCustomer(item: CartItem) {
+    const source = item.customer!;
+    const customer = checkoutManager.checkout.customer;
+    customer.firstName = source.firstName;
+    customer.lastName = source.lastName;
+    // Only overwrite what the item collected: the rest stays for the order-level inputs
+    if (source.email) {
+        customer.email = source.email;
+    }
+    if (source.phone) {
+        customer.phone = source.phone;
+    }
+    if (source.birthDay) {
+        customer.birthDay = source.birthDay;
+    }
+    if (source.address) {
+        customer.address = source.address;
+    }
+    if (item.product.resolvedCustomerSettings.gender !== CustomerFieldRequirement.Disabled) {
+        customer.gender = source.gender;
+    }
+    checkoutManager.saveCheckout();
+}
+
+function selectOtherCustomer() {
+    checkoutManager.checkout.customer = Customer.create({});
+    checkoutManager.saveCheckout();
+}
 
 async function goNext() {
     if (loading.value) {

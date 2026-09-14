@@ -43,7 +43,7 @@ export class WebshopOrderFlow {
     /**
      * Add a product to the cart. For seated tickets, pass the number of seats to pick.
      */
-    async addProduct(name: string, options: { seats?: number; count?: number } = {}) {
+    async addProduct(name: string, options: { seats?: number; count?: number; customer?: { firstName: string; lastName: string } } = {}) {
         const seats = options.seats ?? 0;
         const count = options.seats ?? options.count ?? 1;
 
@@ -60,6 +60,10 @@ export class WebshopOrderFlow {
 
         if (count > 1) {
             await cartItemView.getByTestId('amount-number-input').locator('input').fill(count.toString());
+        }
+        if (options.customer) {
+            await cartItemView.locator('input[name="fname"]').fill(options.customer.firstName);
+            await cartItemView.locator('input[name="lname"]').fill(options.customer.lastName);
         }
         await cartItemView.getByTestId('save-button').click();
 
@@ -89,6 +93,13 @@ export class WebshopOrderFlow {
             await this.page.getByTestId('cart-checkout-button').click();
         }
         await expect(this.page.getByTestId('customer-step')).toBeVisible({ timeout: 15000 });
+    }
+
+    /**
+     * Pick the contact person of the order from the per-item customers (customer step)
+     */
+    async selectMainCustomer(name: string) {
+        await this.page.getByTestId('main-customer-list').locator('label').filter({ hasText: name }).first().click();
     }
 
     async fillCustomer(options: { firstName?: string; lastName?: string; email?: string; birthDay?: TestBirthDay; gender?: 'Male' | 'Female' | 'Other'; address?: TestAddress } = {}) {
