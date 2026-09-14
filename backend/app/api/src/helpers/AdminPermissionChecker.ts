@@ -1840,8 +1840,7 @@ export class AdminPermissionChecker {
             }
         }
 
-        // At least write permissions is required for now to obtain the security code
-        if (!(await this.canAccessMember(member, PermissionLevel.Write))) {
+        if (!(await this.canAccessMember(member, PermissionLevel.Write)) || !(await this.canEditMemberEmailAddresses(member))) {
             cloned.details.securityCode = null;
         }
 
