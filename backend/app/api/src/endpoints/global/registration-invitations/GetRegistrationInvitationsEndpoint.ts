@@ -77,13 +77,12 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
             if (organization) {
                 // Add organization scope filter
                 if (await Context.auth.canAccessAllMembersInCurrentPeriod(organization.id, permissionLevel)) {
-                    if (await Context.auth.hasFullAccess(organization.id, permissionLevel)) {
+                    if (await Context.auth.canAccessAllMembersInEveryPeriod(organization.id, permissionLevel)) {
                         // Can access full history for now
                         scopeFilter = {
                             organizationId: organization.id,
                         };
                     } else {
-                        // Can only access current period
                         scopeFilter = {
                             organizationId: organization.id,
                             group: {
@@ -94,7 +93,7 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
                         };
                     }
                 } else {
-                    const groups = await Group.getAll(organization.id, organization.periodId, true, [GroupType.Membership, GroupType.EventRegistration]);
+                    const groups = await Group.getAll(organization.id, null, true, [GroupType.Membership, GroupType.EventRegistration]);
                     Context.auth.cacheGroups(groups);
                     const groupIds: string[] = [];
 
