@@ -173,15 +173,12 @@
 
 <script lang="ts" setup>
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { Request } from '@simonbackx/simple-networking';
 import { useCanDismiss, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import type { CartItem, Checkout, ProductDateRange, Webshop } from '@stamhoofd/structures';
-import { CartStockHelper, ProductPrice, ProductType, UitpasNumberAndPrice, UitpasPriceCheckRequest, UitpasPriceCheckResponse } from '@stamhoofd/structures';
+import { CartStockHelper, ProductPrice, ProductType, UitpasNumberAndPrice } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { useContext } from '#hooks/useContext.ts';
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref, watch } from 'vue';
@@ -202,6 +199,7 @@ import FieldBox from './FieldBox.vue';
 import OptionMenuBox from './OptionMenuBox.vue';
 import PriceBreakdownBox from './PriceBreakdownBox.vue';
 import ImageGallery from '#images/ImageGallery.vue';
+import { validateUitpasNumbers } from './validateUitpasNumbers';
 
 const props = withDefaults(defineProps<{
     admin?: boolean;
@@ -300,7 +298,7 @@ async function validate() {
         });
 
         if (props.cartItem.productPrice.uitpasBaseProductPriceId !== null) {
-            await validateUitpasNumbers();
+            await validateUitpasNumbers(props.cartItem, context.value.optionalAuthenticatedServer, owner);
         }
     } catch (e) {
         console.error(e);
@@ -312,46 +310,6 @@ async function validate() {
 }
 
 const context = useContext();
-
-async function validateUitpasNumbers() {
-    const baseProductPrice = props.cartItem.product.prices.find(p => p.id === props.cartItem.productPrice.uitpasBaseProductPriceId);
-    if (!baseProductPrice) {
-        return;
-    }
-
-    // verify the UiTPAS numbers are valid for social tariff (call to backend)
-    try {
-        const response = await context.value.optionalAuthenticatedServer.request({
-            method: 'POST',
-            path: '/uitpas',
-            owner: owner,
-            shouldRetry: false,
-            body: UitpasPriceCheckRequest.create({
-                basePrice: baseProductPrice.price,
-                reducedPrice: props.cartItem.productPrice.price,
-                uitpasNumbers: props.cartItem.uitpasNumbers.map(p => p.uitpasNumber),
-                uitpasEventUrl: props.cartItem.product.uitpasEvent?.url ?? null, // null for non-official flow, not null for official flow
-            }),
-            decoder: UitpasPriceCheckResponse as Decoder<UitpasPriceCheckResponse>,
-        }); // will throw if one of the uitpas numbers is invalid
-        const reducedPrices = response.data.prices;
-        if (reducedPrices.length < props.cartItem.uitpasNumbers.length) {
-            // Should already be thrown by the backend
-            throw new SimpleError({
-                code: 'invalid_uitpas_numbers',
-                message: 'Not all uitpas numbers were valid',
-                human: $t('%1B5'),
-            });
-        }
-        for (let i = 0; i < props.cartItem.uitpasNumbers.length; i++) {
-            props.cartItem.uitpasNumbers[i].price = reducedPrices[i];
-        }
-    } catch (e) {
-        if (!Request.isAbortError(e)) {
-            throw e;
-        }
-    }
-}
 
 const loading = ref(false);
 
