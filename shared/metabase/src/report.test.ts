@@ -14,6 +14,15 @@ function expressionOf(sql: string): string {
     return sql.replaceAll(/--[^\n]*/g, '').replaceAll(/\s+/g, ' ').trim();
 }
 
+/**
+ * The key the deelnemerstabblad van de koepel carries in an environment. It is two cards -- keeo
+ * delivers the ploegen it names, every other platform delivers each of them -- and exactly one of
+ * them is written per environment.
+ */
+function bovenlokaalKey(env: string): string {
+    return env === 'keeo' ? 'deelnemers-bovenlokaal-werk-en-projectgroepen' : 'deelnemers-bovenlokaal';
+}
+
 function cardOf(tabs: ReportTab[], tab: string, card: string): ReportCard {
     const found = tabs.find(entry => entry.key === tab)?.cards.find(entry => entry.key === card);
     if (!found) {
@@ -79,9 +88,9 @@ describe('report', () => {
             expect(dashboards.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'netwerk', 'varia', 'jeugdbewegingen', 'filters']);
             expect(splitOnGeslacht(dashboards)).toEqual([]);
             expect(splitOnGeslacht(ravotDashboards).length).toEqual(9);
-            for (const key of ['deelnemers-bovenlokaal', 'deelnemers-lokale-groep']) {
-                expect(`${key}: ${cardOf(dashboards, 'jeugdbewegingen', key).columns.join(', ')}`).not.toContain('Gender_deelnemers');
-                expect(`${key}: ${cardOf(ravotDashboards, 'jeugdbewegingen', key).columns.join(', ')}`).toContain('Gender_deelnemers');
+            for (const [keeoKey, ravotKey] of [[bovenlokaalKey('keeo'), bovenlokaalKey('ravot')], ['deelnemers-lokale-groep', 'deelnemers-lokale-groep']]) {
+                expect(`${keeoKey}: ${cardOf(dashboards, 'jeugdbewegingen', keeoKey).columns.join(', ')}`).not.toContain('Gender_deelnemers');
+                expect(`${ravotKey}: ${cardOf(ravotDashboards, 'jeugdbewegingen', ravotKey).columns.join(', ')}`).toContain('Gender_deelnemers');
             }
         });
 
@@ -225,10 +234,44 @@ describe('report', () => {
          * dropped -- filtered like the rest, it would deliver an empty sheet.
          */
         it('delivers the koepel itself in the aanlevering', () => {
-            const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-bovenlokaal').sql;
+            for (const [env, tabs] of [['keeo', dashboards], ['ravot', ravotDashboards]] as const) {
+                const sql = cardOf(tabs, 'jeugdbewegingen', bovenlokaalKey(env)).sql;
 
-            expect(sql).toContain('FROM all_registrations\nJOIN platform ON platform.membershipOrganizationId = all_registrations.organization_id');
-            expect(/FROM non_platform_registrations\b/.test(sql)).toBe(false);
+                expect(`${env}: ${sql.includes('FROM all_registrations\nJOIN platform ON platform.membershipOrganizationId = all_registrations.organization_id')}`).toEqual(`${env}: true`);
+                expect(`${env}: ${/FROM non_platform_registrations\b/.test(sql)}`).toEqual(`${env}: false`);
+            }
+        });
+
+        /**
+         * Not every ploeg of a koepel is a structuurvrijwilliger of it, which is why the sheet is two
+         * cards. Keeo's names the ones that are and leaves out its personeel, which is in dienst
+         * rather than a vrijwilliger, even where that sits in a werkgroep as well -- a fact of the
+         * member, not of the inschrijving being read. The card every other platform gets says none of
+         * that and delivers each ploeg of its koepel.
+         *
+         * Which ploegen those are is not asserted here: the names of a koepel's own ploegen are not
+         * for this repository, so the card carries a placeholder and the list is kept in the question
+         * itself.
+         */
+        it('delivers the ploegen of the koepel that keeo names, and no ploeg it does not', () => {
+            const sql = expressionOf(cardOf(dashboards, 'jeugdbewegingen', bovenlokaalKey('keeo')).sql);
+
+            // Named on the rows themselves: a group is all this database says about one, and the
+            // categories a koepel files them under reach none of it.
+            expect(cardOf(dashboards, 'jeugdbewegingen', bovenlokaalKey('keeo')).sql).toContain('`groups`.name AS group_name');
+            expect(sql).toContain('all_registrations.group_name IN (');
+
+            expect(sql).toContain("personeel_groep.name = 'Personeel'");
+            expect(sql).toContain('personeel.memberId = all_registrations.member_id');
+            // The koepel's own personeelsgroep: a group of an eenheid carrying that name says nothing here.
+            expect(sql).toContain('personeel_groep.organizationId = all_registrations.organization_id');
+            // The aansluiting and the ploeg are still what they were: this narrows the sheet, it does
+            // not replace what it counted.
+            expect(sql).toContain("all_registrations.group_type = 'Membership'");
+
+            const ravot = expressionOf(cardOf(ravotDashboards, 'jeugdbewegingen', bovenlokaalKey('ravot')).sql);
+            expect(ravot).not.toContain('all_registrations.group_name IN (');
+            expect(ravot).not.toContain('Personeel');
         });
 
         /**
@@ -240,14 +283,15 @@ describe('report', () => {
          */
         it('delivers every sheet as the aanleversjabloon defines it', () => {
             const sheets = [
-                ['organisatie-bovenlokaal', 'Organisatie_Bovenlokaal', ['ID_Organisatie', 'Naam_Organisatie']],
-                ['deelnemers-bovenlokaal', 'Deelnemers_Bovenlokaal', ['ID_Organisatie', 'Geboortejaar_deelnemers', 'Gender_deelnemers', 'Aantal_deelnemers']],
-                ['organisatie-lokale-groep', 'Organisatie_Lokale_groep', ['ID_Organisatie', 'Naam_Organisatie', 'Postcode']],
-                ['deelnemers-lokale-groep', 'Deelnemers_Lokale_groep', ['ID_Organisatie', 'Type_deelnemers', 'Geboortejaar_deelnemers', 'Gender_deelnemers', 'Aantal_deelnemers']],
+                [() => 'organisatie-bovenlokaal', 'Organisatie_Bovenlokaal', ['ID_Organisatie', 'Naam_Organisatie']],
+                [bovenlokaalKey, 'Deelnemers_Bovenlokaal', ['ID_Organisatie', 'Geboortejaar_deelnemers', 'Gender_deelnemers', 'Aantal_deelnemers']],
+                [() => 'organisatie-lokale-groep', 'Organisatie_Lokale_groep', ['ID_Organisatie', 'Naam_Organisatie', 'Postcode']],
+                [() => 'deelnemers-lokale-groep', 'Deelnemers_Lokale_groep', ['ID_Organisatie', 'Type_deelnemers', 'Geboortejaar_deelnemers', 'Gender_deelnemers', 'Aantal_deelnemers']],
             ] as const;
 
-            for (const [key, title, columns] of sheets) {
+            for (const [keyOf, title, columns] of sheets) {
                 for (const [env, tabs] of [['keeo', dashboards], ['ravot', ravotDashboards]] as const) {
+                    const key = keyOf(env);
                     const card = cardOf(tabs, 'jeugdbewegingen', key);
                     const where = `${env} ${key}`;
                     // Keeo asks its leden no geslacht, so it delivers the sheet without that column.
@@ -260,7 +304,9 @@ describe('report', () => {
                 }
             }
 
-            expect(dashboards.find(tab => tab.key === 'jeugdbewegingen')!.cards.map(card => card.key)).toEqual(sheets.map(([key]) => key));
+            for (const [env, tabs] of [['keeo', dashboards], ['ravot', ravotDashboards]] as const) {
+                expect(tabs.find(tab => tab.key === 'jeugdbewegingen')!.cards.map(card => card.key)).toEqual(sheets.map(([keyOf]) => keyOf(env)));
+            }
         });
 
         /**
@@ -291,7 +337,7 @@ describe('report', () => {
                 ['keeo', dashboards, '`Geboortejaar_deelnemers`'],
                 ['ravot', ravotDashboards, '`Geboortejaar_deelnemers`, `Gender_deelnemers`'],
             ] as const) {
-                for (const key of ['deelnemers-bovenlokaal', 'deelnemers-lokale-groep']) {
+                for (const key of [bovenlokaalKey(env), 'deelnemers-lokale-groep']) {
                     const card = cardOf(tabs, 'jeugdbewegingen', key);
                     const where = `${env} ${key}`;
 
@@ -961,8 +1007,10 @@ describe('report', () => {
                 'eenheid-leden-per-geslacht', 'eenheid-geslacht-kinderen-per-jaar', 'eenheid-kinderen-per-geslacht',
                 'eenheid-geslacht-leiding-per-jaar', 'eenheid-leiding-per-geslacht', 'eenheid-leeftijd-en-geslacht',
                 'uldk', 'uldk-totaal',
+                'deelnemers-bovenlokaal',
                 'eenheid-leden-per-leeftijd',
                 'uldk-zonder-geslacht', 'uldk-zonder-geslacht-totaal',
+                'deelnemers-bovenlokaal-werk-en-projectgroepen',
             ]);
             expect(shapeOf(ravotDashboards)).toEqual(shapeOf(dashboards));
         });
@@ -1231,7 +1279,7 @@ describe('report', () => {
          * nowhere, and an unconnected filter counts every registration -- so both sheets say it.
          */
         it('delivers the leeftijdsgroepen to the department and never the activiteiten', () => {
-            for (const key of ['deelnemers-bovenlokaal', 'deelnemers-lokale-groep']) {
+            for (const key of [bovenlokaalKey('keeo'), 'deelnemers-lokale-groep']) {
                 const sql = cardOf(dashboards, 'jeugdbewegingen', key).sql;
 
                 {
@@ -1435,7 +1483,7 @@ describe('report', () => {
 
         /** Written out in both readings of the card, so Metabase is given no reference to resolve. */
         it('writes an inlined fragment into the card rather than referring to it', () => {
-            const card = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-bovenlokaal');
+            const card = cardOf(dashboards, 'jeugdbewegingen', bovenlokaalKey('keeo'));
 
             expect(card.snippetSql).toContain('YEAR(`birth_date`) AS `Geboortejaar_deelnemers`');
             expect(card.snippetSql).toContain('GROUP BY `ID_Organisatie`,\n    `Geboortejaar_deelnemers`');

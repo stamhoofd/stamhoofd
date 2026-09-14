@@ -13,6 +13,7 @@ SELECT
     registration_periods.name AS `Werkjaar`,
     registration_periods.startDate AS period_start,
     `groups`.type AS group_type,
+    `groups`.name AS group_name,
     COALESCE(default_age_groups_with_category.name, `groups`.name) AS `Leeftijdsgroep`,
     default_age_groups_with_category.id AS age_group_id,
     default_age_groups_with_category.category AS age_group_category,

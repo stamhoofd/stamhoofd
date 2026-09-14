@@ -165,7 +165,7 @@
                         </h3>
 
                         <p class="style-definition-text">
-                            {{ capitalizeFirstLetter(formatDate(order.data.timeSlot.date)) }}<br>
+                            {{ capitalizeFirstLetter(order.data.timeSlot.toString()) }}<br>
                         </p>
                     </STListItem>
                     <STListItem v-if="order.data.deliveryPrice > 0" class="right-description">
