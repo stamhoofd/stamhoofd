@@ -12,6 +12,7 @@ import { GroupFactory, Member, MemberFactory, OrganizationFactory, OrganizationR
 import { Address, appToUri, BooleanStatus, GroupCategory, GroupCategorySettings, MemberDetails, OrganizationMetaData, OrganizationRecordsConfiguration, OrganizationType, Parent, ParentType, PermissionLevel, Permissions, PropertyFilter, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
+import { Organization as OrganizationModel } from '@stamhoofd/models';
 import { WorkerData } from '../helpers/index.js';
 
 type Scenario = {
@@ -306,6 +307,103 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         const member = await Member.getByID(memberId);
         return member!.details.parents.find(p => p.id === parentId)?.taxDependent ?? null;
     }
+
+    // ------------------------------------------------------------------
+    // The organization setting itself
+    // ------------------------------------------------------------------
+
+    /** Opens Instellingen > Ledenadministratie > Persoonsgegevens */
+    async function openRecordsSettings({ page, scenario }: { page: Page; scenario: Scenario }) {
+        await page.goto(`${WorkerData.urls.dashboard}/${appToUri('dashboard')}/${scenario.organization.uri}/instellingen/ledenadministratie/persoonsgegevens`);
+
+        const settings = page.getByTestId('save-view').filter({ has: page.getByTestId('records-property-parents') });
+        await expect(settings).toBeVisible({ timeout: 30_000 });
+        return settings;
+    }
+
+    function settingRow(settings: Locator, property: string) {
+        return settings.getByTestId(`records-property-${property}`);
+    }
+
+    /** Ticking a property opens its filter dialog first, so accept the default configuration */
+    async function enableSettingProperty({ page, settings, property }: { page: Page; settings: Locator; property: string }) {
+        const views = page.getByTestId('save-view');
+        const before = await views.count();
+
+        await settingRow(settings, property).getByTestId('checkbox').click();
+        await expect(views).toHaveCount(before + 1);
+
+        await views.nth(before).getByTestId('save-button').first().click();
+        await expect(views).toHaveCount(before, { timeout: 15_000 });
+    }
+
+    test('the tax dependent setting only shows when both the national register number and the parents are collected', async ({ page }) => {
+        test.setTimeout(150_000);
+        const scenario = await seedScenario({ taxDependent: false, nationalRegisterNumbers: { mother: null, father: null } });
+        await loginAs({ page, user: scenario.user });
+
+        const settings = await openRecordsSettings({ page, scenario });
+
+        // Both are on in the seeded organization, so the setting is offered
+        await expect(settingRow(settings, 'nationalRegisterNumber').getByTestId('checkbox')).toBeChecked();
+        await expect(settingRow(settings, 'parents').getByTestId('checkbox')).toBeChecked();
+        await expect(settingRow(settings, 'taxDependent')).toBeVisible();
+
+        // And it sits directly under the parents row
+        const rows = settings.locator('[data-testid^="records-property-"]');
+        const order = await rows.evaluateAll(elements => elements.map(e => e.getAttribute('data-testid')));
+        expect(order.indexOf('records-property-taxDependent')).toBe(order.indexOf('records-property-parents') + 1);
+    });
+
+    test('turning off the national register number hides and unticks the tax dependent setting', async ({ page }) => {
+        test.setTimeout(150_000);
+        const scenario = await seedScenario({ taxDependent: true, nationalRegisterNumbers: { mother: null, father: null } });
+        await loginAs({ page, user: scenario.user });
+
+        const settings = await openRecordsSettings({ page, scenario });
+        await expect(settingRow(settings, 'taxDependent').getByTestId('checkbox')).toBeChecked();
+
+        await settingRow(settings, 'nationalRegisterNumber').getByTestId('checkbox').click();
+        await expect(settingRow(settings, 'taxDependent')).toBeHidden();
+
+        // Turning it back on shows the setting again, now unticked
+        await enableSettingProperty({ page, settings, property: 'nationalRegisterNumber' });
+        await expect(settingRow(settings, 'taxDependent')).toBeVisible();
+        await expect(settingRow(settings, 'taxDependent').getByTestId('checkbox')).not.toBeChecked();
+    });
+
+    test('turning off the parents hides and unticks the tax dependent setting', async ({ page }) => {
+        test.setTimeout(150_000);
+        const scenario = await seedScenario({ taxDependent: true, nationalRegisterNumbers: { mother: null, father: null } });
+        await loginAs({ page, user: scenario.user });
+
+        const settings = await openRecordsSettings({ page, scenario });
+        await expect(settingRow(settings, 'taxDependent').getByTestId('checkbox')).toBeChecked();
+
+        await settingRow(settings, 'parents').getByTestId('checkbox').click();
+        await expect(settingRow(settings, 'taxDependent')).toBeHidden();
+
+        await enableSettingProperty({ page, settings, property: 'parents' });
+        await expect(settingRow(settings, 'taxDependent')).toBeVisible();
+        await expect(settingRow(settings, 'taxDependent').getByTestId('checkbox')).not.toBeChecked();
+    });
+
+    test('the tax dependent setting is stored as off once its dependencies are turned off', async ({ page }) => {
+        test.setTimeout(150_000);
+        const scenario = await seedScenario({ taxDependent: true, nationalRegisterNumbers: { mother: null, father: null } });
+        await loginAs({ page, user: scenario.user });
+
+        const settings = await openRecordsSettings({ page, scenario });
+        await settingRow(settings, 'parents').getByTestId('checkbox').click();
+        await expect(settingRow(settings, 'taxDependent')).toBeHidden();
+
+        await saveView(settings);
+
+        await expect.poll(async () => {
+            const organization = await OrganizationModel.getByID(scenario.organization.id);
+            return organization!.meta.recordsConfiguration.taxDependent;
+        }, { timeout: 20_000 }).toBe(false);
+    });
 
     // ------------------------------------------------------------------
     // Only the national register number is enabled on the organization

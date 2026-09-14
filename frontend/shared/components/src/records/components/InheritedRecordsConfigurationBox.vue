@@ -19,51 +19,53 @@
             </p>
         </STListItem>
 
-        <STListItem v-for="property of properties" :key="property.value.title" element-name="label" :selectable="!property.value.locked">
-            <template #left>
-                <Checkbox v-model="property.value.enabled" v-tooltip="property.value.locked ? $t('%jE') : ''" :disabled="property.value.locked" />
-            </template>
-
-            <p v-if="property.value.configuration" class="style-title-prefix-list">
-                {{ propertyFilterToString(property.value.configuration, filterBuilder) }}
-
-                <template v-if="property.value.parentConfiguration && propertyFilterToString(property.value.parentConfiguration, filterBuilder) !== propertyFilterToString(property.value.configuration, filterBuilder)">
-                    (aangepast vanaf standaardinstelling)
+        <template v-for="property of properties" :key="property.value.title">
+            <STListItem element-name="label" :selectable="!property.value.locked" :data-testid="'records-property-' + property.value.name">
+                <template #left>
+                    <Checkbox v-model="property.value.enabled" v-tooltip="property.value.locked ? $t('%jE') : ''" :disabled="property.value.locked" />
                 </template>
-            </p>
 
-            <p class="style-title-list">
-                {{ property.value.title }}
+                <p v-if="property.value.configuration" class="style-title-prefix-list">
+                    {{ propertyFilterToString(property.value.configuration, filterBuilder) }}
 
-                <span
-                    v-if="property.value.configuration && property.value.parentConfiguration && propertyFilterToString(property.value.parentConfiguration, filterBuilder) !== propertyFilterToString(property.value.configuration, filterBuilder)" v-tooltip="$t('%1It')"
-                    class="icon dot primary small"
-                />
-            </p>
-            <p v-if="property.value.description" class="style-description-small">
-                {{ property.value.description }}
-            </p>
+                    <template v-if="property.value.parentConfiguration && propertyFilterToString(property.value.parentConfiguration, filterBuilder) !== propertyFilterToString(property.value.configuration, filterBuilder)">
+                        (aangepast vanaf standaardinstelling)
+                    </template>
+                </p>
 
-            <p v-if="!groupLevel && property.value.configuration && property.value.configuration.isAlwaysEnabledAndRequired && property.value.options?.preventAlways" class="error-box">
-                {{ property.value.options?.warning ?? $t('%jG') }}
-            </p>
+                <p class="style-title-list">
+                    {{ property.value.title }}
 
-            <template v-if="property.value.enabled" #right>
-                <button class="button gray icon settings" type="button" @click.stop="property.value.edit" />
-            </template>
-        </STListItem>
+                    <span
+                        v-if="property.value.configuration && property.value.parentConfiguration && propertyFilterToString(property.value.parentConfiguration, filterBuilder) !== propertyFilterToString(property.value.configuration, filterBuilder)" v-tooltip="$t('%1It')"
+                        class="icon dot primary small"
+                    />
+                </p>
+                <p v-if="property.value.description" class="style-description-small">
+                    {{ property.value.description }}
+                </p>
 
-        <STListItem element-name="label" :selectable="!taxDependent.locked.value">
-            <template #left>
-                <Checkbox v-model="taxDependent.enabled.value" v-tooltip="taxDependent.locked.value ? $t('%jE') : ''" :disabled="taxDependent.locked.value" />
-            </template>
-            <p class="style-title-list">
-                {{ $t('Fiscaal ten laste') }}
-            </p>
-            <p class="style-description-small">
-                {{ $t('Vraag bij de oudergegevens wie het lid fiscaal ten laste heeft. Dat bepaalt op wiens naam de fiscale attesten komen, en welke ouder een rijksregisternummer moet invullen.') }}
-            </p>
-        </STListItem>
+                <p v-if="!groupLevel && property.value.configuration && property.value.configuration.isAlwaysEnabledAndRequired && property.value.options?.preventAlways" class="error-box">
+                    {{ property.value.options?.warning ?? $t('%jG') }}
+                </p>
+
+                <template v-if="property.value.enabled" #right>
+                    <button class="button gray icon settings" type="button" @click.stop="property.value.edit" />
+                </template>
+            </STListItem>
+
+            <STListItem v-if="property.value.name === 'parents' && isTaxDependentAvailable" element-name="label" :selectable="!taxDependent.locked.value" data-testid="records-property-taxDependent">
+                <template #left>
+                    <Checkbox v-model="taxDependent.enabled.value" v-tooltip="taxDependent.locked.value ? $t('%jE') : ''" :disabled="taxDependent.locked.value" />
+                </template>
+                <p class="style-title-list">
+                    {{ $t('Fiscaal ten laste') }}
+                </p>
+                <p class="style-description-small">
+                    {{ $t('Vraag bij de oudergegevens wie het lid fiscaal ten laste heeft. Dat bepaalt op wiens naam de fiscale attesten komen, en welke ouder een rijksregisternummer moet invullen.') }}
+                </p>
+            </STListItem>
+        </template>
 
         <STListItem v-for="category of inheritedRecordsConfiguration?.recordCategories ?? []" :key="category.id" element-name="label" :selectable="!getRefForInheritedCategory(category.id).value.locked" class="right-stack">
             <template #left>
@@ -86,20 +88,20 @@
 </template>
 
 <script setup lang="ts">
-import { PatchMap } from '@simonbackx/simple-encoding';
-import { usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
+import { PatchMap } from '@simonbackx/simple-encoding';
+import { usePresent } from '@simonbackx/vue-app-navigation';
 
-import { Toast } from '#overlays/Toast.ts';
 import { propertyFilterToString } from '#filters/UIFilter.ts';
-import { useEmitPatch } from '#hooks/useEmitPatch.ts';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
+import { useEmitPatch } from '#hooks/useEmitPatch.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
+import { Toast } from '#overlays/Toast.ts';
 import type { MemberPropertyWithFilter, Organization, OrganizationRecordsConfiguration, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
 import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, PlatformFamily, PlatformMember, PropertyFilter } from '@stamhoofd/structures';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { getMemberFilterBuildersForInheritedRecords } from '../../filters/filter-builders/members';
 
 import { RecordEditorSettings, RecordEditorType } from '../RecordEditorSettings';
@@ -163,7 +165,7 @@ const properties = [
     buildPropertyRefs('birthDay', $t(`%17w`)),
     buildPropertyRefs(
         'nationalRegisterNumber', $t(`%wK`), {
-            description: $t('%17a'),
+            description: $t('Rijksregisternummer van het lid. Schakel ook \'Oudergegevens\' en vervolgens \'Fiscaal ten laste\' in om ook het rijksregisternummer van de ouder die het kind fiscaal ten laste heeft te vragen.'),
         },
     ),
     buildPropertyRefs('parents', $t(`%11P`), {
@@ -227,15 +229,23 @@ const financialSupport = {
     }),
 };
 
+/**
+ * Asking who has the member tax dependent only means something when we also collect
+ * the parents and a national register number, so it follows both of them.
+ */
+const isTaxDependentAvailable = computed(() => !!getFilterConfiguration('nationalRegisterNumber') && !!getFilterConfiguration('parents'));
+
+watch(isTaxDependentAvailable, (available) => {
+    if (!available && patched.value.taxDependent) {
+        addPatch({ taxDependent: false });
+    }
+});
+
 const taxDependent = {
     locked: computed(() => !!props.inheritedRecordsConfiguration?.taxDependent && !patched.value.taxDependent),
     enabled: computed({
         get: () => !!props.inheritedRecordsConfiguration?.taxDependent || patched.value.taxDependent,
         set: (value: boolean) => {
-            if (value && !getFilterConfiguration('nationalRegisterNumber')) {
-                Toast.error($t('Schakel eerst het rijksregisternummer in: dat wordt gevraagd aan de ouder die het lid fiscaal ten laste heeft')).show();
-                return;
-            }
             addPatch({
                 taxDependent: value,
             });
