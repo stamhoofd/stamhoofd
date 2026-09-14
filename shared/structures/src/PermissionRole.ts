@@ -65,6 +65,8 @@ export class PermissionRoleDetailed extends PermissionRole {
         version: 418,
         upgrade: upgradeResourceKeys,
         downgrade: downgradeResourceKeys,
+        upgradePatch: upgradeResourceKeys,
+        downgradePatch: downgradeResourceKeys,
     })
     resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = new Map();
 

@@ -1,3 +1,4 @@
+import { isPatchMap, PatchMap } from '@simonbackx/simple-encoding';
 import { AccessRight } from './AccessRight.js';
 import { PermissionLevel } from './PermissionLevel.js';
 
@@ -56,14 +57,19 @@ export function getWildcardResourceKeys(type: PermissionsResourceType, id: strin
 
 /**
  * old key '' (meaning all resources) is replaced with:
- *  - '~currentPeriod' for period scoped resource types and
- *  - '~all' for non-period scoped resource types.
+ *  - '$currentPeriod' for period scoped resource types and
+ *  - '$all' for non-period scoped resource types.
  */
-export function upgradeResourceKeys<T>(resources: Map<PermissionsResourceType, Map<string, T>>): Map<PermissionsResourceType, Map<string, T>> {
-    const upgraded = new Map<PermissionsResourceType, Map<string, T>>();
+export function upgradeResourceKeys<T>(resources: Map<PermissionsResourceType, Map<string, T> | null>): Map<PermissionsResourceType, Map<string, T> | null> {
+    // Both map levels can independently be replacements or patches.
+    const upgraded = isPatchMap(resources) ? new PatchMap<PermissionsResourceType, Map<string, T> | null>() : new Map<PermissionsResourceType, Map<string, T> | null>();
 
     for (const [type, values] of resources) {
-        const upgradedValues = new Map<string, T>();
+        if (values === null) {
+            upgraded.set(type, null);
+            continue;
+        }
+        const upgradedValues = isPatchMap(values) ? new PatchMap<string, T>() : new Map<string, T>();
 
         for (const [id, value] of values) {
             if (id === '') {
@@ -82,11 +88,15 @@ export function upgradeResourceKeys<T>(resources: Map<PermissionsResourceType, M
 /**
  * Clients before version 418 only know one wildcard: '' (meaning all resources).
  */
-export function downgradeResourceKeys<T>(resources: Map<PermissionsResourceType, Map<string, T>>): Map<PermissionsResourceType, Map<string, T>> {
-    const downgraded = new Map<PermissionsResourceType, Map<string, T>>();
+export function downgradeResourceKeys<T>(resources: Map<PermissionsResourceType, Map<string, T> | null>): Map<PermissionsResourceType, Map<string, T> | null> {
+    const downgraded = isPatchMap(resources) ? new PatchMap<PermissionsResourceType, Map<string, T> | null>() : new Map<PermissionsResourceType, Map<string, T> | null>();
 
     for (const [type, values] of resources) {
-        const downgradedValues = new Map<string, T>();
+        if (values === null) {
+            downgraded.set(type, null);
+            continue;
+        }
+        const downgradedValues = isPatchMap(values) ? new PatchMap<string, T>() : new Map<string, T>();
 
         for (const [id, value] of values) {
             if (id === PermissionsResourceKey.All) {
