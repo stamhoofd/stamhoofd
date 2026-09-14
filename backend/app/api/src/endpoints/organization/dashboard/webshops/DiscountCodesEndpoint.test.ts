@@ -4,13 +4,16 @@ import { Database } from '@simonbackx/simple-database';
 import type { DecodedRequest, Request as EndpointRequest } from '@simonbackx/simple-endpoints';
 import { Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import type { Organization, User, Webshop } from '@stamhoofd/models';
-import { Email, OrganizationFactory, Token, UserFactory, WebshopDiscountCode, WebshopFactory } from '@stamhoofd/models';
-import { CountFilteredRequest, DiscountCode, EmailRecipientFilterType, LimitedFilteredRequest, PermissionLevel, Permissions, SortItemDirection } from '@stamhoofd/structures';
+import type { Token } from '@stamhoofd/models';
+import { Email, OrganizationFactory, UserFactory, WebshopDiscountCode, WebshopFactory } from '@stamhoofd/models';
+import { CountFilteredRequest, DiscountCode, LimitedFilteredRequest, PermissionLevel, Permissions, SortItemDirection } from '@stamhoofd/structures';
+import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
 
 import '../../../../email-recipient-loaders/discount-codes.js';
 import { Context } from '../../../../helpers/Context.js';
+import { SessionService } from '../../../../services/SessionService.js';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { GetWebshopDiscountCodesCountEndpoint } from './GetDiscountCodesCountEndpoint.js';
 import { GetWebshopDiscountCodesEndpoint } from './GetDiscountCodesEndpoint.js';
@@ -81,10 +84,10 @@ class DiscountCodeRecipientLoaderTestEndpoint extends Endpoint<Record<string, ne
 
         return new Response(LoaderTestResult.create({
             count,
-            results: response.results.map(recipient => ({
+            results: response.results.map(recipient => LoaderTestRecipient.create({
                 email: recipient.email,
                 objectId: recipient.objectId,
-                replacements: recipient.replacements.map(replacement => ({
+                replacements: recipient.replacements.map(replacement => LoaderTestReplacement.create({
                     token: replacement.token,
                     value: replacement.value,
                 })),
@@ -112,7 +115,7 @@ describe('Endpoint.WebshopDiscountCodes', () => {
                 level: PermissionLevel.Full,
             }),
         }).create();
-        token = await Token.createToken(user);
+        token = await SessionService.createSession(user);
         webshop = await new WebshopFactory({ organizationId: organization.id, name: 'Discount codes test webshop' }).create();
     });
 

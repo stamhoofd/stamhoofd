@@ -1,5 +1,6 @@
 import { Email, WebshopDiscountCode } from '@stamhoofd/models';
-import { CountFilteredRequest, EmailRecipient, EmailRecipientFilterType, getSortFilter, LimitedFilteredRequest, mergeFilters, PaginatedResponse } from '@stamhoofd/structures';
+import { CountFilteredRequest, EmailRecipient, getSortFilter, LimitedFilteredRequest, mergeFilters, PaginatedResponse } from '@stamhoofd/structures';
+import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 
 import { buildDiscountCodeReplacementsOptions, getEmailReplacementsForDiscountCode } from '../email-replacements/getEmailReplacementsForDiscountCode.js';
 import { GetWebshopDiscountCodesEndpoint } from '../endpoints/organization/dashboard/webshops/GetDiscountCodesEndpoint.js';
