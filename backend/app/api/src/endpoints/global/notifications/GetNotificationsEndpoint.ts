@@ -81,7 +81,7 @@ export class GetNotificationsEndpoint extends Endpoint<Params, Query, Body, Resp
             }
 
             q.sort = this.assertSort(q.sort);
-            await applySQLSorter(query, q.sort, notificationSorters);
+            applySQLSorter(query, q.sort, notificationSorters);
             query.limit(q.limit);
         }
 

@@ -93,7 +93,7 @@ async function fetchPage(requestQuery: LimitedFilteredRequest): Promise<BalanceI
     }
 
     requestQuery.sort = assertSort(requestQuery.sort, [{ key: 'id' }]);
-    await applySQLSorter(query, requestQuery.sort, sorters);
+    applySQLSorter(query, requestQuery.sort, sorters);
     query.limit(requestQuery.limit);
 
     try {
