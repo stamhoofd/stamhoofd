@@ -531,7 +531,10 @@ export class CartItem extends AutoEncoder {
         return descriptions.filter(d => !!d).join('\n');
     }
 
-    validateAnswers() {
+    /**
+     * validate = false only syncs the answers with the product fields, without requiring them
+     */
+    validateAnswers(validate = true) {
         const newAnswers: WebshopFieldAnswer[] = [];
         for (const field of this.product.customFields) {
             const answer = this.fieldAnswers.find(a => a.field.id === field.id);
@@ -539,11 +542,15 @@ export class CartItem extends AutoEncoder {
             try {
                 if (!answer) {
                     const a = WebshopFieldAnswer.create({ field, answer: '' });
-                    a.validate();
+                    if (validate) {
+                        a.validate();
+                    }
                     newAnswers.push(a);
                 } else {
                     answer.field = field;
-                    answer.validate();
+                    if (validate) {
+                        answer.validate();
+                    }
                     newAnswers.push(answer);
                 }
             } catch (e) {
@@ -558,8 +565,9 @@ export class CartItem extends AutoEncoder {
 
     /**
      * Update self to the newest available data, and throw error if something failed (only after refreshing other ones)
+     * requireDetails = false: don't require option menus and custom fields yet (bulk checkout before the details step)
      */
-    refresh(webshop: Webshop) {
+    refresh(webshop: Webshop, { requireDetails = true }: { requireDetails?: boolean } = {}) {
         const errors = new SimpleErrors();
         const product = webshop.products.find(p => p.id === this.product.id);
         if (!product) {
@@ -634,7 +642,7 @@ export class CartItem extends AutoEncoder {
                 o.option = option;
             }
 
-            if (remainingMenus.filter(m => !m.multipleChoice).length > 0) {
+            if (requireDetails && remainingMenus.filter(m => !m.multipleChoice).length > 0) {
                 for (const remaining of remainingMenus) {
                     errors.addError(
                         new SimpleError({
@@ -650,7 +658,7 @@ export class CartItem extends AutoEncoder {
         }
 
         try {
-            this.validateAnswers();
+            this.validateAnswers(requireDetails);
         } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 errors.addError(e);
@@ -736,8 +744,9 @@ export class CartItem extends AutoEncoder {
 
     /**
      * Update self to the newest available data and throw if it was not able to recover
+     * validateDetails = false: skip everything the bulk details step collects (option menus, custom fields, UiTPAS numbers)
      */
-    validate(webshop: Webshop, cart: Cart, { refresh, admin, validateSeats }: { refresh?: boolean; admin?: boolean; validateSeats?: boolean } = { refresh: true, admin: false, validateSeats: true }) {
+    validate(webshop: Webshop, cart: Cart, { refresh, admin, validateSeats, validateDetails }: { refresh?: boolean; admin?: boolean; validateSeats?: boolean; validateDetails?: boolean } = { refresh: true, admin: false, validateSeats: true, validateDetails: true }) {
         this.cartError = null;
 
         if (admin === undefined) {
@@ -749,9 +758,12 @@ export class CartItem extends AutoEncoder {
         if (validateSeats === undefined) {
             validateSeats = true;
         }
+        if (validateDetails === undefined) {
+            validateDetails = true;
+        }
 
         if (refresh) {
-            this.refresh(webshop);
+            this.refresh(webshop, { requireDetails: validateDetails });
         }
         const product = this.product;
 
@@ -895,7 +907,9 @@ export class CartItem extends AutoEncoder {
             }
         }
 
-        this.validateUitpasNumbers();
+        if (validateDetails) {
+            this.validateUitpasNumbers();
+        }
 
         // Update prices
         // should now happen in the checkout so discounts are in sync
