@@ -10,11 +10,12 @@ export type SQLSortDefinition<T, B extends PlainObject | Date = PlainObject | Da
     toSQL(direction: SQLOrderByDirection): SQLOrderBy;
     join?: SQLJoin;
     select?: (SQLExpression | string)[];
+    checkPermission?: () => Promise<void>;
 };
 
 export type SQLSortDefinitions<T = any> = Record<string, SQLSortDefinition<T>>;
 
-export function applySQLSorter(selectQuery: SQLSelect<any>, sortBy: SortList, definitions: SQLSortDefinitions) {
+export async function applySQLSorter(selectQuery: SQLSelect<any>, sortBy: SortList, definitions: SQLSortDefinitions) {
     if (sortBy.length === 0) {
         throw new SimpleError({
             code: 'empty_sort',
@@ -26,6 +27,10 @@ export function applySQLSorter(selectQuery: SQLSelect<any>, sortBy: SortList, de
         const d = definitions[s.key];
         if (!d) {
             throw new Error('Unknown sort key ' + s.key);
+        }
+
+        if (d.checkPermission) {
+            await d.checkPermission();
         }
 
         selectQuery.orderBy(d.toSQL(s.order));
