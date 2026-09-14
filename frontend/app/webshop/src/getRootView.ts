@@ -2,6 +2,7 @@ import { ComponentWithProperties, ModalStackComponent, NavigationController } fr
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
 import ContextProvider from '@stamhoofd/components/containers/ContextProvider.vue';
+import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { ThemeManager } from '@stamhoofd/networking/ThemeManager';
@@ -41,11 +42,22 @@ export function wrapWithModalStack(...components: ComponentWithProperties[]) {
 }
 
 export async function getWebshopRootView(session: SessionContext, webshop: Webshop) {
-    // Do we need to require login?
-    let root = wrapWithModalStack(new ComponentWithProperties(NavigationController, {
-        root: AsyncComponent(() => import('./views/WebshopView.vue'), {}),
-    }));
+    // Organization feature flags live in privateMeta, which the public webshop never receives, so the flag can only be enabled on the platform.
+    const modernView = manualFeatureFlag('modern-webshop', session, session.platform) || STAMHOOFD.environment === 'development';
+    let root: ComponentWithProperties;
+    if (modernView) {
+        root = wrapWithModalStack(AsyncComponent(() => import('./views/WebshopController.vue'), {
+            root: new ComponentWithProperties(NavigationController, {
+                root: AsyncComponent(() => import('./views/ModernWebshopView.vue'), {}),
+            }),
+        }));
+    } else {
+        root = wrapWithModalStack(new ComponentWithProperties(NavigationController, {
+            root: AsyncComponent(() => import('./views/WebshopView.vue'), {}),
+        }));
+    }
 
+    // Do we need to require login?
     if (webshop.meta.authType === WebshopAuthType.Required) {
         root = wrapWithModalStack(
             new ComponentWithProperties(AuthenticatedView, {
