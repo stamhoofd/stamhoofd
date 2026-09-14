@@ -54,7 +54,7 @@
                 </template>
             </STListItem>
 
-            <STListItem v-if="property.value.name === 'parents' && isTaxDependentAvailable" element-name="label" :selectable="!taxDependent.locked.value" data-testid="records-property-taxDependent">
+            <STListItem v-if="property.value.name === 'nationalRegisterNumber' && isTaxDependentAvailable" element-name="label" :selectable="!taxDependent.locked.value" data-testid="records-property-taxDependent">
                 <template #left>
                     <Checkbox v-model="taxDependent.enabled.value" v-tooltip="taxDependent.locked.value ? $t('%jE') : ''" :disabled="taxDependent.locked.value" />
                 </template>
@@ -62,7 +62,7 @@
                     {{ $t('Fiscaal ten laste') }}
                 </p>
                 <p class="style-description-small">
-                    {{ $t('Vraag bij de oudergegevens wie het lid fiscaal ten laste heeft. Dat bepaalt op wiens naam de fiscale attesten komen, en welke ouder een rijksregisternummer moet invullen.') }}
+                    {{ $t('Vraag de gegevens van de ouder die het lid fiscaal ten laste heeft. Dat bepaalt op wiens naam de fiscale attesten komen, en welke ouder een rijksregisternummer moet invullen.') }}
                 </p>
             </STListItem>
         </template>
@@ -165,7 +165,7 @@ const properties = [
     buildPropertyRefs('birthDay', $t(`%17w`)),
     buildPropertyRefs(
         'nationalRegisterNumber', $t(`%wK`), {
-            description: $t('Rijksregisternummer van het lid. Schakel ook \'Oudergegevens\' en vervolgens \'Fiscaal ten laste\' in om ook het rijksregisternummer van de ouder die het kind fiscaal ten laste heeft te vragen.'),
+            description: $t('Rijksregisternummer van het lid. Schakel ook \'Fiscaal ten laste\' in om ook het rijksregisternummer van de ouder die het kind fiscaal ten laste heeft te vragen.'),
         },
     ),
     buildPropertyRefs('parents', $t(`%11P`), {
@@ -230,10 +230,10 @@ const financialSupport = {
 };
 
 /**
- * Asking who has the member tax dependent only means something when we also collect
- * the parents and a national register number, so it follows both of them.
+ * The question decides which parent supplies the national register number,
+ * so it only means something while that is collected.
  */
-const isTaxDependentAvailable = computed(() => !!getFilterConfiguration('nationalRegisterNumber') && !!getFilterConfiguration('parents'));
+const isTaxDependentAvailable = computed(() => !!getFilterConfiguration('nationalRegisterNumber'));
 
 watch(isTaxDependentAvailable, (available) => {
     if (!available && patched.value.taxDependent) {
