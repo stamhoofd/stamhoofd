@@ -3,9 +3,6 @@ import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLIfNull, SQLOrderBy } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 import { memberCachedBalanceForMemberOrganizationJoin } from '../helpers/outstandingBalanceJoin.js';
-import { Context } from '../helpers/Context.js';
-import { AccessRight } from '@stamhoofd/structures';
-import { SimpleError } from '@simonbackx/simple-errors';
 
 export const memberSorters = (organizationId: string | null): SQLSortDefinitions<MemberWithUsersRegistrationsAndGroups> => {
     const sorters: SQLSortDefinitions<MemberWithUsersRegistrationsAndGroups> = {
@@ -113,37 +110,8 @@ export const memberSorters = (organizationId: string | null): SQLSortDefinitions
             },
             join: memberCachedBalanceForMemberOrganizationJoin(organizationId),
             select: [SQL.column('memberCachedBalance', 'amountOpen')],
-            checkPermission: async () => {
-                await throwIfNoFinancialReadAccess();
-            },
         };
     }
 
     return sorters;
 };
-
-async function throwIfNoFinancialReadAccess() {
-    const organization = Context.organization;
-    if (!organization) {
-        if (!Context.auth.hasPlatformFullAccess()) {
-            throw new SimpleError({
-                code: 'permission_denied',
-                message: 'No permissions for financial support sorter.',
-                human: $t(`Je hebt geen toegangsrechten om deze sortering te gebruiken.`),
-                statusCode: 400,
-            });
-        }
-        return;
-    }
-
-    const permissions = await Context.auth.getOrganizationPermissions(organization);
-
-    if (!permissions || !permissions.hasAccessRight(AccessRight.MemberReadFinancialData)) {
-        throw new SimpleError({
-            code: 'permission_denied',
-            message: 'No permissions for financial support sorter (organization scope).',
-            human: $t(`Je hebt geen toegangsrechten om deze sortering te gebruiken.`),
-            statusCode: 400,
-        });
-    }
-}

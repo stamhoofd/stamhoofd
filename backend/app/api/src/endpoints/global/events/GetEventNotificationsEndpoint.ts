@@ -110,7 +110,7 @@ export class GetEventNotificationsEndpoint extends Endpoint<Params, Query, Body,
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            await applySQLSorter(query, q.sort, sorters);
+            applySQLSorter(query, q.sort, sorters);
             query.limit(q.limit);
         }
 

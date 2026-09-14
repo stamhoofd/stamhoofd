@@ -70,7 +70,7 @@ export class GetDocumentsEndpoint extends Endpoint<Params, Query, Body, Response
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            await applySQLSorter(query, q.sort, sorters);
+            applySQLSorter(query, q.sort, sorters);
             query.limit(q.limit);
         }
 

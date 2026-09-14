@@ -10,12 +10,11 @@ export type SQLSortDefinition<T, B extends PlainObject | Date = PlainObject | Da
     toSQL(direction: SQLOrderByDirection): SQLOrderBy;
     join?: SQLJoin;
     select?: (SQLExpression | string)[];
-    checkPermission?: () => Promise<void>;
 };
 
 export type SQLSortDefinitions<T = any> = Record<string, SQLSortDefinition<T>>;
 
-export async function applySQLSorter(selectQuery: SQLSelect<any>, sortBy: SortList, definitions: SQLSortDefinitions) {
+export function applySQLSorter(selectQuery: SQLSelect<any>, sortBy: SortList, definitions: SQLSortDefinitions) {
     if (sortBy.length === 0) {
         throw new SimpleError({
             code: 'empty_sort',
@@ -30,10 +29,6 @@ export async function applySQLSorter(selectQuery: SQLSelect<any>, sortBy: SortLi
         }
 
         selectQuery.orderBy(d.toSQL(s.order));
-
-        if (d.checkPermission) {
-            await d.checkPermission();
-        }
 
         if (d.join) {
             // Check if no overlap in alias/table (otherwise we'll get issues)

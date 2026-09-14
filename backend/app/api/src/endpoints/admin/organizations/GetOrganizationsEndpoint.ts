@@ -122,7 +122,7 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            await applySQLSorter(query, q.sort, sorters);
+            applySQLSorter(query, q.sort, sorters);
             query.limit(q.limit);
         }
 
