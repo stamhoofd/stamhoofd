@@ -27,6 +27,9 @@ const columnCategories = {
     get item() {
         return $t(`%Sc`);
     },
+    get participant() {
+        return $t('Deelnemer');
+    },
     get checkout() {
         return $t(`%Zeq`);
     },
@@ -399,6 +402,80 @@ function getCartItemOptionValue(item: CartItem, slug: string): string {
 }
 
 /**
+ * Participant of a cart item (products with `enableCustomer`): customer details and the answers to the
+ * product's own record category. Only present when a product in the webshop or in the orders collects them.
+ */
+function getCartItemCustomerGroups(webshop: Webshop, orders: PrivateOrder[]): SelectableXlsxTransformerColumn<OrderLineRow>[] {
+    const products = [...webshop.productsInOrder, ...orders.flatMap(order => order.data.cart.items.map(item => item.product))];
+    if (!products.some(product => product.enableCustomer) && !orders.some(order => order.data.cart.items.some(item => item.customer))) {
+        return [];
+    }
+
+    const customerColumn = (id: string, name: string, getValue: (item: CartItem) => CellValue) => singleColumnGroup<OrderLineRow>({
+        id: `itemCustomer.${id}`,
+        name,
+        category: columnCategories.participant,
+        getValue: ({ item }) => item.customer ? getValue(item) : { value: '' },
+    });
+
+    const groups: SelectableXlsxTransformerColumn<OrderLineRow>[] = [
+        customerColumn('firstName', $t(`%1MT`), item => ({ value: item.customer!.firstName })),
+        customerColumn('lastName', $t(`%1MU`), item => ({ value: item.customer!.lastName })),
+        customerColumn('email', $t(`%1FK`), item => ({ value: item.customer!.email })),
+        customerColumn('phone', $t(`%2k`), item => ({ value: item.customer!.phone })),
+        customerColumn('birthDay', $t(`%17w`), item => item.customer!.birthDay ? { value: item.customer!.birthDay, style: { numberFormat: { formatCode: 'dd/mm/yyyy' } } } : { value: '' }),
+        customerColumn('gender', $t(`%Zd4`), item => ({ value: item.customer!.gender === Gender.Other ? '' : getGenderName(item.customer!.gender) })),
+        customerColumn('address', $t(`%Cn`), item => ({ value: item.customer!.address?.toString() ?? '' })),
+    ];
+
+    // Files and images cannot be represented in a spreadsheet cell
+    const isExportable = (record: { type: RecordType; excelColumns: unknown[] }) => record.type !== RecordType.File && record.type !== RecordType.Image && record.excelColumns.length > 0;
+    const recordIds = new Set<string>();
+
+    const addRecordGroup = (recordId: string, recordName: string, excelColumns: { name: string; width?: number; defaultCategory?: string }[]) => {
+        if (recordIds.has(recordId)) {
+            return;
+        }
+        recordIds.add(recordId);
+        groups.push({
+            id: `itemRecordAnswers.${recordId}`,
+            name: recordName,
+            category: columnCategories.participant,
+            columns: excelColumns.map((column, index) => ({
+                id: `itemRecordAnswers.${recordId}.${index}`,
+                name: column.defaultCategory ? (column.defaultCategory + ' - ' + column.name) : column.name,
+                defaultCategory: recordName,
+                width: 0,
+                getValue: ({ item }: OrderLineRow) => ({
+                    value: item.recordAnswers.get(recordId)?.excelValues[index]?.value?.toString() ?? '',
+                }),
+            })),
+        });
+    };
+
+    for (const product of products) {
+        for (const record of product.resolvedCustomerSettings.recordCategory?.getAllRecords() ?? []) {
+            if (isExportable(record)) {
+                addRecordGroup(record.id, record.name.toString(), record.excelColumns);
+            }
+        }
+    }
+
+    // Deleted records that still have answers in the exported orders
+    for (const order of orders) {
+        for (const item of order.data.cart.items) {
+            for (const answer of item.recordAnswers.values()) {
+                if (isExportable(answer.settings)) {
+                    addRecordGroup(answer.settings.id, answer.settings.name.toString(), answer.excelColumns);
+                }
+            }
+        }
+    }
+
+    return groups;
+}
+
+/**
  * One column per product combination (product + price + options) containing the ordered amount,
  * used in the 'orders' sheet.
  */
@@ -538,6 +615,7 @@ function getOrderLinesSheet(webshop: Webshop, orders: PrivateOrder[]): Selectabl
                 }),
             }),
             ...getCartItemOptionGroups(webshop, orders),
+            ...getCartItemCustomerGroups(webshop, orders),
             singleColumnGroup<OrderLineRow>({
                 id: 'seats',
                 name: $t(`%sB`),

@@ -5,6 +5,7 @@
             <span v-if="editable" class="icon arrow-right-small gray" />
         </h3>
         <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
+        <p v-if="participantDetails.length > 0" class="description" data-testid="participant-details" v-text="participantDetails.join('\n')" />
 
         <p v-if="labels.length > 0" class="discount-tags">
             <span v-for="discount of labels" :key="discount.id" class="style-tag discount">
@@ -22,7 +23,7 @@
             </p>
             <div class="actions" @click.stop>
                 <span v-if="cartItem.formattedAmount" class="amount">{{ cartItem.formattedAmount }}</span>
-                <StepperInput v-if="editable && !cartItem.cartError && cartItem.seats.length === 0 && (maximumRemaining === null || maximumRemaining > 1) && cartItem.productPrice.uitpasBaseProductPriceId === null" v-model="amount" :min="1" :max="maximumRemaining" @click.stop />
+                <StepperInput v-if="editable && !cartItem.cartError && cartItem.customer === null && cartItem.seats.length === 0 && (maximumRemaining === null || maximumRemaining > 1) && cartItem.productPrice.uitpasBaseProductPriceId === null" v-model="amount" :min="1" :max="maximumRemaining" @click.stop />
                 <button v-if="editable" class="button icon trash" type="button" @click="deleteItem()" />
             </div>
         </footer>
@@ -46,6 +47,8 @@
 
 <script lang="ts" setup>
 import type { Cart, CartItem, Webshop } from '@stamhoofd/structures';
+import { Gender, getGenderName } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 
 import StepperInput from '../inputs/StepperInput.vue';
@@ -93,6 +96,21 @@ function deleteItem() {
 }
 
 const labels = computed(() => props.cartItem.discounts.filter(d => !!d.cartLabel));
+
+// Everything collected about the participant besides the name (which is part of the description)
+const participantDetails = computed(() => {
+    const customer = props.cartItem.customer;
+    if (!customer) {
+        return [];
+    }
+    const lines = [customer.email, customer.phone, customer.birthDay ? Formatter.date(customer.birthDay, true) : '', customer.gender !== Gender.Other ? getGenderName(customer.gender) : '', customer.address?.toString() ?? ''].filter(line => !!line);
+    for (const answer of props.cartItem.recordAnswers.values()) {
+        if (!answer.isEmpty) {
+            lines.push(answer.descriptionValue);
+        }
+    }
+    return lines;
+});
 
 const maximumRemaining = computed(() => props.cartItem.getMaximumRemaining(props.cartItem, props.cart, props.webshop, props.admin));
 </script>
