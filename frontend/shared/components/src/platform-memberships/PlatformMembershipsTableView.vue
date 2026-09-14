@@ -36,11 +36,14 @@ type ObjectType = PlatformMembership;
 
 const props = withDefaults(
     defineProps<{
-        periodId?: string | null;
+        period?: {
+            id: string;
+            name: string;
+        } | null;
         customFilter?: StamhoofdFilter | null;
         customTitle?: string | null;
     }>(), {
-        periodId: null,
+        period: null,
         customFilter: null,
         customTitle: null,
     },
@@ -52,12 +55,13 @@ const filterBuilders = computed(() => getPlatformMembershipsUIFilterBuilders());
 const title = props.customTitle ?? $t('%1Nt');
 
 const platform = usePlatform();
+const period = computed(() => props.period ?? platform.value.period);
 
 const defaultFilter: StamhoofdFilter = {
     periodId: {
         $: '$rel',
-        value: platform.value.period.id,
-        name: platform.value.period.name,
+        value: period.value.id,
+        name: period.value.name,
     },
 };
 
