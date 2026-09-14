@@ -72,7 +72,7 @@
                             }) }}
                         </p>
                         <p class="style-description-small">
-                            <I18nComponent :t="$t('Fiscale attesten \'Kinderopvang\' worden opgemaakt op naam van deze ouder. Enkel het gezinshoofd mag de kinderen ten laste aangeven als aan de voorwaarden voldaan is. Er is maar één gezinshoofd. Bij gescheiden ouders met fiscaal co-ouderschap kan je het bij beide ouders aanvinken, en wordt het attest in twee verdeeld. Duid hier de juiste persoon aan, anders loop je belastingvoordeel mis en staan de fiscale attesten op naam van de foute ouder. <button>Meer info</button>')">
+                            <I18nComponent :t="$t('Het attest \'Kinderopvang\' komt op naam van de ouder die je aanduidt. Dat mag enkel het gezinshoofd zijn. Alleen bij fiscaal co-ouderschap na een scheiding vink je beide ouders aan, en wordt het attest gesplitst. Een foute keuze kost belastingvoordeel. <button>Meer info</button>')">
                                 <template #button="{content}">
                                     <a class="inline-link" href="https://fin.belgium.be/nl/particulieren/belastingaangifte/persoonlijke-situatie/personen-ten-laste/kinderen" target="_blank">
                                         {{ content }}
