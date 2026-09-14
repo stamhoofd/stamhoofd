@@ -415,6 +415,18 @@ export enum WebshopOrderMode {
     Bulk = 'Bulk',
 }
 
+export enum WebshopCoverPhotoFit {
+    /**
+     * Show the whole photo at its own aspect ratio
+     */
+    KeepAspectRatio = 'KeepAspectRatio',
+
+    /**
+     * Fill the width as a banner with a limited height, cropping the photo
+     */
+    Cover = 'Cover',
+}
+
 export enum WebshopStatus {
     Open = 'Open',
     Closed = 'Closed',
@@ -523,6 +535,9 @@ export class WebshopMetaData extends AutoEncoder {
 
     @field({ decoder: Image, nullable: true })
     coverPhoto: Image | null = null;
+
+    @field({ decoder: new EnumDecoder(WebshopCoverPhotoFit), ...NextVersion })
+    coverPhotoFit = WebshopCoverPhotoFit.KeepAspectRatio;
 
     @field({ decoder: BooleanDecoder, version: 94 })
     allowComments = false;
