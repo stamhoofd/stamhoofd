@@ -6,7 +6,7 @@ import { Database, Migration } from '@simonbackx/simple-database';
  *
  * The models can't be loaded to repair this, so the stored JSON is rewritten directly.
  */
-export function normalizeTaxDependent(value: unknown): boolean {
+function normalizeTaxDependent(value: unknown): boolean {
     let changed = false;
 
     const walk = (node: unknown) => {
@@ -44,7 +44,7 @@ export function normalizeTaxDependent(value: unknown): boolean {
     return changed;
 }
 
-export async function normalizeTaxDependentColumn(table: string, column: string) {
+async function normalizeTaxDependentColumn(table: string, column: string) {
     const [rows] = await Database.select('SELECT `id`, `' + column + '` FROM `' + table + '`');
     let updated = 0;
 
