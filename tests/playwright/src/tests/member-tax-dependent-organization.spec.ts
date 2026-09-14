@@ -187,8 +187,8 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         }, { organizationId, tokenString });
     }
 
-    /** Opens the member's edit view, which contains the parents section */
-    async function openMemberEditView({ page, scenario, memberName }: { page: Page; scenario: Scenario; memberName: string }) {
+    /** Opens the members list, reloading the dashboard */
+    async function openMembersList({ page, scenario }: { page: Page; scenario: Scenario }) {
         await page.goto(`${WorkerData.urls.dashboard}/${appToUri('dashboard')}/${scenario.organization.uri}`);
 
         const membersMenu = page.getByTestId('members-menu');
@@ -200,6 +200,21 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         await expect(allMembers).toBeVisible();
         await allMembers.click();
 
+        await expect(page.getByTestId('table-row').first()).toBeVisible({ timeout: 30_000 });
+    }
+
+    /** Closes the member detail view that a table row opened, so the list is clickable again */
+    async function closeMemberDetailView({ page }: { page: Page }) {
+        const detail = page.locator('.member-segmented-view');
+
+        if (await detail.first().isVisible().catch(() => false)) {
+            await detail.first().getByTestId('close-button').first().click();
+            await expect(detail.first()).toBeHidden({ timeout: 15_000 });
+        }
+    }
+
+    /** Opens a member's edit view from the list that is already on screen, without reloading */
+    async function openMemberEditViewFromList({ page, memberName }: { page: Page; memberName: string }) {
         const row = page.getByTestId('table-row').filter({ hasText: memberName });
         await expect(row).toBeVisible({ timeout: 30_000 });
         await row.click();
@@ -209,6 +224,12 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         const editView = page.getByTestId('member-step');
         await expect(editView).toBeVisible();
         return editView;
+    }
+
+    /** Opens the member's edit view, which contains the parents section */
+    async function openMemberEditView({ page, scenario, memberName }: { page: Page; scenario: Scenario; memberName: string }) {
+        await openMembersList({ page, scenario });
+        return await openMemberEditViewFromList({ page, memberName });
     }
 
     async function openParentEditView({ page, editView, parentName }: { page: Page; editView: Locator; parentName: string }) {
@@ -353,12 +374,26 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         await expect.poll(async () => await readTaxDependent(scenario.memberA.id, scenario.motherId), { timeout: 20_000 }).toBe(true);
         expect(await readTaxDependent(scenario.memberB.id, scenario.motherId)).toBeNull();
 
-        // And the sibling still shows it unticked after a full reload
+        // The sibling shows it unticked in the state the frontend still holds, without reloading
+        await closeMemberDetailView({ page });
+        const liveSiblingEdit = await openMemberEditViewFromList({ page, memberName: scenario.names.memberB });
+        const liveSiblingParentView = await openParentEditView({ page, editView: liveSiblingEdit, parentName: scenario.names.mother });
+
+        await expect(taxDependentCheckbox(liveSiblingParentView)).not.toBeChecked();
+        await expect(taxDependentCheckbox(liveSiblingParentView)).toBeVisible();
+
+        // Close both views again without saving, so the reload starts from a clean state
+        await liveSiblingParentView.getByTestId('close-button').first().click();
+        await expect(liveSiblingParentView).toBeHidden({ timeout: 15_000 });
+        await liveSiblingEdit.getByTestId('close-button').first().click();
+        await expect(liveSiblingEdit).toBeHidden({ timeout: 15_000 });
+
+        // And still unticked after a full reload, so the backend agrees with the frontend
         const siblingEdit = await openMemberEditView({ page, scenario, memberName: scenario.names.memberB });
         const siblingParentView = await openParentEditView({ page, editView: siblingEdit, parentName: scenario.names.mother });
 
         await expect(taxDependentCheckbox(siblingParentView)).not.toBeChecked();
-        // The number itself is shared, so it stays visible for the sibling
+        // The number itself is shared between the family members, so it stays visible for the sibling
         await expect(nationalRegisterNumberInput(siblingParentView)).toBeVisible();
     });
 
