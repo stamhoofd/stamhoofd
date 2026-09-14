@@ -554,6 +554,74 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         await expect(taxDependentCheckbox(thirdView)).not.toBeChecked();
     });
 
+    test('moving tax dependency to the other parent makes that parent\'s number required', async ({ page }) => {
+        test.setTimeout(180_000);
+        const scenario = await seedScenario({
+            taxDependent: true,
+            nationalRegisterNumbers: { mother: VALID_NRN_A, father: null },
+            taxDependentParents: { mother: true },
+        });
+
+        // Admins get every field as optional, so this only shows up in the portal
+        await loginToPortal({ page, scenario });
+
+        const quickAction = page.getByTestId('quick-action').filter({ hasText: new RegExp(scenario.names.memberA) });
+        await expect(quickAction).toBeVisible({ timeout: 30_000 });
+        await quickAction.click();
+
+        const step = page.getByTestId('member-step');
+        await expect(step).toBeVisible();
+
+        // The mother keeps her number, but is no longer the one who has the member tax dependent
+        const motherView = await openParentEditView({ page, editView: step, parentName: scenario.names.mother });
+        await expect(taxDependentCheckbox(motherView)).toBeChecked();
+        await taxDependentCheckbox(motherView).click();
+        await expect(taxDependentCheckbox(motherView)).not.toBeChecked();
+        await saveParentView(motherView);
+
+        // The father now carries it, so his number is required even though the mother still has one
+        const fatherView = await openParentEditView({ page, editView: step, parentName: scenario.names.father });
+        await taxDependentCheckbox(fatherView).click();
+        await expect(nationalRegisterNumberInput(fatherView)).toBeVisible();
+        await expect(nationalRegisterNumberInput(fatherView)).toHaveAttribute('placeholder', 'JJ.MM.DD-XXX.XX');
+
+        // Saving without one has to fail
+        await saveView(fatherView);
+        await expect(fatherView).toBeVisible();
+        await expect(fatherView.getByText(/vul een rijksregisternummer in/i).first()).toBeVisible();
+    });
+
+    test('a number on a parent that is not tax dependent does not complete the member', async ({ page }) => {
+        test.setTimeout(150_000);
+        const scenario = await seedScenario({
+            taxDependent: true,
+            // The mother has a number, but nobody has the member tax dependent
+            nationalRegisterNumbers: { mother: VALID_NRN_A, father: null },
+        });
+
+        await loginToPortal({ page, scenario });
+
+        const quickAction = page.getByTestId('quick-action').filter({ hasText: new RegExp(scenario.names.memberA) });
+        await expect(quickAction).toBeVisible({ timeout: 30_000 });
+        await quickAction.click();
+
+        const step = page.getByTestId('member-step');
+        await expect(step).toBeVisible();
+
+        // Saving has to be refused: the stored number belongs to nobody in particular
+        await saveView(step);
+        await expect(step).toBeVisible();
+        await expect(step.getByText(/fiscaal ten laste/i).first()).toBeVisible();
+
+        // Marking the parent that already has the number resolves it
+        const motherView = await openParentEditView({ page, editView: step, parentName: scenario.names.mother });
+        await taxDependentCheckbox(motherView).click();
+        await saveParentView(motherView);
+        await saveMemberStep(step);
+
+        await expect.poll(async () => await readTaxDependent(scenario.memberA.id, scenario.motherId), { timeout: 20_000 }).toBe(true);
+    });
+
     // ------------------------------------------------------------------
     // Adding a new parent to the whole family
     // ------------------------------------------------------------------

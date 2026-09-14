@@ -178,20 +178,19 @@ const isAllOptional = useIsAllOptional(relatedMembers);
 const showTaxDependent = computed(() => isPropertyEnabled('parents.taxDependent') && !!props.member);
 
 /**
- * If NRN is required, it is only required for one parent of each member
+ * The number of the tax dependent parent ends up on the certificate, so a number
+ * stored for another parent doesn't make this one optional.
  */
 const isNRNRequiredForThisParent = computed(() => {
     if (isAllOptional.value) {
         return false;
     }
 
-    for (const member of relatedMembers.value) {
-        const required = member.isPropertyRequired('parents.nationalRegisterNumber');
-        if (required && !member.patchedMember.details.parents.find(p => p.id !== props.parent.id && !!p.nationalRegisterNumber)) {
-            return true;
-        }
+    if (!patched.value.taxDependent) {
+        return false;
     }
-    return false;
+
+    return relatedMembers.value.some(member => member.isPropertyRequired('parents.nationalRegisterNumber'));
 });
 
 const firstName = computed({
