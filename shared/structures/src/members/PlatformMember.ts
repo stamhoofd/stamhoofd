@@ -645,7 +645,7 @@ export class PlatformRegistration extends Registration {
         if (!details.nationalRegisterNumber && member.isPropertyRequired('nationalRegisterNumber', scope)) {
             base.push($t(`%19Q`));
         } else {
-            if (member.isPropertyRequired('parents', scope) && member.isPropertyRequired('parents.nationalRegisterNumber', scope) && !member.patchedMember.details.parents.find(p => p.nationalRegisterNumber)) {
+            if (member.isPropertyRequired('parents', scope) && member.isPropertyRequired('parents.nationalRegisterNumber', scope) && !member.hasRequiredParentNationalRegisterNumbers) {
                 base.push($t(`%zb`));
             }
         }
@@ -826,6 +826,19 @@ export class PlatformMember implements ObjectWithRecords {
      * Fiscal certificates ('Kinderopvang') only cover activities for members under 14, or under 21 with a severe disability.
      * Certificates are created a year after the fact, so registrations of the last two years still matter.
      */
+    get taxDependentParents(): Parent[] {
+        return this.patchedMember.details.parents.filter(p => p.taxDependent === true);
+    }
+
+    /**
+     * The number is only useful on the parent that has the member tax dependent,
+     * so a number stored on another parent doesn't answer the question.
+     */
+    get hasRequiredParentNationalRegisterNumbers(): boolean {
+        const parents = this.taxDependentParents;
+        return parents.length > 0 && parents.every(p => !!p.nationalRegisterNumber);
+    }
+
     get needsTaxCertificate(): boolean {
         const details = this.patchedMember.details;
         const maxAge = details.severeDisability?.value ? 20 : 13;
