@@ -25,7 +25,7 @@ type Scenario = {
     /** The shared parent, present on both siblings with the same id */
     motherId: string;
     fatherId: string;
-    names: { memberA: string; memberB: string; mother: string; father: string };
+    names: { memberA: string; memberB: string; mother: string; father: string; thirdParent: string };
 };
 
 const PORTAL_PASSWORD = 'testAbc123456';
@@ -49,12 +49,16 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         await WorkerData.resetDatabase();
     });
 
-    async function seedScenario({ taxDependent, nationalRegisterNumbers, profile = YOUNG }: {
+    async function seedScenario({ taxDependent, nationalRegisterNumbers, profile = YOUNG, taxDependentParents = {}, withThirdParent = false }: {
         taxDependent: boolean;
         /** National register number per parent, null to leave it empty */
         nationalRegisterNumbers: { mother: string | null; father: string | null };
         /** Young enough for a fiscal certificate, too old, or kept eligible by a severe disability */
         profile?: { birthDay: Date; nationalRegisterNumber: string; severeDisability?: boolean };
+        /** Parents that already have the member tax dependent */
+        taxDependentParents?: { mother?: boolean; father?: boolean };
+        /** Adds a third parent, to reach the maximum of two tax dependent parents */
+        withThirdParent?: boolean;
     }): Promise<Scenario> {
         const runId = `${WorkerData.id}-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
 
@@ -107,6 +111,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
             memberB: `Bram-${runId}`,
             mother: `Moeder-${runId}`,
             father: `Vader-${runId}`,
+            thirdParent: `Plusouder-${runId}`,
         };
 
         // The same parent objects (same ids) on both siblings, like the backend merge produces
@@ -126,6 +131,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
             email: `moeder-${runId}@example.com`,
             phone: '+32470123456',
             address,
+            taxDependent: taxDependentParents.mother ?? null,
             nationalRegisterNumber: nationalRegisterNumbers.mother,
         });
         const father = Parent.create({
@@ -135,7 +141,17 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
             email: `vader-${runId}@example.com`,
             phone: '+32470123457',
             address,
+            taxDependent: taxDependentParents.father ?? null,
             nationalRegisterNumber: nationalRegisterNumbers.father,
+        });
+
+        const thirdParent = Parent.create({
+            type: ParentType.Other,
+            firstName: names.thirdParent,
+            lastName: 'Doe',
+            email: `plusouder-${runId}@example.com`,
+            phone: '+32470123458',
+            address,
         });
 
         // Both members have to share a user: Member.getFamily joins on _members_users,
@@ -157,7 +173,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
                     // Valid and complete, so the parents step is the one that needs work
                     nationalRegisterNumber: profile.nationalRegisterNumber,
                     severeDisability: profile.severeDisability === undefined ? null : BooleanStatus.create({ value: profile.severeDisability }),
-                    parents: [mother.clone(), father.clone()],
+                    parents: withThirdParent ? [mother.clone(), father.clone(), thirdParent.clone()] : [mother.clone(), father.clone()],
                 }),
             }).create();
 
@@ -440,6 +456,102 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         expect(await readTaxDependent(scenario.memberA.id, scenario.motherId)).toBe(true);
         expect(await readTaxDependent(scenario.memberA.id, scenario.fatherId)).toBeNull();
         expect(await readTaxDependent(scenario.memberB.id, scenario.motherId)).toBeNull();
+    });
+
+    // ------------------------------------------------------------------
+    // Two tax dependent parents only make sense with fiscal co-parenting
+    // ------------------------------------------------------------------
+
+    test('marking a second parent asks to confirm fiscal co-parenting, and applies it when confirmed', async ({ page }) => {
+        test.setTimeout(150_000);
+        const scenario = await seedScenario({
+            taxDependent: true,
+            nationalRegisterNumbers: { mother: VALID_NRN_A, father: null },
+            taxDependentParents: { mother: true },
+        });
+        await loginAs({ page, user: scenario.user });
+
+        const editView = await openMemberEditView({ page, scenario, memberName: scenario.names.memberA });
+        const fatherView = await openParentEditView({ page, editView, parentName: scenario.names.father });
+
+        await expect(taxDependentCheckbox(fatherView)).not.toBeChecked();
+        await taxDependentCheckbox(fatherView).click();
+
+        const confirm = page.getByTestId('centered-message');
+        await expect(confirm).toBeVisible({ timeout: 15_000 });
+        await expect(confirm.getByText(/co-ouderschap/i).first()).toBeVisible();
+
+        // The first button confirms, the second cancels
+        await confirm.getByTestId('centered-message-button').first().click();
+        await expect(confirm).toBeHidden({ timeout: 15_000 });
+
+        await expect(taxDependentCheckbox(fatherView)).toBeChecked();
+        await nationalRegisterNumberInput(fatherView).fill(VALID_NRN_B);
+        await saveParentView(fatherView);
+        await saveMemberStep(editView);
+
+        // Both parents are tax dependent now, which is what co-parenting means
+        await expect.poll(async () => await readTaxDependent(scenario.memberA.id, scenario.fatherId), { timeout: 20_000 }).toBe(true);
+        expect(await readTaxDependent(scenario.memberA.id, scenario.motherId)).toBe(true);
+    });
+
+    test('cancelling the co-parenting confirmation leaves the second parent untouched', async ({ page }) => {
+        test.setTimeout(150_000);
+        const scenario = await seedScenario({
+            taxDependent: true,
+            nationalRegisterNumbers: { mother: VALID_NRN_A, father: null },
+            taxDependentParents: { mother: true },
+        });
+        await loginAs({ page, user: scenario.user });
+
+        const editView = await openMemberEditView({ page, scenario, memberName: scenario.names.memberA });
+        const fatherView = await openParentEditView({ page, editView, parentName: scenario.names.father });
+
+        await taxDependentCheckbox(fatherView).click();
+
+        const confirm = page.getByTestId('centered-message');
+        await expect(confirm).toBeVisible({ timeout: 15_000 });
+
+        // The second button cancels
+        await confirm.getByTestId('centered-message-button').nth(1).click();
+        await expect(confirm).toBeHidden({ timeout: 15_000 });
+
+        // The checkbox springs back, and no national register number is asked
+        await expect(taxDependentCheckbox(fatherView)).not.toBeChecked();
+        await expect(nationalRegisterNumberInput(fatherView)).toBeHidden();
+
+        await saveParentView(fatherView);
+        await saveMemberStep(editView);
+
+        expect(await readTaxDependent(scenario.memberA.id, scenario.fatherId)).toBeNull();
+        expect(await readTaxDependent(scenario.memberA.id, scenario.motherId)).toBe(true);
+    });
+
+    test('a third parent cannot be marked tax dependent', async ({ page }) => {
+        test.setTimeout(150_000);
+        const scenario = await seedScenario({
+            taxDependent: true,
+            nationalRegisterNumbers: { mother: VALID_NRN_A, father: VALID_NRN_B },
+            taxDependentParents: { mother: true, father: true },
+            withThirdParent: true,
+        });
+        await loginAs({ page, user: scenario.user });
+
+        const editView = await openMemberEditView({ page, scenario, memberName: scenario.names.memberA });
+        const thirdView = await openParentEditView({ page, editView, parentName: scenario.names.thirdParent });
+
+        await taxDependentCheckbox(thirdView).click();
+
+        // Blocked outright, not offered as a confirmation
+        const message = page.getByTestId('centered-message');
+        await expect(message).toBeVisible({ timeout: 15_000 });
+        await expect(message.getByText(/maximaal twee ouders/i).first()).toBeVisible();
+        await expect(message.getByText(/co-ouderschap\?/i)).toHaveCount(0);
+
+        await message.getByTestId('centered-message-button').first().click();
+        await expect(message).toBeHidden({ timeout: 15_000 });
+
+        await expect(taxDependentCheckbox(thirdView)).not.toBeChecked();
     });
 
     // ------------------------------------------------------------------
