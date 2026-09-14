@@ -1,7 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email, Member, MemberUser } from '@stamhoofd/models';
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJoinedRelationFilter, createWildcardColumnFilter, SQL, SQLAge, SQLCast, SQLConcat, SQLJsonExtract, SQLScalar, SQLValueType } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJoinedRelationFilter, createWildcardColumnFilter, SQL, SQLAge, SQLCast, SQLConcat, SQLJsonExtract, SQLSafeValue, SQLScalar, SQLValueType } from '@stamhoofd/sql';
 import { AccessRight } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context.js';
 import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers.js';
@@ -569,7 +569,7 @@ export const memberFilterCompilers = (organizationId?: string | null): SQLFilter
             {
                 ...baseSQLFilterCompilers,
                 amountOpen: createColumnFilter({
-                    expression: SQL.column('amountOpen'),
+                    expression: SQL.coalesce(SQL.column('amountOpen'), new SQLSafeValue(0)),
                     type: SQLValueType.Number,
                     nullable: false,
                     checkPermission: async () => {
