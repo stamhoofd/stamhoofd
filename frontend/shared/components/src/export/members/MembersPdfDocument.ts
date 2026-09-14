@@ -23,8 +23,14 @@ export class MembersPdfDocument {
     }
 
     private async createDoc(): Promise<PDFKit.PDFDocument> {
-        const { PDFDocument } = await import('@stamhoofd/ticket-builder/pdfkit');
-        return new PDFDocument({ size: 'A4', margin: pageMargin, bufferPages: true });
+        const PDFDocument = (await import('pdfkit')).default;
+        return new PDFDocument({
+            size: 'A4',
+            margin: pageMargin,
+            bufferPages: true,
+            // pdfkit's browser build ships no standard fonts: null skips loading Helvetica (@types/pdfkit predates this)
+            font: null as unknown as string,
+        });
     }
 
     private async render() {

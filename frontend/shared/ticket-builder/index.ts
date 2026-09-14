@@ -7,8 +7,8 @@ import { WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTicketType } from '@s
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { Buffer } from 'buffer';
+import PDFDocument from 'pdfkit';
 import QRCode from 'qrcode';
-import { PDFDocument } from './pdfkit';
 
 // polyfill
 globalThis.Buffer = Buffer;
@@ -50,7 +50,12 @@ export class TicketBuilder {
         this.webshop = webshop;
         this.organization = organization;
         this.order = order;
-        this.document = new PDFDocument({ size: [PAGE_WIDTH, PAGE_HEIGHT], margin: PAGE_MARGIN });
+        this.document = new PDFDocument({
+            size: [PAGE_WIDTH, PAGE_HEIGHT],
+            margin: PAGE_MARGIN,
+            // pdfkit's browser build ships no standard fonts: null skips loading Helvetica (@types/pdfkit predates this)
+            font: null as unknown as string,
+        });
     }
 
     get primaryColor() {
@@ -76,6 +81,7 @@ export class TicketBuilder {
 
                 this.document.registerFont('Metropolis-SemiBold', metropolisBold);
                 this.document.registerFont('Metropolis-Medium', metropolisMedium);
+                this.document.font('Metropolis-Medium');
 
                 // Initiate building
                 this.drawItems().then(() => {
@@ -163,6 +169,7 @@ export class TicketBuilder {
         }
         height += QR_WIDTH + 2 * MM;
 
+        this.document.font('Metropolis-Medium');
         this.document.fontSize(6);
         this.document.fillColor(COLOR_GRAY);
 

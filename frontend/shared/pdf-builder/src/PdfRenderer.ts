@@ -1,6 +1,7 @@
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { Formatter } from '@stamhoofd/utility';
 import { Buffer } from 'buffer';
+import { metropolisMedium } from './fonts';
 import type { PdfDocWrapper } from './PdfDocWrapper';
 import type { PdfFont } from './PdfFont';
 import type { PdfItem } from './PdfItem';
@@ -51,6 +52,9 @@ export class PdfRenderer {
     async render(docWrapper: PdfDocWrapper, pdfItems: PdfItem[], beforeFlush?: (docWrapper: PdfDocWrapper) => void) {
         const doc = docWrapper.doc;
         const bufferPromise = this.createBuffer(doc);
+
+        await this.registerFonts(doc, [metropolisMedium]);
+        doc.font(metropolisMedium.name);
 
         for (const pdfItem of pdfItems) {
             if (pdfItem.getFonts) {
