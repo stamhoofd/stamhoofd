@@ -1748,7 +1748,7 @@ export class AdminPermissionChecker {
     /**
      * Performance helper
      */
-    async canAccessAllMembers(organizationId: string, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
+    async canAccessAllMembersInCurrentPeriod(organizationId: string, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
         const permissions = await this.getOrganizationPermissions(organizationId);
         if (!permissions) {
             return false;
