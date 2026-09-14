@@ -6,7 +6,7 @@ import type { MemberResponsibilityRecordBase } from './members/MemberResponsibil
 import { getPermissionLevelNumber, PermissionLevel } from './PermissionLevel.js';
 import type { PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole.js';
 import type { Permissions } from './Permissions.js';
-import { PermissionsResourceType } from './PermissionsResourceType.js';
+import { isPeriodScopedResourceType, PermissionsResourceKey, PermissionsResourceType } from './PermissionsResourceType.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 
 /**
@@ -152,20 +152,19 @@ export class LoadedPermissions {
         if (!resource) {
             return null;
         }
-        const rInstance = resource.get(id);
-        const allInstance = resource.get('');
-        if (!rInstance) {
-            if (allInstance) {
-                return allInstance;
+
+        const keys = [id];
+        if (id !== PermissionsResourceKey.All) {
+            keys.push(PermissionsResourceKey.All);
+            if (isPeriodScopedResourceType(type) && id !== PermissionsResourceKey.CurrentPeriod) {
+                keys.push(PermissionsResourceKey.CurrentPeriod);
             }
+        }
+        const instances = keys.map(key => resource.get(key)).filter(instance => instance !== undefined) as LoadedPermissions[];
+        if (instances.length === 0) {
             return null;
         }
-
-        if (allInstance) {
-            return rInstance.merge(allInstance);
-        }
-
-        return rInstance;
+        return instances.reduce((merged, instance) => merged.merge(instance));
     }
 
     getMergedResourcePermissions(type: PermissionsResourceType, id: string): LoadedPermissions {
@@ -222,7 +221,7 @@ export class LoadedPermissions {
     }
 
     hasAccessRightForAllResourcesOfType(type: PermissionsResourceType, right: AccessRight): boolean {
-        return this.hasResourceAccessRight(type, '', right);
+        return this.hasResourceAccessRight(type, PermissionsResourceKey.All, right);
     }
 
     hasAccessRightForSomeResource(right: AccessRight): boolean {

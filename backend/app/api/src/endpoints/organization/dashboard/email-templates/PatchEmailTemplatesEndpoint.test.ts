@@ -3,7 +3,7 @@ import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
 import { EmailTemplate, GroupFactory, OrganizationFactory, Platform, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import { EmailContent, EmailTemplate as EmailTemplateStruct, EmailTemplateType, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
+import { EmailContent, EmailTemplate as EmailTemplateStruct, EmailTemplateType, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
@@ -39,7 +39,7 @@ describe('Endpoint.PatchEmailTemplatesEndpoint', () => {
             const role = PermissionRoleDetailed.create({
                 name: 'Beroepsmedewerker',
                 resources: new Map([[PermissionsResourceType.OrganizationTags, new Map([[
-                    '',
+                    PermissionsResourceKey.All,
                     ResourcePermissions.create({
                         level: PermissionLevel.Full,
                     }),
