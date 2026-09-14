@@ -52,6 +52,38 @@ describe('PlatformMember.needsTaxCertificate', () => {
         expect(build({ birthDay: yearsAgo(20), registeredAt: yearsAgo(1) }).needsTaxCertificate).toBe(false);
     });
 
+    // The age is counted on the day of the registration, so registering a year ago
+    // means the member was one year younger than they are today
+    test.each([
+        [14, 13, true],
+        [15, 14, false],
+    ])('birth %s years ago is %s at the registration: %s', (bornYearsAgo, ageAtRegistration, expected) => {
+        expect(build({ birthDay: yearsAgo(bornYearsAgo), registeredAt: yearsAgo(1) }).needsTaxCertificate).toBe(expected);
+    });
+
+    test.each([
+        [21, 20, true],
+        [22, 21, false],
+    ])('with a severe disability, birth %s years ago is %s at the registration: %s', (bornYearsAgo, ageAtRegistration, expected) => {
+        expect(build({ birthDay: yearsAgo(bornYearsAgo), registeredAt: yearsAgo(1), severeDisability: true }).needsTaxCertificate).toBe(expected);
+    });
+
+    test('a registration just inside the two year window still counts', () => {
+        const almostTwoYears = new Date();
+        almostTwoYears.setFullYear(almostTwoYears.getFullYear() - 2);
+        almostTwoYears.setDate(almostTwoYears.getDate() + 7);
+
+        expect(build({ birthDay: yearsAgo(12), registeredAt: almostTwoYears }).needsTaxCertificate).toBe(true);
+    });
+
+    test('a registration just outside the two year window does not count', () => {
+        const justOverTwoYears = new Date();
+        justOverTwoYears.setFullYear(justOverTwoYears.getFullYear() - 2);
+        justOverTwoYears.setDate(justOverTwoYears.getDate() - 7);
+
+        expect(build({ birthDay: yearsAgo(12), registeredAt: justOverTwoYears }).needsTaxCertificate).toBe(false);
+    });
+
     test('false when the only registration is older than two years', () => {
         expect(build({ birthDay: yearsAgo(12), registeredAt: yearsAgo(3) }).needsTaxCertificate).toBe(false);
     });

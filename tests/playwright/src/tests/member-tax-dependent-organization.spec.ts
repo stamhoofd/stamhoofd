@@ -9,7 +9,7 @@ import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import type { Group, Organization, User } from '@stamhoofd/models';
 import { GroupFactory, Member, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationFactory, RegistrationPeriod, UserFactory } from '@stamhoofd/models';
-import { Address, appToUri, GroupCategory, GroupCategorySettings, MemberDetails, OrganizationMetaData, OrganizationRecordsConfiguration, OrganizationType, Parent, ParentType, PermissionLevel, Permissions, PropertyFilter, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
+import { Address, appToUri, BooleanStatus, GroupCategory, GroupCategorySettings, MemberDetails, OrganizationMetaData, OrganizationRecordsConfiguration, OrganizationType, Parent, ParentType, PermissionLevel, Permissions, PropertyFilter, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { WorkerData } from '../helpers/index.js';
@@ -37,6 +37,8 @@ const VALID_NRN_B = '93042000221';
 // Members need a valid number of their own: the general step validates it, and it has to match the birth day
 const YOUNG = { birthDay: new Date(2015, 3, 20), nationalRegisterNumber: '15042000162' };
 const TOO_OLD = { birthDay: new Date(2008, 3, 20), nationalRegisterNumber: '08042000112' };
+// Over 14, but a severe disability raises the limit to 21
+const DISABLED = { birthDay: new Date(2007, 3, 20), nationalRegisterNumber: '07042000188', severeDisability: true };
 
 test.describe('Tax dependent parents (organization mode) @tax-dependent', () => {
     test.beforeAll(() => {
@@ -51,8 +53,8 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         taxDependent: boolean;
         /** National register number per parent, null to leave it empty */
         nationalRegisterNumbers: { mother: string | null; father: string | null };
-        /** Young enough for a fiscal certificate, or too old */
-        profile?: { birthDay: Date; nationalRegisterNumber: string };
+        /** Young enough for a fiscal certificate, too old, or kept eligible by a severe disability */
+        profile?: { birthDay: Date; nationalRegisterNumber: string; severeDisability?: boolean };
     }): Promise<Scenario> {
         const runId = `${WorkerData.id}-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
 
@@ -154,6 +156,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
                     birthDay: profile.birthDay,
                     // Valid and complete, so the parents step is the one that needs work
                     nationalRegisterNumber: profile.nationalRegisterNumber,
+                    severeDisability: profile.severeDisability === undefined ? null : BooleanStatus.create({ value: profile.severeDisability }),
                     parents: [mother.clone(), father.clone()],
                 }),
             }).create();
@@ -351,6 +354,22 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
 
         await expect(taxDependentCheckbox(parentView)).toBeHidden();
         await expect(nationalRegisterNumberInput(parentView)).toBeHidden();
+    });
+
+    test('a member over 14 with a severe disability is still asked', async ({ page }) => {
+        test.setTimeout(120_000);
+        const scenario = await seedScenario({ taxDependent: true, nationalRegisterNumbers: { mother: null, father: null }, profile: DISABLED });
+        await loginAs({ page, user: scenario.user });
+
+        const editView = await openMemberEditView({ page, scenario, memberName: scenario.names.memberA });
+        const parentView = await openParentEditView({ page, editView, parentName: scenario.names.mother });
+
+        // Same age as the TOO_OLD member, but the disability raises the limit to 21
+        await expect(taxDependentCheckbox(parentView)).toBeVisible();
+        await expect(nationalRegisterNumberInput(parentView)).toBeHidden();
+
+        await taxDependentCheckbox(parentView).click();
+        await expect(nationalRegisterNumberInput(parentView)).toBeVisible();
     });
 
     // ------------------------------------------------------------------
