@@ -2,23 +2,24 @@ import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 
+import { Language } from '@stamhoofd/types/Language';
 import { BalanceItemWithPayments, BalanceItemWithPrivatePayments } from '../BalanceItem.js';
 import { EmailRecipient } from '../email/Email.js';
 import { Recipient, Replacement } from '../endpoints/EmailRequest.js';
-import { Payment, PrivatePayment } from '../members/Payment.js';
 import type { File } from '../files/File.js';
+import { Payment, PrivatePayment } from '../members/Payment.js';
 import { RecordCheckboxAnswer, RecordFileAnswer, RecordImageAnswer } from '../members/records/RecordAnswer.js';
 import { RecordCategory } from '../members/records/RecordCategory.js';
 import type { Organization } from '../Organization.js';
 import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodHelper, PaymentMethodV150 } from '../PaymentMethod.js';
 import { PaymentStatus } from '../PaymentStatus.js';
+import { PaymentType } from '../PaymentType.js';
 import { Checkout } from './Checkout.js';
 import { Customer } from './Customer.js';
 import { TicketPrivate } from './Ticket.js';
 import type { WebshopPreview } from './Webshop.js';
 import type { WebshopTakeoutMethod } from './WebshopMetaData.js';
 import { CheckoutMethodType } from './WebshopMetaData.js';
-import { Language } from '@stamhoofd/types/Language';
 
 export enum OrderStatusV103 {
     Created = 'Created',
@@ -404,8 +405,12 @@ export class Order extends AutoEncoder {
 
     private getRecipientReplacements(organization: Organization, webshop: WebshopPreview, payments: Payment[] = this.payments) {
         const order = this;
-        const succeededTransfers = payments
-            .filter(p => p.status === PaymentStatus.Succeeded && p.method === PaymentMethod.Transfer) ?? payments.filter(p => p.method === PaymentMethod.Transfer);
+        // Refunds and chargebacks of a transfer keep the transfer method, but never carry payment instructions
+        const transfers = payments.filter(p => p.method === PaymentMethod.Transfer && p.type === PaymentType.Payment && p.status !== PaymentStatus.Failed);
+
+        // The payment instructions of a transfer that still has to be paid are the most relevant ones
+        const openTransfers = transfers.filter(p => p.status !== PaymentStatus.Succeeded);
+        const relevantTransfers = openTransfers.length > 0 ? openTransfers : transfers;
 
         return [
             Replacement.create({
@@ -430,18 +435,18 @@ export class Order extends AutoEncoder {
             }),
             Replacement.create({
                 token: 'transferDescription',
-                value: succeededTransfers.map(p => p.transferDescription).join(', '),
+                value: relevantTransfers.map(p => p.transferDescription).join(', '),
             }),
             Replacement.create({
                 token: 'transferBankAccount',
-                value: succeededTransfers
+                value: relevantTransfers
                     .map(p => p.transferSettings?.iban ?? organization.meta.registrationPaymentConfiguration.transferSettings.iban)
                     .filter(iban => !!iban)
                     .join(', '),
             }),
             Replacement.create({
                 token: 'transferBankCreditor',
-                value: succeededTransfers
+                value: relevantTransfers
                     .map(p => p.transferSettings?.creditor ?? organization.meta.registrationPaymentConfiguration.transferSettings.creditor ?? organization.name)
                     .join(', '),
             }),
