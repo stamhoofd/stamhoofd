@@ -4,7 +4,7 @@ import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { User } from '@stamhoofd/models';
 import { EventFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, PlatformEventTypeFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { AccessRight, Event, Group, GroupSettings, GroupType, OrganizationEventType, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, TranslatedString } from '@stamhoofd/structures';
+import { AccessRight, Event, Group, GroupSettings, GroupType, OrganizationEventType, PermissionLevel, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, TranslatedString } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { PatchEventsEndpoint } from './PatchEventsEndpoint.js';
@@ -18,7 +18,7 @@ type Body = EndpointType extends Endpoint<any, any, infer B, any> ? B : never;
 const minimumUserPermissions = Permissions.create({
     resources: new Map([
         [PermissionsResourceType.Groups, new Map([
-            ['', ResourcePermissions.create({
+            [PermissionsResourceKey.CurrentPeriod, ResourcePermissions.create({
                 accessRights: [AccessRight.EventWrite],
             })],
         ])],
@@ -50,7 +50,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             globalPermissions: Permissions.create({
                 resources: new Map([
                     [PermissionsResourceType.OrganizationTags, new Map([
-                        ['', ResourcePermissions.create({
+                        [PermissionsResourceKey.All, ResourcePermissions.create({
                             accessRights: [
                                 AccessRight.EventWrite,
                             ],

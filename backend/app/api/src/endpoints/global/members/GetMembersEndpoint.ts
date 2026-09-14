@@ -74,7 +74,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 }
             } else {
                 // Add organization scope filter
-                if (await Context.auth.canAccessAllMembers(organization.id, permissionLevel)) {
+                if (await Context.auth.canAccessAllMembersInCurrentPeriod(organization.id, permissionLevel)) {
                     if (await Context.auth.hasFullAccess(organization.id, permissionLevel)) {
                         // Can access full history for now
                         scopeFilter = {

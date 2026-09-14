@@ -1,7 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, OrganizationRegistrationPeriod, RegistrationPeriod, Token } from '@stamhoofd/models';
 import { GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import { Group, GroupCategory, GroupCategorySettings, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, OrganizationRegistrationPeriodSettings, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
+import { Group, GroupCategory, GroupCategorySettings, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, OrganizationRegistrationPeriodSettings, PermissionLevel, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
 import { PatchOrganizationRegistrationPeriodsEndpoint } from './PatchOrganizationRegistrationPeriodsEndpoint.js';
 import { SessionService } from '../../../../services/SessionService.js';
 
@@ -46,7 +46,7 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveRegistration
                     resources: new Map([[
                         PermissionsResourceType.Groups,
                         new Map([[
-                            '', ResourcePermissions.create({
+                            PermissionsResourceKey.CurrentPeriod, ResourcePermissions.create({
                                 level: PermissionLevel.Full,
                             }),
                         ]]),

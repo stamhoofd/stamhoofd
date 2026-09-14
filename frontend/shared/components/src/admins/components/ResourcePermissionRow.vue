@@ -45,7 +45,7 @@ import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useEmitPatch } from '#hooks/useEmitPatch.ts';
 import type { AccessRight, PermissionsResourceType} from '@stamhoofd/structures';
-import { AccessRightHelper, PermissionLevel, PermissionRoleDetailed, Permissions, ResourcePermissions, getConfigurableAccessRightsForResourceType, getConfigurablePermissionLevelsForResourceType, getDefaultAccessRightsForResourceType, getDefaultPermissionLevelForResourceType, getPermissionLevelName, getPermissionLevelNumber, getPermissionResourceTypeName, maximumPermissionlevel } from '@stamhoofd/structures';
+import { AccessRightHelper, PermissionLevel, PermissionRoleDetailed, Permissions, ResourcePermissions, getConfigurableAccessRightsForResourceType, getConfigurablePermissionLevelsForResourceType, getDefaultAccessRightsForResourceType, getDefaultPermissionLevelForResourceType, getPermissionLevelName, getPermissionLevelNumber, getPermissionResourceTypeName, getWildcardResourceKeys, maximumPermissionlevel } from '@stamhoofd/structures';
 import type { Ref} from 'vue';
 import { computed } from 'vue';
 
@@ -88,25 +88,29 @@ const isMe = computed(() => {
 
 const resourcePermissions = computed(() => role.value.resources.get(props.resource.type)?.get(props.resource.id));
 
+const wildcardKeys = getWildcardResourceKeys(props.resource.type, props.resource.id);
+
+function getWildcardPermissions(permissions: PermissionRoleDetailed | Permissions): ResourcePermissions[] {
+    const resources = permissions.resources.get(props.resource.type);
+    return wildcardKeys.map(key => resources?.get(key)).filter(p => p !== undefined);
+}
+
 const lockedMinimumLevel = computed(() => {
-    const a = props.role.level;
-    const b = props.resource.id !== '' ? (role.value.resources.get(props.resource.type)?.get('')?.level ?? PermissionLevel.None) : PermissionLevel.None;
+    const levels = [role.value.level, ...getWildcardPermissions(role.value).map(p => p.level)];
 
-    const arr = [a, b];
-
-    for (const role of props.inheritedRoles) {
-        const c = role.level;
-        const d = role.resources.get(props.resource.type)?.get('')?.level ?? PermissionLevel.None;
-        const e = props.resource.id !== '' ? (role.resources.get(props.resource.type)?.get(props.resource.id)?.level ?? PermissionLevel.None) : PermissionLevel.None;
-        arr.push(c, d, e);
+    for (const inheritedRole of props.inheritedRoles) {
+        levels.push(
+            inheritedRole.level,
+            ...getWildcardPermissions(inheritedRole).map(p => p.level),
+            inheritedRole.resources.get(props.resource.type)?.get(props.resource.id)?.level ?? PermissionLevel.None,
+        );
     }
 
-    return maximumPermissionlevel(...arr);
+    return maximumPermissionlevel(...levels);
 });
 
 const lockedAccessRights = computed(() => {
-    const accessRights = props.resource.id !== '' ? (role.value.resources.get(props.resource.type)?.get('')?.accessRights ?? []) : [];
-    return accessRights;
+    return [...new Set(getWildcardPermissions(role.value).flatMap(p => p.accessRights))];
 });
 
 const permissionLevel = computed({
