@@ -10,7 +10,8 @@ import { AsyncTableAction, InMemoryTableAction } from '@stamhoofd/components/tab
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { PrivateWebshop } from '@stamhoofd/structures';
-import { DiscountCode, EmailRecipientFilterType, EmailRecipientSubfilter, LimitedFilteredRequest, mergeFilters, PaginatedResponseDecoder, SortItemDirection } from '@stamhoofd/structures';
+import { DiscountCode, EmailRecipientSubfilter, LimitedFilteredRequest, mergeFilters, PaginatedResponseDecoder, SortItemDirection } from '@stamhoofd/structures';
+import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { generateDiscountCode } from './discountCodeGenerator';
