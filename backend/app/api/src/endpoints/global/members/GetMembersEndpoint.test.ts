@@ -2602,6 +2602,35 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     ? sortedIds
                     : sortedIds.reverse());
             });
+
+            test('Sorting on memberCachedBalance.amountOpen throws if no financial access', async () => {
+                const { host, organization } = await setupMembers([30, 5, 7, 0, 15, 45]);
+
+                const user = await new UserFactory({
+                    organization,
+                    permissions: Permissions.create({
+                        level: PermissionLevel.Write,
+
+                    }),
+                }).create();
+
+                const token = await SessionService.createSession(user);
+
+                const query: LimitedFilteredRequest | undefined = new LimitedFilteredRequest({ sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.ASC }],
+                    limit: 2 });
+                const request = Request.get({
+                    path: baseUrl,
+                    host,
+                    query,
+                    headers: {
+                        authorization: 'Bearer ' + token.accessToken,
+                    },
+                });
+
+                await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                    STExpect.errorWithCode('permission_denied'),
+                );
+            });
         });
     });
 });
