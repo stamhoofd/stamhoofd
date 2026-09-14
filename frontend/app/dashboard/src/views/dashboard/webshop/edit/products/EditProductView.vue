@@ -423,7 +423,74 @@
                     {{ $t('%Tv') }}
                 </p>
             </STListItem>
+
+            <STListItem v-if="modernWebshopEnabled" :selectable="true" element-name="label" data-testid="enable-customer-checkbox">
+                <template #left>
+                    <Checkbox v-model="enableCustomer" />
+                </template>
+
+                <h3 class="style-title-list">
+                    {{ $t('Vraag de gegevens van de deelnemer op voor elk exemplaar') }}
+                </h3>
+                <p class="style-description-small">
+                    {{ $t('Elke persoon wordt een apart artikel in de bestelling. Standaard vragen we enkel de naam; e-mailadres en GSM-nummer worden enkel voor de hoofdbesteller gevraagd.') }}
+                </p>
+            </STListItem>
         </STList>
+
+        <div v-if="modernWebshopEnabled && enableCustomer" class="container">
+            <hr><h2>{{ $t('Gegevens per deelnemer') }}</h2>
+            <p class="style-description-block">
+                {{ $t('Kies welke gegevens je van elke deelnemer wil verzamelen.') }}
+            </p>
+
+            <STList>
+                <STListItem>
+                    <h3 class="style-title-list">
+                        {{ $t('Naam') }}
+                    </h3>
+                    <template #right>
+                        <span class="style-description">{{ getCustomerFieldRequirementName(CustomerFieldRequirement.Required) }}</span>
+                    </template>
+                </STListItem>
+                <STListItem v-for="customerField of customerFields" :key="customerField.key" element-name="label" :selectable="true">
+                    <h3 class="style-title-list">
+                        {{ customerField.name }}
+                    </h3>
+                    <template #right>
+                        <Dropdown :model-value="customerSettings[customerField.key]" :data-testid="'customer-field-' + customerField.key" @update:model-value="setCustomerField(customerField.key, $event)">
+                            <option v-for="requirement of CustomerFieldRequirement" :key="requirement" :value="requirement">
+                                {{ getCustomerFieldRequirementName(requirement) }}
+                            </option>
+                        </Dropdown>
+                    </template>
+                </STListItem>
+            </STList>
+
+            <hr><h2 class="style-with-button">
+                <div>{{ $t('Extra vragen per deelnemer') }}</div>
+                <div>
+                    <button v-if="customerSettings.recordCategory" class="button icon trash" type="button" @click="deleteCustomerRecordCategory" />
+                    <button class="button text" type="button" data-testid="edit-customer-record-category" @click="editCustomerRecordCategory">
+                        <span class="icon edit" />
+                        <span>{{ customerSettings.recordCategory ? $t('Bewerken') : $t('Toevoegen') }}</span>
+                    </button>
+                </div>
+            </h2>
+            <p v-if="!customerSettings.recordCategory" class="style-description-block">
+                {{ $t('Stel extra vragen die elke deelnemer moet beantwoorden.') }}
+            </p>
+            <STList v-else>
+                <STListItem v-for="record of customerSettings.recordCategory.getAllRecords()" :key="record.id" :selectable="true" @click="editCustomerRecordCategory">
+                    <h3 class="style-title-list">
+                        {{ record.name }}
+                    </h3>
+                    <p v-if="!record.required" class="style-description-small">
+                        {{ $t('Optioneel') }}
+                    </p>
+                </STListItem>
+            </STList>
+        </div>
 
         <div v-if="!isNew" class="container">
             <hr><h2>
@@ -445,6 +512,7 @@ import { ComponentWithProperties, NavigationController, usePop, usePresent } fro
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { GroupUIFilterBuilder } from '@stamhoofd/components/filters/GroupUIFilter.ts';
 import { useFeatureFlagComputed } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
@@ -454,27 +522,27 @@ import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';
 import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';
-import ImageComponent from '@stamhoofd/components/views/ImageComponent.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { RecordEditorSettings, RecordEditorType } from '@stamhoofd/components/records/RecordEditorSettings.ts';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import type { Image, ProductDateRange, ProductLocation } from '@stamhoofd/structures';
-import { OptionMenu, PrivateWebshop, Product, ProductPrice, ProductType, ResolutionRequest, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, Version, WebshopField, WebshopTicketType } from '@stamhoofd/structures';
-
-import { useGoToUitpasConfiguration } from './useGoToUitpasConfiguration.ts';
 import { useSetUitpasEvent } from '@stamhoofd/components/uitpas/useSetUitpasEvent.ts';
+import ImageComponent from '@stamhoofd/components/views/ImageComponent.vue';
+import type { Image, ProductDateRange, ProductLocation } from '@stamhoofd/structures';
+import { CartItem, OptionMenu, PrivateWebshop, Product, ProductPrice, ProductType, RecordCategory, ResolutionRequest, TranslatedString, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, Version, WebshopField, WebshopTicketType } from '@stamhoofd/structures';
+import { CustomerFieldRequirement, getCustomerFieldRequirementName } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
+import { ProductCustomerSettings } from '@stamhoofd/structures/webshops/ProductCustomerSettings.js';
 import { computed, onBeforeUnmount, onMounted } from 'vue';
-
 import WebshopFieldsBox from '../fields/WebshopFieldsBox.vue';
-
 import OptionMenuSection from './OptionMenuSection.vue';
 import ProductPriceBox from './ProductPriceBox.vue';
 import ProductPriceRow from './ProductPriceRow.vue';
 import ProductSelectDateRangeInput from './ProductSelectDateRangeInput.vue';
 import ProductSelectLocationInput from './ProductSelectLocationInput.vue';
+import { useGoToUitpasConfiguration } from './useGoToUitpasConfiguration.ts';
 
 const organization = useRequiredOrganization();
 
@@ -771,6 +839,74 @@ const notAllowMultiple = computed({
         addProductPatch({ allowMultiple: !notAllowMultiple });
     },
 });
+
+const modernWebshopEnabled = useFeatureFlagComputed('modern-webshop');
+
+const enableCustomer = computed({
+    get: () => patchedProduct.value.enableCustomer,
+    set: (enableCustomer: boolean) => {
+        addProductPatch({ enableCustomer });
+    },
+});
+
+const customerSettings = computed(() => patchedProduct.value.resolvedCustomerSettings);
+
+const customerFields: { key: 'email' | 'phone' | 'birthDay' | 'gender' | 'address'; name: string }[] = [
+    { key: 'email', name: $t('E-mailadres') },
+    { key: 'phone', name: $t('GSM-nummer') },
+    { key: 'birthDay', name: $t('Geboortedatum') },
+    { key: 'gender', name: $t('Geslacht') },
+    { key: 'address', name: $t('Adres') },
+];
+
+function patchCustomerSettings(patch: AutoEncoderPatchType<ProductCustomerSettings>) {
+    if (patchedProduct.value.customerSettings === null) {
+        // Settings did not exist yet: store a full object instead of a patch
+        addProductPatch({ customerSettings: ProductCustomerSettings.create({}).patch(patch) });
+        return;
+    }
+    addProductPatch({ customerSettings: patch });
+}
+
+function setCustomerField(key: 'email' | 'phone' | 'birthDay' | 'gender' | 'address', requirement: CustomerFieldRequirement) {
+    patchCustomerSettings(ProductCustomerSettings.patch({ [key]: requirement }));
+}
+
+const customerRecordEditorSettings = new RecordEditorSettings({
+    type: RecordEditorType.Webshop,
+    dataPermission: false,
+    filterBuilder: () => new GroupUIFilterBuilder({ builders: [] }),
+    exampleValue: CartItem.create({ product: props.product, productPrice: props.product.prices[0] }),
+});
+
+function editCustomerRecordCategory() {
+    const existing = customerSettings.value.recordCategory;
+    const category = existing ?? RecordCategory.create({ name: TranslatedString.create($t('Extra vragen')) });
+
+    present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: AsyncComponent(() => import('@stamhoofd/components/records/EditRecordCategoryView.vue'), {
+                    categoryId: category.id,
+                    rootCategories: [category],
+                    settings: customerRecordEditorSettings,
+                    isNew: !existing,
+                    allowChildCategories: true,
+                    unboxed: true,
+                    saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
+                        const [patched] = patch.applyTo([category]);
+                        patchCustomerSettings(ProductCustomerSettings.patch({ recordCategory: patched ?? null }));
+                    },
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
+}
+
+function deleteCustomerRecordCategory() {
+    patchCustomerSettings(ProductCustomerSettings.patch({ recordCategory: null }));
+}
 
 const remainingStock = computed(() => patchedProduct.value.remainingStock);
 
