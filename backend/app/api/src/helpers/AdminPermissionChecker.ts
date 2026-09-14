@@ -299,9 +299,41 @@ export class AdminPermissionChecker {
         return STAMHOOFD.userMode !== 'organization' && periodId === this.platform.period.id;
     }
 
-    async canAccessGroupsInPeriod(periodId: string, organizationId: string) {
+    async hasSomeAccessInPeriod(periodId: string, organizationId: string): Promise<boolean> {
         const organization = await this.getOrganization(organizationId);
-        return this.isPeriodInUse(periodId, organization) || await this.hasFullAccess(organization.id);
+        const permissions = await this.getOrganizationPermissions(organizationId);
+
+        if (!permissions) {
+            return false;
+        }
+
+        if (permissions.hasFullAccess()) {
+            return true;
+        }
+
+        const scoped = permissions.forPeriod(this.isPeriodInUse(periodId, organization));
+
+        // Grants that apply irrespective of a specific group: base grants and $all / $currentPeriod entries.
+        if (scoped.level !== PermissionLevel.None || scoped.accessRights.length > 0) {
+            return true;
+        }
+        for (const type of [PermissionsResourceType.Groups, PermissionsResourceType.GroupCategories]) {
+            for (const key of [PermissionsResourceKey.All, PermissionsResourceKey.CurrentPeriod]) {
+                const r = scoped.resources.get(type)?.get(key);
+                if (r && !r.isEmpty) {
+                    return true;
+                }
+            }
+        }
+
+        // Specific-id grants: check if any granted group/category exists in this period.
+        const organizationPeriod = await this.getOrganizationPeriod(organization, periodId);
+        if (!organizationPeriod) {
+            return false;
+        }
+
+        const groups = await Group.getAll(organizationId, periodId, true, [GroupType.Membership, GroupType.WaitingList, GroupType.EventRegistration]);
+        return groups.some(group => group.getStructure().hasSomeAccess(scoped, organizationPeriod.settings.categories));
     }
 
     async canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
