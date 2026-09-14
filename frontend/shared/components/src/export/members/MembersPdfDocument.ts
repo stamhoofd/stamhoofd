@@ -23,7 +23,7 @@ export class MembersPdfDocument {
     }
 
     private async createDoc(): Promise<PDFKit.PDFDocument> {
-        const PDFDocument = (await import('pdfkit/js/pdfkit.standalone')).default;
+        const { PDFDocument } = await import('@stamhoofd/ticket-builder/pdfkit');
         return new PDFDocument({ size: 'A4', margin: pageMargin, bufferPages: true });
     }
 

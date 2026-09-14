@@ -7,11 +7,8 @@ import { WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTicketType } from '@s
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { Buffer } from 'buffer';
-import PDFDocument from 'pdfkit/js/pdfkit.standalone';
-
-// PDFKit is used! Wrong warning below!
-// import PDFKit from "pdfkit"
 import QRCode from 'qrcode';
+import { PDFDocument } from './pdfkit';
 
 // polyfill
 globalThis.Buffer = Buffer;
