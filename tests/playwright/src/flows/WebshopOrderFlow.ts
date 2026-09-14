@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
+import { WebshopOrderMode } from '@stamhoofd/structures';
 
 export interface TestAddress {
     street: string;
@@ -27,17 +28,122 @@ export interface TestBirthDay {
 export class WebshopOrderFlow {
     private readonly page: Page;
     private readonly cartEnabled: boolean;
+    private readonly bulk: boolean;
     /** Global seat index per product name, so products sharing a seating plan never pick the same seat */
     private seatCounter = new Map<string, number>();
 
-    constructor(page: Page, options: { cartEnabled: boolean }) {
+    constructor(page: Page, options: { cartEnabled?: boolean; orderMode?: WebshopOrderMode }) {
         this.page = page;
-        this.cartEnabled = options.cartEnabled;
+        this.bulk = options.orderMode === WebshopOrderMode.Bulk;
+        this.cartEnabled = options.orderMode ? options.orderMode === WebshopOrderMode.Cart : (options.cartEnabled ?? true);
     }
 
     async goto(url: string) {
         await this.page.goto(url);
-        await expect(this.page.getByTestId('product-box').first()).toBeVisible({ timeout: 15000 });
+        // Old view: product boxes. Modern view: product boxes, bulk rows or the single "Bestellen" button
+        await expect(this.page.locator('[data-testid="product-box"], [data-testid="bulk-product-row"], [data-testid="single-order-button"]').first()).toBeVisible({ timeout: 15000 });
+    }
+
+    // --- Bulk mode (modern view) --------------------------------------------
+
+    private bulkRow(productName: string) {
+        return this.page.getByTestId('bulk-product-row').filter({ hasText: productName }).first();
+    }
+
+    /**
+     * Set the amount of a product (or one of its prices) with the stepper buttons.
+     */
+    async setBulkAmount(productName: string, amount: number, priceName?: string) {
+        const row = this.bulkRow(productName);
+        const scope = priceName ? row.locator('.stacked-box .st-list-item').filter({ hasText: priceName }).first() : row;
+        const stepper = scope.getByTestId('bulk-stepper').first();
+        await expect(stepper).toBeVisible();
+        for (let i = 0; i < amount; i++) {
+            await stepper.locator('button.plus').click();
+        }
+    }
+
+    /**
+     * Type an amount in the field next to the stepper
+     */
+    async typeBulkAmount(productName: string, amount: number, priceName?: string) {
+        const input = this.bulkAmount(productName, priceName);
+        await input.fill(amount.toString());
+        await input.press('Enter');
+    }
+
+    /**
+     * The editable amount field next to the stepper (empty while the amount is 0)
+     */
+    bulkAmount(productName: string, priceName?: string) {
+        const row = this.bulkRow(productName);
+        const scope = priceName ? row.locator('.stacked-box .st-list-item').filter({ hasText: priceName }).first() : row;
+        return scope.getByTestId('bulk-amount').first();
+    }
+
+    async toggleBulkProduct(productName: string) {
+        await this.bulkRow(productName).getByTestId('bulk-checkbox').click();
+    }
+
+    async selectBulkPrice(productName: string, priceName: string) {
+        await this.bulkRow(productName).locator('label').filter({ hasText: priceName }).first().click();
+    }
+
+    /**
+     * Press "Bestellen" in bulk mode. The next step (seats, details, customer, ...) opens in a popup.
+     */
+    async startBulkOrder() {
+        await this.page.getByTestId('bulk-order-button').click();
+    }
+
+    /**
+     * Pick `count` seats in the bulk seats step and confirm.
+     */
+    async chooseBulkSeats(productName: string, count: number) {
+        const seatsView = this.page.getByTestId('bulk-seats-view');
+        await expect(seatsView).toBeVisible({ timeout: 15000 });
+        for (let i = 0; i < count; i++) {
+            await seatsView.getByTestId('seat-button').nth(this.seatCounter.get(productName) ?? 0).click();
+            this.seatCounter.set(productName, (this.seatCounter.get(productName) ?? 0) + 1);
+        }
+        await seatsView.getByTestId('confirm-seats-button').click();
+    }
+
+    detailsStep() {
+        return this.page.getByTestId('details-step');
+    }
+
+    detailsItem(index: number) {
+        return this.detailsStep().getByTestId('details-item').nth(index);
+    }
+
+    /**
+     * Fill the inputs of one unit in the details step.
+     */
+    async fillDetails(index: number, options: { option?: string; field?: string; customer?: { firstName: string; lastName: string; email?: string; phone?: string } } = {}) {
+        const item = this.detailsItem(index);
+        await expect(item).toBeVisible({ timeout: 15000 });
+        if (options.option) {
+            await item.locator('label').filter({ hasText: options.option }).first().click();
+        }
+        if (options.field !== undefined) {
+            // Custom fields are the only inputs without a name attribute
+            await item.locator('input.input:not([name])').first().fill(options.field);
+        }
+        if (options.customer) {
+            await item.locator('input[name="fname"]').fill(options.customer.firstName);
+            await item.locator('input[name="lname"]').fill(options.customer.lastName);
+            if (options.customer.email) {
+                await item.locator('input[name="email"]').fill(options.customer.email);
+            }
+            if (options.customer.phone) {
+                await item.locator('input[name="mobile"]').fill(options.customer.phone);
+            }
+        }
+    }
+
+    async submitDetails() {
+        await this.detailsStep().getByTestId('save-button').click();
     }
 
     /**
