@@ -37,7 +37,7 @@
 
                 <template v-if="!showPreview">
                     <CartItemView v-if="embeddedCartItem" :key="embeddedCartItem.id" :cart-item="embeddedCartItem" :old-item="embeddedCartItem" :checkout="checkout" :webshop="webshop" :save-handler="onAddEmbeddedItem" :live-save-handler="saveLiveCartItem" :embedded="true" />
-                    <WebshopProducts v-else-if="canOrder" :webshop="webshop" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @click="hideCartToast" @open-single-product="openSingleProduct" />
+                    <WebshopProducts v-else-if="canOrder" :webshop="webshop" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @click="hideCartToast" @open-single-product="openSingleProduct" @start-bulk-order="startBulkOrder" />
                     <WebshopCartButton v-if="showCartButton" :count="cartCount" @open="showCart().catch(console.error)" />
                     <WebshopPlatformFooter />
                 </template>
@@ -51,7 +51,7 @@
         <!-- Ordering happens next to the content (below it on small screens) -->
         <template v-if="showPreview" #preview>
             <CartItemView v-if="embeddedCartItem" :key="embeddedCartItem.id" :cart-item="embeddedCartItem" :old-item="embeddedCartItem" :checkout="checkout" :webshop="webshop" :save-handler="onAddEmbeddedItem" :live-save-handler="saveLiveCartItem" :embedded="true" />
-            <WebshopProducts v-else :webshop="webshop" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @click="hideCartToast" @open-single-product="openSingleProduct" />
+            <WebshopProducts v-else :webshop="webshop" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @click="hideCartToast" @open-single-product="openSingleProduct" @start-bulk-order="startBulkOrder" />
             <WebshopCartButton v-if="showCartButton" :count="cartCount" @open="showCart().catch(console.error)" />
             <WebshopPlatformFooter />
         </template>
@@ -240,6 +240,14 @@ function saveLiveCartItem(item: CartItem) {
     checkoutManager.saveCart();
 }
 
+function startBulkOrder() {
+    if (cartCount.value === 0) {
+        Toast.warning($t('Maak eerst een keuze')).show();
+        return;
+    }
+    openCheckout(true).catch(console.error);
+}
+
 /**
  * Single mode with one product: open the cart item view directly (no product box)
  */
@@ -393,7 +401,9 @@ function onAddEmbeddedItem(cartItem: CartItem, oldItem: CartItem | null, compone
 */
 async function check() {
     try {
-        cart.value.validate(webshopManager.webshop);
+        // Bulk: seats and details are only collected during the checkout
+        const bulk = webshop.value.orderMode === WebshopOrderMode.Bulk;
+        cart.value.validate(webshopManager.webshop, false, { validateSeats: !bulk, validateDetails: !bulk });
     } catch (e) {
         console.error(e);
     }

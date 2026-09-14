@@ -1,5 +1,6 @@
 import type { Decoder} from '@common/encoding';
 import { ArrayDecoder, ObjectData, VersionBox, VersionBoxDecoder } from '@common/encoding'
+import type { SimpleError, SimpleErrors } from '@common/errors';
 import { Checkout, DiscountCode, Version } from '@stamhoofd/structures'
 
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
@@ -10,6 +11,11 @@ import type { WebshopManager } from './WebshopManager'
  */
 export class CheckoutManager {
     private _checkout: Checkout | null = null
+
+    /**
+     * Cart error from the backend that the bulk details step should show per item after navigating back to it
+     */
+    pendingCartError: SimpleError | SimpleErrors | null = null
 
     $webshopManager: WebshopManager
 

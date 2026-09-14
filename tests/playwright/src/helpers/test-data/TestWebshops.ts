@@ -16,6 +16,10 @@ export interface CreateWebshopOptions {
     productCount?: number;
     /** Whether a cart is used (multiple items) or each product goes straight to checkout */
     cartEnabled?: boolean;
+    /** Explicit order mode (Cart / Single / Bulk); defaults to the cartEnabled flag */
+    orderMode?: WebshopOrderMode;
+    /** Webshop type (wording hint); derived from ticketType and the seating plan when omitted */
+    type?: WebshopType;
     /** Replace the generated products (index-based) with custom ones; `productCount` and `buildPrices` are ignored */
     buildProducts?: (context: { seatingPlanId: string | null }) => Product[];
     /** Add a seating plan to the products (only meaningful for Tickets per item) */
@@ -63,6 +67,8 @@ export class TestWebshops {
             ticketType = WebshopTicketType.None,
             productCount = 1,
             cartEnabled = true,
+            orderMode,
+            type,
             buildProducts,
             withSeatingPlan = false,
             price = 15_0000,
@@ -115,8 +121,8 @@ export class TestWebshops {
         meta = meta.patch({
             paymentConfiguration: paymentConfigurationPatch,
             ticketType,
-            type: withSeatingPlan ? WebshopType.Performance : (ticketType === WebshopTicketType.None ? WebshopType.Webshop : WebshopType.Event),
-            orderMode: cartEnabled ? WebshopOrderMode.Cart : WebshopOrderMode.Single,
+            type: type ?? (withSeatingPlan ? WebshopType.Performance : (ticketType === WebshopTicketType.None ? WebshopType.Webshop : WebshopType.Event)),
+            orderMode: orderMode ?? (cartEnabled ? WebshopOrderMode.Cart : WebshopOrderMode.Single),
             customerSettings: CustomerSettings.create({
                 email: CustomerFieldRequirement.Required,
                 // Keep the customer step minimal so the order flow doesn't require a phone number
@@ -161,6 +167,13 @@ export class TestWebshops {
         }
 
         return { webshop };
+    }
+
+    /**
+     * The seating plan used by `create({ withSeatingPlan: true })`, for tests that reserve seats server-side
+     */
+    static seatingPlanOf(webshop: Webshop): SeatingPlan {
+        return webshop.meta.seatingPlans[0];
     }
 
     static async webshopWithTicketsAndSeatingPlan({ organization, stripeAccountId, seatCount, ticketType }: { organization: Organization; stripeAccountId?: string; seatCount?: number; ticketType?: WebshopTicketType }): Promise<{ webshop: Webshop }> {
