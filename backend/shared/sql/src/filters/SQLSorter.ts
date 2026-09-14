@@ -10,11 +10,12 @@ export type SQLSortDefinition<T, B extends PlainObject | Date = PlainObject | Da
     toSQL(direction: SQLOrderByDirection): SQLOrderBy;
     join?: SQLJoin;
     select?: (SQLExpression | string)[];
+    checkPermission?: () => Promise<void>;
 };
 
 export type SQLSortDefinitions<T = any> = Record<string, SQLSortDefinition<T>>;
 
-export function applySQLSorter(selectQuery: SQLSelect<any>, sortBy: SortList, definitions: SQLSortDefinitions) {
+export async function applySQLSorter(selectQuery: SQLSelect<any>, sortBy: SortList, definitions: SQLSortDefinitions) {
     if (sortBy.length === 0) {
         throw new SimpleError({
             code: 'empty_sort',
@@ -30,12 +31,15 @@ export function applySQLSorter(selectQuery: SQLSelect<any>, sortBy: SortList, de
 
         selectQuery.orderBy(d.toSQL(s.order));
 
+        if (d.checkPermission) {
+            await d.checkPermission();
+        }
+
         if (d.join) {
             // Check if no overlap in alias/table (otherwise we'll get issues)
             if (selectQuery._joins.find(j => j === d.join)) {
                 // Already added
-            }
-            else {
+            } else {
                 const name = d.join.table.getSQL({ defaultNamespace: 'default' });
 
                 for (const j of selectQuery._joins) {
