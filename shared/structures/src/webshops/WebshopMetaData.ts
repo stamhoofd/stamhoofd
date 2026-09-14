@@ -398,6 +398,23 @@ export enum WebshopTicketType {
     Tickets = 'Tickets',
 }
 
+export enum WebshopOrderMode {
+    /**
+     * Classic flow: product → cart item view → cart → checkout
+     */
+    Cart = 'Cart',
+
+    /**
+     * Only one cart item per order, no cart
+     */
+    Single = 'Single',
+
+    /**
+     * All products are listed with an amount input, no cart. Every cart item is one unit (amount 1).
+     */
+    Bulk = 'Bulk',
+}
+
 export enum WebshopStatus {
     Open = 'Open',
     Closed = 'Closed',
@@ -412,6 +429,14 @@ export function getWebshopTypeName(type: WebshopType): string {
         case WebshopType.TakeawayAndDelivery: return $t('%1OT');
         case WebshopType.Donations: return $t('%1O4');
         case WebshopType.Webshop: return $t('%1OV');
+    }
+}
+
+export function getWebshopOrderModeName(mode: WebshopOrderMode): string {
+    switch (mode) {
+        case WebshopOrderMode.Cart: return $t('Winkelmandje');
+        case WebshopOrderMode.Single: return $t('Eén artikel per bestelling');
+        case WebshopOrderMode.Bulk: return $t('Snel bestellen zonder winkelmandje');
     }
 }
 
@@ -707,8 +732,18 @@ export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: BooleanDecoder, optional: true, version: 183 })
     expandLogo = false;
 
+    /**
+     * @deprecated
+     * Use orderMode instead. Still written by the dashboard (= orderMode === Cart) so older clients keep working.
+     */
     @field({ decoder: BooleanDecoder, version: 180 })
     cartEnabled = true;
+
+    /**
+     * null = derive from the deprecated cartEnabled flag
+     */
+    @field({ decoder: new EnumDecoder(WebshopOrderMode), nullable: true, ...NextVersion })
+    orderMode: WebshopOrderMode | null = null;
 
     /**
      * Whether the domain name has been validated and is active. Only used to know if this domain should get used emails and in the dashboard.
@@ -747,6 +782,10 @@ export class WebshopMetaData extends AutoEncoder {
 
     get isRegistrations() {
         return this.type === WebshopType.Registrations;
+    }
+
+    get resolvedOrderMode(): WebshopOrderMode {
+        return this.orderMode ?? (this.cartEnabled ? WebshopOrderMode.Cart : WebshopOrderMode.Single);
     }
 
     get hasTickets() {
