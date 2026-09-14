@@ -38,7 +38,49 @@
             </button>
         </p>
 
-        <template v-if="webshop.canEnableCart">
+        <template v-if="modernWebshopEnabled">
+            <hr><h2>{{ $t('Bestelwijze') }}</h2>
+            <p>
+                {{ $t('Kies hoe bezoekers artikelen selecteren en afrekenen.') }}
+            </p>
+
+            <STList>
+                <STListItem v-if="webshop.canEnableCart" :selectable="true" element-name="label" class="left-center" data-testid="order-mode-cart">
+                    <template #left>
+                        <Radio v-model="orderMode" :value="WebshopOrderMode.Cart" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ getWebshopOrderModeName(WebshopOrderMode.Cart) }}
+                    </h3>
+                    <p class="style-description">
+                        {{ $t('Bezoekers voegen artikelen toe aan een winkelmandje en rekenen daarna af.') }}
+                    </p>
+                </STListItem>
+                <STListItem :selectable="true" element-name="label" class="left-center" data-testid="order-mode-single">
+                    <template #left>
+                        <Radio v-model="orderMode" :value="WebshopOrderMode.Single" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ getWebshopOrderModeName(WebshopOrderMode.Single) }}
+                    </h3>
+                    <p class="style-description">
+                        {{ $t('Bezoekers rekenen meteen af na het selecteren van één artikel. Handig voor formulieren.') }}
+                    </p>
+                </STListItem>
+                <STListItem :selectable="true" element-name="label" class="left-center" data-testid="order-mode-bulk">
+                    <template #left>
+                        <Radio v-model="orderMode" :value="WebshopOrderMode.Bulk" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ getWebshopOrderModeName(WebshopOrderMode.Bulk) }}
+                    </h3>
+                    <p class="style-description">
+                        {{ $t('Alle artikelen staan in een lijst met een aantal ernaast. Bezoekers kiezen de aantallen en rekenen in één keer af, zonder winkelmandje. Ideaal voor tickets en inschrijvingen.') }}
+                    </p>
+                </STListItem>
+            </STList>
+        </template>
+        <template v-else-if="webshop.canEnableCart">
             <hr><h2>{{ $t('%1DQ') }}</h2>
             <p>
                 {{ $t('%Ri') }}
@@ -62,7 +104,9 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { Category, PrivateWebshop, Product, ProductType, WebshopMetaData, WebshopOrderMode, WebshopTicketType } from '@stamhoofd/structures';
+import { useFeatureFlagComputed } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import Radio from '@stamhoofd/components/inputs/Radio.vue';
+import { Category, getWebshopOrderModeName, PrivateWebshop, Product, ProductType, WebshopMetaData, WebshopOrderMode, WebshopTicketType } from '@stamhoofd/structures';
 import CategoryRow from './categories/CategoryRow.vue';
 import ProductRow from './products/ProductRow.vue';
 
@@ -99,10 +143,21 @@ const viewTitle = computed(() => {
 
 const isTickets = computed(() => webshop.value.meta.ticketType === WebshopTicketType.Tickets);
 
+const modernWebshopEnabled = useFeatureFlagComputed('modern-webshop');
+
 const cartEnabled = computed({
     get: () => webshop.value.meta.cartEnabled,
     set: (cartEnabled: boolean) => {
         const patch = WebshopMetaData.patch({ cartEnabled, orderMode: cartEnabled ? WebshopOrderMode.Cart : WebshopOrderMode.Single });
+        addPatch(PrivateWebshop.patch({ meta: patch }));
+    },
+});
+
+const orderMode = computed({
+    get: () => webshop.value.orderMode,
+    set: (orderMode: WebshopOrderMode) => {
+        // Older clients still read cartEnabled
+        const patch = WebshopMetaData.patch({ orderMode, cartEnabled: orderMode === WebshopOrderMode.Cart });
         addPatch(PrivateWebshop.patch({ meta: patch }));
     },
 });

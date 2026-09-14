@@ -33,7 +33,18 @@
                 </div>
                 <div class="right container">
                     <template v-if="(!closed || showOpenAt) && products.length > 0">
-                        <template v-if="orderMode === WebshopOrderMode.Single && products.length === 1">
+                        <template v-if="orderMode === WebshopOrderMode.Bulk">
+                            <BulkProductList />
+
+                            <div class="style-button-bar">
+                                <button type="button" class="button primary full" data-testid="bulk-order-button" @click="startBulkOrder">
+                                    <span>{{ orderButtonText }}</span>
+                                    <span v-if="totalPrice > 0" class="bulk-total">{{ formatPrice(totalPrice) }}</span>
+                                    <span class="icon arrow-right" />
+                                </button>
+                            </div>
+                        </template>
+                        <template v-else-if="orderMode === WebshopOrderMode.Single && products.length === 1">
                             <div class="style-button-bar">
                                 <button type="button" class="button primary full" data-testid="single-order-button" @click="openSingleProduct(products[0])">
                                     <span>{{ orderButtonText }}</span>
@@ -88,6 +99,7 @@ import type { CheckoutStep } from './checkout/CheckoutStepsManager';
 import { CheckoutStepsManager } from './checkout/CheckoutStepsManager';
 import CrowdfundingBar from './components/CrowdfundingBar.vue';
 import { getCartComponent } from './checkout/getCartComponent';
+import BulkProductList from './products/BulkProductList.vue';
 
 const present = usePresent();
 const show = useShow();
@@ -102,6 +114,8 @@ const cartEnabled = computed(() => webshop.value.shouldEnableCart);
 const webshopLayout = computed(() => webshop.value.meta.layout);
 const checkout = computed(() => checkoutManager.checkout);
 const cart = computed(() => checkoutManager.cart);
+const cartCount = computed(() => checkoutManager.cart.count);
+const totalPrice = computed(() => checkoutManager.checkout.totalPrice);
 const orderButtonText = computed(() => getOrderButtonText(webshop.value));
 const bannerImage = computed(() => webshop.value.meta.coverPhoto?.getResolutionForSize(Math.min(document.documentElement.clientWidth - 30, 900), undefined));
 const bannerImageSrc = computed(() => bannerImage.value?.file.getPublicPath());
@@ -195,6 +209,14 @@ function openCart(animated = true, components: ComponentWithProperties[] = []) {
     }).catch(console.error);
 }
 
+function startBulkOrder() {
+    if (cartCount.value === 0) {
+        Toast.warning($t('Maak eerst een keuze')).show();
+        return;
+    }
+    openCheckout(true).catch(console.error);
+}
+
 /**
  * Single mode with one product: open the cart item view directly (no product box)
  */
@@ -277,7 +299,9 @@ function onAddItem(cartItem: CartItem, oldItem: CartItem | null, args: { dismiss
 */
 async function check() {
     try {
-        cart.value.validate(webshopManager.webshop);
+        // Bulk: seats and details are only collected during the checkout
+        const bulk = webshop.value.orderMode === WebshopOrderMode.Bulk;
+        cart.value.validate(webshopManager.webshop, false, { validateSeats: !bulk, validateDetails: !bulk });
     } catch (e) {
         console.error(e);
     }
@@ -457,6 +481,10 @@ async function resumeStep(destination: string, animated = true) {
         padding-top: 20px;
     }
 
+    .bulk-total {
+        opacity: 0.7;
+        padding-left: 5px;
+    }
 }
 
 .stamhoofd-badge {
