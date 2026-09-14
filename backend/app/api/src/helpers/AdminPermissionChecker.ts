@@ -1001,9 +1001,7 @@ export class AdminPermissionChecker {
     }
 
     async canEditMemberEmailAddresses(member: MemberWithUsersRegistrationsAndGroups) {
-        if (this.user.memberId === member.id) {
-            return true;
-        }
+        if (member.users.some(u => u.id === this.user.id)) return true;
 
         const responsibilities = member.id
             ? (
