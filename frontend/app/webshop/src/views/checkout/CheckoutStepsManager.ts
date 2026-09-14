@@ -1,5 +1,6 @@
+import type { SimpleErrors } from '@simonbackx/simple-errors';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, ReactiveUrl, useDismiss, useNavigationController, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ReactiveUrl } from '@simonbackx/vue-app-navigation';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
@@ -41,38 +42,6 @@ export class CheckoutStep {
         this.validate = data.validate;
         this.url = data.url;
     }
-
-    // async getComponent(): Promise<any> {
-    //     switch (this.type) {
-    //         case CheckoutStepType.Method: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CheckoutMethodSelectionView.vue')).default;
-    //         case CheckoutStepType.Address: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './AddressSelectionView.vue')).default;
-    //         case CheckoutStepType.Time:return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './TimeSelectionView.vue')).default;
-    //         case CheckoutStepType.Payment: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './PaymentSelectionView.vue')).default;
-    //         case CheckoutStepType.Customer: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CustomerView.vue')).default;
-//
-    //         default: {
-    //             // If you get a compile error here, a type is missing in the switch and you should add it
-    //             const t: never = this.type
-    //             throw new Error("Missing component for "+t)
-    //         }
-    //     }
-    // }
-//
-    // validate(checkout: Checkout, webshop: Webshop, organizationMeta: OrganizationMetaData) {
-    //     switch (this.type) {
-    //         case CheckoutStepType.Method: checkout.validateCheckoutMethod(webshop, organizationMeta); return;
-    //         case CheckoutStepType.Address: checkout.validateDeliveryAddress(webshop, organizationMeta); return;
-    //         case CheckoutStepType.Time: checkout.validateTimeSlot(webshop, organizationMeta); return;
-    //         case CheckoutStepType.Payment: checkout.validate(webshop, organizationMeta, I18nController.i18n); return;
-    //         case CheckoutStepType.Customer: checkout.validateCustomer(webshop, organizationMeta, I18nController.i18n); return;
-//
-    //         default: {
-    //             // If you get a compile error here, a type is missing in the switch and you should add it
-    //             const t: never = this.type
-    //             throw new Error("Missing validate for "+t)
-    //         }
-    //     }
-    // }
 }
 
 export class CheckoutStepsManager {
@@ -255,37 +224,39 @@ export class CheckoutStepsManager {
         return undefined;
     }
 
+    /**
+     * Whether an error thrown while validating or placing the order is about the cart contents
+     */
+    static isCartError(error: unknown): error is SimpleError | SimpleErrors {
+        if (!isSimpleError(error) && !isSimpleErrors(error)) {
+            return false;
+        }
+        return error.hasFieldThatStartsWith('cart') || error.hasFieldThatStartsWith('fieldAnswers');
+    }
+
+    /**
+     * Reload the webshop and navigate back to where the user can fix the cart: the cart view, or the product view when there is no cart.
+     */
+    async handleCartError(error: SimpleError | SimpleErrors, navigate: NavigationActions) {
+        await this.$webshopManager.reload();
+
+        if (!this.$webshopManager.webshop.shouldEnableCart) {
+            navigate.dismiss({ force: true }).catch(console.error);
+        } else {
+            navigate.navigationController!.popToRoot({ force: true }).catch(e => console.error(e));
+        }
+        Toast.fromError(error).show();
+    }
+
     async goNext(step: string | undefined, navigate: NavigationActions) {
-        const webshop = this.$webshopManager.webshop;
         let nextStep: CheckoutStep | undefined;
 
         // Force a save if nothing changed (to fix timeSlot + updated data)
         try {
             nextStep = await this.getNextStep(step, true);
         } catch (error) {
-            if (isSimpleError(error) || isSimpleErrors(error)) {
-                if (error.hasFieldThatStartsWith('cart')) {
-                    // A cart error: force a reload and go back to the cart.
-                    await this.$webshopManager.reload();
-
-                    if (webshop.shouldEnableCart) {
-                        navigate.navigationController!.popToRoot({ force: true }).catch(e => console.error(e));
-                    } else {
-                        navigate.dismiss({ force: true }).catch(console.error);
-                    }
-                    Toast.fromError(error).show();
-                } else if (error.hasFieldThatStartsWith('fieldAnswers')) {
-                    // A cart error: force a reload and go back to the cart.
-                    await this.$webshopManager.reload();
-
-                    if (webshop.shouldEnableCart) {
-                        navigate.navigationController!.popToRoot({ force: true }).catch(e => console.error(e));
-                    } else {
-                        navigate.dismiss({ force: true }).catch(console.error);
-                    }
-
-                    Toast.fromError(error).show();
-                }
+            if (CheckoutStepsManager.isCartError(error)) {
+                await this.handleCartError(error, navigate);
             }
             throw error;
         }
@@ -297,14 +268,20 @@ export class CheckoutStepsManager {
             });
         }
 
-        const nextComponent = await nextStep.getComponent();
-        nextComponent.provide.reactive_navigation_url = new ReactiveUrl({
-            url: nextStep.url,
-        });
-
         navigate.show({
-            components: [nextComponent],
+            components: [await this.getStepComponent(nextStep)],
             animated: true,
         }).catch(console.error);
+    }
+
+    /**
+     * The component to push for a step, carrying the step url
+     */
+    async getStepComponent(step: CheckoutStep): Promise<ComponentWithProperties> {
+        const component = await step.getComponent();
+        component.provide.reactive_navigation_url = new ReactiveUrl({
+            url: step.url,
+        });
+        return component;
     }
 }
