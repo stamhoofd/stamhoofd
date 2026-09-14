@@ -5,7 +5,7 @@
             <!-- Gives the bar of the WebshopController (in the safe area) a background while scrolling -->
             <STNavigationBar :safe-area-only="true" />
             <main class="flex enable-grid">
-                <figure v-if="webshop.meta.coverPhoto" class="webshop-banner">
+                <figure v-if="webshop.meta.coverPhoto" class="webshop-banner" :class="{ 'cover-fit': webshop.meta.coverPhotoFit === WebshopCoverPhotoFit.Cover }">
                     <ImageComponent :image="webshop.meta.coverPhoto" :auto-height="true" class="style-cover-photo" />
                 </figure>
 
@@ -79,7 +79,7 @@ import ImageComponent from '@stamhoofd/components/views/ImageComponent.vue';
 import CartItemView from '@stamhoofd/components/views/CartItemView.vue';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import type { Payment, Product } from '@stamhoofd/structures';
-import { Cart, CartItem, PaymentStatus, WebshopLayout, WebshopOrderMode } from '@stamhoofd/structures';
+import { Cart, CartItem, PaymentStatus, WebshopCoverPhotoFit, WebshopLayout, WebshopOrderMode } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, onDeactivated, onMounted, ref, watch } from 'vue';
 import { useCheckoutManager } from '../composables/useCheckoutManager';
@@ -606,6 +606,15 @@ async function resumeStep(destination: string, animated = true) {
     > main > .content:has(> h1:only-child) {
         + .webshop-products, + .cart-item-view, + .preview-outlet > .preview-panel-preview {
             padding-top: 10px;
+        }
+    }
+
+    // Banner mode: fill the width with a limited height and crop the photo
+    .webshop-banner.cover-fit .style-cover-photo {
+        max-height: max(250px, 33vh);
+
+        img {
+            object-fit: cover !important;
         }
     }
 }
