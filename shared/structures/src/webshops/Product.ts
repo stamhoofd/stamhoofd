@@ -9,6 +9,7 @@ import { ReservedSeat } from '../SeatingPlan.js';
 import type { Webshop } from './Webshop.js';
 import { WebshopField } from './WebshopField.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
+import { ProductCustomerSettings } from './ProductCustomerSettings.js';
 
 export class ProductPrice extends AutoEncoder {
     /**
@@ -273,6 +274,22 @@ export class Product extends AutoEncoder {
     askName = false;
 
     /**
+     * Collect customer details for every cart item of this product. Forces amount 1 per cart item.
+     */
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    enableCustomer = false;
+
+    /**
+     * null = default settings (only the name is asked)
+     */
+    @field({ decoder: ProductCustomerSettings, nullable: true, ...NextVersion })
+    customerSettings: ProductCustomerSettings | null = null;
+
+    get resolvedCustomerSettings(): ProductCustomerSettings {
+        return this.customerSettings ?? ProductCustomerSettings.create({});
+    }
+
+    /**
      * Maximum amount per order
      */
     @field({ decoder: IntegerDecoder, nullable: true, version: 171 })
@@ -439,6 +456,11 @@ export class Product extends AutoEncoder {
     get isUnique() {
         if (this.maxPerOrder === 1) {
             return true;
+        }
+
+        // Every person is a separate cart item
+        if (this.enableCustomer) {
+            return false;
         }
 
         // No choice options
