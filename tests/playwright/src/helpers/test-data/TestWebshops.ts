@@ -15,6 +15,8 @@ export interface CreateWebshopOptions {
     productCount?: number;
     /** Whether a cart is used (multiple items) or each product goes straight to checkout */
     cartEnabled?: boolean;
+    /** Replace the generated products (index-based) with custom ones; `productCount` and `buildPrices` are ignored */
+    buildProducts?: (context: { seatingPlanId: string | null }) => Product[];
     /** Add a seating plan to the products (only meaningful for Tickets per item) */
     withSeatingPlan?: boolean;
     /** Price per product in cents (default € 15,00). Use 0 for a free shop. */
@@ -57,6 +59,7 @@ export class TestWebshops {
             ticketType = WebshopTicketType.None,
             productCount = 1,
             cartEnabled = true,
+            buildProducts,
             withSeatingPlan = false,
             price = 15_0000,
             buildPrices,
@@ -81,15 +84,17 @@ export class TestWebshops {
             seatingPlanId = seatingPlan.id;
         }
 
-        const products: Product[] = [];
+        const products: Product[] = buildProducts?.({ seatingPlanId }) ?? [];
         const productType = ticketType === WebshopTicketType.Tickets ? ProductType.Ticket : ProductType.Product;
-        for (let i = 0; i < productCount; i++) {
-            products.push(Product.create({
-                name: `Product ${i + 1}`,
-                prices: buildPrices?.() ?? [ProductPrice.create({ name: `Price ${i + 1}`, price })],
-                type: productType,
-                seatingPlanId: withSeatingPlan ? seatingPlanId : null,
-            }));
+        if (!buildProducts) {
+            for (let i = 0; i < productCount; i++) {
+                products.push(Product.create({
+                    name: `Product ${i + 1}`,
+                    prices: buildPrices?.() ?? [ProductPrice.create({ name: `Price ${i + 1}`, price })],
+                    type: productType,
+                    seatingPlanId: withSeatingPlan ? seatingPlanId : null,
+                }));
+            }
         }
 
         const paymentConfigurationPatch = PaymentConfiguration.patch({
