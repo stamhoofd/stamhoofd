@@ -120,6 +120,7 @@ enum Routes {
     Group = 'group',
     Period = 'Period',
     GroupWithPeriod = 'groupWithPeriod',
+    PlatformMemberships = 'aansluitingen',
     Communication = 'berichten',
     Trash = 'prullenmand',
     OrganizationRegistrationPeriods = 'instellingen/werkjaren',
@@ -247,6 +248,18 @@ defineRoute({
         // members of the current organization (all periods) in organization mode.
         return {
             customTitle: $t('%Zcz'),
+        };
+    },
+});
+
+defineRoute({
+    url: 'aansluitingen',
+    name: Routes.PlatformMemberships,
+    show: 'detail',
+    component: async () => (await import('@stamhoofd/components/platform-memberships/PlatformMembershipsTableView.vue')).default,
+    defaultProperties: () => {
+        return {
+            period: period.value.period,
         };
     },
 });
@@ -498,6 +511,15 @@ const allActions = computed(() => {
             title: $t('%L8'),
             route: Routes.All,
         });
+
+        if (STAMHOOFD.userMode === 'platform') {
+            list.push({
+                icon: 'membership-filled',
+                title: $t('%1Nt'),
+                route: Routes.PlatformMemberships,
+                hidden: true,
+            });
+        }
 
         // Lists every member of the organization across all periods (organization mode only).
         // In platform mode members are not scoped to a single organization, so this makes no sense.
