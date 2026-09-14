@@ -127,7 +127,7 @@ export class GetAdminEmailsEndpoint extends Endpoint<Params, Query, Body, Respon
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            applySQLSorter(query, q.sort, sorters);
+            await applySQLSorter(query, q.sort, sorters);
             query.limit(q.limit);
         }
 

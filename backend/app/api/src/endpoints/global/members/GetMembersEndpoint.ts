@@ -157,7 +157,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            applySQLSorter(query, q.sort, sorters(organization?.id ?? null));
+            await applySQLSorter(query, q.sort, sorters(organization?.id ?? null));
             query.limit(q.limit);
         }
 
