@@ -99,7 +99,7 @@ export class GetUserEmailsEndpoint extends Endpoint<Params, Query, Body, Respons
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            applySQLSorter(query, q.sort, sorters);
+            await applySQLSorter(query, q.sort, sorters);
             query.limit(q.limit);
         }
 
