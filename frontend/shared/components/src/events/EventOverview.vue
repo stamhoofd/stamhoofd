@@ -96,6 +96,21 @@
                                     </template>
                                 </STListItem>
 
+                                <STListItem v-if="canEditPermissions" :selectable="true" class="left-center" @click="$navigate(Routes.EditPermissions)">
+                                    <template #left>
+                                        <img src="@stamhoofd/assets/images/illustrations/lock.svg">
+                                    </template>
+                                    <h2 class="style-title-list">
+                                        {{ $t('%Ld') }}
+                                    </h2>
+                                    <p class="style-description-small">
+                                        {{ $t('Bepaal welke beheerders deze activiteit kunnen bekijken of bewerken.') }}
+                                    </p>
+                                    <template #right>
+                                        <span class="icon arrow-right-small gray" />
+                                    </template>
+                                </STListItem>
+
                                 <STListItem v-if="event.group" :selectable="true" class="left-center" @click="$navigate(Routes.EditGroup)">
                                     <template #left>
                                         <img src="@stamhoofd/assets/images/illustrations/list.svg">
@@ -276,7 +291,7 @@ import { useFetchOrganizationPeriodForGroup } from '@stamhoofd/networking/hooks/
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import { AccessRight, EmailTemplate, EmailTemplateType, Event, getAppHost, Group, GroupSettings, GroupStatus, LimitedFilteredRequest, mergeFilters, PrivateWebshop, TranslatedString, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
+import { AccessRight, EmailTemplate, EmailTemplateType, Event, getAppHost, Group, GroupSettings, GroupStatus, LimitedFilteredRequest, mergeFilters, PermissionsResourceType, PrivateWebshop, TranslatedString, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
@@ -407,6 +422,9 @@ function setGroupOrganization(o: Organization) {
 }
 
 const canWriteEvent = computed(() => auth.canWriteEventForOrganization(props.event, eventOrganization.value));
+
+// Roles are edited in the scope the event belongs to: organization roles for an organization event, platform roles for a national event.
+const canEditPermissions = computed(() => canWriteEvent.value && props.event.organizationId === (organization.value?.id ?? null));
 const patchOrganizationPeriod = usePatchOrganizationPeriod();
 
 const levelPrefix = computed(() => {
@@ -459,6 +477,7 @@ enum Routes {
     Edit = 'instellingen',
     EditGroup = 'inschrijvingsinstellingen',
     EditEmails = 'emails',
+    EditPermissions = 'toegangsbeheer',
     Webshop = 'webshop',
     Invitations = 'Invitations',
 }
@@ -594,6 +613,22 @@ defineRoute({
                         }
                     }
                 }
+            },
+        };
+    },
+});
+
+defineRoute({
+    url: Routes.EditPermissions,
+    component: async () => (await import('#admins/EditResourceRolesView.vue')).default,
+    present: 'popup',
+    defaultProperties: () => {
+        return {
+            description: $t('Kies hier welke beheerdersrollen deze activiteit kunnen bekijken of bewerken.'),
+            resource: {
+                id: props.event.id,
+                name: props.event.getNameWithPeriod(),
+                type: PermissionsResourceType.Events,
             },
         };
     },
