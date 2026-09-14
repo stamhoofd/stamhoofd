@@ -30,7 +30,7 @@
     "dependencies": {
         "@anthropic-ai/sdk": "0.124.0",
         "@aws-sdk/client-s3": "3.1127.0",
-        "@inquirer/prompts": "7.10.1",
+        "@inquirer/prompts": "8.7.2",
         "@oclif/core": "4.14.0",
         "@stamhoofd/metabase": "2.152.0",
         "@stamhoofd/types": "2.152.0",
