@@ -9,8 +9,9 @@ import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { User } from '@stamhoofd/models';
 import { Order, Organization, OrganizationFactory, UserFactory, Webshop } from '@stamhoofd/models';
-import { PaymentMethod, PermissionLevel, Permissions, Product, ProductPrice, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
+import { PaymentMethod, PermissionLevel, Permissions, Product, ProductPrice, ProductType, RecordCategory, RecordSettings, RecordType, STPackageBundle, Token as TokenStruct, TranslatedString, Version, WebshopOrderMode, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
+import { ProductCustomerSettings } from '@stamhoofd/structures/webshops/ProductCustomerSettings.js';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WebshopOrderFlow } from '../flows/WebshopOrderFlow.js';
 import { DashboardPage, DashboardTab, WorkerData } from '../helpers/index.js';
@@ -136,5 +137,119 @@ test.describe('Webshop per-item customers @webshop-item-customer', () => {
 
         await expect.poll(async () => (await Webshop.getByID(webshop.id))!.products[0].enableCustomer).toBe(true);
         expect((await Webshop.getByID(webshop.id))!.products[0].customerSettings?.email).toBe(CustomerFieldRequirement.Required);
+    });
+
+    test('Collects a customer per ticket in bulk mode and lets the main customer be picked from them', async ({ page }) => {
+        const organization = await createOrganization({ modernWebshop: true });
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Bulk customers ${WorkerData.id}`,
+            ticketType: WebshopTicketType.Tickets,
+            type: WebshopType.Registrations,
+            orderMode: WebshopOrderMode.Bulk,
+            paymentMethods: [PaymentMethod.PointOfSale],
+            buildProducts: () => [
+                Product.create({
+                    name: 'Deelname',
+                    type: ProductType.Ticket,
+                    enableCustomer: true,
+                    prices: [ProductPrice.create({ name: 'Standaard', price: 5_00_00 })],
+                }),
+            ],
+        });
+
+        const flow = new WebshopOrderFlow(page, { orderMode: WebshopOrderMode.Bulk });
+        await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
+
+        // Registrations wording instead of "Bestellen" / "Ticket"
+        await expect(page.getByTestId('bulk-order-button')).toContainText('Inschrijven');
+        // One product with one price: the first unit is preselected; the amount can also be typed
+        await expect(flow.bulkAmount('Deelname')).toHaveValue('1');
+        await flow.typeBulkAmount('Deelname', 2);
+        await expect(flow.bulkAmount('Deelname')).toHaveValue('2');
+        await flow.startBulkOrder();
+
+        await expect(flow.detailsStep().getByTestId('details-item')).toHaveCount(2);
+        await expect(flow.detailsStep().getByRole('heading', { name: 'Deelnemer 1', exact: true }).last()).toBeVisible();
+        await flow.fillDetails(0, { customer: { firstName: 'Jane', lastName: 'Doe' } });
+        await flow.fillDetails(1, { customer: { firstName: 'Jack', lastName: 'Doe' } });
+        await flow.submitDetails();
+
+        // The main customer can be picked from the ticket holders
+        await expect(page.getByTestId('customer-step')).toBeVisible({ timeout: 15000 });
+        await flow.selectMainCustomer('Jack Doe');
+        await expect(page.getByTestId('customer-step').locator('input[name="fname"]')).toHaveValue('Jack');
+        await flow.fillCustomer({ firstName: 'Jack', lastName: 'Doe', email: 'jack@test.be' });
+        await flow.confirmPayment();
+        await flow.expectTicketsDownloadable();
+        await flow.expectTicketCount(2);
+
+        const orders = await fetchOrders(webshop.id);
+        expect(orders).toHaveLength(1);
+        expect(orders[0].data.customer.name).toBe('Jack Doe');
+        expect(orders[0].data.cart.items.map(i => i.customer?.name)).toEqual(['Jane Doe', 'Jack Doe']);
+    });
+
+    test('Collects the configured participant fields and the unboxed record category', async ({ page }) => {
+        const organization = await createOrganization({ modernWebshop: true });
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Bulk participant settings ${WorkerData.id}`,
+            ticketType: WebshopTicketType.Tickets,
+            orderMode: WebshopOrderMode.Bulk,
+            paymentMethods: [PaymentMethod.PointOfSale],
+            buildProducts: () => [
+                Product.create({
+                    name: 'Deelname',
+                    type: ProductType.Ticket,
+                    enableCustomer: true,
+                    customerSettings: ProductCustomerSettings.create({
+                        email: CustomerFieldRequirement.Required,
+                        recordCategory: RecordCategory.create({
+                            name: TranslatedString.create('Extra vragen'),
+                            records: [RecordSettings.create({ name: TranslatedString.create('Allergieën'), type: RecordType.Text, required: false })],
+                            childCategories: [RecordCategory.create({
+                                name: TranslatedString.create('Noodcontact'),
+                                records: [RecordSettings.create({ name: TranslatedString.create('Naam noodcontact'), type: RecordType.Text })],
+                            })],
+                        }),
+                    }),
+                    prices: [ProductPrice.create({ name: 'Standaard', price: 5_00_00 })],
+                }),
+            ],
+        });
+
+        const flow = new WebshopOrderFlow(page, { orderMode: WebshopOrderMode.Bulk });
+        await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
+        await flow.startBulkOrder();
+
+        const item = flow.detailsItem(0);
+        await expect(item).toBeVisible({ timeout: 15000 });
+        // Unboxed: the category has no title of its own, only the child category gets a subtitle
+        await expect(item.getByRole('heading', { name: 'Noodcontact', exact: true })).toBeVisible();
+        await expect(item.getByRole('heading', { name: 'Extra vragen', exact: true })).toHaveCount(0);
+
+        // Email is required by the product settings
+        await flow.fillDetails(0, { customer: { firstName: 'Jane', lastName: 'Doe' } });
+        await flow.submitDetails();
+        // Both the email and the required emergency contact are reported on this ticket
+        await expect(item.locator('.error-box')).toHaveCount(2);
+        await expect(page.getByTestId('customer-step')).toHaveCount(0);
+
+        await item.locator('input[name="email"]').fill('jane@test.be');
+        const recordInputs = item.locator('input.input:not([name])');
+        await recordInputs.nth(0).fill('Noten');
+        await recordInputs.nth(1).fill('John Doe');
+        await flow.submitDetails();
+
+        await flow.fillCustomer();
+        await flow.confirmPayment();
+        await flow.expectTicketsDownloadable();
+
+        const orders = await fetchOrders(webshop.id);
+        expect(orders).toHaveLength(1);
+        const participant = orders[0].data.cart.items[0];
+        expect(participant.customer?.email).toBe('jane@test.be');
+        expect([...participant.recordAnswers.values()].map(a => a.stringValue).sort()).toEqual(['John Doe', 'Noten']);
     });
 });
