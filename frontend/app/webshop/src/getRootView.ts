@@ -2,11 +2,12 @@ import { ComponentWithProperties, ModalStackComponent, NavigationController } fr
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
 import ContextProvider from '@stamhoofd/components/containers/ContextProvider.vue';
+import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { ThemeManager } from '@stamhoofd/networking/ThemeManager';
 import type { Webshop } from '@stamhoofd/structures';
-import { WebshopAuthType } from '@stamhoofd/structures';
+import { WebshopAuthType, WebshopOrderMode } from '@stamhoofd/structures';
 import { markRaw, reactive } from 'vue';
 import { CheckoutManager } from './classes/CheckoutManager';
 import { WebshopManager } from './classes/WebshopManager';
@@ -42,9 +43,18 @@ export function wrapWithModalStack(...components: ComponentWithProperties[]) {
 
 export async function getWebshopRootView(session: SessionContext, webshop: Webshop) {
     // Do we need to require login?
-    let root = wrapWithModalStack(new ComponentWithProperties(NavigationController, {
-        root: AsyncComponent(() => import('./views/WebshopView.vue'), {}),
-    }));
+    // Bulk mode only exists in the modern view. Organization feature flags live in privateMeta, which the
+    // public webshop never receives, so the flag can only be enabled on the platform.
+    const modernView = webshop.orderMode === WebshopOrderMode.Bulk || manualFeatureFlag('modern-webshop', session, session.platform) || STAMHOOFD.environment === 'development';
+    let root = wrapWithModalStack(modernView
+        ? AsyncComponent(() => import('./views/WebshopController.vue'), {
+            root: new ComponentWithProperties(NavigationController, {
+                root: AsyncComponent(() => import('./views/ModernWebshopView.vue'), {}),
+            }),
+        })
+        : new ComponentWithProperties(NavigationController, {
+            root: AsyncComponent(() => import('./views/WebshopView.vue'), {}),
+        }));
 
     if (webshop.meta.authType === WebshopAuthType.Required) {
         root = wrapWithModalStack(

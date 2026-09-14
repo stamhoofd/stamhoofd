@@ -144,6 +144,29 @@ export class TicketBuilder {
         }
     }
 
+    /**
+     * Download and draw a logo or sponsor image. A missing or undecodable image (pdfkit only reads png and jpeg)
+     * leaves its space empty instead of failing the whole PDF. Returns whether the image was drawn.
+     */
+    private async drawImage(url: string, x: number, y: number, options: { width: number; height: number }): Promise<boolean> {
+        try {
+            const response = await fetch(url, {
+                credentials: 'omit',
+                cache: 'force-cache',
+            });
+            if (!response.ok) {
+                console.warn('Skipping image in ticket PDF: ' + url + ' responded with ' + response.status);
+                return false;
+            }
+            const buffer = await response.arrayBuffer();
+            this.document.image(buffer, x, y, options);
+            return true;
+        } catch (e) {
+            console.warn('Skipping image in ticket PDF: ' + url, e);
+            return false;
+        }
+    }
+
     async drawItem(ticket: TicketPublic, dryRun: boolean) {
         const QR_WIDTH = 50 * MM;
         const QR_MARGIN = 5 * MM;
@@ -203,18 +226,14 @@ export class TicketBuilder {
             }
 
             if (!dryRun) {
-                // Download image
-                const imgResponse = await fetch(resolution.file.getPublicPath(), {
-                    credentials: 'omit',
-                    cache: 'force-cache',
-                });
-                const imgBuffer = await imgResponse.arrayBuffer();
-                this.document.image(imgBuffer, PAGE_MARGIN, y + height, {
+                const drawn = await this.drawImage(resolution.file.getPublicPath(), PAGE_MARGIN, y + height, {
                     width: preferredWidth,
                     height: calculatedHeight,
                 });
-                const webshopUrl = 'https://' + this.webshop.getUrl(this.organization);
-                this.document.link(PAGE_MARGIN, y + height, preferredWidth, calculatedHeight, webshopUrl);
+                if (drawn) {
+                    const webshopUrl = 'https://' + this.webshop.getUrl(this.organization);
+                    this.document.link(PAGE_MARGIN, y + height, preferredWidth, calculatedHeight, webshopUrl);
+                }
             }
 
             height += calculatedHeight;
@@ -467,18 +486,12 @@ export class TicketBuilder {
                 }
 
                 if (!dryRun) {
-                    // Download image
-                    const imgResponse = await fetch(resolution.file.getPublicPath(), {
-                        credentials: 'omit',
-                        cache: 'force-cache',
-                    });
-                    const imgBuffer = await imgResponse.arrayBuffer();
-                    this.document.image(imgBuffer, sponsorX, y + height + currentHeightExpectedHeight / 2 - calculatedHeight / 2, {
+                    const drawn = await this.drawImage(resolution.file.getPublicPath(), sponsorX, y + height + currentHeightExpectedHeight / 2 - calculatedHeight / 2, {
                         width: preferredWidth,
                         height: calculatedHeight,
                     });
 
-                    if (sponsor.url) {
+                    if (drawn && sponsor.url) {
                         this.document.link(sponsorX, y + height, preferredWidth, calculatedHeight, sponsor.url);
                     }
                 }

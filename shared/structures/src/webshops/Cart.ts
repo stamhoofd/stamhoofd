@@ -5,7 +5,7 @@ import { ProductType } from './Product.js';
 import type { Webshop } from './Webshop.js';
 import { CartItem } from './CartItem.js';
 import { Formatter } from '@stamhoofd/utility';
-import { error } from 'console';
+import { WebshopOrderMode } from './WebshopMetaData.js';
 
 export class Cart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(CartItem) })
@@ -20,8 +20,10 @@ export class Cart extends AutoEncoder {
             return;
         }
         const c = item.code;
+        // One person per item: never merge items with a customer, even with identical data
+        const merge = allowMerge && !item.product.enableCustomer;
         for (const i of this.items) {
-            if (i.code === c && allowMerge) {
+            if (i.code === c && merge) {
                 i.amount += item.amount;
                 i.seats.push(...item.seats);
                 i.uitpasNumbers.push(...item.uitpasNumbers);
@@ -47,7 +49,7 @@ export class Cart extends AutoEncoder {
         const oldCode = old.code;
 
         for (const i of this.items) {
-            if (i.code === c && i.code !== oldCode) {
+            if (i.code === c && i.code !== oldCode && !item.product.enableCustomer) {
                 i.amount += item.amount;
                 i.seats.push(...item.seats);
                 i.uitpasNumbers.push(...item.uitpasNumbers);
@@ -139,18 +141,34 @@ export class Cart extends AutoEncoder {
         }
     }
 
-    validate(webshop: Webshop, asAdmin = false) {
+    /**
+     * validateSeats / validateDetails: false while those still have to be chosen (bulk checkout before the seat and details steps)
+     */
+    validate(webshop: Webshop, asAdmin = false, { validateSeats = true, validateDetails = true }: { validateSeats?: boolean; validateDetails?: boolean } = {}) {
         const newItems: CartItem[] = [];
         const errors = new SimpleErrors();
+        const singleItem = webshop.orderMode === WebshopOrderMode.Single;
+        const bulk = webshop.orderMode === WebshopOrderMode.Bulk;
+
         for (const item of this.items) {
             try {
+                if (bulk && !asAdmin && item.amount !== 1) {
+                    throw new SimpleError({
+                        code: 'invalid_amount',
+                        message: 'Cart items must have amount 1 in bulk order mode',
+                        human: $t('Er ging iets mis met de hoeveelheid van {product}. Probeer opnieuw.', { product: item.product.name }),
+                    });
+                }
+
                 item.validate(webshop, this, {
                     refresh: true,
                     admin: asAdmin,
+                    validateSeats,
+                    validateDetails,
                 });
                 newItems.push(item);
 
-                if (!webshop.meta.cartEnabled) {
+                if (singleItem) {
                     break;
                 }
             } catch (e) {
@@ -165,7 +183,7 @@ export class Cart extends AutoEncoder {
                     item.cartError = e;
                     newItems.push(item);
 
-                    if (!webshop.meta.cartEnabled) {
+                    if (singleItem) {
                         break;
                     }
                 }
@@ -174,7 +192,7 @@ export class Cart extends AutoEncoder {
 
         this.items = newItems;
 
-        if (errors.errors.length === 0) {
+        if (errors.errors.length === 0 && validateDetails) {
             // Only validate uitpas usage across items when all items are valid
             try {
                 this.validateUitpasNumbers();

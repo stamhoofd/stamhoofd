@@ -4,8 +4,15 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
+import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
+import type { ObjectWithRecords, PatchAnswers } from '../members/ObjectWithRecords.js';
+import type { RecordAnswer } from '../members/records/RecordAnswer.js';
+import { RecordAnswerMapDecoder } from '../members/records/RecordAnswer.js';
+import { RecordCategory } from '../members/records/RecordCategory.js';
+import type { RecordSettings } from '../members/records/RecordSettings.js';
 import { CartReservedSeat, ReservedSeat } from '../SeatingPlan.js';
 import type { Cart } from './Cart.js';
+import { Customer } from './Customer.js';
 import type { StockDefinition } from './CartStockHelper.js';
 import { CartStockHelper } from './CartStockHelper.js';
 import { ProductDiscountSettings } from './Discount.js';
@@ -49,7 +56,7 @@ export class CartItemOption extends AutoEncoder {
     optionMenu: OptionMenu;
 }
 
-export class CartItem extends AutoEncoder {
+export class CartItem extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4(), version: 106, upgrade: function (this: CartItem) {
         // Warning: this id will always be too long for storage in a normal database record.
         // But that is not a problem, since only new orders will use tickets that need this field
@@ -154,9 +161,42 @@ export class CartItem extends AutoEncoder {
     uitpasNumbers: UitpasNumberAndPrice[] = [];
 
     /**
+     * Only set when `product.enableCustomer`. Such items always have amount 1.
+     */
+    @field({ decoder: Customer, nullable: true, ...NextVersion })
+    customer: Customer | null = null;
+
+    /**
+     * Answers for `product.customerSettings.recordCategory`
+     */
+    @field({ decoder: RecordAnswerMapDecoder, ...NextVersion })
+    recordAnswers: Map<string, RecordAnswer> = new Map();
+
+    /**
      * Show an error in the cart for recovery
      */
     cartError: SimpleError | SimpleErrors | null = null;
+
+    isRecordEnabled(_record: RecordSettings): boolean {
+        return true;
+    }
+
+    getRecordAnswers(): Map<string, RecordAnswer> {
+        return this.recordAnswers;
+    }
+
+    patchRecordAnswers(patch: PatchAnswers): this {
+        return (this as CartItem).patch({
+            recordAnswers: patch,
+        }) as this;
+    }
+
+    /**
+     * Product record categories have no filters
+     */
+    doesMatchFilter(_filter: StamhoofdFilter): boolean {
+        return true;
+    }
 
     /**
      * @deprecated
@@ -491,6 +531,10 @@ export class CartItem extends AutoEncoder {
     get descriptionWithoutDate(): string {
         const descriptions: string[] = [];
 
+        if (this.customer) {
+            descriptions.push(this.customer.name);
+        }
+
         if (this.product.prices.length > 1) {
             descriptions.push(this.productPrice.name);
         }
@@ -531,7 +575,10 @@ export class CartItem extends AutoEncoder {
         return descriptions.filter(d => !!d).join('\n');
     }
 
-    validateAnswers() {
+    /**
+     * validate = false only syncs the answers with the product fields, without requiring them
+     */
+    validateAnswers(validate = true) {
         const newAnswers: WebshopFieldAnswer[] = [];
         for (const field of this.product.customFields) {
             const answer = this.fieldAnswers.find(a => a.field.id === field.id);
@@ -539,11 +586,15 @@ export class CartItem extends AutoEncoder {
             try {
                 if (!answer) {
                     const a = WebshopFieldAnswer.create({ field, answer: '' });
-                    a.validate();
+                    if (validate) {
+                        a.validate();
+                    }
                     newAnswers.push(a);
                 } else {
                     answer.field = field;
-                    answer.validate();
+                    if (validate) {
+                        answer.validate();
+                    }
                     newAnswers.push(answer);
                 }
             } catch (e) {
@@ -558,8 +609,9 @@ export class CartItem extends AutoEncoder {
 
     /**
      * Update self to the newest available data, and throw error if something failed (only after refreshing other ones)
+     * requireDetails = false: don't require option menus and custom fields yet (bulk checkout before the details step)
      */
-    refresh(webshop: Webshop) {
+    refresh(webshop: Webshop, { requireDetails = true }: { requireDetails?: boolean } = {}) {
         const errors = new SimpleErrors();
         const product = webshop.products.find(p => p.id === this.product.id);
         if (!product) {
@@ -634,7 +686,7 @@ export class CartItem extends AutoEncoder {
                 o.option = option;
             }
 
-            if (remainingMenus.filter(m => !m.multipleChoice).length > 0) {
+            if (requireDetails && remainingMenus.filter(m => !m.multipleChoice).length > 0) {
                 for (const remaining of remainingMenus) {
                     errors.addError(
                         new SimpleError({
@@ -650,7 +702,7 @@ export class CartItem extends AutoEncoder {
         }
 
         try {
-            this.validateAnswers();
+            this.validateAnswers(requireDetails);
         } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 errors.addError(e);
@@ -737,7 +789,42 @@ export class CartItem extends AutoEncoder {
     /**
      * Update self to the newest available data and throw if it was not able to recover
      */
-    validate(webshop: Webshop, cart: Cart, { refresh, admin, validateSeats }: { refresh?: boolean; admin?: boolean; validateSeats?: boolean } = { refresh: true, admin: false, validateSeats: true }) {
+    /**
+     * One person per cart item: forces amount 1 and validates the customer and the product's record category
+     */
+    validateCustomer(admin: boolean) {
+        if (!this.product.enableCustomer) {
+            this.customer = null;
+            this.recordAnswers = new Map();
+            return;
+        }
+
+        this.amount = 1;
+
+        if (!this.customer) {
+            throw new SimpleError({
+                code: 'missing_customer',
+                message: 'Missing customer for cart item',
+                human: $t('Vul de gegevens van deze persoon in'),
+                field: 'customer',
+            });
+        }
+
+        const settings = this.product.resolvedCustomerSettings;
+        this.customer.validate({ ...settings, asAdmin: admin });
+
+        if (settings.recordCategory) {
+            RecordCategory.validate([settings.recordCategory], this);
+            this.recordAnswers = new Map(RecordCategory.sortAnswers(this.recordAnswers, [settings.recordCategory]).map(a => [a.settings.id, a]));
+        } else {
+            this.recordAnswers = new Map();
+        }
+    }
+
+    /**
+     * validateDetails = false: skip everything the bulk details step collects (option menus, custom fields, customer, UiTPAS numbers)
+     */
+    validate(webshop: Webshop, cart: Cart, { refresh, admin, validateSeats, validateDetails }: { refresh?: boolean; admin?: boolean; validateSeats?: boolean; validateDetails?: boolean } = { refresh: true, admin: false, validateSeats: true, validateDetails: true }) {
         this.cartError = null;
 
         if (admin === undefined) {
@@ -749,13 +836,22 @@ export class CartItem extends AutoEncoder {
         if (validateSeats === undefined) {
             validateSeats = true;
         }
+        if (validateDetails === undefined) {
+            validateDetails = true;
+        }
 
         if (refresh) {
-            this.refresh(webshop);
+            this.refresh(webshop, { requireDetails: validateDetails });
         }
         const product = this.product;
 
         if (!product.allowMultiple) {
+            this.amount = 1;
+        }
+
+        if (validateDetails) {
+            this.validateCustomer(admin);
+        } else if (product.enableCustomer) {
             this.amount = 1;
         }
 
@@ -895,7 +991,9 @@ export class CartItem extends AutoEncoder {
             }
         }
 
-        this.validateUitpasNumbers();
+        if (validateDetails) {
+            this.validateUitpasNumbers();
+        }
 
         // Update prices
         // should now happen in the checkout so discounts are in sync

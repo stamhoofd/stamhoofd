@@ -1,5 +1,6 @@
 import type { Decoder} from '@simonbackx/simple-encoding';
 import { ArrayDecoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
+import type { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Checkout, DiscountCode, Version } from '@stamhoofd/structures'
 
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
@@ -10,6 +11,17 @@ import type { WebshopManager } from './WebshopManager'
  */
 export class CheckoutManager {
     private _checkout: Checkout | null = null
+
+    /**
+     * Cart error from the backend that the bulk details step should show per item after navigating back to it
+     */
+    pendingCartError: SimpleError | SimpleErrors | null = null
+
+    /**
+     * Modern webshop: the cart and the checkout steps are pushed on the navigation controller of the webshop
+     * itself instead of being presented in a popup
+     */
+    useRootNavigation = false
 
     $webshopManager: WebshopManager
 

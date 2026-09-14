@@ -31,7 +31,7 @@ import { InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableA
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import type { CheckoutMethod, PaymentGeneral, PrivateOrder, TicketPrivate } from '@stamhoofd/structures';
-import { CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PrivateOrderWithTickets, SortItemDirection, WebshopNumberingType, WebshopTimeSlot } from '@stamhoofd/structures';
+import { CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PrivateOrderWithTickets, SortItemDirection, WebshopNumberingType, WebshopOrderMode, WebshopTimeSlot } from '@stamhoofd/structures';
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
@@ -413,7 +413,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
         );
     }
 
-    if (!preview.value.meta.cartEnabled) {
+    if (preview.value.meta.resolvedOrderMode !== WebshopOrderMode.Cart) {
         cols.push(
             new Column<PrivateOrderWithTickets, string>({
                 name: $t('%Sc'),

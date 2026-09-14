@@ -4,63 +4,56 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <template v-if="!isLoggedIn">
-            <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`%Uy`)">
-                <div class="input-group">
-                    <div>
-                        <input v-model="firstName" class="input" name="fname" type="text" required autocomplete="given-name" :placeholder="$t(`%1MT`)">
-                    </div>
-                    <div>
-                        <input v-model="lastName" class="input" name="lname" type="text" required autocomplete="family-name" :placeholder="$t(`%1MU`)">
-                    </div>
-                </div>
-            </STInputBox>
-
-            <EmailInput v-model="email" name="email" :validator="errors.validator" :placeholder="emailPlaceholder" autocomplete="email" :title="$t(`%1FK`)" />
-            <p v-if="emailDescription" class="style-description-small" v-text="emailDescription" />
+        <template v-if="itemsWithCustomer.length > 0 && !isLoggedIn">
+            <p class="style-description-block">
+                {{ $t('Wie is de contactpersoon voor deze bestelling?') }}
+            </p>
+            <STList class="customer-selection-list" data-testid="main-customer-list">
+                <STListItem v-for="item of itemsWithCustomer" :key="item.id" :selectable="true" element-name="label" class="left-center">
+                    <template #left>
+                        <Radio :model-value="selectedItemId" :value="item.id" name="main-customer" @update:model-value="selectItemCustomer(item)" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ item.customer!.name }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ item.product.name }}
+                    </p>
+                </STListItem>
+                <STListItem :selectable="true" element-name="label" class="left-center">
+                    <template #left>
+                        <Radio :model-value="selectedItemId" value="" name="main-customer" @update:model-value="selectOtherCustomer" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('Iemand anders') }}
+                    </h3>
+                </STListItem>
+            </STList>
+            <hr>
         </template>
 
-        <PhoneInput v-if="phoneEnabled" v-model="phone" :title="$t('%2k' )" name="mobile" :validator="errors.validator" autocomplete="tel" :placeholder="$t(`%Xu`)" />
-
-        <BirthDayInput v-if="birthDayEnabled" v-model="birthDay" :title="$t(`%17w`)" :validator="errors.validator" :required="true" />
-
-        <STInputBox v-if="genderEnabled" error-fields="gender" :error-box="errors.errorBox" :title="$t(`%Zd4`)">
-            <RadioGroup>
-                <Radio v-model="gender" :value="Gender.Male" autocomplete="sex" name="sex">
-                    {{ $t('%XK') }}
-                </Radio>
-                <Radio v-model="gender" :value="Gender.Female" autocomplete="sex" name="sex">
-                    {{ $t('%XM') }}
-                </Radio>
-                <Radio v-model="gender" :value="Gender.Other" autocomplete="sex" name="sex">
-                    {{ $t('%1JG') }}
-                </Radio>
-            </RadioGroup>
-        </STInputBox>
-
-        <AddressInput v-if="addressEnabled && !hasDeliveryAddress" v-model="address" :required="true" :validator="errors.validator" :validate-server="unscopedServer" :title="$t(`%Cn`)" />
+        <CustomerInputs :customer="checkoutManager.checkout.customer" :settings="fieldSettings" :show-name="!isLoggedIn" :error-box="errors.errorBox" :validator="errors.validator" :validate-server="unscopedServer" :email-placeholder="emailPlaceholder" :email-description="emailDescription" @change="checkoutManager.saveCheckout()" />
 
         <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="checkoutManager.checkout.fieldAnswers" :error-box="errors.errorBox" />
     </SaveView>
 </template>
 
 <script lang="ts" setup>
-import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
-import BirthDayInput from '@stamhoofd/components/inputs/BirthDayInput.vue';
-import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import FieldBox from '@stamhoofd/components/views/FieldBox.vue';
-import PhoneInput from '@stamhoofd/components/inputs/PhoneInput.vue';
-import Radio from '@stamhoofd/components/inputs/Radio.vue';
-import RadioGroup from '@stamhoofd/components/inputs/RadioGroup.vue';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
-import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import Radio from '@stamhoofd/components/inputs/Radio.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import type { Address, ValidatedAddress } from '@stamhoofd/structures';
-import { Gender, WebshopTicketType } from '@stamhoofd/structures';
+import CustomerInputs from '@stamhoofd/components/views/CustomerInputs.vue';
+import type { CustomerFieldSettings } from '@stamhoofd/components/views/CustomerInputs.vue';
+import FieldBox from '@stamhoofd/components/views/FieldBox.vue';
+import type { CartItem } from '@stamhoofd/structures';
+import { Customer, WebshopTicketType } from '@stamhoofd/structures';
+import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 
 import { computed, ref } from 'vue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
@@ -75,16 +68,23 @@ const checkoutManager = useCheckoutManager();
 const context = useContext();
 const webshop = computed(() => webshopManager.webshop);
 const navigationActions = useNavigationActions();
-const phoneEnabled = computed(() => webshop.value.meta.phoneEnabled);
-const birthDayEnabled = computed(() => webshop.value.meta.birthDayEnabled);
-const addressEnabled = computed(() => webshop.value.meta.addressEnabled);
-const genderEnabled = computed(() => webshop.value.meta.genderEnabled);
 const isLoggedIn = computed(() => context.value.isComplete() ?? false);
 const unscopedServer = computed(() => webshopManager.unscopedServer);
 
 // When a delivery method is chosen, its address is already collected in a separate step
 // and stored on the customer, so we don't ask for the address a second time.
 const hasDeliveryAddress = computed(() => checkoutManager.checkout.deliveryMethod !== null);
+
+const fieldSettings = computed((): CustomerFieldSettings => {
+    const toRequirement = (enabled: boolean) => enabled ? CustomerFieldRequirement.Required : CustomerFieldRequirement.Disabled;
+    return {
+        email: isLoggedIn.value ? CustomerFieldRequirement.Disabled : CustomerFieldRequirement.Required,
+        phone: toRequirement(webshop.value.meta.phoneEnabled),
+        birthDay: toRequirement(webshop.value.meta.birthDayEnabled),
+        gender: toRequirement(webshop.value.meta.genderEnabled),
+        address: toRequirement(webshop.value.meta.addressEnabled && !hasDeliveryAddress.value),
+    };
+});
 
 const emailPlaceholder = computed(() => {
     if (webshop.value.meta.ticketType !== WebshopTicketType.None) {
@@ -102,61 +102,42 @@ const emailDescription = computed(() => {
 
 const fields = computed(() => webshop.value.meta.customFields);
 
-const firstName = computed({
-    get: () => checkoutManager.checkout.customer.firstName,
-    set: (firstName: string) => {
-        checkoutManager.checkout.customer.firstName = firstName;
-        checkoutManager.saveCheckout();
-    },
+const itemsWithCustomer = computed(() => checkoutManager.cart.items.filter(i => i.customer !== null));
+
+// Derived: editing the prefilled name switches back to "someone else"
+const selectedItemId = computed(() => {
+    const customer = checkoutManager.checkout.customer;
+    return itemsWithCustomer.value.find(i => i.customer!.firstName === customer.firstName && i.customer!.lastName === customer.lastName)?.id ?? '';
 });
 
-const lastName = computed({
-    get: () => checkoutManager.checkout.customer.lastName,
-    set: (lastName: string) => {
-        checkoutManager.checkout.customer.lastName = lastName;
-        checkoutManager.saveCheckout();
-    },
-});
+function selectItemCustomer(item: CartItem) {
+    const source = item.customer!;
+    const customer = checkoutManager.checkout.customer;
+    customer.firstName = source.firstName;
+    customer.lastName = source.lastName;
+    // Only overwrite what the item collected: the rest stays for the order-level inputs
+    if (source.email) {
+        customer.email = source.email;
+    }
+    if (source.phone) {
+        customer.phone = source.phone;
+    }
+    if (source.birthDay) {
+        customer.birthDay = source.birthDay;
+    }
+    if (source.address) {
+        customer.address = source.address;
+    }
+    if (item.product.resolvedCustomerSettings.gender !== CustomerFieldRequirement.Disabled) {
+        customer.gender = source.gender;
+    }
+    checkoutManager.saveCheckout();
+}
 
-const email = computed({
-    get: () => checkoutManager.checkout.customer.email,
-    set: (email: string) => {
-        checkoutManager.checkout.customer.email = email;
-        checkoutManager.saveCheckout();
-    },
-});
-
-const phone = computed({
-    get: () => checkoutManager.checkout.customer.phone,
-    set: (phone: string) => {
-        checkoutManager.checkout.customer.phone = phone;
-        checkoutManager.saveCheckout();
-    },
-});
-
-const birthDay = computed({
-    get: () => checkoutManager.checkout.customer.birthDay,
-    set: (birthDay: Date | null) => {
-        checkoutManager.checkout.customer.birthDay = birthDay;
-        checkoutManager.saveCheckout();
-    },
-});
-
-const gender = computed({
-    get: () => checkoutManager.checkout.customer.gender,
-    set: (gender: Gender) => {
-        checkoutManager.checkout.customer.gender = gender;
-        checkoutManager.saveCheckout();
-    },
-});
-
-const address = computed({
-    get: () => checkoutManager.checkout.customer.address,
-    set: (address: Address | ValidatedAddress | null) => {
-        checkoutManager.checkout.customer.address = address;
-        checkoutManager.saveCheckout();
-    },
-});
+function selectOtherCustomer() {
+    checkoutManager.checkout.customer = Customer.create({});
+    checkoutManager.saveCheckout();
+}
 
 async function goNext() {
     if (loading.value) {
@@ -168,8 +149,6 @@ async function goNext() {
     }
     loading.value = true;
     errors.errorBox = null;
-
-    // Clear old open fields
 
     try {
         await CheckoutStepsManager.for(checkoutManager).goNext(CheckoutStepType.Customer, navigationActions);

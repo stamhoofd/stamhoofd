@@ -13,7 +13,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <div class="split-inputs">
+        <div v-if="!unboxed" class="split-inputs">
             <TInput v-model="name" enterkeyhint="next" :placeholder="$t(`%vC`)" error-fields="name" :error-box="errors.errorBox" :title="$t(`%vC`)" />
         </div>
 
@@ -90,7 +90,7 @@
             </STList>
         </div>
 
-        <div v-if="defaultEnabled && (hasFilters || (allowChildCategories && patchedCategory.getAllRecords().length > 1))" class="container">
+        <div v-if="!unboxed && defaultEnabled && (hasFilters || (allowChildCategories && patchedCategory.getAllRecords().length > 1))" class="container">
             <hr><h2>{{ $t('%iK') }}</h2>
             <p v-if="!hasFilters">
                 {{ $t('%iL') }}
@@ -151,8 +151,14 @@ const props = withDefaults(defineProps<{
     allowChildCategories: boolean;
     // ids of records that already had been saved in the database
     savedRecordIds?: Set<string>;
+    /**
+     * The category has no visible title of its own: its records are shown directly in the surrounding form
+     * and only child categories get a subtitle. Hides the title input.
+     */
+    unboxed?: boolean;
 }>(), {
     savedRecordIds: () => new Set<string>(),
+    unboxed: false,
 });
 
 // Hooks
@@ -190,6 +196,9 @@ const hasFilters = computed(() => {
 });
 
 const title = computed(() => {
+    if (props.unboxed && isRootCategory.value) {
+        return $t('Extra vragen');
+    }
     if (isRootCategory.value) {
         return props.isNew ? $t(`%10l`) : $t('%17i');
     }
@@ -220,7 +229,7 @@ const name = computed({
 });
 
 useValidation(errors.validator, () => {
-    if (name.value.length < 1) {
+    if (name.value.length < 1 && !props.unboxed) {
         throw new SimpleError({
             code: 'invalid_field',
             field: 'name',

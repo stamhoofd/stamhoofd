@@ -30,7 +30,7 @@
             </div>
         </div>
         <div ref="scrollColumn">
-            <SaveView v-bind="attrs" class="scroll-column" :class="{'main-shade': !columnsEnabled && isEnabled, 'shade': columnsEnabled && isEnabled}" @save="$emit('save', $event)" v-on="{delete: canDelete ? () => $emit('delete'): undefined}">
+            <SaveView v-bind="saveViewProps" class="scroll-column" :class="{'main-shade': !columnsEnabled && isEnabled, 'shade': columnsEnabled && isEnabled}" @save="$emit('save', $event)" v-on="{delete: canDelete ? () => $emit('delete'): undefined}">
                 <template v-if="!columnsEnabled && isEnabled" #fixed>
                     <ScrollableSegmentedControl v-model="visibleCategory" :items="[null, ...categories]" :labels="['Overzicht', ...categories.map(c => c.title.value)]" :icons="[null, ...categories.map(c => c.icon.value)]" />
                 </template>
@@ -88,8 +88,11 @@ import ScrollableSegmentedControl from '#inputs/ScrollableSegmentedControl.vue';
 import { useResizeObserver } from '#inputs/hooks/useResizeObserver.ts';
 
 const attrs = withDefaults(
-    defineProps<SaveViewProps>(),
-    SaveViewDefaults,
+    defineProps<SaveViewProps & {
+        /** Set to false to always use the inline category list instead of a summary column on the left */
+        columns?: boolean;
+    }>(),
+    { ...SaveViewDefaults, columns: true },
 );
 
 const categories = ref([]) as Ref<CategorizedViewCategory[]>;
@@ -108,7 +111,12 @@ const isEnabled = computed(() => {
 const deviceWidth = useDeviceWidth();
 
 const columnsEnabled = computed(() => {
-    return deviceWidth.value >= 800;
+    return attrs.columns && deviceWidth.value >= 800;
+});
+
+const saveViewProps = computed(() => {
+    const { columns: _columns, ...rest } = attrs;
+    return rest;
 });
 
 const canDelete = computed(() => {

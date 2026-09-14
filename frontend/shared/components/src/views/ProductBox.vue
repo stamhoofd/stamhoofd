@@ -41,7 +41,8 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { useDismiss } from '@simonbackx/vue-app-navigation';
 
 import type { Checkout, Product, ProductDateRange, Webshop } from '@stamhoofd/structures';
-import { Cart, CartItem, CartStockHelper } from '@stamhoofd/structures';
+import { CartItem, CartStockHelper } from '@stamhoofd/structures';
+import { getProductStockTag } from './productStockTag';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 
@@ -106,59 +107,7 @@ const imageSrc = computed(() => imageResolution.value?.file.getPublicPath());
 const imgWidth = computed(() => imageResolution.value?.width);
 const imgHeight = computed(() => imageResolution.value?.height);
 
-const stockText = computed(() => {
-    const remainingWithoutCart = CartStockHelper.getRemainingAcrossOptions({ cart: new Cart(), product: props.product, webshop: props.webshop, admin: props.admin }, { inMultipleCartItems: true, excludeOrder: true });
-
-    if (remainingWithoutCart === 0) {
-        return {
-            text: $t(`%12p`),
-            style: 'error',
-        };
-    }
-    const showStockBelow = props.product.showStockBelow ?? Infinity;
-
-    if (editExisting.value) {
-        if (remainingWithoutCart === null || remainingWithoutCart > showStockBelow) {
-            return null;
-        }
-
-        return {
-            text: $t(`%12q`, { count: props.product.getRemainingStockText(remainingWithoutCart) }),
-            style: 'warn',
-        };
-    }
-
-    // How much we can still order from this product
-    const maxOrder = CartStockHelper.getOrderMaximum({ cart: cart.value, product: props.product, webshop: props.webshop, admin: props.admin });
-    const remaining = CartStockHelper.getRemainingAcrossOptions({ cart: cart.value, product: props.product, webshop: props.webshop, admin: props.admin }, { inMultipleCartItems: true, excludeOrder: true });
-
-    if (maxOrder && maxOrder.remaining === 0) {
-        return {
-            text: $t(`%zD`),
-            style: 'error',
-        };
-    }
-
-    if (remaining === null) {
-        return null;
-    }
-
-    if (remaining > showStockBelow) {
-        return null;
-    }
-
-    if (remaining === 0) {
-        return {
-            text: $t(`%zD`),
-            style: 'error',
-        };
-    }
-
-    return {
-        text: $t(`%12q`, { count: props.product.getRemainingStockText(remaining) }),
-        style: 'warn',
-    };
-});
+const stockText = computed(() => getProductStockTag({ product: props.product, webshop: props.webshop, cart: cart.value, admin: props.admin, editExisting: editExisting.value }));
 
 const editExisting = computed(() => props.product.isUnique || !props.webshop.shouldEnableCart);
 

@@ -1,17 +1,21 @@
-import { TranslatedString } from '../TranslatedString.js';
 import { BalanceItemPaymentWithPayment, BalanceItemWithPayments } from '../BalanceItem.js';
 import { File } from '../files/File.js';
 import { Image } from '../files/Image.js';
 import { Resolution } from '../files/Resolution.js';
+import { Payment } from '../members/Payment.js';
 import { RecordFileAnswer, RecordImageAnswer, RecordTextAnswer } from '../members/records/RecordAnswer.js';
 import { RecordCategory } from '../members/records/RecordCategory.js';
 import { RecordSettings, RecordType } from '../members/records/RecordSettings.js';
 import { Organization } from '../Organization.js';
-import { Payment } from '../members/Payment.js';
 import { PaymentMethod } from '../PaymentMethod.js';
 import { PaymentStatus } from '../PaymentStatus.js';
 import { PaymentType } from '../PaymentType.js';
+import { TranslatedString } from '../TranslatedString.js';
+import { Cart } from './Cart.js';
+import { CartItem } from './CartItem.js';
+import { Customer } from './Customer.js';
 import { Order, OrderData } from './Order.js';
+import { Product } from './Product.js';
 import { TransferSettings } from './TransferSettings.js';
 import { WebshopPreview } from './Webshop.js';
 import { WebshopMetaData } from './WebshopMetaData.js';
@@ -193,5 +197,17 @@ describe('Order', () => {
         );
 
         expect(getTransferReplacements(order, webshop).transferDescription).toBe('+++111/1111/11111+++');
+    });
+
+    test('removePersonalData clears the customer and record answers of every cart item', () => {
+        const product = Product.create({ name: 'Ticket', enableCustomer: true });
+        const item = CartItem.create({ product, productPrice: product.prices[0], customer: Customer.create({ firstName: 'John', lastName: 'Doe' }) });
+        item.recordAnswers.set(textRecordSettings.id, RecordTextAnswer.create({ settings: textRecordSettings, value: 'Noten' }));
+        const order = Order.create({ webshopId: 'x', data: OrderData.create({ cart: Cart.create({ items: [item] }) }) });
+
+        order.data.removePersonalData();
+
+        expect(order.data.cart.items[0].customer).toBeNull();
+        expect(order.data.cart.items[0].recordAnswers.size).toBe(0);
     });
 });

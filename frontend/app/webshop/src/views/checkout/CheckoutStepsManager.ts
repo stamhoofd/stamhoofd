@@ -1,10 +1,11 @@
+import type { SimpleErrors } from '@simonbackx/simple-errors';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, ReactiveUrl, useDismiss, useNavigationController, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ReactiveUrl } from '@simonbackx/vue-app-navigation';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import type { Checkout, CheckoutMethod, OrganizationMetaData, PatchAnswers, Webshop } from '@stamhoofd/structures';
-import { CheckoutMethodType } from '@stamhoofd/structures';
+import type { CartItem, Checkout, CheckoutMethod, OrganizationMetaData, PatchAnswers, Product, Webshop } from '@stamhoofd/structures';
+import { CheckoutMethodType, WebshopOrderMode } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { patchObject } from '@simonbackx/simple-encoding';
@@ -16,6 +17,17 @@ export enum CheckoutStepType {
     Customer = 'Customer',
     Time = 'Time',
     Payment = 'Payment',
+    Details = 'Details',
+}
+
+/**
+ * Whether the bulk details step needs input for this item
+ */
+export function cartItemNeedsDetails(item: CartItem): boolean {
+    return item.product.optionMenus.length > 0
+        || item.product.customFields.length > 0
+        || item.product.enableCustomer
+        || item.productPrice.uitpasBaseProductPriceId !== null;
 }
 
 export class CheckoutStep {
@@ -41,38 +53,6 @@ export class CheckoutStep {
         this.validate = data.validate;
         this.url = data.url;
     }
-
-    // async getComponent(): Promise<any> {
-    //     switch (this.type) {
-    //         case CheckoutStepType.Method: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CheckoutMethodSelectionView.vue')).default;
-    //         case CheckoutStepType.Address: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './AddressSelectionView.vue')).default;
-    //         case CheckoutStepType.Time:return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './TimeSelectionView.vue')).default;
-    //         case CheckoutStepType.Payment: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './PaymentSelectionView.vue')).default;
-    //         case CheckoutStepType.Customer: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CustomerView.vue')).default;
-//
-    //         default: {
-    //             // If you get a compile error here, a type is missing in the switch and you should add it
-    //             const t: never = this.type
-    //             throw new Error("Missing component for "+t)
-    //         }
-    //     }
-    // }
-//
-    // validate(checkout: Checkout, webshop: Webshop, organizationMeta: OrganizationMetaData) {
-    //     switch (this.type) {
-    //         case CheckoutStepType.Method: checkout.validateCheckoutMethod(webshop, organizationMeta); return;
-    //         case CheckoutStepType.Address: checkout.validateDeliveryAddress(webshop, organizationMeta); return;
-    //         case CheckoutStepType.Time: checkout.validateTimeSlot(webshop, organizationMeta); return;
-    //         case CheckoutStepType.Payment: checkout.validate(webshop, organizationMeta, I18nController.i18n); return;
-    //         case CheckoutStepType.Customer: checkout.validateCustomer(webshop, organizationMeta, I18nController.i18n); return;
-//
-    //         default: {
-    //             // If you get a compile error here, a type is missing in the switch and you should add it
-    //             const t: never = this.type
-    //             throw new Error("Missing validate for "+t)
-    //         }
-    //     }
-    // }
 }
 
 export class CheckoutStepsManager {
@@ -94,12 +74,52 @@ export class CheckoutStepsManager {
         return new CheckoutStepsManager($checkoutManager);
     }
 
+    static seatsStepId(product: Product) {
+        return `seats-${product.id}`;
+    }
+
     /// Return all the steps that are confirmed with the current checkout configuration
     getSteps(): CheckoutStep[] {
         const webshop = this.$webshopManager.webshop;
         const checkout = this.$checkoutManager.checkout;
         const checkoutMethod = webshop.meta.checkoutMethods.find(m => m.id === checkout.checkoutMethod?.id) ?? (webshop.meta.checkoutMethods[0] as CheckoutMethod | undefined) ?? null;
         const steps: CheckoutStep[] = [];
+        const bulk = webshop.orderMode === WebshopOrderMode.Bulk;
+
+        // Bulk: seats per seated product, then the details of every item
+        const seatedProducts = bulk
+            ? webshop.products.filter(p => p.seatingPlanId !== null && checkout.cart.items.some(i => i.product.id === p.id))
+            : [];
+
+        for (const product of seatedProducts) {
+            const id = CheckoutStepsManager.seatsStepId(product);
+            steps.push(new CheckoutStep({
+                id,
+                url: '/checkout/seats/' + Formatter.slug(product.name),
+                getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './BulkSeatsView.vue').then(m => new ComponentWithProperties(m.default, { product })),
+                validate: (checkout) => {
+                    const missing = checkout.cart.items.filter(i => i.product.id === product.id && i.seats.length !== i.amount);
+                    if (missing.length > 0) {
+                        throw new SimpleError({
+                            code: 'invalid_seats',
+                            message: 'Missing seats',
+                            human: $t('Kies een plaats voor elk ticket van {product}', { product: product.name }),
+                            field: 'cart',
+                        });
+                    }
+                },
+            }));
+        }
+
+        steps.push(new CheckoutStep({
+            id: CheckoutStepType.Details,
+            url: '/checkout/' + CheckoutStepType.Details.toLowerCase(),
+            active: bulk && checkout.cart.items.some(i => cartItemNeedsDetails(i)),
+            getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './BulkItemDetailsView.vue').then(m => new ComponentWithProperties(m.default, {})),
+            validate: () => {
+                // Items are validated by validateCart at the start of getNextStep
+            },
+        }));
 
         steps.push(
             new CheckoutStep({
@@ -160,10 +180,13 @@ export class CheckoutStepsManager {
         // need to ask for the customer address again.
         const hasDeliveryAddress = checkoutMethod !== null && checkoutMethod.type === CheckoutMethodType.Delivery;
 
+        // Items with their own customer need the step to pick the main customer of the order (a logged in user is the customer)
+        const hasItemCustomers = !loggedIn && checkout.cart.items.some(i => i.customer !== null);
+
         steps.push(new CheckoutStep({
             id: CheckoutStepType.Customer,
             url: '/checkout/' + CheckoutStepType.Customer.toLowerCase(),
-            active: !loggedIn || webshop.meta.phoneEnabled || webshop.meta.birthDayEnabled || webshop.meta.genderEnabled || (webshop.meta.addressEnabled && !hasDeliveryAddress) || !user?.firstName || !user?.lastName,
+            active: hasItemCustomers || !loggedIn || webshop.meta.phoneEnabled || webshop.meta.birthDayEnabled || webshop.meta.genderEnabled || (webshop.meta.addressEnabled && !hasDeliveryAddress) || !user?.firstName || !user?.lastName,
             getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CustomerView.vue').then(m => new ComponentWithProperties(m.default, {})),
             validate: (checkout, webshop, organizationMeta) => checkout.validateCustomer(webshop, organizationMeta, I18nController.i18n, false, loggedIn ? (this.$context.user ?? null) : null),
         }));
@@ -221,8 +244,11 @@ export class CheckoutStepsManager {
             await this.$webshopManager.reload();
         }
 
+        // Bulk: seats, options, fields and customers are collected in the first checkout steps, so don't require them before those are done
+        const detailsPending = this.$webshopManager.webshop.orderMode === WebshopOrderMode.Bulk && (stepId === undefined || stepId.startsWith('seats-'));
+
         try {
-            this.$checkoutManager.checkout.validateCart(this.$webshopManager.webshop, this.$webshopManager.organization.meta);
+            this.$checkoutManager.checkout.validateCart(this.$webshopManager.webshop, this.$webshopManager.organization.meta, false, { validateSeats: !detailsPending, validateDetails: !detailsPending });
         } finally {
             this.$checkoutManager.checkout.update(this.$webshopManager.webshop);
         }
@@ -255,37 +281,87 @@ export class CheckoutStepsManager {
         return undefined;
     }
 
+    /**
+     * Whether an error thrown while validating or placing the order is about the cart contents
+     */
+    static isCartError(error: unknown): error is SimpleError | SimpleErrors {
+        if (!isSimpleError(error) && !isSimpleErrors(error)) {
+            return false;
+        }
+        return error.hasFieldThatStartsWith('cart') || error.hasFieldThatStartsWith('fieldAnswers');
+    }
+
+    /**
+     * Reload the webshop, re-validate the cart and navigate back to where the user can fix the cart.
+     * Bulk: to the details step when it is active, otherwise to the product list. Cart: the cart view. Single: the product view.
+     */
+    async handleCartError(error: SimpleError | SimpleErrors, navigate: NavigationActions) {
+        const webshopManager = this.$webshopManager;
+        await webshopManager.reload();
+
+        const webshop = webshopManager.webshop;
+        const cart = this.$checkoutManager.cart;
+
+        try {
+            // Stores recoverable errors on the items and drops invalid ones. Missing details are not an error yet in
+            // bulk mode: the details step collects and shows them.
+            cart.validate(webshop, false, { validateDetails: webshop.orderMode !== WebshopOrderMode.Bulk });
+        } catch (e) {
+            console.error(e);
+        }
+        this.$checkoutManager.saveCart();
+
+        if (webshop.orderMode === WebshopOrderMode.Bulk) {
+            const detailsStep = this.getSteps().find(s => s.id === (CheckoutStepType.Details as string));
+
+            if (detailsStep?.active && this.popToUrl(navigate, detailsStep.url)) {
+                this.$checkoutManager.pendingCartError = error;
+                return;
+            }
+        }
+
+        if (this.$checkoutManager.useRootNavigation) {
+            // Back to the cart, or to the webshop itself when there is no cart
+            if (!webshop.shouldEnableCart || !this.popToUrl(navigate, 'cart')) {
+                navigate.navigationController!.popToRoot({ force: true }).catch(console.error);
+            }
+        } else if (webshop.orderMode === WebshopOrderMode.Bulk || !webshop.shouldEnableCart) {
+            navigate.dismiss({ force: true }).catch(console.error);
+        } else {
+            navigate.navigationController!.popToRoot({ force: true }).catch(e => console.error(e));
+        }
+        Toast.fromError(error).show();
+    }
+
+    /**
+     * Pop back to the component with the given url on the current navigation controller. Returns false when it isn't on the stack.
+     */
+    private popToUrl(navigate: NavigationActions, url: string): boolean {
+        const navigationController = navigate.navigationController;
+        if (!navigationController) {
+            return false;
+        }
+        const components = navigationController.components;
+        const index = components.findIndex(c => c.provide.reactive_navigation_url?.url === url);
+        if (index < 0) {
+            return false;
+        }
+        const count = components.length - 1 - index;
+        if (count > 0) {
+            navigationController.pop({ count, force: true }).catch(console.error);
+        }
+        return true;
+    }
+
     async goNext(step: string | undefined, navigate: NavigationActions) {
-        const webshop = this.$webshopManager.webshop;
         let nextStep: CheckoutStep | undefined;
 
         // Force a save if nothing changed (to fix timeSlot + updated data)
         try {
             nextStep = await this.getNextStep(step, true);
         } catch (error) {
-            if (isSimpleError(error) || isSimpleErrors(error)) {
-                if (error.hasFieldThatStartsWith('cart')) {
-                    // A cart error: force a reload and go back to the cart.
-                    await this.$webshopManager.reload();
-
-                    if (webshop.shouldEnableCart) {
-                        navigate.navigationController!.popToRoot({ force: true }).catch(e => console.error(e));
-                    } else {
-                        navigate.dismiss({ force: true }).catch(console.error);
-                    }
-                    Toast.fromError(error).show();
-                } else if (error.hasFieldThatStartsWith('fieldAnswers')) {
-                    // A cart error: force a reload and go back to the cart.
-                    await this.$webshopManager.reload();
-
-                    if (webshop.shouldEnableCart) {
-                        navigate.navigationController!.popToRoot({ force: true }).catch(e => console.error(e));
-                    } else {
-                        navigate.dismiss({ force: true }).catch(console.error);
-                    }
-
-                    Toast.fromError(error).show();
-                }
+            if (CheckoutStepsManager.isCartError(error)) {
+                await this.handleCartError(error, navigate);
             }
             throw error;
         }
@@ -297,14 +373,20 @@ export class CheckoutStepsManager {
             });
         }
 
-        const nextComponent = await nextStep.getComponent();
-        nextComponent.provide.reactive_navigation_url = new ReactiveUrl({
-            url: nextStep.url,
-        });
-
         navigate.show({
-            components: [nextComponent],
+            components: [await this.getStepComponent(nextStep)],
             animated: true,
         }).catch(console.error);
+    }
+
+    /**
+     * The component to push for a step, carrying the step url
+     */
+    async getStepComponent(step: CheckoutStep): Promise<ComponentWithProperties> {
+        const component = await step.getComponent();
+        component.provide.reactive_navigation_url = new ReactiveUrl({
+            url: step.url,
+        });
+        return component;
     }
 }

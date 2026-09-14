@@ -105,6 +105,13 @@
 
             <FieldBox v-for="field in cartItem.product.customFields" :key="field.id" :field="field" :answers="cartItem.fieldAnswers" :error-box="errors.errorBox" />
 
+            <template v-if="cartItem.product.enableCustomer && cartItem.customer">
+                <hr>
+                <h2>{{ $t('Gegevens deelnemer') }}</h2>
+                <CustomerInputs :customer="cartItem.customer" :settings="cartItem.product.resolvedCustomerSettings" :name-title="$t('Naam')" :name-autocomplete="false" :error-box="errors.errorBox" :validator="errors.validator" :validate-server="unscopedServer" />
+                <FillRecordCategoryBox v-if="customerRecordCategory" :category="customerRecordCategory" :value="cartItem" :validator="errors.validator" :force-mark-reviewed="true" :hide-title="true" :parent-error-box="errors.errorBox" @patch="patchRecordAnswers" />
+            </template>
+
             <template v-if="canOrder && canSelectAmount">
                 <hr>
                 <h2>{{ $t('%M4') }}</h2>
@@ -173,15 +180,14 @@
 
 <script lang="ts" setup>
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { Request } from '@simonbackx/simple-networking';
 import { useCanDismiss, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import type { CartItem, Checkout, ProductDateRange, Webshop } from '@stamhoofd/structures';
-import { CartStockHelper, ProductPrice, ProductType, UitpasNumberAndPrice, UitpasPriceCheckRequest, UitpasPriceCheckResponse } from '@stamhoofd/structures';
+import type { CartItem, Checkout, PatchAnswers, ProductDateRange, Webshop } from '@stamhoofd/structures';
+import { CartStockHelper, Customer, ProductPrice, ProductType, UitpasNumberAndPrice } from '@stamhoofd/structures';
+import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { Formatter } from '@stamhoofd/utility';
 
 import { useContext } from '#hooks/useContext.ts';
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { patchObject } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref, watch } from 'vue';
@@ -202,6 +208,9 @@ import FieldBox from './FieldBox.vue';
 import OptionMenuBox from './OptionMenuBox.vue';
 import PriceBreakdownBox from './PriceBreakdownBox.vue';
 import ImageGallery from '#images/ImageGallery.vue';
+import FillRecordCategoryBox from '#records/components/FillRecordCategoryBox.vue';
+import CustomerInputs from './CustomerInputs.vue';
+import { validateUitpasNumbers } from './validateUitpasNumbers';
 
 const props = withDefaults(defineProps<{
     admin?: boolean;
@@ -300,7 +309,7 @@ async function validate() {
         });
 
         if (props.cartItem.productPrice.uitpasBaseProductPriceId !== null) {
-            await validateUitpasNumbers();
+            await validateUitpasNumbers(props.cartItem, context.value.optionalAuthenticatedServer, owner);
         }
     } catch (e) {
         console.error(e);
@@ -313,45 +322,6 @@ async function validate() {
 
 const context = useContext();
 
-async function validateUitpasNumbers() {
-    const baseProductPrice = props.cartItem.product.prices.find(p => p.id === props.cartItem.productPrice.uitpasBaseProductPriceId);
-    if (!baseProductPrice) {
-        return;
-    }
-
-    // verify the UiTPAS numbers are valid for social tariff (call to backend)
-    try {
-        const response = await context.value.optionalAuthenticatedServer.request({
-            method: 'POST',
-            path: '/uitpas',
-            owner: owner,
-            shouldRetry: false,
-            body: UitpasPriceCheckRequest.create({
-                basePrice: baseProductPrice.price,
-                reducedPrice: props.cartItem.productPrice.price,
-                uitpasNumbers: props.cartItem.uitpasNumbers.map(p => p.uitpasNumber),
-                uitpasEventUrl: props.cartItem.product.uitpasEvent?.url ?? null, // null for non-official flow, not null for official flow
-            }),
-            decoder: UitpasPriceCheckResponse as Decoder<UitpasPriceCheckResponse>,
-        }); // will throw if one of the uitpas numbers is invalid
-        const reducedPrices = response.data.prices;
-        if (reducedPrices.length < props.cartItem.uitpasNumbers.length) {
-            // Should already be thrown by the backend
-            throw new SimpleError({
-                code: 'invalid_uitpas_numbers',
-                message: 'Not all uitpas numbers were valid',
-                human: $t('%1B5'),
-            });
-        }
-        for (let i = 0; i < props.cartItem.uitpasNumbers.length; i++) {
-            props.cartItem.uitpasNumbers[i].price = reducedPrices[i];
-        }
-    } catch (e) {
-        if (!Request.isAbortError(e)) {
-            throw e;
-        }
-    }
-}
 
 const loading = ref(false);
 
@@ -518,7 +488,22 @@ const canOrder = computed(() => {
     // return (props.admin || ((maximumRemaining.value === null || maximumRemaining.value > 0 || !!props.oldItem) && product.value.isEnabled)) && !this.areSeatsSoldOut
 });
 
-const canSelectAmount = computed(() => product.value.maxPerOrder !== 1 && product.value.allowMultiple);
+const canSelectAmount = computed(() => product.value.maxPerOrder !== 1 && product.value.allowMultiple && !product.value.enableCustomer);
+
+const unscopedServer = NetworkManager.server;
+
+// The structure only stores a customer when the product asks for one
+watch(() => product.value.enableCustomer, (enabled) => {
+    if (enabled && !props.cartItem.customer) {
+        props.cartItem.customer = Customer.create({});
+    }
+}, { immediate: true });
+
+const customerRecordCategory = computed(() => product.value.enableCustomer ? product.value.resolvedCustomerSettings.recordCategory : null);
+
+function patchRecordAnswers(patch: PatchAnswers) {
+    props.cartItem.recordAnswers = patchObject(props.cartItem.recordAnswers, patch);
+}
 
 const uitpasNumbers = ref(props.cartItem.uitpasNumbers);
 const originalUitpasNumbers = props.cartItem.uitpasNumbers.map(u => u.uitpasNumber);

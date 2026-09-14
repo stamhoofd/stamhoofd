@@ -156,7 +156,7 @@
                 <CartItemRow v-for="cartItem of patchedOrder.data.cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="patchedOrder.data.cart" :webshop="webshopFull" :editable="true" :admin="true" @edit="editCartItem(cartItem)" @delete="deleteItem(cartItem)" @amount="setCartItemAmount(cartItem, $event)" />
             </STList>
 
-            <p v-if="(webshopFull && webshopFull.shouldEnableCart) || patchedOrder.data.cart.items.length === 0">
+            <p v-if="(webshopFull && webshopFull.orderMode !== WebshopOrderMode.Single) || patchedOrder.data.cart.items.length === 0">
                 <button class="button text" type="button" data-testid="add-product-button" @click="addProduct">
                     <span class="icon add" />
                     <span>{{ $t('%1IY') }}</span>
@@ -207,7 +207,7 @@ import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { DiscountCode } from '@stamhoofd/structures';
 import type { Address, CartItem, CheckoutMethod, PatchAnswers, ValidatedAddress, WebshopOnSiteMethod, WebshopTakeoutMethod } from '@stamhoofd/structures';
-import { CheckoutMethodType, Customer, Gender, OrderData, PaymentConfiguration, PaymentMethod, PrivateOrder, RecordCategory, Version, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
+import { CheckoutMethodType, Customer, Gender, OrderData, PaymentConfiguration, PaymentMethod, PrivateOrder, RecordCategory, Version, WebshopOrderMode, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
