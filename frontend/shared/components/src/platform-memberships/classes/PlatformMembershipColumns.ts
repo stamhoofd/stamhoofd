@@ -58,6 +58,16 @@ export function useGetPlatformMembershipColumns() {
             enabled: false,
             allowSorting: false,
         }),
+        new Column<ObjectType, Date | null>({
+            id: 'member.birthDay',
+            name: $t(`%17w`),
+            getValue: m => m.member.birthDay,
+            format: date => date ? Formatter.dateNumber(date, true) : '',
+            minimumWidth: 50,
+            recommendedWidth: 170,
+            enabled: false,
+            allowSorting: false,
+        }),
         new Column<ObjectType, string>({
             id: 'organization.name',
             name: $t('%1PI'),
