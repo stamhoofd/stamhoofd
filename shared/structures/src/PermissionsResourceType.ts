@@ -42,6 +42,19 @@ export function isPeriodScopedResourceType(type: PermissionsResourceType): boole
 }
 
 /**
+ * Wildcard keys whose grants also apply to the resource with the given id (the id itself excluded).
+ */
+export function getWildcardResourceKeys(type: PermissionsResourceType, id: string): PermissionsResourceKey[] {
+    if (id === PermissionsResourceKey.All) {
+        return [];
+    }
+    if (id === PermissionsResourceKey.CurrentPeriod || !isPeriodScopedResourceType(type)) {
+        return [PermissionsResourceKey.All];
+    }
+    return [PermissionsResourceKey.All, PermissionsResourceKey.CurrentPeriod];
+}
+
+/**
  * old key '' (meaning all resources) is replaced with:
  *  - '~currentPeriod' for period scoped resource types and
  *  - '~all' for non-period scoped resource types.
