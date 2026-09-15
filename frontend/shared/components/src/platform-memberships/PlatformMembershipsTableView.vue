@@ -46,8 +46,8 @@ const props = withDefaults(
     },
 );
 
-const { getWebshopUIFilterBuilders } = useGetPlatformMembershipsUIFilterBuilders();
-const filterBuilders = computed(() => getWebshopUIFilterBuilders());
+const { getPlatformMembershipsUIFilterBuilders } = useGetPlatformMembershipsUIFilterBuilders();
+const filterBuilders = computed(() => getPlatformMembershipsUIFilterBuilders());
 
 const title = props.customTitle ?? $t('%1Nt');
 
