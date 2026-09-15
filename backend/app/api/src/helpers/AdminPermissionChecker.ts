@@ -1899,8 +1899,9 @@ export class AdminPermissionChecker {
 
         if (data.details.securityCode !== undefined || data.details.trackingYear !== undefined) {
             const hasFullAccess = await this.canAccessMember(member, PermissionLevel.Full);
+            const canEditEmailAdresses = await this.canEditMemberEmailAddresses(member);
 
-            if (!hasFullAccess) {
+            if (!hasFullAccess || !canEditEmailAdresses) {
                 if (data.details.securityCode !== undefined) {
                     // can only be set to null, and only if can access member with full access
                     if (data.details.securityCode !== null) {

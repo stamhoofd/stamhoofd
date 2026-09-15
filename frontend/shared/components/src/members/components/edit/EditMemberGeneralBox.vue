@@ -54,8 +54,8 @@
                         <button v-tooltip="$t('%fI')" class="button icon add small gray" type="button" @click="addEmail" />
                     </template>
                 </EmailInput>
-                <EmailInput v-for="n in alternativeEmails.length" :key="n" :model-value="getEmail(n - 1)" :required="true" :title="$t(`%fR`) + ' ' + (alternativeEmails.length > 1 ? n : '') " :placeholder="$t(`%fP`)" :validator="validator" @update:model-value="setEmail(n - 1, $event ?? '')">
-                    <template #right>
+                <EmailInput v-for="n in alternativeEmails.length" :key="n" :model-value="getEmail(n - 1)" :required="true" :title="$t(`%fR`) + ' ' + (alternativeEmails.length > 1 ? n : '') " :placeholder="$t(`%fP`)" :validator="validator" :disabled="!canEditEmails" @update:model-value="setEmail(n - 1, $event ?? '')">
+                    <template v-if="canEditEmails" #right>
                         <button class="button icon trash small gray" type="button" @click="deleteEmail(n - 1)" />
                     </template>
                 </EmailInput>
@@ -174,7 +174,7 @@ import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import CheckboxListItem from '#inputs/CheckboxListItem.vue';
 import STList from '#layout/STList.vue';
 import { useOrganization } from '#hooks/useOrganization.ts';
-import { useUser } from '#hooks/useUser.ts';
+import { useCanEditEmails } from '#members/composables/useCanEditEmails.ts';
 
 defineOptions({
     inheritAttrs: false,
@@ -199,26 +199,7 @@ const auth = useAuth();
 const isFullAdmin = auth.hasFullAccess();
 const showLanguage = useShowMemberLanguage(computed(() => props.member));
 const availableLanguages = I18nController.shared.availableLanguages;
-
-const user = useUser();
-const canEditEmails = computed(() => {
-    const isUserMember = user.value?.memberId === props.member.id;
-    const responsibilities = props.member.getResponsibilities();
-
-    const responsibilitiesFullAdmin = responsibilities.every((r) => {
-        if (r.organizationId === null) {
-            return auth.hasPlatformFullAccess();
-        }
-        return auth.hasFullAccess();
-    });
-
-    return isUserMember
-        || responsibilities.length === 0
-        || (responsibilities.length > 0
-            && responsibilitiesFullAdmin
-        )
-    ;
-});
+const canEditEmails = useCanEditEmails(props.member);
 
 const language = computed({
     get: () => props.member.patchedMember.details.language,

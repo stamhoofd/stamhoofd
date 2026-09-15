@@ -28,13 +28,13 @@
 
                 <PhoneInput v-model="phone" :title="$t('%2k')" :validator="errors.validator" :placeholder="$t('%2j')" :required="app === 'registration'" />
 
-                <EmailInput v-model="email" :required="app === 'registration'" :title="$t(`%1FK`) " :validator="errors.validator" :placeholder="$t(`%fc`)">
-                    <template #right>
+                <EmailInput v-model="email" :required="app === 'registration'" :title="$t(`%1FK`) " :validator="errors.validator" :placeholder="$t(`%fc`)" :disabled="!canEditEmails">
+                    <template v-if="canEditEmails" #right>
                         <button v-tooltip="$t('%fI')" class="button icon add gray" type="button" @click="addEmail" />
                     </template>
                 </EmailInput>
-                <EmailInput v-for="n in alternativeEmails.length" :key="n" :model-value="getEmail(n - 1)" :required="true" :title="$t(`%fR`) + ' ' + (alternativeEmails.length > 1 ? n : '') " :validator="errors.validator" :placeholder="$t(`%fc`)" @update:model-value="setEmail(n - 1, $event ?? '')">
-                    <template #right>
+                <EmailInput v-for="n in alternativeEmails.length" :key="n" :model-value="getEmail(n - 1)" :required="true" :title="$t(`%fR`) + ' ' + (alternativeEmails.length > 1 ? n : '') " :validator="errors.validator" :placeholder="$t(`%fc`)" :disabled="!canEditEmails" @update:model-value="setEmail(n - 1, $event ?? '')">
+                    <template v-if="canEditEmails" #right>
                         <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" />
                     </template>
                 </EmailInput>
@@ -111,10 +111,11 @@ import NRNInput from '../../../inputs/NRNInput.vue';
 import PhoneInput from '../../../inputs/PhoneInput.vue';
 import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
 import { CenteredMessage } from '../../../overlays/CenteredMessage';
-import type { NavigationActions} from '../../../types/NavigationActions';
+import type { NavigationActions } from '../../../types/NavigationActions';
 import { useNavigationActions } from '../../../types/NavigationActions';
 import { useIsAllOptional, useIsPropertyEnabled, useIsPropertyRequired } from '#members/hooks/useIsPropertyRequired.ts';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
+import { useCanEditEmails } from '#members/composables/useCanEditEmails.ts';
 
 const props = withDefaults(defineProps<{
     member?: PlatformMember | null;
@@ -138,6 +139,8 @@ const app = useAppContext();
 const parentTypes = ParentTypeHelper.getPublicTypes();
 const title = computed(() => !props.isNew ? `${patched.value.firstName || $t(`%14u`)} bewerken` : $t(`%fV`));
 const navigate = useNavigationActions();
+
+const canEditEmails = useCanEditEmails(props.member, props.parent);
 
 const relatedMembers = computed(() => {
     const base = family.getMembersForParent(props.parent);
@@ -320,31 +323,26 @@ async function save() {
                 $t(`%zT`),
                 false)) {
                 props.member.addParent(patched.value);
-            }
-            else {
+            } else {
                 props.member.addParent(patched.value);
                 for (const member of minorMembers) {
                     member.addParent(patched.value);
                 }
             }
-        }
-        else {
+        } else {
             if (props.member) {
                 props.member.patchParent(patch.value);
-            }
-            else if (props.family) {
+            } else if (props.family) {
                 props.family.patchParent(patch.value);
             }
         }
 
         if (props.saveHandler) {
             await props.saveHandler(navigate);
-        }
-        else {
+        } else {
             await pop({ force: true });
         }
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;
