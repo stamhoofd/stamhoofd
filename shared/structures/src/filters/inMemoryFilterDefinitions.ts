@@ -19,7 +19,39 @@ export const recordAnswerItemFilterCompilers: InMemoryFilterDefinitions = {
 };
 
 export const recordAnswersFilterCompilers: InMemoryFilterDefinitions = {
+    ...baseInMemoryFilterCompilers,
     recordAnswers: createInMemoryFilterCompiler('recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers)),
+};
+
+export const optionItemFilterCompilers: InMemoryFilterDefinitions = {
+    ...baseInMemoryFilterCompilers,
+    option: createInMemoryFilterCompiler('option', {
+        ...baseInMemoryFilterCompilers,
+        id: createInMemoryFilterCompiler('id'),
+    }),
+    optionMenu: createInMemoryFilterCompiler('optionMenu', {
+        ...baseInMemoryFilterCompilers,
+        id: createInMemoryFilterCompiler('id'),
+    }),
+};
+
+export const optionsFilterCompilers: InMemoryFilterDefinitions = {
+    options: createInMemoryFilterCompiler('options', optionItemFilterCompilers),
+};
+
+export const fieldAnswerItemFilterCompilers: InMemoryFilterDefinitions = {
+    ...baseInMemoryFilterCompilers,
+    field: createInMemoryFilterCompiler('field', {
+        ...baseInMemoryFilterCompilers,
+        id: createInMemoryFilterCompiler('id'),
+    }),
+    answer: createInMemoryFilterCompiler('answer'),
+};
+
+export const fieldAnswersFilterCompilers: InMemoryFilterDefinitions = {
+    ...baseInMemoryFilterCompilers,
+    // The field-answer UI wrapper applies its conditions to a single answer implicitly.
+    fieldAnswers: (filter, compilers, key) => createInMemoryFilterCompiler('fieldAnswers', fieldAnswerItemFilterCompilers)({ $elemMatch: filter }, compilers, key),
 };
 
 export const registrationInMemoryFilterCompilers: InMemoryFilterDefinitions = {
@@ -74,6 +106,8 @@ export const checkoutInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
     items: createInMemoryFilterCompiler('cart.items', {
         ...baseInMemoryFilterCompilers,
+        ...optionsFilterCompilers,
+        ...fieldAnswersFilterCompilers,
         amount: createInMemoryFilterCompiler('amount'),
         product: createInMemoryFilterCompiler('product', {
             ...baseInMemoryFilterCompilers,
@@ -168,6 +202,8 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
             ...baseInMemoryFilterCompilers,
             id: createInMemoryFilterCompiler('id'),
         }),
+        ...optionsFilterCompilers,
+        ...fieldAnswersFilterCompilers,
     }),
     recordAnswers: createInMemoryFilterCompiler('data.recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers)),
     amountToPay: createInMemoryFilterCompiler('amountToPay'),
