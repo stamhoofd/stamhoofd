@@ -2192,7 +2192,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 query = response.body.next;
                 pages += 1;
 
-                if (pages > 10) {
+                if (pages > 101) {
                     throw new Error('Pagination did not terminate');
                 }
             }
@@ -2583,18 +2583,19 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 [10, SortItemDirection.ASC],
                 [10, SortItemDirection.DESC],
             ])('Sorting on same memberCachedBalance.amountOpen (%s) sorts on id instead: %s', async (cachedBalance, sortDirection) => {
-                const { host, token, members } = await setupMembers([cachedBalance, cachedBalance, cachedBalance]);
+                const cachedBalanceArray = new Array(100).fill(cachedBalance);
+                const { host, token, members } = await setupMembers(cachedBalanceArray);
 
                 const ids = await fetchAllPages({
                     host,
                     token,
                     sort: [{ key: 'memberCachedBalance.amountOpen', order: sortDirection }],
-                    limit: 3,
+                    limit: 1,
                 });
 
                 const sortedIds = members.map(m => m.id).sort();
 
-                expect(ids).toHaveLength(3);
+                expect(ids).toHaveLength(100);
                 expect(ids).toEqual(sortDirection === SortItemDirection.ASC
                     ? sortedIds
                     : sortedIds.reverse());
