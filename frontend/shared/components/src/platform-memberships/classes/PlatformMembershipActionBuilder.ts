@@ -3,9 +3,10 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { PlatformMembership } from '@stamhoofd/structures';
+import type { Organization, PlatformMembership } from '@stamhoofd/structures';
 import { ExcelExportType } from '@stamhoofd/structures';
 import { useContext } from '#hooks/useContext.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
 import type { TableAction, TableActionSelection } from '#tables/classes/TableAction.ts';
 import { AsyncTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
@@ -14,11 +15,13 @@ export function usePlatformMembershipActions() {
     const present = usePresent();
     const context = useContext();
     const owner = useRequestOwner();
+    const organization = useOrganization();
 
     return new PlatformMembershipActionBuilder({
         present,
         context: context.value,
         owner,
+        organization: organization.value,
     });
 }
 
@@ -26,15 +29,18 @@ export class PlatformMembershipActionBuilder {
     present: ReturnType<typeof usePresent>;
     context: SessionContext;
     owner: any;
+    organization: Organization | null;
 
     constructor(settings: {
         present: ReturnType<typeof usePresent>;
         context: SessionContext;
         owner: any;
+        organization?: Organization | null;
     }) {
         this.present = settings.present;
         this.context = settings.context;
         this.owner = settings.owner;
+        this.organization = settings.organization ?? null;
     }
 
     getActions(): TableAction<PlatformMembership>[] {
@@ -78,7 +84,7 @@ export class PlatformMembershipActionBuilder {
                     root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
                         type: ExcelExportType.PlatformMemberships,
                         filter: selection.filter,
-                        workbook: getSelectableWorkbook(),
+                        workbook: getSelectableWorkbook(this.organization),
                         configurationId: 'platform-memberships',
                         title: this.getExcelTitle(selection),
                     }),
