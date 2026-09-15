@@ -456,7 +456,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             this.customer.email = user.email;
         }
 
-        const settings = webshop.meta.resolvedCustomerSettings;
+        const settings = webshop.meta.customerSettings;
 
         this.customer.validate(
             // A delivery address is always stored on the customer, so never clear it in that case

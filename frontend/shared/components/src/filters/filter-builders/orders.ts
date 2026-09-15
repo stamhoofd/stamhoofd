@@ -1,5 +1,6 @@
 import type { PrivateWebshop, WebshopPreview } from '@stamhoofd/structures';
 import { CheckoutMethodType, CheckoutMethodTypeHelper, FilterWrapperMarker, OrderStatus, OrderStatusHelper, Webshop } from '@stamhoofd/structures';
+import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 import { Formatter } from '@stamhoofd/utility';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
@@ -42,7 +43,7 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
         }),
     ];
 
-    if (preview.meta.phoneEnabled) {
+    if (preview.meta.customerSettings.phone !== CustomerFieldRequirement.Disabled) {
         builders.push(new StringFilterBuilder({
             name: $t(`%wD`),
             key: 'phone',
