@@ -51,5 +51,9 @@ export function usePlatformMemberhipsObjectFetcher(overrides?: Partial<ObjectFet
         },
 
         ...overrides,
+
+        get requiredFilter() {
+            return overrides?.requiredFilter ?? null;
+        },
     };
 }

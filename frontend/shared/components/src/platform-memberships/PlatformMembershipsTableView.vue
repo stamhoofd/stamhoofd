@@ -20,6 +20,7 @@
 
 <script lang="ts" setup>
 import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import type { TableAction } from '#tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
@@ -36,28 +37,34 @@ type ObjectType = PlatformMembership;
 
 const props = withDefaults(
     defineProps<{
-        periodId?: string | null;
+        period?: {
+            id: string;
+            name: string;
+        } | null;
         customFilter?: StamhoofdFilter | null;
         customTitle?: string | null;
     }>(), {
-        periodId: null,
+        period: null,
         customFilter: null,
         customTitle: null,
     },
 );
 
-const { getPlatformMembershipsUIFilterBuilders } = useGetPlatformMembershipsUIFilterBuilders();
+const organization = useOrganization();
+
+const { getPlatformMembershipsUIFilterBuilders } = useGetPlatformMembershipsUIFilterBuilders(organization.value);
 const filterBuilders = computed(() => getPlatformMembershipsUIFilterBuilders());
 
 const title = props.customTitle ?? $t('%1Nt');
 
 const platform = usePlatform();
+const period = computed(() => props.period ?? platform.value.period);
 
 const defaultFilter: StamhoofdFilter = {
     periodId: {
         $: '$rel',
-        value: platform.value.period.id,
-        name: platform.value.period.name,
+        value: period.value.id,
+        name: period.value.name,
     },
 };
 
@@ -70,11 +77,21 @@ useGlobalEventListener('members-registered', async () => {
 
 const configurationId = 'platform-memberships';
 
-const objectFetcher = usePlatformMemberhipsObjectFetcher();
+const objectFetcher = usePlatformMemberhipsObjectFetcher({
+    requiredFilter: organization.value
+        ? {
+                organization: {
+                    $elemMatch: {
+                        id: organization.value.id,
+                    },
+                },
+            }
+        : null,
+});
 
 const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
 
-const allColumns = useGetPlatformMembershipColumns();
+const allColumns = useGetPlatformMembershipColumns(organization.value);
 
 const defaultSortColumn = allColumns.find(c => c.id === 'createdAt') ?? null;
 const defaultSortDirection = defaultSortColumn ? SortItemDirection.DESC : null;
