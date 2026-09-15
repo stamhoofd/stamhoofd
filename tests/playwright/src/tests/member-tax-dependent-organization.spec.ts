@@ -427,7 +427,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         await expect(views).toHaveCount(before, { timeout: 15_000 });
     }
 
-    test('the tax dependent setting sits directly under the national register number', async ({ page }) => {
+    test('the tax certificate setting sits last in the list of properties', async ({ page }) => {
         test.setTimeout(150_000);
         const scenario = await seedScenario({ taxDependent: false, nationalRegisterNumbers: { mother: null, father: null } });
         await loginAs({ page, user: scenario.user });
@@ -439,7 +439,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
 
         const rows = settings.locator('[data-testid^="records-property-"]');
         const order = await rows.evaluateAll(elements => elements.map(e => e.getAttribute('data-testid')));
-        expect(order.indexOf('records-property-taxDependent')).toBe(order.indexOf('records-property-nationalRegisterNumber') + 1);
+        expect(order[order.length - 1]).toBe('records-property-taxDependent');
     });
 
     test('the tax certificate setting stands on its own, without the national register number', async ({ page }) => {

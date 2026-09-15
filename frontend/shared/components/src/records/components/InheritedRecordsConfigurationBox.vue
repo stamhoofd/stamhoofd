@@ -19,53 +19,39 @@
             </p>
         </STListItem>
 
-        <template v-for="property of properties" :key="property.value.title">
-            <STListItem element-name="label" :selectable="!property.value.locked" :data-testid="'records-property-' + property.value.name">
-                <template #left>
-                    <Checkbox v-model="property.value.enabled" v-tooltip="property.value.locked ? $t('%jE') : ''" :disabled="property.value.locked" />
+        <STListItem v-for="property of properties" :key="property.value.title" element-name="label" :selectable="!property.value.locked" :data-testid="'records-property-' + property.value.name">
+            <template #left>
+                <Checkbox v-model="property.value.enabled" v-tooltip="property.value.locked ? $t('%jE') : ''" :disabled="property.value.locked" />
+            </template>
+
+            <p v-if="property.value.configuration" class="style-title-prefix-list">
+                {{ propertyFilterToString(property.value.configuration, filterBuilder) }}
+
+                <template v-if="property.value.parentConfiguration && propertyFilterToString(property.value.parentConfiguration, filterBuilder) !== propertyFilterToString(property.value.configuration, filterBuilder)">
+                    (aangepast vanaf standaardinstelling)
                 </template>
+            </p>
 
-                <p v-if="property.value.configuration" class="style-title-prefix-list">
-                    {{ propertyFilterToString(property.value.configuration, filterBuilder) }}
+            <p class="style-title-list">
+                {{ property.value.title }}
 
-                    <template v-if="property.value.parentConfiguration && propertyFilterToString(property.value.parentConfiguration, filterBuilder) !== propertyFilterToString(property.value.configuration, filterBuilder)">
-                        (aangepast vanaf standaardinstelling)
-                    </template>
-                </p>
+                <span
+                    v-if="property.value.configuration && property.value.parentConfiguration && propertyFilterToString(property.value.parentConfiguration, filterBuilder) !== propertyFilterToString(property.value.configuration, filterBuilder)" v-tooltip="$t('%1It')"
+                    class="icon dot primary small"
+                />
+            </p>
+            <p v-if="property.value.description" class="style-description-small">
+                {{ property.value.description }}
+            </p>
 
-                <p class="style-title-list">
-                    {{ property.value.title }}
+            <p v-if="!groupLevel && property.value.configuration && property.value.configuration.isAlwaysEnabledAndRequired && property.value.options?.preventAlways" class="error-box">
+                {{ property.value.options?.warning ?? $t('%jG') }}
+            </p>
 
-                    <span
-                        v-if="property.value.configuration && property.value.parentConfiguration && propertyFilterToString(property.value.parentConfiguration, filterBuilder) !== propertyFilterToString(property.value.configuration, filterBuilder)" v-tooltip="$t('%1It')"
-                        class="icon dot primary small"
-                    />
-                </p>
-                <p v-if="property.value.description" class="style-description-small">
-                    {{ property.value.description }}
-                </p>
-
-                <p v-if="!groupLevel && property.value.configuration && property.value.configuration.isAlwaysEnabledAndRequired && property.value.options?.preventAlways" class="error-box">
-                    {{ property.value.options?.warning ?? $t('%jG') }}
-                </p>
-
-                <template v-if="property.value.enabled" #right>
-                    <button class="button gray icon settings" type="button" @click.stop="property.value.edit" />
-                </template>
-            </STListItem>
-
-            <STListItem v-if="property.value.name === 'nationalRegisterNumber'" element-name="label" :selectable="!taxDependent.locked.value" data-testid="records-property-taxDependent">
-                <template #left>
-                    <Checkbox v-model="taxDependent.enabled.value" v-tooltip="taxDependent.locked.value ? $t('%jE') : ''" :disabled="taxDependent.locked.value" />
-                </template>
-                <p class="style-title-list">
-                    {{ $t('Gegevens voor fiscale attesten kinderopvang verzamelen') }}
-                </p>
-                <p class="style-description-small">
-                    {{ $t('Vraag het rijksregisternummer van het lid en van de ouder die het lid fiscaal ten laste heeft, zodra het lid in aanmerking komt voor een fiscaal attest. Dat bepaalt op wiens naam het attest komt.') }}
-                </p>
-            </STListItem>
-        </template>
+            <template v-if="property.value.enabled && property.value.edit" #right>
+                <button class="button gray icon settings" type="button" @click.stop="property.value.edit?.()" />
+            </template>
+        </STListItem>
 
         <STListItem v-for="category of inheritedRecordsConfiguration?.recordCategories ?? []" :key="category.id" element-name="label" :selectable="!getRefForInheritedCategory(category.id).value.locked" class="right-stack">
             <template #left>
@@ -163,11 +149,7 @@ family.members.push(settings.exampleValue);
 const properties = [
     buildPropertyRefs('gender', $t(`%1d`)),
     buildPropertyRefs('birthDay', $t(`%17w`)),
-    buildPropertyRefs(
-        'nationalRegisterNumber', $t(`%wK`), {
-            description: $t('Rijksregisternummer van het lid, van elk lid dat je aanduidt. Voor fiscale attesten kinderopvang hoef je dit niet aan te zetten: die vraag staat hieronder en werkt op zichzelf.'),
-        },
-    ),
+    buildPropertyRefs('nationalRegisterNumber', $t(`%wK`) + ' ' + $t(`%11R`)),
     buildPropertyRefs('parents', $t(`%11P`), {
         description: $t(`%11Q`),
     }),
@@ -193,6 +175,11 @@ const properties = [
         warning: $t(`%11c`),
         preventAlways: true,
     }),
+    buildBooleanPropertyRefs(
+        'taxDependent',
+        $t('Gegevens voor fiscale attesten kinderopvang verzamelen'),
+        $t('Een bijkomende instelling naast \'Rijksregisternummer\' die je los daarvan kan aanzetten. Vraagt het rijksregisternummer van het lid én van de ouder die het lid fiscaal ten laste heeft, maar enkel bij leden die in aanmerking komen voor een fiscaal attest kinderopvang. Die ouder bepaalt op wiens naam het attest komt.'),
+    ),
 ];
 
 const dataPermissions = {
@@ -229,18 +216,6 @@ const financialSupport = {
     }),
 };
 
-const taxDependent = {
-    locked: computed(() => !!props.inheritedRecordsConfiguration?.taxDependent && !patched.value.taxDependent),
-    enabled: computed({
-        get: () => !!props.inheritedRecordsConfiguration?.taxDependent || patched.value.taxDependent,
-        set: (value: boolean) => {
-            addPatch({
-                taxDependent: value,
-            });
-        },
-    }),
-};
-
 // Methods
 function buildPropertyRefs(property: MemberPropertyWithFilter, title: string, options?: { warning?: string; description?: string; preventAlways?: boolean }) {
     const locked = computed(() => !!props.inheritedRecordsConfiguration?.[property]);
@@ -265,8 +240,31 @@ function buildPropertyRefs(property: MemberPropertyWithFilter, title: string, op
         enabled,
         locked,
         configuration,
-        parentConfiguration: computed(() => props.inheritedRecordsConfiguration?.[property]),
+        parentConfiguration: computed(() => props.inheritedRecordsConfiguration?.[property] ?? null),
         edit: () => editPropertyFilterConfiguration(property, title, options),
+    });
+}
+
+/**
+ * A plain on/off property, without the filter that decides for which members it is asked.
+ */
+function buildBooleanPropertyRefs(property: 'taxDependent', title: string, description: string) {
+    const locked = computed(() => !!props.inheritedRecordsConfiguration?.[property] && !patched.value[property]);
+    const enabled = computed({
+        get: () => !!props.inheritedRecordsConfiguration?.[property] || patched.value[property],
+        set: (value: boolean) => addPatch({ [property]: value }),
+    });
+
+    return ref({
+        name: property,
+        title,
+        description,
+        options: undefined,
+        enabled,
+        locked,
+        configuration: computed(() => null),
+        parentConfiguration: computed(() => null),
+        edit: null,
     });
 }
 
