@@ -5,13 +5,13 @@
         </p>
     </div>
     <div v-else class="container">
-        <h1 v-if="level === 1">
+        <h1 v-if="level === 1 && !hideTitle">
             {{ category.name }}
             <span v-if="titleSuffix" class="title-suffix">
                 {{ titleSuffix }}
             </span>
         </h1>
-        <h2 v-else-if="hasRoot" class="style-with-button">
+        <h2 v-else-if="hasRoot && !hideTitle" class="style-with-button">
             <div>
                 {{ category.name }}
                 <span v-if="titleSuffix" class="title-suffix">
@@ -31,7 +31,7 @@
 
         <RecordAnswerInput v-for="record of filteredWriteableRecords" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
         <div v-for="(childCategory, index) of childCategories" :key="childCategory.id" class="container">
-            <hr v-if="index > 0 || hasRoot"><h2>{{ level === 1 ? childCategory.name : (category.name + ': ' + childCategory.name) }}</h2>
+            <hr v-if="index > 0 || hasRoot"><h2>{{ level === 1 || hideTitle ? childCategory.name : (category.name + ': ' + childCategory.name) }}</h2>
             <p v-if="childCategory.description.length" class="style-description pre-wrap style-wysiwyg" v-html="linkText(childCategory.description.toString())" />
 
             <RecordAnswerInput v-for="record of childCategory.filterRecords(props.value, filterOptions)" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
@@ -86,7 +86,13 @@ const props = withDefaults(
          * An admin can also edit read only fields
          */
         isAdmin?: boolean | null;
+        /**
+         * Unboxed category: no title of its own, the records blend into the surrounding form.
+         * Child categories keep their own subtitle.
+         */
+        hideTitle?: boolean;
     }>(), {
+        hideTitle: false,
         level: 1,
         allOptional: false,
         titleSuffix: '',
