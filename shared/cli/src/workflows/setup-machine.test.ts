@@ -8,6 +8,7 @@ import * as docker from '../services/docker.js';
 import { checkSetup, getRecommendedSetupFixes, isSetupReady, printSetupReport, runSetup, setupCaddy, setupDns, SetupAutomaticFixKey } from './setup-machine.js';
 import type { CheckResult, SetupReport } from './setup-machine.js';
 import { checkNodeVersion, setupNodeVersion } from './setup-node.js';
+import { checkPackageManager, setupPackageManager } from './setup-package-manager.js';
 
 const dnsResolver = vi.hoisted(() => ({
     resolve4: vi.fn(),
@@ -45,6 +46,11 @@ vi.mock('./setup-node.js', () => ({
     setupNodeVersion: vi.fn(),
 }));
 
+vi.mock('./setup-package-manager.js', () => ({
+    checkPackageManager: vi.fn(),
+    setupPackageManager: vi.fn(),
+}));
+
 describe('setup machine workflow', () => {
     const platform = process.platform;
 
@@ -57,6 +63,12 @@ describe('setup machine workflow', () => {
             current: 'v22.22.3',
             expected: 'v22.22.3',
             details: 'v22.22.3 matches .nvmrc',
+        });
+        vi.mocked(checkPackageManager).mockResolvedValue({
+            ok: true,
+            current: '12.4.2',
+            expected: '12.4.2',
+            details: 'pnpm 12.4.2 matches package.json',
         });
         vi.mocked(docker.containerIsRunning).mockResolvedValue(false);
         vi.mocked(corednsService.status).mockResolvedValue({ name: 'CoreDNS', running: true, detail: '127.0.0.1:53' });
@@ -104,6 +116,47 @@ describe('setup machine workflow', () => {
         expect(getRecommendedSetupFixes(report)).toEqual([
             { key: SetupAutomaticFixKey.Node, label: 'Install Node.js v24.1.0' },
         ]);
+    });
+
+    it('recommends pnpm repair when Node.js is ready and pnpm is missing', () => {
+        const report = setupReport({
+            pnpm: missingAutomatic(SetupAutomaticFixKey.Pnpm, 'Install pnpm 12.4.2 with Corepack'),
+        });
+
+        expect(getRecommendedSetupFixes(report)).toEqual([
+            { key: SetupAutomaticFixKey.Pnpm, label: 'Install pnpm 12.4.2 with Corepack' },
+        ]);
+        expect(isSetupReady(report)).toBe(false);
+    });
+
+    it('continues prioritizing Node.js repair over pnpm', () => {
+        const report = setupReport({
+            node: missingAutomatic(SetupAutomaticFixKey.Node, 'Install Node.js v24.1.0'),
+            pnpm: missingAutomatic(SetupAutomaticFixKey.Pnpm, 'Install pnpm 12.4.2 with Corepack'),
+        });
+
+        expect(getRecommendedSetupFixes(report)).toEqual([
+            { key: SetupAutomaticFixKey.Node, label: 'Install Node.js v24.1.0' },
+        ]);
+    });
+
+    it('repairs pnpm and continues with later setup fixes', async () => {
+        vi.mocked(checkPackageManager).mockResolvedValue({
+            ok: false,
+            current: undefined,
+            expected: '12.4.2',
+            details: 'pnpm not found; expected 12.4.2',
+        });
+        vi.mocked(confirm).mockResolvedValue(true);
+        setPlatform('linux');
+        mockSetupCommands({
+            dns: 'Global: 127.0.0.1:1053\n',
+            domains: 'Global: ~stamhoofd\n',
+        });
+
+        await runSetup({ rootDir: '/repo', verbose: true } as any);
+
+        expect(setupPackageManager).toHaveBeenCalledWith('/repo', { verbose: true });
     });
 
     it('does not recommend automatic fixes after a missing manual prerequisite', () => {
@@ -381,6 +434,7 @@ describe('setup machine workflow', () => {
 
         expect(messages.join('\n')).toContain('Checking Stamhoofd local development setup');
         expect(messages.join('\n')).toContain('Podman / Docker');
+        expect(messages.join('\n')).toContain('pnpm');
         expect(messages.join('\n')).toContain('ready');
         expect(messages.join('\n')).toContain('127.0.0.1:4080, 127.0.0.1:4443, admin 127.0.0.1:2021');
     });
@@ -390,6 +444,7 @@ describe('setup machine workflow', () => {
 function setupReport(overrides: Partial<SetupReport>): SetupReport {
     return {
         node: ok(),
+        pnpm: ok(),
         docker: ok(),
         privilegedPorts: ok(),
         caddy: ok(),

@@ -6,12 +6,14 @@ import { getProjectPath } from '../../context/project-path.js';
 import { confirm } from '../../runtime/ux.js';
 import { runSetup, setupCert, setupDns } from '../../workflows/setup-machine.js';
 import { checkNodeVersion, printNodeVersionStatus, setupNodeVersion } from '../../workflows/setup-node.js';
+import { setupPackageManager } from '../../workflows/setup-package-manager.js';
 import { setupShellShortcut } from '../../workflows/setup-shell.js';
 
 export enum SetupAction {
     Cert = 'cert',
     Dns = 'dns',
     Node = 'node',
+    Pnpm = 'pnpm',
     Shell = 'shell',
 }
 
@@ -23,6 +25,7 @@ export default class Setup extends BaseCommand {
     static examples = [
         'stam setup',
         'stam setup node',
+        'stam setup pnpm',
         'stam setup dns --dry-run',
         'stam setup cert --yes --verbose',
         'stam setup shell',
@@ -44,6 +47,11 @@ export default class Setup extends BaseCommand {
 
         if (args.action === SetupAction.Node) {
             await setupNodeVersion(rootDir, { verbose: flags.verbose, dryRun: flags['dry-run'] });
+            return;
+        }
+
+        if (args.action === SetupAction.Pnpm) {
+            await setupPackageManager(rootDir, { verbose: flags.verbose, dryRun: flags['dry-run'] });
             return;
         }
 
