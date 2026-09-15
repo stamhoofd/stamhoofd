@@ -1,5 +1,5 @@
 import { Migration } from '@simonbackx/simple-database';
-import { Organization, Platform } from '@stamhoofd/models';
+import { Group, Organization, Platform } from '@stamhoofd/models';
 import { SeedTools } from '../helpers/SeedTools.js';
 
 export default new Migration(async () => {
@@ -35,6 +35,22 @@ export default new Migration(async () => {
                     skipMarkSaved: true,
                     skipSendEvents: true,
                 });
+            } else {
+                // Groups inherit the setting from the organization, so they only matter while the
+                // organization itself asks nothing
+                const groups = await Group.select()
+                    .where('organizationId', organization.id)
+                    .where('deletedAt', null)
+                    .fetch();
+
+                for (const group of groups) {
+                    if (!group.settings.recordsConfiguration.nationalRegisterNumber) {
+                        continue;
+                    }
+
+                    group.settings.recordsConfiguration.taxDependent = true;
+                    await group.save();
+                }
             }
         },
     });
