@@ -179,6 +179,7 @@ export const boot = async (options: { killProcess: boolean }) => {
     await import('./email-recipient-loaders/receivable-balances.js');
     await import('./excel-loaders/registrations.js');
     await import('./email-recipient-loaders/documents.js');
+    await import('./email-recipient-loaders/discount-codes.js');
     await import ('./email-recipient-loaders/payments.js');
     await import ('./email-recipient-loaders/organizations.js');
 
