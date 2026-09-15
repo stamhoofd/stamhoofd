@@ -371,8 +371,8 @@ function formatDomainLabel(domain: string, env: string): string {
 }
 
 const backendCommand = 'yarn -s lerna run dev --scope @stamhoofd/backend --scope @stamhoofd/backend-renderer --scope @stamhoofd/backend-statistics-syncer --parallel --stream';
-const frontendCommand = 'yarn -s lerna run dev --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/auto --scope @stamhoofd/admin --scope @stamhoofd/verify-email --scope @stamhoofd/web-app --scope @stamhoofd/webshop --parallel --stream';
-const fullStackCommand = 'yarn -s lerna run dev --scope @stamhoofd/backend --scope @stamhoofd/backend-renderer --scope @stamhoofd/backend-statistics-syncer  --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/auto --scope @stamhoofd/admin --scope @stamhoofd/verify-email --scope @stamhoofd/web-app --scope @stamhoofd/webshop --parallel --stream';
+const frontendCommand = 'yarn -s lerna run dev --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/auto --scope @stamhoofd/admin-frontend --scope @stamhoofd/verify-email --scope @stamhoofd/web-app --scope @stamhoofd/webshop --parallel --stream';
+const fullStackCommand = 'yarn -s lerna run dev --scope @stamhoofd/backend --scope @stamhoofd/backend-renderer --scope @stamhoofd/backend-statistics-syncer  --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/auto --scope @stamhoofd/admin-frontend --scope @stamhoofd/verify-email --scope @stamhoofd/web-app --scope @stamhoofd/webshop --parallel --stream';
 
 // The docs site is a standalone Nuxt app outside the Lerna workspaces, so it is
 // started directly through its own package rather than a lerna scope. Because it
