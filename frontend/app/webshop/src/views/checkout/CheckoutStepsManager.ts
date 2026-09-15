@@ -241,9 +241,9 @@ export class CheckoutStepsManager {
         await this.$webshopManager.reload();
 
         if (!this.$webshopManager.webshop.shouldEnableCart) {
-            navigate.dismiss({ force: true }).catch(console.error);
+            await navigate.dismiss({ force: true });
         } else {
-            navigate.navigationController!.popToRoot({ force: true }).catch(e => console.error(e));
+            await navigate.navigationController!.popToRoot({ force: true });
         }
         Toast.fromError(error).show();
     }
