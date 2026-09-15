@@ -8,7 +8,7 @@ import { devices, expect } from '@playwright/test';
 import { MollieMocker, PayconiqMocker, STPackageService, StripeMocker } from '@stamhoofd/backend/tests/helpers';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { User } from '@stamhoofd/models';
-import { Order, OrderFactory, Organization, OrganizationFactory, Payment, TicketFactory, Token, UserFactory } from '@stamhoofd/models';
+import { Order, OrderFactory, Organization, OrganizationFactory, Payment, TicketFactory, Token, UserFactory, Webshop } from '@stamhoofd/models';
 import {
     MollieOnboarding,
     MollieStatus,
@@ -1227,6 +1227,77 @@ function registerWebshopOrderTests() {
         await flow.expectTicketsDownloadable();
         await flow.expectTicketCount(2);
     });
+
+    test('An item that sells out during the checkout sends the visitor back to the cart', async ({ page }) => {
+        const organization = await createWebshopOrganization('SoldOutCartShop');
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Sold out cart shop ${WorkerData.id}`,
+            productCount: 2,
+            cartEnabled: true,
+            paymentMethods: [PaymentMethod.PointOfSale],
+        });
+
+        const flow = new WebshopOrderFlow(page, { cartEnabled: true });
+        await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
+        await flow.addProduct('Product 1');
+        await flow.goToCheckout();
+        await flow.fillCustomer();
+        await flow.selectPaymentMethod(PaymentLabel.PointOfSale);
+
+        // Someone else buys the last one while this visitor is on the payment step
+        await markProductSoldOut(webshop, 'Product 1');
+        await flow.confirmPayment();
+
+        await expect(page.getByTestId('toast-box')).toContainText('uitverkocht');
+        await expect(page.getByTestId('cart-checkout-button')).toBeVisible();
+        await expect(page.getByTestId('payment-step')).toHaveCount(0);
+        expect(await Order.select().where('webshopId', webshop.id).fetch()).toHaveLength(0);
+    });
+
+    test('An item that sells out during the checkout of a shop without a cart returns to the shop', async ({ page }) => {
+        const organization = await createWebshopOrganization('SoldOutShop');
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Sold out shop ${WorkerData.id}`,
+            productCount: 2,
+            cartEnabled: false,
+            paymentMethods: [PaymentMethod.PointOfSale],
+        });
+
+        const flow = new WebshopOrderFlow(page, { cartEnabled: false });
+        await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
+        await flow.addProduct('Product 1');
+        await flow.goToCheckout();
+        await flow.fillCustomer();
+        await flow.selectPaymentMethod(PaymentLabel.PointOfSale);
+
+        await markProductSoldOut(webshop, 'Product 1');
+        await flow.confirmPayment();
+
+        // No cart to return to: the checkout is dismissed and the shop itself is visible again
+        await expect(page.getByTestId('toast-box')).toContainText('uitverkocht');
+        await expect(page.getByTestId('payment-step')).toHaveCount(0);
+        await expect(page.getByTestId('product-box').first()).toBeVisible();
+        expect(await Order.select().where('webshopId', webshop.id).fetch()).toHaveLength(0);
+    });
+}
+
+/**
+ * Sell out a product server side, simulating another visitor taking the last one mid-checkout.
+ */
+async function markProductSoldOut(webshop: Webshop, productName: string) {
+    const model = await Webshop.getByID(webshop.id);
+    if (!model) {
+        throw new Error('Webshop not found');
+    }
+    const product = model.products.find(p => p.name === productName);
+    if (!product) {
+        throw new Error('Product ' + productName + ' not found');
+    }
+    product.stock = 0;
+    product.usedStock = 0;
+    await model.save();
 }
 
 test.describe('Webshop orders (organization mode) @webshop-orders', () => {
