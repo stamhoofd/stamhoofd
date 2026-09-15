@@ -917,16 +917,6 @@ export class MemberDetails extends AutoEncoder {
                             return;
                         }
 
-                        const previous = member[type][currentIndex];
-
-                        if (type === 'parents' && (previous as Parent).taxDependent !== (mergedObject as Parent).taxDependent) {
-                            const parent = (mergedObject as Parent).clone();
-                            parent.taxDependent = (previous as Parent).taxDependent;
-                            member.parents[currentIndex] = parent;
-
-                            return;
-                        }
-
                         member[type][currentIndex] = mergedObject.clone();
                     },
                     reviewDate: object.updatedAt ?? member.reviewTimes.getLastReview(type) ?? object.createdAt,
