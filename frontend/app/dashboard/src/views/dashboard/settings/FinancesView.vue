@@ -182,6 +182,21 @@
                                 </template>
                             </STListItem>
 
+                            <STListItem v-if="$isPlatform && item.organization.id === platform.membershipOrganizationId" :selectable="true" class="left-center" @click="$navigate(Routes.PlatformMemberships)">
+                                <template #left>
+                                    <img src="@stamhoofd/assets/images/illustrations/membership.svg">
+                                </template>
+                                <h2 class="style-title-list">
+                                    {{ $t('Aansluitingen') }}
+                                </h2>
+                                <p class="style-description">
+                                    {{ $t('Bekijk alle aansluitingen van jouw leden bij #koepel.') }}
+                                </p>
+                                <template #right>
+                                    <span class="icon arrow-right-small gray" />
+                                </template>
+                            </STListItem>
+
                             <STListItem v-if="!$isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.Packages)">
                                 <template #left>
                                     <img src="@stamhoofd/assets/images/illustrations/stock.svg">
@@ -271,6 +286,7 @@ enum Routes {
     PayableBalance = 'PayableBalance',
     ReceivableBalance = 'ReceivableBalance',
     Packages = 'pakketten',
+    PlatformMemberships = 'PlatformMemberships',
     SettlementsExport = 'SettlementsExport',
     SettlementsSync = 'SettlementsSync',
 }
@@ -334,6 +350,14 @@ defineRoute({
     url: 'facturen',
     component: async () => (await import('../invoices/InvoicesTableView.vue')).default,
 });
+
+if (isPlatform) {
+    defineRoute({
+        name: Routes.PlatformMemberships,
+        url: 'aansluitingen',
+        component: async () => (await import('@stamhoofd/components/platform-memberships/PlatformMembershipsTableView.vue')).default,
+    });
+}
 
 defineRoute({
     name: Routes.Export,
