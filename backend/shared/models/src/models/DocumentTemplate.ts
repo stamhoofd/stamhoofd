@@ -15,6 +15,27 @@ import { Member } from './Member.js';
 import { Registration } from './Registration.js';
 import { User } from './User.js';
 
+/**
+ * The family points at the parent whose name the certificate has to carry, so once any parent is
+ * marked we never fall back to a parent they did not choose - not even when that parent opted out
+ * of giving a national register number. Returns null when the family has not answered at all.
+ */
+export function getTaxDependentDebtor(parents: Parent[]): { debtor: Parent; missingData: boolean } | null {
+    const taxDependentParents = parents.filter(p => p.taxDependent === true);
+
+    if (taxDependentParents.length === 0) {
+        return null;
+    }
+
+    const withNumber = taxDependentParents.filter(p => p.nationalRegisterNumber && p.nationalRegisterNumber !== NationalRegisterNumberOptOut);
+
+    return {
+        // TODO: Generate multiple documents when both parents have the member tax dependent
+        debtor: withNumber[0] ?? taxDependentParents[0],
+        missingData: withNumber.length === 0,
+    };
+}
+
 export class DocumentTemplate extends QueryableModel {
     static table = 'document_templates';
 
@@ -278,17 +299,12 @@ export class DocumentTemplate extends QueryableModel {
         if (hasDebtor) {
             let debtor: Parent | undefined;
 
-            const taxDependentParents = registration.member.details.parents.filter(p => p.taxDependent === true && p.nationalRegisterNumber !== NationalRegisterNumberOptOut);
-            if (taxDependentParents.length > 0) {
-                if (taxDependentParents.filter(p => p.nationalRegisterNumber).length === 0) {
-                    missingData = true;
-                }
+            const taxDependentDebtor = getTaxDependentDebtor(registration.member.details.parents);
+            if (taxDependentDebtor) {
+                debtor = taxDependentDebtor.debtor;
 
-                if (taxDependentParents.length > 1) {
-                    // TODO: Generate multiple documents
-                    debtor = taxDependentParents.find(p => p.nationalRegisterNumber) ?? taxDependentParents[0];
-                } else {
-                    debtor = taxDependentParents[0];
+                if (taxDependentDebtor.missingData) {
+                    missingData = true;
                 }
             } else {
                 const parentsWithNRN = registration.member.details.parents.filter(p => p.nationalRegisterNumber !== NationalRegisterNumberOptOut && p.nationalRegisterNumber);
