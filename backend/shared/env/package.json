@@ -12,10 +12,10 @@
         "build": "tsc --build tsconfig.build.json"
     },
     "dependencies": {
+        "@stamhoofd/test-utils": "2.152.0",
         "chalk": "5.6.2"
     },
     "devDependencies": {
-        "@stamhoofd/test-utils": "2.152.0",
         "@stamhoofd/types": "2.152.0"
     },
     "peerDependencies": {

@@ -26,6 +26,7 @@
         "vue": "3.5.40"
     },
     "devDependencies": {
-        "eslint-plugin-stamhoofd": "*"
+        "eslint-plugin-stamhoofd": "*",
+        "vite": "8.3.0"
     }
 }
