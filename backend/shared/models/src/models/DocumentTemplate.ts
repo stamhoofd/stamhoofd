@@ -15,6 +15,27 @@ import { Member } from './Member.js';
 import { Registration } from './Registration.js';
 import { User } from './User.js';
 
+/**
+ * The family points at the parent whose name the certificate has to carry, so once any parent is
+ * marked we never fall back to a parent they did not choose - not even when that parent opted out
+ * of giving a national register number. Returns null when the family has not answered at all.
+ */
+export function getTaxDependentDebtor(parents: Parent[]): { debtor: Parent; missingData: boolean } | null {
+    const taxDependentParents = parents.filter(p => p.taxDependent === true);
+
+    if (taxDependentParents.length === 0) {
+        return null;
+    }
+
+    const withNumber = taxDependentParents.filter(p => p.nationalRegisterNumber && p.nationalRegisterNumber !== NationalRegisterNumberOptOut);
+
+    return {
+        // TODO: Generate multiple documents when both parents have the member tax dependent
+        debtor: withNumber[0] ?? taxDependentParents[0],
+        missingData: withNumber.length === 0,
+    };
+}
+
 export class DocumentTemplate extends QueryableModel {
     static table = 'document_templates';
 
@@ -276,24 +297,35 @@ export class DocumentTemplate extends QueryableModel {
         const hasDebtor = allRecords.find(s => s.id.startsWith('debtor.'));
 
         if (hasDebtor) {
-            const parentsWithNRN = registration.member.details.parents.filter(p => p.nationalRegisterNumber !== NationalRegisterNumberOptOut && p.nationalRegisterNumber);
-            let debtor: Parent | undefined = parentsWithNRN[0] ?? registration.member.details.parents[0];
-            if (parentsWithNRN.length > 1) {
-                for (const balanceItem of balanceItems) {
-                    if (balanceItem && balanceItem.userId && balanceItem.priceOpen === 0 && balanceItem.status === BalanceItemStatus.Due) {
-                        const user = await User.getByID(balanceItem.userId);
-                        if (user) {
-                            const parent = parentsWithNRN.find(p => p.hasEmail(user.email));
+            let debtor: Parent | undefined;
 
-                            if (parent) {
-                                debtor = parent;
-                                break;
-                            }
+            const taxDependentDebtor = getTaxDependentDebtor(registration.member.details.parents);
+            if (taxDependentDebtor) {
+                debtor = taxDependentDebtor.debtor;
 
-                            if (!debtor.nationalRegisterNumber) {
-                                const parent = registration.member.details.parents.find(p => p.hasEmail(user.email));
+                if (taxDependentDebtor.missingData) {
+                    missingData = true;
+                }
+            } else {
+                const parentsWithNRN = registration.member.details.parents.filter(p => p.nationalRegisterNumber !== NationalRegisterNumberOptOut && p.nationalRegisterNumber);
+                debtor = parentsWithNRN[0] ?? registration.member.details.parents[0];
+                if (parentsWithNRN.length > 1) {
+                    for (const balanceItem of balanceItems) {
+                        if (balanceItem && balanceItem.userId && balanceItem.priceOpen === 0 && balanceItem.status === BalanceItemStatus.Due) {
+                            const user = await User.getByID(balanceItem.userId);
+                            if (user) {
+                                const parent = parentsWithNRN.find(p => p.hasEmail(user.email));
+
                                 if (parent) {
                                     debtor = parent;
+                                    break;
+                                }
+
+                                if (!debtor.nationalRegisterNumber) {
+                                    const parent = registration.member.details.parents.find(p => p.hasEmail(user.email));
+                                    if (parent) {
+                                        debtor = parent;
+                                    }
                                 }
                             }
                         }

@@ -26,6 +26,8 @@ const props = withDefaults(
         disabled?: boolean;
         birthDay?: Date | null;
         placeholder?: string;
+        /** Replaces the default message when the field is required and left empty */
+        requiredMessage?: string | null;
     }>(), {
         title: '',
         validator: null,
@@ -35,6 +37,7 @@ const props = withDefaults(
         disabled: false,
         birthDay: null,
         placeholder: '',
+        requiredMessage: null,
     },
 );
 
@@ -145,7 +148,7 @@ function validate(final = true, silent = false) {
         if (!silent) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: nrrRaw.value.length === 0 ? $t(`%z4`) : $t(`%1T9`),
+                message: nrrRaw.value.length === 0 ? (props.requiredMessage ?? $t(`%z4`)) : $t(`%1T9`),
                 field: 'nationalRegisterNumber',
             }));
         }

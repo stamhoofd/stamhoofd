@@ -1,4 +1,4 @@
-import type { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
 
 import { AccessRight } from '../AccessRight.js';
@@ -10,7 +10,7 @@ import { PermissionLevel } from '../PermissionLevel.js';
 import { PermissionsResourceType } from '../PermissionsResourceType.js';
 
 import type { Document as DocumentStruct } from '../Document.js';
-import { Platform } from '../Platform.js';
+import type { Platform } from '../Platform.js';
 import type { UserWithMembers } from '../UserWithMembers.js';
 import type { Address } from '../addresses/Address.js';
 import type { PropertyFilter } from '../filters/PropertyFilter.js';
@@ -645,7 +645,7 @@ export class PlatformRegistration extends Registration {
         if (!details.nationalRegisterNumber && member.isPropertyRequired('nationalRegisterNumber', scope)) {
             base.push($t(`%19Q`));
         } else {
-            if (member.isPropertyRequired('parents', scope) && member.isPropertyRequired('nationalRegisterNumber', scope) && !member.patchedMember.details.parents.find(p => p.nationalRegisterNumber)) {
+            if (member.isPropertyRequired('parents', scope) && member.isPropertyRequired('parents.nationalRegisterNumber', scope) && !member.hasRequiredParentNationalRegisterNumbers) {
                 base.push($t(`%zb`));
             }
         }
@@ -822,27 +822,111 @@ export class PlatformMember implements ObjectWithRecords {
         return this.patchedMember.organizationId ? this.family.getOrganization(this.patchedMember.organizationId)?.meta.recordsConfiguration : this.platform.config.recordsConfiguration;
     }
 
+    /**
+     * Fiscal certificates ('Kinderopvang') only cover activities for members under 14, or under 21 with a severe disability.
+     * Certificates are created a year after the fact, so registrations of the last two years still matter.
+     */
+    get taxDependentParents(): Parent[] {
+        return this.patchedMember.details.parents.filter(p => p.taxDependent === true);
+    }
+
+    /**
+     * The number is only useful on the parent that has the member tax dependent,
+     * so a number stored on another parent doesn't answer the question.
+     */
+    get hasRequiredParentNationalRegisterNumbers(): boolean {
+        const parents = this.taxDependentParents;
+        return parents.length > 0 && parents.every(p => !!p.nationalRegisterNumber);
+    }
+
+    /**
+     * The dates the fiscal document runs its age check on. Items still in the cart count too,
+     * otherwise a member signing up for the first time is never asked.
+     *
+     * Waiting list items count as well: asking only once the spot is confirmed leaves members
+     * with missing data that administrators have to chase.
+     */
+    private get taxCertificateDates(): Date[] {
+        const dates: Date[] = [];
+
+        for (const registration of this.patchedMember.registrations) {
+            if (registration.registeredAt === null || registration.deactivatedAt !== null) {
+                continue;
+            }
+
+            // Same date the fiscal document uses for its own age check
+            dates.push(registration.startDate ?? registration.group.settings.startDate);
+        }
+
+        for (const item of [...this.family.checkout.cart.items, ...this.family.pendingRegisterItems]) {
+            if (item.member.id !== this.id) {
+                continue;
+            }
+
+            dates.push(item.calculatedStartDate);
+        }
+
+        return dates;
+    }
+
+    get needsTaxCertificate(): boolean {
+        const details = this.patchedMember.details;
+        const maxAge = details.severeDisability?.value ? 20 : 13;
+
+        const oldest = new Date();
+        oldest.setFullYear(oldest.getFullYear() - 2);
+
+        for (const date of this.taxCertificateDates) {
+            if (date < oldest) {
+                continue;
+            }
+
+            const age = details.ageOnDate(date);
+
+            if (age !== null && age <= maxAge) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     isPropertyEnabledForPlatform(property: MemberProperty) {
         if ((property === 'financialSupport' || property === 'uitpasNumber')
             && this.patchedMember.details.dataPermissions?.value === false) {
             return false;
         }
 
-        if (property === 'dataPermission' || property === 'financialSupport') {
+        if (property === 'parents.taxDependent') {
+            // Asked together with, and only for, the parent that supplies a national register number
+            return this.isPropertyEnabledForPlatform('parents.nationalRegisterNumber');
+        }
+
+        if (property === 'dataPermission' || property === 'financialSupport' || property === 'taxCertificates') {
             if (this.platformRecordsConfiguration?.[property]) {
                 return true;
             }
             return false;
         }
 
+        // Note: the raw 'taxCertificates' property, asking 'parents.taxDependent' here would loop
+        const forTaxCertificate = (property === 'nationalRegisterNumber' || property === 'parents.nationalRegisterNumber')
+            && this.isPropertyEnabledForPlatform('taxCertificates')
+            && this.needsTaxCertificate;
+
         if (property === 'parents.nationalRegisterNumber') {
             if (this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
                 return false;
             }
-            property = 'nationalRegisterNumber';
+            return forTaxCertificate;
+        }
+
+        if (forTaxCertificate) {
+            return true;
         }
 
         const def = this.platformRecordsConfiguration?.[property];
+
         if (def === null || def === undefined) {
             return false;
         }
@@ -850,10 +934,23 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     isPropertyEnabled(property: MemberProperty, options?: { checkPermissions?: { user: UserWithMembers; level: PermissionLevel }; scopeGroups?: Group[] | null }) {
+        if (property === 'parents.taxDependent') {
+            // Asked together with, and only for, the parent that supplies a national register number
+            return this.isPropertyEnabled('parents.nationalRegisterNumber', options);
+        }
+        // Note: the raw 'taxCertificates' property, asking 'parents.taxDependent' here would loop
+        const forTaxCertificate = (property === 'nationalRegisterNumber' || property === 'parents.nationalRegisterNumber')
+            && this.isPropertyEnabled('taxCertificates', options)
+            && this.needsTaxCertificate;
+
         if (property === 'parents.nationalRegisterNumber') {
             if (this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
                 return false;
             }
+            if (!forTaxCertificate) {
+                return false;
+            }
+            // Reading the number stays behind the same permission as the member's own
             property = 'nationalRegisterNumber';
         }
         if ((property === 'financialSupport' || property === 'uitpasNumber')
@@ -895,6 +992,11 @@ export class PlatformMember implements ObjectWithRecords {
             }
         }
 
+        // Collecting certificate data asks for the number regardless of the nationalRegisterNumber filter
+        if (forTaxCertificate) {
+            return true;
+        }
+
         if (this.isPropertyEnabledForPlatform(property)) {
             return true;
         }
@@ -908,7 +1010,7 @@ export class PlatformMember implements ObjectWithRecords {
         });
 
         for (const recordsConfiguration of recordsConfigurations) {
-            if (property === 'dataPermission' || property === 'financialSupport') {
+            if (property === 'dataPermission' || property === 'financialSupport' || property === 'taxCertificates') {
                 if (recordsConfiguration[property]) {
                     return true;
                 }
@@ -934,11 +1036,25 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
+        if (property === 'taxCertificates' || property === 'parents.taxDependent') {
+            // Ticking the checkbox is always optional
+            return false;
+        }
+
+        const forTaxCertificate = (property === 'nationalRegisterNumber' || property === 'parents.nationalRegisterNumber')
+            && this.isPropertyEnabledForPlatform('taxCertificates')
+            && this.needsTaxCertificate;
+
         if (property === 'parents.nationalRegisterNumber') {
             if (this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
                 return false;
             }
             property = 'nationalRegisterNumber';
+        }
+
+        // The certificate cannot be produced without it
+        if (forTaxCertificate) {
+            return true;
         }
 
         const def = this.platformRecordsConfiguration?.[property];
@@ -958,6 +1074,15 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
+        if (property === 'taxCertificates' || property === 'parents.taxDependent') {
+            // Ticking the checkbox is always optional
+            return false;
+        }
+
+        const forTaxCertificate = (property === 'nationalRegisterNumber' || property === 'parents.nationalRegisterNumber')
+            && this.isPropertyEnabled('taxCertificates', options)
+            && this.needsTaxCertificate;
+
         if (property === 'parents.nationalRegisterNumber') {
             property = 'nationalRegisterNumber';
         }
@@ -965,6 +1090,11 @@ export class PlatformMember implements ObjectWithRecords {
         if (property === 'nationalRegisterNumber' && this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
             // Not required for parents or member itself
             return false;
+        }
+
+        // The certificate cannot be produced without it
+        if (forTaxCertificate) {
+            return true;
         }
 
         const recordsConfigurations = this.filterRecordsConfigurations({ currentPeriod: options?.scopeGroups ? undefined : true, groups: options?.scopeGroups });

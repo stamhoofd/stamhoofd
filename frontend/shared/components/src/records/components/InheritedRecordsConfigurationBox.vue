@@ -19,7 +19,7 @@
             </p>
         </STListItem>
 
-        <STListItem v-for="property of properties" :key="property.value.title" element-name="label" :selectable="!property.value.locked">
+        <STListItem v-for="property of properties" :key="property.value.title" element-name="label" :selectable="!property.value.locked" :data-testid="'records-property-' + property.value.name">
             <template #left>
                 <Checkbox v-model="property.value.enabled" v-tooltip="property.value.locked ? $t('%jE') : ''" :disabled="property.value.locked" />
             </template>
@@ -48,8 +48,8 @@
                 {{ property.value.options?.warning ?? $t('%jG') }}
             </p>
 
-            <template v-if="property.value.enabled" #right>
-                <button class="button gray icon settings" type="button" @click.stop="property.value.edit" />
+            <template v-if="property.value.enabled && property.value.edit" #right>
+                <button class="button gray icon settings" type="button" @click.stop="property.value.edit?.()" />
             </template>
         </STListItem>
 
@@ -74,20 +74,20 @@
 </template>
 
 <script setup lang="ts">
-import { PatchMap } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
+import { PatchMap } from '@simonbackx/simple-encoding';
+import { usePresent } from '@simonbackx/vue-app-navigation';
 
-import { Toast } from '#overlays/Toast.ts';
 import { propertyFilterToString } from '#filters/UIFilter.ts';
-import { useEmitPatch } from '#hooks/useEmitPatch.ts';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
+import { useEmitPatch } from '#hooks/useEmitPatch.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
+import { Toast } from '#overlays/Toast.ts';
 import type { MemberPropertyWithFilter, Organization, OrganizationRecordsConfiguration, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
 import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, PlatformFamily, PlatformMember, PropertyFilter } from '@stamhoofd/structures';
-import { computed, ref, watchEffect } from 'vue';
+import { computed, ref } from 'vue';
 import { getMemberFilterBuildersForInheritedRecords } from '../../filters/filter-builders/members';
 
 import { RecordEditorSettings, RecordEditorType } from '../RecordEditorSettings';
@@ -149,11 +149,7 @@ family.members.push(settings.exampleValue);
 const properties = [
     buildPropertyRefs('gender', $t(`%1d`)),
     buildPropertyRefs('birthDay', $t(`%17w`)),
-    buildPropertyRefs(
-        'nationalRegisterNumber', $t(`%wK`), {
-            description: $t('%17a'),
-        },
-    ),
+    buildPropertyRefs('nationalRegisterNumber', $t(`%wK`) + ' ' + $t(`%11R`)),
     buildPropertyRefs('parents', $t(`%11P`), {
         description: $t(`%11Q`),
     }),
@@ -179,6 +175,11 @@ const properties = [
         warning: $t(`%11c`),
         preventAlways: true,
     }),
+    buildBooleanPropertyRefs(
+        'taxCertificates',
+        $t('Gegevens voor fiscale attesten kinderopvang verzamelen'),
+        $t('Een bijkomende instelling naast \'Rijksregisternummer\' die je los daarvan kan aanzetten. Vraagt het rijksregisternummer van het lid én van de ouder die het lid fiscaal ten laste heeft, maar enkel bij leden die in aanmerking komen voor een fiscaal attest kinderopvang. Die ouder bepaalt op wiens naam het attest komt.'),
+    ),
 ];
 
 const dataPermissions = {
@@ -239,8 +240,31 @@ function buildPropertyRefs(property: MemberPropertyWithFilter, title: string, op
         enabled,
         locked,
         configuration,
-        parentConfiguration: computed(() => props.inheritedRecordsConfiguration?.[property]),
+        parentConfiguration: computed(() => props.inheritedRecordsConfiguration?.[property] ?? null),
         edit: () => editPropertyFilterConfiguration(property, title, options),
+    });
+}
+
+/**
+ * A plain on/off property, without the filter that decides for which members it is asked.
+ */
+function buildBooleanPropertyRefs(property: 'taxCertificates', title: string, description: string) {
+    const locked = computed(() => !!props.inheritedRecordsConfiguration?.[property] && !patched.value[property]);
+    const enabled = computed({
+        get: () => !!props.inheritedRecordsConfiguration?.[property] || patched.value[property],
+        set: (value: boolean) => addPatch({ [property]: value }),
+    });
+
+    return ref({
+        name: property,
+        title,
+        description,
+        options: undefined,
+        enabled,
+        locked,
+        configuration: computed(() => null),
+        parentConfiguration: computed(() => null),
+        edit: null,
     });
 }
 

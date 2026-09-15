@@ -63,8 +63,28 @@
                     </template>
                 </p>
 
-                <template v-if="(isPropertyEnabled('parents.nationalRegisterNumber') || nationalRegisterNumber)">
-                    <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`)" :required="isNRNRequiredForThisParent" :nullable="true" :validator="errors.validator" />
+                <template v-if="showTaxDependent">
+                    <Checkbox v-model="taxDependent" data-testid="tax-dependent-checkbox">
+                        <p>
+                            {{ $t('{lid} is fiscaal ten laste van {name} (enkel voor gezinshoofd of fiscaal co-ouderschap)', {
+                                lid: props.member?.member.details.firstName ?? $t('lid'),
+                                name: firstName || $t('deze ouder')
+                            }) }}
+                        </p>
+                        <p class="style-description-small">
+                            <I18nComponent :t="$t('Het attest \'Kinderopvang\' komt op naam van de ouder die je aanduidt. Dat mag enkel het gezinshoofd zijn. Alleen bij fiscaal co-ouderschap na een scheiding vink je beide ouders aan, en wordt het attest gesplitst. Een foute keuze kost belastingvoordeel. <button>Meer info</button>')">
+                                <template #button="{content}">
+                                    <a class="inline-link" href="https://fin.belgium.be/nl/particulieren/belastingaangifte/persoonlijke-situatie/personen-ten-laste/kinderen" target="_blank">
+                                        {{ content }}
+                                    </a>
+                                </template>
+                            </I18nComponent>
+                        </p>
+                    </Checkbox>
+                </template>
+
+                <template v-if="showNationalRegisterNumber">
+                    <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`)" :required="isNRNRequiredForThisParent" :required-message="nrnRequiredMessage" :nullable="true" :validator="errors.validator" data-testid="national-register-number-input" />
                     <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
                         {{ $t('%fa') }} <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
                             {{ $t('%fb') }}
@@ -95,26 +115,26 @@
 </template>
 
 <script setup lang="ts">
+import { usePatch } from '#hooks/usePatch.ts';
+import { useIsAllOptional, useIsPropertyEnabled, useIsPropertyRequired } from '#members/hooks/useIsPropertyRequired.ts';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
+import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import type { Address, Parent, ParentType, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
 import { NationalRegisterNumberOptOut, ParentTypeHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, nextTick, ref } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { useErrors } from '../../../errors/useErrors';
-import { usePatch } from '#hooks/usePatch.ts';
 import Dropdown from '../../../inputs/Dropdown.vue';
 import EmailInput from '../../../inputs/EmailInput.vue';
 import NRNInput from '../../../inputs/NRNInput.vue';
 import PhoneInput from '../../../inputs/PhoneInput.vue';
 import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
 import { CenteredMessage } from '../../../overlays/CenteredMessage';
-import type { NavigationActions} from '../../../types/NavigationActions';
+import type { NavigationActions } from '../../../types/NavigationActions';
 import { useNavigationActions } from '../../../types/NavigationActions';
-import { useIsAllOptional, useIsPropertyEnabled, useIsPropertyRequired } from '#members/hooks/useIsPropertyRequired.ts';
-import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 
 const props = withDefaults(defineProps<{
     member?: PlatformMember | null;
@@ -153,20 +173,61 @@ const isPropertyEnabled = useIsPropertyEnabled(relatedMembers, true);
 const isAllOptional = useIsAllOptional(relatedMembers);
 
 /**
- * If NRN is required, it is only required for one parent of each member
+ * Tax dependency is stored per member so we can only ask it when we know which member we are editing.
+ */
+const showTaxDependent = computed(() => isPropertyEnabled('parents.taxDependent') && !!props.member);
+
+/**
+ * taxDependent is stored per member, so read it from the member rather than from the parent object
+ * we happen to hold: without a member that is one collapsed copy (PlatformFamily.parents keeps the
+ * last member's), and with one the checkbox in this view is the live value.
+ */
+function isTaxDependentFor(member: PlatformMember) {
+    if (props.member && member.id === props.member.id) {
+        return patched.value.taxDependent === true;
+    }
+
+    return member.patchedMember.details.parents.find(p => p.id === props.parent.id)?.taxDependent === true;
+}
+
+/**
+ * The number belongs to the parent and is shared by everyone who has them, so it stays required as
+ * long as any member still has this parent tax dependent. Clearing it would drop that member's
+ * number too, and their certificate needs it.
  */
 const isNRNRequiredForThisParent = computed(() => {
     if (isAllOptional.value) {
         return false;
     }
 
-    for (const member of relatedMembers.value) {
-        const required = member.isPropertyRequired('parents.nationalRegisterNumber');
-        if (required && !member.patchedMember.details.parents.find(p => p.id !== props.parent.id && !!p.nationalRegisterNumber)) {
-            return true;
-        }
+    return relatedMembers.value.some(member => member.isPropertyRequired('parents.nationalRegisterNumber') && isTaxDependentFor(member));
+});
+
+const otherTaxDependentMemberNames = computed(() => {
+    const names = relatedMembers.value
+        .filter(member => (!props.member || member.id !== props.member.id)
+            && member.isPropertyRequired('parents.nationalRegisterNumber')
+            && isTaxDependentFor(member))
+        .map(member => member.patchedMember.details.firstName);
+
+    return Formatter.joinLastLimited(names, {
+        separator: ', ',
+        lastSeparator: ' ' + $t('%M1') + ' ',
+        maxLength: 70,
+        maxCount: 3,
+    });
+});
+
+/**
+ * Naming the other members only matters once leaving it empty is actually blocked, so it belongs
+ * in the error rather than in a hint that sits there for everyone.
+ */
+const nrnRequiredMessage = computed(() => {
+    if (!otherTaxDependentMemberNames.value) {
+        return null;
     }
-    return false;
+
+    return $t('Vul een rijksregisternummer in. Deze ouder heeft ook {names} fiscaal ten laste, dus dit nummer is nodig voor dat attest.', { names: otherTaxDependentMemberNames.value });
 });
 
 const firstName = computed({
@@ -209,6 +270,61 @@ const alternativeEmails = computed({
 const nationalRegisterNumber = computed({
     get: () => patched.value.nationalRegisterNumber,
     set: nationalRegisterNumber => addPatch({ nationalRegisterNumber }),
+});
+
+const taxDependent = computed({
+    get: () => patched.value.taxDependent,
+    set: (taxDependent) => {
+        const otherTaxDependentParents = props.member?.patchedMember.details.parents.filter(p => p.id !== props.parent.id && p.taxDependent) ?? [];
+
+        if (taxDependent && otherTaxDependentParents.length >= 2) {
+            new CenteredMessage(
+                $t('Maximaal twee ouders kunnen dit lid fiscaal ten laste hebben'),
+                $t('Vink het eerst uit bij een andere ouder. Twee ouders zijn enkel mogelijk bij gescheiden ouders met fiscaal co-ouderschap.'),
+            ).addCloseButton().show();
+            return;
+        }
+
+        if (otherTaxDependentParents.length > 0 && taxDependent) {
+            CenteredMessage.confirm({
+                title: $t('Ben je zeker dat er sprake is van fiscaal co-ouderschap?'),
+                description: $t('Dit is enkel nodig als beide ouders gescheiden zijn'),
+                confirmText: $t('Ik ben zeker'),
+            }).then((isSure) => {
+                if (isSure) addPatch({ taxDependent });
+            }).catch(console.error);
+        } else {
+            addPatch({ taxDependent });
+        }
+    },
+});
+
+/**
+ * Correcting a number starts by clearing the field, so once it held a value it keeps its place
+ * for the rest of the session instead of disappearing halfway through the edit.
+ */
+const hasHadNationalRegisterNumber = ref(!!props.parent.nationalRegisterNumber);
+
+watch(nationalRegisterNumber, (value) => {
+    if (value) {
+        hasHadNationalRegisterNumber.value = true;
+    }
+});
+
+/**
+ * We only ask the national register number of the parent that has the member tax dependent.
+ * An already stored value (or opt-out) stays visible so it can still be corrected.
+ */
+const showNationalRegisterNumber = computed(() => {
+    if (hasHadNationalRegisterNumber.value) {
+        return true;
+    }
+
+    if (!isPropertyEnabled('parents.nationalRegisterNumber')) {
+        return false;
+    }
+
+    return showTaxDependent.value && !!taxDependent.value;
 });
 
 const availableAddresses = computed(() => {
@@ -320,31 +436,31 @@ async function save() {
                 $t(`%zT`),
                 false)) {
                 props.member.addParent(patched.value);
-            }
-            else {
+            } else {
                 props.member.addParent(patched.value);
+
+                // taxDependent is stored per member so it is never copied to the other family members
+                const familyParent = patched.value.clone();
+                familyParent.taxDependent = null;
+
                 for (const member of minorMembers) {
-                    member.addParent(patched.value);
+                    member.addParent(familyParent);
                 }
             }
-        }
-        else {
+        } else {
             if (props.member) {
                 props.member.patchParent(patch.value);
-            }
-            else if (props.family) {
+            } else if (props.family) {
                 props.family.patchParent(patch.value);
             }
         }
 
         if (props.saveHandler) {
             await props.saveHandler(navigate);
-        }
-        else {
+        } else {
             await pop({ force: true });
         }
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;

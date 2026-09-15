@@ -95,7 +95,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem class="left-center" :selectable="true" @click="checkData">
+                    <STListItem class="left-center" :selectable="true" data-testid="check-data-button" @click="checkData">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/magnifier.svg" class="style-illustration-img">
                         </template>
