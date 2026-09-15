@@ -909,15 +909,20 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
+        // Note: the raw 'taxDependent' property, asking 'parents.taxDependent' here would loop
+        const forTaxCertificate = (property === 'nationalRegisterNumber' || property === 'parents.nationalRegisterNumber')
+            && this.isPropertyEnabledForPlatform('taxDependent')
+            && this.needsTaxCertificate;
+
         if (property === 'parents.nationalRegisterNumber') {
             if (this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
                 return false;
             }
-            // Note: the raw 'taxDependent' property, asking 'parents.taxDependent' here would loop
-            if (!this.isPropertyEnabledForPlatform('taxDependent') || !this.needsTaxCertificate) {
-                return false;
-            }
-            property = 'nationalRegisterNumber';
+            return forTaxCertificate;
+        }
+
+        if (forTaxCertificate) {
+            return true;
         }
 
         const def = this.platformRecordsConfiguration?.[property];
@@ -933,14 +938,19 @@ export class PlatformMember implements ObjectWithRecords {
             // Asked together with, and only for, the parent that supplies a national register number
             return this.isPropertyEnabled('parents.nationalRegisterNumber', options);
         }
+        // Note: the raw 'taxDependent' property, asking 'parents.taxDependent' here would loop
+        const forTaxCertificate = (property === 'nationalRegisterNumber' || property === 'parents.nationalRegisterNumber')
+            && this.isPropertyEnabled('taxDependent', options)
+            && this.needsTaxCertificate;
+
         if (property === 'parents.nationalRegisterNumber') {
             if (this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
                 return false;
             }
-            // Note: the raw 'taxDependent' property, asking 'parents.taxDependent' here would loop
-            if (!this.isPropertyEnabled('taxDependent', options) || !this.needsTaxCertificate) {
+            if (!forTaxCertificate) {
                 return false;
             }
+            // Reading the number stays behind the same permission as the member's own
             property = 'nationalRegisterNumber';
         }
         if ((property === 'financialSupport' || property === 'uitpasNumber')
@@ -980,6 +990,11 @@ export class PlatformMember implements ObjectWithRecords {
                     return false;
                 }
             }
+        }
+
+        // Collecting certificate data asks for the number regardless of the nationalRegisterNumber filter
+        if (forTaxCertificate) {
+            return true;
         }
 
         if (this.isPropertyEnabledForPlatform(property)) {
@@ -1026,11 +1041,20 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
+        const forTaxCertificate = (property === 'nationalRegisterNumber' || property === 'parents.nationalRegisterNumber')
+            && this.isPropertyEnabledForPlatform('taxDependent')
+            && this.needsTaxCertificate;
+
         if (property === 'parents.nationalRegisterNumber') {
             if (this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
                 return false;
             }
             property = 'nationalRegisterNumber';
+        }
+
+        // The certificate cannot be produced without it
+        if (forTaxCertificate) {
+            return true;
         }
 
         const def = this.platformRecordsConfiguration?.[property];
@@ -1050,18 +1074,27 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
-        if (property === 'parents.nationalRegisterNumber') {
-            property = 'nationalRegisterNumber';
-        }
-
         if (property === 'taxDependent' || property === 'parents.taxDependent') {
             // Ticking the checkbox is always optional
             return false;
         }
 
+        const forTaxCertificate = (property === 'nationalRegisterNumber' || property === 'parents.nationalRegisterNumber')
+            && this.isPropertyEnabled('taxDependent', options)
+            && this.needsTaxCertificate;
+
+        if (property === 'parents.nationalRegisterNumber') {
+            property = 'nationalRegisterNumber';
+        }
+
         if (property === 'nationalRegisterNumber' && this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
             // Not required for parents or member itself
             return false;
+        }
+
+        // The certificate cannot be produced without it
+        if (forTaxCertificate) {
+            return true;
         }
 
         const recordsConfigurations = this.filterRecordsConfigurations({ currentPeriod: options?.scopeGroups ? undefined : true, groups: options?.scopeGroups });

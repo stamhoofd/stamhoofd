@@ -54,15 +54,15 @@
                 </template>
             </STListItem>
 
-            <STListItem v-if="property.value.name === 'nationalRegisterNumber' && isTaxDependentAvailable" element-name="label" :selectable="!taxDependent.locked.value" data-testid="records-property-taxDependent">
+            <STListItem v-if="property.value.name === 'nationalRegisterNumber'" element-name="label" :selectable="!taxDependent.locked.value" data-testid="records-property-taxDependent">
                 <template #left>
                     <Checkbox v-model="taxDependent.enabled.value" v-tooltip="taxDependent.locked.value ? $t('%jE') : ''" :disabled="taxDependent.locked.value" />
                 </template>
                 <p class="style-title-list">
-                    {{ $t('Fiscaal ten laste') }}
+                    {{ $t('Gegevens voor fiscale attesten kinderopvang verzamelen') }}
                 </p>
                 <p class="style-description-small">
-                    {{ $t('Vraag de gegevens van de ouder die het lid fiscaal ten laste heeft. Dat bepaalt op wiens naam de fiscale attesten komen, en welke ouder een rijksregisternummer moet invullen.') }}
+                    {{ $t('Vraag het rijksregisternummer van het lid en van de ouder die het lid fiscaal ten laste heeft, zodra het lid in aanmerking komt voor een fiscaal attest. Dat bepaalt op wiens naam het attest komt.') }}
                 </p>
             </STListItem>
         </template>
@@ -101,7 +101,7 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import { Toast } from '#overlays/Toast.ts';
 import type { MemberPropertyWithFilter, Organization, OrganizationRecordsConfiguration, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
 import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, PlatformFamily, PlatformMember, PropertyFilter } from '@stamhoofd/structures';
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import { getMemberFilterBuildersForInheritedRecords } from '../../filters/filter-builders/members';
 
 import { RecordEditorSettings, RecordEditorType } from '../RecordEditorSettings';
@@ -165,7 +165,7 @@ const properties = [
     buildPropertyRefs('birthDay', $t(`%17w`)),
     buildPropertyRefs(
         'nationalRegisterNumber', $t(`%wK`), {
-            description: $t('Rijksregisternummer van het lid. Schakel ook \'Fiscaal ten laste\' in om ook het rijksregisternummer van de ouder die het kind fiscaal ten laste heeft te vragen.'),
+            description: $t('Rijksregisternummer van het lid, van elk lid dat je aanduidt. Voor fiscale attesten kinderopvang hoef je dit niet aan te zetten: die vraag staat hieronder en werkt op zichzelf.'),
         },
     ),
     buildPropertyRefs('parents', $t(`%11P`), {
@@ -228,18 +228,6 @@ const financialSupport = {
         },
     }),
 };
-
-/**
- * The question decides which parent supplies the national register number,
- * so it only means something while that is collected.
- */
-const isTaxDependentAvailable = computed(() => !!getFilterConfiguration('nationalRegisterNumber'));
-
-watch(isTaxDependentAvailable, (available) => {
-    if (!available && patched.value.taxDependent) {
-        addPatch({ taxDependent: false });
-    }
-});
 
 const taxDependent = {
     locked: computed(() => !!props.inheritedRecordsConfiguration?.taxDependent && !patched.value.taxDependent),

@@ -50,7 +50,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         await WorkerData.resetDatabase();
     });
 
-    async function seedScenario({ taxDependent, nationalRegisterNumbers, profile = YOUNG, taxDependentParents = {}, withThirdParent = false, withRegistrations = true, taxDependentPerMember }: {
+    async function seedScenario({ taxDependent, nationalRegisterNumbers, profile = YOUNG, taxDependentParents = {}, withThirdParent = false, withRegistrations = true, taxDependentPerMember, memberNationalRegisterNumberFilter = true }: {
         taxDependent: boolean;
         /** National register number per parent, null to leave it empty */
         nationalRegisterNumbers: { mother: string | null; father: string | null };
@@ -67,6 +67,8 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
             memberA?: { mother?: boolean | null; father?: boolean | null };
             memberB?: { mother?: boolean | null; father?: boolean | null };
         };
+        /** The plain national register number question, which the UI cannot turn off on its own */
+        memberNationalRegisterNumberFilter?: boolean;
     }): Promise<Scenario> {
         const runId = `${WorkerData.id}-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
 
@@ -83,7 +85,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
                 recordsConfiguration: OrganizationRecordsConfiguration.create({
                     parents: PropertyFilter.createDefault(),
                     birthDay: PropertyFilter.createDefault(),
-                    nationalRegisterNumber: PropertyFilter.createDefault(),
+                    nationalRegisterNumber: memberNationalRegisterNumberFilter ? PropertyFilter.createDefault() : null,
                     taxDependent,
                 }),
             }),
@@ -440,7 +442,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         expect(order.indexOf('records-property-taxDependent')).toBe(order.indexOf('records-property-nationalRegisterNumber') + 1);
     });
 
-    test('turning off the national register number hides and unticks the tax dependent setting', async ({ page }) => {
+    test('the tax certificate setting stands on its own, without the national register number', async ({ page }) => {
         test.setTimeout(150_000);
         const scenario = await seedScenario({ taxDependent: true, nationalRegisterNumbers: { mother: null, father: null } });
         await loginAs({ page, user: scenario.user });
@@ -448,13 +450,12 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         const settings = await openRecordsSettings({ page, scenario });
         await expect(settingRow(settings, 'taxDependent').getByTestId('checkbox')).toBeChecked();
 
+        // It collects its own numbers, so turning the plain question off leaves it alone
         await settingRow(settings, 'nationalRegisterNumber').getByTestId('checkbox').click();
-        await expect(settingRow(settings, 'taxDependent')).toBeHidden();
+        await expect(settingRow(settings, 'nationalRegisterNumber').getByTestId('checkbox')).not.toBeChecked();
 
-        // Turning it back on shows the setting again, now unticked
-        await enableSettingProperty({ page, settings, property: 'nationalRegisterNumber' });
         await expect(settingRow(settings, 'taxDependent')).toBeVisible();
-        await expect(settingRow(settings, 'taxDependent').getByTestId('checkbox')).not.toBeChecked();
+        await expect(settingRow(settings, 'taxDependent').getByTestId('checkbox')).toBeChecked();
     });
 
     test('turning off the parents leaves the tax dependent setting alone', async ({ page }) => {
@@ -473,21 +474,45 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         await expect(settingRow(settings, 'taxDependent').getByTestId('checkbox')).toBeChecked();
     });
 
-    test('the tax dependent setting is stored as off once its dependencies are turned off', async ({ page }) => {
+    test('the tax certificate setting stays stored when the national register number is turned off', async ({ page }) => {
         test.setTimeout(150_000);
         const scenario = await seedScenario({ taxDependent: true, nationalRegisterNumbers: { mother: null, father: null } });
         await loginAs({ page, user: scenario.user });
 
         const settings = await openRecordsSettings({ page, scenario });
         await settingRow(settings, 'nationalRegisterNumber').getByTestId('checkbox').click();
-        await expect(settingRow(settings, 'taxDependent')).toBeHidden();
+        await expect(settingRow(settings, 'taxDependent').getByTestId('checkbox')).toBeChecked();
 
         await saveView(settings);
 
         await expect.poll(async () => {
             const organization = await OrganizationModel.getByID(scenario.organization.id);
             return organization!.meta.recordsConfiguration.taxDependent;
-        }, { timeout: 20_000 }).toBe(false);
+        }, { timeout: 20_000 }).toBe(true);
+    });
+
+    // The UI keeps the national register number ticked alongside it, but the API does not have to
+    test('with only the tax certificate setting, both the member and the parent are still asked', async ({ page }) => {
+        test.setTimeout(150_000);
+        const scenario = await seedScenario({
+            taxDependent: true,
+            nationalRegisterNumbers: { mother: null, father: null },
+            memberNationalRegisterNumberFilter: false,
+        });
+
+        await loginToPortal({ page, scenario });
+
+        const quickAction = page.getByTestId('quick-action').filter({ hasText: new RegExp(scenario.names.memberA) });
+        await expect(quickAction).toBeVisible({ timeout: 30_000 });
+        await quickAction.click();
+
+        const step = page.getByTestId('member-step');
+        await expect(step).toBeVisible();
+
+        const parentView = await openParentEditView({ page, editView: step, parentName: scenario.names.mother });
+        await expect(taxDependentCheckbox(parentView)).toBeVisible();
+        await taxDependentCheckbox(parentView).click();
+        await expect(nationalRegisterNumberInput(parentView)).toBeVisible();
     });
 
     // ------------------------------------------------------------------
