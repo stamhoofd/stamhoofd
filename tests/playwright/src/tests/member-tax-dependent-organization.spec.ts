@@ -50,7 +50,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         await WorkerData.resetDatabase();
     });
 
-    async function seedScenario({ taxDependent, nationalRegisterNumbers, profile = YOUNG, taxDependentParents = {}, withThirdParent = false }: {
+    async function seedScenario({ taxDependent, nationalRegisterNumbers, profile = YOUNG, taxDependentParents = {}, withThirdParent = false, withRegistrations = true }: {
         taxDependent: boolean;
         /** National register number per parent, null to leave it empty */
         nationalRegisterNumbers: { mother: string | null; father: string | null };
@@ -60,6 +60,8 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         taxDependentParents?: { mother?: boolean; father?: boolean };
         /** Adds a third parent, to reach the maximum of two tax dependent parents */
         withThirdParent?: boolean;
+        /** Leave the members unregistered, so the portal can register them for the first time */
+        withRegistrations?: boolean;
     }): Promise<Scenario> {
         const runId = `${WorkerData.id}-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
 
@@ -98,6 +100,12 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
             period,
             name: new TranslatedString('Kapoenen'),
         }).create();
+
+        // The factory closes the group ten seconds after creation, too short to register through the UI
+        const openUntil = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        group.settings.endDate = openUntil;
+        group.settings.registrationEndDate = openUntil;
+        await group.save();
 
         const category = GroupCategory.create({
             settings: GroupCategorySettings.create({ name: 'Takken' }),
@@ -178,8 +186,10 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
                 }),
             }).create();
 
-            // A registration in the current period keeps the member eligible for a fiscal certificate
-            await new RegistrationFactory({ member, group }).create();
+            if (withRegistrations) {
+                // A registration in the current period keeps the member eligible for a fiscal certificate
+                await new RegistrationFactory({ member, group }).create();
+            }
             return member;
         };
 
@@ -306,6 +316,50 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
     async function readTaxDependent(memberId: string, parentId: string) {
         const member = await Member.getByID(memberId);
         return member!.details.parents.find(p => p.id === parentId)?.taxDependent ?? null;
+    }
+
+    /**
+     * Registers a member that has no registration yet. The item sits in pendingRegisterItems
+     * while the member steps run, so this is the flow where the cart is the only signal.
+     */
+    async function startFirstRegistration({ page, memberName }: { page: Page; memberName: string }) {
+        await page.getByTestId('register-member-button').first().click();
+
+        const memberButton = page.getByTestId('member-button').filter({ hasText: memberName });
+        await expect(memberButton).toBeVisible({ timeout: 30_000 });
+        await memberButton.click();
+
+        const groupButton = page.getByTestId('group-button').filter({ hasText: 'Kapoenen' });
+        await expect(groupButton).toBeVisible({ timeout: 30_000 });
+        await groupButton.click();
+
+        // Confirms the group and puts the item in pendingRegisterItems, which starts the member steps
+        await page.getByTestId('save-view').last().getByTestId('save-button').first().click();
+    }
+
+    /**
+     * Walks the member steps until the parents step shows up, so the tests don't depend on
+     * which other steps the records configuration happens to enable.
+     */
+    async function openParentsStepDuringRegistration({ page }: { page: Page }) {
+        const parentsStep = page.getByTestId('member-step').filter({ has: page.getByTestId('parent-row') });
+
+        for (let i = 0; i < 6; i++) {
+            if (await parentsStep.first().isVisible().catch(() => false)) {
+                return parentsStep.first();
+            }
+
+            const current = page.getByTestId('member-step').last();
+            await expect(current).toBeVisible({ timeout: 30_000 });
+            await saveView(current);
+
+            // Either the next step replaces this one, or the parents step appears
+            await expect(async () => {
+                expect(await parentsStep.first().isVisible() || await current.isHidden()).toBe(true);
+            }).toPass({ timeout: 20_000 });
+        }
+
+        throw new Error('The parents step never appeared while registering');
     }
 
     // ------------------------------------------------------------------
@@ -810,5 +864,80 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
 
         await expect.poll(async () => await readTaxDependent(scenario.memberA.id, scenario.motherId), { timeout: 20_000 }).toBe(true);
         expect(await readTaxDependent(scenario.memberB.id, scenario.motherId)).toBeNull();
+    });
+
+    // ------------------------------------------------------------------
+    // A member registering for the first time has no registration yet,
+    // only the item that is being registered
+    // ------------------------------------------------------------------
+
+    test.describe('first registration', () => {
+        async function openParentDuringFirstRegistration({ page, scenario }: { page: Page; scenario: Scenario }) {
+            await loginToPortal({ page, scenario });
+            await startFirstRegistration({ page, memberName: scenario.names.memberA });
+
+            const step = await openParentsStepDuringRegistration({ page });
+            return await openParentEditView({ page, editView: step, parentName: scenario.names.mother });
+        }
+
+        test('asks to mark a parent tax dependent while registering for the first time', async ({ page }) => {
+            test.setTimeout(150_000);
+            const scenario = await seedScenario({
+                taxDependent: true,
+                nationalRegisterNumbers: { mother: null, father: null },
+                withRegistrations: false,
+            });
+
+            const parentView = await openParentDuringFirstRegistration({ page, scenario });
+
+            await expect(taxDependentCheckbox(parentView)).toBeVisible();
+
+            // And it still gates the national register number the same way
+            await expect(nationalRegisterNumberInput(parentView)).toBeHidden();
+            await taxDependentCheckbox(parentView).click();
+            await expect(nationalRegisterNumberInput(parentView)).toBeVisible();
+        });
+
+        test('asks a member over 14 with a severe disability', async ({ page }) => {
+            test.setTimeout(150_000);
+            const scenario = await seedScenario({
+                taxDependent: true,
+                nationalRegisterNumbers: { mother: null, father: null },
+                profile: DISABLED,
+                withRegistrations: false,
+            });
+
+            const parentView = await openParentDuringFirstRegistration({ page, scenario });
+            await expect(taxDependentCheckbox(parentView)).toBeVisible();
+        });
+
+        test('asks nothing when the member is too old for a fiscal certificate', async ({ page }) => {
+            test.setTimeout(150_000);
+            const scenario = await seedScenario({
+                taxDependent: true,
+                nationalRegisterNumbers: { mother: null, father: null },
+                profile: TOO_OLD,
+                withRegistrations: false,
+            });
+
+            const parentView = await openParentDuringFirstRegistration({ page, scenario });
+
+            await expect(taxDependentCheckbox(parentView)).toBeHidden();
+            await expect(nationalRegisterNumberInput(parentView)).toBeHidden();
+        });
+
+        test('asks nothing when the organization did not enable the setting', async ({ page }) => {
+            test.setTimeout(150_000);
+            const scenario = await seedScenario({
+                taxDependent: false,
+                nationalRegisterNumbers: { mother: null, father: null },
+                withRegistrations: false,
+            });
+
+            const parentView = await openParentDuringFirstRegistration({ page, scenario });
+
+            await expect(taxDependentCheckbox(parentView)).toBeHidden();
+            await expect(nationalRegisterNumberInput(parentView)).toBeHidden();
+        });
     });
 });

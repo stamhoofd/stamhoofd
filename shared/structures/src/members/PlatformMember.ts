@@ -839,12 +839,15 @@ export class PlatformMember implements ObjectWithRecords {
         return parents.length > 0 && parents.every(p => !!p.nationalRegisterNumber);
     }
 
-    get needsTaxCertificate(): boolean {
-        const details = this.patchedMember.details;
-        const maxAge = details.severeDisability?.value ? 20 : 13;
-
-        const oldest = new Date();
-        oldest.setFullYear(oldest.getFullYear() - 2);
+    /**
+     * The dates the fiscal document runs its age check on. Items still in the cart count too,
+     * otherwise a member signing up for the first time is never asked.
+     *
+     * Waiting list items count as well: asking only once the spot is confirmed leaves members
+     * with missing data that administrators have to chase.
+     */
+    private get taxCertificateDates(): Date[] {
+        const dates: Date[] = [];
 
         for (const registration of this.patchedMember.registrations) {
             if (registration.registeredAt === null || registration.deactivatedAt !== null) {
@@ -852,8 +855,28 @@ export class PlatformMember implements ObjectWithRecords {
             }
 
             // Same date the fiscal document uses for its own age check
-            const date = registration.startDate ?? registration.group.settings.startDate;
+            dates.push(registration.startDate ?? registration.group.settings.startDate);
+        }
 
+        for (const item of [...this.family.checkout.cart.items, ...this.family.pendingRegisterItems]) {
+            if (item.member.id !== this.id) {
+                continue;
+            }
+
+            dates.push(item.calculatedStartDate);
+        }
+
+        return dates;
+    }
+
+    get needsTaxCertificate(): boolean {
+        const details = this.patchedMember.details;
+        const maxAge = details.severeDisability?.value ? 20 : 13;
+
+        const oldest = new Date();
+        oldest.setFullYear(oldest.getFullYear() - 2);
+
+        for (const date of this.taxCertificateDates) {
             if (date < oldest) {
                 continue;
             }
