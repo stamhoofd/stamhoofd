@@ -3,7 +3,7 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import type { DetailedPayableBalanceCollection } from '@stamhoofd/structures';
 import { PaymentStatus } from '@stamhoofd/structures';
 
-import { BalanceItem, Payment } from '@stamhoofd/models';
+import { BalanceItem, Payment, Platform } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { Context } from '../../../../helpers/Context.js';
 import { GetUserDetailedPayableBalanceEndpoint } from '../../../global/registration/GetUserDetailedPayableBalanceEndpoint.js';
@@ -51,6 +51,24 @@ export class GetOrganizationDetailedPayableBalanceCollectionEndpoint extends End
             )
             .fetch();
 
-        return new Response(await GetUserDetailedPayableBalanceEndpoint.getDetailedBillingStatus(balanceItemModels, paymentModels));
+        return new Response(await GetUserDetailedPayableBalanceEndpoint.getDetailedBillingStatus(balanceItemModels, paymentModels, await this.getAlwaysIncludedOrganizationIds(organization.id)));
+    }
+
+    private async getAlwaysIncludedOrganizationIds(organizationId: string): Promise<string[]> {
+        if (STAMHOOFD.userMode !== 'platform') {
+            return []; // not in org mode
+        }
+
+        const platform = await Platform.getShared();
+
+        if (!platform.membershipOrganizationId) {
+            return []; // not if no membership org is set
+        }
+
+        if (platform.membershipOrganizationId === organizationId) {
+            return []; // not if org is the membership org itself
+        }
+
+        return [platform.membershipOrganizationId];
     }
 }
