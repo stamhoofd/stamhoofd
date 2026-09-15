@@ -22,6 +22,8 @@ import { RichText } from '../RichText.js';
 import { SeatingPlan } from '../SeatingPlan.js';
 import { SponsorConfig } from '../SponsorConfig.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
+import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';
+import { CustomerSettings } from './CustomerSettings.js';
 import { Discount } from './Discount.js';
 import { TransferSettings } from './TransferSettings.js';
 import { WebshopField } from './WebshopField.js';
@@ -474,17 +476,40 @@ export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: BooleanDecoder, version: 94 })
     allowComments = false;
 
+    /**
+     * @deprecated
+     * Use customerSettings instead. Still written by the dashboard so older clients keep working.
+     */
     @field({ decoder: BooleanDecoder, optional: true })
     phoneEnabled = true;
 
+    /**
+     * @deprecated
+     * Use customerSettings instead.
+     */
     @field({ decoder: BooleanDecoder, version: 403 })
     birthDayEnabled = false;
 
+    /**
+     * @deprecated
+     * Use customerSettings instead.
+     */
     @field({ decoder: BooleanDecoder, version: 403 })
     addressEnabled = false;
 
+    /**
+     * @deprecated
+     * Use customerSettings instead.
+     */
     @field({ decoder: BooleanDecoder, version: 403 })
     genderEnabled = false;
+
+    /**
+     * Details asked from the person placing the order.
+     * null = derive from the deprecated *Enabled flags
+     */
+    @field({ decoder: CustomerSettings, nullable: true, ...NextVersion })
+    customerSettings: CustomerSettings | null = null;
 
     @field({ decoder: BooleanDecoder, version: 242 })
     allowDiscountCodeEntry = false;
@@ -670,6 +695,21 @@ export class WebshopMetaData extends AutoEncoder {
 
     get isRegistrations() {
         return this.type === WebshopType.Registrations;
+    }
+
+    /**
+     * The details asked from the person placing the order. The email address is always required: it receives the confirmation.
+     */
+    get resolvedCustomerSettings(): CustomerSettings {
+        const toRequirement = (enabled: boolean) => enabled ? CustomerFieldRequirement.Required : CustomerFieldRequirement.Disabled;
+        const settings = this.customerSettings ?? CustomerSettings.create({
+            phone: toRequirement(this.phoneEnabled),
+            birthDay: toRequirement(this.birthDayEnabled),
+            gender: toRequirement(this.genderEnabled),
+            address: toRequirement(this.addressEnabled),
+        });
+
+        return settings.patch({ email: CustomerFieldRequirement.Required });
     }
 
     get hasTickets() {

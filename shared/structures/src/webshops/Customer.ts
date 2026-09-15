@@ -4,15 +4,7 @@ import { Address } from '../addresses/Address.js';
 import { Gender } from '../members/Gender.js';
 import { PaymentCustomer } from '../PaymentCustomer.js';
 import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';
-
-export interface CustomerValidationSettings {
-    email: CustomerFieldRequirement;
-    phone: CustomerFieldRequirement;
-    birthDay: CustomerFieldRequirement;
-    gender: CustomerFieldRequirement;
-    address: CustomerFieldRequirement;
-    asAdmin: boolean;
-}
+import type { CustomerSettings } from './CustomerSettings.js';
 
 export class Customer extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -38,9 +30,10 @@ export class Customer extends AutoEncoder {
 
     /**
      * Throws with `customer.*` fields. The first and last name are always required.
-     * Required = today's checks, Optional = only validate the format when a value is given, Disabled = clear the value.
+     * Required = must be present and well-formed, Optional = only validate the format when a value is given, Disabled = clear the value.
+     * Admins may leave required fields empty, except for the email format.
      */
-    validate(settings: CustomerValidationSettings) {
+    validate(settings: CustomerSettings, { asAdmin = false }: { asAdmin?: boolean } = {}) {
         if (this.firstName.length < 2) {
             throw new SimpleError({
                 code: 'invalid_first_name',
@@ -61,7 +54,7 @@ export class Customer extends AutoEncoder {
 
         if (settings.phone === CustomerFieldRequirement.Disabled) {
             this.phone = '';
-        } else if (this.phone.length < 6 && !settings.asAdmin && (settings.phone === CustomerFieldRequirement.Required || this.phone.length > 0)) {
+        } else if (this.phone.length < 6 && !asAdmin && (settings.phone === CustomerFieldRequirement.Required || this.phone.length > 0)) {
             throw new SimpleError({
                 code: 'invalid_phone',
                 message: 'Invalid phone',
@@ -72,7 +65,7 @@ export class Customer extends AutoEncoder {
 
         if (settings.birthDay === CustomerFieldRequirement.Disabled) {
             this.birthDay = null;
-        } else if (!this.birthDay && !settings.asAdmin && settings.birthDay === CustomerFieldRequirement.Required) {
+        } else if (!this.birthDay && !asAdmin && settings.birthDay === CustomerFieldRequirement.Required) {
             throw new SimpleError({
                 code: 'invalid_birth_day',
                 message: 'Invalid birth day',
@@ -83,7 +76,7 @@ export class Customer extends AutoEncoder {
 
         if (settings.address === CustomerFieldRequirement.Disabled) {
             this.address = null;
-        } else if (!this.address && !settings.asAdmin && settings.address === CustomerFieldRequirement.Required) {
+        } else if (!this.address && !asAdmin && settings.address === CustomerFieldRequirement.Required) {
             throw new SimpleError({
                 code: 'invalid_address',
                 message: 'Invalid address',

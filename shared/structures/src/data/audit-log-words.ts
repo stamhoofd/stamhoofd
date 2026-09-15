@@ -142,6 +142,7 @@ export default {
     'untitled': 'naamloos',
     'prices.untitled': 'standaard prijs',
     'phoneEnabled': 'GSM-nummer vragen',
+    'customerSettings': 'gegevens van de besteller',
     'notificationEmail': 'Meldingen naar e-mailadres',
     'cart.items': 'bestelde artikels',
     'cart.item': 'besteld artikel',

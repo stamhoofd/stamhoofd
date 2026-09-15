@@ -96,6 +96,8 @@ import EditRecordCategoriesBox from '@stamhoofd/components/records/components/Ed
 import { RecordEditorSettings, RecordEditorType } from '@stamhoofd/components/records/RecordEditorSettings.ts';
 import type { RecordCategory } from '@stamhoofd/structures';
 import { Checkout, PrivateWebshop, WebshopMetaData } from '@stamhoofd/structures';
+import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
+import { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 import { computed } from 'vue';
 import type { UseEditWebshopProps } from './useEditWebshop';
 import { useEditWebshop } from './useEditWebshop';
@@ -107,49 +109,35 @@ const { webshop, addPatch, errors, saving, save, hasChanges, shouldNavigateAway 
 });
 
 const categories = computed(() => webshop.value.meta.recordCategories);
-const phoneEnabled = computed({
-    get: () => webshop.value.meta.phoneEnabled,
-    set: (phoneEnabled: boolean) => {
-        addPatch(PrivateWebshop.patch({
-            meta: WebshopMetaData.patch({
-                phoneEnabled,
-            }),
-        }));
-    },
-});
 
-const birthDayEnabled = computed({
-    get: () => webshop.value.meta.birthDayEnabled,
-    set: (birthDayEnabled: boolean) => {
-        addPatch(PrivateWebshop.patch({
-            meta: WebshopMetaData.patch({
-                birthDayEnabled,
-            }),
-        }));
-    },
-});
+/**
+ * Store the field in customerSettings, and mirror it in the deprecated flag that older clients still read.
+ */
+function customerField(key: 'phone' | 'birthDay' | 'gender' | 'address') {
+    return computed({
+        get: () => webshop.value.meta.resolvedCustomerSettings[key] !== CustomerFieldRequirement.Disabled,
+        set: (enabled: boolean) => {
+            const requirement = enabled ? CustomerFieldRequirement.Required : CustomerFieldRequirement.Disabled;
+            const current = webshop.value.meta.customerSettings;
 
-const addressEnabled = computed({
-    get: () => webshop.value.meta.addressEnabled,
-    set: (addressEnabled: boolean) => {
-        addPatch(PrivateWebshop.patch({
-            meta: WebshopMetaData.patch({
-                addressEnabled,
-            }),
-        }));
-    },
-});
+            const meta = WebshopMetaData.patch({
+                // Settings did not exist yet: store a full object instead of a patch
+                customerSettings: current === null
+                    ? webshop.value.meta.resolvedCustomerSettings.patch({ [key]: requirement })
+                    : CustomerSettings.patch({ [key]: requirement }),
+            });
+            // Older clients still read the deprecated flags
+            meta[`${key}Enabled`] = enabled;
 
-const genderEnabled = computed({
-    get: () => webshop.value.meta.genderEnabled,
-    set: (genderEnabled: boolean) => {
-        addPatch(PrivateWebshop.patch({
-            meta: WebshopMetaData.patch({
-                genderEnabled,
-            }),
-        }));
-    },
-});
+            addPatch(PrivateWebshop.patch({ meta }));
+        },
+    });
+}
+
+const phoneEnabled = customerField('phone');
+const birthDayEnabled = customerField('birthDay');
+const addressEnabled = customerField('address');
+const genderEnabled = customerField('gender');
 
 const getCheckoutFilterDefinitions = useCheckoutInMemoryFilterBuilders();
 

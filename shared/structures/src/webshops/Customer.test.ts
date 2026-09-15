@@ -5,11 +5,12 @@ import { Address } from '../addresses/Address.js';
 import { Gender } from '../members/Gender.js';
 import { Customer } from './Customer.js';
 import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';
+import { CustomerSettings } from './CustomerSettings.js';
 
-const { Required, Optional, Disabled } = CustomerFieldRequirement;
+const { Required, Optional } = CustomerFieldRequirement;
 
-function settings(overrides: Partial<Record<'email' | 'phone' | 'birthDay' | 'gender' | 'address', CustomerFieldRequirement>> = {}, asAdmin = false) {
-    return { email: Disabled, phone: Disabled, birthDay: Disabled, gender: Disabled, address: Disabled, ...overrides, asAdmin };
+function settings(overrides: Partial<CustomerSettings> = {}) {
+    return CustomerSettings.create(overrides);
 }
 
 function customer(overrides: Partial<Customer> = {}) {
@@ -43,8 +44,8 @@ describe('Customer.validate', () => {
     });
 
     it('does not require required fields for admins, except the email format', () => {
-        expect(() => customer().validate(settings({ phone: Required, birthDay: Required, address: Required }, true))).not.toThrow();
-        expect(() => customer().validate(settings({ email: Required }, true))).toThrow(/email/i);
+        expect(() => customer().validate(settings({ phone: Required, birthDay: Required, address: Required }), { asAdmin: true })).not.toThrow();
+        expect(() => customer().validate(settings({ email: Required }), { asAdmin: true })).toThrow(/email/i);
     });
 
     it('accepts empty optional fields but validates their format when given', () => {
