@@ -93,32 +93,32 @@ export function getSelectableColumns() {
             id: 'member.memberNumber',
             name: $t(`%19j`),
             category: memberCategory,
-            enabled: true
+            enabled: true,
         }),
         new SelectableColumn({
             id: 'member.firstName',
             name: $t(`%1MT`),
             category: memberCategory,
-            enabled: true
+            enabled: true,
         }),
         new SelectableColumn({
             id: 'member.lastName',
             name: $t(`%1MU`),
             category: memberCategory,
-            enabled: true
+            enabled: true,
         }),
         // organization
         new SelectableColumn({
             id: 'organization.name',
             name: $t(`%1Os`),
             category: organizationCategory,
-            enabled: true
+            enabled: true,
         }),
         new SelectableColumn({
             id: 'organization.uri',
             name: $t(`%1O1`),
             category: organizationCategory,
-            enabled: true
+            enabled: true,
         }),
     ].filter(column => column !== null);
 
