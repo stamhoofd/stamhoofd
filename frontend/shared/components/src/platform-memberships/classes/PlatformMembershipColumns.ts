@@ -1,13 +1,13 @@
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { Column } from '#tables/classes/Column.ts';
 import { useFetchRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
-import type { PlatformMembership, RegistrationPeriod } from '@stamhoofd/structures';
+import type { Organization, PlatformMembership, RegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { onMounted, shallowRef } from 'vue';
 
 type ObjectType = PlatformMembership;
 
-export function useGetPlatformMembershipColumns() {
+export function useGetPlatformMembershipColumns(organization: Organization | null = null) {
     const platform = usePlatform();
     const fetchRegistrationPeriods = useFetchRegistrationPeriods();
     const periods = shallowRef<RegistrationPeriod[]>([]);
@@ -68,28 +68,32 @@ export function useGetPlatformMembershipColumns() {
             enabled: false,
             allowSorting: false,
         }),
-        new Column<ObjectType, string>({
-            id: 'organization.name',
-            name: $t('%1PI'),
-            getValue: m => m.organization.name,
-            getStyleForObject: (m) => {
-                // Gray if not yet charged
-                return m.balanceItemId ? '' : 'gray';
-            },
-            minimumWidth: 100,
-            recommendedWidth: 200,
-            enabled: true,
-            allowSorting: false,
-        }),
-        new Column<ObjectType, string>({
-            id: 'organization.uri',
-            name: $t('%1O1'),
-            getValue: m => m.organization.uri,
-            minimumWidth: 60,
-            recommendedWidth: 100,
-            enabled: false,
-            allowSorting: false,
-        }),
+        ...(organization
+            ? []
+            : [
+                    new Column<ObjectType, string>({
+                        id: 'organization.name',
+                        name: $t('%1PI'),
+                        getValue: m => m.organization.name,
+                        getStyleForObject: (m) => {
+                            // Gray if not yet charged
+                            return m.balanceItemId ? '' : 'gray';
+                        },
+                        minimumWidth: 100,
+                        recommendedWidth: 200,
+                        enabled: true,
+                        allowSorting: false,
+                    }),
+                    new Column<ObjectType, string>({
+                        id: 'organization.uri',
+                        name: $t('%1O1'),
+                        getValue: m => m.organization.uri,
+                        minimumWidth: 60,
+                        recommendedWidth: 100,
+                        enabled: false,
+                        allowSorting: false,
+                    }),
+                ]),
         new Column<ObjectType, string>({
             id: 'membershipTypeId',
             name: $t('%1LP'),
