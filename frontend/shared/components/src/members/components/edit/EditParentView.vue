@@ -84,7 +84,7 @@
                 </template>
 
                 <template v-if="showNationalRegisterNumber">
-                    <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`)" :required="isNRNRequiredForThisParent" :nullable="true" :validator="errors.validator" data-testid="national-register-number-input" />
+                    <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`)" :required="isNRNRequiredForThisParent" :required-message="nrnRequiredMessage" :nullable="true" :validator="errors.validator" data-testid="national-register-number-input" />
                     <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
                         {{ $t('%fa') }} <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
                             {{ $t('%fb') }}
@@ -123,7 +123,7 @@ import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import type { Address, Parent, ParentType, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
 import { NationalRegisterNumberOptOut, ParentTypeHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, nextTick, ref } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { useErrors } from '../../../errors/useErrors';
@@ -178,19 +178,56 @@ const isAllOptional = useIsAllOptional(relatedMembers);
 const showTaxDependent = computed(() => isPropertyEnabled('parents.taxDependent') && !!props.member);
 
 /**
- * The number of the tax dependent parent ends up on the certificate, so a number
- * stored for another parent doesn't make this one optional.
+ * taxDependent is stored per member, so read it from the member rather than from the parent object
+ * we happen to hold: without a member that is one collapsed copy (PlatformFamily.parents keeps the
+ * last member's), and with one the checkbox in this view is the live value.
+ */
+function isTaxDependentFor(member: PlatformMember) {
+    if (props.member && member.id === props.member.id) {
+        return patched.value.taxDependent === true;
+    }
+
+    return member.patchedMember.details.parents.find(p => p.id === props.parent.id)?.taxDependent === true;
+}
+
+/**
+ * The number belongs to the parent and is shared by everyone who has them, so it stays required as
+ * long as any member still has this parent tax dependent. Clearing it would drop that member's
+ * number too, and their certificate needs it.
  */
 const isNRNRequiredForThisParent = computed(() => {
     if (isAllOptional.value) {
         return false;
     }
 
-    if (!patched.value.taxDependent) {
-        return false;
+    return relatedMembers.value.some(member => member.isPropertyRequired('parents.nationalRegisterNumber') && isTaxDependentFor(member));
+});
+
+const otherTaxDependentMemberNames = computed(() => {
+    const names = relatedMembers.value
+        .filter(member => (!props.member || member.id !== props.member.id)
+            && member.isPropertyRequired('parents.nationalRegisterNumber')
+            && isTaxDependentFor(member))
+        .map(member => member.patchedMember.details.firstName);
+
+    return Formatter.joinLastLimited(names, {
+        separator: ', ',
+        lastSeparator: ' ' + $t('%M1') + ' ',
+        maxLength: 70,
+        maxCount: 3,
+    });
+});
+
+/**
+ * Naming the other members only matters once leaving it empty is actually blocked, so it belongs
+ * in the error rather than in a hint that sits there for everyone.
+ */
+const nrnRequiredMessage = computed(() => {
+    if (!otherTaxDependentMemberNames.value) {
+        return null;
     }
 
-    return relatedMembers.value.some(member => member.isPropertyRequired('parents.nationalRegisterNumber'));
+    return $t('Vul een rijksregisternummer in. Deze ouder heeft ook {names} fiscaal ten laste, dus dit nummer is nodig voor dat attest.', { names: otherTaxDependentMemberNames.value });
 });
 
 const firstName = computed({
@@ -263,11 +300,23 @@ const taxDependent = computed({
 });
 
 /**
+ * Correcting a number starts by clearing the field, so once it held a value it keeps its place
+ * for the rest of the session instead of disappearing halfway through the edit.
+ */
+const hasHadNationalRegisterNumber = ref(!!props.parent.nationalRegisterNumber);
+
+watch(nationalRegisterNumber, (value) => {
+    if (value) {
+        hasHadNationalRegisterNumber.value = true;
+    }
+});
+
+/**
  * We only ask the national register number of the parent that has the member tax dependent.
  * An already stored value (or opt-out) stays visible so it can still be corrected.
  */
 const showNationalRegisterNumber = computed(() => {
-    if (nationalRegisterNumber.value) {
+    if (hasHadNationalRegisterNumber.value) {
         return true;
     }
 

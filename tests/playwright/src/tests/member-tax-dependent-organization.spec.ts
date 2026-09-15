@@ -50,7 +50,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         await WorkerData.resetDatabase();
     });
 
-    async function seedScenario({ taxDependent, nationalRegisterNumbers, profile = YOUNG, taxDependentParents = {}, withThirdParent = false, withRegistrations = true }: {
+    async function seedScenario({ taxDependent, nationalRegisterNumbers, profile = YOUNG, taxDependentParents = {}, withThirdParent = false, withRegistrations = true, taxDependentPerMember }: {
         taxDependent: boolean;
         /** National register number per parent, null to leave it empty */
         nationalRegisterNumbers: { mother: string | null; father: string | null };
@@ -62,6 +62,11 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         withThirdParent?: boolean;
         /** Leave the members unregistered, so the portal can register them for the first time */
         withRegistrations?: boolean;
+        /** Tax dependent parents per member, for families where the siblings differ */
+        taxDependentPerMember?: {
+            memberA?: { mother?: boolean | null; father?: boolean | null };
+            memberB?: { mother?: boolean | null; father?: boolean | null };
+        };
     }): Promise<Scenario> {
         const runId = `${WorkerData.id}-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
 
@@ -171,7 +176,16 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
             password: PORTAL_PASSWORD,
         }).create();
 
-        const buildMember = async (firstName: string) => {
+        const buildMember = async (firstName: string, ownTaxDependentParents?: { mother?: boolean | null; father?: boolean | null }) => {
+            const memberMother = mother.clone();
+            const memberFather = father.clone();
+
+            // taxDependent lives on the member's own copy of the parent, so it can differ per member
+            if (ownTaxDependentParents) {
+                memberMother.taxDependent = ownTaxDependentParents.mother ?? null;
+                memberFather.taxDependent = ownTaxDependentParents.father ?? null;
+            }
+
             const member = await new MemberFactory({
                 organization,
                 user: portalUser,
@@ -182,7 +196,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
                     // Valid and complete, so the parents step is the one that needs work
                     nationalRegisterNumber: profile.nationalRegisterNumber,
                     severeDisability: profile.severeDisability === undefined ? null : BooleanStatus.create({ value: profile.severeDisability }),
-                    parents: withThirdParent ? [mother.clone(), father.clone(), thirdParent.clone()] : [mother.clone(), father.clone()],
+                    parents: withThirdParent ? [memberMother, memberFather, thirdParent.clone()] : [memberMother, memberFather],
                 }),
             }).create();
 
@@ -193,8 +207,8 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
             return member;
         };
 
-        const memberA = await buildMember(names.memberA);
-        const memberB = await buildMember(names.memberB);
+        const memberA = await buildMember(names.memberA, taxDependentPerMember?.memberA);
+        const memberB = await buildMember(names.memberB, taxDependentPerMember?.memberB);
 
         const user = await new UserFactory({
             firstName: 'Tax',
@@ -311,6 +325,26 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         await page.getByTestId('password-input').fill(PORTAL_PASSWORD);
         await page.getByTestId('login-button').click();
         await expect(page.getByTestId('members-start-view')).toBeVisible({ timeout: 30_000 });
+    }
+
+    /** Opens the portal's 'Gegevens nakijken' page, which lists the family's parents */
+    async function openCheckData({ page }: { page: Page }) {
+        await page.getByTestId('check-data-button').click();
+        await expect(page.getByTestId('check-data-parent-row').first()).toBeVisible({ timeout: 30_000 });
+    }
+
+    /**
+     * Opens a parent from that page. The list collapses the per-member copies of a parent into
+     * one, and the editor gets no member at all.
+     */
+    async function openParentFromCheckData({ page, parentName }: { page: Page; parentName: string }) {
+        const row = page.getByTestId('check-data-parent-row').filter({ hasText: parentName });
+        await expect(row).toBeVisible({ timeout: 30_000 });
+        await row.click();
+
+        const parentView = page.getByTestId('save-view').filter({ has: page.getByRole('heading', { name: new RegExp(parentName) }) });
+        await expect(parentView).toBeVisible();
+        return parentView;
     }
 
     async function readTaxDependent(memberId: string, parentId: string) {
@@ -484,6 +518,85 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         await expect(taxDependentCheckbox(motherView)).toBeHidden();
         await expect(nationalRegisterNumberInput(motherView)).toBeVisible();
         await expect(nationalRegisterNumberInput(motherView)).toHaveValue(/93\.04\.20-001\.22|93042000122/);
+    });
+
+    test('each tax dependent parent stays required on the data check page, whichever sibling claims them', async ({ page }) => {
+        test.setTimeout(180_000);
+        // Each parent has the member tax dependent for a different sibling
+        const scenario = await seedScenario({
+            taxDependent: true,
+            nationalRegisterNumbers: { mother: VALID_NRN_A, father: VALID_NRN_B },
+            taxDependentPerMember: {
+                memberA: { mother: true },
+                memberB: { father: true },
+            },
+        });
+
+        await loginToPortal({ page, scenario });
+        await openCheckData({ page });
+
+        // 'Gegevens nakijken' keeps only one copy of each parent, so neither may fall back to optional
+        for (const parentName of [scenario.names.mother, scenario.names.father]) {
+            const parentView = await openParentFromCheckData({ page, parentName });
+            await expect(nationalRegisterNumberInput(parentView)).toHaveAttribute('placeholder', 'JJ.MM.DD-XXX.XX');
+
+            await page.keyboard.press('Escape');
+            await expect(parentView).toBeHidden({ timeout: 15_000 });
+        }
+    });
+
+    test('a number a sibling still depends on stays required, and says who needs it', async ({ page }) => {
+        test.setTimeout(180_000);
+        // The mother has both children tax dependent, and only she has a number
+        const scenario = await seedScenario({
+            taxDependent: true,
+            nationalRegisterNumbers: { mother: VALID_NRN_A, father: null },
+            taxDependentParents: { mother: true },
+        });
+
+        // Admins get every field as optional, so this only shows up in the portal
+        await loginToPortal({ page, scenario });
+
+        const quickAction = page.getByTestId('quick-action').filter({ hasText: new RegExp(scenario.names.memberA) });
+        await expect(quickAction).toBeVisible({ timeout: 30_000 });
+        await quickAction.click();
+
+        const step = page.getByTestId('member-step');
+        await expect(step).toBeVisible();
+
+        const motherView = await openParentEditView({ page, editView: step, parentName: scenario.names.mother });
+
+        // Unticking for this member must not release the number: the sibling still needs it
+        await taxDependentCheckbox(motherView).click();
+        await expect(taxDependentCheckbox(motherView)).not.toBeChecked();
+
+        await expect(nationalRegisterNumberInput(motherView)).toHaveAttribute('placeholder', 'JJ.MM.DD-XXX.XX');
+
+        // Clearing it has to be refused, and the error has to name the sibling that still needs it
+        await nationalRegisterNumberInput(motherView).fill('');
+        await saveView(motherView);
+
+        await expect(motherView).toBeVisible();
+
+        const error = motherView.getByText(/vul een rijksregisternummer in/i).first();
+        await expect(error).toBeVisible();
+        await expect(error).toContainText(scenario.names.memberB);
+    });
+
+    test('clearing the number to correct it keeps the field on screen', async ({ page }) => {
+        test.setTimeout(120_000);
+        const scenario = await seedScenario({ taxDependent: false, nationalRegisterNumbers: { mother: VALID_NRN_A, father: null } });
+        await loginAs({ page, user: scenario.user });
+
+        const editView = await openMemberEditView({ page, scenario, memberName: scenario.names.memberA });
+        const motherView = await openParentEditView({ page, editView, parentName: scenario.names.mother });
+
+        // Correcting a number starts by emptying the field, which must not hide it
+        await nationalRegisterNumberInput(motherView).fill('');
+        await expect(nationalRegisterNumberInput(motherView)).toBeVisible();
+
+        await nationalRegisterNumberInput(motherView).fill(VALID_NRN_B);
+        await expect(nationalRegisterNumberInput(motherView)).toHaveValue(/93\.04\.20-002\.21|93042000221/);
     });
 
     // ------------------------------------------------------------------

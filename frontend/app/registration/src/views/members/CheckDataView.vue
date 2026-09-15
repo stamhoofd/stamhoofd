@@ -45,7 +45,7 @@
                 <p>{{ $t('%XI') }}</p>
 
                 <STList class="illustration-list">
-                    <STListItem v-for="parent in parents" :key="parent.id" class="right-stack" :selectable="true" @click.stop="editParent(parent)">
+                    <STListItem v-for="parent in parents" :key="parent.id" class="right-stack" :selectable="true" data-testid="check-data-parent-row" @click.stop="editParent(parent)">
                         <template #left>
                             <img src="~@stamhoofd/assets/images/illustrations/group.svg">
                         </template>
