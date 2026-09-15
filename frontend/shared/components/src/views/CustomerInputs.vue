@@ -43,6 +43,7 @@ import type { Server } from '@simonbackx/simple-networking';
 import type { Address, Customer, ValidatedAddress } from '@stamhoofd/structures';
 import { Gender } from '@stamhoofd/structures';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
+import type { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 import { computed } from 'vue';
 
 import type { ErrorBox } from '../errors/ErrorBox';
@@ -55,17 +56,9 @@ import Radio from '../inputs/Radio.vue';
 import RadioGroup from '../inputs/RadioGroup.vue';
 import STInputBox from '../inputs/STInputBox.vue';
 
-export interface CustomerFieldSettings {
-    email: CustomerFieldRequirement;
-    phone: CustomerFieldRequirement;
-    birthDay: CustomerFieldRequirement;
-    gender: CustomerFieldRequirement;
-    address: CustomerFieldRequirement;
-}
-
 const props = withDefaults(defineProps<{
     customer: Customer;
-    settings: CustomerFieldSettings;
+    settings: CustomerSettings;
     showName?: boolean;
     nameTitle?: string;
     /** Browser autofill of the buyer's own name: off for participants */

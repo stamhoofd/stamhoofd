@@ -18,11 +18,10 @@ import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import CustomerInputs from '@stamhoofd/components/views/CustomerInputs.vue';
-import type { CustomerFieldSettings } from '@stamhoofd/components/views/CustomerInputs.vue';
 import FieldBox from '@stamhoofd/components/views/FieldBox.vue';
 import { WebshopTicketType } from '@stamhoofd/structures';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
-
+import type { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 import { computed, ref } from 'vue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
 import { useWebshopManager } from '../../composables/useWebshopManager';
@@ -43,15 +42,13 @@ const unscopedServer = computed(() => webshopManager.unscopedServer);
 // and stored on the customer, so we don't ask for the address a second time.
 const hasDeliveryAddress = computed(() => checkoutManager.checkout.deliveryMethod !== null);
 
-const fieldSettings = computed((): CustomerFieldSettings => {
-    const toRequirement = (enabled: boolean) => enabled ? CustomerFieldRequirement.Required : CustomerFieldRequirement.Disabled;
-    return {
-        email: isLoggedIn.value ? CustomerFieldRequirement.Disabled : CustomerFieldRequirement.Required,
-        phone: toRequirement(webshop.value.meta.phoneEnabled),
-        birthDay: toRequirement(webshop.value.meta.birthDayEnabled),
-        gender: toRequirement(webshop.value.meta.genderEnabled),
-        address: toRequirement(webshop.value.meta.addressEnabled && !hasDeliveryAddress.value),
-    };
+const fieldSettings = computed((): CustomerSettings => {
+    const settings = webshop.value.meta.customerSettings;
+    return settings.patch({
+        // A logged in user's name and email address come from their account
+        email: isLoggedIn.value ? CustomerFieldRequirement.Disabled : settings.email,
+        address: hasDeliveryAddress.value ? CustomerFieldRequirement.Disabled : settings.address,
+    });
 });
 
 const emailPlaceholder = computed(() => {
