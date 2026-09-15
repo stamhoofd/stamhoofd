@@ -477,6 +477,24 @@ const allActions = computed(() => {
             },
         });
     }
+    if (showAll.value) {
+        list.push({
+            icon: 'team',
+            title: $t('%L8'),
+            route: Routes.All,
+        });
+    }
+
+    if (showAll.value && STAMHOOFD.userMode === 'platform') {
+        // this could actually be intersting for users with only 1 group (showAll is false)
+        // but for now we choose to hide it (avoid unnecessary complexity)
+        list.push({
+            icon: 'membership-filled',
+            title: $t('%1Nt'),
+            route: Routes.PlatformMemberships,
+            hidden: true,
+        });
+    }
 
     if (auth.hasFullAccess()) {
         // Checklist
@@ -506,20 +524,6 @@ const allActions = computed(() => {
             route: Routes.Settings,
             hidden: true,
         });
-        list.push({
-            icon: 'team',
-            title: $t('%L8'),
-            route: Routes.All,
-        });
-
-        if (STAMHOOFD.userMode === 'platform') {
-            list.push({
-                icon: 'membership-filled',
-                title: $t('%1Nt'),
-                route: Routes.PlatformMemberships,
-                hidden: true,
-            });
-        }
 
         // Lists every member of the organization across all periods (organization mode only).
         // In platform mode members are not scoped to a single organization, so this makes no sense.
