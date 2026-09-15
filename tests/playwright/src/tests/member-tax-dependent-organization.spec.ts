@@ -50,8 +50,9 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         await WorkerData.resetDatabase();
     });
 
-    async function seedScenario({ taxDependent, nationalRegisterNumbers, profile = YOUNG, taxDependentParents = {}, withThirdParent = false, withRegistrations = true, taxDependentPerMember, memberNationalRegisterNumberFilter = true }: {
-        taxDependent: boolean;
+    async function seedScenario({ taxCertificates, nationalRegisterNumbers, profile = YOUNG, taxDependentParents = {}, withThirdParent = false, withRegistrations = true, taxDependentPerMember, memberNationalRegisterNumberFilter = true }: {
+        /** The organization setting that collects data for fiscal certificates */
+        taxCertificates: boolean;
         /** National register number per parent, null to leave it empty */
         nationalRegisterNumbers: { mother: string | null; father: string | null };
         /** Young enough for a fiscal certificate, too old, or kept eligible by a severe disability */
@@ -86,7 +87,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
                     parents: PropertyFilter.createDefault(),
                     birthDay: PropertyFilter.createDefault(),
                     nationalRegisterNumber: memberNationalRegisterNumberFilter ? PropertyFilter.createDefault() : null,
-                    taxDependent,
+                    taxCertificates,
                 }),
             }),
         }).create();
@@ -429,65 +430,65 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
 
     test('the tax certificate setting sits last in the list of properties', async ({ page }) => {
         test.setTimeout(150_000);
-        const scenario = await seedScenario({ taxDependent: false, nationalRegisterNumbers: { mother: null, father: null } });
+        const scenario = await seedScenario({ taxCertificates: false, nationalRegisterNumbers: { mother: null, father: null } });
         await loginAs({ page, user: scenario.user });
 
         const settings = await openRecordsSettings({ page, scenario });
 
         await expect(settingRow(settings, 'nationalRegisterNumber').getByTestId('checkbox')).toBeChecked();
-        await expect(settingRow(settings, 'taxDependent')).toBeVisible();
+        await expect(settingRow(settings, 'taxCertificates')).toBeVisible();
 
         const rows = settings.locator('[data-testid^="records-property-"]');
         const order = await rows.evaluateAll(elements => elements.map(e => e.getAttribute('data-testid')));
-        expect(order[order.length - 1]).toBe('records-property-taxDependent');
+        expect(order[order.length - 1]).toBe('records-property-taxCertificates');
     });
 
     test('the tax certificate setting stands on its own, without the national register number', async ({ page }) => {
         test.setTimeout(150_000);
-        const scenario = await seedScenario({ taxDependent: true, nationalRegisterNumbers: { mother: null, father: null } });
+        const scenario = await seedScenario({ taxCertificates: true, nationalRegisterNumbers: { mother: null, father: null } });
         await loginAs({ page, user: scenario.user });
 
         const settings = await openRecordsSettings({ page, scenario });
-        await expect(settingRow(settings, 'taxDependent').getByTestId('checkbox')).toBeChecked();
+        await expect(settingRow(settings, 'taxCertificates').getByTestId('checkbox')).toBeChecked();
 
         // It collects its own numbers, so turning the plain question off leaves it alone
         await settingRow(settings, 'nationalRegisterNumber').getByTestId('checkbox').click();
         await expect(settingRow(settings, 'nationalRegisterNumber').getByTestId('checkbox')).not.toBeChecked();
 
-        await expect(settingRow(settings, 'taxDependent')).toBeVisible();
-        await expect(settingRow(settings, 'taxDependent').getByTestId('checkbox')).toBeChecked();
+        await expect(settingRow(settings, 'taxCertificates')).toBeVisible();
+        await expect(settingRow(settings, 'taxCertificates').getByTestId('checkbox')).toBeChecked();
     });
 
     test('turning off the parents leaves the tax dependent setting alone', async ({ page }) => {
         test.setTimeout(150_000);
-        const scenario = await seedScenario({ taxDependent: true, nationalRegisterNumbers: { mother: null, father: null } });
+        const scenario = await seedScenario({ taxCertificates: true, nationalRegisterNumbers: { mother: null, father: null } });
         await loginAs({ page, user: scenario.user });
 
         const settings = await openRecordsSettings({ page, scenario });
-        await expect(settingRow(settings, 'taxDependent').getByTestId('checkbox')).toBeChecked();
+        await expect(settingRow(settings, 'taxCertificates').getByTestId('checkbox')).toBeChecked();
 
         // Only the national register number decides whether the question is offered
         await settingRow(settings, 'parents').getByTestId('checkbox').click();
         await expect(settingRow(settings, 'parents').getByTestId('checkbox')).not.toBeChecked();
 
-        await expect(settingRow(settings, 'taxDependent')).toBeVisible();
-        await expect(settingRow(settings, 'taxDependent').getByTestId('checkbox')).toBeChecked();
+        await expect(settingRow(settings, 'taxCertificates')).toBeVisible();
+        await expect(settingRow(settings, 'taxCertificates').getByTestId('checkbox')).toBeChecked();
     });
 
     test('the tax certificate setting stays stored when the national register number is turned off', async ({ page }) => {
         test.setTimeout(150_000);
-        const scenario = await seedScenario({ taxDependent: true, nationalRegisterNumbers: { mother: null, father: null } });
+        const scenario = await seedScenario({ taxCertificates: true, nationalRegisterNumbers: { mother: null, father: null } });
         await loginAs({ page, user: scenario.user });
 
         const settings = await openRecordsSettings({ page, scenario });
         await settingRow(settings, 'nationalRegisterNumber').getByTestId('checkbox').click();
-        await expect(settingRow(settings, 'taxDependent').getByTestId('checkbox')).toBeChecked();
+        await expect(settingRow(settings, 'taxCertificates').getByTestId('checkbox')).toBeChecked();
 
         await saveView(settings);
 
         await expect.poll(async () => {
             const organization = await OrganizationModel.getByID(scenario.organization.id);
-            return organization!.meta.recordsConfiguration.taxDependent;
+            return organization!.meta.recordsConfiguration.taxCertificates;
         }, { timeout: 20_000 }).toBe(true);
     });
 
@@ -495,7 +496,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
     test('with only the tax certificate setting, both the member and the parent are still asked', async ({ page }) => {
         test.setTimeout(150_000);
         const scenario = await seedScenario({
-            taxDependent: true,
+            taxCertificates: true,
             nationalRegisterNumbers: { mother: null, father: null },
             memberNationalRegisterNumberFilter: false,
         });
@@ -521,7 +522,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
 
     test('with only NRN enabled, neither the tax dependent checkbox nor the NRN field is asked', async ({ page }) => {
         test.setTimeout(120_000);
-        const scenario = await seedScenario({ taxDependent: false, nationalRegisterNumbers: { mother: null, father: null } });
+        const scenario = await seedScenario({ taxCertificates: false, nationalRegisterNumbers: { mother: null, father: null } });
         await loginAs({ page, user: scenario.user });
 
         const editView = await openMemberEditView({ page, scenario, memberName: scenario.names.memberA });
@@ -534,7 +535,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
 
     test('with only NRN enabled, an already stored number stays visible so it can be corrected', async ({ page }) => {
         test.setTimeout(120_000);
-        const scenario = await seedScenario({ taxDependent: false, nationalRegisterNumbers: { mother: VALID_NRN_A, father: null } });
+        const scenario = await seedScenario({ taxCertificates: false, nationalRegisterNumbers: { mother: VALID_NRN_A, father: null } });
         await loginAs({ page, user: scenario.user });
 
         const editView = await openMemberEditView({ page, scenario, memberName: scenario.names.memberA });
@@ -549,7 +550,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         test.setTimeout(180_000);
         // Each parent has the member tax dependent for a different sibling
         const scenario = await seedScenario({
-            taxDependent: true,
+            taxCertificates: true,
             nationalRegisterNumbers: { mother: VALID_NRN_A, father: VALID_NRN_B },
             taxDependentPerMember: {
                 memberA: { mother: true },
@@ -574,7 +575,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         test.setTimeout(180_000);
         // The mother has both children tax dependent, and only she has a number
         const scenario = await seedScenario({
-            taxDependent: true,
+            taxCertificates: true,
             nationalRegisterNumbers: { mother: VALID_NRN_A, father: null },
             taxDependentParents: { mother: true },
         });
@@ -610,7 +611,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
 
     test('clearing the number to correct it keeps the field on screen', async ({ page }) => {
         test.setTimeout(120_000);
-        const scenario = await seedScenario({ taxDependent: false, nationalRegisterNumbers: { mother: VALID_NRN_A, father: null } });
+        const scenario = await seedScenario({ taxCertificates: false, nationalRegisterNumbers: { mother: VALID_NRN_A, father: null } });
         await loginAs({ page, user: scenario.user });
 
         const editView = await openMemberEditView({ page, scenario, memberName: scenario.names.memberA });
@@ -630,7 +631,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
 
     test('with both enabled, the NRN field only appears once a parent is marked tax dependent', async ({ page }) => {
         test.setTimeout(120_000);
-        const scenario = await seedScenario({ taxDependent: true, nationalRegisterNumbers: { mother: null, father: null } });
+        const scenario = await seedScenario({ taxCertificates: true, nationalRegisterNumbers: { mother: null, father: null } });
         await loginAs({ page, user: scenario.user });
 
         const editView = await openMemberEditView({ page, scenario, memberName: scenario.names.memberA });
@@ -649,7 +650,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
 
     test('nothing is asked when the member is too old for a fiscal certificate', async ({ page }) => {
         test.setTimeout(120_000);
-        const scenario = await seedScenario({ taxDependent: true, nationalRegisterNumbers: { mother: null, father: null }, profile: TOO_OLD });
+        const scenario = await seedScenario({ taxCertificates: true, nationalRegisterNumbers: { mother: null, father: null }, profile: TOO_OLD });
         await loginAs({ page, user: scenario.user });
 
         const editView = await openMemberEditView({ page, scenario, memberName: scenario.names.memberA });
@@ -661,7 +662,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
 
     test('a member over 14 with a severe disability is still asked', async ({ page }) => {
         test.setTimeout(120_000);
-        const scenario = await seedScenario({ taxDependent: true, nationalRegisterNumbers: { mother: null, father: null }, profile: DISABLED });
+        const scenario = await seedScenario({ taxCertificates: true, nationalRegisterNumbers: { mother: null, father: null }, profile: DISABLED });
         await loginAs({ page, user: scenario.user });
 
         const editView = await openMemberEditView({ page, scenario, memberName: scenario.names.memberA });
@@ -681,7 +682,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
 
     test('marking a parent tax dependent for one child leaves the sibling untouched, also after a reload', async ({ page }) => {
         test.setTimeout(150_000);
-        const scenario = await seedScenario({ taxDependent: true, nationalRegisterNumbers: { mother: null, father: null } });
+        const scenario = await seedScenario({ taxCertificates: true, nationalRegisterNumbers: { mother: null, father: null } });
         await loginAs({ page, user: scenario.user });
 
         const editView = await openMemberEditView({ page, scenario, memberName: scenario.names.memberA });
@@ -721,7 +722,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
 
     test('each child can have a different parent tax dependent', async ({ page }) => {
         test.setTimeout(150_000);
-        const scenario = await seedScenario({ taxDependent: true, nationalRegisterNumbers: { mother: null, father: null } });
+        const scenario = await seedScenario({ taxCertificates: true, nationalRegisterNumbers: { mother: null, father: null } });
         await loginAs({ page, user: scenario.user });
 
         const editA = await openMemberEditView({ page, scenario, memberName: scenario.names.memberA });
@@ -752,7 +753,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
     test('marking a second parent asks to confirm fiscal co-parenting, and applies it when confirmed', async ({ page }) => {
         test.setTimeout(150_000);
         const scenario = await seedScenario({
-            taxDependent: true,
+            taxCertificates: true,
             nationalRegisterNumbers: { mother: VALID_NRN_A, father: null },
             taxDependentParents: { mother: true },
         });
@@ -785,7 +786,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
     test('cancelling the co-parenting confirmation leaves the second parent untouched', async ({ page }) => {
         test.setTimeout(150_000);
         const scenario = await seedScenario({
-            taxDependent: true,
+            taxCertificates: true,
             nationalRegisterNumbers: { mother: VALID_NRN_A, father: null },
             taxDependentParents: { mother: true },
         });
@@ -817,7 +818,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
     test('a third parent cannot be marked tax dependent', async ({ page }) => {
         test.setTimeout(150_000);
         const scenario = await seedScenario({
-            taxDependent: true,
+            taxCertificates: true,
             nationalRegisterNumbers: { mother: VALID_NRN_A, father: VALID_NRN_B },
             taxDependentParents: { mother: true, father: true },
             withThirdParent: true,
@@ -844,7 +845,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
     test('moving tax dependency to the other parent makes that parent\'s number required', async ({ page }) => {
         test.setTimeout(180_000);
         const scenario = await seedScenario({
-            taxDependent: true,
+            taxCertificates: true,
             nationalRegisterNumbers: { mother: VALID_NRN_A, father: null },
             taxDependentParents: { mother: true },
         });
@@ -881,7 +882,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
     test('a number on a parent that is not tax dependent does not complete the member', async ({ page }) => {
         test.setTimeout(150_000);
         const scenario = await seedScenario({
-            taxDependent: true,
+            taxCertificates: true,
             // The mother has a number, but nobody has the member tax dependent
             nationalRegisterNumbers: { mother: VALID_NRN_A, father: null },
         });
@@ -916,7 +917,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
     test('a new parent added to the whole family keeps tax dependency on the edited member only', async ({ page }) => {
         test.setTimeout(180_000);
         const scenario = await seedScenario({
-            taxDependent: true,
+            taxCertificates: true,
             nationalRegisterNumbers: { mother: null, father: null },
         });
 
@@ -973,7 +974,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
     test('the member portal asks to mark a parent tax dependent before the NRN can be added', async ({ page }) => {
         test.setTimeout(150_000);
         const scenario = await seedScenario({
-            taxDependent: true,
+            taxCertificates: true,
             nationalRegisterNumbers: { mother: null, father: null },
         });
 
@@ -1021,7 +1022,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         test('asks to mark a parent tax dependent while registering for the first time', async ({ page }) => {
             test.setTimeout(150_000);
             const scenario = await seedScenario({
-                taxDependent: true,
+                taxCertificates: true,
                 nationalRegisterNumbers: { mother: null, father: null },
                 withRegistrations: false,
             });
@@ -1039,7 +1040,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         test('asks a member over 14 with a severe disability', async ({ page }) => {
             test.setTimeout(150_000);
             const scenario = await seedScenario({
-                taxDependent: true,
+                taxCertificates: true,
                 nationalRegisterNumbers: { mother: null, father: null },
                 profile: DISABLED,
                 withRegistrations: false,
@@ -1052,7 +1053,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         test('asks nothing when the member is too old for a fiscal certificate', async ({ page }) => {
             test.setTimeout(150_000);
             const scenario = await seedScenario({
-                taxDependent: true,
+                taxCertificates: true,
                 nationalRegisterNumbers: { mother: null, father: null },
                 profile: TOO_OLD,
                 withRegistrations: false,
@@ -1067,7 +1068,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         test('asks nothing when the organization did not enable the setting', async ({ page }) => {
             test.setTimeout(150_000);
             const scenario = await seedScenario({
-                taxDependent: false,
+                taxCertificates: false,
                 nationalRegisterNumbers: { mother: null, father: null },
                 withRegistrations: false,
             });

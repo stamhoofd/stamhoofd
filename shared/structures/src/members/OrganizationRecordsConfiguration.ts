@@ -224,7 +224,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     nationalRegisterNumber: PropertyFilter | null = null;
 
     @field({ decoder: BooleanDecoder, ...NextVersion })
-    taxDependent = false;
+    taxCertificates = false;
 
     @field({ decoder: new ArrayDecoder(RecordCategory as Decoder<RecordCategory>), version: 117 })
     recordCategories: RecordCategory[] = [];
@@ -345,8 +345,8 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
             }
         }
 
-        if (parent.taxDependent !== false) {
-            clone.taxDependent = parent.taxDependent;
+        if (parent.taxCertificates !== false) {
+            clone.taxCertificates = parent.taxCertificates;
         }
 
         if (parent.emailAddress !== null) {

@@ -902,16 +902,16 @@ export class PlatformMember implements ObjectWithRecords {
             return this.isPropertyEnabledForPlatform('parents.nationalRegisterNumber');
         }
 
-        if (property === 'dataPermission' || property === 'financialSupport' || property === 'taxDependent') {
+        if (property === 'dataPermission' || property === 'financialSupport' || property === 'taxCertificates') {
             if (this.platformRecordsConfiguration?.[property]) {
                 return true;
             }
             return false;
         }
 
-        // Note: the raw 'taxDependent' property, asking 'parents.taxDependent' here would loop
+        // Note: the raw 'taxCertificates' property, asking 'parents.taxDependent' here would loop
         const forTaxCertificate = (property === 'nationalRegisterNumber' || property === 'parents.nationalRegisterNumber')
-            && this.isPropertyEnabledForPlatform('taxDependent')
+            && this.isPropertyEnabledForPlatform('taxCertificates')
             && this.needsTaxCertificate;
 
         if (property === 'parents.nationalRegisterNumber') {
@@ -938,9 +938,9 @@ export class PlatformMember implements ObjectWithRecords {
             // Asked together with, and only for, the parent that supplies a national register number
             return this.isPropertyEnabled('parents.nationalRegisterNumber', options);
         }
-        // Note: the raw 'taxDependent' property, asking 'parents.taxDependent' here would loop
+        // Note: the raw 'taxCertificates' property, asking 'parents.taxDependent' here would loop
         const forTaxCertificate = (property === 'nationalRegisterNumber' || property === 'parents.nationalRegisterNumber')
-            && this.isPropertyEnabled('taxDependent', options)
+            && this.isPropertyEnabled('taxCertificates', options)
             && this.needsTaxCertificate;
 
         if (property === 'parents.nationalRegisterNumber') {
@@ -1010,7 +1010,7 @@ export class PlatformMember implements ObjectWithRecords {
         });
 
         for (const recordsConfiguration of recordsConfigurations) {
-            if (property === 'dataPermission' || property === 'financialSupport' || property === 'taxDependent') {
+            if (property === 'dataPermission' || property === 'financialSupport' || property === 'taxCertificates') {
                 if (recordsConfiguration[property]) {
                     return true;
                 }
@@ -1036,13 +1036,13 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
-        if (property === 'taxDependent' || property === 'parents.taxDependent') {
+        if (property === 'taxCertificates' || property === 'parents.taxDependent') {
             // Ticking the checkbox is always optional
             return false;
         }
 
         const forTaxCertificate = (property === 'nationalRegisterNumber' || property === 'parents.nationalRegisterNumber')
-            && this.isPropertyEnabledForPlatform('taxDependent')
+            && this.isPropertyEnabledForPlatform('taxCertificates')
             && this.needsTaxCertificate;
 
         if (property === 'parents.nationalRegisterNumber') {
@@ -1074,13 +1074,13 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
-        if (property === 'taxDependent' || property === 'parents.taxDependent') {
+        if (property === 'taxCertificates' || property === 'parents.taxDependent') {
             // Ticking the checkbox is always optional
             return false;
         }
 
         const forTaxCertificate = (property === 'nationalRegisterNumber' || property === 'parents.nationalRegisterNumber')
-            && this.isPropertyEnabled('taxDependent', options)
+            && this.isPropertyEnabled('taxCertificates', options)
             && this.needsTaxCertificate;
 
         if (property === 'parents.nationalRegisterNumber') {

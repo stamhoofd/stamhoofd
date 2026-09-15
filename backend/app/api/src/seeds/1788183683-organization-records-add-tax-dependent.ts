@@ -11,7 +11,7 @@ export default new Migration(async () => {
     // for these platforms the data for tax certificates should always be on
     if (['keeo', 'ravot'].includes(STAMHOOFD.platformName.toLowerCase())) {
         const platform = await Platform.getForEditing();
-        platform.config.recordsConfiguration.taxDependent = true;
+        platform.config.recordsConfiguration.taxCertificates = true;
         await platform.save();
         await Platform.clearCache();
 
@@ -29,7 +29,7 @@ export default new Migration(async () => {
         batchSize: 100,
         action: async (organization) => {
             if (organization.meta.recordsConfiguration.nationalRegisterNumber) {
-                organization.meta.recordsConfiguration.taxDependent = true;
+                organization.meta.recordsConfiguration.taxCertificates = true;
 
                 await organization.save({
                     skipMarkSaved: true,
@@ -48,7 +48,7 @@ export default new Migration(async () => {
                         continue;
                     }
 
-                    group.settings.recordsConfiguration.taxDependent = true;
+                    group.settings.recordsConfiguration.taxCertificates = true;
                     await group.save();
                 }
             }

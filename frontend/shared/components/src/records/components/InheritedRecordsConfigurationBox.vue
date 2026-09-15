@@ -176,7 +176,7 @@ const properties = [
         preventAlways: true,
     }),
     buildBooleanPropertyRefs(
-        'taxDependent',
+        'taxCertificates',
         $t('Gegevens voor fiscale attesten kinderopvang verzamelen'),
         $t('Een bijkomende instelling naast \'Rijksregisternummer\' die je los daarvan kan aanzetten. Vraagt het rijksregisternummer van het lid én van de ouder die het lid fiscaal ten laste heeft, maar enkel bij leden die in aanmerking komen voor een fiscaal attest kinderopvang. Die ouder bepaalt op wiens naam het attest komt.'),
     ),
@@ -248,7 +248,7 @@ function buildPropertyRefs(property: MemberPropertyWithFilter, title: string, op
 /**
  * A plain on/off property, without the filter that decides for which members it is asked.
  */
-function buildBooleanPropertyRefs(property: 'taxDependent', title: string, description: string) {
+function buildBooleanPropertyRefs(property: 'taxCertificates', title: string, description: string) {
     const locked = computed(() => !!props.inheritedRecordsConfiguration?.[property] && !patched.value[property]);
     const enabled = computed({
         get: () => !!props.inheritedRecordsConfiguration?.[property] || patched.value[property],
