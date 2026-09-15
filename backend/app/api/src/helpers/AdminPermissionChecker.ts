@@ -2,7 +2,7 @@ import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, OrganizationRegistrationPeriod, User } from '@stamhoofd/models';
-import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, Organization, Payment, Registration, Webshop } from '@stamhoofd/models';
+import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, Payment, Registration, Webshop } from '@stamhoofd/models';
 import type { GroupCategory, MemberWithRegistrationsBlob, Platform as PlatformStruct, RecordAnswer, RecordSettings, ResourcePermissions } from '@stamhoofd/structures';
 import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPermissionChecker, FinancialSupportSettings, GroupStatus, GroupType, PermissionLevel, PermissionsResourceKey, PermissionsResourceType, ReceivableBalanceType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -11,6 +11,7 @@ import { MemberRecordStore } from '../services/MemberRecordStore.js';
 import { getFinancialSupportSettingsAsync } from './FinancialSupportHelper.js';
 import { RecordAnswerHelper } from './RecordAnswerHelper.js';
 import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryMemberAccess.js';
+import { SQL } from '@stamhoofd/sql';
 
 /**
  * One class with all the responsabilities of checking permissions to each resource in the system by a given user, possibly in an organization context.
@@ -989,6 +990,42 @@ export class AdminPermissionChecker {
         return this.canEditUserName(user);
     }
 
+    private async getResponsibilitiesForMembers(memberIds: string[]) {
+        const rows = await SQL.select()
+            .from(SQL.table(MemberResponsibilityRecord.table))
+            .where(SQL.column('memberId'), memberIds)
+            .where(SQL.column('endDate'), null)
+            .fetch();
+
+        return MemberResponsibilityRecord.fromRows(rows, MemberResponsibilityRecord.table);
+    }
+
+    async canEditMemberEmailAddresses(member: MemberWithUsersRegistrationsAndGroups) {
+        if (member.users.some(u => u.id === this.user.id)) return true;
+
+        const responsibilities = member.id
+            ? (
+                    await this.getResponsibilitiesForMembers([member.id])
+                )
+            : [];
+
+        for (const { organizationId } of responsibilities) {
+            if (organizationId === null) {
+                if (!this.hasPlatformFullAccess()) {
+                    return false;
+                }
+
+                continue;
+            }
+
+            if (!await this.hasFullAccess(organizationId)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     async canAccessEmailTemplate(template: EmailTemplate, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
         if (level === PermissionLevel.Read && !EmailTemplateStruct.isSavedEmail(template.type)) {
             if (template.organizationId === null) {
@@ -1803,8 +1840,7 @@ export class AdminPermissionChecker {
             }
         }
 
-        // At least write permissions is required for now to obtain the security code
-        if (!(await this.canAccessMember(member, PermissionLevel.Write))) {
+        if (!(await this.canAccessMember(member, PermissionLevel.Write)) || !(await this.canEditMemberEmailAddresses(member))) {
             cloned.details.securityCode = null;
         }
 
@@ -1863,8 +1899,9 @@ export class AdminPermissionChecker {
 
         if (data.details.securityCode !== undefined || data.details.trackingYear !== undefined) {
             const hasFullAccess = await this.canAccessMember(member, PermissionLevel.Full);
+            const canEditEmailAdresses = await this.canEditMemberEmailAddresses(member);
 
-            if (!hasFullAccess) {
+            if (!hasFullAccess || !canEditEmailAdresses) {
                 if (data.details.securityCode !== undefined) {
                     // can only be set to null, and only if can access member with full access
                     if (data.details.securityCode !== null) {
@@ -1891,6 +1928,20 @@ export class AdminPermissionChecker {
             } else {
                 // if uitpas number did not change
                 data.details.uitpasNumberDetails.socialTariff = member.details.uitpasNumberDetails?.socialTariff;
+            }
+        }
+
+        if (
+            data.details.email !== undefined
+            || Array.isArray(data.details.alternativeEmails)
+            || data.details.alternativeEmails.changes.length > 0
+        ) {
+            if (!await this.canEditMemberEmailAddresses(member)) {
+                throw new SimpleError({
+                    code: 'permission_denied',
+                    message: $t('Je hebt geen toegangsrechten om de emailadressen van deze gebruiker aan te passen'),
+                    statusCode: 400,
+                });
             }
         }
 
