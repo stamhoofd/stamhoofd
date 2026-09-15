@@ -30,21 +30,20 @@
         "test": "vitest"
     },
     "dependencies": {
-        "@simonbackx/simple-encoding": "2.26.11"
+        "@simonbackx/simple-encoding": "2.26.11",
+        "uuid": "14.0.1"
     },
     "devDependencies": {
         "@simonbackx/simple-errors": "1.5.0",
         "@stamhoofd/test-utils": "2.152.0",
         "@types/uuid": "8.3.4",
-        "uuid": "14.0.1",
         "vitest": "4.1.11"
     },
     "peerDependencies": {
         "@simonbackx/simple-errors": "1.5.0",
         "@stamhoofd/excel-writer": "*",
         "@stamhoofd/types": "*",
-        "@stamhoofd/utility": "*",
-        "uuid": "14.0.1"
+        "@stamhoofd/utility": "*"
     },
     "license": "UNLICENCED",
     "publishConfig": {

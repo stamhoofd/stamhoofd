@@ -29,6 +29,7 @@
         "@aws-sdk/client-s3": "3.1135.0",
         "@aws-sdk/client-sesv2": "3.1135.0",
         "@bwip-js/node": "4.11.2",
+        "@simonbackx/simple-database": "1.40.1",
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/simple-endpoints": "1.22.0",
         "@simonbackx/simple-errors": "1.5.0",
@@ -40,7 +41,6 @@
         "uuid": "14.0.1"
     },
     "devDependencies": {
-        "@simonbackx/simple-database": "1.40.1",
         "@stamhoofd/test-utils": "2.152.0",
         "@types/luxon": "3.7.2",
         "@types/uuid": "8.3.4",
@@ -48,7 +48,6 @@
         "mysql2": "3.24.4"
     },
     "peerDependencies": {
-        "@simonbackx/simple-database": "1.40.1",
         "@stamhoofd/backend-i18n": "*",
         "@stamhoofd/email": "*",
         "@stamhoofd/queues": "*",

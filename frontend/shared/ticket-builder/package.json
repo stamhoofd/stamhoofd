@@ -11,6 +11,7 @@
         "@stamhoofd/structures": "*",
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*",
+        "buffer": "6.0.3",
         "pdfkit": "0.20.2",
         "qrcode": "1.5.4"
     },

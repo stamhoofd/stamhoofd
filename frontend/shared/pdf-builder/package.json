@@ -13,7 +13,8 @@
         "@stamhoofd/components": "*",
         "@stamhoofd/networking": "*",
         "@stamhoofd/structures": "*",
-        "@stamhoofd/utility": "*"
+        "@stamhoofd/utility": "*",
+        "buffer": "6.0.3"
     },
     "devDependencies": {
         "eslint-plugin-stamhoofd": "*"
