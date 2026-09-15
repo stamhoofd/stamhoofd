@@ -129,7 +129,7 @@ export class CheckoutStepsManager {
         // When a delivery method is chosen, the address is collected in the Address step, so we don't
         // need to ask for the customer address again.
         const hasDeliveryAddress = checkoutMethod !== null && checkoutMethod.type === CheckoutMethodType.Delivery;
-        const customerSettings = webshop.meta.resolvedCustomerSettings;
+        const customerSettings = webshop.meta.customerSettings;
         const asks = (requirement: CustomerFieldRequirement) => requirement !== CustomerFieldRequirement.Disabled;
 
         steps.push(new CheckoutStep({

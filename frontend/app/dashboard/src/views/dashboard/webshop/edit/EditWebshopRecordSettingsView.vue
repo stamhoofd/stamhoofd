@@ -110,26 +110,17 @@ const { webshop, addPatch, errors, saving, save, hasChanges, shouldNavigateAway 
 
 const categories = computed(() => webshop.value.meta.recordCategories);
 
-/**
- * Store the field in customerSettings, and mirror it in the deprecated flag that older clients still read.
- */
 function customerField(key: 'phone' | 'birthDay' | 'gender' | 'address') {
     return computed({
-        get: () => webshop.value.meta.resolvedCustomerSettings[key] !== CustomerFieldRequirement.Disabled,
+        get: () => webshop.value.meta.customerSettings[key] !== CustomerFieldRequirement.Disabled,
         set: (enabled: boolean) => {
-            const requirement = enabled ? CustomerFieldRequirement.Required : CustomerFieldRequirement.Disabled;
-            const current = webshop.value.meta.customerSettings;
-
-            const meta = WebshopMetaData.patch({
-                // Settings did not exist yet: store a full object instead of a patch
-                customerSettings: current === null
-                    ? webshop.value.meta.resolvedCustomerSettings.patch({ [key]: requirement })
-                    : CustomerSettings.patch({ [key]: requirement }),
-            });
-            // Older clients still read the deprecated flags
-            meta[`${key}Enabled`] = enabled;
-
-            addPatch(PrivateWebshop.patch({ meta }));
+            addPatch(PrivateWebshop.patch({
+                meta: WebshopMetaData.patch({
+                    customerSettings: CustomerSettings.patch({
+                        [key]: enabled ? CustomerFieldRequirement.Required : CustomerFieldRequirement.Disabled,
+                    }),
+                }),
+            }));
         },
     });
 }

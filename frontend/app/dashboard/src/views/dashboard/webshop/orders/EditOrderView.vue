@@ -208,6 +208,7 @@ import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { DiscountCode } from '@stamhoofd/structures';
 import type { Address, CartItem, CheckoutMethod, PatchAnswers, ValidatedAddress, WebshopOnSiteMethod, WebshopTakeoutMethod } from '@stamhoofd/structures';
 import { CheckoutMethodType, Customer, Gender, OrderData, PaymentConfiguration, PaymentMethod, PrivateOrder, RecordCategory, Version, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
+import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
@@ -309,13 +310,12 @@ const recordCategories = computed(() => {
     );
 });
 
-const phoneEnabed = computed(() => {
-    return webshop.meta.phoneEnabled;
-});
+const asksCustomerField = (key: 'phone' | 'birthDay' | 'gender' | 'address') => computed(() => webshop.meta.customerSettings[key] !== CustomerFieldRequirement.Disabled);
 
-const birthDayEnabled = computed(() => webshop.meta.birthDayEnabled);
-const addressEnabled = computed(() => webshop.meta.addressEnabled);
-const genderEnabled = computed(() => webshop.meta.genderEnabled);
+const phoneEnabed = asksCustomerField('phone');
+const birthDayEnabled = asksCustomerField('birthDay');
+const addressEnabled = asksCustomerField('address');
+const genderEnabled = asksCustomerField('gender');
 
 const emailPlaceholder = computed(() => {
     if (webshop.meta.ticketType !== WebshopTicketType.None) {
