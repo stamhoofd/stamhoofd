@@ -69,6 +69,31 @@
             <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight">
         </figure>
 
+        <STList v-if="coverPhoto && modernWebshopEnabled">
+            <STListItem :selectable="true" element-name="label" class="left-center" data-testid="cover-photo-fit-keep">
+                <template #left>
+                    <Radio v-model="coverPhotoFit" :value="WebshopCoverPhotoFit.KeepAspectRatio" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ $t('Volledige foto tonen') }}
+                </h3>
+                <p class="style-description">
+                    {{ $t('De foto behoudt zijn verhouding en wordt volledig getoond.') }}
+                </p>
+            </STListItem>
+            <STListItem :selectable="true" element-name="label" class="left-center" data-testid="cover-photo-fit-cover">
+                <template #left>
+                    <Radio v-model="coverPhotoFit" :value="WebshopCoverPhotoFit.Cover" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ $t('Bijsnijden tot een banner') }}
+                </h3>
+                <p class="style-description">
+                    {{ $t('De foto vult de volledige breedte met een beperkte hoogte. Wat niet past, wordt weggesneden.') }}
+                </p>
+            </STListItem>
+        </STList>
+
         <hr><h2>{{ $t('%RR') }}</h2>
         <p>
             {{ $t('%RS') }}
@@ -184,9 +209,10 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 
+import { useFeatureFlagComputed } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import LogoEditor from '@stamhoofd/components/views/LogoEditor.vue';
 import type { DarkMode, Image, RichText, SponsorConfig } from '@stamhoofd/structures';
-import { Cart, CartItem, CartReservedSeat, LanguageHelper, Policy, PrivateWebshop, ProductType, ResolutionRequest, TicketPublic, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
+import { Cart, CartItem, CartReservedSeat, LanguageHelper, Policy, PrivateWebshop, ProductType, ResolutionRequest, TicketPublic, WebshopCoverPhotoFit, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';
 
 import { computed } from 'vue';
@@ -308,6 +334,16 @@ const coverPhoto = computed({
     set: (coverPhoto: Image | null) => {
         const patch = WebshopMetaData.patch({ coverPhoto });
         addPatch(PrivateWebshop.patch({ meta: patch }));
+    },
+});
+
+// The crop is only applied by the modern webshop view
+const modernWebshopEnabled = useFeatureFlagComputed('modern-webshop');
+
+const coverPhotoFit = computed({
+    get: () => webshop.value.meta.coverPhotoFit,
+    set: (coverPhotoFit: WebshopCoverPhotoFit) => {
+        addPatch(PrivateWebshop.patch({ meta: WebshopMetaData.patch({ coverPhotoFit }) }));
     },
 });
 
