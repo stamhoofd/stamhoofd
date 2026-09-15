@@ -456,17 +456,15 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             this.customer.email = user.email;
         }
 
-        const toRequirement = (enabled: boolean) => enabled ? CustomerFieldRequirement.Required : CustomerFieldRequirement.Disabled;
+        const settings = webshop.meta.resolvedCustomerSettings;
 
-        this.customer.validate({
-            email: CustomerFieldRequirement.Required,
-            phone: toRequirement(webshop.meta.phoneEnabled),
-            birthDay: toRequirement(webshop.meta.birthDayEnabled),
-            // A delivery address is always stored on the customer, so never clear or require it in that case
-            address: webshop.meta.addressEnabled ? CustomerFieldRequirement.Required : (this.address ? CustomerFieldRequirement.Optional : CustomerFieldRequirement.Disabled),
-            gender: toRequirement(webshop.meta.genderEnabled),
-            asAdmin,
-        });
+        this.customer.validate(
+            // A delivery address is always stored on the customer, so never clear it in that case
+            settings.address === CustomerFieldRequirement.Disabled && this.address
+                ? settings.patch({ address: CustomerFieldRequirement.Optional })
+                : settings,
+            { asAdmin },
+        );
 
         this.validateAnswers(webshop);
     }
