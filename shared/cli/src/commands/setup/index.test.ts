@@ -3,6 +3,7 @@ import Setup, { SetupAction } from './index.js';
 import { confirm } from '../../runtime/ux.js';
 import { runSetup, setupCert, setupDns } from '../../workflows/setup-machine.js';
 import { checkNodeVersion, printNodeVersionStatus, setupNodeVersion } from '../../workflows/setup-node.js';
+import { setupPackageManager } from '../../workflows/setup-package-manager.js';
 import { setupShellShortcut } from '../../workflows/setup-shell.js';
 
 vi.mock('../../workflows/setup-machine.js', () => ({
@@ -19,6 +20,10 @@ vi.mock('../../workflows/setup-node.js', () => ({
     checkNodeVersion: vi.fn(),
     printNodeVersionStatus: vi.fn(),
     setupNodeVersion: vi.fn(),
+}));
+
+vi.mock('../../workflows/setup-package-manager.js', () => ({
+    setupPackageManager: vi.fn(),
 }));
 
 vi.mock('../../runtime/ux.js', () => ({
@@ -94,6 +99,19 @@ describe('Setup command', () => {
         await command.run();
 
         expect(setupNodeVersion).toHaveBeenCalledWith(expect.any(String), { verbose: true, dryRun: false });
+        expect(runSetup).not.toHaveBeenCalled();
+    });
+
+    it('repairs pnpm directly before creating the full setup context', async () => {
+        const command = createCommand({
+            args: { action: SetupAction.Pnpm },
+            flags: { yes: false, 'dry-run': true, verbose: true },
+        });
+
+        await command.run();
+
+        expect(setupPackageManager).toHaveBeenCalledWith(expect.any(String), { verbose: true, dryRun: true });
+        expect((command as any).createContext).not.toHaveBeenCalled();
         expect(runSetup).not.toHaveBeenCalled();
     });
 
