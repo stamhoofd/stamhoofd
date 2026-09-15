@@ -7,6 +7,7 @@ import { listActiveInstanceManifests } from '../runtime/manifest-store.js';
 import { printSharedServicesStatus } from '../services/shared-services.js';
 import { link } from '../runtime/ux.js';
 import { checkNodeVersion, printNodeVersionStatus } from '../workflows/setup-node.js';
+import { checkPackageManager, printPackageManagerStatus } from '../workflows/setup-package-manager.js';
 
 export default class Status extends BaseCommand {
     static summary = 'Show local development status';
@@ -22,8 +23,12 @@ export default class Status extends BaseCommand {
     async run(): Promise<void> {
         const { flags } = await this.parse(Status);
         const rootDir = path.resolve(getProjectPath());
-        const nodeCheck = await checkNodeVersion(rootDir);
+        const [nodeCheck, packageManagerCheck] = await Promise.all([
+            checkNodeVersion(rootDir),
+            checkPackageManager(rootDir),
+        ]);
         printNodeVersionStatus(nodeCheck);
+        printPackageManagerStatus(packageManagerCheck);
         this.log('');
 
         const context = await this.createContext({ verbose: flags.verbose });
