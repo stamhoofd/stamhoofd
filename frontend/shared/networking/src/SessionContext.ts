@@ -505,18 +505,20 @@ export class SessionContext implements RequestMiddleware {
      * signs anybody in.
      */
     async checkImpersonation() {
-        const hash = new URLSearchParams(window.location.hash.startsWith('#') ? window.location.hash.substring(1) : window.location.hash);
+        // The address bar is rewritten while the application boots (it gains a locale prefix and
+        // the url of the view that is shown), and that drops the fragment, so the ticket has to
+        // come from the url as it was when the page loaded.
+        const hash = UrlHelper.initial.getHashParams();
         const ticket = hash.get('impersonate');
 
         if (!ticket) {
             return;
         }
 
-        // Drop the ticket from the address bar before anything else, so a reload or a
-        // shared url cannot carry it any further.
+        // Drop the ticket before anything else, so a reload, a shared url or a second run of
+        // this check cannot use it again.
         hash.delete('impersonate');
-        const remaining = hash.toString();
-        window.history.replaceState(null, '', window.location.pathname + window.location.search + (remaining ? '#' + remaining : ''));
+        UrlHelper.initial.url.hash = hash.toString();
 
         if (this.hasToken()) {
             new Toast($t(`%Zm9`), 'error red').setHide(30000).show();
