@@ -13,6 +13,7 @@
         "@stamhoofd/assets": "*",
         "@stamhoofd/components": "*",
         "@stamhoofd/networking": "*",
+        "@stamhoofd/structures": "*",
         "@stamhoofd/utility": "*",
         "jszip": "3.10.1"
     },
