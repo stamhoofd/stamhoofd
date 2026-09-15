@@ -579,9 +579,10 @@ export function getMemberColumns({ platform, organization, dateRange, group, gro
     if (financialRead) {
         allColumns.push(
             new Column<ObjectType, number>({
+                id: 'memberCachedBalance.amountOpen',
                 name: $t(`%76`),
                 description: $t('%184'),
-                allowSorting: false,
+                allowSorting: !!organization?.id,
                 getValue: v => v.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0),
                 format: (outstandingBalance) => {
                     return Formatter.price(outstandingBalance);
