@@ -20,6 +20,11 @@ export function getSelectableColumns() {
             enabled: true,
         }),
         new SelectableColumn({
+            id: 'periodId',
+            name: $t(`%7Z`),
+            enabled: false,
+        }),
+        new SelectableColumn({
             id: 'startDate',
             name: $t(`%1Of`),
             enabled: true,
