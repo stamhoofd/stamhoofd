@@ -719,6 +719,7 @@ export class AuthenticatedStructures {
                 ),
                 details: member.details,
                 users: member.users.map(u => u.getStructure()),
+                platformMemberships: platformMemberships.filter(r => r.memberId === member.id).map(r => MemberPlatformMembershipStruct.create(r)),
             });
 
             memberBlobs.push(
@@ -734,7 +735,6 @@ export class AuthenticatedStructures {
                 const group = allGroups.get(r.groupId ?? '') ?? null;
                 return r.getStructure(group);
             });
-            blob.platformMemberships = platformMemberships.filter(r => r.memberId == blob.id).map(r => MemberPlatformMembershipStruct.create(r));
             blob.registrationInvitations = memberRegistrationInvitations.get(blob.id) ?? [];
         }
 
