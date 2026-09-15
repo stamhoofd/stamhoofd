@@ -1,3 +1,4 @@
+import { ViewportHelper } from '#ViewportHelper.ts';
 import type { ObjectDirective } from 'vue';
 
 export const AutofocusDirective: ObjectDirective<HTMLInputElement, boolean | null | undefined> = {
@@ -10,9 +11,14 @@ export const AutofocusDirective: ObjectDirective<HTMLInputElement, boolean | nul
         setTimeout(() => {
             if (el.isConnected) {
                 const view = el.closest('.st-view');
+
                 if (!document.activeElement || !view || !view.contains(document.activeElement)) {
                     // only focus if the user isn't typing already (causes flaky playwright tests)
-                    el.focus();
+                    ViewportHelper.scrollIntoView(el, 'center', true);
+
+                    setTimeout(() => {
+                        el.focus();
+                    }, 150);
                 }
             }
         }, 300);
