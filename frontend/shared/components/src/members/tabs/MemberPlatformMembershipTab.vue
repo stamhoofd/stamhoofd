@@ -61,8 +61,11 @@
                                 <p v-else-if="membership.trialUntil && membership.trialUntil > now" class="style-description-small">
                                     {{ $t('%Bq', {organization: getOrganizationName(membership)}) }}
                                 </p>
-                                <p v-else class="style-description-small">
+                                <p v-else-if="membership.price !== null" class="style-description-small">
                                     {{ $t('%Br', {organization: getOrganizationName(membership)}) }}
+                                </p>
+                                <p v-else class="style-description-small">
+                                    {{ $t('%23', {organization: getOrganizationName(membership)}) }}
                                 </p>
                             </template>
 
@@ -74,7 +77,8 @@
                                 {{ $t('%81') }}
                             </p>
                             <template v-if="hasFull && (!organization || membership.organizationId === organization.id)" #right>
-                                <span v-if="membership.price === 0 && (membership.organizationId === platform.membershipOrganizationId || period.locked)" />
+                                <span v-if="membership.price === null || membership.priceWithoutDiscount === null" />
+                                <span v-else-if="membership.price === 0 && (membership.organizationId === platform.membershipOrganizationId || period.locked)" />
                                 <span v-else-if="membership.price === membership.priceWithoutDiscount || membership.priceWithoutDiscount === 0" class="style-price-base">{{ formatPrice(membership.price) }}</span>
                                 <template v-else>
                                     <span class="style-discount-old-price">{{ formatPrice(membership.priceWithoutDiscount) }}</span>

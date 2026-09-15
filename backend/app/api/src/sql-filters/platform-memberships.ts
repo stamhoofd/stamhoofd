@@ -1,6 +1,8 @@
+import { SimpleError } from '@simonbackx/simple-errors';
 import { MemberPlatformMembership } from '@stamhoofd/models';
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, SQL, SQLValueType } from '@stamhoofd/sql';
+import { Context } from '../helpers/Context.js';
 import { memberFilterCompilers } from './members.js';
 import { organizationFilterCompilers } from './organizations.js';
 
@@ -58,6 +60,16 @@ export const platformMembershipFilterCompilers: SQLFilterDefinitions = {
         expression: SQL.column(MemberPlatformMembership.table, 'price'),
         type: SQLValueType.Number,
         nullable: false,
+        checkPermission: async () => {
+            if (!await Context.auth.hasFinancialScopeAccess()) {
+                throw new SimpleError({
+                    code: 'permission_denied',
+                    message: 'No permissions to filter on the price of a platform membership',
+                    human: $t(`%G2`),
+                    statusCode: 400,
+                });
+            }
+        },
     }),
     organization: createJoinedRelationFilter(
         organizationJoin,

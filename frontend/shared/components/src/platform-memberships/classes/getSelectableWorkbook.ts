@@ -3,7 +3,7 @@ import { SelectableSheet } from '@stamhoofd/frontend-excel-export/SelectableShee
 import { SelectableWorkbook } from '@stamhoofd/frontend-excel-export/SelectableWorkbook';
 import type { Organization } from '@stamhoofd/structures';
 
-export function getSelectableColumns(organization: Organization | null = null) {
+export function getSelectableColumns(organization: Organization | null = null, financialAccess = true) {
     const memberCategory = $t('%1PM');
     const organizationCategory = $t('%1PI');
     const balanceItemCategory = $t('%1P6');
@@ -35,16 +35,20 @@ export function getSelectableColumns(organization: Organization | null = null) {
             name: $t(`%1P8`),
             enabled: true,
         }),
-        new SelectableColumn({
-            id: 'price',
-            name: $t(`%1IP`),
-            enabled: true,
-        }),
-        new SelectableColumn({
-            id: 'priceWithoutDiscount',
-            name: $t(`%1Nm`),
-            enabled: false,
-        }),
+        ...(financialAccess
+            ? [
+                    new SelectableColumn({
+                        id: 'price',
+                        name: $t(`%1IP`),
+                        enabled: true,
+                    }),
+                    new SelectableColumn({
+                        id: 'priceWithoutDiscount',
+                        name: $t(`%1Nm`),
+                        enabled: false,
+                    }),
+                ]
+            : []),
         new SelectableColumn({
             id: 'trialUntil',
             name: $t(`%1PU`),
@@ -73,26 +77,28 @@ export function getSelectableColumns(organization: Organization | null = null) {
             enabled: true,
         }),
 
-        new SelectableColumn({
-            id: 'balanceItem.priceOpen',
-            name: $t(`%1Ni`),
-            category: balanceItemCategory,
-            enabled: true,
-        }),
-
-        new SelectableColumn({
-            id: 'balanceItem.pricePaid',
-            name: $t(`%1OD`),
-            category: balanceItemCategory,
-            enabled: true,
-        }),
-
-        new SelectableColumn({
-            id: 'balanceItem.pricePending',
-            name: $t(`%1OL`),
-            category: balanceItemCategory,
-            enabled: true,
-        }),
+        ...(financialAccess
+            ? [
+                    new SelectableColumn({
+                        id: 'balanceItem.priceOpen',
+                        name: $t(`%1Ni`),
+                        category: balanceItemCategory,
+                        enabled: true,
+                    }),
+                    new SelectableColumn({
+                        id: 'balanceItem.pricePaid',
+                        name: $t(`%1OD`),
+                        category: balanceItemCategory,
+                        enabled: true,
+                    }),
+                    new SelectableColumn({
+                        id: 'balanceItem.pricePending',
+                        name: $t(`%1OL`),
+                        category: balanceItemCategory,
+                        enabled: true,
+                    }),
+                ]
+            : []),
 
         // member
         new SelectableColumn({
@@ -140,13 +146,13 @@ export function getSelectableColumns(organization: Organization | null = null) {
     return columns;
 }
 
-export function getSelectableWorkbook(organization: Organization | null = null) {
+export function getSelectableWorkbook(organization: Organization | null = null, financialAccess = true) {
     return new SelectableWorkbook({
         sheets: [
             new SelectableSheet({
                 id: 'platform-memberships',
                 name: $t(`%1Nt`),
-                columns: getSelectableColumns(organization),
+                columns: getSelectableColumns(organization, financialAccess),
             }),
         ],
     });
