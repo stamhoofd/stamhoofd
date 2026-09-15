@@ -149,17 +149,15 @@ import { useRequiredOrganization } from '#hooks/useOrganization.ts';
 import Dropdown from '#inputs/Dropdown.vue';
 import STInputBox from '#inputs/STInputBox.vue';
 import { Toast } from '#overlays/Toast.ts';
-import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import GroupAvatar from '#GroupAvatar.vue';
 import STGrid from '#layout/STGrid.vue';
 import STGridItem from '#layout/STGridItem.vue';
 import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
-import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';
-import type { Group, GroupCategoryTree, RegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures';
-import { GroupStatus, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import { useSwitchOrganizationPeriods } from '@stamhoofd/networking/hooks/useSwitchOrganizationPeriods';
+import type { Group, GroupCategoryTree, RegistrationPeriod, RegistrationPeriodList, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import { GroupStatus } from '@stamhoofd/structures';
 import { computed, onMounted, ref, shallowRef } from 'vue';
 import STListItemGrid from '#layout/STListItemGrid.vue';
 import STListItemGridRow from '#layout/STListItemGridRow.vue';
@@ -260,7 +258,7 @@ const rows = computed(() => {
 });
 const errors = useErrors();
 const pop = usePop();
-const patchOrganizationPeriods = usePatchOrganizationPeriods();
+const switchOrganizationPeriods = useSwitchOrganizationPeriods();
 
 async function start() {
     if (loading.value) {
@@ -270,17 +268,12 @@ async function start() {
 
     try {
         const currentPeriod = fromPeriod.value;
-        let newOrganizationPeriod = OrganizationRegistrationPeriod.create({
-            period: props.period,
+
+        const newOrganizationPeriod = await switchOrganizationPeriods({
+            fromPeriodId: currentPeriod?.id,
+            toPeriodId: props.period.id,
         });
-        if (currentPeriod) {
-            newOrganizationPeriod = currentPeriod.duplicate(props.period);
-        }
 
-        const arr = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>;
-        arr.addPut(newOrganizationPeriod);
-
-        await patchOrganizationPeriods(arr);
         props.callback();
 
         if (currentPeriod && currentPeriod.id === organization.value?.period.id) {
@@ -298,6 +291,7 @@ async function start() {
         }
         await pop({ force: true });
     } catch (e) {
+        console.error(e);
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;
