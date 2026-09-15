@@ -38,7 +38,11 @@ The ledenstatistieken count members, not registrations, so every card of that da
 and none reads the registrations directly. Someone registered in two leeftijdsgroepen of the same eenheid holds
 two registrations, and counted there they land in two bars of the same chart, or -- if they are leiding in one
 leeftijdsgroep and lid in the other -- on both sides of the omkaderingscijfer at once. That fragment picks the one
-registration that speaks for them: leiding beats lid, and the oldest leeftijdsgroep wins between two.
+registration that speaks for them: a leeftijdsgroep beats an activiteit, one that still stands beats
+one that was cancelled, leiding beats lid, and the oldest leeftijdsgroep wins between two. The
+leeftijdsgroep comes first because an activiteit says where someone went, not what they are: a lid who
+left their leeftijdsgroep in november and joined a kamp afterwards is still counted in the
+leeftijdsgroep they were a lid of.
 
 The aanlevering is the exception and keeps reading its own rows. The department counts inschrijvingen
 rather than inschrijvers, and reads what a member is from the cancelled registrations as well, so
