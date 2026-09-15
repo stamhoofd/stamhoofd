@@ -27,11 +27,8 @@ export class GetPlatformMembershipsCountEndpoint extends Endpoint<Params, Query,
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
+        await Context.setOptionalOrganizationScope();
         await Context.authenticate();
-
-        if (!Context.auth.hasPlatformFullAccess()) {
-            throw Context.auth.error();
-        }
 
         const query = await GetPlatformMembershipsEndpoint.buildQuery(request.query);
 
