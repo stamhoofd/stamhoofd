@@ -61,6 +61,7 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import type { Address, ValidatedAddress } from '@stamhoofd/structures';
 import { Gender, WebshopTicketType } from '@stamhoofd/structures';
+import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 
 import { computed, ref } from 'vue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
@@ -75,10 +76,12 @@ const checkoutManager = useCheckoutManager();
 const context = useContext();
 const webshop = computed(() => webshopManager.webshop);
 const navigationActions = useNavigationActions();
-const phoneEnabled = computed(() => webshop.value.meta.phoneEnabled);
-const birthDayEnabled = computed(() => webshop.value.meta.birthDayEnabled);
-const addressEnabled = computed(() => webshop.value.meta.addressEnabled);
-const genderEnabled = computed(() => webshop.value.meta.genderEnabled);
+const asksCustomerField = (key: 'phone' | 'birthDay' | 'gender' | 'address') => computed(() => webshop.value.meta.customerSettings[key] !== CustomerFieldRequirement.Disabled);
+
+const phoneEnabled = asksCustomerField('phone');
+const birthDayEnabled = asksCustomerField('birthDay');
+const addressEnabled = asksCustomerField('address');
+const genderEnabled = asksCustomerField('gender');
 const isLoggedIn = computed(() => context.value.isComplete() ?? false);
 const unscopedServer = computed(() => webshopManager.unscopedServer);
 

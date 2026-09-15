@@ -1,7 +1,10 @@
 import { AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { Address } from '../addresses/Address.js';
 import { Gender } from '../members/Gender.js';
 import { PaymentCustomer } from '../PaymentCustomer.js';
+import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';
+import type { CustomerSettings } from './CustomerSettings.js';
 
 export class Customer extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -24,6 +27,83 @@ export class Customer extends AutoEncoder {
 
     @field({ decoder: new EnumDecoder(Gender), defaultValue: () => Gender.Other, isDefaultValue: v => v === Gender.Other, version: 403 })
     gender: Gender = Gender.Other;
+
+    /**
+     * Throws with `customer.*` fields. The first and last name are always required.
+     * Required = must be present and well-formed, Optional = only validate the format when a value is given, Disabled = clear the value.
+     * Admins may leave required fields empty, except for the email format.
+     */
+    validate(settings: CustomerSettings, { asAdmin = false }: { asAdmin?: boolean } = {}) {
+        if (this.firstName.length < 2) {
+            throw new SimpleError({
+                code: 'invalid_first_name',
+                message: 'Invalid first name',
+                human: $t(`%sn`),
+                field: 'customer.firstName',
+            });
+        }
+
+        if (this.lastName.length < 2) {
+            throw new SimpleError({
+                code: 'invalid_last_name',
+                message: 'Invalid last name',
+                human: $t(`%so`),
+                field: 'customer.lastName',
+            });
+        }
+
+        if (settings.phone === CustomerFieldRequirement.Disabled) {
+            this.phone = '';
+        } else if (this.phone.length < 6 && !asAdmin && (settings.phone === CustomerFieldRequirement.Required || this.phone.length > 0)) {
+            throw new SimpleError({
+                code: 'invalid_phone',
+                message: 'Invalid phone',
+                human: $t('Ongeldig GSM-nummer'),
+                field: 'customer.phone',
+            });
+        }
+
+        if (settings.birthDay === CustomerFieldRequirement.Disabled) {
+            this.birthDay = null;
+        } else if (!this.birthDay && !asAdmin && settings.birthDay === CustomerFieldRequirement.Required) {
+            throw new SimpleError({
+                code: 'invalid_birth_day',
+                message: 'Invalid birth day',
+                human: $t(`%yq`),
+                field: 'customer.birthDay',
+            });
+        }
+
+        if (settings.address === CustomerFieldRequirement.Disabled) {
+            this.address = null;
+        } else if (!this.address && !asAdmin && settings.address === CustomerFieldRequirement.Required) {
+            throw new SimpleError({
+                code: 'invalid_address',
+                message: 'Invalid address',
+                human: $t(`%ZdB`),
+                field: 'customer.address',
+            });
+        }
+
+        if (settings.gender === CustomerFieldRequirement.Disabled) {
+            this.gender = Gender.Other;
+        }
+
+        if (settings.email === CustomerFieldRequirement.Disabled) {
+            this.email = '';
+        } else if (settings.email === CustomerFieldRequirement.Required || this.email.length > 0) {
+            const regex = /^[\w.!#$%&'*+/=?^`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$/i;
+
+            if (!regex.test(this.email)) {
+                throw new SimpleError({
+                    code: 'invalid_email',
+                    message: 'Invalid email',
+                    human: $t('%sR'),
+                    field: 'customer.email',
+                });
+            }
+        }
+    }
 
     get name() {
         if (this.lastName === '') {

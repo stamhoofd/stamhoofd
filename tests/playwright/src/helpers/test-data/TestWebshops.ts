@@ -1,6 +1,8 @@
 import type { Organization, Webshop } from '@stamhoofd/models';
 import { WebshopFactory } from '@stamhoofd/models';
 import { PaymentConfiguration, PaymentMethod, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopDeliveryMethod, WebshopMetaData, WebshopPrivateMetaData, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
+import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
+import { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 import type { Country } from '@stamhoofd/types/Country';
 import { CaddyConfigHelper } from '../../setup/helpers/CaddyConfigHelper.js';
 import { WorkerData } from '../worker/WorkerData.js';
@@ -38,6 +40,10 @@ export interface CreateWebshopOptions {
     deliveryCountries?: Country[];
     /** Raw HTML injected into the document head on custom domains (script/style tags) */
     customCode?: string | null;
+}
+
+function toRequirement(enabled: boolean): CustomerFieldRequirement {
+    return enabled ? CustomerFieldRequirement.Required : CustomerFieldRequirement.Disabled;
 }
 
 export class TestWebshops {
@@ -100,11 +106,14 @@ export class TestWebshops {
             ticketType,
             type: withSeatingPlan ? WebshopType.Performance : (ticketType === WebshopTicketType.None ? WebshopType.Webshop : WebshopType.Event),
             cartEnabled,
-            // Keep the customer step minimal so the order flow doesn't require a phone number
-            phoneEnabled: false,
-            birthDayEnabled,
-            addressEnabled,
-            genderEnabled,
+            customerSettings: CustomerSettings.create({
+                email: CustomerFieldRequirement.Required,
+                // Keep the customer step minimal so the order flow doesn't require a phone number
+                phone: CustomerFieldRequirement.Disabled,
+                birthDay: toRequirement(birthDayEnabled),
+                address: toRequirement(addressEnabled),
+                gender: toRequirement(genderEnabled),
+            }),
             customCode,
         });
 
