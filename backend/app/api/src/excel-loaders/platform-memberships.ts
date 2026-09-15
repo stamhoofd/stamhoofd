@@ -80,7 +80,7 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
             width: 10,
             getValue: (membership: PlatformMembership) => {
                 return {
-                    value: membership.price / 1_0000,
+                    value: membership.price === null ? null : membership.price / 1_0000,
                     style: {
                         numberFormat: {
                             id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
@@ -95,7 +95,7 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
             width: 10,
             getValue: (membership: PlatformMembership) => {
                 return {
-                    value: membership.priceWithoutDiscount / 1_0000,
+                    value: membership.priceWithoutDiscount === null ? null : membership.priceWithoutDiscount / 1_0000,
                     style: {
                         numberFormat: {
                             id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
