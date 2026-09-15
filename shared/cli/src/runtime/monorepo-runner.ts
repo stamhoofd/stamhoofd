@@ -83,6 +83,7 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'sgv', path: 'shared/sgv', needsDatabase: false },
     { name: 'eslint', path: 'shared/eslint', needsDatabase: false },
     { name: 'utility', path: 'shared/utility', needsDatabase: false },
+    { name: 'vite-config', path: 'frontend/shared/vite-config', needsDatabase: false },
     { name: 'queues', path: 'backend/shared/queues', needsDatabase: false },
     { name: 'models', path: 'backend/shared/models', needsDatabase: true, typecheck: true },
     { name: 'vies', path: 'backend/shared/vies', needsDatabase: true, typecheck: true },
