@@ -108,6 +108,7 @@ export class GetEmailRecipientsEndpoint extends Endpoint<Params, Query, Body, Re
     static async buildData(requestQuery: LimitedFilteredRequest) {
         const query = await GetEmailRecipientsEndpoint.buildQuery(requestQuery);
         const recipients = await query.fetch();
+        const canReadFinancialData = await Context.auth.hasFinancialScopeAccess();
 
         let next: LimitedFilteredRequest | undefined;
 
@@ -137,6 +138,7 @@ export class GetEmailRecipientsEndpoint extends Endpoint<Params, Query, Body, Re
                     from: null,
                     replyTo: null,
                     forPreview: true,
+                    canReadFinancialData,
                     forceRefresh: false,
                 });
                 r.replacements = rr.replacements;

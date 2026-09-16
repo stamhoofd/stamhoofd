@@ -9,6 +9,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { Group, Organization, Webshop } from '@stamhoofd/models';
 import { CachedBalance, EmailRecipient, EmailTemplate, Member, Platform, User } from '@stamhoofd/models';
+import { ExampleReplacements } from '@stamhoofd/structures/email/exampleReplacements.js';
 import { TenantContext } from './TenantContext.js';
 
 export type EmailTemplateOptions = {
@@ -595,13 +596,24 @@ export function mergeReplacementsIfEqual(replacementsA: Replacement[], replaceme
     return merged;
 }
 
+export function stripFinancialRecipientReplacements(recipient: Recipient | EmailRecipientStruct | EmailRecipient) {
+    recipient.replacements = recipient.replacements.filter(r => r.token !== 'balanceTable' && r.token !== 'outstandingBalance');
+
+    recipient.replacements.push(
+        ExampleReplacements.all.outstandingBalance.clone(),
+        ExampleReplacements.all.balanceTable.clone(),
+    );
+}
+
 /**
  * Filter replacements for display in the backend.
  * @param options.forPreview if true, it will hide sensitive information in the preview that could leak information to admin users
+ * @param options.canReadFinancialData if true, the balance of the recipient is kept: only pass this for viewers with AccessRight.MemberReadFinancialData
  */
 export function stripSensitiveRecipientReplacements(recipient: Recipient | EmailRecipientStruct | EmailRecipient, options: {
     organization: Organization | null;
     willFill?: boolean;
+    canReadFinancialData?: boolean;
 }) {
     const { organization } = options;
     // Remove unsubscribeUrl and signInUrl if present
@@ -611,6 +623,10 @@ export function stripSensitiveRecipientReplacements(recipient: Recipient | Email
         // Also strip loginDetails, balanceTable and outstandingBalance
         recipient.replacements = recipient.replacements.filter(r => r.token !== 'balanceTable' && r.token !== 'outstandingBalance' && r.token !== 'loginDetails');
         return;
+    }
+
+    if (!options.canReadFinancialData) {
+        stripFinancialRecipientReplacements(recipient);
     }
 
     // Add dummy unsubscribeUrl
@@ -712,6 +728,8 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
     from: EmailInterfaceRecipient | null;
     replyTo: EmailInterfaceRecipient | null;
     forPreview?: boolean;
+    /** Only used with forPreview: keeps the balance of the recipient visible. See canViewerReadFinancialData. */
+    canReadFinancialData?: boolean;
     forceRefresh?: boolean;
     allowedLanguages?: Language[] | null;
 }) {
@@ -723,11 +741,15 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
     // Render every recipient replacement (greeting, loginDetails, balance table, URLs...) in the
     // recipient's own language, so translated emails are consistent end-to-end. Any replacement
     // added below is localized automatically; helpers with an explicit locale get the same i18n.
+    // Only a preview has a viewer that is not the recipient: everywhere else the replacements are
+    // generated for the recipient themselves.
+    const canReadFinancialData = !options.forPreview || (options.canReadFinancialData ?? false);
+
     await runWithRecipientLocale(recipient, organization, async (i18n) => {
         let recipientUser: User | null | undefined = null;
         recipient.replacements = recipient.replacements.slice();
         if (options.forPreview) {
-            stripSensitiveRecipientReplacements(recipient, options);
+            stripSensitiveRecipientReplacements(recipient, { ...options, canReadFinancialData });
         }
 
         if (!recipient.email && !recipient.userId) {
@@ -833,7 +855,9 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
         // Load balance of this user
         // todo: only if detected it is used
         if (!recipient.replacements.find(r => r.token === 'balanceTable')) {
-            if (organization && recipientUser) {
+            if (!canReadFinancialData) {
+                stripFinancialRecipientReplacements(recipient);
+            } else if (organization && recipientUser) {
                 const balanceItemModels = await CachedBalance.balanceForObjects(organization.id, [recipientUser.id], ReceivableBalanceType.user);
                 const balanceItems = balanceItemModels.map(i => i.getStructure());
 

@@ -36,6 +36,7 @@ export class EmailPreviewService {
 
         const organization = email.organizationId ? (await Organization.getByID(email.organizationId))! : null;
         const allowedLanguages = email.getLanguages();
+        const canReadFinancialData = await (ContextInstance.optional?.optionalAuth?.hasFinancialScopeAccess() ?? false);
 
         const fillRow = async (row: EmailRecipientStruct) => {
             const virtualRecipient = row.getRecipient();
@@ -45,6 +46,7 @@ export class EmailPreviewService {
                 from: email.getFromAddress(),
                 replyTo: null,
                 forPreview: true,
+                canReadFinancialData,
                 forceRefresh: !email.sentAt,
                 allowedLanguages,
             });
@@ -152,6 +154,7 @@ export class EmailPreviewService {
         // Remove duplicates that are marked as the same recipient
         const cleanedRecipients: EmailRecipient[] = [...recipientsMap.values()];
         const structures = await EmailRecipient.getStructures(cleanedRecipients);
+        const canReadFinancialData = await (ContextInstance.optional?.optionalAuth?.hasFinancialScopeAccess() ?? false);
 
         for (const struct of structures) {
             if (!(struct.userId === user.id || struct.email === user.email) && !((struct.userId === null && struct.email === null))) {
@@ -183,6 +186,7 @@ export class EmailPreviewService {
                 from: email.getFromAddress(),
                 replyTo: null,
                 forPreview: actingUser !== undefined && actingUser.id !== user.id,
+                canReadFinancialData,
                 forceRefresh: true,
                 allowedLanguages: email.getLanguages(),
             });
