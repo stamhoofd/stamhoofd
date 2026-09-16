@@ -14,8 +14,7 @@
         "package.json"
     ],
     "scripts": {
-        "build": "tsc --build tsconfig.build.json",
-        "lint": "eslint"
+        "build": "tsc --build tsconfig.build.json"
     },
     "dependencies": {
         "jose": "5.10.0"

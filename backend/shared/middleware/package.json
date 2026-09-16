@@ -10,8 +10,7 @@
         "dist"
     ],
     "scripts": {
-        "build": "tsc --build tsconfig.build.json",
-        "lint": "eslint"
+        "build": "tsc --build tsconfig.build.json"
     },
     "dependencies": {
         "@simonbackx/simple-endpoints": "1.22.0",

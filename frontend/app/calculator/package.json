@@ -11,7 +11,6 @@
         "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=production vite build",
         "dev": "STAMHOOFD_ENV=stamhoofd NODE_ENV=development ENV_FILE=../../.env.json vite",
         "dev:preview": "STAMHOOFD_ENV=stamhoofd NODE_ENV=development ENV_FILE=../../.env.json concurrently -r 'vite build' 'vite preview'",
-        "lint": "eslint",
         "production:preview": "cp preview/* dist/ && STAMHOOFD_ENV=stamhoofd NODE_ENV=development vite preview"
     },
     "dependencies": {
