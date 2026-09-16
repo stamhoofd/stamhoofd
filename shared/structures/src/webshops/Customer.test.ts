@@ -7,7 +7,7 @@ import { Customer } from './Customer.js';
 import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';
 import { CustomerSettings } from './CustomerSettings.js';
 
-const { Required, Optional } = CustomerFieldRequirement;
+const { Required, Optional, Disabled } = CustomerFieldRequirement;
 
 function settings(overrides: Partial<CustomerSettings> = {}) {
     return CustomerSettings.create(overrides);
@@ -18,10 +18,24 @@ function customer(overrides: Partial<Customer> = {}) {
 }
 
 describe('Customer.validate', () => {
-    it('always requires a first and last name', () => {
+    it('requires a first and last name by default, also for admins', () => {
         expect(() => customer({ firstName: 'J' }).validate(settings())).toThrow(/first name/i);
         expect(() => customer({ lastName: '' }).validate(settings())).toThrow(/last name/i);
         expect(() => customer().validate(settings())).not.toThrow();
+        expect(() => customer({ lastName: '' }).validate(settings(), { asAdmin: true })).toThrow(/last name/i);
+    });
+
+    it('accepts an empty name when it is optional, but still checks what is given', () => {
+        expect(() => customer({ firstName: '', lastName: '' }).validate(settings({ name: Optional }))).not.toThrow();
+        expect(() => customer({ firstName: 'J', lastName: '' }).validate(settings({ name: Optional }))).toThrow(/first name/i);
+    });
+
+    it('clears the name when it is disabled', () => {
+        const c = customer();
+        c.validate(settings({ name: Disabled }));
+
+        expect(c.firstName).toBe('');
+        expect(c.lastName).toBe('');
     });
 
     it('clears disabled fields', () => {

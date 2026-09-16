@@ -5,24 +5,26 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="!isLoggedIn">
-            <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`%Uy`)">
+            <STInputBox v-if="nameEnabled" error-fields="customer.firstName,customer.lastName" :error-box="errors.errorBox" :title="$t(`%Uy`)">
                 <div class="input-group">
                     <div>
-                        <input v-model="firstName" class="input" name="fname" type="text" required autocomplete="given-name" :placeholder="$t(`%1MT`)">
+                        <input v-model="firstName" class="input" name="fname" type="text" :required="nameRequired" autocomplete="given-name" :placeholder="$t(`%1MT`)">
                     </div>
                     <div>
-                        <input v-model="lastName" class="input" name="lname" type="text" required autocomplete="family-name" :placeholder="$t(`%1MU`)">
+                        <input v-model="lastName" class="input" name="lname" type="text" :required="nameRequired" autocomplete="family-name" :placeholder="$t(`%1MU`)">
                     </div>
                 </div>
             </STInputBox>
 
-            <EmailInput v-model="email" name="email" :validator="errors.validator" :placeholder="emailPlaceholder" autocomplete="email" :title="$t(`%1FK`)" />
-            <p v-if="emailDescription" class="style-description-small" v-text="emailDescription" />
+            <template v-if="emailEnabled">
+                <EmailInput v-model="email" name="email" :validator="errors.validator" :required="emailRequired" :placeholder="emailPlaceholder" autocomplete="email" :title="$t(`%1FK`)" />
+                <p v-if="emailDescription" class="style-description-small" v-text="emailDescription" />
+            </template>
         </template>
 
-        <PhoneInput v-if="phoneEnabled" v-model="phone" :title="$t('%2k' )" name="mobile" :validator="errors.validator" autocomplete="tel" :placeholder="$t(`%Xu`)" />
+        <PhoneInput v-if="phoneEnabled" v-model="phone" :title="$t('%2k' )" name="mobile" :validator="errors.validator" :required="phoneRequired" autocomplete="tel" :placeholder="$t(`%Xu`)" />
 
-        <BirthDayInput v-if="birthDayEnabled" v-model="birthDay" :title="$t(`%17w`)" :validator="errors.validator" :required="true" />
+        <BirthDayInput v-if="birthDayEnabled" v-model="birthDay" :title="$t(`%17w`)" :validator="errors.validator" :required="birthDayRequired" />
 
         <STInputBox v-if="genderEnabled" error-fields="gender" :error-box="errors.errorBox" :title="$t(`%Zd4`)">
             <RadioGroup>
@@ -38,7 +40,7 @@
             </RadioGroup>
         </STInputBox>
 
-        <AddressInput v-if="addressEnabled && !hasDeliveryAddress" v-model="address" :required="true" :validator="errors.validator" :validate-server="unscopedServer" :title="$t(`%Cn`)" />
+        <AddressInput v-if="addressEnabled && !hasDeliveryAddress" v-model="address" :required="addressRequired" :validator="errors.validator" :validate-server="unscopedServer" :title="$t(`%Cn`)" />
 
         <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="checkoutManager.checkout.fieldAnswers" :error-box="errors.errorBox" />
     </SaveView>
@@ -76,12 +78,23 @@ const checkoutManager = useCheckoutManager();
 const context = useContext();
 const webshop = computed(() => webshopManager.webshop);
 const navigationActions = useNavigationActions();
-const asksCustomerField = (key: 'phone' | 'birthDay' | 'gender' | 'address') => computed(() => webshop.value.meta.customerSettings[key] !== CustomerFieldRequirement.Disabled);
+type CustomerField = 'name' | 'email' | 'phone' | 'birthDay' | 'gender' | 'address';
 
+const asksCustomerField = (key: CustomerField) => computed(() => webshop.value.meta.customerSettings[key] !== CustomerFieldRequirement.Disabled);
+const requiresCustomerField = (key: CustomerField) => computed(() => webshop.value.meta.customerSettings[key] === CustomerFieldRequirement.Required);
+
+const nameEnabled = asksCustomerField('name');
+const emailEnabled = asksCustomerField('email');
 const phoneEnabled = asksCustomerField('phone');
 const birthDayEnabled = asksCustomerField('birthDay');
 const addressEnabled = asksCustomerField('address');
 const genderEnabled = asksCustomerField('gender');
+
+const nameRequired = requiresCustomerField('name');
+const emailRequired = requiresCustomerField('email');
+const phoneRequired = requiresCustomerField('phone');
+const birthDayRequired = requiresCustomerField('birthDay');
+const addressRequired = requiresCustomerField('address');
 const isLoggedIn = computed(() => context.value.isComplete() ?? false);
 const unscopedServer = computed(() => webshopManager.unscopedServer);
 

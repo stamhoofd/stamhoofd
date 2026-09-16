@@ -542,6 +542,8 @@ export class WebshopMetaData extends AutoEncoder {
         version: 419,
         upgrade: function (this: WebshopMetaData) {
             return CustomerSettings.create({
+                // Always asked from the person placing the order
+                name: CustomerFieldRequirement.Required,
                 email: CustomerFieldRequirement.Required,
                 phone: toCustomerFieldRequirement(this.legacyPhoneEnabled),
                 birthDay: toCustomerFieldRequirement(this.legacyBirthDayEnabled),
@@ -562,6 +564,7 @@ export class WebshopMetaData extends AutoEncoder {
         },
     })
     customerSettings = CustomerSettings.create({
+        name: CustomerFieldRequirement.Required,
         email: CustomerFieldRequirement.Required,
         phone: CustomerFieldRequirement.Required,
     });

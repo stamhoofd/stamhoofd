@@ -1,11 +1,15 @@
 import { AutoEncoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
 
+import { RecordCategory } from '../members/records/RecordCategory.js';
 import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';
 
 /**
- * Which details are collected from a person. The first and last name are always required.
+ * Which details are collected from a person.
  */
 export class CustomerSettings extends AutoEncoder {
+    @field({ decoder: new EnumDecoder(CustomerFieldRequirement) })
+    name = CustomerFieldRequirement.Required;
+
     @field({ decoder: new EnumDecoder(CustomerFieldRequirement) })
     email = CustomerFieldRequirement.Disabled;
 
@@ -20,4 +24,10 @@ export class CustomerSettings extends AutoEncoder {
 
     @field({ decoder: new EnumDecoder(CustomerFieldRequirement) })
     address = CustomerFieldRequirement.Disabled;
+
+    /**
+     * Extra questions, listed inline with the customer inputs
+     */
+    @field({ decoder: RecordCategory, nullable: true })
+    recordCategory: RecordCategory | null = null;
 }

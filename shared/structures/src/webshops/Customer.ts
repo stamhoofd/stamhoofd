@@ -29,27 +29,35 @@ export class Customer extends AutoEncoder {
     gender: Gender = Gender.Other;
 
     /**
-     * Throws with `customer.*` fields. The first and last name are always required.
+     * Throws with `customer.*` fields.
      * Required = must be present and well-formed, Optional = only validate the format when a value is given, Disabled = clear the value.
      * Admins may leave required fields empty, except for the email format.
      */
     validate(settings: CustomerSettings, { asAdmin = false }: { asAdmin?: boolean } = {}) {
-        if (this.firstName.length < 2) {
-            throw new SimpleError({
-                code: 'invalid_first_name',
-                message: 'Invalid first name',
-                human: $t(`%sn`),
-                field: 'customer.firstName',
-            });
-        }
+        if (settings.name === CustomerFieldRequirement.Disabled) {
+            this.firstName = '';
+            this.lastName = '';
+        } else {
+            // Unlike the other fields, a name is also required for admins
+            const nameRequired = settings.name === CustomerFieldRequirement.Required;
 
-        if (this.lastName.length < 2) {
-            throw new SimpleError({
-                code: 'invalid_last_name',
-                message: 'Invalid last name',
-                human: $t(`%so`),
-                field: 'customer.lastName',
-            });
+            if (this.firstName.length < 2 && (nameRequired || this.firstName.length > 0)) {
+                throw new SimpleError({
+                    code: 'invalid_first_name',
+                    message: 'Invalid first name',
+                    human: $t(`%sn`),
+                    field: 'customer.firstName',
+                });
+            }
+
+            if (this.lastName.length < 2 && (nameRequired || this.lastName.length > 0)) {
+                throw new SimpleError({
+                    code: 'invalid_last_name',
+                    message: 'Invalid last name',
+                    human: $t(`%so`),
+                    field: 'customer.lastName',
+                });
+            }
         }
 
         if (settings.phone === CustomerFieldRequirement.Disabled) {

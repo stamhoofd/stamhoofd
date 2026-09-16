@@ -38,7 +38,8 @@ describe('WebshopMetaData.customerSettings 418 <-> 419', () => {
             expect(meta.customerSettings.birthDay).toBe(Required);
             expect(meta.customerSettings.address).toBe(Disabled);
             expect(meta.customerSettings.gender).toBe(Required);
-            // Always needed for the order confirmation
+            // Always asked from the person placing the order
+            expect(meta.customerSettings.name).toBe(Required);
             expect(meta.customerSettings.email).toBe(Required);
         });
 
