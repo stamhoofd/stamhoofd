@@ -1,34 +1,34 @@
 <template>
     <div class="customer-inputs">
-        <STInputBox v-if="showName" error-fields="customer.firstName,customer.lastName" :error-box="errorBox" :title="nameTitle">
+        <STInputBox v-if="settings.name !== CustomerFieldRequirement.Disabled" error-fields="customer.firstName,customer.lastName" :error-box="errorBox" :title="withOptional(nameTitle, settings.name)">
             <div class="input-group">
                 <div>
-                    <input v-model="firstName" class="input" name="fname" type="text" required :autocomplete="nameAutocomplete ? 'given-name' : 'off'" :placeholder="$t(`%1MT`)">
+                    <input v-model="firstName" class="input" name="fname" type="text" :required="settings.name === CustomerFieldRequirement.Required" :autocomplete="autocomplete('given-name')" :placeholder="$t(`%1MT`)">
                 </div>
                 <div>
-                    <input v-model="lastName" class="input" name="lname" type="text" required :autocomplete="nameAutocomplete ? 'family-name' : 'off'" :placeholder="$t(`%1MU`)">
+                    <input v-model="lastName" class="input" name="lname" type="text" :required="settings.name === CustomerFieldRequirement.Required" :autocomplete="autocomplete('family-name')" :placeholder="$t(`%1MU`)">
                 </div>
             </div>
         </STInputBox>
 
         <template v-if="settings.email !== CustomerFieldRequirement.Disabled">
-            <EmailInput v-model="email" name="email" :validator="validator" :required="settings.email === CustomerFieldRequirement.Required" :placeholder="emailPlaceholder ?? undefined" autocomplete="email" :title="withOptional($t(`%1FK`), settings.email)" />
+            <EmailInput v-model="email" name="email" :validator="validator" :required="settings.email === CustomerFieldRequirement.Required" :placeholder="emailPlaceholder ?? undefined" :autocomplete="autocomplete('email')" :title="withOptional($t(`%1FK`), settings.email)" />
             <p v-if="emailDescription" class="style-description-small" v-text="emailDescription" />
         </template>
 
-        <PhoneInput v-if="settings.phone !== CustomerFieldRequirement.Disabled" v-model="phone" :title="withOptional($t('%2k'), settings.phone)" name="mobile" :validator="validator" :required="settings.phone === CustomerFieldRequirement.Required" autocomplete="tel" :placeholder="$t(`%Xu`)" />
+        <PhoneInput v-if="settings.phone !== CustomerFieldRequirement.Disabled" v-model="phone" :title="withOptional($t('%2k'), settings.phone)" name="mobile" :validator="validator" :required="settings.phone === CustomerFieldRequirement.Required" :autocomplete="autocomplete('tel')" :placeholder="$t(`%Xu`)" />
 
         <BirthDayInput v-if="settings.birthDay !== CustomerFieldRequirement.Disabled" v-model="birthDay" :title="withOptional($t(`%17w`), settings.birthDay)" :validator="validator" :required="settings.birthDay === CustomerFieldRequirement.Required" />
 
         <STInputBox v-if="settings.gender !== CustomerFieldRequirement.Disabled" error-fields="customer.gender" :error-box="errorBox" :title="withOptional($t(`%Zd4`), settings.gender)">
             <RadioGroup>
-                <Radio v-model="gender" :value="Gender.Male" autocomplete="sex" :name="radioGroupName">
+                <Radio v-model="gender" :value="Gender.Male" :autocomplete="autocomplete('sex')" :name="radioGroupName">
                     {{ $t('%XK') }}
                 </Radio>
-                <Radio v-model="gender" :value="Gender.Female" autocomplete="sex" :name="radioGroupName">
+                <Radio v-model="gender" :value="Gender.Female" :autocomplete="autocomplete('sex')" :name="radioGroupName">
                     {{ $t('%XM') }}
                 </Radio>
-                <Radio v-model="gender" :value="Gender.Other" autocomplete="sex" :name="radioGroupName">
+                <Radio v-model="gender" :value="Gender.Other" :autocomplete="autocomplete('sex')" :name="radioGroupName">
                     {{ $t('%1JG') }}
                 </Radio>
             </RadioGroup>
@@ -39,11 +39,12 @@
 </template>
 
 <script lang="ts" setup>
-import type { Server } from '@simonbackx/simple-networking';
+import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import type { Address, Customer, ValidatedAddress } from '@stamhoofd/structures';
 import { Gender } from '@stamhoofd/structures';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 import type { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
+import { v4 as uuidv4 } from 'uuid';
 import { computed } from 'vue';
 
 import type { ErrorBox } from '../errors/ErrorBox';
@@ -59,30 +60,29 @@ import STInputBox from '../inputs/STInputBox.vue';
 const props = withDefaults(defineProps<{
     customer: Customer;
     settings: CustomerSettings;
-    showName?: boolean;
     nameTitle?: string;
-    /** Browser autofill of the buyer's own name: off for participants */
-    nameAutocomplete?: boolean;
-    /** Several customer forms in one page need their own native radio group */
-    radioGroupId?: string | null;
+    /** Browser autofill: off when the form is about someone other than the visitor */
+    enableAutocomplete?: boolean;
     errorBox: ErrorBox | null;
     validator: Validator;
-    validateServer?: Server | null;
     emailPlaceholder?: string | null;
     emailDescription?: string | null;
 }>(), {
-    showName: true,
     nameTitle: () => $t(`%Uy`),
-    nameAutocomplete: true,
-    radioGroupId: null,
-    validateServer: null,
+    enableAutocomplete: true,
     emailPlaceholder: null,
     emailDescription: null,
 });
 
 const emit = defineEmits<{ change: [] }>();
 
-const radioGroupName = computed(() => props.radioGroupId ? 'sex-' + props.radioGroupId : 'sex');
+// Several customer forms on one page each need their own native radio group
+const radioGroupName = 'sex-' + uuidv4();
+const validateServer = NetworkManager.server;
+
+function autocomplete(value: string) {
+    return props.enableAutocomplete ? value : 'off';
+}
 
 function withOptional(title: string, requirement: CustomerFieldRequirement) {
     return requirement === CustomerFieldRequirement.Optional ? title + ' ' + $t('(optioneel)') : title;

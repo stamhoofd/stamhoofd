@@ -4,7 +4,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <CustomerInputs :customer="checkoutManager.checkout.customer" :settings="fieldSettings" :show-name="!isLoggedIn" :error-box="errors.errorBox" :validator="errors.validator" :validate-server="unscopedServer" :email-placeholder="emailPlaceholder" :email-description="emailDescription" @change="checkoutManager.saveCheckout()" />
+        <CustomerInputs :customer="checkoutManager.checkout.customer" :settings="fieldSettings" :error-box="errors.errorBox" :validator="errors.validator" :email-placeholder="emailPlaceholder" :email-description="emailDescription" @change="checkoutManager.saveCheckout()" />
 
         <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="checkoutManager.checkout.fieldAnswers" :error-box="errors.errorBox" />
     </SaveView>
@@ -36,7 +36,6 @@ const context = useContext();
 const webshop = computed(() => webshopManager.webshop);
 const navigationActions = useNavigationActions();
 const isLoggedIn = computed(() => context.value.isComplete() ?? false);
-const unscopedServer = computed(() => webshopManager.unscopedServer);
 
 // When a delivery method is chosen, its address is already collected in a separate step
 // and stored on the customer, so we don't ask for the address a second time.
@@ -46,7 +45,9 @@ const fieldSettings = computed((): CustomerSettings => {
     const settings = webshop.value.meta.customerSettings;
     return settings.patch({
         // A logged in user's name and email address come from their account
+        name: isLoggedIn.value ? CustomerFieldRequirement.Disabled : settings.name,
         email: isLoggedIn.value ? CustomerFieldRequirement.Disabled : settings.email,
+        // The delivery address is collected in its own step
         address: hasDeliveryAddress.value ? CustomerFieldRequirement.Disabled : settings.address,
     });
 });
