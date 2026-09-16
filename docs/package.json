@@ -12,13 +12,13 @@
   "dependencies": {
     "@stamhoofd/assets": "*",
     "@stamhoofd/scss": "*",
-    "docus": "^5.12.3",
-    "better-sqlite3": "^12.11.1",
-    "nuxt": "^4.4.8"
+    "docus": "5.13.0",
+    "better-sqlite3": "12.11.1",
+    "nuxt": "4.5.2"
   },
   "devDependencies": {
     "eslint-plugin-stamhoofd": "*",
-    "sass": "1.104.0",
+    "sass": "1.104.1",
     "vite-svg-2-webfont": "8.2.0"
   }
 }
