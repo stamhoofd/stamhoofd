@@ -1,8 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Registration, RegistrationPeriod, Token } from '@stamhoofd/models';
-import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import type { SortList } from '@stamhoofd/structures';
-import { AccessRight, EventMeta, GroupCategory, GroupCategorySettings, GroupPrice, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, SortItemDirection, TranslatedString } from '@stamhoofd/structures';
+import type { Group, Organization, Registration, RegistrationPeriod, Token } from '@stamhoofd/models';
+import { BalanceItemFactory, CachedBalance, EventFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import type { SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight, BalanceItemStatus, BalanceItemType, EventMeta, GroupCategory, GroupCategorySettings, GroupPrice, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, SortItemDirection, TranslatedString } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { GetRegistrationsEndpoint } from './GetRegistrationsEndpoint.js';
@@ -1207,6 +1207,118 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
                 expect.objectContaining({ id: registration3.id }),
                 expect.objectContaining({ id: registration4.id }),
             ]);
+        });
+    });
+
+    describe('Financial data', () => {
+        const balance = 123_450000;
+
+        /**
+         * Registers a member with an open balance, together with a user that can only read the
+         * group that member is registered in, and that only carries the passed access rights.
+         */
+        async function setupRegistrationWithBalance(accessRights: AccessRight[]) {
+            const role = PermissionRoleDetailed.create({
+                name: 'Test Role',
+                accessRights,
+            });
+
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
+            const group = await new GroupFactory({ organization, period }).create();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    roles: [role],
+                    resources: new Map([[
+                        PermissionsResourceType.Groups, new Map([[
+                            group.id,
+                            ResourcePermissions.create({
+                                level: PermissionLevel.Read,
+                                accessRights,
+                            }),
+                        ]]),
+                    ]]),
+                }),
+            }).create();
+
+            const token = await SessionService.createSession(user);
+            const member = await new MemberFactory({}).create();
+            const registration = await new RegistrationFactory({ member, group }).create();
+
+            await new BalanceItemFactory({
+                organizationId: organization.id,
+                memberId: member.id,
+                registrationId: registration.id,
+                type: BalanceItemType.Registration,
+                amount: 1,
+                unitPrice: balance,
+                status: BalanceItemStatus.Due,
+            }).create();
+
+            // The filters and sorters read the cached balance, not the balance items themselves
+            await CachedBalance.updateForMembers(organization.id, [member.id]);
+            await CachedBalance.updateForRegistrations(organization.id, [registration.id]);
+
+            return { organization, group, member, registration, token };
+        }
+
+        async function fetchRegistrations({ organization, group, token, filter, sort }: { organization: Organization; group: Group; token: Token; filter?: StamhoofdFilter; sort?: SortList }) {
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({
+                    filter: filter ? { $and: [{ groupId: group.id }, filter] } : { groupId: group.id },
+                    sort: sort ?? [{ key: 'id', order: SortItemDirection.ASC }],
+                    limit: 10,
+                }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            return await testServer.test(endpoint, request);
+        }
+
+        test('A user without MemberReadFinancialData cannot filter registrations on a balance', async () => {
+            const { organization, group, token } = await setupRegistrationWithBalance([]);
+
+            // Filtering is enough to read a balance: repeating the request narrows down the exact amount
+            await expect(fetchRegistrations({ organization, group, token, filter: { memberCachedBalance: { amountOpen: { $gt: balance - 1 } } } })).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
+            await expect(fetchRegistrations({ organization, group, token, filter: { registrationCachedBalance: { toPay: { $gt: balance - 1 } } } })).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
+            await expect(fetchRegistrations({ organization, group, token, filter: { registrationCachedBalance: { price: { $gt: balance - 1 } } } })).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
+        });
+
+        test('A user without MemberReadFinancialData cannot sort registrations on a balance', async () => {
+            const { organization, group, token } = await setupRegistrationWithBalance([]);
+
+            // Sorting ranks every member by what they owe, without returning a single amount
+            await expect(fetchRegistrations({ organization, group, token, sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.DESC }] })).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
+            await expect(fetchRegistrations({ organization, group, token, sort: [{ key: 'registrationCachedBalance.toPay', order: SortItemDirection.DESC }] })).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
+            await expect(fetchRegistrations({ organization, group, token, sort: [{ key: 'registrationCachedBalance.price', order: SortItemDirection.DESC }] })).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
+        });
+
+        test('A user with MemberReadFinancialData can filter and sort registrations on a balance', async () => {
+            const { organization, group, registration, token } = await setupRegistrationWithBalance([AccessRight.MemberReadFinancialData]);
+
+            const filtered = await fetchRegistrations({ organization, group, token, filter: { memberCachedBalance: { amountOpen: { $gt: balance - 1 } } } });
+            expect(filtered.body.results.registrations.map(r => r.id)).toEqual([registration.id]);
+
+            const sorted = await fetchRegistrations({ organization, group, token, sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.DESC }, { key: 'id', order: SortItemDirection.ASC }] });
+            expect(sorted.body.results.registrations.map(r => r.id)).toEqual([registration.id]);
         });
     });
 

@@ -1,9 +1,9 @@
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
-import type { MemberWithUsersRegistrationsAndGroups, RegistrationPeriod, Token } from '@stamhoofd/models';
-import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, RecordCategoryFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import type { MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
+import { BalanceItemFactory, CachedBalance, EventFactory, GroupFactory, MemberFactory, MemberPlatformMembership, OrganizationFactory, RecordCategoryFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import type { SortList, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, EventMeta, GroupStatus, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
+import { AccessRight, BalanceItemStatus, BalanceItemType, EventMeta, GroupStatus, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Language } from '@stamhoofd/types/Language';
 import { GetMembersEndpoint } from './GetMembersEndpoint.js';
@@ -2640,6 +2640,251 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 third.id,
                 first.id,
             ]);
+        });
+    });
+
+    describe('Member balance financial data', () => {
+        const balance = 123_450000;
+
+        /**
+         * Registers a member with an open balance, together with a user that can only read the
+         * group that member is registered in, and that only carries the passed access rights.
+         */
+        async function setupMemberWithBalance(accessRights: AccessRight[]) {
+            const role = PermissionRoleDetailed.create({
+                name: 'Test Role',
+                accessRights,
+            });
+
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
+            const group = await new GroupFactory({ organization, period }).create();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    roles: [role],
+                    resources: new Map([[
+                        PermissionsResourceType.Groups, new Map([[
+                            group.id,
+                            ResourcePermissions.create({
+                                level: PermissionLevel.Read,
+                                accessRights,
+                            }),
+                        ]]),
+                    ]]),
+                }),
+            }).create();
+
+            const token = await SessionService.createSession(user);
+            const member = await new MemberFactory({}).create();
+            const registration = await new RegistrationFactory({ member, group }).create();
+
+            await new BalanceItemFactory({
+                organizationId: organization.id,
+                memberId: member.id,
+                registrationId: registration.id,
+                type: BalanceItemType.Registration,
+                amount: 1,
+                unitPrice: balance,
+                status: BalanceItemStatus.Due,
+            }).create();
+
+            // The filters read the cached balance, not the balance items themselves
+            await CachedBalance.updateForMembers(organization.id, [member.id]);
+            await CachedBalance.updateForRegistrations(organization.id, [registration.id]);
+
+            return { organization, member, token };
+        }
+
+        async function filterOnBalance({ organization, token, filter }: { organization: Organization; token: Token; filter: StamhoofdFilter }) {
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({
+                    filter: {
+                        registrations: {
+                            $elemMatch: {
+                                $and: [{ organizationId: organization.id }, filter],
+                            },
+                        },
+                    },
+                    limit: 10,
+                }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            return await testServer.test(endpoint, request);
+        }
+
+        test('A user without MemberReadFinancialData cannot filter members on their balance', async () => {
+            const { organization, token } = await setupMemberWithBalance([]);
+
+            // Repeating this request with different amounts narrows down the exact balance of a member
+            await expect(filterOnBalance({ organization, token, filter: { memberCachedBalance: { amountOpen: { $gt: balance - 1 } } } })).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
+            await expect(filterOnBalance({ organization, token, filter: { registrationCachedBalance: { toPay: { $gt: balance - 1 } } } })).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
+        });
+
+        test('A user with MemberReadFinancialData can filter members on their balance', async () => {
+            const { organization, member, token } = await setupMemberWithBalance([AccessRight.MemberReadFinancialData]);
+
+            const response = await filterOnBalance({ organization, token, filter: { memberCachedBalance: { amountOpen: { $gt: balance - 1 } } } });
+            expect(response.body.results.members.map(m => m.id)).toEqual([member.id]);
+        });
+    });
+
+    describe('Platform membership financial data', () => {
+        const membershipPrice = 3000;
+        const membershipPriceWithoutDiscount = 4000;
+        const membershipFreeAmount = 500;
+
+        /**
+         * Registers a member in a new organization and gives them a platform membership with a price,
+         * together with a user whose role only carries the passed access rights.
+         */
+        async function setupMemberWithMembership(accessRights: AccessRight[]) {
+            const role = PermissionRoleDetailed.create({
+                name: 'Test Role',
+                accessRights,
+            });
+
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
+            const group = await new GroupFactory({ organization, period }).create();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    roles: [role],
+                    resources: new Map([[
+                        PermissionsResourceType.Groups, new Map([[
+                            group.id,
+                            ResourcePermissions.create({
+                                level: PermissionLevel.Read,
+                                accessRights,
+                            }),
+                        ]]),
+                    ]]),
+                }),
+            }).create();
+
+            const token = await SessionService.createSession(user);
+            const member = await new MemberFactory({}).create();
+            await new RegistrationFactory({ member, group }).create();
+
+            const membership = new MemberPlatformMembership();
+            membership.memberId = member.id;
+            membership.membershipTypeId = uuidv4();
+            membership.organizationId = organization.id;
+            membership.periodId = period.id;
+            membership.startDate = period.startDate;
+            membership.endDate = period.endDate;
+            membership.price = membershipPrice;
+            membership.priceWithoutDiscount = membershipPriceWithoutDiscount;
+            membership.freeAmount = membershipFreeAmount;
+            await membership.save();
+
+            return { organization, member, membership, token };
+        }
+
+        async function fetchMember({ organization, token, memberId }: { organization: Organization; token: Token; memberId: string }) {
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({
+                    filter: {
+                        id: memberId,
+                    },
+                    limit: 10,
+                }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.results.members).toHaveLength(1);
+
+            return response.body.results.members[0];
+        }
+
+        test('A user without MemberReadFinancialData cannot filter members on the price of a platform membership', async () => {
+            const { organization, token } = await setupMemberWithMembership([]);
+
+            const filterOnPrice = async (filter: StamhoofdFilter) => {
+                const request = Request.get({
+                    path: baseUrl,
+                    host: organization.getApiHost(),
+                    query: new LimitedFilteredRequest({
+                        filter: { platformMemberships: { $elemMatch: filter } },
+                        limit: 10,
+                    }),
+                    headers: {
+                        authorization: 'Bearer ' + token.accessToken,
+                    },
+                });
+
+                return await testServer.test(endpoint, request);
+            };
+
+            await expect(filterOnPrice({ price: { $eq: membershipPrice } })).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
+            await expect(filterOnPrice({ priceWithoutDiscount: { $gt: membershipPrice - 1000 } })).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
+        });
+
+        test('A user with MemberReadFinancialData can filter members on the price of a platform membership', async () => {
+            const { organization, member, token } = await setupMemberWithMembership([AccessRight.MemberReadFinancialData]);
+
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({
+                    filter: { platformMemberships: { $elemMatch: { price: { $eq: membershipPrice } } } },
+                    limit: 10,
+                }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.results.members.map(m => m.id)).toEqual([member.id]);
+        });
+
+        test('A user with MemberReadFinancialData can see the price of a platform membership', async () => {
+            const { organization, member, token } = await setupMemberWithMembership([AccessRight.MemberReadFinancialData]);
+
+            const blob = await fetchMember({ organization, token, memberId: member.id });
+
+            expect(blob.platformMemberships).toHaveLength(1);
+            expect(blob.platformMemberships[0]).toMatchObject({
+                price: membershipPrice,
+                priceWithoutDiscount: membershipPriceWithoutDiscount,
+            });
+        });
+
+        test('A user without MemberReadFinancialData cannot see the price of a platform membership', async () => {
+            const { organization, member, token } = await setupMemberWithMembership([]);
+
+            const blob = await fetchMember({ organization, token, memberId: member.id });
+
+            // The membership itself stays visible: only its price is hidden
+            expect(blob.platformMemberships).toHaveLength(1);
+            expect(blob.platformMemberships[0]).toMatchObject({
+                price: null,
+                priceWithoutDiscount: null,
+            });
         });
     });
 });
