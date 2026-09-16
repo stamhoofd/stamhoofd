@@ -16,7 +16,7 @@ export default defineNuxtConfig({
     ],
     routeRules: {
         '/favicon.ico': {
-            redirect: 'https://www.stamhoofd.be/docs/content/images/2022/10/logo-small.svg',
+            redirect: '/favicon.svg',
         },
     },
     vite: {
