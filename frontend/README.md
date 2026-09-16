@@ -4,17 +4,15 @@
 
 To automate SSL certificate for a wide range of domains, caddy is used instead of nginx. In production, nginx is still used for the API since a wildcard certificate is required.
 
-In development, Caddy is also used, but you'll need to setup port forwarding for your custom domain to your LAN to make this work. You can also disable SSL in development. Run `yarn caddy:development` after installing Caddy to set the required configurations.
+In development, Caddy is managed by the repository CLI. Run `pnpm stam setup` to configure local DNS and certificate trust, then `pnpm stam services up` to start the shared services.
 
 ## Development
 
-Inside one of the app directories, run `yarn serve` to start a development server with hot reloading. Use `yarn build` to compile to the `dist/` folder.
+Run `pnpm stam dev frontend` from the repository root to start the frontend applications. Dashboard and registration are source packages compiled through `app/web-app`, not standalone applications.
 
 ### Linking shared dependencies
 
-We use shared dependencies between front and back end. In order to debug changes in multiple repositories, you need to use `yalc`. Use `yarn build && yalc publish --push` in one of the dependencies and use `yalc link @stamhoofd/stamhoofd-structures` once (for example, change the name of the dependency). Restart webpack development servers after linking. To undo the linking, use `yarn yalc:clear`. Restart webpack development servers after unlinking. After the dependencies are deployed and have new version numbers, you'll need to upgrade the dependencies without yalc.
-
-Note: `yarn link` (not to confuse with `yalc link`) does not work reliable, avoid using it.
+We use shared dependencies between front and back end. In order to debug changes in multiple repositories, you need to use `yalc`. Use `pnpm run build && yalc publish --push` in one of the dependencies and use `yalc link @stamhoofd/stamhoofd-structures` once (for example, change the name of the dependency). Restart development servers after linking or unlinking. After the dependencies are deployed and have new version numbers, you'll need to upgrade the dependencies without yalc.
 
 ### Development environment
 
@@ -96,7 +94,7 @@ assets/
 src/
     # One folder per (micro)frontend.
     {service-name}/
-        # Compiled result of yarn build is stored in this folder
+        # Compiled result of pnpm run build is stored in this folder
         dist/
         # Modules
         node_modules/
@@ -122,13 +120,10 @@ src/
         .browserlistrc
         # ESLint config
         .eslintrc.js
-        # Dependency manager config (yarn is used)
+        # Package manifest
         package.json
         # Vue cli configuration file (best to adjust webpack config here)
         vue.config.js
-        # Versions of each dependency that was installed by yarn
-        yarn.lock
-
     # All shared scripts and assets
     shared/
         # Vue components used by multiple services, optionally grouped in folders

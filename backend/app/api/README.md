@@ -20,21 +20,26 @@ SMTP_PORT=xxxx
 
 ## Setup
 
-Install dependencies and run the migrations to setup the database.
+From the repository root, install dependencies and run the migrations to setup the database.
 
-```
-yarn install
-yarn migrations
+```bash
+pnpm install
+pnpm run build:shared
+pnpm --dir backend/app/api run migrations
 ```
 
 ## Running
 
-```
-yarn start
+From the repository root:
+
+```bash
+pnpm --dir backend/app/api run start
 ```
 
 ## Testing
 
-```
-yarn test
+From the repository root:
+
+```bash
+pnpm stam test api
 ```
