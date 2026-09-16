@@ -175,7 +175,7 @@ leiding anyway — the department has no third word for them — by naming the l
 names two there: its stam is delivered among the leden and its ondersteunende leden among the
 leiding, and both stay volwassenen everywhere else.
 
-Standing in front of the reader only holds until the next `yarn metabase report`, which rewrites every
+Standing in front of the reader only holds until the next `yarn metabase report` in the separate devops project, which rewrites every
 card from these files — an edit made in Metabase is a correction to bring back here, not a place to
 keep one.
 
@@ -212,13 +212,13 @@ koepel under that same id, so both hold in the years imported from the client's 
 well as in the years the sync owns.
 
 Installing Metabase differs per environment — Docker locally (`stam platform-report start`), a jar
-under systemd on a server (`yarn metabase install` in devops) — but configuring it is the same HTTP
+under systemd on a server (`yarn metabase install` in the separate devops project) — but configuring it is the same HTTP
 calls either way. That is why this package holds no install logic and no credentials: a caller passes the
 base URL, the credentials and the data source to write against.
 
 | | Local | Server |
 |---|---|---|
-| Written by | `stam platform-report dashboards` | `yarn metabase report -s keeo/keeo-metabase-001` |
+| Written by | `stam platform-report dashboards` | `yarn metabase report -s keeo/keeo-metabase-001` in the separate devops project |
 | Authenticates with | the admin account the CLI created | an api key from 1Password |
 | Data source | registered by the CLI | added once by hand, looked up by name |
 
@@ -245,5 +245,5 @@ and filters — and never run a card. A column renamed in the statistics migrati
 in Metabase rather than here.
 
 ```bash
-yarn stam test metabase
+pnpm stam test metabase
 ```

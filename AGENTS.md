@@ -6,7 +6,7 @@ https://app.notion.com/p/Getting-started-20cc403f36798075b190c84c2c21d1ec — en
 
 ## Structure & architecture
 
-Yarn monorepo (Lerna + workspaces). Node.js + TypeScript backend · Vue 3 + Vite + Capacitor frontend.
+pnpm monorepo (Lerna + workspaces). Node.js + TypeScript backend · Vue 3 + Vite + Capacitor frontend.
 
 - `shared/*` — packages used by frontend + backend. `shared/structures` (`@stamhoofd/structures`) defines all data structures as versioned AutoEncoders (`@simonbackx/simple-encoding`): the single source of truth for API bodies and localStorage. `shared/locales` — i18n.
 - `backend/app/*` — `api` (main API server), `renderer`, `backup`, `redirecter`. `backend/shared/*` — backend-only packages (`models` = database models, `sql`, `email`, ...).
@@ -36,40 +36,40 @@ Backend uses a custom router (`@simonbackx/simple-endpoints`), **not Express**: 
 
 ## Build ordering (the #1 source of confusing errors)
 
-Packages consume each other's **built `dist/` output**, not source. After changing a shared package, consumers see stale code until you run `yarn build:shared`. Almost every "type error after editing a shared package", "test fails on module load", or "cached code keeps running" is fixed by running it first. Full reset when badly out of sync:
+Packages consume each other's **built `dist/` output**, not source. After changing a shared package, consumers see stale code until you run `pnpm run build:shared`. Almost every "type error after editing a shared package", "test fails on module load", or "cached code keeps running" is fixed by running it first. Full reset when badly out of sync:
 
 ```bash
-yarn clear && yarn clear-vite-cache && yarn && yarn build:shared
+pnpm run clear && pnpm run clear-vite-cache && pnpm install && pnpm run build:shared
 ```
 
 ## Commands
 
-From repo root: `yarn lint` · `yarn typecheck`. **`yarn stam test` is the one go-to way to run unit tests** — it runs `build:shared` first and only starts an isolated MySQL when a selected package needs one. Prefer it over your own commands; it does all required setup and teardown.
+From repo root: `pnpm run lint` · `pnpm run typecheck`. **`pnpm stam test` is the one go-to way to run unit tests** — it runs `build:shared` first and only starts an isolated MySQL when a selected package needs one. Prefer it over your own commands; it does all required setup and teardown.
 
 ```bash
-yarn stam test unit                 # every unit package (excludes Playwright)
-yarn stam test api                  # one package: api models sql structures renderer redirecter queues utility sgv object-differ eslint cli components networking
-yarn stam test unit SomeFile        # filename filter across all packages
-yarn stam test structures bundle-discounts          # package + filename filter
-yarn stam test structures -t 'partial test name'    # package + test-name filter (-t → vitest -t)
-yarn stam test api --skip-build     # skip the automatic build:shared
-yarn stam test api --clear          # reset the test database (drop its volume) before running
+pnpm stam test unit                 # every unit package (excludes Playwright)
+pnpm stam test api                  # one package: api models sql structures renderer redirecter queues utility sgv object-differ eslint cli components networking
+pnpm stam test unit SomeFile        # filename filter across all packages
+pnpm stam test structures bundle-discounts          # package + filename filter
+pnpm stam test structures -t 'partial test name'    # package + test-name filter (-t → vitest -t)
+pnpm stam test api --skip-build     # skip the automatic build:shared
+pnpm stam test api --clear          # reset the test database (drop its volume) before running
 ```
 
 For running tests, your sandbox needs permission to open ports.
 
 The DB MySQL container is shut down after each run, but its data volume persists (per worktree) so migrations aren't reinitialized every time — use `--clear` for a clean database.
 
-**Never hand-roll test infrastructure.** The isolated MySQL, migrations, `build:shared`, and env are all provisioned by `yarn stam test` — don't spin up Docker, create databases, run `build:shared`, or set `DB_PORT`/env vars yourself. If it doesn't work, STOP and ask the user. Tests use **Vitest**; only `api`, `models`, and `sql` need MySQL. `components` and `networking` are vitest browser-mode tests and need a Playwright Chromium (`yarn playwright install chromium`). The frontend dashboard/web-app "test" is a `vue-tsc` typecheck (run via `yarn typecheck`); UI behavior is covered by Playwright.
+**Never hand-roll test infrastructure.** The isolated MySQL, migrations, `build:shared`, and env are all provisioned by `pnpm stam test` — don't spin up Docker, create databases, run `build:shared`, or set `DB_PORT`/env vars yourself. If it doesn't work, STOP and ask the user. Tests use **Vitest**; only `api`, `models`, and `sql` need MySQL. `components` and `networking` are vitest browser-mode tests and need a Playwright Chromium (`pnpm exec playwright install chromium`). The frontend dashboard/web-app "test" is a `vue-tsc` typecheck (run via `pnpm run typecheck`); UI behavior is covered by Playwright.
 
 ### Playwright
 
-Run ONLY via `yarn stam test e2e`, never invoke or build Playwright manually:
+Run ONLY via `pnpm stam test e2e`, never invoke or build Playwright manually:
 
-- `yarn stam test e2e` — full build + suite
-- `yarn stam test e2e --grep @tag` — only tests matching a name/tag (playwright `--grep`)
-- `yarn stam test e2e --grep @tag --skip-build` — same, but skip `build:shared` + the API/frontend rebuild when only test files changed since the last run
-- `yarn stam test e2e --local-db` — connect to the MySQL already running on `127.0.0.1:3306` (port: `STAMHOOFD_E2E_MYSQL_PORT`) instead of starting MySQL containers
+- `pnpm stam test e2e` — full build + suite
+- `pnpm stam test e2e --grep @tag` — only tests matching a name/tag (playwright `--grep`)
+- `pnpm stam test e2e --grep @tag --skip-build` — same, but skip `build:shared` + the API/frontend rebuild when only test files changed since the last run
+- `pnpm stam test e2e --local-db` — connect to the MySQL already running on `127.0.0.1:3306` (port: `STAMHOOFD_E2E_MYSQL_PORT`) instead of starting MySQL containers
 
 Never use different commands to run tests. On environment issues (domains don't resolve, SSL errors, blank pages): STOP and ask the user to fix it.
 
