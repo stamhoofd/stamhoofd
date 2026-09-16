@@ -8,10 +8,10 @@
             <STInputBox v-if="nameEnabled" error-fields="customer.firstName,customer.lastName" :error-box="errors.errorBox" :title="$t(`%Uy`)">
                 <div class="input-group">
                     <div>
-                        <input v-model="firstName" class="input" name="fname" type="text" :required="nameRequired" autocomplete="given-name" :placeholder="$t(`%1MT`)">
+                        <input v-model="firstName" class="input" name="fname" type="text" autocomplete="given-name" :placeholder="$t(`%1MT`)">
                     </div>
                     <div>
-                        <input v-model="lastName" class="input" name="lname" type="text" :required="nameRequired" autocomplete="family-name" :placeholder="$t(`%1MU`)">
+                        <input v-model="lastName" class="input" name="lname" type="text" autocomplete="family-name" :placeholder="$t(`%1MU`)">
                     </div>
                 </div>
             </STInputBox>
@@ -60,6 +60,7 @@ import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import type { Address, ValidatedAddress } from '@stamhoofd/structures';
 import { Gender, WebshopTicketType } from '@stamhoofd/structures';
@@ -90,7 +91,6 @@ const birthDayEnabled = asksCustomerField('birthDay');
 const addressEnabled = asksCustomerField('address');
 const genderEnabled = asksCustomerField('gender');
 
-const nameRequired = requiresCustomerField('name');
 const emailRequired = requiresCustomerField('email');
 const phoneRequired = requiresCustomerField('phone');
 const birthDayRequired = requiresCustomerField('birthDay');
@@ -101,6 +101,14 @@ const unscopedServer = computed(() => webshopManager.unscopedServer);
 // When a delivery method is chosen, its address is already collected in a separate step
 // and stored on the customer, so we don't ask for the address a second time.
 const hasDeliveryAddress = computed(() => checkoutManager.checkout.deliveryMethod !== null);
+
+// The name inputs are plain html: validate them with the shared rules instead of the browser
+useValidation(errors.validator, () => {
+    if (isLoggedIn.value) {
+        return;
+    }
+    checkoutManager.checkout.customer.validateName(webshop.value.meta.customerSettings.name);
+});
 
 const emailPlaceholder = computed(() => {
     if (webshop.value.meta.ticketType !== WebshopTicketType.None) {

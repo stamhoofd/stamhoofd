@@ -29,36 +29,44 @@ export class Customer extends AutoEncoder {
     gender: Gender = Gender.Other;
 
     /**
+     * Split off so the inputs can validate the name on its own, without requiring the other fields yet.
+     */
+    validateName(requirement: CustomerFieldRequirement) {
+        if (requirement === CustomerFieldRequirement.Disabled) {
+            this.firstName = '';
+            this.lastName = '';
+            return;
+        }
+
+        // Unlike the other fields, a name is also required for admins
+        const required = requirement === CustomerFieldRequirement.Required;
+
+        if (this.firstName.length < 2 && (required || this.firstName.length > 0)) {
+            throw new SimpleError({
+                code: 'invalid_first_name',
+                message: 'Invalid first name',
+                human: $t(`%sn`),
+                field: 'customer.firstName',
+            });
+        }
+
+        if (this.lastName.length < 2 && (required || this.lastName.length > 0)) {
+            throw new SimpleError({
+                code: 'invalid_last_name',
+                message: 'Invalid last name',
+                human: $t(`%so`),
+                field: 'customer.lastName',
+            });
+        }
+    }
+
+    /**
      * Throws with `customer.*` fields.
      * Required = must be present and well-formed, Optional = only validate the format when a value is given, Disabled = clear the value.
      * Admins may leave required fields empty, except for the email format.
      */
     validate(settings: CustomerSettings, { asAdmin = false }: { asAdmin?: boolean } = {}) {
-        if (settings.name === CustomerFieldRequirement.Disabled) {
-            this.firstName = '';
-            this.lastName = '';
-        } else {
-            // Unlike the other fields, a name is also required for admins
-            const nameRequired = settings.name === CustomerFieldRequirement.Required;
-
-            if (this.firstName.length < 2 && (nameRequired || this.firstName.length > 0)) {
-                throw new SimpleError({
-                    code: 'invalid_first_name',
-                    message: 'Invalid first name',
-                    human: $t(`%sn`),
-                    field: 'customer.firstName',
-                });
-            }
-
-            if (this.lastName.length < 2 && (nameRequired || this.lastName.length > 0)) {
-                throw new SimpleError({
-                    code: 'invalid_last_name',
-                    message: 'Invalid last name',
-                    human: $t(`%so`),
-                    field: 'customer.lastName',
-                });
-            }
-        }
+        this.validateName(settings.name);
 
         if (settings.phone === CustomerFieldRequirement.Disabled) {
             this.phone = '';
