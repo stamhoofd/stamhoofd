@@ -20,7 +20,7 @@
                 <STErrorsDefault :error-box="entry.errors.errorBox" />
 
                 <template v-if="entry.item.product.enableCustomer && entry.item.customer">
-                    <CustomerInputs :customer="entry.item.customer" :settings="entry.item.product.resolvedCustomerSettings" :name-title="$t('Naam')" :name-autocomplete="false" :radio-group-id="entry.item.id" :error-box="entry.errors.errorBox" :validator="entry.errors.validator" :validate-server="unscopedServer" @change="checkoutManager.saveCart()" />
+                    <CustomerInputs :customer="entry.item.customer" :settings="entry.item.product.resolvedCustomerSettings" :name-title="$t('Naam')" :enable-autocomplete="false" :error-box="entry.errors.errorBox" :validator="entry.errors.validator" @change="checkoutManager.saveCart()" />
                     <FillRecordCategoryBox v-if="entry.item.product.resolvedCustomerSettings.recordCategory" :category="entry.item.product.resolvedCustomerSettings.recordCategory" :value="entry.item" :validator="entry.errors.validator" :force-mark-reviewed="true" :hide-title="true" :parent-error-box="entry.errors.errorBox" @patch="patchRecordAnswers(entry.item, $event)" />
                 </template>
 
@@ -83,7 +83,6 @@ const navigationActions = useNavigationActions();
 
 const webshop = computed(() => webshopManager.webshop);
 const cart = computed(() => checkoutManager.cart);
-const unscopedServer = computed(() => webshopManager.unscopedServer);
 
 // One error box + validator per item, keyed on the item id so they survive cart changes
 const itemErrors = reactive(new Map<string, ItemErrors>());
