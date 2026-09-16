@@ -9,7 +9,7 @@ import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { User } from '@stamhoofd/models';
 import { Order, Organization, OrganizationFactory, UserFactory, Webshop } from '@stamhoofd/models';
-import { Option, OptionMenu, PaymentMethod, PermissionLevel, Permissions, Product, ProductPrice, ProductType, ReservedSeat, STPackageBundle, Token as TokenStruct, Version, WebshopField, WebshopOrderMode, WebshopTicketType } from '@stamhoofd/structures';
+import { File, Image, Option, OptionMenu, PaymentMethod, PermissionLevel, Permissions, Product, ProductPrice, ProductType, ReservedSeat, Resolution, STPackageBundle, Token as TokenStruct, Version, WebshopCoverPhotoFit, WebshopField, WebshopOrderMode, WebshopTicketType } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WebshopOrderFlow } from '../flows/WebshopOrderFlow.js';
 import { DashboardPage, DashboardTab, WorkerData } from '../helpers/index.js';
@@ -276,5 +276,41 @@ test.describe('Webshop bulk ordering @webshop-bulk', () => {
 
         await expect.poll(async () => (await Webshop.getByID(webshop.id))!.meta.orderMode).toBe(WebshopOrderMode.Bulk);
         expect((await Webshop.getByID(webshop.id))!.meta.cartEnabled).toBe(false);
+    });
+
+    test('The cover photo can be cropped to a banner', async ({ page }) => {
+        const organization = await createOrganization({ modernWebshop: true });
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Cover photo ${WorkerData.id}`,
+            productCount: 2,
+            orderMode: WebshopOrderMode.Bulk,
+        });
+        const file = new File({ id: 'cover', server: 'https://files.example.com', path: 'cover.jpg', name: 'cover.jpg', size: 100 });
+        webshop.meta.coverPhoto = Image.create({ source: file, resolutions: [new Resolution({ file, width: 1200, height: 400 })] });
+        await webshop.save();
+
+        const admin = await new UserFactory({
+            email: `admin-${WorkerData.id}-${Date.now()}@test.be`,
+            organization,
+            permissions: Permissions.create({ level: PermissionLevel.Full }),
+        }).create();
+        await loginAs({ page, user: admin });
+
+        const dashboard = new DashboardPage(page);
+        await dashboard.openOrganizationDashboard({ organizationUri: organization.uri });
+        await dashboard.openTab(DashboardTab.Webshops);
+        await page.getByTestId('webshop-menu-item').filter({ hasText: webshop.meta.name }).click();
+        await page.getByRole('heading', { name: /Omslagfoto/ }).click();
+
+        await expect(page.getByTestId('cover-photo-fit-keep').locator('input')).toBeChecked();
+        await page.getByTestId('cover-photo-fit-cover').click();
+        await page.locator('.st-view').last().getByTestId('save-button').click();
+        await expect.poll(async () => (await Webshop.getByID(webshop.id))!.meta.coverPhotoFit).toBe(WebshopCoverPhotoFit.Cover);
+
+        // The webshop renders the banner variant
+        const flow = new WebshopOrderFlow(page, { orderMode: WebshopOrderMode.Bulk });
+        await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
+        await expect(page.locator('.webshop-banner.cover-fit')).toHaveCount(1);
     });
 });

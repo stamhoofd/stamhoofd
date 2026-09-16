@@ -1,7 +1,7 @@
 <template>
     <section class="st-view shade modern-webshop-view">
         <main class="center flex" :class="webshopLayout + ' ' + (webshopLayout === 'Default' ? 'enable-grid' : '')">
-            <figure v-if="webshop.meta.coverPhoto" class="webshop-banner">
+            <figure v-if="webshop.meta.coverPhoto" class="webshop-banner" :class="{ 'cover-fit': webshop.meta.coverPhotoFit === WebshopCoverPhotoFit.Cover }">
                 <ImageComponent :image="webshop.meta.coverPhoto" :auto-height="true" class="style-cover-photo" />
             </figure>
 
@@ -90,7 +90,7 @@ import ProductGrid from '@stamhoofd/components/views/ProductGrid.vue';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import type { Payment, Product } from '@stamhoofd/structures';
-import { CartItem, PaymentStatus, WebshopOrderMode } from '@stamhoofd/structures';
+import { CartItem, PaymentStatus, WebshopCoverPhotoFit, WebshopOrderMode } from '@stamhoofd/structures';
 import { computed, onMounted } from 'vue';
 import { getOrderButtonText } from '../classes/webshopWording';
 import { useCheckoutManager } from '../composables/useCheckoutManager';
@@ -479,6 +479,15 @@ async function resumeStep(destination: string, animated = true) {
     // The webshop bar above already provides the spacing
     > main {
         padding-top: 20px;
+    }
+
+    // Banner mode: fill the width with a limited height and crop the photo
+    .webshop-banner.cover-fit .style-cover-photo {
+        max-height: max(250px, 33vh);
+
+        img {
+            object-fit: cover !important;
+        }
     }
 
     .bulk-total {
