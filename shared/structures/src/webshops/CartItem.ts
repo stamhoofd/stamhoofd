@@ -811,7 +811,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
         }
 
         const settings = this.product.resolvedCustomerSettings;
-        this.customer.validate({ ...settings, asAdmin: admin });
+        this.customer.validate(settings, { asAdmin: admin });
 
         if (settings.recordCategory) {
             RecordCategory.validate([settings.recordCategory], this);

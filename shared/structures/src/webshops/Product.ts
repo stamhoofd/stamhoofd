@@ -9,7 +9,7 @@ import { ReservedSeat } from '../SeatingPlan.js';
 import type { Webshop } from './Webshop.js';
 import { WebshopField } from './WebshopField.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
-import { ProductCustomerSettings } from './ProductCustomerSettings.js';
+import { CustomerSettings } from './CustomerSettings.js';
 
 export class ProductPrice extends AutoEncoder {
     /**
@@ -282,11 +282,11 @@ export class Product extends AutoEncoder {
     /**
      * null = default settings (only the name is asked)
      */
-    @field({ decoder: ProductCustomerSettings, nullable: true, ...NextVersion })
-    customerSettings: ProductCustomerSettings | null = null;
+    @field({ decoder: CustomerSettings, nullable: true, ...NextVersion })
+    customerSettings: CustomerSettings | null = null;
 
-    get resolvedCustomerSettings(): ProductCustomerSettings {
-        return this.customerSettings ?? ProductCustomerSettings.create({});
+    get resolvedCustomerSettings(): CustomerSettings {
+        return this.customerSettings ?? CustomerSettings.create({});
     }
 
     /**

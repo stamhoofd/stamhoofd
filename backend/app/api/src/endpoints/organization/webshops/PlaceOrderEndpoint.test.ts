@@ -7,7 +7,7 @@ import { MolliePayment, Order, OrganizationFactory, Payment, UserFactory, Websho
 import type { OrderResponse } from '@stamhoofd/structures';
 import { Address, Cart, CartItem, CartItemOption, Customer, MollieOnboarding, MollieStatus, Option, OptionMenu, OrderData, PaymentConfiguration, PaymentMethod, PaymentProvider, PaymentStatus, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopAuthType, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopOrderMode, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
-import { ProductCustomerSettings } from '@stamhoofd/structures/webshops/ProductCustomerSettings.js';
+import { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
@@ -805,7 +805,7 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
             customerProduct = Product.create({
                 name: 'customerProduct',
                 enableCustomer: true,
-                customerSettings: ProductCustomerSettings.create({
+                customerSettings: CustomerSettings.create({
                     email: CustomerFieldRequirement.Required,
                 }),
             });

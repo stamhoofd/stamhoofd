@@ -5,7 +5,7 @@ import { RecordSettings, RecordType } from '../members/records/RecordSettings.js
 import { Cart } from './Cart.js';
 import { Customer } from './Customer.js';
 import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';
-import { ProductCustomerSettings } from './ProductCustomerSettings.js';
+import { CustomerSettings } from './CustomerSettings.js';
 import { CartItem, CartItemOption } from './CartItem.js';
 import { Option, OptionMenu, Product, ProductPrice } from './Product.js';
 import { Webshop } from './Webshop.js';
@@ -190,11 +190,11 @@ describe('Structure.CartItem', () => {
     });
 
     describe('per-item customer', () => {
-        function buildWebshop(settings?: Partial<ProductCustomerSettings>) {
+        function buildWebshop(settings?: Partial<CustomerSettings>) {
             const product = Product.create({
                 name: 'Ticket',
                 enableCustomer: true,
-                customerSettings: settings ? ProductCustomerSettings.create(settings) : null,
+                customerSettings: settings ? CustomerSettings.create(settings) : null,
             });
             const webshop = Webshop.create({ products: [product] });
             return { webshop, product };
