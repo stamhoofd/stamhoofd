@@ -14,6 +14,7 @@ import type { OrganizationManager } from '@stamhoofd/networking/OrganizationMana
 import type { ExcelWorkbookFilter, Platform, PrivateOrderWithTickets } from '@stamhoofd/structures';
 import { EmailRecipientSubfilter, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PrivateOrder, TicketPrivate } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
+import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 import type { WebshopManager } from '../WebshopManager';
 import { OrderRequiredFilterHelper } from './OrderRequiredFilterHelper';
 
@@ -207,7 +208,7 @@ export class OrderActionBuilder {
                 },
             }),
 
-            ...(this.webshopManager.preview.meta.phoneEnabled
+            ...(this.webshopManager.preview.meta.customerSettings.phone !== CustomerFieldRequirement.Disabled
                 ? [new InMemoryTableAction({
                         name: $t(`%PI`),
                         enabled: () => this.webshopManager.hasRead,

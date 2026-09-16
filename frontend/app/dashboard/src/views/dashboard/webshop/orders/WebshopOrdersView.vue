@@ -32,6 +32,7 @@ import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/Tabl
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import type { CheckoutMethod, PaymentGeneral, PrivateOrder, TicketPrivate } from '@stamhoofd/structures';
 import { CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PrivateOrderWithTickets, SortItemDirection, WebshopNumberingType, WebshopTimeSlot } from '@stamhoofd/structures';
+import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
@@ -182,7 +183,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
         }),
     ];
 
-    if (preview.value.meta.phoneEnabled) {
+    if (preview.value.meta.customerSettings.phone !== CustomerFieldRequirement.Disabled) {
         cols.push(
             new Column<PrivateOrder, string>({
                 id: 'phone',

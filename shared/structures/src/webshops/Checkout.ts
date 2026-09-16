@@ -7,7 +7,6 @@ import { compileToInMemoryFilter } from '../filters/InMemoryFilter.js';
 import { checkoutInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions.js';
 import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import type { I18n } from '../I18nInterface.js';
-import { Gender } from '../members/Gender.js';
 import type { ObjectWithRecords, PatchAnswers } from '../members/ObjectWithRecords.js';
 import type { RecordAnswer } from '../members/records/RecordAnswer.js';
 import { RecordAnswerDecoder, RecordAnswerMapDecoder } from '../members/records/RecordAnswer.js';
@@ -20,6 +19,7 @@ import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4Decima
 import type { User } from '../User.js';
 import { Cart } from './Cart.js';
 import { Customer } from './Customer.js';
+import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';
 import type { ProductDiscountTracker } from './Discount.js';
 import { Discount } from './Discount.js';
 import { DiscountCode } from './DiscountCode.js';
@@ -456,79 +456,15 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             this.customer.email = user.email;
         }
 
-        if (this.customer.firstName.length < 2) {
-            throw new SimpleError({
-                code: 'invalid_first_name',
-                message: 'Invalid first name',
-                human: $t(`%sn`),
-                field: 'customer.firstName',
-            });
-        }
+        const settings = webshop.meta.customerSettings;
 
-        if (this.customer.lastName.length < 2) {
-            throw new SimpleError({
-                code: 'invalid_last_name',
-                message: 'Invalid last name',
-                human: $t(`%so`),
-                field: 'customer.lastName',
-            });
-        }
-
-        if (webshop.meta.phoneEnabled) {
-            if (this.customer.phone.length < 6 && !asAdmin) {
-                throw new SimpleError({
-                    code: 'invalid_phone',
-                    message: 'Invalid phone',
-                    human: i18n.t('shared.inputs.mobile.invalidMessage'),
-                    field: 'customer.phone',
-                });
-            }
-        } else {
-            this.customer.phone = '';
-        }
-
-        if (webshop.meta.birthDayEnabled) {
-            if (!this.customer.birthDay && !asAdmin) {
-                throw new SimpleError({
-                    code: 'invalid_birth_day',
-                    message: 'Invalid birth day',
-                    human: $t(`%yq`),
-                    field: 'customer.birthDay',
-                });
-            }
-        } else {
-            this.customer.birthDay = null;
-        }
-
-        if (webshop.meta.addressEnabled) {
-            if (!this.customer.address && !asAdmin) {
-                throw new SimpleError({
-                    code: 'invalid_address',
-                    message: 'Invalid address',
-                    human: $t(`%ZdB`),
-                    field: 'customer.address',
-                });
-            }
-        } else if (!this.address) {
-            // Only clear the customer address when there is no delivery address:
-            // a delivery address is always stored on the customer.
-            this.customer.address = null;
-        }
-
-        if (!webshop.meta.genderEnabled) {
-            this.customer.gender = Gender.Other;
-        }
-
-        const regex = /^[\w.!#$%&'*+/=?^`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$/i;
-
-        if (!regex.test(this.customer.email)) {
-            throw new SimpleError({
-                code: 'invalid_email',
-                message: 'Invalid email',
-                human: $t('%sR'),
-                field: 'customer.email',
-            });
-        }
+        this.customer.validate(
+            // A delivery address is always stored on the customer, so never clear it in that case
+            settings.address === CustomerFieldRequirement.Disabled && this.address
+                ? settings.patch({ address: CustomerFieldRequirement.Optional })
+                : settings,
+            { asAdmin },
+        );
 
         this.validateAnswers(webshop);
     }

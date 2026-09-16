@@ -22,6 +22,8 @@ import { RichText } from '../RichText.js';
 import { SeatingPlan } from '../SeatingPlan.js';
 import { SponsorConfig } from '../SponsorConfig.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
+import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';
+import { CustomerSettings } from './CustomerSettings.js';
 import { Discount } from './Discount.js';
 import { TransferSettings } from './TransferSettings.js';
 import { WebshopField } from './WebshopField.js';
@@ -29,6 +31,32 @@ import { WebshopField } from './WebshopField.js';
 export enum WebshopLayout {
     Default = 'Default',
     Split = 'Split',
+}
+
+type CustomerSettingsField = 'phone' | 'birthDay' | 'gender' | 'address';
+
+function toCustomerFieldRequirement(enabled: boolean): CustomerFieldRequirement {
+    return enabled ? CustomerFieldRequirement.Required : CustomerFieldRequirement.Disabled;
+}
+
+/**
+ * Keep the deprecated *Enabled flags correct for clients that don't know customerSettings yet.
+ */
+function downgradeCustomerField(key: CustomerSettingsField) {
+    return function (this: WebshopMetaData) {
+        return this.customerSettings[key] !== CustomerFieldRequirement.Disabled;
+    };
+}
+
+function downgradeCustomerFieldPatch(key: CustomerSettingsField) {
+    return function (this: AutoEncoderPatchType<WebshopMetaData>) {
+        const requirement = this.customerSettings?.[key];
+        if (requirement === undefined || requirement === null) {
+            // Not part of this patch
+            return undefined;
+        }
+        return requirement !== CustomerFieldRequirement.Disabled;
+    };
 }
 
 export enum DarkMode {
@@ -474,17 +502,72 @@ export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: BooleanDecoder, version: 94 })
     allowComments = false;
 
-    @field({ decoder: BooleanDecoder, optional: true })
-    phoneEnabled = true;
+    /**
+     * @deprecated
+     * Replaced by customerSettings. Kept in sync for older clients, never read by new code.
+     */
+    @field({ decoder: BooleanDecoder, optional: true, field: 'phoneEnabled' })
+    @field({ decoder: BooleanDecoder, version: 419, field: 'phoneEnabled', downgrade: downgradeCustomerField('phone'), downgradePatch: downgradeCustomerFieldPatch('phone') })
+    legacyPhoneEnabled = true;
 
-    @field({ decoder: BooleanDecoder, version: 403 })
-    birthDayEnabled = false;
+    /**
+     * @deprecated
+     * Replaced by customerSettings.
+     */
+    @field({ decoder: BooleanDecoder, version: 403, field: 'birthDayEnabled' })
+    @field({ decoder: BooleanDecoder, version: 419, field: 'birthDayEnabled', downgrade: downgradeCustomerField('birthDay'), downgradePatch: downgradeCustomerFieldPatch('birthDay') })
+    legacyBirthDayEnabled = false;
 
-    @field({ decoder: BooleanDecoder, version: 403 })
-    addressEnabled = false;
+    /**
+     * @deprecated
+     * Replaced by customerSettings.
+     */
+    @field({ decoder: BooleanDecoder, version: 403, field: 'addressEnabled' })
+    @field({ decoder: BooleanDecoder, version: 419, field: 'addressEnabled', downgrade: downgradeCustomerField('address'), downgradePatch: downgradeCustomerFieldPatch('address') })
+    legacyAddressEnabled = false;
 
-    @field({ decoder: BooleanDecoder, version: 403 })
-    genderEnabled = false;
+    /**
+     * @deprecated
+     * Replaced by customerSettings.
+     */
+    @field({ decoder: BooleanDecoder, version: 403, field: 'genderEnabled' })
+    @field({ decoder: BooleanDecoder, version: 419, field: 'genderEnabled', downgrade: downgradeCustomerField('gender'), downgradePatch: downgradeCustomerFieldPatch('gender') })
+    legacyGenderEnabled = false;
+
+    /**
+     * Details asked from the person placing the order. Replaces the deprecated *Enabled flags.
+     */
+    @field({
+        decoder: CustomerSettings,
+        version: 419,
+        upgrade: function (this: WebshopMetaData) {
+            return CustomerSettings.create({
+                // Always asked from the person placing the order
+                name: CustomerFieldRequirement.Required,
+                email: CustomerFieldRequirement.Required,
+                phone: toCustomerFieldRequirement(this.legacyPhoneEnabled),
+                birthDay: toCustomerFieldRequirement(this.legacyBirthDayEnabled),
+                gender: toCustomerFieldRequirement(this.legacyGenderEnabled),
+                address: toCustomerFieldRequirement(this.legacyAddressEnabled),
+            });
+        },
+        upgradePatch: function (this: AutoEncoderPatchType<WebshopMetaData>) {
+            const patch = CustomerSettings.patch({});
+
+            for (const [key, enabled] of [['phone', this.legacyPhoneEnabled], ['birthDay', this.legacyBirthDayEnabled], ['gender', this.legacyGenderEnabled], ['address', this.legacyAddressEnabled]] as const) {
+                if (enabled !== undefined) {
+                    patch[key] = toCustomerFieldRequirement(enabled);
+                }
+            }
+
+            return patch;
+        },
+    })
+    customerSettings = CustomerSettings.create({
+        name: CustomerFieldRequirement.Required,
+        email: CustomerFieldRequirement.Required,
+        phone: CustomerFieldRequirement.Required,
+    });
 
     @field({ decoder: BooleanDecoder, version: 242 })
     allowDiscountCodeEntry = false;

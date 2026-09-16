@@ -8,17 +8,26 @@ import { OrganizationMetaData } from '../OrganizationMetaData.js';
 import { Cart } from './Cart.js';
 import { Checkout } from './Checkout.js';
 import { Customer } from './Customer.js';
+import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';
+import { CustomerSettings } from './CustomerSettings.js';
 import { Webshop } from './Webshop.js';
 import { WebshopDeliveryMethod, WebshopMetaData } from './WebshopMetaData.js';
 
 const i18n = { t: (key: string) => key } as unknown as I18n;
 const organizationMeta = OrganizationMetaData.create({});
 
-function createWebshop(meta: Partial<Record<'phoneEnabled' | 'birthDayEnabled' | 'addressEnabled' | 'genderEnabled', boolean>>) {
+function createWebshop(asked: Partial<Record<'phone' | 'birthDay' | 'address' | 'gender', boolean>>) {
+    const toRequirement = (enabled: boolean | undefined) => enabled ? CustomerFieldRequirement.Required : CustomerFieldRequirement.Disabled;
+
     return Webshop.create({
         meta: WebshopMetaData.create({
-            phoneEnabled: false,
-            ...meta,
+            customerSettings: CustomerSettings.create({
+                email: CustomerFieldRequirement.Required,
+                phone: toRequirement(asked.phone),
+                birthDay: toRequirement(asked.birthDay),
+                address: toRequirement(asked.address),
+                gender: toRequirement(asked.gender),
+            }),
         }),
     });
 }
@@ -45,8 +54,8 @@ function createAddress() {
 }
 
 describe('Checkout.validateCustomer', () => {
-    it('requires a birth day when birthDayEnabled', () => {
-        const webshop = createWebshop({ birthDayEnabled: true });
+    it('requires a birth day when the birth day is asked', () => {
+        const webshop = createWebshop({ birthDay: true });
         const checkout = Checkout.create({ customer: createValidCustomer() });
 
         expect(() => checkout.validateCustomer(webshop, organizationMeta, i18n, false)).toThrow(/birth day/i);
@@ -56,14 +65,14 @@ describe('Checkout.validateCustomer', () => {
     });
 
     it('does not require a birth day for admins', () => {
-        const webshop = createWebshop({ birthDayEnabled: true });
+        const webshop = createWebshop({ birthDay: true });
         const checkout = Checkout.create({ customer: createValidCustomer() });
 
         expect(() => checkout.validateCustomer(webshop, organizationMeta, i18n, true)).not.toThrow();
     });
 
-    it('clears the birth day when birthDayEnabled is false', () => {
-        const webshop = createWebshop({ birthDayEnabled: false });
+    it('clears the birth day when it is not asked', () => {
+        const webshop = createWebshop({ birthDay: false });
         const customer = createValidCustomer();
         customer.birthDay = new Date('2000-01-01');
         const checkout = Checkout.create({ customer });
@@ -72,8 +81,8 @@ describe('Checkout.validateCustomer', () => {
         expect(checkout.customer.birthDay).toBeNull();
     });
 
-    it('requires an address when addressEnabled', () => {
-        const webshop = createWebshop({ addressEnabled: true });
+    it('requires an address when the address is asked', () => {
+        const webshop = createWebshop({ address: true });
         const checkout = Checkout.create({ customer: createValidCustomer() });
 
         expect(() => checkout.validateCustomer(webshop, organizationMeta, i18n, false)).toThrow(/address/i);
@@ -82,8 +91,8 @@ describe('Checkout.validateCustomer', () => {
         expect(() => checkout.validateCustomer(webshop, organizationMeta, i18n, false)).not.toThrow();
     });
 
-    it('clears the customer address when addressEnabled is false and there is no delivery address', () => {
-        const webshop = createWebshop({ addressEnabled: false });
+    it('clears the customer address when the address is not asked and there is no delivery address', () => {
+        const webshop = createWebshop({ address: false });
         const customer = createValidCustomer();
         customer.address = createAddress();
         const checkout = Checkout.create({ customer });
@@ -92,8 +101,8 @@ describe('Checkout.validateCustomer', () => {
         expect(checkout.customer.address).toBeNull();
     });
 
-    it('resets the gender when genderEnabled is false', () => {
-        const webshop = createWebshop({ genderEnabled: false });
+    it('resets the gender when the gender is not asked', () => {
+        const webshop = createWebshop({ gender: false });
         const customer = createValidCustomer();
         customer.gender = Gender.Female;
         const checkout = Checkout.create({ customer });
@@ -102,8 +111,8 @@ describe('Checkout.validateCustomer', () => {
         expect(checkout.customer.gender).toBe(Gender.Other);
     });
 
-    it('keeps the gender when genderEnabled is true', () => {
-        const webshop = createWebshop({ genderEnabled: true });
+    it('keeps the gender when the gender is asked', () => {
+        const webshop = createWebshop({ gender: true });
         const customer = createValidCustomer();
         customer.gender = Gender.Female;
         const checkout = Checkout.create({ customer });
@@ -114,12 +123,12 @@ describe('Checkout.validateCustomer', () => {
 });
 
 describe('Checkout.validateDeliveryAddress', () => {
-    it('copies the delivery address to the customer even when addressEnabled is false', () => {
+    it('copies the delivery address to the customer even when the address is not asked', () => {
         const address = createAddress();
         const checkoutMethod = WebshopDeliveryMethod.create({
             countries: [address.country],
         });
-        const webshop = createWebshop({ addressEnabled: false });
+        const webshop = createWebshop({ address: false });
         const checkout = Checkout.create({
             customer: createValidCustomer(),
             checkoutMethod,
@@ -131,7 +140,7 @@ describe('Checkout.validateDeliveryAddress', () => {
         expect(checkout.customer.address).toStrictEqual(address);
     });
 
-    it('keeps the delivery address as the customer address when addressEnabled and does not re-require it', () => {
+    it('keeps the delivery address as the customer address when the address is asked and does not re-require it', () => {
         // validateCustomer relies on validateDeliveryAddress having run first: the delivery
         // address is copied onto the customer, so the addressEnabled check must not throw even
         // though the customer never filled in a separate address.
@@ -139,7 +148,7 @@ describe('Checkout.validateDeliveryAddress', () => {
         const checkoutMethod = WebshopDeliveryMethod.create({
             countries: [address.country],
         });
-        const webshop = createWebshop({ addressEnabled: true });
+        const webshop = createWebshop({ address: true });
         const checkout = Checkout.create({
             customer: createValidCustomer(),
             checkoutMethod,

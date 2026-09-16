@@ -5,24 +5,26 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="!isLoggedIn">
-            <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`%Uy`)">
+            <STInputBox v-if="nameEnabled" error-fields="customer.firstName,customer.lastName" :error-box="errors.errorBox" :title="$t(`%Uy`)">
                 <div class="input-group">
                     <div>
-                        <input v-model="firstName" class="input" name="fname" type="text" required autocomplete="given-name" :placeholder="$t(`%1MT`)">
+                        <input v-model="firstName" class="input" name="fname" type="text" autocomplete="given-name" :placeholder="$t(`%1MT`)">
                     </div>
                     <div>
-                        <input v-model="lastName" class="input" name="lname" type="text" required autocomplete="family-name" :placeholder="$t(`%1MU`)">
+                        <input v-model="lastName" class="input" name="lname" type="text" autocomplete="family-name" :placeholder="$t(`%1MU`)">
                     </div>
                 </div>
             </STInputBox>
 
-            <EmailInput v-model="email" name="email" :validator="errors.validator" :placeholder="emailPlaceholder" autocomplete="email" :title="$t(`%1FK`)" />
-            <p v-if="emailDescription" class="style-description-small" v-text="emailDescription" />
+            <template v-if="emailEnabled">
+                <EmailInput v-model="email" name="email" :validator="errors.validator" :required="emailRequired" :placeholder="emailPlaceholder" autocomplete="email" :title="$t(`%1FK`)" />
+                <p v-if="emailDescription" class="style-description-small" v-text="emailDescription" />
+            </template>
         </template>
 
-        <PhoneInput v-if="phoneEnabled" v-model="phone" :title="$t('%2k' )" name="mobile" :validator="errors.validator" autocomplete="tel" :placeholder="$t(`%Xu`)" />
+        <PhoneInput v-if="phoneEnabled" v-model="phone" :title="$t('%2k' )" name="mobile" :validator="errors.validator" :required="phoneRequired" autocomplete="tel" :placeholder="$t(`%Xu`)" />
 
-        <BirthDayInput v-if="birthDayEnabled" v-model="birthDay" :title="$t(`%17w`)" :validator="errors.validator" :required="true" />
+        <BirthDayInput v-if="birthDayEnabled" v-model="birthDay" :title="$t(`%17w`)" :validator="errors.validator" :required="birthDayRequired" />
 
         <STInputBox v-if="genderEnabled" error-fields="gender" :error-box="errors.errorBox" :title="$t(`%Zd4`)">
             <RadioGroup>
@@ -38,7 +40,7 @@
             </RadioGroup>
         </STInputBox>
 
-        <AddressInput v-if="addressEnabled && !hasDeliveryAddress" v-model="address" :required="true" :validator="errors.validator" :validate-server="unscopedServer" :title="$t(`%Cn`)" />
+        <AddressInput v-if="addressEnabled && !hasDeliveryAddress" v-model="address" :required="addressRequired" :validator="errors.validator" :validate-server="unscopedServer" :title="$t(`%Cn`)" />
 
         <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="checkoutManager.checkout.fieldAnswers" :error-box="errors.errorBox" />
     </SaveView>
@@ -58,9 +60,11 @@ import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import type { Address, ValidatedAddress } from '@stamhoofd/structures';
 import { Gender, WebshopTicketType } from '@stamhoofd/structures';
+import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 
 import { computed, ref } from 'vue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
@@ -75,16 +79,36 @@ const checkoutManager = useCheckoutManager();
 const context = useContext();
 const webshop = computed(() => webshopManager.webshop);
 const navigationActions = useNavigationActions();
-const phoneEnabled = computed(() => webshop.value.meta.phoneEnabled);
-const birthDayEnabled = computed(() => webshop.value.meta.birthDayEnabled);
-const addressEnabled = computed(() => webshop.value.meta.addressEnabled);
-const genderEnabled = computed(() => webshop.value.meta.genderEnabled);
+type CustomerField = 'name' | 'email' | 'phone' | 'birthDay' | 'gender' | 'address';
+
+const asksCustomerField = (key: CustomerField) => computed(() => webshop.value.meta.customerSettings[key] !== CustomerFieldRequirement.Disabled);
+const requiresCustomerField = (key: CustomerField) => computed(() => webshop.value.meta.customerSettings[key] === CustomerFieldRequirement.Required);
+
+const nameEnabled = asksCustomerField('name');
+const emailEnabled = asksCustomerField('email');
+const phoneEnabled = asksCustomerField('phone');
+const birthDayEnabled = asksCustomerField('birthDay');
+const addressEnabled = asksCustomerField('address');
+const genderEnabled = asksCustomerField('gender');
+
+const emailRequired = requiresCustomerField('email');
+const phoneRequired = requiresCustomerField('phone');
+const birthDayRequired = requiresCustomerField('birthDay');
+const addressRequired = requiresCustomerField('address');
 const isLoggedIn = computed(() => context.value.isComplete() ?? false);
 const unscopedServer = computed(() => webshopManager.unscopedServer);
 
 // When a delivery method is chosen, its address is already collected in a separate step
 // and stored on the customer, so we don't ask for the address a second time.
 const hasDeliveryAddress = computed(() => checkoutManager.checkout.deliveryMethod !== null);
+
+// The name inputs are plain html: validate them with the shared rules instead of the browser
+useValidation(errors.validator, () => {
+    if (isLoggedIn.value) {
+        return;
+    }
+    checkoutManager.checkout.customer.validateName(webshop.value.meta.customerSettings.name);
+});
 
 const emailPlaceholder = computed(() => {
     if (webshop.value.meta.ticketType !== WebshopTicketType.None) {
