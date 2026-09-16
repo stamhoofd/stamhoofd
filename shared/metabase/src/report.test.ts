@@ -1250,16 +1250,25 @@ describe('report', () => {
 
         /**
          * A registration at an eenheid is not the same thing as being a lid of it: someone can be
-         * waiting for a place. The wachtlijsten are the one kind that counts as nobody's lid, and the
-         * rule stands in one fragment so that changing what a lid is means changing one line.
+         * waiting for a place, or be at one activiteit of an eenheid they are no lid of. The
+         * wachtlijsten count as nobody's lid and an activiteit only as the lid of nobody else's, and
+         * the rule stands in one fragment so that changing what a lid is means changing one place.
+         *
+         * A member with a leeftijdsgroep who joins the activiteit of another eenheid was counted at
+         * both before this: at their own eenheid through the leeftijdsgroep, and at the organising
+         * one through the activiteit -- one person in two eenheden, in the kinderen of the second,
+         * where it moved that eenheid's omkaderingscijfer and GTP index as well as its ledenaantal.
          */
-        it('counts the leeftijdsgroepen and the activiteiten as being a lid, and the wachtlijsten as nobody', () => {
+        it('counts a leeftijdsgroep as being a lid, an activiteit only for whoever is in none, and a wachtlijst as nobody', () => {
             for (const dashboard of dashboards.filter(dashboard => !dashboard.hidden)) {
                 for (const card of dashboard.cards.filter(card => card.snippets.includes('filter-registration-types'))) {
                     const sql = expressionOf(card.sql);
+                    const where = card.key;
 
-                    expect(`${card.key}: ${sql.includes("`groups`.type IN ('Membership', 'EventRegistration')")}`).toEqual(`${card.key}: true`);
-                    expect(`${card.key}: ${sql.includes('WaitingList')}`).toEqual(`${card.key}: false`);
+                    expect(`${where}: ${sql.includes("`groups`.type = 'Membership' OR ( `groups`.type = 'EventRegistration' AND NOT EXISTS (")}`).toEqual(`${where}: true`);
+                    // The leeftijdsgroep that suppresses it is the member's own, in the same werkjaar.
+                    expect(`${where}: ${sql.includes("leeftijdsgroep.type = 'Membership' WHERE lidmaatschap.memberId = registrations.memberId AND lidmaatschap.periodId = registrations.periodId")}`).toEqual(`${where}: true`);
+                    expect(`${where}: ${sql.includes('WaitingList')}`).toEqual(`${where}: false`);
                 }
             }
 
@@ -1270,6 +1279,23 @@ describe('report', () => {
                 .map(card => card.key));
 
             expect(without).toEqual([]);
+        });
+
+        /**
+         * Whoever is counted through an activiteit is in no leeftijdsgroep at all -- that is what
+         * lets the activiteit count -- and the charts that draw the leden per leeftijdsgroep group on
+         * that column. Left as the group's own name, a kamp would stand among the takken as though an
+         * eenheid ran one.
+         */
+        it('never draws an activiteit as a leeftijdsgroep', () => {
+            const perLeeftijdsgroep = [...dashboards, ...ravotDashboards]
+                .flatMap(tab => tab.cards.filter(card => /GROUP BY[^;]*`Leeftijdsgroep`/.test(card.sql.replaceAll(/\s+/g, ' '))));
+
+            expect(perLeeftijdsgroep.length).toBeGreaterThan(0);
+
+            for (const card of perLeeftijdsgroep) {
+                expect(`${card.key}: ${expressionOf(card.sql).includes("CASE WHEN `groups`.type = 'EventRegistration' THEN 'Activiteit'")}`).toEqual(`${card.key}: true`);
+            }
         });
 
         /**
