@@ -1,9 +1,11 @@
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { GetEmailRecipientsEndpoint } from './GetEmailRecipientsEndpoint.js';
-import { AccessRight, EmailStatus, LimitedFilteredRequest, OrganizationEmail, PermissionLevel, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
+import { AccessRight, EmailStatus, LimitedFilteredRequest, OrganizationEmail, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, Replacement, ResourcePermissions } from '@stamhoofd/structures';
 import type { Organization, RegistrationPeriod, User, Token } from '@stamhoofd/models';
-import { Email, EmailRecipient, OrganizationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import { BalanceItemFactory, Email, EmailRecipient, MemberFactory, OrganizationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import { BalanceItemStatus, BalanceItemType } from '@stamhoofd/structures';
 import { Request } from '@simonbackx/simple-endpoints';
+import { Formatter } from '@stamhoofd/utility';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { SessionService } from '../../../services/SessionService.js';
 
@@ -390,5 +392,182 @@ describe('Endpoint.GetEmailRecipients', () => {
         await expect(testServer.test(endpoint, request))
             .rejects
             .toThrow(STExpect.errorWithCode('permission_denied'));
+    });
+});
+
+describe('Endpoint.GetEmailRecipients financial data', () => {
+    const endpoint = new GetEmailRecipientsEndpoint();
+    let period: RegistrationPeriod;
+    let organization: Organization;
+    let sender: OrganizationEmail;
+    let emailReaderRole: PermissionRoleDetailed;
+    let financialEmailReaderRole: PermissionRoleDetailed;
+
+    /** Token of an admin that can read all emails, but has no access right to read financial data */
+    let readerToken: Token;
+
+    /** Token of an admin that can read all emails and is allowed to read financial data */
+    let financialReaderToken: Token;
+
+    beforeAll(async () => {
+        TestUtils.setPermanentEnvironment('userMode', 'platform');
+        period = await new RegistrationPeriodFactory({
+            startDate: new Date(2023, 0, 1),
+            endDate: new Date(2023, 11, 31),
+        }).create();
+
+        const senderResources = () => new Map([
+            [PermissionsResourceType.Senders, new Map([[PermissionsResourceKey.All, ResourcePermissions.create({
+                resourceName: 'Alle afzenders',
+                level: PermissionLevel.Read,
+            })]])],
+        ]);
+
+        emailReaderRole = PermissionRoleDetailed.create({
+            name: 'Email reader',
+            resources: senderResources(),
+        });
+
+        financialEmailReaderRole = PermissionRoleDetailed.create({
+            name: 'Email reader with financial access',
+            accessRights: [AccessRight.MemberReadFinancialData],
+            resources: senderResources(),
+        });
+
+        organization = await new OrganizationFactory({ period, roles: [emailReaderRole, financialEmailReaderRole] }).create();
+
+        sender = OrganizationEmail.create({
+            email: 'groepsleiding@voorbeeld.com',
+            name: 'Groepsleiding',
+        });
+        organization.privateMeta.emails.push(sender);
+        await organization.save();
+
+        const reader = await new UserFactory({
+            organization,
+            permissions: Permissions.create({
+                level: PermissionLevel.None,
+                roles: [emailReaderRole],
+            }),
+        }).create();
+        readerToken = await SessionService.createSession(reader);
+
+        const financialReader = await new UserFactory({
+            organization,
+            permissions: Permissions.create({
+                level: PermissionLevel.None,
+                roles: [financialEmailReaderRole],
+            }),
+        }).create();
+        financialReaderToken = await SessionService.createSession(financialReader);
+    });
+
+    /**
+     * Creates a sent email with a single recipient: a member that still has an open balance.
+     */
+    const createEmailToMemberWithBalance = async () => {
+        const memberUser = await new UserFactory({ organization }).create();
+        const member = await new MemberFactory({ organization, user: memberUser }).create();
+
+        const balanceItem = await new BalanceItemFactory({
+            organizationId: organization.id,
+            memberId: member.id,
+            userId: memberUser.id,
+            type: BalanceItemType.Other,
+            amount: 1,
+            unitPrice: 1_234500,
+            status: BalanceItemStatus.Due,
+            description: 'Openstaand lidgeld',
+        }).create();
+
+        const email = new Email();
+        email.subject = 'test subject';
+        email.status = EmailStatus.Sent;
+        email.text = 'test email';
+        email.html = `<p>test email {{balanceTable}}</p>`;
+        email.json = {};
+        email.organizationId = organization.id;
+        email.senderId = sender.id;
+        email.sentAt = new Date();
+        await email.save();
+
+        const emailRecipient = new EmailRecipient();
+        emailRecipient.emailId = email.id;
+        emailRecipient.organizationId = organization.id;
+        emailRecipient.memberId = member.id;
+        emailRecipient.userId = memberUser.id;
+        emailRecipient.email = memberUser.email;
+        emailRecipient.firstName = member.details.firstName;
+        emailRecipient.lastName = member.details.lastName;
+        emailRecipient.sentAt = new Date();
+        await emailRecipient.save();
+
+        return { email, emailRecipient, member, memberUser, price: Formatter.price(balanceItem.priceOpen) };
+    };
+
+    const getRecipients = async (emailId: string, token: Token) => {
+        const request = Request.get({
+            path: baseUrl,
+            host: organization.getApiHost(),
+            query: new LimitedFilteredRequest({
+                filter: {
+                    emailId,
+                },
+                limit: 10,
+            }),
+            headers: {
+                authorization: 'Bearer ' + token.accessToken,
+            },
+        });
+        return await testServer.test(endpoint, request);
+    };
+
+    test('The balance of a recipient is hidden without MemberReadFinancialData', async () => {
+        const { email, price } = await createEmailToMemberWithBalance();
+
+        const result = await getRecipients(email.id, readerToken);
+        expect(result.body.results).toHaveLength(1);
+
+        const replacements = result.body.results[0].replacements;
+        expect(JSON.stringify(replacements)).not.toContain(price);
+
+        expect(replacements.find(r => r.token === 'outstandingBalance')?.value ?? '').not.toBe(price);
+        expect(replacements.find(r => r.token === 'balanceTable')?.html ?? '').not.toContain(price);
+    });
+
+    test('The balance of a recipient is visible with MemberReadFinancialData', async () => {
+        const { email, price } = await createEmailToMemberWithBalance();
+
+        const result = await getRecipients(email.id, financialReaderToken);
+        expect(result.body.results).toHaveLength(1);
+
+        const replacements = result.body.results[0].replacements;
+        expect(replacements.find(r => r.token === 'outstandingBalance')?.value).toBe(price);
+        expect(replacements.find(r => r.token === 'balanceTable')?.html).toContain(price);
+    });
+
+    test('Balance replacements stored on a recipient are hidden without MemberReadFinancialData', async () => {
+        const { email, emailRecipient, price } = await createEmailToMemberWithBalance();
+
+        // Balance replacements are stored on the recipient at the time of sending: these must be
+        // stripped as well, they are not regenerated for sent emails.
+        emailRecipient.replacements = [
+            Replacement.create({
+                token: 'outstandingBalance',
+                value: price,
+            }),
+            Replacement.create({
+                token: 'balanceTable',
+                value: '',
+                html: `<table><tr><td>Openstaand lidgeld</td><td>${price}</td></tr></table>`,
+            }),
+        ];
+        await emailRecipient.save();
+
+        const result = await getRecipients(email.id, readerToken);
+        expect(result.body.results).toHaveLength(1);
+
+        const replacements = result.body.results[0].replacements;
+        expect(JSON.stringify(replacements)).not.toContain(price);
     });
 });

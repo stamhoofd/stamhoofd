@@ -1,7 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, RegistrationPeriod, User, Token } from '@stamhoofd/models';
-import { Email, EmailRecipient, MemberFactory, OrganizationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import { EmailStatus, LimitedFilteredRequest, PermissionLevel, Permissions, Replacement } from '@stamhoofd/structures';
+import { BalanceItemFactory, Email, EmailRecipient, MemberFactory, OrganizationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import { AccessRight, BalanceItemStatus, BalanceItemType, EmailStatus, LimitedFilteredRequest, OrganizationEmail, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, Replacement, ResourcePermissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { GetAdminEmailsEndpoint } from './GetAdminEmailsEndpoint.js';
@@ -172,5 +172,156 @@ describe('Endpoint.getAdminEmails', () => {
         const balanceTableReplacement = recipient.replacements.find(r => r.token === 'balanceTable');
         expect(balanceTableReplacement).toBeDefined();
         expect(balanceTableReplacement!.html).toBe('<table><tr><td>Private balance information</td><td>€ 150.00</td></tr></table>'); // Should be corrected to the new user
+    });
+});
+
+describe('Endpoint.getAdminEmails financial data', () => {
+    const endpoint = new GetAdminEmailsEndpoint();
+    let period: RegistrationPeriod;
+    let organization: Organization;
+    let sender: OrganizationEmail;
+    let emailReaderRole: PermissionRoleDetailed;
+    let financialEmailReaderRole: PermissionRoleDetailed;
+
+    /** Token of an admin that can read all emails, but has no access right to read financial data */
+    let readerToken: Token;
+
+    /** Token of an admin that can read all emails and is allowed to read financial data */
+    let financialReaderToken: Token;
+
+    beforeAll(async () => {
+        TestUtils.setPermanentEnvironment('userMode', 'platform');
+
+        period = await new RegistrationPeriodFactory({
+            startDate: new Date(2023, 0, 1),
+            endDate: new Date(2023, 11, 31),
+        }).create();
+
+        const senderResources = () => new Map([
+            [PermissionsResourceType.Senders, new Map([[PermissionsResourceKey.All, ResourcePermissions.create({
+                resourceName: 'Alle afzenders',
+                level: PermissionLevel.Read,
+            })]])],
+        ]);
+
+        emailReaderRole = PermissionRoleDetailed.create({
+            name: 'Email reader',
+            resources: senderResources(),
+        });
+
+        financialEmailReaderRole = PermissionRoleDetailed.create({
+            name: 'Email reader with financial access',
+            accessRights: [AccessRight.MemberReadFinancialData],
+            resources: senderResources(),
+        });
+
+        organization = await new OrganizationFactory({ period, roles: [emailReaderRole, financialEmailReaderRole] }).create();
+
+        sender = OrganizationEmail.create({
+            email: 'groepsleiding@voorbeeld.com',
+            name: 'Groepsleiding',
+        });
+        organization.privateMeta.emails.push(sender);
+        await organization.save();
+
+        const reader = await new UserFactory({
+            organization,
+            permissions: Permissions.create({
+                level: PermissionLevel.None,
+                roles: [emailReaderRole],
+            }),
+        }).create();
+        readerToken = await SessionService.createSession(reader);
+
+        const financialReader = await new UserFactory({
+            organization,
+            permissions: Permissions.create({
+                level: PermissionLevel.None,
+                roles: [financialEmailReaderRole],
+            }),
+        }).create();
+        financialReaderToken = await SessionService.createSession(financialReader);
+    });
+
+    /**
+     * Creates a sent email with a single recipient: a member that still has an open balance.
+     * The example recipient of this email is that member.
+     */
+    const createEmailToMemberWithBalance = async (subject: string) => {
+        const memberUser = await new UserFactory({ organization }).create();
+        const member = await new MemberFactory({ organization, user: memberUser }).create();
+
+        const balanceItem = await new BalanceItemFactory({
+            organizationId: organization.id,
+            memberId: member.id,
+            userId: memberUser.id,
+            type: BalanceItemType.Other,
+            amount: 1,
+            unitPrice: 1_234500,
+            status: BalanceItemStatus.Due,
+            description: 'Openstaand lidgeld',
+        }).create();
+
+        const email = new Email();
+        email.subject = subject;
+        email.status = EmailStatus.Sent;
+        email.text = 'test email';
+        email.html = `<p>test email {{balanceTable}}</p>`;
+        email.json = {};
+        email.organizationId = organization.id;
+        email.senderId = sender.id;
+        email.sentAt = new Date();
+        await email.save();
+
+        const emailRecipient = new EmailRecipient();
+        emailRecipient.emailId = email.id;
+        emailRecipient.organizationId = organization.id;
+        emailRecipient.memberId = member.id;
+        emailRecipient.userId = memberUser.id;
+        emailRecipient.email = memberUser.email;
+        emailRecipient.firstName = member.details.firstName;
+        emailRecipient.lastName = member.details.lastName;
+        emailRecipient.sentAt = new Date();
+        await emailRecipient.save();
+
+        return { email, emailRecipient, member, memberUser, price: Formatter.price(balanceItem.priceOpen) };
+    };
+
+    const getEmail = async (subject: string, token: Token) => {
+        const request = Request.get({
+            path: baseUrl,
+            host: organization.getApiHost(),
+            query: new LimitedFilteredRequest({
+                limit: 10,
+                search: subject,
+            }),
+            headers: {
+                authorization: 'Bearer ' + token.accessToken,
+            },
+        });
+        const response = await testServer.test(endpoint, request);
+        expect(response.body.results).toHaveLength(1);
+        return response.body.results[0];
+    };
+
+    test('The balance of the example recipient is hidden without MemberReadFinancialData', async () => {
+        const { price } = await createEmailToMemberWithBalance('Balance preview hidden');
+
+        const result = await getEmail('Balance preview hidden', readerToken);
+        const replacements = result.exampleRecipient!.replacements;
+
+        expect(JSON.stringify(replacements)).not.toContain(price);
+        expect(replacements.find(r => r.token === 'outstandingBalance')?.value ?? '').not.toBe(price);
+        expect(replacements.find(r => r.token === 'balanceTable')?.html ?? '').not.toContain(price);
+    });
+
+    test('The balance of the example recipient is visible with MemberReadFinancialData', async () => {
+        const { price } = await createEmailToMemberWithBalance('Balance preview visible');
+
+        const result = await getEmail('Balance preview visible', financialReaderToken);
+        const replacements = result.exampleRecipient!.replacements;
+
+        expect(replacements.find(r => r.token === 'outstandingBalance')?.value).toBe(price);
+        expect(replacements.find(r => r.token === 'balanceTable')?.html).toContain(price);
     });
 });
