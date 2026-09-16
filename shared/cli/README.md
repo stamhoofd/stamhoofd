@@ -5,16 +5,20 @@
 ## Quick Start
 
 ```bash
-yarn install
-yarn stam setup
-yarn stam dev all
+source .development/install-node.sh
+pnpm install
+pnpm run build:shared
+pnpm stam setup
+pnpm stam dev all
 ```
 
-Run `yarn stam setup shell` to install the CLI alias `stam` in your .zshrc or .bashrc (that removes the need to type `yarn` and the need to always run commands in the project root).
+The bootstrap script installs the Node version from `.nvmrc` and prepares the pnpm version pinned in the root `package.json` through Corepack. If only pnpm needs repair, run `corepack enable` followed by `corepack install`, or run `stam setup pnpm` when the CLI alias is already available.
 
-Open the dashboard URL printed by the CLI, or run `yarn stam status` to see active services, instances, URLs, and credentials.
+Run `pnpm stam setup shell` to install the CLI alias `stam` in your .zshrc or .bashrc (that removes the need to type `pnpm` and the need to always run commands in the project root). Afterwards, `stam setup` performs the normal setup checks.
 
-Run `yarn stam --help` or `yarn stam <topic> --help` for command help.
+Open the dashboard URL printed by the CLI, or run `pnpm stam status` to see active services, instances, URLs, and credentials.
+
+Run `pnpm stam --help` or `pnpm stam <topic> --help` for command help.
 
 ## For CLI Users
 
@@ -22,47 +26,48 @@ Run `yarn stam --help` or `yarn stam <topic> --help` for command help.
 
 | Area        | Command                                | Purpose                                                                    |
 | ----------- | -------------------------------------- | -------------------------------------------------------------------------- |
-| Build       | `yarn stam build`                      | Build shared packages and all app packages for the selected environment.   |
-| Setup       | `yarn stam setup`                      | Check the machine and offer recommended setup fixes.                       |
-| Setup       | `yarn stam setup node`                 | Install the Node.js version from `.nvmrc` using fnm or nvm.                |
-| Setup       | `yarn stam setup dns`                  | Configure local `.stamhoofd` DNS.                                          |
-| Setup       | `yarn stam setup cert`                 | Trust the local Caddy HTTPS authority.                                     |
-| Development | `yarn stam dev all`                    | Start shared services and the full app stack.                              |
-| Development | `yarn stam dev backend`                | Start backend apps for the current instance.                               |
-| Development | `yarn stam dev frontend`               | Start frontend apps only.                                                  |
-| Development | `yarn stam dev instance`               | Start this workspace instance using shared services.                       |
-| Services    | `yarn stam services up`                | Start shared Docker services.                                              |
-| Services    | `yarn stam services status`            | Show shared service status.                                                |
-| Services    | `yarn stam services logs`              | Tail shared service logs.                                                  |
-| Services    | `yarn stam services restart`           | Restart shared services with interactive progress output.                  |
-| Services    | `yarn stam services down`              | Stop shared services.                                                      |
-| Services    | `yarn stam services stop`              | Alias for `yarn stam services down`.                                       |
-| Status      | `yarn stam status`                     | Show shared services, active instances, URLs, and credentials.             |
-| Config      | `yarn stam config explain`             | Explain resolved instance config.                                          |
-| Config      | `yarn stam config print`               | Print resolved domains and backend environment values as JSON.             |
-| Database    | `yarn stam db shell`                   | Open a MySQL shell for the current local database.                         |
-| Database    | `yarn stam db migrate`                 | Build shared packages and run migrations.                                  |
-| SSO         | `yarn stam sso config`                 | Print local SSO client, user, and issuer settings.                         |
-| SSO         | `yarn stam sso start <redirect-uri>`   | Start Keycloak and import the local realm.                                 |
-| SSO         | `yarn stam sso logs`                   | Tail Keycloak logs.                                                        |
-| SSO         | `yarn stam sso stop`                   | Stop the local Keycloak container.                                         |
-| Report      | `yarn stam platform-report start`      | Migrate the statistics database, start Metabase with the report, and sync. |
-| Report      | `yarn stam platform-report dashboards` | Rewrite the report's questions and dashboards in Metabase.                 |
-| Report      | `yarn stam platform-report config`     | Print the Metabase URL, login, and data source settings.                   |
-| Report      | `yarn stam platform-report logs`       | Tail Metabase logs.                                                        |
-| Report      | `yarn stam platform-report stop`       | Stop the local Metabase container.                                         |
-| Tests       | `yarn stam test unit`                  | Run unit tests with isolated MySQL.                                        |
-| Tests       | `yarn stam test e2e`                   | Run Playwright tests.                                                      |
-| Tests       | `yarn stam test all --ci`              | Run unit and E2E tests in CI mode.                                         |
-| Checks      | `yarn stam check lint`                 | Run ESLint across the monorepo.                                            |
-| Checks      | `yarn stam check typecheck`            | Run TypeScript checks across the monorepo.                                 |
-| Checks      | `yarn stam check all`                  | Run build, lint, typecheck, unit tests, and E2E tests.                     |
-| Cleanup     | `yarn stam clean build`                | Remove build artifacts.                                                    |
-| Cleanup     | `yarn stam clean db`                   | Drop the selected local MySQL database after confirmation.                 |
-| Cleanup     | `yarn stam clean sso`                  | Stop the local SSO server.                                                 |
-| Cleanup     | `yarn stam clean metabase`             | Stop Metabase and drop its application database after confirmation.        |
-| Cleanup     | `yarn stam clean services`             | Stop shared services.                                                      |
-| Cleanup     | `yarn stam clean all`                  | Clean build artifacts and stop shared services.                            |
+| Build       | `pnpm stam build`                      | Build shared packages and all app packages for the selected environment.   |
+| Setup       | `pnpm stam setup`                      | Check the machine and offer recommended setup fixes.                       |
+| Setup       | `pnpm stam setup node`                 | Install the Node.js version from `.nvmrc` using fnm or nvm.                |
+| Setup       | `pnpm stam setup pnpm`                 | Repair the pinned pnpm runtime through Corepack.                           |
+| Setup       | `pnpm stam setup dns`                  | Configure local `.stamhoofd` DNS.                                          |
+| Setup       | `pnpm stam setup cert`                 | Trust the local Caddy HTTPS authority.                                     |
+| Development | `pnpm stam dev all`                    | Start shared services and the full app stack.                              |
+| Development | `pnpm stam dev backend`                | Start backend apps for the current instance.                               |
+| Development | `pnpm stam dev frontend`               | Start frontend apps only.                                                  |
+| Development | `pnpm stam dev instance`               | Start this workspace instance using shared services.                       |
+| Services    | `pnpm stam services up`                | Start shared Docker services.                                              |
+| Services    | `pnpm stam services status`            | Show shared service status.                                                |
+| Services    | `pnpm stam services logs`              | Tail shared service logs.                                                  |
+| Services    | `pnpm stam services restart`           | Restart shared services with interactive progress output.                  |
+| Services    | `pnpm stam services down`              | Stop shared services.                                                      |
+| Services    | `pnpm stam services stop`              | Alias for `pnpm stam services down`.                                       |
+| Status      | `pnpm stam status`                     | Show shared services, active instances, URLs, and credentials.             |
+| Config      | `pnpm stam config explain`             | Explain resolved instance config.                                          |
+| Config      | `pnpm stam config print`               | Print resolved domains and backend environment values as JSON.             |
+| Database    | `pnpm stam db shell`                   | Open a MySQL shell for the current local database.                         |
+| Database    | `pnpm stam db migrate`                 | Build shared packages and run migrations.                                  |
+| SSO         | `pnpm stam sso config`                 | Print local SSO client, user, and issuer settings.                         |
+| SSO         | `pnpm stam sso start <redirect-uri>`   | Start Keycloak and import the local realm.                                 |
+| SSO         | `pnpm stam sso logs`                   | Tail Keycloak logs.                                                        |
+| SSO         | `pnpm stam sso stop`                   | Stop the local Keycloak container.                                         |
+| Report      | `pnpm stam platform-report start`      | Migrate the statistics database, start Metabase with the report, and sync. |
+| Report      | `pnpm stam platform-report dashboards` | Rewrite the report's questions and dashboards in Metabase.                 |
+| Report      | `pnpm stam platform-report config`     | Print the Metabase URL, login, and data source settings.                   |
+| Report      | `pnpm stam platform-report logs`       | Tail Metabase logs.                                                        |
+| Report      | `pnpm stam platform-report stop`       | Stop the local Metabase container.                                         |
+| Tests       | `pnpm stam test unit`                  | Run unit tests with isolated MySQL.                                        |
+| Tests       | `pnpm stam test e2e`                   | Run Playwright tests.                                                      |
+| Tests       | `pnpm stam test all --ci`              | Run unit and E2E tests in CI mode.                                         |
+| Checks      | `pnpm stam check lint`                 | Run ESLint across the monorepo.                                            |
+| Checks      | `pnpm stam check typecheck`            | Run TypeScript checks across the monorepo.                                 |
+| Checks      | `pnpm stam check all`                  | Run build, lint, typecheck, unit tests, and E2E tests.                     |
+| Cleanup     | `pnpm stam clean build`                | Remove build artifacts.                                                    |
+| Cleanup     | `pnpm stam clean db`                   | Drop the selected local MySQL database after confirmation.                 |
+| Cleanup     | `pnpm stam clean sso`                  | Stop the local SSO server.                                                 |
+| Cleanup     | `pnpm stam clean metabase`             | Stop Metabase and drop its application database after confirmation.        |
+| Cleanup     | `pnpm stam clean services`             | Stop shared services.                                                      |
+| Cleanup     | `pnpm stam clean all`                  | Clean build artifacts and stop shared services.                            |
 
 ### Development Configuration
 
@@ -73,9 +78,9 @@ The main config contract lives in `src/config/development-config.ts`. Keep local
 Inspect the current config with:
 
 ```bash
-yarn stam config explain
-yarn stam config print
-yarn stam config print --env keeo
+pnpm stam config explain
+pnpm stam config print
+pnpm stam config print --env keeo
 ```
 
 ### Instances And Ports
@@ -141,30 +146,30 @@ The setup is intentionally different where Docker behaves differently:
 Start and inspect them with:
 
 ```bash
-yarn stam services up
-yarn stam services status
-yarn stam services logs
+pnpm stam services up
+pnpm stam services status
+pnpm stam services logs
 ```
 
 Stop them with:
 
 ```bash
-yarn stam services down
+pnpm stam services down
 ```
 
 ### Local SSO
 
-Use `yarn stam sso config` to print the issuer, client credentials, test user, and example command.
+Use `pnpm stam sso config` to print the issuer, client credentials, test user, and example command.
 
 Start Keycloak with the redirect URI copied from the app:
 
 ```bash
-yarn stam sso start "https://<organization-id>.api.stamhoofd/openid/callback"
+pnpm stam sso start "https://<organization-id>.api.stamhoofd/openid/callback"
 ```
 
 The command imports a local realm with the printed client and test user.
 
-`yarn stam test e2e` starts a second Keycloak from the same `SsoService`, on its own container, port (6400) and host (`playwright-sso.stamhoofd`), with a realm that allows the `/openid/callback` of every Playwright worker. It is started and stopped by the Playwright global setup, so it never restarts the server you started for manual testing. Like the other e2e services it binds a fixed port, so only one e2e run can be up at a time.
+`pnpm stam test e2e` starts a second Keycloak from the same `SsoService`, on its own container, port (6400) and host (`playwright-sso.stamhoofd`), with a realm that allows the `/openid/callback` of every Playwright worker. It is started and stopped by the Playwright global setup, so it never restarts the server you started for manual testing. Like the other e2e services it binds a fixed port, so only one e2e run can be up at a time.
 
 ### Local platform report
 
@@ -173,7 +178,7 @@ the administration, and are drawn by a local Metabase that only costs memory whi
 command brings up all three:
 
 ```bash
-yarn stam platform-report start
+pnpm stam platform-report start
 ```
 
 It starts the shared services if needed, reloads Caddy, migrates the statistics database of the
@@ -191,7 +196,7 @@ development session is up: in development it syncs on every cron tick.
 While working on the report itself, rewrite its questions and dashboards without restarting anything:
 
 ```bash
-yarn stam platform-report dashboards --env keeo
+pnpm stam platform-report dashboards --env keeo
 ```
 
 #### Platform statistics per environment
@@ -251,41 +256,41 @@ place later, so local and server setups both use a real database.
 Reset Metabase (drops all local questions and dashboards, keeps the statistics data) with:
 
 ```bash
-yarn stam clean metabase
+pnpm stam clean metabase
 ```
 
 `METABASE_PORT` overrides the host port, which defaults to `3030`.
 
 ### Tests
 
-`yarn stam test` runs `build:shared` first and only starts a MySQL container when a selected package needs one. That container runs off a data volume that persists between runs (so the data dir + migrations are reused, mapped `DB_PORT`), and it is shut down after the run. Both the container and volume are namespaced per worktree so runs don't collide:
+`pnpm stam test` runs `build:shared` first and only starts a MySQL container when a selected package needs one. That container runs off a data volume that persists between runs (so the data dir + migrations are reused, mapped `DB_PORT`), and it is shut down after the run. Both the container and volume are namespaced per worktree so runs don't collide:
 
 ```bash
-yarn stam test unit                                 # every unit package (excludes Playwright)
-yarn stam test api                                  # one package (api, models, sql, structures, renderer, redirecter, queues, utility, sgv, object-differ, eslint, cli, components, networking)
-yarn stam test unit SomeFile                         # filter by filename across all packages
-yarn stam test structures bundle-discounts           # package + filename filter
-yarn stam test structures -t 'partial test name'     # package + test-name filter (passed to vitest -t)
-yarn stam test api --skip-build                      # skip the automatic build:shared step
-yarn stam test api --clear                           # reset the test database (drop its volume) before running
-yarn stam test components ImageComponent             # frontend browser tests (vitest browser mode)
+pnpm stam test unit                                 # every unit package (excludes Playwright)
+pnpm stam test api                                  # one package (api, models, sql, structures, renderer, redirecter, queues, utility, sgv, object-differ, eslint, cli, components, networking)
+pnpm stam test unit SomeFile                         # filter by filename across all packages
+pnpm stam test structures bundle-discounts           # package + filename filter
+pnpm stam test structures -t 'partial test name'     # package + test-name filter (passed to vitest -t)
+pnpm stam test api --skip-build                      # skip the automatic build:shared step
+pnpm stam test api --clear                           # reset the test database (drop its volume) before running
+pnpm stam test components ImageComponent             # frontend browser tests (vitest browser mode)
 ```
 
-`components` and `networking` run in vitest browser mode and need a Playwright Chromium (`yarn playwright install chromium`); they are part of `stam test unit` too.
+`components` and `networking` run in vitest browser mode and need a Playwright Chromium (`pnpm exec playwright install chromium`); they are part of `stam test unit` too.
 
 Run Playwright tests with:
 
 ```bash
-yarn stam test e2e                                   # full build + suite
-yarn stam test e2e --ui                              # run with interactive UI to view and pause tests
-yarn stam test e2e --grep @tag                       # only tests matching a name/tag (playwright --grep)
-yarn stam test e2e --grep @tag --skip-build          # skip build:shared + API/frontend rebuild (only test files changed)
+pnpm stam test e2e                                   # full build + suite
+pnpm stam test e2e --ui                              # run with interactive UI to view and pause tests
+pnpm stam test e2e --grep @tag                       # only tests matching a name/tag (playwright --grep)
+pnpm stam test e2e --grep @tag --skip-build          # skip build:shared + API/frontend rebuild (only test files changed)
 ```
 
 Like the unit runs, the e2e command keeps its data volume between runs (so migrated worker databases are reused) and shuts the container down afterward. Reset that persistent e2e database with:
 
 ```bash
-yarn stam test e2e --clear
+pnpm stam test e2e --clear
 ```
 
 Use `--workers <number>` to override Playwright's default worker count for a run.
@@ -296,9 +301,9 @@ Use `--extra` to include tests tagged `@extra`.
 A MySQL that is already running on this machine can serve the e2e tests instead, which skips both the e2e MySQL container and the shared `stamhoofd-mysql` container (the e2e tests never use the development database):
 
 ```bash
-yarn stam test e2e --local-db                          # MySQL on 127.0.0.1:3306
-STAMHOOFD_E2E_MYSQL_PORT=3307 yarn stam test e2e       # the shared stamhoofd-mysql container
-STAMHOOFD_E2E_MYSQL_PORT=3306 STAMHOOFD_E2E_MYSQL_USER=tests STAMHOOFD_E2E_MYSQL_PASSWORD=secret yarn stam test e2e
+pnpm stam test e2e --local-db                          # MySQL on 127.0.0.1:3306
+STAMHOOFD_E2E_MYSQL_PORT=3307 pnpm stam test e2e       # the shared stamhoofd-mysql container
+STAMHOOFD_E2E_MYSQL_PORT=3306 STAMHOOFD_E2E_MYSQL_USER=tests STAMHOOFD_E2E_MYSQL_PASSWORD=secret pnpm stam test e2e
 ```
 
 Set `STAMHOOFD_E2E_MYSQL_PORT` in your shell profile to make this the default, and pass `--no-local-db` for a single run that should use a container after all. The server has to be reachable already: the CLI never starts or stops it, and `--clear` drops the worker databases of the run instead of a data volume.
@@ -308,7 +313,7 @@ The worker databases are named `stamhoofd-playwright[-<instance>]-<slot>`, after
 Run the full validation flow with:
 
 ```bash
-yarn stam check all
+pnpm stam check all
 ```
 
 ## For CLI Maintainers
@@ -432,18 +437,18 @@ Bad candidates for this file:
 
 ### Working On The CLI
 
-`yarn install` builds `shared/cli` so normal CLI startup stays fast. When changing CLI source code, use `stam-dev` to rebuild before running:
+`pnpm run build:shared` builds `shared/cli` so normal CLI startup stays fast. When changing CLI source code, use `stam-dev` to rebuild before running:
 
 ```bash
-yarn stam-dev --help
+pnpm run stam-dev --help
 ```
 
 For CLI-only changes, run:
 
 ```bash
-yarn --cwd shared/cli -s build
-yarn --cwd shared/cli -s lint
-yarn --cwd shared/cli -s test
+pnpm --dir shared/cli --silent run build
+pnpm --dir shared/cli --silent run lint
+pnpm --dir shared/cli --silent run test
 ```
 
 CLI tests live next to source files as `*.test.ts`.
@@ -451,21 +456,21 @@ CLI tests live next to source files as `*.test.ts`.
 After changing CLI behavior, validate at least the package-local checks:
 
 ```bash
-yarn --cwd shared/cli -s test
-yarn --cwd shared/cli -s build
+pnpm --dir shared/cli --silent run test
+pnpm --dir shared/cli --silent run build
 ```
 
 For command-surface changes, it is also useful to compare the generated help output with the README:
 
 ```bash
-yarn stam --help
-yarn stam services --help
-yarn stam clean --help
+pnpm stam --help
+pnpm stam services --help
+pnpm stam clean --help
 ```
 
 ## Troubleshooting
 
-Use `yarn stam setup` first. It checks Node, Docker, Caddy, DNS, and certificate trust.
+Use `pnpm stam setup` first. It checks Node, pnpm, Docker, Caddy, DNS, and certificate trust.
 
 - **The active Node.js version differs from `.nvmrc`**
 
@@ -473,25 +478,27 @@ Use `yarn stam setup` first. It checks Node, Docker, Caddy, DNS, and certificate
 
 If that does not tell you enough, use the first matching case below.
 
+- pnpm is missing or its version differs from the root `packageManager` pin:
+  Run `stam setup pnpm`, or run `corepack enable` followed by `corepack install` if the CLI alias is unavailable.
 - DNS names like `dashboard.stamhoofd` do not resolve:
-  Run `yarn stam setup dns`, then retry `yarn stam setup check`.
-- `yarn stam setup` reports missing privileged port redirects on Linux:
+  Run `pnpm stam setup dns`, then retry `pnpm stam setup`.
+- `pnpm stam setup` reports missing privileged port redirects on Linux:
   Let the setup command apply the recommended `sudo iptables` rules, then retry.
 - HTTPS works badly or the browser does not trust local certificates:
-  Run `yarn stam setup cert`, then retry `yarn stam setup check`.
+  Run `pnpm stam setup cert`, then retry `pnpm stam setup`.
 - Docker commands fail or services do not start:
-  Start Docker, retry the command, and use `yarn stam services status` to confirm which service is still down.
+  Start Docker, retry the command, and use `pnpm stam services status` to confirm which service is still down.
 - Caddy fails to reload or URLs do not open locally:
-  Check `yarn stam services status`, then try `yarn stam services restart`.
+  Check `pnpm stam services status`, then try `pnpm stam services restart`.
 - URLs, instance names, or ports look wrong:
-  Run `yarn stam status`, `yarn stam config explain`, and check whether `--env`, `--name`, or environment variables such as `STAMHOOFD_WORKSPACE_NAME` are overriding the inferred instance.
+  Run `pnpm stam status`, `pnpm stam config explain`, and check whether `--env`, `--name`, or environment variables such as `STAMHOOFD_WORKSPACE_NAME` are overriding the inferred instance.
 - Two workspaces conflict on ports:
   Check whether `STAMHOOFD_PORT_OFFSET` is forcing the same offset in multiple clones. Otherwise rerun the command and let automatic port allocation pick another bucket.
 - Local database state is broken:
-  Use `yarn stam clean db` for the selected instance or `yarn stam clean all` if generated state is broadly stale.
+  Use `pnpm stam clean db` for the selected instance or `pnpm stam clean all` if generated state is broadly stale.
 - Shared services state is broken:
-  Use `yarn stam services restart`, or `yarn stam clean services` if volumes or generated service files need to be cleared manually.
+  Use `pnpm stam services restart`, or `pnpm stam clean services` if volumes or generated service files need to be cleared manually.
 - SSO redirect or Keycloak issues appear locally:
-  Re-run `yarn stam sso config`, make sure the redirect URI still ends in `/openid/callback`, then restart SSO with `yarn stam sso start "<redirect-uri>"`.
+  Re-run `pnpm stam sso config`, make sure the redirect URI still ends in `/openid/callback`, then restart SSO with `pnpm stam sso start "<redirect-uri>"`.
 - Stale build or type errors keep appearing after code changes:
-  Run `yarn build:shared`, then retry the CLI command or app startup flow.
+  Run `pnpm run build:shared`, then retry the CLI command or app startup flow.
