@@ -308,6 +308,8 @@ import ImageComponent from '../views/ImageComponent.vue';
 
 import EventInfoTable from './components/EventInfoTable.vue';
 import { useCreateEventGroup } from './composables/createEventGroup';
+import type { EventPeriodProblem } from './composables/useEventPeriodProblem';
+import { useGetEventPeriodProblem } from './composables/useEventPeriodProblem';
 import { buildTranslatedUrl } from '#containers/TranslatedUrl.ts';
 
 const props = defineProps<{
@@ -324,6 +326,7 @@ const pop = usePop();
 const auth = useAuth();
 const createEventGroup = useCreateEventGroup();
 const eventOrganization: Ref<Organization | null> = ref(null);
+const getEventPeriodProblem = useGetEventPeriodProblem(eventOrganization);
 const owner = useRequestOwner();
 const featureFlag = useFeatureFlag();
 const invitationsCount = ref<number | null>(props.event.group ? null : 0);
@@ -776,7 +779,29 @@ async function directPatch(patch: AutoEncoderPatchType<Event>, event: Event = pr
     deepSetArray([event], response.data);
 }
 
+function eventPeriodProblemText(problem: EventPeriodProblem) {
+    if (problem.type === 'missing-period') {
+        return $t('Er bestaat nog geen werkjaar dat de startdatum van deze activiteit bevat. Je kan hier pas inschrijvingen voor verzamelen als dat werkjaar bestaat.');
+    }
+
+    return $t('Deze #groep is nog niet gestart met het werkjaar {period}, waarin deze activiteit valt. Start eerst dat werkjaar, daarna kan je hier inschrijvingen voor verzamelen.', { period: problem.periodName });
+}
+
 async function createGroup() {
+    // Asking to confirm is pointless when the group can't be created anyway
+    try {
+        const problem = await getEventPeriodProblem(props.event.startDate);
+
+        if (problem) {
+            Toast.error(eventPeriodProblemText(problem)).setHide(20 * 1000).show();
+            return;
+        }
+    }
+    catch (e) {
+        // Best effort: let the backend refuse it instead
+        console.error(e);
+    }
+
     if (!await CenteredMessage.confirm(
         $t('%16b'),
         $t('%16Y'),

@@ -3,7 +3,7 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { User } from '@stamhoofd/models';
-import { EventFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, PlatformEventTypeFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import { Event as EventModel, EventFactory, Group as GroupModel, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, PlatformEventTypeFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AccessRight, Event, Group, GroupSettings, GroupType, OrganizationEventType, PermissionLevel, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, TranslatedString } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -230,6 +230,59 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             typeId: newEvent.typeId,
             name: newEvent.name,
         });
+    });
+
+    // userMode platform: the period is resolved from the event start date without looking at the
+    // organization, so it can land in a period this organization never started.
+    test('Cannot create a group for an event in a platform period the organization has not started', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: Permissions.create({ level: PermissionLevel.Full }),
+        }).create();
+
+        const startedPeriod = await new RegistrationPeriodFactory({
+            startDate: new Date('2000-01-01'),
+            endDate: new Date('2001-01-01'),
+        }).create();
+
+        await new OrganizationRegistrationPeriodFactory({
+            period: startedPeriod,
+            organization,
+        }).create();
+
+        organization.periodId = startedPeriod.id;
+        await organization.save();
+
+        await new RegistrationPeriodFactory({
+            startDate: new Date('2001-01-01'),
+            endDate: new Date('2002-01-01'),
+        }).create();
+
+        const event = await new EventFactory({
+            organization,
+            name: 'test event',
+            startDate: new Date('2001-02-10'),
+            endDate: new Date('2001-02-12'),
+            typeId: (await new PlatformEventTypeFactory({}).create()).id,
+        }).create();
+
+        const body: Body = new PatchableArray();
+        body.addPatch(Event.patch({
+            id: event.id,
+            group: Group.create({
+                settings: GroupSettings.create({
+                    name: TranslatedString.create('Naam'),
+                }),
+            }),
+        }));
+
+        await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(STExpect.simpleError({
+            code: 'missing_organization_period',
+        }));
+
+        const updatedEvent = await EventModel.getByID(event.id);
+        expect(updatedEvent!.groupId).toBeNull();
     });
 
     describe('userMode organization', () => {
@@ -501,6 +554,193 @@ describe('Endpoint.PatchEventsEndpoint', () => {
                 expect(result.body[0].group!.periodId).toEqual(period2.id);
             }
             await part2();
+        });
+
+        test('Cannot create a group for an event in a period the organization has not started', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            const period1 = await new RegistrationPeriodFactory({
+                startDate: new Date('2000-01-01'),
+                endDate: new Date('2001-01-01'),
+                organization,
+            }).create();
+
+            // No OrganizationRegistrationPeriod for period1: the organization never started it
+
+            const period2 = await new RegistrationPeriodFactory({
+                startDate: new Date('2001-01-01'),
+                endDate: new Date('2002-01-01'),
+                organization,
+            }).create();
+
+            await new OrganizationRegistrationPeriodFactory({
+                period: period2,
+                organization,
+            }).create();
+
+            organization.periodId = period2.id;
+            await organization.save();
+
+            const event = await new EventFactory({
+                organization,
+                name: 'test event',
+                startDate: new Date('2000-02-10'),
+                endDate: new Date('2000-02-12'),
+                typeId: OrganizationEventType.DEFAULT_ID,
+            }).create();
+
+            const body: Body = new PatchableArray();
+            body.addPatch(Event.patch({
+                id: event.id,
+                group: Group.create({
+                    settings: GroupSettings.create({
+                        name: TranslatedString.create('Naam'),
+                    }),
+                }),
+            }));
+
+            await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(STExpect.simpleError({
+                code: 'missing_organization_period',
+            }));
+
+            const updatedEvent = await EventModel.getByID(event.id);
+            expect(updatedEvent!.groupId).toBeNull();
+        });
+
+        test('Cannot move an event to a period the organization has not started', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            const period1 = await new RegistrationPeriodFactory({
+                startDate: new Date('2000-01-01'),
+                endDate: new Date('2001-01-01'),
+                organization,
+            }).create();
+
+            await new OrganizationRegistrationPeriodFactory({
+                period: period1,
+                organization,
+            }).create();
+
+            const period2 = await new RegistrationPeriodFactory({
+                startDate: new Date('2001-01-01'),
+                endDate: new Date('2002-01-01'),
+                organization,
+            }).create();
+
+            // No OrganizationRegistrationPeriod for period2: the organization never started it
+
+            organization.periodId = period1.id;
+            await organization.save();
+
+            const event = await new EventFactory({
+                organization,
+                name: 'test event',
+                startDate: new Date('2000-02-10'),
+                endDate: new Date('2000-02-12'),
+                typeId: OrganizationEventType.DEFAULT_ID,
+            }).create();
+
+            const createBody: Body = new PatchableArray();
+            createBody.addPatch(Event.patch({
+                id: event.id,
+                group: Group.create({
+                    settings: GroupSettings.create({
+                        name: TranslatedString.create('Naam'),
+                    }),
+                }),
+            }));
+
+            const created = await TestRequest.patch({ body: createBody, user, organization });
+            expect(created.body[0].group!.periodId).toEqual(period1.id);
+
+            const moveBody: Body = new PatchableArray();
+            moveBody.addPatch(Event.patch({
+                id: event.id,
+                startDate: new Date('2001-02-10'),
+                endDate: new Date('2001-02-12'),
+            }));
+
+            await expect(TestRequest.patch({ body: moveBody, user, organization })).rejects.toThrow(STExpect.simpleError({
+                code: 'missing_organization_period',
+                field: 'startDate',
+            }));
+
+            const group = await GroupModel.getByID(created.body[0].group!.id);
+            expect(group!.periodId).toEqual(period1.id);
+
+            // The event is only saved after its group moved along, so the new dates are not stored
+            const updatedEvent = await EventModel.getByID(event.id);
+            expect(updatedEvent!.startDate).toEqual(new Date('2000-02-10'));
+        });
+
+        test('Cannot move an event with registrations to a date without a period', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            const period = await new RegistrationPeriodFactory({
+                startDate: new Date('2000-01-01'),
+                endDate: new Date('2001-01-01'),
+                organization,
+            }).create();
+
+            await new OrganizationRegistrationPeriodFactory({
+                period,
+                organization,
+            }).create();
+
+            organization.periodId = period.id;
+            await organization.save();
+
+            const event = await new EventFactory({
+                organization,
+                name: 'test event',
+                startDate: new Date('2000-02-10'),
+                endDate: new Date('2000-02-12'),
+                typeId: OrganizationEventType.DEFAULT_ID,
+            }).create();
+
+            const createBody: Body = new PatchableArray();
+            createBody.addPatch(Event.patch({
+                id: event.id,
+                group: Group.create({
+                    settings: GroupSettings.create({
+                        name: TranslatedString.create('Naam'),
+                    }),
+                }),
+            }));
+
+            const created = await TestRequest.patch({ body: createBody, user, organization });
+            expect(created.body[0].group!.periodId).toEqual(period.id);
+
+            // No registration period covers 2005
+            const moveBody: Body = new PatchableArray();
+            moveBody.addPatch(Event.patch({
+                id: event.id,
+                startDate: new Date('2005-02-10'),
+                endDate: new Date('2005-02-12'),
+            }));
+
+            await expect(TestRequest.patch({ body: moveBody, user, organization })).rejects.toThrow(STExpect.simpleError({
+                code: 'invalid_period',
+                field: 'startDate',
+            }));
+
+            const group = await GroupModel.getByID(created.body[0].group!.id);
+            expect(group!.periodId).toEqual(period.id);
+
+            const updatedEvent = await EventModel.getByID(event.id);
+            expect(updatedEvent!.startDate).toEqual(new Date('2000-02-10'));
         });
 
         test('A normal user with write access cannot create a global event', async () => {

@@ -51,6 +51,10 @@
             <TimeInput v-model="endDate" :validator="errors.validator" :title="$t(`%ze`)" />
         </div>
 
+        <p v-if="periodProblemText" class="warning-box">
+            {{ periodProblemText }}
+        </p>
+
         <hr><h2>{{ $t('%1CP') }}</h2>
 
         <STList>
@@ -307,6 +311,7 @@ import DefaultAgeGroupIdsInput from '../inputs/DefaultAgeGroupIdsInput.vue';
 import GroupsInput from '../inputs/GroupsInput.vue';
 
 import { useEventPermissions } from './composables/useEventPermissions';
+import { useEventPeriodProblem } from './composables/useEventPeriodProblem';
 
 const props = withDefaults(
     defineProps<{
@@ -428,6 +433,24 @@ const startDate = computed({
             endDate.value = d;
         }
     },
+});
+
+const periodProblem = useEventPeriodProblem(externalOrganization, startDate);
+
+// Only an activity that already collects registrations breaks on this: its group has to move along
+// with the start date
+const periodProblemText = computed(() => {
+    const problem = periodProblem.value;
+
+    if (!problem || !patched.value.group) {
+        return null;
+    }
+
+    if (problem.type === 'missing-period') {
+        return $t('Er bestaat nog geen werkjaar dat deze startdatum bevat. Je kan de inschrijvingen van deze activiteit niet naar deze datum verplaatsen.');
+    }
+
+    return $t('Deze #groep is nog niet gestart met het werkjaar {period}, waarin deze startdatum valt. Je kan de inschrijvingen van deze activiteit pas naar dat werkjaar verplaatsen als het gestart is.', { period: problem.periodName });
 });
 
 const endDate = computed({
