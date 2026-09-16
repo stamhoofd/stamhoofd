@@ -557,6 +557,9 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
     }
 
     validateRecordAnswers(webshop: Webshop) {
+        const filtered = RecordCategory.removeOldAnswers(webshop.meta.recordCategories, this);
+        this.recordAnswers = filtered.getRecordAnswers();
+
         RecordCategory.validate(webshop.meta.recordCategories, this);
     }
 
