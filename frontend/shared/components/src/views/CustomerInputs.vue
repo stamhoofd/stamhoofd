@@ -3,10 +3,10 @@
         <STInputBox v-if="settings.name !== CustomerFieldRequirement.Disabled" error-fields="customer.firstName,customer.lastName" :error-box="errorBox" :title="withOptional(nameTitle, settings.name)">
             <div class="input-group">
                 <div>
-                    <input v-model="firstName" class="input" name="fname" type="text" :required="settings.name === CustomerFieldRequirement.Required" :autocomplete="autocomplete('given-name')" :placeholder="$t(`%1MT`)">
+                    <input v-model="firstName" class="input" name="fname" type="text" :autocomplete="autocomplete('given-name')" :placeholder="$t(`%1MT`)">
                 </div>
                 <div>
-                    <input v-model="lastName" class="input" name="lname" type="text" :required="settings.name === CustomerFieldRequirement.Required" :autocomplete="autocomplete('family-name')" :placeholder="$t(`%1MU`)">
+                    <input v-model="lastName" class="input" name="lname" type="text" :autocomplete="autocomplete('family-name')" :placeholder="$t(`%1MU`)">
                 </div>
             </div>
         </STInputBox>
@@ -48,6 +48,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { computed } from 'vue';
 
 import type { ErrorBox } from '../errors/ErrorBox';
+import { useValidation } from '../errors/useValidation';
 import type { Validator } from '../errors/Validator';
 import AddressInput from '../inputs/AddressInput.vue';
 import BirthDayInput from '../inputs/BirthDayInput.vue';
@@ -83,6 +84,11 @@ const validateServer = NetworkManager.server;
 function autocomplete(value: string) {
     return props.enableAutocomplete ? value : 'off';
 }
+
+// The name inputs are plain html: validate them with the shared rules instead of the browser
+useValidation(props.validator, () => {
+    props.customer.validateName(props.settings.name);
+});
 
 function withOptional(title: string, requirement: CustomerFieldRequirement) {
     return requirement === CustomerFieldRequirement.Optional ? title + ' ' + $t('(optioneel)') : title;
