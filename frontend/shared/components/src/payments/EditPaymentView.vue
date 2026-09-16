@@ -674,8 +674,6 @@ async function save() {
             props.payment.deepSet(savedPayment);
         }
 
-        console.log(patchedPayment.value.balanceItemPayments.length);
-
         GlobalEventBus.sendEvent('paymentPatch', props.payment).catch(console.error);
 
         if (isOnlineRefund.value) {
