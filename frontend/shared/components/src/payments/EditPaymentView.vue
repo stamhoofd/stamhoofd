@@ -312,7 +312,7 @@ const props = withDefaults(
         getFullPrice: null,
     });
 
-const { patched: patchedPayment, addPatch, hasChanges, patch } = usePatch(props.payment);
+const { patched: patchedPayment, addPatch, hasChanges, patch, reset } = usePatch(props.payment);
 const organization = useOrganization();
 const errors = useErrors();
 const saving = ref(false);
@@ -670,8 +670,11 @@ async function save() {
 
         const savedPayment = response.data[0];
         if (savedPayment) {
+            reset();
             props.payment.deepSet(savedPayment);
         }
+
+        console.log(patchedPayment.value.balanceItemPayments.length);
 
         GlobalEventBus.sendEvent('paymentPatch', props.payment).catch(console.error);
 
