@@ -35,6 +35,7 @@
         "@stamhoofd/utility": "*",
         "jszip": "3.10.1",
         "libphonenumber-js": "1.13.9",
+        "qrcode": "1.5.4",
         "qr-scanner": "1.4.2",
         "vue": "3.5.40",
         "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz",

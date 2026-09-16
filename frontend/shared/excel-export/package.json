@@ -22,6 +22,7 @@
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/vue-app-navigation": "2.25.1",
         "@stamhoofd/components": "*",
+        "@stamhoofd/excel-writer": "*",
         "@stamhoofd/networking": "*",
         "@stamhoofd/structures": "*",
         "@stamhoofd/utility": "*",

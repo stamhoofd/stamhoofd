@@ -20,6 +20,7 @@
         "eslint-plugin-n": "18.3.0",
         "eslint-plugin-regexp": "3.3.0",
         "eslint-plugin-vue": "10.11.0",
+        "globals": "15.15.0",
         "typescript-eslint": "8.70.0",
         "vue-eslint-parser": "10.4.1"
     },

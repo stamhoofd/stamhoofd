@@ -25,5 +25,8 @@
     "scripts": {
         "build": "tsc --build tsconfig.build.json && node build.js"
     },
+    "dependencies": {
+        "@stamhoofd/types": "2.152.0"
+    },
     "license": "UNLICENCED"
 }

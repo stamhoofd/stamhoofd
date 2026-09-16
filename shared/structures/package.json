@@ -44,6 +44,7 @@
     },
     "peerDependencies": {
         "@simonbackx/simple-errors": "1.5.0",
+        "@stamhoofd/excel-writer": "*",
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*",
         "uuid": "14.0.1"
