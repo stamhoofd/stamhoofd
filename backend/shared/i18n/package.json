@@ -21,8 +21,7 @@
         "dist"
     ],
     "scripts": {
-        "build": "tsc --build tsconfig.build.json",
-        "lint": "eslint"
+        "build": "tsc --build tsconfig.build.json"
     },
     "dependencies": {
         "@simonbackx/simple-logging": "1.0.1"

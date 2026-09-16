@@ -8,7 +8,7 @@
         "src"
     ],
     "scripts": {
-        "test": "vitest run"
+        "test": "vitest"
     },
     "dependencies": {
         "@eslint/js": "10.0.1",
