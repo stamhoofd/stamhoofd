@@ -108,7 +108,7 @@
             <template v-if="cartItem.product.enableCustomer && cartItem.customer">
                 <hr>
                 <h2>{{ $t('Gegevens deelnemer') }}</h2>
-                <CustomerInputs :customer="cartItem.customer" :settings="cartItem.product.resolvedCustomerSettings" :name-title="$t('Naam')" :name-autocomplete="false" :error-box="errors.errorBox" :validator="errors.validator" :validate-server="unscopedServer" />
+                <CustomerInputs :customer="cartItem.customer" :settings="cartItem.product.resolvedCustomerSettings" :name-title="$t('Naam')" :enable-autocomplete="false" :error-box="errors.errorBox" :validator="errors.validator" />
                 <FillRecordCategoryBox v-if="customerRecordCategory" :category="customerRecordCategory" :value="cartItem" :validator="errors.validator" :force-mark-reviewed="true" :hide-title="true" :parent-error-box="errors.errorBox" @patch="patchRecordAnswers" />
             </template>
 
@@ -183,7 +183,6 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useCanDismiss, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import type { CartItem, Checkout, PatchAnswers, ProductDateRange, Webshop } from '@stamhoofd/structures';
 import { CartStockHelper, Customer, ProductPrice, ProductType, UitpasNumberAndPrice } from '@stamhoofd/structures';
-import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { Formatter } from '@stamhoofd/utility';
 
 import { useContext } from '#hooks/useContext.ts';
@@ -489,7 +488,6 @@ const canOrder = computed(() => {
 
 const canSelectAmount = computed(() => product.value.maxPerOrder !== 1 && product.value.allowMultiple && !product.value.enableCustomer);
 
-const unscopedServer = NetworkManager.server;
 
 // The structure only stores a customer when the product asks for one
 watch(() => product.value.enableCustomer, (enabled) => {

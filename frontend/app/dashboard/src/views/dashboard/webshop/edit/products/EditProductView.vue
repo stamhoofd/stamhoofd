@@ -534,7 +534,7 @@ import ImageComponent from '@stamhoofd/components/views/ImageComponent.vue';
 import type { Image, ProductDateRange, ProductLocation } from '@stamhoofd/structures';
 import { CartItem, OptionMenu, PrivateWebshop, Product, ProductPrice, ProductType, RecordCategory, ResolutionRequest, TranslatedString, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, Version, WebshopField, WebshopTicketType } from '@stamhoofd/structures';
 import { CustomerFieldRequirement, getCustomerFieldRequirementName } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
-import { ProductCustomerSettings } from '@stamhoofd/structures/webshops/ProductCustomerSettings.js';
+import { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 import { computed, onBeforeUnmount, onMounted } from 'vue';
 import WebshopFieldsBox from '../fields/WebshopFieldsBox.vue';
 import OptionMenuSection from './OptionMenuSection.vue';
@@ -859,17 +859,17 @@ const customerFields: { key: 'email' | 'phone' | 'birthDay' | 'gender' | 'addres
     { key: 'address', name: $t('Adres') },
 ];
 
-function patchCustomerSettings(patch: AutoEncoderPatchType<ProductCustomerSettings>) {
+function patchCustomerSettings(patch: AutoEncoderPatchType<CustomerSettings>) {
     if (patchedProduct.value.customerSettings === null) {
         // Settings did not exist yet: store a full object instead of a patch
-        addProductPatch({ customerSettings: ProductCustomerSettings.create({}).patch(patch) });
+        addProductPatch({ customerSettings: CustomerSettings.create({}).patch(patch) });
         return;
     }
     addProductPatch({ customerSettings: patch });
 }
 
 function setCustomerField(key: 'email' | 'phone' | 'birthDay' | 'gender' | 'address', requirement: CustomerFieldRequirement) {
-    patchCustomerSettings(ProductCustomerSettings.patch({ [key]: requirement }));
+    patchCustomerSettings(CustomerSettings.patch({ [key]: requirement }));
 }
 
 const customerRecordEditorSettings = new RecordEditorSettings({
@@ -895,7 +895,7 @@ function editCustomerRecordCategory() {
                     unboxed: true,
                     saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
                         const [patched] = patch.applyTo([category]);
-                        patchCustomerSettings(ProductCustomerSettings.patch({ recordCategory: patched ?? null }));
+                        patchCustomerSettings(CustomerSettings.patch({ recordCategory: patched ?? null }));
                     },
                 }),
             }),
@@ -905,7 +905,7 @@ function editCustomerRecordCategory() {
 }
 
 function deleteCustomerRecordCategory() {
-    patchCustomerSettings(ProductCustomerSettings.patch({ recordCategory: null }));
+    patchCustomerSettings(CustomerSettings.patch({ recordCategory: null }));
 }
 
 const remainingStock = computed(() => patchedProduct.value.remainingStock);
