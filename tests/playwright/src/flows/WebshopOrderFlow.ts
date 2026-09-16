@@ -24,6 +24,9 @@ export interface TestBirthDay {
  * Pass `cartEnabled` so the flow knows whether adding a product opens the cart (multi-item shops)
  * or jumps straight into the checkout steps (single-item / no-cart shops).
  */
+/** CustomerInputs generates its own radio group name, so match on the prefix */
+const GENDER_INPUT = 'input[name^="sex"]';
+
 export class WebshopOrderFlow {
     private readonly page: Page;
     private readonly cartEnabled: boolean;
@@ -102,7 +105,7 @@ export class WebshopOrderFlow {
             await this.fillBirthDay(step, birthDay);
         }
         if (gender) {
-            await this.selectGender(step, gender, 'sex');
+            await this.selectGender(step, gender);
         }
         if (address) {
             await this.fillAddressInputs(step, address);
@@ -118,7 +121,7 @@ export class WebshopOrderFlow {
         const step = this.page.getByTestId('customer-step');
         await expect(step).toBeVisible({ timeout: 15000 });
         await expect(step.getByTestId('day-select')).toHaveCount(fields.birthDay ? 1 : 0);
-        await expect(step.locator('input[name="sex"]')).toHaveCount(fields.gender ? 3 : 0);
+        await expect(step.locator(GENDER_INPUT)).toHaveCount(fields.gender ? 3 : 0);
         await expect(step.locator('input[name="street-address"]')).toHaveCount(fields.address ? 1 : 0);
     }
 
@@ -144,8 +147,8 @@ export class WebshopOrderFlow {
         await scope.getByTestId('year-select').selectOption({ label: String(birthDay.year) });
     }
 
-    private async selectGender(scope: Locator, gender: 'Male' | 'Female' | 'Other', name: string) {
-        await scope.locator('label.radio', { has: this.page.locator(`input[name="${name}"][value="${gender}"]`) }).click();
+    private async selectGender(scope: Locator, gender: 'Male' | 'Female' | 'Other') {
+        await scope.locator('label.radio', { has: this.page.locator(`${GENDER_INPUT}[value="${gender}"]`) }).click();
     }
 
     private async fillAddressInputs(scope: Locator, address: TestAddress) {

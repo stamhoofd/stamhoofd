@@ -35,7 +35,8 @@ export class EditOrderView {
         }
 
         if (gender) {
-            await this.view.locator('label.radio', { has: this.page.locator(`input[name="customer-sex"][value="${gender}"]`) }).click();
+            // CustomerInputs generates its own radio group name
+            await this.view.locator('label.radio', { has: this.page.locator(`input[name^="sex-"][value="${gender}"]`) }).click();
         }
 
         if (address) {

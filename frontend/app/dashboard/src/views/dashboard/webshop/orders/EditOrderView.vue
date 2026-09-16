@@ -14,39 +14,7 @@
         <template v-else>
             <hr><h2>{{ $t('%Ul') }}</h2>
 
-            <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`%Uy`)">
-                <div class="input-group">
-                    <div>
-                        <input v-model="firstName" class="input" name="fname" type="text" required autocomplete="given-name" :placeholder="$t(`%1MT`)" data-testid="first-name-input">
-                    </div>
-                    <div>
-                        <input v-model="lastName" class="input" name="lname" type="text" required autocomplete="family-name" :placeholder="$t(`%1MU`)" data-testid="last-name-input">
-                    </div>
-                </div>
-            </STInputBox>
-
-            <EmailInput v-model="email" name="email" :validator="errors.validator" :placeholder="emailPlaceholder" autocomplete="email" :title="$t(`%1FK`)" />
-            <p v-if="emailDescription" class="style-description-small" v-text="emailDescription" />
-
-            <PhoneInput v-if="phone || phoneEnabed" v-model="phone" :title="$t('%2k' )" name="mobile" :validator="errors.validator" autocomplete="tel" :required="false" :placeholder="$t(`%Uz`)" />
-
-            <BirthDayInput v-if="customerBirthDay || birthDayEnabled" v-model="customerBirthDay" :title="$t(`%17w`)" :validator="errors.validator" :required="false" />
-
-            <STInputBox v-if="customerGender !== Gender.Other || genderEnabled" error-fields="gender" :error-box="errors.errorBox" :title="$t(`%Zd4`)">
-                <RadioGroup>
-                    <Radio v-model="customerGender" :value="Gender.Male" autocomplete="sex" name="customer-sex">
-                        {{ $t('%XK') }}
-                    </Radio>
-                    <Radio v-model="customerGender" :value="Gender.Female" autocomplete="sex" name="customer-sex">
-                        {{ $t('%XM') }}
-                    </Radio>
-                    <Radio v-model="customerGender" :value="Gender.Other" autocomplete="sex" name="customer-sex">
-                        {{ $t('%1JG') }}
-                    </Radio>
-                </RadioGroup>
-            </STInputBox>
-
-            <AddressInput v-if="(customerAddress || addressEnabled) && selectedMethod?.type !== CheckoutMethodType.Delivery" v-model="customerAddress" :required="false" :validator="errors.validator" :validate-server="server" :title="$t(`%Cn`)" />
+            <CustomerInputs :customer="customerClone" :settings="customerFieldSettings" :error-box="errors.errorBox" :validator="errors.validator" :email-placeholder="emailPlaceholder" :email-description="emailDescription" />
 
             <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="answersClone" :error-box="errors.errorBox" />
 
@@ -185,11 +153,8 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
-import BirthDayInput from '@stamhoofd/components/inputs/BirthDayInput.vue';
-import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
-import PhoneInput from '@stamhoofd/components/inputs/PhoneInput.vue';
+import CustomerInputs from '@stamhoofd/components/views/CustomerInputs.vue';
 import Radio from '@stamhoofd/components/inputs/Radio.vue';
-import RadioGroup from '@stamhoofd/components/inputs/RadioGroup.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
@@ -206,8 +171,8 @@ import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { DiscountCode } from '@stamhoofd/structures';
-import type { Address, CartItem, CheckoutMethod, PatchAnswers, ValidatedAddress, WebshopOnSiteMethod, WebshopTakeoutMethod } from '@stamhoofd/structures';
-import { CheckoutMethodType, Customer, Gender, OrderData, PaymentConfiguration, PaymentMethod, PrivateOrder, RecordCategory, Version, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
+import type { CartItem, CheckoutMethod, PatchAnswers, ValidatedAddress, WebshopOnSiteMethod, WebshopTakeoutMethod } from '@stamhoofd/structures';
+import { CheckoutMethodType, Gender, OrderData, PaymentConfiguration, PaymentMethod, PrivateOrder, RecordCategory, Version, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
@@ -230,11 +195,14 @@ const present = usePresent();
 const dismiss = useDismiss();
 
 const answersClone = ref(order.data.fieldAnswers.map(a => a.clone()));
+// CustomerInputs edits a Customer instance, so keep a clone and merge it into the patch
+const customerClone = ref(order.data.customer.clone());
 
 const finalPatch = computed(() => {
     return patchOrder.value.patch(PrivateOrder.patch({
         data: OrderData.patch({
             fieldAnswers: answersClone.value,
+            customer: customerClone.value,
         }),
     }));
 });
@@ -310,12 +278,34 @@ const recordCategories = computed(() => {
     );
 });
 
-const asksCustomerField = (key: 'phone' | 'birthDay' | 'gender' | 'address') => computed(() => webshop.meta.customerSettings[key] !== CustomerFieldRequirement.Disabled);
+// Fields that already have a value stay visible even when the webshop no longer asks for them
+const hasValue = {
+    phone: !!order.data.customer.phone,
+    birthDay: !!order.data.customer.birthDay,
+    gender: order.data.customer.gender !== Gender.Other,
+    address: !!order.data.customer.address,
+};
 
-const phoneEnabed = asksCustomerField('phone');
-const birthDayEnabled = asksCustomerField('birthDay');
-const addressEnabled = asksCustomerField('address');
-const genderEnabled = asksCustomerField('gender');
+/**
+ * Admins are never forced to fill in a field, but they do see everything the webshop asks or already stored.
+ */
+const customerFieldSettings = computed(() => {
+    const settings = webshop.meta.customerSettings;
+    const forAdmin = (key: 'phone' | 'birthDay' | 'gender' | 'address') => {
+        if (settings[key] === CustomerFieldRequirement.Disabled && !hasValue[key]) {
+            return CustomerFieldRequirement.Disabled;
+        }
+        return CustomerFieldRequirement.Optional;
+    };
+
+    return settings.patch({
+        phone: forAdmin('phone'),
+        birthDay: forAdmin('birthDay'),
+        gender: forAdmin('gender'),
+        // A delivery address is edited in its own input below
+        address: selectedMethod.value?.type === CheckoutMethodType.Delivery ? CustomerFieldRequirement.Disabled : forAdmin('address'),
+    });
+});
 
 const emailPlaceholder = computed(() => {
     if (webshop.meta.ticketType !== WebshopTicketType.None) {
@@ -351,98 +341,6 @@ const paymentConfiguration = PaymentConfiguration.create({
 });
 
 const server = NetworkManager.server;
-
-const firstName = computed({
-    get: () => patchedOrder.value.data.customer.firstName,
-    set: (firstName: string) => {
-        addPatch({
-            data: OrderData.patch({
-                customer: Customer.patch({
-                    firstName,
-                }),
-            }),
-        });
-    },
-
-});
-
-const lastName = computed({
-    get: () => patchedOrder.value.data.customer.lastName,
-    set: (lastName: string) => {
-        addPatch({
-            data: OrderData.patch({
-                customer: Customer.patch({
-                    lastName,
-                }),
-            }),
-        });
-    },
-});
-
-const email = computed({
-    get: () => patchedOrder.value.data.customer.email,
-    set: (email: string) => {
-        addPatch({
-            data: OrderData.patch({
-                customer: Customer.patch({
-                    email,
-                }),
-            }),
-        });
-    },
-});
-
-const phone = computed({
-    get: () => patchedOrder.value.data.customer.phone,
-    set: (phone: string | null) => {
-        addPatch({
-            data: OrderData.patch({
-                customer: Customer.patch({
-                    phone: phone ?? '',
-                }),
-            }),
-        });
-    },
-});
-
-const customerBirthDay = computed({
-    get: () => patchedOrder.value.data.customer.birthDay,
-    set: (birthDay: Date | null) => {
-        addPatch({
-            data: OrderData.patch({
-                customer: Customer.patch({
-                    birthDay,
-                }),
-            }),
-        });
-    },
-});
-
-const customerGender = computed({
-    get: () => patchedOrder.value.data.customer.gender,
-    set: (gender: Gender) => {
-        addPatch({
-            data: OrderData.patch({
-                customer: Customer.patch({
-                    gender,
-                }),
-            }),
-        });
-    },
-});
-
-const customerAddress = computed({
-    get: () => patchedOrder.value.data.customer.address,
-    set: (address: Address | ValidatedAddress | null) => {
-        addPatch({
-            data: OrderData.patch({
-                customer: Customer.patch({
-                    address,
-                }),
-            }),
-        });
-    },
-});
 
 const address = computed({
     get: () => patchedOrder.value.data.address,

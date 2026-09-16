@@ -3,10 +3,10 @@
         <STInputBox v-if="settings.name !== CustomerFieldRequirement.Disabled" error-fields="customer.firstName,customer.lastName" :error-box="errorBox" :title="withOptional(nameTitle, settings.name)">
             <div class="input-group">
                 <div>
-                    <input v-model="firstName" class="input" name="fname" type="text" :autocomplete="autocomplete('given-name')" :placeholder="$t(`%1MT`)">
+                    <input v-model="firstName" class="input" name="fname" type="text" data-testid="first-name-input" :autocomplete="autocomplete('given-name')" :placeholder="$t(`%1MT`)">
                 </div>
                 <div>
-                    <input v-model="lastName" class="input" name="lname" type="text" :autocomplete="autocomplete('family-name')" :placeholder="$t(`%1MU`)">
+                    <input v-model="lastName" class="input" name="lname" type="text" data-testid="last-name-input" :autocomplete="autocomplete('family-name')" :placeholder="$t(`%1MU`)">
                 </div>
             </div>
         </STInputBox>
