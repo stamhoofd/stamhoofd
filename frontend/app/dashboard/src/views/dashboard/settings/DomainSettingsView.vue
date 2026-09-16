@@ -86,7 +86,7 @@
 <script lang="ts" setup>
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, usePop, useShow } from '@simonbackx/vue-app-navigation';
+import { usePop, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
@@ -98,14 +98,13 @@ import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import { Validator } from '@stamhoofd/components/errors/Validator.ts';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { Organization, OrganizationDomains } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import useIsStamhoofd from '../../../composables/useIsStamhoofd.ts';
 
 const context = useContext();
 const organization = useRequiredOrganization();
-const organizationManager = useOrganizationManager();
 const show = useShow();
 const pop = usePop();
 const errorBox = ref<ErrorBox | null>(null);
@@ -117,7 +116,7 @@ const mailDomain = ref(organization.value.privateMeta?.pendingMailDomain ?? orga
 const customRegisterDomain = ref(!!registerDomain.value && !!mailDomain.value && registerDomain.value !== 'inschrijven.' + mailDomain.value);
 const allowSubdomain = ref(/^[a-z0-9-]+\.[a-z0-9-]+\.[a-z]+$/i.test(mailDomain.value));
 const usedRegisterDomain = computed(() => customRegisterDomain.value ? registerDomain.value : 'inschrijven.' + mailDomain.value);
-const isStamhoofd = computed(() => organizationManager.value.user.email.endsWith('@stamhoofd.be') || organizationManager.value.user.email.endsWith('@stamhoofd.nl'));
+const isStamhoofd = useIsStamhoofd();
 const isMailOk = computed(() => organization.value.privateMeta?.pendingMailDomain === null && organization.value.privateMeta?.mailDomain !== null);
 const isRegisterOk = computed(() => organization.value.privateMeta?.pendingRegisterDomain === null && organization.value.registerDomain !== null);
 const enableMemberModule = computed(() => organization.value.meta.modules.useMembers);

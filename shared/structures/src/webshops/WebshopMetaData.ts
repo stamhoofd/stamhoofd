@@ -658,6 +658,9 @@ export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: WebshopCrowdfunding, nullable: true, version: 410 })
     crowdfunding: WebshopCrowdfunding | null = null;
 
+    @field({ decoder: BooleanDecoder, nullable: true, ...NextVersion })
+    noServiceFees = false;
+
     /**
      * Returns whether the webshop is event/ticketing based - regardless whether scanners are used or not
      */
