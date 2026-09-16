@@ -13,7 +13,7 @@
                     </p>
 
                     <STList v-else>
-                        <STListItem v-for="membership of getMembershipsForPeriod(period.id)" :key="membership.id" class="right-stack">
+                        <STListItem v-for="membership of getMembershipsForPeriod(period.id)" :key="membership.id" :selectable="true" class="right-stack" @click="openMembership(membership)">
                             <template #left>
                                 <figure class="style-image-with-icon" :class="{'theme-secundary': membership.isTrial}">
                                     <figure>
@@ -86,10 +86,10 @@
                                 </template>
 
                                 <LoadingButton v-if="!membership.locked && (!membership.generated || !isRegisteredAt(period.id, membership.organizationId)) && (!membership.balanceItemId || auth.hasPlatformFullAccess())" :loading="deletingMemberships.has(membership.id)">
-                                    <button class="button icon trash" type="button" @click="deleteMembership(membership)" />
+                                    <button class="button icon trash" type="button" @click.stop="deleteMembership(membership)" />
                                 </LoadingButton>
 
-                                <button v-if="membership.locked && (auth.hasPlatformFullAccess())" v-tooltip="$t('%AJ')" class="button icon lock" type="button" @click="unlockMembership(membership)" />
+                                <button v-if="membership.locked && (auth.hasPlatformFullAccess())" v-tooltip="$t('%AJ')" class="button icon lock" type="button" @click.stop="unlockMembership(membership)" />
                             </template>
                         </STListItem>
                     </STList>
@@ -109,14 +109,16 @@
 <script lang="ts" setup>
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useAllRegistrationPeriods, useFetchAllRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
 import type { PlatformMember, RegistrationPeriod } from '@stamhoofd/structures';
-import { GroupType, MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMembershipType } from '@stamhoofd/structures';
+import { GroupType, LimitedFilteredRequest, MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMembershipType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import LoadingBoxTransition from '#containers/LoadingBoxTransition.vue';
+import PromiseView from '#containers/PromiseView.vue';
+import { usePlatformMemberhipsObjectFetcher } from '#fetchers/usePlatformMembershipsObjectFetcher.ts';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { useErrors } from '../../errors/useErrors';
 import { useAuth } from '#hooks/useAuth.ts';
@@ -125,7 +127,7 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { Toast } from '../../overlays/Toast';
 import { usePlatformFamilyManager } from '../PlatformFamilyManager';
-
+import { SimpleError } from '@simonbackx/simple-errors';
 
 const props = defineProps<{
     member: PlatformMember;
@@ -144,6 +146,7 @@ const fetchPeriods = useFetchAllRegistrationPeriods();
 fetchPeriods({ shouldRetry: true }).catch(e => errors.errorBox = new ErrorBox(e));
 const periods = useAllRegistrationPeriods();
 const organization = useOrganization();
+const platformMembershipsFetcher = usePlatformMemberhipsObjectFetcher();
 
 function isRegisteredAt(periodId: string, organizationId: string) {
     return props.member.filterRegistrations({
@@ -186,6 +189,36 @@ async function addMembership(period: RegistrationPeriod) {
     });
 }
 
+async function openMembership(membership: MemberPlatformMembership) {
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(PromiseView, {
+                    promise: async () => {
+                        const response = await platformMembershipsFetcher.fetch(new LimitedFilteredRequest({
+                            filter: {
+                                id: membership.id,
+                            },
+                            limit: 1,
+                        }));
+                        if (response.results.length === 0) {
+                            throw new SimpleError({
+                                code: 'membership_not_found',
+                                message: 'Platform membership with id ' + membership.id + ' not found',
+                                human: $t('We konden de aansluiting niet vinden, mogelijk werd deze verwijderd.'),
+                            });
+                        }
+                        return AsyncComponent(() => import('../../platform-memberships/PlatformMembershipView.vue'), {
+                            platformMembership: response.results[0],
+                        });
+                    },
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
+
 async function deleteMembership(membership: MemberPlatformMembership) {
     if (deletingMemberships.value.has(membership.id)) {
         return;
@@ -216,8 +249,7 @@ async function deleteMembership(membership: MemberPlatformMembership) {
         await platformFamilyManager.isolatedPatch([props.member], patch, false);
 
         Toast.success($t(`%10P`)).show();
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
     deletingMemberships.value.delete(membership.id);
@@ -251,8 +283,7 @@ async function unlockMembership(membership: MemberPlatformMembership) {
         await platformFamilyManager.isolatedPatch([props.member], patch, false);
 
         Toast.success($t('%Bg')).show();
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
     patchingMemberships.value.delete(membership.id);
