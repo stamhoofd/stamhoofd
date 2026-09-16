@@ -4,6 +4,9 @@ import { BalanceItem, BalanceItemPayment, Order, OrganizationFactory, Payment, W
 import { compileToSQLFilter, SQL } from '@stamhoofd/sql';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { Address, BalanceItemType, Cart, CartItem, CartItemPrice, CheckoutMethodType, compileToInMemoryFilter, Customer, DiscountCode, OrderData, OrderStatus, PaymentMethod, PaymentStatus, privateOrderWithTicketsFilterCompilers, Product, ProductPrice, RecordCheckboxAnswer, RecordChoice, RecordChooseOneAnswer, RecordDateAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
+import { CartItemOption } from '@stamhoofd/structures/webshops/CartItem.js';
+import { Option, OptionMenu } from '@stamhoofd/structures/webshops/Product.js';
+import { WebshopField, WebshopFieldAnswer } from '@stamhoofd/structures/webshops/WebshopField.js';
 import { Country } from '@stamhoofd/types/Country';
 
 import { orderFilterCompilers } from '../../src/sql-filters/orders.js';
@@ -432,6 +435,69 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
     // --- cart items ($elemMatch) -----------------------------------------------------------------------
 
     describe('items', () => {
+        it.each(['options', 'fieldAnswers'] as const)('%s matches within the selected cart item', async (column) => {
+            const withAnswer = (productId: string) => {
+                const item = cartItem({ productId });
+                item.options = [CartItemOption.create({
+                    option: Option.create({ id: 'option-a' }),
+                    optionMenu: OptionMenu.create({ id: 'menu-a' }),
+                })];
+                item.fieldAnswers = [WebshopFieldAnswer.create({
+                    field: WebshopField.create({ id: 'field-a' }),
+                    answer: 'Answer A',
+                })];
+                return item;
+            };
+            const matching = await createOrder({ data: orderData({ items: [withAnswer('target')] }) });
+            await createOrder({ data: orderData({ items: [cartItem({ productId: 'target' }), withAnswer('other')] }) });
+            await createOrder({ data: orderData({ items: [cartItem({ productId: 'target' })] }) });
+            await createOrder();
+
+            const nestedFilter: StamhoofdFilter = column === 'options'
+                ? { option: { id: 'option-a' }, optionMenu: { id: 'menu-a' } }
+                : { field: { id: 'field-a' }, answer: 'Answer A' };
+            const filter: StamhoofdFilter = { items: { $elemMatch: { product: { id: 'target' }, [column]: column === 'options' ? { $elemMatch: nestedFilter } : nestedFilter } } };
+            await expectFilter(filter, [matching]);
+        });
+
+        it('options: option and menu conditions match the same nested entry', async () => {
+            const option = (optionId: string, menuId: string) => CartItemOption.create({
+                option: Option.create({ id: optionId }),
+                optionMenu: OptionMenu.create({ id: menuId }),
+            });
+            const matchingItem = cartItem();
+            matchingItem.options = [option('option-b', 'menu-b'), option('option-a', 'menu-a')];
+            const matching = await createOrder({ data: orderData({ items: [matchingItem] }) });
+            const splitItem = cartItem();
+            splitItem.options = [option('option-a', 'menu-b'), option('option-b', 'menu-a')];
+            const split = await createOrder({ data: orderData({ items: [splitItem] }) });
+            await createOrder({ data: orderData({ items: [cartItem()] }) });
+
+            await expectFilter({ items: { $elemMatch: { options: { $elemMatch: { option: { id: { $eq: 'option-a' } } } } } } }, [matching, split]);
+            await expectFilter({ items: { $elemMatch: { options: { $elemMatch: { optionMenu: { id: { $in: ['menu-a'] } } } } } } }, [matching, split]);
+            await expectFilter({ items: { $elemMatch: { options: { $elemMatch: { option: { id: { $eq: 'option-a' } }, optionMenu: { id: { $eq: 'menu-a' } } } } } } }, [matching]);
+            await expectFilter({ items: { $elemMatch: { options: { $elemMatch: { option: { id: { $eq: 'missing' } } } } } } }, []);
+        });
+
+        it('fieldAnswers: field and answer conditions match the same nested entry', async () => {
+            const answer = (fieldId: string, value: string) => WebshopFieldAnswer.create({
+                field: WebshopField.create({ id: fieldId }),
+                answer: value,
+            });
+            const matchingItem = cartItem();
+            matchingItem.fieldAnswers = [answer('field-b', 'Other'), answer('field-a', 'Hello World')];
+            const matching = await createOrder({ data: orderData({ items: [matchingItem] }) });
+            const splitItem = cartItem();
+            splitItem.fieldAnswers = [answer('field-a', 'Other'), answer('field-b', 'Hello World')];
+            const split = await createOrder({ data: orderData({ items: [splitItem] }) });
+            await createOrder({ data: orderData({ items: [cartItem()] }) });
+
+            await expectFilter({ items: { $elemMatch: { fieldAnswers: { field: { id: { $eq: 'field-a' } } } } } }, [matching, split]);
+            await expectFilter({ items: { $elemMatch: { fieldAnswers: { answer: { $eq: 'hello world' } } } } }, [matching, split]);
+            await expectFilter({ items: { $elemMatch: { fieldAnswers: { field: { id: { $eq: 'field-a' } }, answer: { $contains: 'WORLD' } } } } }, [matching]);
+            await expectFilter({ items: { $elemMatch: { fieldAnswers: { field: { id: { $eq: 'missing' } } } } } }, []);
+        });
+
         it('$elemMatch on product / productPrice / amount', async () => {
             const apple = await createOrder({ data: orderData({ items: [cartItem({ productId: 'apple', productPriceId: 'apple-price', amount: 2, unitPrice: 1_00 })] }) });
             const pear = await createOrder({ data: orderData({ items: [cartItem({ productId: 'pear', productPriceId: 'pear-price', amount: 5, unitPrice: 1_00 })] }) });
