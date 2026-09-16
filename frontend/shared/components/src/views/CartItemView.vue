@@ -105,6 +105,13 @@
 
             <FieldBox v-for="field in cartItem.product.customFields" :key="field.id" :field="field" :answers="cartItem.fieldAnswers" :error-box="errors.errorBox" />
 
+            <template v-if="cartItem.product.enableCustomer && cartItem.customer">
+                <hr>
+                <h2>{{ $t('Gegevens deelnemer') }}</h2>
+                <CustomerInputs :customer="cartItem.customer" :settings="cartItem.product.resolvedCustomerSettings" :name-title="$t('Naam')" :enable-autocomplete="false" :error-box="errors.errorBox" :validator="errors.validator" />
+                <FillRecordCategoryBox v-if="customerRecordCategory" :category="customerRecordCategory" :value="cartItem" :validator="errors.validator" :force-mark-reviewed="true" :hide-title="true" :parent-error-box="errors.errorBox" @patch="patchRecordAnswers" />
+            </template>
+
             <template v-if="canOrder && canSelectAmount">
                 <hr>
                 <h2>{{ $t('%M4') }}</h2>
@@ -174,11 +181,12 @@
 <script lang="ts" setup>
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useCanDismiss, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import type { CartItem, Checkout, ProductDateRange, Webshop } from '@stamhoofd/structures';
-import { CartStockHelper, ProductPrice, ProductType, UitpasNumberAndPrice } from '@stamhoofd/structures';
+import type { CartItem, Checkout, PatchAnswers, ProductDateRange, Webshop } from '@stamhoofd/structures';
+import { CartStockHelper, Customer, ProductPrice, ProductType, UitpasNumberAndPrice } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { useContext } from '#hooks/useContext.ts';
+import { patchObject } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref, watch } from 'vue';
@@ -199,6 +207,8 @@ import FieldBox from './FieldBox.vue';
 import OptionMenuBox from './OptionMenuBox.vue';
 import PriceBreakdownBox from './PriceBreakdownBox.vue';
 import ImageGallery from '#images/ImageGallery.vue';
+import FillRecordCategoryBox from '#records/components/FillRecordCategoryBox.vue';
+import CustomerInputs from './CustomerInputs.vue';
 import { validateUitpasNumbers } from './validateUitpasNumbers';
 
 const props = withDefaults(defineProps<{
@@ -476,7 +486,21 @@ const canOrder = computed(() => {
     // return (props.admin || ((maximumRemaining.value === null || maximumRemaining.value > 0 || !!props.oldItem) && product.value.isEnabled)) && !this.areSeatsSoldOut
 });
 
-const canSelectAmount = computed(() => product.value.maxPerOrder !== 1 && product.value.allowMultiple);
+const canSelectAmount = computed(() => product.value.maxPerOrder !== 1 && product.value.allowMultiple && !product.value.enableCustomer);
+
+
+// The structure only stores a customer when the product asks for one
+watch(() => product.value.enableCustomer, (enabled) => {
+    if (enabled && !props.cartItem.customer) {
+        props.cartItem.customer = Customer.create({});
+    }
+}, { immediate: true });
+
+const customerRecordCategory = computed(() => product.value.enableCustomer ? product.value.resolvedCustomerSettings.recordCategory : null);
+
+function patchRecordAnswers(patch: PatchAnswers) {
+    props.cartItem.recordAnswers = patchObject(props.cartItem.recordAnswers, patch);
+}
 
 const uitpasNumbers = ref(props.cartItem.uitpasNumbers);
 const originalUitpasNumbers = props.cartItem.uitpasNumbers.map(u => u.uitpasNumber);
