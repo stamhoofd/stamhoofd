@@ -7,7 +7,7 @@ import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { ThemeManager } from '@stamhoofd/networking/ThemeManager';
 import type { Webshop } from '@stamhoofd/structures';
-import { WebshopAuthType } from '@stamhoofd/structures';
+import { WebshopAuthType, WebshopOrderMode } from '@stamhoofd/structures';
 import { markRaw, reactive } from 'vue';
 import { CheckoutManager } from './classes/CheckoutManager';
 import { WebshopManager } from './classes/WebshopManager';
@@ -42,8 +42,9 @@ export function wrapWithModalStack(...components: ComponentWithProperties[]) {
 }
 
 export async function getWebshopRootView(session: SessionContext, webshop: Webshop) {
-    // Organization feature flags live in privateMeta, which the public webshop never receives, so the flag can only be enabled on the platform.
-    const modernView = manualFeatureFlag('modern-webshop', session, session.platform) || STAMHOOFD.environment === 'development';
+    // Bulk mode only exists in the modern view. Organization feature flags live in privateMeta, which the
+    // public webshop never receives, so the flag can only be enabled on the platform.
+    const modernView = webshop.orderMode === WebshopOrderMode.Bulk || manualFeatureFlag('modern-webshop', session, session.platform) || STAMHOOFD.environment === 'development';
     let root: ComponentWithProperties;
     if (modernView) {
         root = wrapWithModalStack(AsyncComponent(() => import('./views/WebshopController.vue'), {
