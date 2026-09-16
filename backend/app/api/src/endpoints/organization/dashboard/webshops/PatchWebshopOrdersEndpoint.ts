@@ -178,7 +178,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         // Determine the payment provider (always null because no online payments here)
                         payment.provider = null;
 
-                        if (webshop.meta.noServiceFees === undefined || !webshop.meta.noServiceFees) {
+                        if (!webshop.meta.noServiceFees) {
                             await ServiceFeeHelper.setServiceFee(
                                 payment,
                                 organization,

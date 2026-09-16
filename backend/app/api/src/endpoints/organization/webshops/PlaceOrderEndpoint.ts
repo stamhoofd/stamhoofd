@@ -195,7 +195,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 payment.provider = provider;
                 payment.stripeAccountId = stripeAccount?.id ?? null;
 
-                if (webshop.meta.noServiceFees === undefined || !webshop.meta.noServiceFees) {
+                if (!webshop.meta.noServiceFees) {
                     await ServiceFeeHelper.setServiceFee(
                         payment,
                         organization,

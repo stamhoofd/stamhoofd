@@ -658,7 +658,7 @@ export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: WebshopCrowdfunding, nullable: true, version: 410 })
     crowdfunding: WebshopCrowdfunding | null = null;
 
-    @field({ decoder: BooleanDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: BooleanDecoder, ...NextVersion })
     noServiceFees = false;
 
     /**

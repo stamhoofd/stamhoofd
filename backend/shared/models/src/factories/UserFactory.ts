@@ -18,6 +18,7 @@ class Options {
     verified?: boolean;
     permissions?: Permissions | null;
     globalPermissions?: Permissions | null;
+    isStamhoofd?: boolean;
 
     apiUser?: boolean;
 }
@@ -33,7 +34,8 @@ export class UserFactory extends Factory<Options, User> {
             organization = this.options.organization ?? null;
         }
 
-        const email = this.options.email ?? 'generated-email-' + this.randomString(20) + '@domain.com';
+        const emailDomain = this.options.isStamhoofd ? '@stamhoofd.be' : '@domain.com';
+        const email = this.options.email ?? 'generated-email-' + this.randomString(20) + emailDomain;
         const password = this.options.password ?? this.randomString(20);
 
         const user = await User.register(organization, NewUser.create({
