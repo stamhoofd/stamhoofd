@@ -362,6 +362,7 @@ import { MollieRequiredScopes } from '@stamhoofd/structures/MollieScopes.js';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import useIsStamhoofd from '../../../composables/useIsStamhoofd';
 
 const errors = useErrors();
 const saving = ref(false);
@@ -401,7 +402,7 @@ const isBelgium = computed(() => {
     return patchedOrganization.value.address.country === Country.Belgium;
 });
 
-const isStamhoofd = computed(() => organizationManager.value.user.email.endsWith('@stamhoofd.be') || organizationManager.value.user.email.endsWith('@stamhoofd.nl'));
+const isStamhoofd = useIsStamhoofd();
 
 function formatJson(blob: any) {
     return JSON.stringify(blob, null, 2);

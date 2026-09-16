@@ -177,12 +177,15 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
                         // Determine the payment provider (always null because no online payments here)
                         payment.provider = null;
-                        await ServiceFeeHelper.setServiceFee(
-                            payment,
-                            organization,
-                            webshop.meta.ticketType === WebshopTicketType.None ? 'webshop' : 'tickets',
-                            order.data.cart.items.flatMap(i => i.calculatedPrices.map(p => p.discountedPrice)),
-                        );
+
+                        if (!webshop.meta.noServiceFees) {
+                            await ServiceFeeHelper.setServiceFee(
+                                payment,
+                                organization,
+                                webshop.meta.ticketType === WebshopTicketType.None ? 'webshop' : 'tickets',
+                                order.data.cart.items.flatMap(i => i.calculatedPrices.map(p => p.discountedPrice)),
+                            );
+                        }
                         await ServiceFeeHelper.setTransferFee({ payment, organization, stripeAccount: null });
                         await payment.save();
 

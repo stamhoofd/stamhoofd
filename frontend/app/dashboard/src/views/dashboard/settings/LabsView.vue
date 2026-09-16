@@ -330,6 +330,7 @@ import { Organization, OrganizationMetaData, OrganizationPrivateMetaData, Privat
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, ref, shallowRef } from 'vue';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
+import useIsStamhoofd from '../../../composables/useIsStamhoofd.ts';
 
 const context = useContext();
 const baseOrganization = useRequiredOrganization();
@@ -351,7 +352,7 @@ const organizationPatch = shallowRef<AutoEncoderPatchType<Organization> & AutoEn
 );
 
 const organization = computed(() => baseOrganization.value.patch(organizationPatch.value));
-const isStamhoofd = computed(() => organizationManager.value.user.email.endsWith('@stamhoofd.be') || organizationManager.value.user.email.endsWith('@stamhoofd.nl'));
+const isStamhoofd = useIsStamhoofd();
 const auth = useAuth();
 const hasPlatformFullAccess = computed(() => auth.hasPlatformFullAccess());
 const blockCreatingNewMembers = computed({

@@ -178,6 +178,14 @@
                     {{ $t('%Qe') }}
                 </p>
             </div>
+
+            <div v-if="isStamhoofd" class="container">
+                <hr><h2>{{ $t('%NU') }}</h2>
+
+                <Checkbox v-model="noServiceFees">
+                    {{ $t('Geen servicekosten aanrekenen voor deze webshop') }}
+                </Checkbox>
+            </div>
         </template>
 
         <!-- payment methods -->
@@ -253,6 +261,7 @@ import { computed, nextTick, onMounted, ref } from 'vue';
 import EditPaymentMethodsBox from '../../../../components/EditPaymentMethodsBox.vue';
 import type { UseEditWebshopProps } from './useEditWebshop';
 import { useEditWebshop } from './useEditWebshop';
+import useIsStamhoofd from '../../../../composables/useIsStamhoofd.ts';
 
 const props = withDefaults(defineProps<UseEditWebshopProps & { forceType: WebshopType | null; isCopy?: boolean }>(), { forceType: null });
 
@@ -273,6 +282,7 @@ const context = useContext();
 const owner = useRequestOwner();
 const organization = useRequiredOrganization();
 const getFeatureFlag = useFeatureFlag();
+const isStamhoofd = useIsStamhoofd();
 
 const viewTitle = computed(() => {
     if (props.forceType) {
@@ -591,6 +601,17 @@ const openAt = computed({
         const p = PrivateWebshop.patch({});
         const meta = WebshopMetaData.patch({});
         meta.openAt = openAt;
+        p.meta = meta;
+        addPatch(p);
+    },
+});
+
+const noServiceFees = computed({
+    get: () => webshop.value.meta.noServiceFees ?? false,
+    set: (noServiceFees: boolean) => {
+        const p = PrivateWebshop.patch({});
+        const meta = WebshopMetaData.patch({});
+        meta.noServiceFees = noServiceFees;
         p.meta = meta;
         addPatch(p);
     },
