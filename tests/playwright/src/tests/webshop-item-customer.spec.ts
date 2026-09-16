@@ -11,7 +11,7 @@ import type { User } from '@stamhoofd/models';
 import { Order, Organization, OrganizationFactory, UserFactory, Webshop } from '@stamhoofd/models';
 import { PaymentMethod, PermissionLevel, Permissions, Product, ProductPrice, ProductType, RecordCategory, RecordSettings, RecordType, STPackageBundle, Token as TokenStruct, TranslatedString, Version, WebshopOrderMode, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
-import { ProductCustomerSettings } from '@stamhoofd/structures/webshops/ProductCustomerSettings.js';
+import { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WebshopOrderFlow } from '../flows/WebshopOrderFlow.js';
 import { DashboardPage, DashboardTab, WorkerData } from '../helpers/index.js';
@@ -203,7 +203,7 @@ test.describe('Webshop per-item customers @webshop-item-customer', () => {
                     name: 'Deelname',
                     type: ProductType.Ticket,
                     enableCustomer: true,
-                    customerSettings: ProductCustomerSettings.create({
+                    customerSettings: CustomerSettings.create({
                         email: CustomerFieldRequirement.Required,
                         recordCategory: RecordCategory.create({
                             name: TranslatedString.create('Extra vragen'),
