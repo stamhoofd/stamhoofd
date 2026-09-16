@@ -44,7 +44,7 @@ yarn clear && yarn clear-vite-cache && yarn && yarn build:shared
 
 ## Commands
 
-From repo root: `yarn lint` · `yarn typecheck`. **`yarn stam test` is the one go-to way to run unit tests** — it runs `build:shared` first and only starts an isolated MySQL when a selected package needs one. Prefer it over your own commands; it does all required setup and teardown.
+From repo root: `yarn stam check lint` · `yarn stam check typecheck`. **`yarn stam test` is the one go-to way to run unit tests** — it runs `build:shared` first and only starts an isolated MySQL when a selected package needs one. Prefer it over your own commands; it does all required setup and teardown.
 
 ```bash
 yarn stam test unit                 # every unit package (excludes Playwright)
@@ -79,13 +79,13 @@ Prefer modern exports and imports in package.json.
 
 ```ts
 // ✅ Same package, higher in the folder tree
-import { Foo } from '#components/Foo.js';
+import { Foo } from "#components/Foo.js";
 
 // ✅ Other package (skip 'src/', no extension for .ts)
-import { Bar } from '@stamhoofd/package-name/components/Bar';
+import { Bar } from "@stamhoofd/package-name/components/Bar";
 
 // ✅ Vue files always need the extension
-import MyView from '@stamhoofd/package-name/views/MyView.vue';
+import MyView from "@stamhoofd/package-name/views/MyView.vue";
 
 // 🚫 Never create, extend, or reference barrel files (legacy pattern)
 ```

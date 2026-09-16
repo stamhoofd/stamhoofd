@@ -15,10 +15,7 @@
         "package.json"
     ],
     "scripts": {
-        "build": "tsc --build tsconfig.build.json",
-        "lint": "eslint .",
-        "test": "vitest",
-        "test:coverage": "vitest --coverage"
+        "build": "tsc --build tsconfig.build.json"
     },
     "dependencies": {
         "@stamhoofd/types": "2.152.0",
