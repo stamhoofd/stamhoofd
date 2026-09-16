@@ -5,8 +5,7 @@ import { GroupPrivateSettings, Group as GroupStruct, GroupType, OrganizationRegi
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import type { Organization } from '@stamhoofd/models';
-import { Event, Group, OrganizationRegistrationPeriod, Platform, Registration, RegistrationInvitation, RegistrationPeriod } from '@stamhoofd/models';
+import { Event, Group, Organization, OrganizationRegistrationPeriod, Platform, Registration, RegistrationInvitation, RegistrationPeriod } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
@@ -527,6 +526,10 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                         statusCode: 400,
                     });
                 }
+
+                if (model.type === GroupType.EventRegistration) {
+                    await this.getOrganizationPeriodOrThrow(model.organizationId, period, { isPatchingEvent });
+                }
             }
 
             if (!isPatchingEvent) {
@@ -667,6 +670,38 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         return model;
     }
 
+    /**
+     * A group is only reachable through the OrganizationRegistrationPeriod of its own period: without
+     * one, its settings can no longer be opened (see useFetchOrganizationPeriodForGroup). Only event
+     * groups need this: every other type is created and moved through an organization period that
+     * exists by construction, since that period is what the request addresses.
+     */
+    static async getOrganizationPeriodOrThrow(organizationId: string, period: RegistrationPeriod, options?: { isPatchingEvent?: boolean }): Promise<OrganizationRegistrationPeriod> {
+        const organizationPeriod = await OrganizationRegistrationPeriod.select()
+            .where('organizationId', organizationId)
+            .where('periodId', period.id)
+            .first(false);
+
+        if (!organizationPeriod) {
+            const organization = await Organization.getByID(organizationId);
+
+            throw new SimpleError({
+                code: 'missing_organization_period',
+                message: `Organization ${organizationId} has not started period ${period.id}`,
+                human: $t('{organization} is nog niet gestart met het werkjaar {period}, daarom kan je hier geen inschrijvingen in aanmaken. Start eerst dat werkjaar, of kies een datum die in een werkjaar valt dat al gestart is.', {
+                    organization: organization?.name ?? $t('Deze #groep'),
+                    period: period.getStructure().nameShort,
+                }),
+                // Only set when patching an event: the period of an event group follows from the
+                // start date of the event, which EditEventView renders this error under
+                field: options?.isPatchingEvent ? 'startDate' : undefined,
+                statusCode: 400,
+            });
+        }
+
+        return organizationPeriod;
+    }
+
     static async createGroup(struct: GroupStruct, organizationId: string, period: RegistrationPeriod, options?: { allowedIds?: string[] }): Promise<Group> {
         const allowedIds = options?.allowedIds ?? [];
 
@@ -694,6 +729,10 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 message: 'Period has different organization id',
                 statusCode: 400,
             });
+        }
+
+        if (struct.type === GroupType.EventRegistration) {
+            await this.getOrganizationPeriodOrThrow(organizationId, period);
         }
 
         const user = Context.auth.user;

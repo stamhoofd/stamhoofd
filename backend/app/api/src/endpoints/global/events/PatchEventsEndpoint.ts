@@ -2,7 +2,7 @@ import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@
 import { PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { Event, Group, OrganizationRegistrationPeriod, Platform, RegistrationPeriod, Webshop } from '@stamhoofd/models';
+import { Event, Group, Platform, RegistrationPeriod, Webshop } from '@stamhoofd/models';
 import { AuditLogSource, Event as EventStruct, Group as GroupStruct, GroupType, NamedObject, OrganizationEventType, PermissionLevel, PlatformEventType } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -34,17 +34,27 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         return [false];
     }
 
-    async putEventGroup(event: Event, putGroup: GroupStruct) {
+    /**
+     * The group of an event lives in the period of the start date of the event, so it can only exist
+     * when such a period exists.
+     */
+    static async getEventGroupPeriodOrThrow(event: Event): Promise<RegistrationPeriod> {
         const period = await RegistrationPeriod.getByDate(event.startDate, event.organizationId);
 
         if (!period) {
             throw new SimpleError({
                 code: 'invalid_period',
                 message: 'No period found for this start date: ' + Formatter.dateIso(event.startDate),
-                human: Context.i18n.$t('%8F'),
+                human: $t('Er bestaat nog geen werkjaar dat de startdatum van deze activiteit bevat. Je kan hier pas inschrijvingen voor verzamelen als dat werkjaar is aangemaakt. Kies anders een andere startdatum.'),
                 field: 'startDate',
             });
         }
+
+        return period;
+    }
+
+    async putEventGroup(event: Event, putGroup: GroupStruct) {
+        const period = await PatchEventsEndpoint.getEventGroupPeriodOrThrow(event);
 
         let group = await Group.getByID(putGroup.id);
         const groupOrganizationId = group?.organizationId ?? putGroup.organizationId;
@@ -229,7 +239,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     patch.group.id = event.groupId;
                     patch.group.type = GroupType.EventRegistration;
 
-                    const period = await RegistrationPeriod.getByDate(event.startDate, event.organizationId);
+                    const period = await PatchEventsEndpoint.getEventGroupPeriodOrThrow(event);
                     group = await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.group, period, { isPatchingEvent: true });
                 } else {
                     if (event.groupId === patch.group.id) {
@@ -246,23 +256,22 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     }
                 }
             } else {
-                if (patch.startDate || patch.endDate) {
+                const groupId = event.groupId;
+
+                if ((patch.startDate || patch.endDate) && groupId) {
                     // Correct period id if needed
-                    const period = await RegistrationPeriod.getByDate(event.startDate, event.organizationId);
-                    if (event.groupId && period) {
-                        await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
-                            if (event.groupId) {
-                                group = await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(
-                                    GroupStruct.patch({
-                                        id: event.groupId,
-                                        periodId: period.id,
-                                    }),
-                                    period,
-                                    { isPatchingEvent: true },
-                                );
-                            }
-                        });
-                    }
+                    const period = await PatchEventsEndpoint.getEventGroupPeriodOrThrow(event);
+
+                    await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
+                        group = await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(
+                            GroupStruct.patch({
+                                id: groupId,
+                                periodId: period.id,
+                            }),
+                            period,
+                            { isPatchingEvent: true },
+                        );
+                    });
                 }
             }
 
@@ -555,13 +564,8 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             });
         }
 
-        const organizationPeriod = await OrganizationRegistrationPeriod.select().where('organizationId', existingGroup.organizationId).where('periodId', period.id).first(true);
-        if (!organizationPeriod) {
-            throw new SimpleError({
-                code: 'not_found',
-                message: 'No organization period found for group',
-            });
-        }
+        const organizationPeriod = await PatchOrganizationRegistrationPeriodsEndpoint.getOrganizationPeriodOrThrow(existingGroup.organizationId, period);
+
         event.groupId = existingGroup.id;
         await event.save();
 
