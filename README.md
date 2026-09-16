@@ -42,27 +42,27 @@ You can read the documentation of the most important building blocks of Stamhoof
 - Git autostash on rebase: `git config --global rebase.autoStash true` (this allows you to pull in changes or rebase when you have local changes pending)
 - Git prune on fetch by default: `git config --global fetch.prune true`
 
-#### Yarn and Node
+#### Node and pnpm
 
 - Install a local Node version manager: [fnm](https://github.com/Schniz/fnm) or [nvm](https://github.com/nvm-sh/nvm).
-- Clone the repository and cd to the repository location. Run `source .development/install-node.sh` to install and use the Node version pinned in `.nvmrc`. The script uses fnm when available, otherwise it uses nvm. With fnm, it also installs Yarn globally. With nvm, it carries over global packages such as Yarn.
-- Afterwards install yarn 2: `npm install --global yarn` (we are planning to move to pnpm soon) - this will globally install yarn. Every time node is updated you'll need to reinstall yarn (which isn't a huge issue as it will keep the installation directory clean).
-- Set the yarn version used to the one used by the project by running `yarn policies set-version 1.22.19`. We currently use version version 1.22.19 of yarn because of a bug in workspaces after that version (https://github.com/yarnpkg/yarn/issues/7807).
-- Run `yarn install`
+- Clone the repository and cd to the repository location. Run `source .development/install-node.sh` to install and use the Node version pinned in `.nvmrc`. The script uses fnm when available, otherwise it uses nvm, and prepares pnpm through Corepack.
+- The repository pins its pnpm version in the root `package.json`. If pnpm needs repair without reinstalling Node, run `corepack enable` followed by `corepack install`.
+- Run `pnpm install`, followed by `pnpm run build:shared`.
 
 #### Local development CLI
 
 Use the Stamhoofd CLI for local setup and development:
 
 ```bash
-yarn install
-yarn stam setup
-yarn stam dev all
+pnpm install
+pnpm run build:shared
+pnpm stam setup
+pnpm stam dev all
 ```
 
-Run `yarn stam setup shell` to install the CLI alias `stam` in your .zshrc or .bashrc (that removes the need to type `yarn` and the need to always run commands in the project root).
+Run `pnpm stam setup shell` to install the CLI alias `stam` in your .zshrc or .bashrc (that removes the need to type `pnpm` and the need to always run commands in the project root).
 
-`yarn stam setup` checks required tools, DNS, and local HTTPS certificate trust. `yarn stam dev all` starts the shared Docker services and app processes. Run `yarn stam status` to see local URLs, credentials, services, and active instances.
+`pnpm stam setup` checks required tools, DNS, and local HTTPS certificate trust. After installing the alias, `stam setup` performs the same checks and `stam setup pnpm` repairs the pinned pnpm runtime. `pnpm stam dev all` starts the shared Docker services and app processes. Run `pnpm stam status` to see local URLs, credentials, services, and active instances.
 
 For all local development commands, environments, services, SSO, tests, and troubleshooting, see [`shared/cli/README.md`](shared/cli/README.md).
 
@@ -80,11 +80,11 @@ These dependencies are optional, and mostly used for internal development.
 Use `--env <name>` with CLI commands to run another local environment:
 
 ```bash
-yarn stam dev all --env keeo
-yarn stam config explain --env ravot
+pnpm stam dev all --env keeo
+pnpm stam config explain --env ravot
 ```
 
-Run `yarn stam config explain` or `yarn stam config print` to inspect the resolved domains, ports, and backend environment values.
+Run `pnpm stam config explain` or `pnpm stam config print` to inspect the resolved domains, ports, and backend environment values.
 
 #### VSCode (optional)
 
@@ -95,16 +95,16 @@ Run `yarn stam config explain` or `yarn stam config print` to inspect the resolv
 To run everything locally, use:
 
 ```bash
-yarn stam dev all
+pnpm stam dev all
 ```
 
-The CLI prints the dashboard and API URLs after startup. You should not get a certificate error after `yarn stam setup` has completed successfully. Never manually trust an individual certificate; use `yarn stam setup cert` if certificate trust needs to be repaired.
+The CLI prints the dashboard and API URLs after startup. You should not get a certificate error after `pnpm stam setup` has completed successfully. Never manually trust an individual certificate; use `pnpm stam setup cert` if certificate trust needs to be repaired.
 
 Feel free to contact us via hello@stamhoofd.be if you have questions about development and how to set it up.
 
 #### Firefox
 
-Firefox does not always use the root SSL certificates of your system. First run `yarn stam setup cert`. If Firefox still shows certificate errors, open the Keychain app on MacOS and search for 'Caddy' in your login keychain.
+Firefox does not always use the root SSL certificates of your system. First run `pnpm stam setup cert`. If Firefox still shows certificate errors, open the Keychain app on MacOS and search for 'Caddy' in your login keychain.
 
 ![Caddy root certificate](.development/images/caddy-root.png)
 
@@ -114,59 +114,48 @@ In Firefox, go to Settings > Privacy and security. Scroll down to certificates. 
 
 ### E-mails
 
-Stamhoofd uses MailDev to test emails in development. It is started by `yarn stam dev all` and `yarn stam services up`. Run `yarn stam status` to see the MailDev URL and credentials.
+Stamhoofd uses MailDev to test emails in development. It is started by `pnpm stam dev all` and `pnpm stam services up`. Run `pnpm stam status` to see the MailDev URL and credentials.
 
 ### Testing (unit tests)
 
-`yarn stam test` is the go-to way to run the Vitest unit suites. It runs `build:shared` first and only starts an isolated MySQL when a selected package needs one — you never have to provision databases yourself.
+`pnpm stam test` is the go-to way to run the Vitest unit suites. It runs `build:shared` first and only starts an isolated MySQL when a selected package needs one — you never have to provision databases yourself.
 
 ```bash
-yarn stam test unit                 # every unit package (excludes Playwright)
-yarn stam test api                  # one package (api, models, sql, structures, renderer, redirecter, queues, utility, sgv, object-differ, eslint)
-yarn stam test unit SomeFile        # filter by filename across all packages
-yarn stam test structures bundle-discounts        # package + filename filter
-yarn stam test structures -t 'partial test name'  # package + test-name filter (passed to vitest -t)
-yarn stam test api --skip-build     # skip the automatic build:shared step
+pnpm stam test unit                 # every unit package (excludes Playwright)
+pnpm stam test api                  # one package (api, models, sql, structures, renderer, redirecter, queues, utility, sgv, object-differ, eslint)
+pnpm stam test unit SomeFile        # filter by filename across all packages
+pnpm stam test structures bundle-discounts        # package + filename filter
+pnpm stam test structures -t 'partial test name'  # package + test-name filter (passed to vitest -t)
+pnpm stam test api --skip-build     # skip the automatic build:shared step
 ```
 
-For browser tests, use `yarn stam test e2e` (Playwright) or `yarn stam test all` for both.
+For browser tests, use `pnpm stam test e2e` (Playwright) or `pnpm stam test all` for both.
 
 ### Backend
 
-Use these commands in `/backend`
+Use these commands in `backend/app/api`:
 
 <dl>
-  <dt><code>yarn build</code></dt>
+  <dt><code>pnpm run build</code></dt>
   <dd>Build the backend into the /dist folder, using TypeScript cache if possible.</dd>
-  <dt><code>yarn build:full</code></dt>
+  <dt><code>pnpm run build:full</code></dt>
   <dd>Build the backend into the /dist folder, clearing cache before building</dd>
-  <dt><code>yarn start</code></dt>
+  <dt><code>pnpm run start</code></dt>
   <dd>Run the backend server locally. This will use the <code>/backend/.env</code> file for configuration. You can use .env.template to create your own .env file.</dd>
-  <dt><code>STAMHOOFD_ENV=stamhoofd/keeo/ravot/... yarn migrations</code></dt>
+  <dt><code>STAMHOOFD_ENV=stamhoofd/keeo/ravot/... pnpm run migrations</code></dt>
   <dd>Run all the migrations. If you don't have the tables in your database, this will also create all the tables. You'll need to create the database yourself (choose your connection details and name in .env)</dd>
 
-  <dt><code>yarn test</code></dt>
-  <dd>Run the tests on a separate test database. You'll need to setup .env.test (same as .env, but please modify it first and make sure <code>NODE_ENV=test</code> is in it)</dd>
+  <dt><code>pnpm stam test api</code> (from the repository root)</dt>
+  <dd>Run the API tests with the repository-managed isolated test database.</dd>
 </dl>
 
 ### Frontend
 
-You can use the following commands in both `/frontend/app/registration` and `/frontend/app/dashboard` (the current frontend apps)
-
-<dl>
-  <dt><code>yarn build</code></dt>
-  <dd>Build the whole app into /dist, without optimizations (for development)</dd>
-
-  <dt><code>yarn build:production</code></dt>
-  <dd>Build the whole app into /dist, with optimizations</dd>
-
-  <dt><code>yarn dev</code></dt>
-  <dd>Serve the frontend locally with HMR (use this for development in combination with <code>yarn start</code> in the backend)</dd>
-</dl>
+Run `pnpm stam dev frontend` from the repository root to start the frontend applications. Dashboard and registration are source packages consumed by `frontend/app/web-app`; they are not built or served independently. The web app and webshop packages own the standalone Vite development and build commands.
 
 ### Shared dependencies
 
-All shared dependencies are located in /shared. These packages are used by the backend and the frontend. If you make changes here, you must rebuild the package with `yarn build:shared`. You can rebuild them all at once by running the same command in the project root.
+All shared dependencies are located in /shared. These packages are used by the backend and the frontend. If you make changes here, you must rebuild the package with `pnpm run build:shared`. You can rebuild them all at once by running the same command in the project root.
 
 # Support and information
 
@@ -180,13 +169,13 @@ More info on our website:
 
 _Translations are still WIP, not all strings are ported to the translations files yet. Feel free to contribute here!_
 
-Translations are stored inside the package shared/locales. They need to get build (`cd shared/locales && yarn build`), because we use one single .json file to store each locale (this makes it easier to use developer and translation tools). Before we use those in the frontend, we need to filter out unused translations to save some bandwidth, that is what happens in the build step. Translations are divided in 4 namespaces: shared, dashboard, registration and webshop. The shared namespace is always loaded. For the dashboard frontend, only the dashboard namespace is loaded etc. After the build step, we have 4 JSON files (one for each namespace) for each locale. The frontend and backend knows which file to load.
+Translations are stored inside the package shared/locales. They need to get built (`pnpm --dir shared/locales run build`), because we use one single .json file to store each locale (this makes it easier to use developer and translation tools). Before we use those in the frontend, we need to filter out unused translations to save some bandwidth, that is what happens in the build step. Translations are divided in 4 namespaces: shared, dashboard, registration and webshop. The shared namespace is always loaded. For the dashboard frontend, only the dashboard namespace is loaded etc. After the build step, we have 4 JSON files (one for each namespace) for each locale. The frontend and backend knows which file to load.
 
 The possible language / country combinations are not restricted. E.g. en-NL is still a valid locale, for users from the Netherlands who want to use the English version.
 
 Translations are resolved in the following order: en-NL > en. So translations from a specific language + country combination are used before the translation for a given language. Try to define most translations only in the language.json file, only country specific translations should be placed in the full locale files.
 
-The keys of the translations are uuids. A new translation can be added by writing $t('new translation value') in a .vue or .ts file. Running `yarn translate` from the root will add the translation to the shared/locales .json files (of the main locales) and will replace the key with a new uuid. The main locales are specified in the `.env` folder of the i18n-uuid package in the .development directory. The .env file in the i18n-uuid directory should contain all required variables (see `.env.template`):
+The keys of the translations are uuids. A new translation can be added by writing $t('new translation value') in a .vue or .ts file. Running `pnpm run translate` from the root will add the translation to the shared/locales .json files (of the main locales) and will replace the key with a new uuid. The main locales are specified in the `.env` folder of the i18n-uuid package in the .development directory. The .env file in the i18n-uuid directory should contain all required variables (see `.env.template`):
 
 - `I18NUUID_DEFAULT_LOCALE`: default locale (e.g. nl)
 
@@ -194,7 +183,7 @@ The keys of the translations are uuids. A new translation can be added by writin
 
 When self hosting the software, we recommend setting correct Content-Security-Policy header(s) to avoid XSS and other type of attacks when untrusted users are allowed to edit WYSIWYG content. By default Stamhoofd already adds CSP meta tags in HTML, but these might not cover all attacks.
 
-For frontend app content (index.html), you'll need to set a nonce. Example for Caddy (JSON) config. 
+For frontend app content (index.html), you'll need to set a nonce. Example for Caddy (JSON) config.
 
 ```
 const cspNoncePlaceholder = 'STAMHOOFD_CSP_NONCE';
@@ -267,7 +256,8 @@ const cspNonceSubRoute = {
     ],
 };
 ```
-As an extra protection you can add 2 Content-Security-Policy headers if you are not using the (trusted) code injection feature on webshops. 
+
+As an extra protection you can add 2 Content-Security-Policy headers if you are not using the (trusted) code injection feature on webshops.
 
 ```
 const cspNoExternalScripts = {
