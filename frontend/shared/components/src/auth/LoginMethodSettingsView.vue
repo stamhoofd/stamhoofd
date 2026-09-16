@@ -495,7 +495,7 @@ const defaultRedirectUri = computed(() => {
 
 const isDevelopment = computed(() => STAMHOOFD.environment === 'development');
 const localSsoCommand = computed(
-    () => `yarn stam sso start "${defaultRedirectUri.value}"`,
+    () => `pnpm stam sso start "${defaultRedirectUri.value}"`,
 );
 
 errors.validator.addValidation('openidConfiguration', () => {
