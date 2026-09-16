@@ -242,13 +242,39 @@ export class CheckoutStepsManager {
      */
     async handleCartError(error: SimpleError | SimpleErrors, navigate: NavigationActions) {
         await this.$webshopManager.reload();
+        const webshop = this.$webshopManager.webshop;
 
-        if (!this.$webshopManager.webshop.shouldEnableCart) {
+        if (this.$checkoutManager.useRootNavigation) {
+            // Back to the cart, or to the webshop itself when there is no cart
+            if (!webshop.shouldEnableCart || !(await this.popToUrl(navigate, 'cart'))) {
+                await navigate.navigationController!.popToRoot({ force: true });
+            }
+        } else if (!webshop.shouldEnableCart) {
             await navigate.dismiss({ force: true });
         } else {
             await navigate.navigationController!.popToRoot({ force: true });
         }
         Toast.fromError(error).show();
+    }
+
+    /**
+     * Pop back to the component with the given url on the current navigation controller. Returns false when it isn't on the stack.
+     */
+    private async popToUrl(navigate: NavigationActions, url: string): Promise<boolean> {
+        const navigationController = navigate.navigationController;
+        if (!navigationController) {
+            return false;
+        }
+        const components = navigationController.components;
+        const index = components.findIndex(c => c.provide.reactive_navigation_url?.url === url);
+        if (index < 0) {
+            return false;
+        }
+        const count = components.length - 1 - index;
+        if (count > 0) {
+            await navigationController.pop({ count, force: true });
+        }
+        return true;
     }
 
     async goNext(step: string | undefined, navigate: NavigationActions) {

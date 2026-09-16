@@ -95,7 +95,21 @@ async function goToOrder(id: string, args: NavigationActions) {
         console.error(e);
     });
 
-    if (!popup) {
+    if (checkoutManager.useRootNavigation) {
+        // The steps are on the navigation controller of the webshop: go back to the shop and show the order on top
+        await args.navigationController?.popToRoot({ force: true });
+        await args.present({
+            components: [
+                AsyncComponent(() => import('../orders/OrderView.vue'), { orderId: id, success: true }, {
+                    provide: {
+                        reactive_navigation_url: new ReactiveUrl({
+                            url: 'order/' + id,
+                        }),
+                    },
+                }),
+            ],
+        });
+    } else if (!popup) {
         // We are not in a popup: on mobile
         // So replace with a force instead of dimissing
         await args.present({
