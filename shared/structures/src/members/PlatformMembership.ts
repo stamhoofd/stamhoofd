@@ -1,4 +1,4 @@
-import { AutoEncoder, StringDecoder, field } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
 import { MemberPlatformMembership } from './MemberPlatformMembership.js';
 import { BalanceItem, BalanceItemWithPayments } from '../BalanceItem.js';
 
@@ -11,6 +11,9 @@ export class PlatformMembershipMemberDetails extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true })
     memberNumber: string | null;
+
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    birthDay: Date | null = null;
 
     get name() {
         if (!this.firstName) {

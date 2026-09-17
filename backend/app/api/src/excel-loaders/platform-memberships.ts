@@ -211,6 +211,19 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
             }),
         },
         {
+            id: 'member.birthDay',
+            name: $t(`%17w`),
+            width: 20,
+            getValue: (membership: PlatformMembership) => ({
+                value: membership.member.birthDay,
+                style: {
+                    numberFormat: {
+                        id: XlsxBuiltInNumberFormat.DateSlash,
+                    },
+                },
+            }),
+        },
+        {
             id: 'member.firstName',
             name: $t(`%1O8`),
             width: 20,

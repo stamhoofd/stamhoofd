@@ -107,6 +107,12 @@ export function getSelectableColumns() {
             category: memberCategory,
             enabled: true,
         }),
+        new SelectableColumn({
+            id: 'member.birthDay',
+            name: $t(`%17w`),
+            category: memberCategory,
+            enabled: true,
+        }),
         // organization
         new SelectableColumn({
             id: 'organization.name',

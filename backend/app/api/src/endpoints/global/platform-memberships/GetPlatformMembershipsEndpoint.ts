@@ -146,7 +146,7 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
             results.push(PlatformMembership.create({
                 ...model,
                 balanceItem: balanceItem,
-                member: PlatformMembershipMemberDetails.create(member),
+                member: member.getPlatformMembershipDetails(),
                 organization: PlatformMembershipOrganizationDetails.create(organization),
             }));
         }

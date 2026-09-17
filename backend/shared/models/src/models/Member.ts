@@ -1,6 +1,6 @@
 import { column, ManyToManyRelation, ManyToOneRelation, OneToManyRelation } from '@simonbackx/simple-database';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
-import { MemberDetails, NationalRegisterNumberOptOut, RegistrationWithTinyMember, TinyMember } from '@stamhoofd/structures';
+import { MemberDetails, NationalRegisterNumberOptOut, PlatformMembershipMemberDetails, RegistrationWithTinyMember, TinyMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import basex from 'base-x';
 import crypto from 'crypto';
@@ -488,6 +488,13 @@ export class Member extends QueryableModel {
      */
     static async getMembersWithRegistrationForUser(user: User): Promise<MemberWithUsersRegistrationsAndGroups[]> {
         return this.getBlobByIds(...(await this.getMemberIdsForUser(user)));
+    }
+
+    getPlatformMembershipDetails() {
+        return PlatformMembershipMemberDetails.create({
+            ...this,
+            birthDay: this.details.birthDay,
+        });
     }
 
     static getRegistrationWithTinyMemberStructure(registration: RegistrationWithMember & { group: Group }): RegistrationWithTinyMember {
