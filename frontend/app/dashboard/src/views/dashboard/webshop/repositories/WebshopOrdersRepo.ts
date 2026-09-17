@@ -16,6 +16,7 @@ import type { ProgressListener, SyncProgress } from './syncProgress';
 import { countSyncItems, getNewItemsFilter, SharedSync, SINGLE_FETCH_TIMEOUT_MS } from './syncProgress';
 import { SyncState } from './SyncState';
 import type { WebshopTicketsRepo } from './WebshopTicketsRepo';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
 
 class CompilerFilterError extends Error {}
 class CallbackError extends Error {}
@@ -87,6 +88,12 @@ export class WebshopOrdersRepo {
 
         let stored = Promise.resolve();
 
+        const toast = new Toast($t('Bestellingen ophalen...'), 'spinner').setHide(null);
+        let showToast = false;
+        const timer = setTimeout(() => {
+            if (showToast) toast.show();
+        }, 1000);
+
         const onResultsReceived = async (orders: PrivateOrder[]) => {
             if (isFetchAll && !hadSuccessfulFetch) {
                 hadSuccessfulFetch = true;
@@ -104,7 +111,12 @@ export class WebshopOrdersRepo {
             }
         };
 
-        await this.apiClient.getAllUpdated({ isFetchAll, onResultsReceived, onProgress });
+        await this.apiClient.getAllUpdated({ isFetchAll, onResultsReceived, onProgress(progress) {
+            if (!showToast && progress.count > 100) showToast = true;
+            toast.setProgress(progress.total !== 0 ? (progress.count / progress.total) : 0);
+
+            onProgress(progress);
+        } });
 
         const deletedOrders: PrivateOrder[] = [];
         const fetchedOrders: PrivateOrder[] = [];
@@ -117,6 +129,9 @@ export class WebshopOrdersRepo {
 
             fetchedOrders.push(order);
         }
+
+        toast.setProgress(1);
+        toast.message = $t('Bestellingen verwerken...');
 
         // wait until all orders have been stored
         await stored;
@@ -132,6 +147,15 @@ export class WebshopOrdersRepo {
         if (deletedOrders.length > 0) {
             await this.eventBus.sendEvent('deleted', deletedOrders);
         }
+
+        clearTimeout(timer);
+
+        toast.message = $t('Bestellingen verwerkt!');
+        toast.setIcon('success green');
+
+        setTimeout(() => {
+            toast.hide();
+        }, 1000);
 
         await this.apiClient.state.setCompleted();
     }
@@ -606,7 +630,7 @@ class WebshopOrdersApiClient {
             fetch: async (data: LimitedFilteredRequest) => {
                 const response = await this.context.authenticatedServer.request({
                     method: 'GET',
-                    path: `/webshop/orders`,
+                    path: '/webshop/orders',
                     decoder: new PaginatedResponseDecoder(new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
                     query: data,
                     shouldRetry: false,
@@ -618,7 +642,7 @@ class WebshopOrdersApiClient {
             fetchCount: async (data: CountFilteredRequest): Promise<number> => {
                 const response = await this.context.authenticatedServer.request({
                     method: 'GET',
-                    path: `/webshop/orders/count`,
+                    path: '/webshop/orders/count',
                     decoder: CountResponse as Decoder<CountResponse>,
                     query: data,
                     shouldRetry: false,
@@ -646,7 +670,7 @@ class WebshopOrdersApiClient {
     async getById(id: string): Promise<PrivateOrder | undefined> {
         const response = await this.context.authenticatedServer.request({
             method: 'GET',
-            path: `/webshop/orders`,
+            path: '/webshop/orders',
             decoder: new PaginatedResponseDecoder(new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
             query: new LimitedFilteredRequest({
                 filter: { webshopId: this.webshopId, id },
@@ -676,6 +700,4 @@ class WebshopOrdersApiClient {
     async clearLastFetchedOrder() {
         await this.state.clear();
     }
-
-
 }

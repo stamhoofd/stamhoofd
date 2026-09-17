@@ -13,6 +13,7 @@ import type { WebshopSettingsStore } from './WebshopSettingsStore';
 import type { ProgressListener, SyncProgress } from './syncProgress';
 import { countSyncItems, getNewItemsFilter, SharedSync, SINGLE_FETCH_TIMEOUT_MS } from './syncProgress';
 import { SyncState } from './SyncState';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
 
 /**
  * Responsible for webshop ticket operations (including patches).
@@ -69,6 +70,12 @@ export class WebshopTicketsRepo {
 
         let stored = Promise.resolve();
 
+        const toast = new Toast($t('Tickets ophalen...'), 'spinner').setHide(null);
+        let showToast = false;
+        const timer = setTimeout(() => {
+            if (showToast) toast.show();
+        }, 1500);
+
         const onResultsReceived = async (tickets: TicketPrivate[]): Promise<void> => {
             if (tickets.length) {
                 const lastOfPage = tickets[tickets.length - 1];
@@ -85,12 +92,30 @@ export class WebshopTicketsRepo {
             }
         };
 
-        await this.apiClient.getAllUpdated({ isFetchAll: false, onResultsReceived, onProgress });
+        await this.apiClient.getAllUpdated({ isFetchAll: false, onResultsReceived, onProgress(progress) {
+            if (!showToast && progress.count > 100) showToast = true;
+            toast.setProgress(progress.total !== 0 ? (progress.count / progress.total) : 0);
+
+            onProgress(progress);
+        } });
+
+        toast.setProgress(1);
+        toast.message = $t('Tickets verwerken...');
+
         await stored;
 
         if (lastTicket) {
             await this.apiClient.state.setCursor(new Date(lastTicket.updatedAt), { isComplete: true });
         }
+
+        clearTimeout(timer);
+
+        toast.message = $t('Tickets verwerkt!');
+        toast.setIcon('success green');
+
+        setTimeout(() => {
+            toast.hide();
+        }, 1000);
 
         await this.apiClient.state.setCompleted();
     }
@@ -613,7 +638,7 @@ class WebshopTicketsApiClient {
             fetch: async (data: LimitedFilteredRequest) => {
                 const response = await this.context.authenticatedServer.request({
                     method: 'GET',
-                    path: `/webshop/tickets/private`,
+                    path: '/webshop/tickets/private',
                     decoder: new PaginatedResponseDecoder(new ArrayDecoder(TicketPrivate as Decoder<TicketPrivate>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
                     query: data,
                     shouldRetry: false,
@@ -625,7 +650,7 @@ class WebshopTicketsApiClient {
             fetchCount: async (data: CountFilteredRequest): Promise<number> => {
                 const response = await this.context.authenticatedServer.request({
                     method: 'GET',
-                    path: `/webshop/tickets/private/count`,
+                    path: '/webshop/tickets/private/count',
                     decoder: CountResponse as Decoder<CountResponse>,
                     query: data,
                     shouldRetry: false,
@@ -653,7 +678,7 @@ class WebshopTicketsApiClient {
     async getBySecret(secret: string): Promise<TicketPrivate | undefined> {
         const response = await this.context.authenticatedServer.request({
             method: 'GET',
-            path: `/webshop/tickets/private`,
+            path: '/webshop/tickets/private',
             decoder: new PaginatedResponseDecoder(new ArrayDecoder(TicketPrivate as Decoder<TicketPrivate>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
             query: new LimitedFilteredRequest({
                 filter: { webshopId: this.webshopId, secret },
@@ -679,6 +704,4 @@ class WebshopTicketsApiClient {
 
         return response.data;
     }
-
-
 }
