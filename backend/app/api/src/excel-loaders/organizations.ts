@@ -69,6 +69,14 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Object, Object
             matchId: 'address',
             getAddress: object => object.address,
         }),
+        {
+            id: 'website',
+            name: $t('Website'),
+            width: 50,
+            getValue: (object: Object) => ({
+                value: object.website,
+            }),
+        },
         // Dynamic records
         XlsxTransformerColumnHelper.createRecordAnswersColumns({
             matchId: 'recordAnswers',
