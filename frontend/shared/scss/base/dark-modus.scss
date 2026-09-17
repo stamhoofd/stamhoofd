@@ -16,7 +16,7 @@ body.light, :host.light {
 }
 
 @media (prefers-color-scheme: dark) {
-    body:not(.light), :host:not(.light), :root:not(:has(body.light)) {
+    body:not(.light), :host:not(.light), :root:not(:has(body.light)), :root:not(:has(:host.light)) {
         @include dark-modus;
 
         .st-color-directive {
