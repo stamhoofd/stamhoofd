@@ -21,6 +21,7 @@ const globalSharedPackages = [
     'shared/cli',
     'shared/excel-writer',
     'shared/structures',
+    'shared/sgv',
     'shared/object-differ',
     'shared/locales',
 ];
