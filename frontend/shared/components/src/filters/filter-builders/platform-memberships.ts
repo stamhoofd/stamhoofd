@@ -3,7 +3,6 @@ import { RelationFilterBuilder } from '#filters/RelationUIFilter.ts';
 import { useRegistrationPeriodsRelationFetcher } from '#filters/relation-fetchers/useRegistrationPeriodsRelationFetcher.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { FilterWrapperMarker } from '@stamhoofd/structures';
-import { ref } from 'vue';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
@@ -17,7 +16,7 @@ export function useGetPlatformMembershipsUIFilterBuilders() {
     const organizationFilterBuilders = useGetOrganizationUIFilterBuilders({ onlyBaseFilters: true });
     const registrationPeriodsRelationFetcher = useRegistrationPeriodsRelationFetcher();
 
-    const getWebshopUIFilterBuilders = (): UIFilterBuilders => {
+    const getPlatformMembershipsUIFilterBuilders = (): UIFilterBuilders => {
         const builders: UIFilterBuilders = [
         ];
 
@@ -110,5 +109,5 @@ export function useGetPlatformMembershipsUIFilterBuilders() {
         return builders;
     };
 
-    return { getWebshopUIFilterBuilders };
+    return { getPlatformMembershipsUIFilterBuilders };
 }
