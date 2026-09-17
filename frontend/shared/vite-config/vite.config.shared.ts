@@ -1,13 +1,14 @@
+import iconConfig from '@stamhoofd/assets/images/icons/icons.font.js';
 import type { FrontendEnvironment } from '@stamhoofd/types/Environment';
 import vue from '@vitejs/plugin-vue';
+import { playwright } from '@vitest/browser-playwright';
 import fs from 'fs';
 import path, { resolve } from 'path';
-import viteSvgToWebfont from 'vite-svg-2-webfont';
-import { playwright } from '@vitest/browser-playwright';
 import postcssDiscardDulicates from 'postcss-discard-duplicates';
+import viteSvgToWebfont from 'vite-svg-2-webfont';
 import type { ViteUserConfig } from 'vitest/config';
-import iconConfig from '@stamhoofd/assets/images/icons/icons.font.js';
 import svgNamespacePlugin from './svgNamespacePlugin.ts';
+import { getVendorChunkName } from './vendorChunkName.ts';
 
 // https://vitejs.dev/config/
 export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calculator'; port: number; clientFiles?: string[]; frontendDir: string }): Promise<ViteUserConfig> {
@@ -133,14 +134,7 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
                     rollupOptions: {
                         treeshake: true,
                         output: {
-                            // One chunk per npm package > ~3 KB. Cache invalidation
-                            // becomes per-library instead of per-app-revision.
-                            manualChunks(id) {
-                                if (id.includes('node_modules')) {
-                                    const pkg = id.match(/node_modules\/([^/]+)/)?.[1];
-                                    if (pkg) return `vendor-${pkg}`;
-                                }
-                            },
+                            manualChunks: getVendorChunkName,
                         },
                     },
                     cssCodeSplit: false,
@@ -162,14 +156,7 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
                             outDir: isPlaywrightBuild ? 'dist-playwright' : undefined,
                             rollupOptions: {
                                 output: {
-                                    // One chunk per npm package > ~3 KB. Cache invalidation
-                                    // becomes per-library instead of per-app-revision.
-                                    manualChunks(id) {
-                                        if (id.includes('node_modules')) {
-                                            const pkg = id.match(/node_modules\/([^/]+)/)?.[1];
-                                            if (pkg) return `vendor-${pkg}`;
-                                        }
-                                    },
+                                    manualChunks: getVendorChunkName,
                                 },
                             },
                         }),
