@@ -7,7 +7,6 @@
 
 <script lang="ts" setup>
 import type { PushOptions } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, useManualPresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import CenteredMessageView from '@stamhoofd/components/overlays/CenteredMessageView.vue';
@@ -87,9 +86,9 @@ watch(modalStack, (modalStack) => {
 @use "@stamhoofd/scss/main";
 @use "@simonbackx/vue-app-navigation/dist/main.css" as VueAppNavigation;
 @use "@stamhoofd/scss/base/dark-modus";
+@use "@stamhoofd/scss/base/variables" as *;
 
 #calculator-app {
-
     margin: 0;
     padding: 0;
     font-family: "Metropolis", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
@@ -106,11 +105,17 @@ watch(modalStack, (modalStack) => {
     word-break: break-word;
 
     will-change: scroll-position;
-
 }
 
 body {
     --st-sheet-width: 450px;
+}
+
+@media (prefers-color-scheme: dark) {
+    :host, .calculator-app-root {
+        @include dark-modus;
+
+    }
 }
 
 .calculator-app-root {
