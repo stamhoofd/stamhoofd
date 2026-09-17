@@ -5,7 +5,7 @@ import type { CountFilteredRequest, PrivateOrderWithTickets, SortItem, SortList,
 import { assertSort, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, SortItemDirection } from '@stamhoofd/structures';
 import { parsePhoneNumber } from 'libphonenumber-js';
 import { toRaw } from 'vue';
-import type { OrderIndexedDBIndex} from '../ordersIndexedDBSorters';
+import type { OrderIndexedDBIndex } from '../ordersIndexedDBSorters';
 import { ordersIndexedDBSorters } from '../ordersIndexedDBSorters';
 import type { WebshopManager } from '../WebshopManager';
 import { OrderRequiredFilterHelper } from './OrderRequiredFilterHelper';
@@ -57,13 +57,11 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 await manager.orders.fetchAllUpdated();
                 await manager.tickets.fetchAllUpdated();
                 this.lastInternetLoad = Date.now();
-            }
-            catch (e) {
+            } catch (e) {
                 if (Request.isNetworkError(e)) {
                     console.warn('Failed to fetch new orders from the network', e);
                     this.isOffline = true;
-                }
-                else {
+                } else {
                     throw e;
                 }
             }
@@ -82,8 +80,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 
             if (data.pageFilter) {
                 filters.unshift(data.pageFilter);
-            }
-            else {
+            } else {
                 await this.loadFromInternet();
             }
 
@@ -118,8 +115,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             if (lastNextRequest !== null) {
                 if (lastNextRequest === data) {
                     advanceCount = itemsToAdvanceNext;
-                }
-                else {
+                } else {
                     lastNextRequest = null;
                     itemsToAdvanceNext = 0;
                 }
@@ -169,8 +165,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 
             if (next) {
                 lastNextRequest = next;
-            }
-            else {
+            } else {
                 lastNextRequest = null;
                 itemsToAdvanceNext = 0;
             }
