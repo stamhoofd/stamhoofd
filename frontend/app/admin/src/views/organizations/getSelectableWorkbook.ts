@@ -1,7 +1,7 @@
 import { SelectableColumn } from '@stamhoofd/frontend-excel-export/SelectableColumn';
 import { SelectableSheet } from '@stamhoofd/frontend-excel-export/SelectableSheet';
 import { SelectableWorkbook } from '@stamhoofd/frontend-excel-export/SelectableWorkbook';
-import type { Platform} from '@stamhoofd/structures';
+import type { Platform } from '@stamhoofd/structures';
 import { RecordCategory } from '@stamhoofd/structures';
 
 export function getSelectableWorkbook(_platform: Platform) {
@@ -41,6 +41,10 @@ export function getSelectableWorkbook(_platform: Platform) {
                     new SelectableColumn({
                         id: 'address',
                         name: $t(`%Cn`),
+                    }),
+                    new SelectableColumn({
+                        id: 'website',
+                        name: $t('Website'),
                     }),
                     ...flattenedCategories.flatMap((category) => {
                         return category.getAllRecords().flatMap((record) => {
