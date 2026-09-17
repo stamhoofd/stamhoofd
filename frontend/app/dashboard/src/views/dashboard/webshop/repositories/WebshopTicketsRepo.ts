@@ -10,6 +10,7 @@ import type { CountFilteredRequest, SortList, StamhoofdFilter } from '@stamhoofd
 import { CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, TicketPrivate, Version } from '@stamhoofd/structures';
 import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
 import type { WebshopSettingsStore } from './WebshopSettingsStore';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
 
 /**
  * Responsible for webshop ticket operations (including patches).
@@ -51,6 +52,12 @@ export class WebshopTicketsRepo {
 
         const promises: Promise<void>[] = [];
 
+        const toast = new Toast($t(`Tickets ophalen...`), 'spinner').setHide(null);
+        let showToast = false;
+        const timer = setTimeout(() => {
+            if (showToast) toast.show();
+        }, 1500);
+
         const onResultsReceived = async (tickets: TicketPrivate[]): Promise<void> => {
             if (tickets.length) {
                 totalTickets.push(...tickets);
@@ -59,7 +66,14 @@ export class WebshopTicketsRepo {
             }
         };
 
-        await this.apiClient.getAllUpdated({ isFetchAll: false, onResultsReceived });
+        await this.apiClient.getAllUpdated({ isFetchAll: false, onResultsReceived, onProgress(count, total) {
+            if (!showToast && count > 100) showToast = true;
+            toast.setProgress(total !== 0 ? (count / total) : 0);
+        } });
+
+        toast.setProgress(1);
+        toast.message = $t('Tickets verwerken...');
+
         await Promise.all(promises);
 
         // Only advance the watermark once every page has been fetched (getAllUpdated resolved) and
@@ -73,6 +87,15 @@ export class WebshopTicketsRepo {
             // deleted tickets get handled in listener
             await this.eventBus.sendEvent('fetched', totalTickets);
         }
+
+        clearTimeout(timer);
+
+        toast.message = $t('Tickets verwerkt!');
+        toast.setIcon('success green');
+
+        setTimeout(() => {
+            toast.hide();
+        }, 1000);
     }
 
     /**
@@ -550,7 +573,11 @@ class WebshopTicketsApiClient {
         this.lastFetchedTicket = undefined;
     }
 
-    async getAllUpdated({ isFetchAll, onResultsReceived }: { isFetchAll?: boolean; onResultsReceived: (results: TicketPrivate[]) => Promise<void> | void }): Promise<void> {
+    async getAllUpdated({ isFetchAll, onResultsReceived, onProgress }: {
+        isFetchAll?: boolean;
+        onResultsReceived: (results: TicketPrivate[]) => Promise<void> | void;
+        onProgress: (count: number, total: number) => Promise<void> | void;
+    }): Promise<void> {
         // TODO: clear local database if resetting
         if (this._isFetching) {
             return;
@@ -616,7 +643,7 @@ class WebshopTicketsApiClient {
         };
 
         try {
-            await fetchAll(filteredRequest, fetcher, { onResultsReceived });
+            await fetchAll(filteredRequest, fetcher, { onResultsReceived, onProgress });
         } finally {
             this._isFetching = false;
         }
