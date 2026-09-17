@@ -189,7 +189,7 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            applySQLSorter(query, q.sort, sorters);
+            await applySQLSorter(query, q.sort, sorters);
             query.limit(q.limit);
         }
 
