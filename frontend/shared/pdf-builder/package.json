@@ -7,10 +7,7 @@
         "./*.ts": "./src/*.ts",
         "./*": "./src/*.ts"
     },
-    "scripts": {
-        "lint": "eslint",
-        "typecheck": "vue-tsc --noEmit"
-    },
+    "scripts": {},
     "dependencies": {
         "@stamhoofd/assets": "*",
         "@stamhoofd/components": "*",

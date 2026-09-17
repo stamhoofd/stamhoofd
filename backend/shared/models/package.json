@@ -22,11 +22,7 @@
         "src"
     ],
     "scripts": {
-        "build": "tsc --build tsconfig.build.json && mkdir -p ./dist/migrations && rsync --delete --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/migrations/ ./dist/migrations/ && rsync -r --checksum ./src/assets/ ./dist/assets/",
-        "lint": "eslint",
-        "typecheck": "tsc --build tsconfig.test.json",
-        "test": "vitest",
-        "test:coverage": "vitest --coverage"
+        "build": "tsc --build tsconfig.build.json && mkdir -p ./dist/migrations && rsync --delete --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/migrations/ ./dist/migrations/ && rsync -r --checksum ./src/assets/ ./dist/assets/"
     },
     "dependencies": {
         "@aws-sdk/client-s3": "3.1130.0",
