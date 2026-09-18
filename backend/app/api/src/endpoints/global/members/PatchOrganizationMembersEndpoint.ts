@@ -348,7 +348,33 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
 
             // Create responsibilities
-            for (const { put } of patch.responsibilities.getPuts()) {
+            const responsibilitiesPuts = patch.responsibilities.getPuts();
+            for (let i = 0; i < responsibilitiesPuts.length; i++) {
+                const { put } = responsibilitiesPuts[i];
+
+                // Filter duplicate responsibilities
+                if (responsibilitiesPuts.findLastIndex(responsibility =>
+                    responsibility.put.responsibilityId === put.responsibilityId
+                    && responsibility.put.groupId === put.groupId
+                    && responsibility.put.organizationId === put.organizationId,
+                ) !== i) {
+                    continue;
+                }
+
+                // Filter existing responsibilities
+                const existingResponsibilities = await MemberResponsibilityRecord.select()
+                    .where('memberId', member.id)
+                    .where(SQL.where('endDate', null).or('endDate', '>', new Date()))
+                    .fetch();
+
+                if (existingResponsibilities.find(r =>
+                    r.responsibilityId === put.responsibilityId
+                    && r.groupId === put.groupId
+                    && r.organizationId === put.organizationId,
+                )) {
+                    continue;
+                }
+
                 if (!Context.auth.hasPlatformFullAccess() && !(organization && await Context.auth.hasFullAccess(organization.id))) {
                     throw Context.auth.error($t(`%Dk`));
                 }
