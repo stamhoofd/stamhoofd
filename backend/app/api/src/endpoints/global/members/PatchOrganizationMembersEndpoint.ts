@@ -54,13 +54,13 @@ export const duplicateCheckLimiter = new RateLimiter({
             duration: 15 * 60 * 1000,
         },
         {
-            // Max 6 requests per 10 minutes
-            limit: 6,
+            // Max 10 requests per 10 minutes
+            limit: 10,
             duration: 15 * 60 * 1000,
         },
         {
-            // Max 7 requests per day
-            limit: 7,
+            // Max 15 requests per day
+            limit: 15,
             duration: 24 * 60 * 60 * 1000,
         },
     ],
