@@ -3,10 +3,10 @@ import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
-import { GroupFactory, Member, MemberFactory, MemberPlatformMembership, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, RegistrationPeriodFactory, User, UserFactory } from '@stamhoofd/models';
+import { GroupFactory, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, RegistrationPeriodFactory, User, UserFactory } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import type { PatchAnswers } from '@stamhoofd/structures';
-import { Address, EmergencyContact, MemberDetails, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, ParentType, PermissionLevel, Permissions, PermissionsResourceKey, PermissionsResourceType, PlatformMembershipType, PlatformMembershipTypeConfig, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, Version } from '@stamhoofd/structures';
+import { Address, EmergencyContact, MemberDetails, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberResponsibility, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, ParentType, PermissionLevel, Permissions, PermissionsResourceKey, PermissionsResourceType, PlatformMembershipType, PlatformMembershipTypeConfig, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
@@ -1453,6 +1453,86 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             expect(struct.details.recordAnswers.get(commentsRecord.id)).toMatchObject({
                 value: 'Some comments',
             });
+        });
+    });
+
+    describe('Responsibilities', () => {
+        test('Can\'t add the same responsibility more than once in the same request', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const responsibility = MemberResponsibility.create({ name: 'Bestuurslid' });
+            organization.privateMeta.responsibilities.push(responsibility);
+            await organization.save();
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization,
+            }).create();
+            const token = await SessionService.createSession(user);
+            const member = await new MemberFactory({}).create();
+            await new RegistrationFactory({ member, organization }).create();
+
+            const responsibilities: PatchableArrayAutoEncoder<MemberResponsibilityRecordStruct> = new PatchableArray();
+            const put = MemberResponsibilityRecordStruct.create({
+                memberId: member.id,
+                organizationId: organization.id,
+                responsibilityId: responsibility.id,
+            });
+            responsibilities.addPut(put);
+            responsibilities.addPut(put.clone());
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                responsibilities,
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            expect(response.body.members[0].responsibilities).toHaveLength(1);
+            expect(await MemberResponsibilityRecord.where({ memberId: member.id })).toHaveLength(1);
+        });
+
+        test('Can\'t add an already existing responsibility', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const responsibility = MemberResponsibility.create({ name: 'Bestuurslid' });
+            organization.privateMeta.responsibilities.push(responsibility);
+            await organization.save();
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization,
+            }).create();
+            const token = await SessionService.createSession(user);
+            const member = await new MemberFactory({}).create();
+            await new RegistrationFactory({ member, organization }).create();
+
+            const existingResponsibility = new MemberResponsibilityRecord();
+            existingResponsibility.memberId = member.id;
+            existingResponsibility.organizationId = organization.id;
+            existingResponsibility.responsibilityId = responsibility.id;
+            await existingResponsibility.save();
+
+            const responsibilities: PatchableArrayAutoEncoder<MemberResponsibilityRecordStruct> = new PatchableArray();
+            responsibilities.addPut(MemberResponsibilityRecordStruct.create({
+                memberId: member.id,
+                organizationId: organization.id,
+                responsibilityId: responsibility.id,
+            }));
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                responsibilities,
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            expect(response.body.members[0].responsibilities).toHaveLength(1);
+            expect(await MemberResponsibilityRecord.where({ memberId: member.id })).toHaveLength(1);
         });
     });
 
