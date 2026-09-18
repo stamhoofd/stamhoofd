@@ -3822,10 +3822,10 @@
   resolved "https://registry.yarnpkg.com/@oxc-parser/binding-win32-x64-msvc/-/binding-win32-x64-msvc-0.143.0.tgz#b1a93532ab5a8fb1998012b74cd7efe7bfdb1b4d"
   integrity sha512-ORMh3JE1s6V7ySicdRK7vgaDQnn5o+UHg9ct989PlWHbel8O9ARrmWXM6kZjrBMtNucxNayQ8g69G0VfWzhANw==
 
-"@oxc-project/runtime@0.147.0":
-  version "0.147.0"
-  resolved "https://registry.yarnpkg.com/@oxc-project/runtime/-/runtime-0.147.0.tgz#9abedac520b84bfad22cf61d897f0a5234d0cd03"
-  integrity sha512-vAYDOvumvPwsx0GSoHj+h1qCarq2f9RmfGk3deWBJTtRUDSqvvja5x+q5bUbs7a7CgVPiQDEIx+a5fBtVIQNdA==
+"@oxc-project/runtime@0.150.0":
+  version "0.150.0"
+  resolved "https://registry.yarnpkg.com/@oxc-project/runtime/-/runtime-0.150.0.tgz#12d2abbb9f79ae94e3df2a4bd2840c2ab859e029"
+  integrity sha512-vC4tN4n2c+gVq69Oi6CoZxGk/1mYjLiN4hVEYwvtuns/S4QwUBiJYViwLGLxPaLQnsY5FQDgGs+h6moAmSedvA==
 
 "@oxc-project/types@=0.149.0":
   version "0.149.0"
