@@ -179,7 +179,7 @@ jobs:
     if: needs.job_setup.outputs.in_stack_range == 'true' && needs.job_setup.outputs.changed_backend_apps == 'true'
     services:
       mysql:
-        image: mysql:8.4@sha256:8dbcf531a03aade657e181b9cf2f1d1803ce621a1d55610cb44cb531ab7d7db6
+        image: mysql:8.4@sha256:85b9bf2e29cf836ecb8c2a15a935d4ba0c606631dff1dd79531a11983c638f2a
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: stamhoofd-tests
@@ -215,7 +215,7 @@ jobs:
     if: needs.job_setup.outputs.in_stack_range == 'true' && needs.job_setup.outputs.changed_backend_shared == 'true'
     services:
       mysql:
-        image: mysql:8.4@sha256:8dbcf531a03aade657e181b9cf2f1d1803ce621a1d55610cb44cb531ab7d7db6
+        image: mysql:8.4@sha256:85b9bf2e29cf836ecb8c2a15a935d4ba0c606631dff1dd79531a11983c638f2a
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: stamhoofd-tests
@@ -264,7 +264,7 @@ jobs:
     if: needs.job_setup.outputs.in_stack_range == 'true'
     services:
       mysql:
-        image: mysql:8.4@sha256:8dbcf531a03aade657e181b9cf2f1d1803ce621a1d55610cb44cb531ab7d7db6
+        image: mysql:8.4@sha256:85b9bf2e29cf836ecb8c2a15a935d4ba0c606631dff1dd79531a11983c638f2a
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: stamhoofd-tests
@@ -351,7 +351,7 @@ jobs:
       STAMHOOFD_CONTAINER_RUNTIME: docker
     services:
       mysql:
-        image: mysql:8.4@sha256:8dbcf531a03aade657e181b9cf2f1d1803ce621a1d55610cb44cb531ab7d7db6
+        image: mysql:8.4@sha256:85b9bf2e29cf836ecb8c2a15a935d4ba0c606631dff1dd79531a11983c638f2a
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: stamhoofd-tests

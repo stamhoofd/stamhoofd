@@ -33,14 +33,14 @@
         "@stamhoofd/models": "2.152.0",
         "@stamhoofd/structures": "2.152.0",
         "@stamhoofd/types": "2.152.0",
-        "axios": "1.18.1",
+        "axios": "1.20.0",
         "jsvat-next": "3.0.4"
     },
     "devDependencies": {
         "@simonbackx/simple-database": "1.40.1",
         "@stamhoofd/backend-i18n": "2.152.0",
         "@stamhoofd/test-utils": "2.152.0",
-        "nock": "14.0.16",
+        "nock": "14.0.17",
         "vitest": "4.1.11",
         "mysql2": "3.24.4"
     },
