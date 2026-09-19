@@ -39,7 +39,7 @@
         "@simonbackx/simple-errors": "1.5.0",
         "@stamhoofd/test-utils": "2.152.0",
         "@types/uuid": "8.3.4",
-        "uuid": "14.0.1",
+        "uuid": "14.0.2",
         "vitest": "4.1.11"
     },
     "peerDependencies": {
@@ -47,7 +47,7 @@
         "@stamhoofd/excel-writer": "*",
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*",
-        "uuid": "14.0.1"
+        "uuid": "14.0.2"
     },
     "license": "UNLICENCED",
     "publishConfig": {

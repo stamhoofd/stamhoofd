@@ -11,7 +11,7 @@
         "typecheck": "tsc --noEmit"
     },
     "devDependencies": {
-        "@types/node": "22.15.34",
+        "@types/node": "22.20.3",
         "eslint-plugin-stamhoofd": "*",
         "jiti": "2.7.0",
         "node-html-parser": "5.4.2",

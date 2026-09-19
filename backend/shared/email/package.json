@@ -16,15 +16,15 @@
     },
     "dependencies": {
         "@simonbackx/simple-database": "1.40.1",
-        "html-to-text": "^10.0.0",
-        "nodemailer": "10.0.1",
-        "uuid": "14.0.1",
+        "html-to-text": "10.0.1",
+        "nodemailer": "10.0.10",
+        "uuid": "14.0.2",
         "mysql2": "3.24.4"
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "2.152.0",
         "@types/html-to-text": "9.0.4",
-        "@types/nodemailer": "8.0.1",
+        "@types/nodemailer": "8.0.2",
         "@types/uuid": "8.3.4",
         "sinon": "18.0.1"
     },
