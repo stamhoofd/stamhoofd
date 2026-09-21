@@ -72,7 +72,7 @@ jobs:
           fi
 
       - name: Determine changed packages
-        uses: AurorNZ/paths-filter@7c547bdd24124b0d69e07c96b62fd7fec5ced19a # v3.0.1
+        uses: AurorNZ/paths-filter@ead37777b84ca4c3301a92f453c4040b85287e76 # v5.1.0
         id: changed
         with:
           filters: |
