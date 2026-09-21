@@ -1,6 +1,6 @@
 import 'vitest'
 
-declare module '@vitest/expect' {
+declare module 'vitest' {
   interface Matchers<T = any> {
     toMatchMap(map: Map<any, any>): void;
     toIncludeSameMembers<E = unknown>(expected: readonly E[]): void;

@@ -175,7 +175,7 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
         output.log('Starting app processes...');
         output.log('Press Ctrl+C to stop this session.');
 
-        const child = spawn('yarn', ['-s', 'concurrently', '-r', ...concurrentlyTargets(target, ports)], {
+        const child = spawn('pnpm', ['exec', 'concurrently', '-r', ...concurrentlyTargets(target, ports)], {
             cwd: context.rootDir,
             env: {
                 ...process.env,
@@ -370,9 +370,9 @@ function formatDomainLabel(domain: string, env: string): string {
     return parts.join('');
 }
 
-const backendCommand = 'yarn -s lerna run dev --scope @stamhoofd/backend --scope @stamhoofd/backend-renderer --scope @stamhoofd/backend-statistics-syncer --parallel --stream';
-const frontendCommand = 'yarn -s lerna run dev --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/auto --scope @stamhoofd/admin-frontend --scope @stamhoofd/verify-email --scope @stamhoofd/web-app --scope @stamhoofd/webshop --parallel --stream';
-const fullStackCommand = 'yarn -s lerna run dev --scope @stamhoofd/backend --scope @stamhoofd/backend-renderer --scope @stamhoofd/backend-statistics-syncer  --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/auto --scope @stamhoofd/admin-frontend --scope @stamhoofd/verify-email --scope @stamhoofd/web-app --scope @stamhoofd/webshop --parallel --stream';
+const backendCommand = 'pnpm exec lerna run dev --scope @stamhoofd/backend --scope @stamhoofd/backend-renderer --scope @stamhoofd/backend-statistics-syncer --parallel --stream';
+const frontendCommand = 'pnpm exec lerna run dev --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/auto --scope @stamhoofd/admin-frontend --scope @stamhoofd/verify-email --scope @stamhoofd/web-app --scope @stamhoofd/webshop --parallel --stream';
+const fullStackCommand = 'pnpm exec lerna run dev --scope @stamhoofd/backend --scope @stamhoofd/backend-renderer --scope @stamhoofd/backend-statistics-syncer  --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/auto --scope @stamhoofd/admin-frontend --scope @stamhoofd/verify-email --scope @stamhoofd/web-app --scope @stamhoofd/webshop --parallel --stream';
 
 // The docs site is a standalone Nuxt app outside the Lerna workspaces, so it is
 // started directly through its own package rather than a lerna scope. Because it
@@ -384,7 +384,7 @@ const fullStackCommand = 'yarn -s lerna run dev --scope @stamhoofd/backend --sco
 // Nuxt otherwise binds the loopback address only (`::1`), which the Caddy
 // container cannot reach, and every request to docs.<instance>.stamhoofd 502s.
 function docsCommand(ports: ReturnType<typeof buildPorts>): string {
-    return `([ -d docs/node_modules ] || yarn --cwd docs install --frozen-lockfile) && yarn --cwd docs dev --port ${ports.docs} --host 0.0.0.0`;
+    return `pnpm --dir docs run dev --port ${ports.docs} --host 0.0.0.0`;
 }
 
 export function commandsForTarget(target: DevTarget, ports: ReturnType<typeof buildPorts>): string[] {

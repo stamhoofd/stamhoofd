@@ -1,0 +1,77 @@
+packages:
+  - 'frontend/app/*'
+  - 'frontend/shared/*'
+  - 'backend/app/*'
+  - 'backend/shared/*'
+  - 'shared/*'
+  - 'tests/*'
+  - '.development/*'
+  - 'docs'
+
+linkWorkspacePackages: true
+minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - '@simonbackx/*'
+  # Versions already adopted before the pnpm cutover.
+  - 'vite@8.3.0'
+  - '@aws-sdk/checksums@3.1001.0'
+  - '@aws-sdk/client-s3@3.1130.0 || 3.1135.0'
+  - '@aws-sdk/client-ses@3.1130.0 || 3.1135.0'
+  - '@aws-sdk/client-sesv2@3.1130.0 || 3.1135.0'
+  - '@aws-sdk/client-sqs@3.1130.0 || 3.1135.0'
+  - '@aws-sdk/core@3.978.0'
+  - '@aws-sdk/credential-provider-env@3.972.71'
+  - '@aws-sdk/credential-provider-http@3.972.73'
+  - '@aws-sdk/credential-provider-ini@3.973.16'
+  - '@aws-sdk/credential-provider-login@3.972.78'
+  - '@aws-sdk/credential-provider-node@3.972.83'
+  - '@aws-sdk/credential-provider-process@3.972.71'
+  - '@aws-sdk/credential-provider-sso@3.973.15'
+  - '@aws-sdk/credential-provider-web-identity@3.972.77'
+  - '@aws-sdk/lib-storage@3.1130.0 || 3.1135.0'
+  - '@aws-sdk/middleware-sdk-s3@3.972.76'
+  - '@aws-sdk/nested-clients@3.997.45'
+  - '@aws-sdk/s3-request-presigner@3.1130.0 || 3.1135.0'
+  - '@aws-sdk/token-providers@3.1129.0'
+  - '@atlowchemi/webfont-generator-darwin-arm64@0.7.0'
+  - '@atlowchemi/webfont-generator-darwin-x64@0.7.0'
+  - '@atlowchemi/webfont-generator-linux-arm-gnueabihf@0.7.0'
+  - '@atlowchemi/webfont-generator-linux-arm64-gnu@0.7.0'
+  - '@atlowchemi/webfont-generator-linux-arm64-musl@0.7.0'
+  - '@atlowchemi/webfont-generator-linux-x64-gnu@0.7.0'
+  - '@atlowchemi/webfont-generator-linux-x64-musl@0.7.0'
+  - '@atlowchemi/webfont-generator-win32-arm64-msvc@0.7.0'
+  - '@atlowchemi/webfont-generator-win32-x64-msvc@0.7.0'
+  - '@atlowchemi/webfont-generator@0.7.0'
+  - vite-svg-2-webfont@8.3.0
+strictDepBuilds: true
+allowBuilds:
+  '@parcel/watcher@2.6.0': true
+  argon2@0.45.1: true
+  better-sqlite3@12.11.1: true
+  core-js@3.50.0: false
+  esbuild@0.25.12 || 0.27.7 || 0.28.2: true
+  nx@22.7.9: false
+  puppeteer: true
+  puppeteer@25.10.0: true
+  unrs-resolver@1.12.2: true
+  vue-demi@0.14.10: true
+
+overrides:
+  '@types/node': '22.20.1'
+  axios: '1.20.0'
+  cookie: '2.0.1'
+  fast-xml-parser: '5.11.1'
+  nodemailer: '10.0.1'
+  pacote: '21.5.1'
+  postcss: '8.5.23'
+  semver: '7.8.5'
+  sharp: '0.35.4'
+  sortablejs: '1.15.7'
+  tar: '7.5.21'
+  vue: '3.5.40'
+  ws: '8.21.1'
+  yargs: '17.7.3'
+  js-yaml: '^4.1.0'
+  '@colors/colors': '1.6.1'
+  '@trapezedev/project': '7.1.10'
