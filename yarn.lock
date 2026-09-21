@@ -2390,14 +2390,15 @@
     semver "^7.5.3"
     tar "^7.4.0"
 
-"@mistralai/mistralai@1.15.1":
-  version "1.15.1"
-  resolved "https://registry.yarnpkg.com/@mistralai/mistralai/-/mistralai-1.15.1.tgz#ba8f676ebbf6adb2ddd17b8068b9a4859c1fdfcb"
-  integrity sha512-fb995eiz3r0KsBGtRjFV+/iLbX+UpfalxpF+YitT3R6ukrPD4PN+FGwwmYcRFhNAzVzDUtTVxQYnjQWEnwV5nw==
+"@mistralai/mistralai@2.7.0":
+  version "2.7.0"
+  resolved "https://registry.yarnpkg.com/@mistralai/mistralai/-/mistralai-2.7.0.tgz#f31665bce4bee26b3fa2e1e56ee16b9974cc7988"
+  integrity sha512-zCrx6MtNpcz+EL/Nqvg55QubSgmfwJfBmd3d3wSYfJGfnvlNnWcJYlxEW5xQpS3KR6A5qK9KUyRBwMDIWnyVGA==
   dependencies:
+    "@opentelemetry/semantic-conventions" "^1.40.0"
     ws "^8.18.0"
     zod "^3.25.0 || ^4.0.0"
-    zod-to-json-schema "^3.24.1"
+    zod-to-json-schema "^3.25.0"
 
 "@miyaneee/rollup-plugin-json5@^1.2.0":
   version "1.2.0"
@@ -3480,6 +3481,11 @@
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@open-draft/until/-/until-2.1.0.tgz#0acf32f470af2ceaf47f095cdecd40d68666efda"
   integrity sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==
+
+"@opentelemetry/semantic-conventions@^1.40.0":
+  version "1.43.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.43.0.tgz#f3f467e36c27332f0e735ec86cdcd78dd6f27865"
+  integrity sha512-eSYWTm620tTk45EKSedaUL8MFYI8hW164hIXsgIHyxu3VobUB3fFCu5t0hQby6OoWRPsG1KkKUG2M5UadiLiVg==
 
 "@otplib/core@^12.0.1":
   version "12.0.1"
@@ -19074,7 +19080,7 @@ zip-stream@^6.0.1:
     compress-commons "^6.0.2"
     readable-stream "^4.0.0"
 
-zod-to-json-schema@^3.24.1, zod-to-json-schema@^3.25.1, zod-to-json-schema@^3.25.2:
+zod-to-json-schema@^3.25.0, zod-to-json-schema@^3.25.1, zod-to-json-schema@^3.25.2:
   version "3.25.2"
   resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.25.2.tgz#3fa799a7badd554541472fb65843fdc460b2e5aa"
   integrity sha512-O/PgfnpT1xKSDeQYSCfRI5Gy3hPf91mKVDuYLUHZJMiDFptvP41MSnWofm8dnCm0256ZNfZIM7DSzuSMAFnjHA==
