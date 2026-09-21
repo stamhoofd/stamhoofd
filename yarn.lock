@@ -61,10 +61,10 @@
     package-manager-detector "^1.7.0"
     tinyexec "^1.2.4"
 
-"@anthropic-ai/sdk@0.124.0":
-  version "0.124.0"
-  resolved "https://registry.yarnpkg.com/@anthropic-ai/sdk/-/sdk-0.124.0.tgz#a490eb61201096a7c5cae78d9b6afe33b12e08e2"
-  integrity sha512-cN5O8i9UVxHeOQAzj/XjshWXG8KiibJDw9OGpH2Z/eR3n/RBxdoLxDJOcfqAJWvjaMDFfHTBADU04hWRJVkDyA==
+"@anthropic-ai/sdk@0.126.0":
+  version "0.126.0"
+  resolved "https://registry.yarnpkg.com/@anthropic-ai/sdk/-/sdk-0.126.0.tgz#f625aef018f1ef33831119294e0551b475ec3d68"
+  integrity sha512-VhiZl6rA/8uC+MgDaOhEcAWaIZ2tPnIY885jlZqxrGrutUW2nqCtophBtlsX0tk5kChBUjV/1NVjL3y0M4OwUg==
   dependencies:
     json-schema-to-ts "^3.1.1"
     standardwebhooks "^1.0.0"
