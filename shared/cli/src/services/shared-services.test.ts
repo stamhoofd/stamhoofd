@@ -168,8 +168,8 @@ describe('shared service Docker args', () => {
     it('tails all shared service logs through concurrently', async () => {
         await tailSharedLogs();
 
-        expect(run).toHaveBeenCalledWith('yarn', [
-            '-s',
+        expect(run).toHaveBeenCalledWith('pnpm', [
+            'exec',
             'concurrently',
             '-n',
             'MySQL,MailDev,RustFS,CoreDNS,Caddy',

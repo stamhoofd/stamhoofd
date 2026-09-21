@@ -40,7 +40,7 @@ export class CaddyHelper {
     async configure(workerCount: number) {
         this.caddyRuntime ??= await this.getRunningRuntime();
         if (!this.caddyRuntime) {
-            throw new Error('Shared Caddy admin endpoint is not reachable. Run `yarn stam services up` first.');
+            throw new Error('Shared Caddy admin endpoint is not reachable. Run `pnpm stam services up` first.');
         }
 
         if (!ProcessInfo.didStartCaddy) {
@@ -81,7 +81,7 @@ export class CaddyHelper {
 
     async start() {
         if (process.env.CI !== 'true') {
-            throw new Error('Shared Caddy is not running. Run `yarn stam services up` first.');
+            throw new Error('Shared Caddy is not running. Run `pnpm stam services up` first.');
         }
 
         const runtime = this.createHostCaddyRuntime();

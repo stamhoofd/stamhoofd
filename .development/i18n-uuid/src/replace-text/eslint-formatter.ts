@@ -21,7 +21,7 @@ class EslintFormatter {
 
     private async fixFile(filePath: string, configurationDirectory: string) {
         const relativePath = filePath.substring(configurationDirectory.length + 1);
-        const command = `cd ${configurationDirectory} && npx eslint --fix ${relativePath}`;
+        const command = `pnpm --dir ${configurationDirectory} exec eslint --fix ${relativePath}`;
 
         await new Promise((resolve) => {
             exec(command, resolve);

@@ -21,7 +21,7 @@ if command -v fnm >/dev/null 2>&1; then
 
     repo_dir="$(dirname "$nvmrc_path")"
     original_dir="$PWD"
-    cd "$repo_dir" && fnm install && fnm use && npm install --global yarn
+    cd "$repo_dir" && fnm install && fnm use && corepack enable && corepack install
     fnm_status=$?
     cd "$original_dir" || return 1
 
@@ -61,5 +61,12 @@ else
     echo "Already using $installed_version."
 fi
 
+if corepack enable && corepack install; then
+    unset current_version installed_version marker_dir marker_path nvmrc_path requested_version
+    unset -f find_nvmrc
+    return 0
+fi
+
 unset current_version installed_version marker_dir marker_path nvmrc_path requested_version
 unset -f find_nvmrc
+return 1

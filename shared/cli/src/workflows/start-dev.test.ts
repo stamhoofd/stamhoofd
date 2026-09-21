@@ -1,17 +1,17 @@
-import { EventEmitter } from 'node:events';
-import { spawn } from 'node:child_process';
 import chalk from 'chalk';
+import { spawn } from 'node:child_process';
+import { EventEmitter } from 'node:events';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CliContext } from '../context/create-context.js';
-import { removeInstanceManifest, writeInstanceManifest } from '../runtime/manifest-store.js';
+import { buildPorts } from '../context/ports.js';
 import { createLiveOutput } from '../runtime/live-output.js';
+import { removeInstanceManifest, writeInstanceManifest } from '../runtime/manifest-store.js';
 import { OutputStream, setActiveOutputTarget } from '../runtime/output-target.js';
 import { CaddyService } from '../services/definitions/caddy-service.js';
 import { startServices, stopServices } from '../services/manager.js';
 import { sharedServicesRunning } from '../services/shared-services.js';
 import { checkSetup, isSetupReady, printSetupReport } from './setup-machine.js';
 import { commandsForTarget, concurrentlyTargets, DevTarget, runDev } from './start-dev.js';
-import { buildPorts } from '../context/ports.js';
 
 vi.mock('node:child_process', () => ({
     spawn: vi.fn(),
@@ -137,19 +137,19 @@ describe.skip('runDev', () => {
         expect(child.kill).toHaveBeenCalledWith('SIGTERM');
     });
 
-    it('starts app processes through yarn and waits for shared CLI and locale builds', async () => {
+    it('starts app processes through pnpm and waits for shared CLI and locale builds', async () => {
         const child = createChild();
         vi.mocked(spawn).mockReturnValue(child as any);
 
         const promise = runDev(context, DevTarget.Instance, { services: true, stripe: false });
         await waitFor(() => signalHandlers.SIGINT !== undefined);
 
-        expect(spawn).toHaveBeenCalledWith('yarn', [
-            '-s',
+        expect(spawn).toHaveBeenCalledWith('pnpm', [
+            'exec',
             'concurrently',
             '-r',
-            expect.stringMatching(/rm -f \.development\/cli\/generated\/shared-build-\d+\.ready.+yarn --cwd shared\/cli -s build.+touch \.development\/cli\/generated\/shared-build-\d+\.ready/),
-            expect.stringMatching(/wait-on \.development\/cli\/generated\/shared-build-\d+\.ready shared\/cli\/dist\/index\.js shared\/locales\/dist\/index\.d\.ts && yarn -s lerna run dev --scope @stamhoofd\/backend --scope @stamhoofd\/backend-renderer --scope @stamhoofd\/dashboard --scope @stamhoofd\/registration --scope @stamhoofd\/webshop --parallel --stream/),
+            expect.stringMatching(/rm -f \.development\/cli\/generated\/shared-build-\d+\.ready.+pnpm --dir shared\/cli run build.+touch \.development\/cli\/generated\/shared-build-\d+\.ready/),
+            expect.stringMatching(/wait-on \.development\/cli\/generated\/shared-build-\d+\.ready shared\/cli\/dist\/index\.js shared\/locales\/dist\/index\.d\.ts && pnpm exec lerna run dev --scope @stamhoofd\/backend --scope @stamhoofd\/backend-renderer --scope @stamhoofd\/dashboard --scope @stamhoofd\/registration --scope @stamhoofd\/webshop --parallel --stream/),
         ], expect.objectContaining({
             cwd: context.rootDir,
             stdio: ['inherit', 'pipe', 'pipe'],
@@ -416,17 +416,16 @@ describe('commandsForTarget', () => {
         const commands = commandsForTarget(DevTarget.Docs, ports);
 
         expect(commands).toHaveLength(1);
-        expect(commands[0]).toContain(`yarn --cwd docs dev --port ${ports.docs}`);
+        expect(commands[0]).toContain(`pnpm --dir docs run dev --port ${ports.docs}`);
         // Must bind all interfaces so the Dockerised Caddy can reach it via
         // host.docker.internal; a loopback-only bind makes the proxy 502.
         expect(commands[0]).toContain('--host 0.0.0.0');
     });
 
-    it('installs the standalone docs dependencies on first run', () => {
-        // docs/ is outside the yarn workspaces, so the root install does not
-        // cover it; the command must install before starting Nuxt.
-        expect(commandsForTarget(DevTarget.Docs, ports)[0]).toContain('docs/node_modules');
-        expect(commandsForTarget(DevTarget.Docs, ports)[0]).toContain('yarn --cwd docs install');
+    it('does not install docs dependencies when starting docs', () => {
+        expect(commandsForTarget(DevTarget.Docs, ports)).toEqual([
+            `pnpm --dir docs run dev --port ${ports.docs} --host 0.0.0.0`,
+        ]);
     });
 
     it('starts docs alongside the full stack for the all target', () => {
@@ -434,12 +433,12 @@ describe('commandsForTarget', () => {
 
         expect(commands).toHaveLength(2);
         expect(commands[0]).toContain('lerna run dev');
-        expect(commands.some(command => command.includes(`yarn --cwd docs dev --port ${ports.docs}`))).toBe(true);
+        expect(commands.some(command => command.includes(`pnpm --dir docs run dev --port ${ports.docs}`))).toBe(true);
     });
 
     it('does not start docs for backend or frontend targets', () => {
-        expect(commandsForTarget(DevTarget.Backend, ports).some(command => command.includes('--cwd docs'))).toBe(false);
-        expect(commandsForTarget(DevTarget.Frontend, ports).some(command => command.includes('--cwd docs'))).toBe(false);
+        expect(commandsForTarget(DevTarget.Backend, ports).some(command => command.includes('--dir docs'))).toBe(false);
+        expect(commandsForTarget(DevTarget.Frontend, ports).some(command => command.includes('--dir docs'))).toBe(false);
     });
 });
 
@@ -455,7 +454,7 @@ describe('concurrentlyTargets', () => {
 
     it('starts docs immediately in all while gating the Lerna processes on the shared build', () => {
         const targets = concurrentlyTargets(DevTarget.All, ports);
-        const docsTarget = targets.find(target => target.includes('--cwd docs dev'));
+        const docsTarget = targets.find(target => target.includes('--dir docs run dev'));
         const lernaTarget = targets.find(target => target.includes('lerna run dev'));
 
         // Docs consumes no shared build output, so it must not wait on it...
@@ -464,6 +463,12 @@ describe('concurrentlyTargets', () => {
         // ...while the Lerna processes still do.
         expect(lernaTarget).toContain('wait-on');
         expect(targets.some(target => target.includes('nodemon'))).toBe(true);
+    });
+
+    it('includes SGV in the shared build watcher', () => {
+        const watcher = concurrentlyTargets(DevTarget.All, ports).find(target => target.includes('nodemon'));
+
+        expect(watcher).toContain('pnpm --dir shared/structures run build && pnpm --dir shared/sgv run build && pnpm --dir shared/object-differ run build');
     });
 });
 

@@ -5,8 +5,8 @@ export class FrontendBuilder {
         console.log('Start building frontend...');
 
         const childProcess = new STChildProcess(
-            'yarn',
-            ['lerna', 'run', 'build:playwright', '--stream', '--parallel'],
+            'pnpm',
+            ['--workspace-root', 'exec', 'lerna', 'run', 'build:playwright', '--stream', '--parallel'],
             {
                 env: {
                     ...process.env,

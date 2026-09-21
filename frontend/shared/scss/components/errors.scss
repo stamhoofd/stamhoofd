@@ -1,6 +1,6 @@
-@use '@stamhoofd/scss/base/variables' as *;
-@use '@stamhoofd/scss/base/responsive-helpers' as *;
-@use '@stamhoofd/scss/components/icons' as *;
+@use '../base/variables' as *;
+@use '../base/responsive-helpers' as *;
+@use './icons' as *;
 
 .error-box {
     background: $color-error-background;
