@@ -92,45 +92,90 @@
   resolved "https://registry.yarnpkg.com/@atlowchemi/webfont-generator-darwin-arm64/-/webfont-generator-darwin-arm64-0.6.1.tgz#80deb11972a9eb0939e9caebd01f72ff2049dc70"
   integrity sha512-r/yN18NETZ3rwbfeU/V3ghkE0F9AfSZXHc/ZCwyFs2o3ijTIjc9QBUpFGRhcQqBWFee6dph9KxI7PVIaMYj7dQ==
 
+"@atlowchemi/webfont-generator-darwin-arm64@0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@atlowchemi/webfont-generator-darwin-arm64/-/webfont-generator-darwin-arm64-0.7.0.tgz#8bba160e2be08cf8d260ba3b3c35a0c320735274"
+  integrity sha512-7IPqxFAGmxQDgC88UbJ/Z0Wsc73E3pDxgwbSFWHIcXvJPbk8KV2+XgbLr1tOeRSKa4u2M+7dcSRXjPlc85jgqg==
+
 "@atlowchemi/webfont-generator-darwin-x64@0.6.1":
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/@atlowchemi/webfont-generator-darwin-x64/-/webfont-generator-darwin-x64-0.6.1.tgz#423dc95424b25511b98c685f18fe55141a1f3bee"
   integrity sha512-LAkTzfAFdn9o8gtdEx/KAYmGHhoQqZArJ6UavUmS/scIz+5thxi0Z9f7XW1CD8RKQkWA2oltijg0LuZTrs4EMg==
+
+"@atlowchemi/webfont-generator-darwin-x64@0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@atlowchemi/webfont-generator-darwin-x64/-/webfont-generator-darwin-x64-0.7.0.tgz#32a5df9137ff138cfaefcdfbece3d99d7432580b"
+  integrity sha512-cLNYd6AOVqIBSLAOsyi1zqN/jA9Z50xmkaRct3n1dYxrHJaIzSP8BuAEe7QRsJaWFKSnXNwwL5/o/43q8gHOzA==
 
 "@atlowchemi/webfont-generator-linux-arm-gnueabihf@0.6.1":
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/@atlowchemi/webfont-generator-linux-arm-gnueabihf/-/webfont-generator-linux-arm-gnueabihf-0.6.1.tgz#8e02d5eab77f72024fbc331a16f49aa7427e385a"
   integrity sha512-eQIHucBxwKKeQ+qL4Xy0n9UZu6k6d+e5hb77J0S4uoF3tc92FcB392vST6AwDtyzT6xsVeoeMUc1pRWLrAC9lQ==
 
+"@atlowchemi/webfont-generator-linux-arm-gnueabihf@0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@atlowchemi/webfont-generator-linux-arm-gnueabihf/-/webfont-generator-linux-arm-gnueabihf-0.7.0.tgz#1c0f8576a49f4e82c2983aa491f702a528bf64d0"
+  integrity sha512-Z1r8ewBCzR4DE26RW4+jBw5trjR1uD6EC8Qjabg6U42s32VQgpiDsMwrJeL9ijcVeneNUIwrtWExnPCmeFnWcQ==
+
 "@atlowchemi/webfont-generator-linux-arm64-gnu@0.6.1":
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/@atlowchemi/webfont-generator-linux-arm64-gnu/-/webfont-generator-linux-arm64-gnu-0.6.1.tgz#8e890768c24c01044a5e4746a85500099831f2aa"
   integrity sha512-27iN1GzOCWkj2G6wkZEwrREejDvVkwHezjnbHZhJ+WegRc83ef9+bXLkiR5S3ImC+p0I7nuF3aYaR1sxLmU4uw==
+
+"@atlowchemi/webfont-generator-linux-arm64-gnu@0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@atlowchemi/webfont-generator-linux-arm64-gnu/-/webfont-generator-linux-arm64-gnu-0.7.0.tgz#a8790f05ab2afeed5d18fdeab58f1f30bbb6a1e4"
+  integrity sha512-1vdA85w45SIFkwWeQeoer/LPLaJgcBsuIQd1z9Kft6qQw3vY/l8gWUyyuWvjF0raInHgoaV+CabPHoLcWMbj/g==
 
 "@atlowchemi/webfont-generator-linux-arm64-musl@0.6.1":
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/@atlowchemi/webfont-generator-linux-arm64-musl/-/webfont-generator-linux-arm64-musl-0.6.1.tgz#d37e12b8d02694d08442bbcc787638cc7dbc72a4"
   integrity sha512-1ntIQ2RVGipTHx+7yY0E2NXr7KY3nH0U24j3oPoCcj1HZ8c07AhrbDqSDST6yI4HkkY2/NfMCzTxtOIjxhlCFw==
 
+"@atlowchemi/webfont-generator-linux-arm64-musl@0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@atlowchemi/webfont-generator-linux-arm64-musl/-/webfont-generator-linux-arm64-musl-0.7.0.tgz#8bd958b1f2261d64aa3967874e62fe174f5c5a47"
+  integrity sha512-lXi2/Rl+zYMFuMRTTVAP1wF1XcyuthoBpaCDBrzZXm/syQ5md53P+RQe4wgTTwszPiJH6K4Uk6WHHOijZ5U7WA==
+
 "@atlowchemi/webfont-generator-linux-x64-gnu@0.6.1":
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/@atlowchemi/webfont-generator-linux-x64-gnu/-/webfont-generator-linux-x64-gnu-0.6.1.tgz#c6edde66a55ff5218215f4568990a449aed02742"
   integrity sha512-1wrprT7wKT64CPv7jRWB1J+pWgEGAASMTItYan+UEW5smW91niDNXsl1UJejemLgrmxblgfzvEIJ6TM1HG0BeA==
+
+"@atlowchemi/webfont-generator-linux-x64-gnu@0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@atlowchemi/webfont-generator-linux-x64-gnu/-/webfont-generator-linux-x64-gnu-0.7.0.tgz#2cf99e29d95fb534dfdb0a63c3c628818c2f9bc5"
+  integrity sha512-kM4rXoYERPcDveXdvhpS0cEg7+Z1JWLW1RKZeMiGFLt7MACucI9AUBLSFHTEHVoAg1Nhum47mtBa2zzrLFWqRA==
 
 "@atlowchemi/webfont-generator-linux-x64-musl@0.6.1":
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/@atlowchemi/webfont-generator-linux-x64-musl/-/webfont-generator-linux-x64-musl-0.6.1.tgz#290815a7481c8b24521c98f4e225ee8c3bb8c693"
   integrity sha512-U5mEVWN1dcwVz5qoE7F5gA0FK2CARZk9dra6d2nvs9iB1OFf88bZjelgrnuqkgLjw/XJumZ8/EsusdmfAir8wA==
 
+"@atlowchemi/webfont-generator-linux-x64-musl@0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@atlowchemi/webfont-generator-linux-x64-musl/-/webfont-generator-linux-x64-musl-0.7.0.tgz#c392f649d6ea9acf628ea4f7ef4279c22dc30324"
+  integrity sha512-HflWr22vxm4TV5Z4DhQQ8MZIEv791RZzhqRK5unhIDg3gQGZHZH4S2io50ur5thoA29F7eb22btS0oJibQn5LQ==
+
 "@atlowchemi/webfont-generator-win32-arm64-msvc@0.6.1":
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/@atlowchemi/webfont-generator-win32-arm64-msvc/-/webfont-generator-win32-arm64-msvc-0.6.1.tgz#0e2066d03147d8425976cee88ddd2820ce08d4ff"
   integrity sha512-3OEwQxV8FFawqbaxvr+ja9MOgyfyPQs/Tppx5fw4bUIHq0jhWzWy2H70u8R3Pr84k+5VwYKYm4c3eqxckiSbvg==
 
+"@atlowchemi/webfont-generator-win32-arm64-msvc@0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@atlowchemi/webfont-generator-win32-arm64-msvc/-/webfont-generator-win32-arm64-msvc-0.7.0.tgz#49c6e6ea76684025d7e64419eb9129c1052e0e5a"
+  integrity sha512-EvF3ZtneWZSRueGpjnfV26+Mf1HN/Jqf2tVAhQH0bCz/UZFKYeDzUlwBX1zdtuH/+a8DKgRjfxNQDPit6PZIIA==
+
 "@atlowchemi/webfont-generator-win32-x64-msvc@0.6.1":
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/@atlowchemi/webfont-generator-win32-x64-msvc/-/webfont-generator-win32-x64-msvc-0.6.1.tgz#afef0fa46b8509c8026a6a66dcf5105fb00b429e"
   integrity sha512-NZqVZze8wvIn/NwcAPcekcUCiY5Y9pfSnIRkHRHRHuG+cgYzPse+MMiooT4ZHMmrtpUUOgCMQzc1IyUmE7hbpg==
+
+"@atlowchemi/webfont-generator-win32-x64-msvc@0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@atlowchemi/webfont-generator-win32-x64-msvc/-/webfont-generator-win32-x64-msvc-0.7.0.tgz#5ae4235bd56a74aa41cf9f724eac84f7c6423851"
+  integrity sha512-bZlSacsUebf2cYK/dfezg+1GOPo/FckmYmetke/5YGQYlWB1XvPerd+3npjuL7FDPaLt60KEPmD4HXONP+Lq1w==
 
 "@atlowchemi/webfont-generator@^0.6.0":
   version "0.6.1"
@@ -146,6 +191,21 @@
     "@atlowchemi/webfont-generator-linux-x64-musl" "0.6.1"
     "@atlowchemi/webfont-generator-win32-arm64-msvc" "0.6.1"
     "@atlowchemi/webfont-generator-win32-x64-msvc" "0.6.1"
+
+"@atlowchemi/webfont-generator@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@atlowchemi/webfont-generator/-/webfont-generator-0.7.0.tgz#66d55be2d342a76cce6e3f85ec2d2c25e82483b4"
+  integrity sha512-IlE9aSDd6H/oOJc/BiA44+comNIOQ6qRCvX1E/y5xOF9i7xGwLdNOedG53kmApJ9grZD+W8SHfdTxbk2NpoLnw==
+  optionalDependencies:
+    "@atlowchemi/webfont-generator-darwin-arm64" "0.7.0"
+    "@atlowchemi/webfont-generator-darwin-x64" "0.7.0"
+    "@atlowchemi/webfont-generator-linux-arm-gnueabihf" "0.7.0"
+    "@atlowchemi/webfont-generator-linux-arm64-gnu" "0.7.0"
+    "@atlowchemi/webfont-generator-linux-arm64-musl" "0.7.0"
+    "@atlowchemi/webfont-generator-linux-x64-gnu" "0.7.0"
+    "@atlowchemi/webfont-generator-linux-x64-musl" "0.7.0"
+    "@atlowchemi/webfont-generator-win32-arm64-msvc" "0.7.0"
+    "@atlowchemi/webfont-generator-win32-x64-msvc" "0.7.0"
 
 "@aws-sdk/checksums@^3.1001.0":
   version "3.1001.0"
@@ -18418,6 +18478,13 @@ vite-svg-2-webfont@8.2.0:
   integrity sha512-Ek8h3DczN/dv6fXOlskeuhBxzFYwmYSTq1ZacT2lMgwUu/5K1mpGwdqknnYR1vylatjV4LOOGNx+C3kqdMkGIQ==
   dependencies:
     "@atlowchemi/webfont-generator" "^0.6.0"
+
+vite-svg-2-webfont@8.3.0:
+  version "8.3.0"
+  resolved "https://registry.yarnpkg.com/vite-svg-2-webfont/-/vite-svg-2-webfont-8.3.0.tgz#7c451560c14c85e29f18d5392afc328811cb2109"
+  integrity sha512-QkF9gtfKzTz9ycH4HYaO2dAZV+q4NJZOQ/ePP9w7Hb0/HfAH+qQwrzRPSu2ORz7rW0onQCYeUA2qIu9/HE7ZSA==
+  dependencies:
+    "@atlowchemi/webfont-generator" "^0.7.0"
 
 vite@8.3.0, "vite@^6.0.0 || ^7.0.0 || ^8.0.0", vite@^8.0.0, vite@^8.2.0:
   version "8.3.0"
