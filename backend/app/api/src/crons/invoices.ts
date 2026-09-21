@@ -9,41 +9,38 @@ import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
 import { InvoiceService } from '../services/InvoiceService.js';
 import { WebmasterReport } from '../helpers/WebmasterReport.js';
 import { useSavedIterator } from './helpers/useSavedIterator.js';
-import { isOutside } from './helpers/isOutside.js';
 import { OrganizationAdminService } from '../services/OrganizationAdminService.js';
 
 registerTenantCron('invoices', invoices);
 
-const { iterate, isHoursAgo } = useSavedIterator(() => {
+const iterator = useSavedIterator(() => {
     return Organization.select();
 }, { limit: 10, maxQueries: 5 });
 
 const bootAt = new Date();
 
 async function invoices() {
-    // Do not run within 5 hours after boot
-    if (bootAt.getTime() > new Date().getTime() - 1000 * 60 * 60 * 5 && STAMHOOFD.environment !== 'development') {
-        return;
-    }
+    if (STAMHOOFD.environment !== 'development') {
+        // Do not run within 5 hours after boot
+        if (bootAt.getTime() > new Date().getTime() - 1000 * 60 * 60 * 5) {
+            return;
+        }
 
-    if (isOutside('03:00', '10:00') && STAMHOOFD.environment !== 'development') {
-        return;
-    }
-
-    if (!isHoursAgo(12)) {
-        return;
+        // Once a month, from the 10th on: the payments of the previous month are invoiced
+        const today = Formatter.luxon();
+        if (today.day < 10 || Formatter.luxon(iterator.lastFullRun).hasSame(today, 'month')) {
+            return;
+        }
     }
 
     // A problem in one invoice usually repeats in every invoice of this run: one email for all of
     // them
     await WebmasterReport.group('Aanmaken facturen', async () => {
-        // Get the next x organization to send e-mails for
-        for await (const organization of iterate()) {
+        for await (const organization of iterator.iterate()) {
             if (!organization.meta.invoicesEnabled) {
                 continue;
             }
 
-            // Create all invoices for this organization
             await createInvoicesFor(organization);
         }
     });
@@ -55,29 +52,15 @@ export async function createInvoicesFor(organization: Organization) {
         return;
     }
 
-    // Belgian rules: allowed to invoice up to the 15th day of the next month. We extend it with one month to fix mistakes.
-    const today = Formatter.luxon();
-    const startDate = today.day <= 15 ? today.minus({ month: 3 }).startOf('month') : today.minus({ month: 2 }).startOf('month');
+    // Payments of the current month wait for next month's run
+    const endDate = Formatter.luxon().startOf('month').toJSDate();
 
-    // Wait at least 24 hours before invoicing: a refund or chargeback shortly after a payment then cancels it
-    // out into a zero receipt, instead of an invoice followed by a credit note
-    const endDate = today.minus({ day: 1 });
-
-    // Don't invoice below 4 euro - unless we reached the timeout date for invoices (end of month + 15 days - 5 days margin) OR + 15 day offset
-    const invoiceLimit = STAMHOOFD.environment === 'development' ? 0 : 4_0000;
-    function getPaymentTimeoutDate(p: Payment) {
-        const a = Formatter.luxon(p.paidAt ?? p.createdAt).plus({ month: 1 }).set({ day: 10 }).startOf('day').toJSDate();
-        const b = Formatter.luxon(p.paidAt ?? p.createdAt).plus({ days: 15 }).startOf('day').toJSDate();
-        return new Date(Math.min(a.getTime(), b.getTime()));
-    }
-
-    console.log('Fetching all payments between ' + Formatter.dateTime(startDate.toJSDate()) + ' and ' + Formatter.dateTime(endDate.toJSDate()) + ' for ' + organization.name);
+    console.log('Fetching all payments before ' + Formatter.dateTime(endDate) + ' for ' + organization.name);
 
     const payments = await Payment.select()
         .where('organizationId', organization.id)
         .where('status', PaymentStatus.Succeeded)
-        .where('paidAt', '>=', startDate.toJSDate())
-        .where('paidAt', '<=', endDate.toJSDate())
+        .where('paidAt', '<', endDate)
         .where('invoiceId', null)
         .where('customer', '!=', null)
         .where('payingOrganizationId', '!=', null)
@@ -110,7 +93,6 @@ export async function createInvoicesFor(organization: Organization) {
 
     const errors: string[] = [];
     const invoices: Invoice[] = [];
-    let skipped = 0;
 
     for (const payments of groups.values()) {
         // Group from last to newest (so we use the last customer details if the address changed during the month)
@@ -132,17 +114,7 @@ export async function createInvoicesFor(organization: Organization) {
             } else if (invoice.totalWithVAT === 0) {
                 // Goods did move (e.g. a swap), which needs a zero invoice: not supported yet
                 console.log('Skipping zero total with items for ' + customer + ' at ' + organization.id);
-                skipped += 1;
                 continue;
-            } else if (invoice.totalWithVAT >= 0 && invoice.totalWithVAT < invoiceLimit) {
-                const first = new Date(Math.min(...payments.map(p => getPaymentTimeoutDate(p).getTime())));
-                if (first > new Date()) {
-                    console.log('Delaying invoicing ' + customer + ' at ' + organization.id + ' until ' + Formatter.dateIso(first));
-                    skipped += 1;
-                    continue;
-                } else {
-                    console.log('Invoiced low priced invoice, because of date ' + Formatter.dateIso(first) + ' being in the past');
-                }
             }
 
             const model = await InvoiceService.createFrom(organization, invoice);
@@ -160,7 +132,7 @@ export async function createInvoicesFor(organization: Organization) {
         }
     }
 
-    console.log('Created ' + invoices.length + ' invoices with ' + errors.length + ' errors and skipped ' + skipped);
+    console.log('Created ' + invoices.length + ' invoices with ' + errors.length + ' errors');
 
     if (errors.length) {
         await sendEmailTemplate(organization, {
@@ -173,7 +145,7 @@ export async function createInvoicesFor(organization: Organization) {
             defaultReplacements: [
                 Replacement.create({
                     token: 'errors',
-                    html: '<ul><li>' + errors.join('</li><li>') + '</li></ul>' + (skipped > 0 ? '<p>' + Formatter.escapeHtml(skipped === 1 ? $t('%1U4') : $t('%1Sp', { count: skipped })) + '</p>' : ''),
+                    html: '<ul><li>' + errors.join('</li><li>') + '</li></ul>',
                 }),
             ],
         });

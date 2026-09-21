@@ -28,5 +28,11 @@ export function useSavedIterator<T extends object = SQLResultNamespacedRow>(star
         return lastFullRun.getTime() < new Date().getTime() - 1000 * 60 * 60 * hours;
     };
 
-    return { iterate, lastFullRun, isHoursAgo };
+    return {
+        iterate,
+        get lastFullRun() {
+            return lastFullRun;
+        },
+        isHoursAgo,
+    };
 }
