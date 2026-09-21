@@ -31,7 +31,7 @@
   // Keep dependency branches aligned with newly added workspace manifests.
   rebaseWhen: "behind-base-branch",
 
-  postUpdateOptions: ["yarnDedupeFewer"],
+  postUpdateOptions: ["pnpmDedupe"],
 
   lockFileMaintenance: {
     enabled: true,

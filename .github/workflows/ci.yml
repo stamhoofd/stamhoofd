@@ -4,13 +4,13 @@
 name: CI
 
 permissions:
-  contents: read
+    contents: read
 
 on:
-  push:
-    branches: [ main, ci-test, 'renovate/**' ]
-  pull_request:
-    branches: [ main ]
+    push:
+        branches: [main, ci-test, "renovate/**"]
+    pull_request:
+        branches: [main]
 
 # Cancel superseded runs on the same ref. We only cancel on pull_request events so
 # that pushes to main always run to completion (and keep their full check history).
@@ -19,782 +19,797 @@ on:
 #   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  job_setup:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      actions: read
-      pull-requests: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+    job_setup:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            actions: read
+            pull-requests: read
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      # A stacked pull request triggers its own full CI run, so a deep stack
-      # multiplies CI usage. Only the bottom two unmerged pull requests of a
-      # stack are tested: everything above them is rebased (and retested) once
-      # the lower ones land.
-      # https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/optimizing-ci-for-stacked-pull-requests
-      - name: Determine stack position
-        id: stack
+            # A stacked pull request triggers its own full CI run, so a deep stack
+            # multiplies CI usage. Only the bottom two unmerged pull requests of a
+            # stack are tested: everything above them is rebased (and retested) once
+            # the lower ones land.
+            # https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/optimizing-ci-for-stacked-pull-requests
+            - name: Determine stack position
+              id: stack
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  STACK_BASE_REF: ${{ github.event.pull_request.stack.base.ref }}
+                  BASE_REF: ${{ github.event.pull_request.base.ref }}
+                  REPO: ${{ github.repository }}
+              run: |
+                  if [ -z "$STACK_BASE_REF" ]; then
+                    echo "Not part of a stack"
+                    echo "run=true" >> "$GITHUB_OUTPUT"
+                    exit 0
+                  fi
+
+                  if [ "$STACK_BASE_REF" = "$BASE_REF" ]; then
+                    echo "Lowest unmerged pull request of the stack"
+                    echo "run=true" >> "$GITHUB_OUTPUT"
+                    exit 0
+                  fi
+
+                  # Not the lowest one: this pull request is the second of the stack when
+                  # the pull request it targets is itself the lowest unmerged one.
+                  parent_base=$(gh api "repos/$REPO/pulls?state=open&per_page=1&head=${REPO%%/*}:$BASE_REF" \
+                    --jq '.[0].base.ref // empty') || parent_base="lookup-failed"
+
+                  if [ "$parent_base" = "$STACK_BASE_REF" ]; then
+                    echo "Second pull request of the stack"
+                    echo "run=true" >> "$GITHUB_OUTPUT"
+                  elif [ -z "$parent_base" ] || [ "$parent_base" = "lookup-failed" ]; then
+                    # Transient state (the pull request below was just merged or closed,
+                    # this one is not rebased yet). Run rather than skip silently.
+                    echo "Could not determine the pull request below $BASE_REF"
+                    echo "run=true" >> "$GITHUB_OUTPUT"
+                  else
+                    echo "Higher than the second pull request of the stack: skipping CI"
+                    echo "run=false" >> "$GITHUB_OUTPUT"
+                  fi
+
+            - name: Determine changed packages
+              uses: AurorNZ/paths-filter@7c547bdd24124b0d69e07c96b62fd7fec5ced19a # v3.0.1
+              id: changed
+              with:
+                  filters: |
+                      backend_apps:
+                        - 'package.json'
+                        - 'pnpm-lock.yaml'
+                        - 'pnpm-workspace.yaml'
+                        - '.npmrc'
+                        - 'shared/**'
+                        - 'backend/**'
+                      backend_shared:
+                        - 'package.json'
+                        - 'pnpm-lock.yaml'
+                        - 'pnpm-workspace.yaml'
+                        - '.npmrc'
+                        - 'shared/**'
+                        - 'backend/shared/**'
+                      frontend:
+                        - 'package.json'
+                        - 'pnpm-lock.yaml'
+                        - 'pnpm-workspace.yaml'
+                        - '.npmrc'
+                        - 'shared/**'
+                        - 'frontend/**'
+                      shared:
+                        - 'package.json'
+                        - 'pnpm-lock.yaml'
+                        - 'pnpm-workspace.yaml'
+                        - '.npmrc'
+                        - 'shared/**'
+                      playwright:
+                        - 'package.json'
+                        - 'pnpm-lock.yaml'
+                        - 'pnpm-workspace.yaml'
+                        - '.npmrc'
+                        - 'tests/playwright/**'
+                      # Changing the workflow itself (or the shared setup action) can affect
+                      # any job, so all of them run.
+                      ci:
+                        - '.github/workflows/ci.yml'
+                        - '.github/actions/**'
+
+            # On pushes, paths-filter only diffs against the previous commit. If the
+            # previous run was red, an unrelated commit would skip the broken job and
+            # the branch would turn green without the failing tests ever re-running.
+            # So: any job that failed in the most recent completed run on this branch
+            # is forced to run again, regardless of which files changed.
+            # (PR runs diff against the base branch, so they don't have this problem.)
+            - name: Re-run jobs that failed in the previous run
+              id: prev
+              if: github.event_name == 'push'
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  run_id=$(gh api "repos/${{ github.repository }}/actions/workflows/ci.yml/runs?branch=${{ github.ref_name }}&event=push&status=completed&per_page=1" \
+                    --jq '.workflow_runs[0].id // empty' || true)
+
+                  failed=""
+                  if [ -n "$run_id" ]; then
+                    failed=$(gh api "repos/${{ github.repository }}/actions/runs/$run_id/jobs?per_page=100" --paginate \
+                      --jq '.jobs[] | select(.conclusion == "failure") | .name' || true)
+                  fi
+                  echo "Previous completed run: ${run_id:-none}"
+                  echo "Failed jobs in that run: ${failed:-none}"
+
+                  has() { printf '%s\n' "$failed" | grep -qxF "$1"; }
+
+                  # If setup or the shared build failed, the conditional jobs were all
+                  # skipped and their state is unknown: re-run everything.
+                  if has 'job_setup' || has 'Build shared packages'; then
+                    failed=$'Backend App Tests\nBackend Shared Tests\nShared Package Tests\nComponents Browser Tests\nPlaywright Tests'
+                  fi
+
+                  {
+                    echo "backend_apps=$(has 'Backend App Tests' && echo true || echo false)"
+                    echo "backend_shared=$(has 'Backend Shared Tests' && echo true || echo false)"
+                    echo "shared=$(has 'Shared Package Tests' && echo true || echo false)"
+                    echo "frontend=$(has 'Components Browser Tests' && echo true || echo false)"
+                    echo "playwright=$(has 'Playwright Tests' && echo true || echo false)"
+                  } >> "$GITHUB_OUTPUT"
+
+        outputs:
+            changed_backend_apps: ${{ steps.changed.outputs.ci == 'true' || steps.changed.outputs.backend_apps == 'true' || steps.prev.outputs.backend_apps == 'true' }}
+            changed_backend_shared: ${{ steps.changed.outputs.ci == 'true' || steps.changed.outputs.backend_shared == 'true' || steps.prev.outputs.backend_shared == 'true' }}
+            changed_shared: ${{ steps.changed.outputs.ci == 'true' || steps.changed.outputs.shared == 'true' || steps.prev.outputs.shared == 'true' }}
+            changed_frontend: ${{ steps.changed.outputs.ci == 'true' || steps.changed.outputs.frontend == 'true' || steps.prev.outputs.frontend == 'true' }}
+            rerun_playwright: ${{ steps.changed.outputs.ci == 'true' || steps.changed.outputs.playwright == 'true' || steps.prev.outputs.playwright == 'true' }}
+            in_stack_range: ${{ steps.stack.outputs.run }}
+
+    # Build all shared TypeScript packages exactly once and share the compiled output
+    # (dist + tsbuildinfo) with every downstream job via an artifact. This removes the
+    # duplicated `pnpm run build:shared` step from each consumer job.
+    job_build_shared:
+        name: "Build shared packages"
+        runs-on: ubuntu-latest
+        needs: [job_setup]
+        if: needs.job_setup.outputs.in_stack_range == 'true'
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/setup
+            - name: Build shared packages
+              run: pnpm run build:shared
+            - name: Upload shared build output
+              uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+              with:
+                  name: shared-dist
+                  retention-days: 1
+                  if-no-files-found: error
+                  path: |
+                      shared/*/dist
+                      shared/*/*.tsbuildinfo
+                      backend/shared/*/dist
+                      backend/shared/*/*.tsbuildinfo
+
+    job_test_backend_apps:
+        name: "Backend App Tests"
+        runs-on: ubuntu-latest
+        needs: [job_setup, job_build_shared]
+        if: needs.job_setup.outputs.in_stack_range == 'true' && needs.job_setup.outputs.changed_backend_apps == 'true'
+        services:
+            mysql:
+                image: mysql:8.4@sha256:8dbcf531a03aade657e181b9cf2f1d1803ce621a1d55610cb44cb531ab7d7db6
+                env:
+                    MYSQL_ROOT_PASSWORD: root
+                    MYSQL_DATABASE: stamhoofd-tests
+                ports:
+                    - 3306:3306
+                options: >-
+                    --health-cmd="mysqladmin ping --silent"
+                    --health-interval=10s
+                    --health-timeout=5s
+                    --health-retries=3
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/setup
+            - name: Download shared build output
+              uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+              with:
+                  name: shared-dist
+            - name: Allow Chrome to use unprivileged user namespaces
+              # ubuntu-latest restricts unprivileged user namespaces via AppArmor, which makes the
+              # Chrome that puppeteer launches in the renderer tests abort with "No usable sandbox!".
+              # Production grants the same exception via /etc/apparmor.d/chrome-dev-builds.
+              run: sudo sysctl -e -w kernel.apparmor_restrict_unprivileged_userns=0
+            - name: Run tests
+              run: |
+                  for package in backend/app/renderer backend/app/redirecter backend/app/api; do
+                    pnpm --dir "$package" run test --bail=1
+                  done
+
+    job_test_backend_shared:
+        name: "Backend Shared Tests"
+        runs-on: ubuntu-latest
+        needs: [job_setup, job_build_shared]
+        if: needs.job_setup.outputs.in_stack_range == 'true' && needs.job_setup.outputs.changed_backend_shared == 'true'
+        services:
+            mysql:
+                image: mysql:8.4@sha256:8dbcf531a03aade657e181b9cf2f1d1803ce621a1d55610cb44cb531ab7d7db6
+                env:
+                    MYSQL_ROOT_PASSWORD: root
+                    MYSQL_DATABASE: stamhoofd-tests
+                ports:
+                    - 3306:3306
+                options: >-
+                    --health-cmd="mysqladmin ping --silent"
+                    --health-interval=10s
+                    --health-timeout=5s
+                    --health-retries=3
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/setup
+            - name: Download shared build output
+              uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+              with:
+                  name: shared-dist
+            - name: Run tests
+              run: |
+                  for package in backend/shared/queues backend/shared/models backend/shared/vies backend/shared/sql; do
+                    pnpm --dir "$package" run test --bail=1
+                  done
+
+    job_test_shared:
+        name: "Shared Package Tests"
+        runs-on: ubuntu-latest
+        needs: [job_setup, job_build_shared]
+        if: needs.job_setup.outputs.in_stack_range == 'true' && needs.job_setup.outputs.changed_shared == 'true'
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/setup
+            - name: Download shared build output
+              uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+              with:
+                  name: shared-dist
+            - name: Run tests
+              run: |
+                  for package in shared/structures shared/utility shared/cli shared/object-differ shared/sgv shared/eslint; do
+                    pnpm --dir "$package" run test --bail=1
+                  done
+
+    job_boot:
+        name: "API boot and shutdown"
+        runs-on: ubuntu-latest
+        needs: [job_setup, job_build_shared]
+        if: needs.job_setup.outputs.in_stack_range == 'true'
+        services:
+            mysql:
+                image: mysql:8.4@sha256:8dbcf531a03aade657e181b9cf2f1d1803ce621a1d55610cb44cb531ab7d7db6
+                env:
+                    MYSQL_ROOT_PASSWORD: root
+                    MYSQL_DATABASE: stamhoofd-tests
+                ports:
+                    - 3306:3306
+                options: >-
+                    --health-cmd="mysqladmin ping --silent"
+                    --health-interval=10s
+                    --health-timeout=5s
+                    --health-retries=3
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/setup
+            - name: Download shared build output
+              uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+              with:
+                  name: shared-dist
+            - name: Build API
+              run: pnpm --dir backend/app/api run build
+            - name: Remove all installed dependencies
+              run: pnpm run clear-dependencies
+            - name: Install production dependencies only
+              run: pnpm install --prod --frozen-lockfile
+            - name: Running migrations
+              run: cd backend/app/api && NODE_ENV=test node ./dist/migrations.js
+            - name: Run boot test
+              run: NODE_ENV=test bash tests/boot/boot-test.sh
+
+    job_test_lint_typecheck_checking:
+        name: "Lint and Typecheck"
+        runs-on: ubuntu-latest
+        needs: [job_setup, job_build_shared]
+        if: needs.job_setup.outputs.in_stack_range == 'true'
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/setup
+            - name: Download shared build output
+              uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+              with:
+                  name: shared-dist
+            - name: Run type checking
+              run: pnpm run typecheck
+            - name: Run type linting
+              run: pnpm run lint
+
+    job_test_components_vitest:
+        name: "Components Browser Tests"
+        runs-on: ubuntu-latest
+        needs: [job_setup, job_build_shared]
+        if: needs.job_setup.outputs.in_stack_range == 'true' && needs.job_setup.outputs.changed_frontend == 'true'
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/setup
+            - name: Cache Playwright browsers
+              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: ~/.cache/ms-playwright
+                  key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+            - name: Install Playwright Browsers
+              run: pnpm --dir tests/playwright exec playwright install --with-deps chromium
+            - name: Download shared build output
+              uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+              with:
+                  name: shared-dist
+            - name: Run components browser tests
+              run: pnpm --dir frontend/shared/components exec vitest run
+            - name: Run networking browser tests
+              run: pnpm --dir frontend/shared/networking exec vitest run
+
+    job_test_playwright:
+        name: "Playwright Tests"
+        timeout-minutes: 60
+        runs-on: ubuntu-latest
+        needs: [job_setup, job_build_shared]
+        if: needs.job_setup.outputs.in_stack_range == 'true' && (needs.job_setup.outputs.changed_backend_apps == 'true' || needs.job_setup.outputs.changed_frontend == 'true' || needs.job_setup.outputs.rerun_playwright == 'true')
+        permissions:
+            contents: read
+            pull-requests: write
         env:
-          GH_TOKEN: ${{ github.token }}
-          STACK_BASE_REF: ${{ github.event.pull_request.stack.base.ref }}
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
-          REPO: ${{ github.repository }}
-        run: |
-          if [ -z "$STACK_BASE_REF" ]; then
-            echo "Not part of a stack"
-            echo "run=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
+            SPACES_CI_BUCKET: stamhoofd-ci-traces
+            SPACES_CI_REGION: ams3
+            # The SSO tests start a Keycloak container from the CLI. Runners ship both docker and
+            # podman, and the auto-detection prefers podman, so pin the runtime we actually verified.
+            STAMHOOFD_CONTAINER_RUNTIME: docker
+        services:
+            mysql:
+                image: mysql:8.4@sha256:8dbcf531a03aade657e181b9cf2f1d1803ce621a1d55610cb44cb531ab7d7db6
+                env:
+                    MYSQL_ROOT_PASSWORD: root
+                    MYSQL_DATABASE: stamhoofd-tests
+                ports:
+                    - 3306:3306
+                options: >-
+                    --health-cmd="mysqladmin ping --silent"
+                    --health-interval=10s
+                    --health-timeout=5s
+                    --health-retries=3
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/setup
+            - name: Restore CoreDNS cache
+              id: cache-coredns
+              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: .coredns
+                  key: coredns-v1.13.1
+            - name: Install CoreDNS
+              if: steps.cache-coredns.outputs.cache-hit != 'true'
+              run: |
+                  mkdir -p .coredns
+                  curl -L -o .coredns/coredns.tgz \
+                  https://github.com/coredns/coredns/releases/download/v1.13.1/coredns_1.13.1_linux_amd64.tgz
+                  tar -xzf .coredns/coredns.tgz -C .coredns
+                  chmod +x .coredns/coredns
+            - name: Add CoreDNS to PATH
+              run: echo "${GITHUB_WORKSPACE}/.coredns" >> $GITHUB_PATH
+            - name: Check CoreDNS version
+              run: coredns -version
+            - name: Disable default DNS
+              run: |
+                  sudo systemctl stop systemd-resolved
+                  sudo systemctl disable systemd-resolved
+                  sudo rm /etc/resolv.conf
+                  echo "nameserver 127.0.0.1" | sudo tee /etc/resolv.conf
+            - name: Run coredns
+              run: export SERVER_IP=127.0.0.1 && . .development/loadenv.sh && sudo -E ./.coredns/coredns -conf .development/Corefile &
+            - name: Use local DNS
+              run: sudo sed -i '1inameserver 127.0.0.1' /etc/resolv.conf
+            - name: Log coredns corefile path
+              run: ps aux | grep coredns
+            - name: Log corefile
+              run: cat .development/Corefile
+            - name: List DNS servers
+              run: sudo cat /etc/resolv.conf
+            - name: Log if DNS is running
+              run: ps aux | grep coredns
+            - name: Log if DNS is listening
+              run: sudo netstat -tulnp | grep ":53"
+            - name: Check DNS resolver
+              run: dig test.stamhoofd @127.0.0.1
+            - name: Check DNS resolution
+              run: |
+                  DOMAIN="test.stamhoofd"
+                  EXPECTED_IP="127.0.0.1"
 
-          if [ "$STACK_BASE_REF" = "$BASE_REF" ]; then
-            echo "Lowest unmerged pull request of the stack"
-            echo "run=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
+                  ACTUAL_IP=$(dig +short A "$DOMAIN" | head -n1)
 
-          # Not the lowest one: this pull request is the second of the stack when
-          # the pull request it targets is itself the lowest unmerged one.
-          parent_base=$(gh api "repos/$REPO/pulls?state=open&per_page=1&head=${REPO%%/*}:$BASE_REF" \
-            --jq '.[0].base.ref // empty') || parent_base="lookup-failed"
+                  echo "Expected IP: $EXPECTED_IP"
+                  echo "Actual IP:   $ACTUAL_IP"
 
-          if [ "$parent_base" = "$STACK_BASE_REF" ]; then
-            echo "Second pull request of the stack"
-            echo "run=true" >> "$GITHUB_OUTPUT"
-          elif [ -z "$parent_base" ] || [ "$parent_base" = "lookup-failed" ]; then
-            # Transient state (the pull request below was just merged or closed,
-            # this one is not rebased yet). Run rather than skip silently.
-            echo "Could not determine the pull request below $BASE_REF"
-            echo "run=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "Higher than the second pull request of the stack: skipping CI"
-            echo "run=false" >> "$GITHUB_OUTPUT"
-          fi
+                  if [[ "$ACTUAL_IP" != "$EXPECTED_IP" ]]; then
+                      echo "❌ DNS check failed! $DOMAIN resolved to $ACTUAL_IP"
+                      exit 1
+                  fi
 
-      - name: Determine changed packages
-        uses: AurorNZ/paths-filter@7c547bdd24124b0d69e07c96b62fd7fec5ced19a # v3.0.1
-        id: changed
-        with:
-          filters: |
-            backend_apps:
-              - 'yarn.lock'
-              - 'shared/**'
-              - 'backend/**'
-            backend_shared:
-              - 'yarn.lock'
-              - 'shared/**'
-              - 'backend/shared/**'
-            frontend:
-              - 'yarn.lock'
-              - 'shared/**'
-              - 'frontend/**'
-            shared:
-              - 'yarn.lock'
-              - 'shared/**'
-            playwright:
-              - 'yarn.lock'
-              - 'tests/playwright/**'
-            # Changing the workflow itself (or the shared setup action) can affect
-            # any job, so all of them run.
-            ci:
-              - '.github/workflows/ci.yml'
-              - '.github/actions/**'
+                    echo "✅ DNS check passed!"
+            # Now Caddy certificates are trusted by the system. Now we need to add it to Chromium as well.
+            - name: Install libnss3-tools
+              run: sudo apt-get update && sudo apt-get install -y libnss3-tools
+            - name: Cache Playwright browsers
+              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: ~/.cache/ms-playwright
+                  key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+            - name: Install Playwright Browsers
+              run: pnpm --dir tests/playwright exec playwright install --with-deps --no-shell chromium
+            - name: Cache Caddy
+              id: caddy-cache
+              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: /usr/local/bin/caddy
+                  key: caddy-${{ runner.os }}-v2.10.2-replace-response
+            - name: Install Caddy if missing
+              if: steps.caddy-cache.outputs.cache-hit != 'true'
+              # The Caddy config uses the replace_response handler (webshop strict-dynamic CSP nonce),
+              # which the stock Caddy release does not bundle, so `caddy run`/`validate` would reject it.
+              # Build a custom binary that compiles the plugin in via xcaddy, pinned to the same Caddy
+              # version. This mirrors the custom Caddy image built for local dev (see caddy-service.ts).
+              run: |
+                  go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
+                  "$(go env GOPATH)/bin/xcaddy" build v2.10.2 \
+                    --with github.com/caddyserver/replace-response \
+                    --output ./caddy
+                  sudo mv ./caddy /usr/local/bin/caddy
+                  sudo chmod +x /usr/local/bin/caddy
+            - name: Verify Caddy
+              run: caddy version
+            - name: Give Caddy permissions to bind to privileged ports
+              run: sudo setcap 'cap_net_bind_service=+ep' $(which caddy)
+            - name: Caddy trust
+              run: caddy start && sudo caddy trust && caddy stop
+            - name: Log ca certificates
+              run: sudo ls -la /usr/local/share/ca-certificates
 
-      # On pushes, paths-filter only diffs against the previous commit. If the
-      # previous run was red, an unrelated commit would skip the broken job and
-      # the branch would turn green without the failing tests ever re-running.
-      # So: any job that failed in the most recent completed run on this branch
-      # is forced to run again, regardless of which files changed.
-      # (PR runs diff against the base branch, so they don't have this problem.)
-      - name: Re-run jobs that failed in the previous run
-        id: prev
-        if: github.event_name == 'push'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          run_id=$(gh api "repos/${{ github.repository }}/actions/workflows/ci.yml/runs?branch=${{ github.ref_name }}&event=push&status=completed&per_page=1" \
-            --jq '.workflow_runs[0].id // empty' || true)
+            # Add chrome certificates to nss
+            - name: Create initial NSS database for Chromium
+              run: |
+                  mkdir -p $HOME/.pki/nssdb
+                  certutil -N -d sql:$HOME/.pki/nssdb --empty-password
+            - name: Add trusted CA certificate to NSS
+              run: certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n Caddy_Local_Authority -i /usr/local/share/ca-certificates/Caddy_Local_Authority*
+            # The Playwright global setup starts a local SSO server (Keycloak) that the SSO login tests
+            # sign in on. Pull it up front so a cold registry pull cannot eat into the setup timeout.
+            # Keep the tag in sync with keycloakImage in shared/cli/src/config/shared-service-config.ts.
+            - name: Pull SSO server image
+              run: docker pull quay.io/keycloak/keycloak:26.0.7
+            - name: Download shared build output
+              uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+              with:
+                  name: shared-dist
+            - name: Build API
+              run: pnpm --dir backend/app/api run build:playwright:pre
+            - name: Run Playwright tests
+              run: pnpm --dir tests/playwright run test
+            - name: Upload Playwright artifacts
+              if: failure()
+              uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+              with:
+                  name: playwright-traces
+                  path: |
+                      tests/playwright/playwright-report
+                      tests/playwright/test-results
+                  retention-days: 1
+            - name: Publish traces to Spaces & build notifications
+              id: publish_traces
+              if: failure()
+              working-directory: tests/playwright
+              env:
+                  AWS_ACCESS_KEY_ID: ${{ secrets.SPACES_CI_KEY }}
+                  AWS_SECRET_ACCESS_KEY: ${{ secrets.SPACES_CI_SECRET }}
+                  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+              run: bash scripts/publish-traces.sh
+            - name: Comment trace links on PR
+              if: failure() && github.event_name == 'pull_request'
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
+              run: |
+                  gh pr comment "$PR_NUMBER" --body-file "${RUNNER_TEMP}/pr-comment.md" --edit-last \
+                    || gh pr comment "$PR_NUMBER" --body-file "${RUNNER_TEMP}/pr-comment.md" \
+                    || echo "Could not post PR comment (read-only token on fork PR?)"
 
-          failed=""
-          if [ -n "$run_id" ]; then
-            failed=$(gh api "repos/${{ github.repository }}/actions/runs/$run_id/jobs?per_page=100" --paginate \
-              --jq '.jobs[] | select(.conclusion == "failure") | .name' || true)
-          fi
-          echo "Previous completed run: ${run_id:-none}"
-          echo "Failed jobs in that run: ${failed:-none}"
+    # ---------------------------------------------------------------------------
+    # Slack incident notifications (pushes to main only).
+    #
+    # One "incident" thread at a time, stored in Spaces. The first failing job in
+    # the chain posts a root message and opens the incident; every later failure
+    # (this run or a later commit while still red) replies in that thread. When a
+    # later commit is fully green, job_notify_recovery posts a ✅ reply + reaction
+    # and closes the incident, so the next failure starts a fresh thread.
+    #
+    # The jobs are chained via `needs` so exactly one runs at a time — this
+    # serializes the read-modify-write of the incident state and guarantees a
+    # single root even when many jobs fail at once. Passing jobs skip instantly
+    # (no runner), so green runs cost nothing here.
+    # ---------------------------------------------------------------------------
+    notify_setup:
+        name: "Notify · Setup"
+        runs-on: ubuntu-latest
+        needs: [job_setup]
+        if: ${{ !cancelled() && needs.job_setup.result == 'failure' && github.event_name != 'pull_request' }}
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/slack-notify
+              with:
+                  mode: report-failure
+                  job-label: "Setup"
+                  slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+                  slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+                  spaces-key: ${{ secrets.SPACES_CI_KEY }}
+                  spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+                  spaces-bucket: stamhoofd-ci-traces
+                  spaces-region: ams3
+                  state-key: incidents/${{ github.ref_name }}.json
 
-          has() { printf '%s\n' "$failed" | grep -qxF "$1"; }
+    notify_build_shared:
+        name: "Notify · Build shared packages"
+        runs-on: ubuntu-latest
+        needs: [job_build_shared, notify_setup]
+        if: ${{ !cancelled() && needs.job_build_shared.result == 'failure' && github.event_name != 'pull_request' }}
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/slack-notify
+              with:
+                  mode: report-failure
+                  job-label: "Build shared packages"
+                  slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+                  slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+                  spaces-key: ${{ secrets.SPACES_CI_KEY }}
+                  spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+                  spaces-bucket: stamhoofd-ci-traces
+                  spaces-region: ams3
+                  state-key: incidents/${{ github.ref_name }}.json
 
-          # If setup or the shared build failed, the conditional jobs were all
-          # skipped and their state is unknown: re-run everything.
-          if has 'job_setup' || has 'Build shared packages'; then
-            failed=$'Backend App Tests\nBackend Shared Tests\nShared Package Tests\nComponents Browser Tests\nPlaywright Tests'
-          fi
+    notify_shared:
+        name: "Notify · Shared Package Tests"
+        runs-on: ubuntu-latest
+        needs: [job_test_shared, notify_build_shared]
+        if: ${{ !cancelled() && needs.job_test_shared.result == 'failure' && github.event_name != 'pull_request' }}
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/slack-notify
+              with:
+                  mode: report-failure
+                  job-label: "Shared Package Tests"
+                  slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+                  slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+                  spaces-key: ${{ secrets.SPACES_CI_KEY }}
+                  spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+                  spaces-bucket: stamhoofd-ci-traces
+                  spaces-region: ams3
+                  state-key: incidents/${{ github.ref_name }}.json
 
-          {
-            echo "backend_apps=$(has 'Backend App Tests' && echo true || echo false)"
-            echo "backend_shared=$(has 'Backend Shared Tests' && echo true || echo false)"
-            echo "shared=$(has 'Shared Package Tests' && echo true || echo false)"
-            echo "frontend=$(has 'Components Browser Tests' && echo true || echo false)"
-            echo "playwright=$(has 'Playwright Tests' && echo true || echo false)"
-          } >> "$GITHUB_OUTPUT"
+    notify_lint:
+        name: "Notify · Lint and Typecheck"
+        runs-on: ubuntu-latest
+        needs: [job_test_lint_typecheck_checking, notify_shared]
+        if: ${{ !cancelled() && needs.job_test_lint_typecheck_checking.result == 'failure' && github.event_name != 'pull_request' }}
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/slack-notify
+              with:
+                  mode: report-failure
+                  job-label: "Lint and Typecheck"
+                  slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+                  slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+                  spaces-key: ${{ secrets.SPACES_CI_KEY }}
+                  spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+                  spaces-bucket: stamhoofd-ci-traces
+                  spaces-region: ams3
+                  state-key: incidents/${{ github.ref_name }}.json
 
-    outputs:
-      changed_backend_apps: ${{ steps.changed.outputs.ci == 'true' || steps.changed.outputs.backend_apps == 'true' || steps.prev.outputs.backend_apps == 'true' }}
-      changed_backend_shared: ${{ steps.changed.outputs.ci == 'true' || steps.changed.outputs.backend_shared == 'true' || steps.prev.outputs.backend_shared == 'true' }}
-      changed_shared: ${{ steps.changed.outputs.ci == 'true' || steps.changed.outputs.shared == 'true' || steps.prev.outputs.shared == 'true' }}
-      changed_frontend: ${{ steps.changed.outputs.ci == 'true' || steps.changed.outputs.frontend == 'true' || steps.prev.outputs.frontend == 'true' }}
-      rerun_playwright: ${{ steps.changed.outputs.ci == 'true' || steps.changed.outputs.playwright == 'true' || steps.prev.outputs.playwright == 'true' }}
-      in_stack_range: ${{ steps.stack.outputs.run }}
+    notify_backend_shared:
+        name: "Notify · Backend Shared Tests"
+        runs-on: ubuntu-latest
+        needs: [job_test_backend_shared, notify_lint]
+        if: ${{ !cancelled() && needs.job_test_backend_shared.result == 'failure' && github.event_name != 'pull_request' }}
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/slack-notify
+              with:
+                  mode: report-failure
+                  job-label: "Backend Shared Tests"
+                  slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+                  slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+                  spaces-key: ${{ secrets.SPACES_CI_KEY }}
+                  spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+                  spaces-bucket: stamhoofd-ci-traces
+                  spaces-region: ams3
+                  state-key: incidents/${{ github.ref_name }}.json
 
-  # Build all shared TypeScript packages exactly once and share the compiled output
-  # (dist + tsbuildinfo) with every downstream job via an artifact. This removes the
-  # duplicated `yarn build:shared` step from each consumer job.
-  job_build_shared:
-    name: 'Build shared packages'
-    runs-on: ubuntu-latest
-    needs: [job_setup]
-    if: needs.job_setup.outputs.in_stack_range == 'true'
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/setup
-      - name: Build shared packages
-        run: yarn build:shared
-      - name: Upload shared build output
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        with:
-          name: shared-dist
-          retention-days: 1
-          if-no-files-found: error
-          path: |
-            shared/*/dist
-            shared/*/*.tsbuildinfo
-            backend/shared/*/dist
-            backend/shared/*/*.tsbuildinfo
+    notify_backend_apps:
+        name: "Notify · Backend App Tests"
+        runs-on: ubuntu-latest
+        needs: [job_test_backend_apps, notify_backend_shared]
+        if: ${{ !cancelled() && needs.job_test_backend_apps.result == 'failure' && github.event_name != 'pull_request' }}
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/slack-notify
+              with:
+                  mode: report-failure
+                  job-label: "Backend App Tests"
+                  slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+                  slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+                  spaces-key: ${{ secrets.SPACES_CI_KEY }}
+                  spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+                  spaces-bucket: stamhoofd-ci-traces
+                  spaces-region: ams3
+                  state-key: incidents/${{ github.ref_name }}.json
 
-  job_test_backend_apps:
-    name: 'Backend App Tests'
-    runs-on: ubuntu-latest
-    needs: [job_setup, job_build_shared]
-    if: needs.job_setup.outputs.in_stack_range == 'true' && needs.job_setup.outputs.changed_backend_apps == 'true'
-    services:
-      mysql:
-        image: mysql:8.4@sha256:8dbcf531a03aade657e181b9cf2f1d1803ce621a1d55610cb44cb531ab7d7db6
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: stamhoofd-tests
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/setup
-      - name: Download shared build output
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          name: shared-dist
-      - name: Allow Chrome to use unprivileged user namespaces
-        # ubuntu-latest restricts unprivileged user namespaces via AppArmor, which makes the
-        # Chrome that puppeteer launches in the renderer tests abort with "No usable sandbox!".
-        # Production grants the same exception via /etc/apparmor.d/chrome-dev-builds.
-        run: sudo sysctl -e -w kernel.apparmor_restrict_unprivileged_userns=0
-      - name: Run tests
-        run: |
-          for package in backend/app/renderer backend/app/redirecter backend/app/api; do
-            (cd "$package" && yarn test --bail=1)
-          done
+    notify_components:
+        name: "Notify · Components Browser Tests"
+        runs-on: ubuntu-latest
+        needs: [job_test_components_vitest, notify_backend_apps]
+        if: ${{ !cancelled() && needs.job_test_components_vitest.result == 'failure' && github.event_name != 'pull_request' }}
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/slack-notify
+              with:
+                  mode: report-failure
+                  job-label: "Components Browser Tests"
+                  slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+                  slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+                  spaces-key: ${{ secrets.SPACES_CI_KEY }}
+                  spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+                  spaces-bucket: stamhoofd-ci-traces
+                  spaces-region: ams3
+                  state-key: incidents/${{ github.ref_name }}.json
 
-  job_test_backend_shared:
-    name: 'Backend Shared Tests'
-    runs-on: ubuntu-latest
-    needs: [job_setup, job_build_shared]
-    if: needs.job_setup.outputs.in_stack_range == 'true' && needs.job_setup.outputs.changed_backend_shared == 'true'
-    services:
-      mysql:
-        image: mysql:8.4@sha256:8dbcf531a03aade657e181b9cf2f1d1803ce621a1d55610cb44cb531ab7d7db6
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: stamhoofd-tests
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/setup
-      - name: Download shared build output
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          name: shared-dist
-      - name: Run tests
-        run: |
-          for package in backend/shared/queues backend/shared/models backend/shared/vies backend/shared/sql; do
-            (cd "$package" && yarn test --bail=1)
-          done
+    notify_boot:
+        name: "Notify · API boot and shutdown"
+        runs-on: ubuntu-latest
+        needs: [job_boot, notify_components]
+        if: ${{ !cancelled() && needs.job_boot.result == 'failure' && github.event_name != 'pull_request' }}
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/slack-notify
+              with:
+                  mode: report-failure
+                  job-label: "API boot and shutdown"
+                  slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+                  slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+                  spaces-key: ${{ secrets.SPACES_CI_KEY }}
+                  spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+                  spaces-bucket: stamhoofd-ci-traces
+                  spaces-region: ams3
+                  state-key: incidents/${{ github.ref_name }}.json
 
-  job_test_shared:
-    name: 'Shared Package Tests'
-    runs-on: ubuntu-latest
-    needs: [job_setup, job_build_shared]
-    if: needs.job_setup.outputs.in_stack_range == 'true' && needs.job_setup.outputs.changed_shared == 'true'
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/setup
-      - name: Download shared build output
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          name: shared-dist
-      - name: Run tests
-        run: |
-          for package in shared/structures shared/utility shared/cli shared/object-differ shared/sgv shared/eslint; do
-            (cd "$package" && yarn test --bail=1)
-          done
+    notify_playwright:
+        name: "Notify · Playwright Tests"
+        runs-on: ubuntu-latest
+        needs: [job_test_playwright, notify_boot]
+        if: ${{ !cancelled() && needs.job_test_playwright.result == 'failure' && github.event_name != 'pull_request' }}
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/slack-notify
+              with:
+                  mode: report-failure
+                  job-label: "Playwright Tests"
+                  trace-links-key: traces/${{ github.run_id }}/${{ github.run_attempt }}/slack-links.txt
+                  slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+                  slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+                  spaces-key: ${{ secrets.SPACES_CI_KEY }}
+                  spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+                  spaces-bucket: stamhoofd-ci-traces
+                  spaces-region: ams3
+                  state-key: incidents/${{ github.ref_name }}.json
 
-  job_boot:
-    name: 'API boot and shutdown'
-    runs-on: ubuntu-latest
-    needs: [job_setup, job_build_shared]
-    if: needs.job_setup.outputs.in_stack_range == 'true'
-    services:
-      mysql:
-        image: mysql:8.4@sha256:8dbcf531a03aade657e181b9cf2f1d1803ce621a1d55610cb44cb531ab7d7db6
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: stamhoofd-tests
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/setup
-      - name: Download shared build output
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          name: shared-dist
-      - name: Build API
-        run: cd backend/app/api && yarn build
-      - name: Remove all installed dependencies
-        run: yarn clear-dependencies
-      - name: Install production dependencies only
-        run: yarn install --prefer-offline --frozen-lockfile --production
-      - name: Running migrations
-        run: cd backend/app/api && NODE_ENV=test node ./dist/migrations.js
-      - name: Run boot test
-        run: NODE_ENV=test bash tests/boot/boot-test.sh
+    # When every CI job succeeds on a PR, check whether the PR carries the
+    # "ready if CI succeeds" label. If it does and the PR is still a draft,
+    # convert it to ready-for-review automatically.
+    job_auto_ready:
+        name: "Auto ready for review"
+        runs-on: ubuntu-latest
+        needs:
+            - job_setup
+            - job_build_shared
+            - job_test_shared
+            - job_test_lint_typecheck_checking
+            - job_test_backend_shared
+            - job_test_backend_apps
+            - job_test_components_vitest
+            - job_boot
+            - job_test_playwright
+        if: |
+            !cancelled() &&
+            github.event_name == 'pull_request' &&
+            needs.job_setup.outputs.in_stack_range == 'true' &&
+            !contains(needs.*.result, 'failure') &&
+            !contains(needs.*.result, 'cancelled')
+        permissions:
+            contents: write
+            pull-requests: write
+        steps:
+            - name: Mark ready if labelled
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
+                  REPO: ${{ github.repository }}
+              run: |
+                  IS_DRAFT=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json isDraft --jq '.isDraft')
+                  HAS_LABEL=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json labels --jq '[.labels[].name] | contains(["ready if CI succeeds"])')
+                  if [ "$IS_DRAFT" = "true" ] && [ "$HAS_LABEL" = "true" ]; then
+                    gh pr ready "$PR_NUMBER" --repo "$REPO" || true
+                    gh pr edit "$PR_NUMBER" --repo "$REPO" --remove-label "ready if CI succeeds" || true
+                    echo "Marked PR #$PR_NUMBER as ready for review and removed the label"
+                  else
+                    echo "No action (isDraft=$IS_DRAFT, hasLabel=$HAS_LABEL)"
+                  fi
 
-  job_test_lint_typecheck_checking:
-    name: 'Lint and Typecheck'
-    runs-on: ubuntu-latest
-    needs: [job_setup, job_build_shared]
-    if: needs.job_setup.outputs.in_stack_range == 'true'
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/setup
-      - name: Download shared build output
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          name: shared-dist
-      - name: Run type checking
-        run: yarn -s typecheck
-      - name: Run type linting
-        run: yarn -s lint
-
-  job_test_components_vitest:
-    name: 'Components Browser Tests'
-    runs-on: ubuntu-latest
-    needs: [job_setup, job_build_shared]
-    if: needs.job_setup.outputs.in_stack_range == 'true' && needs.job_setup.outputs.changed_frontend == 'true'
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/setup
-      - name: Cache Playwright browsers
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
-      - name: Install Playwright Browsers
-        run: yarn playwright install --with-deps chromium
-      - name: Download shared build output
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          name: shared-dist
-      - name: Run components browser tests
-        run: cd frontend/shared/components && yarn vitest run
-      - name: Run networking browser tests
-        run: cd frontend/shared/networking && yarn vitest run
-
-  job_test_playwright:
-    name: 'Playwright Tests'
-    timeout-minutes: 60
-    runs-on: ubuntu-latest
-    needs: [job_setup, job_build_shared]
-    if: needs.job_setup.outputs.in_stack_range == 'true' && (needs.job_setup.outputs.changed_backend_apps == 'true' || needs.job_setup.outputs.changed_frontend == 'true' || needs.job_setup.outputs.rerun_playwright == 'true')
-    permissions:
-      contents: read
-      pull-requests: write
-    env:
-      SPACES_CI_BUCKET: stamhoofd-ci-traces
-      SPACES_CI_REGION: ams3
-      # The SSO tests start a Keycloak container from the CLI. Runners ship both docker and
-      # podman, and the auto-detection prefers podman, so pin the runtime we actually verified.
-      STAMHOOFD_CONTAINER_RUNTIME: docker
-    services:
-      mysql:
-        image: mysql:8.4@sha256:8dbcf531a03aade657e181b9cf2f1d1803ce621a1d55610cb44cb531ab7d7db6
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: stamhoofd-tests
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-    steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-    - uses: ./.github/actions/setup
-    - name: Restore CoreDNS cache
-      id: cache-coredns
-      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-      with:
-        path: .coredns
-        key: coredns-v1.13.1
-    - name: Install CoreDNS
-      if: steps.cache-coredns.outputs.cache-hit != 'true'
-      run: |
-        mkdir -p .coredns
-        curl -L -o .coredns/coredns.tgz \
-        https://github.com/coredns/coredns/releases/download/v1.13.1/coredns_1.13.1_linux_amd64.tgz
-        tar -xzf .coredns/coredns.tgz -C .coredns
-        chmod +x .coredns/coredns
-    - name: Add CoreDNS to PATH
-      run: echo "${GITHUB_WORKSPACE}/.coredns" >> $GITHUB_PATH
-    - name: Check CoreDNS version
-      run: coredns -version
-    - name: Disable default DNS
-      run: |
-        sudo systemctl stop systemd-resolved
-        sudo systemctl disable systemd-resolved
-        sudo rm /etc/resolv.conf
-        echo "nameserver 127.0.0.1" | sudo tee /etc/resolv.conf
-    - name: Run coredns
-      run: export SERVER_IP=127.0.0.1 && . .development/loadenv.sh && sudo -E ./.coredns/coredns -conf .development/Corefile &
-    - name: Use local DNS
-      run: sudo sed -i '1inameserver 127.0.0.1' /etc/resolv.conf
-    - name: Log coredns corefile path
-      run: ps aux | grep coredns
-    - name: Log corefile
-      run: cat .development/Corefile
-    - name: List DNS servers
-      run: sudo cat /etc/resolv.conf
-    - name: Log if DNS is running
-      run: ps aux | grep coredns
-    - name: Log if DNS is listening
-      run: sudo netstat -tulnp | grep ":53"
-    - name: Check DNS resolver
-      run: dig test.stamhoofd @127.0.0.1
-    - name: Check DNS resolution
-      run: |
-        DOMAIN="test.stamhoofd"
-        EXPECTED_IP="127.0.0.1"
-
-        ACTUAL_IP=$(dig +short A "$DOMAIN" | head -n1)
-
-        echo "Expected IP: $EXPECTED_IP"
-        echo "Actual IP:   $ACTUAL_IP"
-
-        if [[ "$ACTUAL_IP" != "$EXPECTED_IP" ]]; then
-            echo "❌ DNS check failed! $DOMAIN resolved to $ACTUAL_IP"
-            exit 1
-        fi
-
-          echo "✅ DNS check passed!"
-    # Now Caddy certificates are trusted by the system. Now we need to add it to Chromium as well.
-    - name: Install libnss3-tools
-      run: sudo apt-get update && sudo apt-get install -y libnss3-tools
-    - name: Cache Playwright browsers
-      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-      with:
-        path: ~/.cache/ms-playwright
-        key: playwright-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
-    - name: Install Playwright Browsers
-      run: yarn playwright install --with-deps --no-shell chromium
-    - name: Cache Caddy
-      id: caddy-cache
-      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-      with:
-        path: /usr/local/bin/caddy
-        key: caddy-${{ runner.os }}-v2.10.2-replace-response
-    - name: Install Caddy if missing
-      if: steps.caddy-cache.outputs.cache-hit != 'true'
-      # The Caddy config uses the replace_response handler (webshop strict-dynamic CSP nonce),
-      # which the stock Caddy release does not bundle, so `caddy run`/`validate` would reject it.
-      # Build a custom binary that compiles the plugin in via xcaddy, pinned to the same Caddy
-      # version. This mirrors the custom Caddy image built for local dev (see caddy-service.ts).
-      run: |
-        go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
-        "$(go env GOPATH)/bin/xcaddy" build v2.10.2 \
-          --with github.com/caddyserver/replace-response \
-          --output ./caddy
-        sudo mv ./caddy /usr/local/bin/caddy
-        sudo chmod +x /usr/local/bin/caddy
-    - name: Verify Caddy
-      run: caddy version
-    - name: Give Caddy permissions to bind to privileged ports
-      run: sudo setcap 'cap_net_bind_service=+ep' $(which caddy)
-    - name: Caddy trust
-      run: caddy start && sudo caddy trust && caddy stop
-    - name: Log ca certificates
-      run: sudo ls -la /usr/local/share/ca-certificates
-
-    # Add chrome certificates to nss
-    - name: Create initial NSS database for Chromium
-      run: |
-        mkdir -p $HOME/.pki/nssdb
-        certutil -N -d sql:$HOME/.pki/nssdb --empty-password
-    - name: Add trusted CA certificate to NSS
-      run: certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n Caddy_Local_Authority -i /usr/local/share/ca-certificates/Caddy_Local_Authority*
-    # The Playwright global setup starts a local SSO server (Keycloak) that the SSO login tests
-    # sign in on. Pull it up front so a cold registry pull cannot eat into the setup timeout.
-    # Keep the tag in sync with keycloakImage in shared/cli/src/config/shared-service-config.ts.
-    - name: Pull SSO server image
-      run: docker pull quay.io/keycloak/keycloak:26.0.7
-    - name: Download shared build output
-      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-      with:
-        name: shared-dist
-    - name: Build API
-      run: cd backend/app/api && yarn build:playwright:pre
-    - name: Run Playwright tests
-      run: cd tests/playwright && yarn -s test
-    - name: Upload Playwright artifacts
-      if: failure()
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-      with:
-        name: playwright-traces
-        path: |
-            tests/playwright/playwright-report
-            tests/playwright/test-results
-        retention-days: 1
-    - name: Publish traces to Spaces & build notifications
-      id: publish_traces
-      if: failure()
-      working-directory: tests/playwright
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.SPACES_CI_KEY }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.SPACES_CI_SECRET }}
-        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-      run: bash scripts/publish-traces.sh
-    - name: Comment trace links on PR
-      if: failure() && github.event_name == 'pull_request'
-      env:
-        GH_TOKEN: ${{ github.token }}
-        PR_NUMBER: ${{ github.event.pull_request.number }}
-      run: |
-        gh pr comment "$PR_NUMBER" --body-file "${RUNNER_TEMP}/pr-comment.md" --edit-last \
-          || gh pr comment "$PR_NUMBER" --body-file "${RUNNER_TEMP}/pr-comment.md" \
-          || echo "Could not post PR comment (read-only token on fork PR?)"
-
-  # ---------------------------------------------------------------------------
-  # Slack incident notifications (pushes to main only).
-  #
-  # One "incident" thread at a time, stored in Spaces. The first failing job in
-  # the chain posts a root message and opens the incident; every later failure
-  # (this run or a later commit while still red) replies in that thread. When a
-  # later commit is fully green, job_notify_recovery posts a ✅ reply + reaction
-  # and closes the incident, so the next failure starts a fresh thread.
-  #
-  # The jobs are chained via `needs` so exactly one runs at a time — this
-  # serializes the read-modify-write of the incident state and guarantees a
-  # single root even when many jobs fail at once. Passing jobs skip instantly
-  # (no runner), so green runs cost nothing here.
-  # ---------------------------------------------------------------------------
-  notify_setup:
-    name: 'Notify · Setup'
-    runs-on: ubuntu-latest
-    needs: [job_setup]
-    if: ${{ !cancelled() && needs.job_setup.result == 'failure' && github.event_name != 'pull_request' }}
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/slack-notify
-        with:
-          mode: report-failure
-          job-label: 'Setup'
-          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
-          spaces-key: ${{ secrets.SPACES_CI_KEY }}
-          spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
-          spaces-bucket: stamhoofd-ci-traces
-          spaces-region: ams3
-          state-key: incidents/${{ github.ref_name }}.json
-
-  notify_build_shared:
-    name: 'Notify · Build shared packages'
-    runs-on: ubuntu-latest
-    needs: [job_build_shared, notify_setup]
-    if: ${{ !cancelled() && needs.job_build_shared.result == 'failure' && github.event_name != 'pull_request' }}
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/slack-notify
-        with:
-          mode: report-failure
-          job-label: 'Build shared packages'
-          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
-          spaces-key: ${{ secrets.SPACES_CI_KEY }}
-          spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
-          spaces-bucket: stamhoofd-ci-traces
-          spaces-region: ams3
-          state-key: incidents/${{ github.ref_name }}.json
-
-  notify_shared:
-    name: 'Notify · Shared Package Tests'
-    runs-on: ubuntu-latest
-    needs: [job_test_shared, notify_build_shared]
-    if: ${{ !cancelled() && needs.job_test_shared.result == 'failure' && github.event_name != 'pull_request' }}
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/slack-notify
-        with:
-          mode: report-failure
-          job-label: 'Shared Package Tests'
-          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
-          spaces-key: ${{ secrets.SPACES_CI_KEY }}
-          spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
-          spaces-bucket: stamhoofd-ci-traces
-          spaces-region: ams3
-          state-key: incidents/${{ github.ref_name }}.json
-
-  notify_lint:
-    name: 'Notify · Lint and Typecheck'
-    runs-on: ubuntu-latest
-    needs: [job_test_lint_typecheck_checking, notify_shared]
-    if: ${{ !cancelled() && needs.job_test_lint_typecheck_checking.result == 'failure' && github.event_name != 'pull_request' }}
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/slack-notify
-        with:
-          mode: report-failure
-          job-label: 'Lint and Typecheck'
-          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
-          spaces-key: ${{ secrets.SPACES_CI_KEY }}
-          spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
-          spaces-bucket: stamhoofd-ci-traces
-          spaces-region: ams3
-          state-key: incidents/${{ github.ref_name }}.json
-
-  notify_backend_shared:
-    name: 'Notify · Backend Shared Tests'
-    runs-on: ubuntu-latest
-    needs: [job_test_backend_shared, notify_lint]
-    if: ${{ !cancelled() && needs.job_test_backend_shared.result == 'failure' && github.event_name != 'pull_request' }}
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/slack-notify
-        with:
-          mode: report-failure
-          job-label: 'Backend Shared Tests'
-          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
-          spaces-key: ${{ secrets.SPACES_CI_KEY }}
-          spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
-          spaces-bucket: stamhoofd-ci-traces
-          spaces-region: ams3
-          state-key: incidents/${{ github.ref_name }}.json
-
-  notify_backend_apps:
-    name: 'Notify · Backend App Tests'
-    runs-on: ubuntu-latest
-    needs: [job_test_backend_apps, notify_backend_shared]
-    if: ${{ !cancelled() && needs.job_test_backend_apps.result == 'failure' && github.event_name != 'pull_request' }}
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/slack-notify
-        with:
-          mode: report-failure
-          job-label: 'Backend App Tests'
-          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
-          spaces-key: ${{ secrets.SPACES_CI_KEY }}
-          spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
-          spaces-bucket: stamhoofd-ci-traces
-          spaces-region: ams3
-          state-key: incidents/${{ github.ref_name }}.json
-
-  notify_components:
-    name: 'Notify · Components Browser Tests'
-    runs-on: ubuntu-latest
-    needs: [job_test_components_vitest, notify_backend_apps]
-    if: ${{ !cancelled() && needs.job_test_components_vitest.result == 'failure' && github.event_name != 'pull_request' }}
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/slack-notify
-        with:
-          mode: report-failure
-          job-label: 'Components Browser Tests'
-          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
-          spaces-key: ${{ secrets.SPACES_CI_KEY }}
-          spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
-          spaces-bucket: stamhoofd-ci-traces
-          spaces-region: ams3
-          state-key: incidents/${{ github.ref_name }}.json
-
-  notify_boot:
-    name: 'Notify · API boot and shutdown'
-    runs-on: ubuntu-latest
-    needs: [job_boot, notify_components]
-    if: ${{ !cancelled() && needs.job_boot.result == 'failure' && github.event_name != 'pull_request' }}
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/slack-notify
-        with:
-          mode: report-failure
-          job-label: 'API boot and shutdown'
-          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
-          spaces-key: ${{ secrets.SPACES_CI_KEY }}
-          spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
-          spaces-bucket: stamhoofd-ci-traces
-          spaces-region: ams3
-          state-key: incidents/${{ github.ref_name }}.json
-
-  notify_playwright:
-    name: 'Notify · Playwright Tests'
-    runs-on: ubuntu-latest
-    needs: [job_test_playwright, notify_boot]
-    if: ${{ !cancelled() && needs.job_test_playwright.result == 'failure' && github.event_name != 'pull_request' }}
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/slack-notify
-        with:
-          mode: report-failure
-          job-label: 'Playwright Tests'
-          trace-links-key: traces/${{ github.run_id }}/${{ github.run_attempt }}/slack-links.txt
-          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
-          spaces-key: ${{ secrets.SPACES_CI_KEY }}
-          spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
-          spaces-bucket: stamhoofd-ci-traces
-          spaces-region: ams3
-          state-key: incidents/${{ github.ref_name }}.json
-
-  # When every CI job succeeds on a PR, check whether the PR carries the
-  # "ready if CI succeeds" label. If it does and the PR is still a draft,
-  # convert it to ready-for-review automatically.
-  job_auto_ready:
-    name: 'Auto ready for review'
-    runs-on: ubuntu-latest
-    needs:
-      - job_setup
-      - job_build_shared
-      - job_test_shared
-      - job_test_lint_typecheck_checking
-      - job_test_backend_shared
-      - job_test_backend_apps
-      - job_test_components_vitest
-      - job_boot
-      - job_test_playwright
-    if: |
-      !cancelled() &&
-      github.event_name == 'pull_request' &&
-      needs.job_setup.outputs.in_stack_range == 'true' &&
-      !contains(needs.*.result, 'failure') &&
-      !contains(needs.*.result, 'cancelled')
-    permissions:
-      contents: write
-      pull-requests: write
-    steps:
-      - name: Mark ready if labelled
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          REPO: ${{ github.repository }}
-        run: |
-          IS_DRAFT=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json isDraft --jq '.isDraft')
-          HAS_LABEL=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json labels --jq '[.labels[].name] | contains(["ready if CI succeeds"])')
-          if [ "$IS_DRAFT" = "true" ] && [ "$HAS_LABEL" = "true" ]; then
-            gh pr ready "$PR_NUMBER" --repo "$REPO" || true
-            gh pr edit "$PR_NUMBER" --repo "$REPO" --remove-label "ready if CI succeeds" || true
-            echo "Marked PR #$PR_NUMBER as ready for review and removed the label"
-          else
-            echo "No action (isDraft=$IS_DRAFT, hasLabel=$HAS_LABEL)"
-          fi
-
-  # Recovery: runs after every job. When the run is fully green (no failures and
-  # at least one job actually ran) and an incident is open, post ✅ and close it.
-  job_notify_recovery:
-    name: 'Notify · recovery'
-    runs-on: ubuntu-latest
-    needs:
-      - job_setup
-      - job_build_shared
-      - job_test_shared
-      - job_test_lint_typecheck_checking
-      - job_test_backend_shared
-      - job_test_backend_apps
-      - job_test_components_vitest
-      - job_boot
-      - job_test_playwright
-    if: ${{ !cancelled() && github.event_name != 'pull_request' }}
-    permissions:
-      contents: read
-    steps:
-      - name: Determine overall result
-        id: status
-        env:
-          RESULTS: ${{ join(needs.*.result, ',') }}
-        run: |
-          echo "needs results: $RESULTS"
-          if printf '%s' "$RESULTS" | tr ',' '\n' | grep -qx 'failure'; then
-            echo "green=false" >> "$GITHUB_OUTPUT"
-          elif printf '%s' "$RESULTS" | tr ',' '\n' | grep -qx 'success'; then
-            echo "green=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "green=false" >> "$GITHUB_OUTPUT"
-          fi
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: steps.status.outputs.green == 'true'
-      - uses: ./.github/actions/slack-notify
-        if: steps.status.outputs.green == 'true'
-        with:
-          mode: report-recovery
-          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
-          spaces-key: ${{ secrets.SPACES_CI_KEY }}
-          spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
-          spaces-bucket: stamhoofd-ci-traces
-          spaces-region: ams3
-          state-key: incidents/${{ github.ref_name }}.json
+    # Recovery: runs after every job. When the run is fully green (no failures and
+    # at least one job actually ran) and an incident is open, post ✅ and close it.
+    job_notify_recovery:
+        name: "Notify · recovery"
+        runs-on: ubuntu-latest
+        needs:
+            - job_setup
+            - job_build_shared
+            - job_test_shared
+            - job_test_lint_typecheck_checking
+            - job_test_backend_shared
+            - job_test_backend_apps
+            - job_test_components_vitest
+            - job_boot
+            - job_test_playwright
+        if: ${{ !cancelled() && github.event_name != 'pull_request' }}
+        permissions:
+            contents: read
+        steps:
+            - name: Determine overall result
+              id: status
+              env:
+                  RESULTS: ${{ join(needs.*.result, ',') }}
+              run: |
+                  echo "needs results: $RESULTS"
+                  if printf '%s' "$RESULTS" | tr ',' '\n' | grep -qx 'failure'; then
+                    echo "green=false" >> "$GITHUB_OUTPUT"
+                  elif printf '%s' "$RESULTS" | tr ',' '\n' | grep -qx 'success'; then
+                    echo "green=true" >> "$GITHUB_OUTPUT"
+                  else
+                    echo "green=false" >> "$GITHUB_OUTPUT"
+                  fi
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              if: steps.status.outputs.green == 'true'
+            - uses: ./.github/actions/slack-notify
+              if: steps.status.outputs.green == 'true'
+              with:
+                  mode: report-recovery
+                  slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+                  slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+                  spaces-key: ${{ secrets.SPACES_CI_KEY }}
+                  spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+                  spaces-bucket: stamhoofd-ci-traces
+                  spaces-region: ams3
+                  state-key: incidents/${{ github.ref_name }}.json

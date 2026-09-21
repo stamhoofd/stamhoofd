@@ -1,5 +1,5 @@
-name: 'Setup Node & Yarn'
-description: 'Set up Node.js with the yarn download cache, pin the yarn version and install dependencies.'
+name: 'Setup Node & pnpm'
+description: 'Set up Node.js and the pinned pnpm version with a store cache, then install dependencies.'
 
 inputs:
   node-version:
@@ -7,7 +7,7 @@ inputs:
     required: false
     default: ''
   production:
-    description: 'Install production dependencies only (--production)'
+    description: 'Install production dependencies only (--prod)'
     required: false
     default: 'false'
 
@@ -19,11 +19,16 @@ runs:
       with:
         node-version: ${{ inputs.node-version }}
         node-version-file: '.nvmrc'
-        cache: 'yarn'
-        cache-dependency-path: 'yarn.lock'
-    - name: Use correct yarn version
+    - name: Use pinned pnpm version
       shell: bash
-      run: yarn policies set-version 1.22.19
+      run: corepack enable && corepack install
+    - name: Cache pnpm store
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: ${{ inputs.node-version }}
+        node-version-file: '.nvmrc'
+        cache: 'pnpm'
+        cache-dependency-path: 'pnpm-lock.yaml'
     - name: Install dependencies
       shell: bash
-      run: yarn install --prefer-offline --frozen-lockfile ${{ inputs.production == 'true' && '--production' || '' }}
+      run: pnpm install --frozen-lockfile ${{ inputs.production == 'true' && '--prod' || '' }}

@@ -13,7 +13,7 @@ import { info, success, warning } from '../../runtime/ux.js';
 
 export default class ReleasePublish extends Command {
     static summary = 'Publish release notes for the current version tag to GitHub';
-    static description = 'Generates release notes from the emoji commits since the previous version tag and creates (or updates) the matching GitHub release. When a new release is created it is also announced in the Slack #development channel, with the release notes posted as thread replies. Runs automatically as part of "yarn ship" after the git tags are pushed.';
+    static description = 'Generates release notes from the emoji commits since the previous version tag and creates (or updates) the matching GitHub release. When a new release is created it is also announced in the Slack #development channel, with the release notes posted as thread replies. Runs automatically as part of "pnpm ship" after the git tags are pushed.';
     static examples = [
         'stam release publish',
         'stam release publish --dry-run',

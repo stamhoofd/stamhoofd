@@ -42,7 +42,7 @@ export default class DocsMigrate extends BaseCommand {
         ];
 
         // stdio is inherited so the migrator's confirmation prompt works.
-        await run('yarn', ['workspace', 'docs-migration', '-s', 'start', ...passthrough], {
+        await run('pnpm', ['--dir', '.development/docs-migration', 'run', 'start', ...passthrough], {
             cwd: getProjectPath(),
             verbose: flags.verbose,
         });

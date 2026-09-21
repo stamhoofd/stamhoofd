@@ -77,7 +77,7 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
         logLevel: 'warn', // Options are 'info', 'warn', 'error', and 'silent'
         resolve: {
             dedupe: [
-                // When yarn linking packages - the issue is that dependencies are resolved to the local node_modules folder in the linked package
+                // Linked packages can resolve dependencies from their local node_modules folder.
                 // this can cause type issues because multiple versions of the same package are loaded
                 '@simonbackx/simple-encoding',
                 '@simonbackx/simple-database',
