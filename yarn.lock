@@ -3334,10 +3334,10 @@
   resolved "https://registry.yarnpkg.com/@nx/nx-win32-x64-msvc/-/nx-win32-x64-msvc-22.7.9.tgz#12418dc43d381e3baa02044bb5f524d25e7a4b37"
   integrity sha512-mwxvj3hDseNWtmmn9UvXyfCQPk/H+0PdstKTBsD9oMUn6NBi6SWERNKlv9QMu11EN7gQfkpSf2FxhEZcJa5fVw==
 
-"@oclif/core@4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-4.14.0.tgz#b5c46200788f95ce57809ddec1502ae0aa9abf2b"
-  integrity sha512-QCJIZoVJxV7jywgVAUlsQwl3dr3Sa21kfi5z9KrYolbexWJUtFSEtMoNiBWojD05mYycLnB50gp/VxlGdaOCRA==
+"@oclif/core@5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-5.0.0.tgz#1c91d74bc6e6a41aa9617aff2c938029e97a68b2"
+  integrity sha512-24ZsN528VButCtvqjBoHw7cEpqXZZILH7Zp0d8oFKrWbqU2BqYrxLd5aGU8LyqRev7CCjAHg+/m1Bewz4V7AmQ==
   dependencies:
     ansi-escapes "^4.3.2"
     ansis "^3.17.0"
