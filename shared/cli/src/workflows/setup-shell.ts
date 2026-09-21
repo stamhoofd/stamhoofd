@@ -23,7 +23,7 @@ export function buildShellSnippet(): string {
         '        if [ -f "$dir/shared/cli/bin/stam.js" ]; then',
         '            if [ ! -f "$dir/shared/cli/dist/index.js" ]; then',
         '                echo "stam: building CLI in $dir/shared/cli (first run)…" >&2',
-        '                yarn --cwd "$dir/shared/cli" -s build || return $?',
+        '                pnpm --dir "$dir/shared/cli" run build || return $?',
         '            fi',
         '            "$dir/shared/cli/bin/stam.js" "$@"',
         '            return $?',
@@ -94,7 +94,7 @@ export async function installShellFunction(rcFile: string): Promise<InstallShell
 }
 
 /**
- * Sets up the `stam` shell shortcut so you can drop the `yarn` prefix. With
+ * Sets up the `stam` shell shortcut so you can drop the `pnpm` prefix. With
  * dryRun, prints the snippet instead of editing any file.
  */
 export async function setupShellShortcut(options: { dryRun?: boolean; shell?: ShellKind } = {}): Promise<void> {

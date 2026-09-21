@@ -19,7 +19,7 @@ type Scenario = {
     user: User;
 };
 
-// Tagged @extra so it is excluded from the default (CI) run. Run it with: yarn stam test e2e --extra
+// Tagged @extra so it is excluded from the default (CI) run. Run it with: pnpm stam test e2e --extra
 test.describe('Import emergency contacts (organization mode) @import-emergency-contacts @extra', () => {
     test.beforeAll(() => {
         TestUtils.setPermanentEnvironment('userMode', 'organization');
