@@ -5,6 +5,7 @@
     "type": "module",
     "scripts": {
         "build": "tsc --build",
+        "lint": "eslint",
         "test": "yarn -s build && NODE_OPTIONS=--use-system-ca NODE_ENV=test STAMHOOFD_ENV=playwright DEBUG=pw:browser* playwright test -c dist",
         "test:extra": "PLAYWRIGHT_INCLUDE_EXTRA=1 yarn -s test --grep @extra",
         "test:trace": "yarn -s test --trace on"

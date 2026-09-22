@@ -15,7 +15,10 @@
         "#*.vue": "./src/*.vue",
         "#*.ts": "./src/*.ts"
     },
-    "scripts": {},
+    "scripts": {
+        "lint": "eslint",
+        "typecheck": "vue-tsc --noEmit"
+    },
     "dependencies": {
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/simple-errors": "1.5.0",

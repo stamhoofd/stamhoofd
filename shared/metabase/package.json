@@ -15,7 +15,11 @@
         "report"
     ],
     "scripts": {
-        "build": "tsc --build tsconfig.build.json"
+        "build": "tsc --build tsconfig.build.json",
+        "lint": "eslint",
+        "typecheck": "tsc --build tsconfig.test.json",
+        "test": "vitest",
+        "test:coverage": "vitest --coverage"
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "2.152.0",

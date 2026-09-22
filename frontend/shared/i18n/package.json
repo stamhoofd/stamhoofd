@@ -14,7 +14,10 @@
         "#*.ts": "./*.ts",
         "#*": "./*.ts"
     },
-    "scripts": {},
+    "scripts": {
+        "lint": "eslint",
+        "typecheck": "vue-tsc --noEmit"
+    },
     "dependencies": {
         "@simonbackx/vue-app-navigation": "2.25.1",
         "@stamhoofd/locales": "*",

@@ -34,9 +34,22 @@
     },
     "scripts": {
         "build": "tsc --build tsconfig.build.json --clean && yarn -s copy-assets && tsc --build tsconfig.build.json",
-        "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/ ./dist/src/",
+        "build:full": "yarn -s clear && yarn -s build",
         "build:playwright:pre": "yarn -s build && tsc --build tsconfig.test.json",
-        "test": "vitest"
+        "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
+        "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/ ./dist/src/",
+        "dev": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'yarn -s build --watch --preserveWatchOutput' \"yarn -s dev:watch\"",
+        "dev:backend": "yarn -s dev",
+        "dev:build": "yarn -s build",
+        "dev:full": "yarn -s dev",
+        "dev:watch": "wait-on ./dist/index.js && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../../shared/*/package.json' --watch '../../shared/*/dist/' --watch '../../shared/*/package.json' --ext .ts,.json,.sql,.js,.html --delay 2000ms --exec 'echo \"Restarting API...\" && exec node --enable-source-maps --use-system-ca ./dist/index.js' --signal SIGTERM",
+        "lint": "eslint",
+        "migrations": "yarn -s build:full && node ./dist/migrations.js",
+        "start": "yarn -s build && node --enable-source-maps ./dist/index.js",
+        "typecheck": "tsc --build tsconfig.test.json",
+        "test": "vitest",
+        "test:coverage": "vitest --coverage",
+        "test:reset": "yarn -s build:full && yarn -s test"
     },
     "dependencies": {
         "@aws-sdk/client-s3": "3.1135.0",

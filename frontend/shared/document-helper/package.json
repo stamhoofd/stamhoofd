@@ -3,7 +3,10 @@
     "version": "1.0.0",
     "private": true,
     "type": "module",
-    "scripts": {},
+    "scripts": {
+        "lint": "eslint",
+        "typecheck": "vue-tsc --noEmit"
+    },
     "dependencies": {
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-networking": "1.23.0",

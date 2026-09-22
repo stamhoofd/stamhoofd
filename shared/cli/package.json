@@ -23,7 +23,9 @@
     },
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
-        "test": "vitest"
+        "lint": "eslint .",
+        "test": "vitest run",
+        "test:coverage": "vitest --coverage"
     },
     "dependencies": {
         "@anthropic-ai/sdk": "0.124.0",

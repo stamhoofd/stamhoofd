@@ -3,7 +3,10 @@
     "version": "1.0.0",
     "private": true,
     "type": "module",
-    "scripts": {},
+    "scripts": {
+        "lint": "eslint",
+        "typecheck": "vue-tsc --noEmit"
+    },
     "dependencies": {
         "@stamhoofd/assets": "*",
         "@stamhoofd/frontend-i18n": "*",

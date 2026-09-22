@@ -308,7 +308,7 @@ jobs:
       - name: Run type checking
         run: yarn -s typecheck
       - name: Run type linting
-        run: yarn stam check lint
+        run: yarn -s lint
 
   job_test_components_vitest:
     name: 'Components Browser Tests'
