@@ -5,8 +5,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Group, Platform, RegistrationInvitation } from '@stamhoofd/models';
 import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import type { CountFilteredRequest, RegistrationInvitation as RegistrationInvitationStruct, StamhoofdFilter } from '@stamhoofd/structures';
-import { GroupType, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, assertSort } from '@stamhoofd/structures';
+import type { CountFilteredRequest, RegistrationInvitation as RegistrationInvitationStruct, StamhoofdFilter, StamhoofdKeyFilter } from '@stamhoofd/structures';
+import { GroupStatus, GroupType, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, assertSort } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
@@ -75,47 +75,70 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
             }
 
             if (organization) {
-                // Add organization scope filter
-                if (await Context.auth.canAccessAllMembersInCurrentPeriod(organization.id, permissionLevel)) {
-                    if (await Context.auth.hasFullAccess(organization.id, permissionLevel)) {
-                        // Can access full history for now
-                        scopeFilter = {
-                            organizationId: organization.id,
-                        };
-                    } else {
-                        // Can only access current period
-                        scopeFilter = {
+                // Add organization scope filter.
+                // Grants that cover a whole period or the whole organization never reach archived
+                // groups: canAccessGroup only allows those with full access.
+                const canAccessArchivedGroups = await Context.auth.canAccessArchivedGroups(organization.id);
+                const groupStateFilter: StamhoofdKeyFilter = canAccessArchivedGroups ? {} : { status: { $neq: GroupStatus.Archived } };
+
+                if (await Context.auth.canAccessAllMembersInEveryPeriod(organization.id, permissionLevel)) {
+                    scopeFilter = canAccessArchivedGroups
+                        ? { organizationId: organization.id }
+                        : {
+                                organizationId: organization.id,
+                                group: {
+                                    $elemMatch: groupStateFilter,
+                                },
+                            };
+                } else {
+                    const filters: StamhoofdFilter[] = [];
+                    const canAccessCurrentPeriod = await Context.auth.canAccessAllMembersInCurrentPeriod(organization.id, permissionLevel);
+
+                    if (canAccessCurrentPeriod) {
+                        filters.push({
                             organizationId: organization.id,
                             group: {
                                 $elemMatch: {
                                     periodId: organization.periodId,
+                                    ...groupStateFilter,
                                 },
                             },
-                        };
+                        });
                     }
-                } else {
-                    const groups = await Group.getAll(organization.id, organization.periodId, true, [GroupType.Membership, GroupType.EventRegistration]);
+
+                    // Check which groups we have access to and filter on those. These are added
+                    // next to the current period filter, not instead of it: a role can hold a
+                    // grant on a group of a period the organization already left.
+                    const groups = await Group.getAll(organization.id, null, true, [GroupType.Membership, GroupType.EventRegistration]);
                     Context.auth.cacheGroups(groups);
                     const groupIds: string[] = [];
 
                     for (const group of groups) {
+                        if (canAccessCurrentPeriod && group.periodId === organization.periodId) {
+                            continue;
+                        }
+
                         if (await Context.auth.canAccessGroup(group, permissionLevel)) {
                             groupIds.push(group.id);
                         }
                     }
 
-                    if (groupIds.length === 0) {
+                    if (groupIds.length > 0) {
+                        filters.push({
+                            groupId: {
+                                $in: groupIds,
+                            },
+                        });
+                    }
+
+                    if (filters.length === 0) {
                         throw Context.auth.error({
                             message: 'You must filter on a group of the organization you are trying to access',
                             human: $t(`%15g`),
                         });
                     }
 
-                    scopeFilter = {
-                        groupId: {
-                            $in: groupIds,
-                        },
-                    };
+                    scopeFilter = filters.length === 1 ? filters[0] : { $or: filters };
                 }
             }
         }

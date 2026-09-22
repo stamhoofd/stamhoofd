@@ -154,6 +154,14 @@ export class ContextPermissions {
         return this.hasAccessRight(AccessRight.ManageEmailTemplates);
     }
 
+    isPeriodInUse(periodId: string, organization: Organization): boolean {
+        if (periodId === organization.period.period.id) {
+            return true;
+        }
+
+        return STAMHOOFD.userMode !== 'organization' && periodId === this.platform.period.id;
+    }
+
     canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read, organization?: Organization | null) {
         if (organization === undefined || (organization === null && this.organization)) {
             organization = this.organization;
@@ -163,18 +171,13 @@ export class ContextPermissions {
             return this.hasFullPlatformAccess();
         }
 
-        if (group.periodId !== organization.period.period.id) {
-            if (STAMHOOFD.userMode === 'organization' || group.periodId !== this.platform.period.id) {
-                if (!this.hasFullAccess()) {
-                    return false;
-                }
-            }
-        }
-
-        const permissions = this.getPermissionsForOrganization(organization);
+        let permissions = this.getPermissionsForOrganization(organization);
         if (!permissions) {
             return false;
         }
+
+        const isPeriodInUse = this.isPeriodInUse(group.periodId, organization);
+        permissions = permissions.forPeriod(isPeriodInUse);
 
         if (permissions.hasResourceAccess(PermissionsResourceType.Groups, group.id, permissionLevel)) {
             return true;
@@ -190,12 +193,14 @@ export class ContextPermissions {
             }
         }
 
-        if (group.type === GroupType.EventRegistration && group.event && group.event.organizationId === organization.id) {
+        // Skip event fallback outside the current period: event access checks use $currentPeriod-scoped grants and would not succeed cross-period.
+        if (isPeriodInUse && group.type === GroupType.EventRegistration && group.event && group.event.organizationId === organization.id) {
             // we'll need to check the event permissions
             return this.canWriteEventForOrganization(group.event, organization);
         }
 
-        if (group.type === GroupType.WaitingList && group.parentGroup && group.parentGroup.type === GroupType.EventRegistration && group.parentGroup.event && group.parentGroup.event.organizationId === organization.id) {
+        // Skip waiting-list-of-event fallback outside the current period: the parent event's permission check would not succeed cross-period.
+        if (isPeriodInUse && group.type === GroupType.WaitingList && group.parentGroup && group.parentGroup.type === GroupType.EventRegistration && group.parentGroup.event && group.parentGroup.event.organizationId === organization.id) {
             // we'll need to check the event permissions
             return this.canWriteEventForOrganization(group.parentGroup.event, organization);
         }
