@@ -223,6 +223,9 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     @field({ decoder: PropertyFilter, nullable: true, version: 348 })
     nationalRegisterNumber: PropertyFilter | null = null;
 
+    /**
+     * Collect data for tax certificates for childcare expenses (Belgium only)
+     */
     @field({ decoder: BooleanDecoder, ...NextVersion })
     taxCertificates = false;
 
