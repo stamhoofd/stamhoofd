@@ -97,6 +97,7 @@
         "@vitest/coverage-v8": "^4.1.11",
         "chalk": "5.6.2",
         "concurrently": "^10.0.5",
+        "eslint": "10.10.0",
         "eslint-plugin-stamhoofd": "*",
         "lerna": "^9.0.7",
         "maildev": "^2.2.1",

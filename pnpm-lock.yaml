@@ -321,6 +321,9 @@ importers:
       concurrently:
         specifier: ^10.0.5
         version: 10.0.5
+      eslint:
+        specifier: 10.10.0
+        version: 10.10.0(jiti@2.7.0)(supports-color@5.5.0)
       eslint-plugin-stamhoofd:
         specifier: '*'
         version: link:shared/eslint
