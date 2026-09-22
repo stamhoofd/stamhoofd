@@ -1,13 +1,16 @@
+import { useAuth } from '#hooks/useAuth.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { Column } from '#tables/classes/Column.ts';
 import { useFetchRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
 import type { Organization, PlatformMembership, RegistrationPeriod } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { onMounted, shallowRef } from 'vue';
 
 type ObjectType = PlatformMembership;
 
 export function useGetPlatformMembershipColumns(organization: Organization | null = null) {
+    const auth = useAuth();
     const platform = usePlatform();
     const fetchRegistrationPeriods = useFetchRegistrationPeriods();
     const periods = shallowRef<RegistrationPeriod[]>([]);
@@ -155,55 +158,6 @@ export function useGetPlatformMembershipColumns(organization: Organization | nul
             enabled: true,
             allowSorting: false,
         }),
-        new Column<ObjectType, number>({
-            id: 'price',
-            name: $t(`%1IP`),
-            allowSorting: true,
-            getValue: m => m.price,
-            format: (price) => {
-                if (price === 0) {
-                    return $t(`%1Mn`);
-                }
-                return Formatter.price(price);
-            },
-            getStyle: v => v === 0 ? 'gray' : (v < 0 ? 'negative' : ''),
-            minimumWidth: 70,
-            recommendedWidth: 80,
-            enabled: false,
-        }),
-        new Column<ObjectType, number | null>({
-            id: 'balanceItem.priceOpen',
-            name: $t('%1Ni'),
-            getValue: m => m.balanceItem?.priceOpen ?? null,
-            format: p => p === null ? $t('%1OJ') : Formatter.price(p),
-            getStyle: p => p === null || p === 0 ? 'gray' : (p < 0 ? 'negative' : ''),
-            minimumWidth: 100,
-            recommendedWidth: 100,
-            enabled: false,
-            allowSorting: false,
-        }),
-        new Column<ObjectType, number | null>({
-            id: 'balanceItem.pricePaid',
-            name: $t('%1OD'),
-            getValue: m => m.balanceItem?.pricePaid ?? null,
-            format: p => Formatter.price(p ?? 0),
-            getStyle: p => p === null || p === 0 ? 'gray' : (p < 0 ? 'negative' : ''),
-            minimumWidth: 100,
-            recommendedWidth: 100,
-            enabled: false,
-            allowSorting: false,
-        }),
-        new Column<ObjectType, number | null>({
-            id: 'balanceItem.pricePending',
-            name: $t('%1OL'),
-            getValue: m => m.balanceItem?.pricePending ?? null,
-            format: p => Formatter.price(p ?? 0),
-            getStyle: p => p === null || p === 0 ? 'gray' : (p < 0 ? 'negative' : ''),
-            minimumWidth: 100,
-            recommendedWidth: 120,
-            enabled: false,
-            allowSorting: false,
-        }),
         new Column<ObjectType, Date>({
             id: 'createdAt',
             name: $t('%1Jc'),
@@ -249,6 +203,63 @@ export function useGetPlatformMembershipColumns(organization: Organization | nul
         }),
 
     ];
+
+    if (auth.hasAccessRight(AccessRight.MemberReadFinancialData)) {
+        columns.push(
+            new Column<ObjectType, number | null>({
+                id: 'balanceItem.priceOpen',
+                name: $t('%1Ni'),
+                getValue: m => m.balanceItem?.priceOpen ?? null,
+                format: p => p === null ? $t('%1OJ') : Formatter.price(p),
+                getStyle: p => p === null || p === 0 ? 'gray' : (p < 0 ? 'negative' : ''),
+                minimumWidth: 100,
+                recommendedWidth: 100,
+                enabled: false,
+                allowSorting: false,
+            }),
+            new Column<ObjectType, number | null>({
+                id: 'balanceItem.pricePaid',
+                name: $t('%1OD'),
+                getValue: m => m.balanceItem?.pricePaid ?? null,
+                format: p => Formatter.price(p ?? 0),
+                getStyle: p => p === null || p === 0 ? 'gray' : (p < 0 ? 'negative' : ''),
+                minimumWidth: 100,
+                recommendedWidth: 100,
+                enabled: false,
+                allowSorting: false,
+            }),
+            new Column<ObjectType, number | null>({
+                id: 'balanceItem.pricePending',
+                name: $t('%1OL'),
+                getValue: m => m.balanceItem?.pricePending ?? null,
+                format: p => Formatter.price(p ?? 0),
+                getStyle: p => p === null || p === 0 ? 'gray' : (p < 0 ? 'negative' : ''),
+                minimumWidth: 100,
+                recommendedWidth: 120,
+                enabled: false,
+                allowSorting: false,
+            }),
+            new Column<ObjectType, number | null>({
+                id: 'price',
+                name: $t(`%1IP`),
+                allowSorting: true,
+                getValue: m => m.price,
+                format: (price) => {
+                    if (price === null) {
+                        return '';
+                    }
+                    if (price === 0) {
+                        return $t(`%1Mn`);
+                    }
+                    return Formatter.price(price);
+                },
+                getStyle: v => v === null || v === 0 ? 'gray' : (v < 0 ? 'negative' : ''),
+                minimumWidth: 70,
+                recommendedWidth: 80,
+                enabled: false,
+            }),
+        );
+    }
 
     if (STAMHOOFD.userMode === 'platform') {
         columns.push(

@@ -4,8 +4,9 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Organization, PlatformMembership } from '@stamhoofd/structures';
-import { ExcelExportType } from '@stamhoofd/structures';
+import { AccessRight, ExcelExportType } from '@stamhoofd/structures';
 import { useContext } from '#hooks/useContext.ts';
+import { useAuth } from '#hooks/useAuth.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import type { TableAction, TableActionSelection } from '#tables/classes/TableAction.ts';
 import { AsyncTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
@@ -16,12 +17,14 @@ export function usePlatformMembershipActions() {
     const context = useContext();
     const owner = useRequestOwner();
     const organization = useOrganization();
+    const auth = useAuth();
 
     return new PlatformMembershipActionBuilder({
         present,
         context: context.value,
         owner,
         organization: organization.value,
+        financialAccess: auth.hasAccessRight(AccessRight.MemberReadFinancialData),
     });
 }
 
@@ -30,17 +33,20 @@ export class PlatformMembershipActionBuilder {
     context: SessionContext;
     owner: any;
     organization: Organization | null;
+    financialAccess: boolean;
 
     constructor(settings: {
         present: ReturnType<typeof usePresent>;
         context: SessionContext;
         owner: any;
         organization?: Organization | null;
+        financialAccess?: boolean;
     }) {
         this.present = settings.present;
         this.context = settings.context;
         this.owner = settings.owner;
         this.organization = settings.organization ?? null;
+        this.financialAccess = settings.financialAccess ?? false;
     }
 
     getActions(): TableAction<PlatformMembership>[] {
@@ -84,7 +90,7 @@ export class PlatformMembershipActionBuilder {
                     root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
                         type: ExcelExportType.PlatformMemberships,
                         filter: selection.filter,
-                        workbook: getSelectableWorkbook(this.organization),
+                        workbook: getSelectableWorkbook(this.organization, this.financialAccess),
                         configurationId: 'platform-memberships',
                         title: this.getExcelTitle(selection),
                     }),
