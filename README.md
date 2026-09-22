@@ -44,10 +44,34 @@ You can read the documentation of the most important building blocks of Stamhoof
 
 #### Node and pnpm
 
+- Clone the repository with Git or Jujutsu, both are supported.
 - Install a local Node version manager: [fnm](https://github.com/Schniz/fnm) or [nvm](https://github.com/nvm-sh/nvm).
-- Clone the repository and cd to the repository location. Run `source .development/install-node.sh` to install and use the Node version pinned in `.nvmrc`. The script uses fnm when available, otherwise it uses nvm, and prepares pnpm through Corepack.
-- The repository pins its pnpm version in the root `package.json`. If pnpm needs repair without reinstalling Node, run `corepack enable` followed by `corepack install`.
-- Run `pnpm install`, followed by `pnpm run build:shared`.
+- `cd` into the cloned repository. You should see `fnm` suggest the installation of the required Node version in case you don't already have it installed:
+
+```bash
+➜ cd stamhoofd
+Can't find an installed Node version matching v22.23.1.
+Do you want to install it? answer [y/N]: y
+Installing Node v22.23.1 (arm64)
+Using Node v22.23.1
+```
+
+- Run `corepack enable` which will lead to `pnpm` being available and you can run `pnpm install`. `corepack` will detect `pnpm` is not yet installed and offer to install it, after which it will continue with the installation of the dependencies:
+
+```bash
+➜ pnpm install
+! Corepack is about to download https://registry.npmjs.org/pnpm/-/pnpm-12.4.2.tgz
+? Do you want to continue? [Y/n]
+
+Downloading the pnpm 12.4.2 binary for darwin-arm64...
+Scope: all 52 workspace projects
+# ...
+Done in 31.6s using pnpm v12.4.2
+```
+
+*In case `corepack` does not offer to install `pnpm` for you, you can run `corepack install` manually.*
+
+Facing some further difficulties, you can also try using `.development/install-node.sh` which is a small installer script.
 
 #### Local development CLI
 
