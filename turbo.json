@@ -1,0 +1,134 @@
+{
+    "$schema": "https://turborepo.com/schema.json",
+    "globalDependencies": ["tsconfig*.json", "jest-extended.d.ts", "shared/stamhoofd.d.ts", "backend/stamhoofd.d.ts", ".nvmrc"],
+    "cacheDir": ".turbo/cache",
+    "tasks": {
+        "build": {
+            "cache": false,
+            "outputs": ["dist/**", "*.tsbuildinfo"]
+        },
+        "@stamhoofd/types#build": {
+            "dependsOn": ["^build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
+        "@stamhoofd/test-utils#build": {
+            "dependsOn": ["^build", "@stamhoofd/types#build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
+        "@stamhoofd/utility#build": {
+            "dependsOn": ["^build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
+        "@stamhoofd/metabase#build": {
+            "dependsOn": ["^build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
+        "@stamhoofd/cli#build": {
+            "dependsOn": ["^build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
+        "@stamhoofd/excel-writer#build": {
+            "dependsOn": ["^build", "@stamhoofd/utility#build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
+        "@stamhoofd/structures#build": {
+            "dependsOn": ["^build", "@stamhoofd/excel-writer#build", "@stamhoofd/types#build", "@stamhoofd/utility#build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
+        "@stamhoofd/sgv#build": {
+            "dependsOn": ["^build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
+        "@stamhoofd/object-differ#build": {
+            "dependsOn": ["^build", "@stamhoofd/structures#build", "@stamhoofd/utility#build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
+        "@stamhoofd/locales#build": {
+            "dependsOn": ["^build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true,
+            "env": ["LANG", "LC_ALL"]
+        },
+        "@stamhoofd/queues#build": {
+            "dependsOn": ["^build", "@stamhoofd/types#build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
+        "@stamhoofd/backend-env#build": {
+            "dependsOn": ["^build", "@stamhoofd/cli#build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
+        "@stamhoofd/backend-i18n#build": {
+            "dependsOn": ["^build", "@stamhoofd/locales#build", "@stamhoofd/structures#build", "@stamhoofd/types#build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
+        "@stamhoofd/sql#build": {
+            "dependsOn": ["^build", "@stamhoofd/structures#build", "@stamhoofd/types#build", "@stamhoofd/utility#build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
+        "@stamhoofd/email#build": {
+            "dependsOn": ["^build", "@stamhoofd/backend-i18n#build", "@stamhoofd/queues#build", "@stamhoofd/sql#build", "@stamhoofd/types#build", "@stamhoofd/utility#build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
+        "@stamhoofd/models#build": {
+            "dependsOn": ["^build", "@stamhoofd/backend-i18n#build", "@stamhoofd/email#build", "@stamhoofd/queues#build", "@stamhoofd/sql#build", "@stamhoofd/structures#build", "@stamhoofd/types#build", "@stamhoofd/utility#build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
+        "@stamhoofd/vies#build": {
+            "dependsOn": ["^build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
+        "@stamhoofd/logging#build": {
+            "dependsOn": ["^build", "@stamhoofd/types#build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
+        "@stamhoofd/crons#build": {
+            "dependsOn": ["^build", "@stamhoofd/utility#build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
+        "@stamhoofd/backend-middleware#build": {
+            "dependsOn": ["^build", "@stamhoofd/structures#build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
+        "dev": {
+            "cache": false,
+            "persistent": true
+        },
+        "lint": {
+            "cache": false
+        },
+        "typecheck": {
+            "cache": false
+        },
+        "test": {
+            "cache": false
+        },
+        "test:coverage": {
+            "cache": false
+        },
+        "migrations": {
+            "cache": false
+        },
+        "build:playwright": {
+            "cache": false
+        }
+    }
+}
