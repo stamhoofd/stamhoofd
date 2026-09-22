@@ -58,9 +58,15 @@ const props = withDefaults(
         configurableAccessRights?: AccessRight[] | null;
         saveHandler: (patch: AutoEncoderPatchType<PermissionRoleDetailed | PermissionRoleForResponsibility>) => void;
         getResources: (options: { period: RegistrationPeriod | null; organizationPeriod: OrganizationRegistrationPeriod | null; search: string }) => Resource[] | Promise<Resource[]>;
+        /**
+         * Set when getResources applies the search itself. The results are then reloaded on every
+         * search instead of being filtered again here, which would drop rows the search did match.
+         */
+        handlesSearch?: boolean;
     }>(), {
         inheritedRoles: () => [],
         configurableAccessRights: null,
+        handlesSearch: false,
     },
 );
 
@@ -108,12 +114,16 @@ async function loadResources() {
 }
 
 const throttledLoadResources = throttle(() => void loadResources(), 500);
-watch(searchQuery, () => throttledLoadResources());
+watch(searchQuery, () => {
+    if (props.handlesSearch) {
+        throttledLoadResources();
+    }
+});
 void loadResources();
 
 const filteredResources = computed(() => {
     const query = searchQuery.value.toLowerCase().trim();
-    if (!query) {
+    if (props.handlesSearch || !query) {
         return resources.value;
     }
     return resources.value.filter(r => r.name.toLowerCase().includes(query));

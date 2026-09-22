@@ -448,6 +448,7 @@ async function addEvents() {
                     role: patched.value,
                     inheritedRoles: props.inheritedRoles,
                     type: PermissionsResourceType.Events,
+                    handlesSearch: true,
                     getResources: async ({ period, search }: { period: RegistrationPeriod; search: string }) => {
                         const events = await searchEventsInPeriod({
                             period,
