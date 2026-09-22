@@ -4,8 +4,8 @@ import { ComponentWithProperties, ReactiveUrl } from '@simonbackx/vue-app-naviga
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import type { Checkout, CheckoutMethod, OrganizationMetaData, PatchAnswers, Webshop } from '@stamhoofd/structures';
-import { CheckoutMethodType } from '@stamhoofd/structures';
+import type { CartItem, Checkout, CheckoutMethod, OrganizationMetaData, PatchAnswers, Product, Webshop } from '@stamhoofd/structures';
+import { CheckoutMethodType, WebshopOrderMode } from '@stamhoofd/structures';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -18,6 +18,17 @@ export enum CheckoutStepType {
     Customer = 'Customer',
     Time = 'Time',
     Payment = 'Payment',
+    Details = 'Details',
+}
+
+/**
+ * Whether the bulk details step needs input for this item
+ */
+export function cartItemNeedsDetails(item: CartItem): boolean {
+    return item.product.optionMenus.length > 0
+        || item.product.customFields.length > 0
+        || item.product.enableCustomer
+        || item.productPrice.uitpasBaseProductPriceId !== null;
 }
 
 export class CheckoutStep {
@@ -64,12 +75,52 @@ export class CheckoutStepsManager {
         return new CheckoutStepsManager($checkoutManager);
     }
 
+    static seatsStepId(product: Product) {
+        return `seats-${product.id}`;
+    }
+
     /// Return all the steps that are confirmed with the current checkout configuration
     getSteps(): CheckoutStep[] {
         const webshop = this.$webshopManager.webshop;
         const checkout = this.$checkoutManager.checkout;
         const checkoutMethod = webshop.meta.checkoutMethods.find(m => m.id === checkout.checkoutMethod?.id) ?? (webshop.meta.checkoutMethods[0] as CheckoutMethod | undefined) ?? null;
         const steps: CheckoutStep[] = [];
+        const bulk = webshop.orderMode === WebshopOrderMode.Bulk;
+
+        // Bulk: seats per seated product, then the details of every item
+        const seatedProducts = bulk
+            ? webshop.products.filter(p => p.seatingPlanId !== null && checkout.cart.items.some(i => i.product.id === p.id))
+            : [];
+
+        for (const product of seatedProducts) {
+            const id = CheckoutStepsManager.seatsStepId(product);
+            steps.push(new CheckoutStep({
+                id,
+                url: '/checkout/seats/' + Formatter.slug(product.name),
+                getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './BulkSeatsView.vue').then(m => new ComponentWithProperties(m.default, { product })),
+                validate: (checkout) => {
+                    const missing = checkout.cart.items.filter(i => i.product.id === product.id && i.seats.length !== i.amount);
+                    if (missing.length > 0) {
+                        throw new SimpleError({
+                            code: 'invalid_seats',
+                            message: 'Missing seats',
+                            human: $t('Kies een plaats voor elk ticket van {product}', { product: product.name }),
+                            field: 'cart',
+                        });
+                    }
+                },
+            }));
+        }
+
+        steps.push(new CheckoutStep({
+            id: CheckoutStepType.Details,
+            url: '/checkout/' + CheckoutStepType.Details.toLowerCase(),
+            active: bulk && checkout.cart.items.some(i => cartItemNeedsDetails(i)),
+            getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './BulkItemDetailsView.vue').then(m => new ComponentWithProperties(m.default, {})),
+            validate: () => {
+                // Items are validated by validateCart at the start of getNextStep
+            },
+        }));
 
         steps.push(
             new CheckoutStep({
@@ -193,8 +244,11 @@ export class CheckoutStepsManager {
             await this.$webshopManager.reload();
         }
 
+        // Bulk: seats, options, fields and customers are collected in the first checkout steps, so don't require them before those are done
+        const detailsPending = this.$webshopManager.webshop.orderMode === WebshopOrderMode.Bulk && (stepId === undefined || stepId.startsWith('seats-'));
+
         try {
-            this.$checkoutManager.checkout.validateCart(this.$webshopManager.webshop, this.$webshopManager.organization.meta);
+            this.$checkoutManager.checkout.validateCart(this.$webshopManager.webshop, this.$webshopManager.organization.meta, false, { validateSeats: !detailsPending, validateDetails: !detailsPending });
         } finally {
             this.$checkoutManager.checkout.update(this.$webshopManager.webshop);
         }
@@ -238,18 +292,40 @@ export class CheckoutStepsManager {
     }
 
     /**
-     * Reload the webshop and navigate back to where the user can fix the cart: the cart view, or the product view when there is no cart.
+     * Reload the webshop, re-validate the cart and navigate back to where the user can fix the cart.
+     * Bulk: to the details step when it is active, otherwise to the product list. Cart: the cart view. Single: the product view.
      */
     async handleCartError(error: SimpleError | SimpleErrors, navigate: NavigationActions) {
-        await this.$webshopManager.reload();
-        const webshop = this.$webshopManager.webshop;
+        const webshopManager = this.$webshopManager;
+        await webshopManager.reload();
+
+        const webshop = webshopManager.webshop;
+        const cart = this.$checkoutManager.cart;
+
+        try {
+            // Stores recoverable errors on the items and drops invalid ones. Missing details are not an error yet in
+            // bulk mode: the details step collects and shows them.
+            cart.validate(webshop, false, { validateDetails: webshop.orderMode !== WebshopOrderMode.Bulk });
+        } catch (e) {
+            console.error(e);
+        }
+        this.$checkoutManager.saveCart();
+
+        if (webshop.orderMode === WebshopOrderMode.Bulk) {
+            const detailsStep = this.getSteps().find(s => s.id === (CheckoutStepType.Details as string));
+
+            if (detailsStep?.active && await this.popToUrl(navigate, detailsStep.url)) {
+                this.$checkoutManager.pendingCartError = error;
+                return;
+            }
+        }
 
         if (this.$checkoutManager.useRootNavigation) {
             // Back to the cart, or to the webshop itself when there is no cart
             if (!webshop.shouldEnableCart || !(await this.popToUrl(navigate, 'cart'))) {
                 await navigate.navigationController!.popToRoot({ force: true });
             }
-        } else if (!webshop.shouldEnableCart) {
+        } else if (webshop.orderMode === WebshopOrderMode.Bulk || !webshop.shouldEnableCart) {
             await navigate.dismiss({ force: true });
         } else {
             await navigate.navigationController!.popToRoot({ force: true });
