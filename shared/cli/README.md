@@ -73,6 +73,8 @@ Run `pnpm stam --help` or `pnpm stam <topic> --help` for command help.
 
 Shared builds in `stam build`, tests, migrations, and development sessions call the root `build:shared` Turbo graph. The development watcher uses nodemon and marks the shared build ready only after success; failed compilations can recover on the next edit. App startup waits for that ready marker. Use `stam dev` instead of the removed `build:shared:watch` script. `stam clean build` removes outputs but retains the local Turbo cache; use `pnpm run clear:shared && pnpm run build:shared --force` for a fresh compilation.
 
+The root and `stam check` lint and typecheck commands use Turbo to select all package scripts. These checks are intentionally uncached because backend TypeScript configurations can emit build metadata and declarations. A failure in any package fails the root command.
+
 `shared/cli` owns local development configuration. Backend and frontend development builds load domains, ports, database settings, storage settings, and app environment values from `@stamhoofd/cli`.
 
 The main config contract lives in `src/config/development-config.ts`. Keep local-development settings there first, then consume the resolved config from commands, workflows, Caddy, SSO, Stripe, status output, or app bootstrapping.
