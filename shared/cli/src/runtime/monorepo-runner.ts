@@ -84,11 +84,11 @@ export async function buildAll(context: CliContext): Promise<void> {
 }
 
 export async function lint(context: CliContext): Promise<void> {
-    await run('pnpm', ['exec', 'lerna', 'run', 'lint', '--', '--quiet'], { cwd: context.rootDir, env: { NX_DAEMON: 'false' }, verbosity: context.verbosity ?? RunVerbosity.Output });
+    await run('pnpm', ['run', 'lint'], { cwd: context.rootDir, verbosity: context.verbosity ?? RunVerbosity.Output });
 }
 
 export async function typecheck(context: CliContext): Promise<void> {
-    await run('pnpm', ['exec', 'lerna', 'run', 'typecheck'], { cwd: context.rootDir, env: { NX_DAEMON: 'false' }, verbosity: context.verbosity ?? RunVerbosity.Output });
+    await run('pnpm', ['run', 'typecheck'], { cwd: context.rootDir, verbosity: context.verbosity ?? RunVerbosity.Output });
 }
 
 export async function migrate(context: CliContext): Promise<void> {
