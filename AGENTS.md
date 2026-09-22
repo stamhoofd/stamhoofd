@@ -54,7 +54,7 @@ pnpm run clear && pnpm run clear-vite-cache && pnpm install && pnpm run build:sh
 
 ## Commands
 
-From repo root: `pnpm run lint` · `pnpm run typecheck`. **`pnpm stam test` is the one go-to way to run unit tests** — it runs `build:shared` first and only starts an isolated MySQL when a selected package needs one. Prefer it over your own commands; it does all required setup and teardown.
+From repo root: `pnpm run lint` · `pnpm run typecheck`. Both dispatch every package-owned check through Turbo and remain uncached. `pnpm run lint` forwards `--quiet` to ESLint. **`pnpm stam test` is the one go-to way to run unit tests** — it runs `build:shared` first and only starts an isolated MySQL when a selected package needs one. Prefer it over your own commands; it does all required setup and teardown.
 
 ```bash
 pnpm stam test unit                 # every unit package (excludes Playwright)

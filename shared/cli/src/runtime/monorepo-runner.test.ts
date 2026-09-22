@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CliContext } from '../context/create-context.js';
-import { run } from './command-runner.js';
-import { buildShared, sharedBuildReadyCommand, sharedBuildWatchCommand } from './monorepo-runner.js';
+import { run, RunVerbosity } from './command-runner.js';
+import { buildShared, lint, sharedBuildReadyCommand, sharedBuildWatchCommand, typecheck } from './monorepo-runner.js';
 
-vi.mock('./command-runner.js', () => ({ run: vi.fn() }));
+vi.mock('./command-runner.js', async importOriginal => ({ ...await importOriginal<typeof import('./command-runner.js')>(), run: vi.fn() }));
 
 const context: CliContext = {
     rootDir: '/repo',
@@ -29,6 +29,16 @@ describe('shared build orchestration', () => {
         vi.mocked(run).mockRejectedValueOnce(new Error('Compilation failed'));
 
         await expect(buildShared(context)).rejects.toThrow('Compilation failed');
+    });
+
+    it.each([
+        ['lint', lint],
+        ['typecheck', typecheck],
+    ] as const)('uses the root %s command and propagates failures', async (script, check) => {
+        vi.mocked(run).mockRejectedValueOnce(new Error('Check failed'));
+
+        await expect(check(context)).rejects.toThrow('Check failed');
+        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', ['run', script], { cwd: '/repo', verbosity: RunVerbosity.Output });
     });
 
     it('only publishes readiness after a successful build and keeps watching after errors', () => {
