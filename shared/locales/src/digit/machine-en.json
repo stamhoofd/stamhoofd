@@ -1395,6 +1395,18 @@
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Ravot. Voor Microsoft kan je",
     "translation": "Make sure users can log in via your own account system, separate from Ravot. For Microsoft you can"
   },
+  "%Zr0": {
+    "original": "Deze groep is nog niet gestart met het werkjaar {period}, waarin deze startdatum valt. Je kan de inschrijvingen van deze activiteit pas naar dat werkjaar verplaatsen als het gestart is.",
+    "translation": "This group hasn't started the work year {period}, which includes this start date. You can only move the registrations of this activity to that work year once it has started."
+  },
+  "%Zro": {
+    "original": "Deze groep is nog niet gestart met het werkjaar {period}, waarin deze activiteit valt. Start eerst dat werkjaar, daarna kan je hier inschrijvingen voor verzamelen.",
+    "translation": "This group has not yet started the work year {period}, which this activity falls under. Start that work year first, then you can collect registrations for this activity."
+  },
+  "%Zru": {
+    "original": "Deze groep",
+    "translation": "This group"
+  },
   "%a6": {
     "original": "Portaal voor beroepsmedewerkers",
     "translation": "Portal for staff members"

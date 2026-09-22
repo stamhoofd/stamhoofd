@@ -45,7 +45,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: 'invalid_period',
                 message: 'No period found for this start date: ' + Formatter.dateIso(event.startDate),
-                human: $t('Er bestaat nog geen werkjaar dat de startdatum van deze activiteit bevat. Je kan hier pas inschrijvingen voor verzamelen als dat werkjaar is aangemaakt. Kies anders een andere startdatum.'),
+                human: $t('%ZrY'),
                 field: 'startDate',
             });
         }

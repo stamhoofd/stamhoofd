@@ -66,9 +66,9 @@
                 <template v-if="showTaxDependent">
                     <Checkbox v-model="taxDependent" data-testid="tax-dependent-checkbox">
                         <p>
-                            {{ $t('{lid} is fiscaal ten laste van {name} (enkel voor gezinshoofd of fiscaal co-ouderschap)', {
-                                lid: props.member?.member.details.firstName ?? $t('lid'),
-                                name: firstName || $t('deze ouder')
+                            {{ $t('%ZrH', {
+                                lid: props.member?.member.details.firstName ?? $t('%79'),
+                                name: firstName || $t('%15U')
                             }) }}
                         </p>
                         <p class="style-description-small">
@@ -227,7 +227,7 @@ const nrnRequiredMessage = computed(() => {
         return null;
     }
 
-    return $t('Vul een rijksregisternummer in. Deze ouder heeft ook {names} fiscaal ten laste, dus dit nummer is nodig voor dat attest.', { names: otherTaxDependentMemberNames.value });
+    return $t('%Zr8', { names: otherTaxDependentMemberNames.value });
 });
 
 const firstName = computed({
@@ -279,17 +279,17 @@ const taxDependent = computed({
 
         if (taxDependent && otherTaxDependentParents.length >= 2) {
             new CenteredMessage(
-                $t('Maximaal twee ouders kunnen dit lid fiscaal ten laste hebben'),
-                $t('Vink het eerst uit bij een andere ouder. Twee ouders zijn enkel mogelijk bij gescheiden ouders met fiscaal co-ouderschap.'),
+                $t('%ZrK'),
+                $t('%Zrd'),
             ).addCloseButton().show();
             return;
         }
 
         if (otherTaxDependentParents.length > 0 && taxDependent) {
             CenteredMessage.confirm({
-                title: $t('Ben je zeker dat er sprake is van fiscaal co-ouderschap?'),
-                description: $t('Dit is enkel nodig als beide ouders gescheiden zijn'),
-                confirmText: $t('Ik ben zeker'),
+                title: $t('%Zqz'),
+                description: $t('%Zrp'),
+                confirmText: $t('%ZlX'),
             }).then((isSure) => {
                 if (isSure) addPatch({ taxDependent });
             }).catch(console.error);

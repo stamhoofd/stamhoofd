@@ -137,13 +137,13 @@ useValidation(errors.validator, () => {
         if (taxDependentParents.length === 0) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Zorg dat er minstens één ouder het lid fiscaal ten laste heeft. Voeg daar dan een rijksregisternummer toe.`),
+                message: $t(`%Zrb`),
                 field: 'parents',
             }));
         } else if (!taxDependentParents.every(p => !!p.nationalRegisterNumber)) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t('Voeg een rijksregisternummer toe bij de ouder die het lid fiscaal ten laste heeft.'),
+                message: $t('%Zrv'),
                 field: 'parents',
             }));
         }

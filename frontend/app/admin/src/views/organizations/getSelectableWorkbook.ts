@@ -44,7 +44,7 @@ export function getSelectableWorkbook(_platform: Platform) {
                     }),
                     new SelectableColumn({
                         id: 'website',
-                        name: $t('Website'),
+                        name: $t('%Zr2'),
                     }),
                     ...flattenedCategories.flatMap((category) => {
                         return category.getAllRecords().flatMap((record) => {

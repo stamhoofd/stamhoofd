@@ -42,8 +42,8 @@ export class InvoiceService {
                 code: 'invalid_invoiced_amount',
                 message: 'Cannot invoice zero',
                 human: struct.items.length === 0
-                    ? $t('Een factuur van 0 euro kan niet aangemaakt worden. Maak in dat geval een aankoopbewijs aan.')
-                    : $t('Een factuur of aankoopbewijs van 0 euro met items kan nog niet aangemaakt worden.'),
+                    ? $t('%ZrR')
+                    : $t('%ZrN'),
                 statusCode: 400,
             });
         }
@@ -52,7 +52,7 @@ export class InvoiceService {
             throw new SimpleError({
                 code: 'missing_payments',
                 message: 'Cannot create a zero receipt without payments',
-                human: $t('Een aankoopbewijs van 0 euro kan enkel aangemaakt worden voor betalingen.'),
+                human: $t('%Zs6'),
             });
         }
 

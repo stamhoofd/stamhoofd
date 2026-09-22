@@ -3,9 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>{{#if invoice.number}}{{#if isReceipt}}{{$t "Aankoopbewijs"}}{{else if isRefundReceipt}}{{$t "Terugbetalingsbewijs"}}{{else if isCreditNote}}{{$t "Creditnota"}}{{else}}{{$t "Factuur"}}{{/if}}
-        {{invoice.number}}{{else}}{{#if isReceipt}}{{$t "Pro-forma aankoopbewijs"}}{{else if isRefundReceipt}}{{$t "Pro-forma terugbetalingsbewijs"}}{{else if isCreditNote}}{{$t "Pro-forma creditnota"}}{{else}}{{$t "Pro-forma
-        factuur"}}{{/if}}{{/if}}</title>
+    <title>{{#if invoice.number}}{{#if isReceipt}}{{$t "%ZqH"}}{{else if isRefundReceipt}}{{$t "%ZqP"}}{{else if isCreditNote}}{{$t "%1aE"}}{{else}}{{$t "%1Zw"}}{{/if}}
+        {{invoice.number}}{{else}}{{#if isReceipt}}{{$t "%Zr5"}}{{else if isRefundReceipt}}{{$t "%ZrZ"}}{{else if isCreditNote}}{{$t "%Zrq"}}{{else}}{{$t "%Zs7"}}{{/if}}{{/if}}</title>
     <style>
         @font-face {
             font-family: 'Metropolis';
@@ -51,7 +50,7 @@
             }
 
             @bottom-right {
-                content: "{{$t " Pagina"}} " counter(page);
+                content: "{{$t "%ZrI"}} " counter(page);
                 font-family: 'Metropolis', system-ui, sans-serif;
                 font-weight: 500;
                 font-size: 8.5pt;
@@ -478,10 +477,9 @@ where the rule starts at x = 28 mm (skipping the # column). */
                     <div class="invoice-title-row">
                         <span class="label">
                             {{#if invoice.number}}
-                            {{#if isReceipt}}{{$t "Aankoopbewijs"}}{{else if isRefundReceipt}}{{$t "Terugbetalingsbewijs"}}{{else if isCreditNote}}{{$t "Creditnota"}}{{else}}{{$t "Factuur"}}{{/if}}
+                            {{#if isReceipt}}{{$t "%ZqH"}}{{else if isRefundReceipt}}{{$t "%ZqP"}}{{else if isCreditNote}}{{$t "%1aE"}}{{else}}{{$t "%1Zw"}}{{/if}}
                             {{else}}
-                            {{#if isReceipt}}{{$t "Pro-forma aankoopbewijs"}}{{else if isRefundReceipt}}{{$t "Pro-forma terugbetalingsbewijs"}}{{else if isCreditNote}}{{$t "Pro-forma creditnota"}}{{else}}{{$t "Pro-forma
-                            factuur"}}{{/if}}
+                            {{#if isReceipt}}{{$t "%Zr5"}}{{else if isRefundReceipt}}{{$t "%ZrZ"}}{{else if isCreditNote}}{{$t "%Zrq"}}{{else}}{{$t "%ZrB"}}{{/if}}
                             {{/if}}
                         </span>
                         {{#if invoice.number}}
@@ -490,13 +488,13 @@ where the rule starts at x = 28 mm (skipping the # column). */
                     </div>
 
                     <div class="date-row">
-                        <span class="label">{{$t "Datum"}}</span>
+                        <span class="label">{{$t "%7R"}}</span>
                         <span class="value">{{formatDate invoice.meta.date}}</span>
                     </div>
 
                     {{#if showDueDate}}
                     <div class="date-row">
-                        <span class="label">{{$t "Vervaldatum"}}</span>
+                        <span class="label">{{$t "%1J7"}}</span>
                         <span class="value">{{formatDate dueDate}}</span>
                     </div>
                     {{/if}}
@@ -511,15 +509,15 @@ where the rule starts at x = 28 mm (skipping the # column). */
 
                     <div class="customer-label">
                         {{#if invoice.number}}
-                        {{#if isCreditNote}}{{$t "Voor"}}{{else if isReceipt}}{{$t "Voor"}}{{else if isRefundReceipt}}{{$t "Voor"}}{{else}}{{$t "Factuur voor"}}{{/if}}
+                        {{#if isCreditNote}}{{$t "%b7"}}{{else if isReceipt}}{{$t "%b7"}}{{else if isRefundReceipt}}{{$t "%b7"}}{{else}}{{$t "%Zrl"}}{{/if}}
                         {{else}}
-                        {{$t "Voor"}}
+                        {{$t "%b7"}}
                         {{/if}}
                     </div>
                     <div class="customer-details">
                         <p>{{invoice.customer.name}}</p>
                         {{#if invoice.customer.contactName }}
-                            <p>{{ $t "T.a.v. "}} {{invoice.customer.contactName}}</p>
+                            <p>{{ $t "%ZrA"}} {{invoice.customer.contactName}}</p>
                         {{/if}}
                         {{#if invoice.customer.address }}
                             <p>{{invoice.customer.address}}</p>
@@ -528,7 +526,7 @@ where the rule starts at x = 28 mm (skipping the # column). */
                             <p>{{invoice.customer.companyNumber}}</p>
                         {{/if}}
                         {{#if invoice.customer.VATNumber}}
-                            <p>{{#if invoice.customer.companyNumber}}{{$t "BTW"}}: {{/if}}{{invoice.customer.VATNumber}}</p>
+                            <p>{{#if invoice.customer.companyNumber}}{{$t "%1JE"}}: {{/if}}{{invoice.customer.VATNumber}}</p>
                         {{/if}}
                     </div>
                 </div>
@@ -541,7 +539,7 @@ where the rule starts at x = 28 mm (skipping the # column). */
         {{!-- ============================================================== --}}
         <main class="invoice-body">
             {{#if showPayments}}
-            <p class="item-desc">{{$t "Er werden geen goederen of diensten geleverd. Dit document boekt de volgende betalingen, die elkaar opheffen."}}</p>
+            <p class="item-desc">{{$t "%Zs3"}}</p>
             <table class="items-table">
                 <colgroup>
                     <col class="c-date">
@@ -550,9 +548,9 @@ where the rule starts at x = 28 mm (skipping the # column). */
                 </colgroup>
                 <thead>
                     <tr>
-                        <th class="col-date">{{$t "Datum"}}</th>
-                        <th class="col-desc">{{$t "Betaling"}}</th>
-                        <th class="col-total">{{$t "Bedrag"}}</th>
+                        <th class="col-date">{{$t "%7R"}}</th>
+                        <th class="col-desc">{{$t "%kP"}}</th>
+                        <th class="col-total">{{$t "%1JL"}}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -584,12 +582,12 @@ where the rule starts at x = 28 mm (skipping the # column). */
                 <thead>
                     <tr>
                         <th class="col-num">#</th>
-                        <th class="col-desc">{{$t "Omschrijving"}}</th>
+                        <th class="col-desc">{{$t "%ZrF"}}</th>
                         {{#if invoice.meta.hasMultipleVATRates}}
-                        <th class="col-vat">{{$t "BTW %"}}</th>
+                        <th class="col-vat">{{$t "%1KU"}}</th>
                         {{/if}}
-                        <th class="col-unit">{{$t "Per stuk"}}</th>
-                        <th class="col-total">{{$t "Totaal"}}</th>
+                        <th class="col-unit">{{$t "%ZrP"}}</th>
+                        <th class="col-total">{{$t "%xL"}}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -624,9 +622,9 @@ where the rule starts at x = 28 mm (skipping the # column). */
                         <table class="vat-breakdown">
                             <thead>
                                 <tr>
-                                    <th class="col-rate">{{$t "BTW %"}}</th>
-                                    <th class="col-amount">{{$t "Excl. BTW"}}</th>
-                                    <th class="col-amount">{{$t "BTW"}}</th>
+                                    <th class="col-rate">{{$t "%1KU"}}</th>
+                                    <th class="col-amount">{{$t "%1KV"}}</th>
+                                    <th class="col-amount">{{$t "%1JE"}}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -643,18 +641,18 @@ where the rule starts at x = 28 mm (skipping the # column). */
                 </div>
                 <div class="totals">
                     <div class="row">
-                        <span class="label">{{$t "Totaal excl. btw"}}</span>
+                        <span class="label">{{$t "%Zrj"}}</span>
                         <span class="value">{{formatPrice invoice.meta.priceWithoutVAT}}</span>
                     </div>
                     {{#if showPayments}}
                     {{else if invoice.meta.hasMultipleVATRates}}
                         <div class="row">
-                            <span class="label">{{$t "BTW"}}</span>
+                            <span class="label">{{$t "%1JE"}}</span>
                             <span class="value">{{formatPrice invoice.meta.VAT}}</span>
                         </div>
                     {{else}}
                         <div class="row">
-                            <span class="label">{{$t "BTW"}} ({{invoice.meta.singleVATRateLabel}})</span>
+                            <span class="label">{{$t "%1JE"}} ({{invoice.meta.singleVATRateLabel}})</span>
                             <span class="value">{{formatPrice invoice.meta.VAT}}</span>
                         </div>
                         {{#if invoice.meta.vatExcemptNote}}
@@ -666,12 +664,12 @@ where the rule starts at x = 28 mm (skipping the # column). */
                     {{/if}}
                     {{#if hasRoundingAmount}}
                     <div class="row">
-                        <span class="label">{{$t "Afrondingsverschil"}}</span>
+                        <span class="label">{{$t "%ZrJ"}}</span>
                         <span class="value">{{formatPrice invoice.meta.payableRoundingAmount}}</span>
                     </div>
                     {{/if}}
                     <div class="row total">
-                        <span class="label">{{$t "Totaal incl. BTW"}}</span>
+                        <span class="label">{{$t "%1KL"}}</span>
                         <span class="value">{{formatPrice invoice.meta.totalPrice}}</span>
                     </div>
                 </div>
@@ -679,7 +677,7 @@ where the rule starts at x = 28 mm (skipping the # column). */
 
             {{#if invoice.comments}}
             <div class="comments">
-                <div class="comments-label">{{$t "Opmerkingen"}}</div>
+                <div class="comments-label">{{$t "%YT"}}</div>
                 <p class="comments-text">{{invoice.comments}}</p>
             </div>
             {{/if}}
@@ -695,21 +693,21 @@ where the rule starts at x = 28 mm (skipping the # column). */
                     <span class="text">
                         {{#unless invoice.number}}
                         {{#if isReceipt}}
-                        {{$t "Druk dit document niet af. Dit is nog geen officieel aankoopbewijs"}}
+                        {{$t "%ZrV"}}
                         {{else if isRefundReceipt}}
-                        {{$t "Druk dit document niet af. Dit is nog geen officieel terugbetalingsbewijs"}}
+                        {{$t "%Zr9"}}
                         {{else}}
-                        {{$t "Druk dit document niet af. Dit is nog geen officiële factuur"}}
+                        {{$t "%Zrs"}}
                         {{/if}}
                         {{else}}
                         {{#if isReceipt}}
-                        {{$t "Hou dit aankoopbewijs bij voorkeur digitaal bij"}}
+                        {{$t "%Zrk"}}
                         {{else if isRefundReceipt}}
-                        {{$t "Hou dit terugbetalingsbewijs bij voorkeur digitaal bij"}}
+                        {{$t "%Zqw"}}
                         {{else if isCreditNote}}
-                        {{$t "Hou deze creditnota bij voorkeur digitaal bij"}}
+                        {{$t "%ZrU"}}
                         {{else}}
-                        {{$t "Hou deze factuur bij voorkeur digitaal bij"}}
+                        {{$t "%Zrw"}}
                         {{/if}}
                         {{/unless}}
                     </span>
@@ -722,7 +720,7 @@ where the rule starts at x = 28 mm (skipping the # column). */
                         <path fill-rule="evenodd" clip-rule="evenodd"
                             d="M6 12C9.31371 12 12 9.31371 12 6C12 2.68629 9.31371 0 6 0C2.68629 0 0 2.68629 0 6C0 9.31371 2.68629 12 6 12ZM8.88815 4.54879C9.08076 4.27914 9.0183 3.90441 8.74865 3.71181C8.479 3.5192 8.10427 3.58165 7.91167 3.8513L5.3881 7.3843L4.07991 5.64005C3.88109 5.37495 3.50501 5.32122 3.23991 5.52005C2.97481 5.71887 2.92109 6.09495 3.11991 6.36005L4.91991 8.76005C5.0347 8.91309 5.21559 9.00223 5.40689 9C5.59818 8.99778 5.77695 8.90446 5.88815 8.74879L8.88815 4.54879Z" />
                     </svg>
-                    <span class="text">{{#if isReceipt}}{{$t "Dit aankoopbewijs werd al betaald via"}}{{else}}{{$t "Deze factuur werd al betaald via"}}{{/if}} {{payment.methodName}}</span>
+                    <span class="text">{{#if isReceipt}}{{$t "%Zqx"}}{{else}}{{$t "%Zr3"}}{{/if}} {{payment.methodName}}</span>
                 </div>
                 {{/if}}
 
@@ -732,7 +730,7 @@ where the rule starts at x = 28 mm (skipping the # column). */
                         <path fill-rule="evenodd" clip-rule="evenodd"
                             d="M1.71429 0.714233C0.767512 0.714233 0 1.48174 0 2.42852V2.85714H12V2.42852C12 1.48175 11.2325 0.714233 10.2857 0.714233H1.71429ZM12 4.57143H0V7.57138C0 8.51815 0.767512 9.28566 1.71429 9.28566H10.2857C11.2325 9.28566 12 8.51815 12 7.57138V4.57143Z" />
                     </svg>
-                    <span class="text">{{$t "Over te schrijven op"}} {{sender.bankAccount}}<br>{{$t "Met mededeling"}} {{payment.transferDescription}}</span>
+                    <span class="text">{{$t "%Zrg"}} {{sender.bankAccount}}<br>{{$t "%Zr7"}} {{payment.transferDescription}}</span>
                 </div>
                 {{/if}}
 
@@ -742,7 +740,7 @@ where the rule starts at x = 28 mm (skipping the # column). */
                         <path fill-rule="evenodd" clip-rule="evenodd"
                             d="M1.71429 0.714233C0.767512 0.714233 0 1.48174 0 2.42852V2.85714H12V2.42852C12 1.48175 11.2325 0.714233 10.2857 0.714233H1.71429ZM12 4.57143H0V7.57138C0 8.51815 0.767512 9.28566 1.71429 9.28566H10.2857C11.2325 9.28566 12 8.51815 12 7.57138V4.57143Z" />
                     </svg>
-                    <span class="text">{{$t "De betaling gebeurt automatisch via domiciliëring"}}</span>
+                    <span class="text">{{$t "%Zs9"}}</span>
                 </div>
                 {{/if}}
 
@@ -752,12 +750,12 @@ where the rule starts at x = 28 mm (skipping the # column). */
                         <path fill-rule="evenodd" clip-rule="evenodd"
                             d="M6 12C9.31371 12 12 9.31371 12 6C12 2.68629 9.31371 0 6 0C2.68629 0 0 2.68629 0 6C0 9.31371 2.68629 12 6 12ZM8.88815 4.54879C9.08076 4.27914 9.0183 3.90441 8.74865 3.71181C8.479 3.5192 8.10427 3.58165 7.91167 3.8513L5.3881 7.3843L4.07991 5.64005C3.88109 5.37495 3.50501 5.32122 3.23991 5.52005C2.97481 5.71887 2.92109 6.09495 3.11991 6.36005L4.91991 8.76005C5.0347 8.91309 5.21559 9.00223 5.40689 9C5.59818 8.99778 5.77695 8.90446 5.88815 8.74879L8.88815 4.54879Z" />
                     </svg>
-                    <span class="text">{{$t "Het bedrag werd reeds ingehouden van jouw Stripe balans."}}</span>
+                    <span class="text">{{$t "%ZrW"}}</span>
                 </div>
                 {{/if}}
 
                 {{#if (or isReceipt isRefundReceipt)}}
-                <p class="not-invoice">{{$t "Dit is geen factuur"}}</p>
+                <p class="not-invoice">{{$t "%Zs1"}}</p>
                 {{/if}}
             </div>
         </footer>

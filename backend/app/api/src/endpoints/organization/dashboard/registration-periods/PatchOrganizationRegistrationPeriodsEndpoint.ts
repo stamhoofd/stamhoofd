@@ -688,8 +688,8 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             throw new SimpleError({
                 code: 'missing_organization_period',
                 message: `Organization ${organizationId} has not started period ${period.id}`,
-                human: $t('{organization} is nog niet gestart met het werkjaar {period}, daarom kan je hier geen inschrijvingen in aanmaken. Start eerst dat werkjaar, of kies een datum die in een werkjaar valt dat al gestart is.', {
-                    organization: organization?.name ?? $t('Deze #groep'),
+                human: $t('%Zrr', {
+                    organization: organization?.name ?? $t('%Zru'),
                     period: period.getStructure().nameShort,
                 }),
                 // Only set when patching an event: the period of an event group follows from the

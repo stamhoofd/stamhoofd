@@ -39,10 +39,6 @@
     "original": "Voeg minstens één ouder toe",
     "translation": "Add at least one parent"
   },
-  "%108": {
-    "original": "Voeg bij minstens één ouder een rijksregisternummer toe.",
-    "translation": "Add a national registration number to at least one parent."
-  },
   "%109": {
     "original": "Verenigingseigenfuncties",
     "translation": "Custom association roles"
@@ -1834,10 +1830,6 @@
   "%17Z": {
     "original": "niet aangevinkt",
     "translation": "unchecked"
-  },
-  "%17a": {
-    "original": "Als je ook de oudergegevens inschakelt, wordt zowel het rijksregisternummer van het lid als dat van de ouders gevraagd (minstens één ouder).",
-    "translation": "If you also enable parent data, the national registration number of both the member and the parents will be requested (at least one parent)."
   },
   "%17b": {
     "original": "Geen internetverbinding. Klik om te herladen.",
@@ -5899,10 +5891,6 @@
     "original": "Stappenplan",
     "translation": "Step-by-step plan"
   },
-  "%1Od": {
-    "original": "Er bestaat al een ander ticket met hetzelfde zaalplan maar een andere datum. Dit zal niet werken omdat de gereserveerde plaatsen tussen beide tickets niet gedeeld zijn. Gebruik in plaats daarvan keuzemenu's in hetzelfde ticket (bv. volwassenen, kinderen, vrijwilligers). Lees de documentatie rond zetelselectie goed door voor meer informatie.",
-    "translation": "There is already another ticket with the same seating plan but a different date. This will not work because the reserved seats are not shared between both tickets. Please use selection menus in the same ticket instead (e.g. adults, children, volunteers). Be sure to read the documentation on seat selection for more information."
-  },
   "%1Oe": {
     "original": "Dit lidnummer is al in gebruik",
     "translation": "This member number is already in use"
@@ -6747,10 +6735,6 @@
     "original": "Deze items stonden nog op ‘te betalen’. Bespaar jezelf wat werk door deze mee af te rekenen. Alle prijzen zijn inclusief BTW.",
     "translation": "These items were still marked as ‘to be paid’. Settle them now and save yourself some work. All prices include VAT."
   },
-  "%1Sp": {
-    "original": "Daarnaast werden {count} te factureren bedragen uitgesteld omwille van een laag bedrag (minder dan één euro).",
-    "translation": "Additionally, {count} chargeable amounts were postponed due to a low amount (less than one euro)."
-  },
   "%1Sq": {
     "original": "Dit vult de nummering langs links aan met nullen zodat de nummers altijd dezelfde lengte hebben.",
     "translation": "This pads the numbering from the left with zeros so that the numbers all have the same length."
@@ -6982,10 +6966,6 @@
   "%1U3": {
     "original": "per stuk / ticket",
     "translation": "per item / ticket"
-  },
-  "%1U4": {
-    "original": "Daarnaast werd een te factureren bedrag uitgesteld omwille van een laag bedrag (minder dan één euro).",
-    "translation": "Additionally, an invoice amount was postponed due to a low amount (less than one euro)."
   },
   "%1U5": {
     "original": "Zonder feitelijke verenigingen",
@@ -15791,10 +15771,6 @@
     "original": "Jouw naam",
     "translation": "Your name"
   },
-  "%Uz": {
-    "original": "Optioneel voor beheerders",
-    "translation": "Optional for administrators"
-  },
   "%V0": {
     "original": "Vul het leveringsadres in",
     "translation": "Enter the delivery address"
@@ -20199,13 +20175,233 @@
     "original": "Deze betaalmethode is geblokkeerd en kan niet meer gebruikt worden. Voeg een nieuwe betaalmethode toe.",
     "translation": "This payment method is blocked and can no longer be used. Please add a new payment method."
   },
+  "%Zqw": {
+    "original": "Hou dit terugbetalingsbewijs bij voorkeur digitaal bij",
+    "translation": "Preferably keep this reimbursement receipt in digital form."
+  },
+  "%Zqx": {
+    "original": "Dit aankoopbewijs werd al betaald via",
+    "translation": "This purchase receipt has already been paid via"
+  },
+  "%Zqz": {
+    "original": "Ben je zeker dat er sprake is van fiscaal co-ouderschap?",
+    "translation": "Are you sure there is joint fiscal co-parenting?"
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Stamhoofd. Voor Microsoft kan je",
     "translation": "Ensure that users can log in via your own account system, separate from Stamhoofd. For Microsoft you can"
   },
+  "%Zr0": {
+    "original": "Deze vereniging is nog niet gestart met het werkjaar {period}, waarin deze startdatum valt. Je kan de inschrijvingen van deze activiteit pas naar dat werkjaar verplaatsen als het gestart is.",
+    "translation": "This association hasn't started the work year {period}, which includes this start date. You can only move the registrations of this activity to that work year once it has started."
+  },
+  "%Zr2": {
+    "original": "Website",
+    "translation": "Website"
+  },
+  "%Zr3": {
+    "original": "Deze factuur werd al betaald via",
+    "translation": "This invoice has already been paid via"
+  },
+  "%Zr4": {
+    "original": "Niet vragen",
+    "translation": "Don't ask"
+  },
+  "%Zr5": {
+    "original": "Pro-forma aankoopbewijs",
+    "translation": "Pro forma purchase receipt"
+  },
+  "%Zr7": {
+    "original": "Met mededeling",
+    "translation": "With reference"
+  },
+  "%Zr8": {
+    "original": "Vul een rijksregisternummer in. Deze ouder heeft ook {names} fiscaal ten laste, dus dit nummer is nodig voor dat attest.",
+    "translation": "Enter a national registration number. This parent is also fiscally responsible for {names}, so this number is required for the certificate."
+  },
+  "%Zr9": {
+    "original": "Druk dit document niet af. Dit is nog geen officieel terugbetalingsbewijs",
+    "translation": "Do not print this document. This is not yet an official reimbursement receipt."
+  },
+  "%ZrA": {
+    "original": "T.a.v. ",
+    "translation": "Attn. "
+  },
+  "%ZrB": {
+    "original": "Pro-forma\n                            factuur",
+    "translation": "Pro forma\n                            invoice"
+  },
+  "%ZrF": {
+    "original": "Omschrijving",
+    "translation": "Description"
+  },
+  "%ZrG": {
+    "original": "Je hebt niet voldoende rechten om de servicekosten uit te schakelen.",
+    "translation": "You do not have sufficient rights to disable the service costs."
+  },
+  "%ZrH": {
+    "original": "{lid} is fiscaal ten laste van {name} (enkel voor gezinshoofd of fiscaal co-ouderschap)",
+    "translation": "{lid} is fiscally dependent on {name} (only for the head of household or joint fiscal co-parenting)"
+  },
+  "%ZrI": {
+    "original": " Pagina",
+    "translation": " Page"
+  },
+  "%ZrJ": {
+    "original": "Afrondingsverschil",
+    "translation": "Rounding difference"
+  },
+  "%ZrK": {
+    "original": "Maximaal twee ouders kunnen dit lid fiscaal ten laste hebben",
+    "translation": "A maximum of two parents can be fiscally responsible for this member."
+  },
+  "%ZrL": {
+    "original": "Geen servicekosten aanrekenen voor deze webshop",
+    "translation": "Don’t charge service fees for this webshop"
+  },
+  "%ZrM": {
+    "original": "Er bestaat nog geen werkjaar dat de startdatum van deze activiteit bevat. Je kan hier pas inschrijvingen voor verzamelen als dat werkjaar bestaat.",
+    "translation": "There is not yet a work year that includes this activity’s start date. You can only collect registrations when such a work year exists."
+  },
+  "%ZrN": {
+    "original": "Een factuur of aankoopbewijs van 0 euro met items kan nog niet aangemaakt worden.",
+    "translation": "An invoice or purchase receipt of 0 euros containing items cannot be created yet."
+  },
+  "%ZrO": {
+    "original": "Gegevens voor fiscale attesten kinderopvang verzamelen",
+    "translation": "Collect data for tax certificates for childcare"
+  },
+  "%ZrP": {
+    "original": "Per stuk",
+    "translation": "Per item"
+  },
+  "%ZrR": {
+    "original": "Een factuur van 0 euro kan niet aangemaakt worden. Maak in dat geval een aankoopbewijs aan.",
+    "translation": "An invoice of 0 euros cannot be created. In this case, please issue a purchase receipt instead."
+  },
+  "%ZrU": {
+    "original": "Hou deze creditnota bij voorkeur digitaal bij",
+    "translation": "Preferably keep this credit note in digital form."
+  },
+  "%ZrV": {
+    "original": "Druk dit document niet af. Dit is nog geen officieel aankoopbewijs",
+    "translation": "Do not print this document. This is not yet an official purchase receipt."
+  },
+  "%ZrW": {
+    "original": "Het bedrag werd reeds ingehouden van jouw Stripe balans.",
+    "translation": "The amount has already been deducted from your Stripe balance."
+  },
+  "%ZrY": {
+    "original": "Er bestaat nog geen werkjaar dat de startdatum van deze activiteit bevat. Je kan hier pas inschrijvingen voor verzamelen als dat werkjaar is aangemaakt. Kies anders een andere startdatum.",
+    "translation": "There is not yet a work year that includes the start date of this activity. You can only collect registrations once such a work year has been created. Alternatively, choose another start date."
+  },
+  "%ZrZ": {
+    "original": "Pro-forma terugbetalingsbewijs",
+    "translation": "Pro forma reimbursement receipt"
+  },
+  "%Zra": {
+    "original": "Er bestaat nog geen werkjaar dat deze startdatum bevat. Je kan de inschrijvingen van deze activiteit niet naar deze datum verplaatsen.",
+    "translation": "There is not yet a work year including this start date. You cannot transfer the registrations for this activity to this date."
+  },
+  "%Zrb": {
+    "original": "Zorg dat er minstens één ouder het lid fiscaal ten laste heeft. Voeg daar dan een rijksregisternummer toe.",
+    "translation": "Make sure at least one parent is fiscally responsible for the member. Then add a national registration number there."
+  },
+  "%Zrc": {
+    "original": "Voor betalingen die elkaar opheffen en samen 0 euro bedragen. Zo worden ze als geboekt gemarkeerd, ook voor een klant met een ondernemingsnummer of BTW-nummer.",
+    "translation": "For payments that offset each other and together total 0 euros. That way, they are marked as booked, including for a customer with a company number or VAT number."
+  },
+  "%Zrd": {
+    "original": "Vink het eerst uit bij een andere ouder. Twee ouders zijn enkel mogelijk bij gescheiden ouders met fiscaal co-ouderschap.",
+    "translation": "First uncheck this for another parent. Two parents are only possible in case of separated parents with joint fiscal co-parenting."
+  },
+  "%Zrg": {
+    "original": "Over te schrijven op",
+    "translation": "To be transferred to"
+  },
+  "%Zrj": {
+    "original": "Totaal excl. btw",
+    "translation": "Total excl. VAT"
+  },
+  "%Zrk": {
+    "original": "Hou dit aankoopbewijs bij voorkeur digitaal bij",
+    "translation": "Preferably keep this purchase receipt in digital form."
+  },
+  "%Zrl": {
+    "original": "Factuur voor",
+    "translation": "Invoice for"
+  },
+  "%Zro": {
+    "original": "Deze vereniging is nog niet gestart met het werkjaar {period}, waarin deze activiteit valt. Start eerst dat werkjaar, daarna kan je hier inschrijvingen voor verzamelen.",
+    "translation": "This association has not yet started the work year {period}, which this activity falls under. Start that work year first, then you can collect registrations for this activity."
+  },
+  "%Zrp": {
+    "original": "Dit is enkel nodig als beide ouders gescheiden zijn",
+    "translation": "This is only necessary if both parents are separated"
+  },
+  "%Zrq": {
+    "original": "Pro-forma creditnota",
+    "translation": "Pro forma credit note"
+  },
+  "%Zrr": {
+    "original": "{organization} is nog niet gestart met het werkjaar {period}, daarom kan je hier geen inschrijvingen in aanmaken. Start eerst dat werkjaar, of kies een datum die in een werkjaar valt dat al gestart is.",
+    "translation": "{organization} has not started the work year {period}, so you cannot create registrations here yet. Start that work year first or choose a date that falls within a work year that has already started."
+  },
+  "%Zrs": {
+    "original": "Druk dit document niet af. Dit is nog geen officiële factuur",
+    "translation": "Do not print this document. This is not yet an official invoice."
+  },
+  "%Zru": {
+    "original": "Deze vereniging",
+    "translation": "This association"
+  },
+  "%Zrv": {
+    "original": "Voeg een rijksregisternummer toe bij de ouder die het lid fiscaal ten laste heeft.",
+    "translation": "Add a national registration number to the parent who is fiscally responsible for the member."
+  },
+  "%Zrw": {
+    "original": "Hou deze factuur bij voorkeur digitaal bij",
+    "translation": "Preferably keep this invoice in digital form."
+  },
+  "%Zrx": {
+    "original": "van dit werkjaar",
+    "translation": "of this work year"
+  },
+  "%Zry": {
+    "original": "De betalingen heffen elkaar volledig op, dus er werden geen goederen of diensten geleverd. Het aankoopbewijs bevat geen items, maar vermeldt de betalingen.",
+    "translation": "The payments offset each other, so no goods or services were delivered. The purchase receipt contains no items, but lists the payments."
+  },
   "%Zs": {
     "original": "deze",
     "translation": "this"
+  },
+  "%Zs1": {
+    "original": "Dit is geen factuur",
+    "translation": "This is not an invoice"
+  },
+  "%Zs3": {
+    "original": "Er werden geen goederen of diensten geleverd. Dit document boekt de volgende betalingen, die elkaar opheffen.",
+    "translation": "No goods or services were supplied. This document records the following payments, which offset each other."
+  },
+  "%Zs4": {
+    "original": "Maximaal twee ouders kunnen een lid fiscaal ten laste hebben. Dat is enkel mogelijk bij gescheiden ouders met fiscaal co-ouderschap.",
+    "translation": "A maximum of two parents can be fiscally responsible for a member. This is only possible with separated parents and joint fiscal co-parenting."
+  },
+  "%Zs5": {
+    "original": "Er bestaat al een ander ticket met hetzelfde zaalplan en hetzelfde tijdstip. Dit zal niet werken omdat de gereserveerde plaatsen tussen beide tickets niet gedeeld zijn. Gebruik in plaats daarvan keuzemenu's in hetzelfde ticket (bv. volwassenen, kinderen, vrijwilligers). Lees de documentatie rond zetelselectie goed door voor meer informatie.",
+    "translation": "There is already another ticket with the same seating plan and time. This won't work, as the reserved seats won't be shared between the tickets. Instead, use selection menus within the same ticket (e.g. adults, children, volunteers). Read the documentation about seat selection for more information."
+  },
+  "%Zs6": {
+    "original": "Een aankoopbewijs van 0 euro kan enkel aangemaakt worden voor betalingen.",
+    "translation": "A purchase receipt for €0 can only be created for payments."
+  },
+  "%Zs7": {
+    "original": "Pro-forma\n        factuur",
+    "translation": "Pro-forma\n        invoice"
+  },
+  "%Zs9": {
+    "original": "De betaling gebeurt automatisch via domiciliëring",
+    "translation": "The payment is processed automatically by direct debit."
   },
   "%Zt": {
     "original": "handleiding volgen.",

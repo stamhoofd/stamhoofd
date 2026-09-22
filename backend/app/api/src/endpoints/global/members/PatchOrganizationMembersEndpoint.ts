@@ -948,7 +948,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'At most two parents can have a member tax dependent',
-                human: $t('Maximaal twee ouders kunnen een lid fiscaal ten laste hebben. Dat is enkel mogelijk bij gescheiden ouders met fiscaal co-ouderschap.'),
+                human: $t('%Zs4'),
                 field: 'parents',
             });
         }

@@ -781,10 +781,10 @@ async function directPatch(patch: AutoEncoderPatchType<Event>, event: Event = pr
 
 function eventPeriodProblemText(problem: EventPeriodProblem) {
     if (problem.type === 'missing-period') {
-        return $t('Er bestaat nog geen werkjaar dat de startdatum van deze activiteit bevat. Je kan hier pas inschrijvingen voor verzamelen als dat werkjaar bestaat.');
+        return $t('%ZrM');
     }
 
-    return $t('Deze #groep is nog niet gestart met het werkjaar {period}, waarin deze activiteit valt. Start eerst dat werkjaar, daarna kan je hier inschrijvingen voor verzamelen.', { period: problem.periodName });
+    return $t('%Zro', { period: problem.periodName });
 }
 
 async function createGroup() {

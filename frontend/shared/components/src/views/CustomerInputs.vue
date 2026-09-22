@@ -91,7 +91,7 @@ useValidation(props.validator, () => {
 });
 
 function withOptional(title: string, requirement: CustomerFieldRequirement) {
-    return requirement === CustomerFieldRequirement.Optional ? title + ' ' + $t('(optioneel)') : title;
+    return requirement === CustomerFieldRequirement.Optional ? title + ' ' + $t('%br') : title;
 }
 
 function field<K extends 'firstName' | 'lastName' | 'email' | 'phone' | 'birthDay' | 'gender' | 'address'>(key: K) {

@@ -60,7 +60,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                 }
 
                 if (request.body.meta.noServiceFees && !(Context.user?.email.endsWith('@stamhoofd.be') || Context.user?.email.endsWith('@stamhoofd.nl'))) {
-                    throw Context.auth.error($t('Je hebt niet voldoende rechten om de servicekosten uit te schakelen.'));
+                    throw Context.auth.error($t('%ZrG'));
                 }
 
                 if (request.body.meta.recordCategories) {

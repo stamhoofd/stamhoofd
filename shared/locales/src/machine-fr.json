@@ -43,10 +43,6 @@
     "original": "Voeg minstens één ouder toe",
     "translation": "Ajoutez au moins un parent"
   },
-  "%108": {
-    "original": "Voeg bij minstens één ouder een rijksregisternummer toe.",
-    "translation": "Ajoutez un numéro de registre national à au moins un parent."
-  },
   "%109": {
     "original": "Verenigingseigenfuncties",
     "translation": "Fonctions propres à l'association"
@@ -1850,10 +1846,6 @@
   "%17Z": {
     "original": "niet aangevinkt",
     "translation": "non coché"
-  },
-  "%17a": {
-    "original": "Als je ook de oudergegevens inschakelt, wordt zowel het rijksregisternummer van het lid als dat van de ouders gevraagd (minstens één ouder).",
-    "translation": "Si vous activez également les données parentales, le numéro national du membre et celui des parents seront demandés (au moins un parent)."
   },
   "%17b": {
     "original": "Geen internetverbinding. Klik om te herladen.",
@@ -5935,10 +5927,6 @@
     "original": "Stappenplan",
     "translation": "Plan par étapes"
   },
-  "%1Od": {
-    "original": "Er bestaat al een ander ticket met hetzelfde zaalplan maar een andere datum. Dit zal niet werken omdat de gereserveerde plaatsen tussen beide tickets niet gedeeld zijn. Gebruik in plaats daarvan keuzemenu's in hetzelfde ticket (bv. volwassenen, kinderen, vrijwilligers). Lees de documentatie rond zetelselectie goed door voor meer informatie.",
-    "translation": "Un autre ticket existe déjà avec le même plan de salle mais une date différente. Cela ne fonctionnera pas car les places réservées ne sont pas partagées entre les tickets. Privilégie plutôt les menus de choix dans le même ticket (ex : adultes, enfants, bénévoles). Consulte bien la documentation sur la sélection des sièges pour plus d'infos."
-  },
   "%1Oe": {
     "original": "Dit lidnummer is al in gebruik",
     "translation": "Ce numéro de membre est déjà utilisé"
@@ -6783,10 +6771,6 @@
     "original": "Deze items stonden nog op ‘te betalen’. Bespaar jezelf wat werk door deze mee af te rekenen. Alle prijzen zijn inclusief BTW.",
     "translation": "Ces articles étaient encore en attente de paiement. Gagnez du temps en les ajoutant à ce règlement. Tous les prix s’entendent TVA comprise."
   },
-  "%1Sp": {
-    "original": "Daarnaast werden {count} te factureren bedragen uitgesteld omwille van een laag bedrag (minder dan één euro).",
-    "translation": "De plus, {count} montants à facturer ont été reportés en raison d'un montant faible (moins d’un euro)."
-  },
   "%1Sq": {
     "original": "Dit vult de nummering langs links aan met nullen zodat de nummers altijd dezelfde lengte hebben.",
     "translation": "Cela complète la numérotation à gauche avec des zéros afin que les numéros aient toujours la même longueur."
@@ -7022,10 +7006,6 @@
   "%1U3": {
     "original": "per stuk / ticket",
     "translation": "par pièce / billet"
-  },
-  "%1U4": {
-    "original": "Daarnaast werd een te factureren bedrag uitgesteld omwille van een laag bedrag (minder dan één euro).",
-    "translation": "De plus, un montant à facturer a été reporté en raison d'un faible montant (moins d'un euro)."
   },
   "%1U5": {
     "original": "Zonder feitelijke verenigingen",
@@ -15963,10 +15943,6 @@
     "original": "Jouw naam",
     "translation": "Votre nom"
   },
-  "%Uz": {
-    "original": "Optioneel voor beheerders",
-    "translation": "Facultatif pour les administrateurs"
-  },
   "%V": {
     "original": "Hello Bank! app",
     "translation": "Application Hello Bank !"
@@ -20383,13 +20359,233 @@
     "original": "Deze betaalmethode is geblokkeerd en kan niet meer gebruikt worden. Voeg een nieuwe betaalmethode toe.",
     "translation": "Ce mode de paiement est bloqué et ne peut plus être utilisé. Veuillez ajouter un nouveau mode de paiement."
   },
+  "%Zqw": {
+    "original": "Hou dit terugbetalingsbewijs bij voorkeur digitaal bij",
+    "translation": "Conservez de préférence ce justificatif de remboursement sous forme numérique."
+  },
+  "%Zqx": {
+    "original": "Dit aankoopbewijs werd al betaald via",
+    "translation": "Ce reçu d'achat a déjà été payé via"
+  },
+  "%Zqz": {
+    "original": "Ben je zeker dat er sprake is van fiscaal co-ouderschap?",
+    "translation": "Es-tu certain qu'il s'agit bien d'une coparentalité fiscale ?"
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Stamhoofd. Voor Microsoft kan je",
     "translation": "Assurez-vous que les utilisateurs peuvent se connecter via votre propre système de compte, séparément de Stamhoofd. Pour Microsoft, vous pouvez"
   },
+  "%Zr0": {
+    "original": "Deze vereniging is nog niet gestart met het werkjaar {period}, waarin deze startdatum valt. Je kan de inschrijvingen van deze activiteit pas naar dat werkjaar verplaatsen als het gestart is.",
+    "translation": "Cette association n'a pas encore commencé l'année associative {period}, dans laquelle cette date de début tombe. Tu pourras transférer les inscriptions de cette activité vers cette année associative uniquement après son lancement."
+  },
+  "%Zr2": {
+    "original": "Website",
+    "translation": "Site web"
+  },
+  "%Zr3": {
+    "original": "Deze factuur werd al betaald via",
+    "translation": "Cette facture a déjà été payée via"
+  },
+  "%Zr4": {
+    "original": "Niet vragen",
+    "translation": "Ne pas demander"
+  },
+  "%Zr5": {
+    "original": "Pro-forma aankoopbewijs",
+    "translation": "Justificatif d'achat pro forma"
+  },
+  "%Zr7": {
+    "original": "Met mededeling",
+    "translation": "Avec communication"
+  },
+  "%Zr8": {
+    "original": "Vul een rijksregisternummer in. Deze ouder heeft ook {names} fiscaal ten laste, dus dit nummer is nodig voor dat attest.",
+    "translation": "Saisis un numéro de registre national. Ce parent a aussi {names} fiscalement à charge, donc ce numéro est nécessaire pour cette attestation."
+  },
+  "%Zr9": {
+    "original": "Druk dit document niet af. Dit is nog geen officieel terugbetalingsbewijs",
+    "translation": "N'imprime pas ce document. Ceci n'est pas encore un justificatif officiel de remboursement."
+  },
+  "%ZrA": {
+    "original": "T.a.v. ",
+    "translation": "À l'attention de "
+  },
+  "%ZrB": {
+    "original": "Pro-forma\n                            factuur",
+    "translation": "Facture\n                            pro forma"
+  },
+  "%ZrF": {
+    "original": "Omschrijving",
+    "translation": "Description"
+  },
+  "%ZrG": {
+    "original": "Je hebt niet voldoende rechten om de servicekosten uit te schakelen.",
+    "translation": "Tu n'as pas suffisamment de droits pour désactiver les frais de service."
+  },
+  "%ZrH": {
+    "original": "{lid} is fiscaal ten laste van {name} (enkel voor gezinshoofd of fiscaal co-ouderschap)",
+    "translation": "{lid} est fiscalement à charge de {name} (seulement pour chef de famille ou coparentalité fiscale)"
+  },
+  "%ZrI": {
+    "original": " Pagina",
+    "translation": " Page"
+  },
+  "%ZrJ": {
+    "original": "Afrondingsverschil",
+    "translation": "Écart d'arrondi"
+  },
+  "%ZrK": {
+    "original": "Maximaal twee ouders kunnen dit lid fiscaal ten laste hebben",
+    "translation": "Au maximum deux parents peuvent avoir cet enfant à charge fiscalement."
+  },
+  "%ZrL": {
+    "original": "Geen servicekosten aanrekenen voor deze webshop",
+    "translation": "Ne pas facturer de frais de service pour cette boutique en ligne"
+  },
+  "%ZrM": {
+    "original": "Er bestaat nog geen werkjaar dat de startdatum van deze activiteit bevat. Je kan hier pas inschrijvingen voor verzamelen als dat werkjaar bestaat.",
+    "translation": "Il n'existe pas encore d'année associative couvrant la date de début de cette activité. Tu pourras seulement collecter des inscriptions lorsque cette année associative existera."
+  },
+  "%ZrN": {
+    "original": "Een factuur of aankoopbewijs van 0 euro met items kan nog niet aangemaakt worden.",
+    "translation": "Une facture ou un justificatif d'achat de 0 euro ne peut pas encore être créé avec des articles."
+  },
+  "%ZrO": {
+    "original": "Gegevens voor fiscale attesten kinderopvang verzamelen",
+    "translation": "Collecter les données pour les attestations fiscales de garde d'enfants"
+  },
+  "%ZrP": {
+    "original": "Per stuk",
+    "translation": "Par pièce"
+  },
+  "%ZrR": {
+    "original": "Een factuur van 0 euro kan niet aangemaakt worden. Maak in dat geval een aankoopbewijs aan.",
+    "translation": "Une facture de 0 euro ne peut pas être créée. Dans ce cas, crée plutôt un justificatif d'achat."
+  },
+  "%ZrU": {
+    "original": "Hou deze creditnota bij voorkeur digitaal bij",
+    "translation": "Conservez de préférence cette note de crédit sous forme numérique."
+  },
+  "%ZrV": {
+    "original": "Druk dit document niet af. Dit is nog geen officieel aankoopbewijs",
+    "translation": "N'imprime pas ce document. Ceci n'est pas encore un justificatif d'achat officiel."
+  },
+  "%ZrW": {
+    "original": "Het bedrag werd reeds ingehouden van jouw Stripe balans.",
+    "translation": "Le montant a déjà été déduit de ton solde Stripe."
+  },
+  "%ZrY": {
+    "original": "Er bestaat nog geen werkjaar dat de startdatum van deze activiteit bevat. Je kan hier pas inschrijvingen voor verzamelen als dat werkjaar is aangemaakt. Kies anders een andere startdatum.",
+    "translation": "Il n'existe pas encore d'année associative couvrant la date de début de cette activité. Tu pourras seulement collecter des inscriptions lorsque cette année aura été créée. Sinon, choisis une autre date de début."
+  },
+  "%ZrZ": {
+    "original": "Pro-forma terugbetalingsbewijs",
+    "translation": "Justificatif de remboursement pro forma"
+  },
+  "%Zra": {
+    "original": "Er bestaat nog geen werkjaar dat deze startdatum bevat. Je kan de inschrijvingen van deze activiteit niet naar deze datum verplaatsen.",
+    "translation": "Il n'existe pas encore d'année associative contenant cette date de début. Tu ne peux pas déplacer les inscriptions de cette activité vers cette date."
+  },
+  "%Zrb": {
+    "original": "Zorg dat er minstens één ouder het lid fiscaal ten laste heeft. Voeg daar dan een rijksregisternummer toe.",
+    "translation": "Assure-toi qu'au moins un parent a l'enfant à charge fiscalement. Ajoute ensuite un numéro de registre national."
+  },
+  "%Zrc": {
+    "original": "Voor betalingen die elkaar opheffen en samen 0 euro bedragen. Zo worden ze als geboekt gemarkeerd, ook voor een klant met een ondernemingsnummer of BTW-nummer.",
+    "translation": "Pour les paiements qui s'annulent et dont le total est de 0 euro. Ils sont alors marqués comme enregistrés, même pour un client disposant d'un numéro d'entreprise ou de TVA."
+  },
+  "%Zrd": {
+    "original": "Vink het eerst uit bij een andere ouder. Twee ouders zijn enkel mogelijk bij gescheiden ouders met fiscaal co-ouderschap.",
+    "translation": "Désélectionne d'abord chez l'autre parent. Deux parents ne sont possibles que pour des parents séparés avec une coparentalité fiscale."
+  },
+  "%Zrg": {
+    "original": "Over te schrijven op",
+    "translation": "À verser sur"
+  },
+  "%Zrj": {
+    "original": "Totaal excl. btw",
+    "translation": "Total hors TVA"
+  },
+  "%Zrk": {
+    "original": "Hou dit aankoopbewijs bij voorkeur digitaal bij",
+    "translation": "Conservez de préférence ce justificatif d'achat sous forme numérique."
+  },
+  "%Zrl": {
+    "original": "Factuur voor",
+    "translation": "Facture pour"
+  },
+  "%Zro": {
+    "original": "Deze vereniging is nog niet gestart met het werkjaar {period}, waarin deze activiteit valt. Start eerst dat werkjaar, daarna kan je hier inschrijvingen voor verzamelen.",
+    "translation": "Cette association n'a pas encore commencé l'année associative {period}, dans laquelle cette activité tombe. Commence d'abord cette année associative, ensuite tu pourras collecter des inscriptions ici."
+  },
+  "%Zrp": {
+    "original": "Dit is enkel nodig als beide ouders gescheiden zijn",
+    "translation": "Ceci n'est nécessaire que si les deux parents sont séparés."
+  },
+  "%Zrq": {
+    "original": "Pro-forma creditnota",
+    "translation": "Note de crédit pro forma"
+  },
+  "%Zrr": {
+    "original": "{organization} is nog niet gestart met het werkjaar {period}, daarom kan je hier geen inschrijvingen in aanmaken. Start eerst dat werkjaar, of kies een datum die in een werkjaar valt dat al gestart is.",
+    "translation": "{organization} n'a pas encore commencé l'année associative {period}, tu ne peux donc pas créer d'inscriptions ici. Lances d'abord cette année associative, ou choisis une date qui tombe dans une année associative déjà commencée."
+  },
+  "%Zrs": {
+    "original": "Druk dit document niet af. Dit is nog geen officiële factuur",
+    "translation": "N'imprime pas ce document. Ceci n'est pas encore une facture officielle."
+  },
+  "%Zru": {
+    "original": "Deze vereniging",
+    "translation": "Cette association"
+  },
+  "%Zrv": {
+    "original": "Voeg een rijksregisternummer toe bij de ouder die het lid fiscaal ten laste heeft.",
+    "translation": "Ajoute un numéro de registre national chez le parent qui a l'enfant fiscalement à charge."
+  },
+  "%Zrw": {
+    "original": "Hou deze factuur bij voorkeur digitaal bij",
+    "translation": "Conservez de préférence cette facture sous forme numérique."
+  },
+  "%Zrx": {
+    "original": "van dit werkjaar",
+    "translation": "de cette année associative"
+  },
+  "%Zry": {
+    "original": "De betalingen heffen elkaar volledig op, dus er werden geen goederen of diensten geleverd. Het aankoopbewijs bevat geen items, maar vermeldt de betalingen.",
+    "translation": "Les paiements se compensent entièrement, donc aucun bien ou service n'a été fourni. Le justificatif d'achat ne contient aucun article, mais mentionne les paiements."
+  },
   "%Zs": {
     "original": "deze",
     "translation": "ce"
+  },
+  "%Zs1": {
+    "original": "Dit is geen factuur",
+    "translation": "Ce n'est pas une facture"
+  },
+  "%Zs3": {
+    "original": "Er werden geen goederen of diensten geleverd. Dit document boekt de volgende betalingen, die elkaar opheffen.",
+    "translation": "Aucun bien ou service n'a été fourni. Ce document enregistre les paiements suivants, qui se compensent."
+  },
+  "%Zs4": {
+    "original": "Maximaal twee ouders kunnen een lid fiscaal ten laste hebben. Dat is enkel mogelijk bij gescheiden ouders met fiscaal co-ouderschap.",
+    "translation": "Au maximum deux parents peuvent avoir un enfant à charge fiscalement. Cela n'est possible que pour des parents séparés avec une coparentalité fiscale."
+  },
+  "%Zs5": {
+    "original": "Er bestaat al een ander ticket met hetzelfde zaalplan en hetzelfde tijdstip. Dit zal niet werken omdat de gereserveerde plaatsen tussen beide tickets niet gedeeld zijn. Gebruik in plaats daarvan keuzemenu's in hetzelfde ticket (bv. volwassenen, kinderen, vrijwilligers). Lees de documentatie rond zetelselectie goed door voor meer informatie.",
+    "translation": "Un autre billet existe déjà avec le même plan de salle et la même heure. Cela ne fonctionnera pas car les places réservées ne sont pas partagées entre ces billets. Utilisez plutôt des menus déroulants dans le même billet (ex. adultes, enfants, bénévoles). Consultez attentivement la documentation sur la sélection des sièges pour plus d'informations."
+  },
+  "%Zs6": {
+    "original": "Een aankoopbewijs van 0 euro kan enkel aangemaakt worden voor betalingen.",
+    "translation": "Un justificatif d'achat de 0 euro ne peut être créé que pour des paiements."
+  },
+  "%Zs7": {
+    "original": "Pro-forma\n        factuur",
+    "translation": "Facture\n        pro forma"
+  },
+  "%Zs9": {
+    "original": "De betaling gebeurt automatisch via domiciliëring",
+    "translation": "Le paiement est effectué automatiquement par domiciliation."
   },
   "%Zt": {
     "original": "handleiding volgen.",

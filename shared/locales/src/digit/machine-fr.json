@@ -1563,6 +1563,18 @@
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Ravot. Voor Microsoft kan je",
     "translation": "Assurez-vous que les utilisateurs peuvent se connecter via votre propre système de compte, séparément de Ravot. Pour Microsoft, vous pouvez"
   },
+  "%Zr0": {
+    "original": "Deze groep is nog niet gestart met het werkjaar {period}, waarin deze startdatum valt. Je kan de inschrijvingen van deze activiteit pas naar dat werkjaar verplaatsen als het gestart is.",
+    "translation": "Ce groupe n’a pas encore commencé l’année associative {period}, dans laquelle cette date de début tombe. Tu pourras transférer les inscriptions de cette activité vers cette année associative uniquement après son lancement."
+  },
+  "%Zro": {
+    "original": "Deze groep is nog niet gestart met het werkjaar {period}, waarin deze activiteit valt. Start eerst dat werkjaar, daarna kan je hier inschrijvingen voor verzamelen.",
+    "translation": "Ce groupe n’a pas encore commencé l’année associative {period}, dans laquelle cette activité tombe. Commence d’abord cette année associative, ensuite tu pourras collecter des inscriptions ici."
+  },
+  "%Zru": {
+    "original": "Deze groep",
+    "translation": "Ce groupe"
+  },
   "%a6": {
     "original": "Portaal voor beroepsmedewerkers",
     "translation": "Portail pour les employés professionnels"

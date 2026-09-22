@@ -133,7 +133,7 @@ export class ResourcePermissions extends AutoEncoder {
                     continue;
                 }
 
-                const name = getPermissionResourceTypeName(type, true) + (key === PermissionsResourceKey.CurrentPeriod ? ' ' + $t('van dit werkjaar') : '');
+                const name = getPermissionResourceTypeName(type, true) + (key === PermissionsResourceKey.CurrentPeriod ? ' ' + $t('%Zrx') : '');
                 const accessRights = all.accessRights.map(a => AccessRightHelper.getDescription(a));
                 if (all.level === PermissionLevel.None) {
                     stack.push($t(`%nF`) + ' ' + name + ': ' + Formatter.joinLast(accessRights, ', ', ' ' + $t(`%M1`) + ' '));

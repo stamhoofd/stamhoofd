@@ -1655,6 +1655,38 @@
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Keeo. Voor Microsoft kan je",
     "translation": "Ensure that users can log in via your own account system, separate from Keeo. For Microsoft you can"
   },
+  "%Zr0": {
+    "original": "Deze eenheid is nog niet gestart met het scoutsjaar {period}, waarin deze startdatum valt. Je kan de inschrijvingen van deze activiteit pas naar dat scoutsjaar verplaatsen als het gestart is.",
+    "translation": "This unit hasn't started the scouts year {period}, which includes this start date. You can only move the registrations of this activity to that scouts year once it has started."
+  },
+  "%ZrM": {
+    "original": "Er bestaat nog geen scoutsjaar dat de startdatum van deze activiteit bevat. Je kan hier pas inschrijvingen voor verzamelen als dat scoutsjaar bestaat.",
+    "translation": "There is not yet a scouts year that includes this activity’s start date. You can only collect registrations once such a scouts year exists."
+  },
+  "%ZrY": {
+    "original": "Er bestaat nog geen scoutsjaar dat de startdatum van deze activiteit bevat. Je kan hier pas inschrijvingen voor verzamelen als dat scoutsjaar is aangemaakt. Kies anders een andere startdatum.",
+    "translation": "There is not yet a scouts year that includes the start date of this activity. You can only collect registrations once such a scouts year has been created. Alternatively, choose another start date."
+  },
+  "%Zra": {
+    "original": "Er bestaat nog geen scoutsjaar dat deze startdatum bevat. Je kan de inschrijvingen van deze activiteit niet naar deze datum verplaatsen.",
+    "translation": "There is not yet a scouts year including this start date. You cannot transfer the registrations for this activity to this date."
+  },
+  "%Zro": {
+    "original": "Deze eenheid is nog niet gestart met het scoutsjaar {period}, waarin deze activiteit valt. Start eerst dat scoutsjaar, daarna kan je hier inschrijvingen voor verzamelen.",
+    "translation": "This unit has not yet started the scouts year {period}, which this activity falls under. Start that scouts year first, then you can collect registrations for this activity."
+  },
+  "%Zrr": {
+    "original": "{organization} is nog niet gestart met het scoutsjaar {period}, daarom kan je hier geen inschrijvingen in aanmaken. Start eerst dat scoutsjaar, of kies een datum die in een scoutsjaar valt dat al gestart is.",
+    "translation": "{organization} has not started the scouts year {period}, so you cannot create registrations here yet. Start that scouts year first or choose a date that falls within a scouts year that has already started."
+  },
+  "%Zru": {
+    "original": "Deze eenheid",
+    "translation": "This unit"
+  },
+  "%Zrx": {
+    "original": "van dit scoutsjaar",
+    "translation": "of this scouts year"
+  },
   "%ad": {
     "original": "Een hoofdbeheerder van jouw eenheid moet eerst een afzender toevoegen die je kan gebruiken voor je een bericht kan versturen.",
     "translation": "A main administrator of your unit must first add a sender that you can use before you can send a message."

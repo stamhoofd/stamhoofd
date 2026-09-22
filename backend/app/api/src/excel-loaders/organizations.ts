@@ -71,7 +71,7 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Object, Object
         }),
         {
             id: 'website',
-            name: $t('Website'),
+            name: $t('%Zr2'),
             width: 50,
             getValue: (object: Object) => ({
                 value: object.website,

@@ -183,7 +183,7 @@
                 <hr><h2>{{ $t('%NU') }}</h2>
 
                 <Checkbox v-model="noServiceFees">
-                    {{ $t('Geen servicekosten aanrekenen voor deze webshop') }}
+                    {{ $t('%ZrL') }}
                 </Checkbox>
             </div>
         </template>

@@ -1671,6 +1671,38 @@
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Jamboree. Voor Microsoft kan je",
     "translation": "Assurez-vous que les utilisateurs peuvent se connecter via votre propre système de compte, séparément de Jamboree. Pour Microsoft, vous pouvez"
   },
+  "%Zr0": {
+    "original": "Deze eenheid is nog niet gestart met het scoutsjaar {period}, waarin deze startdatum valt. Je kan de inschrijvingen van deze activiteit pas naar dat scoutsjaar verplaatsen als het gestart is.",
+    "translation": "Cette unité n'a pas encore commencé l'année scoute {period}, dans laquelle cette date de début tombe. Tu pourras transférer les inscriptions de cette activité vers cette année scoute uniquement après son lancement."
+  },
+  "%ZrM": {
+    "original": "Er bestaat nog geen scoutsjaar dat de startdatum van deze activiteit bevat. Je kan hier pas inschrijvingen voor verzamelen als dat scoutsjaar bestaat.",
+    "translation": "Il n'existe pas encore d'année scoute couvrant la date de début de cette activité. Tu pourras seulement collecter des inscriptions lorsque cette année scoute existera."
+  },
+  "%ZrY": {
+    "original": "Er bestaat nog geen scoutsjaar dat de startdatum van deze activiteit bevat. Je kan hier pas inschrijvingen voor verzamelen als dat scoutsjaar is aangemaakt. Kies anders een andere startdatum.",
+    "translation": "Il n'existe pas encore d'année scoute couvrant la date de début de cette activité. Tu pourras seulement collecter des inscriptions lorsque cette année scoute aura été créée. Sinon, choisis une autre date de début."
+  },
+  "%Zra": {
+    "original": "Er bestaat nog geen scoutsjaar dat deze startdatum bevat. Je kan de inschrijvingen van deze activiteit niet naar deze datum verplaatsen.",
+    "translation": "Il n'existe pas encore d'année scoute contenant cette date de début. Tu ne peux pas déplacer les inscriptions de cette activité vers cette date."
+  },
+  "%Zro": {
+    "original": "Deze eenheid is nog niet gestart met het scoutsjaar {period}, waarin deze activiteit valt. Start eerst dat scoutsjaar, daarna kan je hier inschrijvingen voor verzamelen.",
+    "translation": "Cette unité n'a pas encore commencé l'année scoute {period}, dans laquelle cette activité tombe. Commence d'abord cette année scoute, ensuite tu pourras collecter des inscriptions ici."
+  },
+  "%Zrr": {
+    "original": "{organization} is nog niet gestart met het scoutsjaar {period}, daarom kan je hier geen inschrijvingen in aanmaken. Start eerst dat scoutsjaar, of kies een datum die in een scoutsjaar valt dat al gestart is.",
+    "translation": "{organization} n'a pas encore commencé l'année scoute {period}, tu ne peux donc pas créer d'inscriptions ici. Commence d'abord cette année scoute, ou choisis une date qui tombe dans une année scoute déjà commencée."
+  },
+  "%Zru": {
+    "original": "Deze eenheid",
+    "translation": "Cette unité"
+  },
+  "%Zrx": {
+    "original": "van dit scoutsjaar",
+    "translation": "de cette année scoute"
+  },
   "%ad": {
     "original": "Een hoofdbeheerder van jouw eenheid moet eerst een afzender toevoegen die je kan gebruiken voor je een bericht kan versturen.",
     "translation": "Un administrateur principal de votre unité doit d'abord ajouter un expéditeur que vous pourrez utiliser pour envoyer un message."

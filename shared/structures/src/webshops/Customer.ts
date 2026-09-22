@@ -74,7 +74,7 @@ export class Customer extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_phone',
                 message: 'Invalid phone',
-                human: $t('Ongeldig GSM-nummer'),
+                human: $t('%1Be'),
                 field: 'customer.phone',
             });
         }

@@ -6,8 +6,8 @@ export enum CustomerFieldRequirement {
 
 export function getCustomerFieldRequirementName(requirement: CustomerFieldRequirement): string {
     switch (requirement) {
-        case CustomerFieldRequirement.Required: return $t('Verplicht');
-        case CustomerFieldRequirement.Optional: return $t('Optioneel');
-        case CustomerFieldRequirement.Disabled: return $t('Niet vragen');
+        case CustomerFieldRequirement.Required: return $t('%Qk');
+        case CustomerFieldRequirement.Optional: return $t('%14p');
+        case CustomerFieldRequirement.Disabled: return $t('%Zr4');
     }
 }

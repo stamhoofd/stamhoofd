@@ -447,10 +447,10 @@ const periodProblemText = computed(() => {
     }
 
     if (problem.type === 'missing-period') {
-        return $t('Er bestaat nog geen werkjaar dat deze startdatum bevat. Je kan de inschrijvingen van deze activiteit niet naar deze datum verplaatsen.');
+        return $t('%Zra');
     }
 
-    return $t('Deze #groep is nog niet gestart met het werkjaar {period}, waarin deze startdatum valt. Je kan de inschrijvingen van deze activiteit pas naar dat werkjaar verplaatsen als het gestart is.', { period: problem.periodName });
+    return $t('%Zr0', { period: problem.periodName });
 });
 
 const endDate = computed({
