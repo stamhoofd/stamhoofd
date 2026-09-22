@@ -96,19 +96,22 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
 
             if (organization) {
                 // Add organization scope filter
-                if (await Context.auth.canAccessAllMembersInCurrentPeriod(organization.id, permissionLevel)) {
-                    if (await Context.auth.canAccessAllMembersInEveryPeriod(organization.id, permissionLevel)) {
-                        scopeFilter = {
-                            member: {
-                                registrations: {
-                                    $elemMatch: {
-                                        organizationId: organization.id,
-                                    },
+                if (await Context.auth.canAccessAllMembersInEveryPeriod(organization.id, permissionLevel)) {
+                    scopeFilter = {
+                        member: {
+                            registrations: {
+                                $elemMatch: {
+                                    organizationId: organization.id,
                                 },
                             },
-                        };
-                    } else {
-                        scopeFilter = {
+                        },
+                    };
+                } else {
+                    const filters: StamhoofdFilter[] = [];
+                    const canAccessCurrentPeriod = await Context.auth.canAccessAllMembersInCurrentPeriod(organization.id, permissionLevel);
+
+                    if (canAccessCurrentPeriod) {
+                        filters.push({
                             member: {
                                 registrations: {
                                     $elemMatch: {
@@ -117,38 +120,48 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
                                     },
                                 },
                             },
-                        };
+                        });
                     }
-                } else {
-                    // Check which normal membership groups we have access to and filter on those
+
+                    // Check which normal membership groups we have access to and filter on those.
+                    // These are added next to the current period filter, not instead of it: a role
+                    // can hold a grant on a group of a period the organization already left.
                     const groups = await Group.getAll(organization.id, null, true, [GroupType.Membership, GroupType.WaitingList]);
                     Context.auth.cacheGroups(groups);
                     const groupIds: string[] = [];
 
                     for (const group of groups) {
+                        if (canAccessCurrentPeriod && group.periodId === organization.periodId) {
+                            continue;
+                        }
+
                         if (await Context.auth.canAccessGroup(group, permissionLevel)) {
                             groupIds.push(group.id);
                         }
                     }
 
-                    if (groupIds.length === 0) {
+                    if (groupIds.length > 0) {
+                        filters.push({
+                            member: {
+                                registrations: {
+                                    $elemMatch: {
+                                        groupId: {
+                                            $in: groupIds,
+                                        },
+                                    },
+                                },
+                            },
+                        });
+                    }
+
+                    if (filters.length === 0) {
                         throw Context.auth.error({
                             message: 'You must filter on a group of the organization you are trying to access',
                             human: $t(`%15g`),
                         });
                     }
 
-                    scopeFilter = {
-                        member: {
-                            registrations: {
-                                $elemMatch: {
-                                    groupId: {
-                                        $in: groupIds,
-                                    },
-                                },
-                            },
-                        },
-                    };
+                    scopeFilter = filters.length === 1 ? filters[0] : { $or: filters };
                 }
             }
         }

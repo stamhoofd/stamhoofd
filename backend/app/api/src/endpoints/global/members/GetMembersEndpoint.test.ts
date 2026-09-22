@@ -465,6 +465,99 @@ describe('Endpoint.GetMembersEndpoint', () => {
             ]);
         });
 
+        describe('Period scoping', () => {
+            /**
+             * One organization on `period` with a group in the current period and two in a
+             * previous one, each holding a single member.
+             */
+            async function setupPeriods() {
+                const previousPeriod = await new RegistrationPeriodFactory({
+                    startDate: new Date(2022, 0, 1),
+                    endDate: new Date(2022, 11, 31),
+                }).create();
+
+                const organization = await new OrganizationFactory({ period }).create();
+
+                const currentGroup = await new GroupFactory({ organization, period }).create();
+                const previousGroup = await new GroupFactory({ organization, period: previousPeriod }).create();
+                const otherPreviousGroup = await new GroupFactory({ organization, period: previousPeriod }).create();
+
+                const currentMember = await new MemberFactory({}).create();
+                const previousMember = await new MemberFactory({}).create();
+                const otherPreviousMember = await new MemberFactory({}).create();
+
+                await new RegistrationFactory({ member: currentMember, group: currentGroup }).create();
+                await new RegistrationFactory({ member: previousMember, group: previousGroup }).create();
+                await new RegistrationFactory({ member: otherPreviousMember, group: otherPreviousGroup }).create();
+
+                return { organization, currentGroup, previousGroup, currentMember, previousMember, otherPreviousMember };
+            }
+
+            async function fetchMembers(organization: Awaited<ReturnType<typeof setupPeriods>>['organization'], groupPermissions: [string, ResourcePermissions][]) {
+                const user = await new UserFactory({
+                    organization,
+                    permissions: Permissions.create({
+                        level: PermissionLevel.None,
+                        resources: new Map([[PermissionsResourceType.Groups, new Map(groupPermissions)]]),
+                    }),
+                }).create();
+
+                const token = await SessionService.createSession(user);
+
+                return await testServer.test(endpoint, Request.get({
+                    path: baseUrl,
+                    host: organization.getApiHost(),
+                    query: new LimitedFilteredRequest({ limit: 100 }),
+                    headers: { authorization: 'Bearer ' + token.accessToken },
+                }));
+            }
+
+            const read = () => ResourcePermissions.create({ level: PermissionLevel.Read });
+
+            test('A $currentPeriod grant does not reach previous periods', async () => {
+                const { organization, currentMember } = await setupPeriods();
+
+                const response = await fetchMembers(organization, [
+                    [PermissionsResourceKey.CurrentPeriod, read()],
+                ]);
+
+                expect(response.status).toBe(200);
+                expect(response.body.results.members).toIncludeSameMembers([
+                    expect.objectContaining({ id: currentMember.id }),
+                ]);
+            });
+
+            test('An explicit grant on a previous period group is not lost by adding $currentPeriod', async () => {
+                const { organization, previousGroup, currentMember, previousMember } = await setupPeriods();
+
+                const response = await fetchMembers(organization, [
+                    [PermissionsResourceKey.CurrentPeriod, read()],
+                    [previousGroup.id, read()],
+                ]);
+
+                expect(response.status).toBe(200);
+                expect(response.body.results.members).toIncludeSameMembers([
+                    expect.objectContaining({ id: currentMember.id }),
+                    expect.objectContaining({ id: previousMember.id }),
+                ]);
+            });
+
+            test('An $all grant reaches every period', async () => {
+                const { organization, currentMember, previousMember, otherPreviousMember } = await setupPeriods();
+
+                const response = await fetchMembers(organization, [
+                    [PermissionsResourceKey.All, read()],
+                ]);
+
+                expect(response.status).toBe(200);
+                expect(response.body.results.members).toIncludeSameMembers([
+                    expect.objectContaining({ id: currentMember.id }),
+                    expect.objectContaining({ id: previousMember.id }),
+                    expect.objectContaining({ id: otherPreviousMember.id }),
+                ]);
+            });
+        });
+
         test('Not allowed: Cannot fetch all members if no permissions for a single group', async () => {
             // Same test, but without giving the user permissions to read the group
             // Setup

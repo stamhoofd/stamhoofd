@@ -76,44 +76,58 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
 
             if (organization) {
                 // Add organization scope filter
-                if (await Context.auth.canAccessAllMembersInCurrentPeriod(organization.id, permissionLevel)) {
-                    if (await Context.auth.canAccessAllMembersInEveryPeriod(organization.id, permissionLevel)) {
-                        scopeFilter = {
-                            organizationId: organization.id,
-                        };
-                    } else {
-                        scopeFilter = {
+                if (await Context.auth.canAccessAllMembersInEveryPeriod(organization.id, permissionLevel)) {
+                    scopeFilter = {
+                        organizationId: organization.id,
+                    };
+                } else {
+                    const filters: StamhoofdFilter[] = [];
+                    const canAccessCurrentPeriod = await Context.auth.canAccessAllMembersInCurrentPeriod(organization.id, permissionLevel);
+
+                    if (canAccessCurrentPeriod) {
+                        filters.push({
                             organizationId: organization.id,
                             group: {
                                 $elemMatch: {
                                     periodId: organization.periodId,
                                 },
                             },
-                        };
+                        });
                     }
-                } else {
+
+                    // Check which groups we have access to and filter on those. These are added
+                    // next to the current period filter, not instead of it: a role can hold a
+                    // grant on a group of a period the organization already left.
                     const groups = await Group.getAll(organization.id, null, true, [GroupType.Membership, GroupType.EventRegistration]);
                     Context.auth.cacheGroups(groups);
                     const groupIds: string[] = [];
 
                     for (const group of groups) {
+                        if (canAccessCurrentPeriod && group.periodId === organization.periodId) {
+                            continue;
+                        }
+
                         if (await Context.auth.canAccessGroup(group, permissionLevel)) {
                             groupIds.push(group.id);
                         }
                     }
 
-                    if (groupIds.length === 0) {
+                    if (groupIds.length > 0) {
+                        filters.push({
+                            groupId: {
+                                $in: groupIds,
+                            },
+                        });
+                    }
+
+                    if (filters.length === 0) {
                         throw Context.auth.error({
                             message: 'You must filter on a group of the organization you are trying to access',
                             human: $t(`%15g`),
                         });
                     }
 
-                    scopeFilter = {
-                        groupId: {
-                            $in: groupIds,
-                        },
-                    };
+                    scopeFilter = filters.length === 1 ? filters[0] : { $or: filters };
                 }
             }
         }
