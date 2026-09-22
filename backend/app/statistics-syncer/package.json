@@ -14,7 +14,6 @@
         "build:full": "pnpm run clear && pnpm run build",
         "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
         "dev": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'pnpm run build:watch' \"wait-on ./dist/index.js && nodemon --quiet --inspect=5859 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
-        "dev:build": "pnpm run build",
         "lint": "eslint",
         "migrations": "pnpm run build:full && node ./dist/migrations.js",
         "start": "pnpm run build && node --enable-source-maps ./dist/index.js",
