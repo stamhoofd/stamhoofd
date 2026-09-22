@@ -1,8 +1,9 @@
 <template>
-    <MetaLogo data-testid="organization-logo" :meta-data="metaData" :name="name" />
+    <MetaLogo data-testid="organization-logo" :meta-data="identity.metaData" :name="identity.name" />
 </template>
 
 <script lang="ts" setup>
+import { getWebshopIdentity } from '#helpers/webshopIdentity.ts';
 import type { Organization, Webshop } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
@@ -15,17 +16,5 @@ const props = withDefaults(defineProps<{
     webshop: null,
 });
 
-const metaData = computed(() => {
-    if (!props.webshop || !props.webshop.meta.useLogo) {
-        return props.organization.meta;
-    }
-    return props.webshop.meta;
-});
-
-const name = computed(() => {
-    if (!props.webshop || !props.webshop.meta.useLogo) {
-        return props.organization.name;
-    }
-    return props.webshop.meta.name;
-});
+const identity = computed(() => getWebshopIdentity(props.organization, props.webshop));
 </script>
