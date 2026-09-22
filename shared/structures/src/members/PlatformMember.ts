@@ -933,6 +933,15 @@ export class PlatformMember implements ObjectWithRecords {
         return def.isEnabled(this);
     }
 
+    /**
+     * Notes on special fields:
+     * - 'taxCertificates' returns true if data collection for tax certificates is enabled, even if the member is too old for tax certificates!
+     * - 'parents.nationalRegisterNumber' & 'parents.isMemberTaxDependent' returns true if member needs a tax certificate and tax certificates are enabled
+     * - 'nationalRegisterNumber' returns true if member needs a tax certificate and tax certificates are enabled
+     *                              OR collection of NRR is enabled apart from that
+     *
+     * Returns false if checkPermissions is passed and the current user does not have access to the requested field.
+     */
     isPropertyEnabled(property: MemberProperty, options?: { checkPermissions?: { user: UserWithMembers; level: PermissionLevel }; scopeGroups?: Group[] | null }) {
         if (property === 'parents.taxDependent') {
             // Asked together with, and only for, the parent that supplies a national register number
