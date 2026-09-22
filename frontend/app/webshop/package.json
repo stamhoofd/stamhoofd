@@ -11,7 +11,6 @@
         "build:playwright": "NODE_OPTIONS=\"--max-old-space-size=4096 --max-semi-space-size=128\" NODE_ENV=test STAMHOOFD_ENV=playwright vite build",
         "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=production vite build",
         "dev": "NODE_ENV=development ENV_FILE=../../.env.json vite",
-        "dev:build": "pnpm run build",
         "lint": "eslint",
         "typecheck": "vue-tsc --noEmit"
     },

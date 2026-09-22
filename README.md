@@ -146,12 +146,16 @@ Stamhoofd uses MailDev to test emails in development. It is started by `pnpm sta
 
 ```bash
 pnpm stam test unit                 # every unit package (excludes Playwright)
-pnpm stam test api                  # one package (api, models, sql, structures, renderer, redirecter, queues, utility, sgv, object-differ, eslint)
+pnpm stam test coverage             # package coverage with the same isolated MySQL lifecycle
+pnpm stam test api                  # one package
+pnpm stam test api --coverage       # collect coverage for one package
 pnpm stam test unit SomeFile        # filter by filename across all packages
 pnpm stam test structures bundle-discounts        # package + filename filter
 pnpm stam test structures -t 'partial test name'  # package + test-name filter (passed to vitest -t)
 pnpm stam test api --skip-build     # skip the automatic build:shared step
 ```
+
+The root `pnpm test` and `pnpm run test:coverage` scripts use these same CLI flows.
 
 For browser tests, use `pnpm stam test e2e` (Playwright) or `pnpm stam test all` for both.
 

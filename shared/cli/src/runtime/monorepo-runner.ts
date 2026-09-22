@@ -72,15 +72,19 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'components', path: 'frontend/shared/components', needsDatabase: false },
     { name: 'networking', path: 'frontend/shared/networking', needsDatabase: false },
 ];
+export const coverageTestPackages: UnitTestPackage[] = [
+    { name: 'i18n-uuid', path: '.development/i18n-uuid', needsDatabase: false },
+    ...unitTestPackages.filter(pkg => ['metabase', 'structures', 'object-differ', 'utility', 'queues', 'models', 'vies', 'sql', 'renderer', 'redirecter', 'statistics-syncer', 'api'].includes(pkg.name)),
+];
 const sharedBuildReadyFile = `.development/cli/generated/shared-build-${process.pid}.ready`;
 
 export async function buildShared(context: CliContext): Promise<void> {
-    await run('pnpm', ['run', 'build:shared'], { cwd: context.rootDir, verbose: context.verbose });
+    await run('pnpm', ['run', 'build:shared'], { cwd: context.rootDir, verbosity: context.verbosity ?? RunVerbosity.Output });
 }
 
 export async function buildAll(context: CliContext): Promise<void> {
     await buildShared(context);
-    await run('pnpm', ['exec', 'lerna', 'run', 'dev:build'], { cwd: context.rootDir, env: { NX_DAEMON: 'false', STAMHOOFD_ENV: context.env }, verbosity: context.verbosity ?? RunVerbosity.Output });
+    await run('pnpm', ['exec', 'turbo', 'run', 'build', '--env-mode=loose', '--filter=@stamhoofd/backend', '--filter=@stamhoofd/backend-renderer', '--filter=@stamhoofd/backend-statistics-syncer', '--filter=@stamhoofd/web-app', '--filter=@stamhoofd/webshop'], { cwd: context.rootDir, env: { STAMHOOFD_ENV: context.env }, verbosity: context.verbosity ?? RunVerbosity.Output });
 }
 
 export async function lint(context: CliContext): Promise<void> {
@@ -92,8 +96,7 @@ export async function typecheck(context: CliContext): Promise<void> {
 }
 
 export async function migrate(context: CliContext): Promise<void> {
-    await buildShared(context);
-    await run('pnpm', ['exec', 'lerna', 'run', 'migrations', '--concurrency', '1'], { cwd: context.rootDir, env: { ...buildBackendEnv(context) }, verbosity: context.verbosity ?? RunVerbosity.Output });
+    await run('pnpm', ['run', 'migrate'], { cwd: context.rootDir, env: { ...buildBackendEnv(context) }, verbosity: context.verbosity ?? RunVerbosity.Output });
 }
 
 const statisticsSyncerPackage = 'backend/app/statistics-syncer';
@@ -161,6 +164,7 @@ export type UnitTestOptions = {
     skipBuild?: boolean;
     /** Drop the persistent test database volume before running (fresh start). */
     clear?: boolean;
+    coverage?: boolean;
 };
 
 export async function runUnitTests(context: CliContext, options: UnitTestOptions = {}): Promise<void> {
@@ -183,10 +187,13 @@ export async function runUnitTests(context: CliContext, options: UnitTestOptions
     try {
         for (const pkg of packages) {
             if (pkg.typecheck) {
-                await run('pnpm', ['run', 'typecheck'], { cwd: path.join(context.rootDir, pkg.path), env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort }, verbosity: context.verbosity ?? RunVerbosity.Output });
+                await run('pnpm', ['run', 'typecheck'], { cwd: path.join(context.rootDir, pkg.path), env: { CI: options.ci ? 'true' : undefined, DB_PORT: dbPort }, verbosity: context.verbosity ?? RunVerbosity.Output });
             }
 
             const args = ['exec', 'vitest', 'run'];
+            if (options.coverage) {
+                args.push('--coverage');
+            }
             if (passWithNoTests) {
                 args.push('--passWithNoTests');
             }
@@ -194,7 +201,7 @@ export async function runUnitTests(context: CliContext, options: UnitTestOptions
                 args.push('-t', options.testNamePattern);
             }
             args.push(...(options.fileFilters ?? []));
-            await run('pnpm', args, { cwd: path.join(context.rootDir, pkg.path), env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort }, verbosity: context.verbosity ?? RunVerbosity.Output });
+            await run('pnpm', args, { cwd: path.join(context.rootDir, pkg.path), env: { CI: options.ci ? 'true' : undefined, DB_PORT: dbPort }, verbosity: context.verbosity ?? RunVerbosity.Output });
         }
     } finally {
         // Shut down the container after the run; the data volume is kept for the next run.
@@ -221,7 +228,7 @@ export async function testE2e(context: CliContext, options: { ci: boolean; clear
         if (!options.skipBuild) {
             await run('pnpm', ['--dir', 'backend/app/api', 'run', 'build:playwright:pre'], { cwd: context.rootDir, env: databaseEnv, verbosity: context.verbosity ?? RunVerbosity.Output });
         }
-        await run('pnpm', ['--dir', 'tests/playwright', 'run', 'test', ...(options.ui ? ['--ui'] : []), ...(options.grep === undefined ? [] : ['--grep', options.grep]), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)])], { cwd: context.rootDir, env: { ...databaseEnv, NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, NODE_EXTRA_CA_CERTS: caddyRootCaPath(), PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined, PLAYWRIGHT_WORKER_COUNT: options.workers === undefined ? undefined : String(options.workers), STAMHOOFD_SKIP_FRONTEND_BUILD: options.skipBuild ? 'true' : undefined }, verbosity: context.verbosity ?? RunVerbosity.Output });
+        await run('pnpm', ['--dir', 'tests/playwright', 'run', 'test', ...(options.ui ? ['--ui'] : []), ...(options.grep === undefined ? [] : ['--grep', options.grep]), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)])], { cwd: context.rootDir, env: { ...databaseEnv, CI: options.ci ? 'true' : undefined, NODE_EXTRA_CA_CERTS: caddyRootCaPath(), PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined, PLAYWRIGHT_WORKER_COUNT: options.workers === undefined ? undefined : String(options.workers), STAMHOOFD_SKIP_FRONTEND_BUILD: options.skipBuild ? 'true' : undefined }, verbosity: context.verbosity ?? RunVerbosity.Output });
     } finally {
         // Shut down the e2e MySQL container after the run; the data volume is kept for the next run.
         // A MySQL that was already running is left alone: it is not ours to stop.

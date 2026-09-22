@@ -8,7 +8,6 @@
         "dist"
     ],
     "scripts": {
-        "dev:build": "pnpm run build",
         "lint": "eslint",
         "test": "pnpm run typecheck",
         "typecheck": "vue-tsc --noEmit"
