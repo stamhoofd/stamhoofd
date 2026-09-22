@@ -52,7 +52,7 @@ import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
 import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync';
 import type { Group, GroupCategoryTree, MemberResponsibility, Organization, PlatformRegistration, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, GroupType, mergeFilters, SGVSyncStatus, SortItemDirection } from '@stamhoofd/structures';
+import { AccessRight, GroupType, mergeFilters, PermissionLevel, SGVSyncStatus, SortItemDirection } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useRegistrationsObjectFetcher } from '../fetchers/useRegistrationsObjectFetcher';
@@ -368,7 +368,7 @@ const isLimitedGroup = computed(() => {
     if (organizationScope.value && props.group.organizationId !== organizationScope.value.id) {
         return true;
     }
-    if (!auth.canAccessGroup(props.group)) {
+    if (!auth.canAccessGroup(props.group, PermissionLevel.Read, undefined, organizationRegistrationPeriod.value)) {
         return true;
     }
     return false;

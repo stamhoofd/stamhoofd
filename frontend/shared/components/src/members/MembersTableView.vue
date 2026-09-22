@@ -47,7 +47,7 @@ import ModernTableView from '#tables/ModernTableView.vue';
 import type { ComponentExposed } from '#VueGlobalHelper.ts';
 import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync';
 import type { Group, GroupCategoryTree, MemberResponsibility, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, GroupType, SGVSyncStatus } from '@stamhoofd/structures';
+import { AccessRight, GroupType, PermissionLevel, SGVSyncStatus } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
@@ -288,7 +288,7 @@ const isLimitedGroup = computed(() => {
     if (organization.value && props.group.organizationId !== organization.value.id) {
         return true;
     }
-    if (!auth.canAccessGroup(props.group)) {
+    if (!auth.canAccessGroup(props.group, PermissionLevel.Read, undefined, organizationRegistrationPeriod.value)) {
         return true;
     }
     return false;
