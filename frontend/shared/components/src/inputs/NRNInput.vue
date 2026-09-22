@@ -96,8 +96,7 @@ watch(() => props.birthDay, (val, oldValue) => {
     if (wasSuggestion) {
         if (!val) {
             nrrRaw.value = '';
-        }
-        else {
+        } else {
             nrrRaw.value = suggestion.value ?? '';
         }
     }
@@ -137,8 +136,7 @@ function validate(final = true, silent = false) {
 
         if (props.nullable && value.value !== null) {
             value.value = null;
-        }
-        else if (value.value !== '') {
+        } else if (value.value !== '') {
             value.value = '';
         }
         return false;
@@ -153,18 +151,16 @@ function validate(final = true, silent = false) {
             }));
         }
         return false;
-    }
-    else if (!DataValidator.doesMatchBelgianNationalNumber(nrrRaw.value, props.birthDay)) {
+    } else if (!DataValidator.doesMatchBelgianNationalNumber(nrrRaw.value, props.birthDay)) {
         if (!silent) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%z6`),
+                message: $t(`Dit rijksregisternummer komt niet overeen met de geboortedatum van dit lid.`),
                 field: 'nationalRegisterNumber',
             }));
         }
         return false;
-    }
-    else {
+    } else {
         const formatted = DataValidator.formatBelgianNationalNumber(nrrRaw.value);
         if (formatted !== value.value) {
             value.value = formatted;

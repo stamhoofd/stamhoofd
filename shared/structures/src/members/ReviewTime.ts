@@ -2,7 +2,7 @@ import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@s
 import { Formatter } from '@stamhoofd/utility';
 import { AuditLogReplacement } from '../AuditLogReplacement.js';
 
-export type ReviewTimeType = 'records' | 'parents' | 'emergencyContacts' | 'details' | 'uitpasNumber';
+export type ReviewTimeType = 'records' | 'parents' | 'emergencyContacts' | 'details' | 'uitpasNumber' | 'taxCertificates';
 
 /**
  * Keep a timestamp of when certain information was reviewed of a member

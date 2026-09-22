@@ -87,6 +87,20 @@
             transform: scale(0.95, 0.95);
         }
 
+        &.wrap {
+            height: auto;
+            white-space: wrap;
+            text-overflow: none;
+            padding: 7px 27px;
+            min-height: 40px;
+            line-height: 150%;
+
+            > span {
+                white-space: wrap;
+                text-overflow: none;
+            }
+        }
+
         &:disabled, &.disabled {
             color: $color-gray-2;
             background: $color-background-shade;

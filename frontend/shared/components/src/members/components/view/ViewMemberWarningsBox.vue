@@ -101,6 +101,15 @@ const warnings = computed(() => {
         }
     }
 
+    if (isPropertyEnabled('taxCertificates')) {
+        if (props.member.patchedMember.details.parents.filter(p => p.isMemberTaxDependent).length > 1) {
+            warnings.push(RecordWarning.create({
+                text: TranslatedString.create($t('Gescheiden ouders met fiscaal co-ouderschap')),
+                type: RecordWarningType.Info,
+            }));
+        }
+    }
+
     if (isPropertyEnabled('parents') && props.member.patchedMember.details.parents.length > 0) {
         if (props.member.patchedMember.details.parentsHaveAccess?.value === true) {
             if (props.member.patchedMember.details.defaultAge < 18) {

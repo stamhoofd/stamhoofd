@@ -131,22 +131,6 @@ useValidation(errors.validator, () => {
             message: $t(`%107`),
             field: 'parents',
         }));
-    } else if (parents.value.length > 0 && isPropertyRequired('parents.nationalRegisterNumber')) {
-        const taxDependentParents = props.member.taxDependentParents;
-
-        if (taxDependentParents.length === 0) {
-            se.addError(new SimpleError({
-                code: 'invalid_field',
-                message: $t(`%Zrb`),
-                field: 'parents',
-            }));
-        } else if (!taxDependentParents.every(p => !!p.nationalRegisterNumber)) {
-            se.addError(new SimpleError({
-                code: 'invalid_field',
-                message: $t('%Zrv'),
-                field: 'parents',
-            }));
-        }
     }
 
     if (props.member.patchedMember.details.phone) {
@@ -214,7 +198,7 @@ const visibleParents = computed(() => {
     for (const member of props.member.family.members) {
         for (const parent of member.patchedMember.details.parents) {
             if (!result.find(p => p.id === parent.id)) {
-                result.push(parent);
+                result.push(parent.patch({ isMemberTaxDependent: false }));
             }
         }
     }

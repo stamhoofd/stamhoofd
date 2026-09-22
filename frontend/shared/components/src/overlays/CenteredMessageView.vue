@@ -29,7 +29,7 @@
                             <span v-if="button.icon" class="icon" :class="button.icon" />
                             <span>{{ button.text }}</span>
                         </a>
-                        <button v-else ref="buttons" class="button full" :class="button.type" type="button" :tabindex="0" data-testid="centered-message-button" :disabled="button.disabled || (button.requireAcceptCheckbox && !isChecked)" @click="onClickButton(button)">
+                        <button v-else ref="buttons" class="button full wrap" :class="button.type" type="button" :tabindex="0" data-testid="centered-message-button" :disabled="button.disabled || (button.requireAcceptCheckbox && !isChecked)" @click="onClickButton(button)">
                             <span v-if="button.icon" class="icon" :class="button.icon" />
                             <span>{{ button.text }}</span>
                         </button>

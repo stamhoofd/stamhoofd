@@ -9,10 +9,10 @@ import { useContext } from '#hooks/useContext.ts';
 export function useIsPropertyRequired(member: Ref<PlatformMember | PlatformMember[]>) {
     const isAllOptional = useIsAllOptional(member);
 
-    return (property: MemberProperty) => {
+    return (property: MemberProperty, forDescription = false) => {
         const members = Array.isArray(member.value) ? member.value : [member.value];
         return members.some((m) => {
-            if (isAllOptional.value) {
+            if (isAllOptional.value && !forDescription) {
                 return (['birthDay'].includes(property)) && m.isPropertyRequiredForPlatform(property);
             }
             return m.isPropertyRequired(property);

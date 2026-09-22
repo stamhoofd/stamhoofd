@@ -13,7 +13,7 @@
         @click="onClick"
         @contextmenu="$emit('contextmenu', $event)"
     >
-        <div class="left">
+        <div v-if="$slots.left" class="left">
             <slot name="left" />
         </div>
         <div class="main">

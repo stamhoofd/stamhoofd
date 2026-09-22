@@ -67,39 +67,12 @@
             <SelectionAddressInput v-model="address" :addresses="availableAddresses" :validator="errors.validator" :required="app === 'registration'" />
         </div>
 
-        <template v-if="showTaxDependent">
-            <Checkbox v-model="isMemberTaxDependent" data-testid="tax-dependent-checkbox">
-                <p>
-                    {{ $t('%ZrH', {
-                        lid: props.member?.member.details.firstName ?? $t('%79'),
-                        name: firstName || $t('%15U')
-                    }) }}
-                </p>
-                <p class="style-description-small">
-                    <I18nComponent :t="$t('Het attest \'Kinderopvang\' komt op naam van de ouder die je aanduidt. Dat mag enkel het gezinshoofd zijn. Alleen bij fiscaal co-ouderschap na een scheiding vink je beide ouders aan, en wordt het attest gesplitst. Een foute keuze kost belastingvoordeel. <button>Meer info</button>')">
-                        <template #button="{content}">
-                            <a class="inline-link" href="https://fin.belgium.be/nl/particulieren/belastingaangifte/persoonlijke-situatie/personen-ten-laste/kinderen" target="_blank">
-                                {{ content }}
-                            </a>
-                        </template>
-                    </I18nComponent>
-                </p>
-            </Checkbox>
-        </template>
-
         <template v-if="showNationalRegisterNumber">
-            <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`)" :required="isNRNRequiredForThisParent" :required-message="nrnRequiredMessage" :nullable="true" :validator="errors.validator" data-testid="national-register-number-input" />
+            <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`) + (isNRNRequiredForThisParent ? '' : ' (' + $t('optioneel') + ')')" :required="isNRNRequiredForThisParent && !isAllOptional" :required-message="nrnRequiredMessage" :validator="errors.validator" data-testid="national-register-number-input" />
             <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
                 {{ $t('%fa') }} <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
                     {{ $t('%fb') }}
                 </template>
-                <I18nComponent :t="$t('%15T', {name: firstName || $t('%15U')})">
-                    <template #button="{content}">
-                        <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
-                            {{ content }}
-                        </button>
-                    </template>
-                </I18nComponent>
             </p>
             <p v-else class="style-description-small">
                 <I18nComponent :t="$t('%15N')">
@@ -123,7 +96,7 @@ import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import type { Address, Parent, ParentType, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
 import { NationalRegisterNumberOptOut, ParentTypeHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { useErrors } from '../../../errors/useErrors';
@@ -190,16 +163,7 @@ function isTaxDependentFor(member: PlatformMember) {
     return member.patchedMember.details.parents.find(p => p.id === props.parent.id)?.isMemberTaxDependent === true;
 }
 
-/**
- * The number belongs to the parent and is shared by everyone who has them, so it stays required as
- * long as any member still has this parent tax dependent. Clearing it would drop that member's
- * number too, and their certificate needs it.
- */
 const isNRNRequiredForThisParent = computed(() => {
-    if (isAllOptional.value) {
-        return false;
-    }
-
     return relatedMembers.value.some(member => member.isPropertyRequired('parents.nationalRegisterNumber') && isTaxDependentFor(member));
 });
 
@@ -275,27 +239,7 @@ const nationalRegisterNumber = computed({
 const isMemberTaxDependent = computed({
     get: () => patched.value.isMemberTaxDependent,
     set: (isMemberTaxDependent) => {
-        const otherTaxDependentParents = props.member?.patchedMember.details.parents.filter(p => p.id !== props.parent.id && p.isMemberTaxDependent) ?? [];
-
-        if (isMemberTaxDependent && otherTaxDependentParents.length >= 2) {
-            new CenteredMessage(
-                $t('%ZrK'),
-                $t('%Zrd'),
-            ).addCloseButton().show();
-            return;
-        }
-
-        if (otherTaxDependentParents.length > 0 && isMemberTaxDependent) {
-            CenteredMessage.confirm({
-                title: $t('%Zqz'),
-                description: $t('%Zrp'),
-                confirmText: $t('%ZlX'),
-            }).then((isSure) => {
-                if (isSure) addPatch({ isMemberTaxDependent });
-            }).catch(console.error);
-        } else {
-            addPatch({ isMemberTaxDependent });
-        }
+        addPatch({ isMemberTaxDependent });
     },
 });
 
@@ -308,6 +252,12 @@ const hasHadNationalRegisterNumber = ref(!!props.parent.nationalRegisterNumber);
 watch(nationalRegisterNumber, (value) => {
     if (value) {
         hasHadNationalRegisterNumber.value = true;
+    }
+});
+
+onMounted(() => {
+    if (isMemberTaxDependent.value && props.member && !props.member.needsTaxCertificate) {
+        isMemberTaxDependent.value = false;
     }
 });
 

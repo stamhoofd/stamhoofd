@@ -17,7 +17,7 @@
                     </div>
                 </STInputBox>
 
-                <BirthDayInput v-if="isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay') ? $t(`%17w`) : $t(`%fN`)" :validator="validator" :required="isPropertyRequired('birthDay')">
+                <BirthDayInput v-if="isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay', true) ? $t(`%17w`) : $t(`%fN`)" :validator="validator" :required="isPropertyRequired('birthDay')">
                     <template v-if="!trackingYear && isAdmin" #right>
                         <button class="button icon more-horizontal small gray" type="button" @click="showBirthDayMenu" />
                     </template>
@@ -48,30 +48,31 @@
                     </RadioGroup>
                 </STInputBox>
 
-                <PhoneInput v-if="!member.isNew && (isPropertyEnabled('phone') || phone)" v-model="phone" error-fields="phone" :error-box="errors.errorBox" :title="$t('%2k') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? $t(`%fP`): $t(`%fQ`)" />
-                <EmailInput v-if="!(member.isNew) && (isPropertyEnabled('emailAddress') || email) && (!isPropertyEnabled('birthDay') || birthDay)" v-model="email" :required="isPropertyRequired('emailAddress')" :title="$t(`%1FK`) + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? $t(`%fP`): $t(`%fQ`)" :validator="validator">
-                    <template #right>
-                        <button v-tooltip="$t('%fI')" class="button icon add small gray" type="button" @click="addEmail" />
-                    </template>
-                </EmailInput>
-                <EmailInput v-for="n in alternativeEmails.length" :key="n" :model-value="getEmail(n - 1)" :required="true" :title="$t(`%fR`) + ' ' + (alternativeEmails.length > 1 ? n : '') " :placeholder="$t(`%fP`)" :validator="validator" @update:model-value="setEmail(n - 1, $event ?? '')">
-                    <template #right>
-                        <button class="button icon trash small gray" type="button" @click="deleteEmail(n - 1)" />
-                    </template>
-                </EmailInput>
-                <div v-if="!member.isNew && (isPropertyEnabled('emailAddress') || email)">
-                    <p class="style-description-small">
-                        {{ member.patchedMember.firstName }} {{ $t('%fJ') }} <template v-if="alternativeEmails.length">
-                            {{ $t('%fK') }}
-                        </template><template v-else>
-                            {{ $t('%fL') }}
-                        </template> {{ $t('%fM', {member: member.patchedMember.firstName}) }}
+                <template v-if="!member.isNew">
+                    <PhoneInput v-if="isPropertyEnabled('phone') || phone" v-model="phone" error-fields="phone" :error-box="errors.errorBox" :title="$t('%2k') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone', true) ? $t(`%fP`): $t(`%fQ`)" />
+                    <EmailInput v-if="(isPropertyEnabled('emailAddress') || email) && (!isPropertyEnabled('birthDay') || birthDay)" v-model="email" :required="isPropertyRequired('emailAddress')" :title="$t(`%1FK`) + lidSuffix " :placeholder="isPropertyRequired('emailAddress', true) ? $t(`%fP`): $t(`%fQ`)" :validator="validator">
+                        <template #right>
+                            <button v-tooltip="$t('%fI')" class="button icon add small gray" type="button" @click="addEmail" />
+                        </template>
+                    </EmailInput>
+                    <EmailInput v-for="n in alternativeEmails.length" :key="n" :model-value="getEmail(n - 1)" :required="true" :title="$t(`%fR`) + ' ' + (alternativeEmails.length > 1 ? n : '') " :placeholder="$t(`%fP`)" :validator="validator" @update:model-value="setEmail(n - 1, $event ?? '')">
+                        <template #right>
+                            <button class="button icon trash small gray" type="button" @click="deleteEmail(n - 1)" />
+                        </template>
+                    </EmailInput>
+                    <p
+                        v-if="(isPropertyEnabled('emailAddress') || email)"
+                        class="style-description-small"
+                    >
+                        {{ isPropertyRequired('emailAddress', true)
+                            ? $t('Vul hier enkel een e-mailadres van {firstName} zelf in, niet van een ouder.', {firstName: member.patchedMember.firstName})
+                            : $t('Vul hier enkel een e-mailadres van {firstName} zelf in, niet van een ouder. Laat het anders leeg.', {firstName: member.patchedMember.firstName}) }}
                     </p>
-                </div>
+                </template>
             </div>
 
             <div v-if="!member.isNew">
-                <SelectionAddressInput v-if="address || isPropertyEnabled('address')" v-model="address" :addresses="availableAddresses" :required="isPropertyRequired('address')" :title="$t(`%Cn`) + lidSuffix + (isPropertyRequired('address') ? '' : ' ' + $t(`%br`))" :validator="validator" />
+                <SelectionAddressInput v-if="address || isPropertyEnabled('address')" v-model="address" :addresses="availableAddresses" :required="isPropertyRequired('address')" :title="$t(`%Cn`) + lidSuffix + (isPropertyRequired('address', true) ? '' : ' ' + $t(`%br`))" :validator="validator" />
 
                 <STInputBox v-if="isAdmin && !member.isNew && showLanguage" error-fields="language" :error-box="errors.errorBox" :title="$t('%14T')">
                     <Dropdown v-model="language">
@@ -89,58 +90,7 @@
             </div>
         </div>
 
-        <template v-if="!member.isNew && (nationalRegisterNumber || isPropertyEnabled('nationalRegisterNumber') )">
-            <template v-if="isNationalRegisterNumberCollectedForTaxCertificates">
-                <hr>
-                <h2>{{ $t('%ZqD') }}</h2>
-            </template>
-
-            <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`) + lidSuffix + (!isPropertyRequired('nationalRegisterNumber') ? ' ('+$t('%1GF')+')' : '')" :required="isPropertyRequired('nationalRegisterNumber')" :nullable="true" :validator="validator" :birth-day="birthDay">
-                <template v-if="!isPropertyEnabled('nationalRegisterNumber')" #right>
-                    <button class="button icon trash small gray" type="button" @click="nationalRegisterNumber = null" />
-                </template>
-            </NRNInput>
-            <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
-                <I18nComponent
-                    :t="isNationalRegisterNumberCollectedForTaxCertificates
-                        ? $t('%15M', {firstName: firstName || $t('%15V')})
-                        : $t('Als {firstName} geen Belgische nationaliteit heeft, <button>klik dan hier</button>', {firstName: firstName || $t('%15V')})"
-                >
-                    <template #button="{content}">
-                        <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
-                            {{ content }}
-                        </button>
-                    </template>
-                </I18nComponent>
-            </p>
-            <p v-else class="style-description-small">
-                <I18nComponent
-                    :t="isNationalRegisterNumberCollectedForTaxCertificates
-                        ? $t('%15N')
-                        : $t('Toch een Belgische nationaliteit? <button>Klik dan hier</button>')"
-                >
-                    <template #button="{content}">
-                        <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
-                            {{ content }}
-                        </button>
-                    </template>
-                </I18nComponent>
-            </p>
-
-            <STList v-if="!member.isNew && isAdmin && isFullAdmin && ((isBelgium && age <= 21 && nationalRegisterNumber && nationalRegisterNumber !== NationalRegisterNumberOptOut && isNationalRegisterNumberCollectedForTaxCertificates) || severeDisability)">
-                <CheckboxListItem v-model="severeDisability" :label="$t('%Zq2', {firstName: firstName})" data-testid="severe-disability-input">
-                    <p class="style-description-small">
-                        <I18nComponent :t="$t('%Zq8')">
-                            <template #button="{content}">
-                                <a class="inline-link" href="https://fin.belgium.be/nl/particulieren/belastingvoordelen/kinderopvang/belastingvermindering" target="_blank">
-                                    {{ content }}
-                                </a>
-                            </template>
-                        </I18nComponent>
-                    </p>
-                </CheckboxListItem>
-            </STList>
-        </template>
+        <MemberNRRInput v-if="!member.isNew && (nationalRegisterNumber || isPropertyEnabled('nationalRegisterNumber')) && !isPropertyEnabled('taxCertificates')" :member="member" :validator="validator" />
 
         <p v-if="!willMarkReviewed && reviewDate && isAdmin" class="style-description-small">
             {{ $t('%1NN', {date: formatDate(reviewDate)}) }}. <button v-tooltip="$t('%fD')" type="button" class="inline-link" @click="clear">
@@ -156,10 +106,13 @@
 </template>
 
 <script setup lang="ts">
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { useShowMemberLanguage } from '#members/hooks/useShowMemberLanguage.ts';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import type { PlatformMember } from '@stamhoofd/structures';
-import { BooleanStatus, Gender, LanguageHelper, NationalRegisterNumberOptOut } from '@stamhoofd/structures';
+import { BooleanStatus, Gender, LanguageHelper } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
@@ -169,21 +122,14 @@ import { useValidation } from '../../../errors/useValidation';
 import BirthDayInput from '../../../inputs/BirthDayInput.vue';
 import Dropdown from '../../../inputs/Dropdown.vue';
 import EmailInput from '../../../inputs/EmailInput.vue';
-import NRNInput from '../../../inputs/NRNInput.vue';
 import PhoneInput from '../../../inputs/PhoneInput.vue';
 import RadioGroup from '../../../inputs/RadioGroup.vue';
 import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
 import TrackingYearInput from '../../../inputs/TrackingYearInput.vue';
 import { ContextMenu, ContextMenuItem } from '../../../overlays/ContextMenu';
 import { useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
+import MemberNRRInput from './MemberNRRInput.vue';
 import Title from './Title.vue';
-import { useAuth } from '#hooks/useAuth.ts';
-import { Country } from '@stamhoofd/types/Country';
-import { useShowMemberLanguage } from '#members/hooks/useShowMemberLanguage.ts';
-import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import CheckboxListItem from '#inputs/CheckboxListItem.vue';
-import STList from '#layout/STList.vue';
-import { useOrganization } from '#hooks/useOrganization.ts';
 
 defineOptions({
     inheritAttrs: false,
@@ -204,13 +150,8 @@ const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), tru
 const errors = useErrors({ validator: props.validator });
 const app = useAppContext();
 const isAdmin = app === 'dashboard' || app === 'admin';
-const auth = useAuth();
-const isFullAdmin = auth.hasFullAccess();
 const showLanguage = useShowMemberLanguage(computed(() => props.member));
 const availableLanguages = I18nController.shared.availableLanguages;
-const isNationalRegisterNumberCollectedForTaxCertificates = computed(() => {
-    return isPropertyEnabled('taxCertificates') && props.member.needsTaxCertificate;
-});
 
 const language = computed({
     get: () => props.member.patchedMember.details.language,

@@ -8,6 +8,7 @@ import { MemberGeneralStep } from './MemberGeneralStep';
 import { MemberParentsStep } from './MemberParentsStep';
 import { MemberRecordCategoryStep } from './MemberRecordCategoryStep';
 import type { MemberSharedStepOptions } from './MemberSharedStepOptions';
+import { MemberTaxCertificateStep } from './MemberTaxCertificateStep';
 import { MemberUitpasStep } from './MemberUitpasStep';
 
 const defaultOutdatedTime = 60 * 1000 * 60 * 24 * 31 * 3; // 3 months
@@ -19,6 +20,7 @@ export function getAllMemberSteps(member: PlatformMember, item: RegisterItem | n
         new MemberUitpasStep(options),
         new MemberFinancialSupportStep(options),
         new MemberParentsStep(options),
+        new MemberTaxCertificateStep(options),
         new MemberEmergencyContactsStep(options),
     ];
 

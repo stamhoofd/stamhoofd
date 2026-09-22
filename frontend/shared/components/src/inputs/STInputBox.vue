@@ -1,5 +1,5 @@
 <template>
-    <STErrorsInput :error-fields="errorFields" :error-box="errorBox" class="st-input-box" :class="{indent, noTitle: !title}">
+    <STErrorsInput :error-fields="errorFields" :error-box="parentErrorBox ? ([...(Array.isArray(errorBox) ? errorBox : (errorBox ? [errorBox] : [])), parentErrorBox]) : errorBox" class="st-input-box" :class="{indent, noTitle: !title}">
         <h4 :style="{display: title ? 'flex' : 'none'}">
             <label>{{ title }}</label>
             <div class="right">
@@ -19,11 +19,13 @@ import STErrorsInput from '../errors/STErrorsInput.vue';
 withDefaults(defineProps<{
     errorFields?: string;
     errorBox?: ErrorBox | ErrorBox[] | null;
+    parentErrorBox?: ErrorBox | null;
     indent?: boolean;
     title?: string;
 }>(), {
     errorFields: '',
     errorBox: null,
+    parentErrorBox: null,
     indent: false,
     title: '',
 });

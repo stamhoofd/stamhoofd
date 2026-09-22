@@ -835,6 +835,9 @@ export class PlatformMember implements ObjectWithRecords {
      * so a number stored on another parent doesn't answer the question.
      */
     get hasRequiredParentNationalRegisterNumbers(): boolean {
+        if (this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
+            return true;
+        }
         const parents = this.taxDependentParents;
         return parents.length > 0 && parents.every(p => !!p.nationalRegisterNumber);
     }
@@ -935,7 +938,7 @@ export class PlatformMember implements ObjectWithRecords {
 
     /**
      * Notes on special fields:
-     * - 'taxCertificates' returns true if data collection for tax certificates is enabled, even if the member is too old for tax certificates!
+     * - 'taxCertificates' returns true if member needs a tax certificate (or user is an admin can can change age requirement for tax certificates) and tax certificates are enabled
      * - 'parents.nationalRegisterNumber' & 'parents.isMemberTaxDependent' returns true if member needs a tax certificate and tax certificates are enabled
      * - 'nationalRegisterNumber' returns true if member needs a tax certificate and tax certificates are enabled
      *                              OR collection of NRR is enabled apart from that
@@ -947,19 +950,17 @@ export class PlatformMember implements ObjectWithRecords {
             // Asked together with, and only for, the parent that supplies a national register number
             return this.isPropertyEnabled('parents.nationalRegisterNumber', options);
         }
-        // Note: the raw 'taxCertificates' property, asking 'parents.isMemberTaxDependent' here would loop
-        const forTaxCertificate = (property === 'nationalRegisterNumber' || property === 'parents.nationalRegisterNumber')
-            && this.isPropertyEnabled('taxCertificates', options)
-            && this.needsTaxCertificate;
 
         if (property === 'parents.nationalRegisterNumber') {
             if (this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
                 return false;
             }
-            if (!forTaxCertificate) {
+            if (!this.isPropertyEnabled('taxCertificates', options)) {
                 return false;
             }
+
             property = 'nationalRegisterNumber';
+            // Continue for permission checking only
         }
         if ((property === 'financialSupport' || property === 'uitpasNumber')
             && this.patchedMember.details.dataPermissions?.value === false) {
@@ -1000,8 +1001,28 @@ export class PlatformMember implements ObjectWithRecords {
             }
         }
 
+        if (property === 'taxCertificates') {
+            if (!this.needsTaxCertificate) {
+                // Enabled for full admins if age < 21 (to enable it for older members that normally have it disabled)
+                if (options?.checkPermissions && this.patchedMember.details.defaultAge < 22) {
+                    let foundPermissions = false;
+                    for (const organization of this.filterOrganizations({ currentPeriod: options?.scopeGroups ? undefined : true, groups: options?.scopeGroups })) {
+                        if (options.checkPermissions.user.permissions?.forOrganization(organization, this.platform)?.hasFullAccess()) {
+                            foundPermissions = true;
+                            break;
+                        }
+                    }
+                    if (!foundPermissions) {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            }
+        }
+
         // Collecting certificate data asks for the number regardless of the nationalRegisterNumber filter
-        if (forTaxCertificate) {
+        if (property === 'nationalRegisterNumber' && this.isPropertyEnabled('taxCertificates', options)) {
             return true;
         }
 

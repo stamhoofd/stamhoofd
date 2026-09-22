@@ -13,6 +13,11 @@
             <hr><EditMemberParentsBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
         </div>
 
+        <div v-if="isPropertyEnabled('taxCertificates') && member.patchedMember.details.parents.length" class="container">
+            <hr>
+            <EditMemberTaxCertificateBox :level="level + 1" v-bind="$attrs" :member="member" :validator="validator" :parent-error-box="parentErrorBox" />
+        </div>
+
         <div v-if="member.patchedMember.details.emergencyContacts.length || isPropertyEnabled('emergencyContacts')" class="container">
             <hr><EditEmergencyContactsBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
         </div>
@@ -39,12 +44,12 @@
 import type { PlatformMember } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/structures';
 
+import { useAuth } from '#hooks/useAuth.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
 import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import type { ErrorBox } from '../../../errors/ErrorBox';
 import type { Validator } from '../../../errors/Validator';
-import { useAuth } from '#hooks/useAuth.ts';
-import { useOrganization } from '#hooks/useOrganization.ts';
 import { useIsPropertyEnabled } from '../../hooks/useIsPropertyRequired';
 import EditEmergencyContactsBox from './EditEmergencyContactsBox.vue';
 import EditMemberDataPermissionsBox from './EditMemberDataPermissionsBox.vue';
@@ -53,6 +58,7 @@ import EditMemberGeneralBox from './EditMemberGeneralBox.vue';
 import EditMemberNotesBox from './EditMemberNotesBox.vue';
 import EditMemberParentsBox from './EditMemberParentsBox.vue';
 import EditMemberRecordCategoryBox from './EditMemberRecordCategoryBox.vue';
+import EditMemberTaxCertificateBox from './EditMemberTaxCertificateBox.vue';
 import EditMemberUitpasBox from './EditMemberUitpasBox.vue';
 import Title from './Title.vue';
 
