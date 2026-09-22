@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { run } from '../runtime/command-runner.js';
-import { resolvePrimaryInstance } from './workspace.js';
+import { resolvePrimaryInstance, resolvePrimaryWorkspaceRoot } from './workspace.js';
 
 vi.mock('../runtime/command-runner.js', async importOriginal => ({
     ...await importOriginal<typeof import('../runtime/command-runner.js')>(),
@@ -45,6 +45,18 @@ describe('resolvePrimaryInstance', () => {
         mockJjWorkspaces(['a', '/repo/a'], ['b', '/repo/b']);
 
         await expect(resolvePrimaryInstance('/repo/b')).resolves.toBe(false);
+    });
+
+    it('uses the default jj workspace for shared services even when another name sorts first', async () => {
+        mockJjWorkspaces(['cleanup', '/repo/cleanup'], ['default', '/repo/main'], ['turborepo', '/repo/turborepo']);
+
+        await expect(resolvePrimaryWorkspaceRoot('/repo/turborepo')).resolves.toBe('/repo/main');
+    });
+
+    it('does not mark an alphabetically earlier jj workspace as primary', async () => {
+        mockJjWorkspaces(['cleanup', '/repo/cleanup'], ['default', '/repo/main']);
+
+        await expect(resolvePrimaryInstance('/repo/cleanup')).resolves.toBe(false);
     });
 
     it('falls back to secondary when no VCS workspace list is available', async () => {
