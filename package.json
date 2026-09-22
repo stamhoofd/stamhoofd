@@ -82,12 +82,8 @@
     },
     "devDependencies": {
         "@oxc-project/runtime": "0.147.0",
-        "@stamhoofd/frontend-i18n": "*",
-        "@stamhoofd/networking": "*",
-        "@stamhoofd/structures": "*",
         "@stamhoofd/test-utils": "*",
         "@stamhoofd/types": "*",
-        "@stamhoofd/utility": "*",
         "@stylistic/eslint-plugin": "5.10.0",
         "@testing-library/dom": "10.4.1",
         "@types/eslint__js": "8.42.3",
