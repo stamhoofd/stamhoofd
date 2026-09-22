@@ -5,8 +5,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Group, Platform, RegistrationInvitation } from '@stamhoofd/models';
 import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import type { CountFilteredRequest, RegistrationInvitation as RegistrationInvitationStruct, StamhoofdFilter } from '@stamhoofd/structures';
-import { GroupType, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, assertSort } from '@stamhoofd/structures';
+import type { CountFilteredRequest, RegistrationInvitation as RegistrationInvitationStruct, StamhoofdFilter, StamhoofdKeyFilter } from '@stamhoofd/structures';
+import { GroupStatus, GroupType, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, assertSort } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
@@ -75,11 +75,21 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
             }
 
             if (organization) {
-                // Add organization scope filter
+                // Add organization scope filter.
+                // Grants that cover a whole period or the whole organization never reach archived
+                // groups: canAccessGroup only allows those with full access.
+                const canAccessArchivedGroups = await Context.auth.canAccessArchivedGroups(organization.id);
+                const groupStateFilter: StamhoofdKeyFilter = canAccessArchivedGroups ? {} : { status: { $neq: GroupStatus.Archived } };
+
                 if (await Context.auth.canAccessAllMembersInEveryPeriod(organization.id, permissionLevel)) {
-                    scopeFilter = {
-                        organizationId: organization.id,
-                    };
+                    scopeFilter = canAccessArchivedGroups
+                        ? { organizationId: organization.id }
+                        : {
+                                organizationId: organization.id,
+                                group: {
+                                    $elemMatch: groupStateFilter,
+                                },
+                            };
                 } else {
                     const filters: StamhoofdFilter[] = [];
                     const canAccessCurrentPeriod = await Context.auth.canAccessAllMembersInCurrentPeriod(organization.id, permissionLevel);
@@ -90,6 +100,7 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
                             group: {
                                 $elemMatch: {
                                     periodId: organization.periodId,
+                                    ...groupStateFilter,
                                 },
                             },
                         });

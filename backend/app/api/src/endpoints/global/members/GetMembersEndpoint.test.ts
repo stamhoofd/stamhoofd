@@ -3,7 +3,7 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { MemberWithUsersRegistrationsAndGroups, RegistrationPeriod, Token } from '@stamhoofd/models';
 import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, RecordCategoryFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import type { SortList, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, EventMeta, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
+import { AccessRight, EventMeta, GroupStatus, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Language } from '@stamhoofd/types/Language';
 import { GetMembersEndpoint } from './GetMembersEndpoint.js';
@@ -493,11 +493,11 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 return { organization, currentGroup, previousGroup, currentMember, previousMember, otherPreviousMember };
             }
 
-            async function fetchMembers(organization: Awaited<ReturnType<typeof setupPeriods>>['organization'], groupPermissions: [string, ResourcePermissions][]) {
+            async function fetchMembers(organization: Awaited<ReturnType<typeof setupPeriods>>['organization'], groupPermissions: [string, ResourcePermissions][], level: PermissionLevel = PermissionLevel.None) {
                 const user = await new UserFactory({
                     organization,
                     permissions: Permissions.create({
-                        level: PermissionLevel.None,
+                        level,
                         resources: new Map([[PermissionsResourceType.Groups, new Map(groupPermissions)]]),
                     }),
                 }).create();
@@ -539,6 +539,60 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 expect(response.body.results.members).toIncludeSameMembers([
                     expect.objectContaining({ id: currentMember.id }),
                     expect.objectContaining({ id: previousMember.id }),
+                ]);
+            });
+
+            test('An $all grant does not reach archived groups', async () => {
+                const { organization, currentGroup, previousMember, otherPreviousMember } = await setupPeriods();
+
+                currentGroup.status = GroupStatus.Archived;
+                await currentGroup.save();
+
+                const response = await fetchMembers(organization, [
+                    [PermissionsResourceKey.All, read()],
+                ]);
+
+                expect(response.status).toBe(200);
+                expect(response.body.results.members).toIncludeSameMembers([
+                    expect.objectContaining({ id: previousMember.id }),
+                    expect.objectContaining({ id: otherPreviousMember.id }),
+                ]);
+            });
+
+            test('A $currentPeriod grant does not reach an archived group of the current period', async () => {
+                const { organization, currentGroup, previousGroup, currentMember, previousMember } = await setupPeriods();
+
+                currentGroup.status = GroupStatus.Archived;
+                await currentGroup.save();
+
+                // The explicit grant keeps the enumeration branch running alongside the period filter.
+                const response = await fetchMembers(organization, [
+                    [PermissionsResourceKey.CurrentPeriod, read()],
+                    [previousGroup.id, read()],
+                ]);
+
+                expect(response.status).toBe(200);
+                expect(response.body.results.members).toIncludeSameMembers([
+                    expect.objectContaining({ id: previousMember.id }),
+                ]);
+                expect(response.body.results.members).not.toContainEqual(
+                    expect.objectContaining({ id: currentMember.id }),
+                );
+            });
+
+            test('Full access still reaches archived groups', async () => {
+                const { organization, currentGroup, currentMember, previousMember, otherPreviousMember } = await setupPeriods();
+
+                currentGroup.status = GroupStatus.Archived;
+                await currentGroup.save();
+
+                const response = await fetchMembers(organization, [], PermissionLevel.Full);
+
+                expect(response.status).toBe(200);
+                expect(response.body.results.members).toIncludeSameMembers([
+                    expect.objectContaining({ id: currentMember.id }),
+                    expect.objectContaining({ id: previousMember.id }),
+                    expect.objectContaining({ id: otherPreviousMember.id }),
                 ]);
             });
 

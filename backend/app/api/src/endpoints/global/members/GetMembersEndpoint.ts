@@ -4,8 +4,8 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Group, Member, Platform } from '@stamhoofd/models';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import type { CountFilteredRequest, MembersBlob, StamhoofdFilter } from '@stamhoofd/structures';
-import { GroupType, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, assertSort, getSortFilter } from '@stamhoofd/structures';
+import type { CountFilteredRequest, MembersBlob, StamhoofdFilter, StamhoofdKeyFilter } from '@stamhoofd/structures';
+import { GroupStatus, GroupType, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, assertSort, getSortFilter } from '@stamhoofd/structures';
 import type { CountryCode } from '@stamhoofd/types/Country';
 import { Country } from '@stamhoofd/types/Country';
 import { DataValidator } from '@stamhoofd/utility';
@@ -73,12 +73,19 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     };
                 }
             } else {
-                // Add organization scope filter
+                // Add organization scope filter.
+                // Grants that cover a whole period or the whole organization never reach archived
+                // groups: canAccessGroup only allows those with full access.
+                const groupStateFilter: StamhoofdKeyFilter = await Context.auth.canAccessArchivedGroups(organization.id)
+                    ? {}
+                    : { group: { status: { $neq: GroupStatus.Archived } } };
+
                 if (await Context.auth.canAccessAllMembersInEveryPeriod(organization.id, permissionLevel)) {
                     scopeFilter = {
                         registrations: {
                             $elemMatch: {
                                 organizationId: organization.id,
+                                ...groupStateFilter,
                             },
                         },
                     };
@@ -92,6 +99,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                                 $elemMatch: {
                                     organizationId: organization.id,
                                     periodId: organization.periodId,
+                                    ...groupStateFilter,
                                 },
                             },
                         });
