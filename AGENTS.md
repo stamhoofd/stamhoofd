@@ -42,7 +42,9 @@ Backend uses a custom router (`@simonbackx/simple-endpoints`), **not Express**: 
 
 Shared builds use `^build` for normal dependencies and explicit task dependencies for internal peers and global type declarations. Turbo does not include peer dependencies in `^build`. Frontend source packages have dependency cycles: do not enable `^build` globally. Application builds, Playwright builds, tests, migrations, lint and typecheck are uncached; development tasks are persistent and uncached.
 
-During the staged migration, existing entry points still use their current runners. Lerna remains installed for fixed versioning and npm publication throughout Stack B.
+`pnpm run build:shared` runs the shared Turbo graph. For a narrower build use `pnpm exec turbo run build --filter='./shared/*'` or `--filter='./backend/shared/*'`; prerequisites are included automatically. The old `build:global:shared` and `build:backend:shared` aliases have been removed. CI still uploads and downloads `shared-dist`: a checkout-local cache does not transfer outputs between jobs. Other entry points are being migrated in separate steps; Lerna remains installed for releases.
+
+`pnpm run clear:shared` removes build outputs but retains the Turbo cache. To rebuild without reading cache, run `pnpm run clear:shared && pnpm run build:shared --force`. Use `--dry=json` on the build command to inspect task dependencies and cache inputs.
 
 Packages consume each other's **built `dist/` output**, not source. After changing a shared package, consumers see stale code until you run `pnpm run build:shared`. Almost every "type error after editing a shared package", "test fails on module load", or "cached code keeps running" is fixed by running it first. Full reset when badly out of sync:
 

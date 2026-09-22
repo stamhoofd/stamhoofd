@@ -112,6 +112,7 @@ jobs:
                       # Changing the workflow itself (or the shared setup action) can affect
                       # any job, so all of them run.
                       ci:
+                        - 'turbo.json'
                         - '.github/workflows/ci.yml'
                         - '.github/actions/**'
 
