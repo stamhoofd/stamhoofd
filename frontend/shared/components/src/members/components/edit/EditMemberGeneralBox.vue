@@ -89,20 +89,11 @@
             </div>
         </div>
 
-        <p v-if="!willMarkReviewed && reviewDate && isAdmin" class="style-description-small">
-            {{ $t('%1NN', {date: formatDate(reviewDate)}) }}. <button v-tooltip="$t('%fD')" type="button" class="inline-link" @click="clear">
-                {{ $t('%fE') }}
-            </button>.
-        </p>
-        <p v-if="!willMarkReviewed && !reviewDate && isAdmin && !member.isNew" class="style-description-small">
-            {{ $t('%1NO') }} <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
-                {{ $t('%jC') }}
-            </button>
-        </p>
-
-        <div v-if="!member.isNew && (nationalRegisterNumber || isPropertyEnabled('nationalRegisterNumber') )" class="container">
-            <hr>
-            <h2>{{ $t('%ZqD') }}</h2>
+        <template v-if="!member.isNew && (nationalRegisterNumber || isPropertyEnabled('nationalRegisterNumber') )">
+            <template v-if="isNationalRegisterNumberCollectedForTaxCertificates">
+                <hr>
+                <h2>{{ $t('%ZqD') }}</h2>
+            </template>
 
             <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`) + lidSuffix + (!isPropertyRequired('nationalRegisterNumber') ? ' ('+$t('%1GF')+')' : '')" :required="isPropertyRequired('nationalRegisterNumber')" :nullable="true" :validator="validator" :birth-day="birthDay">
                 <template v-if="!isPropertyEnabled('nationalRegisterNumber')" #right>
@@ -110,7 +101,11 @@
                 </template>
             </NRNInput>
             <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
-                <I18nComponent :t="$t('%15M', {firstName: firstName || $t('%15V')})">
+                <I18nComponent
+                    :t="isNationalRegisterNumberCollectedForTaxCertificates
+                        ? $t('%15M', {firstName: firstName || $t('%15V')})
+                        : $t('Als {firstName} geen Belgische nationaliteit heeft, <button>klik dan hier</button>', {firstName: firstName || $t('%15V')})"
+                >
                     <template #button="{content}">
                         <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
                             {{ content }}
@@ -119,7 +114,11 @@
                 </I18nComponent>
             </p>
             <p v-else class="style-description-small">
-                <I18nComponent :t="$t('%15N')">
+                <I18nComponent
+                    :t="isNationalRegisterNumberCollectedForTaxCertificates
+                        ? $t('%15N')
+                        : $t('Toch een Belgische nationaliteit? <button>Klik dan hier</button>')"
+                >
                     <template #button="{content}">
                         <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
                             {{ content }}
@@ -128,7 +127,7 @@
                 </I18nComponent>
             </p>
 
-            <STList v-if="!member.isNew && isAdmin && isFullAdmin && ((isBelgium && age <= 21 && nationalRegisterNumber && nationalRegisterNumber !== NationalRegisterNumberOptOut) || severeDisability)">
+            <STList v-if="!member.isNew && isAdmin && isFullAdmin && ((isBelgium && age <= 21 && nationalRegisterNumber && nationalRegisterNumber !== NationalRegisterNumberOptOut && isNationalRegisterNumberCollectedForTaxCertificates) || severeDisability)">
                 <CheckboxListItem v-model="severeDisability" :label="$t('%Zq2', {firstName: firstName})" data-testid="severe-disability-input">
                     <p class="style-description-small">
                         <I18nComponent :t="$t('%Zq8')">
@@ -141,7 +140,18 @@
                     </p>
                 </CheckboxListItem>
             </STList>
-        </div>
+        </template>
+
+        <p v-if="!willMarkReviewed && reviewDate && isAdmin" class="style-description-small">
+            {{ $t('%1NN', {date: formatDate(reviewDate)}) }}. <button v-tooltip="$t('%fD')" type="button" class="inline-link" @click="clear">
+                {{ $t('%fE') }}
+            </button>.
+        </p>
+        <p v-if="!willMarkReviewed && !reviewDate && isAdmin && !member.isNew" class="style-description-small">
+            {{ $t('%1NO') }} <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
+                {{ $t('%jC') }}
+            </button>
+        </p>
     </div>
 </template>
 
@@ -198,6 +208,9 @@ const auth = useAuth();
 const isFullAdmin = auth.hasFullAccess();
 const showLanguage = useShowMemberLanguage(computed(() => props.member));
 const availableLanguages = I18nController.shared.availableLanguages;
+const isNationalRegisterNumberCollectedForTaxCertificates = computed(() => {
+    return isPropertyEnabled('taxCertificates') && props.member.needsTaxCertificate;
+});
 
 const language = computed({
     get: () => props.member.patchedMember.details.language,
