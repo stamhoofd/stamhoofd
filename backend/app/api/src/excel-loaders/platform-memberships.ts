@@ -1,12 +1,20 @@
+import { field, StringDecoder } from '@simonbackx/simple-encoding';
 import type { XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
-import type { LimitedFilteredRequest, PlatformMembership, Platform as PlatformStruct } from '@stamhoofd/structures';
-import { ExcelExportType, PaginatedResponse } from '@stamhoofd/structures';
+import { RegistrationPeriod } from '@stamhoofd/models';
+import type { LimitedFilteredRequest, Platform as PlatformStruct } from '@stamhoofd/structures';
+import { ExcelExportType, PaginatedResponse, PlatformMembership } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetPlatformMembershipsEndpoint } from '../endpoints/global/platform-memberships/GetPlatformMembershipsEndpoint.js';
 
+class PlatformMembershipWithPeriod extends PlatformMembership {
+    @field({ decoder: StringDecoder })
+    periodName: string;
+}
+
 // Assign to a typed variable to assure we have correct type checking in place
-const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMembership> => ({
+const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMembershipWithPeriod> => ({
     id: 'platform-memberships',
     name: $t('%1EI'),
     columns: [
@@ -27,6 +35,14 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
                 const value = membershipType ? membershipType.name : '';
                 return { value };
             },
+        },
+        {
+            id: 'periodId',
+            name: $t('%7Z'),
+            width: 20,
+            getValue: (membership: PlatformMembershipWithPeriod) => ({
+                value: membership.periodName,
+            }),
         },
         {
             id: 'startDate',
@@ -262,9 +278,15 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
 ExportToExcelEndpoint.loaders.set(ExcelExportType.PlatformMemberships, {
     fetch: async (query: LimitedFilteredRequest) => {
         const data = await GetPlatformMembershipsEndpoint.buildData(query);
+        const periodIds = Formatter.uniqueArray(data.results.map(membership => membership.periodId));
+        const periods = await RegistrationPeriod.getByIDs(...periodIds);
+        const periodMap = new Map(periods.map(period => [period.id, period.getBaseStructure().nameShort]));
 
         return new PaginatedResponse({
-            results: data.results,
+            results: data.results.map(membership => PlatformMembershipWithPeriod.create({
+                ...membership,
+                periodName: periodMap.get(membership.periodId) ?? membership.periodId,
+            })),
             next: data.next,
         });
     },
