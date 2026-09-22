@@ -371,15 +371,10 @@ function formatDomainLabel(domain: string, env: string): string {
     return parts.join('');
 }
 
-const backendCommand = 'pnpm exec lerna run dev --scope @stamhoofd/backend --scope @stamhoofd/backend-renderer --scope @stamhoofd/backend-statistics-syncer --parallel --stream';
-const frontendCommand = 'pnpm exec lerna run dev --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/auto --scope @stamhoofd/admin-frontend --scope @stamhoofd/verify-email --scope @stamhoofd/web-app --scope @stamhoofd/webshop --parallel --stream';
-const fullStackCommand = 'pnpm exec lerna run dev --scope @stamhoofd/backend --scope @stamhoofd/backend-renderer --scope @stamhoofd/backend-statistics-syncer  --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/auto --scope @stamhoofd/admin-frontend --scope @stamhoofd/verify-email --scope @stamhoofd/web-app --scope @stamhoofd/webshop --parallel --stream';
+const backendCommand = 'pnpm exec turbo run dev --env-mode=loose --filter=@stamhoofd/backend --filter=@stamhoofd/backend-renderer --filter=@stamhoofd/backend-statistics-syncer';
+const frontendCommand = 'pnpm exec turbo run dev --env-mode=loose --filter=@stamhoofd/web-app --filter=@stamhoofd/webshop';
+const fullStackCommand = 'pnpm exec turbo run dev --env-mode=loose --filter=@stamhoofd/backend --filter=@stamhoofd/backend-renderer --filter=@stamhoofd/backend-statistics-syncer --filter=@stamhoofd/web-app --filter=@stamhoofd/webshop';
 
-// The docs site is a standalone Nuxt app outside the Lerna workspaces, so it is
-// started directly through its own package rather than a lerna scope. Because it
-// is not part of the root workspaces, the root `yarn` does not install its
-// dependencies, so install them on first run (when node_modules is missing).
-//
 // `--host 0.0.0.0` is required: Caddy runs in Docker and reaches the dev servers
 // through `host.docker.internal`, so the server must listen on all interfaces.
 // Nuxt otherwise binds the loopback address only (`::1`), which the Caddy
@@ -406,7 +401,7 @@ export function commandsForTarget(target: DevTarget, ports: ReturnType<typeof bu
 
 // The docs site does not consume any @stamhoofd/* build output, so it never
 // waits for the shared build: a docs-only session skips the watcher entirely,
-// and in `all` the docs server starts immediately while the Lerna processes
+// and in `all` the docs server starts immediately while the app processes
 // wait for the shared build to be ready.
 export function concurrentlyTargets(target: DevTarget, ports: ReturnType<typeof buildPorts>): string[] {
     const commands = commandsForTarget(target, ports);

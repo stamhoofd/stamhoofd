@@ -148,8 +148,8 @@ describe.skip('runDev', () => {
             'exec',
             'concurrently',
             '-r',
-            expect.stringMatching(/rm -f \.development\/cli\/generated\/shared-build-\d+\.ready.+pnpm --dir shared\/cli run build.+touch \.development\/cli\/generated\/shared-build-\d+\.ready/),
-            expect.stringMatching(/wait-on \.development\/cli\/generated\/shared-build-\d+\.ready shared\/cli\/dist\/index\.js shared\/locales\/dist\/index\.d\.ts && pnpm exec lerna run dev --scope @stamhoofd\/backend --scope @stamhoofd\/backend-renderer --scope @stamhoofd\/dashboard --scope @stamhoofd\/registration --scope @stamhoofd\/webshop --parallel --stream/),
+            expect.stringMatching(/rm -f \.development\/cli\/generated\/shared-build-\d+\.ready.+pnpm run build:shared.+touch \.development\/cli\/generated\/shared-build-\d+\.ready/),
+            expect.stringMatching(/wait-on \.development\/cli\/generated\/shared-build-\d+\.ready shared\/cli\/dist\/index\.js shared\/locales\/dist\/index\.d\.ts && pnpm exec turbo run dev --env-mode=loose --filter=@stamhoofd\/backend --filter=@stamhoofd\/backend-renderer --filter=@stamhoofd\/backend-statistics-syncer --filter=@stamhoofd\/web-app --filter=@stamhoofd\/webshop/),
         ], expect.objectContaining({
             cwd: context.rootDir,
             stdio: ['inherit', 'pipe', 'pipe'],
@@ -432,7 +432,8 @@ describe('commandsForTarget', () => {
         const commands = commandsForTarget(DevTarget.All, ports);
 
         expect(commands).toHaveLength(2);
-        expect(commands[0]).toContain('lerna run dev');
+        expect(commands[0]).toContain('turbo run dev');
+        expect(commands[0]).toContain('--env-mode=loose');
         expect(commands.some(command => command.includes(`pnpm --dir docs run dev --port ${ports.docs}`))).toBe(true);
     });
 
@@ -452,16 +453,16 @@ describe('concurrentlyTargets', () => {
         expect(targets.some(target => target.includes('nodemon') || target.includes('wait-on'))).toBe(false);
     });
 
-    it('starts docs immediately in all while gating the Lerna processes on the shared build', () => {
+    it('starts docs immediately in all while gating the app processes on the shared build', () => {
         const targets = concurrentlyTargets(DevTarget.All, ports);
         const docsTarget = targets.find(target => target.includes('--dir docs run dev'));
-        const lernaTarget = targets.find(target => target.includes('lerna run dev'));
+        const appTarget = targets.find(target => target.includes('turbo run dev'));
 
         // Docs consumes no shared build output, so it must not wait on it...
         expect(docsTarget).toBeDefined();
         expect(docsTarget).not.toContain('wait-on');
-        // ...while the Lerna processes still do.
-        expect(lernaTarget).toContain('wait-on');
+        // ...while the app processes still do.
+        expect(appTarget).toContain('wait-on');
         expect(targets.some(target => target.includes('nodemon'))).toBe(true);
     });
 
