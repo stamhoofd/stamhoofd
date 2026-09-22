@@ -66,11 +66,11 @@ describe('Model.DocumentTemplate', () => {
 });
 
 describe('Model.getTaxDependentDebtor', () => {
-    function parent({ name, taxDependent, nationalRegisterNumber }: { name: string; taxDependent?: boolean | null; nationalRegisterNumber?: string | typeof NationalRegisterNumberOptOut | null }) {
+    function parent({ name, isMemberTaxDependent, nationalRegisterNumber }: { name: string; isMemberTaxDependent?: boolean | null; nationalRegisterNumber?: string | typeof NationalRegisterNumberOptOut | null }) {
         return Parent.create({
             firstName: name,
             lastName: 'Doe',
-            taxDependent: taxDependent ?? null,
+            isMemberTaxDependent: isMemberTaxDependent ?? null,
             nationalRegisterNumber: nationalRegisterNumber ?? null,
         });
     }
@@ -82,7 +82,7 @@ describe('Model.getTaxDependentDebtor', () => {
     });
 
     test('picks the parent that has the member tax dependent', () => {
-        const linda = parent({ name: 'Linda', taxDependent: true, nationalRegisterNumber: '93042012345' });
+        const linda = parent({ name: 'Linda', isMemberTaxDependent: true, nationalRegisterNumber: '93042012345' });
         const john = parent({ name: 'John', nationalRegisterNumber: '93042017297' });
 
         expect(getTaxDependentDebtor([john, linda])).toEqual({ debtor: linda, missingData: false });
@@ -90,28 +90,28 @@ describe('Model.getTaxDependentDebtor', () => {
 
     // The certificate has to carry the name the family chose, even though it cannot be completed
     test('keeps a tax dependent parent that opted out, instead of falling back to another parent', () => {
-        const linda = parent({ name: 'Linda', taxDependent: true, nationalRegisterNumber: NationalRegisterNumberOptOut });
+        const linda = parent({ name: 'Linda', isMemberTaxDependent: true, nationalRegisterNumber: NationalRegisterNumberOptOut });
         const john = parent({ name: 'John', nationalRegisterNumber: '93042017297' });
 
         expect(getTaxDependentDebtor([linda, john])).toEqual({ debtor: linda, missingData: true });
     });
 
     test('reports missing data when the tax dependent parent has no number yet', () => {
-        const linda = parent({ name: 'Linda', taxDependent: true });
+        const linda = parent({ name: 'Linda', isMemberTaxDependent: true });
 
         expect(getTaxDependentDebtor([linda])).toEqual({ debtor: linda, missingData: true });
     });
 
     test('with co-parenting, prefers the one that can complete the certificate', () => {
-        const linda = parent({ name: 'Linda', taxDependent: true, nationalRegisterNumber: NationalRegisterNumberOptOut });
-        const john = parent({ name: 'John', taxDependent: true, nationalRegisterNumber: '93042017297' });
+        const linda = parent({ name: 'Linda', isMemberTaxDependent: true, nationalRegisterNumber: NationalRegisterNumberOptOut });
+        const john = parent({ name: 'John', isMemberTaxDependent: true, nationalRegisterNumber: '93042017297' });
 
         expect(getTaxDependentDebtor([linda, john])).toEqual({ debtor: john, missingData: false });
     });
 
     test('with co-parenting, neither having a number is missing data', () => {
-        const linda = parent({ name: 'Linda', taxDependent: true });
-        const john = parent({ name: 'John', taxDependent: true });
+        const linda = parent({ name: 'Linda', isMemberTaxDependent: true });
+        const john = parent({ name: 'John', isMemberTaxDependent: true });
 
         expect(getTaxDependentDebtor([linda, john])).toEqual({ debtor: linda, missingData: true });
     });

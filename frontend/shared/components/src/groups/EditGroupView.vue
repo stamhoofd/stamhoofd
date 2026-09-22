@@ -1666,7 +1666,7 @@ async function addWaitingList() {
     });
 }
 
-function isPropertyEnabled(name: Exclude<MemberProperty, 'parents.nationalRegisterNumber' | 'email' | 'parents.taxDependent'>) {
+function isPropertyEnabled(name: Exclude<MemberProperty, 'parents.nationalRegisterNumber' | 'email' | 'parents.isMemberTaxDependent'>) {
     return !!OrganizationRecordsConfiguration.build({
         platform: platform.value,
         organization: externalOrganization.value,

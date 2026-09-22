@@ -148,7 +148,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
             email: `moeder-${runId}@example.com`,
             phone: '+32470123456',
             address,
-            taxDependent: taxDependentParents.mother ?? null,
+            isMemberTaxDependent: taxDependentParents.mother ?? null,
             nationalRegisterNumber: nationalRegisterNumbers.mother,
         });
         const father = Parent.create({
@@ -158,7 +158,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
             email: `vader-${runId}@example.com`,
             phone: '+32470123457',
             address,
-            taxDependent: taxDependentParents.father ?? null,
+            isMemberTaxDependent: taxDependentParents.father ?? null,
             nationalRegisterNumber: nationalRegisterNumbers.father,
         });
 
@@ -183,10 +183,10 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
             const memberMother = mother.clone();
             const memberFather = father.clone();
 
-            // taxDependent lives on the member's own copy of the parent, so it can differ per member
+            // isMemberTaxDependent lives on the member's own copy of the parent, so it can differ per member
             if (ownTaxDependentParents) {
-                memberMother.taxDependent = ownTaxDependentParents.mother ?? null;
-                memberFather.taxDependent = ownTaxDependentParents.father ?? null;
+                memberMother.isMemberTaxDependent = ownTaxDependentParents.mother ?? null;
+                memberFather.isMemberTaxDependent = ownTaxDependentParents.father ?? null;
             }
 
             const member = await new MemberFactory({
@@ -352,7 +352,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
 
     async function readTaxDependent(memberId: string, parentId: string) {
         const member = await Member.getByID(memberId);
-        return member!.details.parents.find(p => p.id === parentId)?.taxDependent ?? null;
+        return member!.details.parents.find(p => p.id === parentId)?.isMemberTaxDependent ?? null;
     }
 
     /**
@@ -957,14 +957,14 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
 
         await expect.poll(async () => {
             const member = await Member.getByID(scenario.memberA.id);
-            return member!.details.parents.find(p => p.firstName === newParentName)?.taxDependent ?? null;
+            return member!.details.parents.find(p => p.firstName === newParentName)?.isMemberTaxDependent ?? null;
         }, { timeout: 30_000 }).toBe(true);
 
         // The sibling got the parent too, but never the tax dependency
         const sibling = await Member.getByID(scenario.memberB.id);
         const copied = sibling!.details.parents.find(p => p.firstName === newParentName);
         expect(copied).toBeDefined();
-        expect(copied!.taxDependent).toBeNull();
+        expect(copied!.isMemberTaxDependent).toBeNull();
     });
 
     // ------------------------------------------------------------------

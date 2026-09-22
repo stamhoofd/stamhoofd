@@ -29,7 +29,7 @@ export class Parent extends AutoEncoder {
     nationalRegisterNumber: string | typeof NationalRegisterNumberOptOut | null;
 
     @field({ decoder: BooleanDecoder, ...NextVersion, nullable: true })
-    taxDependent: boolean | null;
+    isMemberTaxDependent: boolean | null;
 
     @field({ decoder: StringDecoder, nullable: true })
     phone: string | null;

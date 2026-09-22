@@ -933,7 +933,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
     }
 
     static countTaxDependentParents(details: MemberDetails) {
-        return details.parents.filter(p => p.taxDependent === true).length;
+        return details.parents.filter(p => p.isMemberTaxDependent === true).length;
     }
 
     /**
@@ -1047,8 +1047,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     parentPatch.id = parentMergeMap.get(parentPatch.id) ?? parentPatch.id;
 
                     if (m.id !== member.id) {
-                        // We want to ignore taxDependent on familyMembers
-                        parentPatch.taxDependent = undefined;
+                        // We want to ignore isMemberTaxDependent on familyMembers
+                        parentPatch.isMemberTaxDependent = undefined;
                     }
                     arr.addPatch(parentPatch);
                     m.details = m.details.patch({

@@ -62,55 +62,55 @@
                         {{ $t('%15S', {firstName}) }}
                     </template>
                 </p>
-
-                <template v-if="showTaxDependent">
-                    <Checkbox v-model="taxDependent" data-testid="tax-dependent-checkbox">
-                        <p>
-                            {{ $t('%ZrH', {
-                                lid: props.member?.member.details.firstName ?? $t('%79'),
-                                name: firstName || $t('%15U')
-                            }) }}
-                        </p>
-                        <p class="style-description-small">
-                            <I18nComponent :t="$t('Het attest \'Kinderopvang\' komt op naam van de ouder die je aanduidt. Dat mag enkel het gezinshoofd zijn. Alleen bij fiscaal co-ouderschap na een scheiding vink je beide ouders aan, en wordt het attest gesplitst. Een foute keuze kost belastingvoordeel. <button>Meer info</button>')">
-                                <template #button="{content}">
-                                    <a class="inline-link" href="https://fin.belgium.be/nl/particulieren/belastingaangifte/persoonlijke-situatie/personen-ten-laste/kinderen" target="_blank">
-                                        {{ content }}
-                                    </a>
-                                </template>
-                            </I18nComponent>
-                        </p>
-                    </Checkbox>
-                </template>
-
-                <template v-if="showNationalRegisterNumber">
-                    <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`)" :required="isNRNRequiredForThisParent" :required-message="nrnRequiredMessage" :nullable="true" :validator="errors.validator" data-testid="national-register-number-input" />
-                    <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
-                        {{ $t('%fa') }} <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
-                            {{ $t('%fb') }}
-                        </template>
-                        <I18nComponent :t="$t('%15T', {name: firstName || $t('%15U')})">
-                            <template #button="{content}">
-                                <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
-                                    {{ content }}
-                                </button>
-                            </template>
-                        </I18nComponent>
-                    </p>
-                    <p v-else class="style-description-small">
-                        <I18nComponent :t="$t('%15N')">
-                            <template #button="{content}">
-                                <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
-                                    {{ content }}
-                                </button>
-                            </template>
-                        </I18nComponent>
-                    </p>
-                </template>
             </div>
 
             <SelectionAddressInput v-model="address" :addresses="availableAddresses" :validator="errors.validator" :required="app === 'registration'" />
         </div>
+
+        <template v-if="showTaxDependent">
+            <Checkbox v-model="isMemberTaxDependent" data-testid="tax-dependent-checkbox">
+                <p>
+                    {{ $t('%ZrH', {
+                        lid: props.member?.member.details.firstName ?? $t('%79'),
+                        name: firstName || $t('%15U')
+                    }) }}
+                </p>
+                <p class="style-description-small">
+                    <I18nComponent :t="$t('Het attest \'Kinderopvang\' komt op naam van de ouder die je aanduidt. Dat mag enkel het gezinshoofd zijn. Alleen bij fiscaal co-ouderschap na een scheiding vink je beide ouders aan, en wordt het attest gesplitst. Een foute keuze kost belastingvoordeel. <button>Meer info</button>')">
+                        <template #button="{content}">
+                            <a class="inline-link" href="https://fin.belgium.be/nl/particulieren/belastingaangifte/persoonlijke-situatie/personen-ten-laste/kinderen" target="_blank">
+                                {{ content }}
+                            </a>
+                        </template>
+                    </I18nComponent>
+                </p>
+            </Checkbox>
+        </template>
+
+        <template v-if="showNationalRegisterNumber">
+            <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`)" :required="isNRNRequiredForThisParent" :required-message="nrnRequiredMessage" :nullable="true" :validator="errors.validator" data-testid="national-register-number-input" />
+            <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
+                {{ $t('%fa') }} <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
+                    {{ $t('%fb') }}
+                </template>
+                <I18nComponent :t="$t('%15T', {name: firstName || $t('%15U')})">
+                    <template #button="{content}">
+                        <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
+                            {{ content }}
+                        </button>
+                    </template>
+                </I18nComponent>
+            </p>
+            <p v-else class="style-description-small">
+                <I18nComponent :t="$t('%15N')">
+                    <template #button="{content}">
+                        <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
+                            {{ content }}
+                        </button>
+                    </template>
+                </I18nComponent>
+            </p>
+        </template>
     </SaveView>
 </template>
 
@@ -175,19 +175,19 @@ const isAllOptional = useIsAllOptional(relatedMembers);
 /**
  * Tax dependency is stored per member so we can only ask it when we know which member we are editing.
  */
-const showTaxDependent = computed(() => isPropertyEnabled('parents.taxDependent') && !!props.member);
+const showTaxDependent = computed(() => isPropertyEnabled('parents.isMemberTaxDependent') && !!props.member);
 
 /**
- * taxDependent is stored per member, so read it from the member rather than from the parent object
+ * isMemberTaxDependent is stored per member, so read it from the member rather than from the parent object
  * we happen to hold: without a member that is one collapsed copy (PlatformFamily.parents keeps the
  * last member's), and with one the checkbox in this view is the live value.
  */
 function isTaxDependentFor(member: PlatformMember) {
     if (props.member && member.id === props.member.id) {
-        return patched.value.taxDependent === true;
+        return patched.value.isMemberTaxDependent === true;
     }
 
-    return member.patchedMember.details.parents.find(p => p.id === props.parent.id)?.taxDependent === true;
+    return member.patchedMember.details.parents.find(p => p.id === props.parent.id)?.isMemberTaxDependent === true;
 }
 
 /**
@@ -272,12 +272,12 @@ const nationalRegisterNumber = computed({
     set: nationalRegisterNumber => addPatch({ nationalRegisterNumber }),
 });
 
-const taxDependent = computed({
-    get: () => patched.value.taxDependent,
-    set: (taxDependent) => {
-        const otherTaxDependentParents = props.member?.patchedMember.details.parents.filter(p => p.id !== props.parent.id && p.taxDependent) ?? [];
+const isMemberTaxDependent = computed({
+    get: () => patched.value.isMemberTaxDependent,
+    set: (isMemberTaxDependent) => {
+        const otherTaxDependentParents = props.member?.patchedMember.details.parents.filter(p => p.id !== props.parent.id && p.isMemberTaxDependent) ?? [];
 
-        if (taxDependent && otherTaxDependentParents.length >= 2) {
+        if (isMemberTaxDependent && otherTaxDependentParents.length >= 2) {
             new CenteredMessage(
                 $t('%ZrK'),
                 $t('%Zrd'),
@@ -285,16 +285,16 @@ const taxDependent = computed({
             return;
         }
 
-        if (otherTaxDependentParents.length > 0 && taxDependent) {
+        if (otherTaxDependentParents.length > 0 && isMemberTaxDependent) {
             CenteredMessage.confirm({
                 title: $t('%Zqz'),
                 description: $t('%Zrp'),
                 confirmText: $t('%ZlX'),
             }).then((isSure) => {
-                if (isSure) addPatch({ taxDependent });
+                if (isSure) addPatch({ isMemberTaxDependent });
             }).catch(console.error);
         } else {
-            addPatch({ taxDependent });
+            addPatch({ isMemberTaxDependent });
         }
     },
 });
@@ -324,7 +324,7 @@ const showNationalRegisterNumber = computed(() => {
         return false;
     }
 
-    return showTaxDependent.value && !!taxDependent.value;
+    return showTaxDependent.value && !!isMemberTaxDependent.value;
 });
 
 const availableAddresses = computed(() => {
@@ -439,9 +439,9 @@ async function save() {
             } else {
                 props.member.addParent(patched.value);
 
-                // taxDependent is stored per member so it is never copied to the other family members
+                // isMemberTaxDependent is stored per member so it is never copied to the other family members
                 const familyParent = patched.value.clone();
-                familyParent.taxDependent = null;
+                familyParent.isMemberTaxDependent = null;
 
                 for (const member of minorMembers) {
                     member.addParent(familyParent);

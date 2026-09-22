@@ -2610,7 +2610,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             expect(member2.details.parents).toEqual([expectedParent]);
         });
 
-        test('Updating taxDependent for one parent doesn\'t change it for the whole family', async () => {
+        test('Updating isMemberTaxDependent for one parent doesn\'t change it for the whole family', async () => {
             const user = await new UserFactory({}).create();
 
             const parent1 = Parent.create({
@@ -2669,7 +2669,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 Parent.patch({
                     id: parent1.id,
                     updatedAt: d,
-                    taxDependent: true,
+                    isMemberTaxDependent: true,
                 }),
             );
 
@@ -2695,9 +2695,9 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             await member3.refresh();
 
             // Check all parents equal
-            const expectedParent = (taxDependent: boolean | null = null) => Parent.create({
+            const expectedParent = (isMemberTaxDependent: boolean | null = null) => Parent.create({
                 ...parent1,
-                taxDependent,
+                isMemberTaxDependent,
                 updatedAt: d,
             });
 
@@ -2706,7 +2706,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             expect(member3.details.parents).toEqual([expectedParent()]);
         });
 
-        test('Updating taxDependent for another parent doesn\'t change it for the whole family', async () => {
+        test('Updating isMemberTaxDependent for another parent doesn\'t change it for the whole family', async () => {
             const user = await new UserFactory({}).create();
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
@@ -2771,7 +2771,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 Parent.patch({
                     id: parent1.id,
                     updatedAt: d,
-                    taxDependent: true,
+                    isMemberTaxDependent: true,
                 }),
             );
 
@@ -2796,9 +2796,9 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             await member2.refresh();
 
             // Check all parents equal
-            const expectedParent = (parent: Parent, taxDependent: boolean | null = null, updatedAt: Date | null = null) => Parent.create({
+            const expectedParent = (parent: Parent, isMemberTaxDependent: boolean | null = null, updatedAt: Date | null = null) => Parent.create({
                 ...parent,
-                taxDependent,
+                isMemberTaxDependent,
                 updatedAt: updatedAt ? updatedAt : parent.updatedAt,
             });
 
@@ -2808,14 +2808,14 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             expect(member2.details.parents).toHaveLength(2);
             expect(member2.details.parents).toEqual([expectedParent(parent1, null, d), expectedParent(parent2)]);
 
-            // Now change taxDependent for member2 with parent2
+            // Now change isMemberTaxDependent for member2 with parent2
             arr = new PatchableArray();
             parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
             parentsPatch.addPatch(
                 Parent.patch({
                     id: parent2.id,
                     updatedAt: d,
-                    taxDependent: true,
+                    isMemberTaxDependent: true,
                 }),
             );
 
@@ -2855,7 +2855,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             [null, true],
             [null, false],
             [null, null],
-        ])('Adding member to family doesn\'t copy taxDependent (%s : %s)', async (isOriginalTaxDependent, isNewTaxDependent) => {
+        ])('Adding member to family doesn\'t copy isMemberTaxDependent (%s : %s)', async (isOriginalTaxDependent, isNewTaxDependent) => {
             const user = await new UserFactory({}).create();
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
@@ -2867,7 +2867,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 lastName: 'Doe',
                 email: 'linda@example.com',
                 alternativeEmails: ['linda@work.com'],
-                taxDependent: isOriginalTaxDependent,
+                isMemberTaxDependent: isOriginalTaxDependent,
                 phone: '+32412345678',
                 address: Address.create({
                     street: 'Main street 1',
@@ -2905,7 +2905,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 updatedAt: new Date(0),
                 email: 'linda@example.com',
                 phone: '+32412345678',
-                taxDependent: isNewTaxDependent,
+                isMemberTaxDependent: isNewTaxDependent,
             });
             parentsPatch.addPut(createdParent);
 
@@ -2930,9 +2930,9 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             await member2.refresh();
 
             // Check all parents equal
-            const expectedParent = (parent: Parent, taxDependent: boolean | null = null) => Parent.create({
+            const expectedParent = (parent: Parent, isMemberTaxDependent: boolean | null = null) => Parent.create({
                 ...parent,
-                taxDependent,
+                isMemberTaxDependent,
             });
 
             expect(member1.details.parents).toHaveLength(1);
@@ -2952,7 +2952,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             [null, true],
             [null, false],
             [null, null],
-        ])('Merging families keeps original taxDependent (%s : %s)', async (parent1TaxDependent, parent2TaxDepentent) => {
+        ])('Merging families keeps original isMemberTaxDependent (%s : %s)', async (parent1TaxDependent, parent2TaxDepentent) => {
             const user = await new UserFactory({}).create();
 
             const parent1 = Parent.create({
@@ -2960,7 +2960,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 lastName: 'Doe',
                 email: 'linda@example.com',
                 phone: '+32412345678',
-                taxDependent: parent1TaxDependent,
+                isMemberTaxDependent: parent1TaxDependent,
                 createdAt: new Date(0),
             });
             const parent2 = Parent.create({
@@ -2968,7 +2968,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 lastName: 'Doe',
                 email: 'peter@example.com',
                 phone: '+32412345678',
-                taxDependent: parent2TaxDepentent,
+                isMemberTaxDependent: parent2TaxDepentent,
                 createdAt: new Date(1000),
             });
 
@@ -3043,10 +3043,10 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             await member2.refresh();
 
             // Check all parents equal
-            const expectedParent = (taxDependent: boolean | null = null) => Parent.create({
+            const expectedParent = (isMemberTaxDependent: boolean | null = null) => Parent.create({
                 ...parent1,
                 id: parent1.id,
-                taxDependent,
+                isMemberTaxDependent,
                 updatedAt: d,
             });
 
@@ -3057,7 +3057,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
         test.each([
             [2, false],
             [3, true],
-        ])('Marking %s parents as taxDependent throws: %s', async (taxDependentCount, shouldThrow) => {
+        ])('Marking %s parents as isMemberTaxDependent throws: %s', async (taxDependentCount, shouldThrow) => {
             const user = await new UserFactory({}).create();
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
@@ -3084,7 +3084,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             for (const parent of parents.slice(0, taxDependentCount)) {
                 parentsPatch.addPatch(Parent.patch({
                     id: parent.id,
-                    taxDependent: true,
+                    isMemberTaxDependent: true,
                 }));
             }
 
@@ -3106,7 +3106,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 );
 
                 await member.refresh();
-                expect(member.details.parents.filter(p => p.taxDependent === true)).toHaveLength(0);
+                expect(member.details.parents.filter(p => p.isMemberTaxDependent === true)).toHaveLength(0);
                 return;
             }
 
@@ -3114,10 +3114,10 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             expect(response.status).toBe(200);
 
             await member.refresh();
-            expect(member.details.parents.filter(p => p.taxDependent === true)).toHaveLength(taxDependentCount);
+            expect(member.details.parents.filter(p => p.isMemberTaxDependent === true)).toHaveLength(taxDependentCount);
         });
 
-        test('A member that already has too many taxDependent parents can still be changed', async () => {
+        test('A member that already has too many isMemberTaxDependent parents can still be changed', async () => {
             const user = await new UserFactory({}).create();
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
@@ -3129,7 +3129,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 firstName,
                 lastName: 'Doe',
                 email: firstName.toLowerCase() + '@example.com',
-                taxDependent: true,
+                isMemberTaxDependent: true,
                 updatedAt: new Date(0),
             }));
 
@@ -3155,10 +3155,10 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             await member.refresh();
             expect(member.details.phone).toBe('+32412345678');
-            expect(member.details.parents.filter(p => p.taxDependent === true)).toHaveLength(3);
+            expect(member.details.parents.filter(p => p.isMemberTaxDependent === true)).toHaveLength(3);
         });
 
-        test('A member that already has too many taxDependent parents cannot get another one', async () => {
+        test('A member that already has too many isMemberTaxDependent parents cannot get another one', async () => {
             const user = await new UserFactory({}).create();
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
@@ -3169,7 +3169,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 firstName,
                 lastName: 'Doe',
                 email: firstName.toLowerCase() + '@example.com',
-                taxDependent: firstName !== 'Bob',
+                isMemberTaxDependent: firstName !== 'Bob',
                 updatedAt: new Date(0),
             }));
 
@@ -3185,7 +3185,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
             parentsPatch.addPatch(Parent.patch({
                 id: parents[3].id,
-                taxDependent: true,
+                isMemberTaxDependent: true,
             }));
 
             const arr: Body = new PatchableArray();
@@ -3204,7 +3204,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             );
 
             await member.refresh();
-            expect(member.details.parents.filter(p => p.taxDependent === true)).toHaveLength(3);
+            expect(member.details.parents.filter(p => p.isMemberTaxDependent === true)).toHaveLength(3);
         });
     });
 

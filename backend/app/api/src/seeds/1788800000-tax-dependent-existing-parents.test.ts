@@ -15,8 +15,8 @@ describe('Seed.markSingleTaxDependentParent', () => {
         const member = buildMember([withNumber, without]);
 
         expect(markSingleTaxDependentParent(member)).toBe(true);
-        expect(withNumber.taxDependent).toBe(true);
-        expect(without.taxDependent).toBeNull();
+        expect(withNumber.isMemberTaxDependent).toBe(true);
+        expect(without.isMemberTaxDependent).toBeNull();
     });
 
     test('leaves it to the family when both parents have one', () => {
@@ -24,8 +24,8 @@ describe('Seed.markSingleTaxDependentParent', () => {
         const b = Parent.create({ firstName: 'John', lastName: 'Doe', nationalRegisterNumber: '93042017297' });
 
         expect(markSingleTaxDependentParent(buildMember([a, b]))).toBe(false);
-        expect(a.taxDependent).toBeNull();
-        expect(b.taxDependent).toBeNull();
+        expect(a.isMemberTaxDependent).toBeNull();
+        expect(b.isMemberTaxDependent).toBeNull();
     });
 
     test('ignores an opt-out as a national register number', () => {
@@ -33,19 +33,19 @@ describe('Seed.markSingleTaxDependentParent', () => {
         const withNumber = Parent.create({ firstName: 'John', lastName: 'Doe', nationalRegisterNumber: '93042017297' });
 
         expect(markSingleTaxDependentParent(buildMember([optOut, withNumber]))).toBe(true);
-        expect(withNumber.taxDependent).toBe(true);
-        expect(optOut.taxDependent).toBeNull();
+        expect(withNumber.isMemberTaxDependent).toBe(true);
+        expect(optOut.isMemberTaxDependent).toBeNull();
     });
 
     test('does nothing without any national register number', () => {
         const parent = Parent.create({ firstName: 'Linda', lastName: 'Doe' });
         expect(markSingleTaxDependentParent(buildMember([parent]))).toBe(false);
-        expect(parent.taxDependent).toBeNull();
+        expect(parent.isMemberTaxDependent).toBeNull();
     });
 
     test('never overrides an answer the family already gave', () => {
-        const parent = Parent.create({ firstName: 'Linda', lastName: 'Doe', nationalRegisterNumber: '93042012345', taxDependent: false });
+        const parent = Parent.create({ firstName: 'Linda', lastName: 'Doe', nationalRegisterNumber: '93042012345', isMemberTaxDependent: false });
         expect(markSingleTaxDependentParent(buildMember([parent]))).toBe(false);
-        expect(parent.taxDependent).toBe(false);
+        expect(parent.isMemberTaxDependent).toBe(false);
     });
 });

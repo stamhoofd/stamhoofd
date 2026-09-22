@@ -827,7 +827,7 @@ export class PlatformMember implements ObjectWithRecords {
      * Certificates are created a year after the fact, so registrations of the last two years still matter.
      */
     get taxDependentParents(): Parent[] {
-        return this.patchedMember.details.parents.filter(p => p.taxDependent === true);
+        return this.patchedMember.details.parents.filter(p => p.isMemberTaxDependent === true);
     }
 
     /**
@@ -897,7 +897,7 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
-        if (property === 'parents.taxDependent') {
+        if (property === 'parents.isMemberTaxDependent') {
             // Asked together with, and only for, the parent that supplies a national register number
             return this.isPropertyEnabledForPlatform('parents.nationalRegisterNumber');
         }
@@ -909,7 +909,7 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
-        // Note: the raw 'taxCertificates' property, asking 'parents.taxDependent' here would loop
+        // Note: the raw 'taxCertificates' property, asking 'parents.isMemberTaxDependent' here would loop
         const forTaxCertificate = (property === 'nationalRegisterNumber' || property === 'parents.nationalRegisterNumber')
             && this.isPropertyEnabledForPlatform('taxCertificates')
             && this.needsTaxCertificate;
@@ -943,11 +943,11 @@ export class PlatformMember implements ObjectWithRecords {
      * Returns false if checkPermissions is passed and the current user does not have access to the requested field.
      */
     isPropertyEnabled(property: MemberProperty, options?: { checkPermissions?: { user: UserWithMembers; level: PermissionLevel }; scopeGroups?: Group[] | null }) {
-        if (property === 'parents.taxDependent') {
+        if (property === 'parents.isMemberTaxDependent') {
             // Asked together with, and only for, the parent that supplies a national register number
             return this.isPropertyEnabled('parents.nationalRegisterNumber', options);
         }
-        // Note: the raw 'taxCertificates' property, asking 'parents.taxDependent' here would loop
+        // Note: the raw 'taxCertificates' property, asking 'parents.isMemberTaxDependent' here would loop
         const forTaxCertificate = (property === 'nationalRegisterNumber' || property === 'parents.nationalRegisterNumber')
             && this.isPropertyEnabled('taxCertificates', options)
             && this.needsTaxCertificate;
@@ -959,7 +959,6 @@ export class PlatformMember implements ObjectWithRecords {
             if (!forTaxCertificate) {
                 return false;
             }
-            // Reading the number stays behind the same permission as the member's own
             property = 'nationalRegisterNumber';
         }
         if ((property === 'financialSupport' || property === 'uitpasNumber')
@@ -1045,7 +1044,7 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
-        if (property === 'taxCertificates' || property === 'parents.taxDependent') {
+        if (property === 'taxCertificates' || property === 'parents.isMemberTaxDependent') {
             // Ticking the checkbox is always optional
             return false;
         }
@@ -1083,7 +1082,7 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
-        if (property === 'taxCertificates' || property === 'parents.taxDependent') {
+        if (property === 'taxCertificates' || property === 'parents.isMemberTaxDependent') {
             // Ticking the checkbox is always optional
             return false;
         }

@@ -13,7 +13,7 @@ export default {
     'firstName': 'voornaam',
     'lastName': 'achternaam',
     'nationalRegisterNumber': 'rijksregisternummer',
-    'taxDependent': 'fiscaal ten laste',
+    'isMemberTaxDependent': 'fiscaal ten laste',
     'birthDay': 'geboortedatum',
     'dataPermissions': 'toestemming gegevensverwerking',
     'notes': 'notities',

@@ -41,8 +41,8 @@ export class BooleanStatus extends AutoEncoder {
     }
 }
 
-export type MemberProperty = 'birthDay' | 'gender' | 'address' | 'parents' | 'emailAddress' | 'phone' | 'emergencyContacts' | 'dataPermission' | 'financialSupport' | 'uitpasNumber' | 'nationalRegisterNumber' | 'parents.nationalRegisterNumber' | 'taxCertificates' | 'parents.taxDependent';
-export type MemberPropertyWithFilter = Exclude<MemberProperty, 'dataPermission' | 'financialSupport' | 'taxCertificates' | 'parents.nationalRegisterNumber' | 'parents.taxDependent'>;
+export type MemberProperty = 'birthDay' | 'gender' | 'address' | 'parents' | 'emailAddress' | 'phone' | 'emergencyContacts' | 'dataPermission' | 'financialSupport' | 'uitpasNumber' | 'nationalRegisterNumber' | 'parents.nationalRegisterNumber' | 'taxCertificates' | 'parents.isMemberTaxDependent';
+export type MemberPropertyWithFilter = Exclude<MemberProperty, 'dataPermission' | 'financialSupport' | 'taxCertificates' | 'parents.nationalRegisterNumber' | 'parents.isMemberTaxDependent'>;
 /**
  * This full model is always encrypted before sending it to the server. It is never processed on the server - only in encrypted form.
  * The public key of the member is stored in the member model, the private key is stored in the keychain for the 'owner' users. The organization has a copy that is encrypted with the organization's public key.
@@ -942,7 +942,7 @@ export class MemberDetails extends AutoEncoder {
                 const latestTaxDependentByMember = new Map<MemberDetails, boolean | null>();
                 if (type === 'parents') {
                     for (const { member, object } of parents) {
-                        latestTaxDependentByMember.set(member, (object as Parent).taxDependent);
+                        latestTaxDependentByMember.set(member, (object as Parent).isMemberTaxDependent);
                     }
                 }
 
@@ -994,7 +994,7 @@ export class MemberDetails extends AutoEncoder {
                     if (type === 'parents' && latestTaxDependentByMember.has(member)) {
                         const parent = member.parents.find(parent => parent.id === mergeTo.id);
                         if (parent) {
-                            parent.taxDependent = latestTaxDependentByMember.get(member)!;
+                            parent.isMemberTaxDependent = latestTaxDependentByMember.get(member)!;
                         }
                     }
                 }

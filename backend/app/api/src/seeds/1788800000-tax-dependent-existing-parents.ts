@@ -18,11 +18,11 @@ export function markSingleTaxDependentParent(member: Member): boolean {
 
     const parent = withNationalRegisterNumber[0];
 
-    if (parent.taxDependent !== null) {
+    if (parent.isMemberTaxDependent !== null) {
         return false;
     }
 
-    parent.taxDependent = true;
+    parent.isMemberTaxDependent = true;
     return true;
 }
 

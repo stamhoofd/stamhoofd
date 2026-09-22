@@ -308,14 +308,14 @@ describe('Correctly merge multiple details together', () => {
         });
     });
 
-    describe('taxDependent', () => {
-        test('taxDependent doesnt change on both family members', () => {
+    describe('isMemberTaxDependent', () => {
+        test('isMemberTaxDependent doesnt change on both family members', () => {
             const parent1 = Parent.create({
                 firstName: 'Gekke',
                 lastName: 'Test',
                 updatedAt: new Date(1000),
                 email: 'parent1@gmail.com',
-                taxDependent: true,
+                isMemberTaxDependent: true,
                 createdAt: new Date(500),
             });
 
@@ -343,16 +343,16 @@ describe('Correctly merge multiple details together', () => {
 
             MemberDetails.mergeParents([member1, member2]);
 
-            expect(member1.parents[0].taxDependent).toBe(true);
-            expect(member2.parents[0].taxDependent).toBeNull();
+            expect(member1.parents[0].isMemberTaxDependent).toBe(true);
+            expect(member2.parents[0].isMemberTaxDependent).toBeNull();
         });
 
-        test('changing name doesnt change taxDependent', () => {
+        test('changing name doesnt change isMemberTaxDependent', () => {
             const parent1 = Parent.create({
                 firstName: 'Gekke',
                 lastName: 'Test',
                 updatedAt: new Date(1000),
-                taxDependent: true,
+                isMemberTaxDependent: true,
                 createdAt: new Date(500),
             });
 
@@ -361,7 +361,7 @@ describe('Correctly merge multiple details together', () => {
                 firstName: 'Gewijzigde',
                 lastName: 'Naam',
                 updatedAt: new Date(2000),
-                taxDependent: false,
+                isMemberTaxDependent: false,
                 createdAt: new Date(500),
             });
 
@@ -378,17 +378,17 @@ describe('Correctly merge multiple details together', () => {
 
             expect(member1.parents[0].name).toBe('Gewijzigde Naam');
             expect(member2.parents[0].name).toBe('Gewijzigde Naam');
-            expect(member1.parents[0].taxDependent).toBe(true);
-            expect(member2.parents[0].taxDependent).toBe(false);
+            expect(member1.parents[0].isMemberTaxDependent).toBe(true);
+            expect(member2.parents[0].isMemberTaxDependent).toBe(false);
         });
 
-        test('changing email doesnt change taxDependent', () => {
+        test('changing email doesnt change isMemberTaxDependent', () => {
             const parent1 = Parent.create({
                 firstName: 'Gekke',
                 lastName: 'Test',
                 updatedAt: new Date(1000),
                 email: 'old@example.com',
-                taxDependent: true,
+                isMemberTaxDependent: true,
                 createdAt: new Date(500),
             });
 
@@ -398,7 +398,7 @@ describe('Correctly merge multiple details together', () => {
                 lastName: 'Test',
                 updatedAt: new Date(2000),
                 email: 'new@example.com',
-                taxDependent: false,
+                isMemberTaxDependent: false,
                 createdAt: new Date(500),
             });
 
@@ -415,11 +415,11 @@ describe('Correctly merge multiple details together', () => {
 
             expect(member1.parents[0].email).toBe('new@example.com');
             expect(member2.parents[0].email).toBe('new@example.com');
-            expect(member1.parents[0].taxDependent).toBe(true);
-            expect(member2.parents[0].taxDependent).toBe(false);
+            expect(member1.parents[0].isMemberTaxDependent).toBe(true);
+            expect(member2.parents[0].isMemberTaxDependent).toBe(false);
         });
 
-        test('changing address doesnt change taxDependent', () => {
+        test('changing address doesnt change isMemberTaxDependent', () => {
             const oldAddress = Address.create({
                 street: 'Old street',
                 number: '1',
@@ -437,7 +437,7 @@ describe('Correctly merge multiple details together', () => {
                 lastName: 'Test',
                 updatedAt: new Date(1000),
                 address: oldAddress,
-                taxDependent: true,
+                isMemberTaxDependent: true,
                 createdAt: new Date(500),
             });
 
@@ -447,7 +447,7 @@ describe('Correctly merge multiple details together', () => {
                 lastName: 'Test',
                 updatedAt: new Date(2000),
                 address: newAddress,
-                taxDependent: false,
+                isMemberTaxDependent: false,
                 createdAt: new Date(500),
             });
 
@@ -464,16 +464,16 @@ describe('Correctly merge multiple details together', () => {
 
             expect(member1.parents[0].address).toEqual(newAddress);
             expect(member2.parents[0].address).toEqual(newAddress);
-            expect(member1.parents[0].taxDependent).toBe(true);
-            expect(member2.parents[0].taxDependent).toBe(false);
+            expect(member1.parents[0].isMemberTaxDependent).toBe(true);
+            expect(member2.parents[0].isMemberTaxDependent).toBe(false);
         });
 
-        test('merging keeps most recent taxDependent', () => {
+        test('merging keeps most recent isMemberTaxDependent', () => {
             const parent1 = Parent.create({
                 firstName: 'Gekke',
                 lastName: 'Test',
                 updatedAt: new Date(1000),
-                taxDependent: false,
+                isMemberTaxDependent: false,
                 createdAt: new Date(500),
             });
             const parent2 = Parent.create({
@@ -481,7 +481,7 @@ describe('Correctly merge multiple details together', () => {
                 firstName: 'Gekke',
                 lastName: 'Test',
                 updatedAt: new Date(2000),
-                taxDependent: true,
+                isMemberTaxDependent: true,
                 createdAt: new Date(500),
             });
             const member = MemberDetails.create({
@@ -492,16 +492,16 @@ describe('Correctly merge multiple details together', () => {
             MemberDetails.mergeParents([member]);
 
             expect(member.parents).toHaveLength(1);
-            expect(member.parents[0].taxDependent).toBe(true);
+            expect(member.parents[0].isMemberTaxDependent).toBe(true);
         });
 
-        test('keeps each family member taxDependent when one member has duplicate parents', () => {
+        test('keeps each family member isMemberTaxDependent when one member has duplicate parents', () => {
             const original = Parent.create({
                 firstName: 'Gekke',
                 lastName: 'Test',
                 updatedAt: new Date(1000),
                 email: 'old@example.com',
-                taxDependent: true,
+                isMemberTaxDependent: true,
                 createdAt: new Date(500),
             });
             const duplicate = Parent.create({
@@ -510,7 +510,7 @@ describe('Correctly merge multiple details together', () => {
                 lastName: 'Test',
                 updatedAt: new Date(3000),
                 email: 'new@example.com',
-                taxDependent: false,
+                isMemberTaxDependent: false,
                 createdAt: new Date(500),
             });
             const otherMemberParent = Parent.create({
@@ -519,7 +519,7 @@ describe('Correctly merge multiple details together', () => {
                 lastName: 'Test',
                 updatedAt: new Date(2000),
                 email: 'intermediate@example.com',
-                taxDependent: true,
+                isMemberTaxDependent: true,
                 createdAt: new Date(500),
             });
             const member1 = MemberDetails.create({
@@ -537,23 +537,23 @@ describe('Correctly merge multiple details together', () => {
             expect(member2.parents).toHaveLength(1);
             expect(member1.parents[0].email).toBe('new@example.com');
             expect(member2.parents[0].email).toBe('new@example.com');
-            expect(member1.parents[0].taxDependent).toBe(false);
-            expect(member2.parents[0].taxDependent).toBe(true);
+            expect(member1.parents[0].isMemberTaxDependent).toBe(false);
+            expect(member2.parents[0].isMemberTaxDependent).toBe(true);
         });
 
-        test('keeps taxDependent through name and id changes', () => {
+        test('keeps isMemberTaxDependent through name and id changes', () => {
             const parent1 = Parent.create({
                 firstName: 'Original',
                 lastName: 'Name',
                 updatedAt: new Date(1000),
-                taxDependent: true,
+                isMemberTaxDependent: true,
                 createdAt: new Date(500),
             });
             const parent2 = Parent.create({
                 firstName: 'Original',
                 lastName: 'Name',
                 updatedAt: new Date(2000),
-                taxDependent: false,
+                isMemberTaxDependent: false,
                 createdAt: new Date(1500),
             });
             const parent3 = Parent.create({
@@ -561,7 +561,7 @@ describe('Correctly merge multiple details together', () => {
                 firstName: 'Updated',
                 lastName: 'Name',
                 updatedAt: new Date(3000),
-                taxDependent: null,
+                isMemberTaxDependent: null,
                 createdAt: new Date(1500),
             });
             const member1 = MemberDetails.create({ firstName: 'Member 1', parents: [parent1] });
@@ -573,17 +573,17 @@ describe('Correctly merge multiple details together', () => {
             expect(member1.parents[0].name).toBe('Updated Name');
             expect(member2.parents[0].name).toBe('Updated Name');
             expect(member3.parents[0].name).toBe('Updated Name');
-            expect(member1.parents[0].taxDependent).toBe(true);
-            expect(member2.parents[0].taxDependent).toBe(false);
-            expect(member3.parents[0].taxDependent).toBeNull();
+            expect(member1.parents[0].isMemberTaxDependent).toBe(true);
+            expect(member2.parents[0].isMemberTaxDependent).toBe(false);
+            expect(member3.parents[0].isMemberTaxDependent).toBeNull();
         });
 
-        test('does not mix taxDependent between different parents', () => {
+        test('does not mix isMemberTaxDependent between different parents', () => {
             const sharedParent1 = Parent.create({
                 firstName: 'Shared',
                 lastName: 'Parent',
                 updatedAt: new Date(1000),
-                taxDependent: true,
+                isMemberTaxDependent: true,
                 createdAt: new Date(500),
             });
             const sharedParent2 = Parent.create({
@@ -591,14 +591,14 @@ describe('Correctly merge multiple details together', () => {
                 firstName: 'Updated shared',
                 lastName: 'Parent',
                 updatedAt: new Date(2000),
-                taxDependent: false,
+                isMemberTaxDependent: false,
                 createdAt: new Date(500),
             });
             const unrelatedParent = Parent.create({
                 firstName: 'Unrelated',
                 lastName: 'Parent',
                 updatedAt: new Date(3000),
-                taxDependent: null,
+                isMemberTaxDependent: null,
                 createdAt: new Date(2500),
             });
             const member1 = MemberDetails.create({
@@ -614,9 +614,9 @@ describe('Correctly merge multiple details together', () => {
 
             expect(member1.parents).toHaveLength(2);
             expect(member1.parents[0].name).toBe('Updated shared Parent');
-            expect(member1.parents[0].taxDependent).toBe(true);
+            expect(member1.parents[0].isMemberTaxDependent).toBe(true);
             expect(member1.parents[1]).toEqual(unrelatedParent);
-            expect(member2.parents[0].taxDependent).toBe(false);
+            expect(member2.parents[0].isMemberTaxDependent).toBe(false);
         });
 
         test.each([
@@ -629,13 +629,13 @@ describe('Correctly merge multiple details together', () => {
             [null, true],
             [null, false],
             [null, null],
-        ] as const)('keeps taxDependent %s and %s isolated between family members', (taxDependent1, taxDependent2) => {
+        ] as const)('keeps isMemberTaxDependent %s and %s isolated between family members', (taxDependent1, taxDependent2) => {
             const parent1 = Parent.create({
                 firstName: 'Shared',
                 lastName: 'Parent',
                 updatedAt: new Date(1000),
                 email: 'old@example.com',
-                taxDependent: taxDependent1,
+                isMemberTaxDependent: taxDependent1,
                 createdAt: new Date(500),
             });
             const parent2 = Parent.create({
@@ -644,7 +644,7 @@ describe('Correctly merge multiple details together', () => {
                 lastName: 'Parent',
                 updatedAt: new Date(2000),
                 email: 'new@example.com',
-                taxDependent: taxDependent2,
+                isMemberTaxDependent: taxDependent2,
                 createdAt: new Date(500),
             });
             const member1 = MemberDetails.create({ firstName: 'Member 1', parents: [parent1] });
@@ -654,17 +654,17 @@ describe('Correctly merge multiple details together', () => {
 
             expect(member1.parents[0].email).toBe('new@example.com');
             expect(member2.parents[0].email).toBe('new@example.com');
-            expect(member1.parents[0].taxDependent).toBe(taxDependent1);
-            expect(member2.parents[0].taxDependent).toBe(taxDependent2);
+            expect(member1.parents[0].isMemberTaxDependent).toBe(taxDependent1);
+            expect(member2.parents[0].isMemberTaxDependent).toBe(taxDependent2);
         });
 
-        test('does not transfer taxDependent to a family member when duplicate parents with different ids merge', () => {
+        test('does not transfer isMemberTaxDependent to a family member when duplicate parents with different ids merge', () => {
             const duplicate1 = Parent.create({
                 firstName: 'Shared',
                 lastName: 'Parent',
                 updatedAt: new Date(1000),
                 email: 'old@example.com',
-                taxDependent: null,
+                isMemberTaxDependent: null,
                 createdAt: new Date(500),
             });
             const duplicate2 = Parent.create({
@@ -672,7 +672,7 @@ describe('Correctly merge multiple details together', () => {
                 lastName: 'Parent',
                 updatedAt: new Date(2000),
                 email: 'duplicate@example.com',
-                taxDependent: true,
+                isMemberTaxDependent: true,
                 createdAt: new Date(1500),
             });
             const familyMemberParent = Parent.create({
@@ -681,7 +681,7 @@ describe('Correctly merge multiple details together', () => {
                 lastName: 'Parent',
                 updatedAt: new Date(3000),
                 email: 'latest@example.com',
-                taxDependent: false,
+                isMemberTaxDependent: false,
                 createdAt: new Date(1500),
             });
             const memberWithDuplicates = MemberDetails.create({
@@ -699,8 +699,8 @@ describe('Correctly merge multiple details together', () => {
             expect(familyMember.parents).toHaveLength(1);
             expect(memberWithDuplicates.parents[0].email).toBe('latest@example.com');
             expect(familyMember.parents[0].email).toBe('latest@example.com');
-            expect(memberWithDuplicates.parents[0].taxDependent).toBe(true);
-            expect(familyMember.parents[0].taxDependent).toBe(false);
+            expect(memberWithDuplicates.parents[0].isMemberTaxDependent).toBe(true);
+            expect(familyMember.parents[0].isMemberTaxDependent).toBe(false);
         });
 
         test('selects the most recently reviewed duplicate regardless of array order', () => {
@@ -708,7 +708,7 @@ describe('Correctly merge multiple details together', () => {
                 firstName: 'Duplicate',
                 lastName: 'Parent',
                 updatedAt: new Date(3000),
-                taxDependent: null,
+                isMemberTaxDependent: null,
                 createdAt: new Date(500),
             });
             const oldestDuplicate = Parent.create({
@@ -716,7 +716,7 @@ describe('Correctly merge multiple details together', () => {
                 firstName: 'Duplicate',
                 lastName: 'Parent',
                 updatedAt: new Date(1000),
-                taxDependent: true,
+                isMemberTaxDependent: true,
                 createdAt: new Date(500),
             });
             const middleDuplicate = Parent.create({
@@ -724,7 +724,7 @@ describe('Correctly merge multiple details together', () => {
                 firstName: 'Duplicate',
                 lastName: 'Parent',
                 updatedAt: new Date(2000),
-                taxDependent: false,
+                isMemberTaxDependent: false,
                 createdAt: new Date(500),
             });
             const member = MemberDetails.create({
@@ -735,15 +735,15 @@ describe('Correctly merge multiple details together', () => {
             MemberDetails.mergeParents([member]);
 
             expect(member.parents).toHaveLength(1);
-            expect(member.parents[0].taxDependent).toBeNull();
+            expect(member.parents[0].isMemberTaxDependent).toBeNull();
         });
 
-        test('keeps taxDependent isolated for multiple duplicate parent groups', () => {
+        test('keeps isMemberTaxDependent isolated for multiple duplicate parent groups', () => {
             const mother1 = Parent.create({
                 firstName: 'Mother',
                 lastName: 'Parent',
                 updatedAt: new Date(1000),
-                taxDependent: true,
+                isMemberTaxDependent: true,
                 createdAt: new Date(500),
             });
             const mother2 = Parent.create({
@@ -751,21 +751,21 @@ describe('Correctly merge multiple details together', () => {
                 firstName: 'Mother',
                 lastName: 'Parent',
                 updatedAt: new Date(3000),
-                taxDependent: false,
+                isMemberTaxDependent: false,
                 createdAt: new Date(500),
             });
             const father1 = Parent.create({
                 firstName: 'Father',
                 lastName: 'Parent',
                 updatedAt: new Date(1000),
-                taxDependent: false,
+                isMemberTaxDependent: false,
                 createdAt: new Date(500),
             });
             const father2 = Parent.create({
                 firstName: 'Father',
                 lastName: 'Parent',
                 updatedAt: new Date(3000),
-                taxDependent: true,
+                isMemberTaxDependent: true,
                 createdAt: new Date(1500),
             });
             const familyMother = Parent.create({
@@ -773,7 +773,7 @@ describe('Correctly merge multiple details together', () => {
                 firstName: 'Mother',
                 lastName: 'Parent',
                 updatedAt: new Date(2000),
-                taxDependent: true,
+                isMemberTaxDependent: true,
                 createdAt: new Date(500),
             });
             const familyFather = Parent.create({
@@ -781,7 +781,7 @@ describe('Correctly merge multiple details together', () => {
                 firstName: 'Father',
                 lastName: 'Parent',
                 updatedAt: new Date(2000),
-                taxDependent: null,
+                isMemberTaxDependent: null,
                 createdAt: new Date(500),
             });
             const memberWithDuplicates = MemberDetails.create({
@@ -797,10 +797,10 @@ describe('Correctly merge multiple details together', () => {
 
             expect(memberWithDuplicates.parents).toHaveLength(2);
             expect(familyMember.parents).toHaveLength(2);
-            expect(memberWithDuplicates.parents.find(parent => parent.firstName === 'Mother')?.taxDependent).toBe(false);
-            expect(memberWithDuplicates.parents.find(parent => parent.firstName === 'Father')?.taxDependent).toBe(true);
-            expect(familyMember.parents.find(parent => parent.firstName === 'Mother')?.taxDependent).toBe(true);
-            expect(familyMember.parents.find(parent => parent.firstName === 'Father')?.taxDependent).toBeNull();
+            expect(memberWithDuplicates.parents.find(parent => parent.firstName === 'Mother')?.isMemberTaxDependent).toBe(false);
+            expect(memberWithDuplicates.parents.find(parent => parent.firstName === 'Father')?.isMemberTaxDependent).toBe(true);
+            expect(familyMember.parents.find(parent => parent.firstName === 'Mother')?.isMemberTaxDependent).toBe(true);
+            expect(familyMember.parents.find(parent => parent.firstName === 'Father')?.isMemberTaxDependent).toBeNull();
         });
 
         test('keeps merged parents as independent objects between family members', () => {
@@ -808,7 +808,7 @@ describe('Correctly merge multiple details together', () => {
                 firstName: 'Shared',
                 lastName: 'Parent',
                 updatedAt: new Date(1000),
-                taxDependent: true,
+                isMemberTaxDependent: true,
                 createdAt: new Date(500),
             });
             const parent2 = Parent.create({
@@ -816,7 +816,7 @@ describe('Correctly merge multiple details together', () => {
                 firstName: 'Updated',
                 lastName: 'Parent',
                 updatedAt: new Date(2000),
-                taxDependent: false,
+                isMemberTaxDependent: false,
                 createdAt: new Date(500),
             });
             const member1 = MemberDetails.create({ firstName: 'Member 1', parents: [parent1] });
@@ -826,18 +826,18 @@ describe('Correctly merge multiple details together', () => {
 
             expect(member1.parents[0]).not.toBe(member2.parents[0]);
             member1.parents[0].firstName = 'Only member 1';
-            member1.parents[0].taxDependent = null;
+            member1.parents[0].isMemberTaxDependent = null;
             expect(member2.parents[0].firstName).toBe('Updated');
-            expect(member2.parents[0].taxDependent).toBe(false);
+            expect(member2.parents[0].isMemberTaxDependent).toBe(false);
         });
 
-        test('keeps taxDependent isolated when parent overrides are disabled', () => {
+        test('keeps isMemberTaxDependent isolated when parent overrides are disabled', () => {
             const parent1 = Parent.create({
                 firstName: 'Shared',
                 lastName: 'Parent',
                 updatedAt: new Date(1000),
                 email: 'old@example.com',
-                taxDependent: true,
+                isMemberTaxDependent: true,
                 createdAt: new Date(500),
             });
             const parent2 = Parent.create({
@@ -846,7 +846,7 @@ describe('Correctly merge multiple details together', () => {
                 lastName: 'Parent',
                 updatedAt: new Date(2000),
                 email: 'new@example.com',
-                taxDependent: null,
+                isMemberTaxDependent: null,
                 createdAt: new Date(500),
             });
             const member1 = MemberDetails.create({ firstName: 'Member 1', parents: [parent1] });
@@ -854,8 +854,8 @@ describe('Correctly merge multiple details together', () => {
 
             MemberDetails.mergeParents([member1, member2], false);
 
-            expect(member1.parents[0].taxDependent).toBe(true);
-            expect(member2.parents[0].taxDependent).toBeNull();
+            expect(member1.parents[0].isMemberTaxDependent).toBe(true);
+            expect(member2.parents[0].isMemberTaxDependent).toBeNull();
         });
     });
 

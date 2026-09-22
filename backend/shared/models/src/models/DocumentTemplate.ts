@@ -21,7 +21,7 @@ import { User } from './User.js';
  * of giving a national register number. Returns null when the family has not answered at all.
  */
 export function getTaxDependentDebtor(parents: Parent[]): { debtor: Parent; missingData: boolean } | null {
-    const taxDependentParents = parents.filter(p => p.taxDependent === true);
+    const taxDependentParents = parents.filter(p => p.isMemberTaxDependent === true);
 
     if (taxDependentParents.length === 0) {
         return null;

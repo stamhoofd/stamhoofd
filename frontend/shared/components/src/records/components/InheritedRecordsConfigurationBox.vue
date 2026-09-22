@@ -149,6 +149,11 @@ family.members.push(settings.exampleValue);
 const properties = [
     buildPropertyRefs('gender', $t(`%1d`)),
     buildPropertyRefs('birthDay', $t(`%17w`)),
+    buildBooleanPropertyRefs(
+        'taxCertificates',
+        $t('%ZrO'),
+        $t('Vraag automatisch het rijksregisternummer van leden en één van de ouders (schuldenaar) als een lid in aanmerking komt voor een fiscaal attest kinderopvang (op basis van o.a. leeftijd en inschrijvingen). De ouders bepalen op wiens naam het attest komt.'),
+    ),
     buildPropertyRefs('nationalRegisterNumber', $t(`%wK`) + ' ' + $t(`%11R`)),
     buildPropertyRefs('parents', $t(`%11P`), {
         description: $t(`%11Q`),
@@ -175,11 +180,6 @@ const properties = [
         warning: $t(`%11c`),
         preventAlways: true,
     }),
-    buildBooleanPropertyRefs(
-        'taxCertificates',
-        $t('%ZrO'),
-        $t('Een bijkomende instelling naast \'Rijksregisternummer\' die je los daarvan kan aanzetten. Vraagt het rijksregisternummer van het lid én van de ouder die het lid fiscaal ten laste heeft, maar enkel bij leden die in aanmerking komen voor een fiscaal attest kinderopvang. Die ouder bepaalt op wiens naam het attest komt.'),
-    ),
 ];
 
 const dataPermissions = {
