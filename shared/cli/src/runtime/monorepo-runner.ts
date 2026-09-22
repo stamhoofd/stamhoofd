@@ -13,32 +13,6 @@ import { startSharedServices } from '../services/shared-services.js';
 import { run, RunVerbosity } from './command-runner.js';
 import { isPortListening } from './port-probe.js';
 
-const globalSharedPackages = [
-    'shared/types',
-    'shared/test-utils',
-    'shared/utility',
-    'shared/metabase',
-    'shared/cli',
-    'shared/excel-writer',
-    'shared/structures',
-    'shared/sgv',
-    'shared/object-differ',
-    'shared/locales',
-];
-
-const backendSharedPackages = [
-    'backend/shared/queues',
-    'backend/shared/env',
-    'backend/shared/i18n',
-    'backend/shared/sql',
-    'backend/shared/email',
-    'backend/shared/models',
-    'backend/shared/vies',
-    'backend/shared/logging',
-    'backend/shared/crons',
-    'backend/shared/middleware',
-];
-
 /**
  * The MySQL servers the tests use: the unit tests (`test`) and the e2e tests each get their own, so
  * a unit run and an e2e run never wait for or wipe each other's data.
@@ -101,15 +75,7 @@ export const unitTestPackages: UnitTestPackage[] = [
 const sharedBuildReadyFile = `.development/cli/generated/shared-build-${process.pid}.ready`;
 
 export async function buildShared(context: CliContext): Promise<void> {
-    console.log('\x1B[35m[BUILD]\x1B[0m Building globally shared dependencies...');
-    for (const packagePath of globalSharedPackages) {
-        await run('pnpm', ['--dir', packagePath, 'run', 'build'], { cwd: context.rootDir, verbosity: context.verbosity ?? RunVerbosity.Output });
-    }
-    console.log('\x1B[35m[BUILD]\x1B[0m Building shared backend dependencies...');
-    for (const packagePath of backendSharedPackages) {
-        await run('pnpm', ['--dir', packagePath, 'run', 'build'], { cwd: context.rootDir, verbosity: context.verbosity ?? RunVerbosity.Output });
-    }
-    console.log('\x1B[35m[BUILD]\x1B[0m Done building shared dependencies.');
+    await run('pnpm', ['run', 'build:shared'], { cwd: context.rootDir, verbose: context.verbose });
 }
 
 export async function buildAll(context: CliContext): Promise<void> {
@@ -293,10 +259,7 @@ export async function cleanBuild(context: CliContext, options: { dryRun?: boolea
 }
 
 export function sharedBuildWatchCommand(): string {
-    const command = [...globalSharedPackages, ...backendSharedPackages]
-        .map(packagePath => `pnpm --dir ${packagePath} run build`)
-        .join(' && ');
-    return `mkdir -p .development/cli/generated && rm -f ${sharedBuildReadyFile} && pnpm exec nodemon --quiet --signal SIGTERM --watch shared --watch backend/shared --ignore './shared/*/dist/' --ignore './backend/shared/*/dist/' --ext .ts,.json,.sql,.mjs --exec '${command} && touch ${sharedBuildReadyFile} || exit 0'`;
+    return `mkdir -p .development/cli/generated && rm -f ${sharedBuildReadyFile} && pnpm exec nodemon --quiet --signal SIGTERM --watch shared --watch backend/shared --watch backend/stamhoofd.d.ts --watch turbo.json --watch tsconfig.base.json --watch tsconfig.test.json --watch jest-extended.d.ts --ignore './shared/*/dist/' --ignore './backend/shared/*/dist/' --ext .ts,.json,.sql,.mjs,.js --exec 'pnpm run build:shared && touch ${sharedBuildReadyFile} || exit 0'`;
 }
 
 export function sharedBuildReadyCommand(): string {

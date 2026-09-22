@@ -465,10 +465,10 @@ describe('concurrentlyTargets', () => {
         expect(targets.some(target => target.includes('nodemon'))).toBe(true);
     });
 
-    it('includes SGV in the shared build watcher', () => {
+    it('uses the root shared build graph in the watcher', () => {
         const watcher = concurrentlyTargets(DevTarget.All, ports).find(target => target.includes('nodemon'));
 
-        expect(watcher).toContain('pnpm --dir shared/structures run build && pnpm --dir shared/sgv run build && pnpm --dir shared/object-differ run build');
+        expect(watcher).toContain("--exec 'pnpm run build:shared && touch ");
     });
 });
 

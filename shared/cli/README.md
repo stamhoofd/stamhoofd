@@ -71,6 +71,8 @@ Run `pnpm stam --help` or `pnpm stam <topic> --help` for command help.
 
 ### Development Configuration
 
+Shared builds in `stam build`, tests, migrations, and development sessions call the root `build:shared` Turbo graph. The development watcher uses nodemon and marks the shared build ready only after success; failed compilations can recover on the next edit. App startup waits for that ready marker. Use `stam dev` instead of the removed `build:shared:watch` script. `stam clean build` removes outputs but retains the local Turbo cache; use `pnpm run clear:shared && pnpm run build:shared --force` for a fresh compilation.
+
 `shared/cli` owns local development configuration. Backend and frontend development builds load domains, ports, database settings, storage settings, and app environment values from `@stamhoofd/cli`.
 
 The main config contract lives in `src/config/development-config.ts`. Keep local-development settings there first, then consume the resolved config from commands, workflows, Caddy, SSO, Stripe, status output, or app bootstrapping.
@@ -110,7 +112,7 @@ Useful environment variables:
 - `METABASE_ADMIN_EMAIL` and `METABASE_ADMIN_PASSWORD` override the Metabase admin account the CLI signs in with, for an instance that was set up by hand (see Local Metabase).
 - `PUBLIC_IP`: Publish DNS records to your computers public IP address, and make Caddy listen on 0.0.0.0 instead of localhost. Useful for testing on local devices. E.g. `PUBLIC_IP=192.168.1.7 stam services restart` `PUBLIC_IP=192.168.1.7 stam dev all`
 
-The primary `stamhoofd` instance uses base ports. With Git, the primary instance is the first worktree in `git worktree list --porcelain`. With jj, it is the first workspace in `jj workspace list`. Other worktrees and workspaces get deterministic offsets based on the workspace name so multiple workspaces can run on the same machine without changing databases when branches change.
+The primary `stamhoofd` instance uses base ports. With Git, the primary instance is the first worktree in `git worktree list --porcelain`. With jj, it is the `default` workspace, falling back to the first workspace when `default` is absent. Shared service configuration and route manifests live in that primary workspace. Other worktrees and workspaces get deterministic offsets based on the workspace name so multiple workspaces can run on the same machine without changing databases when branches change.
 
 When needing a heavy duty MySQL instance to test migrations, you can restart MySQL using:
 
