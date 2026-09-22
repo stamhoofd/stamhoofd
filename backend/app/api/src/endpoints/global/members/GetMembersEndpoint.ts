@@ -2,10 +2,10 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Group, Member, Platform } from '@stamhoofd/models';
+import { Member } from '@stamhoofd/models';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest, MembersBlob, StamhoofdFilter } from '@stamhoofd/structures';
-import { GroupType, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, assertSort, getSortFilter } from '@stamhoofd/structures';
+import { LimitedFilteredRequest, PaginatedResponse, PermissionLevel, assertSort, getSortFilter } from '@stamhoofd/structures';
 import type { CountryCode } from '@stamhoofd/types/Country';
 import { Country } from '@stamhoofd/types/Country';
 import { DataValidator } from '@stamhoofd/utility';
@@ -14,6 +14,7 @@ import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructure
 import { Context } from '../../../helpers/Context.js';
 import { memberFilterCompilers } from '../../../sql-filters/members.js';
 import { memberSorters } from '../../../sql-sorters/members.js';
+import { getMemberScopeFilter } from './helpers/getMemberScopeFilter.js';
 import { validateGroupFilter } from './helpers/validateGroupFilter.js';
 
 type Params = Record<string, never>;
@@ -48,83 +49,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             // Don't add any scoping. Organization id filter is added automatically.
         } else if (!Context.auth.canAccessAllPlatformMembers(permissionLevel) && !await validateGroupFilter({ filter: q.filter, permissionLevel, key: 'registrations' })) {
             // First do a quick validation of the groups, so that prevents the backend from having to add a scope filter
-
-            if (!organization) {
-                const tags = Context.auth.getPlatformAccessibleOrganizationTags(permissionLevel);
-                if (tags !== 'all' && tags.length === 0) {
-                    throw Context.auth.error();
-                }
-
-                if (tags !== 'all') {
-                    const platform = await Platform.getShared();
-
-                    // Add organization scope filter
-                    scopeFilter = {
-                        registrations: {
-                            $elemMatch: {
-                                organization: {
-                                    tags: {
-                                        $in: tags,
-                                    },
-                                },
-                                periodId: platform.periodIdIfPlatform,
-                            },
-                        },
-                    };
-                }
-            } else {
-                // Add organization scope filter
-                if (await Context.auth.canAccessAllMembersInCurrentPeriod(organization.id, permissionLevel)) {
-                    if (await Context.auth.hasFullAccess(organization.id, permissionLevel)) {
-                        // Can access full history for now
-                        scopeFilter = {
-                            registrations: {
-                                $elemMatch: {
-                                    organizationId: organization.id,
-                                },
-                            },
-                        };
-                    } else {
-                        // Can only access current period
-                        scopeFilter = {
-                            registrations: {
-                                $elemMatch: {
-                                    organizationId: organization.id,
-                                    periodId: organization.periodId,
-                                },
-                            },
-                        };
-                    }
-                } else {
-                    // Check which normal membership groups we have access to and filter on those
-                    const groups = await Group.getAll(organization.id, organization.periodId, true, [GroupType.Membership, GroupType.WaitingList]);
-                    Context.auth.cacheGroups(groups);
-                    const groupIds: string[] = [];
-
-                    for (const group of groups) {
-                        if (await Context.auth.canAccessGroup(group, permissionLevel)) {
-                            groupIds.push(group.id);
-                        }
-                    }
-
-                    if (groupIds.length === 0) {
-                        throw Context.auth.error({
-                            message: 'You must filter on a group of the organization you are trying to access',
-                            human: $t(`%15d`),
-                        });
-                    }
-
-                    scopeFilter = {
-                        registrations: {
-                            $elemMatch: {
-                                groupId: {
-                                    $in: groupIds,
-                                },
-                            },
-                        },
-                    };
-                }
-            }
+            scopeFilter = await getMemberScopeFilter(permissionLevel);
         }
 
         const query = Member.select()
