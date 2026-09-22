@@ -81,6 +81,8 @@ Run ONLY via `pnpm stam test e2e`, never invoke or build Playwright manually:
 - `pnpm stam test e2e --grep @tag --skip-build` — same, but skip `build:shared` + the API/frontend rebuild when only test files changed since the last run
 - `pnpm stam test e2e --local-db` — connect to the MySQL already running on `127.0.0.1:3306` (port: `STAMHOOFD_E2E_MYSQL_PORT`) instead of starting MySQL containers
 
+E2E setup uses an uncached Turbo task filtered to `@stamhoofd/web-app` and `@stamhoofd/webshop` for the two `build:playwright` bundles. The API build, migrations, Caddy, SSO, database setup and Playwright runner remain owned by `stam test e2e`.
+
 Never use different commands to run tests. On environment issues (domains don't resolve, SSL errors, blank pages): STOP and ask the user to fix it.
 
 ### Imports
