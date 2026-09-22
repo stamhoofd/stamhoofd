@@ -36,6 +36,14 @@ Backend uses a custom router (`@simonbackx/simple-endpoints`), **not Express**: 
 
 ## Build ordering (the #1 source of confusing errors)
 
+### Turbo task graph
+
+`turbo.json` enables local caching only for shared TypeScript builds. Outputs include `dist/**` (including locales, assets and migrations) and package-root `*.tsbuildinfo`. Root TypeScript configuration and shared global declarations are cache inputs. `.turbo/cache` is local to each checkout; remote caching is not configured.
+
+Shared builds use `^build` for normal dependencies and explicit task dependencies for internal peers and global type declarations. Turbo does not include peer dependencies in `^build`. Frontend source packages have dependency cycles: do not enable `^build` globally. Application builds, Playwright builds, tests, migrations, lint and typecheck are uncached; development tasks are persistent and uncached.
+
+During the staged migration, existing entry points still use their current runners. Lerna remains installed for fixed versioning and npm publication throughout Stack B.
+
 Packages consume each other's **built `dist/` output**, not source. After changing a shared package, consumers see stale code until you run `pnpm run build:shared`. Almost every "type error after editing a shared package", "test fails on module load", or "cached code keeps running" is fixed by running it first. Full reset when badly out of sync:
 
 ```bash
