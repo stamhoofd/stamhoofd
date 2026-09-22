@@ -9,8 +9,6 @@ import { LimitedFilteredRequest, PaginatedResponse, assertSort, getSortFilter } 
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
-import { InvoicePdfService } from '../../../../services/InvoicePdfService.js';
-import { InvoiceXMlService } from '../../../../services/InvoiceXMLService.js';
 import { invoiceFilterCompilers } from '../../../../sql-filters/invoices.js';
 import { invoiceSorters } from '../../../../sql-sorters/invoices.js';
 
@@ -143,7 +141,7 @@ export class GetInvoicesEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            applySQLSorter(query, q.sort, sorters);
+            await applySQLSorter(query, q.sort, sorters);
             query.limit(q.limit);
         }
 

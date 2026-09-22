@@ -17,7 +17,7 @@ export const registrationFilterCompilers: SQLFilterDefinitions = {
     ...baseRegistrationFilterCompilers,
     member: createJoinedRelationFilter(
         memberJoin,
-        memberFilterCompilers,
+        memberFilterCompilers(),
     ),
     group: createJoinedRelationFilter(
         groupJoin,

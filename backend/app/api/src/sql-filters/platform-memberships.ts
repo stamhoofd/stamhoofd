@@ -67,6 +67,6 @@ export const platformMembershipFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('members', 'id'),
                 SQL.column(MemberPlatformMembership.table, 'memberId'),
             ),
-        memberFilterCompilers,
+        memberFilterCompilers(),
     ),
 };
