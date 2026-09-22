@@ -279,24 +279,12 @@ importers:
       '@oxc-project/runtime':
         specifier: 0.147.0
         version: 0.147.0
-      '@stamhoofd/frontend-i18n':
-        specifier: '*'
-        version: link:frontend/shared/i18n
-      '@stamhoofd/networking':
-        specifier: '*'
-        version: link:frontend/shared/networking
-      '@stamhoofd/structures':
-        specifier: '*'
-        version: link:shared/structures
       '@stamhoofd/test-utils':
         specifier: '*'
         version: link:shared/test-utils
       '@stamhoofd/types':
         specifier: '*'
         version: link:shared/types
-      '@stamhoofd/utility':
-        specifier: '*'
-        version: link:shared/utility
       '@stylistic/eslint-plugin':
         specifier: 5.10.0
         version: 5.10.0(eslint@10.10.0(jiti@2.7.0)(supports-color@5.5.0))
