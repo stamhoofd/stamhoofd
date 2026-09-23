@@ -42,7 +42,7 @@ const props = withDefaults(
 );
 
 const errors = useErrors({ validator: props.validator });
-const value = defineModel<string | typeof NationalRegisterNumberOptOut | null>();
+const value = defineModel<string | typeof NationalRegisterNumberOptOut | null>({ required: true });
 
 useValidation(errors.validator, validate);
 

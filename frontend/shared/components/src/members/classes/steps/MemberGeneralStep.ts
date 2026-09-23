@@ -33,7 +33,7 @@ export function getMarkReviewedForGeneralStep(member: PlatformMember) {
         return [];
     }
 
-    if (!details.nationalRegisterNumber && member.isPropertyEnabled('nationalRegisterNumber')) {
+    if (!details.nationalRegisterNumber && member.isPropertyEnabled('nationalRegisterNumber') && !member.isPropertyEnabled('taxCertificates')) {
         // Don't mark reviewed if data is missing
         return [];
     }
@@ -80,7 +80,7 @@ export class MemberGeneralStep implements EditMemberStep {
                         user: manager.context.user,
                     }
                 : undefined,
-        })) {
+        }) && !member.isPropertyEnabled('taxCertificates')) {
             return true;
         }
 

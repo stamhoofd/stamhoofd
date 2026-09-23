@@ -872,10 +872,8 @@ export class PlatformMember implements ObjectWithRecords {
         return dates;
     }
 
-    get needsTaxCertificate(): boolean {
+    needsTaxCertificateAt(maxAge: number): boolean {
         const details = this.patchedMember.details;
-        const maxAge = details.severeDisability?.value ? 20 : 13;
-
         const oldest = new Date();
         oldest.setFullYear(oldest.getFullYear() - 2);
 
@@ -892,6 +890,19 @@ export class PlatformMember implements ObjectWithRecords {
         }
 
         return false;
+    }
+
+    get needsTaxCertificate(): boolean {
+        const details = this.patchedMember.details;
+
+        if (details.severeDisability?.value) {
+            return this.needsTaxCertificateIfSevereDisability;
+        }
+        return this.needsTaxCertificateAt(13);
+    }
+
+    get needsTaxCertificateIfSevereDisability(): boolean {
+        return this.needsTaxCertificateAt(20);
     }
 
     isPropertyEnabledForPlatform(property: MemberProperty) {
@@ -1003,8 +1014,8 @@ export class PlatformMember implements ObjectWithRecords {
 
         if (property === 'taxCertificates') {
             if (!this.needsTaxCertificate) {
-                // Enabled for full admins if age < 21 (to enable it for older members that normally have it disabled)
-                if (options?.checkPermissions && this.patchedMember.details.defaultAge < 22) {
+                // Allow admins to enable severe disability if that would matter for tax certificates
+                if (options?.checkPermissions && this.needsTaxCertificateIfSevereDisability) {
                     let foundPermissions = false;
                     for (const organization of this.filterOrganizations({ currentPeriod: options?.scopeGroups ? undefined : true, groups: options?.scopeGroups })) {
                         if (options.checkPermissions.user.permissions?.forOrganization(organization, this.platform)?.hasFullAccess()) {

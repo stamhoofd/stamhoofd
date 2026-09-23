@@ -1,7 +1,7 @@
 <template>
-    <div class="container">
+    <div class="container" data-testid="tax-certificate-box">
         <Title v-bind="$attrs" :title="$t('Fiscale attesten')">
-            <template v-if="isAdmin && isFullAdmin && ((member.patchedMember.details.defaultAge <= 22) || severeDisability)" #right>
+            <template v-if="isAdmin && isFullAdmin && (member.needsTaxCertificateIfSevereDisability || severeDisability)" #right>
                 <SevereDisabilityToggle v-model="severeDisability" :member="member" />
             </template>
         </Title>
@@ -13,7 +13,7 @@
         <template v-if="member.patchedMember.details.nationalRegisterNumber !== NationalRegisterNumberOptOut">
             <STInputBox v-if="coParenting || parents.length > 1" :title="$t('Gescheiden ouders met co-ouderschap')" class="max" error-fields="coParenting" :error-box="errors.errorBox" :parent-error-box="parentErrorBox">
                 <STList>
-                    <STListItem :selectable="true" element-name="label" class="right-stack left-center" data-testid="parent-row">
+                    <STListItem :selectable="true" element-name="label" class="right-stack left-center" data-testid="co-parenting-row">
                         <template #left>
                             <Checkbox v-model="coParenting" />
                         </template>
@@ -39,7 +39,7 @@
                     {{ $t('Kies één ouder die het inschrijvingsbedrag betaalt en op de fiscale attesten vermeld wordt.') }}
                 </p>
                 <STList>
-                    <STListItem v-for="parent in parents" :key="parent.id" :selectable="true" element-name="label" class="right-stack left-center">
+                    <STListItem v-for="parent in parents" :key="parent.id" :selectable="true" element-name="label" class="right-stack left-center" data-testid="debtor-row">
                         <template v-if="parents.length > 1 && !(coParenting && parents.length === 2)" #left>
                             <Checkbox v-if="coParenting" :model-value="isParentSelected(parent)" @update:model-value="setParentSelected(parent, $event)" />
                             <Radio v-else :model-value="isParentSelected(parent)" :value="true" name="schuldenaar" @update:model-value="setParentSelected(parent, $event)" />
@@ -53,7 +53,7 @@
                         </p>
 
                         <div v-if="isParentSelected(parent)">
-                            <NRNInput :model-value="getParentNRN(parent)" title="" :placeholder="$t('Rijksregisternummer van {firstName}', {firstName: parent.firstName})" :required="isPropertyRequired('parents.nationalRegisterNumber')" :validator="errors.validator" @update:model-value="setParentNRN(parent, $event)" />
+                            <NRNInput :model-value="getParentNRN(parent)" title="" :placeholder="$t('Rijksregisternummer van {firstName}', {firstName: parent.firstName})" :required="isPropertyRequired('parents.nationalRegisterNumber')" :validator="errors.validator" data-testid="debtor-nrn-input" @update:model-value="setParentNRN(parent, $event)" />
                         </div>
                     </STListItem>
                 </STList>
@@ -123,7 +123,7 @@ const canMarkReviewed = computed(() => !reviewDate.value || reviewDate.value < n
 const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));
 
 onMounted(() => {
-    if (parents.value.length === 1) {
+    if (parents.value.length === 1 && !isAdmin) {
         setParentSelected(parents.value[0], true);
     }
 });
@@ -265,7 +265,7 @@ function setParentSelected(parent: Parent, selected: boolean) {
 function getParentNRN(parent: Parent) {
     return parent.nationalRegisterNumber;
 }
-function setParentNRN(parent: Parent, nationalRegisterNumber: string | null) {
+function setParentNRN(parent: Parent, nationalRegisterNumber: string | null | typeof NationalRegisterNumberOptOut) {
     if (nationalRegisterNumber === getParentNRN(parent)) {
         return;
     }

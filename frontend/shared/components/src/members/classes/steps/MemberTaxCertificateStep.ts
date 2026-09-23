@@ -27,20 +27,24 @@ export class MemberTaxCertificateStep implements EditMemberStep {
             return false;
         }
 
-        if (this.options.outdatedTime) {
-            if (details.reviewTimes.isOutdated('taxCertificates', this.options.outdatedTime)) {
-                return true;
-            }
-        }
-
-        if (member.isPropertyEnabled('taxCertificates', {
+        if (!member.isPropertyEnabled('taxCertificates', {
             checkPermissions: manager.context.user
                 ? {
                         level: PermissionLevel.Write,
                         user: manager.context.user,
                     }
                 : undefined,
-        }) && (!member.hasRequiredParentNationalRegisterNumbers || !member.patchedMember.details.nationalRegisterNumber)) {
+        })) {
+            return false;
+        }
+
+        if (this.options.outdatedTime) {
+            if (details.reviewTimes.isOutdated('taxCertificates', this.options.outdatedTime)) {
+                return true;
+            }
+        }
+
+        if (!member.hasRequiredParentNationalRegisterNumbers || !member.patchedMember.details.nationalRegisterNumber) {
             return true;
         }
 

@@ -2706,6 +2706,144 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             expect(member3.details.parents).toEqual([expectedParent()]);
         });
 
+        // Choosing a debtor unmarks the other parents of that member with an explicit false
+        test('Marking one parent as debtor and the other as not, leaves the tax dependency of a sibling untouched', async () => {
+            const user = await new UserFactory({}).create();
+
+            const mother = Parent.create({
+                firstName: 'Linda',
+                lastName: 'Doe',
+                email: 'linda@example.com',
+                nationalRegisterNumber: '93042012345',
+                updatedAt: new Date(0),
+            });
+            const father = Parent.create({
+                firstName: 'Jef',
+                lastName: 'Doe',
+                email: 'jef@example.com',
+                nationalRegisterNumber: '93042017297',
+                updatedAt: new Date(0),
+            });
+
+            const motherOfAnna = mother.clone();
+            motherOfAnna.isMemberTaxDependent = true;
+
+            const anna = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'Anna',
+                    lastName: 'Doe',
+                    parents: [motherOfAnna, father.clone()],
+                }),
+            }).create();
+
+            const bram = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'Bram',
+                    lastName: 'Doe',
+                    parents: [mother.clone(), father.clone()],
+                }),
+            }).create();
+
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await SessionService.createSession(admin);
+
+            const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+            parentsPatch.addPatch(Parent.patch({ id: mother.id, isMemberTaxDependent: false }));
+            parentsPatch.addPatch(Parent.patch({ id: father.id, isMemberTaxDependent: true }));
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: bram.id,
+                details: MemberDetails.patch({
+                    parents: parentsPatch,
+                }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+
+            await anna.refresh();
+            await bram.refresh();
+
+            const taxDependency = (details: MemberDetails) => details.parents.map(p => [p.firstName, p.isMemberTaxDependent]);
+            expect(taxDependency(bram.details)).toEqual([['Linda', false], ['Jef', true]]);
+            expect(taxDependency(anna.details)).toEqual([['Linda', true], ['Jef', null]]);
+        });
+
+        // The dashboard flow: the debtor of the first child is chosen and saved, then the one of the sibling
+        test('Choosing a debtor for each child in turn keeps both choices', async () => {
+            const user = await new UserFactory({}).create();
+
+            const mother = Parent.create({
+                firstName: 'Linda',
+                lastName: 'Doe',
+                email: 'linda@example.com',
+            });
+            const father = Parent.create({
+                firstName: 'Jef',
+                lastName: 'Doe',
+                email: 'jef@example.com',
+            });
+
+            const anna = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'Anna',
+                    lastName: 'Doe',
+                    parents: [mother.clone(), father.clone()],
+                }),
+            }).create();
+
+            const bram = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'Bram',
+                    lastName: 'Doe',
+                    parents: [mother.clone(), father.clone()],
+                }),
+            }).create();
+
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await SessionService.createSession(admin);
+
+            const choose = async (member: Member, debtor: Parent, other: Parent, nationalRegisterNumber: string) => {
+                const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+                parentsPatch.addPatch(Parent.patch({ id: other.id, isMemberTaxDependent: false }));
+                parentsPatch.addPatch(Parent.patch({ id: debtor.id, isMemberTaxDependent: true, nationalRegisterNumber }));
+
+                const arr: Body = new PatchableArray();
+                arr.addPatch(MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({
+                        parents: parentsPatch,
+                    }),
+                }));
+
+                const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+                request.headers.authorization = 'Bearer ' + token.accessToken;
+                const response = await testServer.test(endpoint, request);
+                expect(response.status).toBe(200);
+            };
+
+            await choose(anna, mother, father, '93042012345');
+            await choose(bram, father, mother, '93042017297');
+
+            await anna.refresh();
+            await bram.refresh();
+
+            const taxDependency = (details: MemberDetails) => details.parents.map(p => [p.firstName, p.isMemberTaxDependent, p.nationalRegisterNumber]);
+            expect(taxDependency(anna.details)).toEqual([['Linda', true, '93042012345'], ['Jef', false, '93042017297']]);
+            expect(taxDependency(bram.details)).toEqual([['Linda', false, '93042012345'], ['Jef', true, '93042017297']]);
+        });
+
         test('Updating isMemberTaxDependent for another parent doesn\'t change it for the whole family', async () => {
             const user = await new UserFactory({}).create();
             const admin = await new UserFactory({

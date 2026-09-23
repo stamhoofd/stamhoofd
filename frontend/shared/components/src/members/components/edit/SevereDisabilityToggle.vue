@@ -1,5 +1,5 @@
 <template>
-    <button class="button text small" type="button" :class="{enabled: model}" @click="toggle">
+    <button class="button text small" type="button" :class="{enabled: model}" data-testid="severe-disability-toggle" @click="toggle">
         <span v-if="model" v-tooltip="$t('Het fiscaal attest wordt aangemaakt tot de leeftijd van 21 jaar in plaats van 14 jaar')">{{ $t('Tot 21 jaar') }}</span>
         <span v-else>{{ $t('Tot 14 jaar') }}</span>
         <span class="icon arrow-down-small" />
@@ -51,6 +51,7 @@ async function toggle(event: MouseEvent) {
     ]);
     await contextMenu.show({
         button: event.currentTarget as HTMLElement,
+        xPlacement: 'left',
     });
 }
 

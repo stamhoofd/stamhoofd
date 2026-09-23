@@ -7,10 +7,10 @@ import { Parent } from './Parent.js';
 import { PlatformFamily, PlatformMember } from './PlatformMember.js';
 
 describe('PlatformMember.hasRequiredParentNationalRegisterNumbers', () => {
-    function build(parents: Parent[]) {
+    function build(parents: Parent[], nationalRegisterNumber: string | typeof NationalRegisterNumberOptOut | null = null) {
         const organization = Organization.create({});
         const member = MemberWithRegistrationsBlob.create({
-            details: MemberDetails.create({ firstName: 'Child', lastName: 'Doe', parents }),
+            details: MemberDetails.create({ firstName: 'Child', lastName: 'Doe', parents, nationalRegisterNumber }),
         });
         const family = new PlatformFamily({ platform: Platform.create({}), contextOrganization: organization });
         return new PlatformMember({ member, family });
@@ -54,6 +54,16 @@ describe('PlatformMember.hasRequiredParentNationalRegisterNumbers', () => {
         expect(build([
             parent({ isMemberTaxDependent: true, nationalRegisterNumber: NationalRegisterNumberOptOut }),
         ]).hasRequiredParentNationalRegisterNumbers).toBe(true);
+    });
+
+    // Without a Belgian number of their own the member gets no certificate, so no parent number is needed either
+    test('true when the member opted out, whatever the parents hold', () => {
+        expect(build([parent({ isMemberTaxDependent: null })], NationalRegisterNumberOptOut).hasRequiredParentNationalRegisterNumbers).toBe(true);
+        expect(build([parent({ isMemberTaxDependent: true })], NationalRegisterNumberOptOut).hasRequiredParentNationalRegisterNumbers).toBe(true);
+    });
+
+    test('a number of the member itself does not answer the question', () => {
+        expect(build([parent({ isMemberTaxDependent: true })], '15042000162').hasRequiredParentNationalRegisterNumbers).toBe(false);
     });
 
     test('with co-parenting both parents need their own number', () => {

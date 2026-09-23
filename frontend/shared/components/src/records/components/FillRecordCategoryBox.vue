@@ -11,6 +11,9 @@
                 {{ titleSuffix }}
             </span>
         </h1>
+        <CategorizedBoxButtons v-else-if="level === 0">
+            <button v-if="!markReviewed && hasAnswers" v-tooltip="$t('%j9')" type="button" class="button icon trash" @click="clearAnswers" />
+        </CategorizedBoxButtons>
         <h2 v-else-if="hasRoot" class="style-with-button">
             <div>
                 {{ category.name }}
@@ -31,7 +34,7 @@
 
         <RecordAnswerInput v-for="record of filteredWriteableRecords" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
         <div v-for="(childCategory, index) of childCategories" :key="childCategory.id" class="container">
-            <hr v-if="index > 0 || hasRoot"><h2>{{ level === 1 ? childCategory.name : (category.name + ': ' + childCategory.name) }}</h2>
+            <hr v-if="index > 0 || hasRoot"><h2>{{ level <= 1 ? childCategory.name : (category.name + ': ' + childCategory.name) }}</h2>
             <p v-if="childCategory.description.length" class="style-description pre-wrap style-wysiwyg" v-html="linkText(childCategory.description.toString())" />
 
             <RecordAnswerInput v-for="record of childCategory.filterRecords(props.value, filterOptions)" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
@@ -68,6 +71,7 @@ import { useValidation } from '../../errors/useValidation';
 import RecordAnswerInput from '../../inputs/RecordAnswerInput.vue';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { useLinkableText } from '../../inputs/hooks/useLinkableText';
+import CategorizedBoxButtons from '#layout/categorized-view/CategorizedBoxButtons.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -78,6 +82,7 @@ const props = withDefaults(
         value: T;
         validator: Validator;
         parentErrorBox?: ErrorBox | null;
+        /** 0: the parent (a CategorizedBox) renders the title and receives the header buttons */
         level?: number;
         allOptional?: boolean;
         titleSuffix?: string;

@@ -23,6 +23,7 @@ export function useEditMember() {
                 title: options.title,
                 saveText: options.saveText,
                 component: markRaw(EditMemberAllBox),
+                categorized: true,
                 saveHandler: options.finishHandler,
             }),
         });

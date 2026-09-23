@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :loading="loading" :save-text="isDuplicate ? $t('%16p') : saveText" data-testid="member-step" @save="save">
+    <component :is="categorized && !isDuplicate ? CategorizedView : SaveView" :title="title" :loading="loading" :save-text="isDuplicate ? $t('%16p') : saveText" data-testid="member-step" @save="save">
         <template v-if="isDuplicate">
             <h1>{{ $t('%dx', {member: cloned.patchedMember.details.firstName}) }}</h1>
             <p>{{ $t('%dy', {member: cloned.patchedMember.details.firstName}) }}</p>
@@ -111,7 +111,7 @@
             </template>
         </template>
         <component :is="component" v-else :title="title" :validator="errors.validator" :parent-error-box="errors.errorBox" :member="cloned" :will-mark-reviewed="willMarkReviewed" v-bind="$attrs" :level="1" />
-    </SaveView>
+    </component>
 </template>
 
 <script setup lang="ts">
@@ -138,6 +138,8 @@ import type { NavigationActions } from '../types/NavigationActions';
 import { usePlatformFamilyManager } from './PlatformFamilyManager';
 
 import IconContainer from '#icons/IconContainer.vue';
+import CategorizedView from '#layout/categorized-view/CategorizedView.vue';
+import SaveView from '#navigation/SaveView.vue';
 import Spinner from '#Spinner.vue';
 
 defineOptions({
@@ -149,6 +151,8 @@ const props = withDefaults(
         title: string;
         saveText?: string;
         component: ComponentOptions;
+        /** Wrap in a CategorizedView; only for components built from CategorizedBoxes (EditMemberAllBox) */
+        categorized?: boolean;
         // do not change this
         member: PlatformMember;
         markReviewed?: ReviewTimeType[];
@@ -156,6 +160,7 @@ const props = withDefaults(
         saveHandler?: ((navigate: NavigationActions) => Promise<void> | void) | null;
     }>(), {
         saveText: () => $t(`%1Op`),
+        categorized: false,
         saveHandler: null,
         markReviewed: () => [],
         getMarkReviewed: null,

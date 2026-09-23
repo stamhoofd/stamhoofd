@@ -1185,6 +1185,7 @@ export async function presentEditMember({ member, present, context }: { member: 
                 member,
                 title: $t(`%15E`, { firstName: member.member.firstName }),
                 component: markRaw(EditMemberAllBox),
+                categorized: true,
                 saveHandler: async ({ dismiss }: NavigationActions) => {
                     Toast.success($t('%ZeV', { firstName: member.patchedMember.firstName })).show();
                     await dismiss({ force: true });

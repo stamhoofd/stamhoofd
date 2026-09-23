@@ -34,7 +34,7 @@
                 <template v-if="!columnsEnabled && isEnabled" #fixed>
                     <ScrollableSegmentedControl v-model="visibleCategory" :items="[null, ...categories]" :labels="['Overzicht', ...categories.map(c => c.title.value)]" :icons="[null, ...categories.map(c => c.icon.value)]" />
                 </template>
-                <template #buttons>
+                <template v-if="$slots.buttons" #buttons>
                     <slot name="buttons" />
                 </template>
                 <header v-if="!columnsEnabled || !isEnabled" class="container">
@@ -47,7 +47,7 @@
                         <STList v-if="isEnabled">
                             <STListItem v-for="(category, index) of categories" :key="index" :selectable="true" class="" @click="scrollToCategory(category)">
                                 <template #left>
-                                    <span :class="'icon ' + category.icon.value" />
+                                    <span :class="'icon small ' + category.icon.value" />
                                 </template>
                                 <h2 class="style-title-list">
                                     {{ category.title.value }}

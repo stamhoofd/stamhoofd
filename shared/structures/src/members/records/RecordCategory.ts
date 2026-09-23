@@ -51,6 +51,17 @@ export class RecordCategory extends AutoEncoder {
         return !!this.getAllRecords().find(r => r.sensitive);
     }
 
+    get icon() {
+        const name = this.name.toString().toLocaleLowerCase();
+        if (name.includes('steekkaart') || name.includes('medisch')) {
+            return 'health-data';
+        }
+        if (name.includes('toestemming')) {
+            return 'privacy';
+        }
+        return 'edit';
+    }
+
     getAllRecords(): RecordSettings[] {
         if (this.childCategories.length > 0) {
             return [...this.records, ...this.childCategories.flatMap(c => c.getAllRecords())];

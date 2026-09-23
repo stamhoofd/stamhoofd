@@ -5,7 +5,7 @@
                 <IconContainer :icon="icon" class="gray" />
             </span>
             <div>{{ title }}</div>
-            <div>
+            <div ref="buttons">
                 <slot name="buttons" />
             </div>
         </h2>
@@ -18,12 +18,13 @@
 <script lang="ts" setup>
 import { getExposeProxy } from '@simonbackx/vue-app-navigation';
 import type { Ref } from 'vue';
-import { computed, getCurrentInstance, onActivated, onBeforeUnmount, onMounted, ref, unref, useSlots, useTemplateRef } from 'vue';
+import { computed, getCurrentInstance, onActivated, onBeforeUnmount, onMounted, provide, ref, unref, useSlots, useTemplateRef } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
 import IconContainer from '../../icons/IconContainer.vue';
 import CategorizedView from './CategorizedView.vue';
 import { CategorizedViewCategory } from './CategorizedViewCategory';
+import { categorizedBoxButtonsTarget } from './categorizedBoxButtonsTarget';
 
 const props = withDefaults(defineProps<{
     title: string;
@@ -50,6 +51,7 @@ const view = computed<null | InstanceType<typeof CategorizedView>>(() => {
 
 const slots = useSlots();
 const rootElement = useTemplateRef('root');
+provide(categorizedBoxButtonsTarget, useTemplateRef('buttons'));
 const hasError = ref(false);
 
 function updateHasError() {

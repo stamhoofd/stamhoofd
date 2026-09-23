@@ -1,5 +1,5 @@
 <template>
-    <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`) + lidSuffix + (!isPropertyRequired('nationalRegisterNumber', true) ? ' ('+$t('%1GF')+')' : '')" :required="isPropertyRequired('nationalRegisterNumber')" :validator="validator" :birth-day="birthDay">
+    <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`) + lidSuffix + (!isPropertyRequired('nationalRegisterNumber', true) ? ' ('+$t('%1GF')+')' : '')" :required="isPropertyRequired('nationalRegisterNumber')" :validator="validator" :birth-day="birthDay" data-testid="member-nrn-input">
         <template v-if="!isPropertyEnabled('nationalRegisterNumber')" #right>
             <button class="button icon trash small gray" type="button" @click="nationalRegisterNumber = null" />
         </template>

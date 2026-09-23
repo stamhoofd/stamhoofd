@@ -106,13 +106,11 @@
 </template>
 
 <script setup lang="ts">
-import { useOrganization } from '#hooks/useOrganization.ts';
 import { useShowMemberLanguage } from '#members/hooks/useShowMemberLanguage.ts';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import type { PlatformMember } from '@stamhoofd/structures';
-import { BooleanStatus, Gender, LanguageHelper } from '@stamhoofd/structures';
-import { Country } from '@stamhoofd/types/Country';
+import { Gender, LanguageHelper } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
@@ -257,27 +255,10 @@ const birthDay = computed({
     get: () => props.member.patchedMember.details.birthDay,
     set: birthDay => props.member.addDetailsPatch({ birthDay }),
 });
-const age = computed(() => {
-    return props.member.patchedMember.details.age ?? props.member.patchedMember.details.defaultAge;
-});
-const organization = useOrganization();
-
-const isBelgium = computed(() => {
-    return organization.value?.address.country === Country.Belgium || address.value?.country === Country.Belgium || props.member.patchedMember.details.parents.some(p => p.address && p.address.country === Country.Belgium);
-});
 
 const trackingYear = computed({
     get: () => props.member.patchedMember.details.trackingYear,
     set: trackingYear => props.member.addDetailsPatch({ trackingYear }),
-});
-
-const severeDisability = computed({
-    get: () => props.member.patchedMember.details.severeDisability?.value ?? false,
-    set: severeDisability => props.member.addDetailsPatch({ severeDisability:
-        BooleanStatus.create({
-            value: severeDisability,
-        }),
-    }),
 });
 
 const gender = computed({

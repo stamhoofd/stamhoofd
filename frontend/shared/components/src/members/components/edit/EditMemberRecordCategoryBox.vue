@@ -13,6 +13,7 @@ import { useIsAllOptional } from '../../hooks/useIsPropertyRequired';
 import { useAppContext } from '../../../context/appContext';
 import type { ErrorBox } from '../../../errors/ErrorBox';
 import { useOrganization } from '#hooks/useOrganization.ts';
+import { getRecordCategoryTitleSuffix } from './recordCategoryTitleSuffix';
 
 const props = withDefaults(defineProps<{
     member: PlatformMember;
@@ -37,21 +38,7 @@ const allOptional = useIsAllOptional(computed(() => props.member));
 const app = useAppContext();
 const organization = useOrganization();
 
-const owningOrganization = computed(() => {
-    return props.member.organizations.find(o => o.meta.recordsConfiguration.recordCategories.find(c => c.id === props.category.id));
-});
-const titleSuffix = computed(() => {
-    if (app === 'registration') {
-        return '';
-    }
-
-    // Platform admins can see who owns the record category
-    if (owningOrganization.value && (!organization.value || owningOrganization.value.id !== organization.value.id)) {
-        return owningOrganization.value.name;
-    }
-
-    return '';
-});
+const titleSuffix = computed(() => getRecordCategoryTitleSuffix({ member: props.member, category: props.category, app, organization: organization.value }));
 
 function addPatch(patch: PatchAnswers) {
     props.member.addDetailsPatch({

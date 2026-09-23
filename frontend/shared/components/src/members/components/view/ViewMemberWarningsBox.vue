@@ -93,7 +93,7 @@ const warnings = computed(() => {
     }
 
     if (isPropertyEnabled('nationalRegisterNumber')) {
-        if (props.member.patchedMember.details.severeDisability && props.member.patchedMember.details.age && props.member.patchedMember.details.age <= 21) {
+        if (props.member.patchedMember.details.severeDisability && props.member.patchedMember.details.age && props.member.needsTaxCertificateIfSevereDisability) {
             warnings.push(RecordWarning.create({
                 text: TranslatedString.create($t('%Zpy')),
                 type: RecordWarningType.Info,
