@@ -738,9 +738,22 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
 
         const editView = await openMemberEditView({ page, scenario, memberName: scenario.names.memberA });
 
-        // Offered with the age toggle, to extend the certificate for a severe disability
+        // Only the age toggle is offered, to extend the certificate for a severe disability
         await expect(taxBox(editView)).toBeVisible();
         await expect(severeDisabilityToggle(editView)).toHaveText(/Tot 14 jaar/);
+        await expect(debtorRow(editView, scenario.names.mother)).toBeHidden();
+
+        await severeDisabilityToggle(editView).click();
+        await page.getByTestId('context-menu-item-title').filter({ hasText: 'Tot 21 jaar' }).click();
+
+        // Confirming the disability asks to tick a checkbox first
+        const confirm = page.getByTestId('centered-message');
+        await expect(confirm).toBeVisible();
+        await confirm.getByTestId('checkbox').click();
+        await confirm.getByTestId('centered-message-button').filter({ hasText: 'Uitreiken tot 21 jaar' }).click();
+        await expect(confirm).toBeHidden();
+
+        await expect(severeDisabilityToggle(editView)).toHaveText(/Tot 21 jaar/);
         await expect(debtorRadio(editView, scenario.names.mother)).toBeAttached();
     });
 
