@@ -51,7 +51,7 @@ import type { TableAction } from '#tables/classes/TableAction.ts';
 import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
 import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync';
-import type { Group, GroupCategoryTree, MemberResponsibility, Organization, PlatformRegistration, StamhoofdFilter } from '@stamhoofd/structures';
+import type { Group, GroupCategoryTree, MemberResponsibility, Organization, OrganizationRegistrationPeriod, PlatformRegistration, StamhoofdFilter } from '@stamhoofd/structures';
 import { AccessRight, GroupType, mergeFilters, PermissionLevel, SGVSyncStatus, SortItemDirection } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
@@ -68,6 +68,8 @@ const props = withDefaults(
         group?: Group | null;
         category?: GroupCategoryTree | null;
         periodId?: string | null;
+        /** The period the group belongs to. Falls back to a lookup when not given. */
+        organizationPeriod?: OrganizationRegistrationPeriod | null;
         responsibility?: MemberResponsibility | null; // for now only for saving column config
         customFilter?: StamhoofdFilter | null;
         customTitle?: string | null;
@@ -77,6 +79,7 @@ const props = withDefaults(
         group: null,
         category: null,
         periodId: null,
+        organizationPeriod: null,
         customFilter: null,
         customTitle: null,
         responsibility: null,
@@ -183,6 +186,10 @@ function getDefaultFilter(): StamhoofdFilter {
 }
 
 const organizationRegistrationPeriod = computed(() => {
+    if (props.organizationPeriod) {
+        return props.organizationPeriod;
+    }
+
     const periodId = filterPeriodId;
 
     return props.organization?.periods?.organizationPeriods?.find(p => p.period.id === periodId);

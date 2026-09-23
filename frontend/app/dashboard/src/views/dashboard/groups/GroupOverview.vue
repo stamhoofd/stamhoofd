@@ -306,6 +306,7 @@ defineRoutes([{
         return {
             group: props.group,
             organization: organization.value,
+            organizationPeriod: props.period,
         };
     },
 },
