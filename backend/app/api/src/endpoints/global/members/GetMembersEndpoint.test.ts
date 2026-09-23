@@ -612,6 +612,53 @@ describe('Endpoint.GetMembersEndpoint', () => {
             });
         });
 
+        test('Not allowed: Cannot combine an allowed group with a forbidden one in a conjunction', async () => {
+            const organization = await new OrganizationFactory({ period }).create();
+
+            const allowedGroup = await new GroupFactory({ organization, period }).create();
+            const forbiddenGroup = await new GroupFactory({ organization, period }).create();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources: new Map([[
+                        PermissionsResourceType.Groups,
+                        new Map([[allowedGroup.id, ResourcePermissions.create({ level: PermissionLevel.Read })]]),
+                    ]]),
+                }),
+            }).create();
+
+            const token = await SessionService.createSession(user);
+
+            // This member is in both groups: an $elemMatch on each does not narrow to one group,
+            // so combining them would reveal who of the allowed group is also in the other one
+            const memberInBoth = await new MemberFactory({}).create();
+            await new RegistrationFactory({ member: memberInBoth, group: allowedGroup }).create();
+            await new RegistrationFactory({ member: memberInBoth, group: forbiddenGroup }).create();
+
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({
+                    filter: {
+                        $and: [
+                            { registrations: { $elemMatch: { groupId: allowedGroup.id } } },
+                            { registrations: { $elemMatch: { groupId: forbiddenGroup.id } } },
+                        ],
+                    },
+                    limit: 10,
+                }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
+        });
+
         test('Not allowed: Cannot fetch all members if no permissions for a single group', async () => {
             // Same test, but without giving the user permissions to read the group
             // Setup

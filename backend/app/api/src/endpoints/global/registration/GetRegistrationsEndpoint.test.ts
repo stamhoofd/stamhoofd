@@ -636,16 +636,19 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
                 path: baseUrl,
                 host: organization.getApiHost(),
                 query: new LimitedFilteredRequest({
-                    // As soon as the table merges a second filter part, the group ids end up
-                    // inside an $and instead of at the root
+                    // The shape the table sends once a UI filter is active: mergeFilters puts the
+                    // built UI filter (itself an $and) next to the required group filter
                     filter: {
                         $and: [
                             {
-                                groupId: eventGroup.id,
-                                deactivatedAt: null,
+                                $and: [
+                                    { registeredAt: { $neq: null } },
+                                    { deactivatedAt: null },
+                                ],
                             },
                             {
-                                registeredAt: { $neq: null },
+                                groupId: eventGroup.id,
+                                deactivatedAt: null,
                             },
                         ],
                     },
@@ -661,6 +664,52 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             expect(response.body.results.registrations).toIncludeSameMembers([
                 expect.objectContaining({ id: registration.id }),
             ]);
+        });
+
+        test('Not allowed: An event only role gets a clear error instead of an empty list without a group filter', async () => {
+            const previousPeriod = await new RegistrationPeriodFactory({
+                startDate: new Date(2022, 0, 1),
+                endDate: new Date(2022, 11, 31),
+            }).create();
+
+            const organization = await new OrganizationFactory({ period }).create();
+            const eventGroup = await new GroupFactory({ organization, period: previousPeriod, type: GroupType.EventRegistration }).create();
+            const event = await new EventFactory({
+                organization,
+                group: eventGroup,
+                startDate: previousPeriod.startDate,
+                endDate: previousPeriod.endDate,
+            }).create();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources: new Map([[
+                        PermissionsResourceType.Events,
+                        new Map([[event.id, ResourcePermissions.create({ level: PermissionLevel.Write })]]),
+                    ]]),
+                }),
+            }).create();
+
+            const token = await SessionService.createSession(user);
+            const member = await new MemberFactory({}).create();
+            await new RegistrationFactory({ member, group: eventGroup }).create();
+
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({ limit: 10 }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            // The scope filter only covers membership groups, so there is nothing to show: that
+            // has to surface as an error, never as a silently empty list.
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
         });
 
         test('Allowed: A user inherits permissions for the waiting list of an event', async () => {

@@ -1,3 +1,4 @@
+import type { StamhoofdFilter } from './StamhoofdFilter.js';
 import { getAndFilterParts, mergeFilters } from './StamhoofdFilter.js';
 
 describe('Unit.StamhoofdFilter', () => {
@@ -32,6 +33,19 @@ describe('Unit.StamhoofdFilter', () => {
             const a = { groupId: 'group-1' };
 
             expect(getAndFilterParts({ $and: [a], organizationId: 'org-1' })).toEqual([a, { organizationId: 'org-1' }]);
+        });
+
+        test('Finds the parts of a UI filter merged next to a required filter', () => {
+            // What the tables actually send: mergeFilters keeps the built UI filter, which is an
+            // $and of its own, next to the required filter
+            const uiFilter: StamhoofdFilter = { $and: [{ name: { $contains: 'jan' } }, { age: { $gt: 10 } }] };
+            const required = { groupId: 'group-1', deactivatedAt: null };
+
+            expect(getAndFilterParts(mergeFilters([uiFilter, [required]]))).toEqual([
+                { name: { $contains: 'jan' } },
+                { age: { $gt: 10 } },
+                required,
+            ]);
         });
 
         test('Leaves $or alone: its parts are not ANDed', () => {
