@@ -84,27 +84,6 @@ export function mergeFilters(filters: (StamhoofdFilter | null)[], type: '$and' |
     };
 }
 
-/**
- * The parts a filter ANDs together, the inverse of what mergeFilters builds: a bare array and an
- * $and object are the same conjunction, and nesting is flattened. A filter that is not a
- * conjunction is its own only part, so callers can always iterate the result.
- */
-export function getAndFilterParts(filter: StamhoofdFilter): StamhoofdFilter[] {
-    if (Array.isArray(filter)) {
-        return filter.flatMap(part => getAndFilterParts(part));
-    }
-
-    if (typeof filter === 'object' && filter !== null && !(filter instanceof Date) && Array.isArray((filter as Record<string, unknown>).$and)) {
-        const { $and, ...rest } = filter as { $and: StamhoofdFilter[] } & Record<string, unknown>;
-        const parts = $and.flatMap(part => getAndFilterParts(part));
-
-        // Other keys next to $and are ANDed with it
-        return Object.keys(rest).length > 0 ? [...parts, rest as StamhoofdFilter] : parts;
-    }
-
-    return [filter];
-}
-
 export function assertSort(list: SortList, assert: AssertSortList): SortList {
     for (const a of assert) {
         if (list.find(l => l.key === a.key)) {

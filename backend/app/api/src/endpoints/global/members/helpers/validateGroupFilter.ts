@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
-import { FilterWrapperMarker, getAndFilterParts, PermissionLevel, unwrapFilter } from '@stamhoofd/structures';
+import { FilterWrapperMarker, PermissionLevel, unwrapFilter } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context.js';
 import { StamhoofdFilterAccessHelper } from '../../../../helpers/StamhoofdFilterAccessHelper.js';
 
@@ -18,14 +18,26 @@ export async function validateGroupFilter({ filter, permissionLevel, key }: { fi
                 groupId: FilterWrapperMarker,
             };
 
-    // The group ids can sit in one part of a conjunction instead of at the root: the other parts
-    // only narrow the result further, so the part carrying them decides access.
-    const unwrapped = getAndFilterParts(filter)
-        .map(part => unwrapFilter(part, requiredFilter))
-        .find(result => result.match);
-
-    if (!unwrapped) {
-        return false;
+    let unwrapped = unwrapFilter(filter, requiredFilter);
+    if (!unwrapped.match) {
+        if (typeof filter === 'object'
+            && filter !== null
+            && filter['$and']
+            && Array.isArray(filter['$and'])
+            && Object.keys(filter).length >= 1 // does not matter if more than 1, because root is always $and together
+            && filter['$and'].length > 0
+        ) {
+            for (const subFilter of filter['$and']) {
+                unwrapped = unwrapFilter(subFilter as StamhoofdFilter, requiredFilter);
+                if (unwrapped.match) {
+                    // Found!
+                    break;
+                }
+            }
+        }
+        if (!unwrapped.match) {
+            return false;
+        }
     }
 
     if (unwrapped.markerValue === undefined) {

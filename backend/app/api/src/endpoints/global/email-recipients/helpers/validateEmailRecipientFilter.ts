@@ -1,7 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/models';
 import type { PermissionLevel, StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
-import { FilterWrapperMarker, getAndFilterParts, unwrapFilter } from '@stamhoofd/structures';
+import { FilterWrapperMarker, unwrapFilter } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context.js';
 
 export async function validateEmailRecipientFilter({ filter, permissionLevel }: { filter: StamhoofdFilter; permissionLevel: PermissionLevel }) {
@@ -10,13 +10,26 @@ export async function validateEmailRecipientFilter({ filter, permissionLevel }: 
         emailId: FilterWrapperMarker,
     };
 
-    // The email id can sit in one part of a conjunction instead of at the root
-    const unwrapped = getAndFilterParts(filter)
-        .map(part => unwrapFilter(part, requiredFilter))
-        .find(result => result.match);
-
-    if (!unwrapped) {
-        return false;
+    let unwrapped = unwrapFilter(filter, requiredFilter);
+    if (!unwrapped.match) {
+        if (typeof filter === 'object'
+            && filter !== null
+            && filter['$and']
+            && Array.isArray(filter['$and'])
+            && Object.keys(filter).length >= 1 // does not matter if more than 1, because root is always $and together
+            && filter['$and'].length > 0
+        ) {
+            for (const subFilter of filter['$and']) {
+                unwrapped = unwrapFilter(subFilter as StamhoofdFilter, requiredFilter);
+                if (unwrapped.match) {
+                    // Found!
+                    break;
+                }
+            }
+        }
+        if (!unwrapped.match) {
+            return false;
+        }
     }
 
     const emailIds = typeof unwrapped.markerValue === 'string'
