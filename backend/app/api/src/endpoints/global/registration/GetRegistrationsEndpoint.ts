@@ -100,16 +100,13 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
                     ? {}
                     : { group: { status: { $neq: GroupStatus.Archived } } };
 
+                // The scope filter constrains the registration that is returned, not the member
+                // it belongs to: a member can be visible through one group while having other
+                // registrations in groups this role may not see.
                 if (await Context.auth.canAccessAllMembersInEveryPeriod(organization.id, permissionLevel)) {
                     scopeFilter = {
-                        member: {
-                            registrations: {
-                                $elemMatch: {
-                                    organizationId: organization.id,
-                                    ...groupStateFilter,
-                                },
-                            },
-                        },
+                        organizationId: organization.id,
+                        ...groupStateFilter,
                     };
                 } else {
                     const filters: StamhoofdFilter[] = [];
@@ -117,15 +114,9 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
 
                     if (canAccessCurrentPeriod) {
                         filters.push({
-                            member: {
-                                registrations: {
-                                    $elemMatch: {
-                                        organizationId: organization.id,
-                                        periodId: organization.periodId,
-                                        ...groupStateFilter,
-                                    },
-                                },
-                            },
+                            organizationId: organization.id,
+                            periodId: organization.periodId,
+                            ...groupStateFilter,
                         });
                     }
 
@@ -148,14 +139,8 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
 
                     if (groupIds.length > 0) {
                         filters.push({
-                            member: {
-                                registrations: {
-                                    $elemMatch: {
-                                        groupId: {
-                                            $in: groupIds,
-                                        },
-                                    },
-                                },
+                            groupId: {
+                                $in: groupIds,
                             },
                         });
                     }
