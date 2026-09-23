@@ -107,7 +107,7 @@ const groupedResponsibilites = computed(() => {
 
     if (groupedOrganizationResponsibilities.length > 0) {
         groups.push({
-            title: $t(`%109`),
+            title: groupedPlatformResponsibilities.length > 0 ? $t(`%109`) : $t('Functies'),
             roles: groupedOrganizationResponsibilities,
         });
     }
@@ -129,8 +129,7 @@ function patchInheritedResponsibilityRole(patch: AutoEncoderPatchType<Permission
         const role = responsibility.responsibility.createDefaultPermissions(responsibility.group);
         const patched = role.patch(patch);
         arr.addPut(patched);
-    }
-    else {
+    } else {
         arr.addPatch(patch);
     }
 
@@ -151,8 +150,7 @@ function patchResponsibilityRole(patch: AutoEncoderPatchType<PermissionRoleForRe
             permissions: patch,
         });
         arr.addPatch(p);
-    }
-    else {
+    } else {
         // Create
         const p = MemberResponsibility.patch({
             id: responsibility.id,
