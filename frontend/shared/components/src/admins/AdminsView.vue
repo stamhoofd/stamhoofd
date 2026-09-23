@@ -8,7 +8,7 @@
                 <p>{{ $t('%30') }}</p>
 
                 <STList class="illustration-list">
-                    <STListItem v-if="showRoles && !showInternalAdmins" :selectable="true" class="left-center" @click="$navigate(Routes.Roles)">
+                    <STListItem v-if="showRoles && !canShowInternalAdmins" :selectable="true" class="left-center" @click="$navigate(Routes.Roles)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/admin-role.svg">
                         </template>
@@ -46,7 +46,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="!showRoles && canShowInternalAdmins" :selectable="true" class="left-center" @click="$navigate(Routes.Roles)">
+                    <STListItem v-if="showRoles && canShowInternalAdmins" :selectable="true" class="left-center" @click="$navigate(Routes.Roles)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/admin-role.svg">
                         </template>
