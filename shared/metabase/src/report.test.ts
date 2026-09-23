@@ -1267,7 +1267,7 @@ describe('report', () => {
 
                     expect(`${where}: ${sql.includes("`groups`.type = 'Membership' OR ( `groups`.type = 'EventRegistration' AND NOT EXISTS (")}`).toEqual(`${where}: true`);
                     // The leeftijdsgroep that suppresses it is the member's own, in the same werkjaar.
-                    expect(`${where}: ${sql.includes("leeftijdsgroep.type = 'Membership' WHERE lidmaatschap.memberId = registrations.memberId AND lidmaatschap.periodId = registrations.periodId")}`).toEqual(`${where}: true`);
+                    expect(`${where}: ${sql.includes("leeftijdsgroep.type = 'Membership' WHERE leeftijdsgroepinschrijving.memberId = registrations.memberId AND leeftijdsgroepinschrijving.periodId = registrations.periodId")}`).toEqual(`${where}: true`);
                     expect(`${where}: ${sql.includes('WaitingList')}`).toEqual(`${where}: false`);
                 }
             }
