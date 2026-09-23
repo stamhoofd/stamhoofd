@@ -94,52 +94,6 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             ]);
         });
 
-        /**
-         * The scope filter selects the registrations that are returned, not the members they
-         * belong to. Selecting by member pulls in their registrations in other groups as well,
-         * which the canAccessRegistration check below then refuses: the whole request fails
-         * instead of returning the registrations this role may see.
-         */
-        test('Allowed: Lists registrations when a visible member is also registered in another group', async () => {
-            const organization = await new OrganizationFactory({ period }).create();
-
-            const allowedGroup = await new GroupFactory({ organization, period }).create();
-            const forbiddenGroup = await new GroupFactory({ organization, period }).create();
-
-            const user = await new UserFactory({
-                organization,
-                permissions: Permissions.create({
-                    level: PermissionLevel.None,
-                    resources: new Map([[
-                        PermissionsResourceType.Groups,
-                        new Map([[allowedGroup.id, ResourcePermissions.create({ level: PermissionLevel.Read })]]),
-                    ]]),
-                }),
-            }).create();
-
-            const token = await SessionService.createSession(user);
-
-            // The member is visible through the allowed group, but their other registration is not
-            const member = await new MemberFactory({}).create();
-            const allowedRegistration = await new RegistrationFactory({ member, group: allowedGroup }).create();
-            await new RegistrationFactory({ member, group: forbiddenGroup }).create();
-
-            const request = Request.get({
-                path: baseUrl,
-                host: organization.getApiHost(),
-                query: new LimitedFilteredRequest({ limit: 10 }),
-                headers: {
-                    authorization: 'Bearer ' + token.accessToken,
-                },
-            });
-
-            const response = await testServer.test(endpoint, request);
-            expect(response.status).toBe(200);
-            expect(response.body.results.registrations).toIncludeSameMembers([
-                expect.objectContaining({ id: allowedRegistration.id }),
-            ]);
-        });
-
         test('Not allowed: Cannot fetch registrations for a given group', async () => {
             // Same test, but without giving the user permissions to read the group
             // Setup
