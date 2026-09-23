@@ -239,7 +239,9 @@ function getRoot() {
             }
 
             if (organization?.meta.packages.useMembers) {
-                tabs.push(membersTab);
+                if (context.value.auth.canAccessSomeMembershipGroup()) {
+                    tabs.push(membersTab);
+                }
 
                 if (!manualFeatureFlag('disable-events', context.value, platform.value) && organization.meta.enableCalendar !== false) {
                     const eventTypes = getEventTypes({ platform: platform.value, organization });

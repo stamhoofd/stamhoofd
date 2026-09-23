@@ -227,6 +227,10 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
         await page.goto(`${WorkerData.urls.dashboard}/${appToUri('dashboard')}/${organization.uri}`);
     }
 
+    function membersTab(page: Page) {
+        return page.locator('[data-testid="tab-button"][data-tab-id="members"]');
+    }
+
     /** Opens the period switcher of the members menu */
     async function openPeriodSwitcher({ page }: { page: Page }) {
         await page.getByTestId('members-menu').locator('.footer button').first().click();
@@ -357,6 +361,9 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
         await page.setViewportSize({ width: 1280, height: 800 });
         await openDashboard({ page, organization: scenario.organization, user });
 
+        // The members tab is kept: the only granted group lives outside the current period
+        await expect(membersTab(page)).toBeVisible();
+
         await switchToPeriod({ page, periodName: scenario.previous.periodName });
         await openGroupMembers({ page, group: scenario.previous.group });
         await expectWriteAction({ page, memberName: scenario.previous.memberName });
@@ -401,8 +408,18 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
     });
     /** Opens the calendar tab and selects the year the event of that period lives in */
     async function openCalendar({ page, year }: { page: Page; year: number }) {
-        await page.getByTestId('tab-button').filter({ hasText: 'Activiteiten' }).click();
-        await expect(page.locator('#settings-view')).toBeVisible();
+        const tab = page.locator('[data-testid="tab-button"][data-tab-id="events"]');
+        const view = page.locator('#settings-view');
+
+        // A role without access to membership groups only keeps the calendar: a single tab is
+        // rendered without a tab bar and its view is already the root. Waiting for either first,
+        // so the tab is only considered missing once the dashboard rendered.
+        await expect(tab.or(view).first()).toBeVisible();
+
+        if (await tab.count() > 0) {
+            await tab.first().click();
+        }
+        await expect(view).toBeVisible();
 
         await page.locator('.scrollable-segmented-control button', { hasText: String(year) }).first().click();
     }
@@ -426,6 +443,10 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
         await openDashboard({ page, organization: scenario.organization, user });
 
         await openCalendar({ page, year: scenario.current.eventYear });
+
+        // An event grant reaches the registrations of that event, not the membership groups
+        await expect(membersTab(page)).toHaveCount(0);
+
         await expect(eventRow(page, scenario.current.eventName)).toHaveCount(1);
 
         // Negative case: the event of the other period is not covered by this grant

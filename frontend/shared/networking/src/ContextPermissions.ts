@@ -392,6 +392,32 @@ export class ContextPermissions {
         return !!this.permissions && !this.permissions.isEmpty;
     }
 
+    /**
+     * Whether the user can reach membership groups at all: the gate for the members module.
+     *
+     * Grants are not resolved against a period, because a grant on a group of another period
+     * must count too. Event permissions are deliberately excluded: they only give access to the
+     * registrations of an event, which live outside the members module.
+     */
+    canAccessSomeMembershipGroup(): boolean {
+        const permissions = this.permissions;
+
+        if (!permissions) {
+            return false;
+        }
+
+        // Only groups and categories are listed here: a Groups grant without a level (e.g. one that
+        // only adds the event write right) doesn't give access to the group's members.
+        for (const type of [PermissionsResourceType.Groups, PermissionsResourceType.GroupCategories]) {
+            if (permissions.hasAccessForSomeResourceOfType(type, PermissionLevel.Read)) {
+                return true;
+            }
+        }
+
+        // Someone who can add groups needs the module to do so, even without an existing group
+        return permissions.hasAccessRightForSomeResourceOfType(PermissionsResourceType.GroupCategories, AccessRight.OrganizationCreateGroups);
+    }
+
     hasSomeAccessInPeriod(period: OrganizationRegistrationPeriod): boolean {
         const organization = this.organization;
         const permissions = this.permissions;
