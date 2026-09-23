@@ -3,7 +3,7 @@ import { ObjectData } from '@simonbackx/simple-encoding';
 import { Image } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import Handlebars from 'handlebars';
-import { Interval } from 'luxon';
+import { countDays } from './countDays.js';
 
 /**
  * Support for async helpers
@@ -116,15 +116,7 @@ Handlebars.registerHelper('days', (a, b) => {
     if (!(a instanceof Date) || !(b instanceof Date)) {
         return 0;
     }
-    // Calculate absolute amount of days between a and b
-    const start = Formatter.luxon(a).set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-    const end = Formatter.luxon(b).set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-    const diff = Interval.fromDateTimes(start, end);
-    const days = diff.length('days');
-    if (isNaN(days)) {
-        return 0;
-    }
-    return days + 1;
+    return countDays(a, b);
 });
 
 Handlebars.registerHelper('div', (a, b, options) => {

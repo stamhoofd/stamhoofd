@@ -1,12 +1,13 @@
 import { column } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
-import type { Parent, RecordAnswer } from '@stamhoofd/structures';
+import type { MemberDetails, Parent, RecordAnswer } from '@stamhoofd/structures';
 import { BalanceItemStatus, DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, GroupType, NationalRegisterNumberOptOut, RecordAddressAnswer, RecordAnswerDecoder, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
+import { countDays } from '../helpers/countDays.js';
 import { BalanceItem } from './BalanceItem.js';
 import { Document } from './Document.js';
 import { Group } from './Group.js';
@@ -30,6 +31,20 @@ export interface DocumentSplit {
 }
 
 type RegistrationBalance = Awaited<ReturnType<typeof BalanceItem.getForRegistration>>;
+
+/**
+ * The days a registration is certified for; `certifiedDays` is only set when that is less than the whole registration
+ */
+interface CertifiedPeriod {
+    startDate: Date | null;
+    endDate: Date | null;
+    certifiedDays: number | null;
+    totalDays: number | null;
+}
+
+function roundToCent(price: number): number {
+    return Math.round(price / 100) * 100;
+}
 
 /**
  * The family points at the parents whose name the certificate has to carry, so once any parent is
@@ -207,6 +222,46 @@ export class DocumentTemplate extends QueryableModel {
         return debtor ? [{ debtor, missingData: false }] : [];
     }
 
+    private getMaxAgeFor(details: MemberDetails): number | null {
+        if (this.settings.maxAge === null) {
+            return null;
+        }
+        if (this.settings.maxAgeSevereDisability && details.severeDisability?.value) {
+            return this.settings.maxAgeSevereDisability;
+        }
+        return this.settings.maxAge;
+    }
+
+    /**
+     * A certificate only covers the days the member is young enough: when the birthday that makes the member
+     * too old falls inside the registration, the certified period ends the day before that birthday.
+     */
+    getCertifiedPeriod(registration: RegistrationWithMember, group: Group | undefined): CertifiedPeriod {
+        const startDate = registration.startDate ?? group?.settings?.startDate ?? null;
+        const endDate = registration.endDate ?? group?.settings?.endDate ?? null;
+        const untrimmed: CertifiedPeriod = { startDate, endDate, certifiedDays: null, totalDays: null };
+
+        const maxAge = this.getMaxAgeFor(registration.member.details);
+        const birthDay = registration.member.details.birthDay;
+        if (maxAge === null || !birthDay || !startDate || !endDate) {
+            return untrimmed;
+        }
+
+        const tooOldFrom = Formatter.luxon(birthDay).plus({ years: maxAge + 1 }).startOf('day');
+        if (tooOldFrom <= Formatter.luxon(startDate).startOf('day') || tooOldFrom > Formatter.luxon(endDate).startOf('day')) {
+            return untrimmed;
+        }
+
+        const lastDay = tooOldFrom.minus({ days: 1 });
+        const certifiedEndDate = Formatter.luxon(endDate).set({ year: lastDay.year, month: lastDay.month, day: lastDay.day }).toJSDate();
+        return {
+            startDate,
+            endDate: certifiedEndDate,
+            certifiedDays: countDays(startDate, certifiedEndDate),
+            totalDays: countDays(startDate, endDate),
+        };
+    }
+
     /**
      * Returns the default answers for a given registration. With a split, the prices are the share of that debtor.
      */
@@ -218,8 +273,16 @@ export class DocumentTemplate extends QueryableModel {
         const { items: balanceItems, payments } = options.balance ?? await BalanceItem.getForRegistration(registration.id, this.organizationId);
 
         const paidAtDates = payments.flatMap(p => p.paidAt ? [p.paidAt?.getTime()] : []);
-        const totalPrice = balanceItems.reduce((sum, item) => sum + (item.priceOpen + item.pricePaid + item.pricePending), 0);
-        const totalPricePaid = balanceItems.reduce((sum, item) => sum + item.pricePaid, 0);
+        let totalPrice = balanceItems.reduce((sum, item) => sum + (item.priceOpen + item.pricePaid + item.pricePending), 0);
+        let totalPricePaid = balanceItems.reduce((sum, item) => sum + item.pricePaid, 0);
+
+        // A trimmed period keeps the daily rate, so the certified amount shrinks with the days
+        const period = this.getCertifiedPeriod(registration, group);
+        if (period.certifiedDays !== null && period.totalDays !== null && period.totalDays > 0) {
+            totalPrice = roundToCent(totalPrice / period.totalDays) * period.certifiedDays;
+            totalPricePaid = Math.min(totalPricePaid, totalPrice);
+        }
+
         const split = options.split;
         const price = split ? splitPrice(totalPrice, split.count, split.index) : totalPrice;
         const pricePaid = split ? splitPrice(totalPricePaid, split.count, split.index) : totalPricePaid;
@@ -248,14 +311,14 @@ export class DocumentTemplate extends QueryableModel {
                     id: 'registration.startDate',
                     type: RecordType.Date,
                 }), // settings will be overwritten
-                dateValue: registration.startDate ?? group?.settings?.startDate,
+                dateValue: period.startDate,
             }),
             'registration.endDate': RecordDateAnswer.create({
                 settings: RecordSettings.create({
                     id: 'registration.endDate',
                     type: RecordType.Date,
                 }), // settings will be overwritten
-                dateValue: registration.endDate ?? group?.settings?.endDate,
+                dateValue: period.endDate,
             }),
             'registration.price':
                 RecordPriceAnswer.create({
@@ -738,19 +801,16 @@ export class DocumentTemplate extends QueryableModel {
             }
 
             if (startDate) {
-                const age = registration.member.details.ageOnDate(startDate);
+                // ageOnDate reads the local calendar day, so hand it the Brussels day the registration starts on
+                const startDay = Formatter.luxon(startDate);
+                const age = registration.member.details.ageOnDate(new Date(startDay.year, startDay.month - 1, startDay.day));
 
                 if (age === null) {
                     console.warn('Missing member age checking maxAge');
                     return false;
                 }
 
-                let maxAge = this.settings.maxAge;
-
-                if (this.settings.maxAgeSevereDisability && registration.member.details.severeDisability?.value) {
-                    maxAge = this.settings.maxAgeSevereDisability;
-                }
-                if (age > maxAge) {
+                if (age > this.getMaxAgeFor(registration.member.details)!) {
                     return false;
                 }
             } else {

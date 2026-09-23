@@ -3,12 +3,15 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { DocumentTemplate, Group, Member, Organization, Registration } from '@stamhoofd/models';
-import { BalanceItemFactory, Document, DocumentTemplateFactory, GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, UserFactory } from '@stamhoofd/models';
+import { BalanceItemFactory, Document, DocumentTemplateFactory, GroupFactory, MemberFactory, OrganizationFactory, Platform, RegistrationFactory, UserFactory } from '@stamhoofd/models';
+import { render } from '@stamhoofd/models/helpers/Handlebars.js';
 import { splitPrice } from '@stamhoofd/models/models/DocumentTemplate.js';
 import type { RecordAnswer } from '@stamhoofd/structures';
-import { DocumentData, DocumentStatus, Document as DocumentStruct, MemberDetails, MemberWithRegistrationsBlob, Parent, PermissionLevel, Permissions, RecordCategory, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
+import { BooleanStatus, DocumentData, DocumentStatus, Document as DocumentStruct, MemberDetails, MemberWithRegistrationsBlob, Parent, PermissionLevel, Permissions, RecordCategory, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
+import { Formatter } from '@stamhoofd/utility';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { DocumentRenderService } from '../../../services/DocumentRenderService.js';
 import { SessionService } from '../../../services/SessionService.js';
 import { PatchDocumentEndpoint } from '../../organization/dashboard/documents/PatchDocumentEndpoint.js';
 import { PatchOrganizationMembersEndpoint } from './PatchOrganizationMembersEndpoint.js';
@@ -19,6 +22,9 @@ type Body = EndpointType extends Endpoint<any, any, infer B, any> ? B : never;
 
 // An odd number of cents (prices carry two extra decimals), so the halves differ by one cent
 const total = 1234500;
+
+// Members with the same name and birthday are merged by the endpoint, so every family gets its own name
+let familyCounter = 0;
 
 /**
  * Tax certificates issued to the parents that have the member tax dependent, through member edits in the dashboard.
@@ -44,12 +50,14 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
         accessToken = (await SessionService.createSession(admin)).accessToken;
     });
 
-    async function createFiscalTemplate(group: Group, { withDebtor = true } = {}) {
+    async function createFiscalTemplate(group: Group, { withDebtor = true, maxAge = null as number | null, maxAgeSevereDisability = null as number | null } = {}) {
         const template = await new DocumentTemplateFactory({
             groups: [group],
             status: DocumentStatus.Published,
             type: 'fiscal',
+            maxAge,
         }).createWithoutSave();
+        template.settings.maxAgeSevereDisability = maxAgeSevereDisability;
 
         if (withDebtor) {
             template.privateSettings.templateDefinition.documentFieldCategories.push(RecordCategory.create({
@@ -75,24 +83,25 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
         });
     }
 
-    async function createFamily(parents: Parent[], { template: familyTemplate = template } = {}): Promise<{ member: Member; registration: Registration }> {
+    async function createFamily(parents: Parent[], { template: familyTemplate = template, group: familyGroup = group, birthDay = new Date(2015, 0, 1), price = total, severeDisability = false } = {}): Promise<{ member: Member; registration: Registration }> {
         const member = await new MemberFactory({
             organization,
             details: MemberDetails.create({
-                firstName: 'Jane',
+                firstName: 'Jane' + (++familyCounter),
                 lastName: 'Doe',
-                birthDay: new Date(2015, 0, 1),
+                birthDay,
                 parents,
+                severeDisability: severeDisability ? BooleanStatus.create({ value: true }) : null,
             }),
         }).create();
-        const registration = await new RegistrationFactory({ member, group }).create();
+        const registration = await new RegistrationFactory({ member, group: familyGroup }).create();
         await new BalanceItemFactory({
             organizationId: organization.id,
             memberId: member.id,
             registrationId: registration.id,
             amount: 1,
-            unitPrice: total,
-            pricePaid: total,
+            unitPrice: price,
+            pricePaid: price,
         }).create();
         await familyTemplate.buildAll();
         return { member, registration };
@@ -390,5 +399,149 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
         expect(documents[0].parentId).toBeNull();
         expect(documents[0].status).toBe(DocumentStatus.Published);
         expectDocumentPrices(documents, total);
+    });
+
+    /**
+     * Fiscal certificates only cover the days a member is 13 or younger (maxAge 13).
+     */
+    describe('age cutoff', () => {
+        // A ten day activity in July 2025, in Brussels time
+        const activityStart = new Date('2025-06-30T22:00:00Z');
+        const activityEnd = new Date('2025-07-10T21:59:59Z');
+        // 100 euro for ten days, so a whole number of euros per day
+        const activityPrice = 100_0000;
+        const dailyTariffInCents = 1000;
+
+        const birthDayInsideActivity = new Date('2011-07-05T22:00:00Z'); // turns 14 on 6 July 2025
+        const birthDayAfterActivity = new Date('2011-12-31T23:00:00Z'); // turns 14 in 2026
+
+        let activityGroup: Group;
+        let activityTemplate: DocumentTemplate;
+
+        beforeAll(async () => {
+            activityGroup = await new GroupFactory({ organization }).create();
+            activityGroup.settings.startDate = activityStart;
+            activityGroup.settings.endDate = activityEnd;
+            await activityGroup.save();
+            activityTemplate = await createFiscalTemplate(activityGroup, { maxAge: 13, maxAgeSevereDisability: 20 });
+        });
+
+        function dateOf(document: Document, id: string) {
+            const value = answer(document, id);
+            return value instanceof Date ? Formatter.luxon(value).toISODate() : null;
+        }
+
+        /**
+         * The day count and daily tariff exactly as the fiscal XML export computes them from the answers
+         */
+        async function renderDaysAndTariff(document: Document): Promise<{ days: number; tariffInCents: number }> {
+            const row = '{{ coalesce registration.days (days registration.startDate registration.endDate) }}|{{ div (div registration.price (coalesce registration.days (days registration.startDate registration.endDate)) round=true) 100 round=true }}';
+            const context = DocumentRenderService.buildDocumentContext(document, organization, await Platform.getSharedStruct());
+            const [days, tariffInCents] = (await render(row, context))!.split('|').map(Number);
+            return { days, tariffInCents };
+        }
+
+        async function createActivityFamily(birthDay: Date, parents = [parent('Linda', { nationalRegisterNumber: '93042012345', isMemberTaxDependent: true })], { severeDisability = false } = {}) {
+            return await createFamily(parents, { template: activityTemplate, group: activityGroup, birthDay, price: activityPrice, severeDisability });
+        }
+
+        async function expectFullActivity(document: Document) {
+            expect(dateOf(document, 'registration.startDate')).toBe('2025-07-01');
+            expect(dateOf(document, 'registration.endDate')).toBe('2025-07-10');
+            expect(await renderDaysAndTariff(document)).toEqual({ days: 10, tariffInCents: dailyTariffInCents });
+            expectDocumentPrices([document], activityPrice);
+        }
+
+        async function expectTrimmedActivity(document: Document) {
+            expect(dateOf(document, 'registration.startDate')).toBe('2025-07-01');
+            expect(dateOf(document, 'registration.endDate')).toBe('2025-07-05');
+            expect(await renderDaysAndTariff(document)).toEqual({ days: 5, tariffInCents: dailyTariffInCents });
+            expectDocumentPrices([document], activityPrice / 2);
+        }
+
+        test('a member that turns 14 during the activity is certified up to the day before the birthday', async () => {
+            const { registration } = await createActivityFamily(birthDayInsideActivity);
+
+            const documents = await loadDocuments(registration);
+            expect(documents.length).toBe(1);
+            expect(documents[0].status).toBe(DocumentStatus.Published);
+            await expectTrimmedActivity(documents[0]);
+        });
+
+        test('a member that turns 14 after the activity is certified for the whole activity', async () => {
+            const { registration } = await createActivityFamily(birthDayAfterActivity);
+
+            const documents = await loadDocuments(registration);
+            expect(documents.length).toBe(1);
+            await expectFullActivity(documents[0]);
+        });
+
+        test('a member that turns 14 on the last day is certified for all but that day', async () => {
+            const { registration } = await createActivityFamily(new Date('2011-07-09T22:00:00Z'));
+
+            const [document] = await loadDocuments(registration);
+            expect(dateOf(document, 'registration.endDate')).toBe('2025-07-09');
+            expect(await renderDaysAndTariff(document)).toEqual({ days: 9, tariffInCents: dailyTariffInCents });
+            expectDocumentPrices([document], activityPrice / 10 * 9);
+        });
+
+        test('a member that turns 14 on the first day gets no certificate', async () => {
+            const { registration } = await createActivityFamily(new Date('2011-06-30T22:00:00Z'));
+
+            expect(await loadDocuments(registration)).toEqual([]);
+        });
+
+        test('a member with a severe disability that turns 21 during the activity is certified up to the day before the birthday', async () => {
+            const birthDay = new Date('2004-07-05T22:00:00Z'); // turns 21 on 6 July 2025
+            const { registration } = await createActivityFamily(birthDay, undefined, { severeDisability: true });
+
+            const documents = await loadDocuments(registration);
+            expect(documents.length).toBe(1);
+            await expectTrimmedActivity(documents[0]);
+
+            // Without the disability the regular limit of 13 applies
+            const { registration: withoutDisability } = await createActivityFamily(birthDay);
+            expect(await loadDocuments(withoutDisability)).toEqual([]);
+        });
+
+        test('correcting the birthday to after the activity restores the whole activity', async () => {
+            const { member, registration } = await createActivityFamily(birthDayInsideActivity);
+            const [original] = await loadDocuments(registration);
+            await expectTrimmedActivity(original);
+
+            await patchMember(member, MemberDetails.patch({ birthDay: birthDayAfterActivity }));
+
+            const documents = await loadDocuments(registration);
+            expect(documents.length).toBe(1);
+            expect(documents[0].id).toBe(original.id);
+            await expectFullActivity(documents[0]);
+        });
+
+        test('correcting the birthday into the activity trims the certificate', async () => {
+            const { member, registration } = await createActivityFamily(birthDayAfterActivity);
+            const [original] = await loadDocuments(registration);
+            await expectFullActivity(original);
+
+            await patchMember(member, MemberDetails.patch({ birthDay: birthDayInsideActivity }));
+
+            const documents = await loadDocuments(registration);
+            expect(documents.length).toBe(1);
+            expect(documents[0].id).toBe(original.id);
+            await expectTrimmedActivity(documents[0]);
+        });
+
+        test('the trimmed amount is what gets split between two debtors', async () => {
+            const linda = parent('Linda', { nationalRegisterNumber: '93042012345', isMemberTaxDependent: true });
+            const john = parent('John', { nationalRegisterNumber: '93042017297', isMemberTaxDependent: true });
+            const { registration } = await createActivityFamily(birthDayInsideActivity, [linda, john]);
+
+            const documents = await loadDocuments(registration);
+            expect(documents.length).toBe(2);
+            for (const document of documents) {
+                expect(dateOf(document, 'registration.endDate')).toBe('2025-07-05');
+                expect((await renderDaysAndTariff(document)).days).toBe(5);
+            }
+            expectDocumentPrices(documents, activityPrice / 2);
+        });
     });
 });
