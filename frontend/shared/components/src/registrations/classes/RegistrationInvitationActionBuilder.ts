@@ -1,14 +1,14 @@
+import { useContext } from '#hooks/useContext.ts';
+import type { TableAction } from '#tables/classes/TableAction.ts';
+import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
-import type { Group, RegistrationInvitation, RegistrationInvitationRequest } from '@stamhoofd/structures';
+import type { Group, OrganizationRegistrationPeriod, RegistrationInvitation, RegistrationInvitationRequest } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/structures';
-import { useContext } from '#hooks/useContext.ts';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { Toast } from '../../overlays/Toast';
-import type { TableAction } from '#tables/classes/TableAction.ts';
-import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import type { RegistrationInvitationEvenOrigin } from './useRegistrationInvitationEventListener';
 import { RegistrationInvitationEventBus } from './useRegistrationInvitationEventListener';
 
@@ -16,7 +16,7 @@ export function useRegistrationInvitationActionBuilder() {
     const context = useContext();
     const owner = useRequestOwner();
 
-    return (options: { group: Group; eventOrigin: RegistrationInvitationEvenOrigin }) => {
+    return (options: { group: Group; eventOrigin: RegistrationInvitationEvenOrigin; organizationPeriod?: OrganizationRegistrationPeriod | null }) => {
         return new RegistrationInvitationActionBuilder({
             ...options,
             context: context.value,
@@ -30,9 +30,10 @@ export class RegistrationInvitationActionBuilder {
     private readonly context: SessionContext;
     private readonly owner: any;
     private readonly eventOrigin: RegistrationInvitationEvenOrigin;
+    private readonly organizationPeriod: OrganizationRegistrationPeriod | null;
 
     get hasWrite() {
-        return this.context.auth.canAccessGroup(this.group, PermissionLevel.Write);
+        return this.context.auth.canAccessGroup(this.group, PermissionLevel.Write, undefined, this.organizationPeriod);
     }
 
     constructor(settings: {
@@ -40,8 +41,10 @@ export class RegistrationInvitationActionBuilder {
         context: SessionContext;
         owner: any;
         eventOrigin: RegistrationInvitationEvenOrigin;
+        organizationPeriod?: OrganizationRegistrationPeriod | null;
     }) {
         this.group = settings.group;
+        this.organizationPeriod = settings.organizationPeriod ?? null;
         this.context = settings.context;
         this.owner = settings.owner;
         this.eventOrigin = settings.eventOrigin;

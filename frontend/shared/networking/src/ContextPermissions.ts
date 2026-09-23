@@ -213,8 +213,8 @@ export class ContextPermissions {
         return false;
     }
 
-    canRegisterMembersInGroup(group: Group, organization?: Organization | null) {
-        if (this.canAccessGroup(group, PermissionLevel.Write, organization)) {
+    canRegisterMembersInGroup(group: Group, organization?: Organization | null, groupPeriod?: OrganizationRegistrationPeriod | null) {
+        if (this.canAccessGroup(group, PermissionLevel.Write, organization, groupPeriod)) {
             return true;
         }
         if (this.organization) {
@@ -237,7 +237,7 @@ export class ContextPermissions {
         return category.canCreate(this.permissions, this.organization.period.settings.categories);
     }
 
-    canAccessRegistration(registration: Registration, organization: Organization, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    canAccessRegistration(registration: Registration, organization: Organization, permissionLevel: PermissionLevel = PermissionLevel.Read, groupPeriod?: OrganizationRegistrationPeriod | null) {
         const organizationPermissions = this.getPermissionsForOrganization(organization);
 
         if (!organizationPermissions) {
@@ -254,7 +254,7 @@ export class ContextPermissions {
             return false;
         }
 
-        if (this.canAccessGroup(registration.group, permissionLevel, organization)) {
+        if (this.canAccessGroup(registration.group, permissionLevel, organization, groupPeriod)) {
             return true;
         }
         return false;

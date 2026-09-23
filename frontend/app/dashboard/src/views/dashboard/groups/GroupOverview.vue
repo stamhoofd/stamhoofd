@@ -316,6 +316,7 @@ defineRoutes([{
     defaultProperties: () => {
         return {
             group: props.group,
+            organizationPeriod: props.period,
             estimatedRows: invitationsCount.value,
             updateTotal: (total: number | null) => {
                 if (total !== null) {

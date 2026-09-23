@@ -25,7 +25,7 @@ import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
 import ModernTableView from '#tables/ModernTableView.vue';
 import { Column } from '#tables/classes/Column.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
-import type { Group, RegistrationInvitation, StamhoofdFilter } from '@stamhoofd/structures';
+import type { Group, OrganizationRegistrationPeriod, RegistrationInvitation, StamhoofdFilter } from '@stamhoofd/structures';
 import { GroupGenderType, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, watch } from 'vue';
@@ -37,9 +37,12 @@ type ObjectType = RegistrationInvitation;
 
 const props = withDefaults(defineProps<{
     group: Group;
+    /** The period the group belongs to. Only needed for membership groups, to resolve their categories. */
+    organizationPeriod?: OrganizationRegistrationPeriod | null;
     estimatedRows?: number | null;
     updateTotal?: (total: number | null) => void;
 }>(), {
+    organizationPeriod: null,
     estimatedRows: null,
     updateTotal: undefined,
 });
@@ -71,7 +74,7 @@ function hasRestrictions(group: Group) {
 }
 
 const getActionBuilder = useRegistrationInvitationActionBuilder();
-const actions = getActionBuilder({ group: props.group, eventOrigin: 'invitations-table' }).getActions();
+const actions = getActionBuilder({ group: props.group, organizationPeriod: props.organizationPeriod, eventOrigin: 'invitations-table' }).getActions();
 
 const title = $t('%1TY');
 

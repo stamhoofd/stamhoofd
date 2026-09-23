@@ -341,10 +341,11 @@ const route = {
 const actionBuilder = useDirectRegistrationActions({
     groups: props.group ? [props.group] : (props.category ? props.category.getAllGroups() : []),
     categories: props.category ? [props.category] : [],
+    organizationPeriod: organizationRegistrationPeriod.value,
 });
 
 const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup();
-let canAdd = (props.group ? auth.canRegisterMembersInGroup(props.group) : false);
+let canAdd = (props.group ? auth.canRegisterMembersInGroup(props.group, undefined, organizationRegistrationPeriod.value) : false);
 if (!organizationScope.value) {
     // For now not possible via admin panel
     canAdd = false;

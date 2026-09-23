@@ -271,6 +271,7 @@ const route = {
 const actionBuilder = useDirectMemberActions({
     groups: props.group ? [props.group] : (props.category ? props.category.getAllGroups() : []),
     categories: props.category ? [props.category] : [],
+    organizationPeriod: organizationRegistrationPeriod.value,
 });
 
 const isLimitedGroup = computed(() => {
@@ -295,7 +296,7 @@ const isLimitedGroup = computed(() => {
 });
 
 const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup();
-let canAdd = (props.group ? auth.canRegisterMembersInGroup(props.group) : false);
+let canAdd = (props.group ? auth.canRegisterMembersInGroup(props.group, undefined, organizationRegistrationPeriod.value) : false);
 if (!organization.value) {
     // For now not possible via admin panel
     canAdd = false;
