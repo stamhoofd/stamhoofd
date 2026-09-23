@@ -875,7 +875,7 @@ export class PlatformMember implements ObjectWithRecords {
     needsTaxCertificateAt(maxAge: number): boolean {
         const details = this.patchedMember.details;
         const oldest = new Date();
-        oldest.setFullYear(oldest.getFullYear() - 3);
+        oldest.setFullYear(oldest.getFullYear() - 2);
 
         for (const date of this.taxCertificateDates) {
             if (date < oldest) {
