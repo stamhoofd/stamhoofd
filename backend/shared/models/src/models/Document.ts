@@ -34,6 +34,12 @@ export class Document extends QueryableModel {
     @column({ type: 'string', nullable: true })
     registrationId: string | null = null;
 
+    /**
+     * Set when the certificate of a registration is split between multiple debtors: the id of the parent this document is issued to
+     */
+    @column({ type: 'string', nullable: true })
+    parentId: string | null = null;
+
     @column({ type: 'string' })
     status = DocumentStatus.Draft;
 

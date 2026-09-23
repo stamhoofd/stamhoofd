@@ -15,25 +15,48 @@ import { Member } from './Member.js';
 import { Registration } from './Registration.js';
 import { User } from './User.js';
 
+export interface DocumentDebtor {
+    debtor: Parent;
+    missingData: boolean;
+}
+
 /**
- * The family points at the parent whose name the certificate has to carry, so once any parent is
- * marked we never fall back to a parent they did not choose - not even when that parent opted out
- * of giving a national register number. Returns null when the family has not answered at all.
+ * One of the documents of a certificate that is split between multiple debtors
  */
-export function getTaxDependentDebtor(parents: Parent[]): { debtor: Parent; missingData: boolean } | null {
-    const taxDependentParents = parents.filter(p => p.isMemberTaxDependent === true);
+export interface DocumentSplit {
+    debtor: DocumentDebtor;
+    count: number;
+    index: number;
+}
 
-    if (taxDependentParents.length === 0) {
-        return null;
-    }
+type RegistrationBalance = Awaited<ReturnType<typeof BalanceItem.getForRegistration>>;
 
-    const withNumber = taxDependentParents.filter(p => p.nationalRegisterNumber && p.nationalRegisterNumber !== NationalRegisterNumberOptOut);
+/**
+ * The family points at the parents whose name the certificate has to carry, so once any parent is
+ * marked we never fall back to a parent they did not choose - not even when that parent opted out
+ * of giving a national register number. Every marked parent receives their own document.
+ * Returns an empty list when the family has not answered at all.
+ */
+export function getTaxDependentDebtors(parents: Parent[]): DocumentDebtor[] {
+    return parents
+        .filter(p => p.isMemberTaxDependent === true)
+        .map(debtor => ({
+            debtor,
+            missingData: !debtor.nationalRegisterNumber || debtor.nationalRegisterNumber === NationalRegisterNumberOptOut,
+        }));
+}
 
-    return {
-        // TODO: Generate multiple documents when both parents have the member tax dependent
-        debtor: withNumber[0] ?? taxDependentParents[0],
-        missingData: withNumber.length === 0,
-    };
+/**
+ * Splits an amount over `count` documents in whole cents (prices carry two extra decimals);
+ * the remaining cents and any sub-cent rest go to the first documents so the shares add up to the total.
+ */
+export function splitPrice(total: number, count: number, index: number): number {
+    const cent = 100;
+    const cents = Math.floor(total / cent);
+    const base = Math.floor(cents / count);
+    const remainder = cents - base * count;
+    const share = (base + (index < remainder ? 1 : 0)) * cent;
+    return index === 0 ? share + (total - cents * cent) : share;
 }
 
 export class DocumentTemplate extends QueryableModel {
@@ -137,19 +160,69 @@ export class DocumentTemplate extends QueryableModel {
         }
     }
 
+    hasDebtorFields() {
+        return this.privateSettings.templateDefinition.documentFieldCategories.flatMap(c => c.getAllRecords()).some(s => s.id.startsWith('debtor.'));
+    }
+
     /**
-     * Returns the default answers for a given registration
+     * The parents the certificate has to be issued to. Empty when the template has no debtor fields,
+     * multiple when the family marked more than one parent as having the member tax dependent.
      */
-    async buildAnswers(registration: RegistrationWithMember): Promise<{ fieldAnswers: Map<string, RecordAnswer>; missingData: boolean }> {
+    async getDebtors(registration: RegistrationWithMember, balanceItems: BalanceItem[]): Promise<DocumentDebtor[]> {
+        if (!this.hasDebtorFields()) {
+            return [];
+        }
+
+        const parents = registration.member.details.parents;
+        const taxDependentDebtors = getTaxDependentDebtors(parents);
+        if (taxDependentDebtors.length > 0) {
+            return taxDependentDebtors;
+        }
+
+        const parentsWithNRN = parents.filter(p => p.nationalRegisterNumber !== NationalRegisterNumberOptOut && p.nationalRegisterNumber);
+        let debtor: Parent | undefined = parentsWithNRN[0] ?? parents[0];
+        if (parentsWithNRN.length > 1) {
+            for (const balanceItem of balanceItems) {
+                if (balanceItem && balanceItem.userId && balanceItem.priceOpen === 0 && balanceItem.status === BalanceItemStatus.Due) {
+                    const user = await User.getByID(balanceItem.userId);
+                    if (user) {
+                        const parent = parentsWithNRN.find(p => p.hasEmail(user.email));
+
+                        if (parent) {
+                            debtor = parent;
+                            break;
+                        }
+
+                        if (!debtor.nationalRegisterNumber) {
+                            const parent = parents.find(p => p.hasEmail(user.email));
+                            if (parent) {
+                                debtor = parent;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return debtor ? [{ debtor, missingData: false }] : [];
+    }
+
+    /**
+     * Returns the default answers for a given registration. With a split, the prices are the share of that debtor.
+     */
+    async buildAnswers(registration: RegistrationWithMember, options: { balance?: RegistrationBalance; debtors?: DocumentDebtor[]; split?: DocumentSplit } = {}): Promise<{ fieldAnswers: Map<string, RecordAnswer>; missingData: boolean }> {
         const fieldAnswers = new Map<string, RecordAnswer>();
         let missingData = false;
 
         const group = 'group' in registration ? registration.group as Group : await Group.getByID(registration.groupId);
-        const { items: balanceItems, payments } = await BalanceItem.getForRegistration(registration.id, this.organizationId);
+        const { items: balanceItems, payments } = options.balance ?? await BalanceItem.getForRegistration(registration.id, this.organizationId);
 
         const paidAtDates = payments.flatMap(p => p.paidAt ? [p.paidAt?.getTime()] : []);
-        const price = balanceItems.reduce((sum, item) => sum + (item.priceOpen + item.pricePaid + item.pricePending), 0);
-        const pricePaid = balanceItems.reduce((sum, item) => sum + item.pricePaid, 0);
+        const totalPrice = balanceItems.reduce((sum, item) => sum + (item.priceOpen + item.pricePaid + item.pricePending), 0);
+        const totalPricePaid = balanceItems.reduce((sum, item) => sum + item.pricePaid, 0);
+        const split = options.split;
+        const price = split ? splitPrice(totalPrice, split.count, split.index) : totalPrice;
+        const pricePaid = split ? splitPrice(totalPricePaid, split.count, split.index) : totalPricePaid;
 
         // We take the minimum date here, because there is a highter change of later paymetns to be for other things than the registration itself
         const paidAt = paidAtDates.length ? new Date(Math.min(...paidAtDates)) : null;
@@ -192,23 +265,23 @@ export class DocumentTemplate extends QueryableModel {
                     }), // settings will be overwritten
                     value: price,
                 }),
-            // This one is duplicated in case it got disabled (we need to use it to check if document is included)
+            // This one is duplicated in case it got disabled (we need to use it to check if document is included), so it is never split
             'registration.priceOriginal':
                 RecordPriceAnswer.create({
                     settings: RecordSettings.create({
                         id: 'registration.priceOriginal',
                         type: RecordType.Price,
                     }), // settings will be overwritten
-                    value: price,
+                    value: totalPrice,
                 }),
-            // This one is duplicated in case it got disabled (we need to use it to check if document is included)
+            // This one is duplicated in case it got disabled (we need to use it to check if document is included), so it is never split
             'registration.pricePaidOriginal':
                 RecordPriceAnswer.create({
                     settings: RecordSettings.create({
                         id: 'registration.pricePaidOriginal',
                         type: RecordType.Price,
                     }), // settings will be overwritten
-                    value: pricePaid,
+                    value: totalPricePaid,
                 }),
             'registration.pricePaid':
                 RecordPriceAnswer.create({
@@ -294,43 +367,13 @@ export class DocumentTemplate extends QueryableModel {
         };
 
         const allRecords = this.privateSettings.templateDefinition.documentFieldCategories.flatMap(c => c.getAllRecords());
-        const hasDebtor = allRecords.find(s => s.id.startsWith('debtor.'));
 
-        if (hasDebtor) {
-            let debtor: Parent | undefined;
+        if (this.hasDebtorFields()) {
+            const documentDebtor = split ? split.debtor : (options.debtors ?? await this.getDebtors(registration, balanceItems))[0];
+            const debtor = documentDebtor?.debtor;
 
-            const taxDependentDebtor = getTaxDependentDebtor(registration.member.details.parents);
-            if (taxDependentDebtor) {
-                debtor = taxDependentDebtor.debtor;
-
-                if (taxDependentDebtor.missingData) {
-                    missingData = true;
-                }
-            } else {
-                const parentsWithNRN = registration.member.details.parents.filter(p => p.nationalRegisterNumber !== NationalRegisterNumberOptOut && p.nationalRegisterNumber);
-                debtor = parentsWithNRN[0] ?? registration.member.details.parents[0];
-                if (parentsWithNRN.length > 1) {
-                    for (const balanceItem of balanceItems) {
-                        if (balanceItem && balanceItem.userId && balanceItem.priceOpen === 0 && balanceItem.status === BalanceItemStatus.Due) {
-                            const user = await User.getByID(balanceItem.userId);
-                            if (user) {
-                                const parent = parentsWithNRN.find(p => p.hasEmail(user.email));
-
-                                if (parent) {
-                                    debtor = parent;
-                                    break;
-                                }
-
-                                if (!debtor.nationalRegisterNumber) {
-                                    const parent = registration.member.details.parents.find(p => p.hasEmail(user.email));
-                                    if (parent) {
-                                        debtor = parent;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            if (documentDebtor?.missingData) {
+                missingData = true;
             }
 
             Object.assign(defaultData, {
@@ -514,7 +557,9 @@ export class DocumentTemplate extends QueryableModel {
             return [];
         }
 
-        const { fieldAnswers, missingData } = await this.buildAnswers(registration);
+        const balance = await BalanceItem.getForRegistration(registration.id, this.organizationId);
+        const debtors = await this.getDebtors(registration, balance.items);
+        const { fieldAnswers, missingData } = await this.buildAnswers(registration, { balance, debtors });
 
         if (!this.checkAnswersIncluded(registration, fieldAnswers)) {
             for (const document of existingDocuments) {
@@ -526,11 +571,32 @@ export class DocumentTemplate extends QueryableModel {
         const group = 'group' in registration ? registration.group as Group : await Group.getByID(registration.groupId);
         const description = `${registration.member.details.name}, ${group ? group.settings.name.toString() : ''}${group && group.settings.period && group.type === GroupType.Membership ? ' ' + group.settings.period?.nameShort : ''}`;
 
-        if (existingDocuments.length > 0) {
-            for (const document of existingDocuments) {
+        const activeDocuments = existingDocuments.filter(d => d.status !== DocumentStatus.Deleted);
+        const manualDocuments = activeDocuments.filter(d => d.parentId === null);
+        const splitDocuments = activeDocuments.filter(d => d.parentId !== null);
+
+        // Multiple documents without a parent were split by hand (duplicated in the dashboard): never touch those
+        if (debtors.length >= 2 && manualDocuments.length < 2) {
+            return await this.updateSplitDocuments(registration, { balance, debtors, existingDocuments, splitDocuments, manualDocuments, unsplitAnswers: fieldAnswers, description });
+        }
+
+        // Merge documents that were split before, by keeping the one of the remaining debtor
+        const keep = splitDocuments.length > 0 ? this.pickDocumentToKeep(splitDocuments, debtors[0]?.debtor.id ?? null) : null;
+        const documents: Document[] = [];
+        for (const document of existingDocuments) {
+            if (document.parentId !== null && document.status !== DocumentStatus.Deleted && document !== keep) {
+                await this.removeDocument(document);
+                continue;
+            }
+            documents.push(document);
+        }
+
+        if (documents.length > 0) {
+            for (const document of documents) {
+                document.parentId = null;
                 await this.updateDocumentWithAnswers(document, fieldAnswers);
                 document.data.name = this.settings.name;
-                if (existingDocuments.length === 1) {
+                if (documents.length === 1) {
                     document.data.description = description;
                 }
                 if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
@@ -538,9 +604,73 @@ export class DocumentTemplate extends QueryableModel {
                 }
                 await document.save();
             }
-            return existingDocuments;
+            return documents;
         }
 
+        return [await this.createDocument(registration, { fieldAnswers, missingData, description, parentId: null })];
+    }
+
+    /**
+     * One document per debtor, each with its share of the price
+     */
+    private async updateSplitDocuments(registration: RegistrationWithMember, { balance, debtors, existingDocuments, splitDocuments, manualDocuments, unsplitAnswers, description }: { balance: RegistrationBalance; debtors: DocumentDebtor[]; existingDocuments: Document[]; splitDocuments: Document[]; manualDocuments: Document[]; unsplitAnswers: Map<string, RecordAnswer>; description: string }): Promise<Document[]> {
+        const documents: Document[] = [];
+
+        // The document from before the split is kept for the first debtor, so it keeps its number
+        const claimable = splitDocuments.length === 0 && manualDocuments.length === 1 ? manualDocuments[0] : null;
+        const unmatched = new Set(splitDocuments);
+
+        for (const [index, debtor] of debtors.entries()) {
+            const split: DocumentSplit = { debtor, count: debtors.length, index };
+            const { fieldAnswers, missingData } = await this.buildAnswers(registration, { balance, split });
+            const splitDescription = `${description} (${debtor.debtor.name})`;
+
+            const document = splitDocuments.find(d => d.parentId === debtor.debtor.id) ?? (index === 0 ? claimable : null);
+            if (!document) {
+                documents.push(await this.createDocument(registration, { fieldAnswers, missingData, description: splitDescription, parentId: debtor.debtor.id }));
+                continue;
+            }
+
+            unmatched.delete(document);
+            document.parentId = debtor.debtor.id;
+            await this.updateDocumentWithAnswers(document, fieldAnswers);
+            document.data.name = this.settings.name;
+            document.data.description = splitDescription;
+            if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
+                document.status = this.status;
+            }
+            await document.save();
+            documents.push(document);
+        }
+
+        for (const document of unmatched) {
+            await this.removeDocument(document);
+        }
+
+        // Documents created by hand keep the answers of an unsplit certificate, their own edits win because they are reviewed
+        for (const document of existingDocuments) {
+            if (documents.includes(document) || unmatched.has(document)) {
+                continue;
+            }
+            await this.updateDocumentWithAnswers(document, unsplitAnswers);
+            document.data.name = this.settings.name;
+            if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
+                document.status = this.status;
+            }
+            await document.save();
+            documents.push(document);
+        }
+
+        return documents;
+    }
+
+    private pickDocumentToKeep(splitDocuments: Document[], parentId: string | null): Document {
+        return splitDocuments.find(d => d.parentId === parentId)
+            ?? splitDocuments.find(d => d.number !== null)
+            ?? [...splitDocuments].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())[0];
+    }
+
+    private async createDocument(registration: RegistrationWithMember, { fieldAnswers, missingData, description, parentId }: { fieldAnswers: Map<string, RecordAnswer>; missingData: boolean; description: string; parentId: string | null }): Promise<Document> {
         const document = new Document();
         document.organizationId = this.organizationId;
         document.templateId = this.id;
@@ -552,8 +682,26 @@ export class DocumentTemplate extends QueryableModel {
         });
         document.memberId = registration.member.id;
         document.registrationId = registration.id;
+        document.parentId = parentId;
         await document.save();
-        return [document];
+        return document;
+    }
+
+    /**
+     * Same rule as buildAll: a document that already received a number stays visible as deleted
+     */
+    private async removeDocument(document: Document) {
+        if (document.isLocked) {
+            return;
+        }
+
+        if (document.number === null) {
+            await document.delete();
+            return;
+        }
+
+        document.status = DocumentStatus.Deleted;
+        await document.save();
     }
 
     checkRegistrationIncluded(registration: Registration) {
@@ -802,7 +950,12 @@ export class DocumentTemplate extends QueryableModel {
     }
 
     async updateDocumentFor(document: Document, registration: RegistrationWithMember) {
-        const { fieldAnswers } = await this.buildAnswers(registration);
+        const balance = await BalanceItem.getForRegistration(registration.id, this.organizationId);
+        const debtors = await this.getDebtors(registration, balance.items);
+        const index = document.parentId === null ? -1 : debtors.findIndex(d => d.debtor.id === document.parentId);
+        const split: DocumentSplit | undefined = debtors.length >= 2 && index !== -1 ? { debtor: debtors[index], count: debtors.length, index } : undefined;
+
+        const { fieldAnswers } = await this.buildAnswers(registration, { balance, debtors, split });
         await this.updateDocumentWithAnswers(document, fieldAnswers);
     }
 }
