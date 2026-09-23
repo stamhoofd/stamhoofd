@@ -1,6 +1,6 @@
 import { DocumentStatus, NationalRegisterNumberOptOut, Parent } from '@stamhoofd/structures';
 import { DocumentTemplateFactory } from '../factories/DocumentTemplateFactory.js';
-import { getTaxDependentDebtor } from './DocumentTemplate.js';
+import { getTaxDependentDebtors, splitPrice } from './DocumentTemplate.js';
 
 describe('Model.DocumentTemplate', () => {
     it('PublishedAt should be set if status is published and publishedAt is null', async () => {
@@ -65,7 +65,7 @@ describe('Model.DocumentTemplate', () => {
     });
 });
 
-describe('Model.getTaxDependentDebtor', () => {
+describe('Model.getTaxDependentDebtors', () => {
     function parent({ name, isMemberTaxDependent, nationalRegisterNumber }: { name: string; isMemberTaxDependent?: boolean | null; nationalRegisterNumber?: string | typeof NationalRegisterNumberOptOut | null }) {
         return Parent.create({
             firstName: name,
@@ -78,14 +78,14 @@ describe('Model.getTaxDependentDebtor', () => {
     test('falls back to the old debtor logic when nobody has the member tax dependent', () => {
         const parents = [parent({ name: 'Linda', nationalRegisterNumber: '93042012345' })];
 
-        expect(getTaxDependentDebtor(parents)).toBeNull();
+        expect(getTaxDependentDebtors(parents)).toEqual([]);
     });
 
     test('picks the parent that has the member tax dependent', () => {
         const linda = parent({ name: 'Linda', isMemberTaxDependent: true, nationalRegisterNumber: '93042012345' });
         const john = parent({ name: 'John', nationalRegisterNumber: '93042017297' });
 
-        expect(getTaxDependentDebtor([john, linda])).toEqual({ debtor: linda, missingData: false });
+        expect(getTaxDependentDebtors([john, linda])).toEqual([{ debtor: linda, missingData: false }]);
     });
 
     // The certificate has to carry the name the family chose, even though it cannot be completed
@@ -93,26 +93,47 @@ describe('Model.getTaxDependentDebtor', () => {
         const linda = parent({ name: 'Linda', isMemberTaxDependent: true, nationalRegisterNumber: NationalRegisterNumberOptOut });
         const john = parent({ name: 'John', nationalRegisterNumber: '93042017297' });
 
-        expect(getTaxDependentDebtor([linda, john])).toEqual({ debtor: linda, missingData: true });
+        expect(getTaxDependentDebtors([linda, john])).toEqual([{ debtor: linda, missingData: true }]);
     });
 
     test('reports missing data when the tax dependent parent has no number yet', () => {
         const linda = parent({ name: 'Linda', isMemberTaxDependent: true });
 
-        expect(getTaxDependentDebtor([linda])).toEqual({ debtor: linda, missingData: true });
+        expect(getTaxDependentDebtors([linda])).toEqual([{ debtor: linda, missingData: true }]);
     });
 
-    test('with co-parenting, prefers the one that can complete the certificate', () => {
+    test('with co-parenting, both parents become a debtor in the order of the parents', () => {
+        const linda = parent({ name: 'Linda', isMemberTaxDependent: true, nationalRegisterNumber: '93042012345' });
+        const john = parent({ name: 'John', isMemberTaxDependent: true, nationalRegisterNumber: '93042017297' });
+
+        expect(getTaxDependentDebtors([linda, john])).toEqual([{ debtor: linda, missingData: false }, { debtor: john, missingData: false }]);
+    });
+
+    test('with co-parenting, missing data is tracked per parent', () => {
         const linda = parent({ name: 'Linda', isMemberTaxDependent: true, nationalRegisterNumber: NationalRegisterNumberOptOut });
         const john = parent({ name: 'John', isMemberTaxDependent: true, nationalRegisterNumber: '93042017297' });
 
-        expect(getTaxDependentDebtor([linda, john])).toEqual({ debtor: john, missingData: false });
+        expect(getTaxDependentDebtors([linda, john])).toEqual([{ debtor: linda, missingData: true }, { debtor: john, missingData: false }]);
+    });
+});
+
+describe('Model.splitPrice', () => {
+    test('splits an even amount in equal halves', () => {
+        expect(splitPrice(1000000, 2, 0)).toBe(500000);
+        expect(splitPrice(1000000, 2, 1)).toBe(500000);
     });
 
-    test('with co-parenting, neither having a number is missing data', () => {
-        const linda = parent({ name: 'Linda', isMemberTaxDependent: true });
-        const john = parent({ name: 'John', isMemberTaxDependent: true });
+    test('gives the remaining cent to the first document', () => {
+        expect(splitPrice(1234500, 2, 0)).toBe(617300);
+        expect(splitPrice(1234500, 2, 1)).toBe(617200);
+    });
 
-        expect(getTaxDependentDebtor([linda, john])).toEqual({ debtor: linda, missingData: true });
+    test('never splits below a whole cent', () => {
+        expect(splitPrice(1234567, 2, 0)).toBe(617367);
+        expect(splitPrice(1234567, 2, 1)).toBe(617200);
+    });
+
+    test('halves of a negative amount add up to the total', () => {
+        expect(splitPrice(-500, 2, 0) + splitPrice(-500, 2, 1)).toBe(-500);
     });
 });
