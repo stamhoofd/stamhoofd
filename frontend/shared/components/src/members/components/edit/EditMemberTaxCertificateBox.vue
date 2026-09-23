@@ -8,9 +8,9 @@
 
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
-        <MemberNRRInput :member="member" :validator="validator" />
+        <MemberNRRInput v-if="isPropertyEnabled('nationalRegisterNumber')" :member="member" :validator="validator" />
 
-        <template v-if="member.patchedMember.details.nationalRegisterNumber !== NationalRegisterNumberOptOut">
+        <template v-if="member.needsTaxCertificate && member.patchedMember.details.nationalRegisterNumber !== NationalRegisterNumberOptOut">
             <STInputBox v-if="coParenting || parents.length > 1" :title="$t('Gescheiden ouders met co-ouderschap')" class="max" error-fields="coParenting" :error-box="errors.errorBox" :parent-error-box="parentErrorBox">
                 <STList>
                     <STListItem :selectable="true" element-name="label" class="right-stack left-center" data-testid="co-parenting-row">
@@ -36,7 +36,7 @@
 
             <STInputBox :title="parents.length === 1 ? $t('Rijksregisternummer {firstName} (schuldenaar)', {firstName: parents[0].firstName}) : (coParenting ? $t('Rijksregisternummer co-ouders (schuldenaars)') : $t('Rijksregisternummer schuldenaar (ouder)'))" class="max" error-fields="debtor" :error-box="errors.errorBox" :parent-error-box="parentErrorBox">
                 <p v-if="parents.length > 1 && !coParenting" class="style-description-small">
-                    {{ $t('Kies één ouder die het inschrijvingsbedrag betaalt en op de fiscale attesten vermeld wordt.') }}
+                    {{ $t('Kies één ouder die het inschrijvingsbedrag betaalt en op de fiscale attesten vermeld wordt. Kies bij voorkeur het gezinshoofd of de ouder die {firstName} ten laste heeft.', {firstName: member.patchedMember.details.firstName}) }}
                 </p>
                 <STList>
                     <STListItem v-for="parent in parents" :key="parent.id" :selectable="true" element-name="label" class="right-stack left-center" data-testid="debtor-row">
@@ -96,7 +96,7 @@ import { usePresent } from '@simonbackx/vue-app-navigation';
 import MemberNRRInput from './MemberNRRInput.vue';
 import SevereDisabilityToggle from './SevereDisabilityToggle.vue';
 import Title from './Title.vue';
-import { useIsPropertyRequired } from '#members/hooks/useIsPropertyRequired.ts';
+import { useIsPropertyEnabled, useIsPropertyRequired } from '#members/hooks/useIsPropertyRequired.ts';
 
 defineOptions({
     inheritAttrs: false,
@@ -121,6 +121,7 @@ const reviewDate = computed(() => {
 const now = new Date();
 const canMarkReviewed = computed(() => !reviewDate.value || reviewDate.value < now || reviewDate.value);
 const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));
+const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), true);
 
 onMounted(() => {
     if (parents.value.length === 1 && !isAdmin) {

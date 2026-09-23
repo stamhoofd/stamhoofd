@@ -152,7 +152,7 @@ const properties = [
     buildBooleanPropertyRefs(
         'taxCertificates',
         $t('%ZrO'),
-        $t('Vraag automatisch het rijksregisternummer van leden en één van de ouders (schuldenaar) als een lid in aanmerking komt voor een fiscaal attest kinderopvang (op basis van o.a. leeftijd en inschrijvingen). De ouders bepalen op wiens naam het attest komt.'),
+        $t('Vraag automatisch het rijksregisternummer van leden en één van de ouders (schuldenaar) als een lid in aanmerking komt voor een fiscaal attest kinderopvang (jonger dan 14 jaar met inschrijving of 21 jaar bij attest van zware handicap). De ouders bepalen op wiens naam het attest komt.'),
     ),
     buildPropertyRefs('nationalRegisterNumber', $t(`%wK`) + ' ' + $t(`%11R`)),
     buildPropertyRefs('parents', $t(`%11P`), {

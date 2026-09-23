@@ -69,12 +69,10 @@
 
         <template v-if="showNationalRegisterNumber">
             <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`) + (isNRNRequiredForThisParent ? '' : ' (' + $t('optioneel') + ')')" :required="isNRNRequiredForThisParent && !isAllOptional" :required-message="nrnRequiredMessage" :validator="errors.validator" data-testid="national-register-number-input" />
-            <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
-                {{ $t('%fa') }} <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
-                    {{ $t('%fb') }}
-                </template>
+            <p v-if="needsNationalRegisterNumber && nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
+                {{ $t('%fa') }}
             </p>
-            <p v-else class="style-description-small">
+            <p v-else-if="needsNationalRegisterNumber && nationalRegisterNumber === NationalRegisterNumberOptOut" class="style-description-small">
                 <I18nComponent :t="$t('%15N')">
                     <template #button="{content}">
                         <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
@@ -261,6 +259,14 @@ onMounted(() => {
     }
 });
 
+const needsNationalRegisterNumber = computed(() => {
+    if (!isPropertyEnabled('parents.nationalRegisterNumber')) {
+        return false;
+    }
+
+    return showTaxDependent.value && !!isMemberTaxDependent.value;
+});
+
 /**
  * We only ask the national register number of the parent that has the member tax dependent.
  * An already stored value (or opt-out) stays visible so it can still be corrected.
@@ -270,11 +276,7 @@ const showNationalRegisterNumber = computed(() => {
         return true;
     }
 
-    if (!isPropertyEnabled('parents.nationalRegisterNumber')) {
-        return false;
-    }
-
-    return showTaxDependent.value && !!isMemberTaxDependent.value;
+    return needsNationalRegisterNumber.value;
 });
 
 const availableAddresses = computed(() => {
