@@ -18,9 +18,26 @@ export async function validateGroupFilter({ filter, permissionLevel, key }: { fi
                 groupId: FilterWrapperMarker,
             };
 
-    const unwrapped = unwrapFilter(filter, requiredFilter);
+    let unwrapped = unwrapFilter(filter, requiredFilter);
     if (!unwrapped.match) {
-        return false;
+        if (typeof filter === 'object'
+            && filter !== null
+            && filter['$and']
+            && Array.isArray(filter['$and'])
+            && Object.keys(filter).length >= 1 // does not matter if more than 1, because root is always $and together
+            && filter['$and'].length > 0
+        ) {
+            for (const subFilter of filter['$and']) {
+                unwrapped = unwrapFilter(subFilter as StamhoofdFilter, requiredFilter);
+                if (unwrapped.match) {
+                    // Found!
+                    break;
+                }
+            }
+        }
+        if (!unwrapped.match) {
+            return false;
+        }
     }
 
     if (unwrapped.markerValue === undefined) {

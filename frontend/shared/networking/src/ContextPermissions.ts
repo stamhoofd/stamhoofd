@@ -162,7 +162,11 @@ export class ContextPermissions {
         return STAMHOOFD.userMode !== 'organization' && periodId === this.platform.period.id;
     }
 
-    canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read, organization?: Organization | null) {
+    /**
+     * @param groupPeriod the period the group belongs to. Required to evaluate category grants on a
+     * group outside the organization's current period, because categories are stored per period.
+     */
+    canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read, organization?: Organization | null, groupPeriod?: OrganizationRegistrationPeriod | null) {
         if (organization === undefined || (organization === null && this.organization)) {
             organization = this.organization;
         }
@@ -185,7 +189,10 @@ export class ContextPermissions {
 
         // Check parent categories
         if (group.type === GroupType.Membership) {
-            const parentCategories = group.getParentCategories(organization.period.settings.categories);
+            // A period other than the group's own lists none of its categories, so it is ignored
+            // rather than silently answering for the wrong period.
+            const period = groupPeriod?.period.id === group.periodId ? groupPeriod : organization.period;
+            const parentCategories = group.getParentCategories(period.settings.categories);
             for (const category of parentCategories) {
                 if (permissions.hasResourceAccess(PermissionsResourceType.GroupCategories, category.id, permissionLevel)) {
                     return true;
@@ -206,8 +213,8 @@ export class ContextPermissions {
         return false;
     }
 
-    canRegisterMembersInGroup(group: Group, organization?: Organization | null) {
-        if (this.canAccessGroup(group, PermissionLevel.Write, organization)) {
+    canRegisterMembersInGroup(group: Group, organization?: Organization | null, groupPeriod?: OrganizationRegistrationPeriod | null) {
+        if (this.canAccessGroup(group, PermissionLevel.Write, organization, groupPeriod)) {
             return true;
         }
         if (this.organization) {
@@ -230,7 +237,7 @@ export class ContextPermissions {
         return category.canCreate(this.permissions, this.organization.period.settings.categories);
     }
 
-    canAccessRegistration(registration: Registration, organization: Organization, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    canAccessRegistration(registration: Registration, organization: Organization, permissionLevel: PermissionLevel = PermissionLevel.Read, groupPeriod?: OrganizationRegistrationPeriod | null) {
         const organizationPermissions = this.getPermissionsForOrganization(organization);
 
         if (!organizationPermissions) {
@@ -247,7 +254,7 @@ export class ContextPermissions {
             return false;
         }
 
-        if (this.canAccessGroup(registration.group, permissionLevel, organization)) {
+        if (this.canAccessGroup(registration.group, permissionLevel, organization, groupPeriod)) {
             return true;
         }
         return false;

@@ -1,8 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Registration, RegistrationPeriod, Token } from '@stamhoofd/models';
-import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import type { SortList } from '@stamhoofd/structures';
-import { AccessRight, EventMeta, GroupPrice, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, SortItemDirection, TranslatedString } from '@stamhoofd/structures';
+import { AccessRight, EventMeta, GroupCategory, GroupCategorySettings, GroupPrice, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, SortItemDirection, TranslatedString } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { GetRegistrationsEndpoint } from './GetRegistrationsEndpoint.js';
@@ -517,6 +517,199 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
                 expect.objectContaining({ id: registration1.id }),
                 expect.objectContaining({ id: registration2.id }),
             ]);
+        });
+
+        test('Allowed: A user with a grant on an event of a previous period can fetch its registrations', async () => {
+            const previousPeriod = await new RegistrationPeriodFactory({
+                startDate: new Date(2022, 0, 1),
+                endDate: new Date(2022, 11, 31),
+            }).create();
+
+            // The organization already moved on to `period`
+            const organization = await new OrganizationFactory({ period }).create();
+
+            const group = await new GroupFactory({ organization, period: previousPeriod, type: GroupType.EventRegistration }).create();
+            const event = await new EventFactory({
+                organization,
+                group,
+                startDate: previousPeriod.startDate,
+                endDate: previousPeriod.endDate,
+            }).create();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources: new Map([[
+                        PermissionsResourceType.Events,
+                        new Map([[event.id, ResourcePermissions.create({ level: PermissionLevel.Write })]]),
+                    ]]),
+                }),
+            }).create();
+
+            const token = await SessionService.createSession(user);
+            const member = await new MemberFactory({}).create();
+            const registration = await new RegistrationFactory({ member, group }).create();
+
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({
+                    // The shape RegistrationsTableView sends for a group
+                    // mergeFilters combines the table's required filters into an $and as soon
+                    // as there is more than one part, which hides the group ids from the root
+                    filter: {
+                        $and: [
+                            {
+                                groupId: group.id,
+                                deactivatedAt: null,
+                            },
+                            {
+                                registeredAt: { $neq: null },
+                            },
+                        ],
+                    },
+                    limit: 10,
+                }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.results.registrations).toIncludeSameMembers([
+                expect.objectContaining({ id: registration.id }),
+            ]);
+        });
+
+        test('Allowed: A category grant does not filter away the registrations of a granted event', async () => {
+            // Reported from organization mode, but the scoping this covers is the same in both
+            const previousPeriod = await new RegistrationPeriodFactory({
+                startDate: new Date(2022, 0, 1),
+                endDate: new Date(2022, 11, 31),
+            }).create();
+
+            const organization = await new OrganizationFactory({ period }).create();
+
+            // A membership group in a granted category of the previous period
+            const membershipGroup = await new GroupFactory({ organization, period: previousPeriod }).create();
+            const category = GroupCategory.create({
+                settings: GroupCategorySettings.create({ name: 'Takken' }),
+                groupIds: [membershipGroup.id],
+            });
+
+            const organizationPeriod = await new OrganizationRegistrationPeriodFactory({
+                organization,
+                period: previousPeriod,
+            }).create();
+            organizationPeriod.settings.categories.push(category);
+            organizationPeriod.settings.rootCategory?.categoryIds.push(category.id);
+            await organizationPeriod.save();
+
+            // The event, in the same previous period, with a participant who is not a member of
+            // any group of the granted category
+            const eventGroup = await new GroupFactory({ organization, period: previousPeriod, type: GroupType.EventRegistration }).create();
+            const event = await new EventFactory({
+                organization,
+                group: eventGroup,
+                startDate: previousPeriod.startDate,
+                endDate: previousPeriod.endDate,
+            }).create();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources: new Map([
+                        [PermissionsResourceType.GroupCategories, new Map([[category.id, ResourcePermissions.create({ level: PermissionLevel.Write })]])],
+                        [PermissionsResourceType.Events, new Map([[event.id, ResourcePermissions.create({ level: PermissionLevel.Write })]])],
+                    ]),
+                }),
+            }).create();
+
+            const token = await SessionService.createSession(user);
+            const participant = await new MemberFactory({}).create();
+            const registration = await new RegistrationFactory({ member: participant, group: eventGroup }).create();
+
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({
+                    // The shape the table sends once a UI filter is active: mergeFilters puts the
+                    // built UI filter (itself an $and) next to the required group filter
+                    filter: {
+                        $and: [
+                            {
+                                $and: [
+                                    { registeredAt: { $neq: null } },
+                                    { deactivatedAt: null },
+                                ],
+                            },
+                            {
+                                groupId: eventGroup.id,
+                                deactivatedAt: null,
+                            },
+                        ],
+                    },
+                    limit: 10,
+                }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.results.registrations).toIncludeSameMembers([
+                expect.objectContaining({ id: registration.id }),
+            ]);
+        });
+
+        test('Not allowed: An event only role gets a clear error instead of an empty list without a group filter', async () => {
+            const previousPeriod = await new RegistrationPeriodFactory({
+                startDate: new Date(2022, 0, 1),
+                endDate: new Date(2022, 11, 31),
+            }).create();
+
+            const organization = await new OrganizationFactory({ period }).create();
+            const eventGroup = await new GroupFactory({ organization, period: previousPeriod, type: GroupType.EventRegistration }).create();
+            const event = await new EventFactory({
+                organization,
+                group: eventGroup,
+                startDate: previousPeriod.startDate,
+                endDate: previousPeriod.endDate,
+            }).create();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources: new Map([[
+                        PermissionsResourceType.Events,
+                        new Map([[event.id, ResourcePermissions.create({ level: PermissionLevel.Write })]]),
+                    ]]),
+                }),
+            }).create();
+
+            const token = await SessionService.createSession(user);
+            const member = await new MemberFactory({}).create();
+            await new RegistrationFactory({ member, group: eventGroup }).create();
+
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({ limit: 10 }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            // The scope filter only covers membership groups, so there is nothing to show: that
+            // has to surface as an error, never as a silently empty list.
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
         });
 
         test('Allowed: A user inherits permissions for the waiting list of an event', async () => {

@@ -5,7 +5,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Group, Member, Platform, Registration } from '@stamhoofd/models';
 import type { SQLExpression, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLSelect, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import type { CountFilteredRequest, RegistrationWithMemberBlob, StamhoofdFilter, StamhoofdKeyFilter, RegistrationsBlob } from '@stamhoofd/structures';
+import type { CountFilteredRequest, RegistrationWithMemberBlob, RegistrationsBlob, StamhoofdFilter, StamhoofdKeyFilter } from '@stamhoofd/structures';
 import { GroupStatus, GroupType, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, assertSort } from '@stamhoofd/structures';
 
 import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
@@ -92,9 +92,7 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
                         },
                     };
                 }
-            }
-
-            if (organization) {
+            } else {
                 // Add organization scope filter.
                 // Grants that cover a whole period or the whole organization never reach archived
                 // groups: canAccessGroup only allows those with full access.

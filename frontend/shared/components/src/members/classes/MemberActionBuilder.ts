@@ -32,7 +32,7 @@ import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsi
 import { RegistrationsActionBuilder } from './RegistrationsActionBuilder';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 
-export function useDirectMemberActions(options?: { groups?: Group[]; organizations?: Organization[]; categories?: GroupCategoryTree[] }) {
+export function useDirectMemberActions(options?: { groups?: Group[]; organizations?: Organization[]; categories?: GroupCategoryTree[]; organizationPeriod?: OrganizationRegistrationPeriod | null }) {
     return useMemberActions()(options);
 }
 
@@ -45,7 +45,7 @@ export function useMemberActions() {
     const platform = usePlatform();
     const fetchOrganizationPeriods = useFetchOrganizationRegistrationPeriods();
 
-    return (options?: { groups?: Group[]; organizations?: Organization[]; categories?: GroupCategoryTree[]; forceWriteAccess?: boolean | null }) => {
+    return (options?: { groups?: Group[]; organizations?: Organization[]; categories?: GroupCategoryTree[]; forceWriteAccess?: boolean | null; organizationPeriod?: OrganizationRegistrationPeriod | null }) => {
         return new MemberActionBuilder({
             present,
             platform: platform.value,
@@ -56,6 +56,7 @@ export function useMemberActions() {
             platformFamilyManager,
             owner,
             forceWriteAccess: options?.forceWriteAccess,
+            organizationPeriod: options?.organizationPeriod,
             fetchOrganizationPeriods,
         });
     };
@@ -82,6 +83,9 @@ export class MemberActionBuilder {
     forceWriteAccess: boolean | null = null;
     fetchOrganizationPeriods?: ReturnType<typeof useFetchOrganizationRegistrationPeriods>;
 
+    /** The period the groups belong to, needed to resolve their categories */
+    organizationPeriod: OrganizationRegistrationPeriod | null = null;
+
     /** Cache of periods, loadResolvedPeriods fills in */
     private resolvedPeriods: OrganizationRegistrationPeriod[] | null = null;
 
@@ -103,9 +107,11 @@ export class MemberActionBuilder {
         categories: GroupCategoryTree[];
         forceWriteAccess?: boolean | null;
         fetchOrganizationPeriods?: ReturnType<typeof useFetchOrganizationRegistrationPeriods>;
+        organizationPeriod?: OrganizationRegistrationPeriod | null;
     }) {
         this.present = settings.present;
         this.context = settings.context;
+        this.organizationPeriod = settings.organizationPeriod ?? null;
         this.platform = settings.platform;
         this.groups = settings.groups;
         this.organizations = settings.organizations;
@@ -127,7 +133,7 @@ export class MemberActionBuilder {
 
     private canWriteAllGroups() {
         for (const group of this.groups) {
-            if (!this.context.auth.canAccessGroup(group, PermissionLevel.Write)) {
+            if (!this.context.auth.canAccessGroup(group, PermissionLevel.Write, undefined, this.organizationPeriod)) {
                 return false;
             }
         }

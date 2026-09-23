@@ -47,7 +47,7 @@ import ModernTableView from '#tables/ModernTableView.vue';
 import type { ComponentExposed } from '#VueGlobalHelper.ts';
 import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync';
 import type { Group, GroupCategoryTree, MemberResponsibility, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, GroupType, SGVSyncStatus } from '@stamhoofd/structures';
+import { AccessRight, GroupType, PermissionLevel, SGVSyncStatus } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
@@ -271,6 +271,7 @@ const route = {
 const actionBuilder = useDirectMemberActions({
     groups: props.group ? [props.group] : (props.category ? props.category.getAllGroups() : []),
     categories: props.category ? [props.category] : [],
+    organizationPeriod: organizationRegistrationPeriod.value,
 });
 
 const isLimitedGroup = computed(() => {
@@ -288,14 +289,14 @@ const isLimitedGroup = computed(() => {
     if (organization.value && props.group.organizationId !== organization.value.id) {
         return true;
     }
-    if (!auth.canAccessGroup(props.group)) {
+    if (!auth.canAccessGroup(props.group, PermissionLevel.Read, undefined, organizationRegistrationPeriod.value)) {
         return true;
     }
     return false;
 });
 
 const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup();
-let canAdd = (props.group ? auth.canRegisterMembersInGroup(props.group) : false);
+let canAdd = (props.group ? auth.canRegisterMembersInGroup(props.group, undefined, organizationRegistrationPeriod.value) : false);
 if (!organization.value) {
     // For now not possible via admin panel
     canAdd = false;

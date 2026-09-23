@@ -73,7 +73,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="group.waitingList && auth.canAccessGroup(group.waitingList, PermissionLevel.Read)" :selectable="true" class="left-center right-stack" @click="navigate(Routes.WaitingList)">
+                    <STListItem v-if="group.waitingList && auth.canAccessGroup(group.waitingList, PermissionLevel.Read, undefined, period)" :selectable="true" class="left-center right-stack" @click="navigate(Routes.WaitingList)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/clock.svg">
                         </template>
@@ -240,7 +240,7 @@ const title = computed(() => props.group.settings.name.toString());
 const isArchive = computed(() => props.group.status === GroupStatus.Archived);
 const isOpen = computed(() => !props.group.closed);
 const auth = useAuth();
-const hasFullPermissions = computed(() => auth.canAccessGroup(props.group, PermissionLevel.Full));
+const hasFullPermissions = computed(() => auth.canAccessGroup(props.group, PermissionLevel.Full, undefined, props.period));
 const organizationManager = useOrganizationManager();
 const organization = useOrganization();
 const navigationController = useNavigationController();
@@ -306,6 +306,7 @@ defineRoutes([{
         return {
             group: props.group,
             organization: organization.value,
+            organizationPeriod: props.period,
         };
     },
 },
@@ -316,6 +317,7 @@ defineRoutes([{
     defaultProperties: () => {
         return {
             group: props.group,
+            organizationPeriod: props.period,
             estimatedRows: invitationsCount.value,
             updateTotal: (total: number | null) => {
                 if (total !== null) {

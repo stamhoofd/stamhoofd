@@ -26,6 +26,7 @@ export function useDirectRegistrationActions(options?: {
     groups?: Group[];
     organizations?: Organization[];
     categories?: GroupCategoryTree[];
+    organizationPeriod?: OrganizationRegistrationPeriod | null;
 }) {
     return useRegistrationActions()(options);
 }
@@ -42,7 +43,8 @@ export function useRegistrationActions() {
     return (options?: { groups?: Group[];
         organizations?: Organization[];
         categories?: GroupCategoryTree[];
-        forceWriteAccess?: boolean | null; }) => {
+        forceWriteAccess?: boolean | null;
+        organizationPeriod?: OrganizationRegistrationPeriod | null; }) => {
         return new RegistrationActionBuilder({
             present,
             platform: platform.value,
@@ -51,6 +53,7 @@ export function useRegistrationActions() {
             organizations: organization.value ? [organization.value] : (options?.organizations ?? []),
             platformFamilyManager,
             forceWriteAccess: options?.forceWriteAccess,
+            organizationPeriod: options?.organizationPeriod,
             owner,
             categories: options?.categories ?? [],
             fetchOrganizationPeriods,
@@ -67,6 +70,9 @@ export class RegistrationActionBuilder {
     private forceWriteAccess: boolean | null = null;
     private present: ReturnType<typeof usePresent>;
     private owner: any;
+    /** The period the groups belong to, needed to resolve their categories */
+    organizationPeriod: OrganizationRegistrationPeriod | null = null;
+
     private readonly isWaitingList: boolean;
     private _allGroupsLinkedToWaitingList: Group[] | null = null;
     private categories: GroupCategoryTree[];
@@ -85,7 +91,7 @@ export class RegistrationActionBuilder {
         }
 
         for (const group of this.groups) {
-            if (!this.context.auth.canAccessGroup(group, PermissionLevel.Write)) {
+            if (!this.context.auth.canAccessGroup(group, PermissionLevel.Write, undefined, this.organizationPeriod)) {
                 return false;
             }
         }
@@ -104,9 +110,11 @@ export class RegistrationActionBuilder {
         owner: any;
         categories: GroupCategoryTree[];
         fetchOrganizationPeriods?: ReturnType<typeof useFetchOrganizationRegistrationPeriods>;
+        organizationPeriod?: OrganizationRegistrationPeriod | null;
     }) {
         this.present = settings.present;
         this.context = settings.context;
+        this.organizationPeriod = settings.organizationPeriod ?? null;
         this.groups = settings.groups;
         this.organizations = settings.organizations;
         this.platformFamilyManager = settings.platformFamilyManager;
