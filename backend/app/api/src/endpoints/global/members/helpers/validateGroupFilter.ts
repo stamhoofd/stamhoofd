@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
-import { FilterWrapperMarker, PermissionLevel, unwrapFilter } from '@stamhoofd/structures';
+import { FilterWrapperMarker, getAndFilterParts, PermissionLevel, unwrapFilter } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context.js';
 import { StamhoofdFilterAccessHelper } from '../../../../helpers/StamhoofdFilterAccessHelper.js';
 
@@ -18,8 +18,13 @@ export async function validateGroupFilter({ filter, permissionLevel, key }: { fi
                 groupId: FilterWrapperMarker,
             };
 
-    const unwrapped = unwrapFilter(filter, requiredFilter);
-    if (!unwrapped.match) {
+    // The group ids can sit in one part of a conjunction instead of at the root: the other parts
+    // only narrow the result further, so the part carrying them decides access.
+    const unwrapped = getAndFilterParts(filter)
+        .map(part => unwrapFilter(part, requiredFilter))
+        .find(result => result.match);
+
+    if (!unwrapped) {
         return false;
     }
 

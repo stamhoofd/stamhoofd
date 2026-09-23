@@ -9,7 +9,7 @@ import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import type { Group, Organization, User } from '@stamhoofd/models';
 import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import { appToUri, GroupCategory, GroupCategorySettings, PermissionLevel, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
+import { appToUri, GroupCategory, GroupCategorySettings, GroupType, PermissionLevel, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WorkerData } from '../helpers/index.js';
 
@@ -29,6 +29,8 @@ type PeriodFixture = {
     otherMemberName: string;
     eventName: string;
     eventId: string;
+    /** Member registered in the event's registration group */
+    eventMemberName: string;
 };
 
 type Scenario = {
@@ -57,11 +59,16 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
         await WorkerData.resetDatabase();
     });
 
-    async function seedPeriod({ organization, period, periodName, label }: {
+    async function seedPeriod({ organization, period, periodName, label, withEventRegistrations }: {
         organization: Organization;
         period: RegistrationPeriod;
         periodName: string;
         label: string;
+        /**
+         * Gives the event a registration group. Off by default: an event with a group is matched
+         * differently by the calendar filters, which would change what the other tests assert.
+         */
+        withEventRegistrations: boolean;
     }): Promise<PeriodFixture> {
         const organizationPeriod = await new OrganizationRegistrationPeriodFactory({
             organization,
@@ -110,12 +117,31 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
         // An event belongs to the period that contains its start date
         const eventName = `Kamp ${label}`;
         const eventStart = new Date(period.startDate.getTime() + 24 * 60 * 60 * 1000);
+
+        // Its registration group lives in the same period as the event
+        const eventGroup = withEventRegistrations
+            ? await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.EventRegistration,
+                name: new TranslatedString(eventName),
+            }).create()
+            : undefined;
+
         const event = await new EventFactory({
             organization,
             name: eventName,
+            group: eventGroup,
             startDate: eventStart,
             endDate: new Date(eventStart.getTime() + 24 * 60 * 60 * 1000),
         }).create();
+
+        const eventMemberName = `Deelnemer-${label}`;
+
+        if (eventGroup) {
+            const eventMember = await new MemberFactory({ organization, firstName: eventMemberName, lastName: 'Test' }).create();
+            await new RegistrationFactory({ member: eventMember, group: eventGroup }).create();
+        }
 
         return {
             period,
@@ -130,10 +156,11 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
             otherMemberName,
             eventName,
             eventId: event.id,
+            eventMemberName,
         };
     }
 
-    async function seedScenario(seedId: string): Promise<Scenario> {
+    async function seedScenario(seedId: string, options?: { withEventRegistrations?: boolean }): Promise<Scenario> {
         const runId = `${WorkerData.id}-${seedId}-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
 
         const organization = await new OrganizationFactory({
@@ -168,8 +195,8 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
         previousPeriod.customName = previousPeriodName;
         await previousPeriod.save();
 
-        const current = await seedPeriod({ organization, period: currentPeriod, periodName: currentPeriodName, label: `huidig-${runId}` });
-        const previous = await seedPeriod({ organization, period: previousPeriod, periodName: previousPeriodName, label: `vorig-${runId}` });
+        const current = await seedPeriod({ organization, period: currentPeriod, periodName: currentPeriodName, label: `huidig-${runId}`, withEventRegistrations: options?.withEventRegistrations ?? false });
+        const previous = await seedPeriod({ organization, period: previousPeriod, periodName: previousPeriodName, label: `vorig-${runId}`, withEventRegistrations: options?.withEventRegistrations ?? false });
 
         return { organization, current, previous };
     }
@@ -483,5 +510,29 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
 
         await openCalendar({ page, year: scenario.previous.eventYear });
         await expect(eventRow(page, scenario.previous.eventName)).toHaveCount(0);
+    });
+    test('a grant on an event of a previous period can read its registrations', async ({ page }) => {
+        test.setTimeout(120_000);
+        const scenario = await seedScenario('previous-event-registrations', { withEventRegistrations: true });
+        const user = await createUser({
+            organization: scenario.organization,
+            permissions: resourcePermissions(PermissionsResourceType.Events, scenario.previous.eventId),
+            seedId: 'previous-event-registrations',
+        });
+
+        await page.setViewportSize({ width: 1280, height: 800 });
+        await openDashboard({ page, organization: scenario.organization, user });
+
+        await openCalendar({ page, year: scenario.previous.eventYear });
+        await eventRow(page, scenario.previous.eventName).click();
+
+        // The registrations of the event itself, not the default members list
+        const registrationsItem = page.locator('.st-list-item', { hasText: 'Ingeschreven leden' }).first();
+        await expect(registrationsItem).toBeVisible();
+        await registrationsItem.click();
+
+        const table = page.getByTestId('table');
+        await expect(table).toBeVisible();
+        await expect(table.locator('[data-testid="table-row"]:visible').filter({ hasText: scenario.previous.eventMemberName })).toHaveCount(1);
     });
 });

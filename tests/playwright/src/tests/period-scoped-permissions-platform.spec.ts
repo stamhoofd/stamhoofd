@@ -7,8 +7,8 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Group, Organization, User } from '@stamhoofd/models';
-import { GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Platform, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import { appToUri, GroupCategory, GroupCategorySettings, PermissionLevel, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
+import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Platform, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import { appToUri, GroupCategory, GroupCategorySettings, GroupType, PermissionLevel, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WorkerData } from '../helpers/index.js';
 
@@ -63,6 +63,34 @@ test.describe('Period scoped permissions in platform mode @period-permissions-pl
         await new RegistrationFactory({ member, group }).create();
 
         return { group, memberName };
+    }
+
+    async function addEventWithRegistration({ organization, period, label }: {
+        organization: Organization;
+        period: RegistrationPeriod;
+        label: string;
+    }) {
+        const eventName = `Kamp ${label}`;
+        const eventGroup = await new GroupFactory({
+            organization,
+            period,
+            type: GroupType.EventRegistration,
+            name: new TranslatedString(eventName),
+        }).create();
+
+        const event = await new EventFactory({
+            organization,
+            name: eventName,
+            group: eventGroup,
+            startDate: new Date(period.startDate.getTime() + 24 * 60 * 60 * 1000),
+            endDate: new Date(period.startDate.getTime() + 2 * 24 * 60 * 60 * 1000),
+        }).create();
+
+        const memberName = `Deelnemer-${label}`;
+        const member = await new MemberFactory({ organization, firstName: memberName, lastName: 'Test' }).create();
+        await new RegistrationFactory({ member, group: eventGroup }).create();
+
+        return { event, eventName, memberName, year: event.startDate.getFullYear() };
     }
 
     async function seedScenario(seedId: string): Promise<Scenario> {
@@ -189,5 +217,72 @@ test.describe('Period scoped permissions in platform mode @period-permissions-pl
 
         await openGroupMembers({ page, group: scenario.platformPeriodGroup });
         await expectWriteAction({ page, memberName: scenario.platformPeriodMember });
+    });
+    test('a grant on an event of the organization period can read its registrations', async ({ page }) => {
+        test.setTimeout(120_000);
+        TestUtils.setPermanentEnvironment('userMode', 'platform');
+
+        const runId = `${WorkerData.id}-platform-event-${Date.now()}`;
+        const period = await new RegistrationPeriodFactory({
+            startDate: new Date(new Date().getFullYear() - 2, 0, 1),
+            endDate: new Date(new Date().getFullYear() - 2, 11, 31, 23, 59, 59, 999),
+        }).create();
+
+        const platformPeriod = await new RegistrationPeriodFactory({
+            startDate: new Date(new Date().getFullYear() - 1, 0, 1),
+            endDate: new Date(new Date().getFullYear() - 1, 11, 31, 23, 59, 59, 999),
+        }).create();
+
+        const platform = await Platform.getForEditing();
+        platform.periodId = platformPeriod.id;
+        await platform.save();
+
+        const organization = await new OrganizationFactory({
+            name: `Platform Event Organization ${runId}`,
+            uri: `platform-event-${runId}`,
+            period,
+        }).create();
+        await new OrganizationRegistrationPeriodFactory({ organization, period }).create();
+
+        const seeded = await addEventWithRegistration({ organization, period, label: runId });
+
+        const user = await new UserFactory({
+            firstName: 'Platform',
+            lastName: 'Event Admin',
+            email: `platform-event-${runId}@test.be`,
+            organization,
+            permissions: Permissions.create({
+                level: PermissionLevel.None,
+                resources: new Map([[
+                    PermissionsResourceType.Events,
+                    new Map([[seeded.event.id, ResourcePermissions.create({ level: PermissionLevel.Write })]]),
+                ]]),
+            }),
+        }).create();
+
+        await page.setViewportSize({ width: 1280, height: 800 });
+
+        const token = await SessionService.createSession(user);
+        const tokenString = JSON.stringify(new TokenStruct(token).encode({ version: Version }));
+        await page.addInitScript(({ tokenString }) => {
+            window.localStorage.setItem('token-platform', tokenString);
+        }, { tokenString });
+        await page.goto(`${WorkerData.urls.dashboard}/${appToUri('dashboard')}/${organization.uri}`);
+
+        await page.getByTestId('tab-button').filter({ hasText: 'Activiteiten' }).click();
+        await expect(page.locator('#settings-view')).toBeVisible();
+        await page.locator('.scrollable-segmented-control button', { hasText: String(seeded.year) }).first().click();
+
+        const row = page.locator('#settings-view .st-list-item:visible h3 span').filter({ hasText: seeded.eventName });
+        await expect(row).toHaveCount(1);
+        await row.click();
+
+        const registrationsItem = page.locator('.st-list-item', { hasText: 'Ingeschreven leden' }).first();
+        await expect(registrationsItem).toBeVisible();
+        await registrationsItem.click();
+
+        const table = page.getByTestId('table');
+        await expect(table).toBeVisible();
+        await expect(table.locator('[data-testid="table-row"]:visible').filter({ hasText: seeded.memberName })).toHaveCount(1);
     });
 });
