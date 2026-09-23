@@ -118,6 +118,7 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
         const organizations = await Organization.getByIDs(...organizationIds);
         const balanceItems = await BalanceItem.getByIDs(...balanceItemIds);
         const balanceItemStructures = await BalanceItem.getStructureWithPayments(balanceItems);
+        const financialAccess = await Context.auth.hasFinancialScopeAccess();
 
         const results: PlatformMembership[] = [];
 
@@ -145,7 +146,10 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
             const balanceItem = model.balanceItemId ? balanceItemStructures.find(o => o.id === model.balanceItemId) : null;
             results.push(PlatformMembership.create({
                 ...model,
-                balanceItem: balanceItem,
+                price: financialAccess ? model.price : null,
+                priceWithoutDiscount: financialAccess ? model.priceWithoutDiscount : null,
+                // A balance item is financial data itself: it carries the open, paid and pending price
+                balanceItem: financialAccess ? balanceItem : null,
                 member: member.getPlatformMembershipDetails(),
                 organization: PlatformMembershipOrganizationDetails.create(organization),
             }));

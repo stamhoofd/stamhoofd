@@ -1509,6 +1509,19 @@ export class AdminPermissionChecker {
     }
 
     /**
+     * Financial read access for the current scope. List endpoints use this instead of
+     * hasFinancialMemberAccess, because they cannot check every member of the list individually.
+     */
+    async hasFinancialScopeAccess(): Promise<boolean> {
+        if (!this.organization) {
+            return this.hasPlatformFullAccess();
+        }
+
+        const permissions = await this.getOrganizationPermissions(this.organization);
+        return permissions?.hasAccessRight(AccessRight.MemberReadFinancialData) ?? false;
+    }
+
+    /**
      * Return a list of RecordSettings the current user can view or edit
      */
     async hasNRNAccess(member: MemberWithUsersAndRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
@@ -1885,6 +1898,11 @@ export class AdminPermissionChecker {
                 registration.price = 0;
                 registration.pricePaid = 0;
                 registration.balances = [];
+            }
+
+            for (const membership of cloned.platformMemberships) {
+                membership.price = null;
+                membership.priceWithoutDiscount = null;
             }
         }
 
