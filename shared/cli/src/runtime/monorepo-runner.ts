@@ -86,6 +86,7 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'utility', path: 'shared/utility', needsDatabase: false },
     { name: 'vite-config', path: 'frontend/shared/vite-config', needsDatabase: false },
     { name: 'queues', path: 'backend/shared/queues', needsDatabase: false },
+    { name: 'logging', path: 'backend/shared/logging', needsDatabase: false },
     { name: 'models', path: 'backend/shared/models', needsDatabase: true, typecheck: true },
     { name: 'vies', path: 'backend/shared/vies', needsDatabase: true, typecheck: true },
     { name: 'sql', path: 'backend/shared/sql', needsDatabase: true, typecheck: true },

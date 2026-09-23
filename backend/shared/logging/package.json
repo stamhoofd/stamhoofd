@@ -23,7 +23,8 @@
     ],
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
-        "lint": "eslint"
+        "lint": "eslint",
+        "test": "vitest"
     },
     "dependencies": {
         "@simonbackx/simple-logging": "1.0.1"
@@ -31,5 +32,8 @@
     "license": "UNLICENCED",
     "publishConfig": {
         "access": "public"
+    },
+    "devDependencies": {
+        "vitest": "4.1.11"
     }
 }

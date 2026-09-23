@@ -3,6 +3,7 @@ import { I18n } from '@stamhoofd/backend-i18n';
 import { CORSMiddleware, LogMiddleware } from '@stamhoofd/backend-middleware';
 import { loadLogger } from '@stamhoofd/logging';
 import { CpuService } from '@stamhoofd/logging/CpuService';
+import { MemoryService } from '@stamhoofd/logging/MemoryService';
 import { TrustedIPWhitelist } from './classes/TrustedIPWhitelist.js';
 
 process.on('unhandledRejection', (error: Error) => {
@@ -45,9 +46,10 @@ const start = async () => {
 
     routerServer.listen(STAMHOOFD.PORT ?? 9090);
 
-    // Monitor CPU load so the /health endpoint can report an overloaded renderer as unhealthy.
+    // Monitor CPU load and memory so the /health endpoint can report an overloaded renderer as unhealthy.
     if (STAMHOOFD.environment !== 'development' && STAMHOOFD.environment !== 'test') {
         CpuService.startMonitoring();
+        MemoryService.startMonitoring();
     }
 
     if (routerServer.server) {

@@ -235,7 +235,7 @@ jobs:
           name: shared-dist
       - name: Run tests
         run: |
-          for package in backend/shared/queues backend/shared/models backend/shared/vies backend/shared/sql; do
+          for package in backend/shared/queues backend/shared/logging backend/shared/models backend/shared/vies backend/shared/sql; do
             (cd "$package" && yarn test --bail=1)
           done
 

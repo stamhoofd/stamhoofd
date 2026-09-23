@@ -5,6 +5,7 @@ import { checkReadOnly } from '@stamhoofd/crons';
 import { Email } from '@stamhoofd/email';
 import { loadLogger } from '@stamhoofd/logging';
 import { CpuService } from '@stamhoofd/logging/CpuService';
+import { MemoryService } from '@stamhoofd/logging/MemoryService';
 import { Version } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 
@@ -205,6 +206,7 @@ export const boot = async (options: { killProcess: boolean }) => {
             }
         });
         CpuService.startMonitoring();
+        MemoryService.startMonitoring();
     } else if (STAMHOOFD.environment === 'development') {
         const { loadDebugFunctions } = await import('./debug.js');
         loadDebugFunctions({ routerServer });
