@@ -20,7 +20,7 @@ function createRole(resources: Partial<Record<PermissionsResourceType, Record<st
     });
 }
 
-function renderRow(props: { resource: { id: string; type: PermissionsResourceType }; role: PermissionRoleDetailed | Permissions; inheritedRoles?: PermissionRoleDetailed[]; configurableAccessRights?: AccessRight[] }) {
+function renderRow(props: { resource: { id: string; type: PermissionsResourceType }; role: PermissionRoleDetailed | Permissions; inheritedRoles?: PermissionRoleDetailed[]; configurableAccessRights?: AccessRight[]; inCurrentPeriod?: boolean }) {
     const patches: AutoEncoderPatchType<PermissionRoleDetailed>[] = [];
     render(ResourcePermissionRow, {
         props: {
@@ -28,6 +28,7 @@ function renderRow(props: { resource: { id: string; type: PermissionsResourceTyp
             'role': props.role,
             'inheritedRoles': props.inheritedRoles ?? [],
             'configurableAccessRights': props.configurableAccessRights ?? [],
+            'inCurrentPeriod': props.inCurrentPeriod ?? true,
             'type': 'resource',
             'onPatch:role': (patch: AutoEncoderPatchType<PermissionRoleDetailed>) => patches.push(patch),
         },
@@ -73,6 +74,15 @@ test.each([
 ])('the row of %s stays editable when only narrower resources are granted', (_, type, id, other) => {
     const role = createRole({ [type]: { [other]: { level: PermissionLevel.Full } } });
     const row = renderRow({ resource: { id, type }, role });
+
+    expect(row.checkbox.checked).toBe(false);
+    expect(row.checkbox.disabled).toBe(false);
+});
+
+test('a grant on the current period does not lock a resource of another period', () => {
+    const role = createRole({ [PermissionsResourceType.Groups]: { [PermissionsResourceKey.CurrentPeriod]: { level: PermissionLevel.Full, accessRights: [AccessRight.EventWrite] } } });
+    const inherited = createRole({ [PermissionsResourceType.Groups]: { [PermissionsResourceKey.CurrentPeriod]: { level: PermissionLevel.Full } } });
+    const row = renderRow({ resource: { id: groupId, type: PermissionsResourceType.Groups }, role, inheritedRoles: [inherited], configurableAccessRights: [AccessRight.EventWrite], inCurrentPeriod: false });
 
     expect(row.checkbox.checked).toBe(false);
     expect(row.checkbox.disabled).toBe(false);

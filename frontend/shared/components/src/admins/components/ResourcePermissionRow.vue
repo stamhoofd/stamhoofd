@@ -45,7 +45,7 @@ import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useEmitPatch } from '#hooks/useEmitPatch.ts';
 import type { AccessRight, PermissionsResourceType} from '@stamhoofd/structures';
-import { AccessRightHelper, PermissionLevel, PermissionRoleDetailed, Permissions, ResourcePermissions, getConfigurableAccessRightsForResourceType, getConfigurablePermissionLevelsForResourceType, getDefaultAccessRightsForResourceType, getDefaultPermissionLevelForResourceType, getPermissionLevelName, getPermissionLevelNumber, getPermissionResourceTypeName, getWildcardResourceKeys, maximumPermissionlevel } from '@stamhoofd/structures';
+import { AccessRightHelper, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ResourcePermissions, getConfigurableAccessRightsForResourceType, getConfigurablePermissionLevelsForResourceType, getDefaultAccessRightsForResourceType, getDefaultPermissionLevelForResourceType, getPermissionLevelName, getPermissionLevelNumber, getPermissionResourceTypeName, getWildcardResourceKeys, maximumPermissionlevel } from '@stamhoofd/structures';
 import type { Ref} from 'vue';
 import { computed } from 'vue';
 
@@ -59,6 +59,10 @@ const props = withDefaults(defineProps<{
     unlisted?: boolean;
     defaultLevel?: PermissionLevel | null;
     defaultAccessRights?: AccessRight[] | null;
+    /**
+     * False when the resource is not (or not known to be) in the period in use: $currentPeriod grants then don't lock the row.
+     */
+    inCurrentPeriod?: boolean;
 }>(), {
     inheritedRoles: () => [],
     configurableAccessRights: null,
@@ -66,6 +70,7 @@ const props = withDefaults(defineProps<{
     defaultLevel: null,
     defaultAccessRights: null,
     unlisted: false,
+    inCurrentPeriod: true,
 });
 
 const configurableAccessRights = props.configurableAccessRights ?? getConfigurableAccessRightsForResourceType(props.resource.type);
@@ -88,11 +93,11 @@ const isMe = computed(() => {
 
 const resourcePermissions = computed(() => role.value.resources.get(props.resource.type)?.get(props.resource.id));
 
-const wildcardKeys = getWildcardResourceKeys(props.resource.type, props.resource.id);
+const wildcardKeys = computed(() => getWildcardResourceKeys(props.resource.type, props.resource.id).filter(key => props.inCurrentPeriod || key !== PermissionsResourceKey.CurrentPeriod));
 
 function getWildcardPermissions(permissions: PermissionRoleDetailed | Permissions): ResourcePermissions[] {
     const resources = permissions.resources.get(props.resource.type);
-    return wildcardKeys.map(key => resources?.get(key)).filter(p => p !== undefined);
+    return wildcardKeys.value.map(key => resources?.get(key)).filter(p => p !== undefined);
 }
 
 const lockedMinimumLevel = computed(() => {

@@ -27,7 +27,7 @@
             }}
         </p>
         <STList v-else>
-            <ResourcePermissionRow v-for="resource in filteredResources" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="configurableAccessRights" type="resource" @patch:role="addPatch" />
+            <ResourcePermissionRow v-for="resource in filteredResources" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="configurableAccessRights" :in-current-period="inCurrentPeriod" type="resource" @patch:role="addPatch" />
         </STList>
     </SaveView>
 </template>
@@ -40,6 +40,9 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import Spinner from '#Spinner.vue';
 import { useSwitchablePeriod } from '#hooks/useSwitchablePeriod.ts';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import type { AccessRight, OrganizationRegistrationPeriod, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType, RegistrationPeriod } from '@stamhoofd/structures';
 import { getPermissionResourceTypeName, isPeriodScopedResourceType } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';
@@ -76,6 +79,19 @@ const isPeriodScoped = isPeriodScopedResourceType(props.type);
 const switchable = isPeriodScoped ? useSwitchablePeriod({ onSwitch: () => loadResources() }) : undefined;
 const period = switchable?.period;
 const organizationPeriod = switchable?.organizationPeriod;
+const auth = useAuth();
+const organization = useOrganization();
+const platform = usePlatform();
+
+const inCurrentPeriod = computed(() => {
+    if (!period) {
+        return true;
+    }
+    if (organization.value) {
+        return auth.isPeriodInUse(period.value.id, organization.value);
+    }
+    return period.value.id === platform.value.period.id;
+});
 
 async function switchPeriod(event: MouseEvent) {
     await switchable?.switchPeriod(event);
