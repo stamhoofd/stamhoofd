@@ -9,19 +9,30 @@ export class FlagMomentCleanup {
      * MemberResponsibilityRecord.getAutoRemoveDate.
      */
     static async endResponsibilitiesOfUnregisteredMembers() {
-        const now = new Date();
-
-        // NOTE: query should always be in accordance with getAutoRemoveDate!
-
         // Platform-wide (default) responsibilities are only kept alive by registrations in groups linked to a
         // default age group. In organization mode this list is empty and that nuance does not apply.
         const platformResponsibilityIds = STAMHOOFD.userMode === 'platform'
             ? (await Platform.getShared()).config.responsibilities.map(r => r.id)
             : [];
 
-        // All active, organization-scoped responsibility records
+        for await (const organizations of Organization.select().whereNot('periodId', null).limit(50).allBatched()) {
+            const periods = await RegistrationPeriod.getByIDs(...Formatter.uniqueArray(organizations.map(o => o.periodId)));
+
+            for (const organization of organizations) {
+                const period = periods.find(p => p.id === organization.periodId);
+                if (!period) {
+                    continue;
+                }
+                await this.endResponsibilitiesForOrganization(organization.id, period, platformResponsibilityIds);
+            }
+        }
+    }
+
+    private static async endResponsibilitiesForOrganization(organizationId: string, currentPeriod: RegistrationPeriod, platformResponsibilityIds: string[]) {
+        const now = new Date();
+
         const records = await MemberResponsibilityRecord.select()
-            .whereNot('organizationId', null) // rule A
+            .where('organizationId', organizationId) // rule A
             .where(MemberResponsibilityRecord.whereActive) // rule B
             .fetch();
 
@@ -29,71 +40,40 @@ export class FlagMomentCleanup {
             return;
         }
 
-        // Group records per member, so we load each member's registrations only once
-        const recordsPerMember = new Map<string, MemberResponsibilityRecord[]>();
+        const memberIds = Formatter.uniqueArray(records.map(r => r.memberId));
+        const registrationsPerMember = await this.getRegistrationsIncludingDeletedGroups(organizationId, currentPeriod.id, memberIds);
+
+        const changedMemberIds = new Set<string>();
         for (const record of records) {
-            const list = recordsPerMember.get(record.memberId);
-            if (list) {
-                list.push(record);
-            } else {
-                recordsPerMember.set(record.memberId, [record]);
+            const registrations = registrationsPerMember.get(record.memberId) ?? [];
+            const autoRemoveDate = record.getBaseStructure().getAutoRemoveDate(registrations, currentPeriod, platformResponsibilityIds);
+            if (autoRemoveDate === null || autoRemoveDate > now) {
+                continue;
             }
+
+            record.endDate = now;
+            await record.save();
+            changedMemberIds.add(record.memberId);
+            console.log(`Ended responsibility ${record.id} of member ${record.memberId} in organization ${organizationId} (auto-remove date was ${autoRemoveDate.toISOString()})`);
         }
 
-        // Resolve the current period per organization (each organization can be in its own period)
-        const periodPerOrganization = new Map<string, RegistrationPeriod | null>();
-        const getCurrentPeriod = async (organizationId: string): Promise<RegistrationPeriod | null> => {
-            const cached = periodPerOrganization.get(organizationId);
-            if (cached !== undefined) {
-                return cached;
-            }
-            const organization = await Organization.getByID(organizationId);
-            const period = organization?.periodId ? (await RegistrationPeriod.getByID(organization.periodId)) ?? null : null;
-            periodPerOrganization.set(organizationId, period);
-            return period;
-        };
+        if (changedMemberIds.size === 0) {
+            return;
+        }
 
-        const allMemberIds = [...recordsPerMember.keys()];
-        for (let i = 0; i < allMemberIds.length; i += 100) {
-            const memberIds = allMemberIds.slice(i, i + 100);
-            const members = await Member.getByIDs(...memberIds);
-            const registrationsPerMember = await this.getRegistrationsIncludingDeletedGroups(memberIds);
-
-            for (const member of members) {
-                const memberRecords = recordsPerMember.get(member.id) ?? [];
-                const registrations = registrationsPerMember.get(member.id) ?? [];
-
-                let changed = false;
-                for (const record of memberRecords) {
-                    // record.organizationId is guaranteed to be set (whereNot organizationId null)
-                    const currentPeriod = await getCurrentPeriod(record.organizationId!);
-                    if (!currentPeriod) {
-                        continue; // organization has no current period -> skip
-                    }
-
-                    const autoRemoveDate = record.getBaseStructure().getAutoRemoveDate(registrations, currentPeriod, platformResponsibilityIds);
-                    if (autoRemoveDate === null || autoRemoveDate > now) {
-                        continue;
-                    }
-
-                    record.endDate = now;
-                    await record.save();
-                    changed = true;
-                    console.log(`Ended responsibility ${record.id} of member ${member.id} in organization ${record.organizationId} (auto-remove date was ${autoRemoveDate.toISOString()})`);
-                }
-
-                if (changed) {
-                    await MemberUserSyncer.onChangeMember(member);
-                }
-            }
+        for (const member of await Member.getByIDs(...changedMemberIds)) {
+            await MemberUserSyncer.onChangeMember(member);
         }
     }
 
     /**
+     * Only loads the registrations getAutoRemoveDate can take into account (same organization and period).
      * Unlike Member.loadRegistrations, this keeps registrations in deleted groups: getAutoRemoveDate needs the group's deletedAt.
      */
-    private static async getRegistrationsIncludingDeletedGroups(memberIds: string[]): Promise<Map<string, RegistrationStruct[]>> {
+    private static async getRegistrationsIncludingDeletedGroups(organizationId: string, periodId: string, memberIds: string[]): Promise<Map<string, RegistrationStruct[]>> {
         const registrations = await Registration.select()
+            .where('organizationId', organizationId)
+            .where('periodId', periodId)
             .where('memberId', memberIds)
             .whereNot('registeredAt', null)
             .fetch();

@@ -1,4 +1,4 @@
-import type { Organization } from '@stamhoofd/models';
+import type { Organization, RegistrationPeriod } from '@stamhoofd/models';
 import { GroupFactory, MemberFactory, MemberResponsibilityRecord, MemberResponsibilityRecordFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { FlagMomentCleanup } from './FlagMomentCleanup.js';
@@ -19,10 +19,10 @@ describe('FlagMomentCleanup.endResponsibilitiesOfUnregisteredMembers', () => {
         organization = await new OrganizationFactory({ period }).create();
     });
 
-    async function createResponsibleMember({ groupDeletedAt }: { groupDeletedAt?: Date | null } = {}) {
+    async function createResponsibleMember({ groupDeletedAt, period }: { groupDeletedAt?: Date | null; period?: RegistrationPeriod } = {}) {
         const member = await new MemberFactory({ organization }).create();
         if (groupDeletedAt !== undefined) {
-            const group = await new GroupFactory({ organization }).create();
+            const group = await new GroupFactory({ organization, period }).create();
             await new RegistrationFactory({ member, group }).create();
             if (groupDeletedAt) {
                 group.deletedAt = groupDeletedAt;
@@ -42,6 +42,12 @@ describe('FlagMomentCleanup.endResponsibilitiesOfUnregisteredMembers', () => {
         const deletedLongAgo = await createResponsibleMember({ groupDeletedAt: new Date(Date.now() - 30 * DAY) });
         const registered = await createResponsibleMember({ groupDeletedAt: null });
         const notRegistered = await createResponsibleMember();
+        const previousPeriod = await new RegistrationPeriodFactory({
+            organization,
+            startDate: new Date(Date.now() - 565 * DAY),
+            endDate: new Date(Date.now() - 200 * DAY),
+        }).create();
+        const onlyRegisteredInPreviousPeriod = await createResponsibleMember({ groupDeletedAt: null, period: previousPeriod });
 
         await FlagMomentCleanup.endResponsibilitiesOfUnregisteredMembers();
 
@@ -49,5 +55,6 @@ describe('FlagMomentCleanup.endResponsibilitiesOfUnregisteredMembers', () => {
         expect(await isEnded(deletedLongAgo)).toBe(true);
         expect(await isEnded(registered)).toBe(false);
         expect(await isEnded(notRegistered)).toBe(true);
+        expect(await isEnded(onlyRegisteredInPreviousPeriod)).toBe(true);
     });
 });
