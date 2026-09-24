@@ -3,7 +3,7 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { User } from '@stamhoofd/models';
-import { Event as EventModel, EventFactory, Group as GroupModel, GroupFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, PlatformEventTypeFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import { Event as EventModel, EventFactory, Group as GroupModel, GroupFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, Platform, PlatformEventTypeFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AccessRight, Event, EventMeta, Group, GroupSettings, GroupType, NamedObject, OrganizationEventType, PermissionLevel, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, TranslatedString } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -396,6 +396,56 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             typeId: newEvent.typeId,
             name: newEvent.name,
         });
+    });
+
+    test('A platform user with only write access to events of the current period can create a global event in that period', async () => {
+        const platform = await Platform.getForEditing();
+        const originalPeriodId = platform.periodId;
+        const period = await new RegistrationPeriodFactory({
+            startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+            endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        }).create();
+        platform.periodId = period.id;
+        await platform.save();
+
+        try {
+            const user = await new UserFactory({
+                globalPermissions: Permissions.create({
+                    resources: new Map([
+                        [PermissionsResourceType.Events, new Map([
+                            [PermissionsResourceKey.CurrentPeriod, ResourcePermissions.create({
+                                level: PermissionLevel.Write,
+                            })],
+                        ])],
+                    ]),
+                }),
+            }).create();
+            const typeId = (await new PlatformEventTypeFactory({}).create()).id;
+
+            const createEvent = (startDate: Date) => {
+                const body: Body = new PatchableArray();
+                body.addPut(Event.create({
+                    organizationId: null,
+                    typeId,
+                    name: 'global event',
+                    startDate,
+                    endDate: new Date(startDate.getTime() + 2 * 24 * 60 * 60 * 1000),
+                }));
+                return TestRequest.patch({ body, user });
+            };
+
+            const result = await createEvent(new Date(Date.now() + 5 * 24 * 60 * 60 * 1000));
+            expect(result.status).toBe(200);
+            expect(result.body[0].organizationId).toBeNull();
+            expect(result.body[0].meta.organizationTagIds).toBeNull();
+
+            await expect(createEvent(new Date(Date.now() + 60 * 24 * 60 * 60 * 1000)))
+                .rejects
+                .toThrow(STExpect.errorWithCode('permission_denied'));
+        } finally {
+            platform.periodId = originalPeriodId;
+            await platform.save();
+        }
     });
 
     // userMode platform: the period is resolved from the event start date without looking at the

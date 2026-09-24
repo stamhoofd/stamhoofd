@@ -612,7 +612,7 @@ const allowNonMembers = computed({
 });
 
 const hasGroupRestrictions = computed(() => !isNationalActivity.value && organization.value && !eventPermissions.canWriteAllGroupEvents() && !eventPermissions.canWriteEventResource(patched.value));
-const hasTagRestrictions = computed(() => isNationalActivity.value && !eventPermissions.canWriteAllTagEvents());
+const hasTagRestrictions = computed(() => isNationalActivity.value && !eventPermissions.canWriteAllTagEvents() && !eventPermissions.canWriteEventResource(patched.value));
 
 watch(hasGroupRestrictions, (hasGroupRestrictions) => {
     if (hasGroupRestrictions) {

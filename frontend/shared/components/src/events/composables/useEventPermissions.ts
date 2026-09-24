@@ -71,11 +71,14 @@ export function useEventPermissions() {
      * Write access through the event itself, which doesn't depend on the groups or tags of the event.
      */
     function canWriteEventResource(event: Event) {
-        if (!permissions) {
+        // National events are checked against the platform permissions and period, also inside an organization
+        const isNational = event.organizationId === null;
+        const eventPermissions = isNational ? auth.platformPermissions : permissions;
+        if (!eventPermissions) {
             return false;
         }
-        return permissions
-            .forPeriod(auth.isEventPeriodInUse(event, organization.value))
+        return eventPermissions
+            .forPeriod(auth.isEventPeriodInUse(event, isNational ? null : organization.value))
             .hasResourceAccess(PermissionsResourceType.Events, event.id, PermissionLevel.Write);
     }
 
