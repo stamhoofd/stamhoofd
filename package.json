@@ -81,7 +81,7 @@
         "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
     },
     "devDependencies": {
-        "@oxc-project/runtime": "0.147.0",
+        "@oxc-project/runtime": "0.151.0",
         "@stamhoofd/test-utils": "*",
         "@stamhoofd/types": "*",
         "@stylistic/eslint-plugin": "5.10.0",
