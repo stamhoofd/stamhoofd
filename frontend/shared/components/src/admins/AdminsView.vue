@@ -5,7 +5,18 @@
 
             <main class="center">
                 <h1>{{ $t('%K5') }}</h1>
-                <p>{{ $t('%30') }}</p>
+                <p v-if="$isStamhoofd">
+                    <I18nComponent :t="$t('Beheer hier alle personen die toegang hebben tot Stamhoofd, en wijzig hun toegangsrechten. <button>Meer info</button>')">
+                        <template #button="{content}">
+                            <a class="inline-link" :href="$domains.getDocs('functies')" target="_blank">
+                                {{ content }}
+                            </a>
+                        </template>
+                    </I18nComponent>
+                </p>
+                <p v-else>
+                    {{ $t('%30') }}
+                </p>
 
                 <STList class="illustration-list">
                     <STListItem v-if="showRoles && !canShowInternalAdmins" :selectable="true" class="left-center" @click="$navigate(Routes.Roles)">
@@ -77,6 +88,7 @@ import ExternalAdminsBox from './ExternalAdminsBox.vue';
 import { useAdmins } from './hooks/useAdmins';
 import { useShowInternalAdmins, useCanShowInternalAdmins } from './hooks/useShowInternalAdmins';
 import InternalAdminsBox from './InternalAdminsBox.vue';
+import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import { Organization } from '@stamhoofd/structures';
 import { useRoles } from './hooks/useRoles.ts';
 import { computed } from 'vue';
