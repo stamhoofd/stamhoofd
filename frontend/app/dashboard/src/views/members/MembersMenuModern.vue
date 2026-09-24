@@ -11,6 +11,11 @@
                 {{ $t('%1X0', {switchDate: Formatter.date(period.period.switchDate)}) }}
             </p>
 
+            <button v-if="hasNoAccessInPeriod" class="info-box selectable small" type="button" data-testid="period-access-hint" @click="switchPeriod">
+                <!-- No extra span for button because the layout would be weird if this appears in the side menu -->
+                {{ $t('Je hebt geen toegang tot dit werkjaar. Wissel van werkjaar om jouw groepen te bekijken.') }}
+            </button>
+
             <div class="block">
                 <div class="items">
                     <button
@@ -110,6 +115,10 @@ const rootCategory = computed(() => period.value.settings.rootCategory);
 const showAll = computed(() => {
     return tree.value.categories.length > 1 || tree.value.getAllGroups().length > 1;
 });
+
+// The menu opens on the current period, which stays empty for a role that is only granted a group
+// of another period
+const hasNoAccessInPeriod = computed(() => !auth.hasSomeAccessInPeriod(period.value));
 
 enum Routes {
     Checklist = 'checklist',

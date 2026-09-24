@@ -345,6 +345,9 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
         await openGroupMembers({ page, group: scenario.current.group });
         await expectWriteAction({ page, memberName: scenario.current.memberName });
 
+        // The current period holds the granted group, so no hint to switch period
+        await expect(page.locator('[data-testid="period-access-hint"]:visible')).toHaveCount(0);
+
         // Negative case: the group outside the grant is not offered in the menu at all
         await expect(page.locator(`[id="${scenario.current.otherGroup.id}"]`)).toHaveCount(0);
     });
@@ -364,8 +367,15 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
         // The members tab is kept: the only granted group lives outside the current period
         await expect(membersTab(page)).toBeVisible();
 
+        // The menu opens on the current period, which holds nothing for this role
+        await expect(page.getByTestId('period-access-hint')).toBeVisible();
+
         await switchToPeriod({ page, periodName: scenario.previous.periodName });
         await openGroupMembers({ page, group: scenario.previous.group });
+
+        // The period of the grant shows the groups themselves, so the hint is gone
+        await expect(page.locator('[data-testid="period-access-hint"]:visible')).toHaveCount(0);
+
         await expectWriteAction({ page, memberName: scenario.previous.memberName });
     });
 
