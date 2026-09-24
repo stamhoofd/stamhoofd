@@ -9,8 +9,11 @@ import { AuditLogReplacement } from '../AuditLogReplacement.js';
 /** A member keeps a responsibility for 14 days after their last registration ends, unless we just started a new period. */
 export const AUTO_REMOVE_GRACE_MS = 1000 * 60 * 60 * 24 * 14;
 
-/** In the 60 days after the start of a new period we never delete responsibilities. */
-export const NEW_PERIOD_GRACE_MS = 1000 * 60 * 60 * 24 * 30 * 2;
+/**
+ * Responsibilities are never deleted in the 60 days after the current period ends (the organization has not switched yet)
+ * or in the 60 days after it starts (the organization just switched).
+ */
+export const PERIOD_GRACE_MS = 1000 * 60 * 60 * 24 * 30 * 2;
 
 export class MemberResponsibilityRecordBase extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -42,7 +45,7 @@ export class MemberResponsibilityRecordBase extends AutoEncoder {
         return AuditLogReplacement.uuid(this.responsibilityId);
     }
 
-    getAutoRemoveDate(registrations: Registration[], currentPeriod: { id: string; startDate: Date }, platformResponsibilityIds: string[]): Date | null {
+    getAutoRemoveDate(registrations: Registration[], currentPeriod: { id: string; startDate: Date; endDate: Date }, platformResponsibilityIds: string[]): Date | null {
         const now = new Date();
 
         // Rule A: Global (not organization-scoped) responsibilities are never auto-removed
@@ -103,9 +106,11 @@ export class MemberResponsibilityRecordBase extends AutoEncoder {
 
         endDate = new Date(endDate.getTime() + AUTO_REMOVE_GRACE_MS);
 
-        if (currentPeriod.startDate.getTime() <= endDate.getTime() && endDate.getTime() <= currentPeriod.startDate.getTime() + NEW_PERIOD_GRACE_MS) {
-            // Rule E: if the end date is within the grace period of a new period, extend it to the end of that grace period
-            endDate = new Date(currentPeriod.startDate.getTime() + NEW_PERIOD_GRACE_MS);
+        for (const graceStart of [currentPeriod.startDate, currentPeriod.endDate]) {
+            if (graceStart.getTime() <= endDate.getTime() && endDate.getTime() <= graceStart.getTime() + PERIOD_GRACE_MS) {
+                // Rule E: if the end date falls within 60 days after the start or end of the current period, extend it to the end of that window
+                endDate = new Date(graceStart.getTime() + PERIOD_GRACE_MS);
+            }
         }
 
         return endDate;
