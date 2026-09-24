@@ -107,12 +107,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         for (const { put } of request.body.getPuts()) {
             const event = new Event();
-            event.id = put.id;
             event.organizationId = put.organizationId;
-            event.name = put.name;
-            event.startDate = put.startDate;
-            event.endDate = put.endDate;
-            event.typeId = put.typeId;
             event.meta = put.meta;
 
             if (event.organizationId === null && event.meta.groups !== null) {
@@ -144,7 +139,14 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 });
             }
 
+            // The access check needs the start date to determine the period of the event.
+            // The id is set after the check, so a grant for a deleted event with the same id can't match.
+            event.startDate = put.startDate;
             const eventOrganization = await Context.auth.checkEventAccess(event);
+            event.id = put.id;
+            event.name = put.name;
+            event.endDate = put.endDate;
+            event.typeId = put.typeId;
 
             event.meta.organizationCache = eventOrganization ? NamedObject.create({ id: eventOrganization.id, name: eventOrganization.name }) : null;
 

@@ -175,6 +175,39 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             .toThrow(STExpect.errorWithCode('permission_denied'));
     });
 
+    test('Write access to a deleted event does not allow creating a new event with the same id', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const deletedEvent = await new EventFactory({ organization }).create();
+        await deletedEvent.delete();
+
+        const user = await new UserFactory({
+            organization,
+            permissions: Permissions.create({
+                resources: new Map([
+                    [PermissionsResourceType.Events, new Map([
+                        [deletedEvent.id, ResourcePermissions.create({
+                            level: PermissionLevel.Write,
+                        })],
+                    ])],
+                ]),
+            }),
+        }).create();
+
+        const body: Body = new PatchableArray();
+        body.addPut(Event.create({
+            id: deletedEvent.id,
+            organizationId: organization.id,
+            typeId: (await new PlatformEventTypeFactory({}).create()).id,
+            name: 'test event',
+            startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+            endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        }));
+
+        await expect(TestRequest.patch({ body, user, organization }))
+            .rejects
+            .toThrow(STExpect.errorWithCode('permission_denied'));
+    });
+
     test('A user with event write access for one group can only create events for that group', async () => {
         const organization = await new OrganizationFactory({}).create();
         const group = await new GroupFactory({ organization }).create();
