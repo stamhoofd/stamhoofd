@@ -142,6 +142,89 @@ describe('Endpoint.PatchEventsEndpoint', () => {
         expect(result.body.find(e => e.id === withGroups.id)?.meta.groups?.map(g => g.id)).toEqual([group.id]);
     });
 
+    test('A user with write access to events of the current period cannot create an event outside that period', async () => {
+        const period = await new RegistrationPeriodFactory({
+            startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+            endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        }).create();
+        const organization = await new OrganizationFactory({ period }).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: Permissions.create({
+                resources: new Map([
+                    [PermissionsResourceType.Events, new Map([
+                        [PermissionsResourceKey.CurrentPeriod, ResourcePermissions.create({
+                            level: PermissionLevel.Write,
+                        })],
+                    ])],
+                ]),
+            }),
+        }).create();
+
+        const body: Body = new PatchableArray();
+        body.addPut(Event.create({
+            organizationId: organization.id,
+            typeId: (await new PlatformEventTypeFactory({}).create()).id,
+            name: 'outside period',
+            startDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
+            endDate: new Date(Date.now() + 61 * 24 * 60 * 60 * 1000),
+        }));
+
+        await expect(TestRequest.patch({ body, user, organization }))
+            .rejects
+            .toThrow(STExpect.errorWithCode('permission_denied'));
+    });
+
+    test('A user with event write access for one group can only create events for that group', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const group = await new GroupFactory({ organization }).create();
+        const otherGroup = await new GroupFactory({ organization }).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: Permissions.create({
+                resources: new Map([
+                    [PermissionsResourceType.Groups, new Map([
+                        [group.id, ResourcePermissions.create({
+                            accessRights: [AccessRight.EventWrite],
+                        })],
+                    ])],
+                ]),
+            }),
+        }).create();
+        const typeId = (await new PlatformEventTypeFactory({}).create()).id;
+
+        const createEvent = (groups: GroupModel[] | null) => {
+            const body: Body = new PatchableArray();
+            body.addPut(Event.create({
+                organizationId: organization.id,
+                typeId,
+                name: 'test event',
+                startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+                endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                meta: EventMeta.create({
+                    groups: groups?.map(g => NamedObject.create({ id: g.id, name: g.settings.name.toString() })) ?? null,
+                }),
+            }));
+            return TestRequest.patch({ body, user, organization });
+        };
+
+        const result = await createEvent([group]);
+        expect(result.status).toBe(200);
+        expect(result.body[0].meta.groups?.map(g => g.id)).toEqual([group.id]);
+
+        await expect(createEvent(null))
+            .rejects
+            .toThrow(STExpect.errorWithCode('permission_denied'));
+
+        await expect(createEvent([otherGroup]))
+            .rejects
+            .toThrow(STExpect.errorWithCode('permission_denied'));
+
+        await expect(createEvent([group, otherGroup]))
+            .rejects
+            .toThrow(STExpect.errorWithCode('permission_denied'));
+    });
+
     describe('hasFutureEvents recomputation', () => {
         // A global event (organizationId === null) counts towards every organization,
         // so make sure leftover events from other tests don't influence these assertions.
