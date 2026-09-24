@@ -9,7 +9,7 @@ import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import type { Group, Organization, User } from '@stamhoofd/models';
 import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import { appToUri, GroupCategory, GroupCategorySettings, GroupType, PermissionLevel, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
+import { appToUri, EventMeta, GroupCategory, GroupCategorySettings, GroupType, NamedObject, PermissionLevel, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WorkerData } from '../helpers/index.js';
 
@@ -132,6 +132,10 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
             organization,
             name: eventName,
             group: eventGroup,
+            // Events without groups are listed for every role, so restrict it to let only event grants reveal it
+            meta: EventMeta.create({
+                groups: [NamedObject.create({ id: otherGroup.id, name: otherGroupName })],
+            }),
             startDate: eventStart,
             endDate: new Date(eventStart.getTime() + 24 * 60 * 60 * 1000),
         }).create();
@@ -424,6 +428,12 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
         await page.locator('.scrollable-segmented-control button', { hasText: String(year) }).first().click();
     }
 
+    /** Absence is only meaningful once the list of the selected year has loaded */
+    async function expectNoEventRow(page: Page, eventName: string) {
+        await expect(page.locator('#settings-view').getByText('Geen activiteiten gevonden')).toBeVisible();
+        await expect(eventRow(page, eventName)).toHaveCount(0);
+    }
+
     function eventRow(page: Page, eventName: string) {
         return page.locator('#settings-view .st-list-item:visible h3 span').filter({
             hasText: new RegExp(`^${eventName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`),
@@ -451,7 +461,7 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
 
         // Negative case: the event of the other period is not covered by this grant
         await openCalendar({ page, year: scenario.previous.eventYear });
-        await expect(eventRow(page, scenario.previous.eventName)).toHaveCount(0);
+        await expectNoEventRow(page, scenario.previous.eventName);
     });
 
     test('a grant on an event of a previous period reaches that event', async ({ page }) => {
@@ -471,7 +481,7 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
         await expect(eventRow(page, scenario.previous.eventName)).toHaveCount(1);
 
         await openCalendar({ page, year: scenario.current.eventYear });
-        await expect(eventRow(page, scenario.current.eventName)).toHaveCount(0);
+        await expectNoEventRow(page, scenario.current.eventName);
     });
     test('a $currentPeriod grant cannot open a previous period', async ({ page }) => {
         test.setTimeout(120_000);
@@ -530,7 +540,7 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
         await expect(eventRow(page, scenario.current.eventName)).toHaveCount(1);
 
         await openCalendar({ page, year: scenario.previous.eventYear });
-        await expect(eventRow(page, scenario.previous.eventName)).toHaveCount(0);
+        await expectNoEventRow(page, scenario.previous.eventName);
     });
     test('a grant on an event of a previous period can read its registrations', async ({ page }) => {
         test.setTimeout(120_000);
