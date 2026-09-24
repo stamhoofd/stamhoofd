@@ -19,8 +19,8 @@ export class FlagMomentCleanup {
 
         // All active, organization-scoped responsibility records
         const records = await MemberResponsibilityRecord.select()
-            .where(MemberResponsibilityRecord.whereActive) // rule A
-            .whereNot('organizationId', null) // rule B
+            .whereNot('organizationId', null) // rule A
+            .where(MemberResponsibilityRecord.whereActive) // rule B
             .fetch();
 
         if (records.length === 0) {
