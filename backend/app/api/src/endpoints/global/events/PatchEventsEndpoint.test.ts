@@ -3,8 +3,8 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { User } from '@stamhoofd/models';
-import { Event as EventModel, EventFactory, Group as GroupModel, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, PlatformEventTypeFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { AccessRight, Event, Group, GroupSettings, GroupType, OrganizationEventType, PermissionLevel, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, TranslatedString } from '@stamhoofd/structures';
+import { Event as EventModel, EventFactory, Group as GroupModel, GroupFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, PlatformEventTypeFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import { AccessRight, Event, EventMeta, Group, GroupSettings, GroupType, NamedObject, OrganizationEventType, PermissionLevel, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, TranslatedString } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { PatchEventsEndpoint } from './PatchEventsEndpoint.js';
@@ -90,6 +90,172 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             typeId: newEvent.typeId,
             name: newEvent.name,
         });
+    });
+
+    test('A user with only write access to events can create an event with or without groups they cannot access', async () => {
+        const period = await new RegistrationPeriodFactory({
+            startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+            endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        }).create();
+        const organization = await new OrganizationFactory({ period }).create();
+        const group = await new GroupFactory({ organization, period }).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: Permissions.create({
+                resources: new Map([
+                    [PermissionsResourceType.Events, new Map([
+                        [PermissionsResourceKey.CurrentPeriod, ResourcePermissions.create({
+                            level: PermissionLevel.Write,
+                        })],
+                    ])],
+                ]),
+            }),
+        }).create();
+        const typeId = (await new PlatformEventTypeFactory({}).create()).id;
+
+        const withoutGroups = Event.create({
+            organizationId: organization.id,
+            typeId,
+            name: 'without groups',
+            startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+            endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        });
+        const withGroups = Event.create({
+            organizationId: organization.id,
+            typeId,
+            name: 'with groups',
+            startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+            endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            meta: EventMeta.create({
+                groups: [NamedObject.create({ id: group.id, name: group.settings.name.toString() })],
+            }),
+        });
+
+        const body: Body = new PatchableArray();
+        body.addPut(withoutGroups);
+        body.addPut(withGroups);
+
+        const result = await TestRequest.patch({ body, user, organization });
+        expect(result.status).toBe(200);
+        expect(result.body).toHaveLength(2);
+        expect(result.body.find(e => e.id === withoutGroups.id)?.meta.groups).toBeNull();
+        expect(result.body.find(e => e.id === withGroups.id)?.meta.groups?.map(g => g.id)).toEqual([group.id]);
+    });
+
+    test('A user with write access to events of the current period cannot create an event outside that period', async () => {
+        const period = await new RegistrationPeriodFactory({
+            startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+            endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        }).create();
+        const organization = await new OrganizationFactory({ period }).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: Permissions.create({
+                resources: new Map([
+                    [PermissionsResourceType.Events, new Map([
+                        [PermissionsResourceKey.CurrentPeriod, ResourcePermissions.create({
+                            level: PermissionLevel.Write,
+                        })],
+                    ])],
+                ]),
+            }),
+        }).create();
+
+        const body: Body = new PatchableArray();
+        body.addPut(Event.create({
+            organizationId: organization.id,
+            typeId: (await new PlatformEventTypeFactory({}).create()).id,
+            name: 'outside period',
+            startDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
+            endDate: new Date(Date.now() + 61 * 24 * 60 * 60 * 1000),
+        }));
+
+        await expect(TestRequest.patch({ body, user, organization }))
+            .rejects
+            .toThrow(STExpect.errorWithCode('permission_denied'));
+    });
+
+    test('Write access to a deleted event does not allow creating a new event with the same id', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const deletedEvent = await new EventFactory({ organization }).create();
+        await deletedEvent.delete();
+
+        const user = await new UserFactory({
+            organization,
+            permissions: Permissions.create({
+                resources: new Map([
+                    [PermissionsResourceType.Events, new Map([
+                        [deletedEvent.id, ResourcePermissions.create({
+                            level: PermissionLevel.Write,
+                        })],
+                    ])],
+                ]),
+            }),
+        }).create();
+
+        const body: Body = new PatchableArray();
+        body.addPut(Event.create({
+            id: deletedEvent.id,
+            organizationId: organization.id,
+            typeId: (await new PlatformEventTypeFactory({}).create()).id,
+            name: 'test event',
+            startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+            endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        }));
+
+        await expect(TestRequest.patch({ body, user, organization }))
+            .rejects
+            .toThrow(STExpect.errorWithCode('permission_denied'));
+    });
+
+    test('A user with event write access for one group can only create events for that group', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const group = await new GroupFactory({ organization }).create();
+        const otherGroup = await new GroupFactory({ organization }).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: Permissions.create({
+                resources: new Map([
+                    [PermissionsResourceType.Groups, new Map([
+                        [group.id, ResourcePermissions.create({
+                            accessRights: [AccessRight.EventWrite],
+                        })],
+                    ])],
+                ]),
+            }),
+        }).create();
+        const typeId = (await new PlatformEventTypeFactory({}).create()).id;
+
+        const createEvent = (groups: GroupModel[] | null) => {
+            const body: Body = new PatchableArray();
+            body.addPut(Event.create({
+                organizationId: organization.id,
+                typeId,
+                name: 'test event',
+                startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+                endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                meta: EventMeta.create({
+                    groups: groups?.map(g => NamedObject.create({ id: g.id, name: g.settings.name.toString() })) ?? null,
+                }),
+            }));
+            return TestRequest.patch({ body, user, organization });
+        };
+
+        const result = await createEvent([group]);
+        expect(result.status).toBe(200);
+        expect(result.body[0].meta.groups?.map(g => g.id)).toEqual([group.id]);
+
+        await expect(createEvent(null))
+            .rejects
+            .toThrow(STExpect.errorWithCode('permission_denied'));
+
+        await expect(createEvent([otherGroup]))
+            .rejects
+            .toThrow(STExpect.errorWithCode('permission_denied'));
+
+        await expect(createEvent([group, otherGroup]))
+            .rejects
+            .toThrow(STExpect.errorWithCode('permission_denied'));
     });
 
     describe('hasFutureEvents recomputation', () => {
