@@ -100,7 +100,7 @@
                 <STList>
                     <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.GroupCategories, PermissionsResourceKey.CurrentPeriod)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.CurrentPeriod, name: $t('Alle categorieën van het huidige werkjaar'), type: PermissionsResourceType.GroupCategories }" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="addPatch" />
                     <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.GroupCategories, PermissionsResourceKey.All)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.All, name: $t('Alle categorieën in alle werkjaren'), type: PermissionsResourceType.GroupCategories }" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="addPatch" />
-                    <ResourcePermissionRow v-for="resource in categoryResources" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow v-for="resource in categoryResources" :key="resource.id" :in-current-period="currentPeriodCategoryIds.has(resource.id)" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="addPatch" />
                 </STList>
             </CategorizedBox>
 
@@ -115,7 +115,7 @@
                 <STList>
                     <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.Groups, PermissionsResourceKey.CurrentPeriod)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.CurrentPeriod, name: $t('Alle leden van het huidige werkjaar'), type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
                     <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.Groups, PermissionsResourceKey.All)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.All, name: $t('Alle leden in alle werkjaren'), type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
-                    <ResourcePermissionRow v-for="resource in groupResources" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow v-for="resource in groupResources" :key="resource.id" :in-current-period="currentPeriodGroupIds.has(resource.id)" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
                 </STList>
             </CategorizedBox>
 
@@ -143,7 +143,7 @@
                 <STList>
                     <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.Events, PermissionsResourceKey.CurrentPeriod)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.CurrentPeriod, name: $t('Alle activiteiten van het huidige werkjaar'), type: PermissionsResourceType.Events }" type="resource" @patch:role="addPatch" />
                     <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.Events, PermissionsResourceKey.All)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.All, name: $t('Alle activiteiten in alle werkjaren'), type: PermissionsResourceType.Events }" type="resource" @patch:role="addPatch" />
-                    <ResourcePermissionRow v-for="resource in eventResources" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow v-for="resource in eventResources" :key="resource.id" :in-current-period="false" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" type="resource" @patch:role="addPatch" />
                 </STList>
             </CategorizedBox>
 
@@ -392,6 +392,10 @@ const groupResources = computed(() => grantedResources(PermissionsResourceType.G
 const categoryResources = computed(() => grantedResources(PermissionsResourceType.GroupCategories));
 
 const eventResources = computed(() => grantedResources(PermissionsResourceType.Events));
+
+const currentPeriodGroupIds = computed(() => new Set(organization.value?.period.groups.map(g => g.id)));
+
+const currentPeriodCategoryIds = computed(() => new Set(organization.value?.period.settings.categories.map(c => c.id)));
 
 const canAddGroups = computed(() => !!organization.value && canAddAccess(PermissionsResourceType.Groups, PermissionsResourceKey.CurrentPeriod));
 const canAddCategories = computed(() => !!organization.value && canAddAccess(PermissionsResourceType.GroupCategories, PermissionsResourceKey.CurrentPeriod));
