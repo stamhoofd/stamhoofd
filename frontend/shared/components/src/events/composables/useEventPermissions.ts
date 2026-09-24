@@ -1,4 +1,4 @@
-import type { NamedObject, Organization, OrganizationTag, StamhoofdFilter } from '@stamhoofd/structures';
+import type { Event, NamedObject, Organization, OrganizationTag, StamhoofdFilter } from '@stamhoofd/structures';
 import { AccessRight, EventPeriodHelper, PermissionLevel, PermissionsResourceKey, PermissionsResourceType } from '@stamhoofd/structures';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
@@ -67,6 +67,18 @@ export function useEventPermissions() {
         return permissions.hasAccessRightForAllResourcesOfType(PermissionsResourceType.Groups, AccessRight.EventWrite);
     }
 
+    /**
+     * Write access through the event itself, which doesn't depend on the groups or tags of the event.
+     */
+    function canWriteEventResource(event: Event) {
+        if (!permissions) {
+            return false;
+        }
+        return permissions
+            .forPeriod(auth.isEventPeriodInUse(event, organization.value))
+            .hasResourceAccess(PermissionsResourceType.Events, event.id, PermissionLevel.Write);
+    }
+
     function canWriteAllTagEvents() {
         if (!permissions) {
             return false;
@@ -129,6 +141,7 @@ export function useEventPermissions() {
     return {
         canWriteSome,
         canWriteAllGroupEvents,
+        canWriteEventResource,
         canWriteAllTagEvents,
         isGroupEnabledOperatorFactory,
         isTagEnabledPredicateFactory,

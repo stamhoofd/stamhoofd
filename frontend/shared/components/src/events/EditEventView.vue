@@ -611,12 +611,16 @@ const allowNonMembers = computed({
     }),
 });
 
-const hasGroupRestrictions = computed(() => !isNationalActivity.value && organization.value && !eventPermissions.canWriteAllGroupEvents());
+const hasGroupRestrictions = computed(() => !isNationalActivity.value && organization.value && !eventPermissions.canWriteAllGroupEvents() && !eventPermissions.canWriteEventResource(patched.value));
 const hasTagRestrictions = computed(() => isNationalActivity.value && !eventPermissions.canWriteAllTagEvents());
 
 watch(hasGroupRestrictions, (hasGroupRestrictions) => {
-    if (hasGroupRestrictions && groups.value === null) {
-        addGroupsRestriction();
+    if (hasGroupRestrictions) {
+        if (groups.value === null) {
+            addGroupsRestriction();
+        }
+    } else if (groups.value?.length === 0) {
+        deleteGroupsRestriction();
     }
 }, { immediate: true });
 

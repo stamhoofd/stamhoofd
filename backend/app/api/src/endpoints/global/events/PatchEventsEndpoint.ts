@@ -107,7 +107,12 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         for (const { put } of request.body.getPuts()) {
             const event = new Event();
+            event.id = put.id;
             event.organizationId = put.organizationId;
+            event.name = put.name;
+            event.startDate = put.startDate;
+            event.endDate = put.endDate;
+            event.typeId = put.typeId;
             event.meta = put.meta;
 
             if (event.organizationId === null && event.meta.groups !== null) {
@@ -140,13 +145,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
 
             const eventOrganization = await Context.auth.checkEventAccess(event);
-            event.id = put.id;
-            event.name = put.name;
-            event.startDate = put.startDate;
-            event.endDate = put.endDate;
-            event.typeId = put.typeId;
 
-            event.meta = put.meta;
             event.meta.organizationCache = eventOrganization ? NamedObject.create({ id: eventOrganization.id, name: eventOrganization.name }) : null;
 
             PatchEventsEndpoint.validateOrCorrectEventMeta(event);
