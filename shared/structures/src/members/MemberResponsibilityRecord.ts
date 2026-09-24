@@ -1,10 +1,10 @@
 import { AutoEncoder, DateDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
+import { AuditLogReplacement } from '../AuditLogReplacement.js';
 import { Group } from '../Group.js';
 import { GroupType } from '../GroupType.js';
 import type { PlatformMember } from './PlatformMember.js';
 import type { Registration } from './Registration.js';
-import { AuditLogReplacement } from '../AuditLogReplacement.js';
 
 /** A member keeps a responsibility for 14 days after their last registration ends, unless we just started a new period. */
 export const AUTO_REMOVE_GRACE_MS = 1000 * 60 * 60 * 24 * 14;
@@ -102,6 +102,10 @@ export class MemberResponsibilityRecordBase extends AutoEncoder {
 
         if (endDate === null || endDate.getTime() < currentPeriod.startDate.getTime()) {
             endDate = currentPeriod.startDate; // Rule D4: end date can be the start of the current period if no other end date was found
+        }
+
+        if (endDate.getTime() < this.startDate.getTime()) {
+            endDate = this.startDate; // end date can be the start of the responsibility, so a new responsibility is never removed immediately
         }
 
         endDate = new Date(endDate.getTime() + AUTO_REMOVE_GRACE_MS);

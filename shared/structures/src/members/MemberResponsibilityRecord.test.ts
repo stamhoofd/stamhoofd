@@ -78,6 +78,14 @@ describe('MemberResponsibilityRecord.getAutoRemoveDate', () => {
     });
 
     describe('removal date', () => {
+        test('is at least 14 days after the responsibility started', () => {
+            const startDate = new Date(midPeriod.getTime() - 1000 * 60 * 60 * 24);
+            const expected = new Date(startDate.getTime() + AUTO_REMOVE_GRACE_MS);
+
+            expect(createRecord({ startDate }).getAutoRemoveDate([], period, [])).toEqual(expected);
+            expect(createRecord({ startDate }).getAutoRemoveDate([createRegistration({ deactivatedAt: new Date(2026, 0, 10) })], period, [])).toEqual(expected);
+        });
+
         test('ignores registrations in other organizations, other periods, non-membership groups and unconfirmed registrations', () => {
             const registrations = [
                 createRegistration({ organizationId: 'other-organization-id' }),

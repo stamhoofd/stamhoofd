@@ -38,7 +38,7 @@ describe('FlagMomentCleanup.endResponsibilitiesOfUnregisteredMembers', () => {
         record.memberId = member.id;
         record.organizationId = organization.id;
         record.responsibilityId = responsibilityId ?? (await new PlatformResponsibilityFactory({}).create()).id;
-        record.startDate = new Date(Date.now() - DAY);
+        record.startDate = new Date(Date.now() - 200 * DAY);
         await record.save();
         return record;
     }
