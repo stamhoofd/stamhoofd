@@ -1,4 +1,6 @@
-import { Member, MemberResponsibilityRecord, Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
+import { Group, Member, MemberResponsibilityRecord, Organization, Platform, Registration, RegistrationPeriod } from '@stamhoofd/models';
+import type { Registration as RegistrationStruct } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { MemberUserSyncer } from './MemberUserSyncer.js';
 
 export class FlagMomentCleanup {
@@ -51,34 +53,69 @@ export class FlagMomentCleanup {
             return period;
         };
 
-        for (const [memberId, memberRecords] of recordsPerMember) {
-            const member = await Member.getByIdWithRegistrationsAndGroups(memberId);
-            if (!member) {
-                continue;
-            }
+        const allMemberIds = [...recordsPerMember.keys()];
+        for (let i = 0; i < allMemberIds.length; i += 100) {
+            const memberIds = allMemberIds.slice(i, i + 100);
+            const members = await Member.getByIDs(...memberIds);
+            const registrationsPerMember = await this.getRegistrationsIncludingDeletedGroups(memberIds);
 
-            let changed = false;
-            for (const record of memberRecords) {
-                // record.organizationId is guaranteed to be set (whereNot organizationId null)
-                const currentPeriod = await getCurrentPeriod(record.organizationId!);
-                if (!currentPeriod) {
-                    continue; // organization has no current period -> skip
+            for (const member of members) {
+                const memberRecords = recordsPerMember.get(member.id) ?? [];
+                const registrations = registrationsPerMember.get(member.id) ?? [];
+
+                let changed = false;
+                for (const record of memberRecords) {
+                    // record.organizationId is guaranteed to be set (whereNot organizationId null)
+                    const currentPeriod = await getCurrentPeriod(record.organizationId!);
+                    if (!currentPeriod) {
+                        continue; // organization has no current period -> skip
+                    }
+
+                    const autoRemoveDate = record.getBaseStructure().getAutoRemoveDate(registrations, currentPeriod, platformResponsibilityIds);
+                    if (autoRemoveDate === null || autoRemoveDate > now) {
+                        continue;
+                    }
+
+                    record.endDate = now;
+                    await record.save();
+                    changed = true;
+                    console.log(`Ended responsibility ${record.id} of member ${member.id} in organization ${record.organizationId} (auto-remove date was ${autoRemoveDate.toISOString()})`);
                 }
 
-                const autoRemoveDate = record.getBaseStructure().getAutoRemoveDate(member.registrations.map(r => r.getStructure()), currentPeriod, platformResponsibilityIds);
-                if (autoRemoveDate === null || autoRemoveDate > now) {
-                    continue;
+                if (changed) {
+                    await MemberUserSyncer.onChangeMember(member);
                 }
-
-                record.endDate = now;
-                await record.save();
-                changed = true;
-                console.log(`Ended responsibility ${record.id} of member ${memberId} in organization ${record.organizationId} (auto-remove date was ${autoRemoveDate.toISOString()})`);
-            }
-
-            if (changed) {
-                await MemberUserSyncer.onChangeMember(member);
             }
         }
+    }
+
+    /**
+     * Unlike Member.loadRegistrations, this keeps registrations in deleted groups: getAutoRemoveDate needs the group's deletedAt.
+     */
+    private static async getRegistrationsIncludingDeletedGroups(memberIds: string[]): Promise<Map<string, RegistrationStruct[]>> {
+        const registrations = await Registration.select()
+            .where('memberId', memberIds)
+            .whereNot('registeredAt', null)
+            .fetch();
+
+        const groupIds = Formatter.uniqueArray(registrations.map(r => r.groupId));
+        const groups = groupIds.length ? await Group.getByIDs(...groupIds) : [];
+        const groupsById = new Map(groups.map(g => [g.id, g]));
+
+        const result = new Map<string, RegistrationStruct[]>();
+        for (const registration of registrations) {
+            const group = groupsById.get(registration.groupId);
+            if (!group) {
+                continue;
+            }
+            const structure = registration.setRelation(Registration.group, group).getStructure();
+            const list = result.get(registration.memberId);
+            if (list) {
+                list.push(structure);
+            } else {
+                result.set(registration.memberId, [structure]);
+            }
+        }
+        return result;
     }
 }
