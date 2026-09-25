@@ -9,6 +9,7 @@ import type { CheckResult, SetupReport } from './setup-machine.js';
 import { checkSetup, getRecommendedSetupFixes, isSetupReady, printSetupReport, runSetup, SetupAutomaticFixKey, setupCaddy, setupDns } from './setup-machine.js';
 import { checkNodeVersion, setupNodeVersion } from './setup-node.js';
 import { checkPackageManager, setupPackageManager } from './setup-package-manager.js';
+import { runServices } from './start-services.js';
 
 const dnsResolver = vi.hoisted(() => ({
     resolve4: vi.fn(),
@@ -50,6 +51,10 @@ vi.mock('./setup-node.js', () => ({
 vi.mock('./setup-package-manager.js', () => ({
     checkPackageManager: vi.fn(),
     setupPackageManager: vi.fn(),
+}));
+
+vi.mock('./start-services.js', () => ({
+    runServices: vi.fn(),
 }));
 
 describe('setup machine workflow', () => {
@@ -158,6 +163,44 @@ describe('setup machine workflow', () => {
         await runSetup({ rootDir: '/repo', verbose: true } as any);
 
         expect(setupPackageManager).toHaveBeenCalledWith('/repo');
+    });
+
+    it('rechecks setup and offers to start services after configuring DNS', async () => {
+        setPlatform('linux');
+        const options = { dns: 'Global: 1.1.1.1\n', domains: 'Global:\n', query: '' };
+        mockSetupCommands(options);
+        const originalRun = vi.mocked(run).getMockImplementation()!;
+        vi.mocked(run).mockImplementation(async (command, args, runOptions) => {
+            const result = await originalRun(command, args, runOptions);
+            if (command === 'sudo' && args[0] === 'systemctl') {
+                options.dns = 'Global: 127.0.0.1:1053\n';
+                options.domains = 'Global: ~stamhoofd\n';
+            }
+            return result;
+        });
+        vi.mocked(corednsService.status).mockResolvedValue({ name: 'CoreDNS', running: false, detail: '127.0.0.1:1053' });
+        vi.mocked(runServices).mockImplementation(async () => {
+            options.query = 'dashboard.stamhoofd: 127.0.0.1\n';
+        });
+        vi.spyOn(fs, 'access').mockResolvedValue(undefined);
+        vi.mocked(confirm).mockResolvedValue(true);
+
+        await runSetup({ rootDir: '/repo', verbose: false } as any);
+
+        expect(runServices).toHaveBeenCalledOnce();
+        expect(confirm).toHaveBeenCalledTimes(2);
+    });
+
+    it('stops retrying a fix when its check remains missing', async () => {
+        setPlatform('linux');
+        mockSetupCommands({ dns: 'Global: 1.1.1.1\n', domains: 'Global:\n' });
+        vi.spyOn(fs, 'access').mockResolvedValue(undefined);
+        vi.mocked(confirm).mockResolvedValue(true);
+
+        await runSetup({ rootDir: '/repo', verbose: false } as any);
+
+        expect(confirm).toHaveBeenCalledOnce();
+        expect(runServices).not.toHaveBeenCalled();
     });
 
     it('does not recommend automatic fixes after a missing manual prerequisite', () => {
