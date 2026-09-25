@@ -8,7 +8,7 @@ import { caddyContainer, caddyDataDir, caddyHttpPort, caddyHttpsPort, caddyRootC
 import { buildSharedServiceProfile, SharedServiceDnsSetupKind } from '../config/shared-service-profile.js';
 import type { SharedServiceProfile } from '../config/shared-service-profile.js';
 import type { CliContext } from '../context/create-context.js';
-import { run } from '../runtime/command-runner.js';
+import { run, RunVerbosity } from '../runtime/command-runner.js';
 import { sharedDir } from '../runtime/manifest-store.js';
 import { CliStatus } from '../runtime/status.js';
 import { command, confirm, statusCell, success, table, Table, warning } from '../runtime/ux.js';
@@ -144,19 +144,19 @@ export async function runSetup(context: CliContext): Promise<void> {
     }
     for (const fix of fixes) {
         if (fix.key === SetupAutomaticFixKey.Node) {
-            await setupNodeVersion(context.rootDir, { verbose: context.verbose });
+            await setupNodeVersion(context.rootDir);
             console.log('\nActivate the new version in this terminal, then run stam setup again.');
             return;
         } else if (fix.key === SetupAutomaticFixKey.Pnpm) {
-            await setupPackageManager(context.rootDir, { verbose: context.verbose });
+            await setupPackageManager(context.rootDir);
         } else if (fix.key === SetupAutomaticFixKey.Dns) {
-            await setupDns({ yes: true, dryRun: false, verbose: context.verbose });
+            await setupDns({ yes: true, dryRun: false });
         } else if (fix.key === SetupAutomaticFixKey.PrivilegedPorts) {
-            await setupPrivilegedPortRedirects({ yes: true, dryRun: false, verbose: context.verbose });
+            await setupPrivilegedPortRedirects({ yes: true, dryRun: false });
         } else if (fix.key === SetupAutomaticFixKey.Services) {
             await runServices(context);
         } else if (fix.key === SetupAutomaticFixKey.Caddy) {
-            await setupCaddy({ yes: true, dryRun: false, verbose: context.verbose });
+            await setupCaddy({ yes: true, dryRun: false });
         } else {
             await setupCert(context, { yes: true, dryRun: false });
         }
@@ -250,7 +250,7 @@ function privilegedRedirectRules(profile: SharedServiceProfile): IptablesRedirec
     ];
 }
 
-export async function setupDns(options: { yes: boolean; dryRun: boolean; verbose: boolean }): Promise<void> {
+export async function setupDns(options: { yes: boolean; dryRun: boolean }): Promise<void> {
     const profile = await currentSharedServiceProfile();
     if (profile.dnsSetupKind === SharedServiceDnsSetupKind.MacosResolver) {
         await setupMacosDns(options);
@@ -281,14 +281,14 @@ export async function setupDns(options: { yes: boolean; dryRun: boolean; verbose
     }
 
     await fs.writeFile(tempPath, content);
-    await run('sudo', ['mkdir', '-p', '/run/systemd/resolved.conf.d'], { verbose: options.verbose });
-    await run('sudo', ['cp', tempPath, '/run/systemd/resolved.conf.d/stamhoofd.conf'], { verbose: options.verbose });
+    await run('sudo', ['mkdir', '-p', '/run/systemd/resolved.conf.d'], { verbosity: RunVerbosity.Output });
+    await run('sudo', ['cp', tempPath, '/run/systemd/resolved.conf.d/stamhoofd.conf'], { verbosity: RunVerbosity.Output });
     await fs.rm(tempPath, { force: true });
-    await run('sudo', ['systemctl', 'restart', 'systemd-resolved'], { verbose: options.verbose });
+    await run('sudo', ['systemctl', 'restart', 'systemd-resolved'], { verbosity: RunVerbosity.Output });
     success('DNS configured.');
 }
 
-async function setupMacosDns(options: { yes: boolean; dryRun: boolean; verbose: boolean }): Promise<void> {
+async function setupMacosDns(options: { yes: boolean; dryRun: boolean }): Promise<void> {
     const domain = process.env.STAMHOOFD_DOMAIN ?? defaultDomain;
     const resolverPath = macosResolverPath(domain);
     const content = macosResolverContent();
@@ -324,13 +324,13 @@ async function setupMacosDns(options: { yes: boolean; dryRun: boolean; verbose: 
     }
 
     await fs.writeFile(tempPath, content);
-    await run('sudo', ['mkdir', '-p', '/etc/resolver'], { verbose: options.verbose });
-    await run('sudo', ['cp', tempPath, resolverPath], { verbose: options.verbose });
+    await run('sudo', ['mkdir', '-p', '/etc/resolver'], { verbosity: RunVerbosity.Output });
+    await run('sudo', ['cp', tempPath, resolverPath], { verbosity: RunVerbosity.Output });
     await fs.rm(tempPath, { force: true });
     success('DNS configured.');
 }
 
-export async function setupPrivilegedPortRedirects(options: { yes: boolean; dryRun: boolean; verbose: boolean }): Promise<void> {
+export async function setupPrivilegedPortRedirects(options: { yes: boolean; dryRun: boolean }): Promise<void> {
     if (process.platform !== 'linux') {
         throw new Error('Automatic privileged port redirect setup currently supports Linux with iptables only.');
     }
@@ -354,14 +354,14 @@ export async function setupPrivilegedPortRedirects(options: { yes: boolean; dryR
 
     for (const rule of rules) {
         if (!(await iptablesRuleExists(rule))) {
-            await run('sudo', iptablesArgs(IptablesAction.Append, rule), { verbose: options.verbose });
+            await run('sudo', iptablesArgs(IptablesAction.Append, rule), { verbosity: RunVerbosity.Output });
         }
     }
 
     success('Privileged port redirects configured.');
 }
 
-export async function setupCaddy(options: { yes: boolean; dryRun: boolean; verbose: boolean }): Promise<void> {
+export async function setupCaddy(options: { yes: boolean; dryRun: boolean }): Promise<void> {
     if (process.platform !== 'darwin') {
         throw new Error('Automatic Caddy installation currently supports macOS with Homebrew only.');
     }
@@ -376,7 +376,7 @@ export async function setupCaddy(options: { yes: boolean; dryRun: boolean; verbo
         warning('Caddy installation skipped.');
         return;
     }
-    await run('brew', ['install', 'caddy'], { verbose: options.verbose });
+    await run('brew', ['install', 'caddy'], { verbosity: RunVerbosity.Output });
     success('Caddy installed.');
 }
 
@@ -394,11 +394,11 @@ export async function setupCert(context: CliContext, options: { yes: boolean; dr
     const configPath = await writeSetupCaddyConfig(context);
     const pidPath = path.join(sharedDir(context), 'caddy-setup.pid');
     console.log('Preparing temporary local Caddy CA...');
-    await run('caddy', ['start', '--config', configPath, '--pidfile', pidPath], { verbose: context.verbose });
+    await run('caddy', ['start', '--config', configPath, '--pidfile', pidPath], { verbosity: RunVerbosity.Output });
     try {
-        await run('caddy', ['trust', '--config', configPath, '--address', localhostPort(caddySetupAdminPort)], { verbose: context.verbose });
+        await run('caddy', ['trust', '--config', configPath, '--address', localhostPort(caddySetupAdminPort)], { verbosity: RunVerbosity.Output });
     } finally {
-        await run('caddy', ['stop', '--config', configPath, '--address', localhostPort(caddySetupAdminPort)], { allowFailure: true, quiet: true, verbose: context.verbose });
+        await run('caddy', ['stop', '--config', configPath, '--address', localhostPort(caddySetupAdminPort)], { allowFailure: true, verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
         await fs.rm(pidPath, { force: true });
     }
     success('Caddy local CA trusted.');
@@ -415,7 +415,7 @@ async function dnsCheck(context: CliContext, profile: SharedServiceProfile): Pro
         return { ok: false, details: `Local DNS is not configured for .${domain}`, manualFix: 'stam setup dns', automaticFix: { key: SetupAutomaticFixKey.Dns, label: 'Configure local DNS' } };
     }
 
-    const result = await run('resolvectl', ['query', `dashboard.${domain}`], { capture: true, allowFailure: true });
+    const result = await run('resolvectl', ['query', `dashboard.${domain}`], { capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
     if (result.stdout.includes(localIpv4Host)) {
         return { ok: true, details: `dashboard.${domain} resolves to ${localIpv4Host}` };
     }
@@ -463,8 +463,8 @@ async function directCorednsCheck(domain: string): Promise<boolean> {
 
 async function dnsConfigurationCheck(domain: string, profile: SharedServiceProfile): Promise<boolean> {
     const [dns, domains] = await Promise.all([
-        run('resolvectl', ['dns'], { capture: true, allowFailure: true }),
-        run('resolvectl', ['domain'], { capture: true, allowFailure: true }),
+        run('resolvectl', ['dns'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet }),
+        run('resolvectl', ['domain'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet }),
     ]);
 
     return dns.status === 0
@@ -481,7 +481,7 @@ async function certCheck(): Promise<CheckResult> {
         return { ok: false, details: 'Caddy local CA not found', manualFix: 'stam setup cert', automaticFix: { key: SetupAutomaticFixKey.Cert, label: 'Trust local HTTPS certificates' } };
     }
     if (process.platform === 'darwin') {
-        const result = await run('security', ['verify-cert', '-c', certPath, '-p', 'ssl', '-l', '-L', '-q'], { capture: true, allowFailure: true });
+        const result = await run('security', ['verify-cert', '-c', certPath, '-p', 'ssl', '-l', '-L', '-q'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
         if (result.status !== 0) {
             return { ok: false, details: 'Caddy local CA is not trusted by macOS', manualFix: 'stam setup cert', automaticFix: { key: SetupAutomaticFixKey.Cert, label: 'Trust local HTTPS certificates' } };
         }
@@ -529,7 +529,7 @@ async function privilegedPortRedirectCheck(profile: SharedServiceProfile): Promi
 }
 
 async function caddyCheck(): Promise<CheckResult> {
-    const result = await run('caddy', ['version'], { capture: true, allowFailure: true });
+    const result = await run('caddy', ['version'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
     if (result.status !== 0) {
         if (process.platform === 'darwin') {
             return { ok: false, details: 'caddy not found', manualFix: 'stam setup', automaticFix: { key: SetupAutomaticFixKey.Caddy, label: 'Install Caddy with Homebrew' } };
@@ -569,7 +569,7 @@ async function readFileIfExists(filePath: string): Promise<string | undefined> {
 }
 
 async function iptablesRuleExists(rule: IptablesRedirectRule): Promise<boolean> {
-    const result = await run('sudo', ['-n', ...iptablesArgs(IptablesAction.Check, rule)], { capture: true, quiet: true, allowFailure: true });
+    const result = await run('sudo', ['-n', ...iptablesArgs(IptablesAction.Check, rule)], { capture: true, verbosity: RunVerbosity.Quiet, allowFailure: true });
     return result.status === 0;
 }
 

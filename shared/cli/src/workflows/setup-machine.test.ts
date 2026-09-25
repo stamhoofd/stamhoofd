@@ -1,7 +1,7 @@
 import dns from 'node:dns/promises';
 import fs from 'node:fs/promises';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { run } from '../runtime/command-runner.js';
+import { run, RunVerbosity } from '../runtime/command-runner.js';
 import { confirm } from '../runtime/ux.js';
 import { corednsService } from '../services/definitions/coredns-service.js';
 import * as docker from '../services/docker.js';
@@ -22,7 +22,8 @@ vi.mock('node:dns/promises', () => ({
     },
 }));
 
-vi.mock('../runtime/command-runner.js', () => ({
+vi.mock('../runtime/command-runner.js', async importOriginal => ({
+    ...await importOriginal<typeof import('../runtime/command-runner.js')>(),
     run: vi.fn(),
 }));
 
@@ -104,7 +105,7 @@ describe('setup machine workflow', () => {
 
         await runSetup({ rootDir: '/repo', verbose: true } as any);
 
-        expect(setupNodeVersion).toHaveBeenCalledWith('/repo', { verbose: true });
+        expect(setupNodeVersion).toHaveBeenCalledWith('/repo');
     });
 
     it('only recommends the Node.js fix when the active version is wrong', () => {
@@ -156,7 +157,7 @@ describe('setup machine workflow', () => {
 
         await runSetup({ rootDir: '/repo', verbose: true } as any);
 
-        expect(setupPackageManager).toHaveBeenCalledWith('/repo', { verbose: true });
+        expect(setupPackageManager).toHaveBeenCalledWith('/repo');
     });
 
     it('does not recommend automatic fixes after a missing manual prerequisite', () => {
@@ -380,7 +381,7 @@ describe('setup machine workflow', () => {
         });
         vi.mocked(confirm).mockResolvedValue(false);
 
-        await setupDns({ yes: false, dryRun: false, verbose: false });
+        await setupDns({ yes: false, dryRun: false });
 
         expect(confirm).toHaveBeenCalledWith('Overwrite /etc/resolver/stamhoofd?', { default: false });
         expect(run).not.toHaveBeenCalledWith('sudo', ['cp', expect.any(String), '/etc/resolver/stamhoofd'], expect.anything());
@@ -412,9 +413,9 @@ describe('setup machine workflow', () => {
         setPlatform('darwin');
         mockSetupCommands({ resolver: 'nameserver 127.0.0.1\n' });
 
-        await setupCaddy({ yes: true, dryRun: false, verbose: true });
+        await setupCaddy({ yes: true, dryRun: false });
 
-        expect(run).toHaveBeenCalledWith('brew', ['install', 'caddy'], { verbose: true });
+        expect(run).toHaveBeenCalledWith('brew', ['install', 'caddy'], { verbosity: RunVerbosity.Output });
     });
 
     it('does not report a generated but untrusted macOS CA as ready', async () => {
@@ -435,7 +436,7 @@ describe('setup machine workflow', () => {
         const report = await checkSetup({ generatedDir: '/repo' } as any);
 
         expect(report.cert).toMatchObject({ ok: false, manualFix: 'stam setup cert' });
-        expect(run).toHaveBeenCalledWith('security', ['verify-cert', '-c', expect.any(String), '-p', 'ssl', '-l', '-L', '-q'], { capture: true, allowFailure: true });
+        expect(run).toHaveBeenCalledWith('security', ['verify-cert', '-c', expect.any(String), '-p', 'ssl', '-l', '-L', '-q'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
     });
 
     it('prints the setup report with standardized status labels', () => {

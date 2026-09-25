@@ -17,8 +17,7 @@ export default class DbCopy extends BaseCommand {
     };
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(DbCopy);
-        const context = await this.createContext(flags);
+        const { flags, context } = await this.parseWithContext(DbCopy);
         await ensureMysqlRunning(context);
         const current = currentDatabase(context);
         const from = await resolveDatabaseOption({ flag: flags.from, message: 'Select the database to copy from', current, includeCurrent: false });

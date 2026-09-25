@@ -14,8 +14,7 @@ export default class SsoConfig extends BaseCommand {
     static flags = BaseCommand.instanceFlags;
 
     async run(): Promise<void> {
-        const { args, flags } = await this.parse(SsoConfig);
-        const context = await this.createContext(flags);
+        const { args, context } = await this.parseWithContext(SsoConfig);
         const domains = buildDomains(context);
         this.log(buildSsoConfigOutput(domains, args.redirectUri));
     }

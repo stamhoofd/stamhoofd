@@ -19,11 +19,10 @@ export default class SsoStart extends BaseCommand {
     static flags = { ...BaseCommand.instanceFlags, background: Flags.boolean({ char: 'b', default: false }) };
 
     async run(): Promise<void> {
-        const { args, flags } = await this.parse(SsoStart);
+        const { args, flags, context } = await this.parseWithContext(SsoStart);
         if (!args.redirectUri.startsWith('https://') || !args.redirectUri.endsWith('/openid/callback')) {
             this.error('Expected an HTTPS /openid/callback URL copied from the SSO settings view.');
         }
-        const context = await this.createContext(flags);
         this.log(buildSsoConfigOutput(buildDomains(context), args.redirectUri));
         if (!(await allRunning(context, sharedServiceDefinitions))) {
             await startServices(context, sharedServiceDefinitions);

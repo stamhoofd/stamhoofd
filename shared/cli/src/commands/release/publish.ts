@@ -3,7 +3,7 @@ import { writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { getProjectPath } from '../../context/project-path.js';
-import { run } from '../../runtime/command-runner.js';
+import { run, RunVerbosity } from '../../runtime/command-runner.js';
 import { writeOutputLine } from '../../runtime/output-target.js';
 import { announceRelease } from '../../runtime/release-announcement.js';
 import { composeReleaseNotesBody } from '../../runtime/release-notes-translator.js';
@@ -59,14 +59,14 @@ export default class ReleasePublish extends Command {
 
         const repoArgs = repositorySlug ? ['--repo', repositorySlug] : [];
 
-        const existing = await run('gh', ['release', 'view', tag, ...repoArgs], { cwd, capture: true, allowFailure: true });
+        const existing = await run('gh', ['release', 'view', tag, ...repoArgs], { cwd, capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
         if (existing.status === 0) {
             warning(`A GitHub release for ${tag} already exists, updating its notes.`);
-            await run('gh', ['release', 'edit', tag, ...repoArgs, '--notes-file', notesFile], { cwd });
+            await run('gh', ['release', 'edit', tag, ...repoArgs, '--notes-file', notesFile], { cwd, verbosity: RunVerbosity.Output });
             success(`Updated GitHub release ${tag}.`);
             return;
         } else {
-            await run('gh', ['release', 'create', tag, ...repoArgs, '--title', tag, '--notes-file', notesFile, '--verify-tag', '--latest'], { cwd });
+            await run('gh', ['release', 'create', tag, ...repoArgs, '--title', tag, '--notes-file', notesFile, '--verify-tag', '--latest'], { cwd, verbosity: RunVerbosity.Output });
             success(`Published GitHub release ${tag}.`);
         }
 

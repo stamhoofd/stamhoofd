@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { caddyAdminPort, caddyHttpPort, caddyHttpsPort, caddyUnprivilegedHttpPort, caddyUnprivilegedHttpsPort, defaultMysqlInnodbBufferPoolSize, defaultMysqlSortBufferSize, localFilesAccessKey, localFilesSecretKey, localhostPort, localhostPortMapping, maildevPassword, maildevUsername, maildevInternalHttpPort, maildevInternalSmtpPort, mysqlDataVolume, mysqlInternalPort, rustfsInternalApiPort } from '../config/shared-service-config.js';
 import { buildSharedServiceProfile } from '../config/shared-service-profile.js';
-import { run } from '../runtime/command-runner.js';
+import { run, RunVerbosity } from '../runtime/command-runner.js';
 import { CaddyService } from './definitions/caddy-service.js';
 import { CorednsService } from './definitions/coredns-service.js';
 import { MaildevService } from './definitions/maildev-service.js';
@@ -11,7 +11,8 @@ import { SsoService } from './definitions/sso-service.js';
 import { ContainerRuntime } from './docker.js';
 import { sharedServicesToStart, tailSharedLogs } from './shared-services.js';
 
-vi.mock('../runtime/command-runner.js', () => ({
+vi.mock('../runtime/command-runner.js', async importOriginal => ({
+    ...await importOriginal<typeof import('../runtime/command-runner.js')>(),
     run: vi.fn(),
 }));
 
@@ -178,6 +179,6 @@ describe('shared service Docker args', () => {
             'podman logs -f stamhoofd-rustfs',
             'podman logs -f stamhoofd-coredns',
             'podman logs -f stamhoofd-caddy',
-        ], { allowFailure: true });
+        ], { allowFailure: true, verbosity: RunVerbosity.Output });
     });
 });

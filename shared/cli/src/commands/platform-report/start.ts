@@ -21,8 +21,7 @@ export default class PlatformReportStart extends BaseCommand {
     static flags = BaseCommand.instanceFlags;
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(PlatformReportStart);
-        const context = await this.createContext(flags);
+        const { context } = await this.parseWithContext(PlatformReportStart);
 
         if (!(await allRunning(context, sharedServiceDefinitions))) {
             await startServices(context, sharedServiceDefinitions);

@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { run } from '../runtime/command-runner.js';
+import { run, RunVerbosity } from '../runtime/command-runner.js';
 import { CliStatus } from '../runtime/status.js';
 import { command, info, statusCell, table, warning } from '../runtime/ux.js';
 import chalk from 'chalk';
@@ -33,7 +33,7 @@ export function nodeInstallCommand(rootDir: string, currentDir: string = process
     return `source ${JSON.stringify(scriptPath)}`;
 }
 
-export async function setupNodeVersion(rootDir: string, options: { verbose: boolean; dryRun?: boolean }): Promise<void> {
+export async function setupNodeVersion(rootDir: string, options: { dryRun?: boolean } = {}): Promise<void> {
     if (options.dryRun) {
         console.log(command(nodeInstallCommand(rootDir)));
         return;
@@ -42,7 +42,7 @@ export async function setupNodeVersion(rootDir: string, options: { verbose: bool
     const scriptPath = path.join(rootDir, '.development/install-node.sh');
     await run('bash', ['-c', '. "$1"', 'stam-install-node', scriptPath], {
         cwd: rootDir,
-        verbose: options.verbose,
+        verbosity: RunVerbosity.Output,
     });
 
     info('');

@@ -2,8 +2,10 @@ import path from 'node:path';
 import type { CliContext } from '../../context/create-context.js';
 import { buildDomains } from '../../config/build-config.js';
 import { read1PasswordCli } from '../../runtime/one-password.js';
+import { RunVerbosity } from '../../runtime/command-runner.js';
 import { DockerService } from '../docker-service.js';
 import * as docker from '../docker.js';
+import type { ServiceStartResult } from '../service.js';
 
 const stripeImage = 'docker.io/stripe/stripe-cli:latest';
 
@@ -18,6 +20,10 @@ export class StripeService extends DockerService<void, StripePrepared> {
     readonly key = 'stripe';
     readonly name = 'Stripe';
     override readonly logsEnabled = false;
+
+    override async start(context: CliContext, options: void): Promise<ServiceStartResult> {
+        return await super.start({ ...context, verbosity: RunVerbosity.Quiet }, options);
+    }
 
     getContainer(context: CliContext): string {
         return StripeService.container(context);
@@ -61,7 +67,7 @@ export class StripeService extends DockerService<void, StripePrepared> {
     }
 
     static async fetchWebhookSecret(context: CliContext, apiKey: string): Promise<string> {
-        const result = await docker.run(['run', '--rm', '--network', 'host', stripeImage, 'listen', '--api-key', apiKey, '--print-secret'], { capture: true, verbose: context.verbose });
+        const result = await docker.run(['run', '--rm', '--network', 'host', stripeImage, 'listen', '--api-key', apiKey, '--print-secret'], { capture: true, verbosity: RunVerbosity.Quiet });
         const secret = result.stdout.trim().split('\n').at(-1)?.trim();
         if (!secret) {
             throw new Error('Stripe did not return a webhook signing secret.');
