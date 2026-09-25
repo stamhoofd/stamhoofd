@@ -80,8 +80,8 @@ export async function printSharedServicesStatus(context: CliContext): Promise<vo
 
 export async function tailSharedLogs(): Promise<void> {
     const runtime = await docker.getContainerRuntime();
-    await run('yarn', [
-        '-s',
+    await run('pnpm', [
+        'exec',
         'concurrently',
         '-n',
         'MySQL,MailDev,RustFS,CoreDNS,Caddy',

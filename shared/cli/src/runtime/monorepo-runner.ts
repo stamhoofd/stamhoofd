@@ -94,7 +94,7 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'redirecter', path: 'backend/app/redirecter', needsDatabase: false },
     { name: 'statistics-syncer', path: 'backend/app/statistics-syncer', needsDatabase: true, typecheck: true },
     { name: 'api', path: 'backend/app/api', needsDatabase: true, typecheck: true },
-    // Browser tests (vitest browser mode); need a Playwright Chromium: `yarn playwright install chromium`.
+    // Browser tests (vitest browser mode); need a Playwright Chromium: `pnpm --dir tests/playwright exec playwright install chromium`.
     { name: 'components', path: 'frontend/shared/components', needsDatabase: false },
     { name: 'networking', path: 'frontend/shared/networking', needsDatabase: false },
 ];
@@ -103,31 +103,31 @@ const sharedBuildReadyFile = `.development/cli/generated/shared-build-${process.
 export async function buildShared(context: CliContext): Promise<void> {
     console.log('\x1B[35m[BUILD]\x1B[0m Building globally shared dependencies...');
     for (const packagePath of globalSharedPackages) {
-        await run('yarn', ['--cwd', packagePath, '-s', 'build'], { cwd: context.rootDir, verbose: context.verbose });
+        await run('pnpm', ['--dir', packagePath, 'run', 'build'], { cwd: context.rootDir, verbose: context.verbose });
     }
     console.log('\x1B[35m[BUILD]\x1B[0m Building shared backend dependencies...');
     for (const packagePath of backendSharedPackages) {
-        await run('yarn', ['--cwd', packagePath, '-s', 'build'], { cwd: context.rootDir, verbose: context.verbose });
+        await run('pnpm', ['--dir', packagePath, 'run', 'build'], { cwd: context.rootDir, verbose: context.verbose });
     }
     console.log('\x1B[35m[BUILD]\x1B[0m Done building shared dependencies.');
 }
 
 export async function buildAll(context: CliContext): Promise<void> {
     await buildShared(context);
-    await run('yarn', ['-s', 'lerna', 'run', 'dev:build'], { cwd: context.rootDir, env: { NX_DAEMON: 'false', STAMHOOFD_ENV: context.env }, verbose: context.verbose });
+    await run('pnpm', ['exec', 'lerna', 'run', 'dev:build'], { cwd: context.rootDir, env: { NX_DAEMON: 'false', STAMHOOFD_ENV: context.env }, verbose: context.verbose });
 }
 
 export async function lint(context: CliContext): Promise<void> {
-    await run('yarn', ['-s', 'lerna', 'run', 'lint', '--', '--', '--quiet'], { cwd: context.rootDir, env: { NX_DAEMON: 'false' }, verbose: context.verbose });
+    await run('pnpm', ['exec', 'lerna', 'run', 'lint', '--', '--quiet'], { cwd: context.rootDir, env: { NX_DAEMON: 'false' }, verbose: context.verbose });
 }
 
 export async function typecheck(context: CliContext): Promise<void> {
-    await run('yarn', ['-s', 'lerna', 'run', 'typecheck'], { cwd: context.rootDir, env: { NX_DAEMON: 'false' }, verbose: context.verbose });
+    await run('pnpm', ['exec', 'lerna', 'run', 'typecheck'], { cwd: context.rootDir, env: { NX_DAEMON: 'false' }, verbose: context.verbose });
 }
 
 export async function migrate(context: CliContext): Promise<void> {
     await buildShared(context);
-    await run('yarn', ['-s', 'lerna', 'run', 'migrations', '--concurrency', '1'], { cwd: context.rootDir, env: { ...buildBackendEnv(context) }, verbose: context.verbose });
+    await run('pnpm', ['exec', 'lerna', 'run', 'migrations', '--concurrency', '1'], { cwd: context.rootDir, env: { ...buildBackendEnv(context) }, verbose: context.verbose });
 }
 
 const statisticsSyncerPackage = 'backend/app/statistics-syncer';
@@ -138,7 +138,7 @@ const statisticsSyncerPackage = 'backend/app/statistics-syncer';
  */
 export async function migratePlatformStatistics(context: CliContext): Promise<void> {
     await buildShared(context);
-    await run('yarn', ['--cwd', statisticsSyncerPackage, '-s', 'migrations'], { cwd: context.rootDir, env: { ...buildBackendEnv(context) }, verbose: context.verbose });
+    await run('pnpm', ['--dir', statisticsSyncerPackage, 'run', 'migrations'], { cwd: context.rootDir, env: { ...buildBackendEnv(context) }, verbose: context.verbose });
 }
 
 /**
@@ -148,7 +148,7 @@ export async function migratePlatformStatistics(context: CliContext): Promise<vo
 export async function runPlatformStatisticsSync(context: CliContext): Promise<void> {
     await new Promise<void>((resolve, reject) => {
         let stopping = false;
-        const child = spawn('yarn', ['--cwd', statisticsSyncerPackage, '-s', 'start'], {
+        const child = spawn('pnpm', ['--dir', statisticsSyncerPackage, 'run', 'start'], {
             cwd: context.rootDir,
             env: { ...process.env, ...buildBackendEnv(context) },
             stdio: 'inherit',
@@ -217,10 +217,10 @@ export async function runUnitTests(context: CliContext, options: UnitTestOptions
     try {
         for (const pkg of packages) {
             if (pkg.typecheck) {
-                await run('yarn', ['typecheck'], { cwd: path.join(context.rootDir, pkg.path), env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort }, verbose: context.verbose });
+                await run('pnpm', ['run', 'typecheck'], { cwd: path.join(context.rootDir, pkg.path), env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort }, verbose: context.verbose });
             }
 
-            const args = ['vitest', 'run'];
+            const args = ['exec', 'vitest', 'run'];
             if (passWithNoTests) {
                 args.push('--passWithNoTests');
             }
@@ -228,7 +228,7 @@ export async function runUnitTests(context: CliContext, options: UnitTestOptions
                 args.push('-t', options.testNamePattern);
             }
             args.push(...(options.fileFilters ?? []));
-            await run('yarn', args, { cwd: path.join(context.rootDir, pkg.path), env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort }, verbose: context.verbose });
+            await run('pnpm', args, { cwd: path.join(context.rootDir, pkg.path), env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort }, verbose: context.verbose });
         }
     } finally {
         // Shut down the container after the run; the data volume is kept for the next run.
@@ -253,9 +253,9 @@ export async function testE2e(context: CliContext, options: { ci: boolean; clear
         await startSharedServices(context, { skipMysql: mysql.kind === 'local' });
         shouldRestoreCaddy = true;
         if (!options.skipBuild) {
-            await run('yarn', ['--cwd', 'backend/app/api', '-s', 'build:playwright:pre'], { cwd: context.rootDir, env: databaseEnv, verbose: context.verbose });
+            await run('pnpm', ['--dir', 'backend/app/api', 'run', 'build:playwright:pre'], { cwd: context.rootDir, env: databaseEnv, verbose: context.verbose });
         }
-        await run('yarn', ['--cwd', 'tests/playwright', '-s', 'test', ...(options.ui ? ['--ui'] : []), ...(options.grep === undefined ? [] : ['--grep', options.grep]), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)])], { cwd: context.rootDir, env: { ...databaseEnv, NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, NODE_EXTRA_CA_CERTS: caddyRootCaPath(), PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined, PLAYWRIGHT_WORKER_COUNT: options.workers === undefined ? undefined : String(options.workers), STAMHOOFD_SKIP_FRONTEND_BUILD: options.skipBuild ? 'true' : undefined }, verbose: context.verbose });
+        await run('pnpm', ['--dir', 'tests/playwright', 'run', 'test', ...(options.ui ? ['--ui'] : []), ...(options.grep === undefined ? [] : ['--grep', options.grep]), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)])], { cwd: context.rootDir, env: { ...databaseEnv, NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, NODE_EXTRA_CA_CERTS: caddyRootCaPath(), PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined, PLAYWRIGHT_WORKER_COUNT: options.workers === undefined ? undefined : String(options.workers), STAMHOOFD_SKIP_FRONTEND_BUILD: options.skipBuild ? 'true' : undefined }, verbose: context.verbose });
     } finally {
         // Shut down the e2e MySQL container after the run; the data volume is kept for the next run.
         // A MySQL that was already running is left alone: it is not ours to stop.
@@ -294,9 +294,9 @@ export async function cleanBuild(context: CliContext, options: { dryRun?: boolea
 
 export function sharedBuildWatchCommand(): string {
     const command = [...globalSharedPackages, ...backendSharedPackages]
-        .map(packagePath => `yarn --cwd ${packagePath} -s build`)
+        .map(packagePath => `pnpm --dir ${packagePath} run build`)
         .join(' && ');
-    return `mkdir -p .development/cli/generated && rm -f ${sharedBuildReadyFile} && yarn -s nodemon --quiet --signal SIGTERM --watch shared --watch backend/shared --ignore './shared/*/dist/' --ignore './backend/shared/*/dist/' --ext .ts,.json,.sql,.mjs --exec '${command} && touch ${sharedBuildReadyFile} || exit 0'`;
+    return `mkdir -p .development/cli/generated && rm -f ${sharedBuildReadyFile} && pnpm exec nodemon --quiet --signal SIGTERM --watch shared --watch backend/shared --ignore './shared/*/dist/' --ignore './backend/shared/*/dist/' --ext .ts,.json,.sql,.mjs --exec '${command} && touch ${sharedBuildReadyFile} || exit 0'`;
 }
 
 export function sharedBuildReadyCommand(): string {
