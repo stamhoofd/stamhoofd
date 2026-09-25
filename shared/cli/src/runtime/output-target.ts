@@ -33,4 +33,13 @@ export function writeOutputLine(message: string, stream: OutputStream = OutputSt
     console.log(message);
 }
 
+export function writeOutputChunk(chunk: string | Buffer, stream: OutputStream): void {
+    if (activeOutputTarget) {
+        activeOutputTarget.write(chunk, stream);
+        return;
+    }
+
+    (stream === OutputStream.Stderr ? process.stderr : process.stdout).write(chunk);
+}
+
 export const defaultOutputWriter: OutputWriter = writeOutputLine;
