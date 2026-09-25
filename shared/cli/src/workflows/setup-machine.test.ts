@@ -245,6 +245,42 @@ describe('setup machine workflow', () => {
         expect(corednsService.status).not.toHaveBeenCalled();
     });
 
+    it('uses the setup command verbosity for checks', async () => {
+        setPlatform('linux');
+        mockSetupCommands({ dns: 'Global: 1.1.1.1\n', domains: 'Global:\n' });
+        vi.mocked(confirm).mockResolvedValue(false);
+
+        await runSetup({ rootDir: '/repo', verbosity: RunVerbosity.Output } as any);
+
+        expect(docker.getContainerRuntime).toHaveBeenCalledWith(RunVerbosity.Output);
+        expect(docker.containerIsRunning).toHaveBeenCalledWith(expect.any(String), RunVerbosity.Output);
+        expect(checkPackageManager).toHaveBeenCalledWith('/repo', RunVerbosity.Output);
+        expect(run).toHaveBeenCalledWith('caddy', ['version'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Output });
+        expect(run).toHaveBeenCalledWith('resolvectl', ['dns'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Output });
+        expect(run).toHaveBeenCalledWith('resolvectl', ['domain'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Output });
+        expect(run).toHaveBeenCalledWith('sudo', expect.arrayContaining(['iptables', '-C']), { capture: true, allowFailure: true, verbosity: RunVerbosity.Output });
+    });
+
+    it('uses the setup command verbosity for DNS and certificate verification', async () => {
+        setPlatform('darwin');
+        mockSetupCommands({ resolver: 'nameserver 127.0.0.1\n' });
+        vi.mocked(corednsService.status).mockResolvedValue({ name: 'CoreDNS', running: false, detail: '' });
+        vi.spyOn(fs, 'access').mockResolvedValue(undefined);
+
+        await checkSetup({ rootDir: '/repo', verbosity: RunVerbosity.Output } as any);
+
+        expect(run).toHaveBeenCalledWith('security', ['verify-cert', '-c', expect.any(String), '-p', 'ssl', '-l', '-L', '-q'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Output });
+    });
+
+    it('uses the setup command verbosity for DNS resolution', async () => {
+        setPlatform('linux');
+        mockSetupCommands({ dns: 'Global: 127.0.0.1:1053\n', domains: 'Global: ~stamhoofd\n' });
+
+        await checkSetup({ rootDir: '/repo', verbosity: RunVerbosity.Output } as any);
+
+        expect(run).toHaveBeenCalledWith('resolvectl', ['query', 'dashboard.stamhoofd'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Output });
+    });
+
     // Skipped: pre-existing failure on main, unrelated to this PR. The shared/cli suite is not run in CI.
     it.skip('recommends starting all shared services when DNS is configured but CoreDNS is stopped', async () => {
         mockSetupCommands({

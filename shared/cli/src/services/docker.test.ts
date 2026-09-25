@@ -26,6 +26,17 @@ describe('container runtime selection', () => {
         expect(runCommand).toHaveBeenCalledExactlyOnceWith('docker', ['info'], { verbosity: RunVerbosity.Quiet });
     });
 
+    it('forwards verbosity to runtime and container checks', async () => {
+        process.env.STAMHOOFD_CONTAINER_RUNTIME = 'Docker';
+        vi.mocked(runCommand).mockResolvedValueOnce(undefined as any).mockResolvedValueOnce({ stdout: 'true\n', stderr: '', status: 0 } as any);
+
+        await expect(docker.getContainerRuntime(RunVerbosity.Output)).resolves.toBe(docker.ContainerRuntime.Docker);
+        await expect(docker.containerIsRunning('caddy', RunVerbosity.Output)).resolves.toBe(true);
+
+        expect(runCommand).toHaveBeenNthCalledWith(1, 'docker', ['info'], { verbosity: RunVerbosity.Output });
+        expect(runCommand).toHaveBeenNthCalledWith(2, 'docker', ['inspect', '-f', '{{.State.Running}}', 'caddy'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Output });
+    });
+
     it('rejects an unknown pinned runtime', async () => {
         process.env.STAMHOOFD_CONTAINER_RUNTIME = 'containerd';
 
