@@ -295,6 +295,7 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
             });
         });
     } finally {
+        output.stop({ persistStatus: true });
         setActiveOutputTarget(undefined);
     }
 }

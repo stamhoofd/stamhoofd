@@ -1,7 +1,7 @@
 import { confirm as confirmPrompt } from '@inquirer/prompts';
 import chalk from 'chalk';
 import { spawn } from 'node:child_process';
-import readline from 'node:readline';
+import { StdSync } from '@stamhoofd/stdsync';
 import ora from 'ora';
 import terminalLink from 'terminal-link';
 import { stripVTControlCharacters } from 'node:util';
@@ -107,9 +107,8 @@ export class Table {
     private readonly rows: TableRowImpl[];
     private readonly title?: string;
     private readonly live: boolean;
-    private readonly stdout: NodeJS.WriteStream;
+    private readonly output = new StdSync();
     private frame = 0;
-    private lines = 0;
     private stopped = false;
     private interval: NodeJS.Timeout | undefined;
     private resolveWait: (() => void) | undefined;
@@ -125,7 +124,6 @@ export class Table {
         });
         this.title = options.title;
         this.live = options.live === true && process.stdout.isTTY;
-        this.stdout = process.stdout;
 
         this.rows.forEach(row => row.onUpdate(() => this.handleRowUpdate()));
 
@@ -189,6 +187,9 @@ export class Table {
             this.interval = undefined;
         }
         this.render(true);
+        if (this.live) {
+            this.output.done();
+        }
     }
 
     private render(force = false): void {
@@ -202,12 +203,7 @@ export class Table {
             return;
         }
 
-        if (this.lines > 0) {
-            readline.moveCursor(this.stdout, 0, -this.lines);
-            readline.clearScreenDown(this.stdout);
-        }
-        this.stdout.write(`${output}\n`);
-        this.lines = output.split('\n').length;
+        this.output.setLive(output);
         this.frame++;
     }
 }

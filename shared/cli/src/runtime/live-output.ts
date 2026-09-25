@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import logUpdate from 'log-update';
+import { StdSync } from '@stamhoofd/stdsync';
 import { OutputStream } from './output-target.js';
 import { link } from './ux.js';
 
@@ -34,6 +34,7 @@ export function createLiveOutput(options: {
     const stdout = options.stdout ?? process.stdout;
     const stderr = options.stderr ?? process.stderr;
     const interactive = (options.enabled ?? true) && stdout.isTTY;
+    const output = new StdSync({ stdout, stderr });
     let renderedStatus = '';
     let staticStatusPrinted = false;
     let liveStatusInterval: NodeJS.Timeout | undefined;
@@ -45,18 +46,12 @@ export function createLiveOutput(options: {
             return;
         }
         if (interactive) {
-            logUpdate(renderedStatus);
+            output.setLive(renderedStatus);
             return;
         }
         if (!staticStatusPrinted) {
             stdout.write(`${renderedStatus}\n`);
             staticStatusPrinted = true;
-        }
-    };
-
-    const clearStatus = () => {
-        if (interactive) {
-            logUpdate.clear();
         }
     };
 
@@ -106,42 +101,29 @@ export function createLiveOutput(options: {
             stopLiveStatus();
         },
         log(message) {
-            if (interactive) {
-                logUpdate.clear();
-            }
-            stdout.write(`${message}\n`);
-            renderStatus();
+            output.write(`${message}\n`);
         },
         write(chunk, stream = OutputStream.Stdout) {
-            const target = stream === OutputStream.Stderr ? stderr : stdout;
-            if (interactive) {
-                logUpdate.clear();
-            }
-            target.write(chunk);
-            renderStatus();
+            output.write(chunk, stream);
         },
         clearStatus() {
             stopLiveStatus();
             renderedStatus = '';
             staticStatusPrinted = false;
-            clearStatus();
+            output.clearLive();
         },
         stop(options = {}) {
             stopLiveStatus();
             if (!interactive) {
                 return;
             }
-            if (!renderedStatus) {
-                logUpdate.clear();
-                return;
-            }
             if (options.persistStatus) {
-                logUpdate.done();
+                output.done();
                 renderedStatus = '';
                 staticStatusPrinted = false;
                 return;
             }
-            logUpdate.clear();
+            output.clearLive();
             renderedStatus = '';
             staticStatusPrinted = false;
         },
