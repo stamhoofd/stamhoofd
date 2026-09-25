@@ -38,9 +38,9 @@ async function resolveJjPrimaryWorkspaceRoot(rootDir: string): Promise<string | 
         return null;
     }
 
-    const firstLine = result.stdout.trim().split('\n').find(line => line.trim());
-    const firstRoot = firstLine?.split('\t').at(1)?.trim();
-    return firstRoot || null;
+    const workspaces = result.stdout.trim().split('\n').filter(line => line.trim());
+    const primary = workspaces.find(line => line.startsWith('default\t')) ?? workspaces[0];
+    return primary?.split('\t').at(1)?.trim() || null;
 }
 
 async function resolveGitPrimaryWorktreeRoot(rootDir: string): Promise<string | null> {
