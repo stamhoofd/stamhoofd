@@ -24,6 +24,7 @@ export enum EmailTemplateType {
     DefaultOrdersEmail = 'DefaultOrdersEmail',
     DefaultDocumentsEmail = 'DefaultDocumentsEmail',
     DefaultPaymentsEmail = 'DefaultPaymentsEmail',
+    DefaultWebshopDiscountCodesEmail = 'DefaultWebshopDiscountCodesEmail',
 
     //
     MembersExpirationReminder = 'MembersExpirationReminder',
@@ -241,6 +242,10 @@ export class EmailTemplate extends AutoEncoder {
             return EmailTemplateType.DefaultPaymentsEmail;
         }
 
+        if (type === EmailRecipientFilterType.WebshopDiscountCodes) {
+            return EmailTemplateType.DefaultWebshopDiscountCodesEmail;
+        }
+
         return null;
     }
 
@@ -287,6 +292,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.DefaultOrdersEmail: return $t(`%pD`);
             case EmailTemplateType.DefaultDocumentsEmail: return $t('%1KN');
             case EmailTemplateType.DefaultPaymentsEmail: return $t('%1N4');
+            case EmailTemplateType.DefaultWebshopDiscountCodesEmail: return $t('Standaard e-mail met kortingscode');
 
             case EmailTemplateType.MembersExpirationReminder: return $t(`%pE`);
             case EmailTemplateType.WebshopsExpirationReminder: return $t(`%pF`);
@@ -373,6 +379,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.DefaultOrdersEmail:
             case EmailTemplateType.DefaultPaymentsEmail:
             case EmailTemplateType.DefaultDocumentsEmail:
+            case EmailTemplateType.DefaultWebshopDiscountCodesEmail:
                 return $t(`%Q`);
 
             case EmailTemplateType.MembersExpirationReminder:
@@ -485,6 +492,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.DefaultOrdersEmail: return true;
             case EmailTemplateType.DefaultDocumentsEmail: return true;
             case EmailTemplateType.DefaultPaymentsEmail: return true;
+            case EmailTemplateType.DefaultWebshopDiscountCodesEmail: return true;
 
             case EmailTemplateType.SavedMembersEmail: return true;
             case EmailTemplateType.SavedReceivableBalancesEmail: return true;
@@ -598,6 +606,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.DefaultOrdersEmail: return $t(`%qI`);
             case EmailTemplateType.DefaultDocumentsEmail: return $t('%1KO');
             case EmailTemplateType.DefaultPaymentsEmail: return $t('%1N5');
+            case EmailTemplateType.DefaultWebshopDiscountCodesEmail: return $t('Standaard e-mail die je kan gebruiken om persoonlijke kortingscodes te versturen.');
 
             case EmailTemplateType.OrderNotification: return $t(`%qJ`);
             case EmailTemplateType.RegistrationConfirmation: return $t(`%qK`);
@@ -877,6 +886,17 @@ export class EmailTemplate extends AutoEncoder {
                 ...ExampleReplacements.default,
                 ExampleReplacements.all.organizationName,
                 ExampleReplacements.all.mailDomain,
+            ];
+        }
+
+        if (type === EmailTemplateType.DefaultWebshopDiscountCodesEmail) {
+            return [
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.discountCode,
+                ExampleReplacements.all.discountUrl,
+                ExampleReplacements.all.webshopName,
+                ExampleReplacements.all.organizationName,
+                ExampleReplacements.all.unsubscribeUrl,
             ];
         }
 

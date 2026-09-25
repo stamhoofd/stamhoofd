@@ -12,6 +12,13 @@ export class DiscountCode extends AutoEncoder {
     @field({ decoder: StringDecoder, version: 241 })
     description = '';
 
+    /**
+     * Optional email address this code is associated with. Used to send the code to a specific
+     * recipient and to upsert codes by email on import. Not unique: codes stay otherwise anonymous.
+     */
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    email: string | null = null;
+
     @field({ decoder: new ArrayDecoder(Discount) })
     discounts: Discount[] = [];
 
