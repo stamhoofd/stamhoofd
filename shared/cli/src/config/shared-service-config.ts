@@ -109,13 +109,13 @@ export function caddyDataDir(): string {
     // The Caddy Docker image sets XDG_DATA_HOME=/data, so it reads PKI data from
     // /data/caddy (= caddyDataDirInContainer). We mount the host Caddy data dir
     // there so the container shares the same CA as the local `caddy` binary.
-    // On macOS the local binary uses ~/Library/Application Support/Caddy;
-    // on Linux it follows XDG (~/.local/share/caddy).
+    if (process.env.XDG_DATA_HOME) {
+        return path.join(process.env.XDG_DATA_HOME, 'caddy');
+    }
     if (process.platform === 'darwin') {
         return path.join(os.homedir(), 'Library/Application Support/Caddy');
     }
-    const dataHome = process.env.XDG_DATA_HOME ?? path.join(os.homedir(), '.local/share');
-    return path.join(dataHome, 'caddy');
+    return path.join(os.homedir(), '.local/share/caddy');
 }
 
 export function caddyRootCaPath(): string {
