@@ -41,7 +41,6 @@
         "dev": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'pnpm run build --watch --preserveWatchOutput' \"pnpm run dev:watch\"",
         "dev:backend": "pnpm run dev",
         "dev:build": "pnpm run build",
-        "dev:full": "pnpm run dev",
         "dev:watch": "wait-on ./dist/index.js && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../../shared/*/package.json' --watch '../../shared/*/dist/' --watch '../../shared/*/package.json' --ext .ts,.json,.sql,.js,.html --delay 2000ms --exec 'echo \"Restarting API...\" && exec node --enable-source-maps --use-system-ca ./dist/index.js' --signal SIGTERM",
         "lint": "eslint",
         "migrations": "pnpm run build:full && node ./dist/migrations.js",

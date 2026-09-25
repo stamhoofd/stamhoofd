@@ -7,7 +7,6 @@
         "build": "tsc --build tsconfig.build.json && pnpm run copy-assets",
         "build:full": "rm -rf ./dist && rm -f *.tsbuildinfo && pnpm run build",
         "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/ ./dist/",
-        "dev:full": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'pnpm run build --watch --preserveWatchOutput' \"wait-on ./dist/src/data/belgium.csv && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
         "lint": "eslint",
         "start": "pnpm run build && node ./dist/index.js",
         "typecheck": "tsc --build tsconfig.test.json",
