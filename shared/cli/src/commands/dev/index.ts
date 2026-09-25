@@ -35,7 +35,8 @@ export default class Dev extends BaseCommand {
     };
 
     async run(): Promise<void> {
-        const { args, flags } = await this.parse(Dev);
+        const parsed = await this.parse(Dev);
+        const { args, flags } = parsed;
         if (!args.target) {
             await showHelp(this.config, ['dev']);
             return;
@@ -49,7 +50,8 @@ export default class Dev extends BaseCommand {
             return;
         }
 
-        await runDev(await this.createContext(flags), target, {
+        const { context } = await this.parseWithContext(Dev, parsed);
+        await runDev(context, target, {
             services: flags.services ?? target !== DevTarget.Frontend,
             stripe: flags.stripe,
             open: flags.open,

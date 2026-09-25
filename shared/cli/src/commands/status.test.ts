@@ -28,7 +28,7 @@ describe('Status command', () => {
         vi.clearAllMocks();
     });
 
-    it('creates context with verbose only', async () => {
+    it('creates context from the parsed flags', async () => {
         const command = new Status([], {} as any);
         const createContext = vi.fn(async () => ({
             rootDir: '/repo',
@@ -54,7 +54,7 @@ describe('Status command', () => {
         expect(printNodeVersionStatus).toHaveBeenCalled();
         expect(checkPackageManager).toHaveBeenCalled();
         expect(printPackageManagerStatus).toHaveBeenCalled();
-        expect(createContext).toHaveBeenCalledWith({ verbose: true });
+        expect(createContext).toHaveBeenCalledWith({ current: false, watch: false, verbose: true }, Status.verbosity, undefined);
         expect(printSharedServicesStatus).toHaveBeenCalled();
         expect(listActiveInstanceManifests).toHaveBeenCalled();
     });

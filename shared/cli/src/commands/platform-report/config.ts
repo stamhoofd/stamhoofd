@@ -15,8 +15,7 @@ export default class PlatformReportConfig extends BaseCommand {
     static flags = BaseCommand.instanceFlags;
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(PlatformReportConfig);
-        const context = await this.createContext(flags);
+        const { context } = await this.parseWithContext(PlatformReportConfig);
         this.log(buildMetabaseConfigOutput(buildDomains(context), {
             name: metabaseDataSourceName(context.env),
             database: buildDatabases(context).platformStatistics,

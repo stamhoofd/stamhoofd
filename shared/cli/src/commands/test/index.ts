@@ -2,9 +2,11 @@ import { Args, Flags } from '@oclif/core';
 import { BaseCommand } from '../../base-command.js';
 import { ciFlag } from '../../command-flags.js';
 import { runUnitTests, unitTestPackages } from '../../runtime/monorepo-runner.js';
+import { RunVerbosity } from '../../runtime/command-runner.js';
 import { showHelp } from '../../runtime/show-help.js';
 
 export default class Test extends BaseCommand {
+    static override verbosity = RunVerbosity.Output;
     static summary = 'Run unit tests';
     static description = [
         'The first argument selects what to run: `unit` for every package, or a single package name',
@@ -35,7 +37,7 @@ export default class Test extends BaseCommand {
     };
 
     static flags = {
-        ...BaseCommand.verboseFlags,
+        ...this.verbosityFlags(),
         'ci': ciFlag,
         'clear': Flags.boolean({ default: false, description: 'Reset the persistent test database (drop its volume) before running' }),
         'test-name': Flags.string({ char: 't', description: 'Only run tests whose name matches this text (vitest -t)' }),
@@ -43,7 +45,8 @@ export default class Test extends BaseCommand {
     };
 
     async run(): Promise<void> {
-        const { argv, flags } = await this.parse(Test);
+        const parsed = await this.parse(Test);
+        const { argv, flags } = parsed;
         const positionals = argv as string[];
 
         if (positionals.length === 0) {
@@ -62,7 +65,8 @@ export default class Test extends BaseCommand {
             packages = [pkg];
         }
 
-        await runUnitTests(await this.createContext(flags), {
+        const { context } = await this.parseWithContext(Test, parsed);
+        await runUnitTests(context, {
             packages,
             fileFilters,
             testNamePattern: flags['test-name'],

@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { run } from './command-runner.js';
+import { run, RunVerbosity } from './command-runner.js';
 import type { ReleaseNotes } from './release-notes.js';
 import { resolveTranslationModel } from './translation/create-translation-model.js';
 import type { CodebaseGrepper, CommitDiffFetcher, TranslationModel } from './translation/translation-model.js';
@@ -48,7 +48,7 @@ export async function getCommitDiff(cwd: string, hash: string): Promise<string> 
     if (!/^[0-9a-f]{4,40}$/i.test(hash)) {
         return `Invalid commit hash: ${hash}`;
     }
-    const result = await run('git', ['show', '--no-color', '--stat', '--patch', hash], { cwd, capture: true, allowFailure: true });
+    const result = await run('git', ['show', '--no-color', '--stat', '--patch', hash], { cwd, capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
     if (result.status !== 0) {
         return `Could not load the diff for ${hash}: ${result.stderr.trim()}`;
     }
@@ -94,7 +94,7 @@ export async function grepCodebase(cwd: string, input: Record<string, unknown>):
         args.push('--', input.pathspec.trim());
     }
 
-    const result = await run('git', args, { cwd, capture: true, allowFailure: true });
+    const result = await run('git', args, { cwd, capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
 
     // git grep exits 1 (no error output) when there are simply no matches.
     if (result.status === 1 && result.stderr.trim().length === 0) {

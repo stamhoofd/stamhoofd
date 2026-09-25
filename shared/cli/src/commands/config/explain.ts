@@ -14,8 +14,7 @@ export default class ConfigExplain extends BaseCommand {
     static flags = BaseCommand.instanceFlags;
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(ConfigExplain);
-        const context = await this.createContext(flags);
+        const { context } = await this.parseWithContext(ConfigExplain);
         const domains = buildDomains(context);
         this.log(`Environment: ${context.env}`);
         this.log(`Instance:    ${context.instance.name}`);

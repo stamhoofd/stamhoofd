@@ -39,19 +39,20 @@ export default class Setup extends BaseCommand {
         }),
     };
 
-    static flags = { ...BaseCommand.verboseFlags, yes: yesFlag, 'dry-run': dryRunFlag };
+    static flags = { ...this.verbosityFlags(), 'yes': yesFlag, 'dry-run': dryRunFlag };
 
     async run(): Promise<void> {
-        const { args, flags } = await this.parse(Setup);
+        const parsed = await this.parse(Setup);
+        const { args, flags } = parsed;
         const rootDir = path.resolve(getProjectPath());
 
         if (args.action === SetupAction.Node) {
-            await setupNodeVersion(rootDir, { verbose: flags.verbose, dryRun: flags['dry-run'] });
+            await setupNodeVersion(rootDir, { dryRun: flags['dry-run'] });
             return;
         }
 
         if (args.action === SetupAction.Pnpm) {
-            await setupPackageManager(rootDir, { verbose: flags.verbose, dryRun: flags['dry-run'] });
+            await setupPackageManager(rootDir, { dryRun: flags['dry-run'] });
             return;
         }
 
@@ -60,16 +61,16 @@ export default class Setup extends BaseCommand {
             if (!nodeCheck.ok) {
                 printNodeVersionStatus(nodeCheck);
                 if (await confirm(`Install Node.js ${nodeCheck.expected} now?`, { default: true })) {
-                    await setupNodeVersion(rootDir, { verbose: flags.verbose });
+                    await setupNodeVersion(rootDir);
                 }
                 return;
             }
         }
 
-        const context = await this.createContext(flags);
+        const { context } = await this.parseWithContext(Setup, parsed);
 
         if (args.action === SetupAction.Dns) {
-            await setupDns({ yes: flags.yes, dryRun: flags['dry-run'], verbose: flags.verbose });
+            await setupDns({ yes: flags.yes, dryRun: flags['dry-run'] });
             return;
         }
 

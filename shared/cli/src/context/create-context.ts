@@ -3,6 +3,7 @@ import { resolvePrimaryInstance, resolvePrimaryWorkspaceRoot, resolveWorkspaceNa
 import { buildInstance } from './instance.js';
 import { getProjectPath } from './project-path.js';
 import { resolvePortOffset } from './port-allocation.js';
+import type { RunVerbosity } from '../runtime/command-runner.js';
 
 export type CliContext = {
     rootDir: string;
@@ -10,6 +11,7 @@ export type CliContext = {
     env: string;
     workspace: string;
     verbose: boolean;
+    verbosity?: RunVerbosity;
     instance: {
         name: string;
         prefix: string;

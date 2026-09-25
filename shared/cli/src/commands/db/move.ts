@@ -17,8 +17,7 @@ export default class DbMove extends BaseCommand {
     };
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(DbMove);
-        const context = await this.createContext(flags);
+        const { flags, context } = await this.parseWithContext(DbMove);
         await ensureMysqlRunning(context);
         const current = currentDatabase(context);
         const from = await resolveDatabaseOption({ flag: flags.from, message: 'Select the database to move from', current, includeCurrent: false });

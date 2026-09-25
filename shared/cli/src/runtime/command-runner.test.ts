@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
 import { spawn } from 'node:child_process';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { run } from './command-runner.js';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { run, RunVerbosity } from './command-runner.js';
 import { writeOutputLine } from './output-target.js';
 
 vi.mock('node:child_process', () => ({
@@ -18,32 +18,65 @@ vi.mock('./ux.js', () => ({
 }));
 
 describe('command runner', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
     afterEach(() => {
         vi.restoreAllMocks();
     });
 
-    it('prints captured commands when verbose mode is enabled', async () => {
+    it('prints commands by default while suppressing child output', async () => {
         const child = createChild();
         vi.mocked(spawn).mockReturnValue(child as never);
 
-        const promise = run('git', ['status'], { capture: true, verbose: true });
-        child.stdout.emit('data', 'ok');
-        child.stderr.emit('data', '');
+        const promise = run('git', ['status']);
+        child.stdout.emit('data', 'hidden output');
         child.emit('exit', 0);
 
-        await expect(promise).resolves.toEqual({ stdout: 'ok', stderr: '', status: 0 });
+        await expect(promise).resolves.toBeUndefined();
         expect(writeOutputLine).toHaveBeenCalledWith('  git status');
+        expect(spawn).toHaveBeenCalledWith('git', ['status'], expect.objectContaining({ stdio: ['ignore', 'ignore', 'pipe'] }));
     });
 
-    it('includes stderr in failed quiet command errors', async () => {
+    it('does not print quiet commands and includes stderr on failure', async () => {
         const child = createChild();
         vi.mocked(spawn).mockReturnValue(child as never);
 
-        const promise = run('podman', ['run', 'docker.io/example/image:latest'], { quiet: true });
+        const promise = run('podman', ['run', 'docker.io/example/image:latest'], { verbosity: RunVerbosity.Quiet });
         child.stderr.emit('data', 'Error: real failure\n');
         child.emit('exit', 125);
 
         await expect(promise).rejects.toThrow('podman run docker.io/example/image:latest exited with status 125: Error: real failure');
+        expect(writeOutputLine).not.toHaveBeenCalled();
+    });
+
+    it('connects child stdout and stderr to parent stderr in output mode', async () => {
+        const child = createChild();
+        vi.mocked(spawn).mockReturnValue(child as never);
+
+        const promise = run('pnpm', ['run', 'build'], { verbosity: RunVerbosity.Output });
+        child.emit('exit', 0);
+
+        await expect(promise).resolves.toBeUndefined();
+        expect(writeOutputLine).toHaveBeenCalledWith('  pnpm run build');
+        expect(spawn).toHaveBeenCalledWith('pnpm', ['run', 'build'], expect.objectContaining({ stdio: ['inherit', 2, 2] }));
+    });
+
+    it('returns captured output without forwarding it', async () => {
+        const child = createChild();
+        vi.mocked(spawn).mockReturnValue(child as never);
+        const write = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+
+        const promise = run('git', ['status'], { capture: true, verbosity: RunVerbosity.Output });
+        child.stdout.emit('data', 'ok');
+        child.stderr.emit('data', 'warning');
+        child.emit('exit', 0);
+
+        await expect(promise).resolves.toEqual({ stdout: 'ok', stderr: 'warning', status: 0 });
+        expect(writeOutputLine).toHaveBeenCalledWith('  git status');
+        expect(write).not.toHaveBeenCalled();
+        expect(spawn).toHaveBeenCalledWith('git', ['status'], expect.objectContaining({ stdio: ['ignore', 'pipe', 'pipe'] }));
     });
 });
 

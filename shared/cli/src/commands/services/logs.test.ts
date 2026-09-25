@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ServicesLogs from './logs.js';
 import { tailSharedLogs } from '../../services/shared-services.js';
+import { RunVerbosity } from '../../runtime/command-runner.js';
 
 vi.mock('../../services/shared-services.js', () => ({
     tailSharedLogs: vi.fn(),
@@ -11,13 +12,13 @@ describe('ServicesLogs command', () => {
         vi.clearAllMocks();
     });
 
-    it('tails shared logs without creating a context', async () => {
+    it('tails shared logs at the selected verbosity', async () => {
         const command = new ServicesLogs([], {} as any);
         (command as any).config = {};
-        (command as any).parse = vi.fn(async () => ({ flags: { verbose: true } }));
+        (command as any).parseWithContext = vi.fn(async () => ({ context: { verbosity: RunVerbosity.Command } }));
 
         await command.run();
 
-        expect(tailSharedLogs).toHaveBeenCalledTimes(1);
+        expect(tailSharedLogs).toHaveBeenCalledExactlyOnceWith(RunVerbosity.Command);
     });
 });

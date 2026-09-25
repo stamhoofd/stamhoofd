@@ -16,8 +16,7 @@ export default class DbBackupRemove extends BaseCommand {
     };
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(DbBackupRemove);
-        const context = await this.createContext(flags);
+        const { flags, context } = await this.parseWithContext(DbBackupRemove);
         const from = await resolveBackupOption({ context, flag: flags.from, message: 'Select the backup to remove' });
 
         await removeBackup(context, from);

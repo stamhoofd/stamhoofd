@@ -11,8 +11,7 @@ export default class SsoStop extends BaseCommand {
     static flags = BaseCommand.instanceFlags;
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(SsoStop);
-        const context = await this.createContext(flags);
+        const { context } = await this.parseWithContext(SsoStop);
         await ssoService.stop(context);
         this.log('Local SSO server stopped.');
     }

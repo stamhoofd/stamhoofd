@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { run } from '../runtime/command-runner.js';
+import { run, RunVerbosity } from '../runtime/command-runner.js';
 import { CliStatus } from '../runtime/status.js';
 import { command, statusCell, success, table, warning } from '../runtime/ux.js';
 
@@ -21,7 +21,7 @@ export async function checkPackageManager(rootDir: string): Promise<PackageManag
     }
 
     const expected = match[1];
-    const result = await run('pnpm', ['--version'], { capture: true, allowFailure: true, cwd: rootDir });
+    const result = await run('pnpm', ['--version'], { capture: true, allowFailure: true, cwd: rootDir, verbosity: RunVerbosity.Quiet });
     if (result.status !== 0) {
         const error = result.stderr.trim();
         return {
@@ -46,7 +46,7 @@ export async function checkPackageManager(rootDir: string): Promise<PackageManag
     };
 }
 
-export async function setupPackageManager(rootDir: string, options: { verbose: boolean; dryRun?: boolean }): Promise<void> {
+export async function setupPackageManager(rootDir: string, options: { dryRun?: boolean } = {}): Promise<void> {
     if (options.dryRun) {
         console.log(command('corepack enable'));
         console.log(command('corepack install'));
@@ -54,8 +54,8 @@ export async function setupPackageManager(rootDir: string, options: { verbose: b
         return;
     }
 
-    await run('corepack', ['enable'], { cwd: rootDir, verbose: options.verbose });
-    await run('corepack', ['install'], { cwd: rootDir, verbose: options.verbose });
+    await run('corepack', ['enable'], { cwd: rootDir, verbosity: RunVerbosity.Output });
+    await run('corepack', ['install'], { cwd: rootDir, verbosity: RunVerbosity.Output });
     success('pnpm installed through Corepack.');
 }
 

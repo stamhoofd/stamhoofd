@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { run } from './command-runner.js';
+import { run, RunVerbosity } from './command-runner.js';
 
 type ReadOptions = {
     optional?: boolean;
@@ -60,13 +60,13 @@ async function read1PasswordCliCached(key: string, account: string, options: Rea
 }
 
 async function read1PasswordCliUncached(key: string, account: string, options: ReadOptions): Promise<string> {
-    const scoped = await run('op', ['read', '--account', account, key], { capture: true, allowFailure: true });
+    const scoped = await run('op', ['read', '--account', account, key], { capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
     if (scoped.status === 0) {
         return parseValue(scoped.stdout, key, options);
     }
 
     if (scoped.stderr.includes('found no accounts for filter')) {
-        const unscoped = await run('op', ['read', key], { capture: true, allowFailure: true });
+        const unscoped = await run('op', ['read', key], { capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
         if (unscoped.status === 0) {
             return parseValue(unscoped.stdout, key, options);
         }

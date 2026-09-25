@@ -62,7 +62,7 @@ describe('Setup command', () => {
 
         await command.run();
 
-        expect(setupDns).toHaveBeenCalledWith({ yes: true, dryRun: true, verbose: true });
+        expect(setupDns).toHaveBeenCalledWith({ yes: true, dryRun: true });
         expect(runSetup).not.toHaveBeenCalled();
     });
 
@@ -98,7 +98,7 @@ describe('Setup command', () => {
 
         await command.run();
 
-        expect(setupNodeVersion).toHaveBeenCalledWith(expect.any(String), { verbose: true, dryRun: false });
+        expect(setupNodeVersion).toHaveBeenCalledWith(expect.any(String), { dryRun: false });
         expect(runSetup).not.toHaveBeenCalled();
     });
 
@@ -110,7 +110,7 @@ describe('Setup command', () => {
 
         await command.run();
 
-        expect(setupPackageManager).toHaveBeenCalledWith(expect.any(String), { verbose: true, dryRun: true });
+        expect(setupPackageManager).toHaveBeenCalledWith(expect.any(String), { dryRun: true });
         expect((command as any).createContext).not.toHaveBeenCalled();
         expect(runSetup).not.toHaveBeenCalled();
     });
@@ -132,7 +132,7 @@ describe('Setup command', () => {
 
         expect(printNodeVersionStatus).toHaveBeenCalled();
         expect(confirm).toHaveBeenCalledWith('Install Node.js v22.22.3 now?', { default: true });
-        expect(setupNodeVersion).toHaveBeenCalledWith(expect.any(String), { verbose: true });
+        expect(setupNodeVersion).toHaveBeenCalledWith(expect.any(String));
         expect((command as any).createContext).not.toHaveBeenCalled();
         expect(runSetup).not.toHaveBeenCalled();
     });

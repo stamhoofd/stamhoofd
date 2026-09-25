@@ -9,11 +9,11 @@ export default class ServicesDown extends BaseCommand {
         'stam services stop --verbose',
     ];
 
-    static flags = BaseCommand.verboseFlags;
+    static flags = this.verbosityFlags();
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(ServicesDown);
-        await stopSharedServicesInteractive(await this.createContext(flags));
+        const { context } = await this.parseWithContext(ServicesDown);
+        await stopSharedServicesInteractive(context);
         this.log('Shared services stopped.');
     }
 }

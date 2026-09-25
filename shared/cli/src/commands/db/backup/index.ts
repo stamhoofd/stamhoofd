@@ -16,8 +16,7 @@ export default class DbBackup extends BaseCommand {
     };
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(DbBackup);
-        const context = await this.createContext(flags);
+        const { flags, context } = await this.parseWithContext(DbBackup);
         const name = flags.name ?? defaultBackupName();
 
         if (!isValidBackupName(name)) {

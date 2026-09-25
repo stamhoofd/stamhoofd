@@ -16,8 +16,7 @@ export default class DbRemove extends BaseCommand {
     };
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(DbRemove);
-        const context = await this.createContext(flags);
+        const { flags, context } = await this.parseWithContext(DbRemove);
         await ensureMysqlRunning(context);
         const current = currentDatabase(context);
         const from = await resolveDatabaseOption({ flag: flags.from, message: 'Select the database to remove', current, includeCurrent: false });
