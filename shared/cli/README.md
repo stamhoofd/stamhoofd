@@ -27,7 +27,7 @@ Run `pnpm stam --help` or `pnpm stam <topic> --help` for command help.
 | Area        | Command                                | Purpose                                                                    |
 | ----------- | -------------------------------------- | -------------------------------------------------------------------------- |
 | Build       | `pnpm stam build`                      | Build shared packages and all app packages for the selected environment.   |
-| Setup       | `pnpm stam setup`                      | Check the machine and offer recommended setup fixes.                       |
+| Setup       | `pnpm stam setup`                      | Check the machine, offer fixes, and recheck for newly revealed issues.     |
 | Setup       | `pnpm stam setup node`                 | Install the Node.js version from `.nvmrc` using fnm or nvm.                |
 | Setup       | `pnpm stam setup pnpm`                 | Repair the pinned pnpm runtime through Corepack.                           |
 | Setup       | `pnpm stam setup dns`                  | Configure local `.stamhoofd` DNS.                                          |
