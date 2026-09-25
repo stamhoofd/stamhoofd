@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { run } from '../runtime/command-runner.js';
 import { resolvePrimaryInstance } from './workspace.js';
 
-vi.mock('../runtime/command-runner.js', () => ({
+vi.mock('../runtime/command-runner.js', async importOriginal => ({
+    ...await importOriginal<typeof import('../runtime/command-runner.js')>(),
     run: vi.fn(),
 }));
 

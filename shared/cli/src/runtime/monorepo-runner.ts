@@ -10,7 +10,7 @@ import { buildPorts } from '../context/ports.js';
 import { CaddyService } from '../services/definitions/caddy-service.js';
 import * as docker from '../services/docker.js';
 import { startSharedServices } from '../services/shared-services.js';
-import { run } from './command-runner.js';
+import { run, RunVerbosity } from './command-runner.js';
 import { isPortListening } from './port-probe.js';
 
 const globalSharedPackages = [
@@ -103,31 +103,31 @@ const sharedBuildReadyFile = `.development/cli/generated/shared-build-${process.
 export async function buildShared(context: CliContext): Promise<void> {
     console.log('\x1B[35m[BUILD]\x1B[0m Building globally shared dependencies...');
     for (const packagePath of globalSharedPackages) {
-        await run('pnpm', ['--dir', packagePath, 'run', 'build'], { cwd: context.rootDir, verbose: context.verbose });
+        await run('pnpm', ['--dir', packagePath, 'run', 'build'], { cwd: context.rootDir, verbosity: context.verbosity ?? RunVerbosity.Output });
     }
     console.log('\x1B[35m[BUILD]\x1B[0m Building shared backend dependencies...');
     for (const packagePath of backendSharedPackages) {
-        await run('pnpm', ['--dir', packagePath, 'run', 'build'], { cwd: context.rootDir, verbose: context.verbose });
+        await run('pnpm', ['--dir', packagePath, 'run', 'build'], { cwd: context.rootDir, verbosity: context.verbosity ?? RunVerbosity.Output });
     }
     console.log('\x1B[35m[BUILD]\x1B[0m Done building shared dependencies.');
 }
 
 export async function buildAll(context: CliContext): Promise<void> {
     await buildShared(context);
-    await run('pnpm', ['exec', 'lerna', 'run', 'dev:build'], { cwd: context.rootDir, env: { NX_DAEMON: 'false', STAMHOOFD_ENV: context.env }, verbose: context.verbose });
+    await run('pnpm', ['exec', 'lerna', 'run', 'dev:build'], { cwd: context.rootDir, env: { NX_DAEMON: 'false', STAMHOOFD_ENV: context.env }, verbosity: context.verbosity ?? RunVerbosity.Output });
 }
 
 export async function lint(context: CliContext): Promise<void> {
-    await run('pnpm', ['exec', 'lerna', 'run', 'lint', '--', '--quiet'], { cwd: context.rootDir, env: { NX_DAEMON: 'false' }, verbose: context.verbose });
+    await run('pnpm', ['exec', 'lerna', 'run', 'lint', '--', '--quiet'], { cwd: context.rootDir, env: { NX_DAEMON: 'false' }, verbosity: context.verbosity ?? RunVerbosity.Output });
 }
 
 export async function typecheck(context: CliContext): Promise<void> {
-    await run('pnpm', ['exec', 'lerna', 'run', 'typecheck'], { cwd: context.rootDir, env: { NX_DAEMON: 'false' }, verbose: context.verbose });
+    await run('pnpm', ['exec', 'lerna', 'run', 'typecheck'], { cwd: context.rootDir, env: { NX_DAEMON: 'false' }, verbosity: context.verbosity ?? RunVerbosity.Output });
 }
 
 export async function migrate(context: CliContext): Promise<void> {
     await buildShared(context);
-    await run('pnpm', ['exec', 'lerna', 'run', 'migrations', '--concurrency', '1'], { cwd: context.rootDir, env: { ...buildBackendEnv(context) }, verbose: context.verbose });
+    await run('pnpm', ['exec', 'lerna', 'run', 'migrations', '--concurrency', '1'], { cwd: context.rootDir, env: { ...buildBackendEnv(context) }, verbosity: context.verbosity ?? RunVerbosity.Output });
 }
 
 const statisticsSyncerPackage = 'backend/app/statistics-syncer';
@@ -138,7 +138,7 @@ const statisticsSyncerPackage = 'backend/app/statistics-syncer';
  */
 export async function migratePlatformStatistics(context: CliContext): Promise<void> {
     await buildShared(context);
-    await run('pnpm', ['--dir', statisticsSyncerPackage, 'run', 'migrations'], { cwd: context.rootDir, env: { ...buildBackendEnv(context) }, verbose: context.verbose });
+    await run('pnpm', ['--dir', statisticsSyncerPackage, 'run', 'migrations'], { cwd: context.rootDir, env: { ...buildBackendEnv(context) }, verbosity: context.verbosity ?? RunVerbosity.Output });
 }
 
 /**
@@ -217,7 +217,7 @@ export async function runUnitTests(context: CliContext, options: UnitTestOptions
     try {
         for (const pkg of packages) {
             if (pkg.typecheck) {
-                await run('pnpm', ['run', 'typecheck'], { cwd: path.join(context.rootDir, pkg.path), env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort }, verbose: context.verbose });
+                await run('pnpm', ['run', 'typecheck'], { cwd: path.join(context.rootDir, pkg.path), env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort }, verbosity: context.verbosity ?? RunVerbosity.Output });
             }
 
             const args = ['exec', 'vitest', 'run'];
@@ -228,7 +228,7 @@ export async function runUnitTests(context: CliContext, options: UnitTestOptions
                 args.push('-t', options.testNamePattern);
             }
             args.push(...(options.fileFilters ?? []));
-            await run('pnpm', args, { cwd: path.join(context.rootDir, pkg.path), env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort }, verbose: context.verbose });
+            await run('pnpm', args, { cwd: path.join(context.rootDir, pkg.path), env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort }, verbosity: context.verbosity ?? RunVerbosity.Output });
         }
     } finally {
         // Shut down the container after the run; the data volume is kept for the next run.
@@ -253,9 +253,9 @@ export async function testE2e(context: CliContext, options: { ci: boolean; clear
         await startSharedServices(context, { skipMysql: mysql.kind === 'local' });
         shouldRestoreCaddy = true;
         if (!options.skipBuild) {
-            await run('pnpm', ['--dir', 'backend/app/api', 'run', 'build:playwright:pre'], { cwd: context.rootDir, env: databaseEnv, verbose: context.verbose });
+            await run('pnpm', ['--dir', 'backend/app/api', 'run', 'build:playwright:pre'], { cwd: context.rootDir, env: databaseEnv, verbosity: context.verbosity ?? RunVerbosity.Output });
         }
-        await run('pnpm', ['--dir', 'tests/playwright', 'run', 'test', ...(options.ui ? ['--ui'] : []), ...(options.grep === undefined ? [] : ['--grep', options.grep]), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)])], { cwd: context.rootDir, env: { ...databaseEnv, NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, NODE_EXTRA_CA_CERTS: caddyRootCaPath(), PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined, PLAYWRIGHT_WORKER_COUNT: options.workers === undefined ? undefined : String(options.workers), STAMHOOFD_SKIP_FRONTEND_BUILD: options.skipBuild ? 'true' : undefined }, verbose: context.verbose });
+        await run('pnpm', ['--dir', 'tests/playwright', 'run', 'test', ...(options.ui ? ['--ui'] : []), ...(options.grep === undefined ? [] : ['--grep', options.grep]), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)])], { cwd: context.rootDir, env: { ...databaseEnv, NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, NODE_EXTRA_CA_CERTS: caddyRootCaPath(), PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined, PLAYWRIGHT_WORKER_COUNT: options.workers === undefined ? undefined : String(options.workers), STAMHOOFD_SKIP_FRONTEND_BUILD: options.skipBuild ? 'true' : undefined }, verbosity: context.verbosity ?? RunVerbosity.Output });
     } finally {
         // Shut down the e2e MySQL container after the run; the data volume is kept for the next run.
         // A MySQL that was already running is left alone: it is not ours to stop.
@@ -343,13 +343,13 @@ async function ensureTestMysql(context: CliContext, names: { container: string; 
     if (!await docker.containerIsRunning(container)) {
         await docker.removeContainer(container, context.verbose);
         await docker.createVolume(volume, context.verbose);
-        await docker.run(['run', '-d', '--name', container, '-e', `MYSQL_ROOT_PASSWORD=${mysqlRootPassword}`, '-p', localhostPortMappingDynamic(mysqlInternalPort), '-v', `${volume}:/var/lib/mysql`, mysqlImage, ...mysqlServerArgs()], { quiet: true, verbose: context.verbose });
+        await docker.run(['run', '-d', '--name', container, '-e', `MYSQL_ROOT_PASSWORD=${mysqlRootPassword}`, '-p', localhostPortMappingDynamic(mysqlInternalPort), '-v', `${volume}:/var/lib/mysql`, mysqlImage, ...mysqlServerArgs()], { verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
     }
 
     await docker.waitForMysql(container);
-    await docker.run(['exec', container, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-e', 'CREATE DATABASE IF NOT EXISTS `stamhoofd-tests` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;'], { quiet: true, verbose: context.verbose });
+    await docker.run(['exec', container, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-e', 'CREATE DATABASE IF NOT EXISTS `stamhoofd-tests` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;'], { verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
 
-    const port = await docker.run(['port', container, '3306/tcp'], { capture: true, verbose: context.verbose });
+    const port = await docker.run(['port', container, '3306/tcp'], { capture: true, verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
     const dbPort = port.stdout.trim().split(':').at(-1);
     if (!dbPort) {
         throw new Error(`Could not determine test MySQL port for ${container}.`);

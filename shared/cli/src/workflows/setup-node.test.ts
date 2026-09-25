@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as commandRunner from '../runtime/command-runner.js';
+import { RunVerbosity } from '../runtime/command-runner.js';
 import { checkNodeVersion, nodeInstallCommand, setupNodeVersion } from './setup-node.js';
 
 describe('setup node workflow', () => {
@@ -44,12 +45,12 @@ describe('setup node workflow', () => {
         const messages: string[] = [];
         vi.spyOn(console, 'log').mockImplementation(message => messages.push(String(message)));
 
-        await setupNodeVersion(tmpDir, { verbose: true });
+        await setupNodeVersion(tmpDir);
 
         expect(run).toHaveBeenCalledWith(
             'bash',
             ['-c', '. "$1"', 'stam-install-node', path.join(tmpDir, '.development/install-node.sh')],
-            { cwd: tmpDir, verbose: true },
+            { cwd: tmpDir, verbosity: RunVerbosity.Output },
         );
         expect(nodeInstallCommand(tmpDir, tmpDir)).toBe('source ".development/install-node.sh"');
         expect(nodeInstallCommand(tmpDir, path.join(tmpDir, 'frontend/app'))).toBe('source "../../.development/install-node.sh"');
@@ -61,7 +62,7 @@ describe('setup node workflow', () => {
         tmpDir = await createProject('v99.1.2');
         const run = vi.spyOn(commandRunner, 'run').mockResolvedValue(undefined);
 
-        await setupNodeVersion(tmpDir, { verbose: false, dryRun: true });
+        await setupNodeVersion(tmpDir, { dryRun: true });
 
         expect(run).not.toHaveBeenCalled();
     });

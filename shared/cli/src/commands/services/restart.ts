@@ -9,11 +9,11 @@ export default class ServicesRestart extends BaseCommand {
         'stam services restart',
         'stam services restart --verbose',
     ];
-    static flags = BaseCommand.verboseFlags;
+    static flags = this.verbosityFlags();
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(ServicesRestart);
-        await restartSharedServicesInteractive(await this.createContext(flags));
+        const { context } = await this.parseWithContext(ServicesRestart);
+        await restartSharedServicesInteractive(context);
         success('Shared services restarted.');
     }
 }

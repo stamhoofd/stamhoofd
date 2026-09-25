@@ -1,10 +1,10 @@
 import { Args, Flags } from '@oclif/core';
 import { BaseCommand } from '../../base-command.js';
 import { yesFlag } from '../../command-flags.js';
-import { getProjectPath } from '../../context/project-path.js';
-import { run } from '../../runtime/command-runner.js';
+import { run, RunVerbosity } from '../../runtime/command-runner.js';
 
 export default class DocsMigrate extends BaseCommand {
+    static override verbosity = RunVerbosity.Output;
     static summary = 'Import a Ghost export into the docs site as Docus content';
     static description = [
         'Converts a Ghost JSON export into Docus markdown under docs/content/, grouped by tag.',
@@ -23,16 +23,22 @@ export default class DocsMigrate extends BaseCommand {
     };
 
     static flags = {
-        ...BaseCommand.verboseFlags,
+        ...this.verbosityFlags(),
         clean: Flags.boolean({ default: false, description: 'Remove all existing content before importing' }),
         yes: yesFlag,
     };
 
     async run(): Promise<void> {
-        const { args, flags } = await this.parse(DocsMigrate);
+        const parsed = await this.parse(DocsMigrate);
+        const { args, flags } = parsed;
 
         if (!args.export && !flags.clean) {
             this.error('Pass a Ghost export path to import, and/or --clean.');
+        }
+
+        const { context } = await this.parseWithContext(DocsMigrate, parsed);
+        if (context.verbosity !== RunVerbosity.Output && !flags.yes) {
+            this.error('--quiet requires --yes because the migrator may prompt for confirmation.');
         }
 
         const passthrough = [
@@ -41,10 +47,9 @@ export default class DocsMigrate extends BaseCommand {
             ...(flags.yes ? ['--yes'] : []),
         ];
 
-        // stdio is inherited so the migrator's confirmation prompt works.
         await run('pnpm', ['--dir', '.development/docs-migration', 'run', 'start', ...passthrough], {
-            cwd: getProjectPath(),
-            verbose: flags.verbose,
+            cwd: context.rootDir,
+            verbosity: context.verbosity ?? RunVerbosity.Output,
         });
     }
 }

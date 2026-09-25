@@ -2,6 +2,7 @@ import { buildDatabases, buildDomains } from '../../config/build-config.js';
 import { dockerHostGateway, localIpv4Host, localhostPortMapping, metabaseAppDatabase, metabaseContainer, metabaseImage, metabaseInternalPort, mysqlContainer, mysqlRootPassword, mysqlRootUser } from '../../config/shared-service-config.js';
 import type { CliContext } from '../../context/create-context.js';
 import { buildPorts } from '../../context/ports.js';
+import { RunVerbosity } from '../../runtime/command-runner.js';
 import { link } from '../../runtime/ux.js';
 import { SharedDockerService } from '../docker-service.js';
 import * as docker from '../docker.js';
@@ -173,19 +174,19 @@ export class MetabaseService extends SharedDockerService {
      * without tables means those have not run yet.
      */
     private async countTables(context: CliContext, database: string): Promise<number> {
-        const result = await docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-N', '-B', '-e', `SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = '${database.replaceAll("'", "''")}'`], { capture: true, quiet: true, verbose: context.verbose });
+        const result = await docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-N', '-B', '-e', `SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = '${database.replaceAll("'", "''")}'`], { capture: true, verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
         return Number.parseInt(result.stdout.trim(), 10) || 0;
     }
 
     /** How many rows a table holds, used to tell whether the maps have coordinates to plot. */
     private async countRows(context: CliContext, database: string, table: string): Promise<number> {
         const query = `SELECT COUNT(*) FROM \`${database.replaceAll('`', '``')}\`.\`${table.replaceAll('`', '``')}\``;
-        const result = await docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-N', '-B', '-e', query], { capture: true, quiet: true, verbose: context.verbose });
+        const result = await docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-N', '-B', '-e', query], { capture: true, verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
         return Number.parseInt(result.stdout.trim(), 10) || 0;
     }
 
     private async createMysqlDatabase(context: CliContext, database: string): Promise<void> {
-        await docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-e', `CREATE DATABASE IF NOT EXISTS \`${database.replaceAll('`', '``')}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;`], { quiet: true, verbose: context.verbose });
+        await docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-e', `CREATE DATABASE IF NOT EXISTS \`${database.replaceAll('`', '``')}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;`], { verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
     }
 
     /**

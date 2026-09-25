@@ -15,8 +15,7 @@ export default class PlatformReportDashboards extends BaseCommand {
     static flags = BaseCommand.instanceFlags;
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(PlatformReportDashboards);
-        const context = await this.createContext(flags);
+        const { context } = await this.parseWithContext(PlatformReportDashboards);
 
         const result = await step(`Writing the ${context.env} report to Metabase`, async () => await metabaseService.provisionReport(context), {
             successMessage: result => `${result.cards} questions across ${result.dashboards.reduce((total, dashboard) => total + dashboard.tabs.length, 0)} tabs`,

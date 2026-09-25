@@ -21,7 +21,8 @@ vi.mock('../../runtime/ux.js', () => ({
     warning: vi.fn(),
 }));
 
-vi.mock('../../runtime/command-runner.js', () => ({
+vi.mock('../../runtime/command-runner.js', async importOriginal => ({
+    ...await importOriginal<typeof import('../../runtime/command-runner.js')>(),
     run: vi.fn(),
 }));
 

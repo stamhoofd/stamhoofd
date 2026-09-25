@@ -12,8 +12,7 @@ export default class PlatformReportLogs extends BaseCommand {
     static flags = BaseCommand.instanceFlags;
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(PlatformReportLogs);
-        const context = await this.createContext(flags);
+        const { context } = await this.parseWithContext(PlatformReportLogs);
         await metabaseService.logs?.(context);
     }
 }

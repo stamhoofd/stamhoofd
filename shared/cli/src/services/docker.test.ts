@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { run as runCommand } from '../runtime/command-runner.js';
+import { run as runCommand, RunVerbosity } from '../runtime/command-runner.js';
 import * as docker from './docker.js';
 
-vi.mock('../runtime/command-runner.js', () => ({
+vi.mock('../runtime/command-runner.js', async importOriginal => ({
+    ...await importOriginal<typeof import('../runtime/command-runner.js')>(),
     run: vi.fn(),
 }));
 
@@ -22,7 +23,7 @@ describe('container runtime selection', () => {
 
         await expect(docker.getContainerRuntime()).resolves.toBe(docker.ContainerRuntime.Docker);
 
-        expect(runCommand).toHaveBeenCalledExactlyOnceWith('docker', ['info'], { quiet: true });
+        expect(runCommand).toHaveBeenCalledExactlyOnceWith('docker', ['info'], { verbosity: RunVerbosity.Quiet });
     });
 
     it('rejects an unknown pinned runtime', async () => {
@@ -39,8 +40,8 @@ describe('container runtime selection', () => {
         await docker.run(['ps']);
         await docker.run(['logs', 'container']);
 
-        expect(runCommand).toHaveBeenNthCalledWith(1, 'podman', ['--version'], { capture: true, allowFailure: true });
-        expect(runCommand).toHaveBeenNthCalledWith(2, 'podman', ['info'], { quiet: true });
+        expect(runCommand).toHaveBeenNthCalledWith(1, 'podman', ['--version'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
+        expect(runCommand).toHaveBeenNthCalledWith(2, 'podman', ['info'], { verbosity: RunVerbosity.Quiet });
         expect(runCommand).toHaveBeenNthCalledWith(3, 'podman', ['ps'], {});
         expect(runCommand).toHaveBeenNthCalledWith(4, 'podman', ['logs', 'container'], {});
     });
@@ -61,7 +62,7 @@ describe('container runtime selection', () => {
 
         await expect(docker.getContainerRuntime()).resolves.toBe(docker.ContainerRuntime.Docker);
 
-        expect(runCommand).toHaveBeenCalledWith('docker', ['info'], { quiet: true });
+        expect(runCommand).toHaveBeenCalledWith('docker', ['info'], { verbosity: RunVerbosity.Quiet });
     });
 
     it('does not fall back to docker when podman is installed but unusable', async () => {
@@ -80,6 +81,6 @@ describe('container runtime selection', () => {
 
         await docker.createVolume('stamhoofd-mysql-data');
 
-        expect(runCommand).toHaveBeenLastCalledWith('podman', ['volume', 'exists', 'stamhoofd-mysql-data'], { capture: true, quiet: true, allowFailure: true, verbose: false });
+        expect(runCommand).toHaveBeenLastCalledWith('podman', ['volume', 'exists', 'stamhoofd-mysql-data'], { capture: true, verbosity: RunVerbosity.Quiet, allowFailure: true });
     });
 });

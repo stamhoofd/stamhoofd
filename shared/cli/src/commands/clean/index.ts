@@ -1,6 +1,7 @@
 import { Args } from '@oclif/core';
 import { BaseCommand } from '../../base-command.js';
 import { dryRunFlag, yesFlag } from '../../command-flags.js';
+import type { CliContext } from '../../context/create-context.js';
 import { metabaseAppDatabase } from '../../config/shared-service-config.js';
 import { currentDatabase, dropDatabase, ensureMysqlRunning } from '../../runtime/database-command-helpers.js';
 import { cleanBuild } from '../../runtime/monorepo-runner.js';
@@ -41,7 +42,8 @@ export default class Clean extends BaseCommand {
     static flags = { ...BaseCommand.instanceFlags, 'yes': yesFlag, 'dry-run': dryRunFlag };
 
     async run(): Promise<void> {
-        const { args, flags } = await this.parse(Clean);
+        const parsed = await this.parse(Clean);
+        const { args, flags } = parsed;
         if (!args.target) {
             await showHelp(this.config, ['clean']);
             return;
@@ -51,7 +53,7 @@ export default class Clean extends BaseCommand {
 
         this.validateTargetFlags(target, flags);
 
-        const context = await this.createContext(flags);
+        const { context } = await this.parseWithContext(Clean, parsed);
 
         if (target === CleanTarget.Build) {
             await cleanBuild(context, { dryRun: flags['dry-run'] });
@@ -81,7 +83,7 @@ export default class Clean extends BaseCommand {
         await this.cleanAll(context, { yes: flags.yes, dryRun: flags['dry-run'] });
     }
 
-    private async cleanAll(context: Awaited<ReturnType<Clean['createContext']>>, options: { yes: boolean; dryRun: boolean }): Promise<void> {
+    private async cleanAll(context: CliContext, options: { yes: boolean; dryRun: boolean }): Promise<void> {
         if (options.dryRun) {
             await cleanBuild(context, { dryRun: true });
             console.log('Would stop local SSO server.');
@@ -103,7 +105,7 @@ export default class Clean extends BaseCommand {
         await deleteSharedServicesData(context);
     }
 
-    private async cleanDatabase(context: Awaited<ReturnType<Clean['createContext']>>, options: { yes: boolean; dryRun: boolean }): Promise<void> {
+    private async cleanDatabase(context: CliContext, options: { yes: boolean; dryRun: boolean }): Promise<void> {
         const database = currentDatabase(context);
 
         if (options.dryRun) {
@@ -120,7 +122,7 @@ export default class Clean extends BaseCommand {
         await dropDatabase(database);
     }
 
-    private async cleanServices(context: Awaited<ReturnType<Clean['createContext']>>, options: { yes: boolean; dryRun: boolean }): Promise<void> {
+    private async cleanServices(context: CliContext, options: { yes: boolean; dryRun: boolean }): Promise<void> {
         if (options.dryRun) {
             console.log('Would stop shared services.');
             console.log('Would delete MySQL, RustFS, and Caddy shared service data.');
@@ -136,7 +138,7 @@ export default class Clean extends BaseCommand {
         await deleteSharedServicesData(context);
     }
 
-    private async cleanMetabase(context: Awaited<ReturnType<Clean['createContext']>>, options: { yes: boolean; dryRun: boolean }): Promise<void> {
+    private async cleanMetabase(context: CliContext, options: { yes: boolean; dryRun: boolean }): Promise<void> {
         if (options.dryRun) {
             console.log('Would stop local Metabase server.');
             console.log(`Would drop local MySQL database ${metabaseAppDatabase}.`);
@@ -154,7 +156,7 @@ export default class Clean extends BaseCommand {
         this.log('Local Metabase server stopped and application database dropped.');
     }
 
-    private async cleanSso(context: Awaited<ReturnType<Clean['createContext']>>, options: { dryRun: boolean }): Promise<void> {
+    private async cleanSso(context: CliContext, options: { dryRun: boolean }): Promise<void> {
         if (options.dryRun) {
             console.log('Would stop local SSO server.');
             return;

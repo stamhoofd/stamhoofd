@@ -4,9 +4,10 @@ import { localIpv4Host, mysqlContainer, mysqlRootPassword, mysqlRootUser } from 
 import { mysqlService } from '../services/definitions/mysql-service.js';
 import * as docker from '../services/docker.js';
 import { step } from './ux.js';
-import type { BaseCommand } from '../base-command.js';
+import { RunVerbosity } from './command-runner.js';
+import type { CliContext } from '../context/create-context.js';
 
-type CommandContext = Awaited<ReturnType<BaseCommand['createContext']>>;
+type CommandContext = CliContext;
 
 /**
  * Database commands are used outside `stam dev`, so the shared MySQL container is often not running:
@@ -24,7 +25,7 @@ export function currentDatabase(context: CommandContext): string {
 }
 
 export async function listDatabases(): Promise<string[]> {
-    const result = await docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-N', '-B', '-e', 'SHOW DATABASES;'], { capture: true });
+    const result = await docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-N', '-B', '-e', 'SHOW DATABASES;'], { capture: true, verbosity: RunVerbosity.Quiet });
     return result.stdout
         .split('\n')
         .map(database => database.trim())
@@ -77,16 +78,16 @@ export async function dropDatabase(database: string): Promise<void> {
 }
 
 export async function openDatabaseShell(database: string): Promise<void> {
-    await docker.run(['exec', '-it', mysqlContainer, 'mysql', `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, database]);
+    await docker.run(['exec', '-it', mysqlContainer, 'mysql', `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, database], { verbosity: RunVerbosity.Output });
 }
 
 export async function copyDatabase(from: string, to: string): Promise<void> {
     await createDatabase(to);
-    await docker.run(['exec', mysqlContainer, 'sh', '-c', `mysqldump -h${shellQuote(localIpv4Host)} -u${shellQuote(mysqlRootUser)} -p${shellQuote(mysqlRootPassword)} --single-transaction --routines --triggers --events ${shellQuote(from)} | mysql -h${shellQuote(localIpv4Host)} -u${shellQuote(mysqlRootUser)} -p${shellQuote(mysqlRootPassword)} ${shellQuote(to)}`]);
+    await docker.run(['exec', mysqlContainer, 'sh', '-c', `mysqldump -h${shellQuote(localIpv4Host)} -u${shellQuote(mysqlRootUser)} -p${shellQuote(mysqlRootPassword)} --single-transaction --routines --triggers --events ${shellQuote(from)} | mysql -h${shellQuote(localIpv4Host)} -u${shellQuote(mysqlRootUser)} -p${shellQuote(mysqlRootPassword)} ${shellQuote(to)}`], { verbosity: RunVerbosity.Output });
 }
 
 function runMysqlStatement(statement: string): Promise<void> {
-    return docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-e', statement]);
+    return docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-e', statement], { verbosity: RunVerbosity.Output });
 }
 
 function escapeIdentifier(identifier: string): string {
