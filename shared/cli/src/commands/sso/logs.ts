@@ -11,8 +11,7 @@ export default class SsoLogs extends BaseCommand {
     static flags = BaseCommand.instanceFlags;
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(SsoLogs);
-        const context = await this.createContext(flags);
+        const { context } = await this.parseWithContext(SsoLogs);
         await ssoService.logs?.(context);
     }
 }

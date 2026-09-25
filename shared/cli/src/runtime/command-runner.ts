@@ -2,12 +2,22 @@ import { spawn } from 'node:child_process';
 import { command as formatCommand, warning } from './ux.js';
 import { writeOutputLine } from './output-target.js';
 
+/** Controls command-line and subprocess output for a run. */
+export enum RunVerbosity {
+    /** Print nothing on success. */
+    Quiet = 0,
+    /** Print the command line; suppress subprocess output on success. */
+    Command = 1,
+    /** Print the command line and forward subprocess stdout and stderr to stderr. */
+    Output = 2,
+}
+
 export type RunOptions = {
     cwd?: string;
     env?: NodeJS.ProcessEnv;
-    quiet?: boolean;
+    verbosity?: RunVerbosity;
     allowFailure?: boolean;
-    verbose?: boolean;
+    /** Return stdout and stderr instead of forwarding or suppressing them. */
     capture?: boolean;
 };
 
@@ -16,7 +26,8 @@ export type RunCaptureResult = { stdout: string; stderr: string; status: number 
 export async function run(command: string, args: string[], options: RunOptions & { capture: true }): Promise<RunCaptureResult>;
 export async function run(command: string, args: string[], options?: RunOptions): Promise<void>;
 export async function run(command: string, args: string[], options: RunOptions = {}): Promise<void | RunCaptureResult> {
-    if (options.verbose) {
+    const verbosity = options.verbosity ?? RunVerbosity.Command;
+    if (verbosity !== RunVerbosity.Quiet) {
         printCommand(command, args);
     }
 
@@ -52,12 +63,12 @@ export async function run(command: string, args: string[], options: RunOptions =
         const child = spawn(command, args, {
             cwd: options.cwd,
             env: { ...process.env, ...options.env },
-            stdio: options.quiet ? ['ignore', 'ignore', 'pipe'] : 'inherit',
+            stdio: verbosity === RunVerbosity.Output ? ['inherit', 2, 2] : ['ignore', 'ignore', 'pipe'],
         });
         let stderr = '';
 
-        if (options.quiet && child.stderr) {
-            child.stderr.on('data', chunk => stderr += String(chunk));
+        if (verbosity !== RunVerbosity.Output) {
+            child.stderr?.on('data', chunk => stderr += String(chunk));
         }
 
         child.on('error', reject);

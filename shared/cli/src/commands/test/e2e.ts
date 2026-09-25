@@ -3,8 +3,10 @@ import { BaseCommand } from '../../base-command.js';
 import { ciFlag } from '../../command-flags.js';
 import { defaultLocalMysqlPort, e2eMysqlPortVariable } from '../../config/test-database-config.js';
 import { testE2e } from '../../runtime/monorepo-runner.js';
+import { RunVerbosity } from '../../runtime/command-runner.js';
 
 export default class TestE2e extends BaseCommand {
+    static override verbosity = RunVerbosity.Output;
     static summary = 'Run Playwright browser tests';
     static description = 'Use this when you changed user-facing flows and want to validate the app in a real browser environment.';
     static examples = [
@@ -16,11 +18,11 @@ export default class TestE2e extends BaseCommand {
         'stam test e2e --extra',
         'stam test e2e --workers 2',
         'stam test e2e --local-db',
-        'stam test e2e --ui --verbose',
+        'stam test e2e --ui',
     ];
 
     static flags = {
-        ...BaseCommand.verboseFlags,
+        ...this.verbosityFlags(),
         'ci': ciFlag,
         'clear': Flags.boolean({ default: false, description: 'Clear the persistent e2e database before running tests' }),
         'extra': Flags.boolean({ default: false, description: 'Include Playwright tests tagged @extra' }),
@@ -32,10 +34,12 @@ export default class TestE2e extends BaseCommand {
     };
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(TestE2e);
+        const parsed = await this.parse(TestE2e);
+        const { flags } = parsed;
         if (flags.workers !== undefined && flags.workers < 1) {
             throw new Error('--workers must be at least 1');
         }
-        await testE2e(await this.createContext(flags), { ci: flags.ci, clear: flags.clear, extra: flags.extra, grep: flags.grep, localDb: flags['local-db'], skipBuild: flags['skip-build'], ui: flags.ui, workers: flags.workers });
+        const { context } = await this.parseWithContext(TestE2e, parsed);
+        await testE2e(context, { ci: flags.ci, clear: flags.clear, extra: flags.extra, grep: flags.grep, localDb: flags['local-db'], skipBuild: flags['skip-build'], ui: flags.ui, workers: flags.workers });
     }
 }

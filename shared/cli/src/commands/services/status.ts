@@ -8,10 +8,10 @@ export default class ServicesStatus extends BaseCommand {
         'stam services status',
         'stam services status --verbose',
     ];
-    static flags = BaseCommand.verboseFlags;
+    static flags = this.verbosityFlags();
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(ServicesStatus);
-        await printSharedServicesStatus(await this.createContext(flags));
+        const { context } = await this.parseWithContext(ServicesStatus);
+        await printSharedServicesStatus(context);
     }
 }

@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { run } from './command-runner.js';
+import { run, RunVerbosity } from './command-runner.js';
 
 export type Commit = {
     hash: string;
@@ -137,7 +137,7 @@ export function groupCommits(commits: Commit[]): ReleaseNotesSection[] {
 
 /** Reads the list of version tags, sorted from newest to oldest. */
 export async function getVersionTags(cwd: string): Promise<string[]> {
-    const result = await run('git', ['tag', '--list', 'v*', '--sort=-v:refname'], { cwd, capture: true });
+    const result = await run('git', ['tag', '--list', 'v*', '--sort=-v:refname'], { cwd, capture: true, verbosity: RunVerbosity.Quiet });
     return result.stdout.split('\n').map(line => line.trim()).filter(line => line.length > 0);
 }
 
@@ -165,7 +165,7 @@ export async function getPreviousVersionTag(cwd: string, tag: string): Promise<s
 export async function collectReleaseCommits(cwd: string, options: { from?: string; to: string }): Promise<Commit[]> {
     const range = options.from ? `${options.from}..${options.to}` : options.to;
     const format = `--pretty=format:%h${FIELD_SEPARATOR}%an${FIELD_SEPARATOR}%ae${FIELD_SEPARATOR}%s`;
-    const result = await run('git', ['log', '--no-merges', format, range], { cwd, capture: true });
+    const result = await run('git', ['log', '--no-merges', format, range], { cwd, capture: true, verbosity: RunVerbosity.Quiet });
 
     const commits: Commit[] = [];
     for (const line of result.stdout.split('\n')) {
@@ -197,20 +197,20 @@ export async function collectReleaseCommits(cwd: string, options: { from?: strin
  * for any other ref (e.g. HEAD) it falls back to the commit date.
  */
 export async function getRefDate(cwd: string, ref: string): Promise<string | undefined> {
-    const tagResult = await run('git', ['for-each-ref', '--format=%(creatordate:short)', `refs/tags/${ref}`], { cwd, capture: true, allowFailure: true });
+    const tagResult = await run('git', ['for-each-ref', '--format=%(creatordate:short)', `refs/tags/${ref}`], { cwd, capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
     const tagDate = tagResult.stdout.trim();
     if (tagDate.length > 0) {
         return tagDate;
     }
 
-    const commitResult = await run('git', ['log', '-1', '--format=%cs', ref], { cwd, capture: true, allowFailure: true });
+    const commitResult = await run('git', ['log', '-1', '--format=%cs', ref], { cwd, capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
     const commitDate = commitResult.stdout.trim();
     return commitDate.length > 0 ? commitDate : undefined;
 }
 
 /** Resolves a ref to its full commit sha, or undefined when it cannot be resolved. */
 async function revParse(cwd: string, ref: string): Promise<string | undefined> {
-    const result = await run('git', ['rev-parse', ref], { cwd, capture: true, allowFailure: true });
+    const result = await run('git', ['rev-parse', ref], { cwd, capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
     const sha = result.stdout.trim();
     return sha.length > 0 ? sha : undefined;
 }
@@ -226,7 +226,7 @@ export async function resolveAuthorLogins(cwd: string, repositorySlug: string, f
 
     // The compare API needs a pushed ref/sha on both ends; resolve HEAD to a sha first.
     const head = to === 'HEAD' ? await revParse(cwd, 'HEAD') ?? to : to;
-    const result = await run('gh', ['api', `repos/${repositorySlug}/compare/${from}...${head}`, '--jq', '.commits[] | [.sha, (.author.login // "")] | @tsv'], { cwd, capture: true, allowFailure: true });
+    const result = await run('gh', ['api', `repos/${repositorySlug}/compare/${from}...${head}`, '--jq', '.commits[] | [.sha, (.author.login // "")] | @tsv'], { cwd, capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
     if (result.status !== 0) {
         return logins;
     }
@@ -283,7 +283,7 @@ export async function getReleaseVersion(cwd: string): Promise<string> {
 
 /** Parses "owner/repo" out of the origin remote URL (https or ssh form). */
 export async function getRepositorySlug(cwd: string): Promise<string | undefined> {
-    const result = await run('git', ['remote', 'get-url', 'origin'], { cwd, capture: true, allowFailure: true });
+    const result = await run('git', ['remote', 'get-url', 'origin'], { cwd, capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
     if (result.status !== 0) {
         return undefined;
     }

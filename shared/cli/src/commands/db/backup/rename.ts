@@ -15,8 +15,7 @@ export default class DbBackupRename extends BaseCommand {
     };
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(DbBackupRename);
-        const context = await this.createContext(flags);
+        const { flags, context } = await this.parseWithContext(DbBackupRename);
         const from = await resolveBackupOption({ context, flag: flags.from, message: 'Select the backup to rename' });
         const to = await resolveBackupOption({ context, flag: flags.to, message: 'Enter the new backup name', customInput: true });
 

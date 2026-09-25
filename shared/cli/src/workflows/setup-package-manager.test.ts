@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as commandRunner from '../runtime/command-runner.js';
+import { RunVerbosity } from '../runtime/command-runner.js';
 import { checkPackageManager, setupPackageManager } from './setup-package-manager.js';
 
 describe('setup package manager workflow', () => {
@@ -26,7 +27,7 @@ describe('setup package manager workflow', () => {
             expected: '12.4.2',
             details: 'pnpm 12.4.2 matches package.json',
         });
-        expect(run).toHaveBeenCalledWith('pnpm', ['--version'], { capture: true, allowFailure: true, cwd: tmpDir });
+        expect(run).toHaveBeenCalledWith('pnpm', ['--version'], { capture: true, allowFailure: true, cwd: tmpDir, verbosity: RunVerbosity.Quiet });
     });
 
     it('reports a missing pnpm executable', async () => {
@@ -69,11 +70,11 @@ describe('setup package manager workflow', () => {
         tmpDir = await createProject('pnpm@12.4.2');
         const run = vi.spyOn(commandRunner, 'run').mockResolvedValue(undefined);
 
-        await setupPackageManager(tmpDir, { verbose: true });
+        await setupPackageManager(tmpDir);
 
         expect(run.mock.calls).toEqual([
-            ['corepack', ['enable'], { cwd: tmpDir, verbose: true }],
-            ['corepack', ['install'], { cwd: tmpDir, verbose: true }],
+            ['corepack', ['enable'], { cwd: tmpDir, verbosity: RunVerbosity.Output }],
+            ['corepack', ['install'], { cwd: tmpDir, verbosity: RunVerbosity.Output }],
         ]);
     });
 
@@ -83,7 +84,7 @@ describe('setup package manager workflow', () => {
         const messages: string[] = [];
         vi.spyOn(console, 'log').mockImplementation(message => messages.push(String(message)));
 
-        await setupPackageManager(tmpDir, { verbose: false, dryRun: true });
+        await setupPackageManager(tmpDir, { dryRun: true });
 
         expect(run).not.toHaveBeenCalled();
         expect(messages.join('\n')).toContain('corepack enable');

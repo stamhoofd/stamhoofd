@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { RunVerbosity } from '../runtime/command-runner.js';
 import type { CliContext } from '../context/create-context.js';
 import * as docker from './docker.js';
 import { ContainerStoppedError, DockerService } from './docker-service.js';
@@ -86,7 +87,7 @@ describe('DockerService', () => {
         });
         expect(docker.requireDocker).toHaveBeenCalledOnce();
         expect(docker.removeContainer).toHaveBeenCalledWith('test-container', false);
-        expect(docker.run).toHaveBeenCalledWith(['run', '--name', 'test-container', 'image', 'prepared'], { quiet: true, verbose: false });
+        expect(docker.run).toHaveBeenCalledWith(['run', '--name', 'test-container', 'image', 'prepared'], { verbosity: RunVerbosity.Quiet });
         expect(service.calls).toEqual(['prepare', 'beforeRun', 'getDockerArgs', 'afterRun']);
     });
 
@@ -103,7 +104,7 @@ describe('DockerService', () => {
 
     it('tails logs by default and no-ops when logs are disabled', async () => {
         await new TestService().logs(context);
-        expect(docker.run).toHaveBeenCalledWith(['logs', '-f', 'test-container'], { allowFailure: true });
+        expect(docker.run).toHaveBeenCalledWith(['logs', '-f', 'test-container'], { allowFailure: true, verbosity: RunVerbosity.Output });
 
         vi.clearAllMocks();
         await new NoLogsService().logs(context);

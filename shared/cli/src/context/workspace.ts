@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { run } from '../runtime/command-runner.js';
+import { run, RunVerbosity } from '../runtime/command-runner.js';
 
 export function slug(value: string): string {
     return value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
@@ -33,7 +33,7 @@ export async function resolvePrimaryInstance(rootDir: string): Promise<boolean> 
 }
 
 async function resolveJjPrimaryWorkspaceRoot(rootDir: string): Promise<string | null> {
-    const result = await run('jj', ['workspace', 'list', '-T', 'name ++ "\\t" ++ root ++ "\\n"'], { cwd: rootDir, capture: true, allowFailure: true });
+    const result = await run('jj', ['workspace', 'list', '-T', 'name ++ "\\t" ++ root ++ "\\n"'], { cwd: rootDir, capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
     if (result.status !== 0) {
         return null;
     }
@@ -44,7 +44,7 @@ async function resolveJjPrimaryWorkspaceRoot(rootDir: string): Promise<string | 
 }
 
 async function resolveGitPrimaryWorktreeRoot(rootDir: string): Promise<string | null> {
-    const result = await run('git', ['worktree', 'list', '--porcelain'], { cwd: rootDir, capture: true, allowFailure: true });
+    const result = await run('git', ['worktree', 'list', '--porcelain'], { cwd: rootDir, capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
     if (result.status !== 0) {
         return null;
     }

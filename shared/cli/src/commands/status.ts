@@ -3,6 +3,7 @@ import { Flags } from '@oclif/core';
 import { BaseCommand } from '../base-command.js';
 import { localFilesAccessKey, localFilesSecretKey, maildevPassword, maildevUsername, successSymbol } from '../config/shared-service-config.js';
 import { getProjectPath } from '../context/project-path.js';
+import type { CliContext } from '../context/create-context.js';
 import { listActiveInstanceManifests } from '../runtime/manifest-store.js';
 import { printSharedServicesStatus } from '../services/shared-services.js';
 import { link } from '../runtime/ux.js';
@@ -18,10 +19,11 @@ export default class Status extends BaseCommand {
         'stam status --watch',
     ];
 
-    static flags = { ...BaseCommand.verboseFlags, current: Flags.boolean({ default: false, description: 'Only show the inferred current instance' }), watch: Flags.boolean({ default: false, description: 'Refresh the status view until interrupted' }) };
+    static flags = { ...this.verbosityFlags(), current: Flags.boolean({ default: false, description: 'Only show the inferred current instance' }), watch: Flags.boolean({ default: false, description: 'Refresh the status view until interrupted' }) };
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(Status);
+        const parsed = await this.parse(Status);
+        const { flags } = parsed;
         const rootDir = path.resolve(getProjectPath());
         const [nodeCheck, packageManagerCheck] = await Promise.all([
             checkNodeVersion(rootDir),
@@ -31,7 +33,7 @@ export default class Status extends BaseCommand {
         printPackageManagerStatus(packageManagerCheck);
         this.log('');
 
-        const context = await this.createContext({ verbose: flags.verbose });
+        const { context } = await this.parseWithContext(Status, parsed);
         if (flags.watch) {
             while (true) {
                 process.stdout.write('\x1Bc');
@@ -42,7 +44,7 @@ export default class Status extends BaseCommand {
         await this.printStatus(context, flags.current);
     }
 
-    private async printStatus(context: Awaited<ReturnType<Status['createContext']>>, current: boolean): Promise<void> {
+    private async printStatus(context: CliContext, current: boolean): Promise<void> {
         await printSharedServicesStatus(context);
         const instances = await listActiveInstanceManifests(context);
         const visible = current ? instances.filter(instance => instance.name === context.instance.name) : instances;

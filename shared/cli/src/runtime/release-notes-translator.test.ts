@@ -15,7 +15,8 @@ import type { ReleaseNotes } from './release-notes.js';
 import { resolveTranslationModel } from './translation/create-translation-model.js';
 import type { TranslationModel, TranslationRequest } from './translation/translation-model.js';
 
-vi.mock('./command-runner.js', () => ({
+vi.mock('./command-runner.js', async importOriginal => ({
+    ...await importOriginal<typeof import('./command-runner.js')>(),
     run: vi.fn(),
 }));
 

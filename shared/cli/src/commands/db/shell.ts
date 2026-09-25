@@ -11,8 +11,7 @@ export default class DbShell extends BaseCommand {
     static flags = BaseCommand.instanceFlags;
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(DbShell);
-        const context = await this.createContext(flags);
+        const { context } = await this.parseWithContext(DbShell);
         await ensureMysqlRunning(context);
         await openDatabaseShell(currentDatabase(context));
     }

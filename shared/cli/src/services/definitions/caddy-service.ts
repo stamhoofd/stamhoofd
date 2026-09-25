@@ -5,6 +5,7 @@ import { caddyAdminPort, caddyBaseImage, caddyBuilderImage, caddyConfigPath, cad
 import type { SharedServiceProfile } from '../../config/shared-service-profile.js';
 import { buildCaddyServiceProfile, buildSharedServiceProfile, SharedServiceCaddyRunMode } from '../../config/shared-service-profile.js';
 import type { CliContext } from '../../context/create-context.js';
+import { RunVerbosity } from '../../runtime/command-runner.js';
 import { withFileLock } from '../../runtime/file-lock.js';
 import type { CaddyRouteOptions, RouteManifest, RouteManifestInput } from '../../runtime/manifest-store.js';
 import { sharedDir } from '../../runtime/manifest-store.js';
@@ -105,7 +106,7 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
             await CaddyService.ensureImage(context);
             await CaddyService.validateConfig(config, context);
             if (await docker.containerIsRunning(CaddyService.container)) {
-                await docker.run(['exec', CaddyService.container, 'caddy', 'reload', '--config', caddyConfigPath, '--address', localhostPort(caddyAdminPort), '--force'], { quiet: true, verbose: context.verbose });
+                await docker.run(['exec', CaddyService.container, 'caddy', 'reload', '--config', caddyConfigPath, '--address', localhostPort(caddyAdminPort), '--force'], { verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
                 return;
             }
             await caddyService.start(context, undefined);
@@ -159,7 +160,7 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
 
     private static async validateConfig(config: string, context: CliContext): Promise<void> {
         const labelArgs = await docker.getContainerRuntime() === docker.ContainerRuntime.Podman ? ['--security-opt', 'label=disable'] : [];
-        await docker.run(['run', '--rm', ...labelArgs, '-v', `${config}:${caddyConfigPath}:ro`, caddyImage, 'caddy', 'validate', '--config', caddyConfigPath], { quiet: true, verbose: context.verbose });
+        await docker.run(['run', '--rm', ...labelArgs, '-v', `${config}:${caddyConfigPath}:ro`, caddyImage, 'caddy', 'validate', '--config', caddyConfigPath], { verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
     }
 
     /**

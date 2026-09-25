@@ -12,8 +12,7 @@ export default class PlatformReportStop extends BaseCommand {
     static flags = BaseCommand.instanceFlags;
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(PlatformReportStop);
-        const context = await this.createContext(flags);
+        const { context } = await this.parseWithContext(PlatformReportStop);
         await metabaseService.stop(context);
         this.log('Local Metabase server stopped.');
     }

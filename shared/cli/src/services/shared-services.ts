@@ -3,7 +3,7 @@ import path from 'node:path';
 import type { CliContext } from '../context/create-context.js';
 import { mysqlDataVolume, rustfsDataVolume } from '../config/shared-service-config.js';
 import { logsDir, sharedDir } from '../runtime/manifest-store.js';
-import { run } from '../runtime/command-runner.js';
+import { run, RunVerbosity } from '../runtime/command-runner.js';
 import { CaddyService } from './definitions/caddy-service.js';
 import { CorednsService } from './definitions/coredns-service.js';
 import { MaildevService } from './definitions/maildev-service.js';
@@ -78,7 +78,7 @@ export async function printSharedServicesStatus(context: CliContext): Promise<vo
     await printServicesStatus(context, sharedServiceDefinitions);
 }
 
-export async function tailSharedLogs(): Promise<void> {
+export async function tailSharedLogs(verbosity: RunVerbosity = RunVerbosity.Output): Promise<void> {
     const runtime = await docker.getContainerRuntime();
     await run('pnpm', [
         'exec',
@@ -90,5 +90,5 @@ export async function tailSharedLogs(): Promise<void> {
         `${runtime} logs -f stamhoofd-rustfs`,
         `${runtime} logs -f stamhoofd-coredns`,
         `${runtime} logs -f stamhoofd-caddy`,
-    ], { allowFailure: true });
+    ], { allowFailure: true, verbosity });
 }

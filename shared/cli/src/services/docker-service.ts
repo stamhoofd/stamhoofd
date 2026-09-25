@@ -1,6 +1,7 @@
 import type { ServiceStatus } from './service.js';
 import type { CliContext } from '../context/create-context.js';
 import * as docker from './docker.js';
+import { RunVerbosity } from '../runtime/command-runner.js';
 import type { MaybePromise, ServiceDefinition, ServiceStartResult } from './service.js';
 
 type PreparedValue<TPrepared> = TPrepared | undefined;
@@ -30,7 +31,7 @@ export async function stopContainer(name: string, verbose = false): Promise<void
 }
 
 export async function tailContainerLogs(name: string): Promise<void> {
-    await docker.run(['logs', '-f', name], { allowFailure: true });
+        await docker.run(['logs', '-f', name], { allowFailure: true, verbosity: RunVerbosity.Output });
 }
 
 export abstract class DockerService<TOptions = void, TPrepared = void> implements ServiceDefinition<TOptions> {
@@ -99,7 +100,7 @@ export abstract class DockerService<TOptions = void, TPrepared = void> implement
 
         await stopContainer(this.getContainer(context), context.verbose);
         await this.beforeRun(context, options, prepared);
-        await docker.run(await this.getDockerArgs(context, options, prepared), { quiet: this.runQuiet, verbose: context.verbose });
+        await docker.run(await this.getDockerArgs(context, options, prepared), { verbosity: this.runQuiet ? (context.verbosity ?? RunVerbosity.Quiet) : RunVerbosity.Output });
         const afterStart = await this.status(context);
         if (!afterStart.running) {
             const logs = await docker.getContainerLogs(this.getContainer(context));
