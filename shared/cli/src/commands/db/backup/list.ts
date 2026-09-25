@@ -13,8 +13,7 @@ export default class DbBackupList extends BaseCommand {
     };
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(DbBackupList);
-        const context = await this.createContext(flags);
+        const { flags, context } = await this.parseWithContext(DbBackupList);
         const backups = await listBackups(context);
 
         if (backups.length === 0) {

@@ -13,8 +13,7 @@ export default class ConfigPrint extends BaseCommand {
     static flags = BaseCommand.instanceFlags;
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(ConfigPrint);
-        const context = await this.createContext(flags);
+        const { context } = await this.parseWithContext(ConfigPrint);
         const domains = buildDomains(context);
         this.log(JSON.stringify({ domains, env: buildBackendEnv(context) }, null, 4));
     }

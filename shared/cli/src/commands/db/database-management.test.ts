@@ -3,7 +3,7 @@ import DbCopy from './copy.js';
 import DbMove from './move.js';
 import DbRemove from './remove.js';
 import { input, select } from '@inquirer/prompts';
-import { run } from '../../runtime/command-runner.js';
+import { run, RunVerbosity } from '../../runtime/command-runner.js';
 import { resetContainerRuntimeCacheForTests } from '../../services/docker.js';
 
 vi.mock('@inquirer/prompts', () => ({
@@ -11,7 +11,8 @@ vi.mock('@inquirer/prompts', () => ({
     select: vi.fn(),
 }));
 
-vi.mock('../../runtime/command-runner.js', () => ({
+vi.mock('../../runtime/command-runner.js', async importOriginal => ({
+    ...await importOriginal<typeof import('../../runtime/command-runner.js')>(),
     run: vi.fn(),
 }));
 
@@ -48,8 +49,8 @@ describe('database management commands', () => {
         await command.run();
 
         expect(select).not.toHaveBeenCalled();
-        expect(run).toHaveBeenNthCalledWith(1, 'podman', ['--version'], { capture: true, allowFailure: true });
-        expect(run).toHaveBeenNthCalledWith(2, 'podman', ['info'], { quiet: true });
+        expect(run).toHaveBeenNthCalledWith(1, 'podman', ['--version'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
+        expect(run).toHaveBeenNthCalledWith(2, 'podman', ['info'], { verbosity: RunVerbosity.Quiet });
         expect(run).toHaveBeenNthCalledWith(3, 'podman', ['inspect', '-f', '{{.State.Running}}', 'stamhoofd-mysql'], expect.anything());
         expect(run).toHaveBeenNthCalledWith(4, 'podman', ['exec', 'stamhoofd-mysql', 'mysql', '-h127.0.0.1', '-uroot', '-proot', '-e', 'CREATE DATABASE IF NOT EXISTS `target-db` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;'], expect.anything());
         expect(run).toHaveBeenNthCalledWith(5, 'podman', ['exec', 'stamhoofd-mysql', 'sh', '-c', "mysqldump -h'127.0.0.1' -u'root' -p'root' --single-transaction --routines --triggers --events 'source-db' | mysql -h'127.0.0.1' -u'root' -p'root' 'target-db'"], expect.anything());

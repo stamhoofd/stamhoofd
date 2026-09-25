@@ -16,8 +16,7 @@ export default class DbRestore extends BaseCommand {
     };
 
     async run(): Promise<void> {
-        const { flags } = await this.parse(DbRestore);
-        const context = await this.createContext(flags);
+        const { flags, context } = await this.parseWithContext(DbRestore);
         const name = await resolveBackupOption({ context, flag: flags.name, message: 'Select the backup to restore' });
 
         if (!await backupExists(context, name)) {

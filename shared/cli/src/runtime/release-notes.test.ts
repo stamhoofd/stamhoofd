@@ -12,7 +12,8 @@ import {
     renderReleaseNotes,
 } from './release-notes.js';
 
-vi.mock('./command-runner.js', () => ({
+vi.mock('./command-runner.js', async importOriginal => ({
+    ...await importOriginal<typeof import('./command-runner.js')>(),
     run: vi.fn(),
 }));
 
