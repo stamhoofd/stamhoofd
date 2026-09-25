@@ -1,12 +1,12 @@
-import fs from 'node:fs/promises';
 import dns from 'node:dns/promises';
+import fs from 'node:fs/promises';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { run } from '../runtime/command-runner.js';
 import { confirm } from '../runtime/ux.js';
 import { corednsService } from '../services/definitions/coredns-service.js';
 import * as docker from '../services/docker.js';
-import { checkSetup, getRecommendedSetupFixes, isSetupReady, printSetupReport, runSetup, setupCaddy, setupDns, SetupAutomaticFixKey } from './setup-machine.js';
 import type { CheckResult, SetupReport } from './setup-machine.js';
+import { checkSetup, getRecommendedSetupFixes, isSetupReady, printSetupReport, runSetup, SetupAutomaticFixKey, setupCaddy, setupDns } from './setup-machine.js';
 import { checkNodeVersion, setupNodeVersion } from './setup-node.js';
 import { checkPackageManager, setupPackageManager } from './setup-package-manager.js';
 
@@ -30,13 +30,13 @@ vi.mock('../services/definitions/coredns-service.js', () => ({
     corednsService: { status: vi.fn() },
 }));
 
-vi.mock('../services/docker.js', async (importOriginal) => ({
+vi.mock('../services/docker.js', async importOriginal => ({
     ...await importOriginal<typeof import('../services/docker.js')>(),
     getContainerRuntime: vi.fn(),
     containerIsRunning: vi.fn(),
 }));
 
-vi.mock('../runtime/ux.js', async (importOriginal) => ({
+vi.mock('../runtime/ux.js', async importOriginal => ({
     ...await importOriginal<typeof import('../runtime/ux.js')>(),
     confirm: vi.fn(),
 }));
@@ -253,8 +253,7 @@ describe('setup machine workflow', () => {
 
         try {
             await runSetup({ verbose: false } as any);
-        }
-        finally {
+        } finally {
             console.log = original;
         }
 
@@ -418,6 +417,27 @@ describe('setup machine workflow', () => {
         expect(run).toHaveBeenCalledWith('brew', ['install', 'caddy'], { verbose: true });
     });
 
+    it('does not report a generated but untrusted macOS CA as ready', async () => {
+        setPlatform('darwin');
+        mockSetupCommands({ resolver: 'nameserver 127.0.0.1\n' });
+        vi.mocked(corednsService.status).mockResolvedValue({ name: 'CoreDNS', running: false, detail: '' });
+        vi.spyOn(fs, 'access').mockResolvedValue(undefined);
+        vi.mocked(run).mockImplementation(async (command, args) => {
+            if (command === 'security' && args[0] === 'verify-cert') {
+                return { stdout: '', stderr: 'certificate not trusted', status: 1 };
+            }
+            if (command === 'caddy' && args[0] === 'version') {
+                return { stdout: 'v2.11.4', stderr: '', status: 0 };
+            }
+            throw new Error(`Unexpected command: ${command} ${args.join(' ')}`);
+        });
+
+        const report = await checkSetup({ generatedDir: '/repo' } as any);
+
+        expect(report.cert).toMatchObject({ ok: false, manualFix: 'stam setup cert' });
+        expect(run).toHaveBeenCalledWith('security', ['verify-cert', '-c', expect.any(String), '-p', 'ssl', '-l', '-L', '-q'], { capture: true, allowFailure: true });
+    });
+
     it('prints the setup report with standardized status labels', () => {
         const messages: string[] = [];
         const original = console.log;
@@ -427,8 +447,7 @@ describe('setup machine workflow', () => {
 
         try {
             printSetupReport(setupReport({ caddy: { ok: true, details: '127.0.0.1:4080, 127.0.0.1:4443, admin 127.0.0.1:2021' } }));
-        }
-        finally {
+        } finally {
             console.log = original;
         }
 
@@ -439,7 +458,6 @@ describe('setup machine workflow', () => {
         expect(messages.join('\n')).toContain('127.0.0.1:4080, 127.0.0.1:4443, admin 127.0.0.1:2021');
     });
 });
-
 
 function setupReport(overrides: Partial<SetupReport>): SetupReport {
     return {
@@ -507,6 +525,9 @@ function mockSetupCommands(options: { dns?: string; domains?: string; query?: st
             return options.missingRedirects
                 ? { stdout: '', stderr: 'missing', status: 1 }
                 : { stdout: '', stderr: '', status: 0 };
+        }
+        if (command === 'security' && args[0] === 'verify-cert') {
+            return { stdout: '', stderr: '', status: 0 };
         }
         if (command === 'sudo' || command === 'brew') {
             return { stdout: '', stderr: '', status: 0 };
