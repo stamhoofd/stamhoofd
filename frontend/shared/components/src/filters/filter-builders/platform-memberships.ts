@@ -2,6 +2,7 @@ import { NumberFilterFormat } from '#filters/NumberFilterFormat.ts';
 import { RelationFilterBuilder } from '#filters/RelationUIFilter.ts';
 import { useRegistrationPeriodsRelationFetcher } from '#filters/relation-fetchers/useRegistrationPeriodsRelationFetcher.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
+import type { Organization } from '@stamhoofd/structures';
 import { FilterWrapperMarker } from '@stamhoofd/structures';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
@@ -11,7 +12,7 @@ import type { UIFilterBuilders } from '../UIFilter';
 import { getMemberBaseFilters } from './members';
 import { useGetOrganizationUIFilterBuilders } from './organizations';
 
-export function useGetPlatformMembershipsUIFilterBuilders() {
+export function useGetPlatformMembershipsUIFilterBuilders(organization: Organization | null = null) {
     const platform = usePlatform();
     const organizationFilterBuilders = useGetOrganizationUIFilterBuilders({ onlyBaseFilters: true });
     const registrationPeriodsRelationFetcher = useRegistrationPeriodsRelationFetcher();
@@ -88,8 +89,10 @@ export function useGetPlatformMembershipsUIFilterBuilders() {
                     },
                 },
             }),
-            // group
-            new GroupUIFilterBuilder({
+        ]);
+
+        if (!organization) {
+            builders.push(new GroupUIFilterBuilder({
                 name: $t('%1Ok'),
                 description: $t('%1PD'),
                 builders: organizationFilterBuilders.getOrganizationUIFilterBuilders(),
@@ -98,8 +101,8 @@ export function useGetPlatformMembershipsUIFilterBuilders() {
                         $elemMatch: FilterWrapperMarker,
                     },
                 },
-            }),
-        ]);
+            }));
+        }
 
         // Put a GroupUIFilterBuilder first so it can parse any filter structure,
         // including the defaultFilter which uses $or for the status.
