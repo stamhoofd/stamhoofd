@@ -11,6 +11,9 @@
     "references": [
         {
             "path": "../types/tsconfig.build.json"
+        },
+        {
+            "path": "../metabase/tsconfig.build.json"
         }
     ],
     "exclude": [
