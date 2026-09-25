@@ -7,6 +7,15 @@ const iconsDir = resolve(dirname(fileURLToPath(import.meta.url)), '../frontend/s
 
 export default defineNuxtConfig({
     extends: ['docus'],
+    modules: [
+        (_, nuxt) => {
+            nuxt.hook('vite:extendConfig', (config) => {
+                if (config.optimizeDeps?.include) {
+                    config.optimizeDeps.include = config.optimizeDeps.include.map(id => id.replace(/^@nuxtjs\/mdc > /, 'docus > @nuxtjs/mdc > '));
+                }
+            });
+        },
+    ],
     compatibilityDate: '2024-04-03',
     css: [
         // Generates the st-icons webfont + the ::before glyphs for .error-box,
