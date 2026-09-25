@@ -1,6 +1,15 @@
 import { ViewportHelper } from '#ViewportHelper.ts';
 import type { ObjectDirective } from 'vue';
 
+function isInScrollViewport(el: HTMLElement) {
+    const scrollElement = ViewportHelper.getScrollElement(el);
+    const elRect = el.getBoundingClientRect();
+    const scrollRect = scrollElement === document.documentElement
+        ? { top: 0, bottom: window.innerHeight }
+        : scrollElement.getBoundingClientRect();
+    return elRect.top >= scrollRect.top && elRect.bottom <= scrollRect.bottom;
+}
+
 export const AutofocusDirective: ObjectDirective<HTMLInputElement, boolean | null | undefined> = {
     // called right before the element is inserted into the DOM.
     beforeMount(el, binding) {
@@ -11,14 +20,12 @@ export const AutofocusDirective: ObjectDirective<HTMLInputElement, boolean | nul
         setTimeout(() => {
             if (el.isConnected) {
                 const view = el.closest('.st-view');
-
                 if (!document.activeElement || !view || !view.contains(document.activeElement)) {
                     // only focus if the user isn't typing already (causes flaky playwright tests)
-                    ViewportHelper.scrollIntoView(el, 'center', true);
-
-                    setTimeout(() => {
-                        el.focus();
-                    }, 150);
+                    // and never scroll to reach the input: on mobile it can be far below the fold
+                    if (isInScrollViewport(el)) {
+                        el.focus({ preventScroll: true });
+                    }
                 }
             }
         }, 300);
