@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { OutputStream, setActiveOutputTarget, writeOutputLine } from './output-target.js';
+import { OutputStream, setActiveOutputTarget, writeOutputChunk, writeOutputLine } from './output-target.js';
 
 describe('output target', () => {
     afterEach(() => {
@@ -27,5 +27,16 @@ describe('output target', () => {
         writeOutputLine('hello');
 
         expect(consoleLog).toHaveBeenCalledWith('hello');
+    });
+
+    it('preserves chunk boundaries and streams for an active target', () => {
+        const target = { log: vi.fn(), write: vi.fn() };
+        setActiveOutputTarget(target);
+
+        writeOutputChunk('partial', OutputStream.Stdout);
+        writeOutputChunk('error\n', OutputStream.Stderr);
+
+        expect(target.write).toHaveBeenNthCalledWith(1, 'partial', OutputStream.Stdout);
+        expect(target.write).toHaveBeenNthCalledWith(2, 'error\n', OutputStream.Stderr);
     });
 });
