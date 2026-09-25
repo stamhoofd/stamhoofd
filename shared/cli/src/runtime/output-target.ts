@@ -1,7 +1,6 @@
-export enum OutputStream {
-    Stdout = 'stdout',
-    Stderr = 'stderr',
-}
+import { OutputStream } from '@stamhoofd/stdsync';
+
+export { OutputStream };
 
 export type OutputTarget = {
     log(message: string): void;
@@ -18,7 +17,11 @@ export function setActiveOutputTarget(target: OutputTarget | undefined): void {
 
 export function writeOutputLine(message: string, stream: OutputStream = OutputStream.Stdout): void {
     if (activeOutputTarget) {
-        activeOutputTarget.log(message);
+        if (stream === OutputStream.Stderr) {
+            activeOutputTarget.write(`${message}\n`, stream);
+        } else {
+            activeOutputTarget.log(message);
+        }
         return;
     }
 

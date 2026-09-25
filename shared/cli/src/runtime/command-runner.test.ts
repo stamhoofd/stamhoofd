@@ -51,16 +51,21 @@ describe('command runner', () => {
         expect(writeOutputLine).not.toHaveBeenCalled();
     });
 
-    it('connects child stdout and stderr to parent stderr in output mode', async () => {
+    it('forwards verbose child output through parent stderr for live rendering', async () => {
         const child = createChild();
         vi.mocked(spawn).mockReturnValue(child as never);
+        const write = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
 
         const promise = run('pnpm', ['run', 'build'], { verbosity: RunVerbosity.Output });
+        child.stdout.emit('data', Buffer.from('build started\n'));
+        child.stderr.emit('data', Buffer.from('build warning\n'));
         child.emit('exit', 0);
 
         await expect(promise).resolves.toBeUndefined();
         expect(writeOutputLine).toHaveBeenCalledWith('  pnpm run build');
-        expect(spawn).toHaveBeenCalledWith('pnpm', ['run', 'build'], expect.objectContaining({ stdio: ['inherit', 2, 2] }));
+        expect(spawn).toHaveBeenCalledWith('pnpm', ['run', 'build'], expect.objectContaining({ stdio: ['inherit', 'pipe', 'pipe'] }));
+        expect(write).toHaveBeenNthCalledWith(1, Buffer.from('build started\n'));
+        expect(write).toHaveBeenNthCalledWith(2, Buffer.from('build warning\n'));
     });
 
     it('returns captured output without forwarding it', async () => {
