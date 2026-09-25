@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 import { command as formatCommand, warning } from './ux.js';
-import { writeOutputLine } from './output-target.js';
+import { OutputStream, writeOutputChunk, writeOutputLine } from './output-target.js';
 
 /** Controls command-line and subprocess output for a run. */
 export enum RunVerbosity {
@@ -40,8 +40,18 @@ export async function run(command: string, args: string[], options: RunOptions =
             });
             let stdout = '';
             let stderr = '';
-            child.stdout.on('data', chunk => stdout += String(chunk));
-            child.stderr.on('data', chunk => stderr += String(chunk));
+            child.stdout.on('data', (chunk) => {
+                stdout += String(chunk);
+                if (verbosity === RunVerbosity.Output) {
+                    writeOutputChunk(chunk, OutputStream.Stdout);
+                }
+            });
+            child.stderr.on('data', (chunk) => {
+                stderr += String(chunk);
+                if (verbosity === RunVerbosity.Output) {
+                    writeOutputChunk(chunk, OutputStream.Stderr);
+                }
+            });
             child.on('error', (error) => {
                 if (options.allowFailure) {
                     resolve({ stdout, stderr: String(error), status: 1 });
@@ -67,11 +77,16 @@ export async function run(command: string, args: string[], options: RunOptions =
         });
         let stderr = '';
 
-        if (verbosity === RunVerbosity.Output) {
-            child.stdout?.on('data', (chunk: Buffer) => process.stderr.write(chunk));
-            child.stderr?.on('data', (chunk: Buffer) => process.stderr.write(chunk));
-        } else {
-            child.stderr?.on('data', chunk => stderr += String(chunk));
+        if (verbosity === RunVerbosity.Output && child.stdout) {
+            child.stdout.on('data', chunk => writeOutputChunk(chunk, OutputStream.Stdout));
+        }
+        if (child.stderr) {
+            child.stderr.on('data', (chunk) => {
+                stderr += String(chunk);
+                if (verbosity === RunVerbosity.Output) {
+                    writeOutputChunk(chunk, OutputStream.Stderr);
+                }
+            });
         }
 
         child.on('error', reject);
