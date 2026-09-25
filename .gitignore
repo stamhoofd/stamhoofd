@@ -1,6 +1,7 @@
 /devops/
 node_modules/
 .node_modules/
+.turbo/
 built/*
 tests/cases/rwc/*
 tests/cases/test262/*

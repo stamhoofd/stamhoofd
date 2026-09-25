@@ -106,6 +106,7 @@
         "postcss-discard-duplicates": "^8.0.1",
         "sass": "1.104.0",
         "terser": "5.51.2",
+        "turbo": "2.10.13",
         "typescript": "6.0.3",
         "vite": "8.3.0",
         "vitest": "4.1.11",
