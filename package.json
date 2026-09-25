@@ -75,6 +75,7 @@
     },
     "devDependencies": {
         "@oxc-project/runtime": "0.147.0",
+        "@stamhoofd/frontend-i18n": "*",
         "@stamhoofd/test-utils": "*",
         "@stamhoofd/types": "*",
         "@stylistic/eslint-plugin": "5.10.0",

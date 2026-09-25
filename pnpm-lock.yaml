@@ -279,6 +279,9 @@ importers:
       '@oxc-project/runtime':
         specifier: 0.147.0
         version: 0.147.0
+      '@stamhoofd/frontend-i18n':
+        specifier: '*'
+        version: link:frontend/shared/i18n
       '@stamhoofd/test-utils':
         specifier: '*'
         version: link:shared/test-utils
