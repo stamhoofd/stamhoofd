@@ -27,7 +27,7 @@
         "dev:watch-env:full": "pnpm run stam dev all",
         "dns": "export SERVER_IP=127.0.0.1 && cd .development && source loadenv.sh && coredns",
         "frontend:types": "wait-on shared/locales/dist/index.d.ts && pnpm --dir frontend/app/dashboard run typecheck",
-        "lint": "lerna run lint -- --quiet",
+        "lint": "turbo run lint -- --quiet",
         "migrate": "pnpm run build:shared && lerna run migrations --concurrency 1",
         "ship": "node ./.development/increase-structures-version.js && pnpm run clear:shared && pnpm run build:shared && lerna version --exact --force-publish --yes --no-private && lerna publish from-git --yes --no-private --otp $(op item get NPM --otp || :) && pnpm run stam release publish",
         "ship:fix": "lerna publish from-git --yes --no-private --otp $(op item get NPM --otp || :) && pnpm run stam release publish",
@@ -44,7 +44,7 @@
         "translate:compress": "pnpm --dir shared/locales run build && pnpm --dir .development/i18n-uuid run merge-duplicates && pnpm --dir .development/i18n-uuid run unused-keys",
         "translate:keys": "pnpm --dir .development/i18n-uuid run replace-keys && pnpm --dir .development/i18n-uuid run replace-keys",
         "translate:machine": "pnpm --dir shared/locales run build && pnpm --dir .development/i18n-uuid run auto-translate",
-        "typecheck": "lerna run typecheck --"
+        "typecheck": "turbo run typecheck"
     },
     "dependencies": {
         "@simonbackx/simple-encoding": "2.26.11",
