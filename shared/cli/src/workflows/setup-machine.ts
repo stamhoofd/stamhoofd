@@ -396,7 +396,13 @@ export async function setupCert(context: CliContext, options: { yes: boolean; dr
     console.log('Preparing temporary local Caddy CA...');
     await run('caddy', ['start', '--config', configPath, '--pidfile', pidPath], { verbose: context.verbose });
     try {
-        await run('caddy', ['trust', '--config', configPath, '--address', localhostPort(caddySetupAdminPort)], { verbose: context.verbose });
+        const trustArgs = ['trust', '--config', configPath, '--address', localhostPort(caddySetupAdminPort)];
+        if (process.platform === 'darwin') {
+            const caddyPath = (await run('which', ['caddy'], { capture: true })).stdout.trim();
+            await run('sudo', [caddyPath, ...trustArgs], { verbose: context.verbose });
+        } else {
+            await run('caddy', trustArgs, { verbose: context.verbose });
+        }
     } finally {
         await run('caddy', ['stop', '--config', configPath, '--address', localhostPort(caddySetupAdminPort)], { allowFailure: true, quiet: true, verbose: context.verbose });
         await fs.rm(pidPath, { force: true });

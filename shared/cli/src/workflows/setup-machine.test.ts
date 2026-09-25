@@ -5,7 +5,8 @@ import { run } from '../runtime/command-runner.js';
 import { confirm } from '../runtime/ux.js';
 import { corednsService } from '../services/definitions/coredns-service.js';
 import * as docker from '../services/docker.js';
-import { checkSetup, getRecommendedSetupFixes, isSetupReady, printSetupReport, runSetup, setupCaddy, setupDns, SetupAutomaticFixKey } from './setup-machine.js';
+import { writeSetupCaddyConfig } from '../config/caddy-config.js';
+import { checkSetup, getRecommendedSetupFixes, isSetupReady, printSetupReport, runSetup, setupCaddy, setupCert, setupDns, SetupAutomaticFixKey } from './setup-machine.js';
 import type { CheckResult, SetupReport } from './setup-machine.js';
 import { checkNodeVersion, setupNodeVersion } from './setup-node.js';
 import { checkPackageManager, setupPackageManager } from './setup-package-manager.js';
@@ -24,6 +25,10 @@ vi.mock('node:dns/promises', () => ({
 
 vi.mock('../runtime/command-runner.js', () => ({
     run: vi.fn(),
+}));
+
+vi.mock('../config/caddy-config.js', () => ({
+    writeSetupCaddyConfig: vi.fn(),
 }));
 
 vi.mock('../services/definitions/coredns-service.js', () => ({
@@ -416,6 +421,20 @@ describe('setup machine workflow', () => {
         await setupCaddy({ yes: true, dryRun: false, verbose: true });
 
         expect(run).toHaveBeenCalledWith('brew', ['install', 'caddy'], { verbose: true });
+    });
+
+    it('trusts the temporary Caddy CA with a top-level sudo on macOS', async () => {
+        setPlatform('darwin');
+        vi.spyOn(fs, 'mkdir').mockResolvedValue(undefined);
+        vi.spyOn(fs, 'rm').mockResolvedValue(undefined);
+        vi.mocked(writeSetupCaddyConfig).mockResolvedValue('/repo/caddy-setup.json');
+        vi.mocked(run).mockImplementation(async (command) => command === 'which' ? { stdout: '/opt/homebrew/bin/caddy\n', stderr: '', status: 0 } : undefined as any);
+
+        await setupCert({ generatedDir: '/repo', verbose: true } as any, { yes: true, dryRun: false });
+
+        expect(run).toHaveBeenCalledWith('caddy', ['start', '--config', '/repo/caddy-setup.json', '--pidfile', '/repo/shared/caddy-setup.pid'], { verbose: true });
+        expect(run).toHaveBeenCalledWith('sudo', ['/opt/homebrew/bin/caddy', 'trust', '--config', '/repo/caddy-setup.json', '--address', '127.0.0.1:2021'], { verbose: true });
+        expect(run).toHaveBeenCalledWith('caddy', ['stop', '--config', '/repo/caddy-setup.json', '--address', '127.0.0.1:2021'], { allowFailure: true, quiet: true, verbose: true });
     });
 
     it('prints the setup report with standardized status labels', () => {
