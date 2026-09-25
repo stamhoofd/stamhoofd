@@ -42,9 +42,11 @@ Backend uses a custom router (`@simonbackx/simple-endpoints`), **not Express**: 
 
 Shared builds use `^build` for normal dependencies and explicit task dependencies for internal peers and global type declarations. Turbo does not include peer dependencies in `^build`. Frontend source packages have dependency cycles: do not enable `^build` globally. Application builds, Playwright builds, tests, migrations, lint and typecheck are uncached; development tasks are persistent and uncached.
 
-`pnpm run build:shared` runs the shared Turbo graph. For a narrower build use `pnpm exec turbo run build --filter='./shared/*'` or `--filter='./backend/shared/*'`; prerequisites are included automatically. The old `build:global:shared` and `build:backend:shared` aliases have been removed. CI still uploads and downloads `shared-dist`: a checkout-local cache does not transfer outputs between jobs. Other entry points are being migrated in separate steps; Lerna remains installed for releases.
+`pnpm run build:shared` runs the shared Turbo graph. For a narrower build use `pnpm exec turbo run build --filter='./shared/*'` or `--filter='./backend/shared/*'`; prerequisites are included automatically. The old `build:global:shared` and `build:backend:shared` aliases have been removed. CI still uploads and downloads `shared-dist`: a checkout-local cache does not transfer outputs between jobs. Lerna remains installed only for fixed versioning and npm publication.
 
 `pnpm stam dev` runs API, renderer, statistics syncer, web-app, and webshop development scripts through explicit Turbo filters. These tasks are persistent and uncached. Development uses Turbo's loose environment mode so the CLI-generated backend, frontend, and Stripe environment reaches package processes. The docs server remains a direct Nuxt process because it does not consume shared build output.
+
+`pnpm stam build` builds shared packages, then those same five executable app owners through explicit uncached Turbo filters. Dashboard and registration are source packages bundled by web-app, not standalone build owners. `pnpm run build:backend:apps` explicitly builds API, renderer, backup, redirecter, and statistics syncer. Migrations run the API and statistics-syncer owners explicitly and serially.
 
 `pnpm run clear:shared` removes build outputs but retains the Turbo cache. To rebuild without reading cache, run `pnpm run clear:shared && pnpm run build:shared --force`. Use `--dry=json` on the build command to inspect task dependencies and cache inputs.
 
@@ -60,7 +62,9 @@ From repo root: `pnpm run lint` · `pnpm run typecheck`. Both dispatch every pac
 
 ```bash
 pnpm stam test unit                 # every unit package (excludes Playwright)
-pnpm stam test api                  # one package: api models sql structures renderer redirecter queues utility sgv object-differ eslint cli components networking
+pnpm stam test coverage             # coverage packages with the same isolated MySQL lifecycle
+pnpm stam test api                  # one package: api models vies sql statistics-syncer structures renderer redirecter queues utility sgv object-differ eslint vite-config metabase i18n-uuid cli components networking
+pnpm stam test api --coverage       # collect coverage for one package
 pnpm stam test unit SomeFile        # filename filter across all packages
 pnpm stam test structures bundle-discounts          # package + filename filter
 pnpm stam test structures -t 'partial test name'    # package + test-name filter (-t → vitest -t)
@@ -72,7 +76,7 @@ For running tests, your sandbox needs permission to open ports.
 
 The DB MySQL container is shut down after each run, but its data volume persists (per worktree) so migrations aren't reinitialized every time — use `--clear` for a clean database.
 
-**Never hand-roll test infrastructure.** The isolated MySQL, migrations, `build:shared`, and env are all provisioned by `pnpm stam test` — don't spin up Docker, create databases, run `build:shared`, or set `DB_PORT`/env vars yourself. If it doesn't work, STOP and ask the user. Tests use **Vitest**; only `api`, `models`, and `sql` need MySQL. `components` and `networking` are vitest browser-mode tests and need a Playwright Chromium (`pnpm exec playwright install chromium`). The frontend dashboard/web-app "test" is a `vue-tsc` typecheck (run via `pnpm run typecheck`); UI behavior is covered by Playwright.
+**Never hand-roll test infrastructure.** The isolated MySQL, migrations, `build:shared`, and env are all provisioned by `pnpm stam test` — don't spin up Docker, create databases, run `build:shared`, or set `DB_PORT`/env vars yourself. If it doesn't work, STOP and ask the user. Tests use **Vitest**; `api`, `models`, `sql`, `statistics-syncer`, and `vies` need MySQL. `components` and `networking` are vitest browser-mode tests and need a Playwright Chromium (`pnpm exec playwright install chromium`). The frontend dashboard/web-app "test" is a `vue-tsc` typecheck (run via `pnpm run typecheck`); UI behavior is covered by Playwright.
 
 ### Playwright
 
