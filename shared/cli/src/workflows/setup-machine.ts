@@ -126,39 +126,48 @@ export function printSetupReport(report: SetupReport): void {
 }
 
 export async function runSetup(context: CliContext): Promise<void> {
-    const report = await checkSetupWithTable(context, { live: true });
-    const fixes = getRecommendedSetupFixes(report);
-    if (fixes.length === 0) {
-        if (setupChecks(report).some(check => !check.ok)) {
-            console.log('\nResolve the missing manual setup items above, then run stam setup again.');
+    const attemptedFixes = new Set<SetupAutomaticFixKey>();
+    while (true) {
+        const report = await checkSetupWithTable(context, { live: true });
+        const fixes = getRecommendedSetupFixes(report);
+        if (fixes.length === 0) {
+            if (setupChecks(report).some(check => !check.ok)) {
+                console.log('\nResolve the missing manual setup items above, then run stam setup again.');
+                return;
+            }
+            console.log('\nSetup looks ready. Next: stam dev all');
             return;
         }
-        console.log('\nSetup looks ready. Next: stam dev all');
-        return;
-    }
-    console.log('\nRecommended fixes:');
-    fixes.forEach(({ label }, index) => console.log(`  ${index + 1}. ${label}`));
-    console.log('');
-    if (!(await confirm('Run recommended fixes now?', { default: true }))) {
-        return;
-    }
-    for (const fix of fixes) {
-        if (fix.key === SetupAutomaticFixKey.Node) {
-            await setupNodeVersion(context.rootDir);
-            console.log('\nActivate the new version in this terminal, then run stam setup again.');
+
+        if (fixes.some(fix => attemptedFixes.has(fix.key))) {
+            console.log('\nA recommended fix did not resolve its setup check. Review the missing items above, then run stam setup again.');
             return;
-        } else if (fix.key === SetupAutomaticFixKey.Pnpm) {
-            await setupPackageManager(context.rootDir);
-        } else if (fix.key === SetupAutomaticFixKey.Dns) {
-            await setupDns({ yes: true, dryRun: false });
-        } else if (fix.key === SetupAutomaticFixKey.PrivilegedPorts) {
-            await setupPrivilegedPortRedirects({ yes: true, dryRun: false });
-        } else if (fix.key === SetupAutomaticFixKey.Services) {
-            await runServices(context);
-        } else if (fix.key === SetupAutomaticFixKey.Caddy) {
-            await setupCaddy({ yes: true, dryRun: false });
-        } else {
-            await setupCert(context, { yes: true, dryRun: false });
+        }
+        console.log('\nRecommended fixes:');
+        fixes.forEach(({ label }, index) => console.log(`  ${index + 1}. ${label}`));
+        console.log('');
+        if (!(await confirm('Run recommended fixes now?', { default: true }))) {
+            return;
+        }
+        for (const fix of fixes) {
+            if (fix.key === SetupAutomaticFixKey.Node) {
+                await setupNodeVersion(context.rootDir);
+                console.log('\nActivate the new version in this terminal, then run stam setup again.');
+                return;
+            } else if (fix.key === SetupAutomaticFixKey.Pnpm) {
+                await setupPackageManager(context.rootDir);
+            } else if (fix.key === SetupAutomaticFixKey.Dns) {
+                await setupDns({ yes: true, dryRun: false });
+            } else if (fix.key === SetupAutomaticFixKey.PrivilegedPorts) {
+                await setupPrivilegedPortRedirects({ yes: true, dryRun: false });
+            } else if (fix.key === SetupAutomaticFixKey.Services) {
+                await runServices(context);
+            } else if (fix.key === SetupAutomaticFixKey.Caddy) {
+                await setupCaddy({ yes: true, dryRun: false });
+            } else {
+                await setupCert(context, { yes: true, dryRun: false });
+            }
+            attemptedFixes.add(fix.key);
         }
     }
 }
