@@ -6,7 +6,7 @@ export class FrontendBuilder {
 
         const childProcess = new STChildProcess(
             'pnpm',
-            ['--workspace-root', 'exec', 'lerna', 'run', 'build:playwright', '--stream', '--parallel'],
+            ['--workspace-root', 'exec', 'turbo', 'run', 'build:playwright', '--filter=@stamhoofd/web-app', '--filter=@stamhoofd/webshop'],
             {
                 env: {
                     ...process.env,
