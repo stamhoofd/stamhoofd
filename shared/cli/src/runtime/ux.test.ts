@@ -100,4 +100,29 @@ describe('ux helpers', () => {
 
         expect(messages.join('\n')).toContain('running');
     });
+
+    it('keeps logs above a live table while rows update', async () => {
+        const originalIsTTY = process.stdout.isTTY;
+        Object.defineProperty(process.stdout, 'isTTY', { configurable: true, value: true });
+        const writes: string[] = [];
+        vi.spyOn(process.stdout, 'write').mockImplementation((chunk: string | Uint8Array) => {
+            writes.push(String(chunk));
+            return true;
+        });
+        try {
+            const row = Table.row(['Service', Table.cell('starting', { indeterminate: true })]);
+            const table = Table.create({ headers: ['Service', 'Status'], rows: [row], live: true });
+            const beforeLog = writes.length;
+
+            process.stdout.write('podman rm -f stamhoofd-mysql\n');
+
+            expect(writes.slice(beforeLog).join('')).toContain('\x1b[5A\x1b[0Jpodman rm -f stamhoofd-mysql');
+            row.update(['Service', 'running']);
+            await table.wait();
+            expect(writes.join('')).toContain('podman rm -f stamhoofd-mysql');
+        }
+        finally {
+            Object.defineProperty(process.stdout, 'isTTY', { configurable: true, value: originalIsTTY });
+        }
+    });
 });

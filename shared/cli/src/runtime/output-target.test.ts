@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { setActiveOutputTarget, writeOutputLine } from './output-target.js';
+import { OutputStream, setActiveOutputTarget, writeOutputLine } from './output-target.js';
 
 describe('output target', () => {
     afterEach(() => {
@@ -15,8 +15,10 @@ describe('output target', () => {
 
         setActiveOutputTarget(target);
         writeOutputLine('hello');
+        writeOutputLine('failure', OutputStream.Stderr);
 
         expect(target.log).toHaveBeenCalledWith('hello');
+        expect(target.write).toHaveBeenCalledWith('failure\n', OutputStream.Stderr);
     });
 
     it('falls back to console when no active target exists', () => {

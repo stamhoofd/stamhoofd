@@ -14,6 +14,9 @@
         },
         {
             "path": "../metabase/tsconfig.build.json"
+        },
+        {
+            "path": "../stdsync/tsconfig.build.json"
         }
     ],
     "exclude": [
