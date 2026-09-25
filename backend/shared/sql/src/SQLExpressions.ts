@@ -150,8 +150,8 @@ export class SQLCalculation implements SQLExpression {
 
     /**
      * Add a new arithmic operation.
-     * @param type 
-     * @param expression 
+     * @param type
+     * @param expression
      */
     private pushOperation(type: SQLArithmicOperatorType, expression: SQLExpression): SQLCalculation {
         this.expressions.push(new SQLArithmicOperator(type), expression);
@@ -447,8 +447,7 @@ export class SQLColumnExpression implements SQLExpression {
 
         if (typeof namespace === 'string') {
             this.namespace = new SQLNamespaceExpression(namespace);
-        }
-        else {
+        } else {
             this.namespace = namespace;
         }
         this.column = column;
@@ -519,11 +518,22 @@ export class SQLJSONTableColumn implements SQLExpression {
         this.path = path;
     }
 
+    private getSqlType() {
+        switch (this.type) {
+            case 'VARCHAR':
+            case 'TEXT':
+            case 'INT':
+                return 'VARCHAR(250)';
+            case 'JSON':
+                return 'JSON';
+        }
+    }
+
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         return joinSQLQuery([
             Database.escapeId(this.name),
             ' ',
-            'VARCHAR(250)',
+            this.getSqlType(),
             ' PATH ',
             JSON.stringify(this.path),
         ]);

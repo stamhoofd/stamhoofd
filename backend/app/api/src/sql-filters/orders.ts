@@ -1,6 +1,6 @@
 import { Payment } from '@stamhoofd/models';
 import type { SQLExpression, SQLFilterDefinitions } from '@stamhoofd/sql';
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createWildcardColumnFilter, SQL, SQLCast, SQLConcat, SQLJsonExtract, SQLJsonUnquote, SQLScalar, SQLSum, SQLValueType } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createWildcardColumnFilter, SQL, SQLCast, SQLConcat, SQLCount, SQLJsonExtract, SQLJsonUnquote, SQLScalar, SQLSum, SQLValueType } from '@stamhoofd/sql';
 import { PaymentStatus } from '@stamhoofd/structures';
 import { paymentFilterCompilers } from './payments.js';
 
@@ -156,10 +156,22 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
                             'productPriceId',
                             'TEXT',
                             '$.productPrice.id',
+                        )
+                        .addColumn(
+                            'options',
+                            'JSON',
+                            '$.options',
+                        )
+                        .addColumn(
+                            'fieldAnswers',
+                            'JSON',
+                            '$.fieldAnswers',
                         ),
                 ),
             )
-            .where(SQL.column('innerOrders', 'id'), SQL.column('webshop_orders', 'id')),
+            .where(SQL.column('innerOrders', 'id'), SQL.column('webshop_orders', 'id'))
+            // Keep the parent JSON_TABLE correlated when its columns feed nested JSON_TABLE queries.
+            .having(SQL.where(new SQLCount(), '>', new SQLScalar(0))),
         {
             ...baseSQLFilterCompilers,
             amount: createColumnFilter({
@@ -183,6 +195,83 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
                     nullable: false,
                 }),
             },
+            options: createExistsFilter(
+                SQL.select()
+                    .from(
+                        SQL.jsonTable(
+                            SQL.column('items', 'options'),
+                            'options',
+                        )
+                            .addColumn(
+                                'optionId',
+                                'TEXT',
+                                '$.option.id',
+                            )
+                            .addColumn(
+                                'optionMenuId',
+                                'TEXT',
+                                '$.optionMenu.id',
+                            ),
+                    )
+                    // Aggregation prevents MySQL 8 from reordering JSON_TABLE before its parent item (bug #114897).
+                    .having(SQL.where(new SQLCount(), '>', new SQLScalar(0))),
+                {
+                    ...baseSQLFilterCompilers,
+                    option: {
+                        ...baseSQLFilterCompilers,
+                        id: createColumnFilter({
+                            expression: SQL.column('options', 'optionId'),
+                            type: SQLValueType.String,
+                            nullable: false,
+                        }),
+                    },
+                    optionMenu: {
+                        ...baseSQLFilterCompilers,
+                        id: createColumnFilter({
+                            expression: SQL.column('options', 'optionMenuId'),
+                            type: SQLValueType.String,
+                            nullable: false,
+                        }),
+                    },
+                },
+            ),
+            fieldAnswers: createExistsFilter(
+                SQL.select()
+                    .from(
+                        SQL.jsonTable(
+                            SQL.column('items', 'fieldAnswers'),
+                            'fieldAnswers',
+                        )
+                            .addColumn(
+                                'fieldId',
+                                'TEXT',
+                                '$.field.id',
+                            )
+                            .addColumn(
+                                'answer',
+                                'TEXT',
+                                '$.answer',
+                            ),
+                    )
+                    // Aggregation prevents MySQL 8 from reordering JSON_TABLE before its parent item (bug #114897).
+                    .having(SQL.where(new SQLCount(), '>', new SQLScalar(0))),
+                {
+                    ...baseSQLFilterCompilers,
+                    field: {
+                        ...baseSQLFilterCompilers,
+                        id: createColumnFilter({
+                            expression: SQL.column('fieldAnswers', 'fieldId'),
+                            type: SQLValueType.String,
+                            nullable: false,
+                        }),
+                    },
+                    answer: createColumnFilter({
+                        expression: SQL.column('fieldAnswers', 'answer'),
+                        type: SQLValueType.String,
+                        nullable: false,
+                    }),
+                },
+            ),
         },
     ),
 
