@@ -11,7 +11,7 @@ export type PackageManagerCheck = {
     details: string;
 };
 
-export async function checkPackageManager(rootDir: string): Promise<PackageManagerCheck> {
+export async function checkPackageManager(rootDir: string, verbosity: RunVerbosity = RunVerbosity.Quiet): Promise<PackageManagerCheck> {
     const packageJson = JSON.parse(await fs.readFile(path.join(rootDir, 'package.json'), 'utf8')) as { packageManager?: unknown };
     const match = typeof packageJson.packageManager === 'string'
         ? /^pnpm@([^+\s]+)(?:\+.+)?$/.exec(packageJson.packageManager)
@@ -21,7 +21,7 @@ export async function checkPackageManager(rootDir: string): Promise<PackageManag
     }
 
     const expected = match[1];
-    const result = await run('pnpm', ['--version'], { capture: true, allowFailure: true, cwd: rootDir, verbosity: RunVerbosity.Quiet });
+    const result = await run('pnpm', ['--version'], { capture: true, allowFailure: true, cwd: rootDir, verbosity });
     if (result.status !== 0) {
         const error = result.stderr.trim();
         return {

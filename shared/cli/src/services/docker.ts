@@ -14,8 +14,8 @@ export async function requireDocker(): Promise<void> {
     await getContainerRuntime();
 }
 
-export async function getContainerRuntime(): Promise<ContainerRuntime> {
-    containerRuntimePromise ??= resolveContainerRuntime();
+export async function getContainerRuntime(verbosity: RunVerbosity = RunVerbosity.Quiet): Promise<ContainerRuntime> {
+    containerRuntimePromise ??= resolveContainerRuntime(verbosity);
     return await containerRuntimePromise;
 }
 
@@ -25,8 +25,8 @@ export async function run(args: string[], options: RunOptions = {}): Promise<voi
     return await commandRunner.run(await getContainerRuntime(), args, options as RunOptions & { capture: true });
 }
 
-export async function containerIsRunning(name: string): Promise<boolean> {
-    const result = await run(['inspect', '-f', '{{.State.Running}}', name], { capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
+export async function containerIsRunning(name: string, verbosity: RunVerbosity = RunVerbosity.Quiet): Promise<boolean> {
+    const result = await run(['inspect', '-f', '{{.State.Running}}', name], { capture: true, allowFailure: true, verbosity });
     return result.stdout.trim() === 'true';
 }
 
@@ -108,7 +108,7 @@ export function resetContainerRuntimeCacheForTests(): void {
     containerRuntimePromise = undefined;
 }
 
-async function resolveContainerRuntime(): Promise<ContainerRuntime> {
+async function resolveContainerRuntime(verbosity: RunVerbosity): Promise<ContainerRuntime> {
     // Both runtimes are often installed side by side (GitHub Actions runners ship podman as well
     // as docker), so allow pinning one instead of relying on the auto-detection order.
     const configured = process.env.STAMHOOFD_CONTAINER_RUNTIME?.trim().toLowerCase();
@@ -117,20 +117,20 @@ async function resolveContainerRuntime(): Promise<ContainerRuntime> {
         if (!supported.includes(configured)) {
             throw new Error(`Unknown STAMHOOFD_CONTAINER_RUNTIME "${configured}": expected ${supported.map(runtime => `"${runtime}"`).join(' or ')}`);
         }
-        await commandRunner.run(configured, ['info'], { verbosity: RunVerbosity.Quiet });
+        await commandRunner.run(configured, ['info'], { verbosity });
         return configured as ContainerRuntime;
     }
 
-    const podmanVersion = await commandRunner.run('podman', ['--version'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
+    const podmanVersion = await commandRunner.run('podman', ['--version'], { capture: true, allowFailure: true, verbosity });
     if (podmanVersion.status === 0) {
-        await commandRunner.run('podman', ['info'], { verbosity: RunVerbosity.Quiet });
+        await commandRunner.run('podman', ['info'], { verbosity });
         return ContainerRuntime.Podman;
     }
     if (!isCommandNotFound(podmanVersion.stderr)) {
         throw new Error(`podman is available but not usable: ${podmanVersion.stderr.trim() || `exited with status ${podmanVersion.status}`}`);
     }
 
-    await commandRunner.run('docker', ['info'], { verbosity: RunVerbosity.Quiet });
+    await commandRunner.run('docker', ['info'], { verbosity });
     return ContainerRuntime.Docker;
 }
 

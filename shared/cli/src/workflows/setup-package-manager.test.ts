@@ -42,6 +42,15 @@ describe('setup package manager workflow', () => {
         });
     });
 
+    it('forwards the selected verbosity when checking pnpm', async () => {
+        tmpDir = await createProject('pnpm@12.4.2');
+        const run = vi.spyOn(commandRunner, 'run').mockResolvedValue({ stdout: '12.4.2\n', stderr: '', status: 0 });
+
+        await checkPackageManager(tmpDir, RunVerbosity.Output);
+
+        expect(run).toHaveBeenCalledWith('pnpm', ['--version'], { capture: true, allowFailure: true, cwd: tmpDir, verbosity: RunVerbosity.Output });
+    });
+
     it('reports a pnpm command failure', async () => {
         tmpDir = await createProject('pnpm@12.4.2');
         vi.spyOn(commandRunner, 'run').mockResolvedValue({ stdout: '', stderr: 'pnpm failed', status: 1 });
