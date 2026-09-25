@@ -9,6 +9,7 @@ SELECT deduplicated.* FROM (
         ROW_NUMBER() OVER (
             PARTITION BY non_platform_registrations.organization_id, non_platform_registrations.`Werkjaar`, non_platform_registrations.member_id
             ORDER BY
+                (non_platform_registrations.group_type = 'Membership') DESC,
                 (non_platform_registrations.deactivated_at IS NULL) DESC,
                 CASE non_platform_registrations.age_group_category WHEN 'leader' THEN 3 WHEN 'child' THEN 2 WHEN 'adult' THEN 1 ELSE 0 END DESC,
                 CASE non_platform_registrations.effective_category WHEN 'leader' THEN 3 WHEN 'child' THEN 2 WHEN 'adult' THEN 1 ELSE 0 END DESC,
