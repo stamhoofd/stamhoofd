@@ -477,10 +477,16 @@ async function certCheck(): Promise<CheckResult> {
     const certPath = caddyRootCaPath();
     try {
         await fs.access(certPath);
-        return { ok: true, details: certPath };
     } catch {
         return { ok: false, details: 'Caddy local CA not found', manualFix: 'stam setup cert', automaticFix: { key: SetupAutomaticFixKey.Cert, label: 'Trust local HTTPS certificates' } };
     }
+    if (process.platform === 'darwin') {
+        const result = await run('security', ['verify-cert', '-c', certPath, '-p', 'ssl', '-l', '-L', '-q'], { capture: true, allowFailure: true });
+        if (result.status !== 0) {
+            return { ok: false, details: 'Caddy local CA is not trusted by macOS', manualFix: 'stam setup cert', automaticFix: { key: SetupAutomaticFixKey.Cert, label: 'Trust local HTTPS certificates' } };
+        }
+    }
+    return { ok: true, details: certPath };
 }
 
 async function privilegedPortRedirectCheck(profile: SharedServiceProfile): Promise<CheckResult> {
