@@ -63,11 +63,14 @@ export async function run(command: string, args: string[], options: RunOptions =
         const child = spawn(command, args, {
             cwd: options.cwd,
             env: { ...process.env, ...options.env },
-            stdio: verbosity === RunVerbosity.Output ? ['inherit', 2, 2] : ['ignore', 'ignore', 'pipe'],
+            stdio: verbosity === RunVerbosity.Output ? ['inherit', 'pipe', 'pipe'] : ['ignore', 'ignore', 'pipe'],
         });
         let stderr = '';
 
-        if (verbosity !== RunVerbosity.Output) {
+        if (verbosity === RunVerbosity.Output) {
+            child.stdout?.on('data', (chunk: Buffer) => process.stderr.write(chunk));
+            child.stderr?.on('data', (chunk: Buffer) => process.stderr.write(chunk));
+        } else {
             child.stderr?.on('data', chunk => stderr += String(chunk));
         }
 

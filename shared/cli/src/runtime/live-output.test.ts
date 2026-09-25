@@ -1,36 +1,21 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { OutputStream } from './output-target.js';
 import { createLiveOutput, StatusItemKind } from './live-output.js';
-
-const logUpdateMock = vi.hoisted(() => {
-    const fn = vi.fn();
-    return Object.assign(fn, {
-        clear: vi.fn(),
-        done: vi.fn(),
-    });
-});
-
-vi.mock('log-update', () => ({
-    default: logUpdateMock,
-}));
 
 vi.mock('./ux.js', () => ({
     link: vi.fn((label: string, url: string) => `${label}|${url}`),
 }));
 
 describe('createLiveOutput', () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-    });
-
     afterEach(() => {
+        vi.useRealTimers();
         vi.restoreAllMocks();
     });
 
-    it('uses log-update in TTY mode and redraws around writes', () => {
+    it('renders status below stdout and stderr, including direct writes', () => {
         const stdout = createStream(true);
         const stderr = createStream(true);
-        const output = createLiveOutput({ stdout, stderr });
+        const output = createLiveOutput({ stdout: stdout.stream, stderr: stderr.stream });
 
         output.setStatus([
             { label: 'instance main', kind: StatusItemKind.Success },
@@ -38,66 +23,84 @@ describe('createLiveOutput', () => {
         ]);
         output.write('hello\n');
         output.write('boom\n', OutputStream.Stderr);
+        stdout.stream.write('direct log\n');
+        output.stop();
 
-        expect(logUpdateMock).toHaveBeenCalledWith(expect.stringContaining('instance main'));
-        expect(logUpdateMock.clear).toHaveBeenCalledTimes(2);
-        expect(stdout.write).toHaveBeenCalledWith('hello\n');
-        expect(stderr.write).toHaveBeenCalledWith('boom\n');
+        expect(stdout.writes.join('')).toContain('\x1b[1A\x1b[0Jhello\n');
+        expect(stdout.writes.join('')).toContain('\x1b[1A\x1b[0Jdirect log\n');
+        expect(stdout.writes.filter(write => write.includes('instance main'))).toHaveLength(4);
+        expect(stderr.writes).toEqual(['boom\n']);
     });
 
     it('prints static output once in non-TTY mode', () => {
         const stdout = createStream(false);
-        const output = createLiveOutput({ stdout, stderr: createStream(false) });
+        const output = createLiveOutput({ stdout: stdout.stream, stderr: createStream(false).stream });
 
         output.setStatus([{ label: 'instance main' }]);
         output.setStatus([{ label: 'instance main' }]);
         output.log('Starting app processes...');
         output.write('hello\n');
 
-        expect(logUpdateMock).not.toHaveBeenCalled();
-        expect(stdout.write).toHaveBeenNthCalledWith(1, 'instance main\n');
-        expect(stdout.write).toHaveBeenNthCalledWith(2, 'instance main\n');
-        expect(stdout.write).toHaveBeenNthCalledWith(3, 'Starting app processes...\n');
-        expect(stdout.write).toHaveBeenNthCalledWith(4, 'hello\n');
+        expect(stdout.writes).toEqual(['instance main\n', 'instance main\n', 'Starting app processes...\n', 'hello\n']);
     });
 
     it('persists status when stopped with persistStatus', () => {
-        const output = createLiveOutput({ stdout: createStream(true), stderr: createStream(true) });
+        const stdout = createStream(true);
+        const output = createLiveOutput({ stdout: stdout.stream, stderr: createStream(true).stream });
 
         output.setStatus([{ label: 'instance main' }]);
         output.stop({ persistStatus: true });
 
-        expect(logUpdateMock.done).toHaveBeenCalledTimes(1);
+        expect(stdout.writes).toEqual(['instance main\n']);
     });
 
     it('animates live status only while active', () => {
         vi.useFakeTimers();
-        const output = createLiveOutput({ stdout: createStream(true), stderr: createStream(true) });
+        const stdout = createStream(true);
+        const output = createLiveOutput({ stdout: stdout.stream, stderr: createStream(true).stream });
 
         output.setLiveStatus(frame => [{ label: `frame ${frame}` }], { intervalMs: 50 });
         vi.advanceTimersByTime(120);
         output.stopLiveStatus();
         vi.advanceTimersByTime(120);
+        output.stop();
 
-        expect(logUpdateMock).toHaveBeenNthCalledWith(1, 'frame 0');
-        expect(logUpdateMock).toHaveBeenNthCalledWith(2, 'frame 1');
-        expect(logUpdateMock).toHaveBeenNthCalledWith(3, 'frame 2');
-        expect(logUpdateMock).toHaveBeenCalledTimes(3);
+        expect(stdout.writes.filter(write => /frame \d\n/.test(write))).toEqual(['frame 0\n', 'frame 1\n', 'frame 2\n']);
     });
 
     it('clears status when stopped without persistence', () => {
-        const output = createLiveOutput({ stdout: createStream(true), stderr: createStream(true) });
+        const stdout = createStream(true);
+        const output = createLiveOutput({ stdout: stdout.stream, stderr: createStream(true).stream });
 
         output.setStatus([{ label: 'instance main' }]);
         output.stop();
 
-        expect(logUpdateMock.clear).toHaveBeenCalledTimes(1);
+        expect(stdout.writes).toEqual(['instance main\n', '\x1b[1A\x1b[0J']);
+    });
+
+    it('clears every terminal line used by a wrapped status', () => {
+        const stdout = createStream(true);
+        stdout.stream.columns = 20;
+        const output = createLiveOutput({ stdout: stdout.stream, stderr: createStream(true).stream });
+
+        output.setStatus([{ label: 'dashboard.stamhoofd  api.stamhoofd' }]);
+        output.log('build started');
+        output.stop();
+
+        expect(stdout.writes.join('')).toContain('\x1b[2A\x1b[0Jbuild started\n');
     });
 });
 
-function createStream(isTTY: boolean): NodeJS.WriteStream {
+function createStream(isTTY: boolean): { stream: NodeJS.WriteStream; writes: string[] } {
+    const writes: string[] = [];
     return {
-        isTTY,
-        write: vi.fn(() => true),
-    } as unknown as NodeJS.WriteStream;
+        stream: {
+            isTTY,
+            write(chunk: string | Uint8Array) {
+                writes.push(String(chunk));
+                return true;
+            },
+        } as NodeJS.WriteStream,
+        writes,
+    };
 }
