@@ -7,6 +7,8 @@ export default class Check extends Command {
     static examples = [
         'stam check lint',
         'stam check typecheck',
+        'stam check format',
+        'stam check format --fix',
         'stam check all',
     ];
 
