@@ -12,9 +12,9 @@
         "@stamhoofd/cli": "*",
         "@stamhoofd/test-utils": "*",
         "@stamhoofd/types": "*",
-        "@vitejs/plugin-vue": "6.0.8",
-        "@vitest/browser-playwright": "^4.1.11",
-        "postcss-discard-duplicates": "^8.0.1",
+        "@vitejs/plugin-vue": "6.0.9",
+        "@vitest/browser-playwright": "4.1.11",
+        "postcss-discard-duplicates": "8.0.4",
         "vite": "8.3.0",
         "vite-svg-2-webfont": "8.3.0",
         "vitest": "4.1.11"
