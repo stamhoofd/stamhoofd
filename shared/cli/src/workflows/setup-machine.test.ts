@@ -147,7 +147,7 @@ describe('setup machine workflow', () => {
     });
 
     it('repairs pnpm and continues with later setup fixes', async () => {
-        vi.mocked(checkPackageManager).mockResolvedValue({
+        vi.mocked(checkPackageManager).mockResolvedValueOnce({
             ok: false,
             current: undefined,
             expected: '12.4.2',
@@ -155,14 +155,17 @@ describe('setup machine workflow', () => {
         });
         vi.mocked(confirm).mockResolvedValue(true);
         setPlatform('linux');
+        vi.spyOn(fs, 'access').mockResolvedValue(undefined);
         mockSetupCommands({
             dns: 'Global: 127.0.0.1:1053\n',
             domains: 'Global: ~stamhoofd\n',
         });
 
-        await runSetup({ rootDir: '/repo', verbose: true } as any);
+        await runSetup({ rootDir: '/repo', generatedDir: '/repo/.development/cli/generated', verbose: true } as any);
 
         expect(setupPackageManager).toHaveBeenCalledWith('/repo');
+        expect(checkPackageManager).toHaveBeenCalledTimes(2);
+        expect(confirm).toHaveBeenCalledOnce();
     });
 
     it('rechecks setup and offers to start services after configuring DNS', async () => {
