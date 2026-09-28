@@ -517,6 +517,8 @@ Bad candidates for this file:
 pnpm run stam-dev --help
 ```
 
+If the separate `devops/` repository has a populated oclif command directory, both `pnpm stam devops` and `pnpm stam-dev devops` load its commands. An absent or empty checkout does not add the topic. DevOps command implementations and their documentation live in `devops/`; the main CLI only discovers the optional plugin.
+
 For CLI-only changes, run:
 
 ```bash
