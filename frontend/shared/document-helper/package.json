@@ -15,7 +15,7 @@
         "@stamhoofd/networking": "*",
         "@stamhoofd/structures": "*",
         "@stamhoofd/utility": "*",
-        "jszip": "3.10.1"
+        "jszip": "3.10.2"
     },
     "devDependencies": {
         "eslint-plugin-stamhoofd": "*"
