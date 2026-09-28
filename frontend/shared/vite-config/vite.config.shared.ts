@@ -7,6 +7,7 @@ import path, { resolve } from 'path';
 import postcssDiscardDulicates from 'postcss-discard-duplicates';
 import viteSvgToWebfont from 'vite-svg-2-webfont';
 import type { ViteUserConfig } from 'vitest/config';
+import emptyLocalesPlugin from './emptyLocalesPlugin.ts';
 import svgNamespacePlugin from './svgNamespacePlugin.ts';
 import { getVendorChunkName } from './vendorChunkName.ts';
 
@@ -94,6 +95,7 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
                 namespace: loadedEnv?.ILLUSTRATIONS_NAMESPACE ?? '',
                 colors: loadedEnv?.ILLUSTRATIONS_COLORS,
             }),
+            options.name === 'calculator' ? emptyLocalesPlugin() : null,
             vue({
                 template: {
                     compilerOptions: {
@@ -145,9 +147,13 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
                                 name: 'StamhoofdCalculator',
                                 fileName: 'calculator',
                                 entry: './src/index.ts',
+                                formats: ['es'],
                             },
                             rollupOptions: {
                                 treeshake: true,
+                                output: {
+                                    codeSplitting: false,
+                                },
                             },
                         }
                     : {
