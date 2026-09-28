@@ -40,13 +40,13 @@ export async function run(command: string, args: string[], options: RunOptions =
             });
             let stdout = '';
             let stderr = '';
-            child.stdout.on('data', (chunk) => {
+            child.stdout.on('data', (chunk: Buffer) => {
                 stdout += String(chunk);
                 if (verbosity === RunVerbosity.Output) {
                     writeOutputChunk(chunk, OutputStream.Stdout);
                 }
             });
-            child.stderr.on('data', (chunk) => {
+            child.stderr.on('data', (chunk: Buffer) => {
                 stderr += String(chunk);
                 if (verbosity === RunVerbosity.Output) {
                     writeOutputChunk(chunk, OutputStream.Stderr);
@@ -78,10 +78,10 @@ export async function run(command: string, args: string[], options: RunOptions =
         let stderr = '';
 
         if (verbosity === RunVerbosity.Output && child.stdout) {
-            child.stdout.on('data', chunk => writeOutputChunk(chunk, OutputStream.Stdout));
+            child.stdout.on('data', (chunk: Buffer) => writeOutputChunk(chunk, OutputStream.Stdout));
         }
         if (child.stderr) {
-            child.stderr.on('data', (chunk) => {
+            child.stderr.on('data', (chunk: Buffer) => {
                 stderr += String(chunk);
                 if (verbosity === RunVerbosity.Output) {
                     writeOutputChunk(chunk, OutputStream.Stderr);
