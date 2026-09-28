@@ -1,7 +1,7 @@
 import { registerCron } from '@stamhoofd/crons';
 import { MolliePayment, MollieToken, Organization, Payment } from '@stamhoofd/models';
 import { PaymentStatus, PaymentType } from '@stamhoofd/structures';
-import type { ListEntityRefundStatus } from 'mollie-api-typescript/models';
+import type { ListRefundResponseStatus } from 'mollie-api-typescript/models';
 import { MollieService } from '../services/MollieService.js';
 import { PaymentService } from '../services/PaymentService.js';
 
@@ -131,7 +131,7 @@ export async function checkMollieRefundsFor(service: MollieService, checkAll = f
  * Update a locally registered refund that is still pending when Mollie reports a final status
  * (refunded, failed or canceled).
  */
-async function reconcileRefundStatus(paymentId: string, mollieStatus: ListEntityRefundStatus, createdAt: Date) {
+async function reconcileRefundStatus(paymentId: string, mollieStatus: ListRefundResponseStatus, createdAt: Date) {
     const payment = await Payment.getByID(paymentId);
     if (!payment || !payment.organizationId) {
         return;
