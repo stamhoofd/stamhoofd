@@ -16,7 +16,7 @@ describe('check format', () => {
     it.each([
         [[], '--check'],
         [['--fix'], '--write'],
-    ])('runs oxfmt for %j', async (args, mode) => {
+    ])('runs the formatters for %j', async (args, mode) => {
         const command = new CheckFormat([], {} as never);
         (command as any).parse = vi.fn(async () => await Parser.parse(args, { flags: CheckFormat.flags }));
 
@@ -24,5 +24,18 @@ describe('check format', () => {
 
         expect(createContext).toHaveBeenCalledWith({ env: 'stamhoofd', instanceName: undefined, verbose: false });
         expect(run).toHaveBeenCalledWith('pnpm', ['exec', 'oxfmt', mode], { cwd: '/repo', verbosity: RunVerbosity.Output });
+        expect(run).toHaveBeenCalledWith(
+            'pnpm',
+            [
+                'exec',
+                'eslint',
+                '**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts,vue}',
+                '--concurrency',
+                'auto',
+                ...(mode === '--write' ? ['--fix', '--fix-type', 'layout'] : []),
+            ],
+            { cwd: '/repo', verbosity: RunVerbosity.Output },
+        );
+        expect(run).toHaveBeenCalledTimes(2);
     });
 });

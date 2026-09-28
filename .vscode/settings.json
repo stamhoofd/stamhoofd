@@ -1,4 +1,5 @@
 {
+    "editor.defaultFormatter": "oxc.oxc-vscode",
     "[javascript]": {
         "editor.defaultFormatter": "dbaeumer.vscode-eslint"
     },
@@ -15,11 +16,7 @@
     "editor.formatOnPaste": false,
     "editor.formatOnSave": false,
     "eslint.format.enable": true,
-    "eslint.validate": [
-        "typescript",
-        "javascript",
-        "vue",
-    ],
+    "eslint.validate": ["typescript", "javascript", "vue"],
     "eslint.workingDirectories": [
         "./backend/app/*",
         "./backend/shared/*",
@@ -43,29 +40,15 @@
     "i18n-ally.dirStructure": "file",
     "i18n-ally.disablePathParsing": true,
     "i18n-ally.displayLanguage": "nl",
-    "i18n-ally.enabledFrameworks": [
-        "vue"
-    ],
+    "i18n-ally.enabledFrameworks": ["vue"],
     "i18n-ally.enabledParsers": ["json"],
     "i18n-ally.extract.autoDetect": true,
-    "i18n-ally.extract.ignored": [
-        "success green"
-    ],
+    "i18n-ally.extract.ignored": ["success green"],
     "i18n-ally.extract.keyMaxLength": 1000,
     "i18n-ally.extract.keygenStrategy": "source",
     "i18n-ally.extract.parsers.html": {
-        "attributes": [
-            "text",
-            "title",
-            "alt",
-            "placeholder",
-            "label",
-            "aria-label"
-        ],
-        "ignoredTags": [
-            "script",
-            "style"
-        ],
+        "attributes": ["text", "title", "alt", "placeholder", "label", "aria-label"],
+        "ignoredTags": ["script", "style"],
         "inlineText": true,
         "vBind": true
     },
@@ -73,9 +56,7 @@
     "i18n-ally.keepFulfilled": false,
     "i18n-ally.keystyle": "flat",
     "i18n-ally.languageTagSystem": "none",
-    "i18n-ally.localesPaths": [
-        "shared/locales/dist/locales/keeo"
-    ],
+    "i18n-ally.localesPaths": ["shared/locales/dist/locales/keeo"],
     "i18n-ally.sourceLanguage": "nl-BE",
     "i18n-ally.tabStyle": "space",
     "javascript.format.enable": false,
@@ -95,7 +76,7 @@
         "LICENSE": true,
         ".worktrees": true,
         "tests/playwright/playwright.log": true,
-        ".development/cli": true,
+        ".development/cli": true
     },
     "search.useIgnoreFiles": false,
     "js/ts.tsdk.promptToUseWorkspaceVersion": true,

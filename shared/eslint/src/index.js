@@ -99,7 +99,7 @@ const baseRules = [
     }),
     {
         rules: {
-            '@stylistic/quotes': ['warn', 'single', { allowTemplateLiterals: true, avoidEscape: true }],
+            '@stylistic/quotes': ['warn', 'single', { allowTemplateLiterals: 'avoidEscape', avoidEscape: true }],
         },
     },
     {

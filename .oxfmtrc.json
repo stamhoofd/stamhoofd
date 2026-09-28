@@ -1,5 +1,17 @@
 {
     "$schema": "./node_modules/oxfmt/configuration_schema.json",
+    "ignorePatterns": [
+        "**/*.js",
+        "**/*.jsx",
+        "**/*.mjs",
+        "**/*.cjs",
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.mts",
+        "**/*.cts",
+        "**/*.vue",
+        "shared/locales/**"
+    ],
     "singleQuote": true,
     "sortPackageJson": false
 }
