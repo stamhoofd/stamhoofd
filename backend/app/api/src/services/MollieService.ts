@@ -9,7 +9,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { DateTime } from 'luxon';
 import { Client } from 'mollie-api-typescript';
 import { ClientError, ErrorResponse } from 'mollie-api-typescript/models/errors';
-import type { EntityRefundResponseStatus, ListEntityRefundStatus, ListMandateResponse, MandateResponse, PaymentResponse } from 'mollie-api-typescript/models';
+import type { ListMandateResponse, ListRefundResponseStatus, MandateResponse, PaymentResponse, RefundResponseStatus } from 'mollie-api-typescript/models';
 import { Context } from '../helpers/Context.js';
 
 export class MollieService {
@@ -546,7 +546,7 @@ export class MollieService {
      * Map a Mollie refund status to a payment status. A refund only succeeds once Mollie
      * reports it as refunded: before that it can still fail or be canceled.
      */
-    static refundStatusToPaymentStatus(status: EntityRefundResponseStatus | ListEntityRefundStatus): PaymentStatus {
+    static refundStatusToPaymentStatus(status: RefundResponseStatus | ListRefundResponseStatus): PaymentStatus {
         switch (status) {
             case 'refunded':
                 return PaymentStatus.Succeeded;
