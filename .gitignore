@@ -246,3 +246,5 @@ __screenshots__
 
 # vitest browser-mode test attachments (screenshots)
 .vitest-attachments
+
+.turbo
