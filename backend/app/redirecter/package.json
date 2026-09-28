@@ -27,8 +27,8 @@
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "2.152.0",
-        "@types/node": "22.20.1",
-        "nock": "14.0.16",
+        "@types/node": "22.20.4",
+        "nock": "14.0.17",
         "vitest": "4.1.11"
     },
     "license": "UNLICENCED",

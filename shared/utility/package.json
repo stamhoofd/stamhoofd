@@ -27,7 +27,7 @@
         "luxon": "3.7.2"
     },
     "devDependencies": {
-        "@types/luxon": "3.7.2",
+        "@types/luxon": "3.7.5",
         "vitest": "4.1.11"
     },
     "license": "UNLICENCED",
