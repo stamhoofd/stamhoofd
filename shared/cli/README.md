@@ -490,6 +490,8 @@ pnpm --dir shared/cli --silent run lint
 pnpm --dir shared/cli --silent run test
 ```
 
+Translation commands call the `i18n-uuid` library in `.development/i18n-uuid`. `pnpm stam-dev` and `build:shared` build it before `shared/cli`; keep that order when changing either package.
+
 CLI tests live next to source files as `*.test.ts`.
 
 After changing CLI behavior, validate at least the package-local checks:
