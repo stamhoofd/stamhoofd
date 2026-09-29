@@ -66,6 +66,7 @@ Run `pnpm stam --help` or `pnpm stam <topic> --help` for command help.
 | Translations | `pnpm stam-dev translate keys`        | Replace translation keys.                                                  |
 | Translations | `pnpm stam-dev translate compress`    | Merge duplicates and remove unused keys.                                   |
 | Translations | `pnpm stam-dev translate machine`     | Machine-translate missing translations.                                    |
+| Translations | `pnpm stam-dev translate --help`      | List all translation tools and their options.                              |
 | Cleanup     | `pnpm stam clean build`                | Remove build artifacts.                                                    |
 | Cleanup     | `pnpm stam clean db`                   | Drop the selected local MySQL database after confirmation.                 |
 | Cleanup     | `pnpm stam clean sso`                  | Stop the local SSO server.                                                 |
