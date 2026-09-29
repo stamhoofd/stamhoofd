@@ -44,7 +44,7 @@
         "uuid": "14.0.2"
     },
     "devDependencies": {
-        "@stamhoofd/test-utils": "2.153.0",
+        "@stamhoofd/test-utils": "workspace:*",
         "@types/luxon": "3.7.5",
         "@types/uuid": "8.3.4",
         "mysql2": "3.24.4",

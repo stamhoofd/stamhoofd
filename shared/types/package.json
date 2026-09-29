@@ -21,7 +21,7 @@
         "jose": "5.10.0"
     },
     "devDependencies": {
-        "eslint-plugin-stamhoofd": "2.153.0"
+        "eslint-plugin-stamhoofd": "workspace:*"
     },
     "license": "UNLICENCED",
     "publishConfig": {

@@ -475,49 +475,49 @@ importers:
         specifier: 13.3.3
         version: 13.3.3
       '@stamhoofd/backend-env':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/env
       '@stamhoofd/backend-i18n':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/i18n
       '@stamhoofd/backend-middleware':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/middleware
       '@stamhoofd/crons':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/crons
       '@stamhoofd/email':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/email
       '@stamhoofd/excel-writer':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/excel-writer
       '@stamhoofd/logging':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/logging
       '@stamhoofd/models':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/models
       '@stamhoofd/object-differ':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/object-differ
       '@stamhoofd/queues':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/queues
       '@stamhoofd/sql':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/sql
       '@stamhoofd/structures':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/structures
       '@stamhoofd/types':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/types
       '@stamhoofd/utility':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/utility
       '@stamhoofd/vies':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/vies
       archiver:
         specifier: 7.0.1
@@ -587,7 +587,7 @@ importers:
         version: 14.0.2
     devDependencies:
       '@stamhoofd/test-utils':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/test-utils
       '@types/cookie':
         specifier: 0.6.0
@@ -644,25 +644,25 @@ importers:
         specifier: 1.0.1
         version: 1.0.1
       '@stamhoofd/backend-env':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/env
       '@stamhoofd/backend-middleware':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/middleware
       '@stamhoofd/crons':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/crons
       '@stamhoofd/logging':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/logging
       '@stamhoofd/queues':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/queues
       '@stamhoofd/types':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/types
       '@stamhoofd/utility':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/utility
       chalk:
         specifier: 5.6.2
@@ -702,26 +702,26 @@ importers:
         specifier: 1.0.1
         version: 1.0.1
       '@stamhoofd/backend-env':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/env
       '@stamhoofd/backend-middleware':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/middleware
       '@stamhoofd/structures':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/structures
       '@stamhoofd/types':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/types
       '@stamhoofd/utility':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/utility
       mysql2:
         specifier: 3.24.4
         version: 3.24.4(@types/node@22.20.4)
     devDependencies:
       '@stamhoofd/test-utils':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/test-utils
       '@types/node':
         specifier: 22.20.4
@@ -751,28 +751,28 @@ importers:
         specifier: 1.0.1
         version: 1.0.1
       '@stamhoofd/backend-env':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/env
       '@stamhoofd/backend-i18n':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/i18n
       '@stamhoofd/backend-middleware':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/middleware
       '@stamhoofd/logging':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/logging
       '@stamhoofd/queues':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/queues
       '@stamhoofd/structures':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/structures
       '@stamhoofd/types':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/types
       '@stamhoofd/utility':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/utility
       formidable:
         specifier: 3.5.4
@@ -791,7 +791,7 @@ importers:
         version: 25.12.0(yauzl@2.10.0)
     devDependencies:
       '@stamhoofd/test-utils':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/test-utils
       '@types/formidable':
         specifier: 3.5.1
@@ -824,38 +824,38 @@ importers:
         specifier: 1.0.1
         version: 1.0.1
       '@stamhoofd/backend-env':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/env
       '@stamhoofd/crons':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/crons
       '@stamhoofd/logging':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/logging
       '@stamhoofd/models':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/models
       '@stamhoofd/queues':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/queues
       '@stamhoofd/sql':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../shared/sql
       '@stamhoofd/structures':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/structures
       '@stamhoofd/types':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/types
       '@stamhoofd/utility':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/utility
       mysql2:
         specifier: 3.24.4
         version: 3.24.4(@types/node@22.20.4)
     devDependencies:
       '@stamhoofd/test-utils':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/test-utils
       '@types/node':
         specifier: 22.20.4
@@ -897,7 +897,7 @@ importers:
         specifier: workspace:*
         version: link:../sql
       '@stamhoofd/test-utils':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/test-utils
       '@stamhoofd/types':
         specifier: workspace:*
@@ -937,14 +937,14 @@ importers:
         specifier: workspace:*
         version: link:../../../shared/cli
       '@stamhoofd/test-utils':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/test-utils
       chalk:
         specifier: 5.6.2
         version: 5.6.2
     devDependencies:
       '@stamhoofd/types':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/types
 
   backend/shared/i18n:
@@ -1054,7 +1054,7 @@ importers:
         version: 14.0.2
     devDependencies:
       '@stamhoofd/test-utils':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/test-utils
       '@types/luxon':
         specifier: 3.7.5
@@ -1107,7 +1107,7 @@ importers:
         version: 11.5.3
     devDependencies:
       '@stamhoofd/test-utils':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/test-utils
       mysql2:
         specifier: 3.24.4
@@ -1125,13 +1125,13 @@ importers:
         specifier: 1.5.0
         version: 1.5.0(@simonbackx/simple-encoding@2.26.11)(uuid@9.0.1)
       '@stamhoofd/models':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../models
       '@stamhoofd/structures':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/structures
       '@stamhoofd/types':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/types
       axios:
         specifier: 1.20.0
@@ -1144,10 +1144,10 @@ importers:
         specifier: 1.40.1
         version: 1.40.1(@simonbackx/simple-encoding@2.26.11)(mysql2@3.24.4(@types/node@22.20.4))
       '@stamhoofd/backend-i18n':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../i18n
       '@stamhoofd/test-utils':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../../../shared/test-utils
       mysql2:
         specifier: 3.24.4
@@ -2286,13 +2286,13 @@ importers:
         specifier: 4.14.0
         version: 4.14.0
       '@stamhoofd/metabase':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../metabase
       '@stamhoofd/stdsync':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../stdsync
       '@stamhoofd/types':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../types
       chalk:
         specifier: 5.6.2
@@ -2385,13 +2385,13 @@ importers:
   shared/locales:
     dependencies:
       '@stamhoofd/types':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../types
 
   shared/metabase:
     devDependencies:
       '@stamhoofd/test-utils':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../test-utils
       vitest:
         specifier: 4.1.11
@@ -2413,7 +2413,7 @@ importers:
         version: 14.0.2
     devDependencies:
       '@stamhoofd/test-utils':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../test-utils
       '@types/uuid':
         specifier: 8.3.4
@@ -2437,13 +2437,13 @@ importers:
         specifier: 1.5.0
         version: 1.5.0(@simonbackx/simple-encoding@2.26.11)(uuid@9.0.1)
       '@stamhoofd/structures':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../structures
       '@stamhoofd/types':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../types
       '@stamhoofd/utility':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../utility
     devDependencies:
       vitest:
@@ -2478,7 +2478,7 @@ importers:
         specifier: 1.5.0
         version: 1.5.0(@simonbackx/simple-encoding@2.26.11)(uuid@14.0.2)
       '@stamhoofd/test-utils':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../test-utils
       '@types/uuid':
         specifier: 8.3.4
@@ -2496,13 +2496,13 @@ importers:
         version: 5.10.0
     devDependencies:
       eslint-plugin-stamhoofd:
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../eslint
 
   shared/utility:
     dependencies:
       '@stamhoofd/types':
-        specifier: 2.153.0
+        specifier: workspace:*
         version: link:../types
       ibantools:
         specifier: 4.5.4

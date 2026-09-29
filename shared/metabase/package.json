@@ -22,7 +22,7 @@
         "test:coverage": "vitest --coverage"
     },
     "devDependencies": {
-        "@stamhoofd/test-utils": "2.153.0",
+        "@stamhoofd/test-utils": "workspace:*",
         "vitest": "4.1.11"
     },
     "license": "UNLICENCED",

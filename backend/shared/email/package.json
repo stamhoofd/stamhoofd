@@ -16,7 +16,7 @@
     },
     "dependencies": {
         "@simonbackx/simple-database": "1.40.1",
-        "@stamhoofd/test-utils": "2.153.0",
+        "@stamhoofd/test-utils": "workspace:*",
         "html-to-text": "10.0.1",
         "mysql2": "3.24.4",
         "nodemailer": "10.0.10",

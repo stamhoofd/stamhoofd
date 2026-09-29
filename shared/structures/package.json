@@ -38,7 +38,7 @@
     },
     "devDependencies": {
         "@simonbackx/simple-errors": "1.5.0",
-        "@stamhoofd/test-utils": "2.153.0",
+        "@stamhoofd/test-utils": "workspace:*",
         "@types/uuid": "8.3.4",
         "vitest": "4.1.11"
     },
