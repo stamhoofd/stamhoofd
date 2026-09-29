@@ -42,10 +42,6 @@
         "test:playwright": "pnpm run build:shared && pnpm --dir backend/app/api run build:playwright:pre && pnpm --dir tests/playwright run test",
         "test:playwright:skip-build": "STAMHOOFD_SKIP_FRONTEND_BUILD=true pnpm --dir tests/playwright run test",
         "test:playwright:ui": "pnpm run build:shared && pnpm --dir backend/app/api run build:playwright:pre && pnpm --dir tests/playwright run test --ui",
-        "translate": "pnpm run translate:keys && pnpm run translate:compress && pnpm run translate:machine",
-        "translate:compress": "pnpm --dir shared/locales run build && pnpm --dir .development/i18n-uuid run merge-duplicates && pnpm --dir .development/i18n-uuid run unused-keys",
-        "translate:keys": "pnpm --dir .development/i18n-uuid run replace-keys && pnpm --dir .development/i18n-uuid run replace-keys",
-        "translate:machine": "pnpm --dir shared/locales run build && pnpm --dir .development/i18n-uuid run auto-translate",
         "typecheck": "pnpm exec turbo run typecheck"
     },
     "dependencies": {
