@@ -28,7 +28,7 @@ export class Parent extends AutoEncoder {
     })
     nationalRegisterNumber: string | typeof NationalRegisterNumberOptOut | null;
 
-    @field({ decoder: BooleanDecoder, ...NextVersion, nullable: true })
+    @field({ decoder: BooleanDecoder, version: 420, nullable: true })
     isMemberTaxDependent: boolean | null;
 
     @field({ decoder: StringDecoder, nullable: true })

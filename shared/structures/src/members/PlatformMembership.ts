@@ -12,7 +12,7 @@ export class PlatformMembershipMemberDetails extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     memberNumber: string | null;
 
-    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: DateDecoder, nullable: true, version: 420 })
     birthDay: Date | null = null;
 
     get name() {

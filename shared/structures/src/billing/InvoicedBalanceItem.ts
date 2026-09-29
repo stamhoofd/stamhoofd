@@ -29,13 +29,13 @@ export class InvoicedBalanceItem extends AutoEncoder {
     /**
      * Copied from the balance item at the time of invoicing, so invoices can be ordered and grouped without loading the balance items.
      */
-    @field({ decoder: new MapDecoder(new EnumDecoder(BalanceItemRelationType), BalanceItemRelation), ...NextVersion })
+    @field({ decoder: new MapDecoder(new EnumDecoder(BalanceItemRelationType), BalanceItemRelation), version: 420 })
     relations: Map<BalanceItemRelationType, BalanceItemRelation> = new Map();
 
-    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: DateDecoder, nullable: true, version: 420 })
     startDate: Date | null = null;
 
-    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: DateDecoder, nullable: true, version: 420 })
     endDate: Date | null = null;
 
     @field({ decoder: StringDecoder })

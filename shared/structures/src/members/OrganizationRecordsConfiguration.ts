@@ -226,7 +226,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     /**
      * Collect data for tax certificates for childcare expenses (Belgium only)
      */
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 420 })
     taxCertificates = false;
 
     @field({ decoder: new ArrayDecoder(RecordCategory as Decoder<RecordCategory>), version: 117 })
