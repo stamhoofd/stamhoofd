@@ -17,6 +17,9 @@
         },
         {
             "path": "../stdsync/tsconfig.build.json"
+        },
+        {
+            "path": "../../.development/i18n-uuid/tsconfig.build.json"
         }
     ],
     "exclude": [
