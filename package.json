@@ -36,7 +36,7 @@
         "ship:private": "node ./.development/increase-structures-version.js --force && pnpm run clear:shared && pnpm run build:shared && lerna version --exact --force-publish --yes --no-private --git-remote private",
         "ship:notes": "pnpm run stam release notes",
         "stam": "./shared/cli/bin/stam.js",
-        "stam-dev": "pnpm --dir .development/i18n-uuid run build && pnpm --dir shared/cli run build && ./shared/cli/bin/stam.js",
+        "stam-dev": "pnpm --dir .development/i18n-uuid run build --force && pnpm --dir shared/cli run build && if [ -f devops/tsconfig.cli.json ]; then pnpm --dir devops run build:cli --force; fi && ./shared/cli/bin/stam.js",
         "test": "pnpm stam test unit",
         "test:coverage": "pnpm stam test coverage",
         "test:playwright": "pnpm run build:shared && pnpm --dir backend/app/api run build:playwright:pre && pnpm --dir tests/playwright run test",
