@@ -1,0 +1,12 @@
+{
+    "name": "@stamhoofd/frontend-tests",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "devDependencies": {
+        "@stamhoofd/frontend-i18n": "workspace:*",
+        "@stamhoofd/test-utils": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
+        "vitest": "4.1.11"
+    }
+}
