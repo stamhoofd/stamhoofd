@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/models",
-    "version": "2.152.0",
+    "version": "2.153.0",
     "type": "module",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
@@ -44,11 +44,11 @@
         "uuid": "14.0.2"
     },
     "devDependencies": {
-        "@stamhoofd/test-utils": "2.152.0",
+        "@stamhoofd/test-utils": "2.153.0",
         "@types/luxon": "3.7.5",
         "@types/uuid": "8.3.4",
-        "vitest": "4.1.11",
-        "mysql2": "3.24.4"
+        "mysql2": "3.24.4",
+        "vitest": "4.1.11"
     },
     "peerDependencies": {
         "@stamhoofd/backend-i18n": "*",

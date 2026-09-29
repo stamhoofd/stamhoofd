@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/locales",
-    "version": "2.152.0",
+    "version": "2.153.0",
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
@@ -26,7 +26,7 @@
         "build": "tsc --build tsconfig.build.json && node build.js"
     },
     "dependencies": {
-        "@stamhoofd/types": "2.152.0"
+        "@stamhoofd/types": "2.153.0"
     },
     "license": "UNLICENCED"
 }

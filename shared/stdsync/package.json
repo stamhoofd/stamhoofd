@@ -1,13 +1,16 @@
 {
     "name": "@stamhoofd/stdsync",
-    "version": "2.152.0",
+    "version": "2.153.0",
     "type": "module",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "exports": {
         ".": "./dist/index.js"
     },
-    "files": ["dist", "package.json"],
+    "files": [
+        "dist",
+        "package.json"
+    ],
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
         "example": "pnpm run build && node examples/live-output.mjs",

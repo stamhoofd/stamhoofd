@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/email",
-    "version": "2.152.0",
+    "version": "2.153.0",
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
@@ -16,11 +16,11 @@
     },
     "dependencies": {
         "@simonbackx/simple-database": "1.40.1",
-        "@stamhoofd/test-utils": "2.152.0",
+        "@stamhoofd/test-utils": "2.153.0",
         "html-to-text": "10.0.1",
+        "mysql2": "3.24.4",
         "nodemailer": "10.0.10",
-        "uuid": "14.0.2",
-        "mysql2": "3.24.4"
+        "uuid": "14.0.2"
     },
     "devDependencies": {
         "@types/html-to-text": "9.0.4",

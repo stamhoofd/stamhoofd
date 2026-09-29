@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/backend-statistics-syncer",
-    "version": "2.152.0",
+    "version": "2.153.0",
     "type": "module",
     "main": "./dist/index.js",
     "exports": {
@@ -27,19 +27,19 @@
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-logging": "1.0.1",
-        "@stamhoofd/backend-env": "2.152.0",
-        "@stamhoofd/crons": "2.152.0",
-        "@stamhoofd/logging": "2.152.0",
-        "@stamhoofd/models": "2.152.0",
-        "@stamhoofd/queues": "2.152.0",
-        "@stamhoofd/sql": "2.152.0",
-        "@stamhoofd/structures": "2.152.0",
-        "@stamhoofd/types": "2.152.0",
-        "@stamhoofd/utility": "2.152.0",
+        "@stamhoofd/backend-env": "2.153.0",
+        "@stamhoofd/crons": "2.153.0",
+        "@stamhoofd/logging": "2.153.0",
+        "@stamhoofd/models": "2.153.0",
+        "@stamhoofd/queues": "2.153.0",
+        "@stamhoofd/sql": "2.153.0",
+        "@stamhoofd/structures": "2.153.0",
+        "@stamhoofd/types": "2.153.0",
+        "@stamhoofd/utility": "2.153.0",
         "mysql2": "3.24.4"
     },
     "devDependencies": {
-        "@stamhoofd/test-utils": "2.152.0",
+        "@stamhoofd/test-utils": "2.153.0",
         "@types/node": "22.20.4",
         "vitest": "4.1.11"
     },
