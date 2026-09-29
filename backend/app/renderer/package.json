@@ -19,7 +19,8 @@
         "start": "pnpm run build && node --enable-source-maps ./dist/index.js",
         "typecheck": "tsc --build tsconfig.test.json",
         "test": "vitest",
-        "test:coverage": "vitest --coverage"
+        "test:coverage": "vitest --coverage",
+        "postinstall": "puppeteer browsers install chrome"
     },
     "dependencies": {
         "@simonbackx/simple-database": "1.40.1",
