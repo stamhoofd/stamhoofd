@@ -511,13 +511,14 @@ Bad candidates for this file:
 
 ### Working On The CLI
 
-`pnpm run build:shared` builds `shared/cli` so normal CLI startup stays fast. When changing CLI source code, use `stam-dev` to rebuild before running:
+`pnpm run build:shared` builds `shared/cli` so normal CLI startup stays fast. When changing CLI source code, use `stam-dev` to rebuild before running (including the optional DevOps CLI when checked out):
 
 ```bash
 pnpm run stam-dev --help
 ```
 
-If the separate `devops/` repository has a populated oclif command directory, both `pnpm stam devops` and `pnpm stam-dev devops` load its commands. An absent or empty checkout does not add the topic. DevOps command implementations and their documentation live in `devops/`; the main CLI only discovers the optional plugin.
+If the separate `devops/` repository has a populated oclif command directory, both `pnpm stam devops` and `pnpm stam-dev devops` load its commands. An absent or empty checkout does not add the topic. The installed `stam` shell wrapper also rebuilds the DevOps CLI incrementally when checked out, while building `shared/cli` only if it is missing. DevOps command implementations and their documentation live in `devops/`; the main CLI only discovers the optional plugin.
+Run `stam setup shell` again to refresh an already installed shell wrapper.
 
 For CLI-only changes, run:
 

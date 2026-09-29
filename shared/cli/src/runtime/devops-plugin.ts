@@ -3,7 +3,7 @@ import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 export async function getOptionalDevopsPlugin(root: string): Promise<Plugin | undefined> {
-    const commands = join(root, 'cli/commands/devops');
+    const commands = join(root, 'dist-cli/commands/devops');
     if (!existsSync(join(root, 'package.json')) || !existsSync(commands) || !readdirSync(commands).some(name => name.endsWith('.js'))) {
         return undefined;
     }

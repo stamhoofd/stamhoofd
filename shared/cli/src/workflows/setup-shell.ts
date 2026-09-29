@@ -12,6 +12,7 @@ export const SHELL_SNIPPET_END = '# <<< stam cli <<<';
  * tree from $PWD until it finds shared/cli/bin/stam.js, so the same `stam`
  * command always runs the right checkout — including from any subdirectory. If
  * that checkout has never been built, it builds the CLI once before running.
+ * It also incrementally rebuilds an optional DevOps CLI checkout on every run.
  */
 export function buildShellSnippet(): string {
     return [
@@ -24,6 +25,9 @@ export function buildShellSnippet(): string {
         '            if [ ! -f "$dir/shared/cli/dist/index.js" ]; then',
         '                echo "stam: building CLI in $dir/shared/cli (first run)…" >&2',
         '                pnpm --dir "$dir/shared/cli" run build || return $?',
+        '            fi',
+        '            if [ -f "$dir/devops/tsconfig.cli.json" ]; then',
+        '                pnpm --dir "$dir/devops" run build:cli || return $?',
         '            fi',
         '            "$dir/shared/cli/bin/stam.js" "$@"',
         '            return $?',
