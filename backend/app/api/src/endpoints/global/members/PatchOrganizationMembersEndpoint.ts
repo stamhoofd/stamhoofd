@@ -125,10 +125,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         // Fast throw first (more in depth checking for patches later)
         if (organization) {
             if (!await Context.auth.hasSomeAccess(organization.id)) {
+                console.error('ORGANIZATION: no access');
                 throw Context.auth.error();
             }
         } else {
             if (!Context.auth.hasSomePlatformAccess()) {
+                console.error('PLATFORM: no access');
                 throw Context.auth.error();
             }
         }

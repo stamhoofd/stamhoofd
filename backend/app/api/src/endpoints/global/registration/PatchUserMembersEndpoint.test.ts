@@ -1202,7 +1202,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
         });
     });
 
-    describe('Name and birth date changes', () => {
+    describe('Name, birth date and email changes', () => {
         async function createOwnedMember() {
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({}).create();
@@ -1266,6 +1266,13 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             const response = await patchMember(organization, token, member.id, MemberDetails.patch({ birthDay: newBirthDay }));
             expect(response.status).toBe(200);
             expect(response.body.members[0].details.birthDay?.getFullYear()).toBe(base.getFullYear() + 1);
+        });
+
+        test('A user can still change his own email', async () => {
+            const { organization, member, token } = await createOwnedMember();
+            const response = await patchMember(organization, token, member.id, MemberDetails.patch({ email: 'jon@stamhoofd.be' }));
+            expect(response.status).toBe(200);
+            expect(response.body.members[0].details.email).toBe('jon@stamhoofd.be');
         });
     });
 
