@@ -344,8 +344,8 @@
     "translation": "The parents' mobile phone number is already collected via the parent data. Only activate this for members who can actually have their own mobile phone number, and only make it mandatory if you are sure that everyone has a mobile phone number."
   },
   "%11T": {
-    "original": "Maak dit niet verplicht voor alle leden, anders moeten minderjarige leden ook verplicht een eigen GSM-nummer invullen, wat ze vaak niet hebben. Denk goed na over wat je instelt.",
-    "translation": "Do not make this mandatory for all members, otherwise minors will also be required to fill in their own mobile phone number, which they often do not have. Think carefully about what you set up."
+    "original": "Maak dit niet verplicht voor alle leden, anders moeten minderjarige leden ook verplicht een eigen GSM-nummer invullen, wat ze vaak niet hebben. Gebruik daarvoor oudergegevens. Denk goed na over wat je instelt.",
+    "translation": "Do not make this mandatory for all members, or underage members will also be required to provide their own mobile number, which they often do not have. Use parent data for this. Think carefully about your settings."
   },
   "%11U": {
     "original": "E-mailadres (van lid zelf)",
@@ -356,8 +356,8 @@
     "translation": "The parents' email address is already collected via the parent data. Only activate this for members who can actually have their own email address, and only make it mandatory if you are sure that everyone has an email address."
   },
   "%11W": {
-    "original": "Maak dit niet verplicht voor alle leden, anders moeten erg jonge leden ook verplicht een eigen e-mailadres invullen, wat ze vaak niet hebben. Denk goed na over wat je instelt.",
-    "translation": "Do not make this mandatory for all members, otherwise very young members will also be required to fill in their own email address, which they often do not have. Think carefully about what you set up."
+    "original": "Maak dit niet verplicht voor alle leden, anders moeten erg jonge leden ook verplicht een eigen e-mailadres invullen, wat ze vaak niet hebben. Gebruik daarvoor oudergegevens. Denk goed na over wat je instelt.",
+    "translation": "Do not make this mandatory for all members, or very young members will have to provide their own email address, which they usually do not have. Use parent data for this instead. Consider your settings carefully."
   },
   "%11X": {
     "original": "Adres (van lid zelf)",
@@ -1291,10 +1291,6 @@
     "original": "Ongeldig tarief",
     "translation": "Invalid tariff"
   },
-  "%15M": {
-    "original": "Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. Als {firstName} geen Belgische nationaliteit heeft, <button>klik dan hier</button>",
-    "translation": "The national register number is used to create tax certificates. If {firstName} does not have Belgian nationality, <button>click here</button>"
-  },
   "%15N": {
     "original": "Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit? <button>Klik dan hier</button>",
     "translation": "You will not receive any tax certificates. Still a Belgian national? <button>Click here</button>"
@@ -1318,14 +1314,6 @@
   "%15S": {
     "original": "{firstName} ontvangt enkel communicatie op het eerste e-mailadres.",
     "translation": "{firstName} will only receive communication at the first email address."
-  },
-  "%15T": {
-    "original": "Als {name} geen Belgische nationaliteit heeft, <button>klik dan hier</button>",
-    "translation": "If {name} does not have Belgian nationality, <button>click here</button>"
-  },
-  "%15U": {
-    "original": "deze ouder",
-    "translation": "this parent"
   },
   "%15V": {
     "original": "dit lid",
@@ -3002,10 +2990,6 @@
   "%1CS": {
     "original": "Beschikbaar tussen: {range}",
     "translation": "Available between: {range}"
-  },
-  "%1CT": {
-    "original": "Deze functie is ongeldig omdat {name} niet is ingeschreven voor een standaard leeftijdsgroep. Deze functie zal automatisch verwijderd worden op het einde van de maand.",
-    "translation": "This role is invalid because {name} isn't registered for a default age group. This role will be automatically deleted at the end of the month."
   },
   "%1CU": {
     "original": "Berekenen...",
@@ -11234,10 +11218,6 @@
   "%Bx": {
     "original": "Opgelet, deze beheerders zijn ook niet aangesloten bij Stamhoofd, en zijn dus ook niet verzekerd. Gebruik met mate, bv. om externen toegang te geven voor evenementen.",
     "translation": "Please note, these administrators are also not affiliated with Stamhoofd, and are therefore not insured. Use sparingly, e.g. to give external parties access for events."
-  },
-  "%By": {
-    "original": "Deze functie is ongeldig omdat {name} niet is ingeschreven. Deze functie zal automatisch verwijderd worden op het einde van de maand.",
-    "translation": "This role is invalid because {name} is not registered. This role will be automatically removed at the end of the month."
   },
   "%Bz": {
     "original": "Dit is een interne beheerder die ook een externe beheerdersrol heeft gekregen.",
@@ -20043,10 +20023,6 @@
     "original": "Je moet gegevens aanvullen om te voorkomen dat uitbetalingen en betalingen worden stopgezet. Dit moet gebeuren voor {date}. Ga naar je Stripe dashboard om dit in orde te brengen.",
     "translation": "You need to complete your data to avoid suspension of payouts and payments. This must be done by {date}. Visit your Stripe dashboard to complete this."
   },
-  "%Zq8": {
-    "original": "Enkel voor leden met een attest van zware handicap. <button>Meer info</button>",
-    "translation": "Only for members with a certificate of severe disability. <button>More info</button>"
-  },
   "%Zq9": {
     "original": "Herinneringsmail",
     "translation": "Reminder email"
@@ -20183,10 +20159,6 @@
     "original": "Dit aankoopbewijs werd al betaald via",
     "translation": "This purchase receipt has already been paid via"
   },
-  "%Zqz": {
-    "original": "Ben je zeker dat er sprake is van fiscaal co-ouderschap?",
-    "translation": "Are you sure there is joint fiscal co-parenting?"
-  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Stamhoofd. Voor Microsoft kan je",
     "translation": "Ensure that users can log in via your own account system, separate from Stamhoofd. For Microsoft you can"
@@ -20239,10 +20211,6 @@
     "original": "Je hebt niet voldoende rechten om de servicekosten uit te schakelen.",
     "translation": "You do not have sufficient rights to disable the service costs."
   },
-  "%ZrH": {
-    "original": "{lid} is fiscaal ten laste van {name} (enkel voor gezinshoofd of fiscaal co-ouderschap)",
-    "translation": "{lid} is fiscally dependent on {name} (only for the head of household or joint fiscal co-parenting)"
-  },
   "%ZrI": {
     "original": " Pagina",
     "translation": " Page"
@@ -20250,10 +20218,6 @@
   "%ZrJ": {
     "original": "Afrondingsverschil",
     "translation": "Rounding difference"
-  },
-  "%ZrK": {
-    "original": "Maximaal twee ouders kunnen dit lid fiscaal ten laste hebben",
-    "translation": "A maximum of two parents can be fiscally responsible for this member."
   },
   "%ZrL": {
     "original": "Geen servicekosten aanrekenen voor deze webshop",
@@ -20266,10 +20230,6 @@
   "%ZrN": {
     "original": "Een factuur of aankoopbewijs van 0 euro met items kan nog niet aangemaakt worden.",
     "translation": "An invoice or purchase receipt of 0 euros containing items cannot be created yet."
-  },
-  "%ZrO": {
-    "original": "Gegevens voor fiscale attesten kinderopvang verzamelen",
-    "translation": "Collect data for tax certificates for childcare"
   },
   "%ZrP": {
     "original": "Per stuk",
@@ -20303,17 +20263,9 @@
     "original": "Er bestaat nog geen werkjaar dat deze startdatum bevat. Je kan de inschrijvingen van deze activiteit niet naar deze datum verplaatsen.",
     "translation": "There is not yet a work year including this start date. You cannot transfer the registrations for this activity to this date."
   },
-  "%Zrb": {
-    "original": "Zorg dat er minstens één ouder het lid fiscaal ten laste heeft. Voeg daar dan een rijksregisternummer toe.",
-    "translation": "Make sure at least one parent is fiscally responsible for the member. Then add a national registration number there."
-  },
   "%Zrc": {
     "original": "Voor betalingen die elkaar opheffen en samen 0 euro bedragen. Zo worden ze als geboekt gemarkeerd, ook voor een klant met een ondernemingsnummer of BTW-nummer.",
     "translation": "For payments that offset each other and together total 0 euros. That way, they are marked as booked, including for a customer with a company number or VAT number."
-  },
-  "%Zrd": {
-    "original": "Vink het eerst uit bij een andere ouder. Twee ouders zijn enkel mogelijk bij gescheiden ouders met fiscaal co-ouderschap.",
-    "translation": "First uncheck this for another parent. Two parents are only possible in case of separated parents with joint fiscal co-parenting."
   },
   "%Zrg": {
     "original": "Over te schrijven op",
@@ -20335,10 +20287,6 @@
     "original": "Deze vereniging is nog niet gestart met het werkjaar {period}, waarin deze activiteit valt. Start eerst dat werkjaar, daarna kan je hier inschrijvingen voor verzamelen.",
     "translation": "This association has not yet started the work year {period}, which this activity falls under. Start that work year first, then you can collect registrations for this activity."
   },
-  "%Zrp": {
-    "original": "Dit is enkel nodig als beide ouders gescheiden zijn",
-    "translation": "This is only necessary if both parents are separated"
-  },
   "%Zrq": {
     "original": "Pro-forma creditnota",
     "translation": "Pro forma credit note"
@@ -20354,10 +20302,6 @@
   "%Zru": {
     "original": "Deze vereniging",
     "translation": "This association"
-  },
-  "%Zrv": {
-    "original": "Voeg een rijksregisternummer toe bij de ouder die het lid fiscaal ten laste heeft.",
-    "translation": "Add a national registration number to the parent who is fiscally responsible for the member."
   },
   "%Zrw": {
     "original": "Hou deze factuur bij voorkeur digitaal bij",
@@ -20403,9 +20347,213 @@
     "original": "De betaling gebeurt automatisch via domiciliëring",
     "translation": "The payment is processed automatically by direct debit."
   },
+  "%ZsA": {
+    "original": "Je hebt geen toegang tot dit werkjaar",
+    "translation": "You do not have access to this work year."
+  },
+  "%ZsB": {
+    "original": "Als {firstName} geen Belgische nationaliteit heeft, <button>klik dan hier</button>",
+    "translation": "If {firstName} does not have Belgian nationality, <button>click here</button>"
+  },
+  "%ZsC": {
+    "original": "Dit werkjaar is nog niet gestart",
+    "translation": "This work year has not started yet."
+  },
+  "%ZsD": {
+    "original": "Uitzondering voor leden met zware handicap",
+    "translation": "Exception for members with a severe disability"
+  },
+  "%ZsE": {
+    "original": "Tot 14 jaar",
+    "translation": "Up to 14 years old"
+  },
+  "%ZsF": {
+    "original": "Geef toegang tot specifieke activiteiten. Wie volledige toegang of ‘activiteiten beheren’ toegang heeft tot een leeftijdsgroep, krijgt automatisch ook toegang tot de activiteiten van die groep. <button>Meer info</button>",
+    "translation": "Grant access to specific activities. Anyone with full access or ‘manage activities’ access to an age group will automatically have access to the activities of that group. <button>More info</button>"
+  },
+  "%ZsH": {
+    "original": "Je kan maximaal twee ouders aanduiden als schuldenaar",
+    "translation": "You can designate a maximum of two parents as liable parties."
+  },
+  "%ZsI": {
+    "original": "Alle leden in alle werkjaren",
+    "translation": "All members in all work years"
+  },
+  "%ZsJ": {
+    "original": "Het fiscaal attest wordt aangemaakt tot de leeftijd van 21 jaar in plaats van 14 jaar",
+    "translation": "The tax certificate will be issued up to the age of 21 instead of 14."
+  },
+  "%ZsK": {
+    "original": "Alle leden van het huidige werkjaar",
+    "translation": "All members of the current work year"
+  },
+  "%ZsL": {
+    "original": "Gescheiden ouders met co-ouderschap",
+    "translation": "Separated parents with joint custody"
+  },
+  "%ZsM": {
+    "original": "Alle activiteiten in alle werkjaren",
+    "translation": "All activities in all work years"
+  },
+  "%ZsN": {
+    "original": "Vul hier enkel een e-mailadres van {firstName} zelf in, niet van een ouder.",
+    "translation": "Only enter an email address belonging to {firstName} here, not that of a parent."
+  },
+  "%ZsO": {
+    "original": "Uitreiken tot 21 jaar",
+    "translation": "Issue up to age 21"
+  },
+  "%ZsP": {
+    "original": "Het rijksregisternummer van een ouder kan niet gelijk zijn aan dat van een andere ouder",
+    "translation": "A parent's national registry number cannot be the same as that of another parent."
+  },
+  "%ZsQ": {
+    "original": "Beheer hier alle personen die toegang hebben tot Stamhoofd, en wijzig hun toegangsrechten. <button>Meer info</button>",
+    "translation": "Manage here all persons who have access to Stamhoofd, and adjust their access rights. <button>More info</button>"
+  },
+  "%ZsR": {
+    "original": "Je hebt geen toegang tot dit werkjaar. Wissel van werkjaar om jouw groepen te bekijken.",
+    "translation": "You do not have access to this work year. Switch work year to view your groups."
+  },
+  "%ZsS": {
+    "original": "Vul hier enkel een e-mailadres van {firstName} zelf in, niet van een ouder. Laat het anders leeg.",
+    "translation": "Only enter an email address belonging to {firstName} here, not that of a parent. Otherwise leave it blank."
+  },
+  "%ZsT": {
+    "original": "Toch een Belgische nationaliteit? <button>Klik dan hier</button>",
+    "translation": "Do you have Belgian nationality after all? <button>Click here</button>"
+  },
+  "%ZsU": {
+    "original": "Schakel dit niet in als je rijksregisternummers enkel nodig hebt voor fiscale attesten. Vink daarvoor ‘{nameStep}’ aan.",
+    "translation": "Do not enable this if you only need national registry numbers for tax certificates. Just tick ‘{nameStep}’ for that."
+  },
+  "%ZsV": {
+    "original": "Deze functie wordt automatisch verwijderd op {date}, omdat {name} niet (meer) is ingeschreven bij een groep die aan een standaard leeftijdsgroep gekoppeld is.",
+    "translation": "This role will be automatically removed on {date}, because {name} is not (or no longer) registered in a group linked to a default age group."
+  },
+  "%ZsX": {
+    "original": "Alle categorieën van het huidige werkjaar",
+    "translation": "All categories of the current work year"
+  },
+  "%ZsY": {
+    "original": "Rijksregisternummer van {firstName}",
+    "translation": "National registry number of {firstName}"
+  },
+  "%ZsZ": {
+    "original": "Kies één ouder die het inschrijvingsbedrag betaalt en op de fiscale attesten vermeld wordt. Kies bij voorkeur het gezinshoofd of de ouder die {firstName} ten laste heeft.",
+    "translation": "Choose one parent who will pay the registration amount and be mentioned on the tax certificates. Preferably choose the head of household or the parent responsible for {firstName}."
+  },
+  "%Zsa": {
+    "original": "Het rijksregisternummer van een ouder kan niet gelijk zijn aan dat van het lid zelf",
+    "translation": "A parent's national registry number cannot be identical to that of the member."
+  },
+  "%Zsb": {
+    "original": "Ingeschakeld",
+    "translation": "Enabled"
+  },
+  "%Zsc": {
+    "original": "Twee aparte fiscale attesten opmaken voor de helft van het bedrag",
+    "translation": "Create two separate tax certificates for half the amount each"
+  },
+  "%Zse": {
+    "original": "Bepaal welke beheerders deze activiteit kunnen bekijken of bewerken.",
+    "translation": "Decide which administrators can view or edit this activity."
+  },
+  "%Zsf": {
+    "original": "Enkel voor leden met een attest van zware handicap.",
+    "translation": "Only for members with a certificate of severe disability."
+  },
+  "%Zsg": {
+    "original": "Alle activiteiten van het huidige werkjaar",
+    "translation": "All activities of the current work year"
+  },
+  "%Zsk": {
+    "original": "Enkel mogelijk als beide ouders {firstName} ten laste hebben, gescheiden zijn, fiscaal co-ouderschap hebben én de kostprijs voor inschrijvingen delen. <button>Meer info</button>",
+    "translation": "Only possible if both parents are responsible for {firstName}, are separated, have joint fiscal custody, and split the registration cost. <button>More info</button>"
+  },
+  "%Zsl": {
+    "original": "Deze toegang geldt over alle werkjaren heen.",
+    "translation": "This access applies across all work years."
+  },
+  "%Zsm": {
+    "original": "Geef toegang tot specifieke activiteiten. Wie volledige toegang of ‘activiteiten beheren’ toegang heeft tot een leeftijdsgroep, krijgt automatisch ook toegang tot de activiteiten van die groep.",
+    "translation": "Grant access to specific activities. Anyone with full access or ‘manage activities’ rights to an age group will automatically have access to the activities of that group."
+  },
+  "%Zsn": {
+    "original": "Kies hier welke beheerdersrollen deze activiteit kunnen bekijken of bewerken.",
+    "translation": "Choose which administrator roles can view or edit this activity."
+  },
+  "%Zso": {
+    "original": "Enkel aanduiden als je dit voor andere zaken dan fiscale attesten nodig hebt",
+    "translation": "Only select this if you need it for purposes other than tax certificates."
+  },
+  "%Zsp": {
+    "original": "Vraag automatisch het rijksregisternummer van leden en één van de ouders (schuldenaar) als een lid in aanmerking komt voor een fiscaal attest kinderopvang (jonger dan 14 jaar met inschrijving of 21 jaar bij attest van zware handicap). De ouders bepalen op wiens naam het attest komt.",
+    "translation": "Automatically request national registry numbers from members and one of the parents (liable party) if a member is eligible for a childcare tax certificate (under 14 registered, or up to 21 with a certificate of severe disability). Parents choose under whose name the certificate will be issued."
+  },
+  "%Zsq": {
+    "original": "Gegevens voor fiscale attesten kinderopvang",
+    "translation": "Data for childcare tax certificates"
+  },
+  "%Zsr": {
+    "original": "activiteiten",
+    "translation": "activities"
+  },
+  "%Zsu": {
+    "original": "Gegevens voor fiscale attesten nog nooit nagekeken.",
+    "translation": "Data for tax certificates has never been checked."
+  },
+  "%Zsv": {
+    "original": "Alle categorieën in alle werkjaren",
+    "translation": "All categories in all work years"
+  },
+  "%Zsw": {
+    "original": "Gegevens voor fiscale attesten laatst nagekeken op {date}",
+    "translation": "Data for tax certificates last checked on {date}"
+  },
+  "%Zsx": {
+    "original": "Kies twee schuldenaars of schakel het splitsen van het fiscale attest uit",
+    "translation": "Choose two liable parties or disable splitting the tax certificate"
+  },
+  "%Zsz": {
+    "original": "Rijksregisternummer {firstName} (schuldenaar)",
+    "translation": "National registry number {firstName} (liable party)"
+  },
   "%Zt": {
     "original": "handleiding volgen.",
     "translation": "manual."
+  },
+  "%Zt0": {
+    "original": "Kies één schuldenaar",
+    "translation": "Choose one liable party"
+  },
+  "%Zt1": {
+    "original": "activiteit",
+    "translation": "activity"
+  },
+  "%Zt2": {
+    "original": "Er zijn geen {resourceType}.",
+    "translation": "There are no {resourceType}."
+  },
+  "%Zt4": {
+    "original": "{firstName} heeft een attest van zware handicap",
+    "translation": "{firstName} has a certificate of severe disability"
+  },
+  "%Zt5": {
+    "original": "Er zijn geen {resourceType} in werkjaar {period}.",
+    "translation": "There are no {resourceType} in work year {period}."
+  },
+  "%Zt6": {
+    "original": "Tot 21 jaar",
+    "translation": "Up to 21 years old"
+  },
+  "%Zt8": {
+    "original": "Dit rijksregisternummer komt niet overeen met de geboortedatum van dit lid.",
+    "translation": "This national register number does not match the birth date of this member."
+  },
+  "%Zt9": {
+    "original": "Gescheiden ouders met fiscaal co-ouderschap",
+    "translation": "Separated parents with shared fiscal custody"
   },
   "%Zu": {
     "original": "De redirect URI behoud je best op de voorgestelde waarde.",
@@ -21659,22 +21807,6 @@
     "original": "Alternatief e-mailadres toevoegen",
     "translation": "Add alternative email address"
   },
-  "%fJ": {
-    "original": "kan zelf inloggen of registreren op",
-    "translation": "can log in or register on"
-  },
-  "%fK": {
-    "original": "één van de ingevoerde e-mailadressen.",
-    "translation": "one of the entered email addresses."
-  },
-  "%fL": {
-    "original": "het ingevoerde e-mailadres.",
-    "translation": "the entered email address."
-  },
-  "%fM": {
-    "original": "Daarnaast kan je in één van de volgende stappen één of meerdere ouders toevoegen, met een e-mailadres, die ook toegang krijgen. Vul hier enkel een e-mailadres van {member} zelf in.",
-    "translation": "In addition, in one of the following steps you can add one or more parents, with an email address, who will also have access. Only enter an email address for {member} here."
-  },
   "%fN": {
     "original": "Geboortedatum (optioneel)",
     "translation": "Date of birth (optional)"
@@ -21730,10 +21862,6 @@
   "%fa": {
     "original": "Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken.",
     "translation": "The national registration number is used to create tax certificates."
-  },
-  "%fb": {
-    "original": "Vul het bij minstens één ouder in, deze ouder zal vermeld worden op de attesten.",
-    "translation": "Fill in for at least one parent, this parent will be mentioned on the certificates."
   },
   "%fc": {
     "original": "E-mailadres van ouder",

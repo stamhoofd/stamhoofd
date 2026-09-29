@@ -68,7 +68,7 @@
         </div>
 
         <template v-if="showNationalRegisterNumber">
-            <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`) + (isNRNRequiredForThisParent ? '' : ' (' + $t('optioneel') + ')')" :required="isNRNRequiredForThisParent && !isAllOptional" :required-message="nrnRequiredMessage" :validator="errors.validator" data-testid="national-register-number-input" />
+            <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`) + (isNRNRequiredForThisParent ? '' : ' (' + $t('%1GF') + ')')" :required="isNRNRequiredForThisParent && !isAllOptional" :required-message="nrnRequiredMessage" :validator="errors.validator" data-testid="national-register-number-input" />
             <p v-if="needsNationalRegisterNumber && nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
                 {{ $t('%fa') }}
             </p>

@@ -107,7 +107,7 @@ const groupedResponsibilites = computed(() => {
 
     if (groupedOrganizationResponsibilities.length > 0) {
         groups.push({
-            title: groupedPlatformResponsibilities.length > 0 ? $t(`%109`) : $t('Functies'),
+            title: groupedPlatformResponsibilities.length > 0 ? $t(`%109`) : $t('%7D'),
             roles: groupedOrganizationResponsibilities,
         });
     }

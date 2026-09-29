@@ -1,6 +1,6 @@
 <template>
     <div class="container" data-testid="tax-certificate-box">
-        <Title v-bind="$attrs" :title="$t('Fiscale attesten')">
+        <Title v-bind="$attrs" :title="$t('%ZqD')">
             <template v-if="isAdmin && isFullAdmin && (member.needsTaxCertificateIfSevereDisability || severeDisability)" #right>
                 <SevereDisabilityToggle v-model="severeDisability" :member="member" />
             </template>
@@ -11,7 +11,7 @@
         <MemberNRRInput v-if="isPropertyEnabled('nationalRegisterNumber')" :member="member" :validator="validator" />
 
         <template v-if="member.needsTaxCertificate && member.patchedMember.details.nationalRegisterNumber !== NationalRegisterNumberOptOut">
-            <STInputBox v-if="coParenting || parents.length > 1" :title="$t('Gescheiden ouders met co-ouderschap')" class="max" error-fields="coParenting" :error-box="errors.errorBox" :parent-error-box="parentErrorBox">
+            <STInputBox v-if="coParenting || parents.length > 1" :title="$t('%ZsL')" class="max" error-fields="coParenting" :error-box="errors.errorBox" :parent-error-box="parentErrorBox">
                 <STList>
                     <STListItem :selectable="true" element-name="label" class="right-stack left-center" data-testid="co-parenting-row">
                         <template #left>
@@ -19,10 +19,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Twee aparte fiscale attesten opmaken voor de helft van het bedrag') }}
+                            {{ $t('%Zsc') }}
                         </h3>
                         <p class="style-description-small">
-                            <I18nComponent :t="$t('Enkel mogelijk als beide ouders {firstName} ten laste hebben, gescheiden zijn, fiscaal co-ouderschap hebben én de kostprijs voor inschrijvingen delen. <button>Meer info</button>', {firstName: member.patchedMember.details.firstName})">
+                            <I18nComponent :t="$t('%Zsk', {firstName: member.patchedMember.details.firstName})">
                                 <template #button="{content}">
                                     <a class="inline-link" href="https://fin.belgium.be/nl/particulieren/belastingaangifte/persoonlijke-situatie/personen-ten-laste/kinderen" target="_blank">
                                         {{ content }}
@@ -34,9 +34,9 @@
                 </STList>
             </STInputBox>
 
-            <STInputBox :title="parents.length === 1 ? $t('Rijksregisternummer {firstName} (schuldenaar)', {firstName: parents[0].firstName}) : (coParenting ? $t('Rijksregisternummer co-ouders (schuldenaars)') : $t('Rijksregisternummer schuldenaar (ouder)'))" class="max" error-fields="debtor" :error-box="errors.errorBox" :parent-error-box="parentErrorBox">
+            <STInputBox :title="parents.length === 1 ? $t('%Zsz', {firstName: parents[0].firstName}) : (coParenting ? $t('Rijksregisternummer co-ouders (schuldenaars)') : $t('Rijksregisternummer schuldenaar (ouder)'))" class="max" error-fields="debtor" :error-box="errors.errorBox" :parent-error-box="parentErrorBox">
                 <p v-if="parents.length > 1 && !coParenting" class="style-description-small">
-                    {{ $t('Kies één ouder die het inschrijvingsbedrag betaalt en op de fiscale attesten vermeld wordt. Kies bij voorkeur het gezinshoofd of de ouder die {firstName} ten laste heeft.', {firstName: member.patchedMember.details.firstName}) }}
+                    {{ $t('%ZsZ', {firstName: member.patchedMember.details.firstName}) }}
                 </p>
                 <STList>
                     <STListItem v-for="parent in parents" :key="parent.id" :selectable="true" element-name="label" class="right-stack left-center" data-testid="debtor-row">
@@ -53,7 +53,7 @@
                         </p>
 
                         <div v-if="isParentSelected(parent)">
-                            <NRNInput :model-value="getParentNRN(parent)" title="" :placeholder="$t('Rijksregisternummer van {firstName}', {firstName: parent.firstName})" :required="isPropertyRequired('parents.nationalRegisterNumber')" :validator="errors.validator" data-testid="debtor-nrn-input" @update:model-value="setParentNRN(parent, $event)" />
+                            <NRNInput :model-value="getParentNRN(parent)" title="" :placeholder="$t('%ZsY', {firstName: parent.firstName})" :required="isPropertyRequired('parents.nationalRegisterNumber')" :validator="errors.validator" data-testid="debtor-nrn-input" @update:model-value="setParentNRN(parent, $event)" />
                         </div>
                     </STListItem>
                 </STList>
@@ -61,12 +61,12 @@
         </template>
 
         <p v-if="!willMarkReviewed && reviewDate && isAdmin" class="style-description-small">
-            {{ $t('Gegevens voor fiscale attesten laatst nagekeken op {date}', {date: formatDate(reviewDate)}) }}. <button v-tooltip="$t('%fD')" type="button" class="inline-link" @click="clear">
+            {{ $t('%Zsw', {date: formatDate(reviewDate)}) }}. <button v-tooltip="$t('%fD')" type="button" class="inline-link" @click="clear">
                 {{ $t('%fE') }}
             </button>.
         </p>
         <p v-if="!willMarkReviewed && !reviewDate && isAdmin && !member.isNew" class="style-description-small">
-            {{ $t('Gegevens voor fiscale attesten nog nooit nagekeken.') }} <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
+            {{ $t('%Zsu') }} <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
                 {{ $t('%jC') }}
             </button>
         </p>
@@ -183,7 +183,7 @@ useValidation(props.validator, () => {
         throw new SimpleError({
             code: 'invalid_field',
             field: 'debtor',
-            message: $t('Kies één schuldenaar'),
+            message: $t('%Zt0'),
         });
     }
 
@@ -191,7 +191,7 @@ useValidation(props.validator, () => {
         throw new SimpleError({
             code: 'invalid_field',
             field: 'debtor',
-            message: $t('Je kan maximaal twee ouders aanduiden als schuldenaar'),
+            message: $t('%ZsH'),
         });
     }
 
@@ -199,7 +199,7 @@ useValidation(props.validator, () => {
         throw new SimpleError({
             code: 'invalid_field',
             field: 'debtor',
-            message: $t('Kies twee schuldenaars of schakel het splitsen van het fiscale attest uit'),
+            message: $t('%Zsx'),
         });
     }
 
@@ -213,7 +213,7 @@ useValidation(props.validator, () => {
                 throw new SimpleError({
                     code: 'invalid_field',
                     field: 'debtor',
-                    message: $t('Het rijksregisternummer van een ouder kan niet gelijk zijn aan dat van het lid zelf'),
+                    message: $t('%Zsa'),
                 });
             }
 
@@ -221,7 +221,7 @@ useValidation(props.validator, () => {
                 throw new SimpleError({
                     code: 'invalid_field',
                     field: 'debtor',
-                    message: $t('Het rijksregisternummer van een ouder kan niet gelijk zijn aan dat van een andere ouder'),
+                    message: $t('%ZsP'),
                 });
             }
         }

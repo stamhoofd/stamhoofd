@@ -21,7 +21,7 @@
         </p>
 
         <template #right>
-            <span v-if="autoRemoveDate" v-tooltip="platformResponsibility ? $t('Deze functie wordt automatisch verwijderd op {date}, omdat {name} niet (meer) is ingeschreven bij een groep die aan een standaard leeftijdsgroep gekoppeld is.', {name: member.patchedMember.firstName, date: formatDate(autoRemoveDate, true)}) : $t('Deze functie wordt automatisch verwijderd op {date}, omdat {name} niet meer is ingeschreven.', {name: member.patchedMember.firstName, date: formatDate(autoRemoveDate, true)})" class="icon warning yellow" />
+            <span v-if="autoRemoveDate" v-tooltip="platformResponsibility ? $t('%ZsV', {name: member.patchedMember.firstName, date: formatDate(autoRemoveDate, true)}) : $t('Deze functie wordt automatisch verwijderd op {date}, omdat {name} niet meer is ingeschreven.', {name: member.patchedMember.firstName, date: formatDate(autoRemoveDate, true)})" class="icon warning yellow" />
         </template>
     </STListItem>
 </template>

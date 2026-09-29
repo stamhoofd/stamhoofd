@@ -104,7 +104,7 @@ const warnings = computed(() => {
     if (isPropertyEnabled('taxCertificates')) {
         if (props.member.patchedMember.details.parents.filter(p => p.isMemberTaxDependent).length > 1) {
             warnings.push(RecordWarning.create({
-                text: TranslatedString.create($t('Gescheiden ouders met fiscaal co-ouderschap')),
+                text: TranslatedString.create($t('%Zt9')),
                 type: RecordWarningType.Info,
             }));
         }

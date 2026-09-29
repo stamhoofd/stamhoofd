@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :disabled="!hasChanges" :save-text="$t('Opslaan')" @save="save">
+    <SaveView :title="title" :disabled="!hasChanges" :save-text="$t('%1Op')" @save="save">
         <h1>{{ title }}</h1>
 
         <div class="input-with-buttons">
@@ -22,8 +22,8 @@
                 searchQuery
                     ? $t('%1AX')
                     : period
-                        ? $t('Er zijn geen {resourceType} in werkjaar {period}.', { resourceType: getPermissionResourceTypeName(props.type, true), period: period.name })
-                        : $t('Er zijn geen {resourceType}.', { resourceType: getPermissionResourceTypeName(props.type, true) })
+                        ? $t('%Zt5', { resourceType: getPermissionResourceTypeName(props.type, true), period: period.name })
+                        : $t('%Zt2', { resourceType: getPermissionResourceTypeName(props.type, true) })
             }}
         </p>
         <STList v-else>

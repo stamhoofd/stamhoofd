@@ -126,7 +126,7 @@ export function downgradeResourceKeys<T>(resources: Map<PermissionsResourceType,
 export function getPermissionResourceTypeName(type: PermissionsResourceType, plural = true): string {
     switch (type) {
         case PermissionsResourceType.Webshops: return plural ? 'webshops' : 'webshop';
-        case PermissionsResourceType.Events: return plural ? $t('activiteiten') : $t('activiteit');
+        case PermissionsResourceType.Events: return plural ? $t('%Zsr') : $t('%Zt1');
         case PermissionsResourceType.Groups: return plural ? $t(`%n1`) : $t(`%14Z`);
         case PermissionsResourceType.GroupCategories: return plural ? $t(`%15H`) : $t(`%n2`);
         case PermissionsResourceType.OrganizationTags: return plural ? $t(`%2C`) : $t(`%2T`);

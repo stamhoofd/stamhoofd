@@ -155,7 +155,7 @@ function validate(final = true, silent = false) {
         if (!silent) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Dit rijksregisternummer komt niet overeen met de geboortedatum van dit lid.`),
+                message: $t(`%Zt8`),
                 field: 'nationalRegisterNumber',
             }));
         }

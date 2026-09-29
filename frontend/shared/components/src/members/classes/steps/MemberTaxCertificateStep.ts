@@ -16,7 +16,7 @@ export class MemberTaxCertificateStep implements EditMemberStep {
     }
 
     getName(_manager: MemberStepManager) {
-        return $t(`Fiscale attesten`);
+        return $t(`%ZqD`);
     }
 
     isEnabled(manager: MemberStepManager) {
@@ -53,7 +53,7 @@ export class MemberTaxCertificateStep implements EditMemberStep {
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {
         return AsyncComponent(() => import('#members/MemberStepView.vue'), {
-            title: $t(`Fiscale attesten`),
+            title: $t(`%ZqD`),
             member: manager.member,
             component: markRaw(EditMemberTaxCertificateBox),
             saveText: $t(`%16p`),

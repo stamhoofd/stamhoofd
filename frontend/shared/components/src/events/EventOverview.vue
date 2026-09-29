@@ -104,7 +104,7 @@
                                         {{ $t('%Ld') }}
                                     </h2>
                                     <p class="style-description-small">
-                                        {{ $t('Bepaal welke beheerders deze activiteit kunnen bekijken of bewerken.') }}
+                                        {{ $t('%Zse') }}
                                     </p>
                                     <template #right>
                                         <span class="icon arrow-right-small gray" />
@@ -627,7 +627,7 @@ defineRoute({
     present: 'popup',
     defaultProperties: () => {
         return {
-            description: $t('Kies hier welke beheerdersrollen deze activiteit kunnen bekijken of bewerken.'),
+            description: $t('%Zsn'),
             resource: {
                 id: props.event.id,
                 name: props.event.getNameWithPeriod(),

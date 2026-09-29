@@ -145,7 +145,7 @@ const settings = new RecordEditorSettings({
     }),
 });
 family.members.push(settings.exampleValue);
-const nameStepTaxCertificates = $t('Gegevens voor fiscale attesten kinderopvang');
+const nameStepTaxCertificates = $t('%Zsq');
 
 const properties = [
     buildPropertyRefs('gender', $t(`%1d`)),
@@ -153,14 +153,14 @@ const properties = [
     buildBooleanPropertyRefs(
         'taxCertificates',
         nameStepTaxCertificates,
-        $t('Vraag automatisch het rijksregisternummer van leden en één van de ouders (schuldenaar) als een lid in aanmerking komt voor een fiscaal attest kinderopvang (jonger dan 14 jaar met inschrijving of 21 jaar bij attest van zware handicap). De ouders bepalen op wiens naam het attest komt.'),
+        $t('%Zsp'),
     ),
     buildPropertyRefs(
         'nationalRegisterNumber',
         $t(`%wK`) + ' ' + $t(`%11R`),
         {
-            description: $t('Enkel aanduiden als je dit voor andere zaken dan fiscale attesten nodig hebt'),
-            warning: $t(`Schakel dit niet in als je rijksregisternummers enkel nodig hebt voor fiscale attesten. Vink daarvoor ‘{nameStep}’ aan.`, { nameStep: nameStepTaxCertificates }),
+            description: $t('%Zso'),
+            warning: $t(`%ZsU`, { nameStep: nameStepTaxCertificates }),
         },
     ),
     buildPropertyRefs('parents', $t(`%11P`), {

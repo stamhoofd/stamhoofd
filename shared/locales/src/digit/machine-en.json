@@ -1407,6 +1407,10 @@
     "original": "Deze groep",
     "translation": "This group"
   },
+  "%ZsQ": {
+    "original": "Beheer hier alle personen die toegang hebben tot Ravot, en wijzig hun toegangsrechten. <button>Meer info</button>",
+    "translation": "Manage all persons who have access to Ravot here, and adjust their access rights. <button>More info</button>"
+  },
   "%a6": {
     "original": "Portaal voor beroepsmedewerkers",
     "translation": "Portal for staff members"

@@ -44,7 +44,7 @@
                         {{ getPermissionLevelName(PermissionLevel.Read) }}
                     </h3>
                     <p v-if="basePermission === PermissionLevel.Read" class="style-description-small">
-                        {{ $t('Deze toegang geldt over alle werkjaren heen.') }}
+                        {{ $t('%Zsl') }}
                     </p>
                 </STListItem>
 
@@ -56,7 +56,7 @@
                         {{ getPermissionLevelName(PermissionLevel.Write) }}
                     </h3>
                     <p v-if="basePermission === PermissionLevel.Write" class="style-description-small">
-                        {{ $t('Deze toegang geldt over alle werkjaren heen.') }}
+                        {{ $t('%Zsl') }}
                     </p>
                 </STListItem>
 
@@ -91,15 +91,15 @@
                 <template v-if="organization && canAddCategories" #buttons>
                     <button class="button text only-icon-smartphone" type="button" @click="addCategories">
                         <span class="icon add" />
-                        <span>{{ $t('Toevoegen') }}</span>
+                        <span>{{ $t('%SN') }}</span>
                     </button>
                 </template>
 
                 <p>{{ $t('%Z6') }}</p>
 
                 <STList>
-                    <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.GroupCategories, PermissionsResourceKey.CurrentPeriod)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.CurrentPeriod, name: $t('Alle categorieën van het huidige werkjaar'), type: PermissionsResourceType.GroupCategories }" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="addPatch" />
-                    <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.GroupCategories, PermissionsResourceKey.All)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.All, name: $t('Alle categorieën in alle werkjaren'), type: PermissionsResourceType.GroupCategories }" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.GroupCategories, PermissionsResourceKey.CurrentPeriod)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.CurrentPeriod, name: $t('%ZsX'), type: PermissionsResourceType.GroupCategories }" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.GroupCategories, PermissionsResourceKey.All)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.All, name: $t('%Zsv'), type: PermissionsResourceType.GroupCategories }" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="addPatch" />
                     <ResourcePermissionRow v-for="resource in categoryResources" :key="resource.id" :in-current-period="currentPeriodCategoryIds.has(resource.id)" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="addPatch" />
                 </STList>
             </CategorizedBox>
@@ -108,27 +108,27 @@
                 <template v-if="canAddGroups" #buttons>
                     <button class="button text only-icon-smartphone" type="button" @click="addGroups">
                         <span class="icon add" />
-                        <span>{{ $t('Toevoegen') }}</span>
+                        <span>{{ $t('%SN') }}</span>
                     </button>
                 </template>
 
                 <STList>
-                    <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.Groups, PermissionsResourceKey.CurrentPeriod)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.CurrentPeriod, name: $t('Alle leden van het huidige werkjaar'), type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
-                    <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.Groups, PermissionsResourceKey.All)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.All, name: $t('Alle leden in alle werkjaren'), type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.Groups, PermissionsResourceKey.CurrentPeriod)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.CurrentPeriod, name: $t('%ZsK'), type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.Groups, PermissionsResourceKey.All)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.All, name: $t('%ZsI'), type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
                     <ResourcePermissionRow v-for="resource in groupResources" :key="resource.id" :in-current-period="currentPeriodGroupIds.has(resource.id)" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
                 </STList>
             </CategorizedBox>
 
-            <CategorizedBox v-if="showEventsBox" icon="calendar" :title="$t('Activiteiten')">
+            <CategorizedBox v-if="showEventsBox" icon="calendar" :title="$t('%uB')">
                 <template v-if="canAddEvents" #buttons>
                     <button class="button text only-icon-smartphone" type="button" @click="addEvents">
                         <span class="icon add" />
-                        <span>{{ $t('Toevoegen') }}</span>
+                        <span>{{ $t('%SN') }}</span>
                     </button>
                 </template>
 
                 <p v-if="$isStamhoofd">
-                    <I18nComponent :t="$t('Geef toegang tot specifieke activiteiten. Wie volledige toegang of ‘activiteiten beheren’ toegang heeft tot een leeftijdsgroep, krijgt automatisch ook toegang tot de activiteiten van die groep. <button>Meer info</button>')">
+                    <I18nComponent :t="$t('%ZsF')">
                         <template #button="{content}">
                             <a class="inline-link" :href="$domains.getDocs('toegang-activiteiten')" target="_blank">
                                 {{ content }}
@@ -137,12 +137,12 @@
                     </I18nComponent>
                 </p>
                 <p v-else>
-                    {{ $t('Geef toegang tot specifieke activiteiten. Wie volledige toegang of ‘activiteiten beheren’ toegang heeft tot een leeftijdsgroep, krijgt automatisch ook toegang tot de activiteiten van die groep.') }}
+                    {{ $t('%Zsm') }}
                 </p>
 
                 <STList>
-                    <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.Events, PermissionsResourceKey.CurrentPeriod)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.CurrentPeriod, name: $t('Alle activiteiten van het huidige werkjaar'), type: PermissionsResourceType.Events }" type="resource" @patch:role="addPatch" />
-                    <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.Events, PermissionsResourceKey.All)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.All, name: $t('Alle activiteiten in alle werkjaren'), type: PermissionsResourceType.Events }" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.Events, PermissionsResourceKey.CurrentPeriod)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.CurrentPeriod, name: $t('%Zsg'), type: PermissionsResourceType.Events }" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow v-if="canAddAccess(PermissionsResourceType.Events, PermissionsResourceKey.All)" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: PermissionsResourceKey.All, name: $t('%ZsM'), type: PermissionsResourceType.Events }" type="resource" @patch:role="addPatch" />
                     <ResourcePermissionRow v-for="resource in eventResources" :key="resource.id" :in-current-period="false" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" type="resource" @patch:role="addPatch" />
                 </STList>
             </CategorizedBox>
@@ -405,7 +405,7 @@ async function addGroups() {
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: AsyncComponent(() => import('./EditResourcePermissionsView.vue'), {
-                    title: $t('Inschrijvingsgroepen'),
+                    title: $t('%aT'),
                     role: patched.value,
                     inheritedRoles: props.inheritedRoles,
                     type: PermissionsResourceType.Groups,
@@ -432,7 +432,7 @@ async function addCategories() {
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: AsyncComponent(() => import('./EditResourcePermissionsView.vue'), {
-                    title: $t('Inschrijvingscategorieën'),
+                    title: $t('%Z5'),
                     role: patched.value,
                     inheritedRoles: props.inheritedRoles,
                     type: PermissionsResourceType.GroupCategories,
@@ -455,7 +455,7 @@ async function addEvents() {
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: AsyncComponent(() => import('./EditResourcePermissionsView.vue'), {
-                    title: $t('Activiteiten'),
+                    title: $t('%uB'),
                     role: patched.value,
                     inheritedRoles: props.inheritedRoles,
                     type: PermissionsResourceType.Events,

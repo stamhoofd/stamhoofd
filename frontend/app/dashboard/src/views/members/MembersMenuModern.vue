@@ -13,7 +13,7 @@
 
             <button v-if="hasNoAccessInPeriod" class="info-box selectable small" type="button" data-testid="period-access-hint" @click="switchPeriod">
                 <!-- No extra span for button because the layout would be weird if this appears in the side menu -->
-                {{ $t('Je hebt geen toegang tot dit werkjaar. Wissel van werkjaar om jouw groepen te bekijken.') }}
+                {{ $t('%ZsR') }}
             </button>
 
             <div class="block">
@@ -330,11 +330,11 @@ function getPeriodDisabledReason(p: RegistrationPeriod, organizationPeriod: Orga
 
     if (!organizationPeriod) {
         // Choosing this period starts it
-        return hasFullAccess.value ? false : $t('Dit werkjaar is nog niet gestart');
+        return hasFullAccess.value ? false : $t('%ZsC');
     }
 
     if (!auth.hasSomeAccessInPeriod(organizationPeriod)) {
-        return $t('Je hebt geen toegang tot dit werkjaar');
+        return $t('%ZsA');
     }
 
     return false;

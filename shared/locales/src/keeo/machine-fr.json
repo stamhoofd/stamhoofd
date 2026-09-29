@@ -1695,6 +1695,54 @@
     "original": "van dit scoutsjaar",
     "translation": "de cette année scoute"
   },
+  "%ZsA": {
+    "original": "Je hebt geen toegang tot dit scoutsjaar",
+    "translation": "Vous n'avez pas accès à cette année scoute"
+  },
+  "%ZsC": {
+    "original": "Dit scoutsjaar is nog niet gestart",
+    "translation": "Cette année scoute n'a pas encore commencé"
+  },
+  "%ZsI": {
+    "original": "Alle leden in alle scoutsjaren",
+    "translation": "Tous les membres de toutes les années scoutes"
+  },
+  "%ZsK": {
+    "original": "Alle leden van het huidige scoutsjaar",
+    "translation": "Tous les membres de l'année scoute en cours"
+  },
+  "%ZsM": {
+    "original": "Alle activiteiten in alle scoutsjaren",
+    "translation": "Toutes les activités de toutes les années scoutes"
+  },
+  "%ZsQ": {
+    "original": "Beheer hier alle personen die toegang hebben tot Keeo, en wijzig hun toegangsrechten. <button>Meer info</button>",
+    "translation": "Gérez ici toutes les personnes qui ont accès à Keeo et adaptez leurs droits. <button>Plus d'info</button>"
+  },
+  "%ZsR": {
+    "original": "Je hebt geen toegang tot dit scoutsjaar. Wissel van scoutsjaar om jouw groepen te bekijken.",
+    "translation": "Vous n'avez pas accès à cette année scoute. Changez d'année scoute pour consulter vos groupes."
+  },
+  "%ZsX": {
+    "original": "Alle categorieën van het huidige scoutsjaar",
+    "translation": "Toutes les catégories de l'année scoute en cours"
+  },
+  "%Zsg": {
+    "original": "Alle activiteiten van het huidige scoutsjaar",
+    "translation": "Toutes les activités de l'année scoute en cours"
+  },
+  "%Zsl": {
+    "original": "Deze toegang geldt over alle scoutsjaren heen.",
+    "translation": "Cet accès est valable pour toutes les années scoutes."
+  },
+  "%Zsv": {
+    "original": "Alle categorieën in alle scoutsjaren",
+    "translation": "Toutes les catégories de toutes les années scoutes"
+  },
+  "%Zt5": {
+    "original": "Er zijn geen {resourceType} in scoutsjaar {period}.",
+    "translation": "Il n'y a pas de {resourceType} pour l'année scoute {period}."
+  },
   "%ad": {
     "original": "Een hoofdbeheerder van jouw eenheid moet eerst een afzender toevoegen die je kan gebruiken voor je een bericht kan versturen.",
     "translation": "Un administrateur principal de votre unité doit d'abord ajouter un expéditeur que vous pourrez utiliser pour envoyer un message."

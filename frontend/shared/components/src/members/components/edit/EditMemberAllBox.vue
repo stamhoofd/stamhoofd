@@ -18,7 +18,7 @@
         <EditMemberParentsBox v-bind="$attrs" :member="member" :validator="validator" :level="0" />
     </CategorizedBox>
 
-    <CategorizedBox v-if="isPropertyEnabled('taxCertificates') && member.patchedMember.details.parents.length" icon="file" :title="$t('Fiscale attesten')">
+    <CategorizedBox v-if="isPropertyEnabled('taxCertificates') && member.patchedMember.details.parents.length" icon="file" :title="$t('%ZqD')">
         <EditMemberTaxCertificateBox v-bind="$attrs" :member="member" :validator="validator" :parent-error-box="parentErrorBox" :level="0" />
     </CategorizedBox>
 
@@ -43,7 +43,7 @@
     <CategorizedBox v-if="isPropertyEnabled('financialSupport') || member.patchedMember.details.requiresFinancialSupport !== null || member.patchedMember.details.uitpasNumberDetails?.isActive" icon="receive" :title="financialSupportSettings.title">
         <template #summary>
             <p v-if="member.patchedMember.details.requiresFinancialSupport?.value" class="style-description-small">
-                {{ $t('Ingeschakeld') }}
+                {{ $t('%Zsb') }}
             </p>
         </template>
         <EditMemberFinancialSupportBox v-bind="$attrs" :member="member" :validator="validator" :level="0" />

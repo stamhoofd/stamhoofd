@@ -1,7 +1,7 @@
 <template>
     <button class="button text small" type="button" :class="{enabled: model}" data-testid="severe-disability-toggle" @click="toggle">
-        <span v-if="model" v-tooltip="$t('Het fiscaal attest wordt aangemaakt tot de leeftijd van 21 jaar in plaats van 14 jaar')">{{ $t('Tot 21 jaar') }}</span>
-        <span v-else>{{ $t('Tot 14 jaar') }}</span>
+        <span v-if="model" v-tooltip="$t('%ZsJ')">{{ $t('%Zt6') }}</span>
+        <span v-else>{{ $t('%ZsE') }}</span>
         <span class="icon arrow-down-small" />
     </button>
 </template>
@@ -20,8 +20,8 @@ async function toggle(event: MouseEvent) {
     const contextMenu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t('Tot 14 jaar'),
-                description: $t('Standaardinstelling'),
+                name: $t('%ZsE'),
+                description: $t('%1Is'),
                 selected: model.value === false,
                 action: async () => {
                     await changeValue(false);
@@ -30,8 +30,8 @@ async function toggle(event: MouseEvent) {
 
             }),
             new ContextMenuItem({
-                name: $t('Tot 21 jaar'),
-                description: $t('Uitzondering voor leden met zware handicap'),
+                name: $t('%Zt6'),
+                description: $t('%ZsD'),
                 selected: model.value === true,
                 action: async () => {
                     await changeValue(true);
@@ -41,7 +41,7 @@ async function toggle(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: $t('Meer info'),
+                name: $t('%19t'),
                 icon: 'external',
                 action: async () => {
                     window.open('https://fin.belgium.be/nl/particulieren/belastingvoordelen/kinderopvang/belastingvermindering', '_blank');
@@ -66,20 +66,20 @@ async function changeValue(to: boolean) {
     }
 
     const result = await CenteredMessage.show({
-        title: $t('Fiscaal attest uitreiken tot hogere leeftijd van 21 jaar'),
-        description: $t('Enkel voor leden met een attest van zware handicap.'),
+        title: $t('%Zq2'),
+        description: $t('%Zsf'),
         checkbox: {
-            text: $t('{firstName} heeft een attest van zware handicap', { firstName: props.member.patchedMember.firstName }),
+            text: $t('%Zt4', { firstName: props.member.patchedMember.firstName }),
         },
         buttons: [
             {
-                text: $t('Uitreiken tot 21 jaar'),
+                text: $t('%ZsO'),
                 value: 'enable',
                 type: 'destructive',
                 requireAcceptCheckbox: true,
             },
             {
-                text: $t('Meer info'),
+                text: $t('%19t'),
                 value: 'info',
                 type: 'secundary',
                 icon: 'external',

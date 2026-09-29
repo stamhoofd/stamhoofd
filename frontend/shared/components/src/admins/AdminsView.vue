@@ -6,7 +6,7 @@
             <main class="center">
                 <h1>{{ $t('%K5') }}</h1>
                 <p v-if="$isStamhoofd">
-                    <I18nComponent :t="$t('Beheer hier alle personen die toegang hebben tot Stamhoofd, en wijzig hun toegangsrechten. <button>Meer info</button>')">
+                    <I18nComponent :t="$t('%ZsQ')">
                         <template #button="{content}">
                             <a class="inline-link" :href="$domains.getDocs('functies')" target="_blank">
                                 {{ content }}

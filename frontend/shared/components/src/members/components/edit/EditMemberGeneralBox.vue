@@ -65,8 +65,8 @@
                         class="style-description-small"
                     >
                         {{ isPropertyRequired('emailAddress', true)
-                            ? $t('Vul hier enkel een e-mailadres van {firstName} zelf in, niet van een ouder.', {firstName: member.patchedMember.firstName})
-                            : $t('Vul hier enkel een e-mailadres van {firstName} zelf in, niet van een ouder. Laat het anders leeg.', {firstName: member.patchedMember.firstName}) }}
+                            ? $t('%ZsN', {firstName: member.patchedMember.firstName})
+                            : $t('%ZsS', {firstName: member.patchedMember.firstName}) }}
                     </p>
                 </template>
             </div>
