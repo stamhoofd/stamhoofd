@@ -20,7 +20,7 @@
         "@stamhoofd/types": "2.153.0"
     },
     "peerDependencies": {
-        "@stamhoofd/cli": "*"
+        "@stamhoofd/cli": "workspace:*"
     },
     "license": "UNLICENCED",
     "publishConfig": {

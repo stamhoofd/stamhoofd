@@ -28,9 +28,9 @@
         "vitest": "4.1.11"
     },
     "peerDependencies": {
-        "@stamhoofd/structures": "*",
-        "@stamhoofd/types": "*",
-        "@stamhoofd/utility": "*"
+        "@stamhoofd/structures": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
+        "@stamhoofd/utility": "workspace:*"
     },
     "license": "UNLICENCED",
     "publishConfig": {

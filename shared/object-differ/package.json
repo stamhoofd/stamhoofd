@@ -34,8 +34,8 @@
         "vitest": "4.1.11"
     },
     "peerDependencies": {
-        "@stamhoofd/structures": "*",
-        "@stamhoofd/utility": "*",
+        "@stamhoofd/structures": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "uuid": "14.0.2"
     },
     "license": "UNLICENCED",

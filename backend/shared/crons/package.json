@@ -18,7 +18,7 @@
         "mysql2": "3.24.4"
     },
     "peerDependencies": {
-        "@stamhoofd/utility": "*"
+        "@stamhoofd/utility": "workspace:*"
     },
     "license": "UNLICENCED",
     "publishConfig": {

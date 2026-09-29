@@ -19,7 +19,7 @@
         "@simonbackx/simple-logging": "1.0.1"
     },
     "peerDependencies": {
-        "@stamhoofd/structures": "*"
+        "@stamhoofd/structures": "workspace:*"
     },
     "license": "UNLICENCED",
     "publishConfig": {

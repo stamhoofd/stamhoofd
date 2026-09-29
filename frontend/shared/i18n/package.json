@@ -20,14 +20,14 @@
     },
     "dependencies": {
         "@simonbackx/vue-app-navigation": "2.25.1",
-        "@stamhoofd/locales": "*",
-        "@stamhoofd/networking": "*",
-        "@stamhoofd/structures": "*",
-        "@stamhoofd/types": "*",
-        "@stamhoofd/utility": "*",
+        "@stamhoofd/locales": "workspace:*",
+        "@stamhoofd/networking": "workspace:*",
+        "@stamhoofd/structures": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "vue": "3.5.43"
     },
     "devDependencies": {
-        "eslint-plugin-stamhoofd": "*"
+        "eslint-plugin-stamhoofd": "workspace:*"
     }
 }

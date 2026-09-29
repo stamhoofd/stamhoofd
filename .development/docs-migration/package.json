@@ -13,7 +13,7 @@
     "devDependencies": {
         "@types/node": "22.20.4",
         "eslint": "10.10.0",
-        "eslint-plugin-stamhoofd": "*",
+        "eslint-plugin-stamhoofd": "workspace:*",
         "jiti": "2.7.0",
         "node-html-parser": "5.4.2",
         "typescript": "6.0.3"

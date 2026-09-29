@@ -8,10 +8,10 @@
         "./svgNamespacePlugin": "./svgNamespacePlugin.ts"
     },
     "dependencies": {
-        "@stamhoofd/assets": "*",
-        "@stamhoofd/cli": "*",
-        "@stamhoofd/test-utils": "*",
-        "@stamhoofd/types": "*",
+        "@stamhoofd/assets": "workspace:*",
+        "@stamhoofd/cli": "workspace:*",
+        "@stamhoofd/test-utils": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
         "@vitejs/plugin-vue": "6.0.9",
         "@vitest/browser-playwright": "4.1.11",
         "postcss-discard-duplicates": "8.0.4",

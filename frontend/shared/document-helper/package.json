@@ -10,14 +10,14 @@
     "dependencies": {
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-networking": "1.23.0",
-        "@stamhoofd/assets": "*",
-        "@stamhoofd/components": "*",
-        "@stamhoofd/networking": "*",
-        "@stamhoofd/structures": "*",
-        "@stamhoofd/utility": "*",
+        "@stamhoofd/assets": "workspace:*",
+        "@stamhoofd/components": "workspace:*",
+        "@stamhoofd/networking": "workspace:*",
+        "@stamhoofd/structures": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "jszip": "3.10.2"
     },
     "devDependencies": {
-        "eslint-plugin-stamhoofd": "*"
+        "eslint-plugin-stamhoofd": "workspace:*"
     }
 }

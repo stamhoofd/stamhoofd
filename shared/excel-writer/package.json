@@ -37,7 +37,7 @@
         "@types/uuid": "8.3.4"
     },
     "peerDependencies": {
-        "@stamhoofd/utility": "*",
+        "@stamhoofd/utility": "workspace:*",
         "archiver": "7.0.1"
     },
     "license": "UNLICENCED",

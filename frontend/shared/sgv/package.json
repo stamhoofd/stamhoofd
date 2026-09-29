@@ -24,18 +24,18 @@
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-networking": "1.23.0",
         "@simonbackx/vue-app-navigation": "2.25.1",
-        "@stamhoofd/assets": "*",
-        "@stamhoofd/components": "*",
-        "@stamhoofd/networking": "*",
-        "@stamhoofd/sgv": "*",
-        "@stamhoofd/structures": "*",
-        "@stamhoofd/types": "*",
-        "@stamhoofd/utility": "*",
+        "@stamhoofd/assets": "workspace:*",
+        "@stamhoofd/components": "workspace:*",
+        "@stamhoofd/networking": "workspace:*",
+        "@stamhoofd/sgv": "workspace:*",
+        "@stamhoofd/structures": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "vue": "3.5.43"
     },
     "devDependencies": {
         "@vue/test-utils": "2.5.1",
-        "eslint-plugin-stamhoofd": "*",
+        "eslint-plugin-stamhoofd": "workspace:*",
         "vitest": "4.1.11"
     }
 }

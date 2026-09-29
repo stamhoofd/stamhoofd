@@ -12,14 +12,14 @@
         "typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {
-        "@stamhoofd/assets": "*",
-        "@stamhoofd/components": "*",
-        "@stamhoofd/networking": "*",
-        "@stamhoofd/structures": "*",
-        "@stamhoofd/utility": "*",
+        "@stamhoofd/assets": "workspace:*",
+        "@stamhoofd/components": "workspace:*",
+        "@stamhoofd/networking": "workspace:*",
+        "@stamhoofd/structures": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "buffer": "6.0.3"
     },
     "devDependencies": {
-        "eslint-plugin-stamhoofd": "*"
+        "eslint-plugin-stamhoofd": "workspace:*"
     }
 }

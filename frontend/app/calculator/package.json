@@ -17,23 +17,23 @@
     "dependencies": {
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/vue-app-navigation": "2.25.1",
-        "@stamhoofd/assets": "*",
-        "@stamhoofd/components": "*",
-        "@stamhoofd/document-helper": "*",
-        "@stamhoofd/frontend-excel-export": "*",
-        "@stamhoofd/frontend-i18n": "*",
-        "@stamhoofd/frontend-pdf-builder": "*",
-        "@stamhoofd/networking": "*",
-        "@stamhoofd/scss": "*",
-        "@stamhoofd/structures": "*",
-        "@stamhoofd/ticket-builder": "*",
-        "@stamhoofd/types": "*",
-        "@stamhoofd/utility": "*",
+        "@stamhoofd/assets": "workspace:*",
+        "@stamhoofd/components": "workspace:*",
+        "@stamhoofd/document-helper": "workspace:*",
+        "@stamhoofd/frontend-excel-export": "workspace:*",
+        "@stamhoofd/frontend-i18n": "workspace:*",
+        "@stamhoofd/frontend-pdf-builder": "workspace:*",
+        "@stamhoofd/networking": "workspace:*",
+        "@stamhoofd/scss": "workspace:*",
+        "@stamhoofd/structures": "workspace:*",
+        "@stamhoofd/ticket-builder": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "vue": "3.5.43"
     },
     "devDependencies": {
-        "@stamhoofd/vite-config": "*",
-        "eslint-plugin-stamhoofd": "*",
+        "@stamhoofd/vite-config": "workspace:*",
+        "eslint-plugin-stamhoofd": "workspace:*",
         "vite": "8.3.1"
     }
 }

@@ -11,14 +11,14 @@
     },
     "dependencies": {
         "@nuxt/content": "3.16.0",
-        "@stamhoofd/assets": "*",
-        "@stamhoofd/scss": "*",
+        "@stamhoofd/assets": "workspace:*",
+        "@stamhoofd/scss": "workspace:*",
         "docus": "5.13.0",
         "better-sqlite3": "12.11.1",
         "nuxt": "4.5.2"
     },
     "devDependencies": {
-        "eslint-plugin-stamhoofd": "*",
+        "eslint-plugin-stamhoofd": "workspace:*",
         "sass": "1.105.0",
         "vite-svg-2-webfont": "8.3.0"
     }

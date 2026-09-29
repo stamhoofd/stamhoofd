@@ -32,7 +32,7 @@
         "commander": "13.1.0",
         "dotenv": "16.6.1",
         "eslint": "10.10.0",
-        "eslint-plugin-stamhoofd": "*",
+        "eslint-plugin-stamhoofd": "workspace:*",
         "fast-xml-parser": "5.11.1",
         "openai": "4.104.0",
         "typescript": "5.9.3",

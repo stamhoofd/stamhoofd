@@ -8,18 +8,18 @@
         "typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {
-        "@stamhoofd/assets": "*",
-        "@stamhoofd/frontend-i18n": "*",
-        "@stamhoofd/networking": "*",
-        "@stamhoofd/structures": "*",
-        "@stamhoofd/types": "*",
-        "@stamhoofd/utility": "*",
+        "@stamhoofd/assets": "workspace:*",
+        "@stamhoofd/frontend-i18n": "workspace:*",
+        "@stamhoofd/networking": "workspace:*",
+        "@stamhoofd/structures": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "buffer": "6.0.3",
         "pdfkit": "0.20.2",
         "qrcode": "1.5.4"
     },
     "devDependencies": {
         "@types/qrcode": "1.5.6",
-        "eslint-plugin-stamhoofd": "*"
+        "eslint-plugin-stamhoofd": "workspace:*"
     }
 }

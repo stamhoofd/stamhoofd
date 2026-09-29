@@ -51,13 +51,13 @@
         "vitest": "4.1.11"
     },
     "peerDependencies": {
-        "@stamhoofd/backend-i18n": "*",
-        "@stamhoofd/email": "*",
-        "@stamhoofd/queues": "*",
-        "@stamhoofd/sql": "*",
-        "@stamhoofd/structures": "*",
-        "@stamhoofd/types": "*",
-        "@stamhoofd/utility": "*",
+        "@stamhoofd/backend-i18n": "workspace:*",
+        "@stamhoofd/email": "workspace:*",
+        "@stamhoofd/queues": "workspace:*",
+        "@stamhoofd/sql": "workspace:*",
+        "@stamhoofd/structures": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "mysql2": "3.24.4"
     },
     "license": "UNLICENCED",

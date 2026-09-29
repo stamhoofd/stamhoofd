@@ -12,22 +12,22 @@
     },
     "dependencies": {
         "@simonbackx/simple-database": "1.40.1",
-        "@stamhoofd/backend": "*",
-        "@stamhoofd/backend-i18n": "*",
-        "@stamhoofd/cli": "*",
-        "@stamhoofd/email": "*",
-        "@stamhoofd/models": "*",
-        "@stamhoofd/structures": "*",
-        "@stamhoofd/types": "*",
-        "@stamhoofd/utility": "*",
+        "@stamhoofd/backend": "workspace:*",
+        "@stamhoofd/backend-i18n": "workspace:*",
+        "@stamhoofd/cli": "workspace:*",
+        "@stamhoofd/email": "workspace:*",
+        "@stamhoofd/models": "workspace:*",
+        "@stamhoofd/structures": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "@simonbackx/simple-encoding": "*",
         "pino": "10.1.1",
         "mysql2": "3.24.4"
     },
     "devDependencies": {
         "@playwright/test": "1.60.0",
-        "@stamhoofd/test-utils": "*",
-        "eslint-plugin-stamhoofd": "*",
+        "@stamhoofd/test-utils": "workspace:*",
+        "eslint-plugin-stamhoofd": "workspace:*",
         "nock": "14.0.16",
         "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
     }
