@@ -7,7 +7,8 @@ import { run, RunVerbosity } from '../../runtime/command-runner.js';
 import { writeOutputLine } from '../../runtime/output-target.js';
 import { announceRelease } from '../../runtime/release-announcement.js';
 import { composeReleaseNotesBody } from '../../runtime/release-notes-translator.js';
-import { buildReleaseNotes, getPreviousVersionTag, getReleaseVersion, getRepositorySlug, renderReleaseNotes } from '../../runtime/release-notes.js';
+import { buildReleaseNotes, getPreviousVersionTag, getRepositorySlug, renderReleaseNotes } from '../../runtime/release-notes.js';
+import { getReleaseVersion } from '../../runtime/release-version.js';
 import { resolveSlackConfig } from '../../runtime/slack.js';
 import { info, success, warning } from '../../runtime/ux.js';
 
@@ -21,7 +22,7 @@ export default class ReleasePublish extends Command {
     ];
 
     static flags = {
-        'tag': Flags.string({ description: 'Tag to publish a release for. Defaults to v<lerna.json version>.' }),
+        'tag': Flags.string({ description: 'Tag to publish a release for. Defaults to the version of the publishable packages.' }),
         'from': Flags.string({ description: 'Previous tag to compare against. Defaults to the preceding version tag.' }),
         'dry-run': Flags.boolean({ description: 'Print the release notes instead of creating the GitHub release.', default: false }),
         'no-slack': Flags.boolean({ description: 'Skip announcing the release in the Slack #development channel.', default: false }),
