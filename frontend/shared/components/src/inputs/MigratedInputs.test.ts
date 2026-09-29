@@ -49,7 +49,7 @@ function renderInput(component: any, props: Record<string, unknown> = {}, slots?
             },
             config: {
                 globalProperties: {
-                    $t: (value: string) => value,
+                    $t: (globalThis as any).$t,
                     $isMobile: false,
                 } as any,
             },

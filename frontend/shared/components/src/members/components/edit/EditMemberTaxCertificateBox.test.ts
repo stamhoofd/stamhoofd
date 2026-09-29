@@ -76,7 +76,7 @@ function renderBox(options: TestOptions = {}) {
             },
             config: {
                 globalProperties: {
-                    $t: (value: string) => value,
+                    $t: (globalThis as any).$t,
                     formatDate: (date: Date) => date.toISOString(),
                 } as any,
             },

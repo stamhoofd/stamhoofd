@@ -14,7 +14,7 @@ function renderAddressInput(props: Record<string, unknown>) {
         global: {
             config: {
                 globalProperties: {
-                    $t: (value: string) => value,
+                    $t: (globalThis as any).$t,
                 } as any,
             },
         },
@@ -95,7 +95,7 @@ test('updates a real parent model while the user completes each address field', 
         global: {
             config: {
                 globalProperties: {
-                    $t: (value: string) => value,
+                    $t: (globalThis as any).$t,
                 } as any,
             },
         },
