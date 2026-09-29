@@ -8,6 +8,7 @@ packages:
   - '.development/*'
   - 'docs'
 
+verifyDepsBeforeRun: false
 linkWorkspacePackages: true
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
