@@ -6,7 +6,7 @@ https://app.notion.com/p/Getting-started-20cc403f36798075b190c84c2c21d1ec — en
 
 ## Structure & architecture
 
-pnpm monorepo (Lerna + workspaces). Node.js + TypeScript backend · Vue 3 + Vite + Capacitor frontend.
+pnpm workspaces + Turborepo monorepo. Node.js + TypeScript backend · Vue 3 + Vite + Capacitor frontend.
 
 - `shared/*` — packages used by frontend + backend. `shared/structures` (`@stamhoofd/structures`) defines all data structures as versioned AutoEncoders (`@simonbackx/simple-encoding`): the single source of truth for API bodies and localStorage. `shared/locales` — i18n.
 - `backend/app/*` — `api` (main API server), `renderer`, `backup`, `redirecter`. `backend/shared/*` — backend-only packages (`models` = database models, `sql`, `email`, ...).
@@ -42,7 +42,7 @@ Backend uses a custom router (`@simonbackx/simple-endpoints`), **not Express**: 
 
 Shared builds use `^build` for normal dependencies and explicit task dependencies for internal peers and global type declarations. Turbo does not include peer dependencies in `^build`. Frontend source packages have dependency cycles: do not enable `^build` globally. Application builds, Playwright builds, tests, migrations, lint and typecheck are uncached; development tasks are persistent and uncached.
 
-`pnpm run build:shared` runs the shared Turbo graph. For a narrower build use `pnpm exec turbo run build --filter='./shared/*'` or `--filter='./backend/shared/*'`; prerequisites are included automatically. The old `build:global:shared` and `build:backend:shared` aliases have been removed. CI still uploads and downloads `shared-dist`: a checkout-local cache does not transfer outputs between jobs. Lerna remains installed only for fixed versioning and npm publication.
+`pnpm run build:shared` runs the shared Turbo graph. For a narrower build use `pnpm exec turbo run build --filter='./shared/*'` or `--filter='./backend/shared/*'`; prerequisites are included automatically. The old `build:global:shared` and `build:backend:shared` aliases have been removed. CI still uploads and downloads `shared-dist`: a checkout-local cache does not transfer outputs between jobs. Fixed versioning and npm publication use `pnpm stam-dev release version` and `pnpm stam-dev release packages`.
 
 `pnpm stam dev` runs API, renderer, statistics syncer, web-app, and webshop development scripts through explicit Turbo filters. These tasks are persistent and uncached. Development uses Turbo's loose environment mode so the CLI-generated backend, frontend, and Stripe environment reaches package processes. The docs server remains a direct Nuxt process because it does not consume shared build output.
 
