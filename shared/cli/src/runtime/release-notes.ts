@@ -1,5 +1,3 @@
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
 import { run, RunVerbosity } from './command-runner.js';
 
 export type Commit = {
@@ -269,16 +267,6 @@ export async function buildReleaseNotes(cwd: string, options: { from?: string; t
         commits,
         sections: groupCommits(commits),
     };
-}
-
-/** Reads the version that is being released. Lerna keeps this in lerna.json (fixed mode). */
-export async function getReleaseVersion(cwd: string): Promise<string> {
-    const raw = await readFile(join(cwd, 'lerna.json'), 'utf8');
-    const parsed = JSON.parse(raw) as { version?: string };
-    if (!parsed.version || parsed.version === 'independent') {
-        throw new Error('No fixed version found in lerna.json');
-    }
-    return parsed.version;
 }
 
 /** Parses "owner/repo" out of the origin remote URL (https or ssh form). */
