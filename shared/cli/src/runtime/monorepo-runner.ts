@@ -18,6 +18,7 @@ const globalSharedPackages = [
     'shared/test-utils',
     'shared/utility',
     'shared/metabase',
+    '.development/i18n-uuid',
     'shared/cli',
     'shared/excel-writer',
     'shared/structures',
