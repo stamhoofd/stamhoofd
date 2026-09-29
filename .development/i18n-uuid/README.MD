@@ -7,6 +7,8 @@ This module:
 
 ## commands
 
+Run commands from the repository root with `pnpm stam-dev translate <command>`. The CLI builds this library before invoking its functions. Run `pnpm stam-dev translate` for the standard keys → compress → machine pipeline.
+
 ### start
 Executes all commands in order. The arguments of each command can be passed.
 
@@ -14,9 +16,9 @@ Executes all commands in order. The arguments of each command can be passed.
 Search untranslated text in Vue templates and replaces them with a translation function.
 
 #### arguments
-- `--commits <commits...>`: Git commits to compare
+- `--commits <commit>`: Git commit to compare (repeat the flag to compare two commits).
 - `-c, --changes`: Only the changed files will be checked.
-- `--attribute-white-list <attributes...>`: Array of html attributes to white list. Text of other attributes will not be checked.
+- `--attribute-white-list <attribute>`: HTML attribute to white list (repeat the flag for multiple attributes). Text of other attributes will not be checked.
 - `--dry-run`: Do not write the translated files.
 - `-p, --prompt`: The prompt will show the code before and after the replacement and ask to accept the change.
 - `-f, --fix`: Fix the changed files with ESLint (can be slow).
@@ -32,7 +34,7 @@ Finds missing or changed translations and translate with an Ai-model.
 #### arguments
 - `--fake`: Translate the misssing translations with a fake translation (for testing purposes).
 - `--translator <translator-type>`: The translator type (GoogleGemini, MistralLarge, MistralSmall, OpenAi or Claude).
-- `--locales <locales...>`: Specify the locals to translate (by default translations for all locals will be added).
+- `--locales <locale>`: Specify a locale to translate (repeat the flag for multiple locales; by default all locales are translated).
 
 ### loop-invalid-auto-translations
 Loop all invalid auto translations. Choose with a prompt if the translation is correct. If the translation is correct it will be added to the translations and removed from the auto translations, if not it will be removed from the machine translations. In case of doubt (key 'd'), the translation will remain in the machine translations.
