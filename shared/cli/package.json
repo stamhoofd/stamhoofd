@@ -36,6 +36,7 @@
         "@stamhoofd/stdsync": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "chalk": "5.6.2",
+        "i18n-uuid": "workspace:*",
         "openai": "4.104.0",
         "ora": "9.4.1",
         "terminal-link": "4.0.0"
