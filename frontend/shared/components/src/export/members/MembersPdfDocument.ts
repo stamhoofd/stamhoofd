@@ -23,14 +23,8 @@ export class MembersPdfDocument {
     }
 
     private async createDoc(): Promise<PDFKit.PDFDocument> {
-        const PDFDocument = (await import('pdfkit')).default;
-        return new PDFDocument({
-            size: 'A4',
-            margin: pageMargin,
-            bufferPages: true,
-            // pdfkit's browser build ships no standard fonts: null skips loading Helvetica (@types/pdfkit predates this)
-            font: null as unknown as string,
-        });
+        const PDFDocument = (await import('pdfkit/js/pdfkit.standalone')).default;
+        return new PDFDocument({ size: 'A4', margin: pageMargin, bufferPages: true });
     }
 
     private async render() {

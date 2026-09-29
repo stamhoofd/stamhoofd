@@ -54,7 +54,7 @@
         "jsvat-next": "3.0.4",
         "libphonenumber-js": "1.13.14",
         "luxon": "3.7.2",
-        "pdfkit": "0.20.2",
+        "pdfkit": "0.19.1",
         "qrcode": "1.5.4",
         "sortablejs": "1.15.7",
         "sortablejs-vue3": "1.3.0",
