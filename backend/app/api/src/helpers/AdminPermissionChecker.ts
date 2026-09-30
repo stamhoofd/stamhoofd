@@ -4,6 +4,7 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, User } from '@stamhoofd/models';
 import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Webshop } from '@stamhoofd/models';
 import type { GroupCategory, MemberWithRegistrationsBlob, Platform as PlatformStruct, RecordAnswer, RecordSettings, RegistrationPeriodBase, ResourcePermissions } from '@stamhoofd/structures';
+import { MemberResponsibilityRecord as MemberResponsibilityRecordStruct } from '@stamhoofd/structures';
 import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPeriodHelper, EventPermissionChecker, FinancialSupportSettings, GroupStatus, GroupType, PermissionLevel, PermissionsResourceKey, PermissionsResourceType, ReceivableBalanceType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { MemberResponsibilityRecord } from '@stamhoofd/models';
 import { Formatter } from '@stamhoofd/utility';
@@ -182,7 +183,7 @@ export class AdminPermissionChecker {
     }
 
     error(humanOrData?: string | { message: string; human?: string }): SimpleError {
-        const human = typeof humanOrData === 'string' ? humanOrData : (humanOrData?.human ?? $t(`%Fg`));
+        const human = typeof humanOrData === 'string' ? humanOrData : (humanOrData?.human ?? $t('%Fg'));
         const message = typeof humanOrData === 'string' ? humanOrData : (humanOrData?.message ?? 'You do not have permissions for this action');
 
         return new SimpleError({
@@ -201,7 +202,7 @@ export class AdminPermissionChecker {
         return new SimpleError({
             code: 'not_found',
             message: 'Resource not found or no access',
-            human: message ?? $t(`%Fh`),
+            human: message ?? $t('%Fh'),
             statusCode: 404,
         });
     }
@@ -1071,20 +1072,23 @@ export class AdminPermissionChecker {
         const rows = await SQL.select()
             .from(SQL.table(MemberResponsibilityRecord.table))
             .where(SQL.column('memberId'), memberIds)
-            .where(SQL.column('endDate'), null)
+            .andWhere(
+                SQL.where(SQL.column('endDate'), null)
+                    .or(SQL.column('endDate'), '>', new Date()),
+            )
             .fetch();
 
-        return MemberResponsibilityRecord.fromRows(rows, MemberResponsibilityRecord.table);
+        return MemberResponsibilityRecord.fromRows(rows, MemberResponsibilityRecord.table).map(r =>
+            MemberResponsibilityRecordStruct.create(r),
+        );
     }
 
-    async canEditMemberEmailAddresses(member: MemberWithUsersRegistrationsAndGroups) {
+    async canEditMemberEmailAddresses(member: MemberWithUsersRegistrationsAndGroups, responsibilities?: MemberResponsibilityRecordStruct[]) {
         if (member.users.some(u => u.id === this.user.id)) return true;
 
-        const responsibilities = member.id
-            ? (
-                    await this.getResponsibilitiesForMembers([member.id])
-                )
-            : [];
+        if (!responsibilities) {
+            responsibilities = await this.getResponsibilitiesForMembers([member.id]);
+        }
 
         for (const { organizationId } of responsibilities) {
             if (organizationId === null) {
@@ -1926,7 +1930,7 @@ export class AdminPermissionChecker {
             }
         }
 
-        if (!(await this.canAccessMember(member, PermissionLevel.Write)) || !(await this.canEditMemberEmailAddresses(member))) {
+        if (!(await this.canAccessMember(member, PermissionLevel.Write)) || !(await this.canEditMemberEmailAddresses(member, data.responsibilities))) {
             cloned.details.securityCode = null;
         }
 
@@ -1995,7 +1999,9 @@ export class AdminPermissionChecker {
                         data.details.securityCode = undefined;
                     }
                 }
+            }
 
+            if (!hasFullAccess) {
                 if (data.details.trackingYear !== undefined) {
                     // Unset silently
                     data.details.trackingYear = undefined;
@@ -2017,15 +2023,20 @@ export class AdminPermissionChecker {
             }
         }
 
+        const clonedDetails = member.details.clone();
+        clonedDetails.patchOrPut(data.details);
+
         if (
             data.details.email !== undefined
             || Array.isArray(data.details.alternativeEmails)
             || data.details.alternativeEmails.changes.length > 0
+            || clonedDetails.getParentEmails().join('\n') !== member.details.getParentEmails().join('\n')
         ) {
             if (!await this.canEditMemberEmailAddresses(member)) {
                 throw new SimpleError({
                     code: 'permission_denied',
-                    message: $t('Je hebt geen toegangsrechten om de emailadressen van deze gebruiker aan te passen'),
+                    message: "You don't have access to change the emailaddresses of this user.",
+                    human: $t('Je hebt geen toegangsrechten om de emailadressen van deze gebruiker aan te passen'),
                     statusCode: 400,
                 });
             }
