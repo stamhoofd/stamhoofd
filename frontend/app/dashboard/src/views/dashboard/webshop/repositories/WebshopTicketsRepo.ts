@@ -52,10 +52,9 @@ export class WebshopTicketsRepo {
 
         const promises: Promise<void>[] = [];
 
-        const toast = new Toast($t(`Tickets ophalen...`), 'spinner').setHide(null);
-        let showToast = false;
+        const toast = new Toast($t('Tickets ophalen...'), 'spinner').setHide(null);
         const timer = setTimeout(() => {
-            if (showToast) toast.show();
+            toast.show();
         }, 1500);
 
         const onResultsReceived = async (tickets: TicketPrivate[]): Promise<void> => {
@@ -67,7 +66,6 @@ export class WebshopTicketsRepo {
         };
 
         await this.apiClient.getAllUpdated({ isFetchAll: false, onResultsReceived, onProgress(count, total) {
-            if (!showToast && count > 100) showToast = true;
             toast.setProgress(total !== 0 ? (count / total) : 0);
         } });
 
@@ -620,7 +618,7 @@ class WebshopTicketsApiClient {
             fetch: async (data: LimitedFilteredRequest) => {
                 const response = await this.context.authenticatedServer.request({
                     method: 'GET',
-                    path: `/webshop/tickets/private`,
+                    path: '/webshop/tickets/private',
                     decoder: new PaginatedResponseDecoder(new ArrayDecoder(TicketPrivate as Decoder<TicketPrivate>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
                     query: data,
                     shouldRetry: false,
@@ -632,7 +630,7 @@ class WebshopTicketsApiClient {
             fetchCount: async (data: CountFilteredRequest): Promise<number> => {
                 const response = await this.context.authenticatedServer.request({
                     method: 'GET',
-                    path: `/webshop/tickets/private/count`,
+                    path: '/webshop/tickets/private/count',
                     decoder: CountResponse as Decoder<CountResponse>,
                     query: data,
                     shouldRetry: false,
