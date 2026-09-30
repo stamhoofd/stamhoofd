@@ -91,7 +91,7 @@ export class WebshopOrdersRepo {
         const toast = new Toast($t('Bestellingen ophalen...'), 'spinner').setHide(null);
         let showToast = false;
         const timer = setTimeout(() => {
-            if (showToast) toast.show();
+            toast.show();
         }, 1000);
 
         const onResultsReceived = async (orders: PrivateOrder[]) => {

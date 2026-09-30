@@ -73,7 +73,7 @@ export class WebshopTicketsRepo {
         const toast = new Toast($t('Tickets ophalen...'), 'spinner').setHide(null);
         let showToast = false;
         const timer = setTimeout(() => {
-            if (showToast) toast.show();
+            toast.show();
         }, 1500);
 
         const onResultsReceived = async (tickets: TicketPrivate[]): Promise<void> => {
