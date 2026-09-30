@@ -25,7 +25,7 @@ if command -v fnm >/dev/null 2>&1; then
     fnm_status=$?
     cd "$original_dir" || return 1
 
-    unset original_dir fnm_status nvmrc_path repo_dir
+    unset original_dir nvmrc_path repo_dir
     unset -f find_nvmrc
     return "$fnm_status"
 fi
