@@ -84,10 +84,9 @@ export class WebshopOrdersRepo {
 
         const promises: Promise<void>[] = [];
 
-        const toast = new Toast($t(`Bestellingen ophalen...`), 'spinner').setHide(null);
-        let showToast = false;
+        const toast = new Toast($t('Bestellingen ophalen...'), 'spinner').setHide(null);
         const timer = setTimeout(() => {
-            if (showToast) toast.show();
+            toast.show();
         }, 1000);
 
         const onResultsReceived = async (orders: PrivateOrder[]) => {
@@ -105,7 +104,6 @@ export class WebshopOrdersRepo {
         };
 
         await this.apiClient.getAllUpdated({ isFetchAll, onResultsReceived, onProgress(count, total) {
-            if (!showToast && count > 100) showToast = true;
             toast.setProgress(total !== 0 ? (count / total) : 0);
         } });
 
@@ -615,7 +613,7 @@ class WebshopOrdersApiClient {
             fetch: async (data: LimitedFilteredRequest) => {
                 const response = await this.context.authenticatedServer.request({
                     method: 'GET',
-                    path: `/webshop/orders`,
+                    path: '/webshop/orders',
                     decoder: new PaginatedResponseDecoder(new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
                     query: data,
                     shouldRetry: false,
@@ -627,7 +625,7 @@ class WebshopOrdersApiClient {
             fetchCount: async (data: CountFilteredRequest): Promise<number> => {
                 const response = await this.context.authenticatedServer.request({
                     method: 'GET',
-                    path: `/webshop/orders/count`,
+                    path: '/webshop/orders/count',
                     decoder: CountResponse as Decoder<CountResponse>,
                     query: data,
                     shouldRetry: false,
