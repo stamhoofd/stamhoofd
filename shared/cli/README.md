@@ -78,7 +78,7 @@ Development sessions use explicit Turbo filters for the API, renderer, statistic
 
 `pnpm stam build` uses those same five executable app owners after the shared build. Dashboard and registration are source packages bundled by web-app. The root backend build explicitly selects API, renderer, backup, redirecter, and statistics syncer. Database migrations invoke the API and statistics-syncer owners serially.
 
-Task orchestration uses pnpm, Turbo, and `stam`. Lerna remains installed only for fixed versioning and npm publication until release tooling is migrated.
+Task orchestration uses pnpm, Turbo, and `stam`. `pnpm ship` bumps the fixed version of all publishable packages, commits and pushes the version tag, publishes unpublished packages with pnpm, and publishes the GitHub release notes. To retry an interrupted npm or notes publication, use `pnpm run ship:fix`. The individual steps are also available through `pnpm stam-dev release version`, `pnpm stam-dev release packages`, and `pnpm stam-dev release publish`.
 
 The root and `stam check` lint and typecheck commands use Turbo to select all package scripts. These checks are intentionally uncached because backend TypeScript configurations can emit build metadata and declarations. A failure in any package fails the root command.
 
