@@ -1,11 +1,12 @@
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { GetEmailRecipientsEndpoint } from './GetEmailRecipientsEndpoint.js';
-import { AccessRight, EmailStatus, LimitedFilteredRequest, OrganizationEmail, PermissionLevel, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
+import { AccessRight, EmailStatus, LimitedFilteredRequest, OrganizationEmail, PermissionLevel, Permissions, PermissionsResourceKey, PermissionsResourceType, Replacement, ResourcePermissions } from '@stamhoofd/structures';
 import type { Organization, RegistrationPeriod, User, Token } from '@stamhoofd/models';
 import { Email, EmailRecipient, OrganizationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { Request } from '@simonbackx/simple-endpoints';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { SessionService } from '../../../services/SessionService.js';
+import { vi } from 'vitest';
 
 const baseUrl = `/email-recipients`;
 
@@ -390,5 +391,59 @@ describe('Endpoint.GetEmailRecipients', () => {
         await expect(testServer.test(endpoint, request))
             .rejects
             .toThrow(STExpect.errorWithCode('permission_denied'));
+    });
+
+    test('It masks secrets in stored replacements', async () => {
+        const email = new Email();
+        email.subject = 'test subject';
+        email.status = EmailStatus.Sent;
+        email.text = '{{loginDetails}} {{unsubscribeUrl}}';
+        email.html = '<p>{{loginDetails}} {{unsubscribeUrl}}</p>';
+        email.json = {};
+        email.organizationId = organization.id;
+        email.senderId = sender.id;
+        await email.save();
+
+        const emailRecipient = new EmailRecipient();
+        emailRecipient.email = 'jan.janssens@geenemail.com';
+        emailRecipient.emailId = email.id;
+        emailRecipient.organizationId = organization.id;
+        emailRecipient.sentAt = new Date();
+        emailRecipient.replacements = [
+            Replacement.create({
+                token: 'loginDetails',
+                value: '',
+                html: '<span class="style-inline-code">AAAA-BBBB-CCCC-DDDD</span>',
+            }),
+            Replacement.create({
+                token: 'unsubscribeUrl',
+                value: 'https://example.com/unsubscribe?token=secret-token-12345',
+            }),
+        ];
+
+        // Rows saved before loginDetails was removed on save still contain security codes
+        const spy = vi.spyOn(EmailRecipient, 'removeUnstoredReplacements').mockImplementation(r => r);
+        await emailRecipient.save();
+        spy.mockRestore();
+
+        const request = Request.get({
+            path: baseUrl,
+            host: organization.getApiHost(),
+            query: new LimitedFilteredRequest({
+                filter: {
+                    emailId: email.id,
+                },
+                limit: 10,
+            }),
+            headers: {
+                authorization: 'Bearer ' + token.accessToken,
+            },
+        });
+        const result = await testServer.test(endpoint, request);
+        expect(result.body.results).toHaveLength(1);
+
+        const serialized = JSON.stringify(result.body.results[0].replacements);
+        expect(serialized).not.toContain('AAAA-BBBB-CCCC-DDDD');
+        expect(serialized).not.toContain('secret-token-12345');
     });
 });

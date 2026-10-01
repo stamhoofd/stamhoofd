@@ -7,6 +7,7 @@ import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { GetAdminEmailsEndpoint } from './GetAdminEmailsEndpoint.js';
 import { Formatter } from '@stamhoofd/utility';
 import { SessionService } from '../../../services/SessionService.js';
+import { vi } from 'vitest';
 
 const baseUrl = `/email`;
 
@@ -113,7 +114,10 @@ describe('Endpoint.getAdminEmails', () => {
             }),
         ];
 
+        // Rows saved before loginDetails was removed on save still contain security codes
+        const spy = vi.spyOn(EmailRecipient, 'removeUnstoredReplacements').mockImplementation(r => r);
         await sensitiveRecipient.save();
+        spy.mockRestore();
 
         // Search specifically for this email to avoid interference from other tests
         const searchQuery = new LimitedFilteredRequest({

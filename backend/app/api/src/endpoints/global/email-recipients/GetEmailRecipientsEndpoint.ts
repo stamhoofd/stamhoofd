@@ -6,9 +6,9 @@ import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse, P
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailRecipient } from '@stamhoofd/models';
-import { fillRecipientReplacements } from '../../../helpers/EmailBuilder.js';
 import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 import { emailRecipientsFilterCompilers } from '../../../sql-filters/email-recipients.js';
 import { emailRecipientSorters } from '../../../sql-sorters/email-recipients.js';
@@ -130,18 +130,7 @@ export class GetEmailRecipientsEndpoint extends Endpoint<Params, Query, Body, Re
         }
 
         return new PaginatedResponse<EmailRecipientStruct[], LimitedFilteredRequest>({
-            results: await Promise.all((await EmailRecipient.getStructures(recipients)).map(async (r) => {
-                const rr = r.getRecipient();
-                await fillRecipientReplacements(rr, {
-                    organization: Context.organization ?? null,
-                    from: null,
-                    replyTo: null,
-                    forPreview: true,
-                    forceRefresh: false,
-                });
-                r.replacements = rr.replacements;
-                return r;
-            })),
+            results: await AuthenticatedStructures.emailRecipients(recipients),
             next,
         });
     }
