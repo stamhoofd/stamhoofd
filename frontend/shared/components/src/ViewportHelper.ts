@@ -243,7 +243,10 @@ export class ViewportHelper {
         return 0;
     }
 
-    static scrollIntoView(element: HTMLElement, align: 'top' | 'bottom' | 'center' = 'bottom', skipIfAlreadyVisible = true) {
+    /**
+     * Resolves when the scroll animation finished (or was skipped or interrupted)
+     */
+    static async scrollIntoView(element: HTMLElement, align: 'top' | 'bottom' | 'center' = 'bottom', skipIfAlreadyVisible = true): Promise<void> {
         // default scrollIntoView is broken on Safari and sometimes causes the scrollview to scroll too far and get stuck
         const scrollElement = ViewportHelper.getScrollElement(element);
         const elRect = element.getBoundingClientRect();
@@ -306,7 +309,7 @@ export class ViewportHelper {
             return x === 1 ? 1 : 1 - Math.pow(1.5, -20 * x);
         };
 
-        ViewportHelper.scrollTo(scrollElement, scrollPosition, Math.min(600, Math.max(300, Math.abs(element.scrollTop - scrollPosition) / 2)), exponential);
+        await ViewportHelper.scrollTo(scrollElement, scrollPosition, Math.min(600, Math.max(300, Math.abs(element.scrollTop - scrollPosition) / 2)), exponential);
     }
 
     static scrollXIntoView(element: HTMLElement, align: 'left' | 'right' | 'center' = 'left', skipIfAlreadyVisible = true) {
@@ -398,8 +401,12 @@ export class ViewportHelper {
     /**
      * Smooth scroll polyfill for Safari
      */
-    static scrollTo(element: HTMLElement, endPosition: number, duration: number, easingFunction: (t: number) => number) {
+    static scrollTo(element: HTMLElement, endPosition: number, duration: number, easingFunction: (t: number) => number): Promise<void> {
         const index = this.increaseIndex(element);
+        let resolve!: () => void;
+        const finished = new Promise<void>((r) => {
+            resolve = r;
+        });
         let start: number;
         let previousTimeStamp: number;
 
@@ -414,6 +421,7 @@ export class ViewportHelper {
         // animate scrollTop of element to zero
         const step = (timestamp: number) => {
             if (this.shouldStopScrolling(element, index)) {
+                resolve();
                 return;
             }
 
@@ -427,6 +435,7 @@ export class ViewportHelper {
                 element.style.overflow = '';
                 element.style.willChange = '';
                 (element.style as any).webkitOverflowScrolling = '';
+                resolve();
                 return;
             }
 
@@ -445,10 +454,12 @@ export class ViewportHelper {
                 element.style.overflow = '';
                 element.style.willChange = '';
                 (element.style as any).webkitOverflowScrolling = '';
+                resolve();
             }
         };
 
         window.requestAnimationFrame(step);
+        return finished;
     }
 
     /**
