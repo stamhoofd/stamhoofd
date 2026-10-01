@@ -2019,20 +2019,26 @@ export class AdminPermissionChecker {
         }
 
         const details = data.details;
-        const willParentEmailsChange = () => {
-            if (isEmptyPatch(details.parents)) {
+        const willLinkedEmailsChange = () => {
+            if (isEmptyPatch(details.parents) && isEmptyPatch(details.unverifiedEmails)) {
                 return false;
             }
             const patchedDetails = member.details.clone();
             patchedDetails.patchOrPut(details);
-            return patchedDetails.getParentEmails().join('\n') !== member.details.getParentEmails().join('\n');
+
+            if (patchedDetails.getParentEmails().join('\n') !== member.details.getParentEmails().join('\n')) {
+                return true;
+            }
+
+            // Removing unverified emails only revokes access
+            return patchedDetails.unverifiedEmails.some(email => !member.details.unverifiedEmails.includes(email));
         };
 
         if (
             data.details.email !== undefined
             || Array.isArray(data.details.alternativeEmails)
             || data.details.alternativeEmails.changes.length > 0
-            || willParentEmailsChange()
+            || willLinkedEmailsChange()
         ) {
             if (!await getCanEditEmailAddresses()) {
                 throw this.error({

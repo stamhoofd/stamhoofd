@@ -1294,6 +1294,46 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             expect(fullResponse.body.members[0].details.securityCode).toBe('ABCD1234WXYZ5678');
         });
 
+        test('A non-full admin can remove, but not add unverified emails of a member with a function', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const group = await new GroupFactory({ organization }).create();
+
+            const admin = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Write }),
+                organization,
+            }).create();
+
+            const member = await new MemberFactory({
+                details: MemberDetails.create({ firstName, lastName, unverifiedEmails: ['old@example.com'] }),
+            }).create();
+            await new RegistrationFactory({ member, group }).create();
+            await addResponsibility(member, PermissionLevel.Full, organization.id);
+
+            const patchUnverifiedEmails = async (unverifiedEmails: PatchableArray<string, string, string>) => {
+                const token = await SessionService.createSession(admin);
+                const arr: Body = new PatchableArray();
+                arr.addPatch(MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ unverifiedEmails }),
+                }));
+
+                const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                request.headers.authorization = 'Bearer ' + token.accessToken;
+                return await testServer.test(endpoint, request);
+            };
+
+            const add = new PatchableArray<string, string, string>();
+            add.addPut('attacker@example.com');
+            await expect(patchUnverifiedEmails(add))
+                .rejects
+                .toThrow(STExpect.simpleError({ code: 'permission_denied', statusCode: 403 }));
+
+            const remove = new PatchableArray<string, string, string>();
+            remove.addDelete('old@example.com');
+            const response = await patchUnverifiedEmails(remove);
+            expect(response.body.members[0].details.unverifiedEmails).toEqual([]);
+        });
+
         describe('Duplicate members', () => {
             let memberCount = 0;
 
