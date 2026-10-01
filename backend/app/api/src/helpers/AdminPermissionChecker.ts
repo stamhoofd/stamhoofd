@@ -2,18 +2,16 @@ import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { isEmptyPatch, PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, User } from '@stamhoofd/models';
-import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Webshop } from '@stamhoofd/models';
+import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Webshop } from '@stamhoofd/models';
+import { SQL } from '@stamhoofd/sql';
 import type { GroupCategory, MemberWithRegistrationsBlob, Platform as PlatformStruct, RecordAnswer, RecordSettings, RegistrationPeriodBase, ResourcePermissions } from '@stamhoofd/structures';
-import { MemberResponsibilityRecord as MemberResponsibilityRecordStruct } from '@stamhoofd/structures';
 import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPeriodHelper, EventPermissionChecker, FinancialSupportSettings, GroupStatus, GroupType, PermissionLevel, PermissionsResourceKey, PermissionsResourceType, ReceivableBalanceType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
-import { MemberResponsibilityRecord } from '@stamhoofd/models';
 import { Formatter } from '@stamhoofd/utility';
 import type { RecordCacheEntry } from '../services/MemberRecordStore.js';
 import { MemberRecordStore } from '../services/MemberRecordStore.js';
 import { getFinancialSupportSettingsAsync } from './FinancialSupportHelper.js';
 import { RecordAnswerHelper } from './RecordAnswerHelper.js';
 import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryMemberAccess.js';
-import { SQL } from '@stamhoofd/sql';
 
 /**
  * One class with all the responsabilities of checking permissions to each resource in the system by a given user, possibly in an organization context.
@@ -183,7 +181,7 @@ export class AdminPermissionChecker {
     }
 
     error(humanOrData?: string | { message: string; human?: string }): SimpleError {
-        const human = typeof humanOrData === 'string' ? humanOrData : (humanOrData?.human ?? $t('%Fg'));
+        const human = typeof humanOrData === 'string' ? humanOrData : (humanOrData?.human ?? $t(`%Fg`));
         const message = typeof humanOrData === 'string' ? humanOrData : (humanOrData?.message ?? 'You do not have permissions for this action');
 
         return new SimpleError({
@@ -202,7 +200,7 @@ export class AdminPermissionChecker {
         return new SimpleError({
             code: 'not_found',
             message: 'Resource not found or no access',
-            human: message ?? $t('%Fh'),
+            human: message ?? $t(`%Fh`),
             statusCode: 404,
         });
     }
@@ -1069,18 +1067,10 @@ export class AdminPermissionChecker {
     }
 
     private async getResponsibilitiesForMembers(memberIds: string[]) {
-        const rows = await SQL.select()
-            .from(SQL.table(MemberResponsibilityRecord.table))
-            .where(SQL.column('memberId'), memberIds)
-            .andWhere(
-                SQL.where(SQL.column('endDate'), null)
-                    .or(SQL.column('endDate'), '>', new Date()),
-            )
+        return await MemberResponsibilityRecord.select()
+            .where('memberId', memberIds)
+            .where(SQL.where('endDate', null).or('endDate', '>', new Date()))
             .fetch();
-
-        return MemberResponsibilityRecord.fromRows(rows, MemberResponsibilityRecord.table).map(r =>
-            MemberResponsibilityRecordStruct.create(r),
-        );
     }
 
     async canEditMemberEmailAddresses(member: MemberWithUsers, responsibilities?: { organizationId: string | null }[]) {
