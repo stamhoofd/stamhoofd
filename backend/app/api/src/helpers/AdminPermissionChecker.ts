@@ -2045,11 +2045,9 @@ export class AdminPermissionChecker {
             || willParentEmailsChange()
         ) {
             if (!await getCanEditEmailAddresses()) {
-                throw new SimpleError({
-                    code: 'permission_denied',
+                throw this.error({
                     message: "You don't have access to change the emailaddresses of this user.",
                     human: $t('Je hebt geen toegangsrechten om de emailadressen van deze gebruiker aan te passen'),
-                    statusCode: 400,
                 });
             }
         }

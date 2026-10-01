@@ -1010,7 +1010,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 .rejects
                 .toThrow(STExpect.simpleError({
                     code: 'permission_denied',
-                    statusCode: 400,
+                    statusCode: 403,
                 }));
         });
 
@@ -1054,7 +1054,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 .rejects
                 .toThrow(STExpect.simpleError({
                     code: 'permission_denied',
-                    statusCode: 400,
+                    statusCode: 403,
                 }));
         });
 
@@ -1100,7 +1100,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 .rejects
                 .toThrow(STExpect.simpleError({
                     code: 'permission_denied',
-                    statusCode: 400,
+                    statusCode: 403,
                 }));
         });
 
@@ -1136,7 +1136,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 .rejects
                 .toThrow(STExpect.simpleError({
                     code: 'permission_denied',
-                    statusCode: 400,
+                    statusCode: 403,
                 }));
         });
 
