@@ -151,4 +151,28 @@ describe('Endpoint.VerifyEmail', () => {
         expect(refreshed!.verified).toBe(true);
         expect(refreshed!.email).toBe('other@example.com');
     });
+
+    test('parallel wrong guesses cannot exceed the maximum number of tries', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({ organization }).create();
+        const code = await EmailVerificationCode.createFor(user, user.email);
+
+        // Avoid the real code and the '111111' test bypass
+        const wrongCode = ['000000', '000001', '000002'].find(c => c !== code.code)!;
+
+        const guess = (c: string) => testServer.test(endpoint, Request.buildJson('POST', '/verify-email', organization.getApiHost(), {
+            token: code.token,
+            code: c,
+        }));
+
+        const results = await Promise.allSettled(
+            Array.from({ length: EmailVerificationCode.MAX_TRIES * 2 }, () => guess(wrongCode)),
+        );
+        expect(results.every(r => r.status === 'rejected')).toBe(true);
+
+        const stored = await EmailVerificationCode.getByID(code.id);
+        expect(stored!.tries).toBe(EmailVerificationCode.MAX_TRIES);
+
+        await expect(guess(code.code)).rejects.toMatchObject({ code: 'too_many_attempts' });
+    });
 });

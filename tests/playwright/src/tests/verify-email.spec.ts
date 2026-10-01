@@ -152,8 +152,9 @@ async function expectMemberPortal(page: Page, expectedUrl: string) {
     await expect(page).toHaveURL(expectedUrl, { timeout: 15_000 });
 }
 
-async function expectUserVerified(userId: string) {
-    const user = await User.getByID(userId);
+async function expectUserVerified(userId: string | null) {
+    expect(userId).not.toBeNull();
+    const user = await User.getByID(userId!);
     expect(user?.verified).toBe(true);
 }
 

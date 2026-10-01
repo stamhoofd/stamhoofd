@@ -92,7 +92,7 @@ export class VerificationCodeService {
             return;
         }
 
-        const user = await User.getByID(verificationCode.userId);
+        const user = verificationCode.userId ? await User.getByID(verificationCode.userId) : undefined;
         if (!user) {
             return;
         }

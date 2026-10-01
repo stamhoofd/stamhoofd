@@ -68,7 +68,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             });
         }
 
-        const user = await User.getByID(code.userId);
+        const user = code.userId ? await User.getByID(code.userId) : undefined;
 
         if (!user || (user.organizationId !== null && user.organizationId !== (organization?.id ?? null))) {
             throw new SimpleError({
