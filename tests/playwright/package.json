@@ -28,7 +28,7 @@
         "@playwright/test": "1.60.0",
         "@stamhoofd/test-utils": "workspace:*",
         "eslint-plugin-stamhoofd": "workspace:*",
-        "nock": "14.0.16",
+        "nock": "14.0.17",
         "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
     }
 }
