@@ -1,8 +1,9 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { PatchMap } from '@simonbackx/simple-encoding';
+import { isEmptyPatch, PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, User } from '@stamhoofd/models';
-import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Webshop } from '@stamhoofd/models';
+import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Webshop } from '@stamhoofd/models';
+import { SQL } from '@stamhoofd/sql';
 import type { GroupCategory, MemberWithRegistrationsBlob, Platform as PlatformStruct, RecordAnswer, RecordSettings, RegistrationPeriodBase, ResourcePermissions } from '@stamhoofd/structures';
 import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPeriodHelper, EventPermissionChecker, FinancialSupportSettings, GroupStatus, GroupType, PermissionLevel, PermissionsResourceKey, PermissionsResourceType, ReceivableBalanceType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -1065,6 +1066,37 @@ export class AdminPermissionChecker {
         return this.canEditUserName(user);
     }
 
+    private async getResponsibilitiesForMembers(memberIds: string[]) {
+        return await MemberResponsibilityRecord.select()
+            .where('memberId', memberIds)
+            .where(SQL.where('endDate', null).or('endDate', '>', new Date()))
+            .fetch();
+    }
+
+    async canEditMemberEmailAddresses(member: MemberWithUsers, responsibilities?: { organizationId: string | null }[]) {
+        if (member.users.some(u => u.id === this.user.id)) return true;
+
+        if (!responsibilities) {
+            responsibilities = await this.getResponsibilitiesForMembers([member.id]);
+        }
+
+        for (const { organizationId } of responsibilities) {
+            if (organizationId === null) {
+                if (!this.hasPlatformFullAccess()) {
+                    return false;
+                }
+
+                continue;
+            }
+
+            if (!await this.hasFullAccess(organizationId)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     async canAccessEmailTemplate(template: EmailTemplate, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
         if (level === PermissionLevel.Read && !EmailTemplateStruct.isSavedEmail(template.type)) {
             if (template.organizationId === null) {
@@ -1845,7 +1877,7 @@ export class AdminPermissionChecker {
     /**
      * Changes data inline
      */
-    async filterMemberData(member: MemberWithUsersRegistrationsAndGroups, data: MemberWithRegistrationsBlob, options?: { forAdminCartCalculation?: boolean }): Promise<MemberWithRegistrationsBlob> {
+    async filterMemberData(member: MemberWithUsersRegistrationsAndGroups, data: MemberWithRegistrationsBlob, options?: { forAdminCartCalculation?: boolean; responsibilities?: { organizationId: string | null }[] }): Promise<MemberWithRegistrationsBlob> {
         const cloned = data.clone();
 
         await this.loopRecordAnswerSettingsAccess({
@@ -1888,8 +1920,7 @@ export class AdminPermissionChecker {
             }
         }
 
-        // At least write permissions is required for now to obtain the security code
-        if (!(await this.canAccessMember(member, PermissionLevel.Write))) {
+        if (!(await this.canAccessMember(member, PermissionLevel.Write)) || !(await this.canEditMemberEmailAddresses(member, options?.responsibilities))) {
             cloned.details.securityCode = null;
         }
 
@@ -1946,10 +1977,16 @@ export class AdminPermissionChecker {
         const hasNotes = data.details.notes !== undefined;
         const isSetFinancialSupportTrue = data.details.didSetManualFinancialSupport;
 
+        let canEditEmailAddresses: boolean | undefined;
+        const getCanEditEmailAddresses = async () => {
+            canEditEmailAddresses ??= await this.canEditMemberEmailAddresses(member);
+            return canEditEmailAddresses;
+        };
+
         if (data.details.securityCode !== undefined || data.details.trackingYear !== undefined) {
             const hasFullAccess = await this.canAccessMember(member, PermissionLevel.Full);
 
-            if (!hasFullAccess) {
+            if (!hasFullAccess || !await getCanEditEmailAddresses()) {
                 if (data.details.securityCode !== undefined) {
                     // can only be set to null, and only if can access member with full access
                     if (data.details.securityCode !== null) {
@@ -1957,7 +1994,9 @@ export class AdminPermissionChecker {
                         data.details.securityCode = undefined;
                     }
                 }
+            }
 
+            if (!hasFullAccess) {
                 if (data.details.trackingYear !== undefined) {
                     // Unset silently
                     data.details.trackingYear = undefined;
@@ -1976,6 +2015,30 @@ export class AdminPermissionChecker {
             } else {
                 // if uitpas number did not change
                 data.details.uitpasNumberDetails.socialTariff = member.details.uitpasNumberDetails?.socialTariff;
+            }
+        }
+
+        const details = data.details;
+        const willParentEmailsChange = () => {
+            if (isEmptyPatch(details.parents)) {
+                return false;
+            }
+            const patchedDetails = member.details.clone();
+            patchedDetails.patchOrPut(details);
+            return patchedDetails.getParentEmails().join('\n') !== member.details.getParentEmails().join('\n');
+        };
+
+        if (
+            data.details.email !== undefined
+            || Array.isArray(data.details.alternativeEmails)
+            || data.details.alternativeEmails.changes.length > 0
+            || willParentEmailsChange()
+        ) {
+            if (!await getCanEditEmailAddresses()) {
+                throw this.error({
+                    message: "You don't have access to change the emailaddresses of this user.",
+                    human: $t('Je hebt geen toegangsrechten om de emailadressen van deze gebruiker aan te passen'),
+                });
             }
         }
 

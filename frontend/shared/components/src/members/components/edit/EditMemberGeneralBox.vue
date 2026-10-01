@@ -50,13 +50,13 @@
 
                 <template v-if="!member.isNew">
                     <PhoneInput v-if="isPropertyEnabled('phone') || phone" v-model="phone" error-fields="phone" :error-box="errors.errorBox" :title="$t('%2k') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone', true) ? $t(`%fP`): $t(`%fQ`)" />
-                    <EmailInput v-if="(isPropertyEnabled('emailAddress') || email) && (!isPropertyEnabled('birthDay') || birthDay)" v-model="email" :required="isPropertyRequired('emailAddress')" :title="$t(`%1FK`) + lidSuffix " :placeholder="isPropertyRequired('emailAddress', true) ? $t(`%fP`): $t(`%fQ`)" :validator="validator">
-                        <template #right>
+                    <EmailInput v-if="(isPropertyEnabled('emailAddress') || email) && (!isPropertyEnabled('birthDay') || birthDay)" v-model="email" :required="isPropertyRequired('emailAddress')" :title="$t(`%1FK`) + lidSuffix " :placeholder="isPropertyRequired('emailAddress', true) ? $t(`%fP`): $t(`%fQ`)" :validator="validator" :disabled="!canEditEmails">
+                        <template v-if="canEditEmails" #right>
                             <button v-tooltip="$t('%fI')" class="button icon add small gray" type="button" @click="addEmail" />
                         </template>
                     </EmailInput>
-                    <EmailInput v-for="n in alternativeEmails.length" :key="n" :model-value="getEmail(n - 1)" :required="true" :title="$t(`%fR`) + ' ' + (alternativeEmails.length > 1 ? n : '') " :placeholder="$t(`%fP`)" :validator="validator" @update:model-value="setEmail(n - 1, $event ?? '')">
-                        <template #right>
+                    <EmailInput v-for="n in alternativeEmails.length" :key="n" :model-value="getEmail(n - 1)" :required="true" :title="$t(`%fR`) + ' ' + (alternativeEmails.length > 1 ? n : '') " :placeholder="$t(`%fP`)" :validator="validator" :disabled="!canEditEmails" @update:model-value="setEmail(n - 1, $event ?? '')">
+                        <template v-if="canEditEmails" #right>
                             <button class="button icon trash small gray" type="button" @click="deleteEmail(n - 1)" />
                         </template>
                     </EmailInput>
@@ -128,6 +128,7 @@ import { ContextMenu, ContextMenuItem } from '../../../overlays/ContextMenu';
 import { useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import MemberNRRInput from './MemberNRRInput.vue';
 import Title from './Title.vue';
+import { useCanEditEmails } from '#members/composables/useCanEditEmails.ts';
 
 defineOptions({
     inheritAttrs: false,
@@ -150,6 +151,7 @@ const app = useAppContext();
 const isAdmin = app === 'dashboard' || app === 'admin';
 const showLanguage = useShowMemberLanguage(computed(() => props.member));
 const availableLanguages = I18nController.shared.availableLanguages;
+const canEditEmails = useCanEditEmails(props.member);
 
 const language = computed({
     get: () => props.member.patchedMember.details.language,

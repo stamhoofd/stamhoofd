@@ -33,6 +33,7 @@ function renderBox(options: TaxCertificateMemberOptions = {}) {
                     auth: {
                         canAccessPlatformMember: () => true,
                         hasFullAccess: () => true,
+                        hasPlatformFullAccess: () => true,
                     },
                     organization,
                     user: null,
