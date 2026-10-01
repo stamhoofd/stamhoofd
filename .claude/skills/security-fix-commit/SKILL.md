@@ -19,12 +19,12 @@ date. The user releases it with `pnpm run ship:private` on a local `security` br
 - **Verify `fork` is private on GitHub immediately before every push** (step 1). If the check
   fails or is inconclusive, stop and tell the user. Do not push.
 - Only push to `fork`'s `security` branch, never to its `main` or another branch. The rebase needs
-  a force push: only ever use `--force-with-lease` with the exact SHA you rebased (step 6), never
+  a force push: only ever use `--force-with-lease` with the exact SHA you rebased (step 7), never
   `--force`. Other agents' commits on `security` must never be lost.
 - Don't post vulnerability details anywhere public (PR titles/descriptions, public issues, comments
   on public repos). Don't create or comment on Linear issues unless asked.
-- Never commit the fix on the current branch: it may get pushed to `origin` later. Commit in a
-  temporary detached worktree (step 4).
+- Commit the fixes only on the local `security` branch (step 4), never on another branch: that may
+  get pushed to `origin` later. Stay on `security` afterwards.
 - Publishing on `origin` is a separate step (the `security-fix-publish` skill) that only happens
   when the user explicitly asks.
 
@@ -58,58 +58,47 @@ In the current worktree, before moving anything: every fix has a regression test
 the fix and passes with it. Run lint, typecheck and the affected test packages as described in
 `CLAUDE.md`. Then run `/self-review` on the changes and resolve its remarks.
 
-## 4. Create a worktree with `security` rebased onto origin/main
+## 4. Switch to `security`
 
 ```bash
-WT="$(mktemp -d)/security-fork"
-git fetch origin main
-git worktree add --detach "$WT" origin/main
-git -C "$WT" config extensions.worktreeConfig true
-git -C "$WT" config --worktree commit.gpgsign false
-```
-
-Then sync it with the fork's `security` branch. Run this block again whenever step 6 says so:
-
-```bash
+git config extensions.worktreeConfig true
+git config --worktree commit.gpgsign false
 git fetch origin main
 if git ls-remote --exit-code --heads fork security; then
   git fetch --no-tags fork +refs/heads/security:refs/remotes/fork/security
   LEASE=$(git rev-parse fork/security)
-  git -C "$WT" checkout --detach "$LEASE"
-  git -C "$WT" rebase origin/main
 else
   LEASE=
-  git -C "$WT" checkout --detach origin/main
 fi
-ONTO=$(git -C "$WT" rev-parse HEAD)
+git show-ref --verify --quiet refs/heads/security && git log --oneline "${LEASE:-origin/main}"..security
 ```
 
 - Decide on the remote branch (`ls-remote`), not on a local `fork/security` ref: that can be stale
   after the branch was deleted on the fork.
-- `LEASE` is the remote tip you rebased (empty = the branch doesn't exist yet). Step 6 only
-  overwrites the branch if it still points there.
-- The rebase drops commits that were already published on `origin/main`. Version commits from
-  private releases (`vX.Y.Z`, `Increased structures to version N`) stay on the branch.
-- A conflict in `lerna.json`, a `package.json` version or `Version.ts` usually means `main` was
-  released while the fork had a private release, or a dependency bump landed next to a version line.
-  Stop and ask; don't resolve it.
-- On a conflict while rebasing another agent's commit: resolve it only if it is mechanical, and
-  mention it in the report. Otherwise `git -C "$WT" rebase --abort` and stop and ask.
+- `LEASE` is the remote tip (empty = the branch doesn't exist yet). Step 7 only overwrites the
+  branch if it still points there.
+- If the last command lists commits, the local `security` branch has unpushed work: stop and ask.
+
+If the fixes are local commits, note their SHAs first. Then switch; uncommitted changes come along:
+
+```bash
+git switch -C security "${LEASE:-origin/main}"
+git config branch.security.remote fork
+git config branch.security.merge refs/heads/security
+git config branch.security.pushRemote fork
+git rev-parse --abbrev-ref --symbolic-full-name '@{push}'   # must print fork/security
+```
+
+The repo sets `remote.pushDefault=origin`, which overrides `branch.security.remote`: without
+`pushRemote`, a bare `git push` on `security` goes to `origin`. If `@{push}` prints anything other
+than `fork/security`, stop and tell the user. If the switch fails (conflicting local changes, or
+`security` is checked out in another worktree), stop and ask.
 
 ## 5. One commit per vulnerability
 
-For uncommitted work, build a patch from only that vulnerability's files (split hunks by hand when a
-file touches several vulnerabilities) and apply it in the worktree:
-
-```bash
-P="$(mktemp)"
-git diff --binary HEAD -- <tracked files> > "$P"
-for f in <untracked files>; do git diff --binary --no-index /dev/null "$f" >> "$P"; done
-git -C "$WT" apply --3way --index "$P"
-```
-
-For existing local commits use `git -C "$WT" cherry-pick <sha>` and rewrite the message.
-Resolve conflicts carefully; if a conflict is not mechanical, stop and ask.
+Stage only that vulnerability's files (`git add -p` when a file touches several vulnerabilities) and
+commit. For fixes that were local commits, `git cherry-pick <sha>` and rewrite the message. On a
+non-mechanical conflict, stop and ask.
 
 Commit message format (English, short, past tense like the existing 🔒 commits):
 
@@ -121,45 +110,56 @@ fixes STA-XXXX
 
 Omit the `fixes` line only when there is no Linear issue. No other trailers.
 
-Check before pushing:
+`git status --porcelain` must be empty afterwards. If unrelated changes remain, stop and ask.
+
+## 6. Rebase onto origin/main
 
 ```bash
-git -C "$WT" log --format='%h %s%n%b' "$ONTO"..HEAD    # only the intended commits, correct messages
-git -C "$WT" diff --stat "$ONTO"..HEAD                  # only the intended files
-git -C "$WT" status --porcelain                         # empty: nothing left unapplied
+git rebase origin/main
+ONTO=$(git rev-parse HEAD~<number of your commits>)
+git log --format='%h %s%n%b' "$ONTO"..HEAD   # only your commits, correct messages
+git diff --stat "$ONTO"..HEAD                 # only the intended files
 ```
 
-## 6. Push to the fork
+- The rebase drops commits that were already published on `origin/main`. Version commits from
+  private releases (`vX.Y.Z`, `Increased structures to version N`) stay on the branch.
+- A conflict in `lerna.json`, a `package.json` version or `Version.ts` usually means `main` was
+  released while the fork had a private release, or a dependency bump landed next to a version line.
+  Stop and ask; don't resolve it.
+- On a conflict in another agent's commit: resolve it only if it is mechanical, and mention it in
+  the report. Otherwise `git rebase --abort` and stop and ask.
+
+## 7. Push to the fork
 
 Re-run step 1, then:
 
 ```bash
-git -C "$WT" push --force-with-lease=refs/heads/security:"$LEASE" fork HEAD:refs/heads/security
+git push --force-with-lease=refs/heads/security:"$LEASE" fork security:refs/heads/security
 ```
 
 An empty `LEASE` makes the push fail if the branch was created in the meantime.
 
-A rejected push means another agent pushed to (or created) `security` in the meantime. Keep your own
-commits, sync again, reapply them and push again:
+A rejected push means another agent pushed to (or created) `security` in the meantime. Rebuild the
+branch from the new remote tip and reapply your commits:
 
 ```bash
-OLD_ONTO=$ONTO OLD_HEAD=$(git -C "$WT" rev-parse HEAD)
-# run the sync block from step 4 again (updates LEASE and ONTO)
-git -C "$WT" cherry-pick "$OLD_ONTO..$OLD_HEAD"
+OLD_ONTO=$ONTO OLD_HEAD=$(git rev-parse HEAD)
+git fetch origin main
+git fetch --no-tags fork +refs/heads/security:refs/remotes/fork/security
+LEASE=$(git rev-parse fork/security)
+git reset --hard "$LEASE"
+git rebase origin/main
+ONTO=$(git rev-parse HEAD)
+git cherry-pick "$OLD_ONTO..$OLD_HEAD"
 ```
 
-Only when the cherry-pick succeeded: rerun the step 5 checks (with the new `ONTO`) and step 1, then
-push with the new `LEASE` as above. Never push after a failed or partial cherry-pick: that would
-drop your own fixes. On a non-mechanical conflict, `git -C "$WT" cherry-pick --abort` and stop and
-ask. Never `--force`.
+Only when the cherry-pick succeeded: rerun the step 6 checks and step 1, then push with the new
+`LEASE`. Never push after a failed or partial cherry-pick: that would drop your own fixes (they stay
+reachable as `$OLD_HEAD`). On a non-mechanical conflict, `git cherry-pick --abort` and stop and ask.
+Never `--force`.
 
-## 7. Clean up and report
+## 8. Report
 
-```bash
-git worktree remove "$WT"
-```
-
-Leave the original changes in the current worktree untouched. Report to the user: the pushed commit
-SHAs and subjects, whether `security` was created or rebased and added to, any rebase conflicts you
-resolved, and a reminder that the fix is not public yet, so the current branch must not be pushed to
-`origin` until they decide to publish it.
+Stay on `security`. Report to the user: the pushed commit SHAs and subjects, whether `security` was
+created or rebased and added to, any rebase conflicts you resolved, and a reminder that the fix is
+not public yet.

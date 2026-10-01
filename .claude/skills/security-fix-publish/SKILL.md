@@ -25,6 +25,9 @@ published**. Commits on `security` that were not released stay private.
   is merged and everything in the tag is on `origin/main` (step 6).
 - Never `--force` push; the only lease-protected push is the branch delete in step 7. Commits other
   agents added to `fork/security` after the release must never be lost or published.
+- Never run a bare `git push` on the local `security` branch. `remote.pushDefault=origin` overrides
+  its upstream; keep `git config branch.security.pushRemote fork` set (verify with
+  `git rev-parse --abbrev-ref --symbolic-full-name 'security@{push}'` → `fork/security`).
 
 ## 1. Fetch the current state
 
