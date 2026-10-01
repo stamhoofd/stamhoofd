@@ -1056,52 +1056,6 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 }));
         });
 
-        test.todo('A non-full admin cannot override alternativeEmails with empty array', async () => {
-            const organization = await new OrganizationFactory({}).create();
-
-            const group = await new GroupFactory({ organization }).create();
-            const resources = new Map();
-            resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({ level: PermissionLevel.None }),
-                ]]),
-            );
-
-            const user = await new UserFactory({
-                permissions: Permissions.create({ level: PermissionLevel.Write, resources }),
-                organization,
-            }).create();
-
-            const memberUser = await new UserFactory({
-                permissions: Permissions.create({ level: PermissionLevel.Full, resources }),
-                organization,
-            }).create();
-
-            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false, user: memberUser }).create();
-            await new RegistrationFactory({ member, group }).create();
-            await addResponsibility(member, PermissionLevel.Full, organization.id);
-
-            const token = await SessionService.createSession(user);
-
-            const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({
-                    alternativeEmails: [] as any,
-                }),
-            }));
-
-            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
-            request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request))
-                .rejects
-                .toThrow(STExpect.simpleError({
-                    code: 'permission_denied',
-                    statusCode: 403,
-                }));
-        });
-
         test('A non-full platform admin cannot change the email of a member with with global permissions', async () => {
             const organization = await new OrganizationFactory({}).create();
 
