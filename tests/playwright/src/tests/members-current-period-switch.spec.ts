@@ -221,8 +221,9 @@ test.describe('Switching the current period from the members menu @members-perio
 
         // We return to the current-period menu, now showing the newly selected period,
         // and no members overview is opened (nothing to show on a collapsed split view).
-        const membersMenu = page.getByTestId('members-menu');
-        await expect(membersMenu).toBeVisible();
+        // The menu of the previous period stays in the DOM until the navigation animation finished
+        const membersMenu = page.getByTestId('members-menu').filter({ visible: true });
+        await expect(membersMenu).toHaveCount(1);
         await expect(membersMenu.locator('.footer')).toContainText(scenario.otherPeriodName);
         await expect(page.getByTestId('table')).toHaveCount(0);
     });
