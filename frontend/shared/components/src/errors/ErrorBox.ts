@@ -53,7 +53,7 @@ export class ErrorBox {
     }
 
     static scrollIntoView(element: HTMLElement) {
-        ViewportHelper.scrollIntoView(element, 'center', true);
+        ViewportHelper.scrollIntoView(element, 'center', true).catch(console.error);
     }
 
     private static fireScroll() {
