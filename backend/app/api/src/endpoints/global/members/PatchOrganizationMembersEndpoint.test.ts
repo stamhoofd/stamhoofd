@@ -1056,52 +1056,6 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 }));
         });
 
-        test.todo('A non-full admin cannot override alternativeEmails with empty array', async () => {
-            const organization = await new OrganizationFactory({}).create();
-
-            const group = await new GroupFactory({ organization }).create();
-            const resources = new Map();
-            resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({ level: PermissionLevel.None }),
-                ]]),
-            );
-
-            const user = await new UserFactory({
-                permissions: Permissions.create({ level: PermissionLevel.Write, resources }),
-                organization,
-            }).create();
-
-            const memberUser = await new UserFactory({
-                permissions: Permissions.create({ level: PermissionLevel.Full, resources }),
-                organization,
-            }).create();
-
-            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false, user: memberUser }).create();
-            await new RegistrationFactory({ member, group }).create();
-            await addResponsibility(member, PermissionLevel.Full, organization.id);
-
-            const token = await SessionService.createSession(user);
-
-            const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({
-                    alternativeEmails: [] as any,
-                }),
-            }));
-
-            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
-            request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request))
-                .rejects
-                .toThrow(STExpect.simpleError({
-                    code: 'permission_denied',
-                    statusCode: 403,
-                }));
-        });
-
         test('A non-full platform admin cannot change the email of a member with with global permissions', async () => {
             const organization = await new OrganizationFactory({}).create();
 
@@ -1292,6 +1246,132 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const fullResponse = await patchPhone(fullAdmin);
             expect(fullResponse.body.members[0].details.securityCode).toBe('ABCD1234WXYZ5678');
+        });
+
+        test('A non-full admin can remove, but not add unverified emails of a member with a function', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const group = await new GroupFactory({ organization }).create();
+
+            const admin = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Write }),
+                organization,
+            }).create();
+
+            const member = await new MemberFactory({
+                details: MemberDetails.create({ firstName, lastName, unverifiedEmails: ['old@example.com'] }),
+            }).create();
+            await new RegistrationFactory({ member, group }).create();
+            await addResponsibility(member, PermissionLevel.Full, organization.id);
+
+            const patchUnverifiedEmails = async (unverifiedEmails: PatchableArray<string, string, string>) => {
+                const token = await SessionService.createSession(admin);
+                const arr: Body = new PatchableArray();
+                arr.addPatch(MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ unverifiedEmails }),
+                }));
+
+                const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                request.headers.authorization = 'Bearer ' + token.accessToken;
+                return await testServer.test(endpoint, request);
+            };
+
+            const add = new PatchableArray<string, string, string>();
+            add.addPut('attacker@example.com');
+            await expect(patchUnverifiedEmails(add))
+                .rejects
+                .toThrow(STExpect.simpleError({ code: 'permission_denied', statusCode: 403 }));
+
+            const remove = new PatchableArray<string, string, string>();
+            remove.addDelete('old@example.com');
+            const response = await patchUnverifiedEmails(remove);
+            expect(response.body.members[0].details.unverifiedEmails).toEqual([]);
+        });
+
+        describe('Duplicate members', () => {
+            let memberCount = 0;
+
+            const setup = async () => {
+                // A unique name per member avoids hitting the duplicate check rate limiter
+                const lastName = `Duplicate${++memberCount}`;
+                const organization = await new OrganizationFactory({}).create();
+                const group = await new GroupFactory({ organization }).create();
+
+                const admin = await new UserFactory({
+                    permissions: Permissions.create({ level: PermissionLevel.Write }),
+                    organization,
+                }).create();
+
+                const member = await new MemberFactory({
+                    birthDay,
+                    details: MemberDetails.create({ firstName, lastName, email: 'original@example.com', securityCode: 'ABCD1234WXYZ5678' }),
+                }).create();
+                await new RegistrationFactory({ member, group }).create();
+                await addResponsibility(member, PermissionLevel.Full, organization.id);
+
+                const createDuplicate = async (details: Partial<MemberDetails>) => {
+                    const token = await SessionService.createSession(admin);
+                    const arr: Body = new PatchableArray();
+                    arr.addPut(MemberWithRegistrationsBlob.create({
+                        details: MemberDetails.create({ firstName, lastName, birthDay: member.details.birthDay, ...details }),
+                    }));
+
+                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    request.headers.authorization = 'Bearer ' + token.accessToken;
+                    return await testServer.test(endpoint, request);
+                };
+
+                return { member, createDuplicate };
+            };
+
+            test.each([
+                ['an email', { email: 'attacker@example.com' }],
+                ['a parent email', { parents: [Parent.create({ firstName: 'Eve', lastName: 'Doe', email: 'attacker@example.com' })] }],
+                ['an unverified email', { unverifiedEmails: ['attacker@example.com'] }],
+            ])('A non-full admin cannot add %s to a member with a function by creating a duplicate', async (_, details) => {
+                const { member, createDuplicate } = await setup();
+
+                await expect(createDuplicate(details))
+                    .rejects
+                    .toThrow(STExpect.simpleError({ code: 'permission_denied', statusCode: 403 }));
+
+                await member.refresh();
+                expect(member.details.email).toBe('original@example.com');
+                expect(member.details.alternativeEmails).toEqual([]);
+                expect(member.details.parents).toEqual([]);
+                expect(member.details.unverifiedEmails).toEqual([]);
+            });
+
+            test('A non-full admin can only keep a parent email without access of a member with a function when creating a duplicate', async () => {
+                const { member, createDuplicate } = await setup();
+
+                // Adult member, so parents do not have access by default
+                member.details.parents = [Parent.create({ firstName: 'Linda', lastName: 'Doe', email: 'parent@example.com' })];
+                await member.save();
+                expect(member.details.calculatedParentsHaveAccess).toBe(false);
+
+                await expect(createDuplicate({ email: 'parent@example.com' }))
+                    .rejects
+                    .toThrow(STExpect.simpleError({ code: 'permission_denied', statusCode: 403 }));
+
+                await member.refresh();
+                expect(member.details.email).toBe('original@example.com');
+
+                const sameParent = await createDuplicate({ parents: [Parent.create({ firstName: 'Linda', lastName: 'Doe', email: 'parent@example.com' })] });
+                expect(sameParent.body.members[0].id).toBe(member.id);
+            });
+
+            test('A non-full admin can create a duplicate of a member with a function without new emails, or with its security code', async () => {
+                const { member, createDuplicate } = await setup();
+
+                const withoutNewEmails = await createDuplicate({ email: 'original@example.com', phone: '+32412345678' });
+                expect(withoutNewEmails.body.members[0].id).toBe(member.id);
+                expect(withoutNewEmails.body.members[0].details.phone).toBe('+32412345678');
+
+                const withSecurityCode = await createDuplicate({ email: 'new@example.com', securityCode: 'ABCD1234WXYZ5678' });
+                expect(withSecurityCode.body.members[0].id).toBe(member.id);
+                expect(withSecurityCode.body.members[0].details.email).toBe('new@example.com');
+            });
         });
 
         describe('Parent email addresses', () => {

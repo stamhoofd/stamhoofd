@@ -24,7 +24,7 @@ import { PlatformMembershipService } from '../../../services/PlatformMembershipS
 import { RegistrationService } from '../../../services/RegistrationService.js';
 import { shouldCheckIfMemberIsDuplicateForPatch } from './shouldCheckIfMemberIsDuplicate.js';
 import { throwIfDrasticMemberDetailsChange } from './throwIfDrasticMemberDetailsChange.js';
-import { mergeTwoMembers } from '../../../helpers/MemberMerger.js';
+import { mergeMemberDetails, mergeTwoMembers } from '../../../helpers/MemberMerger.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -1218,6 +1218,23 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         return age !== null && age < 81;
     }
 
+    /**
+     * The details mergeTwoMembers(base, other) would produce, without changing either member
+     */
+    static previewMergedDetails(base: Member, other: Member) {
+        const preview = new Member();
+        preview.id = base.id;
+        preview.details = base.details.clone();
+
+        const otherPreview = new Member();
+        otherPreview.id = other.id;
+        otherPreview.details = other.details.clone();
+
+        mergeMemberDetails(preview, otherPreview);
+        preview.details.cleanData();
+        return preview.details;
+    }
+
     static async checkDuplicate(member: Member, securityCode: string | null | undefined, type: 'put' | 'patch') {
         if (!this.shouldCheckIfMemberIsDuplicate(member)) {
             return;
@@ -1249,6 +1266,24 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             console.error(duplicate.details.parents);
 
             await this.checkCanAccessMember(duplicate, securityCode, type);
+
+            // checkCanAccessMember skips the security code for admins with write access, so it cannot be trusted as proof here
+            const hasValidSecurityCode = !!securityCode && securityCode === duplicate.details.securityCode;
+            if (!hasValidSecurityCode) {
+                // Reject emails that are new to the member, and existing emails that would start linking a user (e.g. a parent email without access that becomes the member email)
+                const mergedDetails = this.previewMergedDetails(duplicate, member);
+                const existingEmails = MemberUserSyncer.getMemberAccessEmails(duplicate.details).allEmails;
+                const existingLinkedEmails = MemberUserSyncer.getLinkedEmails(duplicate.details);
+                const addsEmails = MemberUserSyncer.getMemberAccessEmails(mergedDetails).allEmails.some(email => !existingEmails.includes(email))
+                    || MemberUserSyncer.getLinkedEmails(mergedDetails).some(email => !existingLinkedEmails.includes(email));
+
+                if (addsEmails && !await Context.auth.canEditMemberEmailAddresses(duplicate)) {
+                    throw Context.auth.error({
+                        message: "You don't have access to change the emailaddresses of this user.",
+                        human: $t('Je hebt geen toegangsrechten om de emailadressen van deze gebruiker aan te passen'),
+                    });
+                }
+            }
 
             // Merge data
             // NOTE: We use mergeTwoMembers instead of mergeMultipleMembers, because we should never safe 'member' , because that one does not exist in the database
