@@ -163,6 +163,18 @@ export class MemberUserSyncerStatic {
         };
     }
 
+    /**
+     * Emails for which onChangeMember links a user to the member
+     */
+    getLinkedEmails(details: MemberDetails) {
+        const { userEmails, parentEmails, unverifiedEmails } = this.getMemberAccessEmails(details);
+        return [
+            ...userEmails,
+            ...(details.calculatedParentsHaveAccess ? parentEmails : []),
+            ...unverifiedEmails.filter(email => !parentEmails.includes(email)),
+        ];
+    }
+
     doesEmailHaveAccess(details: MemberDetails, email: string) {
         const { allEmails } = this.getMemberAccessEmails(details);
         return allEmails.includes(email.toLocaleLowerCase());

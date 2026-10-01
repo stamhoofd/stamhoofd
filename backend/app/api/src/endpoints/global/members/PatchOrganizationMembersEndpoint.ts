@@ -1253,7 +1253,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             // checkCanAccessMember skips the security code for admins with write access, so it cannot be trusted as proof here
             const hasValidSecurityCode = !!securityCode && securityCode === duplicate.details.securityCode;
             if (!hasValidSecurityCode) {
-                const existingEmails = MemberUserSyncer.getMemberAccessEmails(duplicate.details).allEmails;
+                const existingEmails = MemberUserSyncer.getLinkedEmails(duplicate.details);
                 const addsEmails = MemberUserSyncer.getMemberAccessEmails(member.details).allEmails.some(email => !existingEmails.includes(email));
 
                 if (addsEmails && !await Context.auth.canEditMemberEmailAddresses(duplicate)) {
