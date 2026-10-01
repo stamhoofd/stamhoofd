@@ -202,11 +202,11 @@ export class VueGlobalHelper {
             document.addEventListener('focusin', (event) => {
                 const el = document.activeElement as HTMLElement;
                 if (el && el.tagName !== 'BUTTON') {
-                    ViewportHelper.scrollIntoView(el, 'center');
+                    ViewportHelper.scrollIntoView(el, 'center').catch(console.error);
 
                     window.setTimeout(() => {
                         if (el === document.activeElement) {
-                            ViewportHelper.scrollIntoView(el, 'center');
+                            ViewportHelper.scrollIntoView(el, 'center').catch(console.error);
                         }
                     }, 250);
                 }

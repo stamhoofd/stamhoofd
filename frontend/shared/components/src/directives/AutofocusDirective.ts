@@ -1,6 +1,14 @@
 import { ViewportHelper } from '#ViewportHelper.ts';
 import type { ObjectDirective } from 'vue';
 
+/**
+ * Whether the user already focused something in the view (e.g. started typing)
+ */
+function hasFocusInView(el: HTMLElement) {
+    const view = el.closest('.st-view');
+    return !!document.activeElement && !!view && view.contains(document.activeElement);
+}
+
 export const AutofocusDirective: ObjectDirective<HTMLInputElement, boolean | null | undefined> = {
     // called right before the element is inserted into the DOM.
     beforeMount(el, binding) {
@@ -9,36 +17,16 @@ export const AutofocusDirective: ObjectDirective<HTMLInputElement, boolean | nul
         }
 
         setTimeout(() => {
-            if (el.isConnected) {
-                const view = el.closest('.st-view');
-
-                if (!document.activeElement || !view || !view.contains(document.activeElement)) {
-                    // only focus if the user isn't typing already (causes flaky playwright tests)
-                    ViewportHelper.scrollIntoView(el, 'center', true);
-
-                    setTimeout(() => {
-                        el.focus();
-                    }, 150);
-                }
+            if (!el.isConnected || hasFocusInView(el)) {
+                return;
             }
+
+            ViewportHelper.scrollIntoView(el, 'center', true).then(() => {
+                // Checked again: the user can focus another input during the scroll
+                if (el.isConnected && !hasFocusInView(el)) {
+                    el.focus();
+                }
+            }).catch(console.error);
         }, 300);
     },
 };
-
-/**
-onMounted(() => {
-    if (props.initialEmail.length === 0) {
-        setTimeout(() => {
-            animating.value = false;
-            if (emailInput.value && (!document.activeElement || (!el.value || !el.value.contains(document.activeElement)))) {
-                // only focus if the user isn't typing already (causes flaky playwright tests)
-                emailInput.value.focus();
-            }
-        }, 300);
-    } else {
-        setTimeout(() => {
-            animating.value = false;
-        }, 300);
-    }
-});
- */

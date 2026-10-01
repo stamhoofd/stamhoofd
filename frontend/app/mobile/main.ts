@@ -225,7 +225,7 @@ window.addEventListener('statusTap', () => {
             return x === 1 ? 1 : 1 - Math.pow(1.5, -20 * x);
         };
 
-        ViewportHelper.scrollTo(element, 0, Math.min(600, Math.max(300, element.scrollTop / 2)), exponential);
+        ViewportHelper.scrollTo(element, 0, Math.min(600, Math.max(300, element.scrollTop / 2)), exponential).catch(console.error);
     }
 });
 

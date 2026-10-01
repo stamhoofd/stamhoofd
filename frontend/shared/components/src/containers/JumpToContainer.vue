@@ -30,7 +30,7 @@ watch(() => props.visible, async (newValue, oldValue) => {
             console.log("Scrolling to element", el.value);
             const element = el.value;
             if (element) {
-                ViewportHelper.scrollIntoView(element)
+                ViewportHelper.scrollIntoView(element).catch(console.error);
 
                 // Focus
                 setTimeout(() => {

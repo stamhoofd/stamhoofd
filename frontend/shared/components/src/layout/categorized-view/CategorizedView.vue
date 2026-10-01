@@ -303,7 +303,7 @@ const visibleCategory = computed({
                 const exponential = function (x: number): number {
                     return x === 1 ? 1 : 1 - Math.pow(1.5, -20 * x);
                 };
-                ViewportHelper.scrollTo(s, 0, 200, exponential);
+                ViewportHelper.scrollTo(s, 0, 200, exponential).catch(console.error);
             }
         }
     },
@@ -330,9 +330,9 @@ function scrollToCategory(category: CategorizedViewCategory) {
     }
     const errorElement = el.querySelector('.error-box') as HTMLElement;
     if (errorElement) {
-        ViewportHelper.scrollIntoView(errorElement, 'center', false);
+        ViewportHelper.scrollIntoView(errorElement, 'center', false).catch(console.error);
     } else {
-        ViewportHelper.scrollIntoView(el, 'center', false);
+        ViewportHelper.scrollIntoView(el, 'center', false).catch(console.error);
     }
 }
 
