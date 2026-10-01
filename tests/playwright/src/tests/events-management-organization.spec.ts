@@ -225,6 +225,11 @@ test.describe('Events management', () => {
 test.describe('Duplicate event', () => {
     const password = 'testAbc123456';
 
+    // The event is looked up by its date: periods left behind by earlier tests must not overlap with the locked period
+    test.beforeEach(async () => {
+        await WorkerData.resetDatabase();
+    });
+
     test.afterEach(async () => {
         await WorkerData.resetDatabase();
     });
