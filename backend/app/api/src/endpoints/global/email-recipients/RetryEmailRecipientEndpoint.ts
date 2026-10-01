@@ -5,6 +5,7 @@ import type { EmailRecipient as EmailRecipientStruct } from '@stamhoofd/structur
 import { EmailStatus, PermissionLevel } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 import { EmailSendService } from '../../../services/EmailSendService.js';
 
@@ -81,6 +82,6 @@ export class RetryEmailRecipientEndpoint extends Endpoint<Params, Query, Body, R
 
         await emailRecipient.refresh();
 
-        return new Response((await EmailRecipient.getStructures([emailRecipient]))[0]);
+        return new Response((await AuthenticatedStructures.emailRecipients([emailRecipient]))[0]);
     }
 }
