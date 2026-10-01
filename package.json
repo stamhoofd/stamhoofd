@@ -31,6 +31,7 @@
         "ship": "node ./.development/increase-structures-version.js && pnpm run clear:shared && pnpm run build:shared && lerna version --exact --force-publish --yes --no-private && lerna publish from-git --yes --no-private --otp $(op item get NPM --otp || :) && pnpm run stam release publish",
         "ship:fix": "lerna publish from-git --yes --no-private --otp $(op item get NPM --otp || :) && pnpm run stam release publish",
         "ship:force": "node ./.development/increase-structures-version.js --force && pnpm run clear:shared && pnpm run build:shared && npm login && lerna version --exact --force-publish --yes --no-private && lerna publish from-git --yes --no-private --otp $(op item get NPM --otp || :) && pnpm run stam release publish",
+        "ship:private": "node ./.development/increase-structures-version.js --force && pnpm run clear:shared && pnpm run build:shared && lerna version --exact --force-publish --yes --no-private --git-remote fork",
         "ship:notes": "pnpm run stam release notes",
         "stam": "./shared/cli/bin/stam.js",
         "stam-dev": "pnpm --dir shared/cli run build && ./shared/cli/bin/stam.js",
