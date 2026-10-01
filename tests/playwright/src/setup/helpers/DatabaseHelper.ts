@@ -143,9 +143,12 @@ export class DatabaseHelper {
             ['delete'],
         );
         await Database.delete('DELETE FROM `organizations`');
+
+        // In platform mode periods are global: leftovers overlap with the periods of the next tests, so looking up a period by date would return a random one
         await Database.delete(
-            'DELETE FROM `registration_periods` where customName = ? and organizationId = null',
-            ['delete'],
+            'DELETE FROM `registration_periods` WHERE NOT EXISTS (SELECT 1 FROM `platform` WHERE `platform`.`periodId` = `registration_periods`.`id`)'
+            + ' AND NOT EXISTS (SELECT 1 FROM `groups` WHERE `groups`.`periodId` = `registration_periods`.`id`)'
+            + ' AND NOT EXISTS (SELECT 1 FROM `registrations` WHERE `registrations`.`periodId` = `registration_periods`.`id`)',
         );
         await Database.delete('DELETE FROM `events`');
         await Database.delete('DELETE FROM `payments`');
