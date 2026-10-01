@@ -1,11 +1,12 @@
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { MemberWithUsersRegistrationsAndGroups, RegistrationPeriod, Token } from '@stamhoofd/models';
-import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, RecordCategoryFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, Platform, RecordCategoryFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import type { SortList, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, EventMeta, GroupStatus, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
+import { AccessRight, CountFilteredRequest, EventMeta, GroupStatus, GroupType, LimitedFilteredRequest, NamedObject, OrganizationTag, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Language } from '@stamhoofd/types/Language';
+import { GetMembersCountEndpoint } from './GetMembersCountEndpoint.js';
 import { GetMembersEndpoint } from './GetMembersEndpoint.js';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initPlatformRecordCategory } from '../../../../tests/init/initPlatformRecordCategory.js';
@@ -1538,6 +1539,98 @@ describe('Endpoint.GetMembersEndpoint', () => {
             await expect(testServer.test(endpoint, request)).rejects.toThrow(
                 STExpect.errorWithCode('permission_denied'),
             );
+        });
+    });
+
+    describe('Tag-scoped platform admins', () => {
+        const tags = {
+            platform: OrganizationTag.create({ name: 'Tag-scoped members (platform)' }),
+            organization: OrganizationTag.create({ name: 'Tag-scoped members (organization)' }),
+        };
+        let originalTags: OrganizationTag[];
+
+        beforeAll(async () => {
+            const platform = await Platform.getForEditing();
+            originalTags = platform.config.tags;
+            platform.config.tags = [...originalTags, tags.platform, tags.organization];
+            await platform.save();
+        });
+
+        afterAll(async () => {
+            const platform = await Platform.getForEditing();
+            platform.config.tags = originalTags;
+            await platform.save();
+        });
+
+        test.each(['platform', 'organization'] as const)('Lists and counts members of every period of tagged organizations only (userMode %s)', async (userMode) => {
+            TestUtils.setEnvironment('userMode', userMode);
+            const tag = tags[userMode];
+
+            const organization = await new OrganizationFactory({ tags: [tag.id] }).create();
+            const otherOrganization = await new OrganizationFactory({}).create();
+            const previousPeriod = await new RegistrationPeriodFactory({
+                organization: userMode === 'organization' ? organization : undefined,
+                startDate: new Date(2023, 0, 1),
+                endDate: new Date(2023, 11, 31),
+            }).create();
+
+            const currentGroup = await new GroupFactory({ organization }).create();
+            const previousPeriodGroup = await new GroupFactory({ organization, period: previousPeriod }).create();
+            const otherGroup = await new GroupFactory({ organization: otherOrganization }).create();
+            const archivedGroup = await new GroupFactory({ organization }).create();
+            archivedGroup.status = GroupStatus.Archived;
+            await archivedGroup.save();
+
+            const currentMember = await new MemberFactory({}).create();
+            const previousPeriodMember = await new MemberFactory({}).create();
+            const otherMember = await new MemberFactory({}).create();
+            const archivedMember = await new MemberFactory({}).create();
+
+            await new RegistrationFactory({ member: currentMember, group: currentGroup }).create();
+            await new RegistrationFactory({ member: previousPeriodMember, group: previousPeriodGroup }).create();
+            await new RegistrationFactory({ member: otherMember, group: otherGroup }).create();
+
+            // Archived groups require full access to the organization
+            await new RegistrationFactory({ member: archivedMember, group: archivedGroup }).create();
+
+            const user = await new UserFactory({
+                globalPermissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources: new Map([[
+                        PermissionsResourceType.OrganizationTags, new Map([[
+                            tag.id,
+                            ResourcePermissions.create({ level: PermissionLevel.Read }),
+                        ]]),
+                    ]]),
+                }),
+            }).create();
+            const token = await SessionService.createSession(user);
+            const headers = { authorization: 'Bearer ' + token.accessToken };
+
+            const response = await testServer.test(endpoint, Request.get({
+                path: baseUrl,
+                query: new LimitedFilteredRequest({ limit: 10 }),
+                headers,
+            }));
+            expect(response.status).toBe(200);
+            expect(response.body.results.members.map(m => m.id)).toIncludeSameMembers([currentMember.id, previousPeriodMember.id]);
+
+            const countResponse = await testServer.test(new GetMembersCountEndpoint(), Request.get({
+                path: `${baseUrl}/count`,
+                query: new CountFilteredRequest({}),
+                headers,
+            }));
+            expect(countResponse.body.count).toBe(2);
+
+            // Filtering on another organization cannot reach outside the tag scope
+            const otherCountResponse = await testServer.test(new GetMembersCountEndpoint(), Request.get({
+                path: `${baseUrl}/count`,
+                query: new CountFilteredRequest({
+                    filter: { registrations: { $elemMatch: { organizationId: otherOrganization.id } } },
+                }),
+                headers,
+            }));
+            expect(otherCountResponse.body.count).toBe(0);
         });
     });
 

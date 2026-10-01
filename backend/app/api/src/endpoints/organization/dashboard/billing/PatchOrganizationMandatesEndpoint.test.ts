@@ -3,6 +3,7 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Token } from '@stamhoofd/models';
 import { BlockedPaymentMandate, Organization, OrganizationFactory } from '@stamhoofd/models';
+import { AccessRight } from '@stamhoofd/structures';
 import { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { MollieMocker } from '../../../../../tests/helpers/MollieMocker.js';
@@ -101,11 +102,34 @@ describe('Endpoint.PatchOrganizationMandatesEndpoint', () => {
         expect(await getBlockedIds(organization)).toEqual([blockedMandate.id]);
     });
 
+    test('A seller admin with only payment access can block a mandate', async () => {
+        TestUtils.setEnvironment('userMode', 'platform');
+        const { organization, defaultMandate, blockedMandate } = await init();
+        const { adminToken: sellerToken } = await initAdmin({ organization: sellingOrganization, accessRights: [AccessRight.OrganizationManagePayments] });
+
+        const response = await patch(setBlockedPatch(defaultMandate.id, true), organization, sellerToken);
+        expect(response.status).toBe(200);
+        expect(await getBlockedIds(organization)).toEqual([defaultMandate.id, blockedMandate.id].sort());
+    });
+
     test('The paying organization cannot block or unblock a mandate', async () => {
         const { organization, token, defaultMandate, blockedMandate } = await init();
 
         await expect(patch(setBlockedPatch(defaultMandate.id, true), organization, token)).rejects.toMatchObject({ code: 'permission_denied' });
         await expect(patch(setBlockedPatch(blockedMandate.id, false), organization, token)).rejects.toMatchObject({ code: 'permission_denied' });
+        expect(await getBlockedIds(organization)).toEqual([blockedMandate.id]);
+    });
+
+    test('An admin without full access cannot change the default mandate', async () => {
+        const { organization, defaultMandate, blockedMandate } = await init();
+        const { adminToken } = await initAdmin({ organization, accessRights: [AccessRight.OrganizationFinanceDirector] });
+
+        const otherMandate = mollieMocker.addMandate({ customerId: organization.serverMeta.mollieCustomerId!, cardNumber: '5678' });
+
+        await expect(patch(setDefaultPatch(otherMandate.id), organization, adminToken)).rejects.toMatchObject({ code: 'permission_denied' });
+
+        const updated = (await Organization.getByID(organization.id))!;
+        expect(updated.serverMeta.mollieMandateId).toBe(defaultMandate.id);
         expect(await getBlockedIds(organization)).toEqual([blockedMandate.id]);
     });
 

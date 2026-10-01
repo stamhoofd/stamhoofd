@@ -98,6 +98,10 @@ export class PatchOrganizationMandatesEndpoint extends Endpoint<Params, Query, B
             }
 
             if (patch.isDefault === true) {
+                if (!await Context.auth.hasFullAccess(payingOrganization.id)) {
+                    throw Context.auth.error();
+                }
+
                 if (mandate.isBlocked) {
                     throw new SimpleError({
                         code: 'mandate_blocked',

@@ -2,7 +2,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Group, Member, Platform, Registration } from '@stamhoofd/models';
+import { Group, Member, Registration } from '@stamhoofd/models';
 import type { SQLExpression, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLSelect, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest, RegistrationWithMemberBlob, RegistrationsBlob, StamhoofdFilter, StamhoofdKeyFilter } from '@stamhoofd/structures';
@@ -77,11 +77,8 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
                 }
 
                 if (tags !== 'all') {
-                    const platform = await Platform.getShared();
-
-                    // Add organization scope filter
+                    // Add organization scope filter. Archived groups require full access to the organization (canAccessGroup).
                     scopeFilter = {
-                        periodId: platform.periodIdIfPlatform,
                         organization: {
                             $elemMatch: {
                                 tags: {
@@ -90,6 +87,7 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
                             },
 
                         },
+                        group: { status: { $neq: GroupStatus.Archived } },
                     };
                 }
             } else {

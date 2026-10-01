@@ -1,8 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Registration, RegistrationPeriod, Token } from '@stamhoofd/models';
-import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Platform, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import type { SortList } from '@stamhoofd/structures';
-import { AccessRight, EventMeta, GroupCategory, GroupCategorySettings, GroupPrice, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, SortItemDirection, TranslatedString } from '@stamhoofd/structures';
+import { AccessRight, EventMeta, GroupCategory, GroupCategorySettings, GroupPrice, GroupStatus, GroupType, LimitedFilteredRequest, NamedObject, OrganizationTag, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, SortItemDirection, TranslatedString } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { GetRegistrationsEndpoint } from './GetRegistrationsEndpoint.js';
@@ -1041,6 +1041,79 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             await expect(testServer.test(endpoint, request)).rejects.toThrow(
                 STExpect.errorWithCode('permission_denied'),
             );
+        });
+    });
+
+    describe('Tag-scoped platform admins', () => {
+        const tags = {
+            platform: OrganizationTag.create({ name: 'Tag-scoped registrations (platform)' }),
+            organization: OrganizationTag.create({ name: 'Tag-scoped registrations (organization)' }),
+        };
+        let originalTags: OrganizationTag[];
+
+        beforeAll(async () => {
+            const platform = await Platform.getForEditing();
+            originalTags = platform.config.tags;
+            platform.config.tags = [...originalTags, tags.platform, tags.organization];
+            await platform.save();
+        });
+
+        afterAll(async () => {
+            const platform = await Platform.getForEditing();
+            platform.config.tags = originalTags;
+            await platform.save();
+        });
+
+        test.each(['platform', 'organization'] as const)('Lists registrations of every period of tagged organizations only (userMode %s)', async (userMode) => {
+            TestUtils.setEnvironment('userMode', userMode);
+            const tag = tags[userMode];
+
+            const organization = await new OrganizationFactory({ tags: [tag.id] }).create();
+            const otherOrganization = await new OrganizationFactory({}).create();
+            const previousPeriod = await new RegistrationPeriodFactory({
+                organization: userMode === 'organization' ? organization : undefined,
+                startDate: new Date(2023, 0, 1),
+                endDate: new Date(2023, 11, 31),
+            }).create();
+
+            const currentGroup = await new GroupFactory({ organization }).create();
+            const previousPeriodGroup = await new GroupFactory({ organization, period: previousPeriod }).create();
+            const otherGroup = await new GroupFactory({ organization: otherOrganization }).create();
+
+            const member = await new MemberFactory({}).create();
+            const currentRegistration = await new RegistrationFactory({ member, group: currentGroup }).create();
+            const previousPeriodRegistration = await new RegistrationFactory({ member, group: previousPeriodGroup }).create();
+            await new RegistrationFactory({ member, group: otherGroup }).create();
+
+            // Archived groups require full access to the organization
+            const archivedGroup = await new GroupFactory({ organization }).create();
+            archivedGroup.status = GroupStatus.Archived;
+            await archivedGroup.save();
+            await new RegistrationFactory({ member, group: archivedGroup }).create();
+
+            const user = await new UserFactory({
+                globalPermissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources: new Map([[
+                        PermissionsResourceType.OrganizationTags, new Map([[
+                            tag.id,
+                            ResourcePermissions.create({ level: PermissionLevel.Read }),
+                        ]]),
+                    ]]),
+                }),
+            }).create();
+            const token = await SessionService.createSession(user);
+
+            const response = await testServer.test(endpoint, Request.get({
+                path: baseUrl,
+                query: new LimitedFilteredRequest({ limit: 10 }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            }));
+
+            expect(response.status).toBe(200);
+            expect(response.body.results.registrations.map(r => r.id)).toIncludeSameMembers([currentRegistration.id, previousPeriodRegistration.id]);
         });
     });
 
