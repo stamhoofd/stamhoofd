@@ -4,22 +4,18 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, ComponentWithPropertiesInstance, ModalStackComponent, NavigationController, setTitleSuffix, SplitViewController, useCurrentComponent } from '@simonbackx/vue-app-navigation';
-
 import { useLoginRoot } from '@stamhoofd/components/auth/useLoginRoot.ts';
-
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
 import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
 import { TabBarItem, TabBarItemGroup } from '@stamhoofd/components/containers/TabBarItem.ts';
-
+import { buildTranslatedUrl } from '@stamhoofd/components/containers/TranslatedUrl.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
 import { computed } from 'vue';
-
 import { useAdminAuditLogRenderers } from './views/organizations/useAdminAuditLogRenderers';
-import { buildTranslatedUrl } from '@stamhoofd/components/containers/TranslatedUrl.ts';
 
 const getLoginRoot = useLoginRoot();
 const context = useContext();
