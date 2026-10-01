@@ -1294,6 +1294,73 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             expect(fullResponse.body.members[0].details.securityCode).toBe('ABCD1234WXYZ5678');
         });
 
+        describe('Duplicate members', () => {
+            let memberCount = 0;
+
+            const setup = async () => {
+                // A unique name per member avoids hitting the duplicate check rate limiter
+                const lastName = `Duplicate${++memberCount}`;
+                const organization = await new OrganizationFactory({}).create();
+                const group = await new GroupFactory({ organization }).create();
+
+                const admin = await new UserFactory({
+                    permissions: Permissions.create({ level: PermissionLevel.Write }),
+                    organization,
+                }).create();
+
+                const member = await new MemberFactory({
+                    birthDay,
+                    details: MemberDetails.create({ firstName, lastName, email: 'original@example.com', securityCode: 'ABCD1234WXYZ5678' }),
+                }).create();
+                await new RegistrationFactory({ member, group }).create();
+                await addResponsibility(member, PermissionLevel.Full, organization.id);
+
+                const createDuplicate = async (details: Partial<MemberDetails>) => {
+                    const token = await SessionService.createSession(admin);
+                    const arr: Body = new PatchableArray();
+                    arr.addPut(MemberWithRegistrationsBlob.create({
+                        details: MemberDetails.create({ firstName, lastName, birthDay: member.details.birthDay, ...details }),
+                    }));
+
+                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    request.headers.authorization = 'Bearer ' + token.accessToken;
+                    return await testServer.test(endpoint, request);
+                };
+
+                return { member, createDuplicate };
+            };
+
+            test.each([
+                ['an email', { email: 'attacker@example.com' }],
+                ['a parent email', { parents: [Parent.create({ firstName: 'Eve', lastName: 'Doe', email: 'attacker@example.com' })] }],
+                ['an unverified email', { unverifiedEmails: ['attacker@example.com'] }],
+            ])('A non-full admin cannot add %s to a member with a function by creating a duplicate', async (_, details) => {
+                const { member, createDuplicate } = await setup();
+
+                await expect(createDuplicate(details))
+                    .rejects
+                    .toThrow(STExpect.simpleError({ code: 'permission_denied', statusCode: 403 }));
+
+                await member.refresh();
+                expect(member.details.email).toBe('original@example.com');
+                expect(member.details.alternativeEmails).toEqual([]);
+                expect(member.details.parents).toEqual([]);
+                expect(member.details.unverifiedEmails).toEqual([]);
+            });
+
+            test('A non-full admin can create a duplicate of a member with a function without new emails, or with its security code', async () => {
+                const { member, createDuplicate } = await setup();
+
+                const withoutNewEmails = await createDuplicate({ email: 'original@example.com', phone: '+32412345678' });
+                expect(withoutNewEmails.body.members[0].id).toBe(member.id);
+                expect(withoutNewEmails.body.members[0].details.phone).toBe('+32412345678');
+
+                const withSecurityCode = await createDuplicate({ email: 'new@example.com', securityCode: 'ABCD1234WXYZ5678' });
+                expect(withSecurityCode.body.members[0].id).toBe(member.id);
+                expect(withSecurityCode.body.members[0].details.email).toBe('new@example.com');
+            });
+        });
+
         describe('Parent email addresses', () => {
             const setup = async () => {
                 const organization = await new OrganizationFactory({}).create();

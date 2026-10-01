@@ -1250,6 +1250,20 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             await this.checkCanAccessMember(duplicate, securityCode, type);
 
+            // checkCanAccessMember skips the security code for admins with write access, so it cannot be trusted as proof here
+            const hasValidSecurityCode = !!securityCode && securityCode === duplicate.details.securityCode;
+            if (!hasValidSecurityCode) {
+                const existingEmails = MemberUserSyncer.getMemberAccessEmails(duplicate.details).allEmails;
+                const addsEmails = MemberUserSyncer.getMemberAccessEmails(member.details).allEmails.some(email => !existingEmails.includes(email));
+
+                if (addsEmails && !await Context.auth.canEditMemberEmailAddresses(duplicate)) {
+                    throw Context.auth.error({
+                        message: "You don't have access to change the emailaddresses of this user.",
+                        human: $t('Je hebt geen toegangsrechten om de emailadressen van deze gebruiker aan te passen'),
+                    });
+                }
+            }
+
             // Merge data
             // NOTE: We use mergeTwoMembers instead of mergeMultipleMembers, because we should never safe 'member' , because that one does not exist in the database
             await mergeTwoMembers(duplicate, member);
