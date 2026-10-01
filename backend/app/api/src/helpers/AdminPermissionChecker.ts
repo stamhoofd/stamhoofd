@@ -1,5 +1,5 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { PatchMap } from '@simonbackx/simple-encoding';
+import { isEmptyPatch, PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, User } from '@stamhoofd/models';
 import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Webshop } from '@stamhoofd/models';
@@ -1987,11 +1987,16 @@ export class AdminPermissionChecker {
         const hasNotes = data.details.notes !== undefined;
         const isSetFinancialSupportTrue = data.details.didSetManualFinancialSupport;
 
+        let canEditEmailAddresses: boolean | undefined;
+        const getCanEditEmailAddresses = async () => {
+            canEditEmailAddresses ??= await this.canEditMemberEmailAddresses(member);
+            return canEditEmailAddresses;
+        };
+
         if (data.details.securityCode !== undefined || data.details.trackingYear !== undefined) {
             const hasFullAccess = await this.canAccessMember(member, PermissionLevel.Full);
-            const canEditEmailAdresses = await this.canEditMemberEmailAddresses(member);
 
-            if (!hasFullAccess || !canEditEmailAdresses) {
+            if (!hasFullAccess || !await getCanEditEmailAddresses()) {
                 if (data.details.securityCode !== undefined) {
                     // can only be set to null, and only if can access member with full access
                     if (data.details.securityCode !== null) {
@@ -2023,16 +2028,23 @@ export class AdminPermissionChecker {
             }
         }
 
-        const clonedDetails = member.details.clone();
-        clonedDetails.patchOrPut(data.details);
+        const details = data.details;
+        const willParentEmailsChange = () => {
+            if (isEmptyPatch(details.parents)) {
+                return false;
+            }
+            const patchedDetails = member.details.clone();
+            patchedDetails.patchOrPut(details);
+            return patchedDetails.getParentEmails().join('\n') !== member.details.getParentEmails().join('\n');
+        };
 
         if (
             data.details.email !== undefined
             || Array.isArray(data.details.alternativeEmails)
             || data.details.alternativeEmails.changes.length > 0
-            || clonedDetails.getParentEmails().join('\n') !== member.details.getParentEmails().join('\n')
+            || willParentEmailsChange()
         ) {
-            if (!await this.canEditMemberEmailAddresses(member)) {
+            if (!await getCanEditEmailAddresses()) {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: "You don't have access to change the emailaddresses of this user.",
