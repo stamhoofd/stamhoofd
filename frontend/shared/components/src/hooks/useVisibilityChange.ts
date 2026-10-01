@@ -11,11 +11,28 @@ export function useVisibilityChange(
     let isMountedAndActive = false;
     const focused = options?.onFocusChange ? useFocused() : { value: true };
 
+    // Switching to another application keeps the document visible, so window focus is tracked separately
+    let windowFocused = document.hasFocus();
+
     function isVisible() {
-        return document.visibilityState === 'visible' && !document.hidden && focused.value && isMountedAndActive;
+        return document.visibilityState === 'visible' && !document.hidden && windowFocused && focused.value && isMountedAndActive;
     }
 
-    if (options.onFocusChange ?? true) {
+    function onWindowFocus() {
+        windowFocused = true;
+        onVisibilityChange();
+    }
+
+    function onWindowBlur() {
+        // Focus moved into an iframe of this page
+        if (document.activeElement instanceof HTMLIFrameElement) {
+            return;
+        }
+        windowFocused = false;
+        onVisibilityChange();
+    }
+
+    if (options.onFocusChange) {
         watch(focused, () => {
             onVisibilityChange();
         });
@@ -57,8 +74,8 @@ export function useVisibilityChange(
         // extra event listeners for better behaviour
         document.addEventListener('focus', onVisibilityChange, { passive: true });
         document.addEventListener('blur', onVisibilityChange, { passive: true });
-        window.addEventListener('focus', onVisibilityChange, { passive: true });
-        window.addEventListener('blur', onVisibilityChange, { passive: true });
+        window.addEventListener('focus', onWindowFocus, { passive: true });
+        window.addEventListener('blur', onWindowBlur, { passive: true });
     }
 
     function removeListeners() {
@@ -71,12 +88,13 @@ export function useVisibilityChange(
         // extra event listeners for better behaviour
         document.removeEventListener('focus', onVisibilityChange);
         document.removeEventListener('blur', onVisibilityChange);
-        window.removeEventListener('focus', onVisibilityChange);
-        window.removeEventListener('blur', onVisibilityChange);
+        window.removeEventListener('focus', onWindowFocus);
+        window.removeEventListener('blur', onWindowBlur);
     }
 
     onMounted(() => {
         isMountedAndActive = true;
+        windowFocused = document.hasFocus();
         addListeners();
         if (immediate) {
             onVisibilityChange();
@@ -85,6 +103,8 @@ export function useVisibilityChange(
 
     onActivated(() => {
         isMountedAndActive = true;
+        // The listeners were removed while deactivated
+        windowFocused = document.hasFocus();
         addListeners();
         onVisibilityChange();
     });

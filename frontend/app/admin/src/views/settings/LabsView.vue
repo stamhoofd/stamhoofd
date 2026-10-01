@@ -113,6 +113,10 @@
             {{ $t('%15o') }}
         </Checkbox>
 
+        <Checkbox :model-value="getFeatureFlag('notifications')" @update:model-value="setFeatureFlag('notifications', !!$event)">
+            {{ $t('Meldingen in de navigatiebalk (in ontwikkeling)') }}
+        </Checkbox>
+
         <Checkbox :model-value="getFeatureFlag('impersonation')" @update:model-value="setFeatureFlag('impersonation', !!$event)">
             {{ $t('%ZnQ') }}
         </Checkbox>

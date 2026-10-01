@@ -4,6 +4,7 @@ import ContextNavigationBar from '@stamhoofd/components/context/ContextNavigatio
 import ContextProvider from '@stamhoofd/components/containers/ContextProvider.vue';
 import CustomHooksContainer from '@stamhoofd/components/containers/CustomHooksContainer.vue';
 import OrganizationSwitcher from '@stamhoofd/components/context/OrganizationSwitcher.vue';
+import NotificationsButton from '@stamhoofd/components/notifications/NotificationsButton.vue';
 import { MemberManager } from '@stamhoofd/networking/MemberManager';
 import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { loadPlatform } from '@stamhoofd/networking/loadPlatform';
@@ -62,6 +63,7 @@ export async function wrap(organization: Organization | null = null, app: AppTyp
             $organizationManager: new OrganizationManager(context),
             reactive_components: {
                 'tabbar-left': new ComponentWithProperties(OrganizationSwitcher, {}),
+                'tabbar-notifications': new ComponentWithProperties(NotificationsButton, {}),
                 'tabbar-right': new ComponentWithProperties(AccountSwitcher, {}),
                 'tabbar-replacement': new ComponentWithProperties(ContextNavigationBar, {}),
             },

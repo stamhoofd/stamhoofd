@@ -623,6 +623,15 @@
             --button-icon-size: 26px;
         }
 
+        > .bubble {
+            @extend %style-bubble;
+            position: absolute;
+            top: 0;
+            right: 0;
+            transform: translate(50%, -50%) scale(0.75, 0.75);
+            z-index: 1;
+        }
+
         body.native-iOS .st-navigation-bar &, body.web-iOS .st-navigation-bar &, .scanner-view &, .images-box-actions & {
             background: $color-background;
             color: $color-dark;

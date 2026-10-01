@@ -171,6 +171,7 @@ export default {
                             'ContextNavigationBar',
                             'OrganizationSwitcher',
                             'AccountSwitcher',
+                            'NotificationsButton',
                             'LoadingView',
                             'ColumnSelectorContextMenu',
                             'ColumnSortingContextMenu',

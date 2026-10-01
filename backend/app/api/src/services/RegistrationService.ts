@@ -8,6 +8,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { AuditLogService } from './AuditLogService.js';
 import { GroupService } from './GroupService.js';
 import { PlatformMembershipService } from './PlatformMembershipService.js';
+import { RegistrationNotificationService } from './RegistrationNotificationService.js';
 
 export const RegistrationService = {
     /**
@@ -80,6 +81,15 @@ export const RegistrationService = {
 
         // Update group occupancy
         await GroupService.updateOccupancy(registration.groupId);
+
+        try {
+            const group = await Group.getByID(registration.groupId);
+            if (group) {
+                await RegistrationNotificationService.notifyRegistrationCreated(registration, group);
+            }
+        } catch (e) {
+            console.error('Failed to send registration notification', e);
+        }
 
         return true;
     },

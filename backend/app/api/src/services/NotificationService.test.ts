@@ -131,6 +131,38 @@ describe('NotificationService', () => {
         expect(added.readCount).toBe(3);
     });
 
+    test('a merge only marks the notification unread again for the users it was sent to', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const unsubscribed = await new UserFactory({}).create();
+        const other = await new UserFactory({}).create();
+
+        const send = (id: string) => NotificationService.send({
+            type: NotificationType.RegistrationCreated,
+            payload: {},
+            organizationId: organization.id,
+            group: { key: 'registrations', resource: resource(id) },
+            to: { users: [unsubscribed, other] },
+        });
+
+        const first = (await send('1'))!;
+        for (const recipient of await recipientsOf(first)) {
+            await NotificationService.markAsRead(recipient);
+        }
+
+        const preference = new NotificationPreference();
+        preference.userId = unsubscribed.id;
+        preference.notificationType = NotificationType.RegistrationCreated;
+        preference.channel = NotificationChannel.InApp;
+        preference.enabled = false;
+        await preference.save();
+
+        await send('2');
+
+        const recipients = await recipientsOf(first);
+        expect(recipients.find(r => r.userId === unsubscribed.id)!.readAt).not.toBeNull();
+        expect(recipients.find(r => r.userId === other.id)!.readAt).toBeNull();
+    });
+
     test('does not group across days, organizations, types or group keys', async () => {
         // Grouping uses the Europe/Brussels day: 21:30Z is 23:30 local
         vitest.useFakeTimers({ shouldAdvanceTime: true, toFake: ['Date'] }).setSystemTime(new Date('2026-09-03T21:30:00Z'));

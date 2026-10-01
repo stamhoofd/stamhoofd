@@ -5,6 +5,7 @@
         </div>
 
         <div class="right">
+            <InheritComponent name="tabbar-notifications" />
             <InheritComponent name="tabbar-right" />
         </div>
     </div>

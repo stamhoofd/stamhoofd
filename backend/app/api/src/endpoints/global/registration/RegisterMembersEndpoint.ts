@@ -427,6 +427,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             registration.trialUntil = null;
             registration.pricePaid = 0;
             registration.payingOrganizationId = null;
+            registration.registeredByMember = !checkout.asOrganizationId;
 
             if (checkout.isAdminFromSameOrganization) {
                 registration.sendConfirmationEmail = checkout.sendConfirmationEmail;
