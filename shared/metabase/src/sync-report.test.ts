@@ -18,6 +18,7 @@ function card(overrides: Partial<ReportCard> = {}): ReportCard {
         parameters: [],
         except: [],
         only: [],
+        defaults: {},
         snippets: [],
         sql: 'SELECT 1',
         snippetSql: 'SELECT 1',
@@ -314,6 +315,47 @@ describe('buildVisualizationSettings', () => {
         expect(segmentColors(6, 'low')).toEqual([...segmentColors(6, 'high')].reverse());
     });
 
+    /**
+     * Metabase colors a cell by the first rule that matches it, so each range is everything below its
+     * upper boundary, lowest first. The outer two are open, like a number's.
+     */
+    it('colors the metrics of a table in the ranges of the meter', () => {
+        const segments = [0, 35, 55, 75, 95, 115, 135];
+        const settings = buildVisualizationSettings(card({ display: 'table', metrics: ['A', 'B'], segments }));
+        const number = buildVisualizationSettings(card({ display: 'scalar', segments }))['scalar.segments'] as { color: string }[];
+
+        expect(settings['table.column_formatting']).toEqual([
+            { columns: ['A', 'B'], type: 'single', operator: '<', value: 35, color: '#ed6e6e', highlight_row: false },
+            { columns: ['A', 'B'], type: 'single', operator: '<', value: 55, color: '#f2955f', highlight_row: false },
+            { columns: ['A', 'B'], type: 'single', operator: '<', value: 75, color: '#f7bc50', highlight_row: false },
+            { columns: ['A', 'B'], type: 'single', operator: '<', value: 95, color: '#e2cb49', highlight_row: false },
+            { columns: ['A', 'B'], type: 'single', operator: '<', value: 115, color: '#b3c34a', highlight_row: false },
+            { columns: ['A', 'B'], type: 'single', operator: '>=', value: 115, color: '#84bb4c', highlight_row: false },
+        ]);
+        expect((settings['table.column_formatting'] as { color: string }[]).map(rule => rule.color)).toEqual(number.map(segment => segment.color));
+    });
+
+    it('highlights the rows of a table by the value of its highlight column, after the cell colors', () => {
+        const rules = buildVisualizationSettings(card({ display: 'table', metrics: ['A'], segments: [0, 35, 55], highlight: 'Opvolgen' }))['table.column_formatting'] as { highlight_row: boolean }[];
+        const palette = columnPalettes.get('Opvolgen')!;
+
+        expect(rules.slice(0, 2).map(rule => rule.highlight_row)).toEqual([false, false]);
+        expect(rules.slice(2)).toEqual(Object.entries(palette).map(([value, color]) => ({ columns: ['Opvolgen'], type: 'single', operator: '=', value, color, highlight_row: true })));
+    });
+
+    it('hides the column the rows are highlighted by', () => {
+        expect(buildVisualizationSettings(card({ display: 'table', highlight: 'Opvolgen' }))['table.columns']).toEqual([{ name: 'Opvolgen', enabled: false }]);
+        expect(buildVisualizationSettings(card({ display: 'table', metrics: ['A'], segments: [0, 35, 55] }))).not.toHaveProperty('table.columns');
+    });
+
+    it('refuses to highlight rows by a column without colors', () => {
+        expect(() => buildVisualizationSettings(card({ display: 'table', highlight: 'Onbekend' }))).toThrow('has no colors in columnPalettes');
+    });
+
+    it('leaves a table that names no ranges or highlight unformatted', () => {
+        expect(buildVisualizationSettings(card({ display: 'table' }))).not.toHaveProperty('table.column_formatting');
+    });
+
     it('uses the pie settings for a pie, which ignores the graph ones', () => {
         const settings = buildVisualizationSettings(card({ display: 'pie', dimensions: ['Geslacht'], metrics: ['Aantal leden'] }));
 
@@ -427,6 +469,14 @@ describe('buildTemplateTags', () => {
      * A nested fragment is looked up among the tags of the question that is running, not among those
      * of the fragment referring to it, so the card declares what it only reaches through another one.
      */
+    it('declares a parameter with a default as a number that needs no filter', () => {
+        const tags = buildTemplateTags(card({ parameters: ['werkjaar', 'aantal_werkjaren'], defaults: { aantal_werkjaren: 3 } }), new Map(), ['werkjaar']);
+
+        expect(tags['aantal_werkjaren']).toMatchObject({ type: 'number', default: 3 });
+        expect(tags['aantal_werkjaren']).not.toHaveProperty('required');
+        expect(tags['werkjaar']).toMatchObject({ type: 'text', required: true });
+    });
+
     it('points a tag at every fragment the card reads, the nested ones included', () => {
         const tags = buildTemplateTags(card({ snippets: ['facts', 'leeftijdsgroepen'] }), new Map([['facts', 7], ['leeftijdsgroepen', 9]]), []) as Record<string, unknown>;
 

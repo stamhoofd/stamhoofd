@@ -60,6 +60,17 @@ WHERE registrations.registeredAt IS NOT NULL
       OR NOT EXISTS (SELECT 1 FROM platform WHERE platform.membershipOrganizationId = registrations.organizationId)
   )
   [[AND organizations.name = {{eenheid}}]]
+  -- Only the chosen werkjaar and the ones before it, for a card that gives `aantal_werkjaren` a
+  -- value. Every other card leaves it empty, which drops the clause and keeps every werkjaar.
+  [[AND registration_periods.name IN (
+      SELECT werkjaren.name FROM (
+          SELECT name, ROW_NUMBER() OVER (ORDER BY MIN(startDate) DESC) AS positie
+          FROM registration_periods
+          GROUP BY name
+          HAVING MIN(startDate) <= (SELECT MIN(startDate) FROM registration_periods WHERE name = {{werkjaar}})
+      ) werkjaren
+      WHERE werkjaren.positie <= {{aantal_werkjaren}}
+  )]]
   AND (
       -- @include filter-registration-types
   )

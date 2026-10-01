@@ -61,8 +61,8 @@ describe('report', () => {
     });
 
     describe('definition', () => {
-        it('has the four pages of the report as tabs, plus the aanlevering and the filter values', () => {
-            expect(ravotDashboards.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'netwerk', 'varia', 'jeugdbewegingen', 'filters']);
+        it('has the pages of the report as tabs, plus the aanlevering and the filter values', () => {
+            expect(ravotDashboards.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'gtp', 'netwerk', 'varia', 'jeugdbewegingen', 'filters']);
             expect(ravotDashboards.find(tab => tab.key === 'filters')!.hidden).toBe(true);
         });
 
@@ -85,7 +85,7 @@ describe('report', () => {
                 .filter(card => card.dimensions.includes('Geslacht') || card.snippets.includes('uldk'))
                 .map(card => card.key);
 
-            expect(dashboards.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'netwerk', 'varia', 'jeugdbewegingen', 'filters']);
+            expect(dashboards.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'gtp', 'netwerk', 'varia', 'jeugdbewegingen', 'filters']);
             expect(splitOnGeslacht(dashboards)).toEqual([]);
             expect(splitOnGeslacht(ravotDashboards).length).toEqual(9);
             for (const [keeoKey, ravotKey] of [[bovenlokaalKey('keeo'), bovenlokaalKey('ravot')], ['deelnemers-lokale-groep', 'deelnemers-lokale-groep']]) {
@@ -204,7 +204,7 @@ describe('report', () => {
         it('gives the aanlevering a dashboard of its own and leaves every other tab on the report', () => {
             expect(ravotDashboards.find(tab => tab.key === 'jeugdbewegingen')!.dashboard).toEqual('Groepen en Deelnemers - Departement Jeugd');
 
-            for (const key of ['nationaal', 'eenheden', 'netwerk', 'varia']) {
+            for (const key of ['nationaal', 'eenheden', 'gtp', 'netwerk', 'varia']) {
                 expect(`${key}: ${ravotDashboards.find(tab => tab.key === key)!.dashboard}`).toEqual(`${key}: undefined`);
             }
         });
@@ -214,7 +214,7 @@ describe('report', () => {
             const drops = (sql: string) => /NOT EXISTS \(SELECT 1 FROM platform WHERE platform\.membershipOrganizationId = /.test(sql);
             const pages = ravotDashboards.filter(dashboard => dashboard.dashboard === undefined && !dashboard.hidden);
 
-            expect(pages.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'netwerk', 'varia']);
+            expect(pages.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'gtp', 'netwerk', 'varia']);
 
             for (const dashboard of pages) {
                 expect(dashboard.filters).toContain('platformleden_opnemen');
@@ -874,7 +874,7 @@ describe('report', () => {
         });
 
         /**
-         * Four cards draw a GTP index, at three different grains. They only agree because they share
+         * Five cards draw a GTP index, at three different grains. They only agree because they share
          * one fragment, and nothing but this notices when one grows a copy of its own -- in either
          * environment, since each has a fragment of its own to drift from.
          */
@@ -883,10 +883,10 @@ describe('report', () => {
                 ['keeo', dashboards, /ROUND\( \( COUNT\(DISTINCT CASE WHEN age_group_id = 'f274a949-9318-4c2b-ae35-e50114efe686'.*?, 2\)/],
                 ['ravot', ravotDashboards, /ROUND\( COUNT\(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd < 10.*?, 2\)/],
             ] as const) {
-                const expressions = [['nationaal', 'leden-per-eenheid'], ['eenheden', 'eenheid-gtp'], ['eenheden', 'eenheid-gtp-meter'], ['eenheden', 'eenheid-gtp-per-werkjaar']]
+                const expressions = [['nationaal', 'leden-per-eenheid'], ['eenheden', 'eenheid-gtp'], ['eenheden', 'eenheid-gtp-meter'], ['eenheden', 'eenheid-gtp-per-werkjaar'], ['gtp', 'gtp-per-eenheid']]
                     .map(([tab, key]) => cardOf(tabs, tab, key).sql.replaceAll(/\s+/g, ' ').match(pattern)?.[0]);
 
-                expect(`${env}: ${expressions.filter(expression => expression !== undefined).length}`).toEqual(`${env}: 4`);
+                expect(`${env}: ${expressions.filter(expression => expression !== undefined).length}`).toEqual(`${env}: 5`);
                 expect(`${env}: ${new Set(expressions).size}`).toEqual(`${env}: 1`);
             }
         });
@@ -900,6 +900,57 @@ describe('report', () => {
             for (const tabs of [dashboards, ravotDashboards]) {
                 expect(cardOf(tabs, 'eenheden', 'eenheid-gtp-meter').segments).toEqual([0, 35, 55, 75, 95, 115, 135]);
             }
+        });
+
+        /**
+         * The overview of every eenheid colors its GTP cells in the ranges the meter of a single
+         * eenheid is divided into, so an eenheid reads the same on both pages.
+         */
+        it('colors the GTP overview in the ranges of the meter', () => {
+            for (const tabs of [dashboards, ravotDashboards]) {
+                const overview = cardOf(tabs, 'gtp', 'gtp-per-eenheid');
+                const meter = cardOf(tabs, 'eenheden', 'eenheid-gtp-meter');
+
+                expect(`${overview.segments.join(',')} best ${overview.best}`).toEqual(`${meter.segments.join(',')} best ${meter.best}`);
+                expect(overview.metrics).toEqual(['GTP twee werkjaren eerder', 'GTP vorig werkjaar', 'GTP dit werkjaar']);
+                for (const column of [...overview.metrics, overview.highlight!]) {
+                    expect(`selects ${column}: ${overview.sql.includes(`AS \`${column}\``)}`).toEqual(`selects ${column}: true`);
+                }
+            }
+        });
+
+        /** A value the palette does not name highlights no row, so the eenheid would go unnoticed. */
+        it('colors every reason an eenheid is flagged in the GTP overview', () => {
+            const written = /CASE((?:(?!CASE)[\s\S])*?)END AS `Opvolgen`/.exec(cardOf(ravotDashboards, 'gtp', 'gtp-per-eenheid').sql);
+            const values = [...(written?.[1] ?? '').matchAll(/THEN '([^']+)'/g)].map(match => match[1]);
+
+            expect(values.sort()).toEqual(Object.keys(columnPalettes.get('Opvolgen')!).sort());
+        });
+
+        /**
+         * Reading every werkjaar costs as much as every werkjaar holds, so the overview has the
+         * fragment read only its own three. Every other card leaves the limit off: a trend over the
+         * years that got it would quietly lose its oldest ones.
+         */
+        it('limits only the GTP overview to its own werkjaren', () => {
+            for (const tabs of [dashboards, ravotDashboards]) {
+                const limited = tabs.flatMap(tab => tab.cards).filter(card => Object.keys(card.defaults).length > 0).map(card => `${card.key}: ${JSON.stringify(card.defaults)}`);
+
+                expect(limited).toEqual(['gtp-per-eenheid: {"aantal_werkjaren":3}']);
+            }
+
+            const sql = cardOf(ravotDashboards, 'gtp', 'gtp-per-eenheid').sql;
+            expect(/\[\[AND registration_periods\.name IN \([\s\S]*?\{\{werkjaar\}\}[\s\S]*?\{\{aantal_werkjaren\}\}\s*\)\]\]/.test(sql)).toBe(true);
+        });
+
+        /** The three werkjaren are the chosen one and the two before it, so the filter moves all of them. */
+        it('reads the GTP overview from the chosen werkjaar back', () => {
+            const card = cardOf(ravotDashboards, 'gtp', 'gtp-per-eenheid');
+
+            expect(card.parameters).toContain('werkjaar');
+            expect(ravotDashboards.find(tab => tab.key === 'gtp')!.required).toEqual(['werkjaar']);
+            expect(card.snippets).toContain('deduplicated-non-platform-registrations-all-years');
+            expect(card.sql.replaceAll(/\s+/g, ' ')).toContain('WHERE leden.`Werkjaar` IN (gekozen.name, gekozen.vorig, gekozen.voorvorig)');
         });
 
         /**
@@ -1247,7 +1298,7 @@ describe('report', () => {
         it('gives the unit filter to the eenheden tab only, as the report does', () => {
             expect(ravotDashboards.find(dashboard => dashboard.key === 'eenheden')!.filters).toEqual(['werkjaar', 'eenheid', 'platformleden_opnemen']);
 
-            for (const key of ['nationaal', 'netwerk', 'varia']) {
+            for (const key of ['nationaal', 'gtp', 'netwerk', 'varia']) {
                 expect(`${key}: ${ravotDashboards.find(dashboard => dashboard.key === key)!.filters.join(',')}`).toEqual(`${key}: werkjaar,platformleden_opnemen`);
             }
         });
@@ -1410,12 +1461,39 @@ describe('report', () => {
                 .toMatchObject({ segments: [0, 4, 6, 8], best: 'low' });
         });
 
+        it('reads the columns a table colors and the column its rows are highlighted by', () => {
+            expect(parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- metrics: A, B\n-- segments: 0, 35, 55\n-- highlight: Opvolgen\nSELECT 1', 'x.sql', new Map()).cards[0])
+                .toMatchObject({ metrics: ['A', 'B'], segments: [0, 35, 55], best: 'high', highlight: 'Opvolgen' });
+        });
+
+        it('reads the numbers a card gives its parameters', () => {
+            expect(parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- defaults: aantal = 3\nSELECT {{aantal}}', 'x.sql', new Map()).cards[0].defaults)
+                .toEqual({ aantal: 3 });
+        });
+
+        it('rejects a default that is no number, or for a parameter the query does not take', () => {
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- defaults: aantal = drie\nSELECT {{aantal}}', 'x.sql', new Map()))
+                .toThrow('expected <parameter> = <number>');
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- defaults: ander = 3\nSELECT {{aantal}}', 'x.sql', new Map()))
+                .toThrow('its query takes no {{ander}}');
+        });
+
+        it('rejects a table with ranges but no columns to color', () => {
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- segments: 0, 35, 55\nSELECT 1', 'x.sql', new Map()))
+                .toThrow('names no metrics to color');
+        });
+
+        it('rejects a highlight on a card that is not a table', () => {
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- highlight: Opvolgen\nSELECT 1', 'x.sql', new Map()))
+                .toThrow('names highlight, which only a table reads');
+        });
+
         /** Every other display drops the setting without a word, leaving a chart that looks right. */
         it('rejects ranges on a card that reads none', () => {
             expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- segments: 0, 35, 55, 75\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('names segments, which only a gauge or a number reads');
+                .toThrow('names segments, which only a gauge, a number or a table reads');
             expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- best: low\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('names best, which only a gauge or a number reads');
+                .toThrow('names best, which only a gauge, a number or a table reads');
         });
 
         /** A range that ends before it starts is drawn nowhere, so the arc loses it silently. */

@@ -72,7 +72,7 @@ export type ReportCard = {
     description?: string;
     /** Columns to group by, for the chart displays. */
     dimensions: string[];
-    /** Columns to plot, for the chart displays. */
+    /** Columns to plot, for the chart displays. For a table, the columns its segments color. */
     metrics: string[];
     /**
      * The headers a table has to be exported under, in order. Named here because a card that is
@@ -86,7 +86,8 @@ export type ReportCard = {
     /**
      * The boundaries the figure is read in, lowest first: `0, 35, 55, 75, 95, 115, 135` makes six
      * ranges. A gauge draws them as its arc and a number is colored by the one it falls in, which is
-     * how the two cards of one figure say the same thing. The outer two are where the arc starts and
+     * how the two cards of one figure say the same thing. A table colors the cells of its metrics the
+     * same way. The outer two are where the arc starts and
      * stops rather than a figure anything is measured against, since the figure itself has no ends.
      * Absent leaves a gauge to Metabase, which splits the arc in three, and a number uncolored.
      */
@@ -97,6 +98,12 @@ export type ReportCard = {
      * the fewer leden a leider has to look after, the better.
      */
     best: ReportCardBest;
+    /**
+     * For a table, the column whose value colors the whole row, in the colors `columnPalettes` gives
+     * that column's values. The column itself is hidden: the row color says what it holds. A cell
+     * colored by the segments keeps its own color.
+     */
+    highlight?: string;
     /**
      * How the labels along the x-axis are drawn. Absent lets the chart decide, which drops them
      * entirely when too many do not fit -- an eenheid or leeftijdsgroep chart needs a rotation to keep them.
@@ -111,6 +118,11 @@ export type ReportCard = {
     xScale?: ReportCardXScale;
     /** Parameters the query takes, read from the `{{...}}` in the sql. */
     parameters: string[];
+    /**
+     * Numbers a parameter takes when no filter gives it one, written `-- defaults: aantal_werkjaren = 3`.
+     * It is how a card switches on an optional clause of a fragment that no dashboard filter drives.
+     */
+    defaults: Record<string, number>;
     /**
      * The environments this card is not written for. A platform that does not record what the card
      * counts has no variant of it to be given, only an empty one, so it is left out there instead.
@@ -198,7 +210,7 @@ export const reportCardBest = ['low', 'high'] as const;
 export type ReportCardBest = typeof reportCardBest[number];
 
 /** The order the tabs are written in: the pages of the client's report first, then what is not one. */
-export const reportTabOrder = ['nationaal', 'eenheden', 'netwerk', 'varia', 'jeugdbewegingen', 'filters'];
+export const reportTabOrder = ['nationaal', 'eenheden', 'gtp', 'netwerk', 'varia', 'jeugdbewegingen', 'filters'];
 
 export function getReportDirectory(): string {
     return path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'report');
@@ -405,7 +417,7 @@ type Section = { kind: 'tab' | 'card'; key: string; attributes: Map<string, stri
  * slipped down rather than a comment, and would otherwise be dropped without a word: writing a
  * comment above `-- size:` is enough to make the whole block below it stop counting.
  */
-const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'columns', 'stacked', 'segments', 'best', 'xlabels', 'height', 'span', 'latitude', 'longitude', 'filters', 'required', 'hidden', 'dashboard', 'except', 'only', 'xscale']);
+const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'columns', 'stacked', 'segments', 'best', 'xlabels', 'height', 'span', 'latitude', 'longitude', 'filters', 'required', 'hidden', 'dashboard', 'except', 'only', 'xscale', 'highlight', 'defaults']);
 
 function splitSections(contents: string, file: string, env?: string): Section[] {
     const sections: Section[] = [];
@@ -490,6 +502,15 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
     }
 
     const { segments, best } = parseRanges(section, file, display);
+    const metrics = splitList(section.attributes.get('metrics'));
+    if (display === 'table' && segments.length > 0 && metrics.length === 0) {
+        throw new Error(`${file}: card "${section.key}" is a table with segments but names no metrics to color`);
+    }
+
+    const highlight = section.attributes.get('highlight');
+    if (highlight !== undefined && display !== 'table') {
+        throw new Error(`${file}: card "${section.key}" names highlight, which only a table reads`);
+    }
     const height = parseCount(section, file, 'height');
     const span = parseCount(section, file, 'span') ?? 1;
 
@@ -500,6 +521,8 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
     }
 
     const sql = expandIncludes(section.body, includes, file, section.key).trim();
+    const parameters = parameterNames(sql);
+    const defaults = parseDefaults(section, file, parameters);
 
     return {
         key: section.key,
@@ -512,20 +535,41 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
         span,
         description: section.attributes.get('description'),
         dimensions: splitList(section.attributes.get('dimensions')),
-        metrics: splitList(section.attributes.get('metrics')),
+        metrics,
         columns: splitList(section.attributes.get('columns')),
         stacked,
         segments,
         best,
+        highlight,
         xLabels: xLabels as ReportCardXLabels | undefined,
         xScale: xScale as ReportCardXScale | undefined,
-        parameters: parameterNames(sql),
+        parameters,
+        defaults,
         except: splitList(section.attributes.get('except')),
         only: splitList(section.attributes.get('only')),
         snippets: collectIncludes(section.body, includes),
         sql,
         snippetSql: referenceIncludes(section.body, includes).trim(),
     };
+}
+
+/** `name = 3, other = 5`: a number per parameter the query takes. */
+function parseDefaults(section: Section, file: string, parameters: string[]): Record<string, number> {
+    const defaults: Record<string, number> = {};
+
+    for (const entry of splitList(section.attributes.get('defaults'))) {
+        const match = /^([a-z_]+)[ \t]*=[ \t]*(\S+)$/.exec(entry);
+        const value = Number(match?.[2]);
+        if (!match || !Number.isFinite(value)) {
+            throw new Error(`${file}: card "${section.key}" has default "${entry}", expected <parameter> = <number>`);
+        }
+        if (!parameters.includes(match[1])) {
+            throw new Error(`${file}: card "${section.key}" gives "${match[1]}" a default, but its query takes no {{${match[1]}}}`);
+        }
+        defaults[match[1]] = value;
+    }
+
+    return defaults;
 }
 
 /** A setting counted in whole cards or rows, which is only a size while it is a positive number. */
@@ -542,8 +586,8 @@ function parseCount(section: Section, file: string, name: string): number | unde
     return count;
 }
 
-/** The displays that read a figure against ranges: a gauge draws them, a number is colored by them. */
-const rangedDisplays = ['gauge', 'scalar'];
+/** The displays that read a figure against ranges: a gauge draws them, a number or a table cell is colored by them. */
+const rangedDisplays = ['gauge', 'scalar', 'table'];
 
 /**
  * How a figure is divided into ranges and which way they are read, both of which every other display
@@ -557,7 +601,7 @@ function parseRanges(section: Section, file: string, display: string): { segment
 
     for (const name of ['segments', 'best']) {
         if (section.attributes.has(name) && !rangedDisplays.includes(display)) {
-            throw new Error(`${file}: card "${section.key}" names ${name}, which only a gauge or a number reads`);
+            throw new Error(`${file}: card "${section.key}" names ${name}, which only a gauge, a number or a table reads`);
         }
     }
     if (!(reportCardBest as readonly string[]).includes(best)) {

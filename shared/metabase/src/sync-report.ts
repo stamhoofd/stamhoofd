@@ -251,12 +251,15 @@ export function buildTemplateTags(card: ReportCard, snippetIds: Map<string, numb
 
     for (const parameter of card.parameters) {
         const filter = reportFilters.find(entry => entry.name === parameter);
+        const fallback = card.defaults[parameter];
+
         tags[parameter] = {
             id: templateTagId(card.key, parameter),
             name: parameter,
             'display-name': filter?.title ?? parameter,
-            type: filter?.type === 'boolean' ? 'boolean' : 'text',
+            type: fallback !== undefined ? 'number' : filter?.type === 'boolean' ? 'boolean' : 'text',
             ...(filter?.type === 'boolean' ? { default: filter.start } : {}),
+            ...(fallback !== undefined ? { default: fallback } : {}),
             ...(required.includes(parameter) ? { required: true } : {}),
         };
     }
@@ -365,7 +368,55 @@ export const columnPalettes = new Map<string, Record<string, string>>([
         Andere: '#8A2BE2',
         Onbekend: '#949AAB',
     }],
+    // Metabase draws a highlighted row at a fifth of this strength.
+    ['Opvolgen', {
+        'Onder 55': segmentScale[1],
+        'Gedaald': '#F2A86F',
+        'Onder 55 en gedaald': segmentScale[0],
+    }],
 ]);
+
+/**
+ * The conditional formatting of a table: its metrics colored by the range they fall in, and its rows
+ * by the value of the highlight column.
+ *
+ * Metabase takes the first rule that matches a cell, and only falls back to the row rules for a cell
+ * no rule of its own colors. So each range is written as everything below its upper boundary, lowest
+ * first, with the outer two left open like a number's.
+ */
+function buildColumnFormatting(card: ReportCard): Record<string, unknown>[] {
+    const colors = card.segments.length === 0 ? [] : segmentColors(card.segments.length - 1, card.best);
+    const last = card.segments.length - 2;
+
+    const ranges = card.segments.slice(0, -1).map((min, index) => ({
+        columns: card.metrics,
+        type: 'single',
+        operator: index === last ? '>=' : '<',
+        value: index === last ? min : card.segments[index + 1],
+        color: colors[index],
+        highlight_row: false,
+    }));
+
+    if (card.highlight === undefined) {
+        return ranges;
+    }
+
+    const palette = columnPalettes.get(card.highlight);
+    if (palette === undefined) {
+        throw new Error(`Card "${card.key}" highlights its rows by "${card.highlight}", which has no colors in columnPalettes`);
+    }
+
+    const rows = Object.entries(palette).map(([value, color]) => ({
+        columns: [card.highlight],
+        type: 'single',
+        operator: '=',
+        value,
+        color,
+        highlight_row: true,
+    }));
+
+    return [...ranges, ...rows];
+}
 
 /**
  * The colors a chart falls back to, per platform: the ones the platform shows itself in everywhere
@@ -457,6 +508,18 @@ export function buildVisualizationSettings(card: ReportCard, hasCoordinates = tr
         // the meter further down says without having to be read against it.
         if (card.segments.length > 0) {
             settings['scalar.segments'] = buildSegments(card, 'scalar');
+        }
+        return settings;
+    }
+
+    if (display === 'table') {
+        if (card.segments.length > 0 || card.highlight !== undefined) {
+            settings['table.column_formatting'] = buildColumnFormatting(card);
+        }
+        // Metabase colors a row from the query result rather than from the visible columns, so the
+        // highlight column still colors the rows when hidden. Unlisted columns stay visible.
+        if (card.highlight !== undefined) {
+            settings['table.columns'] = [{ name: card.highlight, enabled: false }];
         }
         return settings;
     }

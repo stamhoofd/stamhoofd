@@ -27,6 +27,10 @@ learns what it is built from. It also means every fragment runs as it stands: pa
 how a figure is investigated apart from the aggregates the cards draw over it.
 `includes/deduplicated-non-platform-registrations-all-years.sql` is the same over every werkjaar at once -- the year filter does not
 reach it, which is what the trend cards read; a test keeps its ranking identical to the single-year fragment's.
+A card that only needs the last few werkjaren gives `aantal_werkjaren` a number (`-- defaults: aantal_werkjaren = 3`):
+that switches on an optional clause in `all-non-platform-registrations-all-years` which keeps the chosen werkjaar and
+the ones before it, before the ranking runs. Filtering the result afterwards reads the same rows but builds every
+werkjaar first, which is as slow as the platform has years.
 
 A fragment that is a condition rather than a query -- which aansluitingen count, which kinds of
 registration count -- carries a `filter-` prefix and is a bare predicate: the query that includes it
