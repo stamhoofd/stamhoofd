@@ -1,6 +1,6 @@
 import { column } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { QueryableModel } from '@stamhoofd/sql';
+import { QueryableModel, readDynamicSQLExpression, SQL } from '@stamhoofd/sql';
 import basex from 'base-x';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
@@ -49,8 +49,11 @@ export class EmailVerificationCode extends QueryableModel {
     @column({ type: 'string', nullable: true })
     organizationId: string | null = null;
 
-    @column({ type: 'string' })
-    userId: string;
+    /**
+     * Null for decoy codes, which can never be redeemed
+     */
+    @column({ type: 'string', nullable: true })
+    userId: string | null = null;
 
     /**
      * The e-mail that will get verified. If on verification, the user e-mail differs from this one,
@@ -202,6 +205,23 @@ export class EmailVerificationCode extends QueryableModel {
             });
         }
 
+        // Claim the try atomically before comparing, so parallel guesses can't exceed MAX_TRIES
+        const { changedRows } = await EmailVerificationCode.update()
+            .where('id', verificationCode.id)
+            .where('tries', '<', EmailVerificationCode.MAX_TRIES)
+            .set('tries', SQL.calculation(SQL.column('tries')).add(readDynamicSQLExpression(1)))
+            .update();
+
+        if (changedRows === 0) {
+            throw new SimpleError({
+                code: 'too_many_attempts',
+                message: 'Too many attempts',
+                human: $t(`%GL`),
+                statusCode: 429,
+            });
+        }
+        verificationCode.tries++;
+
         if (verificationCode.code === code || (code === '111111' && (STAMHOOFD.environment === 'development' || STAMHOOFD.environment === 'test'))) {
             // Delete all remaining information!
             // To avoid leaving information about the existince of this user (tries)
@@ -209,9 +229,6 @@ export class EmailVerificationCode extends QueryableModel {
 
             return verificationCode;
         }
-
-        verificationCode.tries++;
-        await verificationCode.save();
 
         if (verificationCode.tries >= EmailVerificationCode.MAX_TRIES) {
             // We can saferly inform the user, because he is authenticated with the token
@@ -222,6 +239,14 @@ export class EmailVerificationCode extends QueryableModel {
                 statusCode: 429,
             });
         }
+    }
+
+    /**
+     * Behaves like a real code for the requester (including reuse on repeated requests), but is not linked to a user, so it can never be redeemed.
+     */
+    static async createDecoy(organizationId: string | null, email: string): Promise<EmailVerificationCode> {
+        const verificationCodes = await this.where({ userId: null, organizationId, email }, { limit: 1 });
+        return await this.createOrReuse(verificationCodes[0], organizationId, null, email);
     }
 
     /**
@@ -238,11 +263,14 @@ export class EmailVerificationCode extends QueryableModel {
         // So multiple users should be able to request changing to a password, but only on validation should they fail
         // (or this should be noted in the verification email and accounts could be merged)
         const verificationCodes = await this.where({ userId: user.id }, { limit: 1 });
+        return await this.createOrReuse(verificationCodes[0], user.organizationId, user.id, email);
+    }
 
+    private static async createOrReuse(existing: EmailVerificationCode | undefined, organizationId: string | null, userId: string | null, email: string): Promise<EmailVerificationCode> {
         let verificationCode: EmailVerificationCode;
-        if (verificationCodes.length == 0) {
+        if (!existing) {
             verificationCode = new EmailVerificationCode();
-            verificationCode.organizationId = user.organizationId;
+            verificationCode.organizationId = organizationId;
             await verificationCode.generateCode();
 
             // Reset the real tries
@@ -251,7 +279,7 @@ export class EmailVerificationCode extends QueryableModel {
             // Expire in 3 hours
             verificationCode.expiresAt = new Date(new Date().getTime() + 1000 * 60 * 60 * 3);
         } else {
-            verificationCode = verificationCodes[0];
+            verificationCode = existing;
 
             if (verificationCode.email !== email || verificationCode.expiresAt < new Date(new Date().getTime() - 15 * 60 * 1000) || verificationCode.tries >= EmailVerificationCode.MAX_TRIES) {
                 // Expired: also update the token
@@ -260,7 +288,7 @@ export class EmailVerificationCode extends QueryableModel {
         }
 
         verificationCode.email = email;
-        verificationCode.userId = user.id;
+        verificationCode.userId = userId;
 
         await verificationCode.save();
         return verificationCode;

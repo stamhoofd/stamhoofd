@@ -128,8 +128,11 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
             }
         }
 
-        // We always need the code, to return it. Also on password recovery -> may not be visible to the client whether the user exists or not
-        const code = await EmailVerificationCode.createFor(user, user.email);
+        // Always return a token, so the response doesn't expose whether the account exists.
+        // For an existing account the requester proved nothing, so the token must not be redeemable.
+        const code = sendCode
+            ? await EmailVerificationCode.createFor(user, user.email)
+            : await EmailVerificationCode.createDecoy(user.organizationId, user.email);
 
         if (sendCode) {
             VerificationCodeService.send(code, user, organization, request.i18n).catch(console.error);
