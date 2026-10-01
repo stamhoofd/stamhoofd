@@ -27,7 +27,7 @@
     "devDependencies": {
         "@anthropic-ai/sdk": "0.124.0",
         "@google/generative-ai": "0.24.1",
-        "@mistralai/mistralai": "1.15.1",
+        "@mistralai/mistralai": "2.7.0",
         "chalk": "4.1.2",
         "commander": "13.1.0",
         "dotenv": "16.6.1",
