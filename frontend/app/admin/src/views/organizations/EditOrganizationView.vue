@@ -36,14 +36,14 @@
 
         <hr><h2>{{ $t('%3G') }}</h2>
         <STList>
-            <SelectOrganizationTagRow v-for="tag in rootTags" :key="tag.id" :organization="patched" :tag="tag" @patch:organization="addPatch" />
+            <SelectOrganizationTagRow v-for="tag in rootTags.filter(isVisible)" :key="tag.id" :organization="patched" :tag="tag" :lock-value="canEditTags ? null : isSelected(tag)" @patch:organization="addPatch" />
         </STList>
 
-        <div v-for="tag in allTagsWithChildren" :key="tag.id" class="container">
+        <div v-for="tag in allTagsWithChildren.filter(isVisible)" :key="tag.id" class="container">
             <JumpToContainer :visible="isSelected(tag)">
                 <hr><h2>{{ $t('%3G') }} → {{ tag.name }}</h2>
                 <STList>
-                    <SelectOrganizationTagRow v-for="childTag in tagIdsToTags(tag.childTags)" :key="childTag.id" :organization="patched" :tag="childTag" @patch:organization="addPatch" />
+                    <SelectOrganizationTagRow v-for="childTag in tagIdsToTags(tag.childTags).filter(isVisible)" :key="childTag.id" :organization="patched" :tag="childTag" :lock-value="canEditTags ? null : isSelected(childTag)" @patch:organization="addPatch" />
                 </STList>
             </JumpToContainer>
         </div>
@@ -75,7 +75,7 @@ import UrlInput from '@stamhoofd/components/inputs/UrlInput.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import FillRecordCategoryBox from '@stamhoofd/components/records/components/FillRecordCategoryBox.vue';
 import type { Organization, OrganizationTag, PatchAnswers} from '@stamhoofd/structures';
-import { OrganizationMetaData, OrganizationPrivateMetaData, TagHelper } from '@stamhoofd/structures';
+import { AccessRight, OrganizationMetaData, OrganizationPrivateMetaData, PermissionLevel, PermissionsResourceType, TagHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch } from 'vue';
 import OrganizationUriInput from './components/OrganizationUriInput.vue';
@@ -147,6 +147,34 @@ const selectedTagIds = computed(() => patched.value.meta.tags);
 const selectedTags = computed(() => tagIdsToTags(selectedTagIds.value));
 const allTagsWithChildren = computed(() => platformTags.value.filter(tag => tag.childTags.length > 0));
 const selectedTagsWithChildren = computed(() => selectedTags.value.filter(tag => tag.childTags.length > 0));
+
+// Only full platform admins can change the tags of existing organizations
+const canEditTags = props.isNew || auth.hasPlatformFullAccess();
+
+// Admins without full platform access only see the tags they can create organizations with, or have access to
+const visibleTagIds = computed(() => {
+    if (auth.hasPlatformFullAccess()) {
+        return null;
+    }
+    const allTags = platformTags.value;
+    let tagIds: string[];
+    if (props.isNew) {
+        const managed = allTags.filter(tag => auth.platformPermissions?.hasResourceAccessRight(PermissionsResourceType.OrganizationTags, tag.id, AccessRight.PlatformCreateOrganizations)).map(tag => tag.id);
+        tagIds = [...managed, ...managed.flatMap(id => TagHelper.getAllDescendants(id, { allTags }))];
+    }
+    else {
+        const accessible = auth.getPlatformAccessibleOrganizationTags(PermissionLevel.Read);
+        if (accessible === 'all') {
+            return null;
+        }
+        tagIds = accessible.map(tag => tag.id);
+    }
+    return new Set([...tagIds, ...tagIds.flatMap(id => TagHelper.getAllAncestors(id, { allTags }))]);
+});
+
+function isVisible(tag: OrganizationTag) {
+    return visibleTagIds.value?.has(tag.id) ?? true;
+}
 
 watch(() => selectedTagsWithChildren.value, (selectedTagsWithChildren) => {
     const tagIds = selectedTagIds.value;

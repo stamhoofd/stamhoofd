@@ -40,7 +40,7 @@ import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { OrganizationTag, OrganizationType, StamhoofdFilter, UmbrellaOrganization } from '@stamhoofd/structures';
-import { AccessRight, Address, CountryHelper, EmailRecipientSubfilter, ExcelExportType, isEmptyFilter, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationTypeHelper, PermissionLevel, STPackageType, STPackageTypeHelper, TagHelper, UmbrellaOrganizationHelper } from '@stamhoofd/structures';
+import { AccessRight, Address, CountryHelper, EmailRecipientSubfilter, ExcelExportType, isEmptyFilter, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationTypeHelper, PermissionLevel, PermissionsResourceType, STPackageType, STPackageTypeHelper, TagHelper, UmbrellaOrganizationHelper } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import type { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
@@ -433,7 +433,7 @@ actions.push(
         groupIndex: 4,
         allowAutoSelectAll: true,
         needsSelection: true,
-        enabled: () => platform.value.config.tags.length > 0,
+        enabled: () => auth.hasPlatformFullAccess() && platform.value.config.tags.length > 0,
         childActions: () => {
             const allTags = platform.value.config.tags;
             const rootTags = TagHelper.getRootTags(allTags);
@@ -449,7 +449,7 @@ actions.push(
         groupIndex: 4,
         allowAutoSelectAll: true,
         needsSelection: true,
-        enabled: () => platform.value.config.tags.length > 0,
+        enabled: () => auth.hasPlatformFullAccess() && platform.value.config.tags.length > 0,
         childActions: () => {
             const allTags = platform.value.config.tags;
             const rootTags = TagHelper.getRootTags(allTags);
@@ -602,7 +602,7 @@ function getExcelTitle(selection: TableActionSelection<ObjectType>) {
     return parts.filter(Boolean).join(' - ');
 }
 
-if (auth.hasPlatformFullAccess()) {
+if (auth.platformPermissions?.hasAccessRightForSomeResourceOfType(PermissionsResourceType.OrganizationTags, AccessRight.PlatformCreateOrganizations)) {
     actions.push(
         new InMemoryTableAction({
             name: $t('%3E'),
@@ -611,8 +611,12 @@ if (auth.hasPlatformFullAccess()) {
             groupIndex: 1,
             needsSelection: false,
             handler: async () => {
+                const tagId = props.tag?.id && auth.platformPermissions?.hasResourceAccessRight(PermissionsResourceType.OrganizationTags, props.tag.id, AccessRight.PlatformCreateOrganizations) ? props.tag.id : null;
                 const organization = Organization.create({
                     address: Address.createDefault(I18nController.shared.countryCode),
+                    meta: OrganizationMetaData.create({
+                        tags: tagId ? [...TagHelper.getAllAncestors(tagId, { allTags: platform.value.config.tags }), tagId] : [],
+                    }),
                     privateMeta: OrganizationPrivateMetaData.create({}),
                 });
 
@@ -647,7 +651,9 @@ if (auth.hasPlatformFullAccess()) {
             },
         }),
     );
+}
 
+if (auth.hasPlatformFullAccess()) {
     actions.push(new AsyncTableAction({
         name: $t(`%Gb`),
         icon: 'send',

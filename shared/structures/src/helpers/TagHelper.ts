@@ -86,4 +86,10 @@ export class TagHelper {
 
         return descendants;
     }
+
+    static getAllAncestors(tagId: string, tags: { allTags: OrganizationTag[] } | { tagMap: Map<string, OrganizationTag> }): string[] {
+        const tagMap = 'tagMap' in tags ? tags.tagMap : new Map(tags.allTags.map(tag => [tag.id, tag]));
+
+        return [...tagMap.keys()].filter(id => this.containsDeep(id, tagId, { tagMap }));
+    }
 }

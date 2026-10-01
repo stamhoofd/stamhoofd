@@ -2182,7 +2182,7 @@ export class AdminPermissionChecker {
             }
         }
 
-        if (tags.length === allTags.length) {
+        if (tags.length > 0 && tags.length === allTags.length) {
             return 'all';
         }
 
