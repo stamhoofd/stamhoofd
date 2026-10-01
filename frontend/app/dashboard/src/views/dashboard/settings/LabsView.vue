@@ -286,6 +286,18 @@
                     </p>
                 </STListItem>
 
+                <STListItem :selectable="true" element-name="label" data-testid="notifications-checkbox">
+                    <template #left>
+                        <Checkbox :model-value="getFeatureFlag('notifications')" @update:model-value="setFeatureFlag('notifications', !!$event)" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('Meldingen') }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ $t('Toon meldingen bovenaan in de navigatiebalk. Nog in ontwikkeling.') }}
+                    </p>
+                </STListItem>
+
                 <STListItem v-if="!platform.config.featureFlags.includes('impersonation')" :selectable="true" element-name="label" data-testid="impersonation-checkbox">
                     <template #left>
                         <Checkbox :model-value="getFeatureFlag('impersonation')" @update:model-value="setFeatureFlag('impersonation', !!$event)" />

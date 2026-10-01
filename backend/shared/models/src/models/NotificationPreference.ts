@@ -1,6 +1,7 @@
 import { column } from '@simonbackx/simple-database';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { NotificationChannel } from '@stamhoofd/structures/notifications/NotificationChannel.js';
+import { NotificationPreference as NotificationPreferenceStruct } from '@stamhoofd/structures/notifications/NotificationPreference.js';
 import type { NotificationType } from '@stamhoofd/structures/notifications/NotificationType.js';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -47,4 +48,12 @@ export class NotificationPreference extends QueryableModel {
         skipUpdate: true,
     })
     updatedAt: Date;
+
+    getStructure(): NotificationPreferenceStruct {
+        return NotificationPreferenceStruct.create({
+            type: this.notificationType,
+            channel: this.channel,
+            enabled: this.enabled,
+        });
+    }
 }

@@ -6,11 +6,12 @@ import { NotificationRecipient } from '@stamhoofd/models/models/NotificationReci
 import { QueueHandler } from '@stamhoofd/queues';
 import { SQL } from '@stamhoofd/sql';
 import type { NamedObject } from '@stamhoofd/structures';
+import type { NotificationPreference as NotificationPreferenceStruct } from '@stamhoofd/structures/notifications/NotificationPreference.js';
 import { NotificationChannel } from '@stamhoofd/structures/notifications/NotificationChannel.js';
 import type { NotificationSubjectType } from '@stamhoofd/structures/notifications/NotificationSubjectType.js';
 import type { NotificationType } from '@stamhoofd/structures/notifications/NotificationType.js';
 import { Formatter } from '@stamhoofd/utility';
-import { v7 as uuidv7 } from 'uuid';
+import { v4 as uuidv4, v7 as uuidv7 } from 'uuid';
 
 export type NotificationTarget = {
     users?: (User | string)[];
@@ -86,6 +87,34 @@ export class NotificationService {
         return await this.markRead('r.userId = ? AND r.readAt IS NULL', [user.id]);
     }
 
+    static async getPreferences(user: User): Promise<NotificationPreference[]> {
+        return await NotificationPreference.select()
+            .where('userId', user.id)
+            .fetch();
+    }
+
+    /**
+     * Upserts the given preferences; preferences of other types and channels are kept
+     */
+    static async setPreferences(user: User, preferences: NotificationPreferenceStruct[]): Promise<void> {
+        if (preferences.length === 0) {
+            return;
+        }
+
+        const now = new Date();
+        now.setMilliseconds(0);
+
+        await SQL.insert(NotificationPreference.table)
+            .columns('id', 'userId', 'notificationType', 'channel', 'enabled', 'createdAt', 'updatedAt')
+            .values(...preferences.map(p => [uuidv4(), user.id, p.type, p.channel, p.enabled, now, now]))
+            .as('v')
+            .onDuplicateKeyUpdate(
+                SQL.assignment('enabled', SQL.column('v', 'enabled')),
+                SQL.assignment('updatedAt', SQL.column('v', 'updatedAt')),
+            )
+            .insert();
+    }
+
     private static async markRead(where: string, params: unknown[]): Promise<number> {
         const now = new Date();
         now.setMilliseconds(0);
@@ -150,10 +179,12 @@ export class NotificationService {
         }
         await notification.save();
 
+        // Recipients that are not targeted anymore (e.g. unsubscribed) keep their read state
         await SQL.update(NotificationRecipient.table)
             .set('readAt', null)
             .set('seenAt', null)
             .where('notificationId', notification.id)
+            .andWhere('userId', userIds)
             .update();
 
         const existingRecipients = await NotificationRecipient.select()

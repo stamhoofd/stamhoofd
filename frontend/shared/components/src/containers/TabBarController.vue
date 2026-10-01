@@ -17,6 +17,7 @@
                 </template>
             </div>
             <div class="right">
+                <InheritComponent name="tabbar-notifications" />
                 <InheritComponent name="tabbar-right" />
             </div>
         </header>
@@ -477,6 +478,9 @@ defineExpose({
 
             // Align grid items right
             justify-self: end;
+            display: flex;
+            align-items: center;
+            gap: 20px;
         }
 
         > .middle {

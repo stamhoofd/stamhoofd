@@ -127,6 +127,12 @@ export class Registration extends QueryableModel {
     @column({ type: 'boolean' })
     sendConfirmationEmail = true;
 
+    /**
+     * Started by the member (or a linked user) instead of by an administrator, so administrators get notified once it is valid
+     */
+    @column({ type: 'boolean' })
+    registeredByMember = false;
+
     @column({ type: 'datetime', nullable: true })
     deactivatedAt: Date | null = null;
 
