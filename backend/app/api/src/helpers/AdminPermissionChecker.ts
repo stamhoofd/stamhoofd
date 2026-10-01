@@ -1083,7 +1083,7 @@ export class AdminPermissionChecker {
         );
     }
 
-    async canEditMemberEmailAddresses(member: MemberWithUsersRegistrationsAndGroups, responsibilities?: { organizationId: string | null }[]) {
+    async canEditMemberEmailAddresses(member: MemberWithUsers, responsibilities?: { organizationId: string | null }[]) {
         if (member.users.some(u => u.id === this.user.id)) return true;
 
         if (!responsibilities) {

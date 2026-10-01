@@ -958,10 +958,18 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         const __familyMembers = await Member.getFamily(member.id);
         const _familyMembers = await Member.loadRegistrationsAndUsers(__familyMembers);
         const familyMembers: Member[] = [];
+
+        // Parent emails link users to a member, so they can only change for members whose emails the user can edit
+        const protectedParents = new Map<string, Parent[]>();
+
         // Only modify members if we have write access to them (this avoids issues with overriding data)
-        for (const member of _familyMembers) {
-            if (await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
-                familyMembers.push(member);
+        for (const familyMember of _familyMembers) {
+            if (await Context.auth.canAccessMember(familyMember, PermissionLevel.Write)) {
+                familyMembers.push(familyMember);
+
+                if (familyMember.id !== member.id && !await Context.auth.canEditMemberEmailAddresses(familyMember)) {
+                    protectedParents.set(familyMember.id, familyMember.details.parents.map(p => p.clone()));
+                }
             }
         }
 
@@ -1070,6 +1078,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
 
             for (const m of familyMembers) {
+                const originalParents = protectedParents.get(m.id);
+                if (originalParents && originalParents.flatMap(p => p.getEmails()).join('\n') !== m.details.getParentEmails().join('\n')) {
+                    m.details.parents = originalParents;
+                }
+
                 m.details.cleanData();
 
                 if (await m.save() && m.id !== member.id) {
