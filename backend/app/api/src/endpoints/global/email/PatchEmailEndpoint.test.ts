@@ -18,6 +18,7 @@ import '../../../email-recipient-loaders/orders.js';
 import '../../../email-recipient-loaders/receivable-balances.js';
 import '../../../email-recipient-loaders/registrations.js';
 import { EmailMocker } from '@stamhoofd/email';
+import { vi } from 'vitest';
 
 const baseUrl = `/v${Version}/email`;
 
@@ -696,17 +697,8 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             expect(greeting).toBeDefined();
             expect(greeting?.value).toEqual('Dag ' + recipient.firstName + ',');
 
-            // Check loginDetails replacement includes email address
-            const loginDetails = recipient.replacements.find(r => r.token === 'loginDetails');
-            expect(loginDetails).toBeDefined();
-
-            if (recipient.email) {
-                expect(loginDetails?.html).toContain(recipient.email || ''); // If no email, won't contain it
-            } else {
-                // Cehck loginDetails is an empty string
-                expect(loginDetails?.html).toBe(undefined);
-                expect(loginDetails?.value).toBe('');
-            }
+            // loginDetails contains security codes and is only generated when sending
+            expect(recipient.replacements.find(r => r.token === 'loginDetails')).toBeUndefined();
 
             const balanceTable = recipient.replacements.find(r => r.token === 'balanceTable');
             expect(balanceTable).toBeDefined();
@@ -732,6 +724,15 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             const lastNameMember = recipient.replacements.find(r => r.token === 'lastNameMember');
             expect(lastNameMember).toBeUndefined();
         }
+
+        await vi.waitFor(async () => {
+            await email.refresh();
+            expect(email.status).toBe(EmailStatus.Sent);
+        });
+        const sentEmails = await EmailMocker.getSucceededEmails();
+        const sentEmail = sentEmails.find(e => e.to.includes(userWithEmail.email));
+        expect(sentEmail).toBeDefined();
+        expect(sentEmail?.html).toContain(`<strong>${Formatter.escapeHtml(userWithEmail.email)}</strong>`);
     });
 
     test('Should merge identical emails', async () => {

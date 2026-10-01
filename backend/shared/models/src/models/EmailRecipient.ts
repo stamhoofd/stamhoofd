@@ -51,7 +51,13 @@ export class EmailRecipient extends QueryableModel {
     @column({ type: 'string', nullable: true })
     language: Language | null = null;
 
-    @column({ type: 'json', decoder: new ArrayDecoder(Replacement) })
+    @column({
+        type: 'json',
+        decoder: new ArrayDecoder(Replacement),
+        beforeSave(value: Replacement[]) {
+            return EmailRecipient.removeUnstoredReplacements(value);
+        },
+    })
     replacements: Replacement[] = [];
 
     /**
@@ -151,6 +157,14 @@ export class EmailRecipient extends QueryableModel {
         skipUpdate: true,
     })
     updatedAt: Date;
+
+    /**
+     * loginDetails contains the security codes of every member linked to the recipient's user.
+     * It is regenerated when sending, so it never needs to be stored.
+     */
+    static removeUnstoredReplacements(replacements: Replacement[]) {
+        return replacements.filter(r => r.token !== 'loginDetails');
+    }
 
     async getStructure() {
         return (await EmailRecipient.getStructures([this]))[0];

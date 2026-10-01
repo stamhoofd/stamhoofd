@@ -1,7 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { AuditLog, Document, EventNotification, MemberWithUsersRegistrationsAndGroups, Order, Ticket } from '@stamhoofd/models';
-import { BalanceItem, CachedBalance, Event, Group, Invoice, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Platform as PlatformModel, Registration, RegistrationInvitation, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
-import type { PaymentGeneral } from '@stamhoofd/structures';
+import { BalanceItem, CachedBalance, EmailRecipient, Event, Group, Invoice, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Platform as PlatformModel, Registration, RegistrationInvitation, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
+import type { EmailRecipient as EmailRecipientStruct, PaymentGeneral } from '@stamhoofd/structures';
 import { BaseOrganization, getAppHost, ImpersonatedBy, OrganizationPrivateMetaData } from '@stamhoofd/structures';
 import { Payment as PaymentStruct, AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, BalanceItem as BalanceItemStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, InvitationGroupData, InvitationMemberData, InvoicedBalanceItem, InvoiceStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberRegistrationInvitation, MembersBlob, MemberWithRegistrationsBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentCustomer, PermissionLevel, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationInvitation as RegistrationInvitationStruct, RegistrationsBlob, RegistrationWithMemberBlob, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
@@ -9,6 +9,7 @@ import { Sorter } from '@stamhoofd/utility';
 import { SQL } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from './Context.js';
+import { fillRecipientReplacements } from './EmailBuilder.js';
 import { TwoFactorHelper } from './TwoFactorHelper.js';
 
 /**
@@ -1279,6 +1280,24 @@ export class AuthenticatedStructures {
         }
 
         return structs;
+    }
+
+    /**
+     * Stored replacements contain secrets (e.g. unsubscribe tokens), so they are regenerated in preview mode.
+     */
+    static async emailRecipients(recipients: EmailRecipient[]): Promise<EmailRecipientStruct[]> {
+        return await Promise.all((await EmailRecipient.getStructures(recipients)).map(async (r) => {
+            const rr = r.getRecipient();
+            await fillRecipientReplacements(rr, {
+                organization: Context.organization ?? null,
+                from: null,
+                replyTo: null,
+                forPreview: true,
+                forceRefresh: false,
+            });
+            r.replacements = rr.replacements;
+            return r;
+        }));
     }
 
     static async balanceItems(balanceItems: BalanceItem[]) {

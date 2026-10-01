@@ -553,7 +553,8 @@ export class EmailSendService {
                                 forPreview: false,
                                 allowedLanguages: upToDate.getLanguages(),
                             });
-                            recipient.replacements = removeUnusedReplacements(combinedHtml, recipient.replacements);
+                            // Stored duplicates never contain the unstored replacements, so remove them before comparing
+                            recipient.replacements = EmailRecipient.removeUnstoredReplacements(removeUnusedReplacements(combinedHtml, recipient.replacements));
 
                             let duplicateOfRecipientId: string | null = null;
                             if (item.email && emailsSet.has(item.email)) {

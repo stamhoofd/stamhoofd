@@ -1213,6 +1213,49 @@ describe('EmailSendService', () => {
                     }),
                 );
             }, 15_000);
+
+            it('loginDetails are not stored and duplicate recipients still merge', async () => {
+                const organization = await new OrganizationFactory({}).create();
+                const existingUser = await new UserFactory({
+                    organization,
+                    password: null,
+                }).create();
+                const members = [
+                    await new MemberFactory({ organization, user: existingUser }).create(),
+                    await new MemberFactory({ organization, user: existingUser }).create(),
+                ];
+                members[0].details.securityCode = 'AAAABBBBCCCCDDDD';
+                members[1].details.securityCode = 'EEEEFFFFGGGGHHHH';
+                await members[0].save();
+                await members[1].save();
+
+                const model = await buildEmail({
+                    organizationId: organization.id,
+                    recipients: members.map(member => EmailRecipientStruct.create({
+                        email: existingUser.email,
+                        userId: existingUser.id,
+                        memberId: member.id,
+                    })),
+                    html: '{{loginDetails}}',
+                    emailType: 'system-test',
+                });
+
+                await EmailSendService.queueForSending(model, true);
+                await model.refresh();
+                expect(model.status).toBe(EmailStatus.Sent);
+
+                expect(await EmailMocker.getSucceededCount()).toBe(1);
+                for (const member of members) {
+                    expect(EmailMocker.getSucceededEmail(0).html).toContain(Formatter.spaceString(member.details.securityCode!, 4, '-'));
+                }
+
+                const recipients = await EmailRecipient.select().where('emailId', model.id).fetch();
+                expect(recipients).toHaveLength(2);
+                expect(recipients.filter(r => r.duplicateOfRecipientId !== null)).toHaveLength(1);
+                for (const recipient of recipients) {
+                    expect(recipient.replacements.find(r => r.token === 'loginDetails')).toBeUndefined();
+                }
+            }, 15_000);
         });
     });
 });
