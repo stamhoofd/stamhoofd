@@ -1255,6 +1255,46 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             expect(response.status).toBe(200);
             expect(response.body.members[0].details.alternativeEmails.length).toBe(0);
         });
+
+        test('Only an admin that can change the email addresses of a member with a function receives the security code', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const group = await new GroupFactory({ organization }).create();
+
+            const writeAdmin = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Write }),
+                organization,
+            }).create();
+
+            const fullAdmin = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization,
+            }).create();
+
+            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false }).create();
+            member.details.securityCode = 'ABCD1234WXYZ5678';
+            await member.save();
+            await new RegistrationFactory({ member, group }).create();
+            await addResponsibility(member, PermissionLevel.Full, organization.id);
+
+            const patchPhone = async (admin: User) => {
+                const token = await SessionService.createSession(admin);
+                const arr: Body = new PatchableArray();
+                arr.addPatch(MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ phone: '+32412345678' }),
+                }));
+
+                const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                request.headers.authorization = 'Bearer ' + token.accessToken;
+                return await testServer.test(endpoint, request);
+            };
+
+            const writeResponse = await patchPhone(writeAdmin);
+            expect(writeResponse.body.members[0].details.securityCode).toBeNull();
+
+            const fullResponse = await patchPhone(fullAdmin);
+            expect(fullResponse.body.members[0].details.securityCode).toBe('ABCD1234WXYZ5678');
+        });
     });
 
     describe('Record answers', () => {

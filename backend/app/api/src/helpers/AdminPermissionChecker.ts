@@ -1083,7 +1083,7 @@ export class AdminPermissionChecker {
         );
     }
 
-    async canEditMemberEmailAddresses(member: MemberWithUsersRegistrationsAndGroups, responsibilities?: MemberResponsibilityRecordStruct[]) {
+    async canEditMemberEmailAddresses(member: MemberWithUsersRegistrationsAndGroups, responsibilities?: { organizationId: string | null }[]) {
         if (member.users.some(u => u.id === this.user.id)) return true;
 
         if (!responsibilities) {
@@ -1887,7 +1887,7 @@ export class AdminPermissionChecker {
     /**
      * Changes data inline
      */
-    async filterMemberData(member: MemberWithUsersRegistrationsAndGroups, data: MemberWithRegistrationsBlob, options?: { forAdminCartCalculation?: boolean }): Promise<MemberWithRegistrationsBlob> {
+    async filterMemberData(member: MemberWithUsersRegistrationsAndGroups, data: MemberWithRegistrationsBlob, options?: { forAdminCartCalculation?: boolean; responsibilities?: { organizationId: string | null }[] }): Promise<MemberWithRegistrationsBlob> {
         const cloned = data.clone();
 
         await this.loopRecordAnswerSettingsAccess({
@@ -1930,7 +1930,7 @@ export class AdminPermissionChecker {
             }
         }
 
-        if (!(await this.canAccessMember(member, PermissionLevel.Write)) || !(await this.canEditMemberEmailAddresses(member, data.responsibilities))) {
+        if (!(await this.canAccessMember(member, PermissionLevel.Write)) || !(await this.canEditMemberEmailAddresses(member, options?.responsibilities))) {
             cloned.details.securityCode = null;
         }
 

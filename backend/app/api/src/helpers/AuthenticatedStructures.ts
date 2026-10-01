@@ -722,7 +722,10 @@ export class AuthenticatedStructures {
             });
 
             memberBlobs.push(
-                await Context.auth.filterMemberData(member, blob, { forAdminCartCalculation: options?.forAdminCartCalculation ?? false }),
+                await Context.auth.filterMemberData(member, blob, {
+                    forAdminCartCalculation: options?.forAdminCartCalculation ?? false,
+                    responsibilities: responsibilities.filter(r => r.memberId === member.id),
+                }),
             );
         }
 
