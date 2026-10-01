@@ -29,7 +29,17 @@ type Scenario = {
  * organization's own one, which matters while an organization has not rolled over yet.
  */
 test.describe('Period scoped permissions in platform mode @period-permissions-platform', () => {
+    // The tests move the platform to another period, which would leak into the next tests of this worker
+    let originalPlatformPeriodId: string;
+
+    test.beforeEach(async () => {
+        originalPlatformPeriodId = (await Platform.getForEditing()).periodId;
+    });
+
     test.afterEach(async () => {
+        const platform = await Platform.getForEditing();
+        platform.periodId = originalPlatformPeriodId;
+        await platform.save();
         await WorkerData.resetDatabase();
     });
 
