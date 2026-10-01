@@ -22,7 +22,7 @@
                     <hr>
                     <h2 class="style-with-button">
                         <div>{{ $t('%1Qj') }}</div>
-                        <div class="hover-show">
+                        <div v-if="canEditPackages" class="hover-show">
                             <button class="button icon gray add" type="button" @click="createPackage()" />
                         </div>
                     </h2>
@@ -31,7 +31,7 @@
                         {{ $t('%1Pn') }}
                     </p>
                     <STList v-else>
-                        <STPackageRow v-for="pack of packageStatus.packages" :key="pack.id" :pack="pack" :selectable="true" @click="editPackage(pack)" />
+                        <STPackageRow v-for="pack of packageStatus.packages" :key="pack.id" :pack="pack" :selectable="canEditPackages" @click="canEditPackages && editPackage(pack)" />
                     </STList>
                 </div>
             </main>
@@ -47,6 +47,7 @@ import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewT
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
 import PaymentMandatesBox from '@stamhoofd/components/mandates/PaymentMandatesBox.vue';
@@ -75,6 +76,9 @@ const context = useContext();
 const owner = useRequestOwner();
 const present = usePresent()
 const platform = usePlatform();
+const auth = useAuth();
+const canEditPackages = auth.hasPlatformFullAccess();
+
 onMounted(() => {
     reload().catch(console.error)
 });

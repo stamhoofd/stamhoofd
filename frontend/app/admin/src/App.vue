@@ -169,8 +169,12 @@ function getRoot() {
 
             const tabs: (TabBarItem | TabBarItemGroup)[] = [
                 startTab,
-                membersTab,
             ];
+
+            // Members are only scoped by organization tags in platform mode
+            if (isPlatform || context.value.auth.hasFullAccess()) {
+                tabs.push(membersTab);
+            }
 
             if (!STAMHOOFD.singleOrganization) {
                 tabs.push(groupsTab);

@@ -5,12 +5,14 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, Invoice, Organization, OrganizationRegistrationPeriod, Payment, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
-import { Organization as OrganizationStruct } from '@stamhoofd/structures';
+import { AccessRight, Organization as OrganizationStruct } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
+import { TagHelper } from '../../../helpers/TagHelper.js';
 import { SQL } from '@stamhoofd/sql';
+import { isAbortedError, isCanceledError } from '@stamhoofd/queues';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -35,7 +37,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         await Context.authenticate();
-        if (!Context.auth.hasPlatformFullAccess()) {
+        if (!Context.auth.hasSomePlatformAccess()) {
             throw Context.auth.error();
         }
 
@@ -93,9 +95,32 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
         }
 
         // Organization creation
-        for (const { put } of request.body.getPuts()) {
-            if (!Context.auth.hasPlatformFullAccess()) {
-                throw Context.auth.error($t(`%Cy`));
+        const puts = request.body.getPuts();
+        const platform = await Platform.getShared();
+        const allowedTags = Context.auth.getOrganizationTagsWithAccessRight(AccessRight.PlatformCreateOrganizations);
+
+        // Organizations with one of these tags are managed by the admin
+        const managedTags = allowedTags === 'all' ? null : new Set(allowedTags.flatMap(id => [id, ...TagHelper.getAllDescendants(id, { allTags: platform.config.tags })]));
+
+        if (puts.length > 0 && managedTags?.size === 0) {
+            throw Context.auth.error($t('Je hebt geen toegang om nieuwe verenigingen aan te maken'));
+        }
+
+        for (const { put } of puts) {
+            put.meta.tags = TagHelper.getAllTagsFromHierarchy(put.meta.tags, platform.config.tags);
+
+            if (managedTags) {
+                // Only managed tags and their parents are allowed
+                const permittedTags = TagHelper.getAllTagsFromHierarchy(put.meta.tags.filter(t => managedTags.has(t)), platform.config.tags);
+                if (permittedTags.length === 0 || put.meta.tags.some(t => !permittedTags.includes(t))) {
+                    throw new SimpleError({
+                        code: 'permission_denied',
+                        message: 'You can only create organizations with tags you manage',
+                        human: $t('Je kan enkel verenigingen aanmaken met tags die je beheert. Selecteer minstens één van die tags.'),
+                        field: 'tags',
+                        statusCode: 403,
+                    });
+                }
             }
 
             if (put.name.length < 4) {
@@ -116,7 +141,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 });
             }
 
-            const uri = put.uri || Formatter.slug(put.name);
+            const uri = Formatter.slug(put.uri || put.name);
 
             if (uri.length > 100) {
                 throw new SimpleError({
@@ -124,6 +149,15 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                     message: 'Field is too long',
                     human: $t(`%D1`),
                     field: 'organization.name',
+                });
+            }
+
+            if (uri.length < 3) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: 'Field is too short',
+                    human: $t(`%EX`),
+                    field: 'uri',
                 });
             }
             const uriExists = await Organization.getByURI(uri);
@@ -149,19 +183,25 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
             }
 
             const organization = new Organization();
-            organization.id = put.id;
+            if (Context.auth.hasPlatformFullAccess()) {
+                organization.id = put.id;
+            }
             organization.name = put.name;
 
-            organization.uri = put.uri;
-            organization.meta = put.meta;
+            organization.uri = uri;
+            if (Context.auth.hasPlatformFullAccess()) {
+                organization.meta = put.meta;
+            }
+            else {
+                organization.meta.tags = put.meta.tags;
+            }
             organization.address = put.address;
             organization.language = put.language;
 
             let period: RegistrationPeriod | null = null;
 
             if (STAMHOOFD.userMode === 'platform') {
-                const periodId = (await Platform.getShared()).periodIdIfPlatform;
-                organization.periodId = periodId;
+                organization.periodId = platform.periodIdIfPlatform;
             } else {
                 period = new RegistrationPeriod();
                 period.configureForNewOrganization();
@@ -170,7 +210,12 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
             }
 
             if (put.privateMeta) {
-                organization.privateMeta = put.privateMeta;
+                if (Context.auth.hasPlatformFullAccess()) {
+                    organization.privateMeta = put.privateMeta;
+                }
+                else {
+                    organization.privateMeta.recordAnswers = put.privateMeta.recordAnswers;
+                }
             }
 
             try {
@@ -195,6 +240,14 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
             await organizationPeriod.save();
 
             result.push(organization);
+        }
+
+        if (result.some(organization => organization.meta.tags.length > 0)) {
+            try {
+                await TagHelper.updateOrganizations();
+            } catch (e) {
+                if (!isAbortedError(e) && !isCanceledError(e)) throw e;
+            }
         }
 
         return new Response(await AuthenticatedStructures.adminOrganizations(result));

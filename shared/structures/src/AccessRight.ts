@@ -11,6 +11,11 @@ export enum AccessRight {
      */
     PlatformLoginAs = 'PlatformLoginAs',
 
+    /**
+     * Create new organizations with at least one of the tags this right was granted for
+     */
+    PlatformCreateOrganizations = 'PlatformCreateOrganizations',
+
     // Organization level permissions
     OrganizationCreateWebshops = 'OrganizationCreateWebshops',
     OrganizationManagePayments = 'OrganizationManagePayments',
@@ -49,6 +54,7 @@ export class AccessRightHelper {
     static getName(right: AccessRight): string {
         switch (right) {
             case AccessRight.PlatformLoginAs: return $t(`%l4`);
+            case AccessRight.PlatformCreateOrganizations: return $t('Verenigingen aanmaken');
             case AccessRight.OrganizationFinanceDirector: return $t(`%l5`);
             case AccessRight.OrganizationManagePayments: return $t(`%l6`);
             case AccessRight.OrganizationCreateWebshops: return $t(`%l7`);
@@ -74,6 +80,7 @@ export class AccessRightHelper {
     static getNameShort(right: AccessRight): string {
         switch (right) {
             case AccessRight.PlatformLoginAs: return $t(`%Qg`);
+            case AccessRight.PlatformCreateOrganizations: return $t('Nieuwe verenigingen');
             case AccessRight.OrganizationFinanceDirector: return $t(`%tx`);
             case AccessRight.OrganizationManagePayments: return $t(`%MM`);
             case AccessRight.OrganizationCreateWebshops: return $t(`%lE`);
@@ -94,6 +101,7 @@ export class AccessRightHelper {
     static getDescription(right: AccessRight): string {
         switch (right) {
             case AccessRight.PlatformLoginAs: return $t(`%lI`);
+            case AccessRight.PlatformCreateOrganizations: return $t('verenigingen aanmaken');
             case AccessRight.OrganizationFinanceDirector: return $t(`%lJ`);
             case AccessRight.OrganizationManagePayments: return $t(`%lK`);
             case AccessRight.OrganizationCreateWebshops: return $t(`%lL`);
@@ -136,6 +144,7 @@ export class AccessRightHelper {
             case AccessRight.WebshopScanTickets: return PermissionLevel.Write;
             case AccessRight.SendMessages: return PermissionLevel.Write;
             case AccessRight.OrganizationEventNotificationReviewer: return null; // Never granted to full-admins, unless given by the platform
+            case AccessRight.PlatformCreateOrganizations: return null;
         }
         return PermissionLevel.Full;
     }
