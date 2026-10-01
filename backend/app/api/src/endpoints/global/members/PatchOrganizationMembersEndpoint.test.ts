@@ -1342,7 +1342,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 expect(member.details.unverifiedEmails).toEqual([]);
             });
 
-            test('A non-full admin cannot move a parent email without access to the email of a member with a function by creating a duplicate', async () => {
+            test('A non-full admin can only keep a parent email without access of a member with a function when creating a duplicate', async () => {
                 const { member, createDuplicate } = await setup();
 
                 // Adult member, so parents do not have access by default
@@ -1356,6 +1356,9 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
                 await member.refresh();
                 expect(member.details.email).toBe('original@example.com');
+
+                const sameParent = await createDuplicate({ parents: [Parent.create({ firstName: 'Linda', lastName: 'Doe', email: 'parent@example.com' })] });
+                expect(sameParent.body.members[0].id).toBe(member.id);
             });
 
             test('A non-full admin can create a duplicate of a member with a function without new emails, or with its security code', async () => {
