@@ -12,6 +12,8 @@ import type { OrderIndexedDBIndex } from '../ordersIndexedDBSorters';
 import { createPrivateOrderIndexBox } from '../ordersIndexedDBSorters';
 import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
 import type { WebshopSettingsStore } from './WebshopSettingsStore';
+import type { SyncProgress } from './withSyncProgress';
+import { withSyncProgress } from './withSyncProgress';
 import type { WebshopTicketsRepo } from './WebshopTicketsRepo';
 
 /**
@@ -71,9 +73,10 @@ export class WebshopOrdersRepo {
     /**
      * Get the orders from the backend and store them in the indexed db
      * @param isFetchAll true if all orders should be fetched (and not only the updated orders)
+     * @param onProgress called while a sync of more than one page of new orders is running
      * @returns true if the backend returned updated orders
      */
-    async fetchAllUpdated({ isFetchAll }: { isFetchAll?: boolean } = {}): Promise<void> {
+    async fetchAllUpdated({ isFetchAll, onProgress }: { isFetchAll?: boolean; onProgress?: (progress: SyncProgress) => void } = {}): Promise<void> {
         let hadSuccessfulFetch = false;
 
         const totalOrders: PrivateOrder[] = [];
@@ -94,7 +97,7 @@ export class WebshopOrdersRepo {
             }
         };
 
-        await this.apiClient.getAllUpdated({ isFetchAll, onResultsReceived });
+        await this.apiClient.getAllUpdated({ isFetchAll, onResultsReceived, onProgress });
 
         const deletedOrders: PrivateOrder[] = [];
         const fetchedOrders: PrivateOrder[] = [];
@@ -542,7 +545,7 @@ class WebshopOrdersApiClient {
      * @param isFetchAll true if all orders should be fetched (and not only the updated orders)
      * @returns true if the backend returned updated orders
      */
-    async getAllUpdated({ isFetchAll, onResultsReceived }: { isFetchAll?: boolean; onResultsReceived: (results: PrivateOrder[]) => Promise<void> | void }): Promise<void> {
+    async getAllUpdated({ isFetchAll, onResultsReceived, onProgress }: { isFetchAll?: boolean; onResultsReceived: (results: PrivateOrder[]) => Promise<void> | void; onProgress?: (progress: SyncProgress) => void }): Promise<void> {
         if (this._isFetching) {
             return;
         }
@@ -567,6 +570,11 @@ class WebshopOrdersApiClient {
             // being re-fetched until that second is safely in the past.
             filter['updatedAt'] = { $gt: this.lastFetchedOrder.updatedAt };
         }
+
+        // A recent watermark is one second early (see setlastFetchedOrder), so the sync starts with items that are already stored
+        const newItemsFilter: StamhoofdFilter | null = this.lastFetchedOrder
+            ? { webshopId: this.webshopId, updatedAt: { $gt: new Date(this.lastFetchedOrder.updatedAt.getTime() + 1_000) } }
+            : null;
 
         const request = new LimitedFilteredRequest({
             limit: 100,
@@ -609,7 +617,7 @@ class WebshopOrdersApiClient {
         };
 
         try {
-            await fetchAll(request, fetcher, { onResultsReceived });
+            await fetchAll(request, onProgress ? withSyncProgress(fetcher, newItemsFilter, onProgress) : fetcher, { onResultsReceived });
         } finally {
             this._isFetching = false;
         }

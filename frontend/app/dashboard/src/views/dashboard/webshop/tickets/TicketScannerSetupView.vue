@@ -23,6 +23,11 @@
                 {{ $t('%1KZ') }}
             </a>
 
+            <p v-if="!noDatabaseSupport && isCatchingUp" class="loading-box" data-testid="ticket-scanner-setup-catching-up">
+                <TicketSyncProgressRing :progress-percentage="progressPercentage" />
+                {{ $t('De tickets worden op dit toestel gedownload zodat je ze ook zonder internet kan scannen. Laat deze pagina best open op een goede internetverbinding tot het downloaden klaar is.') }}
+            </p>
+
             <template v-if="shouldFilter && !isLoading && (ticketProducts.length > 1 || disabledProducts.length)">
                 <div v-for="category of categories" :key="category.id" class="container">
                     <hr v-if="categories.length > 1"><h2 v-if="categories.length > 1">
@@ -72,7 +77,8 @@ import { Formatter } from '@stamhoofd/utility';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { computed, ref } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
-
+import TicketSyncProgressRing from './TicketSyncProgressRing.vue';
+import { useTicketSync } from './useTicketSync';
 
 const props = defineProps<{
     webshopManager: WebshopManager;
@@ -83,6 +89,7 @@ const present = usePresent();
 const disabledProducts = ref<Product[]>([]);
 const isChecking = ref(false);
 const noDatabaseSupport = ref(false);
+const { isCatchingUp, progressPercentage } = useTicketSync(() => props.webshopManager);
 
 function created() {
     props.webshopManager.loadWebshopIfNeeded().then(() => {
@@ -104,6 +111,11 @@ function created() {
             noDatabaseSupport.value = true;
         }
         isChecking.value = false;
+
+        if (isSupported) {
+            // Start downloading before the scanner opens, so tickets are available sooner
+            props.webshopManager.syncForScanner().catch(console.error);
+        }
     }).catch(console.error);
 }
 
@@ -155,8 +167,7 @@ function setProductSelected(product: Product, selected: boolean) {
     }
     if (selected) {
         disabledProducts.value = disabledProducts.value.filter(p => p.id !== product.id);
-    }
-    else {
+    } else {
         disabledProducts.value.push(product);
     }
 }

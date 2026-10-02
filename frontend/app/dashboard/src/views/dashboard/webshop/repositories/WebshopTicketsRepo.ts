@@ -10,6 +10,8 @@ import type { CountFilteredRequest, SortList, StamhoofdFilter } from '@stamhoofd
 import { CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, TicketPrivate, Version } from '@stamhoofd/structures';
 import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
 import type { WebshopSettingsStore } from './WebshopSettingsStore';
+import type { SyncProgress } from './withSyncProgress';
+import { withSyncProgress } from './withSyncProgress';
 
 /**
  * Responsible for webshop ticket operations (including patches).
@@ -44,9 +46,9 @@ export class WebshopTicketsRepo {
 
     /**
      * Fetch all the updated tickets from the server and store them in the offline database.
-     * @returns
+     * @param onProgress called while a sync of more than one page of new tickets is running
      */
-    async fetchAllUpdated(): Promise<void> {
+    async fetchAllUpdated({ onProgress }: { onProgress?: (progress: SyncProgress) => void } = {}): Promise<void> {
         const totalTickets: TicketPrivate[] = [];
 
         const promises: Promise<void>[] = [];
@@ -59,7 +61,7 @@ export class WebshopTicketsRepo {
             }
         };
 
-        await this.apiClient.getAllUpdated({ isFetchAll: false, onResultsReceived });
+        await this.apiClient.getAllUpdated({ isFetchAll: false, onResultsReceived, onProgress });
         await Promise.all(promises);
 
         // Only advance the watermark once every page has been fetched (getAllUpdated resolved) and
@@ -550,7 +552,7 @@ class WebshopTicketsApiClient {
         this.lastFetchedTicket = undefined;
     }
 
-    async getAllUpdated({ isFetchAll, onResultsReceived }: { isFetchAll?: boolean; onResultsReceived: (results: TicketPrivate[]) => Promise<void> | void }): Promise<void> {
+    async getAllUpdated({ isFetchAll, onResultsReceived, onProgress }: { isFetchAll?: boolean; onResultsReceived: (results: TicketPrivate[]) => Promise<void> | void; onProgress?: (progress: SyncProgress) => void }): Promise<void> {
         // TODO: clear local database if resetting
         if (this._isFetching) {
             return;
@@ -575,6 +577,11 @@ class WebshopTicketsApiClient {
             // being re-fetched until that second is safely in the past.
             filter['updatedAt'] = { $gt: this.lastFetchedTicket.updatedAt };
         }
+
+        // A recent watermark is one second early (see setLastFetchedTicket), so the sync starts with items that are already stored
+        const newItemsFilter: StamhoofdFilter | null = this.lastFetchedTicket
+            ? { webshopId: this.webshopId, updatedAt: { $gt: new Date(this.lastFetchedTicket.updatedAt.getTime() + 1_000) } }
+            : null;
 
         const filteredRequest = new LimitedFilteredRequest({
             limit: 100,
@@ -616,7 +623,7 @@ class WebshopTicketsApiClient {
         };
 
         try {
-            await fetchAll(filteredRequest, fetcher, { onResultsReceived });
+            await fetchAll(filteredRequest, onProgress ? withSyncProgress(fetcher, newItemsFilter, onProgress) : fetcher, { onResultsReceived });
         } finally {
             this._isFetching = false;
         }
