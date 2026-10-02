@@ -11,7 +11,6 @@ import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
-import { organizationFilterCompilers } from '../../../sql-filters/organizations.js';
 import { webshopFilterCompilers } from '../../../sql-filters/webshops.js';
 import { webshopSorters } from '../../../sql-sorters/webshops.js';
 
@@ -68,22 +67,14 @@ export class GetWebshopsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
 
             if (tags !== 'all') {
-                // Join with organizations table to filter by accessible organization tags
-                query.join(
-                    SQL.join(SQL.table('organizations'))
-                        .where(
-                            SQL.column('webshops', 'organizationId'),
-                            SQL.column('organizations', 'id'),
-                        ),
-                );
-
-                // Apply tag scope filter using the organizations filter compiler
                 const tagScopeFilter: StamhoofdFilter = {
-                    tags: {
-                        $in: tags,
+                    organization: {
+                        tags: {
+                            $in: tags,
+                        },
                     },
                 };
-                query.where(await compileToSQLFilter(tagScopeFilter, organizationFilterCompilers));
+                query.where(await compileToSQLFilter(tagScopeFilter, filterCompilers));
             }
         }
 
