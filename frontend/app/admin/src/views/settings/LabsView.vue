@@ -114,7 +114,7 @@
         </Checkbox>
 
         <Checkbox :model-value="getFeatureFlag('notifications')" @update:model-value="setFeatureFlag('notifications', !!$event)">
-            {{ $t('Meldingen in de navigatiebalk (in ontwikkeling)') }}
+            {{ $t('%Zta') }}
         </Checkbox>
 
         <Checkbox :model-value="getFeatureFlag('impersonation')" @update:model-value="setFeatureFlag('impersonation', !!$event)">

@@ -103,7 +103,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
         const managedTags = allowedTags === 'all' ? null : new Set(allowedTags.flatMap(id => [id, ...TagHelper.getAllDescendants(id, { allTags: platform.config.tags })]));
 
         if (puts.length > 0 && managedTags?.size === 0) {
-            throw Context.auth.error($t('Je hebt geen toegang om nieuwe verenigingen aan te maken'));
+            throw Context.auth.error($t('%ZtS'));
         }
 
         for (const { put } of puts) {
@@ -116,7 +116,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                     throw new SimpleError({
                         code: 'permission_denied',
                         message: 'You can only create organizations with tags you manage',
-                        human: $t('Je kan enkel verenigingen aanmaken met tags die je beheert. Selecteer minstens één van die tags.'),
+                        human: $t('%ZtO'),
                         field: 'tags',
                         statusCode: 403,
                     });

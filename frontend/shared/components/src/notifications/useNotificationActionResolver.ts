@@ -21,7 +21,7 @@ function groupNotFoundError() {
     return new SimpleError({
         code: 'not_found',
         message: 'Group not found',
-        human: $t('Deze groep bestaat niet meer of je hebt er geen toegang meer toe'),
+        human: $t('%ZtX'),
     });
 }
 
@@ -116,7 +116,7 @@ export function useNotificationActionResolver() {
             const payload = RegistrationCreatedNotificationPayload.decodeBoxed(notification.payload);
             if (payload) {
                 return {
-                    name: $t('Inschrijvingen bekijken'),
+                    name: $t('%ZtP'),
                     run: async () => await navigateToDashboard(organization, await getGroupPath(organization, payload.group.id)),
                 };
             }
@@ -131,7 +131,7 @@ export function useNotificationActionResolver() {
         const subjectId = notification.subjectId;
         if (subjectId && notification.subjectType === NotificationSubjectType.Member && notification.groupResourceCount <= 1) {
             return {
-                name: $t('Lid bekijken'),
+                name: $t('%ZtI'),
                 run: async () => await showMember(subjectId),
             };
         }

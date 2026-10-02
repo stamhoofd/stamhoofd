@@ -1319,10 +1319,6 @@
     "original": "Je kan de hoofdgroep niet verwijderen. Als je dit toch wil doen, kan je eerst een andere eenheid instellen als hoofdgroep via ')Boekhouding en aansluitingen'.",
     "translation": "You cannot delete the main group. If you still want to do this, you can first set another unit as the main group via ')Accounting and affiliations'."
   },
-  "%Cy": {
-    "original": "Enkel een platform hoofdbeheerder kan nieuwe eenheden aanmaken",
-    "translation": "Only a platform main administrator can add new units"
-  },
   "%D": {
     "original": "Scoutsgroep De Goudvis",
     "translation": "Scouts group De Goudvis"
@@ -1734,6 +1730,30 @@
   "%Zt5": {
     "original": "Er zijn geen {resourceType} in scoutsjaar {period}.",
     "translation": "There are no {resourceType} in scout year {period}."
+  },
+  "%ZtA": {
+    "original": "Je kan een scoutsjaar met inschrijvingen niet verwijderen. Schrijf eerst alle leden uit of verwijder alle groepen met inschrijvingen uit dit scoutsjaar.",
+    "translation": "You can't delete a scout year with registrations. Please unregister all members or remove all groups with registrations from this scout year first."
+  },
+  "%ZtO": {
+    "original": "Je kan enkel eenheden aanmaken met tags die je beheert. Selecteer minstens één van die tags.",
+    "translation": "You can only create units with tags you manage. Please select at least one of those tags."
+  },
+  "%ZtS": {
+    "original": "Je hebt geen toegang om nieuwe eenheden aan te maken",
+    "translation": "You don't have permission to create new units"
+  },
+  "%ZtT": {
+    "original": "Nieuwe eenheden",
+    "translation": "New units"
+  },
+  "%ZtY": {
+    "original": "eenheden aanmaken",
+    "translation": "create units"
+  },
+  "%ZtZ": {
+    "original": "Eenheden aanmaken",
+    "translation": "Create units"
   },
   "%ad": {
     "original": "Een hoofdbeheerder van jouw eenheid moet eerst een afzender toevoegen die je kan gebruiken voor je een bericht kan versturen.",

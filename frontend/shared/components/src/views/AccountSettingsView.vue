@@ -342,8 +342,8 @@ async function save() {
 
         if (result.verificationEmailSent) {
             new CenteredMessage(
-                $t('Bevestig jouw nieuwe e-mailadres'),
-                $t('We hebben een e-mail gestuurd naar {email}. Klik op de link in die e-mail om jouw nieuwe e-mailadres te bevestigen.', { email: email.value }),
+                $t('%ZtQ'),
+                $t('%ZtC', { email: email.value }),
             ).addCloseButton().show();
         } else {
             const toast = new Toast($t(`%HA`), 'success green');

@@ -1280,7 +1280,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 if (addsEmails && !await Context.auth.canEditMemberEmailAddresses(duplicate)) {
                     throw Context.auth.error({
                         message: "You don't have access to change the emailaddresses of this user.",
-                        human: $t('Je hebt geen toegangsrechten om de emailadressen van deze gebruiker aan te passen'),
+                        human: $t('%ZtM'),
                     });
                 }
             }

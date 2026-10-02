@@ -1111,10 +1111,6 @@
     "original": "Je kan de hoofdgroep niet verwijderen. Als je dit toch wil doen, kan je eerst een andere groep instellen als hoofdgroep via ')Boekhouding en aansluitingen'.",
     "translation": "You cannot delete the main group. If you still want to do this, you can first set another group as the main group via ')Accounting and affiliations'."
   },
-  "%Cy": {
-    "original": "Enkel een platform hoofdbeheerder kan nieuwe groepen aanmaken",
-    "translation": "Only a platform main administrator can add new groups"
-  },
   "%D1": {
     "original": "De naam van de groep is te lang. Probeer de naam wat te verkorten en probeer opnieuw.",
     "translation": "The group name is too long. Try shortening the name and try again."
@@ -1410,6 +1406,26 @@
   "%ZsQ": {
     "original": "Beheer hier alle personen die toegang hebben tot Ravot, en wijzig hun toegangsrechten. <button>Meer info</button>",
     "translation": "Manage all persons who have access to Ravot here, and adjust their access rights. <button>More info</button>"
+  },
+  "%ZtO": {
+    "original": "Je kan enkel groepen aanmaken met tags die je beheert. Selecteer minstens één van die tags.",
+    "translation": "You can only create groups with tags that you manage. Please select at least one of those tags."
+  },
+  "%ZtS": {
+    "original": "Je hebt geen toegang om nieuwe groepen aan te maken",
+    "translation": "You don't have permission to create new groups."
+  },
+  "%ZtT": {
+    "original": "Nieuwe groepen",
+    "translation": "New groups"
+  },
+  "%ZtY": {
+    "original": "groepen aanmaken",
+    "translation": "create groups"
+  },
+  "%ZtZ": {
+    "original": "Groepen aanmaken",
+    "translation": "Create groups"
   },
   "%a6": {
     "original": "Portaal voor beroepsmedewerkers",

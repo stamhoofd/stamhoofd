@@ -1339,10 +1339,6 @@
     "original": "Je kan de hoofdgroep niet verwijderen. Als je dit toch wil doen, kan je eerst een andere eenheid instellen als hoofdgroep via ')Boekhouding en aansluitingen'.",
     "translation": "Vous ne pouvez pas supprimer le groupe principal. Si vous souhaitez le faire, vous pouvez d'abord définir une autre unité comme groupe principal via ')Comptabilité et affiliations'."
   },
-  "%Cy": {
-    "original": "Enkel een platform hoofdbeheerder kan nieuwe eenheden aanmaken",
-    "translation": "Seul un administrateur principal de la plateforme peut créer de nouvelles unités"
-  },
   "%D": {
     "original": "Scoutsgroep De Goudvis",
     "translation": "Scoutsgroupe Le Poisson rouge"
@@ -1750,6 +1746,30 @@
   "%Zt5": {
     "original": "Er zijn geen {resourceType} in scoutsjaar {period}.",
     "translation": "Il n'y a pas de {resourceType} pour l'année scoute {period}."
+  },
+  "%ZtA": {
+    "original": "Je kan een scoutsjaar met inschrijvingen niet verwijderen. Schrijf eerst alle leden uit of verwijder alle groepen met inschrijvingen uit dit scoutsjaar.",
+    "translation": "Vous ne pouvez pas supprimer une année scoute qui contient des inscriptions. Veuillez d'abord désinscrire tous les membres ou supprimer tous les groupes avec inscriptions de cette année scoute."
+  },
+  "%ZtO": {
+    "original": "Je kan enkel eenheden aanmaken met tags die je beheert. Selecteer minstens één van die tags.",
+    "translation": "Vous ne pouvez créer des unités qu’avec les tags que vous gérez. Sélectionnez au moins un de ces tags."
+  },
+  "%ZtS": {
+    "original": "Je hebt geen toegang om nieuwe eenheden aan te maken",
+    "translation": "Vous n’avez pas accès à la création de nouvelles unités"
+  },
+  "%ZtT": {
+    "original": "Nieuwe eenheden",
+    "translation": "Nouvelles unités"
+  },
+  "%ZtY": {
+    "original": "eenheden aanmaken",
+    "translation": "créer des unités"
+  },
+  "%ZtZ": {
+    "original": "Eenheden aanmaken",
+    "translation": "Créer des unités"
   },
   "%ad": {
     "original": "Een hoofdbeheerder van jouw eenheid moet eerst een afzender toevoegen die je kan gebruiken voor je een bericht kan versturen.",
