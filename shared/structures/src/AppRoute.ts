@@ -6,4 +6,5 @@ export enum AppRoute {
     OrgScopedAuto = 'org-scoped-auto',
     UnscopedAuto = 'unscoped-auto',
     VerifyEmail = 'verify-email',
+    UnscopedVerifyEmail = 'unscoped-verify-email',
 }
