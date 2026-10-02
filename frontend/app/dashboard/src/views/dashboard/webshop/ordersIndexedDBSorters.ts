@@ -1,5 +1,6 @@
 import { AutoEncoder, field, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import type { PrivateOrder, SortDefinitions } from '@stamhoofd/structures';
+import type { InMemoryFilterDefinitions, PrivateOrder, SortDefinitions } from '@stamhoofd/structures';
+import { baseInMemoryFilterCompilers, createInMemoryFilterCompiler } from '@stamhoofd/structures';
 import type { IndexedDbIndexValue } from './IndexBox';
 import { IndexBox } from './IndexBox';
 
@@ -75,6 +76,24 @@ export const ordersIndexedDBSorters: SortDefinitions<PrivateOrder> = {
     [OrderIndexedDBIndex.TimeSlotTime]: {
         getValue: value => value.data.timeSlot?.timeIndex,
     },
+};
+
+/**
+ * Compilers for filtering on the index values that are stored alongside each order (IndexBox.indexes),
+ * instead of on a decoded order.
+ *
+ * The stored values are lowercased copies of the values the equally named sorter reads from an order.
+ * Every in-memory comparison lowercases both of its sides, so filtering an index key matches the same
+ * orders as filtering the same key on a decoded order - without paying for the decode.
+ *
+ * Only the keys in OrderIndexedDBIndex exist here: anything else (items, payments, recordAnswers, the
+ * ticket keys, ...) has to be filtered on a decoded order.
+ */
+export const orderIndexesInMemoryFilterCompilers: InMemoryFilterDefinitions = {
+    ...baseInMemoryFilterCompilers,
+    ...Object.fromEntries(
+        Object.values(OrderIndexedDBIndex).map(index => [index, createInMemoryFilterCompiler(index)]),
+    ),
 };
 
 /**

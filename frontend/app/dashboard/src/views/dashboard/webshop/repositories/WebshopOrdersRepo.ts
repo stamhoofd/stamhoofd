@@ -9,7 +9,7 @@ import type { CountFilteredRequest, InMemoryFilterRunner, SortItem, SortList, St
 import { compileToInMemoryFilter, CountResponse, LimitedFilteredRequest, OrderStatus, PaginatedResponseDecoder, PrivateOrder, privateOrderWithTicketsFilterCompilers, SortItemDirection, Version } from '@stamhoofd/structures';
 import { IndexBoxDecoder } from '../IndexBox';
 import type { OrderIndexedDBIndex } from '../ordersIndexedDBSorters';
-import { createPrivateOrderIndexBox } from '../ordersIndexedDBSorters';
+import { createPrivateOrderIndexBox, orderIndexesInMemoryFilterCompilers } from '../ordersIndexedDBSorters';
 import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
 import type { WebshopSettingsStore } from './WebshopSettingsStore';
 import type { ProgressListener, SyncProgress } from './syncProgress';
@@ -195,6 +195,7 @@ export class WebshopOrdersRepo {
     async stream(options: {
         callback: (data: PrivateOrder) => void;
         filter?: StamhoofdFilter;
+        indexFilter?: StamhoofdFilter;
         limit?: number;
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
         advanceCount?: number;
@@ -222,6 +223,7 @@ export class WebshopOrdersRepo {
         transform: (rawOrder: any) => Promise<T>;
         callback: (data: T) => void;
         filter?: StamhoofdFilter;
+        indexFilter?: StamhoofdFilter;
         limit?: number;
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
         advanceCount?: number;
@@ -349,10 +351,18 @@ export class OrdersStore {
         });
     }
 
-    async streamRaw<T>({ callback, filter, limit, sortItem, advanceCount, transform, openTransaction }: {
+    async streamRaw<T>({ callback, filter, indexFilter, limit, sortItem, advanceCount, transform, openTransaction }: {
         transform: (rawOrder: any) => Promise<T>;
         callback: (data: T) => void;
         filter?: StamhoofdFilter;
+        /**
+         * Filter evaluated on the stored index values (see orderIndexesInMemoryFilterCompilers) before an
+         * order is decoded, to skip orders that cannot match without paying for their decode.
+         *
+         * It may never exclude an order that `filter` would have matched; `filter` stays authoritative, so
+         * matching too many orders here only costs performance.
+         */
+        indexFilter?: StamhoofdFilter;
         limit?: number;
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
         advanceCount?: number;
@@ -413,15 +423,20 @@ export class OrdersStore {
             let totalIterationCount = advanceCount ?? 0;
 
             let compiledFilter: InMemoryFilterRunner | undefined;
+            let compiledIndexFilter: InMemoryFilterRunner | undefined;
 
-            if (filter) {
-                try {
+            try {
+                if (filter) {
                     compiledFilter = compileToInMemoryFilter(filter, privateOrderWithTicketsFilterCompilers);
-                } catch (e: any) {
-                    console.error('Compile filter failed', e);
-                    reject(new CompilerFilterError((e.message as string | undefined) ?? 'Compile filter failed'));
-                    return;
                 }
+
+                if (indexFilter) {
+                    compiledIndexFilter = compileToInMemoryFilter(indexFilter, orderIndexesInMemoryFilterCompilers);
+                }
+            } catch (e: any) {
+                console.error('Compile filter failed', e);
+                reject(new CompilerFilterError((e.message as string | undefined) ?? 'Compile filter failed'));
+                return;
             }
 
             const onsuccess: ((this: IDBRequest<IDBCursorWithValue | null>, ev: Event) => any) | null = (event: any) => {
@@ -435,6 +450,13 @@ export class OrdersStore {
                 if (!cursor) {
                     // no more results
                     resolve(totalIterationCount);
+                    return;
+                }
+
+                if (compiledIndexFilter && !compiledIndexFilter(cursor.value.indexes)) {
+                    // Cannot match: skip it without decoding the order or reading its tickets.
+                    totalIterationCount += 1;
+                    cursor.continue();
                     return;
                 }
 
