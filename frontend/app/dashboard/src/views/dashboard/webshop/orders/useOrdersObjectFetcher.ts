@@ -209,8 +209,6 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 },
                 filter,
                 indexFilter: searchFilter ?? undefined,
-                // Counting never looks at an order, let alone at its tickets
-                withTickets: false,
             });
             console.log('[Done] Orders(IndexedDb).fetchCount', data, count);
 
