@@ -72,7 +72,7 @@ export async function fetchAll<T>(initialRequest: LimitedFilteredRequest, object
         }
 
         if (options?.onResultsReceived) {
-            await options.onResultsReceived(results);
+            await options.onResultsReceived(data.results);
         }
     }
 
