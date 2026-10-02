@@ -192,17 +192,21 @@ function getRoot() {
                 moreTab.items.push(settingsTab);
                 moreTab.items.push(communicationTab);
                 moreTab.items.push(financesTab);
-                moreTab.items.push(webshopsTab);
                 moreTab.items.push(auditLogsTab);
             } else {
                 if (context.value.auth.canReadEmails()) {
                     moreTab.items.push(communicationTab);
                 }
             }
-
             if (manualFeatureFlag('event-notifications', context.value, platform.value) && context.value.auth.hasAccessRightForSomeResourceOfType(PermissionsResourceType.OrganizationTags, AccessRight.OrganizationEventNotificationReviewer)) {
                 // Feature is still in development so not visible for everyone
                 moreTab.items.push(eventNotificationsTab);
+            }
+
+            if (moreTab.items.length > 0) {
+                moreTab.items.push(webshopsTab);
+            } else {
+                tabs.push(webshopsTab);
             }
 
             if (moreTab.items.length > 0) {
