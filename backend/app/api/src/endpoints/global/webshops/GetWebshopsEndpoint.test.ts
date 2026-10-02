@@ -1,7 +1,9 @@
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import { Database } from '@simonbackx/simple-database';
+import type { User } from '@stamhoofd/models';
 import { OrganizationFactory, OrganizationTagFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { CountFilteredRequest, LimitedFilteredRequest, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, SortItemDirection, WebshopMetaData, WebshopStatus } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -803,6 +805,49 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             expect(response.status).toBe(200);
             expect(response.body.results).toHaveLength(1);
             expect(response.body.results[0].id).toBe(webshopA.id);
+        });
+    });
+
+    describe('Filtering on organization data in platform context', () => {
+        test('A tag admin can filter on organization fields and only gets webshops of organizations with an accessible tag', async () => {
+            const tag = await new OrganizationTagFactory({}).create();
+            // With a single tag in the platform, access to that tag equals access to all organizations
+            await new OrganizationTagFactory({}).create();
+
+            const name = 'Groep ' + tag.id;
+            const orgWithTag = await new OrganizationFactory({ name: name + ' A', tags: [tag.id] }).create();
+            const orgWithoutTag = await new OrganizationFactory({ name: name + ' B' }).create();
+            const webshopInTaggedOrg = await new WebshopFactory({ organizationId: orgWithTag.id }).create();
+            const webshopInUntaggedOrg = await new WebshopFactory({ organizationId: orgWithoutTag.id }).create();
+
+            const fetchWebshopIds = async (user: User, filter: StamhoofdFilter) => {
+                const token = await SessionService.createSession(user);
+                const response = await testServer.test(endpoint, Request.get({
+                    path: baseUrl,
+                    host: 'platform.stamhoofd.app',
+                    query: new LimitedFilteredRequest({ filter, limit: 100 }),
+                    headers: { authorization: 'Bearer ' + token.accessToken },
+                }));
+                return response.body.results.map(r => r.id);
+            };
+
+            const nameFilter = { organization: { name: { $contains: name } } };
+
+            const fullAdmin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            expect(await fetchWebshopIds(fullAdmin, nameFilter)).toIncludeSameMembers([webshopInTaggedOrg.id, webshopInUntaggedOrg.id]);
+
+            const tagAdmin = await new UserFactory({
+                globalPermissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources: new Map([[
+                        PermissionsResourceType.OrganizationTags,
+                        new Map([[tag.id, ResourcePermissions.create({ level: PermissionLevel.Read })]]),
+                    ]]),
+                }),
+            }).create();
+            expect(await fetchWebshopIds(tagAdmin, nameFilter)).toEqual([webshopInTaggedOrg.id]);
         });
     });
 });
