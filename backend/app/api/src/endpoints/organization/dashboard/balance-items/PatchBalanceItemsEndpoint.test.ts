@@ -4,10 +4,12 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, User } from '@stamhoofd/models';
 import { AuditLog, BalanceItem, BalanceItemFactory, MemberFactory, OrganizationFactory, UserFactory } from '@stamhoofd/models';
 import { AuditLogReplacementType, AuditLogSource, AuditLogType, BalanceItemStatus, BalanceItemWithPayments, PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import '../../../../audit-logs/init.js';
 import { AuditLogService } from '../../../../services/AuditLogService.js';
 import { SessionService } from '../../../../services/SessionService.js';
+import { GetBalanceItemEndpoint } from './GetBalanceItemEndpoint.js';
 import { PatchBalanceItemsEndpoint } from './PatchBalanceItemsEndpoint.js';
 
 describe('Endpoint.PatchBalanceItemsEndpoint', () => {
@@ -22,6 +24,61 @@ describe('Endpoint.PatchBalanceItemsEndpoint', () => {
 
     beforeAll(() => {
         AuditLogService.listen();
+    });
+
+    describe('Permissions', () => {
+        test('an admin of the paying organization cannot edit or cancel balance items charged by another organization', async () => {
+            const sellingOrganization = await new OrganizationFactory({}).create();
+            const payingOrganization = await new OrganizationFactory({}).create();
+            const payingAdmin = await new UserFactory({ organization: payingOrganization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const balanceItem = await new BalanceItemFactory({
+                organizationId: sellingOrganization.id,
+                payingOrganizationId: payingOrganization.id,
+                name: 'Lidgeld',
+                unitPrice: 10_00,
+                amount: 1,
+            }).create();
+
+            for (const patch of [{ unitPrice: 0 }, { status: BalanceItemStatus.Canceled }]) {
+                const body = new PatchableArray<string, BalanceItemWithPayments, AutoEncoderPatchType<BalanceItemWithPayments>>();
+                body.addPatch(BalanceItemWithPayments.patch({ id: balanceItem.id, ...patch }));
+                await expect(patchBalanceItems({ body, organization: payingOrganization, user: payingAdmin })).rejects.toThrow(/BalanceItem not found/);
+            }
+
+            const model = await BalanceItem.getByID(balanceItem.id);
+            expect(model?.unitPrice).toBe(10_00);
+            expect(model?.status).toBe(BalanceItemStatus.Due);
+        });
+
+        test('payment access on the paying organization grants read but not write access via the selling organization', async () => {
+            TestUtils.setEnvironment('userMode', 'platform');
+            const sellingOrganization = await new OrganizationFactory({}).create();
+            const payingOrganization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ organization: payingOrganization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            user.permissions!.organizationPermissions.set(sellingOrganization.id, Permissions.create({ level: PermissionLevel.Read }));
+            await user.save();
+
+            const balanceItem = await new BalanceItemFactory({
+                organizationId: sellingOrganization.id,
+                payingOrganizationId: payingOrganization.id,
+                name: 'Lidgeld',
+                unitPrice: 10_00,
+                amount: 1,
+            }).create();
+
+            const token = await SessionService.createSession(user);
+            const getRequest = Request.buildJson('GET', '/balance-items/' + balanceItem.id, sellingOrganization.getApiHost());
+            getRequest.headers.authorization = 'Bearer ' + token.accessToken;
+            const getResponse = await testServer.test(new GetBalanceItemEndpoint(), getRequest);
+            expect(getResponse.body.id).toBe(balanceItem.id);
+
+            const body = new PatchableArray<string, BalanceItemWithPayments, AutoEncoderPatchType<BalanceItemWithPayments>>();
+            body.addPatch(BalanceItemWithPayments.patch({ id: balanceItem.id, unitPrice: 0 }));
+            await expect(patchBalanceItems({ body, organization: sellingOrganization, user })).rejects.toThrow(/BalanceItem not found/);
+
+            const model = await BalanceItem.getByID(balanceItem.id);
+            expect(model?.unitPrice).toBe(10_00);
+        });
     });
 
     describe('Description', () => {
