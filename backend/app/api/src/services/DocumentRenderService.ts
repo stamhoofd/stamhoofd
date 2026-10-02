@@ -2,9 +2,11 @@ import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import type { Document, Organization } from '@stamhoofd/models';
 import { DocumentTemplate, Platform } from '@stamhoofd/models';
 import { render } from '@stamhoofd/models/helpers/Handlebars.js';
-import type { Platform as PlatformStruct } from '@stamhoofd/structures';
+import type { Platform as PlatformStruct, RecordAnswer } from '@stamhoofd/structures';
 import { DocumentStatus, Version } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
+
+const FORBIDDEN_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 
 /**
  * Renders documents and document templates into HTML/XML.
@@ -49,15 +51,24 @@ export class DocumentRenderService {
             data['logo'] = logo.encode({ version: Version }) ?? null;
         }
 
-        for (const field of document.data.fieldAnswers.values()) {
+        this.assignFieldAnswers(data, document.data.fieldAnswers.values());
+        return data;
+    }
+
+    /**
+     * Field ids are dot separated paths into the context, e.g. 'registration.price'.
+     * They are user input, so keys that reach the prototype chain are rejected.
+     */
+    private static assignFieldAnswers(data: Record<string, any>, fieldAnswers: Iterable<RecordAnswer>) {
+        for (const field of fieldAnswers) {
             const keys = field.settings.id.split('.');
-            let current = data;
-            const lastKey = keys.pop()!;
-            if (!lastKey) {
+            if (keys.some(key => !key || FORBIDDEN_KEYS.has(key))) {
                 throw new Error('Invalid field id');
             }
+            const lastKey = keys.pop()!;
+            let current = data;
             for (const key of keys) {
-                if (!current[key]) {
+                if (!Object.hasOwn(current, key) || !current[key]) {
                     current[key] = {};
                 }
                 current = current[key];
@@ -68,7 +79,6 @@ export class DocumentRenderService {
             }
             current[lastKey] = field.objectValue;
         }
-        return data;
     }
 
     /**
@@ -106,25 +116,7 @@ export class DocumentRenderService {
             },
         };
 
-        for (const field of template.settings.fieldAnswers.values()) {
-            const keys = field.settings.id.split('.');
-            let current = data;
-            const lastKey = keys.pop()!;
-            if (!lastKey) {
-                throw new Error('Invalid field id');
-            }
-            for (const key of keys) {
-                if (!current[key]) {
-                    current[key] = {};
-                }
-                current = current[key];
-
-                if (typeof current !== 'object') {
-                    throw new Error('Invalid field type');
-                }
-            }
-            current[lastKey] = field.objectValue;
-        }
+        this.assignFieldAnswers(data, template.settings.fieldAnswers.values());
 
         return data;
     }
