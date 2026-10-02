@@ -123,7 +123,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
             for (const patch of request.body.getPatches()) {
                 // Create a new balance item
                 const model = await BalanceItem.getByID(patch.id);
-                if (!model || !(await Context.auth.canAccessBalanceItems([model], PermissionLevel.Write))) {
+                if (!model || model.organizationId !== organization.id || !(await Context.auth.canAccessBalanceItems([model], PermissionLevel.Write))) {
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'BalanceItem not found',
