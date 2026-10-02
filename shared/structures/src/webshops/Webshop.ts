@@ -8,7 +8,7 @@ import { appToUri } from '../AppType.js';
 import type { Organization } from '../Organization.js';
 import { Category } from './Category.js';
 import { Product } from './Product.js';
-import { WebshopMetaData, WebshopPrivateMetaData, WebshopStatus } from './WebshopMetaData.js';
+import { WebshopMetaData, WebshopOrderMode, WebshopPrivateMetaData, WebshopStatus } from './WebshopMetaData.js';
 
 export class WebshopPreview extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -241,11 +241,19 @@ export class Webshop extends AutoEncoder {
         return true;
     }
 
-    get shouldEnableCart() {
-        if (!this.meta.cartEnabled) {
-            return false;
+    /**
+     * A Cart webshop with a single unique product behaves as Single
+     */
+    get orderMode(): WebshopOrderMode {
+        const mode = this.meta.resolvedOrderMode;
+        if (mode === WebshopOrderMode.Cart && !this.canEnableCart) {
+            return WebshopOrderMode.Single;
         }
-        return this.canEnableCart;
+        return mode;
+    }
+
+    get shouldEnableCart() {
+        return this.orderMode === WebshopOrderMode.Cart;
     }
 
     get hasCustomDomain(): boolean {
