@@ -290,6 +290,12 @@ export class EmailVerificationCode extends QueryableModel {
         verificationCode.email = email;
         verificationCode.userId = userId;
 
+        // Always save email, code and token together. Otherwise two requests at the same time can
+        // mix them up. Not tries: verify() updates those separately.
+        verificationCode.forceSaveProperty('email');
+        verificationCode.forceSaveProperty('code');
+        verificationCode.forceSaveProperty('token');
+
         await verificationCode.save();
         return verificationCode;
     }

@@ -531,10 +531,10 @@ describe('MFA security', () => {
             });
 
             const err = await captureError(testServer.test(new PatchUserEndpoint(), request));
-            expect(err.code).toBe('verify_email');
+            expect(err.code).toBe('verify_email_link');
 
-            const verificationToken = (err.meta as { token: string }).token;
-            const code = await EmailVerificationCode.select().where('token', verificationToken).first(true);
+            // The token and code are only in the emailed link
+            const code = await EmailVerificationCode.select().where('userId', user.id).first(true);
             expect(code.email).toBe(newEmail);
             return code;
         }

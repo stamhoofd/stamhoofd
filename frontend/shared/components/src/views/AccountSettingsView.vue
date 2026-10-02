@@ -240,9 +240,8 @@ import { ComponentWithProperties, useDismiss, usePop, usePresent, useShow } from
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
-import { AppRoute, LanguageHelper, LoginMethod, LoginProviderType, NewUser, UserMeta } from '@stamhoofd/structures';
+import { LanguageHelper, LoginMethod, LoginProviderType, NewUser, UserMeta } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
-import { useAppNavigate } from '../hooks/useAppNavigate.ts';
 
 import { useSwitchLanguage } from './hooks/useSwitchLanguage';
 import IconContainer from '#icons/IconContainer.vue';
@@ -325,8 +324,6 @@ useValidation(errors.validator, () => {
     return true;
 });
 
-const appNavigate = useAppNavigate();
-
 async function save() {
     if (saving.value) {
         return;
@@ -343,20 +340,16 @@ async function save() {
     try {
         const result = await LoginHelper.patchUser($context.value, patch.value);
 
-        if (result.verificationToken) {
-            await appNavigate(AppRoute.VerifyEmail, {
-                properties: {
-                    organization: $context.value.organization,
-                    token: result.verificationToken,
-                    email: email.value,
-                },
-                adjustHistory: false,
-            });
+        if (result.verificationEmailSent) {
+            new CenteredMessage(
+                $t('Bevestig jouw nieuwe e-mailadres'),
+                $t('We hebben een e-mail gestuurd naar {email}. Klik op de link in die e-mail om jouw nieuwe e-mailadres te bevestigen.', { email: email.value }),
+            ).addCloseButton().show();
         } else {
             const toast = new Toast($t(`%HA`), 'success green');
             toast.show();
-            await dismiss({ force: true });
         }
+        await dismiss({ force: true });
     } catch (e) {
         errors.errorBox = new ErrorBox(e);
     } finally {
