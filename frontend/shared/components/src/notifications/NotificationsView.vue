@@ -1,14 +1,14 @@
 <template>
     <!-- Fixed height (limited to the available height) avoids height jumps while loading more notifications -->
     <div class="st-view" data-testid="notifications-view" style="height: min(400px, calc(var(--vh, 1vh) * 100))">
-        <STNavigationBar :title="$t('Meldingen')">
+        <STNavigationBar :title="$t('%1FR')">
             <template #right>
                 <button class="button icon more" type="button" data-testid="notifications-more-button" @click.prevent="showMoreMenu" @contextmenu.prevent="showMoreMenu" />
             </template>
         </STNavigationBar>
 
         <main>
-            <h1>{{ $t('Meldingen') }}</h1>
+            <h1>{{ $t('%1FR') }}</h1>
 
             <STList>
                 <NotificationRow v-for="notification of fetcher.objects" :key="notification.id" :notification="notification" @click="open(notification)" @contextmenu="showContextMenu($event, notification)" />
@@ -21,7 +21,7 @@
                     {{ $t('%Y9') }}
                 </button>
             </p>
-            <InfiniteObjectFetcherEnd v-else :fetcher="fetcher" :empty-message="$t('Je hebt nog geen meldingen')" />
+            <InfiniteObjectFetcherEnd v-else :fetcher="fetcher" :empty-message="$t('%Ztd')" />
         </main>
     </div>
 </template>
@@ -100,7 +100,7 @@ async function showMoreMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t('Alles markeren als gelezen'),
+                name: $t('%ZtH'),
                 icon: 'success',
                 action: () => {
                     readAll().catch(console.error);
@@ -108,7 +108,7 @@ async function showMoreMenu(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t('Instellingen voor meldingen'),
+                name: $t('%ZtV'),
                 icon: 'settings',
                 action: () => {
                     show(AsyncComponent(() => import('./NotificationSettingsView.vue'), {})).catch(console.error);
@@ -126,7 +126,7 @@ async function showContextMenu(event: MouseEvent, notification: UserNotification
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t('Markeren als gelezen'),
+                name: $t('%ZtW'),
                 icon: 'success',
                 disabled: !!notification.readAt,
                 action: () => {
@@ -147,13 +147,13 @@ async function showContextMenu(event: MouseEvent, notification: UserNotification
         ],
         [
             new ContextMenuItem({
-                name: $t('Uitschrijven voor dit type meldingen'),
+                name: $t('%ZtF'),
                 icon: 'disabled',
                 action: () => {
                     run(async () => {
                         await unsubscribe(notification.type);
                         const name = NotificationTypeHelper.isKnown(notification.type) ? NotificationTypeHelper.getName(notification.type) : notification.type;
-                        Toast.success($t('Je ontvangt geen meldingen meer voor ‘{type}’', { type: name })).show();
+                        Toast.success($t('%ZtK', { type: name })).show();
                     }).catch(console.error);
                     return true;
                 },

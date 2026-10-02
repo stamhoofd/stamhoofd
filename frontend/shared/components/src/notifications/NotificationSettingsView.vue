@@ -1,14 +1,14 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
         <div v-if="preferences" class="st-view" data-testid="notification-settings-view">
-            <STNavigationBar :title="$t('Instellingen voor meldingen')" />
+            <STNavigationBar :title="$t('%ZtV')" />
 
             <main>
-                <h1>{{ $t('Instellingen voor meldingen') }}</h1>
-                <p>{{ $t('Kies welke meldingen je wilt ontvangen en waar.') }}</p>
+                <h1>{{ $t('%ZtV') }}</h1>
+                <p>{{ $t('%Zte') }}</p>
 
                 <p v-if="types.length === 0" class="info-box">
-                    {{ $t('Er zijn geen meldingen die je kan ontvangen.') }}
+                    {{ $t('%Ztc') }}
                 </p>
                 <STList v-else>
                     <STListItem class="right-stack">

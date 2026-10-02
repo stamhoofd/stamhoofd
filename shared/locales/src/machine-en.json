@@ -11463,10 +11463,6 @@
     "original": "Je kan de hoofdgroep niet verwijderen. Als je dit toch wil doen, kan je eerst een andere vereniging instellen als hoofdgroep via ')Boekhouding en aansluitingen'.",
     "translation": "You cannot delete the main group. If you still want to do this, you can first set another association as the main group via ')Accounting and affiliations'."
   },
-  "%Cy": {
-    "original": "Enkel een platform hoofdbeheerder kan nieuwe verenigingen aanmaken",
-    "translation": "Only a platform main administrator can add new associations"
-  },
   "%Cz": {
     "original": "Je bent de naam van je organisatie vergeten in te vullen",
     "translation": "You forgot to fill in the name of your organisation"
@@ -20554,6 +20550,118 @@
   "%Zt9": {
     "original": "Gescheiden ouders met fiscaal co-ouderschap",
     "translation": "Separated parents with shared fiscal custody"
+  },
+  "%ZtA": {
+    "original": "Je kan een werkjaar met inschrijvingen niet verwijderen. Schrijf eerst alle leden uit of verwijder alle groepen met inschrijvingen uit dit werkjaar.",
+    "translation": "You can't delete a work year with registrations. Please unregister all members or remove all groups with registrations from this work year first."
+  },
+  "%ZtB": {
+    "original": "{count} nieuwe inschrijvingen voor {group}",
+    "translation": "{count} new registrations for {group}"
+  },
+  "%ZtC": {
+    "original": "We hebben een e-mail gestuurd naar {email}. Klik op de link in die e-mail om jouw nieuwe e-mailadres te bevestigen.",
+    "translation": "We've sent an email to {email}. Click the link in that email to confirm your new email address."
+  },
+  "%ZtD": {
+    "original": "Nieuwe inschrijving voor {group}",
+    "translation": "New registration for {group}"
+  },
+  "%ZtE": {
+    "original": "Deze melding werd niet gevonden",
+    "translation": "This notification was not found"
+  },
+  "%ZtF": {
+    "original": "Uitschrijven voor dit type meldingen",
+    "translation": "Unsubscribe from this type of notifications"
+  },
+  "%ZtH": {
+    "original": "Alles markeren als gelezen",
+    "translation": "Mark all as read"
+  },
+  "%ZtI": {
+    "original": "Lid bekijken",
+    "translation": "View member"
+  },
+  "%ZtJ": {
+    "original": "anderen",
+    "translation": "others"
+  },
+  "%ZtK": {
+    "original": "Je ontvangt geen meldingen meer voor ‘{type}’",
+    "translation": "You will no longer receive notifications for ‘{type}’"
+  },
+  "%ZtL": {
+    "original": "In de app",
+    "translation": "In the app"
+  },
+  "%ZtM": {
+    "original": "Je hebt geen toegangsrechten om de emailadressen van deze gebruiker aan te passen",
+    "translation": "You do not have access rights to change this user's email addresses"
+  },
+  "%ZtN": {
+    "original": "Push",
+    "translation": "Push"
+  },
+  "%ZtO": {
+    "original": "Je kan enkel verenigingen aanmaken met tags die je beheert. Selecteer minstens één van die tags.",
+    "translation": "You can only create associations with tags you manage. Please select at least one of those tags."
+  },
+  "%ZtP": {
+    "original": "Inschrijvingen bekijken",
+    "translation": "View registrations"
+  },
+  "%ZtQ": {
+    "original": "Bevestig jouw nieuwe e-mailadres",
+    "translation": "Confirm your new email address"
+  },
+  "%ZtR": {
+    "original": "Toon meldingen bovenaan in de navigatiebalk. Nog in ontwikkeling.",
+    "translation": "Show notifications at the top of the navigation bar. Still in development."
+  },
+  "%ZtS": {
+    "original": "Je hebt geen toegang om nieuwe verenigingen aan te maken",
+    "translation": "You don't have permission to create new associations"
+  },
+  "%ZtT": {
+    "original": "Nieuwe verenigingen",
+    "translation": "New associations"
+  },
+  "%ZtV": {
+    "original": "Instellingen voor meldingen",
+    "translation": "Notification settings"
+  },
+  "%ZtW": {
+    "original": "Markeren als gelezen",
+    "translation": "Mark as read"
+  },
+  "%ZtX": {
+    "original": "Deze groep bestaat niet meer of je hebt er geen toegang meer toe",
+    "translation": "This group no longer exists or you no longer have access to it"
+  },
+  "%ZtY": {
+    "original": "verenigingen aanmaken",
+    "translation": "create associations"
+  },
+  "%ZtZ": {
+    "original": "Verenigingen aanmaken",
+    "translation": "Create associations"
+  },
+  "%Zta": {
+    "original": "Meldingen in de navigatiebalk (in ontwikkeling)",
+    "translation": "Notifications in the navigation bar (in development)"
+  },
+  "%Ztc": {
+    "original": "Er zijn geen meldingen die je kan ontvangen.",
+    "translation": "There are no notifications you can receive."
+  },
+  "%Ztd": {
+    "original": "Je hebt nog geen meldingen",
+    "translation": "You don't have any notifications yet"
+  },
+  "%Zte": {
+    "original": "Kies welke meldingen je wilt ontvangen en waar.",
+    "translation": "Choose which notifications you want to receive and where."
   },
   "%Zu": {
     "original": "De redirect URI behoud je best op de voorgestelde waarde.",

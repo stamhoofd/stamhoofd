@@ -291,10 +291,10 @@
                         <Checkbox :model-value="getFeatureFlag('notifications')" @update:model-value="setFeatureFlag('notifications', !!$event)" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Meldingen') }}
+                        {{ $t('%1FR') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Toon meldingen bovenaan in de navigatiebalk. Nog in ontwikkeling.') }}
+                        {{ $t('%ZtR') }}
                     </p>
                 </STListItem>
 

@@ -7,9 +7,9 @@ export class NotificationChannelHelper {
     static getName(channel: NotificationChannel): string {
         switch (channel) {
             case NotificationChannel.InApp:
-                return $t('In de app');
+                return $t('%ZtL');
             case NotificationChannel.Push:
-                return $t('Push');
+                return $t('%ZtN');
         }
     }
 
