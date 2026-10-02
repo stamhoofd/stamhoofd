@@ -96,12 +96,12 @@
                 </STListItem>
             </STList>
 
-            <div v-if="hasWrite && detailedItem.objectType === ReceivableBalanceType.organization && detailedItem.organizationId === organization?.id && organization?.meta.registrationPaymentConfiguration.enableMandates" class="container">
+            <div v-if="hasWrite && auth.canManagePayments() && detailedItem.objectType === ReceivableBalanceType.organization && detailedItem.organizationId === organization?.id && organization?.meta.registrationPaymentConfiguration.enableMandates" class="container">
                 <hr>
                 <h2 class="style-with-button">
                     <div>{{ $t('%1UB') }}</div>
                 </h2>
-                <PaymentMandatesBox :paying-organization-id="detailedItem.object.id" :selling-organization-id="detailedItem.organizationId" :can-block="auth.canManagePayments()" />
+                <PaymentMandatesBox :paying-organization-id="detailedItem.object.id" :selling-organization-id="detailedItem.organizationId" :can-block="true" />
             </div>
 
             <template v-if="pendingPayments.length > 0">

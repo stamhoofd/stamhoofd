@@ -53,6 +53,10 @@ export class GetOrganizationMandatesEndpoint extends Endpoint<Params, Query, Bod
             });
         }
 
+        if (!await Context.auth.canViewPaymentMandates({ payingOrganizationId: payingOrganization.id, sellingOrganizationId: sellingOrganization.id })) {
+            throw Context.auth.error();
+        }
+
         const mandates = await PaymentMandateService.getMandates({
             sellingOrganization,
             user,

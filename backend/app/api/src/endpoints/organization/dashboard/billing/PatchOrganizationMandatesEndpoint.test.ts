@@ -120,17 +120,40 @@ describe('Endpoint.PatchOrganizationMandatesEndpoint', () => {
         expect(await getBlockedIds(organization)).toEqual([blockedMandate.id]);
     });
 
-    test('An admin without full access cannot change the default mandate', async () => {
-        const { organization, defaultMandate, blockedMandate } = await init();
+    test('A finance director can change the default mandate', async () => {
+        const { organization } = await init();
         const { adminToken } = await initAdmin({ organization, accessRights: [AccessRight.OrganizationFinanceDirector] });
 
         const otherMandate = mollieMocker.addMandate({ customerId: organization.serverMeta.mollieCustomerId!, cardNumber: '5678' });
 
-        await expect(patch(setDefaultPatch(otherMandate.id), organization, adminToken)).rejects.toMatchObject({ code: 'permission_denied' });
+        const response = await patch(setDefaultPatch(otherMandate.id), organization, adminToken);
+        expect(response.status).toBe(200);
+        expect((await Organization.getByID(organization.id))!.serverMeta.mollieMandateId).toBe(otherMandate.id);
+    });
+
+    test('A seller admin cannot change the default mandate', async () => {
+        TestUtils.setEnvironment('userMode', 'platform');
+        const { organization, defaultMandate, blockedMandate } = await init();
+        const { adminToken: sellerToken } = await initAdmin({ organization: sellingOrganization, accessRights: [AccessRight.OrganizationManagePayments] });
+
+        const otherMandate = mollieMocker.addMandate({ customerId: organization.serverMeta.mollieCustomerId!, cardNumber: '5678' });
+
+        await expect(patch(setDefaultPatch(otherMandate.id), organization, sellerToken)).rejects.toMatchObject({ code: 'permission_denied' });
 
         const updated = (await Organization.getByID(organization.id))!;
         expect(updated.serverMeta.mollieMandateId).toBe(defaultMandate.id);
         expect(await getBlockedIds(organization)).toEqual([blockedMandate.id]);
+    });
+
+    test('Users without finance access cannot read or patch the mandates', async () => {
+        const { organization, defaultMandate } = await init();
+        const { adminToken } = await initAdmin({ organization, accessRights: [AccessRight.OrganizationCreateWebshops] });
+
+        // A patch without changes only returns the mandates
+        const noopPatch: PatchableArrayAutoEncoder<PaymentMandate> = new PatchableArray();
+        noopPatch.addPatch(PaymentMandate.patch({ id: defaultMandate.id }));
+
+        await expect(patch(noopPatch, organization, adminToken)).rejects.toMatchObject({ code: 'permission_denied' });
     });
 
     test('Blocked mandates are returned as blocked', async () => {

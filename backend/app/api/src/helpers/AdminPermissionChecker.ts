@@ -1224,6 +1224,13 @@ export class AdminPermissionChecker {
         );
     }
 
+    /**
+     * The selling organization can view its debtors' mandates so it can block them.
+     */
+    async canViewPaymentMandates({ payingOrganizationId, sellingOrganizationId }: { payingOrganizationId: string; sellingOrganizationId: string }) {
+        return await this.canManageFinances(payingOrganizationId) || await this.canManagePayments(sellingOrganizationId);
+    }
+
     async canCreateWebshops(organizationId: string) {
         const organizationPermissions = await this.getOrganizationPermissions(organizationId);
 

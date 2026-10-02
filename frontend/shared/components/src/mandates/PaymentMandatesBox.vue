@@ -6,7 +6,7 @@
             </p>
             <STGrid v-else>
                 <PaymentMandateRow v-for="mandate of mandates" :key="mandate.id" :mandate="mandate" :selectable="false" @contextmenu="showContextMenu($event, mandate.id)">
-                    <template #right>
+                    <template v-if="canBlock || canManage" #right>
                         <LoadingButton :loading="updatingMandates.has(mandate.id)">
                             <button type="button" class="button icon more" @click.stop="showContextMenu($event, mandate.id)" />
                         </LoadingButton>
@@ -20,12 +20,14 @@
 <script setup lang="ts">
 import LoadingBoxTransition from '#containers/LoadingBoxTransition.vue';
 import { useErrors } from '#errors/useErrors';
+import { useAuth } from '#hooks/useAuth.ts';
 import STGrid from '#layout/STGrid.vue';
 import PaymentMandateRow from '#mandates/PaymentMandateRow.vue';
 import { useOrganizationPaymentMandates } from '#mandates/useOrganizationPaymentMandates';
 import { CenteredMessage } from '#overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu';
 import { Toast } from '#overlays/Toast';
+import { PaymentMandateStatus } from '@stamhoofd/structures/PaymentMandate.js';
 
 const props = withDefaults(defineProps<{
     payingOrganizationId?: string | null;
@@ -35,12 +37,19 @@ const props = withDefaults(defineProps<{
      * Whether the viewer is an admin of the selling organization and may block or unblock mandates
      */
     canBlock?: boolean;
+
+    /**
+     * Whether the viewer can manage the finances of the paying organization and may set the default mandate or delete mandates
+     */
+    canManage?: boolean;
 }>(), {
     payingOrganizationId: null,
     canBlock: false,
+    canManage: false,
 });
 
 const errors = useErrors();
+const auth = useAuth();
 
 const { mandates, deleteMandate: doDeleteMandate, updatingMandates, setDefaultMandate, setMandateBlocked } = useOrganizationPaymentMandates({
     payingOrganizationId: props.payingOrganizationId,
@@ -49,20 +58,28 @@ const { mandates, deleteMandate: doDeleteMandate, updatingMandates, setDefaultMa
 });
 
 async function showContextMenu(event: MouseEvent, mandateId: string) {
+    if (!props.canBlock && !props.canManage) {
+        return;
+    }
     event.preventDefault();
     const mandate = mandates.value?.find(m => m.id === mandateId);
     const isDefault = mandate?.isDefault;
+    const isLastUsable = !!mandate && !mandate.isBlocked && (mandates.value ?? []).filter(m => m.status === PaymentMandateStatus.Valid && !m.isBlocked).length <= 1;
 
     const menu = new ContextMenu([
         [
-            new ContextMenuItem({
-                name: $t(`%1Tc`),
-                icon: 'success',
-                disabled: isDefault || mandate?.isBlocked,
-                action: async () => {
-                    await setDefaultMandate(mandateId);
-                },
-            }),
+            ...(props.canManage
+                ? [
+                        new ContextMenuItem({
+                            name: $t(`%1Tc`),
+                            icon: 'success',
+                            disabled: isDefault || mandate?.isBlocked,
+                            action: async () => {
+                                await setDefaultMandate(mandateId);
+                            },
+                        }),
+                    ]
+                : []),
             ...(props.canBlock
                 ? [
                         mandate?.isBlocked
@@ -82,15 +99,20 @@ async function showContextMenu(event: MouseEvent, mandateId: string) {
                                 }),
                     ]
                 : []),
-
-            new ContextMenuItem({
-                name: $t(`%CJ`),
-                icon: 'trash',
-                destructive: true,
-                action: async () => {
-                    await deleteMandate(mandateId);
-                },
-            }),
+            ...(props.canManage
+                ? [
+                        new ContextMenuItem({
+                            name: $t(`%CJ`),
+                            icon: 'trash',
+                            destructive: true,
+                            // Only a platform admin can delete these
+                            disabled: (isDefault || isLastUsable) && !auth.hasPlatformFullAccess(),
+                            action: async () => {
+                                await deleteMandate(mandateId);
+                            },
+                        }),
+                    ]
+                : []),
         ],
     ]);
     await menu.show({ clickEvent: event });
