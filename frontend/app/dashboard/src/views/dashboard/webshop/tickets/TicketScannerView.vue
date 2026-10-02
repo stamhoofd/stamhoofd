@@ -17,8 +17,16 @@
                 </div>
 
                 <div class="status-bar">
-                    <p v-if="isLoading">
+                    <p v-if="isCatchingUp" data-testid="ticket-scanner-catching-up">
+                        <TicketSyncProgressRing class="inline" :progress-percentage="progressPercentage" /> {{ $t('Tickets downloaden...') }}<br><span class="style-description-small">{{ $t('Tot het downloaden klaar is, worden nog niet alle tickets herkend.') }}</span>
+                    </p>
+                    <p v-else-if="isLoading">
                         <Spinner class="inline" /> {{ $t('%Vp') }}
+                    </p>
+                    <p v-else-if="hadNetworkError && hasNeverSynced">
+                        {{ $t('Geen internetverbinding. Nog niet alle tickets zijn gedownload, dus niet alle tickets worden herkend.') }}<br><button class="button text" type="button" @click="updateTickets">
+                            {{ $t('%1EU') }}
+                        </button>
                     </p>
                     <p v-else-if="hadNetworkError">
                         {{ $t('%Vq') }}<br><span class="style-description-small">{{ $t('%Vr') }} {{ lastUpdatedText }}</span><br><button class="button text" type="button" @click="updateTickets">
@@ -55,6 +63,8 @@ import QrScanner from 'qr-scanner';
 
 import { computed, onActivated, onBeforeUnmount, onDeactivated, ref } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
+import TicketSyncProgressRing from './TicketSyncProgressRing.vue';
+import { useTicketSync } from './useTicketSync';
 
 // if you have another AudioContext class use that one, as some browsers have a limit
 // var audioCtx = new (window.AudioContext || (window as any).webkitAudioContext || (window as any).audioContext)();
@@ -120,7 +130,7 @@ const disableWebVideo = ref(false);
 
 let nativeListener: PluginListenerHandle | null = null;
 
-const isLoading = computed(() => props.webshopManager.orders.isFetching || props.webshopManager.tickets.isFetching);
+const { isSyncing: isLoading, hasNeverSynced, isCatchingUp, mightMissTickets, progressPercentage } = useTicketSync(() => props.webshopManager);
 
 const lastUpdatedText = computed(() => {
     const min = Math.min(props.webshopManager.tickets.lastUpdated?.getTime() ?? 0, props.webshopManager.orders.lastUpdated?.getTime() ?? 0);
@@ -196,10 +206,7 @@ function toggleFlash() {
 
 async function updateTickets() {
     try {
-        await Promise.all([
-            props.webshopManager.tickets.fetchAllUpdated(),
-            props.webshopManager.orders.fetchAllUpdated(),
-        ]);
+        await props.webshopManager.syncForScanner();
 
         hadNetworkError.value = false;
 
@@ -376,9 +383,11 @@ async function checkTicket(result: string) {
         const ticket = await props.webshopManager.tickets.get(secret);
         if (ticket) {
             const order = await props.webshopManager.orders.get(ticket.orderId);
-            if (!order) {
+            if (!order && mightMissTickets.value) {
+                notYetDownloadedTicket();
+            } else if (!order) {
                 AppManager.shared.hapticError();
-                new Toast('Er ging iets mis. Dit is een geldig ticket, maar de bijhorende bestelling kon niet geladen worden. Waarschijnlijk heb je tijdelijk internet nodig om nieuwe bestellingen op te halen. Probeer daarna opnieuw.', 'error red').show();
+                new Toast($t('Er ging iets mis. Dit is een geldig ticket, maar de bijhorende bestelling kon niet geladen worden. Waarschijnlijk heb je tijdelijk internet nodig om nieuwe bestellingen op te halen. Probeer daarna opnieuw.'), 'error red').show();
             } else {
                 if (ticket.itemId !== null) {
                     const item = order.data.cart.items.find(i => i.id === ticket.itemId);
@@ -399,6 +408,8 @@ async function checkTicket(result: string) {
                     validTicket(ticket, order);
                 }
             }
+        } else if (mightMissTickets.value) {
+            notYetDownloadedTicket();
         } else {
             console.error('Ticket not found');
             invalidTicket();
@@ -449,9 +460,14 @@ function disabledTicket(product: Product, scannedAt: Date | null) {
     AppManager.shared.hapticError();
 }
 
+function notYetDownloadedTicket() {
+    new Toast($t('Dit ticket is nog niet gedownload. Wacht tot alle tickets gedownload zijn en scan opnieuw.'), 'warning yellow').show();
+    AppManager.shared.hapticWarning();
+}
+
 function invalidTicket() {
     // TODO: show invalid ticket
-    new Toast('Ongeldig ticket', 'error red').show();
+    new Toast($t('Ongeldig ticket'), 'error red').show();
     AppManager.shared.hapticError();
 }
 
@@ -624,9 +640,7 @@ onActivated(() => {
         }
     }, 1000 * 30);
 
-    if (!isLoading.value) {
-        updateTickets().catch(console.error);
-    }
+    updateTickets().catch(console.error);
 });
 
 onBeforeUnmount(() => stopScanning());

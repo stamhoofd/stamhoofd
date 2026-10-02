@@ -12,6 +12,8 @@ import type { OrderIndexedDBIndex } from '../ordersIndexedDBSorters';
 import { createPrivateOrderIndexBox } from '../ordersIndexedDBSorters';
 import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
 import type { WebshopSettingsStore } from './WebshopSettingsStore';
+import type { ProgressListener, SyncProgress } from './syncProgress';
+import { countSyncItems, getNewItemsFilter, SharedSync } from './syncProgress';
 import type { WebshopTicketsRepo } from './WebshopTicketsRepo';
 
 /**
@@ -40,6 +42,7 @@ export class WebshopOrdersRepo {
     readonly eventBus = new EventBus<string, PrivateOrder[]>();
 
     private readonly store: OrdersStore;
+    private readonly sync = new SharedSync();
     readonly apiClient: WebshopOrdersApiClient;
     private readonly tickets: WebshopTicketsRepo;
 
@@ -58,6 +61,13 @@ export class WebshopOrdersRepo {
         return this.apiClient.hasFetchedOne;
     }
 
+    /**
+     * Whether a sync completed on this device since the offline orders were last cleared.
+     */
+    get hasCompletedSync() {
+        return this.apiClient.hasCompletedSync || this.lastUpdated !== null;
+    }
+
     constructor({ database, context, settingsStore, webshopId, tickets }: { database: WebshopDatabase; context: SessionContext; settingsStore: WebshopSettingsStore; webshopId: string; tickets: WebshopTicketsRepo }) {
         this.apiClient = new WebshopOrdersApiClient({ context, settingsStore, webshopId });
         this.store = new OrdersStore({ database });
@@ -71,9 +81,18 @@ export class WebshopOrdersRepo {
     /**
      * Get the orders from the backend and store them in the indexed db
      * @param isFetchAll true if all orders should be fetched (and not only the updated orders)
+     * @param onProgress called while a sync of more than one page of new orders is running
      * @returns true if the backend returned updated orders
      */
-    async fetchAllUpdated({ isFetchAll }: { isFetchAll?: boolean } = {}): Promise<void> {
+    async fetchAllUpdated({ isFetchAll, onProgress }: { isFetchAll?: boolean; onProgress?: ProgressListener } = {}): Promise<void> {
+        if (isFetchAll) {
+            // A full fetch clears the stored orders, so it can't join a running incremental sync
+            await this.sync.waitUntilIdle();
+        }
+        return this.sync.run(async report => this.fetchAllUpdatedNow({ isFetchAll, onProgress: report }), onProgress);
+    }
+
+    private async fetchAllUpdatedNow({ isFetchAll, onProgress }: { isFetchAll?: boolean; onProgress: (progress: SyncProgress) => void }): Promise<void> {
         let hadSuccessfulFetch = false;
 
         const totalOrders: PrivateOrder[] = [];
@@ -94,7 +113,7 @@ export class WebshopOrdersRepo {
             }
         };
 
-        await this.apiClient.getAllUpdated({ isFetchAll, onResultsReceived });
+        await this.apiClient.getAllUpdated({ isFetchAll, onResultsReceived, onProgress });
 
         const deletedOrders: PrivateOrder[] = [];
         const fetchedOrders: PrivateOrder[] = [];
@@ -127,6 +146,8 @@ export class WebshopOrdersRepo {
         if (deletedOrders.length > 0) {
             await this.eventBus.sendEvent('deleted', deletedOrders);
         }
+
+        await this.apiClient.setSyncCompleted();
     }
 
     /**
@@ -508,7 +529,11 @@ export class OrdersStore {
  */
 class WebshopOrdersApiClient {
     private _isFetching = false;
-    private lastFetchedOrder: { updatedAt: Date; number: number } | null | undefined = undefined;
+    private _hasCompletedSync = false;
+    /**
+     * itemUpdatedAt is the updatedAt of the last stored item, missing in watermarks stored by older versions
+     */
+    private lastFetchedOrder: { updatedAt: Date; number: number; itemUpdatedAt?: Date } | null | undefined = undefined;
 
     private readonly webshopId: string;
     private readonly context: SessionContext;
@@ -520,6 +545,18 @@ class WebshopOrdersApiClient {
 
     get isFetching() {
         return this._isFetching;
+    }
+
+    get hasCompletedSync() {
+        return this._hasCompletedSync;
+    }
+
+    async setSyncCompleted() {
+        if (this._hasCompletedSync) {
+            return;
+        }
+        this._hasCompletedSync = true;
+        await this.settingsStore.set('ordersSyncCompleted', true);
     }
 
     get lastUpdated(): Date | null {
@@ -534,6 +571,7 @@ class WebshopOrdersApiClient {
 
     reset() {
         this._isFetching = false;
+        this._hasCompletedSync = false;
         this.lastFetchedOrder = undefined;
     }
 
@@ -542,7 +580,7 @@ class WebshopOrdersApiClient {
      * @param isFetchAll true if all orders should be fetched (and not only the updated orders)
      * @returns true if the backend returned updated orders
      */
-    async getAllUpdated({ isFetchAll, onResultsReceived }: { isFetchAll?: boolean; onResultsReceived: (results: PrivateOrder[]) => Promise<void> | void }): Promise<void> {
+    async getAllUpdated({ isFetchAll, onResultsReceived, onProgress }: { isFetchAll?: boolean; onResultsReceived: (results: PrivateOrder[]) => Promise<void> | void; onProgress?: (progress: SyncProgress) => void }): Promise<void> {
         if (this._isFetching) {
             return;
         }
@@ -567,6 +605,9 @@ class WebshopOrdersApiClient {
             // being re-fetched until that second is safely in the past.
             filter['updatedAt'] = { $gt: this.lastFetchedOrder.updatedAt };
         }
+
+        // A recent watermark is one second early (see setlastFetchedOrder), so the sync starts with items that are already stored
+        const newItemsFilter = getNewItemsFilter(this.webshopId, this.lastFetchedOrder ? (this.lastFetchedOrder.itemUpdatedAt ?? this.lastFetchedOrder.updatedAt) : null);
 
         const request = new LimitedFilteredRequest({
             limit: 100,
@@ -609,7 +650,15 @@ class WebshopOrdersApiClient {
         };
 
         try {
-            await fetchAll(request, fetcher, { onResultsReceived });
+            await fetchAll(request, fetcher, {
+                onResultsReceived,
+                ...(onProgress
+                    ? {
+                            countAfterFirstPage: async () => countSyncItems(fetcher, filter, newItemsFilter),
+                            onProgress: (count: number, total: number) => onProgress({ count, total }),
+                        }
+                    : {}),
+            });
         } finally {
             this._isFetching = false;
         }
@@ -630,7 +679,9 @@ class WebshopOrdersApiClient {
 
     async clearLastFetchedOrder() {
         this.lastFetchedOrder = null;
+        this._hasCompletedSync = false;
         await this.settingsStore.set('lastFetchedOrder', null);
+        await this.settingsStore.set('ordersSyncCompleted', false);
     }
 
     async setlastFetchedOrder(order: PrivateOrder) {
@@ -656,6 +707,7 @@ class WebshopOrdersApiClient {
         this.lastFetchedOrder = {
             updatedAt: timestamp,
             number: order.number!,
+            itemUpdatedAt: new Date(order.updatedAt),
         };
         await this.settingsStore.set('lastFetchedOrder', this.lastFetchedOrder);
     }
@@ -668,6 +720,7 @@ class WebshopOrdersApiClient {
 
         try {
             this.lastFetchedOrder = await this.settingsStore.get('lastFetchedOrder') ?? null;
+            this._hasCompletedSync = await this.settingsStore.get('ordersSyncCompleted') === true;
         } catch (e) {
             console.error(e);
             // Probably no database support. Ignore it and load everything.

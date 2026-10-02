@@ -11,6 +11,9 @@ import { WebshopDatabase } from './repositories/WebshopDatabase';
 import { OrdersStore, WebshopOrdersRepo } from './repositories/WebshopOrdersRepo';
 import { WebshopSettingsStore } from './repositories/WebshopSettingsStore';
 import { WebshopTicketPatchesStore, WebshopTicketsRepo, WebshopTicketsStore } from './repositories/WebshopTicketsRepo';
+import type { SyncProgress } from './repositories/syncProgress';
+
+export type ScannerSyncPart = { isRunning: boolean; progress: SyncProgress | null };
 
 /**
  * Responsible for managing a single webshop orders and tickets
@@ -35,6 +38,13 @@ export class WebshopManager {
     readonly tickets: WebshopTicketsRepo;
     readonly orders: WebshopOrdersRepo;
 
+    /**
+     * State of the running syncForScanner, null if none is running.
+     * Finished parts keep their progress so the combined progress never goes back.
+     */
+    scannerSync: { tickets: ScannerSyncPart; orders: ScannerSyncPart } | null = null;
+    private scannerSyncPromise: Promise<void> | null = null;
+
     get hasWrite() {
         return this.context.auth.canAccessWebshop(this.preview, PermissionLevel.Write);
     }
@@ -56,6 +66,48 @@ export class WebshopManager {
         this.webshopApiClient = new WebshopApiClient({ context, webshopId });
         this.tickets = new WebshopTicketsRepo({ database, context, settingsStore, webshopId });
         this.orders = new WebshopOrdersRepo({ database, context, settingsStore, webshopId, tickets: this.tickets });
+    }
+
+    /**
+     * Download all updated tickets and orders for the ticket scanner, or join the running download.
+     */
+    syncForScanner(): Promise<void> {
+        if (this.scannerSyncPromise) {
+            return this.scannerSyncPromise;
+        }
+
+        this.scannerSync = {
+            tickets: { isRunning: true, progress: null },
+            orders: { isRunning: true, progress: null },
+        };
+        const sync = this.scannerSync;
+
+        const run = async (part: ScannerSyncPart, fetch: (onProgress: (progress: SyncProgress | null) => void) => Promise<void>) => {
+            try {
+                await fetch((progress) => {
+                    part.progress = progress;
+                });
+            }
+            finally {
+                part.isRunning = false;
+            }
+        };
+
+        this.scannerSyncPromise = (async () => {
+            const results = await Promise.allSettled([
+                run(sync.tickets, onProgress => this.tickets.fetchAllUpdated({ onProgress })),
+                run(sync.orders, onProgress => this.orders.fetchAllUpdated({ onProgress })),
+            ]);
+            const failed = results.find(result => result.status === 'rejected');
+            if (failed) {
+                throw failed.reason;
+            }
+        })().finally(() => {
+            this.scannerSyncPromise = null;
+            this.scannerSync = null;
+        });
+
+        return this.scannerSyncPromise;
     }
 
     async reload(): Promise<boolean> {

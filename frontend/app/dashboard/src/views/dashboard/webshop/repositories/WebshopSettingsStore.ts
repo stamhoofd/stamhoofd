@@ -7,6 +7,8 @@ export enum WebshopSettingsKeys {
     Webshop = 'webshop',
     LastFetchedOrder = 'lastFetchedOrder',
     LastFetchedTicket = 'lastFetchedTicket',
+    OrdersSyncCompleted = 'ordersSyncCompleted',
+    TicketsSyncCompleted = 'ticketsSyncCompleted',
 }
 
 type WebshopSettingsKey = `${WebshopSettingsKeys}`;
