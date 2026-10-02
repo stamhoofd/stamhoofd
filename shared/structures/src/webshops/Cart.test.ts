@@ -77,12 +77,13 @@ describe('Cart.validate without seat validation', () => {
 });
 
 describe('Cart.validate without details validation', () => {
-    it('keeps items without options and fields when validateDetails is false', () => {
+    it('keeps items without options, fields and customer when validateDetails is false', () => {
         const optionMenu = OptionMenu.create({ name: 'Maaltijd', multipleChoice: false, autoSelectFirst: false, options: [Option.create({ name: 'A' })] });
         const product = Product.create({
             name: 'Workshop',
             optionMenus: [optionMenu],
             customFields: [WebshopField.create({ name: 'Naam', required: true })],
+            enableCustomer: true,
         });
         const webshop = Webshop.create({ meta: WebshopMetaData.create({ orderMode: WebshopOrderMode.Bulk }), products: [product] });
         const cart = Cart.create({ items: [CartItem.create({ product, productPrice: product.prices[0] })] });
