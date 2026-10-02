@@ -141,7 +141,7 @@ export function usePaymentsUIFilterBuilders() {
     const platform = usePlatform();
     const getRelationFilterBuilders = useBalanceItemRelationFilterBuilders();
     const organizationsRelationFetcher = useOrganizationsRelationFetcher();
-    const { getOrganizationUIFilterBuilders } = useGetOrganizationUIFilterBuilders();
+    const { getOrganizationUIFilterBuilders } = useGetOrganizationUIFilterBuilders({ onlyBaseFilters: true });
     const hasSettlementsFlag = useFeatureFlag()('settlements');
 
     const balanceItemRegistrationWrapper: WrapperFilter = {

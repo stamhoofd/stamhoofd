@@ -2,7 +2,10 @@ import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLConcat, SQLNow, SQLNull, SQLScalar, SQLValueType, SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '@stamhoofd/sql';
 import { SetupStepType } from '@stamhoofd/structures';
 
-export const organizationFilterCompilers: SQLFilterDefinitions = {
+/**
+ * Only the organization's own columns. Relations to sensitive or expensive data are only available to platform admins via organizationFilterCompilers.
+ */
+export const baseOrganizationFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
     id: createColumnFilter({
         expression: SQL.column('organizations', 'id'),
@@ -69,101 +72,10 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.JSONArray,
         nullable: false,
     }),
-    recordCategoryName: createColumnFilter({
-        expression: SQL.jsonExtract(SQL.column('organizations', 'meta'), '$.value.recordsConfiguration.recordCategories[*].name'),
-        type: SQLValueType.JSONArray,
-        nullable: true,
-    }),
-    // Name of a child (sub)category in any record category, at any nesting depth
-    recordChildCategoryName: createColumnFilter({
-        expression: SQL.jsonExtract(SQL.column('organizations', 'meta'), '$.value.recordsConfiguration.recordCategories**.childCategories[*].name'),
-        type: SQLValueType.JSONArray,
-        nullable: true,
-    }),
-    recordName: createColumnFilter({
-        expression: SQL.jsonExtract(SQL.column('organizations', 'meta'), '$.value.recordsConfiguration.recordCategories**.records[*].name'),
-        type: SQLValueType.JSONArray,
-        nullable: true,
-    }),
-    documentTemplates: createExistsFilter(
-        SQL.select()
-            .from(SQL.table('document_templates'))
-            .where(
-                SQL.column('document_templates', 'organizationId'),
-                SQL.column('organizations', 'id'),
-            ),
-        {
-            ...baseSQLFilterCompilers,
-            type: createColumnFilter({
-                expression: SQL.jsonExtract(SQL.column('document_templates', 'privateSettings'), '$.value.templateDefinition.type'),
-                type: SQLValueType.JSONString,
-                nullable: true,
-            }),
-            year: createColumnFilter({
-                expression: SQL.column('document_templates', 'year'),
-                type: SQLValueType.Number,
-                nullable: false,
-            }),
-            status: createColumnFilter({
-                expression: SQL.column('document_templates', 'status'),
-                type: SQLValueType.String,
-                nullable: false,
-            }),
-            isLocked: createColumnFilter({
-                expression: SQL.column('document_templates', 'isLocked'),
-                type: SQLValueType.Boolean,
-                nullable: false,
-            }),
-            updatesEnabled: createColumnFilter({
-                expression: SQL.column('document_templates', 'updatesEnabled'),
-                type: SQLValueType.Boolean,
-                nullable: false,
-            }),
-        },
-    ),
-    setupSteps: createExistsFilter(
-        SQL.select()
-            .from(SQL.table('organization_registration_periods'))
-            .where(
-                SQL.column('organization_registration_periods', 'organizationId'),
-                SQL.column('organizations', 'id'),
-            ),
-        {
-            ...baseSQLFilterCompilers,
-            periodId: createColumnFilter({
-                expression: SQL.column('organization_registration_periods', 'periodId'),
-                type: SQLValueType.String,
-                nullable: false,
-            }),
-            ...Object.fromEntries(
-                Object.values(SetupStepType)
-                    .map((setupStep) => {
-                        return [
-                            setupStep,
-                            {
-                                ...baseSQLFilterCompilers,
-                                reviewedAt: createColumnFilter({
-                                    expression: SQL.jsonExtract(
-                                        SQL.column('organization_registration_periods', 'setupSteps'),
-                                        `$.value.steps.${setupStep}.review.date`,
-                                    ),
-                                    type: SQLValueType.JSONString,
-                                    nullable: true,
-                                }),
-                                complete: createColumnFilter({
-                                    expression: {
-                                        getSQL: () =>
-                                            `case when CAST(JSON_UNQUOTE(JSON_EXTRACT(\`organization_registration_periods\`.\`setupSteps\`, "$.value.steps.${setupStep}.finishedSteps")) AS unsigned) >= CAST(JSON_UNQUOTE(JSON_EXTRACT(\`organization_registration_periods\`.\`setupSteps\`, "$.value.steps.${setupStep}.totalSteps")) AS unsigned) then 1 else 0 end`,
-                                    },
-                                    type: SQLValueType.Boolean,
-                                    nullable: false,
-                                }),
-                            },
-                        ];
-                    }),
-            ),
-        },
-    ),
+};
+
+export const organizationFilterCompilers: SQLFilterDefinitions = {
+    ...baseOrganizationFilterCompilers,
     packages: createExistsFilter(
         SQL.select()
             .from(SQL.table('stamhoofd_packages'))
@@ -338,4 +250,99 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
             }),
         },
     ),
+    documentTemplates: createExistsFilter(
+        SQL.select()
+            .from(SQL.table('document_templates'))
+            .where(
+                SQL.column('document_templates', 'organizationId'),
+                SQL.column('organizations', 'id'),
+            ),
+        {
+            ...baseSQLFilterCompilers,
+            type: createColumnFilter({
+                expression: SQL.jsonExtract(SQL.column('document_templates', 'privateSettings'), '$.value.templateDefinition.type'),
+                type: SQLValueType.JSONString,
+                nullable: true,
+            }),
+            year: createColumnFilter({
+                expression: SQL.column('document_templates', 'year'),
+                type: SQLValueType.Number,
+                nullable: false,
+            }),
+            status: createColumnFilter({
+                expression: SQL.column('document_templates', 'status'),
+                type: SQLValueType.String,
+                nullable: false,
+            }),
+            isLocked: createColumnFilter({
+                expression: SQL.column('document_templates', 'isLocked'),
+                type: SQLValueType.Boolean,
+                nullable: false,
+            }),
+            updatesEnabled: createColumnFilter({
+                expression: SQL.column('document_templates', 'updatesEnabled'),
+                type: SQLValueType.Boolean,
+                nullable: false,
+            }),
+        },
+    ),
+    setupSteps: createExistsFilter(
+        SQL.select()
+            .from(SQL.table('organization_registration_periods'))
+            .where(
+                SQL.column('organization_registration_periods', 'organizationId'),
+                SQL.column('organizations', 'id'),
+            ),
+        {
+            ...baseSQLFilterCompilers,
+            periodId: createColumnFilter({
+                expression: SQL.column('organization_registration_periods', 'periodId'),
+                type: SQLValueType.String,
+                nullable: false,
+            }),
+            ...Object.fromEntries(
+                Object.values(SetupStepType)
+                    .map((setupStep) => {
+                        return [
+                            setupStep,
+                            {
+                                ...baseSQLFilterCompilers,
+                                reviewedAt: createColumnFilter({
+                                    expression: SQL.jsonExtract(
+                                        SQL.column('organization_registration_periods', 'setupSteps'),
+                                        `$.value.steps.${setupStep}.review.date`,
+                                    ),
+                                    type: SQLValueType.JSONString,
+                                    nullable: true,
+                                }),
+                                complete: createColumnFilter({
+                                    expression: {
+                                        getSQL: () =>
+                                            `case when CAST(JSON_UNQUOTE(JSON_EXTRACT(\`organization_registration_periods\`.\`setupSteps\`, "$.value.steps.${setupStep}.finishedSteps")) AS unsigned) >= CAST(JSON_UNQUOTE(JSON_EXTRACT(\`organization_registration_periods\`.\`setupSteps\`, "$.value.steps.${setupStep}.totalSteps")) AS unsigned) then 1 else 0 end`,
+                                    },
+                                    type: SQLValueType.Boolean,
+                                    nullable: false,
+                                }),
+                            },
+                        ];
+                    }),
+            ),
+        },
+    ),
+    recordCategoryName: createColumnFilter({
+        expression: SQL.jsonExtract(SQL.column('organizations', 'meta'), '$.value.recordsConfiguration.recordCategories[*].name'),
+        type: SQLValueType.JSONArray,
+        nullable: true,
+    }),
+    // Name of a child (sub)category in any record category, at any nesting depth
+    recordChildCategoryName: createColumnFilter({
+        expression: SQL.jsonExtract(SQL.column('organizations', 'meta'), '$.value.recordsConfiguration.recordCategories**.childCategories[*].name'),
+        type: SQLValueType.JSONArray,
+        nullable: true,
+    }),
+    recordName: createColumnFilter({
+        expression: SQL.jsonExtract(SQL.column('organizations', 'meta'), '$.value.recordsConfiguration.recordCategories**.records[*].name'),
+        type: SQLValueType.JSONArray,
+        nullable: true,
+    }),
 };
