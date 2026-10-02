@@ -2735,4 +2735,42 @@ describe('Endpoint.GetMembersEndpoint', () => {
             ]);
         });
     });
+
+    describe('Filtering on the organization of registrations', () => {
+        test('Members, admins, companies and packages of organizations cannot be filtered on', async () => {
+            const organization = await new OrganizationFactory({ period }).create();
+            const member = await new MemberFactory({}).create();
+            await new RegistrationFactory({ member, organization }).create();
+
+            const organizationAdmin = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const platformAdmin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            for (const [user, host] of [[organizationAdmin, organization.getApiHost()], [platformAdmin, 'platform.stamhoofd.app']] as const) {
+                const token = await SessionService.createSession(user);
+                const fetchMembers = (organizationFilter: StamhoofdFilter) => testServer.test(endpoint, Request.get({
+                    path: baseUrl,
+                    host,
+                    query: new LimitedFilteredRequest({
+                        filter: { id: member.id, registrations: { $elemMatch: { organization: organizationFilter } } },
+                        limit: 10,
+                    }),
+                    headers: { authorization: 'Bearer ' + token.accessToken },
+                }));
+
+                const response = await fetchMembers({ name: organization.name });
+                expect(response.body.results.members.map(m => m.id)).toEqual([member.id]);
+
+                for (const key of ['members', 'admins', 'companies', 'packages']) {
+                    await expect(fetchMembers({ [key]: { $elemMatch: { name: { $contains: 'a' } } } })).rejects.toThrow(
+                        STExpect.errorWithCode('unknown_filter'),
+                    );
+                }
+            }
+        });
+    });
 });

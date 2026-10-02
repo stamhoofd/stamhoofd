@@ -51,6 +51,10 @@ export class GetWebshopsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             );
 
         if (organization) {
+            if (!await Context.auth.hasSomeAccess(organization.id)) {
+                throw Context.auth.error();
+            }
+
             // Organization context: scope to this organization's webshops only
             const scopeFilter: StamhoofdFilter = {
                 organizationId: {

@@ -175,7 +175,7 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
                 },
             }),
 
-            ifNotPlatform(new MultipleChoiceFilterBuilder({
+            ifNotPlatform(ifNotBase(new MultipleChoiceFilterBuilder({
                 name: $t(`%1Qj`),
                 multipleChoiceConfiguration: {
                     isSubjectPlural: true,
@@ -197,7 +197,7 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
                         },
                     },
                 },
-            })),
+            }))),
 
             ifNotPlatform(new MultipleChoiceFilterBuilder({
                 name: $t(`%1LP`),

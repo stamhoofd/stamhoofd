@@ -7,7 +7,7 @@ import type { UIFilterBuilders } from '../UIFilter';
 import { useGetOrganizationUIFilterBuilders } from './organizations';
 
 export function useGetWebshopUIFilterBuilders() {
-    const {getOrganizationUIFilterBuilders} = useGetOrganizationUIFilterBuilders()
+    const { getOrganizationUIFilterBuilders } = useGetOrganizationUIFilterBuilders({ onlyBaseFilters: true });
     const getWebshopUIFilterBuilders = (): UIFilterBuilders => {
         const builders: UIFilterBuilders = [
             new StringFilterBuilder({
