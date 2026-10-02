@@ -190,8 +190,8 @@ export function getAppHost(
             includeUri = false;
         }
 
-        if (app === 'verify-email' && STAMHOOFD.userMode === 'platform') {
-            // Users are not scoped
+        if (app === 'verify-email' && (STAMHOOFD.userMode === 'platform' || !organization)) {
+            // Users are not scoped, or the user is a platform user
             includeUri = false;
         }
 

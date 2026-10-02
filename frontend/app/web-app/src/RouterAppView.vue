@@ -273,6 +273,21 @@ if (orgInDomain) {
             return await loadVerifyEmail(props.organization, props);
         },
     });
+
+    // Platform users (without organizationId) get an unscoped link
+    defineRoute({
+        name: AppRoute.UnscopedVerifyEmail,
+        url: 'verify-email',
+        force: true,
+        replace: 100,
+        defaultProperties: parseEmailVerifyQuery,
+        propsToParams: props => ({
+            query: getEmailVerifyQuery(props),
+        }),
+        component: async (props) => {
+            return await loadVerifyEmail(null, props);
+        },
+    });
 }
 
 // AUTO (DEFAULT)

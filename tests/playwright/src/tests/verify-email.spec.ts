@@ -7,11 +7,14 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { MFATestHelper, STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
-import { EmailVerificationCode, Organization, OrganizationFactory, Token, User, UserFactory } from '@stamhoofd/models';
-import { AcquisitionType, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
+import { EmailMocker } from '@stamhoofd/email';
+import { EmailTemplateFactory, EmailVerificationCode, Organization, OrganizationFactory, Token, User, UserFactory } from '@stamhoofd/models';
+import { AcquisitionType, EmailTemplateType, PermissionLevel, Permissions, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { OnboardingScenario } from '../flows/OnboardingScenario.js';
 import { WorkerData } from '../helpers/index.js';
+
+EmailMocker.infect();
 
 /**
  * These tests cover all the places that should end up on the VerifyEmail route:
@@ -19,7 +22,7 @@ import { WorkerData } from '../helpers/index.js';
  *  2. After signing up at an existing organization
  *  3. After signing up a new organization (organization mode only)
  *  4. After changing the email address of a user with two-factor authentication
- *  5. Opening the verification link from the email directly (token + code)
+ *  5. Opening the verification link from the email (token + code)
  *  6. Reloading the verify email page (token, but no code)
  *
  * In every scenario we also check:
@@ -53,6 +56,8 @@ type EnvContext = {
     loginUrl: string;
     /** Expected url of the member portal where users without permissions land after verification */
     memberPortalUrl: string;
+    /** Member portal url after opening the emailed link, when that link is on another domain */
+    emailedLinkMemberPortalUrl?: string;
 };
 
 function randomEmail(prefix: string) {
@@ -98,6 +103,23 @@ async function getVerificationCode(email: string): Promise<EmailVerificationCode
         throw new Error('No verification code found in the database for ' + email);
     }
     return codes[0];
+}
+
+async function createVerifyEmailTemplates() {
+    await new EmailTemplateFactory({ type: EmailTemplateType.VerifyEmail, html: '<p>{{confirmEmailUrl}}</p>', text: '{{confirmEmailUrl}}' }).create();
+    await new EmailTemplateFactory({ type: EmailTemplateType.VerifyEmailWithoutCode, html: '<p>{{confirmEmailUrl}}</p>', text: '{{confirmEmailUrl}}' }).create();
+}
+
+/**
+ * The link in the most recent verification email sent to this address.
+ */
+async function getEmailedVerifyEmailUrl(email: string): Promise<string> {
+    const findEmail = async () => (await EmailMocker.getSucceededEmails()).filter(e => e.to.includes(email)).at(-1);
+    await expect.poll(findEmail, { timeout: 20_000 }).toBeDefined();
+
+    const url = (await findEmail())!.text?.trim();
+    expect(url).toMatch(/^https:\/\/\S+$/);
+    return url!;
 }
 
 /**
@@ -346,8 +368,7 @@ function defineCommonScenarios(getContext: () => EnvContext) {
         await page.getByTestId('centered-message-button').click();
 
         await test.step('Open the link in the email', async () => {
-            const verificationCode = await getVerificationCode(newEmail);
-            await page.goto(buildVerifyEmailUrl({ domain: ctx.domain, uriOrganization: ctx.uriOrganization, token: verificationCode.token, email: newEmail, code: verificationCode.code }));
+            await page.goto(await getEmailedVerifyEmailUrl(newEmail));
         });
 
         // The user already passed their second factor when they signed in: verifying a new
@@ -395,10 +416,9 @@ function defineCommonScenarios(getContext: () => EnvContext) {
         expect((await User.getByID(user.id))?.email).toBe(email);
 
         await test.step('Open the link in the email', async () => {
-            const verificationCode = await getVerificationCode(newEmail);
-            await page.goto(buildVerifyEmailUrl({ domain: ctx.domain, uriOrganization: ctx.uriOrganization, token: verificationCode.token, email: newEmail, code: verificationCode.code }));
+            await page.goto(await getEmailedVerifyEmailUrl(newEmail));
             await expectVerifiedToast(page);
-            await expectMemberPortal(page, ctx.memberPortalUrl);
+            await expectMemberPortal(page, ctx.emailedLinkMemberPortalUrl ?? ctx.memberPortalUrl);
         });
         expect((await User.getByID(user.id))?.email).toBe(newEmail);
 
@@ -420,6 +440,26 @@ function defineCommonScenarios(getContext: () => EnvContext) {
         // The code is submitted automatically on load
         await expectVerifiedToast(page);
         await expectMemberPortal(page, ctx.memberPortalUrl);
+        await expectUserVerified(user.id);
+    });
+
+    test('opening the link in the verification email after logging in', async ({ page }) => {
+        const ctx = getContext();
+        const email = randomEmail('verify-emailed-link');
+        const { user } = await createUnverifiedUser({ organization: ctx.userOrganization, email });
+
+        await page.goto(ctx.loginUrl);
+
+        if (ctx.scope && ctx.scope.meta.packages.useMembers && STAMHOOFD.userMode === 'organization') {
+            await openLoginOnMembersLogin(page);
+        }
+        await loginViaUI(page, { email, password: PASSWORD });
+        await expectVerifyEmailView(page);
+
+        await page.goto(await getEmailedVerifyEmailUrl(email));
+
+        await expectVerifiedToast(page);
+        await expectMemberPortal(page, ctx.emailedLinkMemberPortalUrl ?? ctx.memberPortalUrl);
         await expectUserVerified(user.id);
     });
 
@@ -457,6 +497,7 @@ test.describe('Verify email routing @verify-email', () => {
             }).create();
             await STPackageService.updateOrganizationPackages(organization.id);
             await organization.refresh();
+            await createVerifyEmailTemplates();
         });
 
         test.afterAll(async () => {
@@ -471,6 +512,8 @@ test.describe('Verify email routing @verify-email', () => {
                 userOrganization: organization,
                 loginUrl: domain + '/leden/' + organization.uri,
                 memberPortalUrl: domain + '/nl-BE/leden/' + organization.uri + '/start',
+                // Users without permissions get a link to the registration domain
+                emailedLinkMemberPortalUrl: WorkerData.urls.registration(organization.uri) + '/nl-BE/leden/start',
             }));
         });
 
@@ -483,6 +526,60 @@ test.describe('Verify email routing @verify-email', () => {
                 loginUrl: WorkerData.urls.registration(organization.uri) + '/leden',
                 memberPortalUrl: WorkerData.urls.registration(organization.uri) + '/nl-BE/leden/start',
             }));
+        });
+
+        test('opening the link in the verification email as an administrator on the dashboard', async ({ page }) => {
+            const email = randomEmail('verify-admin-link');
+            const user = await new UserFactory({
+                organization,
+                email,
+                password: PASSWORD,
+                verified: false,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            await page.goto(domain + '/beheerders/' + organization.uri);
+            await loginViaUI(page, { email, password: PASSWORD });
+            await expectVerifyEmailView(page);
+
+            await page.goto(await getEmailedVerifyEmailUrl(email));
+
+            await expectVerifiedToast(page);
+            await page.locator('.account-switcher').waitFor({ timeout: 20_000 });
+            await expect(page.getByTestId('app-name')).toContainText(organization.name);
+            await expectUserVerified(user.id);
+        });
+
+        test('changing the email address as a platform administrator on the dashboard', async ({ page }) => {
+            const email = randomEmail('verify-platform-admin');
+            const newEmail = randomEmail('verify-platform-admin-changed');
+            const user = await new UserFactory({
+                email,
+                password: PASSWORD,
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            await loginAs({ page, user });
+            await page.goto(domain + '/beheerders/' + organization.uri);
+
+            await test.step('Change the email address in the account settings', async () => {
+                await page.locator('.account-switcher').click({ timeout: 20_000 });
+                const accountView = page.locator('#account-view');
+                await expect(accountView).toBeVisible({ timeout: 20_000 });
+                await accountView.getByTestId('email-input').fill(newEmail);
+                await accountView.locator('#submit').click();
+            });
+
+            await expect(page.getByTestId('centered-message')).toContainText(newEmail);
+            await page.getByTestId('centered-message-button').click();
+
+            // Platform users are not scoped to an organization: the link is unscoped too
+            const url = await getEmailedVerifyEmailUrl(newEmail);
+            expect(new URL(url).pathname).toBe('/nl-BE/verify-email');
+
+            await page.goto(url);
+            await expectVerifiedToast(page);
+            expect((await User.getByID(user.id))?.email).toBe(newEmail);
         });
 
         test('after signing up a new organization', async ({ page }) => {
@@ -517,6 +614,7 @@ test.describe('Verify email routing @verify-email', () => {
         test.beforeAll(async () => {
             TestUtils.setPermanentEnvironment('userMode', 'platform');
             TestUtils.setPermanentEnvironment('singleOrganization', undefined);
+            await createVerifyEmailTemplates();
         });
 
         test.afterAll(async () => {
@@ -540,6 +638,7 @@ test.describe('Verify email routing @verify-email', () => {
             TestUtils.setPermanentEnvironment('userMode', 'platform');
             organization = await new OrganizationFactory({}).create();
             TestUtils.setPermanentEnvironment('singleOrganization', organization.id);
+            await createVerifyEmailTemplates();
         });
 
         test.afterAll(async () => {
