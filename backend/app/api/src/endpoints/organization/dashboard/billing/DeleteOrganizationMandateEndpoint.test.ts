@@ -1,10 +1,11 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Token } from '@stamhoofd/models';
 import { BlockedPaymentMandate, Organization, OrganizationFactory } from '@stamhoofd/models';
+import { AccessRight } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { MollieMocker } from '../../../../../tests/helpers/MollieMocker.js';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
-import { initAdmin } from '../../../../../tests/init/index.js';
+import { initAdmin, initPlatformAdmin } from '../../../../../tests/init/index.js';
 import { initMembershipOrganization } from '../../../../../tests/init/initMembershipOrganization.js';
 import { DeleteOrganizationMandateEndpoint } from './DeleteOrganizationMandateEndpoint.js';
 
@@ -59,6 +60,50 @@ describe('Endpoint.DeleteOrganizationMandateEndpoint', () => {
 
         return { organization, token: adminToken, usableMandates, blockedMandates };
     };
+
+    test('A finance director can delete a mandate, but not the default or the last usable one', async () => {
+        const { organization, usableMandates } = await init({ usable: 2, blocked: 0 });
+        const { adminToken } = await initAdmin({ organization, accessRights: [AccessRight.OrganizationFinanceDirector] });
+
+        await expect(remove(usableMandates[0].id, organization, adminToken)).rejects.toMatchObject({ code: 'not_allowed', message: 'You cannot delete the default mandate' });
+
+        const response = await remove(usableMandates[1].id, organization, adminToken);
+        expect(response.status).toBe(201);
+        expect(mollieMocker.mandates.map(m => m.id)).toEqual([usableMandates[0].id]);
+
+        const fresh = (await Organization.getByID(organization.id))!;
+        fresh.serverMeta.mollieMandateId = null;
+        await fresh.save();
+
+        await expect(remove(usableMandates[0].id, organization, adminToken)).rejects.toMatchObject({ code: 'not_allowed', message: 'You cannot delete the last usable mandate' });
+        expect(mollieMocker.mandates.map(m => m.id)).toEqual([usableMandates[0].id]);
+    });
+
+    test('A platform admin can delete the last usable mandate', async () => {
+        const { organization, usableMandates } = await init({ usable: 1, blocked: 0 });
+        const { adminToken } = await initPlatformAdmin();
+
+        const response = await remove(usableMandates[0].id, organization, adminToken);
+        expect(response.status).toBe(201);
+        expect(mollieMocker.mandates).toHaveLength(0);
+    });
+
+    test('An admin without finance access cannot delete a mandate', async () => {
+        const { organization, usableMandates } = await init({ usable: 2, blocked: 0 });
+        const { adminToken } = await initAdmin({ organization, accessRights: [AccessRight.OrganizationManagePayments] });
+
+        await expect(remove(usableMandates[1].id, organization, adminToken)).rejects.toMatchObject({ code: 'permission_denied' });
+        expect(mollieMocker.mandates.map(m => m.id)).toContain(usableMandates[1].id);
+    });
+
+    test('A seller admin cannot delete a mandate of the paying organization', async () => {
+        TestUtils.setEnvironment('userMode', 'platform');
+        const { organization, usableMandates } = await init({ usable: 2, blocked: 0 });
+        const { adminToken: sellerToken } = await initAdmin({ organization: sellingOrganization, accessRights: [AccessRight.OrganizationManagePayments] });
+
+        await expect(remove(usableMandates[1].id, organization, sellerToken)).rejects.toMatchObject({ code: 'permission_denied' });
+        expect(mollieMocker.mandates.map(m => m.id)).toContain(usableMandates[1].id);
+    });
 
     test('A blocked mandate can be deleted even when it is the last one', async () => {
         const { organization, token, blockedMandates } = await init({ usable: 0, blocked: 2 });

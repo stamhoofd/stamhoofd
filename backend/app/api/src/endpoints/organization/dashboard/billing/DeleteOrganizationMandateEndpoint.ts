@@ -48,6 +48,10 @@ export class DeleteOrganizationMandateEndpoint extends Endpoint<Params, Query, B
             });
         }
 
+        if (!await Context.auth.canManageFinances(payingOrganization.id)) {
+            throw Context.auth.error();
+        }
+
         await PaymentMandateService.deleteMandate({
             mandateId: request.params.id,
             sellingOrganization,
