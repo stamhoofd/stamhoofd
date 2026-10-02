@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/vies",
-    "version": "2.153.2",
+    "version": "2.153.3",
     "type": "module",
     "main": "./dist/ViesService.js",
     "types": "./dist/ViesService.d.ts",
