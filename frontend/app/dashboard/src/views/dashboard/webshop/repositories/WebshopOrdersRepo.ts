@@ -13,6 +13,7 @@ import { createPrivateOrderIndexBox } from '../ordersIndexedDBSorters';
 import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
 import type { WebshopSettingsStore } from './WebshopSettingsStore';
 import type { WebshopTicketsRepo } from './WebshopTicketsRepo';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
 
 /**
  * Safety margin subtracted from the current time when advancing the order sync watermark.
@@ -73,12 +74,20 @@ export class WebshopOrdersRepo {
      * @param isFetchAll true if all orders should be fetched (and not only the updated orders)
      * @returns true if the backend returned updated orders
      */
-    async fetchAllUpdated({ isFetchAll }: { isFetchAll?: boolean } = {}): Promise<void> {
+    async fetchAllUpdated({ isFetchAll }: {
+        isFetchAll?: boolean;
+    } = {
+    }): Promise<void> {
         let hadSuccessfulFetch = false;
 
         const totalOrders: PrivateOrder[] = [];
 
         const promises: Promise<void>[] = [];
+
+        const toast = new Toast($t('Bestellingen ophalen...'), 'spinner').setHide(null);
+        const timer = setTimeout(() => {
+            toast.show();
+        }, 1000);
 
         const onResultsReceived = async (orders: PrivateOrder[]) => {
             if (isFetchAll && !hadSuccessfulFetch) {
@@ -94,7 +103,9 @@ export class WebshopOrdersRepo {
             }
         };
 
-        await this.apiClient.getAllUpdated({ isFetchAll, onResultsReceived });
+        await this.apiClient.getAllUpdated({ isFetchAll, onResultsReceived, onProgress(count, total) {
+            toast.setProgress(total !== 0 ? (count / total) : 0);
+        } });
 
         const deletedOrders: PrivateOrder[] = [];
         const fetchedOrders: PrivateOrder[] = [];
@@ -107,6 +118,9 @@ export class WebshopOrdersRepo {
 
             fetchedOrders.push(order);
         }
+
+        toast.setProgress(1);
+        toast.message = $t('Bestellingen verwerken...');
 
         // wait until all orders have been stored
         await Promise.all(promises);
@@ -127,6 +141,15 @@ export class WebshopOrdersRepo {
         if (deletedOrders.length > 0) {
             await this.eventBus.sendEvent('deleted', deletedOrders);
         }
+
+        clearTimeout(timer);
+
+        toast.message = $t('Bestellingen verwerkt!');
+        toast.setIcon('success green');
+
+        setTimeout(() => {
+            toast.hide();
+        }, 1000);
     }
 
     /**
@@ -542,7 +565,11 @@ class WebshopOrdersApiClient {
      * @param isFetchAll true if all orders should be fetched (and not only the updated orders)
      * @returns true if the backend returned updated orders
      */
-    async getAllUpdated({ isFetchAll, onResultsReceived }: { isFetchAll?: boolean; onResultsReceived: (results: PrivateOrder[]) => Promise<void> | void }): Promise<void> {
+    async getAllUpdated({ isFetchAll, onResultsReceived, onProgress }: {
+        isFetchAll?: boolean;
+        onResultsReceived: (results: PrivateOrder[]) => Promise<void> | void;
+        onProgress: (count: number, total: number) => Promise<void> | void;
+    }): Promise<void> {
         if (this._isFetching) {
             return;
         }
@@ -586,7 +613,7 @@ class WebshopOrdersApiClient {
             fetch: async (data: LimitedFilteredRequest) => {
                 const response = await this.context.authenticatedServer.request({
                     method: 'GET',
-                    path: `/webshop/orders`,
+                    path: '/webshop/orders',
                     decoder: new PaginatedResponseDecoder(new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
                     query: data,
                     shouldRetry: false,
@@ -598,7 +625,7 @@ class WebshopOrdersApiClient {
             fetchCount: async (data: CountFilteredRequest): Promise<number> => {
                 const response = await this.context.authenticatedServer.request({
                     method: 'GET',
-                    path: `/webshop/orders/count`,
+                    path: '/webshop/orders/count',
                     decoder: CountResponse as Decoder<CountResponse>,
                     query: data,
                     shouldRetry: false,
@@ -609,7 +636,7 @@ class WebshopOrdersApiClient {
         };
 
         try {
-            await fetchAll(request, fetcher, { onResultsReceived });
+            await fetchAll(request, fetcher, { onResultsReceived, onProgress });
         } finally {
             this._isFetching = false;
         }
