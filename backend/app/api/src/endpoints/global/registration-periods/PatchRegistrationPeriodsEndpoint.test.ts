@@ -43,20 +43,11 @@ describe('Endpoint.PatchRegistrationPeriodsEndpoint', () => {
         return await patchPeriods(body);
     };
 
-    const createPeriod = async ({ createdAt }: { createdAt?: Date } = {}) => {
-        const period = await new RegistrationPeriodFactory({ organization }).create();
-        if (createdAt) {
-            period.createdAt = createdAt;
-            await period.save();
-        }
-        return period;
-    };
+    const createPeriod = async () => await new RegistrationPeriodFactory({ organization }).create();
 
-    const twoDaysAgo = () => new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
-
-    test('Cannot delete an older period with registrations', async () => {
-        const emptyPeriod = await createPeriod({ createdAt: twoDaysAgo() });
-        const period = await createPeriod({ createdAt: twoDaysAgo() });
+    test('Cannot delete a period with registrations', async () => {
+        const emptyPeriod = await createPeriod();
+        const period = await createPeriod();
         const group = await new GroupFactory({ organization, period }).create();
         const member = await new MemberFactory({ organization }).create();
         await new RegistrationFactory({ group, member }).create();
@@ -75,12 +66,13 @@ describe('Endpoint.PatchRegistrationPeriodsEndpoint', () => {
         expect(await Group.getByID(group.id)).toBeDefined();
     });
 
-    test('Can delete an older period with only unconfirmed registrations or registrations in deleted groups', async () => {
-        const period = await createPeriod({ createdAt: twoDaysAgo() });
+    test('Can delete a period with only unconfirmed, deactivated or deleted-group registrations', async () => {
+        const period = await createPeriod();
         const group = await new GroupFactory({ organization, period }).create();
         const cartRegistration = await new RegistrationFactory({ group, member: await new MemberFactory({ organization }).create() }).create();
         cartRegistration.registeredAt = null;
         await cartRegistration.save();
+        await new RegistrationFactory({ group, member: await new MemberFactory({ organization }).create(), deactivatedAt: new Date() }).create();
 
         const deletedGroup = await new GroupFactory({ organization, period }).create();
         const member = await new MemberFactory({ organization }).create();
@@ -91,17 +83,5 @@ describe('Endpoint.PatchRegistrationPeriodsEndpoint', () => {
         await deletePeriods(period);
 
         expect(await RegistrationPeriod.getByID(period.id)).toBeUndefined();
-    });
-
-    test('Can delete a period with registrations that was created today', async () => {
-        const period = await createPeriod();
-        const group = await new GroupFactory({ organization, period }).create();
-        const member = await new MemberFactory({ organization }).create();
-        await new RegistrationFactory({ group, member }).create();
-
-        await deletePeriods(period);
-
-        expect(await RegistrationPeriod.getByID(period.id)).toBeUndefined();
-        expect(await Group.getByID(group.id)).toBeUndefined();
     });
 });

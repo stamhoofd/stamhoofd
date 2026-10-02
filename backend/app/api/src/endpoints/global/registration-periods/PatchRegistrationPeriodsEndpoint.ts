@@ -89,24 +89,23 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
                 });
             }
 
-            if (model.createdAt.getTime() < Date.now() - 24 * 60 * 60 * 1000) {
-                const registration = await Registration.select()
-                    .join(
-                        SQL.innerJoin(SQL.table(Group.table))
-                            .where(SQL.column(Group.table, 'id'), SQL.column(Registration.table, 'groupId')),
-                    )
-                    .where(SQL.column(Group.table, 'periodId'), model.id)
-                    .where(SQL.column(Group.table, 'deletedAt'), null)
-                    .whereNot(SQL.column(Registration.table, 'registeredAt'), null)
-                    .first(false);
+            const registration = await Registration.select()
+                .join(
+                    SQL.innerJoin(SQL.table(Group.table))
+                        .where(SQL.column(Group.table, 'id'), SQL.column(Registration.table, 'groupId')),
+                )
+                .where(SQL.column(Group.table, 'periodId'), model.id)
+                .where(SQL.column(Group.table, 'deletedAt'), null)
+                .whereNot(SQL.column(Registration.table, 'registeredAt'), null)
+                .where(SQL.column(Registration.table, 'deactivatedAt'), null)
+                .first(false);
 
-                if (registration) {
-                    throw new SimpleError({
-                        code: 'period_has_registrations',
-                        message: 'Cannot delete a registration period that has registrations',
-                        human: $t('Je kan een werkjaar met inschrijvingen niet verwijderen. Verwijder eerst alle groepen met inschrijvingen uit dit werkjaar.'),
-                    });
-                }
+            if (registration) {
+                throw new SimpleError({
+                    code: 'period_has_registrations',
+                    message: 'Cannot delete a registration period that has registrations',
+                    human: $t('Je kan een werkjaar met inschrijvingen niet verwijderen. Schrijf eerst alle leden uit of verwijder alle groepen met inschrijvingen uit dit werkjaar.'),
+                });
             }
 
             deletePeriods.push(model);
