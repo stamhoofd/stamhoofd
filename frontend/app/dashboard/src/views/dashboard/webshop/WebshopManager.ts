@@ -6,6 +6,7 @@ import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { SortItem, StamhoofdFilter, WebshopPreview } from '@stamhoofd/structures';
 import { PermissionLevel, PrivateOrderWithTickets, PrivateWebshop, Version } from '@stamhoofd/structures';
 import { IndexBoxDecoder } from './IndexBox';
+import { filterNeedsTickets } from './orderTicketFilters';
 import type { OrderIndexedDBIndex } from './ordersIndexedDBSorters';
 import { WebshopDatabase } from './repositories/WebshopDatabase';
 import { OrdersStore, WebshopOrdersRepo } from './repositories/WebshopOrdersRepo';
@@ -291,12 +292,17 @@ export class WebshopManager {
     }
 
     /**
-     * Stream orders with patched tickets.
+     * Stream the orders of the local database, with their tickets attached.
+     *
+     * The tickets of an order live in their own store, so attaching them costs extra reads. They are
+     * only read for the orders that the filter keeps, unless the filter itself needs them: pass
+     * withTickets false if the callback does not look at them either (counting, for example).
      */
     async streamOrdersWithPatchedTickets(options: {
         callback: (data: PrivateOrderWithTickets) => void;
         filter?: StamhoofdFilter;
         indexFilter?: StamhoofdFilter;
+        withTickets?: boolean;
         limit?: number;
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
         advanceCount?: number;
@@ -304,6 +310,9 @@ export class WebshopManager {
         const db = await this.database.get();
         const openTransaction = db.transaction([OrdersStore.storeName, WebshopTicketsStore.storeName, WebshopTicketPatchesStore.storeName], 'readonly');
         const decoder = new IndexBoxDecoder(PrivateOrderWithTickets as Decoder<PrivateOrderWithTickets>);
+
+        const needsTicketsForFilter = filterNeedsTickets(options.filter ?? null);
+        const callbackNeedsTickets = options.withTickets ?? true;
 
         return this.orders.streamRaw({
             ...options,
@@ -320,8 +329,18 @@ export class WebshopManager {
                     throw e;
                 }
 
-                order.tickets = await this.tickets.getForOrder(order.id, true, openTransaction);
+                if (needsTicketsForFilter) {
+                    order.tickets = await this.tickets.getForOrder(order.id, true, openTransaction);
+                }
+
                 return order;
+            },
+            callback: async (order: PrivateOrderWithTickets) => {
+                if (callbackNeedsTickets && !needsTicketsForFilter) {
+                    order.tickets = await this.tickets.getForOrder(order.id, true, openTransaction);
+                }
+
+                options.callback(order);
             },
         });
     }

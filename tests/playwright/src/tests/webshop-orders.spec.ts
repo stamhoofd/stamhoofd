@@ -878,6 +878,52 @@ function registerWebshopOrderTests() {
         await adminContext.close();
     });
 
+    test('Searching the orders keeps the tickets of the rows it returns', async ({ browser }) => {
+        // The tickets of an order are stored apart from the order itself, so reading them costs an extra
+        // lookup per order. Only the orders that the filter keeps get one, which means a search must not
+        // lose them: an order without its tickets shows '-' in the ticket column instead of its amount.
+        const organization = await createWebshopOrganization('SearchTickets');
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Search tickets ${WorkerData.id}`,
+            ticketType: WebshopTicketType.Tickets,
+            productCount: 1,
+            cartEnabled: false,
+        });
+        const admin = await createAdmin(organization);
+
+        const orderCount = 5;
+        for (let number = 1; number <= orderCount; number++) {
+            const label = number.toString().padStart(2, '0');
+            const order = await new OrderFactory({
+                webshop,
+                number,
+                firstName: 'Klant',
+                lastName: label,
+                email: `klant-${label}@example.com`,
+            }).create();
+
+            for (let index = 1; index <= 2; index++) {
+                await new TicketFactory({ order, index, total: 2 }).create();
+            }
+        }
+
+        const adminContext = await browser.newContext();
+        const adminPage = await adminContext.newPage();
+        await loginAs({ page: adminPage, user: admin });
+
+        const table = await openWebshopOrders(adminPage, organization, webshop.meta.name);
+        await expect(table.getRow('Klant 03')).toContainText('0 / 2');
+
+        await table.search('Klant 03');
+        await expect(table.getResultCount()).toHaveText(`1 van ${orderCount}`);
+        await expect(table.getRows()).toHaveCount(1);
+        await expect(table.getRow('Klant 03')).toContainText('0 / 2');
+        await expect(table.getErrorBox()).toHaveCount(0);
+
+        await adminContext.close();
+    });
+
     test('Bancontact via Mollie: admin can refund the payment online', async ({ page, browser }) => {
         const organization = await createWebshopOrganization('MollieRefund');
         organization.privateMeta.mollieOnboarding = MollieOnboarding.create({
