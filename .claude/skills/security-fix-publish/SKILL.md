@@ -19,10 +19,10 @@ published**. Commits on `security` that were not released stay private.
   stop.
 - Get explicit confirmation from the user that the release is deployed (step 3) before anything is
   pushed to `origin`.
-- Never push to `origin/main` directly; land the commits via a pull request with a rebase merge, so
-  every vulnerability stays one commit.
-- Push a release tag to `origin`, publish it to npm or create its GitHub release only after the PR
-  is merged and everything in the tag is on `origin/main` (step 6).
+- Push the commits straight to `origin/main` as a fast-forward (step 5): no pull request, no merge
+  commit, so every vulnerability stays one commit.
+- Push a release tag to `origin`, publish it to npm or create its GitHub release only after the
+  commits are on `origin/main` and everything in the tag is there (step 6).
 - Never `--force` push; the only lease-protected push is the branch delete in step 7. Commits other
   agents added to `fork/security` after the release must never be lost or published.
 - Never run a bare `git push` on the local `security` branch. `remote.pushDefault=origin` overrides
@@ -86,7 +86,8 @@ cat "$OUT/tags"
 - `$OUT/private`: fixes added after the release. They stay private. A commit whose content differs
   from the released copy (e.g. after resolving a rebase conflict) also ends up here; if the user
   says one of them was released anyway, ask them to name the tag and verify it by hand before
-  including it.
+  including it. The check also misfires when a later commit on `security` touched the same lines:
+  `git range-diff origin/main..<tag> origin/main..$TIP` is authoritative, an `=` row means released.
 
 ## 3. Confirm the release is deployed
 
@@ -111,18 +112,17 @@ git -C "$WT" log --format='%h %s%n%b' origin/main..HEAD
 Every commit must be a 🔒 commit or a version commit from `$OUT/publish`. Anything else: stop and
 ask. On a non-mechanical conflict, stop and ask.
 
-## 5. Open the pull request and merge
+## 5. Push to origin/main
+
+The fixes were already reviewed and released, so they go to `main` directly, without a pull
+request:
 
 ```bash
-git -C "$WT" push origin HEAD:refs/heads/security/$TAG
-gh pr create -R stamhoofd/stamhoofd --base main --head "security/$TAG" \
-  --title "🔒 Security fixes released in $TAG" --body "<one line per commit: subject + fixes STA-XXXX>"
-gh pr checks <number> -R stamhoofd/stamhoofd --watch
-gh pr merge <number> -R stamhoofd/stamhoofd --rebase --delete-branch
+git -C "$WT" push origin HEAD:refs/heads/main
 ```
 
-Required checks failing: report the failure and stop; don't merge. Never use `--squash` (it
-collapses the vulnerabilities into one commit) or `--admin`.
+Rejected as non-fast-forward: `origin/main` moved in the meantime. Run `git fetch origin main`,
+`git -C "$WT" rebase origin/main` and push again. Never `--force`.
 
 ## 6. Publish the releases to npm and GitHub
 
@@ -134,7 +134,7 @@ root (`stam` needs the built CLI; run `pnpm run build:shared` first if it fails)
 git fetch origin main
 for T in $(awk '$1 ~ /^fork\//{sub("^fork/", "", $1); print $1}' "$OUT/tags" | sort -V); do
   git ls-remote --exit-code --tags origin "refs/tags/$T" >/dev/null && continue   # already public
-  git fetch --no-tags fork "+refs/tags/$T:refs/tags/$T"
+  git fetch --no-tags fork "+refs/tags/${T}:refs/tags/${T}"   # braces: zsh reads `$T:r` as a modifier
   [ "$(git merge-tree --write-tree origin/main "$T" | head -1)" = "$(git rev-parse 'origin/main^{tree}')" ] \
     || { echo "$T contains changes that are not on origin/main"; break; }
   git push origin "refs/tags/$T"
@@ -172,5 +172,5 @@ git worktree remove "$WT"
 If commits stay private or the delete is rejected, leave the branch. The `security-fix-commit`
 skill drops the published commits from it the next time it rebases onto `origin/main`.
 
-Report: the release tags, the merged PR, the npm and GitHub releases, the published commits, the
+Report: the release tags, the npm and GitHub releases, the commits pushed to `origin/main`, the
 commits that stay private on `fork/security`, and whether the branch was deleted.
