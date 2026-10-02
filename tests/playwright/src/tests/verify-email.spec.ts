@@ -358,6 +358,58 @@ function defineCommonScenarios(getContext: () => EnvContext) {
         expect((await User.getByID(user.id))?.email).toBe(newEmail);
     });
 
+    test('changing the email address in the account settings', async ({ page }) => {
+        const ctx = getContext();
+        const email = randomEmail('verify-change');
+        const newEmail = randomEmail('verify-changed');
+        const user = await new UserFactory({ organization: ctx.userOrganization, email, password: PASSWORD }).create();
+
+        const pageErrors: string[] = [];
+        page.on('pageerror', error => pageErrors.push(error.message));
+
+        await loginAs({ page, user });
+        await page.goto(ctx.loginUrl);
+
+        const accountView = page.locator('#account-view');
+        await test.step('Change the email address in the account settings', async () => {
+            await page.locator('.account-switcher').click({ timeout: 20_000 });
+            await expect(accountView).toBeVisible({ timeout: 20_000 });
+            await accountView.getByTestId('email-input').fill(newEmail);
+            await accountView.locator('#submit').click();
+        });
+
+        await test.step('The new email address waits for the link in the email', async () => {
+            const message = page.getByTestId('centered-message');
+            await expect(message).toBeVisible();
+            await expect(message).toContainText('Bevestig jouw nieuwe e-mailadres');
+            await expect(message).toContainText(newEmail);
+            await message.getByTestId('centered-message-button').click();
+            await expect(message).toBeHidden();
+        });
+
+        // Back on the member portal. There is no code to enter: checked first, because the code
+        // view closes itself after a while.
+        await expect(page.locator(VERIFY_EMAIL_VIEW)).toHaveCount(0);
+        await expect(accountView).toBeHidden();
+        await expectMemberPortal(page, ctx.memberPortalUrl);
+        expect((await User.getByID(user.id))?.email).toBe(email);
+
+        await test.step('Open the link in the email', async () => {
+            const verificationCode = await getVerificationCode(newEmail);
+            await page.goto(buildVerifyEmailUrl({ domain: ctx.domain, uriOrganization: ctx.uriOrganization, token: verificationCode.token, email: newEmail, code: verificationCode.code }));
+            await expectVerifiedToast(page);
+            await expectMemberPortal(page, ctx.memberPortalUrl);
+        });
+        expect((await User.getByID(user.id))?.email).toBe(newEmail);
+
+        await test.step('The account settings show the new email address', async () => {
+            await page.locator('.account-switcher').click({ timeout: 20_000 });
+            await expect(accountView.getByTestId('email-input')).toHaveValue(newEmail);
+        });
+
+        expect(pageErrors).toEqual([]);
+    });
+
     test('opening the verification link with token and code verifies automatically', async ({ page }) => {
         const ctx = getContext();
         const email = randomEmail('verify-link');

@@ -8,8 +8,9 @@ import { expect } from '@playwright/test';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization } from '@stamhoofd/models';
-import { MFARecoveryCode, MFATOTP, OrganizationFactory, PasswordToken, Platform, Token, User, UserFactory } from '@stamhoofd/models';
+import { EmailVerificationCode, MFARecoveryCode, MFATOTP, OrganizationFactory, PasswordToken, Platform, Token, User, UserFactory } from '@stamhoofd/models';
 import { PasswordForgotService } from '@stamhoofd/backend/services/PasswordForgotService';
+import { VerificationCodeService } from '@stamhoofd/backend/services/VerificationCodeService';
 import { MFATestHelper, STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { PermissionLevel, PermissionRoleDetailed, Permissions, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -422,6 +423,92 @@ function defineCommonScenarios(getContext: () => EnvContext, { includeOtherOrgan
         expect(invited.permissions?.globalPermissions?.roles.map(r => r.name)).toContain(PLATFORM_ROLE);
 
         await openInviteAndChoosePassword(browser, { userId: invited.id, organization: null, requiresTwoFactor: true });
+    });
+
+    test('change the email address while accepting an invite', async ({ browser }) => {
+        const ctx = getContext();
+        const email = randomEmail('invite-change-email');
+        const newEmail = randomEmail('invite-changed-email');
+
+        // What an invite of a new user creates: a user without password, with permissions and a password token
+        const invited = await new UserFactory({
+            organization: ctx.organization,
+            email,
+            permissions: Permissions.create({ level: PermissionLevel.Full }),
+        }).create();
+        invited.password = null;
+        await invited.save();
+        await PasswordToken.createToken(invited);
+        const passwordToken = await PasswordToken.select().where('userId', invited.id).first(true);
+        const url = await PasswordForgotService.getPasswordRecoveryUrlForToken(passwordToken, ctx.organization, i18n);
+
+        // A new browser session with a clean local storage
+        const context = await browser.newContext();
+        try {
+            const page = await context.newPage();
+            const pageErrors: string[] = [];
+            page.on('pageerror', error => pageErrors.push(error.message));
+
+            await test.step('Choose a password and a new email address', async () => {
+                await page.goto(url);
+
+                const form = page.locator('form.forgot-password-reset-view');
+                await expect(form).toBeVisible({ timeout: 20_000 });
+                await form.locator('input[autocomplete="given-name"]').fill('Nieuwe');
+                await form.locator('input[autocomplete="family-name"]').fill('Beheerder');
+                await form.getByTestId('email-input').fill(newEmail);
+
+                const passwordInputs = form.locator('input[autocomplete="new-password"]');
+                await passwordInputs.nth(0).fill(NEW_PASSWORD);
+                await passwordInputs.nth(1).fill(NEW_PASSWORD);
+
+                const policies = form.getByTestId('checkbox');
+                const count = await policies.count();
+                for (let i = 0; i < count; i++) {
+                    await policies.nth(i).check();
+                }
+                await form.locator('#submit').click();
+            });
+
+            await test.step('The new email address waits for the link in the email', async () => {
+                const message = page.getByTestId('centered-message');
+                await expect(message).toBeVisible({ timeout: 20_000 });
+                await expect(message).toContainText('Bevestig jouw nieuwe e-mailadres');
+                await expect(message).toContainText(newEmail);
+                await message.getByTestId('centered-message-button').click();
+                await expect(message).toBeHidden();
+            });
+
+            await test.step('Land signed in on the dashboard of the organization', async () => {
+                // There is no code to enter. Checked first: the code view closes itself after a while.
+                await expect(page.getByTestId('verify-email-view')).toHaveCount(0);
+                await expect(page.locator('form.forgot-password-reset-view')).toBeHidden();
+                await expect(page).toHaveURL(url => url.pathname.startsWith('/nl-BE/beheerders/'), { timeout: 20_000 });
+                await expect(page.getByRole('heading', { name: ctx.organization.name }).first()).toBeVisible({ timeout: 20_000 });
+                await expect(page.locator('[data-testid="login-view"]')).toBeHidden();
+            });
+
+            // The password and name are saved, the email address not yet
+            const saved = await User.getByID(invited.id);
+            expect(saved?.password).toBeTruthy();
+            expect(saved?.firstName).toBe('Nieuwe');
+            expect(saved?.email).toBe(email);
+
+            await test.step('Open the link in the email', async () => {
+                const [code] = await EmailVerificationCode.where({ userId: invited.id });
+                expect(code.email).toBe(newEmail);
+                await page.goto(VerificationCodeService.getEmailVerificationUrl(code, invited, ctx.organization, i18n));
+                await expect(page.getByTestId('toast-email-verification-succeeded')).toBeVisible({ timeout: 10_000 });
+
+                // In platform mode the link isn't scoped, so this can also be the organization selection
+                await expect(page.getByRole('heading', { name: ctx.organization.name }).first()).toBeVisible({ timeout: 20_000 });
+            });
+
+            expect((await User.getByID(invited.id))?.email).toBe(newEmail);
+            expect(pageErrors).toEqual([]);
+        } finally {
+            await context.close();
+        }
     });
 
     if (includeOrganizationTwoFactor) {
