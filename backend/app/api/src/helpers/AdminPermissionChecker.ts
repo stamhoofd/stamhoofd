@@ -740,11 +740,13 @@ export class AdminPermissionChecker {
             orders: Order[];
         },
     ): Promise<boolean> {
-        // These balance items are out of scope - but we do have access to them
-        for (const balanceItem of balanceItems) {
-            if (balanceItem.payingOrganizationId && (this.checkScope(balanceItem.payingOrganizationId) || this.checkScope(balanceItem.organizationId))) {
-                if (await this.canManagePayments(balanceItem.payingOrganizationId)) {
-                    return true;
+        // The paying organization can view, but never change, balance items charged to it by another organization
+        if (permissionLevel === PermissionLevel.Read) {
+            for (const balanceItem of balanceItems) {
+                if (balanceItem.payingOrganizationId && (this.checkScope(balanceItem.payingOrganizationId) || this.checkScope(balanceItem.organizationId))) {
+                    if (await this.canManagePayments(balanceItem.payingOrganizationId)) {
+                        return true;
+                    }
                 }
             }
         }
