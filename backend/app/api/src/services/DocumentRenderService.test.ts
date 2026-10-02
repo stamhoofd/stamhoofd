@@ -67,6 +67,17 @@ function createInvalidFieldAnswers() {
     ]);
 }
 
+function createFieldAnswers(id: string) {
+    return new Map([
+        [id, RecordTextAnswer.create({
+            settings: RecordSettings.create({ id, type: RecordType.Text }),
+            value: 'polluted',
+        })],
+    ]);
+}
+
+const prototypePollutionIds = ['__proto__.polluted', 'registration.__proto__.polluted', 'constructor.prototype.polluted', '__proto__'];
+
 const xmlExport = '<documents>{{#each documents}}<document>{{{this.number}}}</document>{{/each}}</documents>';
 
 /**
@@ -194,6 +205,24 @@ describe('DocumentRenderService', () => {
             // The platform logo remains available separately
             expect(context['platform'].logo.id).toBe(platformLogo.id);
         });
+
+        test.each(prototypePollutionIds)('A field id %s cannot write to the prototype chain', (id) => {
+            const document = createDocument();
+            document.data.fieldAnswers = createFieldAnswers(id);
+
+            expect(() => DocumentRenderService.buildDocumentContext(document, createOrganization(), createPlatform({}))).toThrow('Invalid field id');
+            expect(({} as Record<string, unknown>)['polluted']).toBeUndefined();
+        });
+
+        test('A field id matching an inherited property creates an own property', () => {
+            const document = createDocument();
+            document.data.fieldAnswers = createFieldAnswers('toString.value');
+
+            const context = DocumentRenderService.buildDocumentContext(document, createOrganization(), createPlatform({}));
+
+            expect(context['toString']).toEqual({ value: 'polluted' });
+            expect(Object.prototype.toString).toBeTypeOf('function');
+        });
     });
 
     describe('day price', () => {
@@ -283,6 +312,20 @@ describe('DocumentRenderService', () => {
             try {
                 await expect(DocumentRenderService.getRenderedXml(template, organization)).resolves.toBeNull();
                 expect(consoleError).toHaveBeenCalledWith('Failed to render document html', expect.any(Error));
+            } finally {
+                consoleError.mockRestore();
+            }
+        });
+
+        test('A template field id cannot write to the prototype chain', async () => {
+            const { template, organization } = await createTemplateWithDocuments([1]);
+            template.settings.fieldAnswers = createFieldAnswers('__proto__.polluted');
+
+            const consoleError = vitest.spyOn(console, 'error').mockImplementation(() => {});
+
+            try {
+                await expect(DocumentRenderService.getRenderedXml(template, organization)).resolves.toBeNull();
+                expect(({} as Record<string, unknown>)['polluted']).toBeUndefined();
             } finally {
                 consoleError.mockRestore();
             }
