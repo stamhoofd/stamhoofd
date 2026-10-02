@@ -350,8 +350,11 @@ export class LoginHelper {
         return await this.patchUser(session, patch);
     }
 
-    static async patchUser(session: SessionContext, patch: AutoEncoderPatchType<NewUser | User>): Promise<{ verificationToken?: string }> {
-        // Do netwowrk request to create organization
+    /**
+     * @returns verificationEmailSent: the new email address is only changed after clicking the link in the email
+     */
+    static async patchUser(session: SessionContext, patch: AutoEncoderPatchType<NewUser | User>): Promise<{ verificationEmailSent?: boolean }> {
+        let verificationEmailSent = false;
         try {
             await session.authenticatedIdentityServer.request({
                 method: 'PATCH',
@@ -361,22 +364,17 @@ export class LoginHelper {
                 shouldRetry: false,
             });
         } catch (e) {
-            if ((isSimpleError(e) || isSimpleErrors(e))) {
-                const error = e.getCode('verify_email');
-                if (error) {
-                    const meta = SignupResponse.decode(new ObjectData(error.meta, { version: Version }));
-                    return {
-                        verificationToken: meta.token,
-                    };
-                }
+            // The other changes are saved, only the new email address waits for the link
+            if (!(isSimpleError(e) || isSimpleErrors(e)) || !e.getCode('verify_email_link')) {
+                throw e;
             }
-            throw e;
+            verificationEmailSent = true;
         }
 
         if (session.user!.id === patch.id) {
             await session.updateData(true, false);
         }
-        return {};
+        return { verificationEmailSent };
     }
 
     static async signUp(session: SessionContext, email: string, password: string, firstName: string | null = null, lastName: string | null = null): Promise<string> {

@@ -341,10 +341,14 @@ function defineCommonScenarios(getContext: () => EnvContext) {
             await accountView.locator('#submit').click();
         });
 
-        await expectVerifyEmailView(page);
+        // The app doesn't get the token: the change can only be confirmed with the emailed link
+        await expect(page.getByTestId('centered-message')).toContainText(newEmail);
+        await page.getByTestId('centered-message-button').click();
 
-        const verificationCode = await getVerificationCode(newEmail);
-        await fillCode(page, verificationCode.code);
+        await test.step('Open the link in the email', async () => {
+            const verificationCode = await getVerificationCode(newEmail);
+            await page.goto(buildVerifyEmailUrl({ domain: ctx.domain, uriOrganization: ctx.uriOrganization, token: verificationCode.token, email: newEmail, code: verificationCode.code }));
+        });
 
         // The user already passed their second factor when they signed in: verifying a new
         // email address may not ask for it again.
