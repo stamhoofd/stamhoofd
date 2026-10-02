@@ -24,10 +24,6 @@ function extendSort(list: SortList): SortList {
     return assertSort(list, [{ key: 'id', order }]);
 }
 
-/**
- * The keys this builds (number, email, phone, name) all have a stored IndexedDB index, so the result is
- * also passed as the indexFilter of a stream: it then skips non-matching orders before they get decoded.
- */
 function searchToFilter(search: string | null): StamhoofdFilter | null {
     return getOrderSearchFilter(search, parsePhoneNumber);
 }
@@ -135,7 +131,6 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                     results.push(order);
                 },
                 filter,
-                indexFilter: searchFilter ?? undefined,
                 limit: data.limit,
                 sortItem,
                 advanceCount,
@@ -208,7 +203,6 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                     count++;
                 },
                 filter,
-                indexFilter: searchFilter ?? undefined,
             });
             console.log('[Done] Orders(IndexedDb).fetchCount', data, count);
 
