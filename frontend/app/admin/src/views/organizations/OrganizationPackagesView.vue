@@ -15,7 +15,7 @@
                     <h2 class="style-with-button">
                         <div>{{ $t('%1UB') }}</div>
                     </h2>
-                    <PaymentMandatesBox :paying-organization-id="organization.id" :selling-organization-id="platform.membershipOrganizationId!" :can-block="true" />
+                    <PaymentMandatesBox :paying-organization-id="organization.id" :selling-organization-id="platform.membershipOrganizationId!" :can-block="true" :can-manage="auth.hasPlatformFullAccess()" />
                 </div>
 
                 <div class="container">

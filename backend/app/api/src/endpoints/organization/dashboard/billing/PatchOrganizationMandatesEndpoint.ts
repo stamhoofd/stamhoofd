@@ -57,6 +57,10 @@ export class PatchOrganizationMandatesEndpoint extends Endpoint<Params, Query, B
             });
         }
 
+        if (!await Context.auth.canViewPaymentMandates({ payingOrganizationId: payingOrganization.id, sellingOrganizationId: sellingOrganization.id })) {
+            throw Context.auth.error();
+        }
+
         const mandates = await PaymentMandateService.getMandates({
             sellingOrganization,
             user,
@@ -98,7 +102,7 @@ export class PatchOrganizationMandatesEndpoint extends Endpoint<Params, Query, B
             }
 
             if (patch.isDefault === true) {
-                if (!await Context.auth.hasFullAccess(payingOrganization.id)) {
+                if (!await Context.auth.canManageFinances(payingOrganization.id)) {
                     throw Context.auth.error();
                 }
 
