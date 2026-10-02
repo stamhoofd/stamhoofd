@@ -11591,10 +11591,6 @@
     "original": "Je kan de hoofdgroep niet verwijderen. Als je dit toch wil doen, kan je eerst een andere vereniging instellen als hoofdgroep via ')Boekhouding en aansluitingen'.",
     "translation": "Vous ne pouvez pas supprimer le groupe principal. Si vous souhaitez le faire, vous pouvez d'abord définir une autre association comme groupe principal via ')Comptabilité et connexions'."
   },
-  "%Cy": {
-    "original": "Enkel een platform hoofdbeheerder kan nieuwe verenigingen aanmaken",
-    "translation": "Seul un administrateur principal de la plateforme peut créer de nouvelles associations"
-  },
   "%Cz": {
     "original": "Je bent de naam van je organisatie vergeten in te vullen",
     "translation": "Vous avez oublié de saisir le nom de votre organisation"
@@ -20738,6 +20734,118 @@
   "%Zt9": {
     "original": "Gescheiden ouders met fiscaal co-ouderschap",
     "translation": "Parents séparés avec co-parentalité fiscale"
+  },
+  "%ZtA": {
+    "original": "Je kan een werkjaar met inschrijvingen niet verwijderen. Schrijf eerst alle leden uit of verwijder alle groepen met inschrijvingen uit dit werkjaar.",
+    "translation": "Vous ne pouvez pas supprimer une année associative qui contient des inscriptions. Veuillez d'abord désinscrire tous les membres ou supprimer tous les groupes avec inscriptions de cette année associative."
+  },
+  "%ZtB": {
+    "original": "{count} nieuwe inschrijvingen voor {group}",
+    "translation": "{count} nouvelles inscriptions pour {group}"
+  },
+  "%ZtC": {
+    "original": "We hebben een e-mail gestuurd naar {email}. Klik op de link in die e-mail om jouw nieuwe e-mailadres te bevestigen.",
+    "translation": "Nous avons envoyé un e-mail à {email}. Cliquez sur le lien dans cet e-mail pour confirmer votre nouvelle adresse e-mail."
+  },
+  "%ZtD": {
+    "original": "Nieuwe inschrijving voor {group}",
+    "translation": "Nouvelle inscription pour {group}"
+  },
+  "%ZtE": {
+    "original": "Deze melding werd niet gevonden",
+    "translation": "Cette notification n’a pas été trouvée"
+  },
+  "%ZtF": {
+    "original": "Uitschrijven voor dit type meldingen",
+    "translation": "Se désinscrire de ce type de notifications"
+  },
+  "%ZtH": {
+    "original": "Alles markeren als gelezen",
+    "translation": "Tout marquer comme lu"
+  },
+  "%ZtI": {
+    "original": "Lid bekijken",
+    "translation": "Voir le membre"
+  },
+  "%ZtJ": {
+    "original": "anderen",
+    "translation": "autres"
+  },
+  "%ZtK": {
+    "original": "Je ontvangt geen meldingen meer voor ‘{type}’",
+    "translation": "Vous ne recevrez plus de notifications pour ‘{type}’"
+  },
+  "%ZtL": {
+    "original": "In de app",
+    "translation": "Dans l’app"
+  },
+  "%ZtM": {
+    "original": "Je hebt geen toegangsrechten om de emailadressen van deze gebruiker aan te passen",
+    "translation": "Vous n'avez pas les droits nécessaires pour modifier les adresses e-mail de cet utilisateur"
+  },
+  "%ZtN": {
+    "original": "Push",
+    "translation": "Push"
+  },
+  "%ZtO": {
+    "original": "Je kan enkel verenigingen aanmaken met tags die je beheert. Selecteer minstens één van die tags.",
+    "translation": "Vous ne pouvez créer des associations qu’avec les tags que vous gérez. Sélectionnez au moins un de ces tags."
+  },
+  "%ZtP": {
+    "original": "Inschrijvingen bekijken",
+    "translation": "Voir les inscriptions"
+  },
+  "%ZtQ": {
+    "original": "Bevestig jouw nieuwe e-mailadres",
+    "translation": "Confirmez votre nouvelle adresse e-mail"
+  },
+  "%ZtR": {
+    "original": "Toon meldingen bovenaan in de navigatiebalk. Nog in ontwikkeling.",
+    "translation": "Afficher les notifications en haut de la barre de navigation. En cours de développement."
+  },
+  "%ZtS": {
+    "original": "Je hebt geen toegang om nieuwe verenigingen aan te maken",
+    "translation": "Vous n’avez pas accès à la création de nouvelles associations"
+  },
+  "%ZtT": {
+    "original": "Nieuwe verenigingen",
+    "translation": "Nouvelles associations"
+  },
+  "%ZtV": {
+    "original": "Instellingen voor meldingen",
+    "translation": "Paramètres de notification"
+  },
+  "%ZtW": {
+    "original": "Markeren als gelezen",
+    "translation": "Marquer comme lu"
+  },
+  "%ZtX": {
+    "original": "Deze groep bestaat niet meer of je hebt er geen toegang meer toe",
+    "translation": "Ce groupe n'existe plus ou vous n’y avez plus accès"
+  },
+  "%ZtY": {
+    "original": "verenigingen aanmaken",
+    "translation": "créer des associations"
+  },
+  "%ZtZ": {
+    "original": "Verenigingen aanmaken",
+    "translation": "Créer des associations"
+  },
+  "%Zta": {
+    "original": "Meldingen in de navigatiebalk (in ontwikkeling)",
+    "translation": "Notifications dans la barre de navigation (en cours de développement)"
+  },
+  "%Ztc": {
+    "original": "Er zijn geen meldingen die je kan ontvangen.",
+    "translation": "Il n'y a pas de notifications que vous puissiez recevoir."
+  },
+  "%Ztd": {
+    "original": "Je hebt nog geen meldingen",
+    "translation": "Vous n’avez pas encore de notifications"
+  },
+  "%Zte": {
+    "original": "Kies welke meldingen je wilt ontvangen en waar.",
+    "translation": "Choisissez quelles notifications vous souhaitez recevoir et où."
   },
   "%Zu": {
     "original": "De redirect URI behoud je best op de voorgestelde waarde.",

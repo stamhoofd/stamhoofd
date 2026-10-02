@@ -2052,7 +2052,7 @@ export class AdminPermissionChecker {
             if (!await getCanEditEmailAddresses()) {
                 throw this.error({
                     message: "You don't have access to change the emailaddresses of this user.",
-                    human: $t('Je hebt geen toegangsrechten om de emailadressen van deze gebruiker aan te passen'),
+                    human: $t('%ZtM'),
                 });
             }
         }

@@ -39,7 +39,7 @@ export class MarkNotificationReadEndpoint extends Endpoint<Params, Query, Body, 
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Notification not found',
-                human: $t('Deze melding werd niet gevonden'),
+                human: $t('%ZtE'),
                 statusCode: 404,
             });
         }

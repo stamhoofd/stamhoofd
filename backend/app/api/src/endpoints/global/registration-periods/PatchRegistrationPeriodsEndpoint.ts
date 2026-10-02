@@ -104,7 +104,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
                 throw new SimpleError({
                     code: 'period_has_registrations',
                     message: 'Cannot delete a registration period that has registrations',
-                    human: $t('Je kan een werkjaar met inschrijvingen niet verwijderen. Schrijf eerst alle leden uit of verwijder alle groepen met inschrijvingen uit dit werkjaar.'),
+                    human: $t('%ZtA'),
                 });
             }
 

@@ -41,22 +41,22 @@ const title = computed(() => {
         if (payload) {
             const count = Math.max(1, props.notification.groupResourceCount);
             if (count === 1) {
-                return $t('Nieuwe inschrijving voor {group}', { group: payload.group.name });
+                return $t('%ZtD', { group: payload.group.name });
             }
-            return $t('{count} nieuwe inschrijvingen voor {group}', { count: count.toString(), group: payload.group.name });
+            return $t('%ZtB', { count: count.toString(), group: payload.group.name });
         }
     }
     if (NotificationTypeHelper.isKnown(props.notification.type)) {
         return NotificationTypeHelper.getName(props.notification.type);
     }
-    return $t('Melding');
+    return $t('%wr');
 });
 
 const description = computed(() => {
     const names = props.notification.groupResources.map(r => r.name);
     const others = props.notification.groupResourceCount - names.length;
     if (others > 0) {
-        return names.join(', ') + ' ' + $t('%M1') + ' ' + Formatter.pluralText(others, $t('andere'), $t('anderen'));
+        return names.join(', ') + ' ' + $t('%M1') + ' ' + Formatter.pluralText(others, $t('%tu'), $t('%ZtJ'));
     }
     return Formatter.joinLast(names, ', ', ' ' + $t('%M1') + ' ');
 });

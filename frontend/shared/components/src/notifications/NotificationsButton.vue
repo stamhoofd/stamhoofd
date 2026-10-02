@@ -1,5 +1,5 @@
 <template>
-    <button v-if="enabled" v-tooltip="$t('Meldingen')" class="button icon notification" type="button" data-testid="notifications-button" @click="open">
+    <button v-if="enabled" v-tooltip="$t('%1FR')" class="button icon notification" type="button" data-testid="notifications-button" @click="open">
         <span v-if="unreadCount > 0" class="bubble" data-testid="notifications-unread-count">{{ unreadCount }}</span>
     </button>
 </template>

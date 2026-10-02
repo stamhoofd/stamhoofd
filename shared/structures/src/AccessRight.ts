@@ -54,7 +54,7 @@ export class AccessRightHelper {
     static getName(right: AccessRight): string {
         switch (right) {
             case AccessRight.PlatformLoginAs: return $t(`%l4`);
-            case AccessRight.PlatformCreateOrganizations: return $t('Verenigingen aanmaken');
+            case AccessRight.PlatformCreateOrganizations: return $t('%ZtZ');
             case AccessRight.OrganizationFinanceDirector: return $t(`%l5`);
             case AccessRight.OrganizationManagePayments: return $t(`%l6`);
             case AccessRight.OrganizationCreateWebshops: return $t(`%l7`);
@@ -80,7 +80,7 @@ export class AccessRightHelper {
     static getNameShort(right: AccessRight): string {
         switch (right) {
             case AccessRight.PlatformLoginAs: return $t(`%Qg`);
-            case AccessRight.PlatformCreateOrganizations: return $t('Nieuwe verenigingen');
+            case AccessRight.PlatformCreateOrganizations: return $t('%ZtT');
             case AccessRight.OrganizationFinanceDirector: return $t(`%tx`);
             case AccessRight.OrganizationManagePayments: return $t(`%MM`);
             case AccessRight.OrganizationCreateWebshops: return $t(`%lE`);
@@ -101,7 +101,7 @@ export class AccessRightHelper {
     static getDescription(right: AccessRight): string {
         switch (right) {
             case AccessRight.PlatformLoginAs: return $t(`%lI`);
-            case AccessRight.PlatformCreateOrganizations: return $t('verenigingen aanmaken');
+            case AccessRight.PlatformCreateOrganizations: return $t('%ZtY');
             case AccessRight.OrganizationFinanceDirector: return $t(`%lJ`);
             case AccessRight.OrganizationManagePayments: return $t(`%lK`);
             case AccessRight.OrganizationCreateWebshops: return $t(`%lL`);
