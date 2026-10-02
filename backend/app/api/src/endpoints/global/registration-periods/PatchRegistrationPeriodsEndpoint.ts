@@ -5,7 +5,8 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Group, Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
+import { Group, Organization, Platform, Registration, RegistrationPeriod } from '@stamhoofd/models';
+import { SQL } from '@stamhoofd/sql';
 import { Context } from '../../../helpers/Context.js';
 import { PeriodHelper } from '../../../helpers/PeriodHelper.js';
 
@@ -73,6 +74,42 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
             if (!Context.auth.hasPlatformFullAccess()) {
                 throw Context.auth.error();
             }
+        }
+
+        const deletePeriods: RegistrationPeriod[] = [];
+
+        for (const id of request.body.getDeletes()) {
+            const model = await RegistrationPeriod.getByID(id);
+
+            if (!model || model.organizationId !== (organization?.id ?? null)) {
+                throw new SimpleError({
+                    code: 'not_found',
+                    statusCode: 404,
+                    message: 'Registration period not found',
+                });
+            }
+
+            if (model.createdAt.getTime() < Date.now() - 24 * 60 * 60 * 1000) {
+                const registration = await Registration.select()
+                    .join(
+                        SQL.innerJoin(SQL.table(Group.table))
+                            .where(SQL.column(Group.table, 'id'), SQL.column(Registration.table, 'groupId')),
+                    )
+                    .where(SQL.column(Group.table, 'periodId'), model.id)
+                    .where(SQL.column(Group.table, 'deletedAt'), null)
+                    .whereNot(SQL.column(Registration.table, 'registeredAt'), null)
+                    .first(false);
+
+                if (registration) {
+                    throw new SimpleError({
+                        code: 'period_has_registrations',
+                        message: 'Cannot delete a registration period that has registrations',
+                        human: $t('Je kan een werkjaar met inschrijvingen niet verwijderen. Verwijder eerst alle groepen met inschrijvingen uit dit werkjaar.'),
+                    });
+                }
+            }
+
+            deletePeriods.push(model);
         }
 
         const periods: RegistrationPeriod[] = [];
@@ -175,17 +212,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
             periods.push(model)
         }
 
-        for (const id of request.body.getDeletes()) {
-            const model = await RegistrationPeriod.getByID(id);
-
-            if (!model || model.organizationId !== (organization?.id ?? null)) {
-                throw new SimpleError({
-                    code: 'not_found',
-                    statusCode: 404,
-                    message: 'Registration period not found',
-                });
-            }
-
+        for (const model of deletePeriods) {
             // Delete all groups in this period
             const q = Group.delete().where('periodId', model.id);
             if (organization) {
