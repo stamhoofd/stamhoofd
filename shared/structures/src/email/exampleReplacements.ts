@@ -332,6 +332,14 @@ function getReplacements() {
             token: 'webshopName',
             value: $t('%Au'),
         }),
+        discountCode: Replacement.create({
+            token: 'discountCode',
+            value: 'ABCD-1234-EFGH-5678',
+        }),
+        discountUrl: Replacement.create({
+            token: 'discountUrl',
+            value: 'https://www.example.com/code/ABCD-1234-EFGH-5678',
+        }),
 
         errors: Replacement.create({
             token: 'errors',
