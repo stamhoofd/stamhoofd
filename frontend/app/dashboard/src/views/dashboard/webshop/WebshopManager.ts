@@ -296,6 +296,7 @@ export class WebshopManager {
     async streamOrdersWithPatchedTickets(options: {
         callback: (data: PrivateOrderWithTickets) => void;
         filter?: StamhoofdFilter;
+        indexFilter?: StamhoofdFilter;
         limit?: number;
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
         advanceCount?: number;
