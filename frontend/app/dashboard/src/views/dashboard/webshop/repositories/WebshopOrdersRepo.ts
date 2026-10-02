@@ -194,7 +194,7 @@ export class WebshopOrdersRepo {
 
     async streamRaw<T>(options: {
         transform: (rawOrder: any) => Promise<T>;
-        callback: (data: T) => void;
+        callback: (data: T) => void | Promise<void>;
         filter?: StamhoofdFilter;
         indexFilter?: StamhoofdFilter;
         limit?: number;
@@ -326,7 +326,11 @@ export class OrdersStore {
 
     async streamRaw<T>({ callback, filter, indexFilter, limit, sortItem, advanceCount, transform, openTransaction }: {
         transform: (rawOrder: any) => Promise<T>;
-        callback: (data: T) => void;
+        /**
+         * Called for every order that matches, before the cursor moves on. Anything it awaits has to
+         * keep the transaction alive, so it may only await work on `openTransaction`.
+         */
+        callback: (data: T) => void | Promise<void>;
         filter?: StamhoofdFilter;
         /**
          * Filter evaluated on the stored index values (see orderIndexesInMemoryFilterCompilers) before an
@@ -433,7 +437,7 @@ export class OrdersStore {
                     return;
                 }
 
-                transform(cursor.value).then((decodedResult) => {
+                transform(cursor.value).then(async (decodedResult) => {
                     if (compiledFilter && !compiledFilter(decodedResult)) {
                         cursor.continue();
                         totalIterationCount += 1;
@@ -441,7 +445,7 @@ export class OrdersStore {
                     }
 
                     try {
-                        callback(decodedResult);
+                        await callback(decodedResult);
                     } catch (e: any) {
                         console.error('callback failed', e);
                         // Propagate error
