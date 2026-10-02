@@ -5,7 +5,7 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailVerificationCode, Member, PasswordToken, Platform, User } from '@stamhoofd/models';
 import type { UserWithMembers } from '@stamhoofd/structures';
-import { LoginMethod, NewUser, PermissionLevel, SignupResponse, UserPermissions } from '@stamhoofd/structures';
+import { LoginMethod, NewUser, PermissionLevel, UserPermissions } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../helpers/Context.js';
@@ -223,18 +223,16 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             if (request.body.email && request.body.email !== editUser.email) {
                 Context.assertNotImpersonating();
 
-                // Create an validation code
-                // We always need the code, to return it. Also on password recovery -> may not be visible to the client whether the user exists or not
+                // Don't return the token: the change can only be confirmed with the link in the email.
+                // Otherwise the requester could guess the code, and confirming merges the account
+                // that already uses this address.
                 const code = await EmailVerificationCode.createFor(editUser, request.body.email);
-                VerificationCodeService.send(code, editUser, organization, request.i18n, editUser.id === user.id).catch(console.error);
+                VerificationCodeService.send(code, editUser, organization, request.i18n, false).catch(console.error);
 
                 throw new SimpleError({
-                    code: 'verify_email',
-                    message: 'Your email address needs verification',
+                    code: 'verify_email_link',
+                    message: 'Your email address needs verification via the link in the email',
                     human: editUser.id === user.id ? $t(`%DJ`) : $t(`%DK`) + ' ' + request.body.email + ' ' + $t(`%DL`),
-                    meta: SignupResponse.create({
-                        token: code.token,
-                    }).encode({ version: request.request.getVersion() }),
                     statusCode: 403,
                 });
             }

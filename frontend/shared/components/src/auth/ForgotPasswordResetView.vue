@@ -62,6 +62,7 @@ import PasswordStrength from '#inputs/PasswordStrength.vue';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
 import STInputBox from '#inputs/STInputBox.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import { Validator } from '#errors/Validator.ts';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
@@ -105,7 +106,7 @@ const hasAccount = ref(false);
  */
 const mfaSetup = ref<MFASetupResponse | null>(null);
 const passwordChanged = ref(false);
-const verificationToken = ref<string | null>(null);
+const verificationEmailSent = ref(false);
 
 const loadingSession = computed(() => !session.value?.user || loadingToken.value);
 const title = computed(() => hasAccount.value ? $t(`%oM`) : $t(`%ur`));
@@ -297,7 +298,7 @@ async function submit() {
 
         const result = await LoginHelper.patchUser(session.value, patch);
         passwordChanged.value = true;
-        verificationToken.value = result.verificationToken ?? null;
+        verificationEmailSent.value = result.verificationEmailSent ?? false;
 
         if (mfaSetup.value) {
             // Two-factor authentication is required for this user: enroll a factor before
@@ -331,17 +332,15 @@ async function finish() {
         new Toast($t(`%uy`), 'success green').show();
     }
 
+    if (verificationEmailSent.value) {
+        new CenteredMessage(
+            $t('Bevestig jouw nieuwe e-mailadres'),
+            $t('We hebben een e-mail gestuurd naar {email}. Klik op de link in die e-mail om jouw nieuwe e-mailadres te bevestigen.', { email: email.value }),
+        ).addCloseButton().show();
+    }
+
     const org = session.value.organization;
-    if (verificationToken.value) {
-        await appNavigate(AppRoute.VerifyEmail, {
-            properties: {
-                token: verificationToken.value,
-                email: email.value,
-                organization: org,
-            },
-            adjustHistory: false,
-        });
-    } else if (org) {
+    if (org) {
         await appNavigate(AppRoute.OrgScopedAuto, { properties: { organization: org }, adjustHistory: false });
     } else {
         await appNavigate(AppRoute.UnscopedAuto, { adjustHistory: false });
