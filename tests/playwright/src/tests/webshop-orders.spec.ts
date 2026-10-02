@@ -792,6 +792,92 @@ function registerWebshopOrderTests() {
         await adminContext.close();
     });
 
+    test('Searching the orders finds them by name, e-mail and number', async ({ browser }) => {
+        // Searching does not hit the backend: getOrderSearchFilter turns the query into a filter on
+        // number, email, phone or name, and the local order database runs it over every order it has.
+        // Those four keys all have a stored index (ordersIndexedDBSorters), and the index holds a
+        // lowercased copy of the value, so the search filter is also used to skip orders before they
+        // are decoded. A comparison that stops lowercasing both of its sides would make the search
+        // miss orders that are only spelled differently.
+        const organization = await createWebshopOrganization('OrderSearch');
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Order search ${WorkerData.id}`,
+            ticketType: WebshopTicketType.None,
+            productCount: 1,
+            cartEnabled: false,
+        });
+        const admin = await createAdmin(organization);
+
+        const orderCount = 12;
+        for (let number = 1; number <= 10; number++) {
+            const label = number.toString().padStart(2, '0');
+            await new OrderFactory({
+                webshop,
+                number,
+                firstName: 'Klant',
+                lastName: label,
+                email: `klant-${label}@example.com`,
+            }).create();
+        }
+
+        await new OrderFactory({
+            webshop,
+            number: 11,
+            firstName: 'Sofie',
+            lastName: 'Peeters',
+            email: 'Sofie.Peeters@Example.com',
+        }).create();
+
+        await new OrderFactory({
+            webshop,
+            number: 12,
+            firstName: 'José',
+            lastName: 'Müller',
+            email: 'jose.muller@example.com',
+        }).create();
+
+        const adminContext = await browser.newContext();
+        const adminPage = await adminContext.newPage();
+        await loginAs({ page: adminPage, user: admin });
+
+        const table = await openWebshopOrders(adminPage, organization, webshop.meta.name);
+        await expect(table.getResultCount()).toHaveText(orderCount.toString());
+
+        const searches = [
+            // Name, typed in another case than it is stored
+            { query: 'PEETERS', row: 'Sofie Peeters' },
+            // Name with accents, typed without them
+            { query: 'jose muller', row: 'José Müller' },
+            // Complete e-mail address: an exact compare, also in another case than it is stored
+            { query: 'sofie.peeters@example.com', row: 'Sofie Peeters' },
+            // Part of an e-mail address
+            { query: 'klant-07@', row: 'Klant 07' },
+            // Order number
+            { query: '12', row: 'José Müller' },
+        ];
+
+        for (const { query, row } of searches) {
+            await table.search(query);
+
+            // The count comes from a separate pass over the local orders than the rows do
+            await expect(table.getResultCount()).toHaveText(`1 van ${orderCount}`);
+            await expect(table.getRows()).toHaveCount(1);
+            await expect(table.getRow(row)).toBeVisible();
+            await expect(table.getErrorBox()).toHaveCount(0);
+        }
+
+        await table.search('bestaat niet');
+        await expect(table.getRows()).toHaveCount(0);
+
+        // Clearing the search brings every order back
+        await table.search('');
+        await expect(table.getResultCount()).toHaveText(orderCount.toString());
+        await expect(table.getRows()).toHaveCount(orderCount);
+
+        await adminContext.close();
+    });
+
     test('Bancontact via Mollie: admin can refund the payment online', async ({ page, browser }) => {
         const organization = await createWebshopOrganization('MollieRefund');
         organization.privateMeta.mollieOnboarding = MollieOnboarding.create({
