@@ -38,7 +38,7 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({
 
     const { loading, getRegistrationFilters } = useAdvancedRegistrationsUIFilterBuilders();
     const { loading: loadingMembershipFilters, filterBuilders: membershipFilters } = useAdvancedPlatformMembershipUIFilterBuilders();
-    const { getOrganizationUIFilterBuilders } = useGetOrganizationUIFilterBuilders();
+    const { getOrganizationUIFilterBuilders } = useGetOrganizationUIFilterBuilders({ onlyBaseFilters: true });
     const financialSupportSettings = useFinancialSupportSettings();
     const organization = useOrganization();
     const registrationPeriodsRelationFetcher = useRegistrationPeriodsRelationFetcher();

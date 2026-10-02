@@ -93,7 +93,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             expect(response.body.results[0].id).toBe(webshop1.id);
         });
 
-        test('An org admin with no webshop access gets an empty result', async () => {
+        test('A user with empty permissions in the organization cannot count its webshops', async () => {
             const organization = await new OrganizationFactory({}).create();
             await new WebshopFactory({ organizationId: organization.id }).create();
 
@@ -107,15 +107,15 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             const token = await SessionService.createSession(user);
 
             const request = Request.get({
-                path: baseUrl,
+                path: baseUrl + '/count',
                 host: organization.getApiHost(),
-                query: new LimitedFilteredRequest({ limit: 100 }),
+                query: new CountFilteredRequest({}),
                 headers: { authorization: 'Bearer ' + token.accessToken },
             });
 
-            const response = await testServer.test(endpoint, request);
-            expect(response.status).toBe(200);
-            expect(response.body.results).toHaveLength(0);
+            await expect(testServer.test(countEndpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
         });
 
         test('Unauthenticated request is rejected', async () => {
@@ -848,6 +848,41 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 }),
             }).create();
             expect(await fetchWebshopIds(tagAdmin, nameFilter)).toEqual([webshopInTaggedOrg.id]);
+
+            await expect(fetchWebshopIds(fullAdmin, { organization: { members: { $elemMatch: { email: { $contains: '@' } } } } })).rejects.toThrow(
+                STExpect.errorWithCode('unknown_filter'),
+            );
+        });
+    });
+
+    describe('Filtering on organization data in organization context', () => {
+        test('An admin with only webshop access cannot filter on members or admins of the organization', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources: new Map([[
+                        PermissionsResourceType.Webshops,
+                        new Map([[webshop.id, ResourcePermissions.create({ level: PermissionLevel.Read })]]),
+                    ]]),
+                }),
+            }).create();
+            const token = await SessionService.createSession(user);
+
+            for (const key of ['members', 'admins']) {
+                const request = Request.get({
+                    path: baseUrl + '/count',
+                    host: organization.getApiHost(),
+                    query: new CountFilteredRequest({ filter: { organization: { [key]: { $elemMatch: { email: { $contains: '@' } } } } } }),
+                    headers: { authorization: 'Bearer ' + token.accessToken },
+                });
+                await expect(testServer.test(countEndpoint, request)).rejects.toThrow(
+                    STExpect.errorWithCode('unknown_filter'),
+                );
+            }
         });
     });
 });

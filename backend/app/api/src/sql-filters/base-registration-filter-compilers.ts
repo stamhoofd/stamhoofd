@@ -6,7 +6,7 @@ import { Context } from '../helpers/Context.js';
 import { memberCachedBalanceForOrganizationJoin, registrationCachedBalanceJoin } from '../helpers/outstandingBalanceJoin.js';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 import { StamhoofdFilterAccessHelper } from '../helpers/StamhoofdFilterAccessHelper.js';
-import { organizationFilterCompilers } from './organizations.js';
+import { baseOrganizationFilterCompilers } from './organizations.js';
 
 async function checkGroupIdFilterAccess(filter: StamhoofdFilter, permissionLevel: PermissionLevel) {
     const groupIds = StamhoofdFilterAccessHelper.getGroupIdsFromFilter(filter);
@@ -151,7 +151,7 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('organizations', 'id'),
                 SQL.column('registrations', 'organizationId'),
             ),
-        organizationFilterCompilers,
+        baseOrganizationFilterCompilers,
     ),
     memberCachedBalance: createJoinedRelationFilter(
         memberCachedBalanceForOrganizationJoin,

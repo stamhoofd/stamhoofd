@@ -1,7 +1,7 @@
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, createExistsFilter, SQL, SQLValueType } from '@stamhoofd/sql';
 import { eventFilterCompilers } from './events.js';
-import { organizationFilterCompilers } from './organizations.js';
+import { baseOrganizationFilterCompilers } from './organizations.js';
 
 export const organizationJoin = SQL.join('organizations').where(SQL.column('organizations', 'id'), SQL.column('event_notifications', 'organizationId'));
 
@@ -54,7 +54,7 @@ export const eventNotificationsFilterCompilers: SQLFilterDefinitions = {
     }),
     organization: createJoinedRelationFilter(
         organizationJoin,
-        organizationFilterCompilers,
+        baseOrganizationFilterCompilers,
     ),
     events: createExistsFilter(
         SQL.select()
