@@ -1,8 +1,9 @@
 import { SelectableColumn } from '@stamhoofd/frontend-excel-export/SelectableColumn';
 import { SelectableSheet } from '@stamhoofd/frontend-excel-export/SelectableSheet';
 import { SelectableWorkbook } from '@stamhoofd/frontend-excel-export/SelectableWorkbook';
+import type { Organization } from '@stamhoofd/structures';
 
-export function getSelectableColumns() {
+export function getSelectableColumns(organization: Organization | null = null) {
     const memberCategory = $t('%1PM');
     const organizationCategory = $t('%1PI');
     const balanceItemCategory = $t('%1P6');
@@ -118,31 +119,34 @@ export function getSelectableColumns() {
             category: memberCategory,
             enabled: true,
         }),
-        // organization
-        new SelectableColumn({
-            id: 'organization.name',
-            name: $t(`%1Os`),
-            category: organizationCategory,
-            enabled: true,
-        }),
-        new SelectableColumn({
-            id: 'organization.uri',
-            name: $t(`%1O1`),
-            category: organizationCategory,
-            enabled: true,
-        }),
+        ...(organization
+            ? []
+            : [
+                    new SelectableColumn({
+                        id: 'organization.name',
+                        name: $t(`%1Os`),
+                        category: organizationCategory,
+                        enabled: true,
+                    }),
+                    new SelectableColumn({
+                        id: 'organization.uri',
+                        name: $t(`%1O1`),
+                        category: organizationCategory,
+                        enabled: true,
+                    }),
+                ]),
     ].filter(column => column !== null);
 
     return columns;
 }
 
-export function getSelectableWorkbook() {
+export function getSelectableWorkbook(organization: Organization | null = null) {
     return new SelectableWorkbook({
         sheets: [
             new SelectableSheet({
                 id: 'platform-memberships',
                 name: $t(`%1Nt`),
-                columns: getSelectableColumns(),
+                columns: getSelectableColumns(organization),
             }),
         ],
     });
