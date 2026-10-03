@@ -1,9 +1,9 @@
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '#filters/MultipleChoiceUIFilter.ts';
 import type { UIFilterBuilder, UIFilter } from '#filters/UIFilter.ts';
 import { FilterWrapperMarker } from '@stamhoofd/structures';
-import type { GroupOptionMenu } from '@stamhoofd/structures';
+import type { GroupOptionMenu, OptionMenu } from '@stamhoofd/structures';
 
-export function getFilterBuildersForOptionMenus(optionMenus: GroupOptionMenu[], prefix = '') {
+export function getFilterBuildersForOptionMenus(optionMenus: (GroupOptionMenu | OptionMenu)[], prefix = '') {
     const all: UIFilterBuilder<UIFilter>[] = [];
 
     for (const optionMenu of optionMenus) {
