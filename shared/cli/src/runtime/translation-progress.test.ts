@@ -36,3 +36,10 @@ it('formats machine progress with its namespace, locale, and completed batch cou
         .toBe('Translating batches (stamhoofd/fr) 2/4');
     expect(formatTranslationProgress({ phase: 'build' })).toBe('Building locales');
 });
+
+it('shows overall progress across the shared scan and all translation files', () => {
+    expect(formatTranslationProgress({ phase: 'scan', completed: 550, total: 3213, overallCompleted: 550, overallTotal: 3225 }))
+        .toBe('Overall 17% — Scanning source files 550/3213');
+    expect(formatTranslationProgress({ phase: 'cleanup', completed: 12, total: 12, translationFile: '/repo/fr.json', overallCompleted: 3225, overallTotal: 3225 }))
+        .toBe('Overall 100% — Cleaning translation files (fr.json) 12/12');
+});

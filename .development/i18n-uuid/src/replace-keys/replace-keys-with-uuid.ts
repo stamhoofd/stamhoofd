@@ -6,7 +6,6 @@ import { writeTranslation } from './write-translations.js';
 import { isBase62 } from './compress-uuids.js';
 import { reportProgress } from '../shared/progress.js';
 import type { ProgressCallback } from '../shared/progress.js';
-import { setImmediate } from 'node:timers/promises';
 
 /**
  * Searches for keys that are present in translation files that are not uuids, and replaces them with uuids in both the locale.json file and the $t(keys).
@@ -189,19 +188,23 @@ export async function findUnusedTranslationKeys(keys: Set<string>, files: string
     if (keys.size === 0) return new Set<string>();
 
     const remaining = new Set<string>(keys);
+    let maxKeyLength = 0;
+    for (const key of keys) {
+        maxKeyLength = Math.max(maxKeyLength, key.length);
+    }
+    const keyStart = /\$t(?:\((['"`])|\s+(['"]))/g;
     let completed = 0;
     await reportProgress(onProgress, { phase: 'scan', completed, total: files.length });
     for (const file of files) {
         const fileContent = fs.readFileSync(file, 'utf8');
 
-        let checked = 0;
-        for (const key of remaining.values()) {
-            const isUsed = createKeyPatterns(key).some(({ searchValue }) => searchValue.test(fileContent));
-            if (isUsed) {
-                remaining.delete(key);
-            }
-            if (++checked % 250 === 0) {
-                await setImmediate();
+        for (const match of fileContent.matchAll(keyStart)) {
+            const quote = match[1] ?? match[2];
+            const start = match.index + match[0].length;
+            const candidate = fileContent.slice(start, start + maxKeyLength + 1);
+            // Literal keys can contain quotes; each closing quote can terminate a known key.
+            for (let end = candidate.indexOf(quote); end !== -1; end = candidate.indexOf(quote, end + 1)) {
+                remaining.delete(candidate.slice(0, end));
             }
         }
         await reportProgress(onProgress, { phase: 'scan', completed: ++completed, total: files.length });
