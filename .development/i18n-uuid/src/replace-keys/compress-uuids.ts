@@ -2,11 +2,12 @@ import { TranslationManager } from '../auto-translate/TranslationManager.js';
 import { getTranslationsWithPath } from './get-translations-with-path.js';
 import { replaceOccurrences } from './replace-keys-with-uuid.js';
 import { writeTranslation } from './write-translations.js';
+import type { ProgressCallback } from '../shared/progress.js';
 
 /**
  * Find translations that have the same translation for every language (machine translations are ignored because those are automatically generated and should resolve to the same value), and merge them.
  */
-export function compressUuids() {
+export async function compressUuids(onProgress?: ProgressCallback) {
     const translationsWithPath = getTranslationsWithPath();
 
     const usedKeys = new Set<string>();
@@ -65,7 +66,7 @@ export function compressUuids() {
 
     // Also replace in all translation files
     // Run multiple times to avoid regex errors
-    replaceOccurrences(merge);
+    await replaceOccurrences(merge, undefined, onProgress);
 
     // Replace machine translations
     const manager = new TranslationManager();
@@ -88,6 +89,7 @@ export function compressUuids() {
             namespace,
         });
     });
+    return merge.size;
 }
 
 const START_CHAR = '%';

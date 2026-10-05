@@ -4,6 +4,9 @@ import { getFilesToSearch, translatableFileTypes } from '../shared/get-files-to-
 import { getTranslationsWithPath } from './get-translations-with-path.js';
 import { writeTranslation } from './write-translations.js';
 import { isBase62 } from './compress-uuids.js';
+import { reportProgress } from '../shared/progress.js';
+import type { ProgressCallback } from '../shared/progress.js';
+import { setImmediate } from 'node:timers/promises';
 
 /**
  * Searches for keys that are present in translation files that are not uuids, and replaces them with uuids in both the locale.json file and the $t(keys).
@@ -32,11 +35,9 @@ import { isBase62 } from './compress-uuids.js';
  * - `$t('namespace.not a uuid')` → `$t('uuid2')`
  *
  */
-export function replaceKeysWithUuid() {
-    console.log('Start replace keys with uuids.');
+export async function replaceKeysWithUuid(onProgress?: ProgressCallback) {
     const translationsWithPath = getTranslationsWithPath();
-    replaceKeysWithUuidInTranslations(translationsWithPath);
-    console.log('Finished replace keys with uuids.');
+    await replaceKeysWithUuidInTranslations(translationsWithPath, onProgress);
 }
 
 type TranslationValue =
@@ -45,8 +46,9 @@ type TranslationValue =
         [key: string]: TranslationValue;
     };
 
-function replaceKeysWithUuidInTranslations(
+async function replaceKeysWithUuidInTranslations(
     translationsWithPath: Map<string, Record<string, string>>,
+    onProgress?: ProgressCallback,
 ) {
     const keysToSkip = ['replacements', 'extends', 'consistent-words'];
     // oldKey, newKey
@@ -104,11 +106,10 @@ function replaceKeysWithUuidInTranslations(
 
         if (changes > 0) {
             writeTranslation(filePath, newTranslations);
-            console.log(`Replaced ${changes} key(s) with UUIDs in: ${filePath}`);
         }
     }
 
-    replaceOccurrences(replacedKeys);
+    await replaceOccurrences(replacedKeys, undefined, onProgress);
 }
 
 function isUuid(key: string) {
@@ -169,32 +170,41 @@ export function replaceOccurrencesInContent(content: string, replacedKeys: Map<s
     return newContent;
 }
 
-export function replaceOccurrences(replacedKeys: Map<string, string>, files: string[] = getFilesToSearch(translatableFileTypes)) {
+export async function replaceOccurrences(replacedKeys: Map<string, string>, files: string[] = getFilesToSearch(translatableFileTypes), onProgress?: ProgressCallback) {
+    let completed = 0;
+    await reportProgress(onProgress, { phase: 'replace', completed, total: files.length });
     if (replacedKeys.size === 0) return;
     for (const file of files) {
         const fileContent = fs.readFileSync(file, 'utf8');
         const newContent = replaceOccurrencesInContent(fileContent, replacedKeys);
 
         if (fileContent !== newContent) {
-            console.log('Replaced keys in ' + file);
             fs.writeFileSync(file, newContent);
         }
+        await reportProgress(onProgress, { phase: 'replace', completed: ++completed, total: files.length });
     }
 }
 
-export function findUnusedTranslationKeys(keys: Set<string>, files: string[] = getFilesToSearch(translatableFileTypes)) {
+export async function findUnusedTranslationKeys(keys: Set<string>, files: string[] = getFilesToSearch(translatableFileTypes), onProgress?: ProgressCallback) {
     if (keys.size === 0) return new Set<string>();
 
     const remaining = new Set<string>(keys);
+    let completed = 0;
+    await reportProgress(onProgress, { phase: 'scan', completed, total: files.length });
     for (const file of files) {
         const fileContent = fs.readFileSync(file, 'utf8');
 
+        let checked = 0;
         for (const key of remaining.values()) {
             const isUsed = createKeyPatterns(key).some(({ searchValue }) => searchValue.test(fileContent));
             if (isUsed) {
                 remaining.delete(key);
             }
+            if (++checked % 250 === 0) {
+                await setImmediate();
+            }
         }
+        await reportProgress(onProgress, { phase: 'scan', completed: ++completed, total: files.length });
 
         if (remaining.size === 0) {
             // all found

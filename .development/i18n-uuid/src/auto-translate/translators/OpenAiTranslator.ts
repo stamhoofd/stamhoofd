@@ -1,4 +1,3 @@
-import chalk from 'chalk';
 import OpenAI from 'openai';
 import type { AutoTranslateOptions } from '../../types/AutoTranslateOptions.js';
 import type { Batch } from '../../types/Batch.js';
@@ -49,8 +48,6 @@ export class OpenAiTranslator extends Translator {
                 },
             },
         });
-
-        console.log(chalk.blue(JSON.stringify(result)));
 
         return result.choices[0].message.content ?? '';
     }

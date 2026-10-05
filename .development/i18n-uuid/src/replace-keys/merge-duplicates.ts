@@ -2,11 +2,13 @@ import { decodeBase62, isBase62 } from './compress-uuids.js';
 import { getTranslationsWithPath } from './get-translations-with-path.js';
 import { findUnusedTranslationKeys, replaceOccurrences } from './replace-keys-with-uuid.js';
 import { writeTranslation } from './write-translations.js';
+import { reportProgress } from '../shared/progress.js';
+import type { ProgressCallback } from '../shared/progress.js';
 
 /**
  * Find translations that have the same translation for every language (machine translations are ignored because those are automatically generated and should resolve to the same value), and merge them.
  */
-export function mergeDuplicates() {
+export async function mergeDuplicates(onProgress?: ProgressCallback) {
     const translationsWithPath = getTranslationsWithPath();
 
     /**
@@ -43,6 +45,8 @@ export function mergeDuplicates() {
 
     // Find uuids in translationsForKeys with the exact same content (so same map keys and values, same size)
     const merge: Map<string, string> = new Map();
+    let completed = 0;
+    await reportProgress(onProgress, { phase: 'compare', completed, total: translationsForKeys.size });
     for (const [uuid, values] of translationsForKeys.entries()) {
         for (const [otherUuid, otherValues] of translationsForKeys.entries()) {
             if (otherUuid === uuid) {
@@ -65,23 +69,21 @@ export function mergeDuplicates() {
 
                 if (uuidVal <= otherUuidVal) {
                     // uuid should be the goal, replace otheruuid with uuid
-                    console.log('Found duplicate keys ', otherUuid, ' → ', uuid);
                     merge.set(otherUuid, uuid);
                 } else {
                     // uuid should be the goal, replace otheruuid with uuid
-                    console.log('Found duplicate keys ', uuid, ' → ', otherUuid);
                     merge.set(uuid, otherUuid);
                 }
             }
         }
+        await reportProgress(onProgress, { phase: 'compare', completed: ++completed, total: translationsForKeys.size });
     }
 
     // Run multiple times to avoid regex errors
-    replaceOccurrences(merge);
-    replaceOccurrences(merge);
-    replaceOccurrences(merge);
-
-    console.log('Run unused-keys to clean up.');
+    await replaceOccurrences(merge, undefined, onProgress);
+    await replaceOccurrences(merge, undefined, onProgress);
+    await replaceOccurrences(merge, undefined, onProgress);
+    return merge.size;
 }
 
 function isMapEqual(a: Map<string, string>, b: Map<string, string>) {

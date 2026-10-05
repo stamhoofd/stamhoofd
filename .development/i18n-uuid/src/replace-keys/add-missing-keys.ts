@@ -5,6 +5,8 @@ import { getDefaultTranslations } from './get-translations-with-path.js';
 import { findTranslationKeyUsages, replaceOccurrences } from './replace-keys-with-uuid.js';
 import { writeTranslation } from './write-translations.js';
 import { isBase62 } from './compress-uuids.js';
+import { reportProgress } from '../shared/progress.js';
+import type { ProgressCallback } from '../shared/progress.js';
 
 /**
  * Adds all usages of `$t(key)` (TypeScript / Vue) and `{{$t "key"}}` (Handlebars) in the code base - where they key is not present in the default translation file, to the default translation file (with a newly generated uuid).
@@ -26,18 +28,13 @@ import { isBase62 } from './compress-uuids.js';
  *     ```
  *    The key won't be replaced in the $t in this case.
  *
- * @returns the keys added to the default translation file
+ * @returns the number of keys added to the default translation file
  */
-export function addMissingKeys(): Record<string, string> {
-    console.log('Start add missing keys.');
+export async function addMissingKeys(onProgress?: ProgressCallback): Promise<number> {
     const { filePath, translations } = getDefaultTranslations();
-    const { missingKeys, filesWithMissingKeys } = getMissingKeys(translations);
+    const { missingKeys, filesWithMissingKeys } = await getMissingKeys(translations, onProgress);
 
     if (missingKeys.size > 0) {
-        console.log(
-            `Found ${missingKeys.size} missing key(s) in ${filesWithMissingKeys.size} file(s).`,
-        );
-
         const missingUuidKeys = new Map<string, string>();
         const replacedKeys = new Map<string, string>();
 
@@ -78,27 +75,24 @@ export function addMissingKeys(): Record<string, string> {
         writeTranslation(filePath, translations);
 
         // Replace the translations with the generated keys. Run multiple times because this sometimes fails
-        replaceOccurrences(replacedKeys, Array.from(filesWithMissingKeys));
+        await replaceOccurrences(replacedKeys, Array.from(filesWithMissingKeys), onProgress);
     }
-    else {
-        console.log('No missing keys found.');
-    }
-
-    console.log('Finished add missing keys.');
-    return translations;
+    return missingKeys.size;
 }
 
 /**
  * Returns used keys ( $t(key) ), found anywhere in the source code, where the key is not present in the provided translations map, including the file where the keys are used.
  */
-function getMissingKeys(translations: Record<string, string>): {
+async function getMissingKeys(translations: Record<string, string>, onProgress?: ProgressCallback): Promise<{
     missingKeys: Set<string>;
     filesWithMissingKeys: Set<string>;
-} {
+}> {
     const filesToSearch = getFilesToSearch(translatableFileTypes);
 
     const missingKeys = new Set<string>();
     const filesWithMissingKeys = new Set<string>();
+    let completed = 0;
+    await reportProgress(onProgress, { phase: 'scan', completed, total: filesToSearch.length });
 
     for (const filePath of filesToSearch) {
         const fileContent = fs.readFileSync(filePath, 'utf8');
@@ -114,6 +108,7 @@ function getMissingKeys(translations: Record<string, string>): {
         if (hasMissingKey) {
             filesWithMissingKeys.add(filePath);
         }
+        await reportProgress(onProgress, { phase: 'scan', completed: ++completed, total: filesToSearch.length });
     }
 
     return { missingKeys, filesWithMissingKeys };

@@ -11,12 +11,6 @@ export class OutdatedTranslationFinder {
     }
 
     removeOutdatedTranslations(translator: TranslatorType, locales?: string[]) {
-        console.log(
-            chalk.blue(
-                `Start clear changed translations (locales: ${locales ? locales?.join(' ') : 'all locales'}, translator: ${translator}).`,
-            ),
-        );
-
         // todo: maybe use iterateNonDefaultLocalesWithNamespace
 
         const otherLocales = this.translationManager.locales.filter(
@@ -34,8 +28,6 @@ export class OutdatedTranslationFinder {
         );
 
         const namespaces = this.translationManager.namespaces;
-
-        let foundChanges = false;
 
         // compare dist build of default locale with dist build of other locales
         for (const namespace of namespaces) {
@@ -70,7 +62,6 @@ export class OutdatedTranslationFinder {
                         - Object.keys(filteredDictionary).length;
 
                 if (difference > 0) {
-                    foundChanges = true;
                     console.log(
                         chalk.yellow(
                             `Clear ${difference} changed translations (locale: ${locale}, namespace: ${namespace}, translator: ${translator}).`,
@@ -87,8 +78,5 @@ export class OutdatedTranslationFinder {
             }
         }
 
-        if (!foundChanges) {
-            console.log(chalk.green('No changed translations found.'));
-        }
     }
 }

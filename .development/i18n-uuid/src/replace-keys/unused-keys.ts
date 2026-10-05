@@ -1,9 +1,11 @@
 import { getTranslationsWithPath } from './get-translations-with-path.js';
 import { findUnusedTranslationKeys } from './replace-keys-with-uuid.js';
 import { writeTranslation } from './write-translations.js';
+import type { ProgressCallback } from '../shared/progress.js';
 
-export function unusedKeys() {
+export async function unusedKeys(onProgress?: ProgressCallback) {
     const translationsWithPath = getTranslationsWithPath();
+    let removed = 0;
     for (const [filePath, translations] of translationsWithPath) {
         const keys = new Set<string>();
 
@@ -16,16 +18,16 @@ export function unusedKeys() {
             }
         }
 
-        const unusedKeys = findUnusedTranslationKeys(keys);
+        const unusedKeys = await findUnusedTranslationKeys(keys, undefined, progress => onProgress?.({ ...progress, translationFile: filePath }));
 
         if (unusedKeys.size) {
             for (const key of unusedKeys.values()) {
-                console.log('Found unused key ' + key + ' in ' + filePath);
-
                 delete translations[key];
+                removed++;
             }
 
             writeTranslation(filePath, translations);
         }
     }
+    return removed;
 }

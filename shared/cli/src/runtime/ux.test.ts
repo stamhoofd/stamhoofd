@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process';
 import { stripVTControlCharacters } from 'node:util';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CliStatus, formatStatusLabel } from './status.js';
-import { formatTable, openUrl, Table } from './ux.js';
+import { formatTable, openUrl, step, Table } from './ux.js';
 
 vi.mock('node:child_process', () => ({
     spawn: vi.fn(),
@@ -41,6 +41,34 @@ describe('ux helpers', () => {
         }
         finally {
             Object.defineProperty(process.stdout, 'columns', { configurable: true, value: originalColumns });
+        }
+    });
+
+    it('prints readable step output without cursor animation outside a terminal', async () => {
+        const descriptor = Object.getOwnPropertyDescriptor(process.stderr, 'isTTY');
+        Object.defineProperty(process.stderr, 'isTTY', { configurable: true, value: false });
+        const writes: string[] = [];
+        vi.spyOn(process.stderr, 'write').mockImplementation((chunk: string | Uint8Array) => {
+            writes.push(String(chunk));
+            return true;
+        });
+        try {
+            await step('Scan translation keys', async (update) => {
+                update('Scanning files 25/100');
+                return 4;
+            }, { successMessage: count => `Removed ${count} entries` });
+            const output = writes.join('');
+            expect(stripVTControlCharacters(output)).toContain('Scan translation keys');
+            expect(stripVTControlCharacters(output)).toContain('Removed 4 entries');
+            expect(output).not.toContain('\u001B[2K');
+        }
+        finally {
+            if (descriptor) {
+                Object.defineProperty(process.stderr, 'isTTY', descriptor);
+            }
+            else {
+                Reflect.deleteProperty(process.stderr, 'isTTY');
+            }
         }
     });
 

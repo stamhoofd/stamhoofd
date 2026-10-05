@@ -5,7 +5,6 @@
  * - improve prompt
  * - provide context?
  * - context caching?
- * - add feedback while translating (if it takes a long time for example)
  */
 
 import { globals } from '../shared/globals.js';
@@ -19,6 +18,7 @@ export async function autoTranslate(args: Partial<AutoTranslateOptions>) {
     const manager = new TranslationManager();
     const autoTranslator = new AutoTranslator(args.translatorType ?? globals.TRANSLATOR, manager, {
         apiKey: args.apiKey,
+        onProgress: args.onProgress,
         fake: args.fake ?? false,
         translatorType: args.translatorType ?? globals.TRANSLATOR,
         locales: args.locales,
