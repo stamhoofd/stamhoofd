@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { getProjectPath } from '../context/project-path.js';
 import { run, RunVerbosity } from './command-runner.js';
+import type { autoTranslate } from 'i18n-uuid/auto-translate';
 
 async function inTranslationDirectory(action: () => void | Promise<void>): Promise<void> {
     const previousDirectory = process.cwd();
@@ -31,11 +32,11 @@ export async function translateCompress(): Promise<void> {
     });
 }
 
-export async function translateMachine(): Promise<void> {
+export async function translateMachine(options: Parameters<typeof autoTranslate>[0] = {}): Promise<void> {
     await run('pnpm', ['--dir', 'shared/locales', 'run', 'build'], { cwd: getProjectPath(), verbosity: RunVerbosity.Output });
     await inTranslationDirectory(async () => {
         const { autoTranslate } = await import('i18n-uuid/auto-translate');
-        await autoTranslate({});
+        await autoTranslate(options);
     });
 }
 

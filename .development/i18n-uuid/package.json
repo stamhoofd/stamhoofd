@@ -8,7 +8,8 @@
         "./replace-keys": "./dist/replace-keys/replace-keys.js",
         "./merge-duplicates": "./dist/replace-keys/merge-duplicates.js",
         "./unused-keys": "./dist/replace-keys/unused-keys.js",
-        "./auto-translate": "./dist/auto-translate/auto-translate.js"
+        "./auto-translate": "./dist/auto-translate/auto-translate.js",
+        "./translator-type": "./dist/enums/TranslatorType.js"
     },
     "license": "MIT",
     "private": true,
