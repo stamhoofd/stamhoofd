@@ -66,14 +66,14 @@ The CLI build clears its own compiled output before compiling so commands remove
 | Checks      | `pnpm stam check lint`                 | Run ESLint across the monorepo.                                            |
 | Checks      | `pnpm stam check typecheck`            | Run TypeScript checks across the monorepo.                                 |
 | Checks      | `pnpm stam check all`                  | Run build, lint, typecheck, unit tests, and E2E tests.                     |
-| Translations | `pnpm stam-dev translate`             | Show translation help; never modify files without a subcommand.           |
-| Translations | `pnpm stam-dev translate auto`        | Replace keys, clean up translations, and machine-translate.                |
-| Translations | `pnpm stam-dev translate manual keys` | Replace translation keys.                                                  |
-| Translations | `pnpm stam-dev translate manual cleanup` | Merge duplicates and remove unused keys.                                |
-| Translations | `pnpm stam-dev translate manual machine` | Machine-translate missing translations.                                 |
-| Translations | `pnpm stam-dev translate manual source` | Wrap untranslated source text in translation calls.                      |
-| Translations | `pnpm stam-dev translate manual review` | Review machine translations identical to the original.                   |
-| Translations | `pnpm stam-dev translate maintenance` | Show specialist cache, key, and repair tools.                             |
+| Translations | `pnpm stam translate`             | Show translation help; never modify files without a subcommand.           |
+| Translations | `pnpm stam translate auto`        | Replace keys, clean up translations, and machine-translate.                |
+| Translations | `pnpm stam translate manual keys` | Replace translation keys.                                                  |
+| Translations | `pnpm stam translate manual cleanup` | Merge duplicates and remove unused keys.                                |
+| Translations | `pnpm stam translate manual machine` | Machine-translate missing translations.                                 |
+| Translations | `pnpm stam translate manual source` | Wrap untranslated source text in translation calls.                      |
+| Translations | `pnpm stam translate manual review` | Review machine translations identical to the original.                   |
+| Translations | `pnpm stam translate maintenance` | Show specialist cache, key, and repair tools.                             |
 | Cleanup     | `pnpm stam clean build`                | Remove build artifacts.                                                    |
 | Cleanup     | `pnpm stam clean db`                   | Drop the selected local MySQL database after confirmation.                 |
 | Cleanup     | `pnpm stam clean sso`                  | Stop the local SSO server.                                                 |
@@ -83,7 +83,7 @@ The CLI build clears its own compiled output before compiling so commands remove
 
 ### Translations
 
-During development, write Dutch `$t('Opslaan')` strings and commit them unchanged. Do not manually edit `shared/locales/src/nl.json`. Before releasing, a maintainer runs `pnpm stam-dev translate auto`, reviews the generated changes, and commits them separately.
+During development, write Dutch `$t('Opslaan')` strings and commit them unchanged. Do not manually edit `shared/locales/src/nl.json`. Before releasing, a maintainer runs `pnpm stam translate auto`, reviews the generated changes, and commits them separately.
 
 The automatic flow runs keys → cleanup → machine. Use `--locale fr --locale en` to select languages, `--provider openai` to choose a provider, or `--no-machine` to prepare keys without AI requests. Each stage is also available under `translate manual`.
 
@@ -100,21 +100,21 @@ Bare `translate` now shows help. Update scripts that previously ran the pipeline
 Source migration and review are optional, not part of `auto`:
 
 ```bash
-pnpm stam-dev translate manual source --changes --dry-run
-pnpm stam-dev translate manual source --changes --prompt --fix
-pnpm stam-dev translate manual review --dry-run
-pnpm stam-dev translate manual review
+pnpm stam translate manual source --changes --dry-run
+pnpm stam translate manual source --changes --prompt --fix
+pnpm stam translate manual review --dry-run
+pnpm stam translate manual review
 ```
 
 Source migration only wraps text in `$t(...)`; it does not generate keys or call an AI provider. `--commits HEAD~1 --commits HEAD` selects a Git comparison and implies `--changes`. Source previews do not write source files or processing caches and do not prompt. Review only flags nonempty translations identical to their original Dutch text. Accepting an entry writes it to the human-maintained translations; rejecting deletes its machine entry; deferring leaves it unchanged. Review previews do not prompt or write files.
 
 `translate maintenance` shows help for cache clearing, UUID compression, invalid-entry filtering, duplicate machine-translation repair, and legacy comparison generation. These are not additional release steps. Prefer `manual review` over bulk `maintenance filter-invalid` when unchanged wording may be legitimate. The comparison tool writes JSON files to `.development/i18n-uuid/output`; its provider labels currently repeat the same machine translation and do not represent independent provider results.
 
-The translation library no longer has a separate command runner or package scripts for these operations. Use the Stamhoofd CLI; `pnpm stam-dev` builds the library and CLI before running a command. Both `translate manual` and `translate maintenance` show help without modifying files when no subcommand is supplied.
+The translation library no longer has a separate command runner or package scripts for these operations. Use the Stamhoofd CLI; `pnpm stam` builds the library and CLI through Turbo before running a command. Both `translate manual` and `translate maintenance` show help without modifying files when no subcommand is supplied.
 
 ### Version Control
 
-`pnpm stam-dev setup` includes repository checks. Run `pnpm stam-dev setup vcs` separately to repair only version control, or add `--dry-run` to preview repairs and `--yes` to approve them.
+`pnpm stam setup` includes repository checks. Run `pnpm stam setup vcs` separately to repair only version control, or add `--dry-run` to preview repairs and `--yes` to approve them.
 
 Setup validates fetch and push URLs for public `origin` (`stamhoofd/stamhoofd`) and private `private` (`stamhoofd/stamhoofd-private`). It creates the local `private` branch if missing, configures its upstream as `private/private`, and sets `branch.private.pushRemote=private`, `branch.main.pushRemote=origin`, and `push.default=current`. It never switches checkout, resets existing branches, or pushes.
 
@@ -511,13 +511,15 @@ Bad candidates for this file:
 
 ### Working On The CLI
 
-`pnpm run build:shared` builds `shared/cli` so normal CLI startup stays fast. When changing CLI source code, use `stam-dev` to rebuild before running (including the optional DevOps CLI when checked out):
+`pnpm stam` checks the CLI and its build dependencies through Turbo before launching. Unchanged builds use the local cache; source changes trigger rebuilding and missing outputs are restored from cache. The optional DevOps CLI is included when `devops/tsconfig.cli.json` exists:
+
+Successful bootstrap builds are silent; failed builds print diagnostics to stderr. Use `pnpm --silent stam` to also suppress pnpm's script-command echo.
 
 ```bash
-pnpm run stam-dev --help
+pnpm stam --help
 ```
 
-If the separate `devops/` repository has a populated oclif command directory, both `pnpm stam devops` and `pnpm stam-dev devops` load its commands. An absent or empty checkout does not add the topic. The installed `stam` shell wrapper also rebuilds the DevOps CLI incrementally when checked out, while building `shared/cli` only if it is missing. DevOps command implementations and their documentation live in `devops/`; the main CLI only discovers the optional plugin.
+If the separate `devops/` repository has a populated oclif command directory, `pnpm stam devops` loads its commands. An absent or empty checkout does not add the topic. The installed `stam` shell wrapper also rebuilds the DevOps CLI incrementally when checked out, while building `shared/cli` only if it is missing. DevOps command implementations and their documentation live in `devops/`; the main CLI only discovers the optional plugin.
 Run `stam setup shell` again to refresh an already installed shell wrapper.
 
 For CLI-only changes, run:
@@ -528,7 +530,7 @@ pnpm --dir shared/cli --silent run lint
 pnpm --dir shared/cli --silent run test
 ```
 
-Translation commands call the `i18n-uuid` library in `.development/i18n-uuid`. `pnpm stam-dev` and `build:shared` build it before `shared/cli`; keep that order when changing either package.
+Translation commands call the `i18n-uuid` library in `.development/i18n-uuid`. `pnpm stam` and `build:shared` build it before `shared/cli` through Turbo's dependency graph.
 
 CLI tests live next to source files as `*.test.ts`.
 

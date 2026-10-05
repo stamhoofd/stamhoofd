@@ -9,7 +9,7 @@ During development, write Dutch `$t('Opslaan')` strings and commit them unchange
 Before releasing, run from the repository root:
 
 ```bash
-pnpm stam-dev translate auto
+pnpm stam translate auto
 ```
 
 This runs key registration → duplicate/unused-key cleanup → machine translation. Review and commit generated changes separately. Bare `translate` only shows help. Use `--locale fr`, `--provider openai`, `--no-machine`, or `--yes` as needed.
@@ -17,15 +17,15 @@ This runs key registration → duplicate/unused-key cleanup → machine translat
 Individual stages are `translate manual keys`, `manual cleanup`, and `manual machine`. Optional source migration and unchanged-translation review are separate:
 
 ```bash
-pnpm stam-dev translate manual source --changes --dry-run
-pnpm stam-dev translate manual source --changes --prompt --fix
-pnpm stam-dev translate manual review --dry-run
-pnpm stam-dev translate manual review
+pnpm stam translate manual source --changes --dry-run
+pnpm stam translate manual source --changes --prompt --fix
+pnpm stam translate manual review --dry-run
+pnpm stam translate manual review
 ```
 
 Source and review previews do not write translation/source files or processing caches. Key processing supports `$t(...)` in TypeScript/Vue and `{{$t "..."}}` in Handlebars (`.hbs`, `.hbs.html`). Specialist repair tools are listed by `translate maintenance`. Legacy comparison output repeats the same saved translation under every provider label; it does not compare independent AI results.
 
-See [the CLI documentation](../../shared/cli/README.md#translations) or run `pnpm stam-dev translate --help` for details. `pnpm stam-dev` builds this library and the CLI first.
+See [the CLI documentation](../../shared/cli/README.md#translations) or run `pnpm stam translate --help` for details. `pnpm stam` builds this library and the CLI first, using Turbo's local cache for unchanged builds.
 
 ## Credentials
 
