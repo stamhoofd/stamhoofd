@@ -93,6 +93,22 @@ it('respects --no-machine without asking about AI or looking up credentials', as
     expect(translate).toHaveBeenCalledWith(expect.objectContaining({ skipMachine: true }));
 });
 
+it('labels fake translation explicitly and still respects the final cancellation', async () => {
+    Object.defineProperty(process.stdin, 'isTTY', { configurable: true, value: true });
+    Object.defineProperty(process.stdout, 'isTTY', { configurable: true, value: true });
+    const command = new TranslateAuto([], {} as never);
+    vi.spyOn(command, 'parse' as never).mockResolvedValue(await Parser.parse(['--fake'], { flags: TranslateAuto.flags }) as never);
+    vi.mocked(confirm).mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+    vi.mocked(validateMachineTranslation).mockResolvedValue(['fr']);
+
+    await command.run();
+
+    expect(confirm).toHaveBeenNthCalledWith(1, 'Generate fake machine translations as well?');
+    expect(info).not.toHaveBeenCalledWith(expect.stringContaining('1Password'));
+    expect(translate).not.toHaveBeenCalled();
+    expect(info).toHaveBeenCalledWith('Cancelled. No translation files were changed.');
+});
+
 it('requires explicit approval before starting in a noninteractive terminal', async () => {
     const command = new TranslateAuto([], {} as never);
     vi.spyOn(command, 'parse').mockResolvedValue(await Parser.parse([], { flags: TranslateAuto.flags }) as never);

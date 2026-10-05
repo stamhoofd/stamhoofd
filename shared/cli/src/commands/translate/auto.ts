@@ -23,7 +23,16 @@ export default class TranslateAuto extends Command {
             this.error('Automatic translation needs confirmation. Run interactively or pass --yes. No translation files were changed.');
         }
         const machine = machineArgs(flags);
-        const locales = flags['no-machine'] ? undefined : await validateMachineTranslation(machine);
+        let skipMachine = flags['no-machine'];
+        if (!skipMachine) {
+            if (!flags.fake) {
+                info('For API keys from 1Password, unlock the "DevOps Development" vault before continuing.');
+            }
+            if (!flags.yes) {
+                skipMachine = !await confirm(flags.fake ? 'Generate fake machine translations as well?' : 'Perform AI machine translation as well?');
+            }
+        }
+        const locales = skipMachine ? undefined : await validateMachineTranslation(machine);
         const root = getProjectPath();
         info(`Repository: ${root}`);
         info(`Flow: keys → cleanup${locales ? ' → machine' : ''}`);
@@ -45,7 +54,7 @@ export default class TranslateAuto extends Command {
         try {
             await translate({
                 machine,
-                skipMachine: flags['no-machine'],
+                skipMachine,
                 onStage: (next) => {
                     stage = next;
                     info(`[${++completed}/${locales ? 3 : 2}] ${labels[next]}`);
