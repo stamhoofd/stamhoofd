@@ -14,7 +14,7 @@ pnpm stam dev all
 
 The bootstrap script installs the Node version from `.nvmrc` and prepares the pnpm version pinned in the root `package.json` through Corepack. If only pnpm needs repair, run `corepack enable` followed by `corepack install`, or run `stam setup pnpm` when the CLI alias is already available.
 
-Run `pnpm stam setup shell` to install the CLI alias `stam` in your .zshrc or .bashrc (that removes the need to type `pnpm` and the need to always run commands in the project root). Afterwards, `stam setup` performs the normal setup checks.
+Run `pnpm stam setup shortcut` to install `shared/cli/bin/stam` as `/usr/local/bin/stam` using sudo. This removes the need to type `pnpm` or run commands in the project root. Setup also removes the legacy `stam` function blocks from `.zshrc` and `.bashrc`; restart your terminal or run `unset -f stam` if the old function is still loaded. Afterwards, `stam setup` performs the normal setup checks.
 
 Open the dashboard URL printed by the CLI, or run `pnpm stam status` to see active services, instances, URLs, and credentials.
 
@@ -519,8 +519,8 @@ Successful bootstrap builds are silent; failed builds print diagnostics to stder
 pnpm stam --help
 ```
 
-If the separate `devops/` repository has a populated oclif command directory, `pnpm stam devops` loads its commands. An absent or empty checkout does not add the topic. The installed `stam` shell wrapper also rebuilds the DevOps CLI incrementally when checked out, while building `shared/cli` only if it is missing. DevOps command implementations and their documentation live in `devops/`; the main CLI only discovers the optional plugin.
-Run `stam setup shell` again to refresh an already installed shell wrapper.
+If the separate `devops/` repository has a populated oclif command directory, `pnpm stam devops` loads its commands. An absent or empty checkout does not add the topic. The installed `stam` shell wrapper finds the enclosing clone or worktree by its `stamhoofd/stamhoofd` GitHub remote (SSH or HTTPS, under any remote name) and delegates to `pnpm --silent run stam`. It also finds the parent checkout when invoked inside the nested DevOps repository. DevOps command implementations and their documentation live in `devops/`; the main CLI only discovers the optional plugin.
+Run `pnpm stam setup shortcut` again to refresh `/usr/local/bin/stam` and clean up any remaining legacy shell function blocks. `--dry-run` previews the installation and cleanup.
 
 For CLI-only changes, run:
 

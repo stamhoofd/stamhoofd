@@ -92,7 +92,7 @@ describe('Setup command', () => {
 
     it('installs the shell shortcut directly', async () => {
         const command = createCommand({
-            args: { action: SetupAction.Shell },
+            args: { action: SetupAction.Shortcut },
             flags: { yes: false, 'dry-run': true, verbose: false },
         });
 
