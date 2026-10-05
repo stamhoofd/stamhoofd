@@ -5,6 +5,10 @@ import { runSetup, setupCert, setupDns } from '../../workflows/setup-machine.js'
 import { checkNodeVersion, printNodeVersionStatus, setupNodeVersion } from '../../workflows/setup-node.js';
 import { setupPackageManager } from '../../workflows/setup-package-manager.js';
 import { setupShellShortcut } from '../../workflows/setup-shell.js';
+import { setupVcs } from '../../workflows/setup-vcs.js';
+import { RunVerbosity } from '../../runtime/command-runner.js';
+
+vi.mock('../../workflows/setup-vcs.js', () => ({ setupVcs: vi.fn() }));
 
 vi.mock('../../workflows/setup-machine.js', () => ({
     runSetup: vi.fn(),
@@ -63,6 +67,14 @@ describe('Setup command', () => {
         await command.run();
 
         expect(setupDns).toHaveBeenCalledWith({ yes: true, dryRun: true });
+        expect(runSetup).not.toHaveBeenCalled();
+    });
+
+    it('runs vcs setup without creating development context', async () => {
+        const command = createCommand({ args: { action: SetupAction.Vcs }, flags: { yes: true, 'dry-run': true, verbose: true } });
+        await command.run();
+        expect(setupVcs).toHaveBeenCalledWith(expect.any(String), { yes: true, dryRun: true, verbosity: RunVerbosity.Output });
+        expect((command as any).createContext).not.toHaveBeenCalled();
         expect(runSetup).not.toHaveBeenCalled();
     });
 

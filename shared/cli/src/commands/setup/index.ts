@@ -4,10 +4,12 @@ import { BaseCommand } from '../../base-command.js';
 import { dryRunFlag, yesFlag } from '../../command-flags.js';
 import { getProjectPath } from '../../context/project-path.js';
 import { confirm } from '../../runtime/ux.js';
+import { RunVerbosity } from '../../runtime/command-runner.js';
 import { runSetup, setupCert, setupDns } from '../../workflows/setup-machine.js';
 import { checkNodeVersion, printNodeVersionStatus, setupNodeVersion } from '../../workflows/setup-node.js';
 import { setupPackageManager } from '../../workflows/setup-package-manager.js';
 import { setupShellShortcut } from '../../workflows/setup-shell.js';
+import { setupVcs } from '../../workflows/setup-vcs.js';
 
 export enum SetupAction {
     Cert = 'cert',
@@ -15,6 +17,7 @@ export enum SetupAction {
     Node = 'node',
     Pnpm = 'pnpm',
     Shell = 'shell',
+    Vcs = 'vcs',
 }
 
 const setupActions = Object.values(SetupAction);
@@ -29,6 +32,7 @@ export default class Setup extends BaseCommand {
         'stam setup dns --dry-run',
         'stam setup cert --yes --verbose',
         'stam setup shell',
+        'stam setup vcs --dry-run',
     ];
 
     static args = {
@@ -45,6 +49,11 @@ export default class Setup extends BaseCommand {
         const parsed = await this.parse(Setup);
         const { args, flags } = parsed;
         const rootDir = path.resolve(getProjectPath());
+
+        if (args.action === SetupAction.Vcs) {
+            await setupVcs(rootDir, { yes: flags.yes, dryRun: flags['dry-run'], verbosity: flags.quiet ? RunVerbosity.Quiet : flags.verbose ? RunVerbosity.Output : RunVerbosity.Command });
+            return;
+        }
 
         if (args.action === SetupAction.Node) {
             await setupNodeVersion(rootDir, { dryRun: flags['dry-run'] });

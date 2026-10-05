@@ -18,12 +18,14 @@ import * as docker from '../services/docker.js';
 import { runServices } from './start-services.js';
 import { checkNodeVersion, setupNodeVersion } from './setup-node.js';
 import { checkPackageManager, setupPackageManager } from './setup-package-manager.js';
+import { checkVcs, setupVcs } from './setup-vcs.js';
 
 const directDnsQueryTimeoutMs = 1000;
 
 export type SetupReport = {
     node: CheckResult;
     pnpm: CheckResult;
+    vcs: CheckResult;
     docker: CheckResult;
     privilegedPorts: CheckResult;
     caddy: CheckResult;
@@ -34,6 +36,7 @@ export type SetupReport = {
 export enum SetupAutomaticFixKey {
     Node = 'node',
     Pnpm = 'pnpm',
+    Vcs = 'vcs',
     Dns = 'dns',
     PrivilegedPorts = 'privileged-ports',
     Services = 'services',
@@ -58,6 +61,7 @@ export async function checkSetup(context: CliContext): Promise<SetupReport> {
     return {
         node: await nodeCheck(context),
         pnpm: await packageManagerCheck(context),
+        vcs: await vcsCheck(context),
         docker: await dockerCheck(context.verbosity),
         privilegedPorts: await privilegedPortRedirectCheck(profile, context.verbosity),
         caddy: await caddyCheck(context.verbosity),
@@ -71,6 +75,7 @@ export async function checkSetupWithTable(context: CliContext, options: { live: 
     const rows = {
         node: Table.row(['Node.js', Table.cell('checking', { indeterminate: true }), '']),
         pnpm: Table.row(['pnpm', Table.cell('checking', { indeterminate: true }), '']),
+        vcs: Table.row(['Git / JJ', Table.cell('checking', { indeterminate: true }), '']),
         docker: Table.row(['Podman / Docker', Table.cell('checking', { indeterminate: true }), '']),
         privilegedPorts: Table.row(['Privileged port redirects', Table.cell('checking', { indeterminate: true }), '']),
         caddy: Table.row(['Caddy', Table.cell('checking', { indeterminate: true }), '']),
@@ -80,7 +85,7 @@ export async function checkSetupWithTable(context: CliContext, options: { live: 
     const liveTable = Table.create({
         title: 'Checking Stamhoofd local development setup',
         headers: ['Check', 'Status', 'Details'],
-        rows: [rows.node, rows.pnpm, rows.docker, rows.privilegedPorts, rows.caddy, rows.dns, rows.cert],
+        rows: [rows.node, rows.pnpm, rows.vcs, rows.docker, rows.privilegedPorts, rows.caddy, rows.dns, rows.cert],
         live: options.live,
     });
 
@@ -93,6 +98,7 @@ export async function checkSetupWithTable(context: CliContext, options: { live: 
         runSetupCheck(rows.caddy, 'Caddy', caddyCheck(context.verbosity)),
         profilePromise.then(profile => runSetupCheck(rows.dns, `DNS .${domain}`, dnsCheck(context, profile))),
         runSetupCheck(rows.cert, 'Caddy local CA', certCheck(context.verbosity)),
+        runSetupCheck(rows.vcs, 'Git / JJ', vcsCheck(context)),
     ]);
 
     await liveTable.wait();
@@ -110,6 +116,7 @@ export async function checkSetupWithTable(context: CliContext, options: { live: 
         caddy: results[4].status === 'fulfilled' ? results[4].value : neverRejected(results[4]),
         dns: results[5].status === 'fulfilled' ? results[5].value : neverRejected(results[5]),
         cert: results[6].status === 'fulfilled' ? results[6].value : neverRejected(results[6]),
+        vcs: results[7].status === 'fulfilled' ? results[7].value : neverRejected(results[7]),
     };
 }
 
@@ -117,6 +124,7 @@ export function printSetupReport(report: SetupReport): void {
     table(['Check', 'Status', 'Details'], [
         row('Node.js', report.node),
         row('pnpm', report.pnpm),
+        row('Git / JJ', report.vcs),
         row('Podman / Docker', report.docker),
         row('Privileged port redirects', report.privilegedPorts),
         row('Caddy', report.caddy),
@@ -156,6 +164,8 @@ export async function runSetup(context: CliContext): Promise<void> {
                 return;
             } else if (fix.key === SetupAutomaticFixKey.Pnpm) {
                 await setupPackageManager(context.rootDir);
+            } else if (fix.key === SetupAutomaticFixKey.Vcs) {
+                await setupVcs(context.rootDir, { yes: true, dryRun: false, verbosity: context.verbosity });
             } else if (fix.key === SetupAutomaticFixKey.Dns) {
                 await setupDns({ yes: true, dryRun: false });
             } else if (fix.key === SetupAutomaticFixKey.PrivilegedPorts) {
@@ -196,7 +206,20 @@ export function isSetupReady(report: SetupReport): boolean {
 }
 
 function setupChecks(report: SetupReport): CheckResult[] {
-    return [report.node, report.pnpm, report.docker, report.privilegedPorts, report.caddy, report.dns, report.cert];
+    return [report.node, report.pnpm, report.vcs, report.docker, report.privilegedPorts, report.caddy, report.dns, report.cert];
+}
+
+async function vcsCheck(context: CliContext): Promise<CheckResult> {
+    const missing = (await checkVcs(context.rootDir, context.verbosity)).filter(check => !check.ok);
+    if (missing.length === 0) {
+        return { ok: true, details: 'Repository push destinations configured' };
+    }
+    return {
+        ok: false,
+        details: missing.map(check => check.label).join(', '),
+        manualFix: 'stam setup vcs',
+        ...(missing.every(check => check.repairs.length > 0) ? { automaticFix: { key: SetupAutomaticFixKey.Vcs, label: 'Configure Git / JJ push destinations' } } : {}),
+    };
 }
 
 async function nodeCheck(context: CliContext): Promise<CheckResult> {
