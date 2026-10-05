@@ -9,7 +9,9 @@
         "./merge-duplicates": "./dist/replace-keys/merge-duplicates.js",
         "./unused-keys": "./dist/replace-keys/unused-keys.js",
         "./auto-translate": "./dist/auto-translate/auto-translate.js",
-        "./translator-type": "./dist/enums/TranslatorType.js"
+        "./translator-type": "./dist/enums/TranslatorType.js",
+        "./globals": "./dist/shared/globals.js",
+        "./translation-manager": "./dist/auto-translate/TranslationManager.js"
     },
     "license": "MIT",
     "private": true,

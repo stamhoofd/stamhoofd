@@ -84,6 +84,10 @@ During development, write Dutch `$t('Opslaan')` strings and commit them unchange
 
 The automatic flow runs keys → cleanup → machine. Use `--locale fr --locale en` to select languages, `--provider openai` to choose a provider, or `--no-machine` to prepare keys without AI requests. Each stage is also available under `translate manual`.
 
+`auto` validates the selected locales and provider credentials before changing translation files, explains the flow and potential AI costs, and asks for confirmation. Use `--yes` for noninteractive execution. It shows stage progress, stops on failures without rolling back partial changes, and prints the current working-copy diff summary (including any pre-existing edits).
+
+Providers are `openai`, `gemini`, `mistral-large`, and `mistral-small`. Configure `OPENAI_API_KEY`, `GEMINI_API_KEY`, or `MISTRAL_API_KEY` in `.development/i18n-uuid/.env` or your environment. Claude is not implemented by this translation library. `--fake` writes test translations without AI requests but still requires provider credentials to initialize the existing SDK.
+
 Bare `translate` now shows help. Update scripts that previously ran the pipeline to use `translate auto`. The old `translate keys`, `compress`, and `machine` commands remain available as hidden compatibility commands.
 
 ### Version Control
