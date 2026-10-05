@@ -205,7 +205,7 @@ Translations are resolved in the following order: en-NL > en. So translations fr
 
 During development, write new strings in Dutch, for example `$t('Opslaan')`, and commit them unchanged. Do not manually edit `shared/locales/src/nl.json`. Before a release, run `pnpm stam-dev translate auto` from the root to register strings, generate compact keys, merge duplicates, remove unused keys, and machine-translate missing or changed strings. Review and commit those generated changes separately. Bare `pnpm stam-dev translate` shows help; use `translate manual keys`, `manual cleanup`, or `manual machine` for individual stages. See [`shared/cli/README.md`](shared/cli/README.md#translations) for options. The .env file in the i18n-uuid directory should contain all required variables (see `.env.template`):
 
-- `I18NUUID_DEFAULT_LOCALE`: default locale (e.g. nl)
+- `OPENAI_API_KEY`, `GEMINI_API_KEY`, or `MISTRAL_API_KEY`, depending on the selected provider.
 
 # Self hosting
 
