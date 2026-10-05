@@ -117,13 +117,14 @@ function runReplacements(json) {
             return a.localeCompare(b, undefined, { caseFirst: 'upper' }); // alphabetically
         });
 
+        const patterns = keys.map(key => [new RegExp(`${key}(?![^{]*})`, 'g'), replacements[key]]);
         replaceValues(json, (value) => {
             if (typeof value !== 'string') {
                 return value;
             }
 
-            for (const r of keys) {
-                value = value.replaceAll(new RegExp(`${r}(?![^{]*})`, 'g'), replacements[r]);
+            for (const [pattern, replacement] of patterns) {
+                value = value.replaceAll(pattern, replacement);
             }
 
             return value;
