@@ -66,7 +66,8 @@ The CLI build clears its own compiled output before compiling so commands remove
 | Checks      | `pnpm stam check lint`                 | Run ESLint across the monorepo.                                            |
 | Checks      | `pnpm stam check typecheck`            | Run TypeScript checks across the monorepo.                                 |
 | Checks      | `pnpm stam check all`                  | Run build, lint, typecheck, unit tests, and E2E tests.                     |
-| Translations | `pnpm stam-dev translate`             | Replace keys, clean up translations, and machine-translate.                |
+| Translations | `pnpm stam-dev translate`             | Show translation help; never modify files without a subcommand.           |
+| Translations | `pnpm stam-dev translate auto`        | Replace keys, clean up translations, and machine-translate.                |
 | Translations | `pnpm stam-dev translate manual keys` | Replace translation keys.                                                  |
 | Translations | `pnpm stam-dev translate manual cleanup` | Merge duplicates and remove unused keys.                                |
 | Translations | `pnpm stam-dev translate manual machine` | Machine-translate missing translations.                                 |
@@ -76,6 +77,14 @@ The CLI build clears its own compiled output before compiling so commands remove
 | Cleanup     | `pnpm stam clean metabase`             | Stop Metabase and drop its application database after confirmation.        |
 | Cleanup     | `pnpm stam clean services`             | Stop shared services.                                                      |
 | Cleanup     | `pnpm stam clean all`                  | Clean build artifacts and stop shared services.                            |
+
+### Translations
+
+During development, write Dutch `$t('Opslaan')` strings and commit them unchanged. Do not manually edit `shared/locales/src/nl.json`. Before releasing, a maintainer runs `pnpm stam-dev translate auto`, reviews the generated changes, and commits them separately.
+
+The automatic flow runs keys → cleanup → machine. Use `--locale fr --locale en` to select languages, `--provider openai` to choose a provider, or `--no-machine` to prepare keys without AI requests. Each stage is also available under `translate manual`.
+
+Bare `translate` now shows help. Update scripts that previously ran the pipeline to use `translate auto`. The old `translate keys`, `compress`, and `machine` commands remain available as hidden compatibility commands.
 
 ### Version Control
 

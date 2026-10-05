@@ -60,4 +60,18 @@ describe('translate pipeline', () => {
         expect(autoTranslate).toHaveBeenCalledWith(options);
         expect(calls).toEqual(['build', 'machine']);
     });
+
+    it('skips machine translation when preparing translations offline', async () => {
+        await translate({ skipMachine: true });
+        expect(calls).toEqual(['keys', 'keys', 'build', 'merge', 'unused']);
+        expect(autoTranslate).not.toHaveBeenCalled();
+    });
+
+    it('stops the pipeline before mutations when a required build fails', async () => {
+        vi.mocked(run).mockRejectedValueOnce(new Error('build failed'));
+        await expect(translate()).rejects.toThrow('build failed');
+        expect(mergeDuplicates).not.toHaveBeenCalled();
+        expect(unusedKeys).not.toHaveBeenCalled();
+        expect(autoTranslate).not.toHaveBeenCalled();
+    });
 });
