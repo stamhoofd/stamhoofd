@@ -10,6 +10,7 @@ import { checkSetup, getRecommendedSetupFixes, isSetupReady, printSetupReport, r
 import { checkNodeVersion, setupNodeVersion } from './setup-node.js';
 import { checkPackageManager, setupPackageManager } from './setup-package-manager.js';
 import { runServices } from './start-services.js';
+import { checkVcs, setupVcs } from './setup-vcs.js';
 
 const dnsResolver = vi.hoisted(() => ({
     resolve4: vi.fn(),
@@ -57,11 +58,14 @@ vi.mock('./start-services.js', () => ({
     runServices: vi.fn(),
 }));
 
+vi.mock('./setup-vcs.js', () => ({ checkVcs: vi.fn(), setupVcs: vi.fn() }));
+
 describe('setup machine workflow', () => {
     const platform = process.platform;
 
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.mocked(checkVcs).mockResolvedValue([]);
         setPlatform(platform);
         vi.mocked(docker.getContainerRuntime).mockResolvedValue(docker.ContainerRuntime.Docker);
         vi.mocked(checkNodeVersion).mockResolvedValue({
@@ -133,6 +137,16 @@ describe('setup machine workflow', () => {
             { key: SetupAutomaticFixKey.Pnpm, label: 'Install pnpm 12.4.2 with Corepack' },
         ]);
         expect(isSetupReady(report)).toBe(false);
+    });
+
+    it('repairs vcs configuration as part of full setup', async () => {
+        vi.mocked(checkVcs).mockResolvedValueOnce([{ label: 'push.default', ok: false, details: 'Expected current', repairs: [{ command: 'git', args: ['config', '--local', 'push.default', 'current'] }] }]);
+        vi.mocked(confirm).mockResolvedValue(true);
+        setPlatform('linux');
+        vi.spyOn(fs, 'access').mockResolvedValue(undefined);
+        mockSetupCommands({ dns: 'Global: 127.0.0.1:1053\n', domains: 'Global: ~stamhoofd\n' });
+        await runSetup({ rootDir: '/repo', verbose: false } as any);
+        expect(setupVcs).toHaveBeenCalledWith('/repo', { yes: true, dryRun: false, verbosity: undefined });
     });
 
     it('continues prioritizing Node.js repair over pnpm', () => {
@@ -546,6 +560,7 @@ function setupReport(overrides: Partial<SetupReport>): SetupReport {
     return {
         node: ok(),
         pnpm: ok(),
+        vcs: ok(),
         docker: ok(),
         privilegedPorts: ok(),
         caddy: ok(),
