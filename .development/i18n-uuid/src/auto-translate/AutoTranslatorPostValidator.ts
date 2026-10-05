@@ -44,13 +44,10 @@ export class AutoTranslatorPostValidator {
             const total = Object.entries(dict).filter(([, value]) => {
                 const errorMessage = this.validateDictionaryValue(value);
                 return errorMessage !== null;
-            }).length + 1;
+            }).length;
 
             if (total > 0) {
                 console.log(chalk.blue('Found ' + total + ' errors in auto translations (locale: ' + locale + ', namespace: ' + namespace + ')'));
-
-                console.log(chalk.blue(`
-Found ${total} errors in auto translations (locale: ${locale}, namespace: ${namespace})`));
 
                 let current = 0;
                 for (const [key, value] of Object.entries(dict)) {
