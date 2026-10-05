@@ -53,4 +53,11 @@ describe('translate pipeline', () => {
         await expect(translateMachine()).rejects.toThrow('failed');
         expect(process.chdir).toHaveBeenLastCalledWith('/previous');
     });
+
+    it('forwards machine options without running key or cleanup stages', async () => {
+        const options = { fake: true, locales: ['fr'] };
+        await translateMachine(options);
+        expect(autoTranslate).toHaveBeenCalledWith(options);
+        expect(calls).toEqual(['build', 'machine']);
+    });
 });

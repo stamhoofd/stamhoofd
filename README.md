@@ -203,7 +203,7 @@ The possible language / country combinations are not restricted. E.g. en-NL is s
 
 Translations are resolved in the following order: en-NL > en. So translations from a specific language + country combination are used before the translation for a given language. Try to define most translations only in the language.json file, only country specific translations should be placed in the full locale files.
 
-The keys of the translations are uuids. A new translation can be added by writing $t('new translation value') in a .vue or .ts file. Running `pnpm stam-dev translate` from the root will add the translation to the shared/locales .json files (of the main locales) and will replace the key with a new uuid. Run `pnpm stam-dev translate keys`, `compress`, or `machine` to run an individual stage. The main locales are specified in the `.env` folder of the i18n-uuid package in the .development directory. The .env file in the i18n-uuid directory should contain all required variables (see `.env.template`):
+The keys of the translations are uuids. A new translation can be added by writing $t('new translation value') in a .vue or .ts file. Running `pnpm stam-dev translate` from the root will add the translation to the shared/locales .json files (of the main locales) and will replace the key with a new uuid. Run `pnpm stam-dev translate manual keys`, `manual cleanup`, or `manual machine` to run an individual stage. The main locales are specified in the `.env` folder of the i18n-uuid package in the .development directory. The .env file in the i18n-uuid directory should contain all required variables (see `.env.template`):
 
 - `I18NUUID_DEFAULT_LOCALE`: default locale (e.g. nl)
 

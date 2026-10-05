@@ -67,9 +67,9 @@ The CLI build clears its own compiled output before compiling so commands remove
 | Checks      | `pnpm stam check typecheck`            | Run TypeScript checks across the monorepo.                                 |
 | Checks      | `pnpm stam check all`                  | Run build, lint, typecheck, unit tests, and E2E tests.                     |
 | Translations | `pnpm stam-dev translate`             | Replace keys, clean up translations, and machine-translate.                |
-| Translations | `pnpm stam-dev translate keys`        | Replace translation keys.                                                  |
-| Translations | `pnpm stam-dev translate compress`    | Merge duplicates and remove unused keys.                                   |
-| Translations | `pnpm stam-dev translate machine`     | Machine-translate missing translations.                                    |
+| Translations | `pnpm stam-dev translate manual keys` | Replace translation keys.                                                  |
+| Translations | `pnpm stam-dev translate manual cleanup` | Merge duplicates and remove unused keys.                                |
+| Translations | `pnpm stam-dev translate manual machine` | Machine-translate missing translations.                                 |
 | Cleanup     | `pnpm stam clean build`                | Remove build artifacts.                                                    |
 | Cleanup     | `pnpm stam clean db`                   | Drop the selected local MySQL database after confirmation.                 |
 | Cleanup     | `pnpm stam clean sso`                  | Stop the local SSO server.                                                 |
