@@ -22,6 +22,8 @@ describe('PlatformMember.needsTaxCertificate', () => {
 
     function yearsAgo(years: number) {
         const date = new Date();
+        // Keep the calendar day identical in UTC and Brussels time.
+        date.setHours(12, 0, 0, 0);
         date.setFullYear(date.getFullYear() - years);
         return date;
     }
