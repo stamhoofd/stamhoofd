@@ -11,6 +11,15 @@ import { RegisterItem } from './checkout/RegisterItem.js';
 import { Registration } from './Registration.js';
 
 describe('PlatformMember.needsTaxCertificate', () => {
+    beforeEach(() => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-10-06T22:24:27Z'));
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
     function yearsAgo(years: number) {
         const date = new Date();
         date.setFullYear(date.getFullYear() - years);
