@@ -1,5 +1,5 @@
 import { Command } from '@oclif/core';
-import { inTranslationDirectory } from '../../../runtime/translate.js';
+import { fixDoubleTranslations } from 'i18n-uuid/fix-double-translations';
 
 export default class TranslateFixDouble extends Command {
     static summary = 'Remove redundant machine translations from other namespaces';
@@ -7,9 +7,6 @@ export default class TranslateFixDouble extends Command {
 
     async run(): Promise<void> {
         await this.parse(TranslateFixDouble);
-        await inTranslationDirectory(async () => {
-            const { fixDoubleTranslations } = await import('i18n-uuid/fix-double-translations');
-            fixDoubleTranslations();
-        });
+        fixDoubleTranslations();
     }
 }

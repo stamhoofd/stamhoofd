@@ -1,5 +1,5 @@
 import { Command, Flags } from '@oclif/core';
-import { inTranslationDirectory } from '../../../runtime/translate.js';
+import { replaceText } from 'i18n-uuid/replace-text';
 
 export default class TranslateSource extends Command {
     static summary = 'Wrap untranslated source text in $t(...)';
@@ -22,16 +22,13 @@ export default class TranslateSource extends Command {
         if (flags.prompt && !flags['dry-run'] && !(process.stdin.isTTY && process.stdout.isTTY)) {
             this.error('--prompt requires an interactive terminal. Use --dry-run to preview without prompts.');
         }
-        await inTranslationDirectory(async () => {
-            const { replaceText } = await import('i18n-uuid/replace-text');
-            await replaceText({
-                changes: flags.changes || Boolean(flags.commits),
-                commits: flags.commits,
-                attributes: flags['attribute-white-list'],
-                dryRun: flags['dry-run'],
-                prompt: flags.prompt && !flags['dry-run'],
-                fix: flags.fix,
-            });
+        await replaceText({
+            changes: flags.changes || Boolean(flags.commits),
+            commits: flags.commits,
+            attributes: flags['attribute-white-list'],
+            dryRun: flags['dry-run'],
+            prompt: flags.prompt && !flags['dry-run'],
+            fix: flags.fix,
         });
     }
 }

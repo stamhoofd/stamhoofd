@@ -1,5 +1,5 @@
 import { Command, Flags } from '@oclif/core';
-import { inTranslationDirectory } from '../../../runtime/translate.js';
+import { filterInvalidAutoTranslations } from 'i18n-uuid/post-validator';
 
 export default class TranslateFilterInvalid extends Command {
     static summary = 'Remove machine translations identical to their original';
@@ -8,9 +8,6 @@ export default class TranslateFilterInvalid extends Command {
 
     async run(): Promise<void> {
         const { flags } = await this.parse(TranslateFilterInvalid);
-        await inTranslationDirectory(async () => {
-            const { filterInvalidAutoTranslations } = await import('i18n-uuid/post-validator');
-            filterInvalidAutoTranslations({ dryRun: flags['dry-run'] });
-        });
+        filterInvalidAutoTranslations({ dryRun: flags['dry-run'] });
     }
 }

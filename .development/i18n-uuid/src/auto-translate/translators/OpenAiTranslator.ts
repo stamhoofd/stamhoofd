@@ -1,6 +1,5 @@
 import chalk from 'chalk';
 import OpenAI from 'openai';
-import { globals } from '../../shared/globals.js';
 import type { AutoTranslateOptions } from '../../types/AutoTranslateOptions.js';
 import type { Batch } from '../../types/Batch.js';
 import { PromiseQueue } from '../PromiseQueue.js';
@@ -10,18 +9,16 @@ import { Translator } from './Translator.js';
 export class OpenAiTranslator extends Translator {
     protected readonly maxBatchLength = 5000;
     protected readonly queue = new PromiseQueue<Batch<any>>(2, 60 * 1000 / 45); // 500 requests per minute
-    protected readonly openai: OpenAI;
+    protected readonly openai: OpenAI | undefined;
 
     constructor(manager: TranslationManager, options: AutoTranslateOptions) {
         super(manager, options);
 
-        this.openai = new OpenAI({
-            apiKey: globals.OPENAI_API_KEY,
-        });
+        this.openai = options.fake ? undefined : new OpenAI({ apiKey: options.apiKey });
     }
 
     protected async generateResponse(prompt: string): Promise<string> {
-        const result = await this.openai.chat.completions.create({
+        const result = await this.openai!.chat.completions.create({
             model: 'gpt-4.1-2025-04-14',
             store: true,
             messages: [{ role: 'user', content: prompt }],

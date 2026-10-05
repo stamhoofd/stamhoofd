@@ -1,5 +1,5 @@
 import { Command, Flags } from '@oclif/core';
-import { inTranslationDirectory } from '../../../runtime/translate.js';
+import { loopAndPromptValidateInvalidTranslations } from 'i18n-uuid/post-validator';
 
 export default class TranslateReview extends Command {
     static summary = 'Review machine translations identical to the original';
@@ -12,9 +12,6 @@ export default class TranslateReview extends Command {
         if (!flags['dry-run'] && !(process.stdin.isTTY && process.stdout.isTTY)) {
             this.error('Review requires an interactive terminal. Use --dry-run to list entries without changing them.');
         }
-        await inTranslationDirectory(async () => {
-            const { loopAndPromptValidateInvalidTranslations } = await import('i18n-uuid/post-validator');
-            await loopAndPromptValidateInvalidTranslations({ dryRun: flags['dry-run'] });
-        });
+        await loopAndPromptValidateInvalidTranslations({ dryRun: flags['dry-run'] });
     }
 }

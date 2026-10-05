@@ -1,10 +1,12 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { config } from 'dotenv';
 import winston from 'winston';
+import { getFilesToSearch } from './shared/get-files-to-search.js';
 
 vi.mock('dotenv', () => ({ config: vi.fn() }));
+vi.mock('./shared/get-files-to-search.js', () => ({ getFilesToSearch: vi.fn(() => []) }));
 vi.mock('winston', async importOriginal => {
-    const original = await importOriginal<typeof import('winston')>();
+    const original = await importOriginal<{ default: typeof winston }>();
     return {
         ...original,
         default: {
@@ -32,4 +34,9 @@ it('does not open or truncate logs when translation is imported', async () => {
     await import('./auto-translate/auto-translate.js');
     expect(winston.createLogger).not.toHaveBeenCalled();
     expect(winston.transports.File).not.toHaveBeenCalled();
+});
+
+it('does not scan the repository when source migration is imported', async () => {
+    await import('./replace-text/replace-text.js');
+    expect(getFilesToSearch).not.toHaveBeenCalled();
 });

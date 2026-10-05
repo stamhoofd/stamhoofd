@@ -1,4 +1,6 @@
 import winston from 'winston';
+import path from 'node:path';
+import { finished } from 'node:stream/promises';
 
 function formatDuration(durationMs: number): string {
     const minutes = Math.floor(durationMs / 60000);
@@ -18,27 +20,40 @@ const timerFormat = winston.format.printf(({ durationMs, message }: any) => {
 });
 
 class PromptLogger {
-    private readonly winstonPromptLogger = winston.createLogger({
-        level: 'info',
-        format: winston.format.json(),
-        transports: [
-            new winston.transports.File({
-                filename: 'prompts.log',
-                format: timerFormat,
-                options: { flags: 'w' },
-            }),
-        ],
-    });
+    private winstonPromptLogger: winston.Logger;
+    private winstonErrorLogger: winston.Logger;
 
-    private readonly winstonErrorLogger = winston.createLogger({
-        level: 'error',
-        transports: [
-            new winston.transports.File({
-                filename: 'errors.log',
-                options: { flags: 'w' },
-            }),
-        ],
-    });
+    initialize(directory: string) {
+        this.winstonPromptLogger = winston.createLogger({
+            level: 'info',
+            format: winston.format.json(),
+            transports: [
+                new winston.transports.File({
+                    filename: path.join(directory, 'prompts.log'),
+                    format: timerFormat,
+                    options: { flags: 'w' },
+                }),
+            ],
+        });
+
+        this.winstonErrorLogger = winston.createLogger({
+            level: 'error',
+            transports: [
+                new winston.transports.File({
+                    filename: path.join(directory, 'errors.log'),
+                    options: { flags: 'w' },
+                }),
+            ],
+        });
+    }
+
+    async close() {
+        await Promise.all([this.winstonPromptLogger, this.winstonErrorLogger].map(async (logger) => {
+            logger.end();
+            await finished(logger, { readable: false });
+            logger.close();
+        }));
+    }
 
     prompt(
         prompt: string,
