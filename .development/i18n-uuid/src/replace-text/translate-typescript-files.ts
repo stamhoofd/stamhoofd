@@ -97,7 +97,9 @@ export async function translateTypescriptFileHelper(filePath: string, options: T
         },
         onPromptDoubt: () => {
             isDoubt = true;
-            fileCache.doubtFile(filePath);
+            if (!options.dryRun) {
+                fileCache.doubtFile(filePath);
+            }
         },
         replaceChangesOnly: options.replaceChangesOnly ? { filePath, commitsToCompare } : undefined,
         fileProgress,
@@ -106,7 +108,7 @@ export async function translateTypescriptFileHelper(filePath: string, options: T
 
     const fileContent = fs.readFileSync(filePath, 'utf8');
     const translation = await translateTypescript(fileContent, fileOptions);
-    if (!isDoubt) {
+    if (!isDoubt && !options.dryRun) {
         fileCache.addFile(filePath);
     }
 

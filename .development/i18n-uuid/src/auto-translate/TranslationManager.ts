@@ -24,8 +24,15 @@ export class TranslationManager {
     }
 
     async buildDist() {
-        await new Promise((resolve) => {
-            exec(`pnpm --dir ${globals.I18NUUID_LOCALES_ROOT} run build`, resolve);
+        await new Promise<void>((resolve, reject) => {
+            exec(`pnpm --dir ${globals.I18NUUID_LOCALES_ROOT} run build`, (error) => {
+                if (error) {
+                    reject(error);
+                }
+                else {
+                    resolve();
+                }
+            });
         });
     }
 

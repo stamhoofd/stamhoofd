@@ -70,7 +70,9 @@ TRANSLATION:`));
 
 ${current}/${total}`));
 
-                        // prompt
+                        if (dryRun) {
+                            continue;
+                        }
                         const promptResult = await promptYesNoOrDoubt(chalk.yellow(`> Accept (press [y] or [enter])?`));
 
                         switch (promptResult) {

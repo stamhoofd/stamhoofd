@@ -90,7 +90,9 @@ export async function translateVueFileHelper(filePath: string, options: Translat
         },
         onPromptDoubt: () => {
             isDoubt = true;
-            fileCache.doubtFile(filePath);
+            if (!options.dryRun) {
+                fileCache.doubtFile(filePath);
+            }
         },
         replaceChangesOnly: options.replaceChangesOnly ? { filePath, commitsToCompare } : undefined,
         fileProgress,
@@ -115,7 +117,7 @@ export async function translateVueFileHelper(filePath: string, options: Translat
         newFileContent = replaceScript(newFileContent, scriptTranslation, scriptContent);
     }
 
-    if (!isDoubt) {
+    if (!isDoubt && !options.dryRun) {
         fileCache.addFile(filePath);
     }
 

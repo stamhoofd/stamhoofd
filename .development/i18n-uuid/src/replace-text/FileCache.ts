@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'node:path';
 
-const cachePath = path.normalize(import.meta.dirname + '/../../..') + '/file-cache.txt';
-const doubtCachePath = path.normalize(import.meta.dirname + '/../../..') + '/file-cache-doubt.txt';
+const cachePath = path.resolve(import.meta.dirname, '../..', 'file-cache.txt');
+const doubtCachePath = path.resolve(import.meta.dirname, '../..', 'file-cache-doubt.txt');
 const separator = ';';
 
 class FileCache {
