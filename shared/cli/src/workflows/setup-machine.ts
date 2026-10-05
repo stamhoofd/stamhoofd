@@ -3,6 +3,7 @@ import dns from 'node:dns/promises';
 import net from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
+import chalk from 'chalk';
 import { writeSetupCaddyConfig } from '../config/caddy-config.js';
 import { caddyContainer, caddyDataDir, caddyHttpPort, caddyHttpsPort, caddyRootCaPath, caddySetupAdminPort, defaultDomain, localIpv4Host, localhostPort } from '../config/shared-service-config.js';
 import { buildSharedServiceProfile, SharedServiceDnsSetupKind } from '../config/shared-service-profile.js';
@@ -19,6 +20,7 @@ import { runServices } from './start-services.js';
 import { checkNodeVersion, setupNodeVersion } from './setup-node.js';
 import { checkPackageManager, setupPackageManager } from './setup-package-manager.js';
 import { checkVcs, setupVcs } from './setup-vcs.js';
+import { checkShellShortcut } from './setup-shell.js';
 
 const directDnsQueryTimeoutMs = 1000;
 
@@ -31,6 +33,7 @@ export type SetupReport = {
     caddy: CheckResult;
     dns: CheckResult;
     cert: CheckResult;
+    shell: CheckResult;
 };
 
 export enum SetupAutomaticFixKey {
@@ -51,55 +54,57 @@ export type AutomaticFix = {
 
 export type CheckResult = {
     ok: boolean;
+    optional?: boolean;
     details: string;
     manualFix?: string;
     automaticFix?: AutomaticFix;
 };
 
+function setupCheckDefinitions(context: CliContext): { key: keyof SetupReport; label: string; optional?: boolean; check: () => Promise<CheckResult> }[] {
+    const domain = process.env.STAMHOOFD_DOMAIN ?? defaultDomain;
+    const profile = currentSharedServiceProfile(context.verbosity);
+    return [
+        { key: 'node', label: 'Node.js', check: () => nodeCheck(context) },
+        { key: 'pnpm', label: 'pnpm', check: () => packageManagerCheck(context) },
+        { key: 'vcs', label: 'Git / JJ', check: () => vcsCheck(context) },
+        { key: 'docker', label: 'Podman / Docker', check: () => dockerCheck(context.verbosity) },
+        { key: 'privilegedPorts', label: 'Privileged port redirects', check: async () => privilegedPortRedirectCheck(await profile, context.verbosity) },
+        { key: 'caddy', label: 'Caddy', check: () => caddyCheck(context.verbosity) },
+        { key: 'dns', label: `DNS .${domain}`, check: async () => dnsCheck(context, await profile) },
+        { key: 'cert', label: 'Caddy local CA', check: () => certCheck(context.verbosity) },
+        { key: 'shell', label: 'Binary shortcut', optional: true, check: async () => {
+            const result = await checkShellShortcut();
+            return { ...result, ...(!result.ok ? { manualFix: 'pnpm stam setup shortcut' } : {}) };
+        } },
+    ];
+}
+
 export async function checkSetup(context: CliContext): Promise<SetupReport> {
-    const profile = await currentSharedServiceProfile(context.verbosity);
-    return {
-        node: await nodeCheck(context),
-        pnpm: await packageManagerCheck(context),
-        vcs: await vcsCheck(context),
-        docker: await dockerCheck(context.verbosity),
-        privilegedPorts: await privilegedPortRedirectCheck(profile, context.verbosity),
-        caddy: await caddyCheck(context.verbosity),
-        dns: await dnsCheck(context, profile),
-        cert: await certCheck(context.verbosity),
-    };
+    const results = await Promise.all(setupCheckDefinitions(context).map(async ({ key, optional, check }) => [key, { ...await check(), optional }]));
+    return Object.fromEntries(results) as SetupReport;
 }
 
 export async function checkSetupWithTable(context: CliContext, options: { live: boolean }): Promise<SetupReport> {
-    const domain = process.env.STAMHOOFD_DOMAIN ?? defaultDomain;
-    const rows = {
-        node: Table.row(['Node.js', Table.cell('checking', { indeterminate: true }), '']),
-        pnpm: Table.row(['pnpm', Table.cell('checking', { indeterminate: true }), '']),
-        vcs: Table.row(['Git / JJ', Table.cell('checking', { indeterminate: true }), '']),
-        docker: Table.row(['Podman / Docker', Table.cell('checking', { indeterminate: true }), '']),
-        privilegedPorts: Table.row(['Privileged port redirects', Table.cell('checking', { indeterminate: true }), '']),
-        caddy: Table.row(['Caddy', Table.cell('checking', { indeterminate: true }), '']),
-        dns: Table.row([`DNS .${domain}`, Table.cell('checking', { indeterminate: true }), '']),
-        cert: Table.row(['Caddy local CA', Table.cell('checking', { indeterminate: true }), '']),
-    };
+    const checks = setupCheckDefinitions(context).map(definition => ({
+        ...definition,
+        row: Table.row([definition.label, Table.cell('checking', { indeterminate: true }), '']),
+    }));
+    const optional = checks.filter(check => check.optional);
     const liveTable = Table.create({
         title: 'Checking Stamhoofd local development setup',
         headers: ['Check', 'Status', 'Details'],
-        rows: [rows.node, rows.pnpm, rows.vcs, rows.docker, rows.privilegedPorts, rows.caddy, rows.dns, rows.cert],
+        rows: [
+            ...checks.filter(check => !check.optional).map(check => check.row),
+            ...(optional.length ? optionalSectionRows().map(cells => Table.row(cells)) : []),
+            ...optional.map(check => check.row),
+        ],
         live: options.live,
     });
 
-    const profilePromise = currentSharedServiceProfile(context.verbosity);
-    const results = await Promise.allSettled([
-        runSetupCheck(rows.node, 'Node.js', nodeCheck(context)),
-        runSetupCheck(rows.pnpm, 'pnpm', packageManagerCheck(context)),
-        runSetupCheck(rows.docker, 'Podman / Docker', dockerCheck(context.verbosity)),
-        profilePromise.then(profile => runSetupCheck(rows.privilegedPorts, 'Privileged port redirects', privilegedPortRedirectCheck(profile, context.verbosity))),
-        runSetupCheck(rows.caddy, 'Caddy', caddyCheck(context.verbosity)),
-        profilePromise.then(profile => runSetupCheck(rows.dns, `DNS .${domain}`, dnsCheck(context, profile))),
-        runSetupCheck(rows.cert, 'Caddy local CA', certCheck(context.verbosity)),
-        runSetupCheck(rows.vcs, 'Git / JJ', vcsCheck(context)),
-    ]);
+    const results = await Promise.allSettled(checks.map(async ({ key, label, optional, check, row }) => [
+        key,
+        { ...await runSetupCheck(row, label, check()), optional },
+    ]));
 
     await liveTable.wait();
 
@@ -108,28 +113,26 @@ export async function checkSetupWithTable(context: CliContext, options: { live: 
         throw rejected.reason;
     }
 
-    return {
-        node: results[0].status === 'fulfilled' ? results[0].value : neverRejected(results[0]),
-        pnpm: results[1].status === 'fulfilled' ? results[1].value : neverRejected(results[1]),
-        docker: results[2].status === 'fulfilled' ? results[2].value : neverRejected(results[2]),
-        privilegedPorts: results[3].status === 'fulfilled' ? results[3].value : neverRejected(results[3]),
-        caddy: results[4].status === 'fulfilled' ? results[4].value : neverRejected(results[4]),
-        dns: results[5].status === 'fulfilled' ? results[5].value : neverRejected(results[5]),
-        cert: results[6].status === 'fulfilled' ? results[6].value : neverRejected(results[6]),
-        vcs: results[7].status === 'fulfilled' ? results[7].value : neverRejected(results[7]),
-    };
+    return Object.fromEntries(results.map(result => result.status === 'fulfilled' ? result.value : neverRejected(result))) as SetupReport;
 }
 
 export function printSetupReport(report: SetupReport): void {
+    const checks: [string, CheckResult][] = [
+        ['Node.js', report.node],
+        ['pnpm', report.pnpm],
+        ['Git / JJ', report.vcs],
+        ['Podman / Docker', report.docker],
+        ['Privileged port redirects', report.privilegedPorts],
+        ['Caddy', report.caddy],
+        [`DNS .${process.env.STAMHOOFD_DOMAIN ?? defaultDomain}`, report.dns],
+        ['Caddy local CA', report.cert],
+        ['Binary shortcut', report.shell],
+    ];
+    const optional = checks.filter(([, result]) => result.optional);
     table(['Check', 'Status', 'Details'], [
-        row('Node.js', report.node),
-        row('pnpm', report.pnpm),
-        row('Git / JJ', report.vcs),
-        row('Podman / Docker', report.docker),
-        row('Privileged port redirects', report.privilegedPorts),
-        row('Caddy', report.caddy),
-        row(`DNS .${process.env.STAMHOOFD_DOMAIN ?? defaultDomain}`, report.dns),
-        row('Caddy local CA', report.cert),
+        ...checks.filter(([, result]) => !result.optional).map(([label, result]) => row(label, result)),
+        ...(optional.length ? optionalSectionRows() : []),
+        ...optional.map(([label, result]) => row(label, result)),
     ], { title: 'Checking Stamhoofd local development setup' });
 }
 
@@ -139,7 +142,7 @@ export async function runSetup(context: CliContext): Promise<void> {
         const report = await checkSetupWithTable(context, { live: true });
         const fixes = getRecommendedSetupFixes(report);
         if (fixes.length === 0) {
-            if (setupChecks(report).some(check => !check.ok)) {
+            if (!isSetupReady(report)) {
                 console.log('\nResolve the missing manual setup items above, then run stam setup again.');
                 return;
             }
@@ -186,7 +189,7 @@ export function getRecommendedSetupFixes(report: SetupReport): AutomaticFix[] {
     const fixes: AutomaticFix[] = [];
 
     for (const check of setupChecks(report)) {
-        if (check.ok) {
+        if (check.ok || check.optional) {
             continue;
         }
         if (!check.automaticFix) {
@@ -202,11 +205,15 @@ export function getRecommendedSetupFixes(report: SetupReport): AutomaticFix[] {
 }
 
 export function isSetupReady(report: SetupReport): boolean {
-    return setupChecks(report).every(check => check.ok);
+    return setupChecks(report).every(check => check.ok || check.optional);
 }
 
 function setupChecks(report: SetupReport): CheckResult[] {
-    return [report.node, report.pnpm, report.vcs, report.docker, report.privilegedPorts, report.caddy, report.dns, report.cert];
+    return [report.node, report.pnpm, report.vcs, report.docker, report.privilegedPorts, report.caddy, report.dns, report.cert, report.shell];
+}
+
+function optionalSectionRows(): string[][] {
+    return [['', '', ''], [chalk.dim('Optional'), '', '']];
 }
 
 async function vcsCheck(context: CliContext): Promise<CheckResult> {

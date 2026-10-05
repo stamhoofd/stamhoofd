@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { run, RunVerbosity } from '../runtime/command-runner.js';
-import { removeLegacyShellFunction, setupShellShortcut } from './setup-shell.js';
+import { checkShellShortcut, removeLegacyShellFunction, setupShellShortcut } from './setup-shell.js';
 
 vi.mock(import('../runtime/command-runner.js'), async importOriginal => ({
     ...await importOriginal(),
@@ -30,6 +30,16 @@ describe('setup-shell', () => {
     afterEach(async () => {
         vi.restoreAllMocks();
         await fs.rm(tmpDir, { recursive: true, force: true });
+    });
+
+    it('checks whether the shortcut is installed and executable', async () => {
+        const access = vi.spyOn(fs, 'access').mockResolvedValue(undefined);
+        expect(await checkShellShortcut()).toEqual({ ok: true, details: 'stam installed in /usr/local/bin' });
+        expect(access).toHaveBeenCalledWith('/usr/local/bin/stam', fs.constants.X_OK);
+        access.mockRejectedValueOnce(Object.assign(new Error('missing'), { code: 'ENOENT' }));
+        expect(await checkShellShortcut()).toEqual({ ok: false, details: 'stam not installed in /usr/local/bin' });
+        access.mockRejectedValueOnce(Object.assign(new Error('permission denied'), { code: 'EACCES' }));
+        expect(await checkShellShortcut()).toEqual({ ok: false, details: '/usr/local/bin/stam is not executable' });
     });
 
     it('installs the standalone executable and removes legacy functions from both shells', async () => {

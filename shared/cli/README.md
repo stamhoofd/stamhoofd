@@ -16,6 +16,8 @@ The bootstrap script installs the Node version from `.nvmrc` and prepares the pn
 
 Run `pnpm stam setup shortcut` to install `shared/cli/bin/stam` as `/usr/local/bin/stam` using sudo. This removes the need to type `pnpm` or run commands in the project root. Setup also removes the legacy `stam` function blocks from `.zshrc` and `.bashrc`; restart your terminal or run `unset -f stam` if the old function is still loaded. Afterwards, `stam setup` performs the normal setup checks.
 
+Setup lists the binary shortcut under **Optional**, with its installation command when missing. Optional checks do not block development readiness or appear in recommended fixes.
+
 Open the dashboard URL printed by the CLI, or run `pnpm stam status` to see active services, instances, URLs, and credentials.
 
 Run `pnpm stam --help` or `pnpm stam <topic> --help` for command help.
