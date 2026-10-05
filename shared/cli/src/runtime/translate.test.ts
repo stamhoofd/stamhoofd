@@ -5,6 +5,7 @@ import { replaceKeys } from 'i18n-uuid/replace-keys';
 import { mergeDuplicates } from 'i18n-uuid/merge-duplicates';
 import { unusedKeys } from 'i18n-uuid/unused-keys';
 import { autoTranslate } from 'i18n-uuid/auto-translate';
+import { globals } from 'i18n-uuid/globals';
 
 const calls: string[] = [];
 vi.mock('./command-runner.js', async importOriginal => ({
@@ -16,6 +17,11 @@ vi.mock('i18n-uuid/replace-keys', () => ({ replaceKeys: vi.fn(() => { calls.push
 vi.mock('i18n-uuid/merge-duplicates', () => ({ mergeDuplicates: vi.fn(() => { calls.push('merge'); }) }));
 vi.mock('i18n-uuid/unused-keys', () => ({ unusedKeys: vi.fn(() => { calls.push('unused'); }) }));
 vi.mock('i18n-uuid/auto-translate', () => ({ autoTranslate: vi.fn(async () => { calls.push('machine'); }) }));
+vi.mock('i18n-uuid/globals', () => ({ globals: { TRANSLATOR: 'OpenAi', DEFAULT_LOCALE: 'nl-BE', OPENAI_API_KEY: 'test-key' } }));
+vi.mock('i18n-uuid/translation-manager', () => ({ TranslationManager: class {
+    locales = ['nl', 'nl-BE', 'en', 'fr'];
+    getMappedLocale(locale: string) { return locale === 'nl' ? 'nl-BE' : locale; }
+} }));
 vi.spyOn(process, 'cwd').mockReturnValue('/previous');
 vi.spyOn(process, 'chdir').mockImplementation(() => {});
 
@@ -23,6 +29,7 @@ describe('translate pipeline', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         calls.length = 0;
+        Object.assign(globals, { OPENAI_API_KEY: 'test-key' });
     });
 
     it.each([
@@ -67,11 +74,19 @@ describe('translate pipeline', () => {
         expect(autoTranslate).not.toHaveBeenCalled();
     });
 
-    it('stops the pipeline before mutations when a required build fails', async () => {
+    it('stops the remaining pipeline stages when a required build fails', async () => {
         vi.mocked(run).mockRejectedValueOnce(new Error('build failed'));
         await expect(translate()).rejects.toThrow('build failed');
         expect(mergeDuplicates).not.toHaveBeenCalled();
         expect(unusedKeys).not.toHaveBeenCalled();
         expect(autoTranslate).not.toHaveBeenCalled();
+    });
+
+    it.each(['credentials', 'locale'])('validates %s before any pipeline mutations', async (problem) => {
+        if (problem === 'credentials') {
+            Object.assign(globals, { OPENAI_API_KEY: '' });
+        }
+        await expect(translate({ machine: { locales: problem === 'locale' ? ['unknown'] : ['fr'] } })).rejects.toThrow(problem === 'locale' ? 'configured non-Dutch locale' : 'OPENAI_API_KEY');
+        expect(calls).toEqual([]);
     });
 });
