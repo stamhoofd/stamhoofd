@@ -1,6 +1,8 @@
 import chalk from 'chalk';
 import fs from 'fs';
+import path from 'node:path';
 import { getFilesToSearch } from '../shared/get-files-to-search.js';
+import { globals } from '../shared/globals.js';
 import { eslintFormatter } from './eslint-formatter.js';
 import { fileCache } from './FileCache.js';
 import { getChangedFiles } from './git-helper.js';
@@ -18,7 +20,9 @@ interface TranslateTypescriptFilesOptions {
 }
 
 export async function translateTypescriptFiles(options: TranslateTypescriptFilesOptions = {}) {
-    const files = getFilesToSearch(['typescript']).filter(filePath => !fileCache.hasFile(filePath));
+    // Locale configuration contains language identifiers, not user-facing text.
+    const localesRoot = path.resolve(globals.I18NUUID_LOCALES_ROOT) + path.sep;
+    const files = getFilesToSearch(['typescript']).filter(filePath => !path.resolve(filePath).startsWith(localesRoot) && !fileCache.hasFile(filePath));
     let filesToLoop: string[];
 
     if (options.replaceChangesOnly) {
