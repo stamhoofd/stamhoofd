@@ -73,6 +73,16 @@ it('preserves conservative literal matching for quoted keys and overlapping sour
 });
 afterEach(() => vi.restoreAllMocks());
 
+it('merges only identical language maps into the smallest numeric key regardless of insertion order', async () => {
+    vi.mocked(getTranslationsWithPath).mockReturnValue(new Map<string, Record<string, string>>([
+        ['nl.json', { '%10': 'Save', '%z': 'Save', '%2': 'Save', '%3': 'Save', '%4': 'Save', literal: 'Save' }],
+        ['fr.json', { '%10': 'Enregistrer', '%z': 'Enregistrer', '%2': 'Enregistrer', '%3': 'Different', literal: 'Enregistrer' }],
+    ]));
+    vi.mocked(fs.readFileSync).mockReturnValue("$t('%10') $t('%z') $t('%2') $t('%3') $t('%4') $t('literal')");
+    expect(await mergeDuplicates()).toBe(2);
+    expect(fs.writeFileSync).toHaveBeenCalledWith('source.ts', "$t('%2') $t('%2') $t('%2') $t('%3') $t('%4') $t('literal')");
+});
+
 it('reports unused-key scan progress, yields to the CLI, and returns a removal summary', async () => {
     let yielded = false;
     const scheduled = new Promise<void>(resolve => setImmediate(() => { yielded = true; resolve(); }));
