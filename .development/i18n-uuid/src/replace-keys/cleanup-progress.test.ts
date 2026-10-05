@@ -50,6 +50,27 @@ it('handles a large unused-key set across many source files', async () => {
     expect(unused.has('%1')).toBe(false);
     expect(fs.readFileSync).toHaveBeenCalledTimes(100);
 });
+
+it('keeps unchanged files and reserved metadata untouched', async () => {
+    vi.mocked(getTranslationsWithPath).mockReturnValue(new Map<string, Record<string, string>>([
+        ['nl.json', { '%1': 'Save', replacements: 'reserved', extends: 'reserved', 'consistent-words': 'reserved' }],
+        ['fr.json', { '%2': 'Supprimer' }],
+    ]));
+    expect(await unusedKeys()).toBe(1);
+    expect(writeTranslation).toHaveBeenCalledExactlyOnceWith('fr.json', {});
+});
+
+it('does not change any translation files when the shared scan fails', async () => {
+    vi.mocked(fs.readFileSync).mockImplementationOnce(() => { throw new Error('unreadable source'); });
+    await expect(unusedKeys()).rejects.toThrow('unreadable source');
+    expect(writeTranslation).not.toHaveBeenCalled();
+});
+
+it('preserves conservative literal matching for quoted keys and overlapping source snippets', async () => {
+    vi.mocked(fs.readFileSync).mockReturnValue("$t('short'long') $t('outer$t('inner')') $t('')");
+    expect(await findUnusedTranslationKeys(new Set(['short', "short'long", "outer$t('inner')", 'inner', '', 'unused']), ['source.ts']))
+        .toEqual(new Set(['unused']));
+});
 afterEach(() => vi.restoreAllMocks());
 
 it('reports unused-key scan progress, yields to the CLI, and returns a removal summary', async () => {

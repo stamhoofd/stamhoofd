@@ -9,10 +9,12 @@ export function formatTranslationProgress(progress: TranslationProgress): string
         compare: 'Comparing translation keys',
         build: 'Building locales',
         translate: 'Translating batches',
+        cleanup: 'Cleaning translation files',
     };
     const scope = progress.translationFile ? path.basename(progress.translationFile) : [progress.namespace, progress.locale].filter(Boolean).join('/');
     const counts = progress.total === undefined ? '' : ` ${progress.completed ?? 0}/${progress.total}`;
-    return `${labels[progress.phase]}${scope ? ` (${scope})` : ''}${counts}`;
+    const overall = progress.overallTotal ? `Overall ${Math.floor((progress.overallCompleted ?? 0) * 100 / progress.overallTotal)}% — ` : '';
+    return `${overall}${labels[progress.phase]}${scope ? ` (${scope})` : ''}${counts}`;
 }
 
 export async function translationStep<T>(message: string, action: (onProgress: ProgressCallback) => Promise<T>, successMessage?: (result: T) => string): Promise<T> {
