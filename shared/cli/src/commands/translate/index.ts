@@ -1,18 +1,16 @@
 import { Command } from '@oclif/core';
-import { translate } from '../../runtime/translate.js';
+import { showHelp } from '../../runtime/show-help.js';
 
 export default class Translate extends Command {
-    static summary = 'Replace translation keys, clean up translations, and machine-translate';
-    static description = 'Run the translation pipeline in order: keys, compress, then machine. Each step can also be run separately.';
+    static summary = 'Prepare, migrate, and maintain translations';
+    static description = 'During development, commit Dutch $t(...) strings unchanged. Before a release, use auto to generate keys, clean up, and machine-translate. Use manual for individual steps. Running this command without a subcommand only shows help.';
     static examples = [
-        'stam translate',
-        'stam translate manual keys',
-        'stam translate manual cleanup',
-        'stam translate manual machine',
+        'stam translate auto',
+        'stam translate auto --no-machine',
+        'stam translate manual',
     ];
 
     async run(): Promise<void> {
-        await this.parse(Translate);
-        await translate();
+        await showHelp(this.config, ['translate']);
     }
 }

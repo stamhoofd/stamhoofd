@@ -40,8 +40,10 @@ export async function translateMachine(options: Parameters<typeof autoTranslate>
     });
 }
 
-export async function translate(): Promise<void> {
+export async function translate(options: { machine?: Parameters<typeof autoTranslate>[0]; skipMachine?: boolean } = {}): Promise<void> {
     await translateKeys();
     await translateCompress();
-    await translateMachine();
+    if (!options.skipMachine) {
+        await translateMachine(options.machine);
+    }
 }
