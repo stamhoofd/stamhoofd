@@ -52,6 +52,7 @@ export type UnitTestPackage = {
 // query `Database` from @simonbackx/simple-database).
 export const unitTestPackages: UnitTestPackage[] = [
     { name: 'cli', path: 'shared/cli', needsDatabase: false },
+    { name: 'i18n-uuid', path: '.development/i18n-uuid', needsDatabase: false },
     { name: 'metabase', path: 'shared/metabase', needsDatabase: false, typecheck: true },
     { name: 'structures', path: 'shared/structures', needsDatabase: false, typecheck: true },
     { name: 'object-differ', path: 'shared/object-differ', needsDatabase: false },
