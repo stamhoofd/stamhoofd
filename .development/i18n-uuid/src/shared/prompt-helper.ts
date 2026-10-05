@@ -17,21 +17,14 @@ export async function promptYesNoOrDoubt(message: string): Promise<YesNoOrDoubt>
         process.exit();
     });
 
-    await rl.question(message + ' ');
-
-    let listener = () => {};
-
-    const answer: string = await new Promise((resolve) => {
-        listener = () => resolve(rl.line);
-        (rl as any)['input'].on('keypress', listener);
-    });
-
-    (rl as any)['input'].removeListener('keypress', listener);
-
-    rl.close();
-    rl.removeAllListeners();
-
-    return answerToResult(answer);
+    try {
+        const answer = await rl.question(message + ' ');
+        return answerToResult(answer);
+    }
+    finally {
+        rl.close();
+        rl.removeAllListeners();
+    }
 }
 
 function answerToResult(answer: string): YesNoOrDoubt {

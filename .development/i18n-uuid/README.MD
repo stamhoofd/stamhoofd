@@ -18,6 +18,7 @@ Search untranslated text in Vue templates and replaces them with a translation f
 - `-c, --changes`: Only the changed files will be checked.
 - `--attribute-white-list <attributes...>`: Array of html attributes to white list. Text of other attributes will not be checked.
 - `--dry-run`: Do not write the translated files.
+- Previewing also leaves the source-processing cache unchanged, so a later applying run still processes the same files.
 - `-p, --prompt`: The prompt will show the code before and after the replacement and ask to accept the change.
 - `-f, --fix`: Fix the changed files with ESLint (can be slow).
 
@@ -39,6 +40,7 @@ Loop all invalid auto translations. Choose with a prompt if the translation is c
 
 #### arguments
 - `--dry-run`: Do not remove the invalid auto translations.
+- Previewing shows invalid entries without prompting, approving, or removing them.
 
 ### create-comparison
 Create a comparison of the machine translations for each locale and write the comparison in the output directory.
