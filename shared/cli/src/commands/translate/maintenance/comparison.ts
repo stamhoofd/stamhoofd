@@ -3,7 +3,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { getProjectPath } from '../../../context/project-path.js';
 import { run, RunVerbosity } from '../../../runtime/command-runner.js';
-import { inTranslationDirectory } from '../../../runtime/translate.js';
+import { globals } from 'i18n-uuid/globals';
+import { createAutoTranslateComparison } from 'i18n-uuid/create-comparison';
 import { info, warning } from '../../../runtime/ux.js';
 
 export default class TranslateComparison extends Command {
@@ -14,12 +15,8 @@ export default class TranslateComparison extends Command {
         await this.parse(TranslateComparison);
         warning('Legacy comparison labels repeat the same saved translation; they are not independent provider results.');
         await run('pnpm', ['--dir', 'shared/locales', 'run', 'build'], { cwd: getProjectPath(), verbosity: RunVerbosity.Output });
-        await inTranslationDirectory(async () => {
-            const { globals } = await import('i18n-uuid/globals');
-            const { createAutoTranslateComparison } = await import('i18n-uuid/create-comparison');
-            await fs.mkdir(globals.COMPARE_OUTPUT_DIR, { recursive: true });
-            createAutoTranslateComparison();
-            info(`Comparison files written to ${path.resolve(globals.COMPARE_OUTPUT_DIR)}.`);
-        });
+        await fs.mkdir(globals.COMPARE_OUTPUT_DIR, { recursive: true });
+        createAutoTranslateComparison();
+        info(`Comparison files written to ${path.resolve(globals.COMPARE_OUTPUT_DIR)}.`);
     }
 }

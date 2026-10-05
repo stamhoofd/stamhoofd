@@ -89,7 +89,9 @@ The automatic flow runs keys → cleanup → machine. Use `--locale fr --locale 
 
 `auto` validates the selected locales and provider credentials before changing translation files, explains the flow and potential AI costs, and asks for confirmation. Use `--yes` for noninteractive execution. It shows stage progress, stops on failures without rolling back partial changes, and prints the current working-copy diff summary (including any pre-existing edits).
 
-Providers are `openai`, `gemini`, `mistral-large`, and `mistral-small`. Configure `OPENAI_API_KEY`, `GEMINI_API_KEY`, or `MISTRAL_API_KEY` in `.development/i18n-uuid/.env` or your environment. Claude is not implemented by this translation library. `--fake` writes test translations without AI requests but still requires provider credentials to initialize the existing SDK.
+Providers are `openai`, `gemini`, `mistral-large`, and `mistral-small`. The CLI resolves the selected provider's key from the environment (`OPENAI_API_KEY`, `GEMINI_API_KEY`, or `MISTRAL_API_KEY`), then `.development/i18n-uuid/.env`, then 1Password. The 1Password references are `op://DevOps Development/OpenAI/Token`, `op://DevOps Development/Gemini/Token`, and `op://DevOps Development/Mistral/Token`; authenticate the `op` CLI to use them. Both Mistral providers share the same key. Claude is not implemented by this translation library. Help, maintenance, `--no-machine`, and `--fake` need no credentials and do not query 1Password.
+
+Translation imports do not load environment files or open logs. The CLI resolves credentials when a machine translation is requested and passes them to the library. Machine translation writes `prompts.log` and `errors.log` under `.development/i18n-uuid`, regardless of the shell's working directory.
 
 Bare `translate` now shows help. Update scripts that previously ran the pipeline to use `translate auto`. The old `translate keys`, `compress`, and `machine` commands remain available as hidden compatibility commands.
 

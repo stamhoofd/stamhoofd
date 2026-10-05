@@ -1,12 +1,7 @@
-import { config } from 'dotenv';
 import path from 'node:path';
 import { TranslatorType } from '../enums/TranslatorType.js';
 import type { DefaultLocalesDict } from '../types/DefaultLocalesDist.js';
-import type { EnvVariables } from '../types/EnvVariables.js';
-
-config();
-
-type Globals = EnvVariables & {
+type Globals = {
     // Path to the directory containing your files that should be checked for translation keys
     readonly I18NUUID_ROOT: string;
     readonly I18NUUID_LOCALES_ROOT: string;
@@ -28,21 +23,14 @@ type Globals = EnvVariables & {
 };
 
 function getGlobals(): Globals {
-    const envVariables: EnvVariables = readEnvVariables({
-        GEMINI_API_KEY: '',
-        OPENAI_API_KEY: '',
-        MISTRAL_API_KEY: '',
-    });
-
-    const root = path.normalize(import.meta.dirname + '/../../../..'); // (note we should build relative to the compiled output file in .development/i18n-uuid/dist/src/shared/globals.js)
+    const root = path.normalize(import.meta.dirname + '/../../../..');
 
     const globals: Globals = {
         I18NUUID_ROOT: root,
         I18NUUID_LOCALES_ROOT: root + '/shared/locales',
         I18NUUID_LOCALES_DIR: root + '/shared/locales/src',
         I18NUUID_LOCALES_DIR_DIST: root + '/shared/locales/dist/locales',
-        COMPARE_OUTPUT_DIR: 'output',
-        // This is the only environment variable we'll read for now, because the other once should always stay the same
+        COMPARE_OUTPUT_DIR: path.join(root, '.development/i18n-uuid/output'),
         I18NUUID_EXCLUDE_DIRS_ARRAY: ['dist', 'esm', 'node_modules'],
 
         I18NUUID_DEFAULT_LOCALE: 'nl',
@@ -67,19 +55,10 @@ function getGlobals(): Globals {
             },
         },
         TRANSLATOR: TranslatorType.OpenAi,
-        ...envVariables,
 
     };
 
     return globals;
-}
-
-function readEnvVariables(defaults: EnvVariables): EnvVariables {
-    return Object.fromEntries(
-        Object.entries(defaults).map(([key, defaultValue]) => {
-            const value = (process.env as unknown as Partial<EnvVariables>)[key];
-            return [key, value === undefined ? defaultValue : value];
-        })) as EnvVariables;
 }
 
 export const globals: Globals = getGlobals();

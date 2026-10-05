@@ -1,5 +1,4 @@
 import { Mistral } from '@mistralai/mistralai';
-import { globals } from '../../shared/globals.js';
 import type { AutoTranslateOptions } from '../../types/AutoTranslateOptions.js';
 import type { Batch } from '../../types/Batch.js';
 import { PromiseQueue } from '../PromiseQueue.js';
@@ -11,12 +10,12 @@ abstract class MistralTranslator extends Translator {
 
     // Mistral current Requests per second: 1 rps -> 1200ms (with extrta margin)
     protected readonly queue = this.options.fake ? new PromiseQueue<Batch<any>>(100, 0) : new PromiseQueue<Batch<any>>(20, 1200);
-    private readonly client: Mistral;
+    private readonly client: Mistral | undefined;
     protected abstract readonly model: string;
 
     constructor(manager: TranslationManager, options: AutoTranslateOptions) {
         super(manager, options);
-        this.client = new Mistral({ apiKey: globals.MISTRAL_API_KEY });
+        this.client = options.fake ? undefined : new Mistral({ apiKey: options.apiKey });
     }
 
     protected override canRetryBatch(error: any): boolean {
@@ -29,7 +28,7 @@ abstract class MistralTranslator extends Translator {
     }
 
     protected async generateResponse(prompt: string): Promise<string> {
-        const chatResponse = await this.client.chat.complete({
+        const chatResponse = await this.client!.chat.complete({
             model: this.model,
             messages: [{ role: 'user', content: prompt }],
         });

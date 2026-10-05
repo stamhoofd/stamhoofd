@@ -1,5 +1,5 @@
 import { Command } from '@oclif/core';
-import { inTranslationDirectory } from '../../../runtime/translate.js';
+import { fileCache } from 'i18n-uuid/file-cache';
 import { success } from '../../../runtime/ux.js';
 
 export default class TranslateClearCache extends Command {
@@ -8,10 +8,7 @@ export default class TranslateClearCache extends Command {
 
     async run(): Promise<void> {
         await this.parse(TranslateClearCache);
-        await inTranslationDirectory(async () => {
-            const { fileCache } = await import('i18n-uuid/file-cache');
-            fileCache.clear();
-        });
+        fileCache.clear();
         success('Source-migration cache cleared.');
     }
 }

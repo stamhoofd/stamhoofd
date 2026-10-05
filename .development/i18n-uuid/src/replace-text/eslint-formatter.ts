@@ -3,11 +3,7 @@ import { exec } from 'child_process';
 import { getFilesToSearch } from '../shared/get-files-to-search.js';
 
 class EslintFormatter {
-    private readonly directoriesWithConfiguration: string[];
-
-    constructor() {
-        this.directoriesWithConfiguration = this.getDirectoriesWithEslintConfiguration();
-    }
+    private directoriesWithConfiguration: string[] | undefined;
 
     async tryFixFile(filePath: string) {
         const configurationDirectory = this.getConfigurationDirectory(filePath);
@@ -29,6 +25,7 @@ class EslintFormatter {
     }
 
     private getConfigurationDirectory(filePath: string): string | undefined {
+        this.directoriesWithConfiguration ??= this.getDirectoriesWithEslintConfiguration();
         return this.directoriesWithConfiguration.find(directory => filePath.startsWith(directory));
     }
 

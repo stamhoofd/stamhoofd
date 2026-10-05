@@ -5,7 +5,6 @@ import {
     GoogleGenerativeAI,
     SchemaType,
 } from '@google/generative-ai';
-import { globals } from '../../shared/globals.js';
 import type { AutoTranslateOptions } from '../../types/AutoTranslateOptions.js';
 import type { Batch } from '../../types/Batch.js';
 import { PromiseQueue } from '../PromiseQueue.js';
@@ -13,14 +12,16 @@ import type { TranslationManager } from '../TranslationManager.js';
 import { Translator } from './Translator.js';
 
 export class GoogleGeminiTranslator extends Translator {
-    private readonly genAI: GoogleGenerativeAI;
-    private readonly model: GenerativeModel;
+    private readonly model: GenerativeModel | undefined;
     protected readonly maxBatchLength = 15000;
     protected readonly queue = new PromiseQueue<Batch<any>>(2, 1000);
 
     constructor(manager: TranslationManager, options: AutoTranslateOptions) {
         super(manager, options);
-        this.genAI = new GoogleGenerativeAI(globals.GEMINI_API_KEY);
+        if (options.fake) {
+            return;
+        }
+        const genAI = new GoogleGenerativeAI(options.apiKey ?? '');
 
         // https://ai.google.dev/gemini-api/docs/structured-output?lang=node
         const schema: Schema = {
@@ -35,7 +36,7 @@ export class GoogleGeminiTranslator extends Translator {
             },
         };
 
-        this.model = this.genAI.getGenerativeModel({
+        this.model = genAI.getGenerativeModel({
             model: 'gemini-1.5-flash',
             generationConfig: {
                 responseMimeType: 'application/json',
@@ -45,7 +46,7 @@ export class GoogleGeminiTranslator extends Translator {
     }
 
     protected async generateResponse(prompt: string): Promise<string> {
-        const apiResult = await this.model.generateContent(prompt);
+        const apiResult = await this.model!.generateContent(prompt);
         return apiResult.response.text();
     }
 
