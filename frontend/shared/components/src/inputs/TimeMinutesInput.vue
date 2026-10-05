@@ -1,6 +1,7 @@
 <template>
     <STInputBox :title="title" error-fields="time" :error-box="errors.errorBox">
-        <input v-model="timeRaw" class="input" :class="{ error: errors.errorBox !== null }" type="time" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" @change="validate">
+        <!-- Stop propagation: Android opens the time picker as the default action of the click, which parents often prevent -->
+        <input v-model="timeRaw" class="input" :class="{ error: errors.errorBox !== null }" type="time" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" @change="validate" @click.stop>
     </STInputBox>
 </template>
 

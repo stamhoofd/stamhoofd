@@ -2,6 +2,8 @@ import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
 import { enableAutoUnmount, mount } from '@vue/test-utils';
 import { describe, expect, test } from 'vitest';
+import { render } from 'vitest-browser-vue';
+import { defineComponent, h, ref, withModifiers } from 'vue';
 import TimeInput from './TimeInput.vue';
 import TestAppWithModalStackComponent from '../../tests/helpers/TestAppWithModalStackComponent.vue';
 
@@ -259,4 +261,34 @@ describe('TimeInput', async () => {
         const inputWrapperAfter = wrapperAfter.find('input');
         expect(inputWrapperAfter.element).toHaveValue('15:00');
     });
+});
+
+/**
+ * Mirrors the option pattern in edit views: a label with a checkbox, containing inputs wrapped in an element
+ * that prevents clicks from toggling that checkbox
+ */
+const OptionWithTimeInput = defineComponent({
+    setup() {
+        const date = ref<Date | null>(new Date(2026, 0, 1, 12, 30));
+        return () => h('label', [
+            h('input', { 'type': 'checkbox', 'data-testid': 'checkbox' }),
+            h('div', { onClick: withModifiers(() => {}, ['stop', 'prevent']) }, [
+                h(TimeInput, { 'modelValue': date.value, 'onUpdate:modelValue': (v: Date | null) => { date.value = v; } }),
+            ]),
+        ]);
+    },
+});
+
+test('clicking the time input inside a click-preventing option keeps its default action', () => {
+    render(OptionWithTimeInput);
+
+    const input = document.querySelector<HTMLInputElement>('input[type="time"]')!;
+    const checkbox = document.querySelector<HTMLInputElement>('[data-testid="checkbox"]')!;
+
+    // Android opens the native time picker as the default action of the click
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+    input.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(false);
+    expect(checkbox.checked).toBe(false);
 });

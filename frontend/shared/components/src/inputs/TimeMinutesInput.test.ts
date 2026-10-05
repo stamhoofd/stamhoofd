@@ -1,6 +1,8 @@
 import { Formatter } from '@stamhoofd/utility';
 import { enableAutoUnmount, mount } from '@vue/test-utils';
 import { describe, expect, test } from 'vitest';
+import { render } from 'vitest-browser-vue';
+import { defineComponent, h, withModifiers } from 'vue';
 import TimeMinutesInput from './TimeMinutesInput.vue';
 
 // DO NOT COPY THIS PATTERN!
@@ -199,4 +201,27 @@ describe('TimeInput', async () => {
             expect(inputWrapper.element).toHaveValue(expected);
         }
     });
+});
+
+test('clicking the time input inside a click-preventing option keeps its default action', () => {
+    render(defineComponent({
+        setup() {
+            return () => h('label', [
+                h('input', { 'type': 'checkbox', 'data-testid': 'checkbox' }),
+                h('div', { onClick: withModifiers(() => {}, ['stop', 'prevent']) }, [
+                    h(TimeMinutesInput, { modelValue: 600 }),
+                ]),
+            ]);
+        },
+    }));
+
+    const input = document.querySelector<HTMLInputElement>('input[type="time"]')!;
+    const checkbox = document.querySelector<HTMLInputElement>('[data-testid="checkbox"]')!;
+
+    // Android opens the native time picker as the default action of the click
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+    input.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(false);
+    expect(checkbox.checked).toBe(false);
 });
