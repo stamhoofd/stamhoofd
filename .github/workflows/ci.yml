@@ -182,11 +182,14 @@ jobs:
                   name: shared-dist
                   retention-days: 1
                   if-no-files-found: error
+                  include-hidden-files: true
                   path: |
                       shared/*/dist
                       shared/*/*.tsbuildinfo
                       backend/shared/*/dist
                       backend/shared/*/*.tsbuildinfo
+                      .development/i18n-uuid/dist
+                      .development/i18n-uuid/*.tsbuildinfo
 
     job_test_backend_apps:
         name: "Backend App Tests"
