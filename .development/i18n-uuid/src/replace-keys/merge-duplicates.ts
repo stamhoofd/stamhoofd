@@ -73,9 +73,9 @@ export async function mergeDuplicates(onProgress?: ProgressCallback) {
         }
     }
 
-    // Run multiple times to avoid regex errors
-    await replaceOccurrences(merge, undefined, onProgress);
-    await replaceOccurrences(merge, undefined, onProgress);
+    // Targets are not themselves replaced, so one source pass reaches the final key in any order.
+    // Global key patterns cover repeated and nested usages: $t('%z', { label: $t('%5') })
+    // becomes $t('%2', { label: $t('%2') }); the same mappings apply to {{$t "%z"}}.
     await replaceOccurrences(merge, undefined, onProgress);
     return merge.size;
 }

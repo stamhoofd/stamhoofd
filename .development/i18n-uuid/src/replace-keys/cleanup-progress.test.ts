@@ -81,6 +81,14 @@ it('merges only identical language maps into the smallest numeric key regardless
     vi.mocked(fs.readFileSync).mockReturnValue("$t('%10') $t('%z') $t('%2') $t('%3') $t('%4') $t('literal')");
     expect(await mergeDuplicates()).toBe(2);
     expect(fs.writeFileSync).toHaveBeenCalledWith('source.ts', "$t('%2') $t('%2') $t('%2') $t('%3') $t('%4') $t('literal')");
+    expect(fs.readFileSync).toHaveBeenCalledTimes(1);
+});
+
+it('replaces adjacent, nested, and Handlebars duplicate usages in one source pass', async () => {
+    vi.mocked(fs.readFileSync).mockReturnValue("$t('%2', { label: $t('%2') }) + $t('%2'); {{$t \"%2\"}}");
+    expect(await mergeDuplicates()).toBe(1);
+    expect(fs.writeFileSync).toHaveBeenCalledExactlyOnceWith('source.ts', "$t('%1', { label: $t('%1') }) + $t('%1'); {{$t \"%1\"}}");
+    expect(fs.readFileSync).toHaveBeenCalledTimes(1);
 });
 
 it('reports unused-key scan progress, yields to the CLI, and returns a removal summary', async () => {
