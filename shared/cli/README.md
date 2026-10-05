@@ -30,6 +30,7 @@ Run `pnpm stam --help` or `pnpm stam <topic> --help` for command help.
 | Setup       | `pnpm stam setup`                      | Check the machine, offer fixes, and recheck for newly revealed issues.     |
 | Setup       | `pnpm stam setup node`                 | Install the Node.js version from `.nvmrc` using fnm or nvm.                |
 | Setup       | `pnpm stam setup pnpm`                 | Repair the pinned pnpm runtime through Corepack.                           |
+| Setup       | `pnpm stam setup vcs`                  | Validate and repair Git and existing JJ repositories.                      |
 | Setup       | `pnpm stam setup dns`                  | Configure local `.stamhoofd` DNS.                                          |
 | Setup       | `pnpm stam setup cert`                 | Trust the local Caddy HTTPS authority.                                     |
 | Development | `pnpm stam dev all`                    | Start shared services and the full app stack.                              |
@@ -69,6 +70,23 @@ Run `pnpm stam --help` or `pnpm stam <topic> --help` for command help.
 | Cleanup     | `pnpm stam clean metabase`             | Stop Metabase and drop its application database after confirmation.        |
 | Cleanup     | `pnpm stam clean services`             | Stop shared services.                                                      |
 | Cleanup     | `pnpm stam clean all`                  | Clean build artifacts and stop shared services.                            |
+
+### Version Control
+
+`pnpm stam-dev setup` includes repository checks. Run `pnpm stam-dev setup vcs` separately to repair only version control, or add `--dry-run` to preview repairs and `--yes` to approve them.
+
+Setup validates fetch and push URLs for public `origin` (`stamhoofd/stamhoofd`) and private `private` (`stamhoofd/stamhoofd-private`). It creates the local `private` branch if missing, configures its upstream as `private/private`, and sets `branch.private.pushRemote=private`, `branch.main.pushRemote=origin`, and `push.default=current`. It never switches checkout, resets existing branches, or pushes.
+
+Existing JJ repositories also fetch both remotes by default, push to `origin` by default, and track `private@private` and `main@origin` without cross-remote tracking. Git-only checkouts are not initialized as JJ repositories. JJ does not use Git's per-branch push destinations; push explicitly:
+
+```bash
+jj git push --bookmark main
+jj git push --remote private --bookmark private
+```
+
+Setup and workspace resolution share VCS detection: when JJ is available and recognizes the repository (or `.jj` exists), JJ is preferred. Otherwise Git is used. Setup reports only which VCS is used; missing JJ is not a blocker, even if `.jj` exists. Repository checks report any problems with the selected VCS.
+
+These defaults are not an access-control boundary. Explicit remote/refspec arguments can override them; the public repository must reject the `private` branch server-side.
 
 ### Development Configuration
 
