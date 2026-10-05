@@ -14,6 +14,10 @@ Use `--grep @tag` to select tests, and add `--skip-build` only when the applicat
 
 On environment problems such as DNS failures, SSL errors, or blank pages, stop and ask for help rather than provisioning alternative test infrastructure.
 
+Each run writes test durations, retries, and results to `playwright-report/results.json`. CI uploads this report in the `playwright-traces` artifact on successful and failed runs, including runs with flaky tests. For local before/after measurements, keep the same filter and worker count and use `--skip-build` once the app build is current. Compare test durations separately from global setup time.
+
+Fixture timing attachments split database resets, environment reloads, authentication seeding, session creation, and storage-state serialization. The JSON report includes these attachments, so repeated setup costs can be compared separately from test actions.
+
 ## Todo
 Set a fixed time. The tests should be predictable. Now the current time in tests will change depending on the date the test is run.
 

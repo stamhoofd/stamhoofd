@@ -27,6 +27,7 @@ export function setup() {
     // eslint-disable-next-line no-empty-pattern
     base.beforeAll(async ({}, testInfo) => {
         Logger.info('BEFORE ALL' + testInfo.file);
+        const started = performance.now();
 
         // Note: we use a custom beforeall here for the simple reason that Playwright fixtures are called after the beforeAll inside the tests,
         // which is too late to reset environments.
@@ -38,9 +39,19 @@ export function setup() {
 
         // Resetting database
         await WorkerData.resetDatabase();
+        const resetFinished = performance.now();
 
         // Reset environment (remove any set environments from different files)
         WorkerHelper.loadEnvironment({ force: true });
+        const environmentFinished = performance.now();
+
+        await testInfo.attach('base-fixture-timings', {
+            body: JSON.stringify({
+                databaseResetMs: resetFinished - started,
+                environmentReloadMs: environmentFinished - resetFinished,
+            }),
+            contentType: 'application/json',
+        });
     });
 
     // eslint-disable-next-line no-empty-pattern
