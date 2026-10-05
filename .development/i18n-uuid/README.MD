@@ -1,51 +1,34 @@
-# i18n uuid
-This module:
-- finds untranslated text in Vue templates and replaces them with a translation function
-- searches translation keys, replaces the key with an uuid key and adds the key to the translations
-- finds missing or changed translations and translates them with an Ai-model
-- creates a comparison of the machine translations for each locale and writes the comparison in the output directory
+# Translation library
 
-## commands
+This package provides source-text extraction, translation-key processing, machine translation, and repair functions. The Stamhoofd CLI owns its commands; there is no separate command runner here.
 
-### start
-Executes all commands in order. The arguments of each command can be passed.
+## Workflow
 
-### replace-text
-Search untranslated text in Vue templates and replaces them with a translation function.
+During development, write Dutch `$t('Opslaan')` strings and commit them unchanged. Do not manually edit `shared/locales/src/nl.json`.
 
-#### arguments
-- `--commits <commits...>`: Git commits to compare
-- `-c, --changes`: Only the changed files will be checked.
-- `--attribute-white-list <attributes...>`: Array of html attributes to white list. Text of other attributes will not be checked.
-- `--dry-run`: Do not write the translated files.
-- Previewing also leaves the source-processing cache unchanged, so a later applying run still processes the same files.
-- `-p, --prompt`: The prompt will show the code before and after the replacement and ask to accept the change.
-- `-f, --fix`: Fix the changed files with ESLint (can be slow).
+Before releasing, run from the repository root:
 
-### replace-keys
-Search translation keys, replace the key with an uuid key and add the key to the translations.
+```bash
+pnpm stam-dev translate auto
+```
 
-Supports `$t('key')` in TypeScript and Vue files, and `{{$t "key"}}` in Handlebars templates (`.hbs`, `.hbs.html`).
+This runs key registration → duplicate/unused-key cleanup → machine translation. Review and commit generated changes separately. Bare `translate` only shows help. Use `--locale fr`, `--provider openai`, `--no-machine`, or `--yes` as needed.
 
-### auto-translate
-Finds missing or changed translations and translate with an Ai-model.
+Individual stages are `translate manual keys`, `manual cleanup`, and `manual machine`. Optional source migration and unchanged-translation review are separate:
 
-#### arguments
-- `--fake`: Translate the misssing translations with a fake translation (for testing purposes).
-- `--translator <translator-type>`: The translator type (GoogleGemini, MistralLarge, MistralSmall, OpenAi or Claude).
-- `--locales <locales...>`: Specify the locals to translate (by default translations for all locals will be added).
+```bash
+pnpm stam-dev translate manual source --changes --dry-run
+pnpm stam-dev translate manual source --changes --prompt --fix
+pnpm stam-dev translate manual review --dry-run
+pnpm stam-dev translate manual review
+```
 
-### loop-invalid-auto-translations
-Loop all invalid auto translations. Choose with a prompt if the translation is correct. If the translation is correct it will be added to the translations and removed from the auto translations, if not it will be removed from the machine translations. In case of doubt (key 'd'), the translation will remain in the machine translations.
+Source and review previews do not write translation/source files or processing caches. Key processing supports `$t(...)` in TypeScript/Vue and `{{$t "..."}}` in Handlebars (`.hbs`, `.hbs.html`). Specialist repair tools are listed by `translate maintenance`. Legacy comparison output repeats the same saved translation under every provider label; it does not compare independent AI results.
 
-#### arguments
-- `--dry-run`: Do not remove the invalid auto translations.
-- Previewing shows invalid entries without prompting, approving, or removing them.
+See [the CLI documentation](../../shared/cli/README.md#translations) or run `pnpm stam-dev translate --help` for details. `pnpm stam-dev` builds this library and the CLI first.
 
-### create-comparison
-Create a comparison of the machine translations for each locale and write the comparison in the output directory.
+## Credentials
 
-## Environment variables
-- `GEMINI_API_KEY`
-- `OPENAI_API_KEY`
-- `MISTRAL_API_KEY`
+Set `OPENAI_API_KEY`, `GEMINI_API_KEY`, or `MISTRAL_API_KEY` in `.development/i18n-uuid/.env` or your environment. Supported provider names are `openai`, `gemini`, `mistral-large`, and `mistral-small`; Claude is not implemented here.
+
+Run this package's tests with `pnpm stam test i18n-uuid`.

@@ -15,7 +15,7 @@ const rootGroups = [
     },
     {
         header: 'CODE',
-        ids: ['build', 'check', 'test'],
+        ids: ['build', 'check', 'test', 'translate'],
     },
 ] as const;
 

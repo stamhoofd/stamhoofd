@@ -73,6 +73,7 @@ The CLI build clears its own compiled output before compiling so commands remove
 | Translations | `pnpm stam-dev translate manual machine` | Machine-translate missing translations.                                 |
 | Translations | `pnpm stam-dev translate manual source` | Wrap untranslated source text in translation calls.                      |
 | Translations | `pnpm stam-dev translate manual review` | Review machine translations identical to the original.                   |
+| Translations | `pnpm stam-dev translate maintenance` | Show specialist cache, key, and repair tools.                             |
 | Cleanup     | `pnpm stam clean build`                | Remove build artifacts.                                                    |
 | Cleanup     | `pnpm stam clean db`                   | Drop the selected local MySQL database after confirmation.                 |
 | Cleanup     | `pnpm stam clean sso`                  | Stop the local SSO server.                                                 |
@@ -102,6 +103,10 @@ pnpm stam-dev translate manual review
 ```
 
 Source migration only wraps text in `$t(...)`; it does not generate keys or call an AI provider. `--commits HEAD~1 --commits HEAD` selects a Git comparison and implies `--changes`. Source previews do not write source files or processing caches and do not prompt. Review only flags nonempty translations identical to their original Dutch text. Accepting an entry writes it to the human-maintained translations; rejecting deletes its machine entry; deferring leaves it unchanged. Review previews do not prompt or write files.
+
+`translate maintenance` shows help for cache clearing, UUID compression, invalid-entry filtering, duplicate machine-translation repair, and legacy comparison generation. These are not additional release steps. Prefer `manual review` over bulk `maintenance filter-invalid` when unchanged wording may be legitimate. The comparison tool writes JSON files to `.development/i18n-uuid/output`; its provider labels currently repeat the same machine translation and do not represent independent provider results.
+
+The translation library no longer has a separate command runner or package scripts for these operations. Use the Stamhoofd CLI; `pnpm stam-dev` builds the library and CLI before running a command. Both `translate manual` and `translate maintenance` show help without modifying files when no subcommand is supplied.
 
 ### Version Control
 
