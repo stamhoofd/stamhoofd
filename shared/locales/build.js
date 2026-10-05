@@ -7,6 +7,16 @@ const validLocales = {
     ['NL']: ['nl'],
 };
 
+const fileContents = new Map();
+
+async function readJson(file) {
+    if (!fileContents.has(file)) {
+        fileContents.set(file, await fs.readFile(file, 'utf8'));
+    }
+    // Merging and replacements mutate nested values in the returned dictionary.
+    return JSON.parse(fileContents.get(file));
+}
+
 async function fileExists(file) {
     try {
         await fs.access(file, fs.constants.F_OK);
@@ -158,7 +168,7 @@ async function build(country, language, namespace, skipFallbackLanguages, skipNa
 
     // base
     if (await fileExists(folder + '/base.json')) {
-        const specifics = JSON.parse(await fs.readFile(folder + '/base.json'));
+        const specifics = await readJson(folder + '/base.json');
         if ('extends' in specifics) {
             if (!Array.isArray(specifics.extends)) {
                 throw new Error('Invalid extends in ' + folder + '/base.json');
@@ -193,13 +203,13 @@ async function build(country, language, namespace, skipFallbackLanguages, skipNa
 
     // language
     if (await fileExists(folder + '/' + language + '.json')) {
-        const specifics = JSON.parse(await fs.readFile(folder + '/' + language + '.json'));
+        const specifics = await readJson(folder + '/' + language + '.json');
         json = mergeObjects(json, specifics);
     }
 
     // locale
     if (await fileExists(folder + '/' + locale + '.json')) {
-        const specifics = JSON.parse(await fs.readFile(folder + '/' + locale + '.json'));
+        const specifics = await readJson(folder + '/' + locale + '.json');
         json = mergeObjects(json, specifics);
     }
 
@@ -255,7 +265,7 @@ for (const country of Object.keys(validLocales)) {
 }
 
 async function readMachineTranslations(machineLanguageFile) {
-    const dictonary = JSON.parse(await fs.readFile(machineLanguageFile));
+    const dictonary = await readJson(machineLanguageFile);
     return Object.fromEntries(
         Object.entries(
             dictonary,
