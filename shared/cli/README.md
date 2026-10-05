@@ -2,6 +2,8 @@
 
 `stam` is the development CLI for this repository. It manages local setup, shared services, app processes, development configuration, database helpers, SSO helpers, tests, and cleanup.
 
+Always prefer `stam` over lower-level scripts or commands. The examples use `pnpm stam` so they work from the repository root without installing the shortcut; with the shortcut installed, use `stam` directly.
+
 ## Quick Start
 
 ```bash
@@ -140,6 +142,8 @@ Development sessions use explicit Turbo filters for the API, renderer, statistic
 `pnpm stam build` uses those same five executable app owners after the shared build. Dashboard and registration are source packages bundled by web-app. The root backend build explicitly selects API, renderer, backup, redirecter, and statistics syncer. Database migrations invoke the API and statistics-syncer owners serially.
 
 Task orchestration uses pnpm, Turbo, and `stam`. Lerna remains installed only for fixed versioning and npm publication until release tooling is migrated.
+
+See the [build-system documentation](../../.development/README.md) for Turbo cache inputs and outputs, dependency ordering, and low-level build diagnostics.
 
 The root and `stam check` lint and typecheck commands use Turbo to select all package scripts. These checks are intentionally uncached because backend TypeScript configurations can emit build metadata and declarations. A failure in any package fails the root command.
 
@@ -352,6 +356,8 @@ pnpm stam test components ImageComponent             # frontend browser tests (v
 
 `components` and `networking` run in vitest browser mode and need a Playwright Chromium (`pnpm exec playwright install chromium`); they are part of `stam test unit` too.
 
+Unit tests use Vitest. The `api`, `models`, `sql`, `statistics-syncer`, and `vies` suites require MySQL. Dashboard and web-app use `vue-tsc` for typechecking through `stam check typecheck`; their UI behavior is covered by Playwright.
+
 The root `pnpm test` and `pnpm run test:coverage` commands delegate to `stam test unit` and `stam test coverage`, so package selection, failure propagation, MySQL ownership, and teardown stay consistent. Coverage runs serially and is uncached.
 
 Run Playwright tests with:
@@ -513,7 +519,7 @@ Bad candidates for this file:
 
 ### Working On The CLI
 
-`pnpm stam` checks the CLI and its build dependencies through Turbo before launching. Unchanged builds use the local cache; source changes trigger rebuilding and missing outputs are restored from cache. The optional DevOps CLI is included when `devops/tsconfig.cli.json` exists:
+`pnpm stam` checks the CLI and its build dependencies through Turbo via `.development/stam.mjs` before launching. Unchanged builds use the local cache; source changes trigger rebuilding and missing outputs are restored from cache. The optional DevOps CLI is included through the root `build:stam-devops` task when `devops/tsconfig.cli.json` exists. DevOps remains a separate repository outside the workspace. There is no separate `stam-dev` command; CLI arguments and exit status are preserved.
 
 Successful bootstrap builds are silent; failed builds print diagnostics to stderr. Use `pnpm --silent stam` to also suppress pnpm's script-command echo.
 
@@ -524,24 +530,19 @@ pnpm stam --help
 If the separate `devops/` repository has a populated oclif command directory, `pnpm stam devops` loads its commands. An absent or empty checkout does not add the topic. The installed `stam` shell wrapper finds the enclosing clone or worktree by its `stamhoofd/stamhoofd` GitHub remote (SSH or HTTPS, under any remote name) and delegates to `pnpm --silent run stam`. It also finds the parent checkout when invoked inside the nested DevOps repository. DevOps command implementations and their documentation live in `devops/`; the main CLI only discovers the optional plugin.
 Run `pnpm stam setup shortcut` again to refresh `/usr/local/bin/stam` and clean up any remaining legacy shell function blocks. `--dry-run` previews the installation and cleanup.
 
-For CLI-only changes, run:
+For CLI changes, use the managed CLI commands:
 
 ```bash
-pnpm --dir shared/cli --silent run build
-pnpm --dir shared/cli --silent run lint
-pnpm --dir shared/cli --silent run test
+stam test cli
+stam check lint
+stam check typecheck
 ```
 
 Translation commands call the `i18n-uuid` library in `.development/i18n-uuid`. `pnpm stam` and `build:shared` build it before `shared/cli` through Turbo's dependency graph.
 
 CLI tests live next to source files as `*.test.ts`.
 
-After changing CLI behavior, validate at least the package-local checks:
-
-```bash
-pnpm --dir shared/cli --silent run test
-pnpm --dir shared/cli --silent run build
-```
+Before completing a contribution, run `stam check all` as described in [CONTRIBUTING.md](../../CONTRIBUTING.md#validation).
 
 For command-surface changes, it is also useful to compare the generated help output with the README:
 
@@ -584,4 +585,4 @@ If that does not tell you enough, use the first matching case below.
 - SSO redirect or Keycloak issues appear locally:
   Re-run `pnpm stam sso config`, make sure the redirect URI still ends in `/openid/callback`, then restart SSO with `pnpm stam sso start "<redirect-uri>"`.
 - Stale build or type errors keep appearing after code changes:
-  Run `pnpm run build:shared`, then retry the CLI command or app startup flow.
+  Run `stam build`, then retry the app startup flow. `stam test` already rebuilds shared packages unless `--skip-build` is supplied. For cache diagnostics or a forced shared compilation, see the [build-system documentation](../../.development/README.md).
