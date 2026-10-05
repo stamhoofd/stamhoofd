@@ -1,5 +1,5 @@
 #!/usr/bin/env -S node --use-system-ca
-import { Config, Plugin, run } from '@oclif/core';
+import { Config, Errors, Plugin, run } from '@oclif/core';
 import { fileURLToPath } from 'node:url';
 import { getOptionalDevopsPlugin } from '../dist/runtime/devops-plugin.js';
 
@@ -31,7 +31,8 @@ async function main() {
 }
 
 main().catch((error) => {
-    const exitCode = typeof error?.exitCode === 'number' ? error.exitCode : 1;
-    console.error(error);
-    process.exitCode = exitCode;
+    if (error?.parse?.input?.argv) {
+        error.showHelp = true;
+    }
+    return Errors.handle(error);
 });
