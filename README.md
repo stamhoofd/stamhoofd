@@ -84,7 +84,7 @@ pnpm stam setup
 pnpm stam dev all
 ```
 
-Run `pnpm stam setup shell` to install the CLI alias `stam` in your .zshrc or .bashrc (that removes the need to type `pnpm` and the need to always run commands in the project root).
+Run `pnpm stam setup shortcut` to install `/usr/local/bin/stam`, so you can run `stam` from any directory inside a checkout. Setup also removes the legacy function blocks from `.zshrc` and `.bashrc`; restart your terminal or run `unset -f stam` if the old function is still loaded.
 
 `pnpm stam setup` checks required tools, DNS, and local HTTPS certificate trust. After installing the alias, `stam setup` performs the same checks and `stam setup pnpm` repairs the pinned pnpm runtime. `pnpm stam dev all` starts the shared Docker services and app processes. Run `pnpm stam status` to see local URLs, credentials, services, and active instances.
 

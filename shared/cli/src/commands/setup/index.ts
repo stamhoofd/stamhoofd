@@ -16,7 +16,7 @@ export enum SetupAction {
     Dns = 'dns',
     Node = 'node',
     Pnpm = 'pnpm',
-    Shell = 'shell',
+    Shortcut = 'shortcut',
     Vcs = 'vcs',
 }
 
@@ -31,7 +31,7 @@ export default class Setup extends BaseCommand {
         'stam setup pnpm',
         'stam setup dns --dry-run',
         'stam setup cert --yes --verbose',
-        'stam setup shell',
+        'stam setup shortcut',
         'stam setup vcs --dry-run',
     ];
 
@@ -88,7 +88,7 @@ export default class Setup extends BaseCommand {
             return;
         }
 
-        if (args.action === SetupAction.Shell) {
+        if (args.action === SetupAction.Shortcut) {
             await setupShellShortcut({ dryRun: flags['dry-run'] });
             return;
         }
