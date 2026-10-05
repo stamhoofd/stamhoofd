@@ -71,6 +71,8 @@ The CLI build clears its own compiled output before compiling so commands remove
 | Translations | `pnpm stam-dev translate manual keys` | Replace translation keys.                                                  |
 | Translations | `pnpm stam-dev translate manual cleanup` | Merge duplicates and remove unused keys.                                |
 | Translations | `pnpm stam-dev translate manual machine` | Machine-translate missing translations.                                 |
+| Translations | `pnpm stam-dev translate manual source` | Wrap untranslated source text in translation calls.                      |
+| Translations | `pnpm stam-dev translate manual review` | Review machine translations identical to the original.                   |
 | Cleanup     | `pnpm stam clean build`                | Remove build artifacts.                                                    |
 | Cleanup     | `pnpm stam clean db`                   | Drop the selected local MySQL database after confirmation.                 |
 | Cleanup     | `pnpm stam clean sso`                  | Stop the local SSO server.                                                 |
@@ -89,6 +91,17 @@ The automatic flow runs keys → cleanup → machine. Use `--locale fr --locale 
 Providers are `openai`, `gemini`, `mistral-large`, and `mistral-small`. Configure `OPENAI_API_KEY`, `GEMINI_API_KEY`, or `MISTRAL_API_KEY` in `.development/i18n-uuid/.env` or your environment. Claude is not implemented by this translation library. `--fake` writes test translations without AI requests but still requires provider credentials to initialize the existing SDK.
 
 Bare `translate` now shows help. Update scripts that previously ran the pipeline to use `translate auto`. The old `translate keys`, `compress`, and `machine` commands remain available as hidden compatibility commands.
+
+Source migration and review are optional, not part of `auto`:
+
+```bash
+pnpm stam-dev translate manual source --changes --dry-run
+pnpm stam-dev translate manual source --changes --prompt --fix
+pnpm stam-dev translate manual review --dry-run
+pnpm stam-dev translate manual review
+```
+
+Source migration only wraps text in `$t(...)`; it does not generate keys or call an AI provider. `--commits HEAD~1 --commits HEAD` selects a Git comparison and implies `--changes`. Source previews do not write source files or processing caches and do not prompt. Review only flags nonempty translations identical to their original Dutch text. Accepting an entry writes it to the human-maintained translations; rejecting deletes its machine entry; deferring leaves it unchanged. Review previews do not prompt or write files.
 
 ### Version Control
 

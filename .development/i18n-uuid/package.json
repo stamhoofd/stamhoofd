@@ -11,7 +11,9 @@
         "./auto-translate": "./dist/auto-translate/auto-translate.js",
         "./translator-type": "./dist/enums/TranslatorType.js",
         "./globals": "./dist/shared/globals.js",
-        "./translation-manager": "./dist/auto-translate/TranslationManager.js"
+        "./translation-manager": "./dist/auto-translate/TranslationManager.js",
+        "./replace-text": "./dist/replace-text/replace-text.js",
+        "./post-validator": "./dist/auto-translate/AutoTranslatorPostValidator.js"
     },
     "license": "MIT",
     "private": true,
