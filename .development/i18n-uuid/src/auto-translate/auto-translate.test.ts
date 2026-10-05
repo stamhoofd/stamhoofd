@@ -14,9 +14,10 @@ vi.mock('./PromptLogger.js', () => ({ promptLogger: { initialize: vi.fn(), close
 beforeEach(() => vi.resetAllMocks());
 
 it('uses the selected provider and passes credentials before starting translation', async () => {
-    await autoTranslate({ translatorType: TranslatorType.MistralSmall, apiKey: 'test-token', locales: ['fr'] });
+    const onProgress = vi.fn();
+    await autoTranslate({ translatorType: TranslatorType.MistralSmall, apiKey: 'test-token', locales: ['fr'], onProgress });
     expect(AutoTranslator).toHaveBeenCalledWith(TranslatorType.MistralSmall, expect.anything(), {
-        translatorType: TranslatorType.MistralSmall, apiKey: 'test-token', fake: false, locales: ['fr'],
+        translatorType: TranslatorType.MistralSmall, apiKey: 'test-token', fake: false, locales: ['fr'], onProgress,
     });
     expect(promptLogger.initialize).toHaveBeenCalledWith(path.join(globals.I18NUUID_ROOT, '.development/i18n-uuid'));
     expect(promptLogger.initialize).toHaveBeenCalledBefore(start);

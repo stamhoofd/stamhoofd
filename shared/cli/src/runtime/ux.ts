@@ -28,10 +28,10 @@ export function failure(message: string): void {
     writeOutputLine(`${chalk.red('✖')} ${message}`, OutputStream.Stderr);
 }
 
-export async function step<T>(message: string, fn: () => Promise<T>, options: { successMessage?: (result: T) => string } = {}): Promise<T> {
+export async function step<T>(message: string, fn: (update: (message: string) => void) => Promise<T>, options: { successMessage?: (result: T) => string } = {}): Promise<T> {
     const spinner = ora(message).start();
     try {
-        const result = await fn();
+        const result = await fn((text) => { spinner.text = text; });
         spinner.stopAndPersist({ symbol: chalk.green(successSymbol), text: options.successMessage?.(result) ?? message });
         return result;
     } catch (error) {

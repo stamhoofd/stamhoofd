@@ -49,15 +49,12 @@ export default class TranslateAuto extends Command {
             return;
         }
         let stage: TranslationStage = 'keys';
-        let completed = 0;
-        const labels = { keys: 'Register translation keys', cleanup: 'Merge duplicates and remove unused keys', machine: 'Translate missing or changed strings' };
         try {
             await translate({
                 machine,
                 skipMachine,
                 onStage: (next) => {
                     stage = next;
-                    info(`[${++completed}/${locales ? 3 : 2}] ${labels[next]}`);
                 },
             });
         }

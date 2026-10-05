@@ -8,22 +8,35 @@ import { unusedKeys } from 'i18n-uuid/unused-keys';
 import { globals } from 'i18n-uuid/globals';
 import { TranslationManager } from 'i18n-uuid/translation-manager';
 import { resolveTranslationApiKey } from './translation-credentials.js';
+import { translationStep } from './translation-progress.js';
+import { step } from './ux.js';
 
 export async function translateKeys(): Promise<void> {
-    replaceKeys();
-    replaceKeys();
+    await translationStep('Register translation keys', async (onProgress) => {
+        const added = await replaceKeys(onProgress);
+        return added + await replaceKeys(onProgress);
+    }, added => `Registered ${added} new translation keys`);
 }
 
 export async function translateCompress(): Promise<void> {
-    await run('pnpm', ['--dir', 'shared/locales', 'run', 'build'], { cwd: getProjectPath(), verbosity: RunVerbosity.Output });
-    mergeDuplicates();
-    unusedKeys();
+    await buildTranslationLocales();
+    await translationStep('Merge duplicate translations', mergeDuplicates, count => `Merged ${count} duplicate keys`);
+    await translationStep('Remove unused translation keys', unusedKeys, count => `Removed ${count} unused translation entries`);
 }
 
 export async function translateMachine(options: Parameters<typeof autoTranslate>[0] = {}): Promise<void> {
     const { apiKey } = await prepareMachineTranslation(options);
-    await run('pnpm', ['--dir', 'shared/locales', 'run', 'build'], { cwd: getProjectPath(), verbosity: RunVerbosity.Output });
-    await autoTranslate({ ...options, apiKey });
+    await buildTranslationLocales();
+    await translationStep(options.fake ? 'Generate fake translations' : 'Machine translation', async onProgress => await autoTranslate({ ...options, apiKey, onProgress }));
+}
+
+async function buildTranslationLocales() {
+    await step('Build translation locales', async () => {
+        const result = await run('pnpm', ['--dir', 'shared/locales', 'run', 'build'], { cwd: getProjectPath(), verbosity: RunVerbosity.Quiet, capture: true, allowFailure: true });
+        if (result.status !== 0) {
+            throw new Error(`Locale build failed:\n${result.stdout}\n${result.stderr}`);
+        }
+    });
 }
 
 export type TranslationStage = 'keys' | 'cleanup' | 'machine';

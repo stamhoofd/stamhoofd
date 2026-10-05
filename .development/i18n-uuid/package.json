@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "type": "module",
     "exports": {
+        "./progress": "./dist/shared/progress.js",
         "./replace-keys": "./dist/replace-keys/replace-keys.js",
         "./merge-duplicates": "./dist/replace-keys/merge-duplicates.js",
         "./unused-keys": "./dist/replace-keys/unused-keys.js",

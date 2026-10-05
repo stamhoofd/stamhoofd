@@ -306,6 +306,9 @@ Above is an array with an original text in ${originalLocal}, the translation of 
             prompt: string;
         },
     ): Promise<Translations> {
+        let completed = 0;
+        const report = () => this.options.onProgress?.({ phase: 'translate', completed, total: batches.length, locale: targetLocal, namespace });
+        report();
         const promises: Promise<Batch<string>>[] = batches.map(
             async (batch, i) => {
                 const batchNumber = i + 1;
@@ -314,12 +317,6 @@ Above is an array with an original text in ${originalLocal}, the translation of 
                 const tryTranslateBatchInQueue = async () => {
                     try {
                         const result = await this.queue.add(async () => {
-                            console.log(
-                                chalk.gray(
-                                    `Start translating batch ${batchNumber} of ${totalBatches}`,
-                                ),
-                            );
-
                             const translatedBatch = await translateBatch(
                                 batch,
                                 {
@@ -331,12 +328,6 @@ Above is an array with an original text in ${originalLocal}, the translation of 
                                     totalBatches,
                                     prompt,
                                 },
-                            );
-
-                            console.log(
-                                chalk.gray(
-                                    `Finished translating batch ${batchNumber} of ${totalBatches}`,
-                                ),
                             );
 
                             const validatedBatch: Batch<string>
@@ -394,7 +385,10 @@ ${error}`;
                     }
                 };
 
-                return await tryTranslateBatchInQueue();
+                const result = await tryTranslateBatchInQueue();
+                completed++;
+                report();
+                return result;
             },
         );
 
@@ -419,14 +413,6 @@ ${error}`;
         },
     ): Promise<Translations> {
         const targetLocal = args.targetLocal;
-
-        console.log(
-            chalk.white(
-                `Start translate ${Object.keys(translations).length} items from ${args.originalLocal} to ${targetLocal} for namespace ${args.namespace}`,
-            ),
-        );
-
-        // console.log(chalk.cyan(JSON.stringify(translations)))
 
         const { valid, message } = validateTranslations(translations);
         if (!valid) {
@@ -456,12 +442,6 @@ ${error}`;
             prompt,
         });
 
-        console.log(
-            chalk.green(
-                `Finished translate ${Object.keys(translations).length} items from ${args.originalLocal} to ${targetLocal} for namespace ${args.namespace}`,
-            ),
-        );
-
         return result;
     }
 
@@ -475,14 +455,6 @@ ${error}`;
         },
     ) {
         const targetLocal = args.targetLocal;
-
-        console.log(
-            chalk.white(
-                `Start translate ${Object.keys(translationsWithVariant).length} items with variants from ${args.originalLocal} to ${targetLocal} for namespace ${args.namespace}`,
-            ),
-        );
-
-        console.log(chalk.cyan(JSON.stringify(translationsWithVariant)));
 
         const batches = this.splitInBatches(translationsWithVariant);
 
@@ -507,12 +479,6 @@ ${error}`;
             afterBatchTranslated: args.afterBatchTranslated,
             prompt,
         });
-
-        console.log(
-            chalk.green(
-                `Finished translate ${Object.keys(translationsWithVariant).length} items from ${args.originalLocal} to ${targetLocal} for namespace ${args.namespace}`,
-            ),
-        );
 
         return result;
     }

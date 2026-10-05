@@ -1,5 +1,6 @@
 import { Command } from '@oclif/core';
 import { compressUuids } from 'i18n-uuid/compress-uuids';
+import { translationStep } from '../../../runtime/translation-progress.js';
 
 export default class TranslateCompressUuids extends Command {
     static summary = 'Convert translation UUIDs to compact keys';
@@ -7,6 +8,6 @@ export default class TranslateCompressUuids extends Command {
 
     async run(): Promise<void> {
         await this.parse(TranslateCompressUuids);
-        compressUuids();
+        await translationStep('Compress translation keys', compressUuids, count => `Compressed ${count} translation keys`);
     }
 }

@@ -1,4 +1,3 @@
-import chalk from 'chalk';
 import { TranslatorType } from '../enums/TranslatorType.js';
 import {
     getCountry,
@@ -63,12 +62,12 @@ export class AutoTranslator {
             return true;
         });
 
-        await this.manager.buildDist();
+        await this.buildDist();
         this.outdatedTranslationFinder.removeOutdatedTranslations(
             this.type,
             locales,
         );
-        await this.manager.buildDist();
+        await this.buildDist();
 
         // first auto translate default namespace and locale
         await this.autoTranslateDefaultNamespace(otherLocales);
@@ -76,9 +75,8 @@ export class AutoTranslator {
         if (!(await this.isDefaultNamespaceTranslationComplete(otherLocales))) {
             const message
                 = 'Translation of other namespaces is skipped because the default namespace is not translated completely yet.';
-            console.log(chalk.red(message));
+            console.warn(`${message} Locales: ${otherLocales.join(', ')}.`);
             promptLogger.error(message);
-            console.log('Locales', otherLocales.join(', '));
             return;
         }
 
@@ -113,7 +111,7 @@ export class AutoTranslator {
             });
 
             if (Object.keys(missingTranslations).length > 0) {
-                console.log('missingTranslations', missingTranslations);
+                console.warn(`${Object.keys(missingTranslations).length} translations remain missing for ${locale}.`);
                 return false;
             }
         }
@@ -185,12 +183,9 @@ export class AutoTranslator {
             );
         }
 
-        console.log(
-            `Start auto translate (namespace: ${args.namespace}, locale: ${args.locale})`,
-        );
-
         // build dist
-        await this.manager.buildDist();
+        await this.buildDist();
+        this.options.onProgress?.({ phase: 'translate', namespace: args.namespace, locale: args.locale });
 
         // get missing translations
         const missingTranslations = await this.findMissingTranslations(args);
@@ -476,5 +471,10 @@ export class AutoTranslator {
         }
 
         throw Error(`Unknown translator type: ${type}`);
+    }
+
+    private async buildDist() {
+        this.options.onProgress?.({ phase: 'build' });
+        await this.manager.buildDist();
     }
 }
