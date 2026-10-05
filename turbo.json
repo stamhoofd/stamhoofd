@@ -32,6 +32,22 @@
             "outputs": ["dist/**", "*.tsbuildinfo"],
             "cache": true
         },
+        "i18n-uuid#build": {
+            "dependsOn": ["^build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
+        "@stamhoofd/stdsync#build": {
+            "dependsOn": ["^build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
+        "//#build:stam-devops": {
+            "dependsOn": ["@stamhoofd/metabase#build", "@stamhoofd/queues#build", "@stamhoofd/structures#build", "@stamhoofd/types#build", "@stamhoofd/utility#build"],
+            "inputs": ["devops/src/**", "devops/cli/**", "devops/tsconfig*.json", "devops/package.json", "devops/pnpm-lock.yaml", "environment.d.ts"],
+            "outputs": ["devops/dist/**", "devops/dist-cli/**", "devops/*.tsbuildinfo"],
+            "cache": true
+        },
         "@stamhoofd/excel-writer#build": {
             "dependsOn": ["^build", "@stamhoofd/utility#build"],
             "outputs": ["dist/**", "*.tsbuildinfo"],

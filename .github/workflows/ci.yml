@@ -330,7 +330,7 @@ jobs:
               run: pnpm run lint
             # Temporarily disabled until everything is formatted.
             # - name: Check formatting
-            #   run: pnpm stam-dev check format
+            #   run: pnpm stam check format
 
     job_test_components_vitest:
         name: "Components Browser Tests"

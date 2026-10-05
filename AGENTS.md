@@ -48,6 +48,8 @@ Shared builds use `^build` for normal dependencies and explicit task dependencie
 
 `pnpm stam build` builds shared packages, then those same five executable app owners through explicit uncached Turbo filters. Dashboard and registration are source packages bundled by web-app, not standalone build owners. `pnpm run build:backend:apps` explicitly builds API, renderer, backup, redirecter, and statistics syncer. Migrations run the API and statistics-syncer owners explicitly and serially.
 
+`pnpm stam` first runs cached Turbo builds for the CLI and its dependencies through `.development/stam.mjs`. When `devops/tsconfig.cli.json` exists, it also runs the cached root `build:stam-devops` task; `devops` remains a separate repository outside the workspace. Successful bootstrap builds are silent; failed builds print diagnostics to stderr. CLI arguments and exit status are preserved. There is no separate `stam-dev` command.
+
 `pnpm run clear:shared` removes build outputs but retains the Turbo cache. To rebuild without reading cache, run `pnpm run clear:shared && pnpm run build:shared --force`. Use `--dry=json` on the build command to inspect task dependencies and cache inputs.
 
 Packages consume each other's **built `dist/` output**, not source. After changing a shared package, consumers see stale code until you run `pnpm run build:shared`. Almost every "type error after editing a shared package", "test fails on module load", or "cached code keeps running" is fixed by running it first. Full reset when badly out of sync:
