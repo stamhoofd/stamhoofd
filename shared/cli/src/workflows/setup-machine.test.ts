@@ -6,11 +6,12 @@ import { confirm } from '../runtime/ux.js';
 import { corednsService } from '../services/definitions/coredns-service.js';
 import * as docker from '../services/docker.js';
 import type { CheckResult, SetupReport } from './setup-machine.js';
-import { checkSetup, getRecommendedSetupFixes, isSetupReady, printSetupReport, runSetup, SetupAutomaticFixKey, setupCaddy, setupDns } from './setup-machine.js';
+import { checkSetup, checkSetupWithTable, getRecommendedSetupFixes, isSetupReady, printSetupReport, runSetup, SetupAutomaticFixKey, setupCaddy, setupDns } from './setup-machine.js';
 import { checkNodeVersion, setupNodeVersion } from './setup-node.js';
 import { checkPackageManager, setupPackageManager } from './setup-package-manager.js';
 import { runServices } from './start-services.js';
 import { checkVcs, setupVcs } from './setup-vcs.js';
+import { checkShellShortcut } from './setup-shell.js';
 
 const dnsResolver = vi.hoisted(() => ({
     resolve4: vi.fn(),
@@ -59,6 +60,7 @@ vi.mock('./start-services.js', () => ({
 }));
 
 vi.mock('./setup-vcs.js', () => ({ checkVcs: vi.fn(), setupVcs: vi.fn() }));
+vi.mock('./setup-shell.js', () => ({ checkShellShortcut: vi.fn() }));
 
 describe('setup machine workflow', () => {
     const platform = process.platform;
@@ -66,6 +68,7 @@ describe('setup machine workflow', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.mocked(checkVcs).mockResolvedValue([]);
+        vi.mocked(checkShellShortcut).mockResolvedValue({ ok: true, details: 'stam installed in /usr/local/bin' });
         setPlatform(platform);
         vi.mocked(docker.getContainerRuntime).mockResolvedValue(docker.ContainerRuntime.Docker);
         vi.mocked(checkNodeVersion).mockResolvedValue({
@@ -244,6 +247,55 @@ describe('setup machine workflow', () => {
     it('reports ready only when all setup checks are ok', () => {
         expect(isSetupReady(setupReport({}))).toBe(true);
         expect(isSetupReady(setupReport({ docker: missingManual('docker missing') }))).toBe(false);
+    });
+
+    it('ignores optional failures for readiness and automatic fix recommendations', () => {
+        const report = setupReport({
+            docker: { ...missingManual('docker missing'), optional: true },
+            dns: { ...missingAutomatic(SetupAutomaticFixKey.Dns, 'Configure local DNS'), optional: true },
+            shell: { ok: false, optional: true, details: 'stam not installed', manualFix: 'pnpm stam setup shortcut' },
+        });
+        expect(isSetupReady(report)).toBe(true);
+        expect(getRecommendedSetupFixes(report)).toEqual([]);
+        report.cert = missingAutomatic(SetupAutomaticFixKey.Cert, 'Trust local HTTPS certificates');
+        expect(isSetupReady(report)).toBe(false);
+        expect(getRecommendedSetupFixes(report)).toEqual([{ key: SetupAutomaticFixKey.Cert, label: 'Trust local HTTPS certificates' }]);
+    });
+
+    it('reports ready without prompting when only the optional shortcut is missing', async () => {
+        setPlatform('linux');
+        vi.spyOn(fs, 'access').mockResolvedValue(undefined);
+        mockSetupCommands({ dns: 'Global: 127.0.0.1:1053\n', domains: 'Global: ~stamhoofd\n' });
+        vi.mocked(checkShellShortcut).mockResolvedValue({ ok: false, details: 'stam not installed in /usr/local/bin' });
+        const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+        try {
+            await runSetup({ rootDir: '/repo', verbosity: RunVerbosity.Quiet } as any);
+            expect(confirm).not.toHaveBeenCalled();
+            expect(log.mock.calls.flat().join('\n')).toContain('Setup looks ready.');
+        } finally {
+            log.mockRestore();
+        }
+    });
+
+    it.each(['static', 'live'])('groups optional checks and displays their manual fix in the %s report', async (mode) => {
+        setPlatform('linux');
+        mockSetupCommands({ dns: 'Global: 127.0.0.1:1053\n', domains: 'Global: ~stamhoofd\n' });
+        vi.mocked(checkShellShortcut).mockResolvedValue({ ok: false, details: 'stam not installed in /usr/local/bin' });
+        const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+        try {
+            const context = { rootDir: '/repo', verbosity: RunVerbosity.Quiet } as any;
+            const report = mode === 'static' ? await checkSetup(context) : await checkSetupWithTable(context, { live: false });
+            if (mode === 'static') {
+                printSetupReport(report);
+            }
+            expect(report.shell).toEqual({ ok: false, optional: true, details: 'stam not installed in /usr/local/bin', manualFix: 'pnpm stam setup shortcut' });
+            const output = log.mock.calls.flat().join('\n');
+            expect(output.indexOf('Optional')).toBeGreaterThan(output.indexOf('Caddy local CA'));
+            expect(output.indexOf('Binary shortcut')).toBeGreaterThan(output.indexOf('Optional'));
+            expect(output).toContain('pnpm stam setup shortcut');
+        } finally {
+            log.mockRestore();
+        }
     });
 
     it('recommends DNS setup when local DNS is not configured', async () => {
@@ -566,6 +618,7 @@ function setupReport(overrides: Partial<SetupReport>): SetupReport {
         caddy: ok(),
         dns: ok(),
         cert: ok(),
+        shell: { ...ok(), optional: true },
         ...overrides,
     };
 }

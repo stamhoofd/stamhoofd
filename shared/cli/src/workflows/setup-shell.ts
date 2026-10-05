@@ -1,9 +1,25 @@
 import fs from 'node:fs/promises';
+import { constants } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { run, RunVerbosity } from '../runtime/command-runner.js';
 import { command, info, success } from '../runtime/ux.js';
+
+export async function checkShellShortcut(): Promise<{ ok: boolean; details: string }> {
+    try {
+        await fs.access('/usr/local/bin/stam', constants.X_OK);
+        return { ok: true, details: 'stam installed in /usr/local/bin' };
+    } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+            return { ok: false, details: 'stam not installed in /usr/local/bin' };
+        }
+        if ((error as NodeJS.ErrnoException).code === 'EACCES') {
+            return { ok: false, details: '/usr/local/bin/stam is not executable' };
+        }
+        throw error;
+    }
+}
 
 export async function removeLegacyShellFunction(rcFile: string): Promise<boolean> {
     let existing: string;
