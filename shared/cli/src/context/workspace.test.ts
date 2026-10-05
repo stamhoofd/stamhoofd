@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { run } from '../runtime/command-runner.js';
 import { resolvePrimaryInstance, resolvePrimaryWorkspaceRoot } from './workspace.js';
+import { detectVcs, Vcs } from '../runtime/vcs.js';
+
+vi.mock('../runtime/vcs.js', async original => ({ ...await original<typeof import('../runtime/vcs.js')>(), detectVcs: vi.fn() }));
 
 vi.mock('../runtime/command-runner.js', async importOriginal => ({
     ...await importOriginal<typeof import('../runtime/command-runner.js')>(),
@@ -65,10 +68,18 @@ describe('resolvePrimaryInstance', () => {
 
         await expect(resolvePrimaryInstance('/repo/a')).resolves.toBe(false);
     });
+
+    it('does not switch to Git when an initialized JJ repository cannot be read', async () => {
+        vi.mocked(detectVcs).mockResolvedValue(Vcs.Jj);
+        vi.mocked(run).mockResolvedValueOnce({ stdout: '', stderr: 'Invalid configuration', status: 1 });
+        await expect(resolvePrimaryWorkspaceRoot('/repo')).resolves.toBeNull();
+        expect(run).toHaveBeenCalledOnce();
+        expect(vi.mocked(run).mock.calls[0][0]).toBe('jj');
+    });
 });
 
 function mockJjFailure() {
-    vi.mocked(run).mockResolvedValueOnce({ stdout: '', stderr: 'not a jj repo', status: 1 });
+    vi.mocked(detectVcs).mockResolvedValue(Vcs.Git);
 }
 
 function mockGitFailure() {
@@ -76,6 +87,7 @@ function mockGitFailure() {
 }
 
 function mockJjWorkspaces(...workspaces: Array<[string, string]>) {
+    vi.mocked(detectVcs).mockResolvedValue(Vcs.Jj);
     vi.mocked(run).mockResolvedValueOnce({ stdout: workspaces.map(([name, root]) => `${name}\t${root}`).join('\n'), stderr: '', status: 0 });
 }
 
