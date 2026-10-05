@@ -20847,6 +20847,10 @@
     "original": "Kies welke meldingen je wilt ontvangen en waar.",
     "translation": "Choisissez quelles notifications vous souhaitez recevoir et où."
   },
+  "%Ztf": {
+    "original": "Inschrijvingen {periodName}",
+    "translation": "Inscriptions {periodName}"
+  },
   "%Zu": {
     "original": "De redirect URI behoud je best op de voorgestelde waarde.",
     "translation": "Il est préférable de conserver l'URI de redirection sur la valeur proposée."

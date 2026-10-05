@@ -20663,6 +20663,10 @@
     "original": "Kies welke meldingen je wilt ontvangen en waar.",
     "translation": "Choose which notifications you want to receive and where."
   },
+  "%Ztf": {
+    "original": "Inschrijvingen {periodName}",
+    "translation": "Registrations {periodName}"
+  },
   "%Zu": {
     "original": "De redirect URI behoud je best op de voorgestelde waarde.",
     "translation": "It is best to keep the redirect URI at the suggested value."
