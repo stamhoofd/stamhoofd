@@ -53,11 +53,16 @@ export class WebshopTicketsRepo {
         const promises: Promise<void>[] = [];
 
         const toast = new Toast($t('Tickets ophalen...'), 'spinner').setHide(null);
+        let showToast = false;
         const timer = setTimeout(() => {
-            toast.show();
-        }, 1500);
+            if (showToast) {
+                toast.show();
+            }
+        }, 2000);
 
         const onResultsReceived = async (tickets: TicketPrivate[]): Promise<void> => {
+            if (!showToast) showToast = true;
+
             if (tickets.length) {
                 totalTickets.push(...tickets);
                 // Store each page as it arrives, but do not advance the watermark yet (see below).
@@ -69,8 +74,10 @@ export class WebshopTicketsRepo {
             toast.setProgress(total !== 0 ? (count / total) : 0);
         } });
 
-        toast.setProgress(1);
-        toast.message = $t('Tickets verwerken...');
+        if (showToast) {
+            toast.setProgress(1);
+            toast.message = $t('Tickets verwerken...');
+        }
 
         await Promise.all(promises);
 
@@ -86,14 +93,16 @@ export class WebshopTicketsRepo {
             await this.eventBus.sendEvent('fetched', totalTickets);
         }
 
-        clearTimeout(timer);
+        if (showToast) {
+            clearTimeout(timer);
 
-        toast.message = $t('Tickets verwerkt!');
-        toast.setIcon('success green');
+            toast.message = $t('Tickets verwerkt!');
+            toast.setIcon('success green');
 
-        setTimeout(() => {
-            toast.hide();
-        }, 1000);
+            setTimeout(() => {
+                toast.hide();
+            }, 1000);
+        }
     }
 
     /**

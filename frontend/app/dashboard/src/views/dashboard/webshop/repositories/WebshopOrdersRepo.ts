@@ -85,11 +85,16 @@ export class WebshopOrdersRepo {
         const promises: Promise<void>[] = [];
 
         const toast = new Toast($t('Bestellingen ophalen...'), 'spinner').setHide(null);
+        let showToast = false;
         const timer = setTimeout(() => {
-            toast.show();
-        }, 1000);
+            if (showToast) {
+                toast.show();
+            }
+        }, 2000);
 
         const onResultsReceived = async (orders: PrivateOrder[]) => {
+            if (!showToast) showToast = true;
+
             if (isFetchAll && !hadSuccessfulFetch) {
                 hadSuccessfulFetch = true;
                 await this.store.clear();
@@ -119,8 +124,10 @@ export class WebshopOrdersRepo {
             fetchedOrders.push(order);
         }
 
-        toast.setProgress(1);
-        toast.message = $t('Bestellingen verwerken...');
+        if (showToast) {
+            toast.setProgress(1);
+            toast.message = $t('Bestellingen verwerken...');
+        }
 
         // wait until all orders have been stored
         await Promise.all(promises);
@@ -142,14 +149,16 @@ export class WebshopOrdersRepo {
             await this.eventBus.sendEvent('deleted', deletedOrders);
         }
 
-        clearTimeout(timer);
+        if (showToast) {
+            clearTimeout(timer);
 
-        toast.message = $t('Bestellingen verwerkt!');
-        toast.setIcon('success green');
+            toast.message = $t('Bestellingen verwerkt!');
+            toast.setIcon('success green');
 
-        setTimeout(() => {
-            toast.hide();
-        }, 1000);
+            setTimeout(() => {
+                toast.hide();
+            }, 1000);
+        }
     }
 
     /**
