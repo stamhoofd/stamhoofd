@@ -73,10 +73,14 @@ export class WebshopTicketsRepo {
         const toast = new Toast($t('Tickets ophalen...'), 'spinner').setHide(null);
         let showToast = false;
         const timer = setTimeout(() => {
-            toast.show();
-        }, 1500);
+            if (showToast) {
+                toast.show();
+            }
+        }, 2000);
 
         const onResultsReceived = async (tickets: TicketPrivate[]): Promise<void> => {
+            if (!showToast) showToast = true;
+
             if (tickets.length) {
                 const lastOfPage = tickets[tickets.length - 1];
                 lastTicket = lastOfPage;
@@ -99,8 +103,10 @@ export class WebshopTicketsRepo {
             onProgress(progress);
         } });
 
-        toast.setProgress(1);
-        toast.message = $t('Tickets verwerken...');
+        if (showToast) {
+            toast.setProgress(1);
+            toast.message = $t('Tickets verwerken...');
+        }
 
         await stored;
 
@@ -108,10 +114,12 @@ export class WebshopTicketsRepo {
             await this.apiClient.state.setCursor(new Date(lastTicket.updatedAt), { isComplete: true });
         }
 
-        clearTimeout(timer);
+        if (showToast) {
+            clearTimeout(timer);
 
-        toast.message = $t('Tickets verwerkt!');
-        toast.setIcon('success green');
+            toast.message = $t('Tickets verwerkt!');
+            toast.setIcon('success green');
+        }
 
         setTimeout(() => {
             toast.hide();
