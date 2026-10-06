@@ -142,14 +142,19 @@ describe('setup machine workflow', () => {
         expect(isSetupReady(report)).toBe(false);
     });
 
-    it('repairs vcs configuration as part of full setup', async () => {
-        vi.mocked(checkVcs).mockResolvedValueOnce([{ label: 'push.default', ok: false, details: 'Expected current', repairs: [{ command: 'git', args: ['config', '--local', 'push.default', 'current'] }] }]);
+    it('keeps missing private repository configuration optional during full setup', async () => {
+        vi.mocked(checkVcs).mockResolvedValue([{ label: 'private remote', ok: false, details: 'Expected private repository', repairs: [{ command: 'git', args: ['remote', 'add', 'private', 'git@github.com:stamhoofd/stamhoofd-private.git'] }] }]);
         vi.mocked(confirm).mockResolvedValue(true);
         setPlatform('linux');
         vi.spyOn(fs, 'access').mockResolvedValue(undefined);
         mockSetupCommands({ dns: 'Global: 127.0.0.1:1053\n', domains: 'Global: ~stamhoofd\n' });
         await runSetup({ rootDir: '/repo', verbose: false } as any);
-        expect(setupVcs).toHaveBeenCalledWith('/repo', { yes: true, dryRun: false, verbosity: undefined });
+        expect(setupVcs).not.toHaveBeenCalled();
+        expect(confirm).not.toHaveBeenCalled();
+        const report = await checkSetup({ rootDir: '/repo', verbose: false } as any);
+        expect(report.vcs).toMatchObject({ ok: false, optional: true, manualFix: 'stam setup vcs' });
+        expect(isSetupReady(report)).toBe(true);
+        expect(getRecommendedSetupFixes(report)).toEqual([]);
     });
 
     it('continues prioritizing Node.js repair over pnpm', () => {

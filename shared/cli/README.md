@@ -116,7 +116,7 @@ The translation library no longer has a separate command runner or package scrip
 
 ### Version Control
 
-`pnpm stam setup` includes repository checks. Run `pnpm stam setup vcs` separately to repair only version control, or add `--dry-run` to preview repairs and `--yes` to approve them.
+`pnpm stam setup` includes repository checks as optional items: missing private repository configuration does not block setup or trigger automatic repairs. Run `pnpm stam setup vcs` separately to configure version control, or add `--dry-run` to preview repairs and `--yes` to approve them.
 
 Setup validates fetch and push URLs for public `origin` (`stamhoofd/stamhoofd`) and private `private` (`stamhoofd/stamhoofd-private`). It creates the local `private` branch if missing, configures its upstream as `private/private`, and sets `branch.private.pushRemote=private`, `branch.main.pushRemote=origin`, and `push.default=current`. It never switches checkout, resets existing branches, or pushes.
 

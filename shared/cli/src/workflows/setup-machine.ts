@@ -66,7 +66,7 @@ function setupCheckDefinitions(context: CliContext): { key: keyof SetupReport; l
     return [
         { key: 'node', label: 'Node.js', check: () => nodeCheck(context) },
         { key: 'pnpm', label: 'pnpm', check: () => packageManagerCheck(context) },
-        { key: 'vcs', label: 'Git / JJ', check: () => vcsCheck(context) },
+        { key: 'vcs', label: 'Git / JJ', optional: true, check: () => vcsCheck(context) },
         { key: 'docker', label: 'Podman / Docker', check: () => dockerCheck(context.verbosity) },
         { key: 'privilegedPorts', label: 'Privileged port redirects', check: async () => privilegedPortRedirectCheck(await profile, context.verbosity) },
         { key: 'caddy', label: 'Caddy', check: () => caddyCheck(context.verbosity) },
