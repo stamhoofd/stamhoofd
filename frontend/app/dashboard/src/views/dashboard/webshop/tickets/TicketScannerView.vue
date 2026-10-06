@@ -64,7 +64,7 @@ import { sleep } from '@stamhoofd/utility';
 // QR-scanner worker
 import QrScanner from 'qr-scanner';
 
-import { computed, onActivated, onBeforeUnmount, onDeactivated, ref } from 'vue';
+import { computed, defineProps, onActivated, onBeforeUnmount, onDeactivated, ref } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
 import TicketSyncProgressRing from './TicketSyncProgressRing.vue';
 import { useTicketSync } from './useTicketSync';
@@ -402,9 +402,16 @@ async function checkTicket(result: string) {
 
     // Fetch ticket from database
     try {
-        const ticket = await props.webshopManager.tickets.get(secret);
+        const ticket = await getTicket(secret);
+        if (ticket === null) {
+            notYetDownloadedTicket();
+            return;
+        }
+
         if (ticket) {
-            const order = await props.webshopManager.orders.get(ticket.orderId);
+            const orderId = ticket.orderId;
+            const order = await props.webshopManager.orders.get(orderId)
+                ?? (await fetchIfOnline(async () => props.webshopManager.orders.fetchById(orderId)))?.result;
             if (!order && mightMissTickets.value) {
                 notYetDownloadedTicket();
             } else if (!order) {
@@ -430,8 +437,6 @@ async function checkTicket(result: string) {
                     validTicket(ticket, order);
                 }
             }
-        } else if (mightMissTickets.value) {
-            notYetDownloadedTicket();
         } else {
             console.error('Ticket not found');
             invalidTicket();
@@ -442,6 +447,37 @@ async function checkTicket(result: string) {
         Toast.fromError(e).show();
 
         AppManager.shared.hapticError();
+    }
+}
+
+/**
+ * Get the ticket from the offline database, or from the server if it is not stored (e.g. sold after the last download).
+ * @returns null when the ticket might not be downloaded yet and there is no internet connection
+ */
+async function getTicket(secret: string): Promise<TicketPrivate | undefined | null> {
+    const ticket = await props.webshopManager.tickets.get(secret);
+    if (ticket) {
+        return ticket;
+    }
+
+    const fetched = await fetchIfOnline(async () => props.webshopManager.tickets.fetchBySecret(secret));
+    if (fetched) {
+        return fetched.result;
+    }
+    return mightMissTickets.value ? null : undefined;
+}
+
+/**
+ * @returns null when there is no internet connection
+ */
+async function fetchIfOnline<T>(fetch: () => Promise<T>): Promise<{ result: T } | null> {
+    try {
+        return { result: await fetch() };
+    } catch (e) {
+        if (Request.isNetworkError(e as Error)) {
+            return null;
+        }
+        throw e;
     }
 }
 

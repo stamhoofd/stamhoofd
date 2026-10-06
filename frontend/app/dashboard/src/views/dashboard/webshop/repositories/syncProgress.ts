@@ -5,6 +5,11 @@ import { CountFilteredRequest } from '@stamhoofd/structures';
 export type SyncProgress = { count: number; total: number };
 
 /**
+ * A scanned ticket waits for a single fetch, so it should fail fast on a bad connection.
+ */
+export const SINGLE_FETCH_TIMEOUT_MS = 10_000;
+
+/**
  * Matches the items of a sync that are newer than the last stored item, null if nothing is stored yet.
  */
 export function getNewItemsFilter(webshopId: string, lastStoredUpdatedAt: Date | null): StamhoofdFilter | null {

@@ -25,7 +25,7 @@ async function isRequireMFASetup(response: Response): Promise<boolean> {
 export class DashboardPage {
     constructor(public readonly page: Page) {}
 
-    private getOrganizationDashboardUrl(organizationUri: string) {
+    getOrganizationDashboardUrl(organizationUri: string) {
         return WorkerData.urls.dashboard + '/' + appToUri('dashboard') + '/' + organizationUri;
     }
 
