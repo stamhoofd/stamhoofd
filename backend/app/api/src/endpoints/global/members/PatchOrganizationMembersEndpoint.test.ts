@@ -18,7 +18,7 @@ import { SessionService } from '../../../services/SessionService.js';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer.js';
 import { hasTemporaryMemberAccess } from '../../../helpers/TemporaryMemberAccess.js';
 
-const baseUrl = `/organization/members`;
+const baseUrl = '/organization/members';
 const endpoint = new PatchOrganizationMembersEndpoint();
 type EndpointType = typeof endpoint;
 type Body = EndpointType extends Endpoint<any, any, infer B, any> ? B : never;
@@ -265,16 +265,17 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             expect(member.details.alternativeEmails).toHaveLength(0);
         });
 
-        test('The security code is not a requirement for members without additional data', async () => {
+        test('A security code is required when user it\'s email is not listed on an existing member', async () => {
             const organization = await new OrganizationFactory({ }).create();
             const user = await new UserFactory({
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
-                organization, // since we are in platform mode, this will only set the permissions for this organization
+                organization,
+                email: 'attacker@example.com',
             }).create();
 
             const existingMember = await new MemberFactory({
-                firstName,
-                lastName,
+                firstName: 'Victim',
+                lastName: 'Member',
                 birthDay,
                 generateData: false,
             }).create();
@@ -282,13 +283,46 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
-            const newBirthDay = new Date(existingMember.details.birthDay!.getTime() + 1);
             const put = MemberWithRegistrationsBlob.create({
                 details: MemberDetails.create({
-                    firstName,
-                    lastName,
-                    birthDay: newBirthDay,
-                    email: 'anewemail@example.com',
+                    firstName: 'Victim',
+                    lastName: 'Member',
+                    birthDay: new Date(existingMember.details.birthDay!.getTime() + 1),
+                }),
+            });
+            arr.addPut(put);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, request))
+                .rejects
+                .toThrow(STExpect.errorWithCode('known_member_missing_rights'));
+        });
+
+        test('No security code is required when user it\'s email is listed on a member without responsibilities', async () => {
+            const organization = await new OrganizationFactory({ }).create();
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization,
+                email: 'owner@example.com',
+            }).create();
+
+            const existingMember = await new MemberFactory({
+                firstName: 'Victim',
+                lastName: 'Member',
+                birthDay,
+                generateData: false,
+                details: MemberDetails.create({ email: 'owner@example.com' }),
+            }).create();
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            const put = MemberWithRegistrationsBlob.create({
+                details: MemberDetails.create({
+                    firstName: 'Victim',
+                    lastName: 'Member',
+                    birthDay: new Date(existingMember.details.birthDay!.getTime() + 1),
                 }),
             });
             arr.addPut(put);
@@ -297,18 +331,43 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             request.headers.authorization = 'Bearer ' + token.accessToken;
             const response = await testServer.test(endpoint, request);
             expect(response.status).toBe(200);
-
-            // Check id of the returned memebr matches the existing member
-            expect(response.body.members.length).toBe(1);
             expect(response.body.members[0].id).toBe(existingMember.id);
+        });
 
-            // Check data matches the original data + changes from the put
-            const member = response.body.members[0];
-            expect(member.details.firstName).toBe(firstName);
-            expect(member.details.lastName).toBe(lastName);
-            expect(member.details.birthDay).toEqual(newBirthDay);
-            expect(member.details.email).toBe('anewemail@example.com'); // this has been merged
-            expect(member.details.alternativeEmails).toHaveLength(0);
+        test('A security code is always required if the user has a responsibility', async () => {
+            const organization = await new OrganizationFactory({ }).create();
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization,
+                email: 'responsible-owner@example.com',
+            }).create();
+
+            const existingMember = await new MemberFactory({
+                firstName: 'Victim',
+                lastName: 'Member',
+                birthDay,
+                generateData: false,
+                details: MemberDetails.create({ email: 'responsible-owner@example.com' }),
+            }).create();
+            await new MemberResponsibilityRecordFactory({ member: existingMember }).create();
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            const put = MemberWithRegistrationsBlob.create({
+                details: MemberDetails.create({
+                    firstName: 'Victim',
+                    lastName: 'Member',
+                    birthDay: new Date(existingMember.details.birthDay!.getTime() + 1),
+                }),
+            });
+            arr.addPut(put);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, request))
+                .rejects
+                .toThrow(STExpect.errorWithCode('known_member_missing_rights'));
         });
 
         test('A duplicate member with existing registrations returns those registrations after a merge', async () => {
