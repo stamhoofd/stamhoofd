@@ -14,6 +14,9 @@
                     <button v-if="cameras.length > 1" class="round-button" type="button" @click="switchCamera">
                         <span class="icon reverse" />
                     </button>
+                    <button v-if="isDevelopment" class="round-button" type="button" :title="$t('Lokale database verwijderen en herladen')" @click="deleteDatabaseAndReload">
+                        <span class="icon trash" />
+                    </button>
                 </div>
 
                 <div class="status-bar">
@@ -48,11 +51,11 @@
 
 <script lang="ts" setup>
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, useDismiss, useShow } from '@simonbackx/vue-app-navigation';
+import { useDismiss, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import Spinner from '@stamhoofd/components/Spinner.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
+import Spinner from '@stamhoofd/components/Spinner.vue';
 import type { PluginListenerHandle } from '@stamhoofd/networking/AppManager';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import type { Order, PrivateOrder, Product, TicketPrivate } from '@stamhoofd/structures';
@@ -131,6 +134,25 @@ const disableWebVideo = ref(false);
 let nativeListener: PluginListenerHandle | null = null;
 
 const { isSyncing: isLoading, hasNeverSynced, isCatchingUp, mightMissTickets, progressPercentage } = useTicketSync(() => props.webshopManager);
+
+const isDevelopment = STAMHOOFD.environment === 'development';
+
+async function deleteDatabaseAndReload() {
+    props.webshopManager.closeDatabase();
+    try {
+        await new Promise<void>((resolve, reject) => {
+            const request = window.indexedDB.deleteDatabase(props.webshopManager.database.databaseName);
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error ?? new Error('Failed to delete the database'));
+            // A running sync can reopen the database before the delete starts
+            request.onblocked = () => props.webshopManager.closeDatabase();
+        });
+    } catch (e) {
+        Toast.fromError(e).show();
+        return;
+    }
+    window.location.reload();
+}
 
 const lastUpdatedText = computed(() => {
     const min = Math.min(props.webshopManager.tickets.lastUpdated?.getTime() ?? 0, props.webshopManager.orders.lastUpdated?.getTime() ?? 0);
