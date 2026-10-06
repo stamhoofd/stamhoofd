@@ -2,7 +2,7 @@ import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import type { RateLimiter, Token } from '@stamhoofd/models';
 import { AuditLog, EmailTemplateFactory, Member, MemberFactory, OrganizationFactory, UserFactory } from '@stamhoofd/models';
-import { AuditLogReplacementType, AuditLogType, EmailTemplateType, MemberDetails, Parent, ParentType, SecurityCodeSendMethod, SendMemberSecurityCodeRequest } from '@stamhoofd/structures';
+import { AuditLogReplacementType, AuditLogType, EmailTemplateType, MemberDetails, Parent, ParentType, PermissionLevel, Permissions, SecurityCodeSendMethod, SendMemberSecurityCodeRequest } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Formatter } from '@stamhoofd/utility';
 import type { SMSMocker } from '../../../../tests/helpers/SMSMocker.js';
@@ -68,7 +68,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         return { organization, user, token, member };
     }
 
-    function buildRequest(host: string, token: Token, body: SendMemberSecurityCodeRequest) {
+    function buildRequest(host: string | undefined, token: Token, body: SendMemberSecurityCodeRequest) {
         const request = Request.buildJson('POST', baseUrl, host, body);
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return request;
@@ -115,6 +115,38 @@ describe('Endpoint.SendMemberSecurityCode', () => {
 
         // No emails should have been sent
         expect(await EmailMocker.transactional.getSucceededCount()).toBe(0);
+    });
+
+    test('sends the code via SMS without an organization in platform mode', async () => {
+        TestUtils.setEnvironment('userMode', 'platform');
+        const mocker: SMSMocker = initSMSApi();
+        await new EmailTemplateFactory({ type: EmailTemplateType.MemberSecurityCode }).create();
+
+        const user = await new UserFactory({
+            globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+        }).create();
+        const token = await SessionService.createSession(user);
+
+        const details = MemberDetails.create({
+            firstName: 'Jef',
+            lastName: 'Testman',
+            birthDay: new Date(Date.UTC(2010, 4, 5)),
+            phone: memberPhone,
+            securityCode,
+        });
+        const member = await new MemberFactory({ details }).create();
+
+        const request = buildRequest(undefined, token, SendMemberSecurityCodeRequest.create({
+            memberId: member.id,
+            method: SecurityCodeSendMethod.SMS,
+        }));
+
+        const response = await testServer.test(endpoint, request);
+
+        expect(response.body.method).toBe(SecurityCodeSendMethod.SMS);
+        expect(mocker.sentMessages.length).toBe(1);
+        expect(mocker.lastMessage!.recipient).toEqual(32470123456);
+        expect(mocker.lastMessage!.message).toContain(formattedCode);
     });
 
     test('cycles to the next phone number on retries', async () => {

@@ -10,105 +10,67 @@
                 <CodeInput v-model="code" :code-length="16" :space-length="4" :numbers-only="false" @complete="save" />
             </STInputBox>
 
-            <template v-if="$isPlatform">
-                <hr>
-                <h2>{{ $t('%dz') }}</h2>
+            <hr>
+            <h2>{{ $t('%dz') }}</h2>
 
-                <STList class="illustration-list">
-                    <STListItem class="left-center">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/email.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%e1') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%e2') }}
-                        </p>
-                    </STListItem>
+            <STList class="illustration-list">
+                <STListItem class="left-center">
+                    <template #left>
+                        <IconContainer icon="email" aside-icon="search stroke" class="gray" />
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('%e1') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('%e2') }}
+                    </p>
+                </STListItem>
 
-                    <STListItem class="left-center" :selectable="true" @click="sendSecurityCodeViaEmail">
-                        <template #left>
-                            <IconContainer icon="email" aside-icon="send send" />
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%Zb3') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%Zau') }}
-                        </p>
+                <STListItem class="left-center" :selectable="true" @click="sendSecurityCodeViaEmail">
+                    <template #left>
+                        <IconContainer icon="email" aside-icon="send stroke" />
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('%Zb3') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('%Zau') }}
+                    </p>
 
-                        <template #right>
-                            <Spinner v-if="sendingCode === SecurityCodeSendMethod.Email" />
-                            <span v-else class="icon arrow-right-small" />
-                        </template>
-                    </STListItem>
+                    <template #right>
+                        <Spinner v-if="sendingCode === SecurityCodeSendMethod.Email" />
+                        <span v-else class="icon arrow-right-small" />
+                    </template>
+                </STListItem>
 
-                    <STListItem class="left-center">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/communication.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%e0') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%7h') }}
-                        </p>
-                    </STListItem>
-                </STList>
-            </template>
+                <STListItem class="left-center" :selectable="true" @click="startSecurityCodeViaSMS">
+                    <template #left>
+                        <IconContainer icon="smartphone" aside-icon="send stroke" />
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('%ZbE') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('%Zan', {member: cloned.patchedMember.details.firstName}) }}
+                    </p>
 
-            <template v-else>
-                <hr>
-                <h2>{{ $t('%dz') }}</h2>
+                    <template #right>
+                        <span class="icon arrow-right-small" />
+                    </template>
+                </STListItem>
 
-                <STList class="illustration-list">
-                    <STListItem class="left-center">
-                        <template #left>
-                            <IconContainer icon="email" aside-icon="search stroke" class="gray" />
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%e1') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%e2') }}
-                        </p>
-                    </STListItem>
-
-                    <STListItem class="left-center" :selectable="true" @click="sendSecurityCodeViaEmail">
-                        <template #left>
-                            <IconContainer icon="email" aside-icon="send stroke" />
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%Zb3') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%Zau') }}
-                        </p>
-
-                        <template #right>
-                            <Spinner v-if="sendingCode === SecurityCodeSendMethod.Email" />
-                            <span v-else class="icon arrow-right-small" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem class="left-center" :selectable="true" @click="startSecurityCodeViaSMS">
-                        <template #left>
-                            <IconContainer icon="smartphone" aside-icon="send stroke" />
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%ZbE') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%Zan', {member: cloned.patchedMember.details.firstName}) }}
-                        </p>
-
-                        <template #right>
-                            <span class="icon arrow-right-small" />
-                        </template>
-                    </STListItem>
-                </STList>
-            </template>
+                <STListItem class="left-center">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/communication.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('Vraag de code aan {contact}', {contact: contactInfo.contact}) }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('{contactCan} in #platform jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf {role}, vraag het dan aan {alternative}.', contactInfo) }}
+                    </p>
+                </STListItem>
+            </STList>
         </template>
         <component :is="component" v-else :title="title" :validator="errors.validator" :parent-error-box="errors.errorBox" :member="cloned" :will-mark-reviewed="willMarkReviewed" v-bind="$attrs" :level="1" />
     </component>
@@ -129,6 +91,7 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Formatter } from '@stamhoofd/utility';
 import { useAppContext } from '#context/appContext.ts';
 import { useContext } from '#hooks/useContext.ts';
+import { useRequiredOrganization } from '#hooks/useOrganization.ts';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import CodeInput from '../inputs/CodeInput.vue';
@@ -159,7 +122,7 @@ const props = withDefaults(
         getMarkReviewed?: ((member: PlatformMember) => ReviewTimeType[]) | null;
         saveHandler?: ((navigate: NavigationActions) => Promise<void> | void) | null;
     }>(), {
-        saveText: () => $t(`%1Op`),
+        saveText: () => $t('%1Op'),
         categorized: false,
         saveHandler: null,
         markReviewed: () => [],
@@ -301,7 +264,7 @@ async function save() {
             if (code.value.length !== 16) {
                 errors.errorBox = new ErrorBox(new SimpleError({
                     code: 'invalid_field',
-                    message: $t(`%zO`),
+                    message: $t('%zO'),
                     field: 'code',
                 }));
                 loading.value = false;
@@ -365,12 +328,29 @@ async function modifyAddress(from: Address, to: Address) {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`%zP`), $t(`%zQ`), from.shortString() + ' ' + $t(`%zR`) + ' ' + Formatter.joinLast(occurrences, ', ', ' ' + $t(`%M1`) + ' ') + $t(`%zS`) + ' ' + to.shortString() + '.', $t(`%zT`), false)) {
+    if (!await CenteredMessage.confirm($t('%zP'), $t('%zQ'), from.shortString() + ' ' + $t('%zR') + ' ' + Formatter.joinLast(occurrences, ', ', ' ' + $t('%M1') + ' ') + $t('%zS') + ' ' + to.shortString() + '.', $t('%zT'), false)) {
         return;
     }
 
     cloned.value.family.updateAddress(from, to);
 }
+
+const isPlatform = STAMHOOFD.userMode === 'platform';
+const organization = useRequiredOrganization();
+
+const contactInfo = computed(() => isPlatform
+    ? {
+            contact: $t('jouw leiding'),
+            contactCan: $t('Jouw leiding kan'),
+            role: $t('leiding'),
+            alternative: $t('jouw medeleiding of #koepel'),
+        }
+    : {
+            contact: $t('de beheerders van {org}', { org: organization.value.name }),
+            contactCan: $t('De beheerders kunnen'),
+            role: $t('beheerder'),
+            alternative: $t('de hoofdbeheerder van {org}', { org: organization.value.name }),
+        });
 
 const hasChanges = computed(() => {
     return cloned.value.isNew || patchContainsChanges(cloned.value.patch, cloned.value.member, { version: Version });
@@ -380,7 +360,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value && !loading.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 }
 
 defineExpose({
