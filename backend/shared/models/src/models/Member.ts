@@ -1,6 +1,6 @@
 import { column, ManyToManyRelation, ManyToOneRelation, OneToManyRelation } from '@simonbackx/simple-database';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
-import { MemberDetails, NationalRegisterNumberOptOut, PlatformMembershipMemberDetails, RegistrationWithTinyMember, TinyMember } from '@stamhoofd/structures';
+import { MemberDetails, PlatformMembershipMemberDetails, RegistrationWithTinyMember, TinyMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import basex from 'base-x';
 import crypto from 'crypto';
@@ -509,40 +509,14 @@ export class Member extends QueryableModel {
         });
     }
 
-    async isSafeToMergeDuplicateWithoutSecurityCode(email?: string) {
-        let quickPass = false;
-        if (email) {
-            if (this.details.hasEmail(email) || this.details.hasUnverifiedEmail(email)) {
-                // Give access
-                quickPass = true;
+    async isSafeToMergeDuplicateWithoutSecurityCode(email: string) {
+        if (this.details.hasEmail(email) || this.details.hasUnverifiedEmail(email)) {
+            const responsibilities = await MemberResponsibilityRecord.where({ memberId: this.id }, { limit: 1 });
+            if (responsibilities.length === 0) {
+                return true;
             }
         }
-
-        if (this.details.getNotificationEmails().length === 0 && this.details.getPhoneNumbersForVerification().length === 0) {
-            quickPass = true;
-        }
-
-        if (!quickPass) {
-            if ([...this.details.recordAnswers.values()].find(a => a.settings.sensitive)) {
-                return false;
-            }
-
-            if (this.details.parents.find(p => p.nationalRegisterNumber !== null && p.nationalRegisterNumber !== NationalRegisterNumberOptOut)) {
-                return false;
-            }
-
-            if (this.details.nationalRegisterNumber !== null && this.details.nationalRegisterNumber !== NationalRegisterNumberOptOut) {
-                return false;
-            }
-        }
-
-        // If responsibilities: not safe
-        const responsibilities = await MemberResponsibilityRecord.where({ memberId: this.id }, { limit: 1 });
-        if (responsibilities.length > 0) {
-            return false;
-        }
-
-        return true;
+        return false;
     }
 
     async tryUpdateLastRegisteredAt(registration: Registration) {
