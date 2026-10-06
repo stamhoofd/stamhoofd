@@ -13,7 +13,7 @@ import { createPrivateOrderIndexBox } from '../ordersIndexedDBSorters';
 import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
 import type { WebshopSettingsStore } from './WebshopSettingsStore';
 import type { ProgressListener, SyncProgress } from './syncProgress';
-import { countSyncItems, getNewItemsFilter, SharedSync } from './syncProgress';
+import { countSyncItems, getNewItemsFilter, SharedSync, SINGLE_FETCH_TIMEOUT_MS } from './syncProgress';
 import { SyncState } from './SyncState';
 import type { WebshopTicketsRepo } from './WebshopTicketsRepo';
 
@@ -134,6 +134,26 @@ export class WebshopOrdersRepo {
         }
 
         await this.apiClient.state.setCompleted();
+    }
+
+    /**
+     * Fetch a single order from the server and store it in the offline database, without moving the sync cursor.
+     * @returns undefined if the order does not exist or is deleted
+     */
+    async fetchById(id: string): Promise<PrivateOrder | undefined> {
+        const order = await this.apiClient.getById(id);
+        if (!order) {
+            return undefined;
+        }
+
+        await this.store.putAll([order]);
+        if (order.status === OrderStatus.Deleted) {
+            await this.eventBus.sendEvent('deleted', [order]);
+            return undefined;
+        }
+
+        await this.eventBus.sendEvent('fetched', [order]);
+        return order;
     }
 
     /**
@@ -621,6 +641,23 @@ class WebshopOrdersApiClient {
         } finally {
             this._isFetching = false;
         }
+    }
+
+    async getById(id: string): Promise<PrivateOrder | undefined> {
+        const response = await this.context.authenticatedServer.request({
+            method: 'GET',
+            path: `/webshop/orders`,
+            decoder: new PaginatedResponseDecoder(new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
+            query: new LimitedFilteredRequest({
+                filter: { webshopId: this.webshopId, id },
+                limit: 1,
+            }),
+            shouldRetry: false,
+            timeout: SINGLE_FETCH_TIMEOUT_MS,
+            owner: this,
+        });
+
+        return response.data.results[0];
     }
 
     async putPatches(patches: PatchableArrayAutoEncoder<PrivateOrder>) {

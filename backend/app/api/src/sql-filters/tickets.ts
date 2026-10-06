@@ -23,6 +23,11 @@ export const ticketFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.String,
         nullable: false,
     }),
+    secret: createColumnFilter({
+        expression: SQL.column('secret'),
+        type: SQLValueType.String,
+        nullable: false,
+    }),
     createdAt: createColumnFilter({
         expression: SQL.column('createdAt'),
         type: SQLValueType.Datetime,

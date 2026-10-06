@@ -11,7 +11,7 @@ import { CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, SortIt
 import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
 import type { WebshopSettingsStore } from './WebshopSettingsStore';
 import type { ProgressListener, SyncProgress } from './syncProgress';
-import { countSyncItems, getNewItemsFilter, SharedSync } from './syncProgress';
+import { countSyncItems, getNewItemsFilter, SharedSync, SINGLE_FETCH_TIMEOUT_MS } from './syncProgress';
 import { SyncState } from './SyncState';
 
 /**
@@ -75,7 +75,7 @@ export class WebshopTicketsRepo {
                 totalTickets.push(...tickets);
                 const lastTicket = tickets[tickets.length - 1];
                 // Moving the cursor once this page and all pages before it are stored lets an interrupted sync resume here
-                stored = Promise.all([stored, this.storeAll(tickets)]).then(async () => this.apiClient.state.setCursor(new Date(lastTicket.updatedAt), { isComplete: false }));
+                stored = Promise.all([stored, this.store.putAll(tickets)]).then(async () => this.apiClient.state.setCursor(new Date(lastTicket.updatedAt), { isComplete: false }));
                 promises.push(stored);
             }
         };
@@ -91,6 +91,21 @@ export class WebshopTicketsRepo {
         }
 
         await this.apiClient.state.setCompleted();
+    }
+
+    /**
+     * Fetch a single ticket from the server and store it in the offline database, without moving the sync cursor.
+     * @returns undefined if the ticket does not exist
+     */
+    async fetchBySecret(secret: string): Promise<TicketPrivate | undefined> {
+        const ticket = await this.apiClient.getBySecret(secret);
+        if (!ticket) {
+            return undefined;
+        }
+
+        await this.store.putAll([ticket]);
+        await this.eventBus.sendEvent('fetched', [ticket]);
+        return this.get(secret);
     }
 
     /**
@@ -166,7 +181,7 @@ export class WebshopTicketsRepo {
      * - Get all offline patches (from indexed db)
      * - Patch them in the backend
      * - Store the patched tickets
-     * - Clear the offline patches
+     * - Clear the offline patches that did not change while saving
      */
     async trySavePatches(): Promise<void> {
         if (this.isSavingPatches) {
@@ -203,18 +218,6 @@ export class WebshopTicketsRepo {
     }
 
     /**
-     * Put all tickets in the offline database store.
-     * @param tickets
-     * @param clearPatches
-     */
-    private async storeAll(tickets: TicketPrivate[], clearPatches = true) {
-        await this.store.putAll(tickets);
-        if (clearPatches) {
-            await this.patchesStore.deleteAll(tickets.map(t => t.secret));
-        }
-    }
-
-    /**
      * Patch all tickets in the backend and store them in the database.
      */
     private async patchAllTickets(patches: AutoEncoderPatchType<TicketPrivate>[]) {
@@ -247,7 +250,9 @@ export class WebshopTicketsRepo {
 
         // Move all data to original order
         try {
-            await this.storeAll(patched);
+            await this.store.putAll(patched);
+            // A patch that changed while saving (e.g. an undone scan) still has to be saved
+            await this.patchesStore.deleteIfUnchanged(patches);
         } catch (e) {
             console.error(e);
             // No db support or other error. Should ignore
@@ -393,8 +398,13 @@ export class WebshopTicketPatchesStore {
         this.database = database;
     }
 
-    async deleteAll(secrets: string[]) {
+    /**
+     * Delete the patches, except the ones that were replaced in the meantime.
+     */
+    async deleteIfUnchanged(patches: AutoEncoderPatchType<TicketPrivate>[]) {
         const db = await this.database.get();
+        const decoder = TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>;
+        const encode = (patch: AutoEncoderPatchType<TicketPrivate>) => JSON.stringify(patch.encode({ version: Version }));
 
         return new Promise<void>((resolve, reject) => {
             const transaction = db.transaction([WebshopTicketPatchesStore.storeName], 'readwrite');
@@ -410,8 +420,17 @@ export class WebshopTicketPatchesStore {
 
             const objectStore = transaction.objectStore(WebshopTicketPatchesStore.storeName);
 
-            for (const secret of secrets) {
-                objectStore.delete(secret);
+            for (const patch of patches) {
+                const request = objectStore.get(patch.secret!);
+                request.onsuccess = () => {
+                    if (request.result === undefined) {
+                        return;
+                    }
+                    const current = decoder.decode(new ObjectData(request.result, { version: Version }));
+                    if (encode(current) === encode(patch)) {
+                        objectStore.delete(patch.secret!);
+                    }
+                };
             }
         });
     }
@@ -627,6 +646,23 @@ class WebshopTicketsApiClient {
         } finally {
             this._isFetching = false;
         }
+    }
+
+    async getBySecret(secret: string): Promise<TicketPrivate | undefined> {
+        const response = await this.context.authenticatedServer.request({
+            method: 'GET',
+            path: `/webshop/tickets/private`,
+            decoder: new PaginatedResponseDecoder(new ArrayDecoder(TicketPrivate as Decoder<TicketPrivate>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
+            query: new LimitedFilteredRequest({
+                filter: { webshopId: this.webshopId, secret },
+                limit: 1,
+            }),
+            shouldRetry: false,
+            timeout: SINGLE_FETCH_TIMEOUT_MS,
+            owner: this,
+        });
+
+        return response.data.results[0];
     }
 
     async patchAll(patches: AutoEncoderPatchType<TicketPrivate>[]) {

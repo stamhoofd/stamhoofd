@@ -3,7 +3,7 @@ import { test, setup } from '../test-fixtures/platform.js';
 setup();
 
 // other imports
-import type { Locator, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { devices, expect } from '@playwright/test';
 import type {
     Organization,
@@ -15,6 +15,7 @@ import {
     OrderFactory,
     OrganizationFactory,
     RegistrationPeriodFactory,
+    Ticket,
     TicketFactory,
 } from '@stamhoofd/models';
 import { PaymentMethod, PermissionLevel, Permissions, PropertyFilter, UserPermissions, WebshopTicketType } from '@stamhoofd/structures';
@@ -24,6 +25,8 @@ import {
     TableHelper,
     WorkerData,
 } from '../helpers/index.js';
+import { installFakeCamera, showQRCodeToCamera } from '../helpers/fakeCamera.js';
+import { clickEvenIfCoveredByToast, hasCompletedTicketSync, readOfflineDatabase } from '../helpers/page/webshop/TicketScannerDevice.js';
 import { WebshopOrdersView } from '../helpers/page/webshop/WebshopOrdersView.js';
 import { simulateNetworkOffline } from '../helpers/simulateNetworkOffline.js';
 import { TestWebshops } from '../helpers/test-data/TestWebshops.js';
@@ -589,6 +592,111 @@ test.describe('Webshops offline', () => {
         });
     });
 
+    test('Should scan a ticket that is not downloaded yet and save the scan once back online', async ({ browser, storageState }) => {
+        test.setTimeout(120_000);
+
+        const testWebshop = await createTicketWebshop('Los ticket');
+        const order = await new OrderFactory({ webshop: testWebshop }).create();
+        const firstPageUpdatedAt = new Date(Date.now() - 2 * 60 * 60 * 1000);
+        for (let i = 0; i < 100; i++) {
+            await new TicketFactory({ order, index: i + 1, total: 101, updatedAt: firstPageUpdatedAt }).create();
+        }
+        // Updated last, so the download only reaches it on the second page
+        const ticket = await new TicketFactory({ order, index: 101, total: 101, updatedAt: new Date(Date.now() - 60 * 60 * 1000) }).create();
+
+        const context = await browser.newContext({
+            storageState,
+            ...devices['iPhone 13'],
+            userAgent: undefined,
+        });
+
+        const page = await context.newPage();
+        await installFakeCamera(page);
+        const dashboard = new DashboardPage(page);
+
+        let releaseNextPages!: () => void;
+        const nextPagesReleased = new Promise<void>((resolve) => {
+            releaseNextPages = resolve;
+        });
+        await page.route(url => url.pathname.endsWith('/webshop/tickets/private') && url.searchParams.has('pageFilter'), async (route) => {
+            await nextPagesReleased;
+            await route.continue();
+        });
+
+        await test.step('scan the ticket while it is not downloaded yet', async () => {
+            await dashboard.openOrganizationDashboard({ organizationUri: organization.uri });
+            await dashboard.openTab(DashboardTab.Webshops);
+            await page.getByTestId('webshop-menu-item')
+                .filter({ hasText: testWebshop.meta.name })
+                .click();
+            await page.getByTestId('scan-tickets-button').click();
+            await clickEvenIfCoveredByToast(page, page.getByTestId('start-scan-tickets-button'));
+            await expect(page.getByTestId('ticket-scanner-catching-up')).toBeVisible();
+
+            await showQRCodeToCamera(page, `https://example.com/tickets/${ticket.secret}`);
+            await expect(page.getByTestId('valid-ticket-view')).toBeVisible();
+            await showQRCodeToCamera(page, null);
+        });
+
+        await test.step('mark it as scanned without internet', async () => {
+            await simulateNetworkOffline(page);
+            await page.getByTestId('scan-button').click();
+            await expect.poll(async () => readOfflineDatabase(page, testWebshop.id, 'ticketPatches')).toBe(1);
+        });
+
+        await test.step('keep the scan when the download reaches the ticket', async () => {
+            releaseNextPages();
+            await expect.poll(async () => hasCompletedTicketSync(page, testWebshop.id)).toBe(true);
+            expect(await readOfflineDatabase(page, testWebshop.id, 'tickets')).toBe(101);
+            expect(await readOfflineDatabase(page, testWebshop.id, 'ticketPatches')).toBe(1);
+        });
+
+        await test.step('save the scan once back online', async () => {
+            await page.unrouteAll({ behavior: 'ignoreErrors' });
+            // The scanner retries saving scans every 30 seconds
+            await expect.poll(async () => (await Ticket.getByID(ticket.id))?.scannedAt ?? null, { timeout: 45_000 }).not.toBeNull();
+            await expect.poll(async () => readOfflineDatabase(page, testWebshop.id, 'ticketPatches')).toBe(0);
+        });
+    });
+
+    test('Should scan a ticket that was sold after the download', async ({ browser, storageState }) => {
+        const testWebshop = await createTicketWebshop('Later verkocht');
+        await new TicketFactory({ order: await new OrderFactory({ webshop: testWebshop }).create() }).create();
+
+        const context = await browser.newContext({
+            storageState,
+            ...devices['iPhone 13'],
+            userAgent: undefined,
+        });
+
+        const page = await context.newPage();
+        await installFakeCamera(page);
+        const dashboard = new DashboardPage(page);
+
+        await test.step('download all tickets', async () => {
+            await dashboard.openOrganizationDashboard({ organizationUri: organization.uri });
+            await dashboard.openTab(DashboardTab.Webshops);
+            await page.getByTestId('webshop-menu-item')
+                .filter({ hasText: testWebshop.meta.name })
+                .click();
+            await page.getByTestId('scan-tickets-button').click();
+            await clickEvenIfCoveredByToast(page, page.getByTestId('start-scan-tickets-button'));
+            await expect(page.getByTestId('ticket-scanner-view')).toContainText($t('%Vt'));
+        });
+
+        await test.step('reject an unknown ticket', async () => {
+            await showQRCodeToCamera(page, 'https://example.com/tickets/unknown-secret');
+            await expect(page.locator('.toast-view')).toContainText($t('Ongeldig ticket'));
+            await showQRCodeToCamera(page, null);
+        });
+
+        await test.step('recognize a ticket sold after the download', async () => {
+            const ticket = await new TicketFactory({ order: await new OrderFactory({ webshop: testWebshop }).create() }).create();
+            await showQRCodeToCamera(page, `https://example.com/tickets/${ticket.secret}`);
+            await expect(page.getByTestId('valid-ticket-view')).toBeVisible();
+        });
+    });
+
     test('Should keep a download of an older version', async ({ browser, storageState }) => {
         const testWebshop = await createTicketWebshop('Oudere versie');
         const order = await new OrderFactory({ webshop: testWebshop }).create();
@@ -643,38 +751,6 @@ test.describe('Webshops offline', () => {
 });
 
 /**
- * Reads from the offline database of a webshop on this device.
- */
-async function readOfflineDatabase(page: Page, webshopId: string, storeName: 'settings' | 'tickets', key?: string): Promise<unknown> {
-    return page.evaluate(async ({ id, storeName, key }) => new Promise<unknown>((resolve) => {
-        const open = indexedDB.open('webshop-' + id);
-        open.onerror = () => resolve(undefined);
-        open.onsuccess = () => {
-            const database = open.result;
-            if (!database.objectStoreNames.contains(storeName)) {
-                database.close();
-                resolve(undefined);
-                return;
-            }
-            const objectStore = database.transaction(storeName).objectStore(storeName);
-            const request = key === undefined ? objectStore.count() : objectStore.get(key);
-            request.onerror = () => {
-                database.close();
-                resolve(undefined);
-            };
-            request.onsuccess = () => {
-                database.close();
-                resolve(request.result);
-            };
-        };
-    }), { id: webshopId, storeName, key });
-}
-
-async function hasCompletedTicketSync(page: Page, webshopId: string): Promise<boolean> {
-    return await readOfflineDatabase(page, webshopId, 'settings', 'ticketsSyncCompleted') === true;
-}
-
-/**
  * Rewrites the stored sync state to what versions without sync completed flags stored after a completed sync.
  */
 async function storeSyncStateOfOlderVersion(page: Page, webshopId: string) {
@@ -704,24 +780,4 @@ async function storeSyncStateOfOlderVersion(page: Page, webshopId: string) {
             transaction.onerror = () => reject(new Error('Could not store the sync state'));
         };
     }), webshopId);
-}
-
-async function clickEvenIfCoveredByToast(page: Page, element: Locator) {
-    await expect(element).toBeAttached();
-    try {
-        await element.click({ timeout: 3_000 });
-    } catch (e) {
-        // If toast is visible, dismiss it
-        const items = page.locator('.toast-view');
-
-        const count = await items.count();
-
-        for (let i = 0; i < count; i++) {
-            // Close toasts
-            await items.nth(i).click();
-        }
-
-        // Retry
-        await element.click();
-    }
 }

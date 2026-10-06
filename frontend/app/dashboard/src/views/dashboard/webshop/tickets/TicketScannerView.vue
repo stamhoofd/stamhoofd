@@ -14,11 +14,14 @@
                     <button v-if="cameras.length > 1" class="round-button" type="button" @click="switchCamera">
                         <span class="icon reverse" />
                     </button>
+                    <button v-if="isDevelopment" class="round-button" type="button" :title="$t('Lokale database verwijderen en herladen')" @click="deleteDatabaseAndReload">
+                        <span class="icon trash" />
+                    </button>
                 </div>
 
                 <div class="status-bar">
                     <p v-if="isCatchingUp" data-testid="ticket-scanner-catching-up">
-                        <TicketSyncProgressRing class="inline" :progress-percentage="progressPercentage" /> {{ $t('Tickets downloaden...') }}<br><span class="style-description-small">{{ $t('Tot het downloaden klaar is, worden nog niet alle tickets herkend.') }}</span>
+                        <TicketSyncProgressRing class="inline" :progress-percentage="progressPercentage" /> {{ $t('Tickets downloaden...') }}<br><span class="style-description-small">{{ $t('Tot het downloaden klaar is, heb je internet nodig om alle tickets te herkennen.') }}</span>
                     </p>
                     <p v-else-if="isLoading">
                         <Spinner class="inline" /> {{ $t('%Vp') }}
@@ -48,11 +51,11 @@
 
 <script lang="ts" setup>
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, useDismiss, useShow } from '@simonbackx/vue-app-navigation';
+import { useDismiss, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import Spinner from '@stamhoofd/components/Spinner.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
+import Spinner from '@stamhoofd/components/Spinner.vue';
 import type { PluginListenerHandle } from '@stamhoofd/networking/AppManager';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import type { Order, PrivateOrder, Product, TicketPrivate } from '@stamhoofd/structures';
@@ -131,6 +134,25 @@ const disableWebVideo = ref(false);
 let nativeListener: PluginListenerHandle | null = null;
 
 const { isSyncing: isLoading, hasNeverSynced, isCatchingUp, mightMissTickets, progressPercentage } = useTicketSync(() => props.webshopManager);
+
+const isDevelopment = STAMHOOFD.environment === 'development';
+
+async function deleteDatabaseAndReload() {
+    props.webshopManager.closeDatabase();
+    try {
+        await new Promise<void>((resolve, reject) => {
+            const request = window.indexedDB.deleteDatabase(props.webshopManager.database.databaseName);
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error ?? new Error('Failed to delete the database'));
+            // A running sync can reopen the database before the delete starts
+            request.onblocked = () => props.webshopManager.closeDatabase();
+        });
+    } catch (e) {
+        Toast.fromError(e).show();
+        return;
+    }
+    window.location.reload();
+}
 
 const lastUpdatedText = computed(() => {
     const min = Math.min(props.webshopManager.tickets.lastUpdated?.getTime() ?? 0, props.webshopManager.orders.lastUpdated?.getTime() ?? 0);
@@ -380,9 +402,16 @@ async function checkTicket(result: string) {
 
     // Fetch ticket from database
     try {
-        const ticket = await props.webshopManager.tickets.get(secret);
+        const ticket = await getTicket(secret);
+        if (ticket === null) {
+            notYetDownloadedTicket();
+            return;
+        }
+
         if (ticket) {
-            const order = await props.webshopManager.orders.get(ticket.orderId);
+            const orderId = ticket.orderId;
+            const order = await props.webshopManager.orders.get(orderId)
+                ?? (await fetchIfOnline(async () => props.webshopManager.orders.fetchById(orderId)))?.result;
             if (!order && mightMissTickets.value) {
                 notYetDownloadedTicket();
             } else if (!order) {
@@ -408,8 +437,6 @@ async function checkTicket(result: string) {
                     validTicket(ticket, order);
                 }
             }
-        } else if (mightMissTickets.value) {
-            notYetDownloadedTicket();
         } else {
             console.error('Ticket not found');
             invalidTicket();
@@ -420,6 +447,37 @@ async function checkTicket(result: string) {
         Toast.fromError(e).show();
 
         AppManager.shared.hapticError();
+    }
+}
+
+/**
+ * Get the ticket from the offline database, or from the server if it is not stored (e.g. sold after the last download).
+ * @returns null when the ticket might not be downloaded yet and there is no internet connection
+ */
+async function getTicket(secret: string): Promise<TicketPrivate | undefined | null> {
+    const ticket = await props.webshopManager.tickets.get(secret);
+    if (ticket) {
+        return ticket;
+    }
+
+    const fetched = await fetchIfOnline(async () => props.webshopManager.tickets.fetchBySecret(secret));
+    if (fetched) {
+        return fetched.result;
+    }
+    return mightMissTickets.value ? null : undefined;
+}
+
+/**
+ * @returns null when there is no internet connection
+ */
+async function fetchIfOnline<T>(fetch: () => Promise<T>): Promise<{ result: T } | null> {
+    try {
+        return { result: await fetch() };
+    } catch (e) {
+        if (Request.isNetworkError(e as Error)) {
+            return null;
+        }
+        throw e;
     }
 }
 
@@ -461,7 +519,7 @@ function disabledTicket(product: Product, scannedAt: Date | null) {
 }
 
 function notYetDownloadedTicket() {
-    new Toast($t('Dit ticket is nog niet gedownload. Wacht tot alle tickets gedownload zijn en scan opnieuw.'), 'warning yellow').show();
+    new Toast($t('Dit ticket is nog niet gedownload en kon niet opgehaald worden zonder internetverbinding. Wacht tot alle tickets gedownload zijn en scan opnieuw.'), 'warning yellow').show();
     AppManager.shared.hapticWarning();
 }
 
