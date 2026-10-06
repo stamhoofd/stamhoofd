@@ -360,7 +360,7 @@ test.describe('Webshops offline', () => {
         await page.getByTestId('scan-tickets-button').click();
 
         await test.step('download all tickets on the setup page', async () => {
-            await expect.poll(async () => hasStoredTicketWatermark(page, testWebshop.id)).toBe(true);
+            await expect.poll(async () => hasCompletedTicketSync(page, testWebshop.id)).toBe(true);
         });
 
         let releaseNextPages!: () => void;
@@ -533,31 +533,175 @@ test.describe('Webshops offline', () => {
             await expect(scannerView).toContainText($t('%Vq'));
         });
     });
+
+    test('Should resume an interrupted download after a reload', async ({ browser, storageState }) => {
+        test.setTimeout(120_000);
+
+        const testWebshop = await createTicketWebshop('Hervatten');
+        const order = await new OrderFactory({ webshop: testWebshop }).create();
+        // Different seconds, so resuming does not start with the tickets of the first page again
+        const firstUpdatedAt = Date.now() - 24 * 60 * 60 * 1000;
+        for (let i = 0; i < 250; i++) {
+            await new TicketFactory({ order, index: i + 1, total: 250, updatedAt: new Date(firstUpdatedAt + i * 1000) }).create();
+        }
+
+        const context = await browser.newContext({
+            storageState,
+            ...devices['iPhone 13'],
+            userAgent: undefined,
+        });
+
+        const page = await context.newPage();
+        const dashboard = new DashboardPage(page);
+
+        async function openTicketScannerSetup() {
+            await dashboard.openOrganizationDashboard({ organizationUri: organization.uri });
+            await dashboard.openTab(DashboardTab.Webshops);
+            await page.getByTestId('webshop-menu-item')
+                .filter({ hasText: testWebshop.meta.name })
+                .click();
+            await page.getByTestId('scan-tickets-button').click();
+        }
+
+        function isTicketsRequest(url: URL, { nextPage }: { nextPage: boolean }) {
+            return url.pathname.endsWith('/webshop/tickets/private') && url.searchParams.has('pageFilter') === nextPage;
+        }
+
+        await test.step('interrupt the download after the first page', async () => {
+            // Never answered, so the download stops after the first page
+            await page.route(url => isTicketsRequest(url, { nextPage: true }), () => {});
+            await openTicketScannerSetup();
+            await expect.poll(async () => readOfflineDatabase(page, testWebshop.id, 'tickets')).toBe(100);
+            await expect.poll(async () => readOfflineDatabase(page, testWebshop.id, 'settings', 'lastFetchedTicket')).toBeTruthy();
+            expect(await hasCompletedTicketSync(page, testWebshop.id)).toBe(false);
+            await page.unrouteAll({ behavior: 'ignoreErrors' });
+        });
+
+        await test.step('resume after the stored tickets when reloading', async () => {
+            const firstRequest = page.waitForRequest(request => isTicketsRequest(new URL(request.url()), { nextPage: false }));
+            await openTicketScannerSetup();
+
+            const filter = JSON.parse(new URL((await firstRequest).url()).searchParams.get('filter')!) as { updatedAt?: unknown };
+            expect(filter.updatedAt).toBeDefined();
+
+            await expect.poll(async () => hasCompletedTicketSync(page, testWebshop.id)).toBe(true);
+            expect(await readOfflineDatabase(page, testWebshop.id, 'tickets')).toBe(250);
+        });
+    });
+
+    test('Should keep a download of an older version', async ({ browser, storageState }) => {
+        const testWebshop = await createTicketWebshop('Oudere versie');
+        const order = await new OrderFactory({ webshop: testWebshop }).create();
+        await new TicketFactory({ order }).create();
+
+        const context = await browser.newContext({
+            storageState,
+            ...devices['iPhone 13'],
+            userAgent: undefined,
+        });
+
+        const page = await context.newPage();
+        const dashboard = new DashboardPage(page);
+        const scannerView = page.getByTestId('ticket-scanner-view');
+
+        async function openTicketScanner() {
+            await dashboard.openTab(DashboardTab.Webshops);
+            await page.getByTestId('webshop-menu-item')
+                .filter({ hasText: testWebshop.meta.name })
+                .click();
+            await page.getByTestId('scan-tickets-button').click();
+            await clickEvenIfCoveredByToast(page, page.getByTestId('start-scan-tickets-button'));
+        }
+
+        await test.step('download with an older version', async () => {
+            await dashboard.openOrganizationDashboard({ organizationUri: organization.uri });
+            await openTicketScanner();
+            await expect.poll(async () => readOfflineDatabase(page, testWebshop.id, 'settings', 'ticketsLastSyncedAt')).toBeTruthy();
+            await expect.poll(async () => readOfflineDatabase(page, testWebshop.id, 'settings', 'ordersLastSyncedAt')).toBeTruthy();
+            await storeSyncStateOfOlderVersion(page, testWebshop.id);
+        });
+
+        await test.step('treat it as downloaded when offline', async () => {
+            await dashboard.openOrganizationDashboard({ organizationUri: organization.uri });
+            await simulateNetworkOffline(page);
+            await openTicketScanner();
+            await expect(scannerView).toContainText($t('%Vq'));
+            await expect(scannerView).not.toContainText('nooit');
+            await page.unrouteAll({ behavior: 'ignoreErrors' });
+        });
+
+        await test.step('only fetch updated tickets when online', async () => {
+            const firstRequest = page.waitForRequest(request => new URL(request.url()).pathname.endsWith('/webshop/tickets/private'));
+            await dashboard.openOrganizationDashboard({ organizationUri: organization.uri });
+            await openTicketScanner();
+
+            const filter = JSON.parse(new URL((await firstRequest).url()).searchParams.get('filter')!) as { updatedAt?: unknown };
+            expect(filter.updatedAt).toBeDefined();
+            await expect(scannerView).toContainText($t('%Vt'));
+        });
+    });
 });
 
 /**
- * The ticket watermark is stored once all tickets of a sync are stored.
+ * Reads from the offline database of a webshop on this device.
  */
-async function hasStoredTicketWatermark(page: Page, webshopId: string): Promise<boolean> {
-    return page.evaluate(async id => new Promise<boolean>((resolve) => {
+async function readOfflineDatabase(page: Page, webshopId: string, storeName: 'settings' | 'tickets', key?: string): Promise<unknown> {
+    return page.evaluate(async ({ id, storeName, key }) => new Promise<unknown>((resolve) => {
         const open = indexedDB.open('webshop-' + id);
-        open.onerror = () => resolve(false);
+        open.onerror = () => resolve(undefined);
         open.onsuccess = () => {
             const database = open.result;
-            if (!database.objectStoreNames.contains('settings')) {
+            if (!database.objectStoreNames.contains(storeName)) {
                 database.close();
-                resolve(false);
+                resolve(undefined);
                 return;
             }
-            const request = database.transaction('settings').objectStore('settings').get('lastFetchedTicket');
+            const objectStore = database.transaction(storeName).objectStore(storeName);
+            const request = key === undefined ? objectStore.count() : objectStore.get(key);
             request.onerror = () => {
                 database.close();
-                resolve(false);
+                resolve(undefined);
             };
             request.onsuccess = () => {
                 database.close();
-                resolve(!!request.result);
+                resolve(request.result);
             };
+        };
+    }), { id: webshopId, storeName, key });
+}
+
+async function hasCompletedTicketSync(page: Page, webshopId: string): Promise<boolean> {
+    return await readOfflineDatabase(page, webshopId, 'settings', 'ticketsSyncCompleted') === true;
+}
+
+/**
+ * Rewrites the stored sync state to what versions without sync completed flags stored after a completed sync.
+ */
+async function storeSyncStateOfOlderVersion(page: Page, webshopId: string) {
+    await page.evaluate(async id => new Promise<void>((resolve, reject) => {
+        const open = indexedDB.open('webshop-' + id);
+        open.onerror = () => reject(new Error('Could not open the offline database'));
+        open.onsuccess = () => {
+            const database = open.result;
+            const transaction = database.transaction('settings', 'readwrite');
+            const settings = transaction.objectStore('settings');
+            for (const key of ['ordersSyncCompleted', 'ticketsSyncCompleted', 'ordersLastSyncedAt', 'ticketsLastSyncedAt']) {
+                settings.delete(key);
+            }
+            for (const key of ['lastFetchedOrder', 'lastFetchedTicket']) {
+                const request = settings.get(key);
+                request.onsuccess = () => {
+                    const cursor = request.result as { updatedAt: Date; itemUpdatedAt?: Date } | null | undefined;
+                    if (cursor) {
+                        settings.put({ updatedAt: cursor.updatedAt, id: 'older-version' }, key);
+                    }
+                };
+            }
+            transaction.oncomplete = () => {
+                database.close();
+                resolve();
+            };
+            transaction.onerror = () => reject(new Error('Could not store the sync state'));
         };
     }), webshopId);
 }
