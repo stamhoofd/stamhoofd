@@ -9,7 +9,10 @@
                 @click="handleWarningClick(warning)"
             >
                 <span :class="'icon '+warning.icon" />
-                <span class="text">{{ warning.text }}</span>
+                <span class="text">
+                    {{ warning.text }}
+                    <a v-if="warning.inlineLink" class="inline-link" :href="warning.inlineLink.url" target="_blank" @click.stop>{{ warning.inlineLink.text }}</a>
+                </span>
             </li>
         </ul>
     </div>
@@ -20,6 +23,7 @@ import { useDataPermissionSettings } from '#groups/hooks/useDataPermissionSettin
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { isMemberManaged } from '@stamhoofd/sgv-frontend/SGVSyncReport';
 import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync';
 import type { MemberPlatformMembership, PlatformMember } from '@stamhoofd/structures';
@@ -67,8 +71,13 @@ const autoCompletedAnswers = computed(() => {
 const { financialSupportSettings } = useFinancialSupportSettings();
 const { dataPermissionSettings } = useDataPermissionSettings();
 
+// A RecordWarning with an optional clickable "more info" link
+type MemberWarning = RecordWarning & {
+    inlineLink?: { text: TranslatedString; url: string };
+};
+
 const warnings = computed(() => {
-    const warnings: RecordWarning[] = [];
+    const warnings: MemberWarning[] = [];
 
     for (const answer of autoCompletedAnswers.value.values()) {
         warnings.push(...answer.getWarnings());
@@ -188,6 +197,21 @@ const warnings = computed(() => {
         }
     }
 
+    if (
+        props.member.patchedMember.details.getNotificationEmails().length === 0
+        && props.member.patchedMember.details.getPhoneNumbersForVerification().length === 0
+    ) {
+        const warning = RecordWarning.create({
+            text: TranslatedString.create($t('Vic kan niet worden aangemeld via het ledenportaal. Voeg een telefoonnummer of e-mailadres toe zodat men zelf de beveiliginscode kan aanvragen.')),
+            type: RecordWarningType.Warning,
+        }) as MemberWarning;
+        warning.inlineLink = {
+            text: TranslatedString.create($t('Meer info')),
+            url: LocalizedDomains.getDocs('bestaande-leden-toelaten'),
+        };
+        warnings.push(warning);
+    }
+
     return warnings;
 });
 const hasWarnings = computed(() => warnings.value.length > 0);
@@ -208,7 +232,12 @@ const getNextMembership = (): MemberPlatformMembership | null => {
 
     return null;
 };
-function handleWarningClick(warning: RecordWarning) {
+function handleWarningClick(warning: MemberWarning) {
+    if (warning.inlineLink) {
+        window.open(warning.inlineLink.url, '_blank', 'noopener');
+        return;
+    }
+
     if (!auth.hasFullAccess() || !organization.value || !isMemberManaged(props.member.member, organization.value)) {
         return;
     }
