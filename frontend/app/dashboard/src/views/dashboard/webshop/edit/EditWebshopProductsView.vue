@@ -54,13 +54,17 @@
                     </h3>
                 </STListItem>
             </STList>
+
+            <div v-if="!cartEnabled" class="warning-box">
+                <p>{{ $t('Zonder winkelmandje kunnen er geen kortingscodes worden ingevoerd bij een bestelling.') }}</p>
+            </div>
         </template>
     </SaveView>
 </template>
 
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { Category, PrivateWebshop, Product, ProductType, WebshopMetaData, WebshopTicketType } from '@stamhoofd/structures';
 import CategoryRow from './categories/CategoryRow.vue';
@@ -68,9 +72,9 @@ import ProductRow from './products/ProductRow.vue';
 
 import { computed } from 'vue';
 
-
 import type { UseEditWebshopProps } from './useEditWebshop';
 import { useEditWebshop } from './useEditWebshop';
+import { defineProps, defineExpose } from 'vue';
 
 const props = defineProps<UseEditWebshopProps>();
 
@@ -116,16 +120,16 @@ function addProduct() {
     p.products.addPut(product);
 
     present(AsyncComponent(() => import('./products/EditProductView.vue'), {
-            product,
-            webshop: webshop.value.patch(p),
-            isNew: true,
-            saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
-                // Merge both patches
-                addPatch(p.patch(patch));
+        product,
+        webshop: webshop.value.patch(p),
+        isNew: true,
+        saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
+            // Merge both patches
+            addPatch(p.patch(patch));
 
-                // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-            },
-        }).setDisplayStyle('popup'))
+            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+        },
+    }).setDisplayStyle('popup'))
         .catch(console.error);
 }
 
@@ -141,14 +145,14 @@ function addCategory() {
     p.categories.addPut(category);
 
     present(AsyncComponent(() => import('./categories/EditCategoryView.vue'), {
-            category,
-            webshop: webshop.value.patch(p),
-            isNew: true,
-            saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
-                // Merge both patches
-                addPatch(p.patch(patch));
-            },
-        }).setDisplayStyle('popup')).catch(console.error);
+        category,
+        webshop: webshop.value.patch(p),
+        isNew: true,
+        saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
+            // Merge both patches
+            addPatch(p.patch(patch));
+        },
+    }).setDisplayStyle('popup')).catch(console.error);
 }
 
 function moveCategoryUp(category: Category) {
