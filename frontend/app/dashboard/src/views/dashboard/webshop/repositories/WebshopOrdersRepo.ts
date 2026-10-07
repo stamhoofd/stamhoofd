@@ -14,23 +14,8 @@ import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
 import type { WebshopSettingsStore } from './WebshopSettingsStore';
 import type { ProgressListener, SyncProgress } from './syncProgress';
 import { countSyncItems, getNewItemsFilter, SharedSync } from './syncProgress';
+import { SyncState } from './SyncState';
 import type { WebshopTicketsRepo } from './WebshopTicketsRepo';
-
-/**
- * Safety margin subtracted from the current time when advancing the order sync watermark.
- *
- * updatedAt is stamped with new Date() at save time and stored with a one-second resolution, so a
- * write only ever gets timestamp S during wall-clock second S. Right after a fetch that read up to
- * second S, another order can still be saved with that same timestamp S (before second S ends, or
- * before our query happened to see it). Advancing the watermark all the way to S would skip such an
- * order forever, because the next sync uses updatedAt > watermark.
- *
- * By capping the stored watermark to (now - this margin) we keep re-fetching the most recent seconds
- * until they are safely in the past, without ever re-fetching older, sealed seconds. The margin must
- * exceed the one-second resolution plus any client/server clock skew and write-visibility lag; it
- * also bounds how many recent seconds get re-fetched on each sync.
- */
-const WATERMARK_SAFETY_MARGIN_MS = 60 * 60 * 1000;
 
 class CompilerFilterError extends Error {}
 class CallbackError extends Error {}
@@ -50,8 +35,11 @@ export class WebshopOrdersRepo {
         return this.apiClient.isFetching;
     }
 
+    /**
+     * When the last completed sync ended
+     */
     get lastUpdated() {
-        return this.apiClient.lastUpdated;
+        return this.apiClient.state.lastUpdated;
     }
 
     /**
@@ -65,7 +53,7 @@ export class WebshopOrdersRepo {
      * Whether a sync completed on this device since the offline orders were last cleared.
      */
     get hasCompletedSync() {
-        return this.apiClient.hasCompletedSync || this.lastUpdated !== null;
+        return this.apiClient.state.hasCompletedSync;
     }
 
     constructor({ database, context, settingsStore, webshopId, tickets }: { database: WebshopDatabase; context: SessionContext; settingsStore: WebshopSettingsStore; webshopId: string; tickets: WebshopTicketsRepo }) {
@@ -98,6 +86,7 @@ export class WebshopOrdersRepo {
         const totalOrders: PrivateOrder[] = [];
 
         const promises: Promise<void>[] = [];
+        let stored = Promise.resolve();
 
         const onResultsReceived = async (orders: PrivateOrder[]) => {
             if (isFetchAll && !hadSuccessfulFetch) {
@@ -108,8 +97,10 @@ export class WebshopOrdersRepo {
 
             if (orders.length) {
                 totalOrders.push(...orders);
-                // Store each page as it arrives, but do not advance the watermark yet (see below).
-                promises.push(this.store.putAll(orders));
+                const lastOrder = orders[orders.length - 1];
+                // Moving the cursor once this page and all pages before it are stored lets an interrupted sync resume here
+                stored = Promise.all([stored, this.store.putAll(orders)]).then(async () => this.apiClient.state.setCursor(new Date(lastOrder.updatedAt), { isComplete: false }));
+                promises.push(stored);
             }
         };
 
@@ -130,13 +121,8 @@ export class WebshopOrdersRepo {
         // wait until all orders have been stored
         await Promise.all(promises);
 
-        // Only advance the watermark once every page has been fetched (getAllUpdated resolved) and
-        // stored. Advancing it per page would skip orders on a page that failed to load: the next
-        // sync filters updatedAt > watermark, so an order sharing the last stored order's (sealed)
-        // second would never be re-fetched. If a page fails, getAllUpdated throws before this line,
-        // so the watermark stays put and the next sync re-fetches from where it left off.
         if (totalOrders.length > 0) {
-            await this.apiClient.setlastFetchedOrder(totalOrders[totalOrders.length - 1]);
+            await this.apiClient.state.setCursor(new Date(totalOrders[totalOrders.length - 1].updatedAt), { isComplete: true });
         }
 
         if (fetchedOrders.length > 0) {
@@ -147,7 +133,7 @@ export class WebshopOrdersRepo {
             await this.eventBus.sendEvent('deleted', deletedOrders);
         }
 
-        await this.apiClient.setSyncCompleted();
+        await this.apiClient.state.setCompleted();
     }
 
     /**
@@ -529,50 +515,30 @@ export class OrdersStore {
  */
 class WebshopOrdersApiClient {
     private _isFetching = false;
-    private _hasCompletedSync = false;
-    /**
-     * itemUpdatedAt is the updatedAt of the last stored item, missing in watermarks stored by older versions
-     */
-    private lastFetchedOrder: { updatedAt: Date; number: number; itemUpdatedAt?: Date } | null | undefined = undefined;
+    readonly state: SyncState;
 
     private readonly webshopId: string;
     private readonly context: SessionContext;
     private readonly settingsStore: WebshopSettingsStore;
 
     get hasFetchedOne() {
-        return this.lastUpdated !== null;
+        return this.state.syncCursor !== null;
     }
 
     get isFetching() {
         return this._isFetching;
     }
 
-    get hasCompletedSync() {
-        return this._hasCompletedSync;
-    }
-
-    async setSyncCompleted() {
-        if (this._hasCompletedSync) {
-            return;
-        }
-        this._hasCompletedSync = true;
-        await this.settingsStore.set('ordersSyncCompleted', true);
-    }
-
-    get lastUpdated(): Date | null {
-        return this.lastFetchedOrder?.updatedAt ?? null;
-    }
-
     constructor({ context, settingsStore, webshopId }: { context: SessionContext; settingsStore: WebshopSettingsStore; webshopId: string }) {
         this.context = context;
         this.settingsStore = settingsStore;
         this.webshopId = webshopId;
+        this.state = new SyncState(settingsStore, { cursor: 'lastFetchedOrder', completed: 'ordersSyncCompleted', lastSyncedAt: 'ordersLastSyncedAt' });
     }
 
     reset() {
         this._isFetching = false;
-        this._hasCompletedSync = false;
-        this.lastFetchedOrder = undefined;
+        this.state.reset();
     }
 
     /**
@@ -587,27 +553,20 @@ class WebshopOrdersApiClient {
 
         this._isFetching = true;
 
-        if (isFetchAll) {
-            this.lastFetchedOrder = null;
-        } else {
-            await this.initLastFetchedOrder();
-        }
+        await this.state.load();
 
         // create request
         const filter: StamhoofdFilter = {
             webshopId: this.webshopId,
         };
 
-        if (this.lastFetchedOrder) {
-            // The watermark is capped when it is stored (see setlastFetchedOrder) so it never points
-            // into a second that might still receive order updates we haven't fetched. A strict > is
-            // therefore safe and complete: every order in and after an as-yet-unsealed second keeps
-            // being re-fetched until that second is safely in the past.
-            filter['updatedAt'] = { $gt: this.lastFetchedOrder.updatedAt };
+        const cursor = isFetchAll ? null : this.state.syncCursor;
+        if (cursor) {
+            filter['updatedAt'] = { $gt: cursor.updatedAt };
         }
 
-        // A recent watermark is one second early (see setlastFetchedOrder), so the sync starts with items that are already stored
-        const newItemsFilter = getNewItemsFilter(this.webshopId, this.lastFetchedOrder ? (this.lastFetchedOrder.itemUpdatedAt ?? this.lastFetchedOrder.updatedAt) : null);
+        // The cursor can start one second early (see SyncState.setCursor), so the sync can start with items that are already stored
+        const newItemsFilter = getNewItemsFilter(this.webshopId, cursor ? (cursor.itemUpdatedAt ?? cursor.updatedAt) : null);
 
         const request = new LimitedFilteredRequest({
             limit: 100,
@@ -678,53 +637,8 @@ class WebshopOrdersApiClient {
     }
 
     async clearLastFetchedOrder() {
-        this.lastFetchedOrder = null;
-        this._hasCompletedSync = false;
-        await this.settingsStore.set('lastFetchedOrder', null);
-        await this.settingsStore.set('ordersSyncCompleted', false);
+        await this.state.clear();
     }
 
-    async setlastFetchedOrder(order: PrivateOrder) {
-        if (order.number === null) {
-            console.error('Order has no number');
-            return;
-        }
 
-        let timestamp = new Date(order.updatedAt);
-        if (timestamp.getTime() > Date.now() - WATERMARK_SAFETY_MARGIN_MS) {
-            // There is a chance multiple orders will be updated at the same time
-            timestamp = new Date(timestamp.getTime() - 1_000);
-        }
-
-        // important: this only works if the orders are sorted by updatedAt asc and then by number asc
-        if (this.lastFetchedOrder
-            && (this.lastFetchedOrder.updatedAt > timestamp
-                || (this.lastFetchedOrder.updatedAt === timestamp && this.lastFetchedOrder.number > order.number)
-            )) {
-            return;
-        }
-
-        this.lastFetchedOrder = {
-            updatedAt: timestamp,
-            number: order.number!,
-            itemUpdatedAt: new Date(order.updatedAt),
-        };
-        await this.settingsStore.set('lastFetchedOrder', this.lastFetchedOrder);
-    }
-
-    private async initLastFetchedOrder() {
-        // Only once (if undefined)
-        if (this.lastFetchedOrder !== undefined) {
-            return;
-        }
-
-        try {
-            this.lastFetchedOrder = await this.settingsStore.get('lastFetchedOrder') ?? null;
-            this._hasCompletedSync = await this.settingsStore.get('ordersSyncCompleted') === true;
-        } catch (e) {
-            console.error(e);
-            // Probably no database support. Ignore it and load everything.
-            this.lastFetchedOrder = null;
-        }
-    }
 }

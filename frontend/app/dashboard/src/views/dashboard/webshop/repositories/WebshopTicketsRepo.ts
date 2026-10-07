@@ -12,6 +12,7 @@ import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
 import type { WebshopSettingsStore } from './WebshopSettingsStore';
 import type { ProgressListener, SyncProgress } from './syncProgress';
 import { countSyncItems, getNewItemsFilter, SharedSync } from './syncProgress';
+import { SyncState } from './SyncState';
 
 /**
  * Responsible for webshop ticket operations (including patches).
@@ -31,15 +32,18 @@ export class WebshopTicketsRepo {
         return this.apiClient.isFetching;
     }
 
+    /**
+     * When the last completed sync ended
+     */
     get lastUpdated() {
-        return this.apiClient.lastUpdated;
+        return this.apiClient.state.lastUpdated;
     }
 
     /**
      * Whether a sync completed on this device since the offline tickets were last cleared.
      */
     get hasCompletedSync() {
-        return this.apiClient.hasCompletedSync || this.lastUpdated !== null;
+        return this.apiClient.state.hasCompletedSync;
     }
 
     constructor({ database, context, settingsStore, webshopId }: { database: WebshopDatabase; context: SessionContext; settingsStore: WebshopSettingsStore; webshopId: string }) {
@@ -64,31 +68,29 @@ export class WebshopTicketsRepo {
         const totalTickets: TicketPrivate[] = [];
 
         const promises: Promise<void>[] = [];
+        let stored = Promise.resolve();
 
         const onResultsReceived = async (tickets: TicketPrivate[]): Promise<void> => {
             if (tickets.length) {
                 totalTickets.push(...tickets);
-                // Store each page as it arrives, but do not advance the watermark yet (see below).
-                promises.push(this.storeAll(tickets));
+                const lastTicket = tickets[tickets.length - 1];
+                // Moving the cursor once this page and all pages before it are stored lets an interrupted sync resume here
+                stored = Promise.all([stored, this.storeAll(tickets)]).then(async () => this.apiClient.state.setCursor(new Date(lastTicket.updatedAt), { isComplete: false }));
+                promises.push(stored);
             }
         };
 
         await this.apiClient.getAllUpdated({ isFetchAll: false, onResultsReceived, onProgress });
         await Promise.all(promises);
 
-        // Only advance the watermark once every page has been fetched (getAllUpdated resolved) and
-        // stored. Advancing it per page would skip tickets on a page that failed to load: the next
-        // sync filters updatedAt > watermark, so a ticket sharing the last stored ticket's (sealed)
-        // second would never be re-fetched. If a page fails, getAllUpdated throws before this line,
-        // so the watermark stays put and the next sync re-fetches from where it left off.
         if (totalTickets.length > 0) {
-            await this.apiClient.setLastFetchedTicket(totalTickets[totalTickets.length - 1]);
+            await this.apiClient.state.setCursor(new Date(totalTickets[totalTickets.length - 1].updatedAt), { isComplete: true });
 
             // deleted tickets get handled in listener
             await this.eventBus.sendEvent('fetched', totalTickets);
         }
 
-        await this.apiClient.setSyncCompleted();
+        await this.apiClient.state.setCompleted();
     }
 
     /**
@@ -525,27 +527,11 @@ export class WebshopTicketPatchesStore {
 }
 
 /**
- * How recent an updatedAt must be for the sync watermark to treat its second as still open.
- *
- * updatedAt is stored with a one-second resolution, so multiple tickets can share the exact same
- * second. When the last fetched ticket was updated within this margin of now, the watermark is
- * stored one second before its updatedAt, so a sibling ticket saved in that same second — which our
- * query might not have seen yet — is still re-fetched on the next sync. Once a ticket is older than
- * this margin its second can no longer receive writes, so the exact updatedAt is stored and it is no
- * longer re-fetched. The margin must exceed any client/server clock skew and write-visibility lag.
- */
-const WATERMARK_SAFETY_MARGIN_MS = 60 * 60 * 1000;
-
-/**
  * Responsible webshop tickets network operations.
  */
 class WebshopTicketsApiClient {
     private _isFetching = false;
-    private _hasCompletedSync = false;
-    /**
-     * itemUpdatedAt is the updatedAt of the last stored item, missing in watermarks stored by older versions
-     */
-    private lastFetchedTicket: { updatedAt: Date; id: string; itemUpdatedAt?: Date } | null | undefined = undefined;
+    readonly state: SyncState;
 
     private readonly webshopId: string;
     private readonly context: SessionContext;
@@ -555,32 +541,16 @@ class WebshopTicketsApiClient {
         return this._isFetching;
     }
 
-    get hasCompletedSync() {
-        return this._hasCompletedSync;
-    }
-
-    async setSyncCompleted() {
-        if (this._hasCompletedSync) {
-            return;
-        }
-        this._hasCompletedSync = true;
-        await this.settingsStore.set('ticketsSyncCompleted', true);
-    }
-
-    get lastUpdated(): Date | null {
-        return this.lastFetchedTicket?.updatedAt ?? null;
-    }
-
     constructor({ context, settingsStore, webshopId }: { context: SessionContext; settingsStore: WebshopSettingsStore; webshopId: string }) {
         this.context = context;
         this.settingsStore = settingsStore;
         this.webshopId = webshopId;
+        this.state = new SyncState(settingsStore, { cursor: 'lastFetchedTicket', completed: 'ticketsSyncCompleted', lastSyncedAt: 'ticketsLastSyncedAt' });
     }
 
     reset() {
         this._isFetching = false;
-        this._hasCompletedSync = false;
-        this.lastFetchedTicket = undefined;
+        this.state.reset();
     }
 
     async getAllUpdated({ isFetchAll, onResultsReceived, onProgress }: { isFetchAll?: boolean; onResultsReceived: (results: TicketPrivate[]) => Promise<void> | void; onProgress?: (progress: SyncProgress) => void }): Promise<void> {
@@ -590,27 +560,20 @@ class WebshopTicketsApiClient {
         }
         this._isFetching = true;
 
-        if (isFetchAll) {
-            this.lastFetchedTicket = null;
-        } else {
-            await this.initLastFetchedTicket();
-        }
+        await this.state.load();
 
         // create request
         const filter: StamhoofdFilter = {
             webshopId: this.webshopId,
         };
 
-        if (this.lastFetchedTicket) {
-            // The watermark is capped when it is stored (see setLastFetchedTicket) so it never points
-            // into a second that might still receive ticket updates we haven't fetched. A strict > is
-            // therefore safe and complete: every ticket in and after an as-yet-unsealed second keeps
-            // being re-fetched until that second is safely in the past.
-            filter['updatedAt'] = { $gt: this.lastFetchedTicket.updatedAt };
+        const cursor = isFetchAll ? null : this.state.syncCursor;
+        if (cursor) {
+            filter['updatedAt'] = { $gt: cursor.updatedAt };
         }
 
-        // A recent watermark is one second early (see setLastFetchedTicket), so the sync starts with items that are already stored
-        const newItemsFilter = getNewItemsFilter(this.webshopId, this.lastFetchedTicket ? (this.lastFetchedTicket.itemUpdatedAt ?? this.lastFetchedTicket.updatedAt) : null);
+        // The cursor can start one second early (see SyncState.setCursor), so the sync can start with items that are already stored
+        const newItemsFilter = getNewItemsFilter(this.webshopId, cursor ? (cursor.itemUpdatedAt ?? cursor.updatedAt) : null);
 
         const filteredRequest = new LimitedFilteredRequest({
             limit: 100,
@@ -679,42 +642,5 @@ class WebshopTicketsApiClient {
         return response.data;
     }
 
-    async setLastFetchedTicket(ticket: TicketPrivate) {
-        let timestamp = new Date(ticket.updatedAt);
-        if (timestamp.getTime() > Date.now() - WATERMARK_SAFETY_MARGIN_MS) {
-            // There is a chance multiple tickets will be updated at the same time
-            timestamp = new Date(timestamp.getTime() - 1_000);
-        }
 
-        // important: this only works if the tickets are sorted by updatedAt asc and then by id asc
-        if (this.lastFetchedTicket
-            && (this.lastFetchedTicket.updatedAt > timestamp
-                || (this.lastFetchedTicket.updatedAt === timestamp && this.lastFetchedTicket.id > ticket.id)
-            )) {
-            return;
-        }
-
-        this.lastFetchedTicket = {
-            updatedAt: timestamp,
-            id: ticket.id!,
-            itemUpdatedAt: new Date(ticket.updatedAt),
-        };
-        await this.settingsStore.set('lastFetchedTicket', this.lastFetchedTicket);
-    }
-
-    private async initLastFetchedTicket() {
-        // Only once (if undefined)
-        if (this.lastFetchedTicket !== undefined) {
-            return;
-        }
-
-        try {
-            this.lastFetchedTicket = await this.settingsStore.get('lastFetchedTicket') ?? null;
-            this._hasCompletedSync = await this.settingsStore.get('ticketsSyncCompleted') === true;
-        } catch (e) {
-            console.error(e);
-            // Probably no database support. Ignore it and load everything.
-            this.lastFetchedTicket = null;
-        }
-    }
 }
