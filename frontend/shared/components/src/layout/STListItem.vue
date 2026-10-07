@@ -43,6 +43,7 @@ const props = withDefaults(
         elementName?: string;
         selectable?: boolean;
         disabled?: boolean;
+        compact?: boolean;
     }>(),
     // default values
     {
@@ -284,13 +285,15 @@ button.st-list-item {
                 display: block;
 
                 > .middle {
-                padding-right: var(--custom-st-horizontal-padding, 15px);
-                padding-bottom: 0px;
+                    padding-right: var(--custom-st-horizontal-padding, 15px);
+                    padding-bottom: 0px;
                 }
 
                 > .right {
-                padding-top: 5px;
-                padding-bottom: 15px;
+                    text-align: start;
+                    padding-left: 0px;
+                    padding-top: 5px;
+                    padding-bottom: 15px;
                 }
             }
         }
