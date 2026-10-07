@@ -14,7 +14,7 @@
             <h2>{{ $t('%dz') }}</h2>
 
             <STList class="illustration-list">
-                <STListItem class="left-center">
+                <STListItem v-if="!isAdmin" class="left-center">
                     <template #left>
                         <IconContainer icon="email" aside-icon="search stroke" class="gray" />
                     </template>
@@ -26,7 +26,7 @@
                     </p>
                 </STListItem>
 
-                <STListItem class="left-center" :selectable="true" @click="sendSecurityCodeViaEmail">
+                <STListItem v-if="!isAdmin" class="left-center" :selectable="true" @click="sendSecurityCodeViaEmail">
                     <template #left>
                         <IconContainer icon="email" aside-icon="send stroke" />
                     </template>
@@ -43,7 +43,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem class="left-center" :selectable="true" @click="startSecurityCodeViaSMS">
+                <STListItem v-if="!isAdmin" class="left-center" :selectable="true" @click="startSecurityCodeViaSMS">
                     <template #left>
                         <IconContainer icon="smartphone" aside-icon="send stroke" />
                     </template>
@@ -59,7 +59,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem class="left-center">
+                <STListItem v-if="!isAdmin" class="left-center">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/communication.svg">
                     </template>
@@ -68,6 +68,43 @@
                     </h2>
                     <p class="style-description">
                         {{ $t('{contactCan} in #platform jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf {role}, vraag het dan aan {alternative}.', contactInfo) }}
+                    </p>
+                </STListItem>
+
+                <STListItem v-if="isAdmin" class="left-center">
+                    <template #left>
+                        <OrganizationAvatar v-if="!isPlatform" :organization="organization" />
+                        <PlatformAvatar v-else />
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('Vraag het lid om zichzelf in te schrijven via het ledenportaal') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('Als het lid of diens ouders zelf inschrijven, krijg je automatisch toegang tot hun gegevens.') }}
+                    </p>
+                </STListItem>
+
+                <STListItem v-if="isAdmin && isOrgMember" class="left-center">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/communication.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('Vraag de code aan jouw #platform-verantwoordelijke') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('Een hoofdbeheerder van {org} kan de beveiligingscode opzoeken en doorgeven, of zelfs deze inschrijving doen.', {org: organization.name}) }}
+                    </p>
+                </STListItem>
+
+                <STListItem v-if="isAdmin && !isOrgMember" class="left-center">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/communication.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('Vraag de code aan #koepel') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('Contacteer #koepel en verduidelijk waarom je toegang nodig hebt tot {member}.', {member: cloned.patchedMember.details.firstName}) }}
                     </p>
                 </STListItem>
             </STList>
@@ -100,6 +137,8 @@ import { Toast } from '../overlays/Toast';
 import type { NavigationActions } from '../types/NavigationActions';
 import { usePlatformFamilyManager } from './PlatformFamilyManager';
 
+import OrganizationAvatar from '#context/OrganizationAvatar.vue';
+import PlatformAvatar from '#context/PlatformAvatar.vue';
 import IconContainer from '#icons/IconContainer.vue';
 import CategorizedView from '#layout/categorized-view/CategorizedView.vue';
 import SaveView from '#navigation/SaveView.vue';
@@ -337,6 +376,9 @@ async function modifyAddress(from: Address, to: Address) {
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
 const organization = useRequiredOrganization();
+
+const isOrgMember = computed(() => !isPlatform // in org mode, everyone is org member
+    || cloned.value.filterOrganizations({}).some(o => o.id === organization.value.id)); // in platform mode, check if member is related to this org
 
 const contactInfo = computed(() => isPlatform
     ? {
