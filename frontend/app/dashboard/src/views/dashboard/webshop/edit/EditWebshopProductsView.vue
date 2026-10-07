@@ -69,12 +69,9 @@ import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.
 import { Category, PrivateWebshop, Product, ProductType, WebshopMetaData, WebshopTicketType } from '@stamhoofd/structures';
 import CategoryRow from './categories/CategoryRow.vue';
 import ProductRow from './products/ProductRow.vue';
-
-import { computed } from 'vue';
-
 import type { UseEditWebshopProps } from './useEditWebshop';
 import { useEditWebshop } from './useEditWebshop';
-import { defineProps, defineExpose } from 'vue';
+import { defineProps, defineExpose, computed } from 'vue';
 
 const props = defineProps<UseEditWebshopProps>();
 
