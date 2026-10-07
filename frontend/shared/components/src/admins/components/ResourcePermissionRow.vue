@@ -1,5 +1,5 @@
 <template>
-    <STListItem element-name="label" :selectable="true" class="left-center">
+    <STListItem element-name="label" :selectable="true" class="left-center smartphone-wrap">
         <template #left>
             <Checkbox v-model="selected" :disabled="locked" />
         </template>
@@ -39,14 +39,14 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useEmitPatch } from '#hooks/useEmitPatch.ts';
-import type { AccessRight, PermissionsResourceType} from '@stamhoofd/structures';
+import type { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
 import { AccessRightHelper, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ResourcePermissions, getConfigurableAccessRightsForResourceType, getConfigurablePermissionLevelsForResourceType, getDefaultAccessRightsForResourceType, getDefaultPermissionLevelForResourceType, getPermissionLevelName, getPermissionLevelNumber, getPermissionResourceTypeName, getWildcardResourceKeys, maximumPermissionlevel } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed } from 'vue';
 
 const props = withDefaults(defineProps<{
@@ -143,8 +143,7 @@ const permissionLevel = computed({
             // Delete the resource if no access rights
             if (resourcePermissions.value?.accessRights.length) {
                 // Keep it but set the level
-            }
-            else {
+            } else {
                 // Delete it
                 const subPatch = new PatchMap<string, AutoEncoderPatchType<ResourcePermissions> | ResourcePermissions | null>();
                 subPatch.set(props.resource.id, null);
@@ -161,8 +160,7 @@ const permissionLevel = computed({
                 resourceName: props.resource.name,
                 level,
             }));
-        }
-        else {
+        } else {
             subPatch.set(props.resource.id, ResourcePermissions.create({
                 resourceName: props.resource.name,
                 level,
@@ -193,14 +191,12 @@ for (const accessRight of configurableAccessRights) {
                 if (enable) {
                     p.accessRights.addDelete(accessRight); // prevent creating duplicates
                     p.accessRights.addPut(accessRight);
-                }
-                else {
+                } else {
                     p.accessRights.addDelete(accessRight);
                     p.accessRights.addDelete(accessRight); // auto correct duplicates
                 }
                 subPatch.set(props.resource.id, p);
-            }
-            else {
+            } else {
                 subPatch.set(props.resource.id, ResourcePermissions.create({
                     resourceName: props.resource.name,
                     level: PermissionLevel.None,
@@ -233,15 +229,13 @@ const selected = computed({
         if (value) {
             if (defaultLevel) {
                 permissionLevel.value = defaultLevel;
-            }
-            else {
+            } else {
                 permissionLevel.value = configurablePermissionLevels.find(l => l !== PermissionLevel.None) ?? PermissionLevel.Read;
             }
             for (const accessRight of defaultAccessRights) {
                 accessRightsMap.get(accessRight)!.value = true;
             }
-        }
-        else {
+        } else {
             // Delete it
             const patch = createPatch();
             const subPatch = new PatchMap<string, AutoEncoderPatchType<ResourcePermissions> | ResourcePermissions | null>();
@@ -266,7 +260,7 @@ const levelText = computed(() => {
             if (accessRights.length) {
                 return accessRights.map(r => AccessRightHelper.getNameShort(r)).join(' + ');
             }
-            return $t(`%GV`); // Special translation
+            return $t('%GV'); // Special translation
         }
         case PermissionLevel.Read: {
             const rights = [getPermissionLevelName(PermissionLevel.Read, props.resource.type)];
@@ -352,10 +346,9 @@ const choosePermissions = async (event: MouseEvent) => {
                         let description: string | undefined = undefined;
                         if (!isLocked) {
                             if (included) {
-                                description = ($t(`%uR`) + ' ' + getPermissionLevelName(baseLevel, props.resource.type));
-                            }
-                            else {
-                                description = AccessRightHelper.getDescription(accessRight) || ($t(`%uS`) + ' ' + getPermissionLevelName(permissionLevel.value, props.resource.type));
+                                description = ($t('%uR') + ' ' + getPermissionLevelName(baseLevel, props.resource.type));
+                            } else {
+                                description = AccessRightHelper.getDescription(accessRight) || ($t('%uS') + ' ' + getPermissionLevelName(permissionLevel.value, props.resource.type));
                             }
                         }
 
