@@ -86,8 +86,11 @@
                     </tr>
                 </tbody>
             </table>
-            <p v-if="file && columns.length > 0" class="warning-box">
+            <p v-if="file && columns.length > 0 && !includesBirthDay" class="warning-box">
                 {{ $t('%19y') }}
+            </p>
+            <p v-if="file && columns.length > 0 && !includesContactInfo" class="warning-box">
+                {{ $t('Het is aan te bevelen om ook e-mailadresse en telefoonnummers toe te voegen. Zo kunnen leden of ouders toegang krijgen tot de juiste leden als ze zich aanmelden in het ledenportaal.') }}
             </p>
             <STErrorsDefault :error-box="errors.errorBox" />
             <hr>
@@ -123,7 +126,10 @@ import XLSX from 'xlsx';
 import { AddressColumnMatcher } from '../../../../../classes/import/AddressColumnMatcher';
 import type { ColumnMatcher } from '../../../../../classes/import/ColumnMatcher';
 import { DateColumnMatcher } from '../../../../../classes/import/DateColumnMatcher';
+import { BirthDayColumnMatcher } from '../../../../../classes/import/default-matchers/BirthDayColumnMatcher';
+import { EmailColumnMatcher } from '../../../../../classes/import/default-matchers/EmailColumnMatcher';
 import { MemberIdColumnMatcher } from '../../../../../classes/import/default-matchers/MemberIdColumnMatcher';
+import { PhoneColumnMatcher } from '../../../../../classes/import/default-matchers/PhoneColumnMatcher';
 import { getAllMatchers } from '../../../../../classes/import/defaultMatchers';
 import { FindExistingMemberResult } from '../../../../../classes/import/FindExistingMemberResult';
 import { ImportError } from '../../../../../classes/import/ImportError';
@@ -291,6 +297,9 @@ const matcherCategories = computed(() => {
     }
     return Object.values(arr);
 });
+
+const includesBirthDay = computed(() => columns.value.some(c => c.matcher instanceof BirthDayColumnMatcher));
+const includesContactInfo = computed(() => columns.value.some(c => c.matcher instanceof EmailColumnMatcher || c.matcher instanceof PhoneColumnMatcher));
 
 function changedFile(event: any) {
     if (!event.target.files || event.target.files.length === 0) {
