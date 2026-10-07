@@ -71,7 +71,7 @@ import CategoryRow from './categories/CategoryRow.vue';
 import ProductRow from './products/ProductRow.vue';
 import type { UseEditWebshopProps } from './useEditWebshop';
 import { useEditWebshop } from './useEditWebshop';
-import { defineProps, defineExpose, computed } from 'vue';
+import { computed } from 'vue';
 
 const props = defineProps<UseEditWebshopProps>();
 
