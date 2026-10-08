@@ -20839,6 +20839,54 @@
     "original": "Inschrijvingen {periodName}",
     "translation": "Inscriptions {periodName}"
   },
+  "%Ztg": {
+    "original": "Ongeldig ticket",
+    "translation": "Ticket invalide"
+  },
+  "%Zth": {
+    "original": "Dit ticket is nog niet gedownload. Wacht tot alle tickets gedownload zijn en scan opnieuw.",
+    "translation": "Ce ticket n'a pas encore été téléchargé. Veuillez attendre que tous les tickets soient téléchargés et réessayez de scanner."
+  },
+  "%Zti": {
+    "original": "Tickets downloaden...",
+    "translation": "Téléchargement des tickets..."
+  },
+  "%Ztj": {
+    "original": "Tot het downloaden klaar is, worden nog niet alle tickets herkend.",
+    "translation": "Tant que le téléchargement n'est pas terminé, certains tickets risquent de ne pas être reconnus."
+  },
+  "%Ztk": {
+    "original": "Je hebt geen toegang om de telefoonnummers van dit lid te wijzigen.",
+    "translation": "Vous n'avez pas l'autorisation de modifier les numéros de téléphone de ce membre."
+  },
+  "%Ztl": {
+    "original": "Er ging iets mis. Dit is een geldig ticket, maar de bijhorende bestelling kon niet geladen worden. Waarschijnlijk heb je tijdelijk internet nodig om nieuwe bestellingen op te halen. Probeer daarna opnieuw.",
+    "translation": "Une erreur s'est produite. Ce ticket est valide mais la commande associée n'a pas pu être chargée. Une connexion internet temporaire est probablement nécessaire pour récupérer les nouvelles commandes. Réessayez ensuite."
+  },
+  "%Ztm": {
+    "original": "De tickets worden op dit toestel gedownload zodat je ze ook zonder internet kan scannen. Laat deze pagina best open op een goede internetverbinding tot het downloaden klaar is.",
+    "translation": "Les tickets sont téléchargés sur cet appareil afin que vous puissiez les scanner même sans connexion internet. Il est préférable de laisser cette page ouverte sur une bonne connexion jusqu'à la fin du téléchargement."
+  },
+  "%Ztn": {
+    "original": "Je hebt geen toegang om te filteren op gegevens van verenigingen",
+    "translation": "Vous n'avez pas l'autorisation de filtrer sur les données des associations."
+  },
+  "%Zto": {
+    "original": "Er bestaat al een lid met dit ID",
+    "translation": "Un membre avec cet identifiant existe déjà."
+  },
+  "%Ztp": {
+    "original": "Geen internetverbinding. Nog niet alle tickets zijn gedownload, dus niet alle tickets worden herkend.",
+    "translation": "Pas de connexion internet. Comme tous les tickets n'ont pas encore été téléchargés, certains tickets pourraient ne pas être reconnus."
+  },
+  "%Ztq": {
+    "original": "Lokale database verwijderen en herladen",
+    "translation": "Supprimer et recharger la base de données locale"
+  },
+  "%Ztr": {
+    "original": "Dit e-mailadres is al in gebruik door een ander account. Log in met dat account of kies een ander e-mailadres.",
+    "translation": "Cette adresse e-mail est déjà utilisée par un autre compte. Connectez-vous avec ce compte ou choisissez une autre adresse e-mail."
+  },
   "%Zu": {
     "original": "De redirect URI behoud je best op de voorgestelde waarde.",
     "translation": "Il est préférable de conserver l'URI de redirection sur la valeur proposée."

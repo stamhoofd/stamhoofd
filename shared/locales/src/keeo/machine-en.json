@@ -1755,6 +1755,10 @@
     "original": "Eenheden aanmaken",
     "translation": "Create units"
   },
+  "%Ztn": {
+    "original": "Je hebt geen toegang om te filteren op gegevens van eenheden",
+    "translation": "You don't have access to filter unit data."
+  },
   "%ad": {
     "original": "Een hoofdbeheerder van jouw eenheid moet eerst een afzender toevoegen die je kan gebruiken voor je een bericht kan versturen.",
     "translation": "A main administrator of your unit must first add a sender that you can use before you can send a message."

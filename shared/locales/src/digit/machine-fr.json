@@ -1595,6 +1595,10 @@
     "original": "Groepen aanmaken",
     "translation": "Créer des groupes"
   },
+  "%Ztn": {
+    "original": "Je hebt geen toegang om te filteren op gegevens van groepen",
+    "translation": "Vous n'avez pas accès pour filtrer les données des groupes."
+  },
   "%a6": {
     "original": "Portaal voor beroepsmedewerkers",
     "translation": "Portail pour les employés professionnels"
