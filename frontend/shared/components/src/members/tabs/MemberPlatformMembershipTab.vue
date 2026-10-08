@@ -13,7 +13,7 @@
                     </p>
 
                     <STList v-else>
-                        <STListItem v-for="membership of getMembershipsForPeriod(period.id)" :key="membership.id" :selectable="true" class="right-stack" @click="openMembership(membership)">
+                        <STListItem v-for="membership of getMembershipsForPeriod(period.id)" :key="membership.id" :selectable="canOpenMembership(membership)" class="right-stack" @click="openMembership(membership)">
                             <template #left>
                                 <figure class="style-image-with-icon" :class="{'theme-secundary': membership.isTrial}">
                                     <figure>
@@ -189,7 +189,16 @@ async function addMembership(period: RegistrationPeriod) {
     });
 }
 
+// The API only returns memberships charged to the organization in scope
+function canOpenMembership(membership: MemberPlatformMembership) {
+    return !organization.value || membership.organizationId === organization.value.id;
+}
+
 async function openMembership(membership: MemberPlatformMembership) {
+    if (!canOpenMembership(membership)) {
+        return;
+    }
+
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
