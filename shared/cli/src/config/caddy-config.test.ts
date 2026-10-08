@@ -81,7 +81,7 @@ describe('Caddy config', () => {
         const documentRoute = nonceSubroute.routes.find(route => route.match?.[0].not !== undefined);
         const headers = documentRoute.handle.find((handle: any) => handle.handler === 'headers');
         expect(headers.response.set['Content-Security-Policy'][0])
-            .toBe(`script-src 'nonce-{http.request.uuid}' 'strict-dynamic'; object-src 'none'; base-uri 'none'`);
+            .toBe(`script-src 'nonce-{http.request.uuid}' 'strict-dynamic'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'`);
 
         const replace = documentRoute.handle.find((handle: any) => handle.handler === 'replace_response');
         expect(replace.replacements[0]).toEqual({ search: 'STAMHOOFD_CSP_NONCE', replace: '{http.request.uuid}' });
@@ -250,7 +250,7 @@ describe('cspFrontendSubroutes', () => {
         expect(documentRoute).toBeDefined();
         expect(documentRoute!.match![0].not![0].path).toContain('*.js');
         expect(cspHeaderValues(documentRoute!.handle, 'set')).toEqual([
-            `script-src 'nonce-{http.request.uuid}' 'strict-dynamic'; object-src 'none'; base-uri 'none'`,
+            `script-src 'nonce-{http.request.uuid}' 'strict-dynamic'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'`,
         ]);
 
         // ...and the build-time placeholder is rewritten to the per-request nonce.
@@ -281,7 +281,7 @@ describe('cspFrontendSubroutes', () => {
         expect(documentRoute).toBeDefined();
         expect(documentRoute!.match![0].not![0].path).toContain('*.js');
         expect(cspHeaderValues(documentRoute!.handle, 'add')).toEqual([
-            `script-src 'self' 'nonce-{http.request.uuid}'`,
+            `script-src 'self' 'nonce-{http.request.uuid}'; worker-src 'self' blob:`,
         ]);
     });
 });
