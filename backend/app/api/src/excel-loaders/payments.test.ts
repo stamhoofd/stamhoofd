@@ -1,3 +1,4 @@
+import { isXlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import { BalanceItem, BalanceItemPaymentDetailed, BalanceItemRelation, BalanceItemRelationType, BalanceItemType, Cart, CartItem, CartItemPrice, OrderData, OrderStatus, PaymentGeneral, PaymentMethod, PaymentStatus, Product, ProductPrice, TranslatedString } from '@stamhoofd/structures';
 import { createPaymentExportOrder, expandPaymentBalanceItemPayments, getBalanceItemPaymentColumns, getOrderColumns, getOrderNumberCell, getPaymentOrders, PaymentGeneralWithStripeAccount } from './payments.js';
 import type { PaymentExportOrder } from './payments.js';
@@ -292,9 +293,9 @@ describe('payments excel loader', () => {
         it('renders the order number column from the row', () => {
             const orderMap = createOrderMap([{ id: 'order-1', number: 123 }]);
             const rows = expandPaymentBalanceItemPayments(createPayment(1000), orderMap);
-            const column = getBalanceItemPaymentColumns().find(c => 'id' in c && c.id === 'orderNumber');
+            const column = getBalanceItemPaymentColumns().find(c => isXlsxTransformerConcreteColumn(c) && c.id === 'orderNumber');
 
-            if (!column || !('getValue' in column)) {
+            if (!column || !isXlsxTransformerConcreteColumn(column)) {
                 throw new Error('Missing order number column');
             }
 

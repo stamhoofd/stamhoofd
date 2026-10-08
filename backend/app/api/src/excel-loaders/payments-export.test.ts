@@ -106,7 +106,9 @@ describe('ExcelLoader.Payments order numbers', () => {
 
         const orderNumber = getColumn<PaymentWithItem>(rowSheet.columns, 'orderNumber');
         const liveRows = rowSheet.transform!(byId.get(livePayment.id)!) as PaymentWithItem[];
-        expect(liveRows.map(row => orderNumber.getValue(row).value).sort()).toEqual(['', 123]);
+        const liveValues = liveRows.map(row => orderNumber.getValue(row).value);
+        expect(liveValues).toHaveLength(2);
+        expect(liveValues).toEqual(expect.arrayContaining(['', 123]));
 
         const deletedRows = rowSheet.transform!(byId.get(deletedPayment.id)!) as PaymentWithItem[];
         expect(deletedRows.map(row => orderNumber.getValue(row).value)).toEqual(['Verwijderd']);

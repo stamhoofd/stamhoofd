@@ -17,10 +17,7 @@ export type PaymentWithItem = {
 export type PaymentExportOrder = {
     id: string;
 
-    /**
-     * Deleting an order replaces its number with a random 13 digit one, so the number it held can be
-     * handed out again. That replacement means nothing to a reader, so a deleted order has no number here.
-     */
+    /** A deleted order carries a random 13 digit replacement number (see PatchWebshopOrdersEndpoint), so it is exported without one */
     number: number | null;
     isDeleted: boolean;
     data: OrderData;
@@ -655,7 +652,7 @@ export function getOrderColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>
         {
             id: 'orderNumbers',
             name: $t('Bestelnummer'),
-            width: 16,
+            width: 24,
             getValue: (object: PaymentGeneralWithStripeAccount) => getOrderNumberCell(object.orders),
         },
     ];
