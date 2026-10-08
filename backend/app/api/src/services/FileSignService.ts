@@ -14,6 +14,22 @@ import * as jose from 'jose';
 export class FileSignService {
     static s3: S3Client;
 
+    /**
+     * Whether the file lives on our own storage server. The server of a public file is client-supplied, so the
+     * server may only download a file from there when it points at our storage.
+     */
+    static isStoredOnOwnServer(file: File): boolean {
+        if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT) {
+            return false;
+        }
+
+        try {
+            return new URL(file.server).origin === new URL('https://' + STAMHOOFD.SPACES_BUCKET + '.' + STAMHOOFD.SPACES_ENDPOINT).origin;
+        } catch {
+            return false;
+        }
+    }
+
     static async load() {
         this.s3 = new S3Client({
             forcePathStyle: false, // Configures to use subdomain/virtual calling format.

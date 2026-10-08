@@ -44,6 +44,34 @@ describe('FileSignService', () => {
         return new URL(signed!.signedUrl!).searchParams;
     };
 
+    describe('isStoredOnOwnServer', () => {
+        const fileOn = (server: string) => new File({
+            id: '1c9ab9e6-1234-4c5e-9f1a-000000000001',
+            server,
+            path: 'p/abc/file.pdf',
+            size: 100,
+            isPrivate: false,
+            contentType: 'application/pdf',
+        });
+
+        test.each([
+            ['https://test-bucket.test.digitaloceanspaces.com', true],
+            ['HTTPS://TEST-BUCKET.test.digitaloceanspaces.com:443', true],
+            ['http://test-bucket.test.digitaloceanspaces.com', false],
+            ['https://test-bucket.test.digitaloceanspaces.com.attacker.example', false],
+            ['https://attacker.example/test-bucket.test.digitaloceanspaces.com', false],
+            ['https://test-bucket.test.digitaloceanspaces.com@attacker.example', false],
+            ['http://169.254.169.254', false],
+        ])('%s -> %s', (server, expected) => {
+            expect(FileSignService.isStoredOnOwnServer(fileOn(server))).toBe(expected);
+        });
+
+        test('nothing is trusted when the storage is not configured', () => {
+            TestUtils.setEnvironment('SPACES_BUCKET', '');
+            expect(FileSignService.isStoredOnOwnServer(fileOn('https://test-bucket.test.digitaloceanspaces.com'))).toBe(false);
+        });
+    });
+
     test('A signed url never renders a file type a browser could execute', async () => {
         const query = await getSignedQuery(buildFile({ path: 'users/1/abc/report.docx', contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }));
 

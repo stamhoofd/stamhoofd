@@ -292,10 +292,12 @@ describe('Email.getCombinedHtml', () => {
 describe('getEmailBuilder replacement file attachments', () => {
     const from = { email: 'sender@example.com' };
 
-    const buildFile = (data: { id?: string; name?: string; size?: number; isPrivate?: boolean }) => {
+    const ownServer = () => 'https://' + STAMHOOFD.SPACES_BUCKET + '.' + STAMHOOFD.SPACES_ENDPOINT;
+
+    const buildFile = (data: { id?: string; name?: string; size?: number; isPrivate?: boolean; server?: string }) => {
         return new File({
             id: data.id ?? 'file-1',
-            server: 'https://files.example.com',
+            server: data.server ?? ownServer(),
             path: 'users/1/abc/attest.pdf',
             name: data.name ?? 'Attest 2024.pdf',
             size: data.size ?? 100,
@@ -330,7 +332,7 @@ describe('getEmailBuilder replacement file attachments', () => {
         expect(email.attachments).toEqual([
             {
                 filename: 'attest-2024.pdf',
-                href: 'https://files.example.com/users/1/abc/attest.pdf',
+                href: ownServer() + '/users/1/abc/attest.pdf',
                 contentType: 'application/pdf',
             },
         ]);
@@ -426,6 +428,35 @@ describe('getEmailBuilder replacement file attachments', () => {
         } finally {
             FileSignService.s3 = originalClient;
         }
+    });
+
+    test('a public file that is not stored on our own server is not attached', async () => {
+        // The server of a public file comes from the client (e.g. a file answer on a webshop order) and the
+        // mailer would download it: that must never reach an internal host
+        const email = await buildEmail({
+            html: '<p>{{orderDetailsTable}}</p>',
+            replacements: [
+                Replacement.create({ token: 'orderDetailsTable', html: '<table></table>', files: [
+                    buildFile({ id: 'metadata', server: 'http://169.254.169.254' }),
+                    buildFile({ id: 'lookalike', server: 'https://' + STAMHOOFD.SPACES_BUCKET + '.' + STAMHOOFD.SPACES_ENDPOINT + '.attacker.example' }),
+                    buildFile({ id: 'own', name: 'own.pdf' }),
+                ] }),
+            ],
+        });
+
+        expect(email.attachments!.map(a => a.filename)).toEqual(['own.pdf']);
+    });
+
+    test('a public file that is not stored on our own server is not attached inline either', async () => {
+        const file = buildFile({ id: 'inline-foreign', name: 'logo.png', server: 'http://10.0.0.1' });
+        const email = await buildEmail({
+            html: '<p>{{header}}</p>',
+            replacements: [
+                Replacement.create({ token: 'header', html: '<img src="' + file.inlineEmailSrc + '">', files: [file] }),
+            ],
+        });
+
+        expect(email.attachments ?? []).toEqual([]);
     });
 
     test('a private file without a valid signature is not attached', async () => {

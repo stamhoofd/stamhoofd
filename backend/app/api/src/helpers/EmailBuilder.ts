@@ -9,6 +9,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { Group, Organization, Webshop } from '@stamhoofd/models';
 import { CachedBalance, EmailRecipient, EmailTemplate, Member, Platform, User } from '@stamhoofd/models';
+import { FileSignService } from '../services/FileSignService.js';
 import { TenantContext } from './TenantContext.js';
 
 export type EmailTemplateOptions = {
@@ -305,6 +306,11 @@ async function getReplacementAttachments(html: string, replacements: Replacement
             }
             href = signed.signedUrl;
         } else {
+            // The mailer downloads the attachment: a public file is not signed, so its server is only trusted when it is ours
+            if (!FileSignService.isStoredOnOwnServer(file)) {
+                console.warn('Skipping replacement file attachment that is not stored on our own server', file.id, file.server);
+                continue;
+            }
             href = file.getPublicPath();
         }
 
