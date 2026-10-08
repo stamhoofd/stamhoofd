@@ -218,6 +218,9 @@ async function requestSecurityCode(method: SecurityCodeSendMethod, phone: string
         path: '/members/security-code',
         body: SendMemberSecurityCodeRequest.create({
             memberId: isDuplicate.value,
+            firstName: cloned.value.patchedMember.details.firstName,
+            lastName: cloned.value.patchedMember.details.lastName,
+            birthDay: cloned.value.patchedMember.details.birthDay,
             method,
             phone,
             tryCount: smsTryCount.value,

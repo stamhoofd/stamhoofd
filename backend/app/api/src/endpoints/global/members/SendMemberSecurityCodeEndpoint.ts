@@ -150,6 +150,16 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
             });
         }
 
+        // Clients from before these fields existed cannot prove the duplicate match
+        if (!body.firstName || !body.lastName || !body.birthDay) {
+            throw new SimpleError({
+                code: 'client_update_required',
+                statusCode: 400,
+                message: 'The name and birth day of the member are required to request a security code',
+                human: $t(`%G8`),
+            });
+        }
+
         const member = await this.findMember(body, organization);
         if (!member) {
             throw new SimpleError({
@@ -168,11 +178,26 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
     }
 
     /**
-     * Look up the member by id, or by the combination of first name, last name and birth day.
-     * String matching relies on the case- and accent-insensitive collation of the database.
+     * Only return the member when the id, name and birth day all match, in the same scope the duplicate check
+     * uses for a PUT (the organization in organization mode, no organization in platform mode). A member id
+     * from another source is not enough to get a code sent. String matching relies on the case- and
+     * accent-insensitive collation of the database.
      */
     private async findMember(body: SendMemberSecurityCodeRequest, organization: Organization | null): Promise<Member | undefined> {
-        return (await Member.getByID(body.memberId)) ?? undefined;
+        if (!body.firstName || !body.lastName || !body.birthDay) {
+            return;
+        }
+
+        // The duplicate check matched on cleaned names (trimmed, single spaces); the collation does not ignore whitespace
+        const organizationId = STAMHOOFD.userMode === 'platform' ? null : (organization?.id ?? null);
+        const members = await Member.where({
+            id: body.memberId,
+            organizationId,
+            firstName: Formatter.removeDuplicateSpaces(body.firstName.trim()),
+            lastName: Formatter.removeDuplicateSpaces(body.lastName.trim()),
+            birthDay: Formatter.dateIso(body.birthDay),
+        }, { limit: 1 });
+        return members[0];
     }
 
     /**

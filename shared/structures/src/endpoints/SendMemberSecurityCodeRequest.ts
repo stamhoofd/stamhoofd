@@ -1,18 +1,25 @@
-import { AutoEncoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { SecurityCodeSendMethod } from '../members/SecurityCodeSendMethod.js';
 
 /**
  * Request to send the security code of a member to the member (or its parents) via email or SMS.
  *
- * The member is looked up either by its id, or by the combination of first name, last name and birth day.
+ * The member id alone is not enough: the first name, last name and birth day must match the member too,
+ * so a code can only be requested after the duplicate check matched on those details.
  */
 export class SendMemberSecurityCodeRequest extends AutoEncoder {
-    /**
-     * Look up the member by id. When set, the name/birthDay fields are ignored.
-     */
     @field({ decoder: StringDecoder })
     memberId: string;
+
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    firstName: string | null = null;
+
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    lastName: string | null = null;
+
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    birthDay: Date | null = null;
 
     @field({ decoder: new EnumDecoder(SecurityCodeSendMethod) })
     method: SecurityCodeSendMethod;

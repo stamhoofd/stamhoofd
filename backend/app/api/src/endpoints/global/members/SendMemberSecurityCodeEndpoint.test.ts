@@ -68,6 +68,18 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         return { organization, user, token, member };
     }
 
+    /**
+     * The request fields the endpoint needs to accept the member id: the same name and birth day the duplicate check matched on.
+     */
+    function matchingDetails(member: Member) {
+        return {
+            memberId: member.id,
+            firstName: member.details.firstName,
+            lastName: member.details.lastName,
+            birthDay: member.details.birthDay,
+        };
+    }
+
     function buildRequest(host: string | undefined, token: Token, body: SendMemberSecurityCodeRequest) {
         const request = Request.buildJson('POST', baseUrl, host, body);
         request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -78,7 +90,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         const { organization, token, member } = await setup();
 
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            memberId: member.id,
+            ...matchingDetails(member),
             method: SecurityCodeSendMethod.Email,
         }));
 
@@ -100,7 +112,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         const { organization, token, member } = await setup();
 
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            memberId: member.id,
+            ...matchingDetails(member),
             method: SecurityCodeSendMethod.SMS,
         }));
 
@@ -137,7 +149,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         const member = await new MemberFactory({ details }).create();
 
         const request = buildRequest(undefined, token, SendMemberSecurityCodeRequest.create({
-            memberId: member.id,
+            ...matchingDetails(member),
             method: SecurityCodeSendMethod.SMS,
         }));
 
@@ -154,7 +166,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         const { organization, token, member } = await setup();
 
         const body = SendMemberSecurityCodeRequest.create({
-            memberId: member.id,
+            ...matchingDetails(member),
             method: SecurityCodeSendMethod.SMS,
             tryCount: 0,
         });
@@ -166,7 +178,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         resetLimiter(memberSecurityCodeSendLimiter);
 
         const retry = SendMemberSecurityCodeRequest.create({
-            memberId: member.id,
+            ...matchingDetails(member),
             method: SecurityCodeSendMethod.SMS,
             tryCount: 1,
         });
@@ -184,7 +196,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         // Provide the parent number in national format. Even though tryCount 0 would normally select the
         // member number, an exact (normalized) match must win.
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            memberId: member.id,
+            ...matchingDetails(member),
             method: SecurityCodeSendMethod.SMS,
             tryCount: 0,
             phone: '0471 98 76 54',
@@ -202,7 +214,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         const { organization, token, member } = await setup();
 
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            memberId: member.id,
+            ...matchingDetails(member),
             method: SecurityCodeSendMethod.SMS,
             phone: '+32 490 00 00 00',
         }));
@@ -225,7 +237,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         }
 
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            memberId: member.id,
+            ...matchingDetails(member),
             method: SecurityCodeSendMethod.SMS,
             phone: '+32 490 00 00 00',
         }));
@@ -240,7 +252,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         const { organization, user, token, member } = await setup();
 
         await testServer.test(endpoint, buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            memberId: member.id,
+            ...matchingDetails(member),
             method: SecurityCodeSendMethod.Email,
         })));
 
@@ -266,7 +278,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         const { user, organization, token, member } = await setup();
 
         await testServer.test(endpoint, buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            memberId: member.id,
+            ...matchingDetails(member),
             method: SecurityCodeSendMethod.SMS,
         })));
 
@@ -288,7 +300,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         await member.save();
 
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            memberId: member.id,
+            ...matchingDetails(member),
             method: SecurityCodeSendMethod.Email,
         }));
 
@@ -305,10 +317,72 @@ describe('Endpoint.SendMemberSecurityCode', () => {
     });
 
     test('throws when no member is found', async () => {
-        const { organization, token } = await setup();
+        const { organization, token, member } = await setup();
 
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
+            ...matchingDetails(member),
             memberId: 'not-found',
+            method: SecurityCodeSendMethod.Email,
+        }));
+
+        await expect(testServer.test(endpoint, request))
+            .rejects
+            .toThrow(STExpect.errorWithCode('member_not_found'));
+    });
+
+    test('throws when only the member id is known', async () => {
+        const { organization, token, member } = await setup();
+
+        const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
+            memberId: member.id,
+            method: SecurityCodeSendMethod.Email,
+        }));
+
+        await expect(testServer.test(endpoint, request))
+            .rejects
+            .toThrow(STExpect.errorWithCode('client_update_required'));
+        expect(await EmailMocker.transactional.getSucceededCount()).toBe(0);
+    });
+
+    test('throws when the name or birth day does not match the member', async () => {
+        const { organization, token, member } = await setup();
+
+        for (const override of [{ firstName: 'Other' }, { lastName: 'Other' }, { birthDay: new Date(Date.UTC(2010, 4, 6)) }]) {
+            const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
+                ...matchingDetails(member),
+                ...override,
+                method: SecurityCodeSendMethod.Email,
+            }));
+
+            await expect(testServer.test(endpoint, request))
+                .rejects
+                .toThrow(STExpect.errorWithCode('member_not_found'));
+        }
+        expect(await EmailMocker.transactional.getSucceededCount()).toBe(0);
+    });
+
+    test('matches the name case-insensitively and ignores extra whitespace', async () => {
+        const { organization, token, member } = await setup();
+
+        const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
+            ...matchingDetails(member),
+            firstName: ' jef ',
+            lastName: 'TESTMAN  ',
+            method: SecurityCodeSendMethod.Email,
+        }));
+
+        const response = await testServer.test(endpoint, request);
+        expect(response.body.method).toBe(SecurityCodeSendMethod.Email);
+    });
+
+    test('throws when the member belongs to another organization', async () => {
+        const { member } = await setup();
+        const otherOrganization = await new OrganizationFactory({}).create();
+        const otherUser = await new UserFactory({ organization: otherOrganization }).create();
+        const token = await SessionService.createSession(otherUser);
+
+        const request = buildRequest(otherOrganization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
+            ...matchingDetails(member),
             method: SecurityCodeSendMethod.Email,
         }));
 
@@ -322,7 +396,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         const { organization, token, member } = await setup({ phone: null, parents: [] });
 
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            memberId: member.id,
+            ...matchingDetails(member),
             method: SecurityCodeSendMethod.SMS,
         }));
 
@@ -335,7 +409,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         const { organization, token, member } = await setup();
 
         const body = () => SendMemberSecurityCodeRequest.create({
-            memberId: member.id,
+            ...matchingDetails(member),
             method: SecurityCodeSendMethod.Email,
         });
 
@@ -352,7 +426,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         const { organization, token, member } = await setup();
 
         const body = () => SendMemberSecurityCodeRequest.create({
-            memberId: member.id,
+            ...matchingDetails(member),
             method: SecurityCodeSendMethod.SMS,
         });
 
@@ -376,7 +450,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         }
 
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            memberId: member.id,
+            ...matchingDetails(member),
             method: SecurityCodeSendMethod.SMS,
         }));
 
@@ -395,7 +469,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         }
 
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            memberId: member.id,
+            ...matchingDetails(member),
             method: SecurityCodeSendMethod.Email,
         }));
 
@@ -410,7 +484,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         const { organization, token, member } = await setup();
 
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            memberId: member.id,
+            ...matchingDetails(member),
             method: SecurityCodeSendMethod.SMS,
         }));
 
