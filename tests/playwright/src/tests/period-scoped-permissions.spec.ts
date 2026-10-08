@@ -27,6 +27,8 @@ type PeriodFixture = {
     otherGroup: Group;
     otherGroupName: string;
     otherMemberName: string;
+    /** Waiting list of the group outside the grant, listed in its own menu section */
+    otherWaitingList: Group;
     eventName: string;
     eventId: string;
     /** Member registered in the event's registration group */
@@ -84,10 +86,18 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
             name: new TranslatedString(groupName),
         }).create();
 
+        const otherWaitingList = await new GroupFactory({
+            organization,
+            period,
+            type: GroupType.WaitingList,
+            name: new TranslatedString(`Wachtlijst ${label}`),
+        }).create();
+
         const otherGroup = await new GroupFactory({
             organization,
             period,
             name: new TranslatedString(otherGroupName),
+            waitingListId: otherWaitingList.id,
         }).create();
 
         // Only the first group sits in the granted category: the second one stays reachable
@@ -158,6 +168,7 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
             otherGroup,
             otherGroupName,
             otherMemberName,
+            otherWaitingList,
             eventName,
             eventId: event.id,
             eventMemberName,
@@ -316,6 +327,9 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
 
         await openGroupMembers({ page, group: scenario.current.group });
         await expectWriteAction({ page, memberName: scenario.current.memberName });
+
+        // Every waiting list is listed for a full admin
+        await expect(page.locator(`[id="${scenario.current.otherWaitingList.id}"]`)).toBeVisible();
     });
 
     test('a $currentPeriod grant reaches the groups of the current period', async ({ page }) => {
@@ -352,8 +366,9 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
         // The current period holds the granted group, so no hint to switch period
         await expect(page.locator('[data-testid="period-access-hint"]:visible')).toHaveCount(0);
 
-        // Negative case: the group outside the grant is not offered in the menu at all
+        // Negative case: the group outside the grant and its waiting list are not offered in the menu at all
         await expect(page.locator(`[id="${scenario.current.otherGroup.id}"]`)).toHaveCount(0);
+        await expect(page.locator(`[id="${scenario.current.otherWaitingList.id}"]`)).toHaveCount(0);
     });
 
     test('a grant on one group of a previous period reaches that group', async ({ page }) => {
