@@ -39,7 +39,8 @@ export async function applySQLSorter(selectQuery: SQLSelect<any>, sortBy: SortLi
             // Check if no overlap in alias/table (otherwise we'll get issues)
             if (selectQuery._joins.find(j => j === d.join)) {
                 // Already added
-            } else {
+            }
+            else {
                 const name = d.join.table.getSQL({ defaultNamespace: 'default' });
 
                 for (const j of selectQuery._joins) {

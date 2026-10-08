@@ -2,12 +2,10 @@ import type { MemberWithUsersRegistrationsAndGroups } from '@stamhoofd/models';
 import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLIfNull, SQLOrderBy } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
-import { memberCachedBalanceForMemberOrganizationJoin } from '../helpers/outstandingBalanceJoin.js';
-import { Context } from '../helpers/Context.js';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { AccessRight } from '@stamhoofd/structures';
+import { memberCachedBalanceJoinForOrganization } from '../helpers/outstandingBalanceJoin.js';
+import { throwIfNoFinancialReadAccess } from '../sql-filters/members.js';
 
-export const memberSorters = (organizationId: string | null): SQLSortDefinitions<MemberWithUsersRegistrationsAndGroups> => {
+export const memberSorters = (organizationId: string | null = null): SQLSortDefinitions<MemberWithUsersRegistrationsAndGroups> => {
     const sorters: SQLSortDefinitions<MemberWithUsersRegistrationsAndGroups> = {
     // WARNING! TEST NEW SORTERS THOROUGHLY!
     // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
@@ -98,12 +96,11 @@ export const memberSorters = (organizationId: string | null): SQLSortDefinitions
     if (organizationId) {
         sorters['memberCachedBalance.amountOpen'] = {
             getValue(a) {
-                if (a.rawSelectedRow) {
-                    if (a.rawSelectedRow?.['memberCachedBalance']?.['amountOpen']) {
-                        return a.rawSelectedRow?.['memberCachedBalance']?.['amountOpen'];
-                    }
+                const row = a.rawSelectedRow?.['memberCachedBalance'];
+                if (!row) {
+                    throw new Error('memberCachedBalance was not joined when selecting this member');
                 }
-                return 0;
+                return (row['amountOpen'] as number | null) ?? 0;
             },
             toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
                 return new SQLOrderBy({
@@ -111,26 +108,11 @@ export const memberSorters = (organizationId: string | null): SQLSortDefinitions
                     direction,
                 });
             },
-            join: memberCachedBalanceForMemberOrganizationJoin(organizationId),
+            join: memberCachedBalanceJoinForOrganization(organizationId),
             select: [SQL.column('memberCachedBalance', 'amountOpen')],
-            checkPermission: async () => {
-                await throwIfNoFinancialReadAccess(organizationId);
-            },
+            checkPermission: throwIfNoFinancialReadAccess,
         };
     }
 
     return sorters;
 };
-
-async function throwIfNoFinancialReadAccess(organizationId: string) {
-    const permissions = await Context.auth.getOrganizationPermissions(organizationId);
-
-    if (!permissions || !permissions.hasAccessRight(AccessRight.MemberReadFinancialData)) {
-        throw new SimpleError({
-            code: 'permission_denied',
-            message: 'No permissions for financial support sort (organization scope).',
-            human: $t(`%G2`),
-            statusCode: 400,
-        });
-    }
-}

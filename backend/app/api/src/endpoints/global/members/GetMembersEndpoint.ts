@@ -42,6 +42,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
     static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest, permissionLevel: PermissionLevel = PermissionLevel.Read) {
         const organization = Context.organization;
+        const scopedFilterCompilers = filterCompilers(organization?.id ?? null);
         let scopeFilter: StamhoofdFilter | undefined = undefined;
 
         if (organization && STAMHOOFD.userMode === 'organization' && await Context.auth.hasFullAccess(organization.id)) {
@@ -155,22 +156,22 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         }
 
         if (scopeFilter) {
-            query.where(await compileToSQLFilter(scopeFilter, filterCompilers(organization?.id)));
+            query.where(await compileToSQLFilter(scopeFilter, scopedFilterCompilers));
         }
 
         if (q.filter) {
-            query.where(await compileToSQLFilter(q.filter, filterCompilers(organization?.id)));
+            query.where(await compileToSQLFilter(q.filter, scopedFilterCompilers));
         }
 
         const searchFilter = GetMembersEndpoint.buildSearchFilter(q.search);
 
         if (searchFilter) {
-            query.where(await compileToSQLFilter(searchFilter, filterCompilers(organization?.id)));
+            query.where(await compileToSQLFilter(searchFilter, scopedFilterCompilers));
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers(organization?.id)));
+                query.where(await compileToSQLFilter(q.pageFilter, scopedFilterCompilers));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);

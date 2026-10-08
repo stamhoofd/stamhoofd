@@ -1,20 +1,20 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email, Member, MemberUser } from '@stamhoofd/models';
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJoinedRelationFilter, createWildcardColumnFilter, SQL, SQLAge, SQLCast, SQLConcat, SQLJsonExtract, SQLSafeValue, SQLScalar, SQLValueType } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJoinedRelationFilter, createWildcardColumnFilter, SQL, SQLAge, SQLCast, SQLConcat, SQLIfNull, SQLJsonExtract, SQLScalar, SQLValueType } from '@stamhoofd/sql';
 import { AccessRight } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context.js';
 import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers.js';
 import { organizationFilterCompilers } from './organizations.js';
 import { userFilterCompilers } from './users.js';
-import { memberCachedBalanceRawJoin } from '../helpers/outstandingBalanceJoin.js';
+import { memberCachedBalanceJoinForOrganization } from '../helpers/outstandingBalanceJoin.js';
 
 const membersTable = SQL.table(Member.table);
 
 /**
  * Defines how to filter members in the database from StamhoofdFilter objects
  */
-export const memberFilterCompilers = (organizationId?: string | null): SQLFilterDefinitions => {
+export const memberFilterCompilers = (organizationId: string | null = null): SQLFilterDefinitions => {
     const filters: SQLFilterDefinitions = {
         ...baseSQLFilterCompilers,
         'id': createColumnFilter({
@@ -565,16 +565,14 @@ export const memberFilterCompilers = (organizationId?: string | null): SQLFilter
 
     if (organizationId) {
         filters['memberCachedBalance'] = createJoinedRelationFilter(
-            memberCachedBalanceRawJoin(organizationId),
+            memberCachedBalanceJoinForOrganization(organizationId),
             {
                 ...baseSQLFilterCompilers,
                 amountOpen: createColumnFilter({
-                    expression: SQL.coalesce(SQL.column('amountOpen'), new SQLSafeValue(0)),
+                    expression: new SQLIfNull(SQL.column('memberCachedBalance', 'amountOpen'), 0),
                     type: SQLValueType.Number,
                     nullable: false,
-                    checkPermission: async () => {
-                        await throwIfNoFinancialReadAccess();
-                    },
+                    checkPermission: throwIfNoFinancialReadAccess,
                 }),
             },
         );
@@ -583,7 +581,7 @@ export const memberFilterCompilers = (organizationId?: string | null): SQLFilter
     return filters;
 };
 
-async function throwIfNoFinancialReadAccess() {
+export async function throwIfNoFinancialReadAccess() {
     const organization = Context.organization;
     if (!organization) {
         if (!Context.auth.hasPlatformFullAccess()) {

@@ -1,6 +1,6 @@
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
-import type { MemberWithUsersRegistrationsAndGroups, RegistrationPeriod, Token, User } from '@stamhoofd/models';
+import type { MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod, Token, User } from '@stamhoofd/models';
 import { CachedBalance, EventFactory, GroupFactory, MemberFactory, MemberResponsibilityRecordFactory, OrganizationFactory, OrganizationTagFactory, Platform, RecordCategoryFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import type { SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { AccessRight, CountFilteredRequest, EventMeta, GroupStatus, GroupType, LimitedFilteredRequest, NamedObject, OrganizationTag, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, ReceivableBalanceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection, STPackageBundle, STPackageType } from '@stamhoofd/structures';
@@ -2517,12 +2517,12 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
     describe('Sorting', () => {
         /**
-             * Requests every page by following the 'next' request the endpoint returns, exactly like the frontend does.
-             * That next request is built from the sorter's getValue, so this covers the full sort + pagination flow:
-             * getValue -> page filter -> encoded in the query -> decoded -> compiled back to SQL.
-             *
-             * Returns the ids of all members across all pages, in the order they were received.
-             */
+         * Requests every page by following the 'next' request the endpoint returns, exactly like the frontend does.
+         * That next request is built from the sorter's getValue, so this covers the full sort + pagination flow:
+         * getValue -> page filter -> encoded in the query -> decoded -> compiled back to SQL.
+         *
+         * Returns the ids of all members across all pages, in the order they were received.
+         */
         async function fetchAllPages({ host, token, sort, limit }: { host: string; token: Token; sort: SortList; limit: number }) {
             const ids: string[] = [];
             let query: LimitedFilteredRequest | undefined = new LimitedFilteredRequest({ sort, limit });
@@ -2737,7 +2737,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             });
         });
 
-        describe('memberCachedBalances.amountOpen', () => {
+        describe('memberCachedBalance.amountOpen', () => {
             /**
              * Creates one member per passed value, all registered in the same group of a new organization,
              * and returns an admin with full access to that organization.
@@ -2769,7 +2769,6 @@ describe('Endpoint.GetMembersEndpoint', () => {
                         balance.organizationId = organization.id;
                         await balance.save();
                     }
-                    await member.save();
 
                     members.push(member);
                 }
@@ -2778,8 +2777,8 @@ describe('Endpoint.GetMembersEndpoint', () => {
             }
 
             test('Members are sorted by memberCachedBalance.amountOpen ascending across all pages', async () => {
-                const { host, token, members } = await setupMembers([30, 5, 7, 0, 15, 45]);
-                const [member30, member5, member7, member0, member15, member45] = members;
+                const { host, token, members } = await setupMembers([30, 5, 7, 0, 15, 45, -20]);
+                const [member30, member5, member7, member0, member15, member45, memberMinus20] = members;
 
                 // A limit lower than the total forces the endpoint to build a next page filter from getValue
                 const ids = await fetchAllPages({
@@ -2790,6 +2789,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 });
 
                 expect(ids).toEqual([
+                    memberMinus20.id,
                     member0.id,
                     member5.id,
                     member7.id,
@@ -2800,8 +2800,8 @@ describe('Endpoint.GetMembersEndpoint', () => {
             });
 
             test('Members are sorted by memberCachedBalance.amountOpen descending across all pages', async () => {
-                const { host, token, members } = await setupMembers([30, 5, 7, 0, 15, 45]);
-                const [member30, member5, member7, member0, member15, member45] = members;
+                const { host, token, members } = await setupMembers([30, 5, 7, 0, 15, 45, -20]);
+                const [member30, member5, member7, member0, member15, member45, memberMinus20] = members;
 
                 const ids = await fetchAllPages({
                     host,
@@ -2817,6 +2817,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     member7.id,
                     member5.id,
                     member0.id,
+                    memberMinus20.id,
                 ]);
             });
 
@@ -2897,17 +2898,17 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 });
             });
 
-            test('Sorting on memberCachedBalance.amountOpen doesn\'t return duplicate rows', async () => {
+            test('Balances at other organizations are ignored and do not duplicate members', async () => {
                 const { host, token, members } = await setupMembers([30, 5, 7, 0, 15, 45]);
                 const [member30, member5, member7, member0, member15, member45] = members;
-                const organization = await new OrganizationFactory({ period }).create();
+                const otherOrganization = await new OrganizationFactory({ period }).create();
 
                 for (const member of [member0, member45, member15]) {
                     const balance = new CachedBalance();
                     balance.amountOpen = 15;
                     balance.objectId = member.id;
                     balance.objectType = ReceivableBalanceType.member;
-                    balance.organizationId = organization.id;
+                    balance.organizationId = otherOrganization.id;
 
                     await balance.save();
                 }
@@ -2954,25 +2955,28 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     : sortedIds.reverse());
             });
 
-            test('Sorting on memberCachedBalance.amountOpen throws if no financial access', async () => {
-                const { host, organization } = await setupMembers([30, 5, 7, 0, 15, 45]);
-
+            async function createUserWithoutFinancialAccess(organization: Organization) {
                 const user = await new UserFactory({
                     organization,
                     permissions: Permissions.create({
                         level: PermissionLevel.Write,
-
                     }),
                 }).create();
 
-                const token = await SessionService.createSession(user);
+                return await SessionService.createSession(user);
+            }
 
-                const query: LimitedFilteredRequest | undefined = new LimitedFilteredRequest({ sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.ASC }],
-                    limit: 2 });
+            test('Sorting on memberCachedBalance.amountOpen throws if no financial access', async () => {
+                const { host, organization } = await setupMembers([30, 5]);
+                const token = await createUserWithoutFinancialAccess(organization);
+
                 const request = Request.get({
                     path: baseUrl,
                     host,
-                    query,
+                    query: new LimitedFilteredRequest({
+                        sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.ASC }],
+                        limit: 2,
+                    }),
                     headers: {
                         authorization: 'Bearer ' + token.accessToken,
                     },
@@ -2981,6 +2985,80 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 await expect(testServer.test(endpoint, request)).rejects.toThrow(
                     STExpect.errorWithCode('permission_denied'),
                 );
+            });
+
+            test('Filtering on memberCachedBalance.amountOpen throws if no financial access', async () => {
+                const { host, organization } = await setupMembers([30, 5]);
+                const token = await createUserWithoutFinancialAccess(organization);
+
+                const request = Request.get({
+                    path: baseUrl,
+                    host,
+                    query: new LimitedFilteredRequest({
+                        filter: { memberCachedBalance: { amountOpen: { $gt: 10 } } },
+                        limit: 10,
+                    }),
+                    headers: {
+                        authorization: 'Bearer ' + token.accessToken,
+                    },
+                });
+
+                await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                    STExpect.errorWithCode('permission_denied'),
+                );
+            });
+
+            test('Members can be filtered and counted on memberCachedBalance.amountOpen', async () => {
+                const { host, token, members } = await setupMembers([30, null, 7, 0, 15]);
+                const [member30, memberNull, member7, member0, member15] = members;
+                const headers = { authorization: 'Bearer ' + token.accessToken };
+                const filter = { memberCachedBalance: { amountOpen: { $gte: 7 } } };
+
+                const response = await testServer.test(endpoint, Request.get({
+                    path: baseUrl,
+                    host,
+                    query: new LimitedFilteredRequest({ filter, limit: 10 }),
+                    headers,
+                }));
+                expect(response.status).toBe(200);
+                expect(response.body.results.members.map(m => m.id)).toIncludeSameMembers([member30.id, member7.id, member15.id]);
+
+                const countResponse = await testServer.test(new GetMembersCountEndpoint(), Request.get({
+                    path: `${baseUrl}/count`,
+                    host,
+                    query: new CountFilteredRequest({ filter }),
+                    headers,
+                }));
+                expect(countResponse.body.count).toBe(3);
+
+                // Members without a balance row count as 0
+                const zeroResponse = await testServer.test(endpoint, Request.get({
+                    path: baseUrl,
+                    host,
+                    query: new LimitedFilteredRequest({ filter: { memberCachedBalance: { amountOpen: 0 } }, limit: 10 }),
+                    headers,
+                }));
+                expect(zeroResponse.body.results.members.map(m => m.id)).toIncludeSameMembers([memberNull.id, member0.id]);
+            });
+
+            test('memberCachedBalance.amountOpen is not available without an organization scope', async () => {
+                await setupMembers([30]);
+                const platformAdmin = await new UserFactory({ globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+                const token = await SessionService.createSession(platformAdmin);
+
+                const request = Request.get({
+                    path: baseUrl,
+                    host: 'platform.stamhoofd.app',
+                    query: new LimitedFilteredRequest({
+                        sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.ASC }],
+                        limit: 2,
+                    }),
+                    headers: {
+                        authorization: 'Bearer ' + token.accessToken,
+                    },
+                });
+
+                await expect(testServer.test(endpoint, request)).rejects.toThrow('Unknown sort key memberCachedBalance.amountOpen');
             });
         });
     });
