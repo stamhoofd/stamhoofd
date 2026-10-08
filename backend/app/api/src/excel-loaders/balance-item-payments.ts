@@ -140,8 +140,7 @@ async function toRows(balanceItemPayments: BalanceItemPayment[]): Promise<Paymen
         return [{ payment, detailed }];
     });
 
-    // A row that paid for a webshop order reports the number of that order, which the balance item only
-    // holds the id of
+    // The balance item only holds the id of the order it paid for
     const orderMap = await loadPaymentExportOrders(rows.map(row => row.detailed.balanceItem));
 
     return rows.map(({ payment, detailed }) => ({
