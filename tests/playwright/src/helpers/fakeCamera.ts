@@ -18,7 +18,7 @@ export async function installFakeCamera(page: Page) {
             }
 
             async detect() {
-                return shownValue ? [{ rawValue: shownValue }] : [];
+                return shownValue ? [{ rawValue: shownValue, cornerPoints: [] }] : [];
             }
         };
         // Otherwise qr-scanner ignores the BarcodeDetector on ARM Macs, because Chromium's is broken there
