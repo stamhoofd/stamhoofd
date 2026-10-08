@@ -1,6 +1,6 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, Ticket, User, Webshop } from '@stamhoofd/models';
-import { OrderFactory, OrganizationFactory, TicketFactory, UserFactory, WebshopFactory } from '@stamhoofd/models';
+import { GroupFactory, OrderFactory, OrganizationFactory, TicketFactory, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import type { CountResponse, PaginatedResponse, StamhoofdFilter, TicketPrivate } from '@stamhoofd/structures';
 import { AccessRight, CountFilteredRequest, LimitedFilteredRequest, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
 import { STExpect } from '@stamhoofd/test-utils';
@@ -183,12 +183,78 @@ describe('Endpoint.GetWebshopTicketsEndpoint', () => {
         expect(response.body.results).toEqual([expect.objectContaining({ id: ticket.id })]);
     });
 
-    test('a user without access to the webshop cannot download its tickets', async () => {
-        await new TicketFactory({ order: await new OrderFactory({ webshop }).create() }).create();
+    test('a user who can only scan tickets can look up and count a ticket by its secret', async () => {
+        const order = await new OrderFactory({ webshop }).create();
+        const ticket = await new TicketFactory({ order, index: 1, total: 3 }).create();
+        const other = await new TicketFactory({ order, index: 2, total: 3 }).create();
+        await new TicketFactory({ order, index: 3, total: 3 }).create();
+        const scanner = await createWebshopAdmin({ organization, webshop, level: PermissionLevel.None, accessRights: [AccessRight.WebshopScanTickets] });
+
+        const response = await filterTickets({ organization, user: scanner, filter: { webshopId: webshop.id, secret: ticket.secret } });
+        expect(response.body.results).toEqual([expect.objectContaining({ id: ticket.id })]);
+
+        const count = await countTickets({ organization, user: scanner, filter: { webshopId: webshop.id, secret: { $in: [ticket.secret, other.secret] } } });
+        expect(count.body.count).toBe(2);
+    });
+
+    test('a user without access to the webshop cannot download or count its tickets', async () => {
+        const ticket = await new TicketFactory({ order: await new OrderFactory({ webshop }).create() }).create();
         const otherWebshop = await new WebshopFactory({ organizationId: organization.id }).create();
+        const ownTicket = await new TicketFactory({ order: await new OrderFactory({ webshop: otherWebshop }).create() }).create();
         const otherAdmin = await createWebshopAdmin({ organization, webshop: otherWebshop, level: PermissionLevel.Full });
 
-        await expect(filterTickets({ organization, user: otherAdmin, filter: { webshopId: webshop.id } }))
-            .rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+        // Responses must not depend on whether the filter matches tickets of the inaccessible webshop
+        const filters: StamhoofdFilter[] = [
+            { webshopId: webshop.id },
+            { webshopId: webshop.id, secret: ticket.secret },
+            { secret: ticket.secret },
+            { id: ticket.id },
+        ];
+        for (const filter of filters) {
+            const response = await filterTickets({ organization, user: otherAdmin, filter });
+            expect(response.body.results).toEqual([]);
+
+            const count = await countTickets({ organization, user: otherAdmin, filter });
+            expect(count.body.count).toBe(0);
+        }
+
+        const response = await filterTickets({ organization, user: otherAdmin, filter: { $or: [{ webshopId: otherWebshop.id }, { secret: ticket.secret }] } });
+        expect(response.body.results).toEqual([expect.objectContaining({ id: ownTicket.id })]);
+
+        const count = await countTickets({ organization, user: otherAdmin, filter: {} });
+        expect(count.body.count).toBe(1);
+    });
+
+    test('an admin without any webshop permissions cannot count tickets', async () => {
+        const ticket = await new TicketFactory({ order: await new OrderFactory({ webshop }).create() }).create();
+        const group = await new GroupFactory({ organization }).create();
+        const admin = await new UserFactory({
+            organization,
+            permissions: Permissions.create({
+                level: PermissionLevel.None,
+                resources: new Map([
+                    [PermissionsResourceType.Groups, new Map([[group.id, ResourcePermissions.create({ level: PermissionLevel.Full })]])],
+                ]),
+            }),
+        }).create();
+
+        const count = await countTickets({ organization, user: admin, filter: { secret: ticket.secret } });
+        expect(count.body.count).toBe(0);
+    });
+
+    test.each<StamhoofdFilter>([
+        { $gt: '' },
+        { $lt: 'zzzzzzzzzzzzzzzz' },
+        { $gte: '' },
+        { $contains: '' },
+        { $neq: 'x' },
+        { $not: { $eq: 'x' } },
+    ])('rejects secret filter %j that could be used to guess secrets', async (secretFilter) => {
+        await new TicketFactory({ order: await new OrderFactory({ webshop }).create() }).create();
+
+        await expect(filterTickets({ organization, user, filter: { webshopId: webshop.id, secret: secretFilter } }))
+            .rejects.toThrow(STExpect.errorWithCode('unknown_filter'));
+        await expect(countTickets({ organization, user, filter: { webshopId: webshop.id, secret: secretFilter } }))
+            .rejects.toThrow(STExpect.errorWithCode('unknown_filter'));
     });
 });

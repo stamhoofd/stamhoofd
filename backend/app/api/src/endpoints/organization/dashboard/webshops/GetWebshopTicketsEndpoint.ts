@@ -1,9 +1,9 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { Ticket } from '@stamhoofd/models';
+import { Ticket, Webshop } from '@stamhoofd/models';
 import type { CountFilteredRequest, TicketPrivate } from '@stamhoofd/structures';
-import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse } from '@stamhoofd/structures';
+import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PermissionLevel } from '@stamhoofd/structures';
 
 import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { applySQLSorter, compileToSQLFilter, SQL } from '@stamhoofd/sql';
@@ -37,6 +37,23 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
         return [false];
     }
 
+    static async getAccessibleWebshopIds(organizationId: string): Promise<string[]> {
+        const rows = await SQL
+            .select(SQL.column('id'))
+            .from(SQL.table(Webshop.table))
+            .where('organizationId', organizationId)
+            .fetch();
+
+        const webshopIds: string[] = [];
+        for (const row of rows) {
+            const id = row[Webshop.table]['id'] as string;
+            if (await Context.auth.canAccessWebshopTickets({ id, organizationId }, PermissionLevel.Read)) {
+                webshopIds.push(id);
+            }
+        }
+        return webshopIds;
+    }
+
     static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
         const organization = Context.organization!;
 
@@ -47,7 +64,9 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
             .from(SQL.table(ticketsTable))
             .where(await Promise.resolve(compileToSQLFilter({
                 organizationId: organization.id,
-            }, filterCompilers)));
+            }, filterCompilers)))
+            // Restricted in the query itself so tickets of other webshops cannot influence counts or errors
+            .where('webshopId', await GetWebshopTicketsEndpoint.getAccessibleWebshopIds(organization.id));
 
         if (q.filter) {
             query.where(await compileToSQLFilter(q.filter, filterCompilers));
