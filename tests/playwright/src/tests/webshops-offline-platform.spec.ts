@@ -265,7 +265,7 @@ test.describe('Webshops offline', () => {
         await page.getByTestId('scan-tickets-button').click();
         await clickEvenIfCoveredByToast(page, page.getByTestId('start-scan-tickets-button'));
 
-        await expect(page.getByTestId('ticket-scanner-view')).toContainText($t('Geen internetverbinding. Nog niet alle tickets zijn gedownload, dus niet alle tickets worden herkend.'));
+        await expect(page.getByTestId('ticket-scanner-view')).toContainText($t('%Ztp'));
     });
 
     test('Should show download progress when catching up on many new tickets', async ({ browser, storageState }) => {

@@ -94,7 +94,7 @@ function platformOnly(compiler: SQLFilterCompiler): SQLFilterCompiler {
             if (tags !== 'all' && tags.length === 0) {
                 throw Context.auth.error({
                     message: 'Filtering on ' + key + ' of an organization requires platform access',
-                    human: $t('Je hebt geen toegang om te filteren op gegevens van verenigingen'),
+                    human: $t('%Ztn'),
                 });
             }
 

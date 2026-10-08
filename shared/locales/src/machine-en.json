@@ -11551,14 +11551,6 @@
     "original": "Verifieer jouw nieuwe e-mailadres via de link in de e-mail, daarna passen we het automatisch aan.",
     "translation": "Verify your new email address via the link in the email, then we will automatically adjust it."
   },
-  "%DK": {
-    "original": "Er is een verificatie e-mail verstuurd naar",
-    "translation": "A verification email has been sent to"
-  },
-  "%DL": {
-    "original": "om het e-mailadres te verifiëren. Zodra dat is gebeurd, wordt het e-mailadres gewijzigd.",
-    "translation": "to verify the email address. Once this has been done, the email address will be changed."
-  },
   "%DM": {
     "original": "Er ging iets mis",
     "translation": "Something went wrong"
@@ -18670,10 +18662,6 @@
   "%Zir": {
     "original": "Dit is wat er van deze aanrekeningen ontvangen werd, niet wat er aangerekend werd.",
     "translation": "This is what has been received from these charges, not what has been charged."
-  },
-  "%Zis": {
-    "original": "Er bestaat al een account met dit e-mailadres dat beveiligd is met tweestapsverificatie. Log in op het bestaande account in plaats van je e-mailadres te wijzigen.",
-    "translation": "There already exists an account with this email address secured with two-factor authentication. Log in to the existing account instead of changing your email address."
   },
   "%Zit": {
     "original": "Een betaling gaat tot op de cent, wat aangerekend werd tot op vier cijfers na de komma.",

@@ -2150,7 +2150,7 @@ export class AdminPermissionChecker {
         if (willVerificationPhonesChange() && !await getCanEditEmailAddresses()) {
             throw this.error({
                 message: "You don't have access to change the phone numbers of this member.",
-                human: $t('Je hebt geen toegang om de telefoonnummers van dit lid te wijzigen.'),
+                human: $t('%Ztk'),
             });
         }
 

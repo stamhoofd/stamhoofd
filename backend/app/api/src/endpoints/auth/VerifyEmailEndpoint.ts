@@ -89,7 +89,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'email_in_use',
                         message: 'This e-mail is already in use by another account',
-                        human: $t('Dit e-mailadres is al in gebruik door een ander account. Log in met dat account of kies een ander e-mailadres.'),
+                        human: $t('%Ztr'),
                         statusCode: 400,
                     });
                 }

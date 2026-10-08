@@ -14,20 +14,20 @@
                     <button v-if="cameras.length > 1" class="round-button" type="button" @click="switchCamera">
                         <span class="icon reverse" />
                     </button>
-                    <button v-if="isDevelopment" class="round-button" type="button" :title="$t('Lokale database verwijderen en herladen')" @click="deleteDatabaseAndReload">
+                    <button v-if="isDevelopment" class="round-button" type="button" :title="$t('%Ztq')" @click="deleteDatabaseAndReload">
                         <span class="icon trash" />
                     </button>
                 </div>
 
                 <div class="status-bar">
                     <p v-if="isCatchingUp" data-testid="ticket-scanner-catching-up">
-                        <TicketSyncProgressRing class="inline" :progress-percentage="progressPercentage" /> {{ $t('Tickets downloaden...') }}<br><span class="style-description-small">{{ $t('Tot het downloaden klaar is, worden nog niet alle tickets herkend.') }}</span>
+                        <TicketSyncProgressRing class="inline" :progress-percentage="progressPercentage" /> {{ $t('%Zti') }}<br><span class="style-description-small">{{ $t('%Ztj') }}</span>
                     </p>
                     <p v-else-if="isLoading">
                         <Spinner class="inline" /> {{ $t('%Vp') }}
                     </p>
                     <p v-else-if="hadNetworkError && hasNeverSynced">
-                        {{ $t('Geen internetverbinding. Nog niet alle tickets zijn gedownload, dus niet alle tickets worden herkend.') }}<br><button class="button text" type="button" @click="updateTickets">
+                        {{ $t('%Ztp') }}<br><button class="button text" type="button" @click="updateTickets">
                             {{ $t('%1EU') }}
                         </button>
                     </p>
@@ -409,7 +409,7 @@ async function checkTicket(result: string) {
                 notYetDownloadedTicket();
             } else if (!order) {
                 AppManager.shared.hapticError();
-                new Toast($t('Er ging iets mis. Dit is een geldig ticket, maar de bijhorende bestelling kon niet geladen worden. Waarschijnlijk heb je tijdelijk internet nodig om nieuwe bestellingen op te halen. Probeer daarna opnieuw.'), 'error red').show();
+                new Toast($t('%Ztl'), 'error red').show();
             } else {
                 if (ticket.itemId !== null) {
                     const item = order.data.cart.items.find(i => i.id === ticket.itemId);
@@ -483,13 +483,13 @@ function disabledTicket(product: Product, scannedAt: Date | null) {
 }
 
 function notYetDownloadedTicket() {
-    new Toast($t('Dit ticket is nog niet gedownload. Wacht tot alle tickets gedownload zijn en scan opnieuw.'), 'warning yellow').show();
+    new Toast($t('%Zth'), 'warning yellow').show();
     AppManager.shared.hapticWarning();
 }
 
 function invalidTicket() {
     // TODO: show invalid ticket
-    new Toast($t('Ongeldig ticket'), 'error red').show();
+    new Toast($t('%Ztg'), 'error red').show();
     AppManager.shared.hapticError();
 }
 

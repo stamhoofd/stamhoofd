@@ -25,7 +25,7 @@
 
             <p v-if="!noDatabaseSupport && isCatchingUp" class="loading-box" data-testid="ticket-scanner-setup-catching-up">
                 <TicketSyncProgressRing :progress-percentage="progressPercentage" />
-                {{ $t('De tickets worden op dit toestel gedownload zodat je ze ook zonder internet kan scannen. Laat deze pagina best open op een goede internetverbinding tot het downloaden klaar is.') }}
+                {{ $t('%Ztm') }}
             </p>
 
             <template v-if="shouldFilter && !isLoading && (ticketProducts.length > 1 || disabledProducts.length)">

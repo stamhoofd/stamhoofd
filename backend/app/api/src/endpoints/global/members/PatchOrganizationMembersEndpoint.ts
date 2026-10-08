@@ -150,7 +150,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'A member with this id already exists',
-                    human: $t('Er bestaat al een lid met dit ID'),
+                    human: $t('%Zto'),
                     field: 'id',
                     statusCode: 400,
                 });
@@ -1293,7 +1293,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 if ((addsEmails || addsPhones) && !await Context.auth.canEditMemberEmailAddresses(duplicate)) {
                     throw Context.auth.error({
                         message: addsEmails ? "You don't have access to change the emailaddresses of this user." : "You don't have access to change the phone numbers of this member.",
-                        human: addsEmails ? $t('%ZtM') : $t('Je hebt geen toegang om de telefoonnummers van dit lid te wijzigen.'),
+                        human: addsEmails ? $t('%ZtM') : $t('%Ztk'),
                     });
                 }
             }
