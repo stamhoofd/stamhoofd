@@ -4,7 +4,7 @@ import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJ
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers.js';
 import { memberFilterCompilers } from './members.js';
-import { baseOrganizationFilterCompilers } from './organizations.js';
+import { organizationFilterCompilers } from './organizations.js';
 
 export const memberJoin = SQL.join(Member.table).where(SQL.column(Member.table, 'id'), SQL.column(Registration.table, 'memberId'));
 
@@ -115,6 +115,6 @@ export const registrationFilterCompilers: SQLFilterDefinitions = {
     ),
     organization: createJoinedRelationFilter(
         organizationJoin,
-        baseOrganizationFilterCompilers,
+        organizationFilterCompilers,
     ),
 };

@@ -2,7 +2,7 @@ import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import { Database } from '@simonbackx/simple-database';
 import type { User } from '@stamhoofd/models';
-import { OrganizationFactory, OrganizationTagFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
+import { MemberFactory, OrganizationFactory, OrganizationTagFactory, RegistrationFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { CountFilteredRequest, LimitedFilteredRequest, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, SortItemDirection, WebshopMetaData, WebshopStatus } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
@@ -849,9 +849,13 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             }).create();
             expect(await fetchWebshopIds(tagAdmin, nameFilter)).toEqual([webshopInTaggedOrg.id]);
 
-            await expect(fetchWebshopIds(fullAdmin, { organization: { members: { $elemMatch: { email: { $contains: '@' } } } } })).rejects.toThrow(
-                STExpect.errorWithCode('unknown_filter'),
-            );
+            // Tag admins may use the relation filters; the result is still limited to organizations with an accessible tag
+            const member = await new MemberFactory({ firstName: 'Member ' + tag.id }).create();
+            await new RegistrationFactory({ member, organization: orgWithoutTag }).create();
+            const memberFilter = { organization: { members: { $elemMatch: { firstName: member.firstName } } } };
+
+            expect(await fetchWebshopIds(fullAdmin, memberFilter)).toEqual([webshopInUntaggedOrg.id]);
+            expect(await fetchWebshopIds(tagAdmin, memberFilter)).toEqual([]);
         });
     });
 
@@ -880,7 +884,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                     headers: { authorization: 'Bearer ' + token.accessToken },
                 });
                 await expect(testServer.test(countEndpoint, request)).rejects.toThrow(
-                    STExpect.errorWithCode('unknown_filter'),
+                    STExpect.errorWithCode('permission_denied'),
                 );
             }
         });

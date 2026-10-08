@@ -1,6 +1,6 @@
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, SQL, SQLValueType } from '@stamhoofd/sql';
-import { baseOrganizationFilterCompilers } from './organizations.js';
+import { organizationFilterCompilers } from './organizations.js';
 
 export const organizationJoin = SQL.join('organizations').where(SQL.column('organizations', 'id'), SQL.column('webshops', 'organizationId'));
 
@@ -28,7 +28,7 @@ export const webshopFilterCompilers: SQLFilterDefinitions = {
     }),
     organization: createJoinedRelationFilter(
         organizationJoin,
-        baseOrganizationFilterCompilers,
+        organizationFilterCompilers,
     ),
     createdAt: createColumnFilter({
         expression: SQL.column('createdAt'),

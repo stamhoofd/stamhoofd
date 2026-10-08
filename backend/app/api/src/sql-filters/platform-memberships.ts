@@ -2,7 +2,7 @@ import { MemberPlatformMembership } from '@stamhoofd/models';
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLValueType } from '@stamhoofd/sql';
 import { memberFilterCompilers } from './members.js';
-import { baseOrganizationFilterCompilers } from './organizations.js';
+import { organizationFilterCompilers } from './organizations.js';
 
 export const platformMembershipFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
@@ -58,7 +58,7 @@ export const platformMembershipFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('organizations', 'id'),
                 SQL.column(MemberPlatformMembership.table, 'organizationId'),
             ),
-        baseOrganizationFilterCompilers,
+        organizationFilterCompilers,
     ),
     member: createExistsFilter(
         SQL.select()
