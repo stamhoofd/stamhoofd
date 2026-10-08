@@ -1257,7 +1257,7 @@ async function loadColumnConfiguration() {
 
                 if (decoded.sortColumnId) {
                     const _sort = reactiveColumns.find(c => c.id === decoded.sortColumnId);
-                    if (_sort) {
+                    if (_sort && _sort.allowSorting) {
                         sortBy.value = _sort;
                         sortDirection.value = decoded.sortDirection ?? SortItemDirection.ASC;
                     }

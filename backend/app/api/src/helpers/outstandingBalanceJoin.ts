@@ -1,6 +1,10 @@
-import { CachedBalance, Registration } from '@stamhoofd/models';
+import { CachedBalance, Member, Registration } from '@stamhoofd/models';
 import type { SQLNamedExpression } from '@stamhoofd/sql';
 import { SQL, SQLAlias, SQLSelectAs, SQLSum } from '@stamhoofd/sql';
+
+type SQLJoin = ReturnType<typeof SQL.leftJoin>;
+
+const memberCachedBalanceJoinCache = new Map<string, SQLJoin>();
 
 export const memberCachedBalanceForOrganizationJoin = SQL.leftJoin(
     SQL.select('objectId', 'organizationId',
@@ -19,6 +23,27 @@ export const memberCachedBalanceForOrganizationJoin = SQL.leftJoin(
 )
     .where(SQL.column('objectId'), SQL.column(Registration.table, 'memberId'))
     .andWhere(SQL.column('organizationId'), SQL.column(Registration.table, 'organizationId'));
+
+/**
+ * Joins the outstanding balance a member has at one organization as `memberCachedBalance.amountOpen`.
+ * The join is cached per organization because SQLSelect dedupes joins by reference: the sorter and the
+ * pagination filter must hand over the same object or the query would join the same alias twice.
+ */
+export function memberCachedBalanceJoinForOrganization(organizationId: string): SQLJoin {
+    const cached = memberCachedBalanceJoinCache.get(organizationId);
+    if (cached) {
+        return cached;
+    }
+
+    // (organizationId, objectId, objectType) is unique, so this yields at most one row per member
+    const join = SQL.leftJoin(CachedBalance.table, 'memberCachedBalance')
+        .where(SQL.column('objectId'), SQL.column(Member.table, 'id'))
+        .andWhere(SQL.column('objectType'), 'member')
+        .andWhere(SQL.column('organizationId'), organizationId);
+
+    memberCachedBalanceJoinCache.set(organizationId, join);
+    return join;
+}
 
 export const registrationCachedBalanceJoin = SQL.leftJoin(
     SQL.select('objectId', 'organizationId',

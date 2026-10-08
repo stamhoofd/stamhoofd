@@ -43,7 +43,7 @@ export const registrationInvitationFilterCompilers: SQLFilterDefinitions = {
     }),
     member: createJoinedRelationFilter(
         memberJoin,
-        memberFilterCompilers,
+        memberFilterCompilers(),
     ),
     group: createJoinedRelationFilter(
         groupJoin,

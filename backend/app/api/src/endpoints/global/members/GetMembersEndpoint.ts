@@ -42,6 +42,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
     static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest, permissionLevel: PermissionLevel = PermissionLevel.Read) {
         const organization = Context.organization;
+        const scopedFilterCompilers = filterCompilers(organization?.id ?? null);
         let scopeFilter: StamhoofdFilter | undefined = undefined;
 
         if (organization && STAMHOOFD.userMode === 'organization' && await Context.auth.hasFullAccess(organization.id)) {
@@ -155,26 +156,26 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         }
 
         if (scopeFilter) {
-            query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
+            query.where(await compileToSQLFilter(scopeFilter, scopedFilterCompilers));
         }
 
         if (q.filter) {
-            query.where(await compileToSQLFilter(q.filter, filterCompilers));
+            query.where(await compileToSQLFilter(q.filter, scopedFilterCompilers));
         }
 
         const searchFilter = GetMembersEndpoint.buildSearchFilter(q.search);
 
         if (searchFilter) {
-            query.where(await compileToSQLFilter(searchFilter, filterCompilers));
+            query.where(await compileToSQLFilter(searchFilter, scopedFilterCompilers));
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await compileToSQLFilter(q.pageFilter, scopedFilterCompilers));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            applySQLSorter(query, q.sort, sorters);
+            await applySQLSorter(query, q.sort, sorters(organization?.id ?? null));
             query.limit(q.limit);
         }
 
@@ -272,6 +273,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     }
 
     static async buildData(requestQuery: LimitedFilteredRequest, permissionLevel = PermissionLevel.Read) {
+        const organization = Context.organization;
         const query = await GetMembersEndpoint.buildQuery(requestQuery, permissionLevel);
         let data: Member[];
 
@@ -301,7 +303,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
         if (members.length >= requestQuery.limit) {
             const lastObject = members[members.length - 1];
-            const nextFilter = getSortFilter(lastObject, sorters, requestQuery.sort);
+            const nextFilter = getSortFilter(lastObject, sorters(organization?.id ?? null), requestQuery.sort);
 
             next = new LimitedFilteredRequest({
                 filter: requestQuery.filter,
