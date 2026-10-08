@@ -897,6 +897,7 @@ export function useAdvancedPlatformMembershipUIFilterBuilders(): { loading: Ref<
     const loading = ref(true);
     const registrationPeriodsRelationFetcher = useRegistrationPeriodsRelationFetcher();
     const organization = useOrganization();
+    const auth = useAuth();
 
     return {
         loading,
@@ -942,21 +943,23 @@ export function useAdvancedPlatformMembershipUIFilterBuilders(): { loading: Ref<
                 }),
             );
 
-            all.push(
-                new NumberFilterBuilder({
-                    name: $t('%1IP'),
-                    key: 'price',
-                    type: NumberFilterFormat.Currency,
-                }),
-            );
+            if (auth.hasAccessRight(AccessRight.MemberReadFinancialData)) {
+                all.push(
+                    new NumberFilterBuilder({
+                        name: $t('%1IP'),
+                        key: 'price',
+                        type: NumberFilterFormat.Currency,
+                    }),
+                );
 
-            all.push(
-                new NumberFilterBuilder({
-                    name: $t('%1Nm'),
-                    key: 'priceWithoutDiscount',
-                    type: NumberFilterFormat.Currency,
-                }),
-            );
+                all.push(
+                    new NumberFilterBuilder({
+                        name: $t('%1Nm'),
+                        key: 'priceWithoutDiscount',
+                        type: NumberFilterFormat.Currency,
+                    }),
+                );
+            }
 
             all.push(
                 new MultipleChoiceFilterBuilder({

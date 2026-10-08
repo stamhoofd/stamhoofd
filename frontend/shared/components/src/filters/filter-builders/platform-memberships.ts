@@ -1,9 +1,10 @@
 import { NumberFilterFormat } from '#filters/NumberFilterFormat.ts';
 import { RelationFilterBuilder } from '#filters/RelationUIFilter.ts';
 import { useRegistrationPeriodsRelationFetcher } from '#filters/relation-fetchers/useRegistrationPeriodsRelationFetcher.ts';
+import { useAuth } from '#hooks/useAuth.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import type { Organization } from '@stamhoofd/structures';
-import { FilterWrapperMarker } from '@stamhoofd/structures';
+import { AccessRight, FilterWrapperMarker } from '@stamhoofd/structures';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
@@ -13,6 +14,7 @@ import { getMemberBaseFilters } from './members';
 import { useGetOrganizationUIFilterBuilders } from './organizations';
 
 export function useGetPlatformMembershipsUIFilterBuilders(organization: Organization | null = null) {
+    const auth = useAuth();
     const platform = usePlatform();
     const organizationFilterBuilders = useGetOrganizationUIFilterBuilders({ onlyBaseFilters: true });
     const registrationPeriodsRelationFetcher = useRegistrationPeriodsRelationFetcher();
@@ -70,15 +72,18 @@ export function useGetPlatformMembershipsUIFilterBuilders(organization: Organiza
                 key: 'trialUntil',
             }),
             new NumberFilterBuilder({
-                key: 'price',
-                name: $t('%1IP'),
-                type: NumberFilterFormat.Currency,
-            }),
-
-            new NumberFilterBuilder({
                 key: 'freeAmount',
                 name: $t('%1Oo'),
             }),
+            // The API refuses a price filter without this right, because it would otherwise reveal a
+            // price that is hidden from the results themselves
+            ...(auth.hasAccessRight(AccessRight.MemberReadFinancialData)
+                ? [new NumberFilterBuilder({
+                        key: 'price',
+                        name: $t('%1IP'),
+                        type: NumberFilterFormat.Currency,
+                    })]
+                : []),
             // member
             new GroupUIFilterBuilder({
                 name: $t('%1Oi'),

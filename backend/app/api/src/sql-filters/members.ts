@@ -374,11 +374,17 @@ export const memberFilterCompilers = (organizationId: string | null = null): SQL
                     expression: SQL.column('member_platform_memberships', 'price'),
                     type: SQLValueType.Number,
                     nullable: false,
+                    checkPermission: async () => {
+                        await throwIfNoFinancialReadAccess();
+                    },
                 }),
                 priceWithoutDiscount: createColumnFilter({
                     expression: SQL.column('member_platform_memberships', 'priceWithoutDiscount'),
                     type: SQLValueType.Number,
                     nullable: false,
+                    checkPermission: async () => {
+                        await throwIfNoFinancialReadAccess();
+                    },
                 }),
                 startDate: createColumnFilter({
                     expression: SQL.column('member_platform_memberships', 'startDate'),
