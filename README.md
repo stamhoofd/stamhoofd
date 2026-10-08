@@ -237,7 +237,7 @@ const cspNonceSubRoute = {
                     response: {
                         set: {
                             'Content-Security-Policy': [
-                                `script-src 'nonce-{http.request.uuid}' 'strict-dynamic'; object-src 'none'; base-uri 'none'; form-action 'self'`,
+                                `script-src 'nonce-{http.request.uuid}' 'strict-dynamic'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'self'`,
                             ],
                         },
                     },
@@ -311,7 +311,7 @@ const cspNoExternalScripts = {
                         add: {
                             'Content-Security-Policy': [
                                 // Still allow the nonce, but only top-level (all other scripts without nonce should be 'self')
-                                `script-src 'self' 'nonce-{http.request.uuid}'`,
+                                `script-src 'self' 'nonce-{http.request.uuid}'; worker-src 'self' blob:`,
                             ],
                         },
                     },

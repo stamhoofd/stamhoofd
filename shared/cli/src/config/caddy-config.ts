@@ -31,7 +31,14 @@ const streamCloseDelay = '24h';
  * device, so there is no Caddy to set the header or rewrite the nonce.)
  */
 export const CSP_NONCE_PLACEHOLDER = 'STAMHOOFD_CSP_NONCE';
-const cspNonceHeaderValue = `script-src 'nonce-{http.request.uuid}' 'strict-dynamic'; object-src 'none'; base-uri 'none'`;
+
+/**
+ * qr-scanner decodes in a Worker created from a blob: URL whenever the browser has no usable
+ * BarcodeDetector (e.g. Safari, Chromium on ARM Macs). Without worker-src, workers fall back to
+ * script-src, which blocks blob: and breaks the web ticket scanner.
+ */
+const cspWorkerSrc = `worker-src 'self' blob:`;
+const cspNonceHeaderValue = `script-src 'nonce-{http.request.uuid}' 'strict-dynamic'; ${cspWorkerSrc}; object-src 'none'; base-uri 'none'`;
 
 /**
  * CSP served on resources (hashed, long-cached assets): fully sandboxed, no scripts. This is a
@@ -49,7 +56,7 @@ const cspResourceHeaderValue = `sandbox; default-src 'none'; base-uri 'none'; fo
  * nonce'd script can no longer propagate trust to arbitrary (e.g. externally hosted) scripts it
  * injects — those must still be same-origin or nonce'd. Two CSP headers are enforced together.
  */
-const cspNoExternalScriptsHeaderValue = `script-src 'self' 'nonce-{http.request.uuid}'`;
+const cspNoExternalScriptsHeaderValue = `script-src 'self' 'nonce-{http.request.uuid}'; ${cspWorkerSrc}`;
 
 /**
  * Paths treated as (hashed, long-cached) resources rather than HTML documents. Mirrors the
