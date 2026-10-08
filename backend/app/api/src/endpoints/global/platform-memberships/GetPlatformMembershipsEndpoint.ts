@@ -71,6 +71,17 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
+
+            // The price is hidden without financial access, but the sort order would still reveal it
+            if (q.sort.some(s => s.key === 'price') && !await Context.auth.hasFinancialScopeAccess()) {
+                throw new SimpleError({
+                    code: 'permission_denied',
+                    message: 'No permissions to sort on the price of a platform membership',
+                    human: $t(`%G2`),
+                    statusCode: 400,
+                });
+            }
+
             await applySQLSorter(query, q.sort, sorters);
             query.limit(q.limit);
         }
