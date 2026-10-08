@@ -133,7 +133,7 @@ const fields: { id: MappingField; name: string; description: string }[] = [
     },
     {
         id: 'description',
-        name: $t('Omschrijving'),
+        name: $t('%6o'),
         description: $t('Optionele interne omschrijving.'),
     },
     {

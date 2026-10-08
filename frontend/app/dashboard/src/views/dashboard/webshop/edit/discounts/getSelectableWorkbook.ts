@@ -20,7 +20,7 @@ export function getSelectableWorkbook() {
                     }),
                     new SelectableColumn({
                         id: 'description',
-                        name: $t('Omschrijving'),
+                        name: $t('%6o'),
                     }),
                     new SelectableColumn({
                         id: 'maximumUsage',

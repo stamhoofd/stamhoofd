@@ -91,7 +91,7 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
     new Column<ObjectType, string>({
         id: 'description',
-        name: $t('Omschrijving'),
+        name: $t('%6o'),
         getValue: object => object.description,
         format: value => value || $t('Geen beschrijving'),
         compare: (a, b) => Sorter.byStringValue(a, b),

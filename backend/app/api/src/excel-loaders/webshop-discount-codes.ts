@@ -48,7 +48,7 @@ function getColumns(): XlsxTransformerConcreteColumn<PrivateDiscountCode>[] {
         },
         {
             id: 'description',
-            name: $t('Omschrijving'),
+            name: $t('%6o'),
             width: 50,
             getValue: (object: PrivateDiscountCode) => ({
                 value: object.description,

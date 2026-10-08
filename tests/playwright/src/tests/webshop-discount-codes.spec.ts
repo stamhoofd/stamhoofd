@@ -200,7 +200,7 @@ test.describe('Webshop discount codes @webshop-discount-codes', () => {
         const rows = XLSX.utils.sheet_to_json<(string | number | undefined)[]>(workbook.Sheets['Kortingscodes'], { header: 1 });
         const headerIndex = rows.findIndex(row => row.includes('Code'));
         const headers = rows[headerIndex];
-        expect(headers).toEqual(['Code', 'E-mailadres', 'Omschrijving', 'Maximum aantal keer gebruikt']);
+        expect(headers).toEqual(['Code', 'E-mailadres', 'Beschrijving', 'Maximum aantal keer gebruikt']);
         const data = rows.slice(headerIndex + 1).filter(row => row.length > 0);
         expect(data).toHaveLength(3);
         const sponsorRow = data.find(row => row[0] === 'SPONSOR-2026')!;
