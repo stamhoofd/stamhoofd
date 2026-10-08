@@ -21,6 +21,11 @@
             {{ $t('%S1') }} <span v-copyable="'https://'+link" class="style-copyable style-inline-code">{{ link }}</span>
         </p>
 
+        <EmailInput v-model="email" :required="false" :validator="errors.validator" :title="$t('E-mailadres')" :placeholder="$t('Optioneel')" />
+        <p class="style-description-small">
+            {{ $t('Enkel om de kortingscode per e-mail te versturen. De code werkt ook voor bestellers met een ander e-mailadres en wordt niet automatisch toegepast.') }}
+        </p>
+
         <STInputBox class="max" error-fields="description" :error-box="errors.errorBox" :title="$t(`%6o`)">
             <textarea v-model="description" class="input" autocomplete="off" :placeholder="$t(`%14p`)" />
         </STInputBox>
@@ -104,18 +109,20 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import type { PrivateWebshop } from '@stamhoofd/structures';
-import { Discount, DiscountCode } from '@stamhoofd/structures';
+import { Discount, PrivateDiscountCode } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import { computed } from 'vue';
+import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
+import { generateDiscountCode } from './discountCodeGenerator';
 
 const props = defineProps<{
-    discountCode: DiscountCode;
+    discountCode: PrivateDiscountCode;
     isNew: boolean;
     webshop: PrivateWebshop;
     // If we can immediately save this product, then you can create a save handler and pass along the changes.
-    saveHandler: (patch: PatchableArrayAutoEncoder<DiscountCode>) => void;
+    saveHandler: (patch: PatchableArrayAutoEncoder<PrivateDiscountCode>) => void;
 }>();
 
 const errors = useErrors();
@@ -138,7 +145,7 @@ function getDiscountTitle(discount: Discount) {
 const code = computed({
     get: () => patchedDiscountCode.value.code,
     set: (code: string) => {
-        addPatch(DiscountCode.patch({
+        addPatch(PrivateDiscountCode.patch({
             code,
         }));
     },
@@ -147,8 +154,17 @@ const code = computed({
 const description = computed({
     get: () => patchedDiscountCode.value.description,
     set: (description: string) => {
-        addPatch(DiscountCode.patch({
+        addPatch(PrivateDiscountCode.patch({
             description,
+        }));
+    },
+});
+
+const email = computed({
+    get: () => patchedDiscountCode.value.email,
+    set: (email: string | null) => {
+        addPatch(PrivateDiscountCode.patch({
+            email,
         }));
     },
 });
@@ -156,7 +172,7 @@ const description = computed({
 const maximumUsage = computed({
     get: () => patchedDiscountCode.value.maximumUsage,
     set: (maximumUsage: number | null) => {
-        addPatch(DiscountCode.patch({
+        addPatch(PrivateDiscountCode.patch({
             maximumUsage,
         }));
     },
@@ -174,7 +190,7 @@ const useMaximumUsage = computed({
 });
 
 function addDiscountsPatch(d: PatchableArrayAutoEncoder<Discount>) {
-    const meta = DiscountCode.patch({
+    const meta = PrivateDiscountCode.patch({
         discounts: d,
     });
     addPatch(meta);
@@ -259,7 +275,7 @@ async function save() {
     if (!isValid) {
         return;
     }
-    const p: PatchableArrayAutoEncoder<DiscountCode> = new PatchableArray();
+    const p: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
     p.addPatch(patchDiscountCode.value);
     props.saveHandler(p);
     pop({ force: true })?.catch(console.error);
@@ -268,35 +284,21 @@ async function save() {
 async function deleteMe() {
     if (!await CenteredMessage.confirm({
         title: code.value ? $t('%Zn2', { name: code.value }) : $t('Deze kortingscode verwijderen?'),
-        confirmText: 'Verwijderen',
-        description: $t('%ZmS'),
+        confirmText: $t('%CJ'),
+        description: $t('Je kan dit niet ongedaan maken.'),
         availabilityDelay: 2_000,
     })) {
         return;
     }
 
-    const p: PatchableArrayAutoEncoder<DiscountCode> = new PatchableArray();
+    const p: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
     p.addDelete(props.discountCode.id);
     props.saveHandler(p);
     pop({ force: true })?.catch(console.error);
 }
 
 function generateCode() {
-    function nextChar() {
-        // All characters except difficult to differentiate characters in uppercase (0, O, 1, L, I)
-        const allowList = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '2', '3', '4', '5', '6', '7', '8', '9'];
-        return allowList[Math.floor(Math.random() * allowList.length)];
-    }
-
-    function nextChars(num = 4) {
-        let result = '';
-        for (let i = 0; i < num; i++) {
-            result += nextChar();
-        }
-        return result;
-    }
-
-    code.value = nextChars(4) + '-' + nextChars(4) + '-' + nextChars(4) + '-' + nextChars(4);
+    code.value = generateDiscountCode();
 }
 
 async function shouldNavigateAway() {

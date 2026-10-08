@@ -1,6 +1,9 @@
 import type { WorkerInfo } from '@playwright/test';
 import { TestUtils } from '@stamhoofd/test-utils';
 import type { BackendEnvironment } from '@stamhoofd/types/Environment';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 import { WorkerData } from '../../helpers/worker/WorkerData.js';
 import { ApiService } from './ApiService.js';
 import { CaddyConfigHelper } from './CaddyConfigHelper.js';
@@ -8,6 +11,10 @@ import { DatabaseHelper } from './DatabaseHelper.js';
 import type { FrontendProjectName } from './FrontendService.js';
 import { FrontendService } from './FrontendService.js';
 import type { ServiceProcess } from './ServiceHelper.js';
+
+function getCachePath(workerId: string | number) {
+    return path.join(os.tmpdir(), 'stamhoofd-playwright-cache', String(workerId));
+}
 
 class WorkerHelperInstance {
     private _isInitialized = false;
@@ -59,6 +66,8 @@ class WorkerHelperInstance {
 
         return {
             teardown: async () => {
+                await fs.rm(getCachePath(workerId), { recursive: true, force: true });
+
                 // kill processes
                 // eslint-disable-next-line @typescript-eslint/await-thenable
                 await Promise.all(allProcesses.map((p) => {
@@ -145,6 +154,8 @@ class WorkerHelperInstance {
             translationNamespace: 'stamhoofd',
             platformName: 'stamhoofd',
             DB_DATABASE: DatabaseHelper.getDatabaseName(WorkerData.id),
+            // Excel exports are written here before they are downloaded; removed on teardown
+            CACHE_PATH: getCachePath(WorkerData.id),
             UITPAS_API_CLIENT_SECRET: 'sk_test_test',
             UITPAS_API_CLIENT_ID: 'sk_test_test',
             UITPAS_API_URL: 'https://api-test.uitpas.be',

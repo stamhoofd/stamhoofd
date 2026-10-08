@@ -6,3 +6,4 @@ import './event-notifications.js';
 import './balance-items.js';
 import './balance-item-payments.js';
 import './platform-memberships.js';
+import './webshop-discount-codes.js';

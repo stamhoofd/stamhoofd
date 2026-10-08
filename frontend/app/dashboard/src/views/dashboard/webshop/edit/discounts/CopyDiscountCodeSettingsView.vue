@@ -3,19 +3,10 @@
         <h1>{{ $t('%1dm') }}</h1>
         <p>{{ $t('%1dv', { code: discountCode.code }) }}</p>
 
-        <div v-if="candidates.length > 5" class="input-with-buttons">
-            <div>
-                <form class="input-icon-container icon search gray" @submit.prevent>
-                    <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
-                </form>
-            </div>
-            <div>
-                <button type="button" class="button text" @click="editFilter">
-                    <span class="icon filter" />
-                    <span class="hide-small">{{ $t('%1e1') }}</span>
-                    <span v-if="hasActiveFilter" class="icon dot primary" />
-                </button>
-            </div>
+        <div v-if="candidates.length > 5">
+            <form class="input-icon-container icon search gray" @submit.prevent>
+                <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
+            </form>
         </div>
 
         <STList v-if="filteredCandidates.length">
@@ -61,24 +52,33 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import type { Discount } from '@stamhoofd/structures';
-import { DiscountCode } from '@stamhoofd/structures';
+import { PrivateDiscountCode } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, ref } from 'vue';
-import { useDiscountCodeFilter } from './useDiscountCodeFilter';
 
 const props = defineProps<{
-    discountCode: DiscountCode;
-    discountCodes: DiscountCode[];
-    saveHandler: (patch: PatchableArrayAutoEncoder<DiscountCode>) => void;
+    discountCode: PrivateDiscountCode;
+    discountCodes: PrivateDiscountCode[];
+    saveHandler: (patch: PatchableArrayAutoEncoder<PrivateDiscountCode>) => void;
 }>();
 
 const pop = usePop();
 const selectedIds = ref<Set<string>>(new Set());
-
-const { searchQuery, hasActiveFilter, filterCodes, editFilter } = useDiscountCodeFilter();
+const searchQuery = ref('');
 
 const candidates = computed(() => props.discountCodes.filter(c => c.id !== props.discountCode.id));
-const filteredCandidates = computed(() => filterCodes(candidates.value));
+const filteredCandidates = computed(() => {
+    const query = searchQuery.value.trim().toLowerCase();
+    if (!query) {
+        return candidates.value;
+    }
+
+    return candidates.value.filter(c =>
+        c.code.toLowerCase().includes(query)
+        || c.description.toLowerCase().includes(query)
+        || (c.email ?? '').toLowerCase().includes(query),
+    );
+});
 
 const allSelected = computed(() => filteredCandidates.value.length > 0 && filteredCandidates.value.every(c => selectedIds.value.has(c.id)));
 const someSelected = computed(() => filteredCandidates.value.some(c => selectedIds.value.has(c.id)));
@@ -106,7 +106,7 @@ function toggleAll(value: boolean) {
 }
 
 function save() {
-    const arr: PatchableArrayAutoEncoder<DiscountCode> = new PatchableArray();
+    const arr: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
 
     for (const target of candidates.value) {
         if (!selectedIds.value.has(target.id)) {
@@ -124,7 +124,7 @@ function save() {
             discounts.addPut(cloned);
         }
 
-        arr.addPatch(DiscountCode.patch({
+        arr.addPatch(PrivateDiscountCode.patch({
             id: target.id,
             description: props.discountCode.description,
             maximumUsage: props.discountCode.maximumUsage,

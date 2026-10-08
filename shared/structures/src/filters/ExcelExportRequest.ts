@@ -15,6 +15,7 @@ export enum ExcelExportType {
      */
     BalanceItemPayments = 'balance-item-payments',
     PlatformMemberships = 'platform-memberships',
+    WebshopDiscountCodes = 'webshop-discount-codes',
 }
 
 export class ExcelSheetColumnFilter extends AutoEncoder {

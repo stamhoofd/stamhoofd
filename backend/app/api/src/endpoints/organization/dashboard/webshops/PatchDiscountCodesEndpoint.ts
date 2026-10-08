@@ -5,17 +5,17 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Webshop, WebshopDiscountCode } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { DiscountCode, PermissionLevel } from '@stamhoofd/structures';
+import { DiscountCode, PermissionLevel, PrivateDiscountCode } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
 
 type Params = { id: string };
 type Query = undefined;
-type Body = PatchableArrayAutoEncoder<DiscountCode>;
-type ResponseBody = DiscountCode[];
+type Body = PatchableArrayAutoEncoder<PrivateDiscountCode>;
+type ResponseBody = PrivateDiscountCode[];
 
 export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new PatchableArrayDecoder(DiscountCode as Decoder<DiscountCode>, DiscountCode.patchType() as Decoder<AutoEncoderPatchType<DiscountCode>>, StringDecoder);
+    bodyDecoder = new PatchableArrayDecoder(PrivateDiscountCode as Decoder<PrivateDiscountCode>, PrivateDiscountCode.patchType() as Decoder<AutoEncoderPatchType<PrivateDiscountCode>>, StringDecoder);
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
@@ -45,15 +45,49 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
         }
 
         const discountCodes: WebshopDiscountCode[] = [];
+        const puts = request.body.getPuts();
 
         // Updating discoutn codes should happen in the stock queue (because they are also edited when placing orders)
         await QueueHandler.schedule('webshop-stock/' + request.params.id, async () => {
+            if (puts.length > 0) {
+                const existingDiscountCodes = await WebshopDiscountCode.select()
+                    .where('webshopId', webshop.id)
+                    .count();
+
+                if (existingDiscountCodes + puts.length > DiscountCode.maxPerWebshop) {
+                    throw new SimpleError({
+                        code: 'too_many_discount_codes',
+                        message: 'Too many discount codes',
+                        human: $t('Je kan maximaal {max} kortingscodes hebben.', { max: DiscountCode.maxPerWebshop }),
+                    });
+                }
+
+                // Saves are not transactional, so refuse the batch before anything is written.
+                // The unique index is case-insensitive.
+                const codes = puts.map(put => put.put.code);
+                if (codes.some(code => code.length === 0)) {
+                    throw emptyCodeError();
+                }
+                const lowercased = codes.map(code => code.toLowerCase());
+                const duplicate = codes.find((_, index) => lowercased.indexOf(lowercased[index]) !== index)
+                    ?? (await WebshopDiscountCode.where({ webshopId: webshop.id, code: { sign: 'IN', value: codes } }))[0]?.code;
+
+                if (duplicate !== undefined) {
+                    throw new SimpleError({
+                        code: 'used_code',
+                        message: 'Discount code already in use',
+                        human: $t(`%FK`) + ' ' + duplicate + $t(`%FL`),
+                    });
+                }
+            }
+
             // TODO: handle order creation here
-            for (const put of request.body.getPuts()) {
+            for (const put of puts) {
                 const struct = put.put;
                 const model = new WebshopDiscountCode();
                 model.code = struct.code;
                 model.description = struct.description;
+                model.email = struct.email;
                 model.webshopId = webshop.id;
                 model.organizationId = webshop.organizationId;
                 model.discounts = struct.discounts;
@@ -86,7 +120,11 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
                 }
 
                 model.code = patchObject(model.code, patch.code);
+                if (model.code.length === 0) {
+                    throw emptyCodeError();
+                }
                 model.description = patchObject(model.description, patch.description);
+                model.email = patchObject(model.email, patch.email);
                 model.discounts = patchObject(model.discounts, patch.discounts);
                 model.maximumUsage = patchObject(model.maximumUsage, patch.maximumUsage);
 
@@ -121,7 +159,16 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
         });
 
         return new Response(
-            discountCodes.map(d => d.getStructure()),
+            discountCodes.map(d => d.getPrivateStructure()),
         );
     }
+}
+
+function emptyCodeError() {
+    return new SimpleError({
+        code: 'invalid_field',
+        field: 'code',
+        message: 'Discount code is empty',
+        human: $t('Vul een code in.'),
+    });
 }
