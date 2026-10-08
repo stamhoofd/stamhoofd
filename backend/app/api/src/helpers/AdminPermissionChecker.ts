@@ -4,13 +4,14 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, User } from '@stamhoofd/models';
 import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Webshop } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import type { GroupCategory, MemberWithRegistrationsBlob, Platform as PlatformStruct, RecordAnswer, RecordSettings, RegistrationPeriodBase, ResourcePermissions } from '@stamhoofd/structures';
+import type { GroupCategory, MemberDetails, MemberWithRegistrationsBlob, Platform as PlatformStruct, RecordAnswer, RecordSettings, RegistrationPeriodBase, ResourcePermissions } from '@stamhoofd/structures';
 import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPeriodHelper, EventPermissionChecker, FinancialSupportSettings, GroupStatus, GroupType, PermissionLevel, PermissionsResourceKey, PermissionsResourceType, ReceivableBalanceType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { RecordCacheEntry } from '../services/MemberRecordStore.js';
 import { MemberRecordStore } from '../services/MemberRecordStore.js';
 import { getFinancialSupportSettingsAsync } from './FinancialSupportHelper.js';
 import { RecordAnswerHelper } from './RecordAnswerHelper.js';
+import { SMSService } from '../services/SMSService.js';
 import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryMemberAccess.js';
 
 /**
@@ -1117,6 +1118,24 @@ export class AdminPermissionChecker {
         return true;
     }
 
+    /**
+     * Whether the new details add a phone number the security code of the member can be sent to. Compared after
+     * normalisation, because the frontend reformats a number on every save.
+     */
+    addsSecurityCodePhoneNumbers(oldDetails: MemberDetails, newDetails: MemberDetails): boolean {
+        const defaultCountry = oldDetails.address?.country ?? this.organization?.address?.country;
+        const normalize = (phone: string) => {
+            try {
+                return SMSService.toE164(phone, defaultCountry);
+            } catch {
+                return phone.replace(/\s/g, '');
+            }
+        };
+
+        const existingPhones = oldDetails.getPhoneNumbersForVerification().map(normalize);
+        return newDetails.getPhoneNumbersForVerification().some(phone => !existingPhones.includes(normalize(phone)));
+    }
+
     async canAccessEmailTemplate(template: EmailTemplate, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
         if (level === PermissionLevel.Read && !EmailTemplateStruct.isSavedEmail(template.type)) {
             if (template.organizationId === null) {
@@ -2046,12 +2065,20 @@ export class AdminPermissionChecker {
         }
 
         const details = data.details;
+        let patchedDetails: MemberDetails | undefined;
+        const getPatchedDetails = () => {
+            if (!patchedDetails) {
+                patchedDetails = member.details.clone();
+                patchedDetails.patchOrPut(details);
+            }
+            return patchedDetails;
+        };
+
         const willLinkedEmailsChange = () => {
             if (isEmptyPatch(details.parents) && isEmptyPatch(details.unverifiedEmails)) {
                 return false;
             }
-            const patchedDetails = member.details.clone();
-            patchedDetails.patchOrPut(details);
+            const patchedDetails = getPatchedDetails();
 
             if (patchedDetails.getParentEmails().join('\n') !== member.details.getParentEmails().join('\n')) {
                 return true;
@@ -2073,6 +2100,21 @@ export class AdminPermissionChecker {
                     human: $t('%ZtM'),
                 });
             }
+        }
+
+        // The security code can be sent by SMS to these numbers, so a new number gives access to the member
+        const willVerificationPhonesChange = () => {
+            if (details.phone === undefined && isEmptyPatch(details.parents)) {
+                return false;
+            }
+            return this.addsSecurityCodePhoneNumbers(member.details, getPatchedDetails());
+        };
+
+        if (willVerificationPhonesChange() && !await getCanEditEmailAddresses()) {
+            throw this.error({
+                message: "You don't have access to change the phone numbers of this member.",
+                human: $t('Je hebt geen toegang om de telefoonnummers van dit lid te wijzigen.'),
+            });
         }
 
         if (hasRecordAnswers) {

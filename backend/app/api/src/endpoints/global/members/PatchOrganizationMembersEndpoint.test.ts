@@ -1152,6 +1152,119 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 }));
         });
 
+        test('A non-full admin cannot change the phone number of a member with a function', async () => {
+            // The security code can be sent by SMS, so a new number gives access to the member
+            const organization = await new OrganizationFactory({}).create();
+            const group = await new GroupFactory({ organization }).create();
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Write }),
+                organization,
+            }).create();
+
+            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false }).create();
+            await new RegistrationFactory({ member, group }).create();
+            await addResponsibility(member, PermissionLevel.Full, organization.id);
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ phone: '+32412345678' }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, request))
+                .rejects
+                .toThrow(STExpect.simpleError({ code: 'permission_denied', statusCode: 403 }));
+
+            await member.refresh();
+            expect(member.details.phone).toBeNull();
+        });
+
+        test('A non-full admin can re-save the existing phone number of a member with a function in another format', async () => {
+            // The frontend reformats the number on every save
+            const organization = await new OrganizationFactory({}).create();
+            const group = await new GroupFactory({ organization }).create();
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Write }),
+                organization,
+            }).create();
+
+            const member = await new MemberFactory({ details: MemberDetails.create({ firstName, lastName, birthDay: new Date(1993, 3, 5), phone: '+32412345678' }) }).create();
+            await new RegistrationFactory({ member, group }).create();
+            await addResponsibility(member, PermissionLevel.Full, organization.id);
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ phone: '+32 412 34 56 78' }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+            expect(response.body.members[0].details.phone).toBe('+32 412 34 56 78');
+        });
+
+        test('A non-full admin can change the phone number of a member without a function', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const group = await new GroupFactory({ organization }).create();
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Write }),
+                organization,
+            }).create();
+
+            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false }).create();
+            await new RegistrationFactory({ member, group }).create();
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ phone: '+32412345678' }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+            expect(response.body.members[0].details.phone).toBe('+32412345678');
+        });
+
+        test('A full admin can change the phone number of a member with a function', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const group = await new GroupFactory({ organization }).create();
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization,
+            }).create();
+
+            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false }).create();
+            await new RegistrationFactory({ member, group }).create();
+            await addResponsibility(member, PermissionLevel.Full, organization.id);
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ phone: '+32412345678' }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+            expect(response.body.members[0].details.phone).toBe('+32412345678');
+        });
+
         test('A non-full admin cannot change email to empty string', async () => {
             const organization = await new OrganizationFactory({}).create();
 
@@ -1368,12 +1481,12 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             await new RegistrationFactory({ member, group }).create();
             await addResponsibility(member, PermissionLevel.Full, organization.id);
 
-            const patchPhone = async (admin: User) => {
+            const patchAddress = async (admin: User) => {
                 const token = await SessionService.createSession(admin);
                 const arr: Body = new PatchableArray();
                 arr.addPatch(MemberWithRegistrationsBlob.patch({
                     id: member.id,
-                    details: MemberDetails.patch({ phone: '+32412345678' }),
+                    details: MemberDetails.patch({ address: Address.create({ street: 'Kerkstraat', number: '1', postalCode: '9000', city: 'Gent', country: Country.Belgium }) }),
                 }));
 
                 const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
@@ -1381,10 +1494,10 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 return await testServer.test(endpoint, request);
             };
 
-            const writeResponse = await patchPhone(writeAdmin);
+            const writeResponse = await patchAddress(writeAdmin);
             expect(writeResponse.body.members[0].details.securityCode).toBeNull();
 
-            const fullResponse = await patchPhone(fullAdmin);
+            const fullResponse = await patchAddress(fullAdmin);
             expect(fullResponse.body.members[0].details.securityCode).toBe('ABCD1234WXYZ5678');
         });
 
@@ -1468,6 +1581,8 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 ['an email', { email: 'attacker@example.com' }],
                 ['a parent email', { parents: [Parent.create({ firstName: 'Eve', lastName: 'Doe', email: 'attacker@example.com' })] }],
                 ['an unverified email', { unverifiedEmails: ['attacker@example.com'] }],
+                ['a phone number', { phone: '+32412345678' }],
+                ['a parent phone number', { parents: [Parent.create({ firstName: 'Eve', lastName: 'Doe', phone: '+32412345678' })] }],
             ])('A non-full admin cannot add %s to a member with a function by creating a duplicate', async (_, details) => {
                 const { member, createDuplicate } = await setup();
 
@@ -1480,6 +1595,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 expect(member.details.alternativeEmails).toEqual([]);
                 expect(member.details.parents).toEqual([]);
                 expect(member.details.unverifiedEmails).toEqual([]);
+                expect(member.details.phone).toBeNull();
             });
 
             test('A non-full admin can only keep a parent email without access of a member with a function when creating a duplicate', async () => {
@@ -1501,12 +1617,13 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 expect(sameParent.body.members[0].id).toBe(member.id);
             });
 
-            test('A non-full admin can create a duplicate of a member with a function without new emails, or with its security code', async () => {
+            test('A non-full admin can create a duplicate of a member with a function without new contact details, or with its security code', async () => {
                 const { member, createDuplicate } = await setup();
 
-                const withoutNewEmails = await createDuplicate({ email: 'original@example.com', phone: '+32412345678' });
-                expect(withoutNewEmails.body.members[0].id).toBe(member.id);
-                expect(withoutNewEmails.body.members[0].details.phone).toBe('+32412345678');
+                const address = Address.create({ street: 'Kerkstraat', number: '1', postalCode: '9000', city: 'Gent', country: Country.Belgium });
+                const withoutNewContactDetails = await createDuplicate({ email: 'original@example.com', address });
+                expect(withoutNewContactDetails.body.members[0].id).toBe(member.id);
+                expect(withoutNewContactDetails.body.members[0].details.address?.street).toBe('Kerkstraat');
 
                 const withSecurityCode = await createDuplicate({ email: 'new@example.com', securityCode: 'ABCD1234WXYZ5678' });
                 expect(withSecurityCode.body.members[0].id).toBe(member.id);
@@ -1551,7 +1668,9 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 ['changing the email of a parent', (parent: Parent) => Parent.patch({ id: parent.id, email: 'attacker@example.com' })],
                 ['adding an alternative email to a parent', (parent: Parent) => Parent.patch({ id: parent.id, alternativeEmails: ['attacker@example.com'] as any })],
                 ['adding a parent with an email', () => Parent.create({ firstName: 'Eve', lastName: 'Doe', email: 'attacker@example.com' })],
-            ])('A non-full admin cannot change parent emails of a member with a function: %s', async (_, change) => {
+                ['changing the phone of a parent', (parent: Parent) => Parent.patch({ id: parent.id, phone: '+32412345678' })],
+                ['adding a parent with a phone', () => Parent.create({ firstName: 'Eve', lastName: 'Doe', phone: '+32412345678' })],
+            ])('A non-full admin cannot change parent contact details of a member with a function: %s', async (_, change) => {
                 const { member, parent, patchParents } = await setup();
 
                 const parents = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
@@ -1568,19 +1687,20 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
                 await member.refresh();
                 expect(member.details.getParentEmails()).toEqual(['linda@example.com']);
+                expect(member.details.getPhoneNumbersForVerification()).toEqual([]);
             });
 
             test('A non-full admin can change other parent data of a member with a function', async () => {
                 const { member, parent, patchParents } = await setup();
 
                 const parents = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
-                parents.addPatch(Parent.patch({ id: parent.id, phone: '+32412345678' }));
+                parents.addPatch(Parent.patch({ id: parent.id, firstName: 'Lynda' }));
 
                 const response = await patchParents(parents);
                 expect(response.status).toBe(200);
 
                 await member.refresh();
-                expect(member.details.parents[0].phone).toBe('+32412345678');
+                expect(member.details.parents[0].firstName).toBe('Lynda');
             });
 
             test('A parent email change by a non-full admin does not reach a family member with a function', async () => {

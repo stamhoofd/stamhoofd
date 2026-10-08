@@ -1287,10 +1287,13 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 const addsEmails = MemberUserSyncer.getMemberAccessEmails(mergedDetails).allEmails.some(email => !existingEmails.includes(email))
                     || MemberUserSyncer.getLinkedEmails(mergedDetails).some(email => !existingLinkedEmails.includes(email));
 
-                if (addsEmails && !await Context.auth.canEditMemberEmailAddresses(duplicate)) {
+                // A new phone number can receive the security code of the existing member
+                const addsPhones = Context.auth.addsSecurityCodePhoneNumbers(duplicate.details, mergedDetails);
+
+                if ((addsEmails || addsPhones) && !await Context.auth.canEditMemberEmailAddresses(duplicate)) {
                     throw Context.auth.error({
-                        message: "You don't have access to change the emailaddresses of this user.",
-                        human: $t('%ZtM'),
+                        message: addsEmails ? "You don't have access to change the emailaddresses of this user." : "You don't have access to change the phone numbers of this member.",
+                        human: addsEmails ? $t('%ZtM') : $t('Je hebt geen toegang om de telefoonnummers van dit lid te wijzigen.'),
                     });
                 }
             }
