@@ -75,10 +75,14 @@ export class GetUserDetailedPayableBalanceEndpoint extends Endpoint<Params, Quer
         return new Response(await GetUserDetailedPayableBalanceEndpoint.getDetailedBillingStatus(balanceItemModels, payments));
     }
 
-    static async getDetailedBillingStatus(balanceItemModels: BalanceItem[], paymentModels: Payment[]) {
+    /**
+     * extraOrganizationIds are always included, also when they don't have any balance items or payments.
+     */
+    static async getDetailedBillingStatus(balanceItemModels: BalanceItem[], paymentModels: Payment[], extraOrganizationIds: string[] = []) {
         const organizationIds = Formatter.uniqueArray([
             ...balanceItemModels.map(b => b.organizationId),
             ...paymentModels.map(p => p.organizationId).filter(p => p !== null),
+            ...extraOrganizationIds,
         ]);
 
         // Group by organization you'll have to pay to
