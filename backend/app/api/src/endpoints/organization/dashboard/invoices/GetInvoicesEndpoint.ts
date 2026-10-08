@@ -9,6 +9,8 @@ import { LimitedFilteredRequest, PaginatedResponse, assertSort, getSortFilter } 
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
+import { InvoicePdfService } from '../../../../services/InvoicePdfService.js';
+import { InvoiceXMlService } from '../../../../services/InvoiceXMLService.js';
 import { invoiceFilterCompilers } from '../../../../sql-filters/invoices.js';
 import { invoiceSorters } from '../../../../sql-sorters/invoices.js';
 

@@ -26,7 +26,12 @@ export async function applySQLSorter(selectQuery: SQLSelect<any>, sortBy: SortLi
     for (const s of sortBy) {
         const d = definitions[s.key];
         if (!d) {
-            throw new Error('Unknown sort key ' + s.key);
+            throw new SimpleError({
+                code: 'invalid_sort',
+                message: 'Unknown sort key ' + s.key,
+                human: $t('Sorteren op dit veld is hier niet mogelijk'),
+                statusCode: 400,
+            });
         }
 
         if (d.checkPermission) {

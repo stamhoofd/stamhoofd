@@ -587,8 +587,8 @@ export async function throwIfNoFinancialReadAccess() {
         if (!Context.auth.hasPlatformFullAccess()) {
             throw new SimpleError({
                 code: 'permission_denied',
-                message: 'No permissions for financial support filter.',
-                human: $t(`%G2`),
+                message: 'No permissions to filter or sort on financial data.',
+                human: $t('Je hebt geen toegangsrechten om te filteren of sorteren op financiële gegevens.'),
                 statusCode: 400,
             });
         }
@@ -600,8 +600,8 @@ export async function throwIfNoFinancialReadAccess() {
     if (!permissions || !permissions.hasAccessRight(AccessRight.MemberReadFinancialData)) {
         throw new SimpleError({
             code: 'permission_denied',
-            message: 'No permissions for financial support filter (organization scope).',
-            human: $t(`%G2`),
+            message: 'No permissions to filter or sort on financial data (organization scope).',
+            human: $t('Je hebt geen toegangsrechten om te filteren of sorteren op financiële gegevens.'),
             statusCode: 400,
         });
     }

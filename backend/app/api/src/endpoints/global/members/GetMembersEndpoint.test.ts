@@ -2523,9 +2523,9 @@ describe('Endpoint.GetMembersEndpoint', () => {
          *
          * Returns the ids of all members across all pages, in the order they were received.
          */
-        async function fetchAllPages({ host, token, sort, limit }: { host: string; token: Token; sort: SortList; limit: number }) {
+        async function fetchAllPages({ host, token, sort, limit, filter, search }: { host: string; token: Token; sort: SortList; limit: number; filter?: StamhoofdFilter; search?: string }) {
             const ids: string[] = [];
-            let query: LimitedFilteredRequest | undefined = new LimitedFilteredRequest({ sort, limit });
+            let query: LimitedFilteredRequest | undefined = new LimitedFilteredRequest({ sort, limit, filter, search });
             let pages = 0;
 
             while (query) {
@@ -2742,7 +2742,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
              * Creates one member per passed value, all registered in the same group of a new organization,
              * and returns an admin with full access to that organization.
              */
-            async function setupMembers(outstandingBalances: (number | null)[]) {
+            async function setupMembers(outstandingBalances: (number | null)[], options: { firstName?: string } = {}) {
                 const organization = await new OrganizationFactory({ period }).create();
 
                 const user = await new UserFactory({
@@ -2758,7 +2758,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 const members: MemberWithUsersRegistrationsAndGroups[] = [];
 
                 for (const outstandingBalance of outstandingBalances) {
-                    const member = await new MemberFactory({}).create();
+                    const member = await new MemberFactory({ firstName: options.firstName }).create();
                     await new RegistrationFactory({ member, group }).create();
 
                     if (outstandingBalance !== null) {
@@ -2773,7 +2773,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     members.push(member);
                 }
 
-                return { host: organization.getApiHost(), token, members, organization };
+                return { host: organization.getApiHost(), token, members, organization, group };
             }
 
             test('Members are sorted by memberCachedBalance.amountOpen ascending across all pages', async () => {
@@ -3041,6 +3041,72 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 expect(zeroResponse.body.results.members.map(m => m.id)).toIncludeSameMembers([memberNull.id, member0.id]);
             });
 
+            test('Filtering and sorting on memberCachedBalance.amountOpen can be combined', async () => {
+                const { host, token, members } = await setupMembers([30, null, 7, 0, 15, 45]);
+                const [member30, , member7, , member15, member45] = members;
+
+                const ids = await fetchAllPages({
+                    host,
+                    token,
+                    filter: { memberCachedBalance: { amountOpen: { $gte: 7 } } },
+                    sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.DESC }],
+                    limit: 2,
+                });
+
+                expect(ids).toEqual([member45.id, member30.id, member15.id, member7.id]);
+            });
+
+            test('Searching and sorting on memberCachedBalance.amountOpen can be combined', async () => {
+                const firstName = 'Searchable' + Math.random().toString(36).slice(2);
+                const { host, token, members } = await setupMembers([30, null, 7], { firstName });
+                const [member30, memberNull, member7] = members;
+                await setupMembers([50], { firstName });
+
+                const ids = await fetchAllPages({
+                    host,
+                    token,
+                    search: firstName,
+                    sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.ASC }],
+                    limit: 2,
+                });
+
+                expect(ids).toEqual([memberNull.id, member7.id, member30.id]);
+            });
+
+            test('A group-scoped admin with financial access can sort on memberCachedBalance.amountOpen', async () => {
+                const { host, members, organization, group } = await setupMembers([30, 5, 7]);
+                const [member30, member5, member7] = members;
+
+                const role = PermissionRoleDetailed.create({
+                    name: 'Group admin',
+                    accessRights: [AccessRight.MemberReadFinancialData],
+                });
+                organization.privateMeta.roles.push(role);
+                await organization.save();
+
+                const user = await new UserFactory({
+                    organization,
+                    permissions: Permissions.create({
+                        level: PermissionLevel.None,
+                        roles: [role],
+                        resources: new Map([[
+                            PermissionsResourceType.Groups,
+                            new Map([[group.id, ResourcePermissions.create({ level: PermissionLevel.Read })]]),
+                        ]]),
+                    }),
+                }).create();
+                const token = await SessionService.createSession(user);
+
+                const ids = await fetchAllPages({
+                    host,
+                    token,
+                    sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.DESC }],
+                    limit: 2,
+                });
+
+                expect(ids).toEqual([member30.id, member7.id, member5.id]);
+            });
+
             test('memberCachedBalance.amountOpen is not available without an organization scope', async () => {
                 await setupMembers([30]);
                 const platformAdmin = await new UserFactory({ globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
@@ -3058,7 +3124,9 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     },
                 });
 
-                await expect(testServer.test(endpoint, request)).rejects.toThrow('Unknown sort key memberCachedBalance.amountOpen');
+                await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                    STExpect.errorWithCode('invalid_sort'),
+                );
             });
         });
     });

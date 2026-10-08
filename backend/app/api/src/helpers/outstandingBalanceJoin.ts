@@ -25,7 +25,7 @@ export const memberCachedBalanceForOrganizationJoin = SQL.leftJoin(
     .andWhere(SQL.column('organizationId'), SQL.column(Registration.table, 'organizationId'));
 
 /**
- * Joins the summed outstanding balance a member has at one organization as `memberCachedBalance.amountOpen`.
+ * Joins the outstanding balance a member has at one organization as `memberCachedBalance.amountOpen`.
  * The join is cached per organization because SQLSelect dedupes joins by reference: the sorter and the
  * pagination filter must hand over the same object or the query would join the same alias twice.
  */
@@ -35,23 +35,11 @@ export function memberCachedBalanceJoinForOrganization(organizationId: string): 
         return cached;
     }
 
-    const join = SQL.leftJoin(
-        SQL.select('objectId',
-            new SQLSelectAs(
-                new SQLSum(
-                    SQL.column('amountOpen'),
-                ),
-                new SQLAlias('amountOpen'),
-            ),
-        )
-            .from(CachedBalance.table)
-            .where(SQL.column(CachedBalance.table, 'objectType'), 'member')
-            .andWhere(SQL.column(CachedBalance.table, 'organizationId'), organizationId)
-            .groupBy(SQL.column(CachedBalance.table, 'objectId'))
-            .as('memberCachedBalance') as SQLNamedExpression,
-        'memberCachedBalance',
-    )
-        .where(SQL.column('objectId'), SQL.column(Member.table, 'id'));
+    // (organizationId, objectId, objectType) is unique, so this yields at most one row per member
+    const join = SQL.leftJoin(CachedBalance.table, 'memberCachedBalance')
+        .where(SQL.column('objectId'), SQL.column(Member.table, 'id'))
+        .andWhere(SQL.column('objectType'), 'member')
+        .andWhere(SQL.column('organizationId'), organizationId);
 
     memberCachedBalanceJoinCache.set(organizationId, join);
     return join;
