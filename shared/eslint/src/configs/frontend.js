@@ -46,6 +46,7 @@ export default [
             'vue/no-unused-components': 'warn',
             'vue/no-multiple-template-root': 'off', // For some reason when you have html comments inside components, they are treated as root elements too, which cause unwanted bugs
             'vue/multi-word-component-names': 'off',
+            'vue/no-import-compiler-macros': 'error',
         },
     },
 ];
