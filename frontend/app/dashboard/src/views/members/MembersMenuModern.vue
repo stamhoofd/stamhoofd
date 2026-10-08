@@ -11,11 +11,6 @@
                 {{ $t('%1X0', {switchDate: Formatter.date(period.period.switchDate)}) }}
             </p>
 
-            <button v-if="hasNoAccessInPeriod" class="info-box selectable small" type="button" data-testid="period-access-hint" @click="switchPeriod">
-                <!-- No extra span for button because the layout would be weird if this appears in the side menu -->
-                {{ $t('%ZsR') }}
-            </button>
-
             <div class="block">
                 <div class="items">
                     <button
@@ -36,6 +31,13 @@
                     </button>
                 </div>
             </div>
+
+            <p v-if="groupsWarning === 'none'" class="info-box" data-testid="period-no-groups-hint">
+                {{ $t('Er zijn nog geen inschrijvingsgroepen') }}
+            </p>
+            <p v-else-if="groupsWarning === 'no-access'" class="warning-box" data-testid="period-access-hint">
+                {{ $t('Je hebt geen toegang tot inschrijvingsgroepen in dit werkjaar, vraag een hoofdbeheerder om toegang of wissel van werkjaar onderaan') }}
+            </p>
 
             <GroupCategoryMenuBox :period="period" />
 
@@ -73,7 +75,9 @@ import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/Con
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 
 import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods.ts';
+import { GroupType } from '@stamhoofd/structures/GroupType.js';
 import { Organization } from '@stamhoofd/structures/Organization.js';
+import { PermissionLevel } from '@stamhoofd/structures/PermissionLevel.js';
 import type { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures/RegistrationPeriod.js';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onActivated, watch } from 'vue';
@@ -116,9 +120,17 @@ const showAll = computed(() => {
     return tree.value.categories.length > 1 || tree.value.getAllGroups().length > 1;
 });
 
-// The menu opens on the current period, which stays empty for a role that is only granted a group
-// of another period
-const hasNoAccessInPeriod = computed(() => !auth.hasSomeAccessInPeriod(period.value));
+const groupsWarning = computed((): 'none' | 'no-access' | null => {
+    const hasGroups = period.value.groups.some(g => g.type === GroupType.Membership && g.deletedAt === null);
+    if (!hasGroups) {
+        return 'none';
+    }
+
+    const hasVisibleItems = tree.value.categories.length > 0
+        || tree.value.getAllGroups().length > 0
+        || period.value.waitingLists.some(w => w.eventId === null && w.deletedAt === null && auth.canAccessGroup(w, PermissionLevel.Read, undefined, period.value));
+    return hasVisibleItems ? null : 'no-access';
+});
 
 enum Routes {
     Checklist = 'checklist',

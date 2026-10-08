@@ -371,6 +371,37 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
         await expect(page.locator(`[id="${scenario.current.otherWaitingList.id}"]`)).toHaveCount(0);
     });
 
+    test('a period without groups shows a hint instead of an empty menu', async ({ page }) => {
+        test.setTimeout(120_000);
+        const scenario = await seedScenario('empty-period');
+
+        const emptyYear = scenario.previous.period.startDate.getFullYear() - 1;
+        const emptyPeriod = await new RegistrationPeriodFactory({
+            organization: scenario.organization,
+            startDate: new Date(emptyYear, 0, 1, 0, 0, 0, 0),
+            endDate: new Date(emptyYear, 11, 31, 23, 59, 59, 999),
+        }).create();
+        emptyPeriod.customName = 'Leeg testwerkjaar';
+        await emptyPeriod.save();
+        await new OrganizationRegistrationPeriodFactory({ organization: scenario.organization, period: emptyPeriod }).create();
+
+        const user = await createUser({
+            organization: scenario.organization,
+            permissions: Permissions.create({ level: PermissionLevel.Full }),
+            seedId: 'empty-period',
+        });
+
+        await page.setViewportSize({ width: 1280, height: 800 });
+        await openDashboard({ page, organization: scenario.organization, user });
+
+        await expect(membersTab(page)).toBeVisible();
+        await expect(page.getByTestId('period-no-groups-hint')).toHaveCount(0);
+
+        await switchToPeriod({ page, periodName: 'Leeg testwerkjaar' });
+        await expect(page.getByTestId('period-no-groups-hint').first()).toBeVisible();
+        await expect(page.getByTestId('period-access-hint')).toHaveCount(0);
+    });
+
     test('a grant on one group of a previous period reaches that group', async ({ page }) => {
         test.setTimeout(120_000);
         const scenario = await seedScenario('previous-group');
@@ -386,8 +417,9 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
         // The members tab is kept: the only granted group lives outside the current period
         await expect(membersTab(page)).toBeVisible();
 
-        // The menu opens on the current period, which holds nothing for this role
+        // The menu opens on the current period, which holds groups but none for this role
         await expect(page.getByTestId('period-access-hint')).toBeVisible();
+        await expect(page.getByTestId('period-no-groups-hint')).toHaveCount(0);
 
         await switchToPeriod({ page, periodName: scenario.previous.periodName });
         await openGroupMembers({ page, group: scenario.previous.group });
