@@ -23,6 +23,15 @@ export const ticketFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.String,
         nullable: false,
     }),
+    // Only exact matches: comparison operators would allow guessing a secret character by character
+    secret: createColumnFilter({
+        expression: SQL.column('secret'),
+        type: SQLValueType.String,
+        nullable: false,
+    }, {
+        $eq: baseSQLFilterCompilers.$eq,
+        $in: baseSQLFilterCompilers.$in,
+    }),
     createdAt: createColumnFilter({
         expression: SQL.column('createdAt'),
         type: SQLValueType.Datetime,
