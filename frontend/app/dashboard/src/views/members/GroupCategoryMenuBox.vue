@@ -41,9 +41,11 @@
 
 <script setup lang="ts">
 import { defineRoute, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import STMenuCategory from '@stamhoofd/components/menu/STMenuCategory.vue';
 import type { Group, GroupCategory, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import GroupCategoryBox from './GroupCategoryBox.vue';
@@ -56,6 +58,7 @@ const props = defineProps<{
 }>();
 
 const context = useContext();
+const auth = useAuth();
 const $navigate = useNavigate();
 const tree = computed(() => {
     return props.period.getCategoryTree({
@@ -63,7 +66,8 @@ const tree = computed(() => {
     });
 });
 const getCategoryActions = useGroupCategoryActions();
-const filteredWaitingLists = computed(() => props.period.waitingLists.filter(w => w.eventId === null && w.deletedAt === null));
+// Same rule as the category tree above: only list waiting lists the admin can open
+const filteredWaitingLists = computed(() => props.period.waitingLists.filter(w => w.eventId === null && w.deletedAt === null && auth.canAccessGroup(w, PermissionLevel.Read, undefined, props.period)));
 
 enum Routes {
     Checklist = 'checklist',
