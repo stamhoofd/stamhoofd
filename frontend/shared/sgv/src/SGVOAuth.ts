@@ -79,9 +79,18 @@ export class SGVOAuth {
         }
     }
 
+    /** The iOS app serves pages from capacitor://, which S&GV does not accept as redirect URI. */
+    static getRedirectUri(href: string): string {
+        const url = new URL(href);
+        if (url.protocol === 'https:') {
+            return href;
+        }
+        return href.replace(url.protocol, 'https:');
+    }
+
     /** Starts the SGV OAuth flow and stores enough state to validate the callback and resume the current page. */
     static async login(): Promise<never> {
-        const redirectUri = window.location.href;
+        const redirectUri = SGVOAuth.getRedirectUri(window.location.href);
 
         const state = randomState();
         await SGVOAuth.setPendingLogin(PendingOAuthLogin.create({
