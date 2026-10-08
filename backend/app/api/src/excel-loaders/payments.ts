@@ -1,9 +1,9 @@
 import { field } from '@simonbackx/simple-encoding';
-import type { XlsxTransformerColumn, XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
+import type { CellValue, XlsxTransformerColumn, XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { Order, StripeAccount } from '@stamhoofd/models';
 import type { OrderData } from '@stamhoofd/structures';
-import { BalanceItem, BalanceItemPaymentDetailed, BalanceItemRelationType, BalanceItemType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, PaginatedResponse, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatusHelper, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemPaymentDetailed, BalanceItemRelationType, BalanceItemType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, OrderStatus, PaginatedResponse, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatusHelper, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetPaymentsEndpoint } from '../endpoints/organization/dashboard/payments/GetPaymentsEndpoint.js';
@@ -14,14 +14,20 @@ export type PaymentWithItem = {
     balanceItemPayment: PaymentExportBalanceItemPayment;
 };
 
-type PaymentExportOrder = {
+export type PaymentExportOrder = {
     id: string;
+
+    /** A deleted order carries a random 13 digit replacement number (see PatchWebshopOrdersEndpoint), so it is exported without one */
     number: number | null;
+    isDeleted: boolean;
     data: OrderData;
 };
 
 export type PaymentExportBalanceItemPayment = BalanceItemPaymentDetailed & {
     customTitle: string | null;
+
+    /** The webshop order this row paid for, if it was one */
+    order: PaymentExportOrder | null;
 };
 
 export class PaymentGeneralWithStripeAccount extends PaymentGeneral {
@@ -29,6 +35,9 @@ export class PaymentGeneralWithStripeAccount extends PaymentGeneral {
     stripeAccount: StripeAccountStruct | null = null;
 
     expandedBalanceItemPayments: PaymentExportBalanceItemPayment[] = [];
+
+    /** The webshop orders this payment paid for, each once. A balance item only holds the id of its order. */
+    orders: PaymentExportOrder[] = [];
 }
 
 ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
@@ -43,13 +52,9 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
             accounts = (await StripeAccount.getByIDs(...stripeAccountIds)).map(s => StripeAccountStruct.create(s));
         }
 
-        const orderIds = Formatter.uniqueArray(
-            data.results.flatMap(payment => payment.balanceItemPayments.flatMap((item) => {
-                return item.balanceItem.orderId ? [item.balanceItem.orderId] : [];
-            })),
+        const orderMap = await loadPaymentExportOrders(
+            data.results.flatMap(payment => payment.balanceItemPayments.map(item => item.balanceItem)),
         );
-        const orders = orderIds.length > 0 ? await Order.getByIDs(...orderIds) : [];
-        const orderMap = new Map<string, PaymentExportOrder>(orders.map(order => [order.id, order]));
         const addedOrderIds = new Set<string>();
 
         return new PaginatedResponse({
@@ -57,6 +62,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
             results: data.results.map((p) => {
                 const payment = PaymentGeneralWithStripeAccount.create(p);
                 payment.stripeAccount = p.stripeAccountId ? (accounts.find(a => a.id === p.stripeAccountId) ?? null) : null;
+                payment.orders = getPaymentOrders(payment, orderMap);
                 payment.expandedBalanceItemPayments = expandPaymentBalanceItemPayments(payment, orderMap, addedOrderIds);
                 return payment;
             }),
@@ -68,6 +74,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
             name: $t(`%1JH`),
             columns: [
                 ...getGeneralColumns(),
+                ...getOrderColumns(),
                 ...getInvoiceColumns(),
                 ...getPayingOrganizationColumns(),
                 ...getSettlementColumns(),
@@ -130,20 +137,91 @@ export function getBalanceItemPaymentColumns(): XlsxTransformerColumn<PaymentWit
     ];
 }
 
+export function createPaymentExportOrder(order: { id: string; number: number | null; status: OrderStatus; data: OrderData }): PaymentExportOrder {
+    const isDeleted = order.status === OrderStatus.Deleted;
+    return {
+        id: order.id,
+        number: isDeleted ? null : order.number,
+        isDeleted,
+        data: order.data,
+    };
+}
+
+/**
+ * The webshop orders this payment paid for, in the order they appear in the payment. One payment can
+ * settle more than one order.
+ */
+export function getPaymentOrders(
+    payment: PaymentGeneral,
+    orderMap: Map<string, PaymentExportOrder>,
+): PaymentExportOrder[] {
+    const orders = payment.balanceItemPayments.flatMap((item) => {
+        const order = getExportOrder(item, orderMap);
+        return order ? [order] : [];
+    });
+    return Formatter.uniqueArray(orders);
+}
+
+/**
+ * The order a balance item payment was for, if it is one of the orders that were loaded for this export.
+ */
+export function getExportOrder(
+    item: BalanceItemPaymentDetailed,
+    orderMap: Map<string, PaymentExportOrder>,
+): PaymentExportOrder | null {
+    const orderId = item.balanceItem.orderId;
+    return (orderId ? orderMap.get(orderId) : undefined) ?? null;
+}
+
+/**
+ * Loads the webshop orders the given balance items belong to, with the number they can be exported with.
+ */
+export async function loadPaymentExportOrders(balanceItems: { orderId: string | null }[]): Promise<Map<string, PaymentExportOrder>> {
+    const orderIds = Formatter.uniqueArray(balanceItems.flatMap(item => item.orderId ? [item.orderId] : []));
+
+    if (orderIds.length === 0) {
+        return new Map();
+    }
+
+    const orders = await Order.getByIDs(...orderIds);
+    return new Map(orders.map(order => [order.id, createPaymentExportOrder(order)]));
+}
+
+/**
+ * A deleted order is named as such instead of leaving a cell that reads the same as a payment that never
+ * had a webshop order. A single live order is written as a number, so the column stays sortable.
+ */
+export function getOrderNumberCell(orders: PaymentExportOrder[]): CellValue {
+    const numbers = orders.flatMap(order => order.number !== null ? [order.number] : []);
+    const hasDeleted = orders.some(order => order.isDeleted);
+
+    if (numbers.length === 1 && !hasDeleted) {
+        return {
+            value: numbers[0],
+            style: {
+                numberFormat: {
+                    id: XlsxBuiltInNumberFormat.Number,
+                },
+            },
+        };
+    }
+
+    const parts = numbers.map(number => number.toString());
+    if (hasDeleted) {
+        parts.push($t(`%1FX`));
+    }
+    return { value: parts.join(', ') };
+}
+
 export function expandPaymentBalanceItemPayments(
     payment: PaymentGeneral,
     orderMap: Map<string, PaymentExportOrder>,
     addedOrderIds = new Set<string>(),
 ): PaymentExportBalanceItemPayment[] {
     return payment.balanceItemPayments.flatMap((item) => {
-        const orderId = item.balanceItem.orderId;
-        if (!orderId) {
-            return [createExportBalanceItemPayment(item, null)];
-        }
-
-        const order = orderMap.get(orderId);
+        const order = getExportOrder(item, orderMap);
         if (!order) {
-            return [createExportBalanceItemPayment(item, null)];
+            return [createExportBalanceItemPayment(item, null, null)];
         }
 
         if (!addedOrderIds.has(order.id) && item.price === order.data.totalPrice) {
@@ -154,6 +232,7 @@ export function expandPaymentBalanceItemPayments(
         return [
             createSyntheticBalanceItemPayment({
                 source: item,
+                order,
                 description: getPartialOrderPaymentDescription(order),
                 amount: 1,
                 price: item.price,
@@ -172,6 +251,7 @@ function createOrderItemPaymentRows(
         rows.push(
             createSyntheticBalanceItemPayment({
                 source: item,
+                order,
                 customTitle: orderItem.product.name,
                 description: orderItem.description,
                 amount: orderItem.amount,
@@ -186,6 +266,7 @@ function createOrderItemPaymentRows(
         rows.push(
             createSyntheticBalanceItemPayment({
                 source: item,
+                order,
                 customTitle: $t('%1eU'),
                 description: $t('%1eU'),
                 amount: 1,
@@ -198,6 +279,7 @@ function createOrderItemPaymentRows(
         rows.push(
             createSyntheticBalanceItemPayment({
                 source: item,
+                order,
                 customTitle: $t('%xK'),
                 description: $t('%xK'),
                 amount: 1,
@@ -211,6 +293,7 @@ function createOrderItemPaymentRows(
         rows.push(
             createSyntheticBalanceItemPayment({
                 source: item,
+                order,
                 customTitle: $t('%1eE'),
                 description: $t('%1eE'),
                 amount: 1,
@@ -234,6 +317,7 @@ function addOrderDiscountRows(
         rows.push(
             createSyntheticBalanceItemPayment({
                 source: item,
+                order,
                 customTitle: $t('%1ei', { percentage: Formatter.percentage(order.data.percentageDiscount) }),
                 description: $t('%1ei', { percentage: Formatter.percentage(order.data.percentageDiscount) }),
                 amount: 1,
@@ -248,6 +332,7 @@ function addOrderDiscountRows(
         rows.push(
             createSyntheticBalanceItemPayment({
                 source: item,
+                order,
                 customTitle: $t('%176'),
                 description: $t('%1eM'),
                 amount: 1,
@@ -267,12 +352,14 @@ function getPartialOrderPaymentDescription(order: PaymentExportOrder): string {
 
 function createSyntheticBalanceItemPayment({
     source,
+    order,
     customTitle = null,
     description,
     amount,
     price,
 }: {
     source: BalanceItemPaymentDetailed;
+    order: PaymentExportOrder;
     customTitle?: string | null;
     description: string;
     amount: number;
@@ -289,16 +376,15 @@ function createSyntheticBalanceItemPayment({
             amount,
             unitPrice: amount === 0 ? 0 : price / amount,
         }),
-    }), customTitle);
+    }), customTitle, order);
 }
 
-function createExportBalanceItemPayment(
+export function createExportBalanceItemPayment(
     item: BalanceItemPaymentDetailed,
     customTitle: string | null,
+    order: PaymentExportOrder | null,
 ): PaymentExportBalanceItemPayment {
-    return Object.assign(item, {
-        customTitle,
-    });
+    return Object.assign(item, { customTitle, order });
 }
 
 function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
@@ -331,6 +417,15 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
             getValue: (object: PaymentWithItem) => ({
                 value: object.payment.id,
             }),
+        },
+        {
+            id: 'orderNumber',
+            name: $t('Bestelnummer'),
+            width: 16,
+            getValue: (object: PaymentWithItem) => {
+                const order = object.balanceItemPayment.order;
+                return getOrderNumberCell(order ? [order] : []);
+            },
         },
         {
             id: 'balanceItem.type',
@@ -548,6 +643,17 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>[] {
                     },
                 },
             }),
+        },
+    ];
+}
+
+export function getOrderColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>[] {
+    return [
+        {
+            id: 'orderNumbers',
+            name: $t('Bestelnummer'),
+            width: 24,
+            getValue: (object: PaymentGeneralWithStripeAccount) => getOrderNumberCell(object.orders),
         },
     ];
 }

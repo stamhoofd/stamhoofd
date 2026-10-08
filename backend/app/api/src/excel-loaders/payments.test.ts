@@ -1,5 +1,7 @@
-import { BalanceItem, BalanceItemPaymentDetailed, BalanceItemRelation, BalanceItemRelationType, BalanceItemType, Cart, CartItem, CartItemPrice, OrderData, PaymentGeneral, PaymentMethod, PaymentStatus, Product, ProductPrice, TranslatedString } from '@stamhoofd/structures';
-import { expandPaymentBalanceItemPayments } from './payments.js';
+import { isXlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
+import { BalanceItem, BalanceItemPaymentDetailed, BalanceItemRelation, BalanceItemRelationType, BalanceItemType, Cart, CartItem, CartItemPrice, OrderData, OrderStatus, PaymentGeneral, PaymentMethod, PaymentStatus, Product, ProductPrice, TranslatedString } from '@stamhoofd/structures';
+import { createPaymentExportOrder, expandPaymentBalanceItemPayments, getBalanceItemPaymentColumns, getOrderColumns, getOrderNumberCell, getPaymentOrders, PaymentGeneralWithStripeAccount } from './payments.js';
+import type { PaymentExportOrder } from './payments.js';
 
 function createOrderData(options: {
     percentageDiscount?: number;
@@ -71,6 +73,33 @@ function createPayment(price: number): PaymentGeneral {
     });
 }
 
+function createPaymentForOrders(orderIds: (string | null)[]): PaymentGeneral {
+    return PaymentGeneral.create({
+        id: 'payment-1',
+        method: PaymentMethod.Transfer,
+        status: PaymentStatus.Succeeded,
+        price: 1000 * orderIds.length,
+        balanceItemPayments: orderIds.map((orderId, index) => BalanceItemPaymentDetailed.create({
+            id: 'balance-item-payment-' + index,
+            price: 1000,
+            balanceItem: BalanceItem.create({
+                id: 'balance-item-' + index,
+                type: orderId ? BalanceItemType.Order : BalanceItemType.Other,
+                orderId,
+                description: 'Bestelling',
+                amount: 1,
+                unitPrice: 1000,
+            }),
+        })),
+    });
+}
+
+function createOrderMap(orders: { id: string; number: number | null; isDeleted?: boolean }[], data: OrderData = createOrderData()) {
+    return new Map<string, PaymentExportOrder>(
+        orders.map(order => [order.id, { ...order, isDeleted: order.isDeleted ?? false, data }]),
+    );
+}
+
 function expectRowsToMatchReplacedPayment(rows: BalanceItemPaymentDetailed[], payment: PaymentGeneral) {
     expect(rows.reduce((sum, row) => sum + row.price, 0)).toBe(payment.balanceItemPayments[0].price);
 }
@@ -81,9 +110,7 @@ describe('payments excel loader', () => {
             const orderData = createOrderData();
             const payment = createPayment(orderData.totalPrice);
 
-            const rows = expandPaymentBalanceItemPayments(payment, new Map([
-                ['order-1', { id: 'order-1', number: 123, data: orderData }],
-            ]));
+            const rows = expandPaymentBalanceItemPayments(payment, createOrderMap([{ id: 'order-1', number: 123 }], orderData));
 
             expect(rows).toHaveLength(2);
             expect(rows[0].customTitle).toBe('Koffie');
@@ -105,9 +132,7 @@ describe('payments excel loader', () => {
             });
             const payment = createPayment(orderData.totalPrice);
 
-            const rows = expandPaymentBalanceItemPayments(payment, new Map([
-                ['order-1', { id: 'order-1', number: 123, data: orderData }],
-            ]));
+            const rows = expandPaymentBalanceItemPayments(payment, createOrderMap([{ id: 'order-1', number: 123 }], orderData));
 
             expect(rows).toHaveLength(4);
             expect(rows.map(row => row.customTitle)).toEqual([
@@ -138,9 +163,7 @@ describe('payments excel loader', () => {
             });
             const payment = createPayment(orderData.totalPrice);
 
-            const rows = expandPaymentBalanceItemPayments(payment, new Map([
-                ['order-1', { id: 'order-1', number: 123, data: orderData }],
-            ]));
+            const rows = expandPaymentBalanceItemPayments(payment, createOrderMap([{ id: 'order-1', number: 123 }], orderData));
 
             expect(rows).toHaveLength(3);
             expect(rows.map(row => row.customTitle)).toEqual([
@@ -163,9 +186,7 @@ describe('payments excel loader', () => {
 
         it('keeps partial order payments and refunds as single rows', () => {
             const orderData = createOrderData();
-            const orderMap = new Map([
-                ['order-1', { id: 'order-1', number: 123, data: orderData }],
-            ]);
+            const orderMap = createOrderMap([{ id: 'order-1', number: 123 }], orderData);
 
             const changedRows = expandPaymentBalanceItemPayments(createPayment(1000), orderMap);
             expect(changedRows).toHaveLength(1);
@@ -182,9 +203,7 @@ describe('payments excel loader', () => {
 
         it('only splits the same full order once per export page', () => {
             const orderData = createOrderData();
-            const orderMap = new Map([
-                ['order-1', { id: 'order-1', number: 123, data: orderData }],
-            ]);
+            const orderMap = createOrderMap([{ id: 'order-1', number: 123 }], orderData);
             const addedOrderIds = new Set<string>();
 
             const firstRows = expandPaymentBalanceItemPayments(createPayment(orderData.totalPrice), orderMap, addedOrderIds);
@@ -196,6 +215,121 @@ describe('payments excel loader', () => {
             expect(secondRows[0].price).toBe(orderData.totalPrice);
             expectRowsToMatchReplacedPayment(firstRows, createPayment(orderData.totalPrice));
             expectRowsToMatchReplacedPayment(secondRows, createPayment(orderData.totalPrice));
+        });
+    });
+
+    describe('getPaymentOrders', () => {
+        it('looks up the order that was paid', () => {
+            const orderMap = createOrderMap([{ id: 'order-1', number: 123 }]);
+
+            expect(getPaymentOrders(createPaymentForOrders(['order-1']), orderMap).map(o => o.number)).toEqual([123]);
+        });
+
+        it('lists every order a payment paid for, without repeating one', () => {
+            const orderMap = createOrderMap([
+                { id: 'order-1', number: 123 },
+                { id: 'order-2', number: 124 },
+            ]);
+
+            const payment = createPaymentForOrders(['order-1', 'order-2', 'order-1']);
+
+            expect(getPaymentOrders(payment, orderMap).map(o => o.id)).toEqual(['order-1', 'order-2']);
+        });
+
+        it('skips balance items without a loaded order', () => {
+            const orderMap = createOrderMap([{ id: 'order-2', number: 124 }]);
+
+            expect(getPaymentOrders(createPaymentForOrders([null]), orderMap)).toEqual([]);
+            expect(getPaymentOrders(createPaymentForOrders(['unknown-order']), orderMap)).toEqual([]);
+            expect(getPaymentOrders(createPaymentForOrders([null, 'unknown-order', 'order-2']), orderMap).map(o => o.id)).toEqual(['order-2']);
+        });
+    });
+
+    describe('createPaymentExportOrder', () => {
+        const data = createOrderData();
+
+        it('keeps the number of an order that still exists', () => {
+            expect(createPaymentExportOrder({ id: 'order-1', status: OrderStatus.Created, number: 123, data })).toEqual({ id: 'order-1', number: 123, isDeleted: false, data });
+            expect(createPaymentExportOrder({ id: 'order-1', status: OrderStatus.Canceled, number: 123, data }).number).toBe(123);
+            expect(createPaymentExportOrder({ id: 'order-1', status: OrderStatus.Created, number: null, data }).number).toBe(null);
+        });
+
+        it('drops the replacement number a deleted order was given', () => {
+            expect(createPaymentExportOrder({ id: 'order-1', status: OrderStatus.Deleted, number: 1638492047163, data })).toEqual({ id: 'order-1', number: null, isDeleted: true, data });
+        });
+    });
+
+    describe('deleted orders', () => {
+        it('describes a partial payment for a deleted order without a number', () => {
+            const orderMap = createOrderMap([{ id: 'order-1', number: null, isDeleted: true }]);
+
+            const rows = expandPaymentBalanceItemPayments(createPayment(1000), orderMap);
+
+            expect(rows).toHaveLength(1);
+            expect(rows[0].balanceItem.name).toBe('Gedeeltelijke betaling/terugbetaling voor bestelling');
+            expect(rows[0].price).toBe(1000);
+            expect(rows[0].order?.isDeleted).toBe(true);
+        });
+    });
+
+    describe('order number of a payment line', () => {
+        it('carries the order onto every row an order was split into', () => {
+            const orderData = createOrderData();
+            const orderMap = createOrderMap([{ id: 'order-1', number: 123 }], orderData);
+
+            const rows = expandPaymentBalanceItemPayments(createPayment(orderData.totalPrice), orderMap);
+
+            expect(rows).toHaveLength(2);
+            expect(rows.map(row => row.order?.number)).toEqual([123, 123]);
+        });
+
+        it('leaves the order empty for a balance item that is not a webshop order', () => {
+            const rows = expandPaymentBalanceItemPayments(createPaymentForOrders([null]), createOrderMap([]));
+
+            expect(rows).toHaveLength(1);
+            expect(rows[0].order).toBe(null);
+        });
+
+        it('renders the order number column from the row', () => {
+            const orderMap = createOrderMap([{ id: 'order-1', number: 123 }]);
+            const rows = expandPaymentBalanceItemPayments(createPayment(1000), orderMap);
+            const column = getBalanceItemPaymentColumns().find(c => isXlsxTransformerConcreteColumn(c) && c.id === 'orderNumber');
+
+            if (!column || !isXlsxTransformerConcreteColumn(column)) {
+                throw new Error('Missing order number column');
+            }
+
+            expect(column.getValue({ payment: PaymentGeneralWithStripeAccount.create(createPayment(1000)), balanceItemPayment: rows[0] }).value).toBe(123);
+        });
+    });
+
+    describe('order number column', () => {
+        function getPaymentOrderNumberCell(orders: { id: string; number: number | null; isDeleted?: boolean }[]) {
+            const payment = PaymentGeneralWithStripeAccount.create(createPayment(1000));
+            payment.orders = [...createOrderMap(orders).values()];
+
+            return getOrderColumns()[0].getValue(payment);
+        }
+
+        it('writes one order number as a number, so it stays sortable', () => {
+            expect(getPaymentOrderNumberCell([{ id: 'order-1', number: 123 }]).value).toBe(123);
+        });
+
+        it('joins the numbers of a payment that paid for more than one order', () => {
+            expect(getOrderNumberCell([...createOrderMap([{ id: 'order-1', number: 123 }, { id: 'order-2', number: 124 }]).values()]).value).toBe('123, 124');
+        });
+
+        it('names a deleted order instead of leaving the cell empty', () => {
+            expect(getOrderNumberCell([...createOrderMap([{ id: 'order-1', number: null, isDeleted: true }]).values()]).value).toBe('Verwijderd');
+            expect(getOrderNumberCell([...createOrderMap([{ id: 'order-1', number: 123 }, { id: 'order-2', number: null, isDeleted: true }]).values()]).value).toBe('123, Verwijderd');
+        });
+
+        it('skips an order that has no number yet', () => {
+            expect(getOrderNumberCell([...createOrderMap([{ id: 'order-1', number: null }]).values()]).value).toBe('');
+        });
+
+        it('leaves the cell empty for a payment without a webshop order', () => {
+            expect(getOrderNumberCell([]).value).toBe('');
         });
     });
 });
