@@ -5,12 +5,14 @@ import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.
 import type { RecipientChooseOneOption } from '@stamhoofd/components/email/EmailView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import type { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
+import { fetchAll } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
-import { AsyncTableAction, InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { PrivateWebshop } from '@stamhoofd/structures';
-import { DiscountCode, EmailRecipientSubfilter, LimitedFilteredRequest, mergeFilters, PaginatedResponseDecoder, SortItemDirection } from '@stamhoofd/structures';
+import { CountFilteredRequest, DiscountCode, EmailRecipientSubfilter, LimitedFilteredRequest, mergeFilters, PrivateDiscountCode, SortItemDirection } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -20,21 +22,24 @@ export class DiscountCodeActionBuilder {
     navigationActions: NavigationActions;
     webshop: PrivateWebshop;
     $context: SessionContext;
-    afterPatch: (discountCodes: DiscountCode[]) => void;
+    objectFetcher: ObjectFetcher<PrivateDiscountCode>;
+    afterPatch: (discountCodes: PrivateDiscountCode[]) => void;
 
     constructor(settings: {
         navigationActions: NavigationActions;
         webshop: PrivateWebshop;
         $context: SessionContext;
-        afterPatch: (discountCodes: DiscountCode[]) => void;
+        objectFetcher: ObjectFetcher<PrivateDiscountCode>;
+        afterPatch: (discountCodes: PrivateDiscountCode[]) => void;
     }) {
         this.navigationActions = settings.navigationActions;
         this.webshop = settings.webshop;
         this.$context = settings.$context;
+        this.objectFetcher = settings.objectFetcher;
         this.afterPatch = settings.afterPatch;
     }
 
-    getActions(): TableAction<DiscountCode>[] {
+    getActions(): TableAction<PrivateDiscountCode>[] {
         return [
             new InMemoryTableAction({
                 name: $t('Nieuw'),
@@ -61,7 +66,7 @@ export class DiscountCodeActionBuilder {
                 icon: 'email',
                 priority: 8,
                 groupIndex: 1,
-                handler: async (selection: TableActionSelection<DiscountCode>) => {
+                handler: async (selection: TableActionSelection<PrivateDiscountCode>) => {
                     await this.openMail(selection);
                 },
             }),
@@ -72,11 +77,11 @@ export class DiscountCodeActionBuilder {
                 groupIndex: 1,
                 needsSelection: true,
                 singleSelection: true,
-                handler: (discountCodes: DiscountCode[]) => {
+                handler: (discountCodes: PrivateDiscountCode[]) => {
                     this.editDiscountCode(discountCodes[0]);
                 },
             }),
-            new InMemoryTableAction({
+            new MenuTableAction({
                 name: $t('Dupliceren'),
                 icon: 'copy',
                 priority: 6,
@@ -89,7 +94,7 @@ export class DiscountCodeActionBuilder {
                         icon: 'copy',
                         needsSelection: true,
                         singleSelection: true,
-                        handler: (discountCodes: DiscountCode[]) => {
+                        handler: (discountCodes: PrivateDiscountCode[]) => {
                             this.duplicateOnce(discountCodes[0]);
                         },
                     }),
@@ -98,14 +103,11 @@ export class DiscountCodeActionBuilder {
                         icon: 'copy',
                         needsSelection: true,
                         singleSelection: true,
-                        handler: (discountCodes: DiscountCode[]) => {
-                            this.duplicateMultiple(discountCodes[0]);
+                        handler: async (discountCodes: PrivateDiscountCode[]) => {
+                            await this.duplicateMultiple(discountCodes[0]);
                         },
                     }),
                 ],
-                handler: () => {
-                    // Child actions handle the work.
-                },
             }),
             new InMemoryTableAction({
                 name: $t('Kopieer instellingen naar...'),
@@ -114,8 +116,8 @@ export class DiscountCodeActionBuilder {
                 groupIndex: 2,
                 needsSelection: true,
                 singleSelection: true,
-                handler: (discountCodes: DiscountCode[]) => {
-                    this.copySettingsTo(discountCodes[0]).catch(console.error);
+                handler: async (discountCodes: PrivateDiscountCode[]) => {
+                    await this.copySettingsTo(discountCodes[0]);
                 },
             }),
             new InMemoryTableAction({
@@ -125,14 +127,14 @@ export class DiscountCodeActionBuilder {
                 priority: 1,
                 groupIndex: 3,
                 needsSelection: true,
-                handler: async (discountCodes: DiscountCode[]) => {
+                handler: async (discountCodes: PrivateDiscountCode[]) => {
                     await this.deleteDiscountCodes(discountCodes);
                 },
             }),
         ];
     }
 
-    private buildClone(discountCode: DiscountCode, code: string): DiscountCode {
+    private buildClone(discountCode: PrivateDiscountCode, code: string): PrivateDiscountCode {
         const cloned = discountCode.clone();
         cloned.id = uuidv4();
         cloned.code = code;
@@ -144,7 +146,7 @@ export class DiscountCodeActionBuilder {
         return cloned;
     }
 
-    private async patchDiscountCodes(patch: PatchableArrayAutoEncoder<DiscountCode>) {
+    private async patchDiscountCodes(patch: PatchableArrayAutoEncoder<PrivateDiscountCode>) {
         try {
             const response = await this.$context.authenticatedServer.request({
                 method: 'PATCH',
@@ -152,7 +154,7 @@ export class DiscountCodeActionBuilder {
                 body: patch,
                 shouldRetry: false,
                 owner: this.navigationActions,
-                decoder: new ArrayDecoder(DiscountCode as Decoder<DiscountCode>),
+                decoder: new ArrayDecoder(PrivateDiscountCode as Decoder<PrivateDiscountCode>),
             });
             this.afterPatch(response.data);
         } catch (e) {
@@ -161,11 +163,11 @@ export class DiscountCodeActionBuilder {
     }
 
     addDiscountCode() {
-        const discountCode = DiscountCode.create({
+        const discountCode = PrivateDiscountCode.create({
             code: '',
             maximumUsage: 1,
         });
-        const arr: PatchableArrayAutoEncoder<DiscountCode> = new PatchableArray();
+        const arr: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
         arr.addPut(discountCode);
 
         this.navigationActions.present({
@@ -174,7 +176,7 @@ export class DiscountCodeActionBuilder {
                     isNew: true,
                     discountCode,
                     webshop: this.webshop,
-                    saveHandler: (patch: PatchableArrayAutoEncoder<DiscountCode>) => {
+                    saveHandler: (patch: PatchableArrayAutoEncoder<PrivateDiscountCode>) => {
                         arr.merge(patch);
                         this.patchDiscountCodes(arr).catch(console.error);
                     },
@@ -196,14 +198,14 @@ export class DiscountCodeActionBuilder {
         }).catch(console.error);
     }
 
-    editDiscountCode(discountCode: DiscountCode) {
+    editDiscountCode(discountCode: PrivateDiscountCode) {
         this.navigationActions.present({
             components: [
                 AsyncComponent(() => import('./EditDiscountCodeView.vue'), {
                     isNew: false,
                     discountCode,
                     webshop: this.webshop,
-                    saveHandler: (patch: PatchableArrayAutoEncoder<DiscountCode>) => {
+                    saveHandler: (patch: PatchableArrayAutoEncoder<PrivateDiscountCode>) => {
                         this.patchDiscountCodes(patch).catch(console.error);
                     },
                 }),
@@ -212,9 +214,9 @@ export class DiscountCodeActionBuilder {
         }).catch(console.error);
     }
 
-    duplicateOnce(discountCode: DiscountCode) {
+    duplicateOnce(discountCode: PrivateDiscountCode) {
         const cloned = this.buildClone(discountCode, '');
-        const arr: PatchableArrayAutoEncoder<DiscountCode> = new PatchableArray();
+        const arr: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
         arr.addPut(cloned);
 
         this.navigationActions.present({
@@ -223,7 +225,7 @@ export class DiscountCodeActionBuilder {
                     isNew: true,
                     discountCode: cloned,
                     webshop: this.webshop,
-                    saveHandler: (patch: PatchableArrayAutoEncoder<DiscountCode>) => {
+                    saveHandler: (patch: PatchableArrayAutoEncoder<PrivateDiscountCode>) => {
                         arr.merge(patch);
                         this.patchDiscountCodes(arr).catch(console.error);
                     },
@@ -233,14 +235,20 @@ export class DiscountCodeActionBuilder {
         }).catch(console.error);
     }
 
-    duplicateMultiple(discountCode: DiscountCode) {
-        this.navigationActions.present({
+    async duplicateMultiple(discountCode: PrivateDiscountCode) {
+        const remaining = DiscountCode.maxPerWebshop - await this.objectFetcher.fetchCount(new CountFilteredRequest({}));
+        if (remaining <= 0) {
+            new Toast($t('Je kan maximaal {max} kortingscodes hebben.', { max: DiscountCode.maxPerWebshop }), 'error red').show();
+            return;
+        }
+
+        await this.navigationActions.present({
             components: [
                 AsyncComponent(() => import('./DuplicateDiscountCodesView.vue'), {
-                    maxCount: 1000,
+                    maxCount: remaining,
                     saveHandler: (count: number) => {
                         const usedCodes = new Set<string>();
-                        const arr: PatchableArrayAutoEncoder<DiscountCode> = new PatchableArray();
+                        const arr: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
 
                         for (let i = 0; i < count; i++) {
                             let code = generateDiscountCode();
@@ -256,29 +264,21 @@ export class DiscountCodeActionBuilder {
                 }),
             ],
             modalDisplayStyle: 'sheet',
-        }).catch(console.error);
+        });
     }
 
-    async copySettingsTo(discountCode: DiscountCode) {
-        const response = await this.$context.authenticatedServer.request({
-            method: 'GET',
-            path: `/webshop/${this.webshop.id}/discount-codes`,
-            decoder: new PaginatedResponseDecoder(new ArrayDecoder(DiscountCode as Decoder<DiscountCode>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
-            query: new LimitedFilteredRequest({
-                limit: 1000,
-                sort: [{ key: 'id', order: SortItemDirection.ASC }],
-            }),
-            shouldRetry: false,
-            owner: this.navigationActions,
-            timeout: 30 * 1000,
-        });
+    async copySettingsTo(discountCode: PrivateDiscountCode) {
+        const discountCodes = await fetchAll(new LimitedFilteredRequest({
+            limit: 100,
+            sort: [{ key: 'id', order: SortItemDirection.ASC }],
+        }), this.objectFetcher);
 
         this.navigationActions.present({
             components: [
                 AsyncComponent(() => import('./CopyDiscountCodeSettingsView.vue'), {
                     discountCode,
-                    discountCodes: response.data.results,
-                    saveHandler: (patch: PatchableArrayAutoEncoder<DiscountCode>) => {
+                    discountCodes,
+                    saveHandler: (patch: PatchableArrayAutoEncoder<PrivateDiscountCode>) => {
                         this.patchDiscountCodes(patch).catch(console.error);
                     },
                 }),
@@ -287,7 +287,7 @@ export class DiscountCodeActionBuilder {
         }).catch(console.error);
     }
 
-    async deleteDiscountCodes(discountCodes: DiscountCode[]) {
+    async deleteDiscountCodes(discountCodes: PrivateDiscountCode[]) {
         const title = discountCodes.length === 1
             ? (discountCodes[0].code ? $t('%Zn2', { name: discountCodes[0].code }) : $t('Deze kortingscode verwijderen?'))
             : $t('{count} kortingscodes verwijderen?', { count: discountCodes.length });
@@ -309,14 +309,14 @@ export class DiscountCodeActionBuilder {
             return;
         }
 
-        const arr: PatchableArrayAutoEncoder<DiscountCode> = new PatchableArray();
+        const arr: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
         for (const discountCode of discountCodes) {
             arr.addDelete(discountCode.id);
         }
         await this.patchDiscountCodes(arr);
     }
 
-    async openMail(selection: TableActionSelection<DiscountCode>) {
+    async openMail(selection: TableActionSelection<PrivateDiscountCode>) {
         if (this.webshop.isClosed()) {
             new Toast($t('Open de webshop om e-mails met kortingscodes te versturen.'), 'error red').show();
             return;

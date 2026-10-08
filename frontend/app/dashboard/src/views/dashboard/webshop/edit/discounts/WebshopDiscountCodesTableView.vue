@@ -1,5 +1,6 @@
 <template>
     <ModernTableView
+        class="webshop-discount-codes-table-view"
         :table-object-fetcher="tableObjectFetcher"
         :filter-builders="filterBuilders"
         :default-sort-column="allColumns.find(c => c.id === 'createdAt')"
@@ -26,7 +27,7 @@ import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import type { DiscountCode, PrivateWebshop } from '@stamhoofd/structures';
+import type { PrivateDiscountCode, PrivateWebshop } from '@stamhoofd/structures';
 import { SortItemDirection } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
@@ -36,7 +37,7 @@ const props = defineProps<{
     webshop: PrivateWebshop;
 }>();
 
-type ObjectType = DiscountCode;
+type ObjectType = PrivateDiscountCode;
 
 const context = useContext();
 const navigationActions = useNavigationActions();
@@ -45,7 +46,7 @@ const objectFetcher = useDiscountCodesObjectFetcher(props.webshop.id);
 const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
 const filterBuilders: UIFilterBuilders = getDiscountCodesUIFilterBuilders();
 
-function refreshTable(discountCodes: DiscountCode[] = []) {
+function refreshTable(discountCodes: PrivateDiscountCode[] = []) {
     for (const discountCode of discountCodes) {
         tableObjectFetcher.cacheBeforeReset(discountCode);
     }
@@ -56,12 +57,13 @@ const actionBuilder = computed(() => new DiscountCodeActionBuilder({
     $context: context.value,
     webshop: props.webshop,
     navigationActions,
+    objectFetcher,
     afterPatch: refreshTable,
 }));
 
 const actions = computed(() => actionBuilder.value.getActions());
 
-function openDiscountCode(discountCode: DiscountCode) {
+function openDiscountCode(discountCode: PrivateDiscountCode) {
     actionBuilder.value.editDiscountCode(discountCode);
 }
 
@@ -91,7 +93,7 @@ const allColumns: Column<ObjectType, any>[] = [
         id: 'description',
         name: $t('%6o'),
         getValue: object => object.description,
-        format: value => value || $t('%Gr'),
+        format: value => value || $t('Geen beschrijving'),
         compare: (a, b) => Sorter.byStringValue(a, b),
         getStyle: value => value ? '' : 'gray',
         minimumWidth: 150,
@@ -129,3 +131,9 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
 ];
 </script>
+
+<style lang="scss">
+.webshop-discount-codes-table-view {
+    --st-popup-width: 1200px;
+}
+</style>

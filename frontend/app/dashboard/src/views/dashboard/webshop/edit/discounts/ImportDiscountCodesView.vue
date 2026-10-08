@@ -1,21 +1,33 @@
 <template>
     <SaveView :title="$t('Kortingscodes importeren')" :save-text="$t('Importeren')" :loading="saving" :disabled="!sheet" @save="save">
         <h1>{{ $t('Kortingscodes importeren') }}</h1>
-        <p>{{ $t('Upload een Excel of CSV-bestand met kortingscodes. Kolommen voor e-mailadres en code zijn optioneel.') }}</p>
-
-        <p>
-            <label class="button secundary">
-                <span class="icon upload" />
-                <span>{{ fileName || $t('Bestand kiezen') }}</span>
-                <input class="hidden-file-input" type="file" accept=".xlsx, .xls, .csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @change="changedFile">
-            </label>
-        </p>
+        <p>{{ $t('Upload een Excel- of CSV-bestand met één rij per kortingscode. Rijen zonder code krijgen automatisch een nieuwe code. Rijen met een bestaande code of een bestaand e-mailadres werken die kortingscode bij.') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
+        <STList class="illustration-list">
+            <STListItem :selectable="true" class="left-center" element-name="label">
+                <input type="file" style="display: none;" accept=".xlsx, .xls, .csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @change="changedFile">
+                <template #left>
+                    <img src="@stamhoofd/assets/images/illustrations/box-upload.svg">
+                </template>
+
+                <h2 class="style-title-list">
+                    {{ fileName || $t('Bestand kiezen') }}
+                </h2>
+                <p class="style-description">
+                    {{ sheet ? $t('{count} rijen gevonden in dit bestand.', { count: rowCount }) : $t('Excel- of CSV-bestand') }}
+                </p>
+
+                <template #right>
+                    <span class="icon upload gray" />
+                </template>
+            </STListItem>
+        </STList>
+
         <template v-if="sheet">
             <hr><h2>{{ $t('Kolommen') }}</h2>
-            <p>{{ $t('Koppel de kolommen uit je bestand aan de velden die je wilt importeren.') }}</p>
+            <p>{{ $t('Kies per veld welke kolom uit je bestand je wilt gebruiken.') }}</p>
 
             <STList>
                 <STListItem v-for="field of fields" :key="field.id">
@@ -27,25 +39,17 @@
                     </p>
 
                     <template #right>
-                        <select v-model="mapping[field.id]" class="input mapping-select">
+                        <Dropdown v-model="mapping[field.id]">
                             <option value="">
                                 {{ $t('Geen kolom') }}
                             </option>
                             <option v-for="column of columns" :key="column.key" :value="column.key">
                                 {{ column.name }}
                             </option>
-                        </select>
+                        </Dropdown>
                     </template>
                 </STListItem>
             </STList>
-
-            <p class="style-description-small">
-                {{ $t('Rijen zonder code krijgen automatisch een nieuwe code. Bestaande codes met hetzelfde e-mailadres worden bijgewerkt zonder hun code te wijzigen.') }}
-            </p>
-
-            <p v-if="previewText" class="info-box">
-                {{ previewText }}
-            </p>
 
             <template v-if="importErrors.length">
                 <hr><h2>{{ $t('Fouten') }}</h2>
@@ -78,14 +82,17 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useDiscountCodesObjectFetcher } from '@stamhoofd/components/fetchers/useDiscountCodesObjectFetcher.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { fetchAll } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import type { PrivateWebshop, StamhoofdFilter } from '@stamhoofd/structures';
-import { DiscountCode, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection } from '@stamhoofd/structures';
+import type { PrivateWebshop } from '@stamhoofd/structures';
+import { LimitedFilteredRequest, PrivateDiscountCode, SortItemDirection } from '@stamhoofd/structures';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import XLSX from 'xlsx';
@@ -110,7 +117,7 @@ type ParsedDiscountCodeRow = {
 
 const props = defineProps<{
     webshop: PrivateWebshop;
-    afterImport: (discountCodes: DiscountCode[]) => void;
+    afterImport: (discountCodes: PrivateDiscountCode[]) => void;
 }>();
 
 const fields: { id: MappingField; name: string; description: string }[] = [
@@ -139,6 +146,7 @@ const fields: { id: MappingField; name: string; description: string }[] = [
 const errors = useErrors();
 const context = useContext();
 const navigationActions = useNavigationActions();
+const objectFetcher = useDiscountCodesObjectFetcher(props.webshop.id);
 const pop = usePop();
 const saving = ref(false);
 const fileName = ref<string | null>(null);
@@ -152,18 +160,9 @@ const mapping = ref<Record<MappingField, string>>({
     maximumUsage: '',
 });
 
-const previewText = computed(() => {
-    if (!sheet.value) {
-        return '';
-    }
-
-    const range = getRange(sheet.value);
-    if (!range) {
-        return '';
-    }
-
-    const count = Math.max(0, range.e.r - range.s.r);
-    return $t('{count} rijen gevonden in dit bestand.', { count });
+const rowCount = computed(() => {
+    const range = sheet.value ? getRange(sheet.value) : null;
+    return range ? Math.max(0, range.e.r - range.s.r) : 0;
 });
 
 function changedFile(event: Event) {
@@ -175,12 +174,15 @@ function changedFile(event: Event) {
         return;
     }
 
+    const unreadableError = new SimpleError({
+        code: 'invalid_file',
+        message: 'Could not read the file',
+        human: $t('We konden dit bestand niet lezen. Kies een Excel- of CSV-bestand.'),
+    });
+
     const reader = new FileReader();
     reader.onerror = () => {
-        errors.errorBox = new ErrorBox(new SimpleError({
-            code: 'invalid_field',
-            message: 'Kon dit bestand niet lezen',
-        }));
+        errors.errorBox = new ErrorBox(unreadableError);
     };
     reader.onload = (e) => {
         try {
@@ -212,10 +214,7 @@ function changedFile(event: Event) {
             sheet.value = null;
             columns.value = [];
             fileName.value = null;
-            errors.errorBox = new ErrorBox(new SimpleError({
-                code: 'invalid_field',
-                message: 'Kon dit bestand niet lezen',
-            }));
+            errors.errorBox = new ErrorBox(unreadableError);
         }
     };
 
@@ -291,6 +290,7 @@ function inferMapping(columns: ImportColumn[]): Record<MappingField, string> {
         maximumUsage: findColumn(columns, ['maximum', 'maximum gebruik', 'max gebruik', 'maximaal aantal']),
     };
 
+    // A column can only feed one field
     const used = new Set<string>();
     for (const field of fields) {
         const key = next[field.id];
@@ -312,14 +312,14 @@ function cleanCode(code: string): string {
     return Formatter.slug(code).toUpperCase();
 }
 
-function parseMaximumUsage(value: string, row: number, column: number, errors: ImportError[]): number | null {
+function parseMaximumUsage(value: string, row: number, column: number, rowErrors: ImportError[]): number | null {
     if (!value) {
         return null;
     }
 
     const parsed = Number(value.replace(',', '.'));
     if (!Number.isInteger(parsed) || parsed < 1) {
-        errors.push(new ImportError(row, column, $t('Vul een positief geheel getal in.')));
+        rowErrors.push(new ImportError(row, column, $t('Vul een positief geheel getal in.')));
         return null;
     }
 
@@ -343,11 +343,13 @@ function parseRows(): { rows: ParsedDiscountCodeRow[]; importErrors: ImportError
     const nextErrors: ImportError[] = [];
     const rows: ParsedDiscountCodeRow[] = [];
     const seenEmails = new Set<string>();
+    const seenCodes = new Set<string>();
 
     if (selectedColumns.length === 0) {
         throw new SimpleError({
             code: 'required_field',
-            message: 'Kies minstens één kolom om te importeren',
+            message: 'No columns selected',
+            human: $t('Kies minstens één kolom om te importeren.'),
         });
     }
 
@@ -379,9 +381,17 @@ function parseRows(): { rows: ParsedDiscountCodeRow[]; importErrors: ImportError
             seenEmails.add(email);
         }
 
+        const code = rawCode.length > 0 ? cleanCode(rawCode) : null;
+        if (code && seenCodes.has(code)) {
+            nextErrors.push(new ImportError(row, mappedColumns.code ?? range.s.c, $t('Deze code staat meerdere keren in het bestand.')));
+        }
+        if (code) {
+            seenCodes.add(code);
+        }
+
         rows.push({
             row,
-            code: rawCode.length > 0 ? cleanCode(rawCode) : null,
+            code,
             email,
             description,
             maximumUsage,
@@ -391,7 +401,8 @@ function parseRows(): { rows: ParsedDiscountCodeRow[]; importErrors: ImportError
     if (rows.length === 0) {
         throw new SimpleError({
             code: 'empty_import',
-            message: 'Er werden geen rijen gevonden om te importeren',
+            message: 'No rows to import',
+            human: $t('Er werden geen rijen gevonden om te importeren.'),
         });
     }
 
@@ -410,35 +421,26 @@ function generateUniqueDiscountCode(usedCodes: Set<string>) {
     return code;
 }
 
-async function fetchExistingCodesByEmail(emails: string[]) {
-    const result = new Map<string, DiscountCode>();
+async function fetchExistingCodes(field: 'code' | 'email', values: string[]) {
+    const result = new Map<string, PrivateDiscountCode>();
     const chunkSize = 100;
 
-    for (let start = 0; start < emails.length; start += chunkSize) {
-        const chunk = emails.slice(start, start + chunkSize);
-        const filter: StamhoofdFilter = {
-            email: {
-                $in: chunk,
+    for (let start = 0; start < values.length; start += chunkSize) {
+        const discountCodes = await fetchAll(new LimitedFilteredRequest({
+            filter: {
+                [field]: {
+                    $in: values.slice(start, start + chunkSize),
+                },
             },
-        };
+            limit: chunkSize,
+            sort: [{ key: 'id', order: SortItemDirection.ASC }],
+        }), objectFetcher);
 
-        const response = await context.value.authenticatedServer.request({
-            method: 'GET',
-            path: `/webshop/${props.webshop.id}/discount-codes`,
-            decoder: new PaginatedResponseDecoder(new ArrayDecoder(DiscountCode as Decoder<DiscountCode>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
-            query: new LimitedFilteredRequest({
-                filter,
-                limit: chunkSize,
-                sort: [{ key: 'id', order: SortItemDirection.ASC }],
-            }),
-            shouldRetry: false,
-            owner: navigationActions,
-            timeout: 30 * 1000,
-        });
-
-        for (const discountCode of response.data.results) {
-            if (discountCode.email && !result.has(discountCode.email)) {
-                result.set(discountCode.email, discountCode);
+        for (const discountCode of discountCodes) {
+            // The database matches case-insensitively, the file values are normalized
+            const value = discountCode[field]?.toLowerCase();
+            if (value && !result.has(value)) {
+                result.set(value, discountCode);
             }
         }
     }
@@ -464,30 +466,29 @@ async function save() {
 
         const rows = parsed.rows;
         const emails = Formatter.uniqueArray(rows.flatMap(row => row.email ? [row.email] : []));
-        const existingCodes = await fetchExistingCodesByEmail(emails);
-        const usedCodes = new Set(rows.flatMap(row => row.code ? [row.code] : []));
-        const patch: PatchableArrayAutoEncoder<DiscountCode> = new PatchableArray();
+        const codes = rows.flatMap(row => row.code ? [row.code] : []);
+        const existingByEmail = await fetchExistingCodes('email', emails);
+        const existingByCode = await fetchExistingCodes('code', codes);
+        const usedCodes = new Set(codes);
+        const patch: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
 
         for (const row of rows) {
-            const existing = row.email ? existingCodes.get(row.email) : undefined;
+            // Matching on code first keeps a re-import of a partially imported file idempotent
+            const existing = (row.code ? existingByCode.get(row.code.toLowerCase()) : undefined)
+                ?? (row.email ? existingByEmail.get(row.email) : undefined);
 
             if (existing) {
-                const patchData: Record<string, unknown> = {
+                patch.addPatch(PrivateDiscountCode.patch({
                     id: existing.id,
-                    email: row.email,
-                };
-                if (row.description !== undefined) {
-                    patchData.description = row.description;
-                }
-                if (row.maximumUsage !== undefined) {
-                    patchData.maximumUsage = row.maximumUsage;
-                }
-                patch.addPatch(DiscountCode.patch(patchData));
+                    email: row.email ?? existing.email,
+                    description: row.description,
+                    maximumUsage: row.maximumUsage,
+                }));
                 continue;
             }
 
             const code = row.code ?? generateUniqueDiscountCode(usedCodes);
-            patch.addPut(DiscountCode.create({
+            patch.addPut(PrivateDiscountCode.create({
                 code,
                 email: row.email,
                 description: row.description ?? '',
@@ -501,7 +502,7 @@ async function save() {
             body: patch,
             shouldRetry: false,
             owner: navigationActions,
-            decoder: new ArrayDecoder(DiscountCode as Decoder<DiscountCode>),
+            decoder: new ArrayDecoder(PrivateDiscountCode as Decoder<PrivateDiscountCode>),
         });
 
         props.afterImport(response.data);
@@ -517,13 +518,3 @@ async function save() {
     }
 }
 </script>
-
-<style scoped>
-.hidden-file-input {
-    display: none;
-}
-
-.mapping-select {
-    min-width: 220px;
-}
-</style>

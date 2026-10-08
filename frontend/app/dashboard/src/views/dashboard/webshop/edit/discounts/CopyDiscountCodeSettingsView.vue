@@ -52,14 +52,14 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import type { Discount } from '@stamhoofd/structures';
-import { DiscountCode } from '@stamhoofd/structures';
+import { PrivateDiscountCode } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, ref } from 'vue';
 
 const props = defineProps<{
-    discountCode: DiscountCode;
-    discountCodes: DiscountCode[];
-    saveHandler: (patch: PatchableArrayAutoEncoder<DiscountCode>) => void;
+    discountCode: PrivateDiscountCode;
+    discountCodes: PrivateDiscountCode[];
+    saveHandler: (patch: PatchableArrayAutoEncoder<PrivateDiscountCode>) => void;
 }>();
 
 const pop = usePop();
@@ -106,7 +106,7 @@ function toggleAll(value: boolean) {
 }
 
 function save() {
-    const arr: PatchableArrayAutoEncoder<DiscountCode> = new PatchableArray();
+    const arr: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
 
     for (const target of candidates.value) {
         if (!selectedIds.value.has(target.id)) {
@@ -124,7 +124,7 @@ function save() {
             discounts.addPut(cloned);
         }
 
-        arr.addPatch(DiscountCode.patch({
+        arr.addPatch(PrivateDiscountCode.patch({
             id: target.id,
             description: props.discountCode.description,
             maximumUsage: props.discountCode.maximumUsage,

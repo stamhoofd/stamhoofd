@@ -28,7 +28,7 @@ export const discountCodeSorters: SQLSortDefinitions<WebshopDiscountCode> = {
     },
     email: {
         getValue(code) {
-            return code.email ?? '';
+            return code.email;
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({

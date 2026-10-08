@@ -1983,7 +1983,6 @@ defineExpose({
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
-    --st-popup-width: 1200px;
 
     > main {
         overflow-y: auto;

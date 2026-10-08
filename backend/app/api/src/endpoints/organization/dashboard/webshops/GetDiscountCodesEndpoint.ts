@@ -2,8 +2,8 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Webshop, WebshopDiscountCode } from '@stamhoofd/models';
-import type { CountFilteredRequest, DiscountCode, StamhoofdFilter } from '@stamhoofd/structures';
-import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PermissionLevel } from '@stamhoofd/structures';
+import type { CountFilteredRequest, PrivateDiscountCode, StamhoofdFilter } from '@stamhoofd/structures';
+import { assertSort, LimitedFilteredRequest, PaginatedResponse, PermissionLevel } from '@stamhoofd/structures';
 import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { applySQLSorter, compileToSQLFilter, SQL } from '@stamhoofd/sql';
 
@@ -15,7 +15,7 @@ import { discountCodeSorters } from '../../../../sql-sorters/discount-codes.js';
 type Params = { id: string };
 type Query = LimitedFilteredRequest;
 type Body = undefined;
-type ResponseBody = PaginatedResponse<DiscountCode[], LimitedFilteredRequest>;
+type ResponseBody = PaginatedResponse<PrivateDiscountCode[], LimitedFilteredRequest>;
 
 const filterCompilers: SQLFilterDefinitions = discountCodeFilterCompilers;
 const sorters: SQLSortDefinitions<WebshopDiscountCode> = discountCodeSorters;
@@ -85,29 +85,9 @@ export class GetWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, Bod
 
         const discountCodes = WebshopDiscountCode.fromRows(data, WebshopDiscountCode.table);
 
-        let next: LimitedFilteredRequest | undefined;
-
-        if (discountCodes.length >= requestQuery.limit) {
-            const lastObject = discountCodes[discountCodes.length - 1];
-            const nextFilter = getSortFilter(lastObject, sorters, requestQuery.sort);
-
-            next = new LimitedFilteredRequest({
-                filter: requestQuery.filter,
-                pageFilter: nextFilter,
-                sort: requestQuery.sort,
-                limit: requestQuery.limit,
-                search: requestQuery.search,
-            });
-
-            if (JSON.stringify(nextFilter) === JSON.stringify(requestQuery.pageFilter)) {
-                console.error('Found infinite loading loop for', requestQuery);
-                next = undefined;
-            }
-        }
-
-        return new PaginatedResponse<DiscountCode[], LimitedFilteredRequest>({
-            results: discountCodes.map(d => d.getStructure()),
-            next,
+        return new PaginatedResponse<PrivateDiscountCode[], LimitedFilteredRequest>({
+            results: discountCodes.map(d => d.getPrivateStructure()),
+            next: LimitedFilteredRequestHelper.fixInfiniteLoadingLoop({ request: requestQuery, results: discountCodes, sorters }),
         });
     }
 

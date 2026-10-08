@@ -1,8 +1,10 @@
-import { AutoEncoder, field, StringDecoder, ArrayDecoder, IntegerDecoder, BooleanDecoder, DateDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, StringDecoder, ArrayDecoder, IntegerDecoder, BooleanDecoder, DateDecoder, EmailDecoder } from '@simonbackx/simple-encoding';
 import { Discount } from './Discount.js';
 import { v4 as uuidv4 } from 'uuid';
 
 export class DiscountCode extends AutoEncoder {
+    static readonly maxPerWebshop = 1000;
+
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
@@ -11,13 +13,6 @@ export class DiscountCode extends AutoEncoder {
 
     @field({ decoder: StringDecoder, version: 241 })
     description = '';
-
-    /**
-     * Optional email address this code is associated with. Used to send the code to a specific
-     * recipient and to upsert codes by email on import. Not unique: codes stay otherwise anonymous.
-     */
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
-    email: string | null = null;
 
     @field({ decoder: new ArrayDecoder(Discount) })
     discounts: Discount[] = [];
@@ -40,4 +35,16 @@ export class DiscountCode extends AutoEncoder {
 
     @field({ decoder: DateDecoder, version: 240 })
     updatedAt: Date = new Date();
+}
+
+/**
+ * Dashboard only: the public DiscountCode is returned to shoppers who enter a code.
+ */
+export class PrivateDiscountCode extends DiscountCode {
+    /**
+     * Only used to email the code to someone and to match rows on import. Not unique, and not
+     * checked against the email of the person placing the order.
+     */
+    @field({ decoder: EmailDecoder, nullable: true, ...NextVersion })
+    email: string | null = null;
 }

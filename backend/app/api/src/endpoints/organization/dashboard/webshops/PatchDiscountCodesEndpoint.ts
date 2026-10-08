@@ -5,18 +5,17 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Webshop, WebshopDiscountCode } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { DiscountCode, PermissionLevel } from '@stamhoofd/structures';
+import { DiscountCode, PermissionLevel, PrivateDiscountCode } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
-import { MAX_DISCOUNT_CODES } from '../../../../helpers/discountCodeLimits.js';
 
 type Params = { id: string };
 type Query = undefined;
-type Body = PatchableArrayAutoEncoder<DiscountCode>;
-type ResponseBody = DiscountCode[];
+type Body = PatchableArrayAutoEncoder<PrivateDiscountCode>;
+type ResponseBody = PrivateDiscountCode[];
 
 export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new PatchableArrayDecoder(DiscountCode as Decoder<DiscountCode>, DiscountCode.patchType() as Decoder<AutoEncoderPatchType<DiscountCode>>, StringDecoder);
+    bodyDecoder = new PatchableArrayDecoder(PrivateDiscountCode as Decoder<PrivateDiscountCode>, PrivateDiscountCode.patchType() as Decoder<AutoEncoderPatchType<PrivateDiscountCode>>, StringDecoder);
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
@@ -55,11 +54,24 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
                     .where('webshopId', webshop.id)
                     .count();
 
-                if (existingDiscountCodes + puts.length > MAX_DISCOUNT_CODES) {
+                if (existingDiscountCodes + puts.length > DiscountCode.maxPerWebshop) {
                     throw new SimpleError({
                         code: 'too_many_discount_codes',
                         message: 'Too many discount codes',
-                        human: $t('Je kan maximaal {max} kortingscodes hebben.', { max: MAX_DISCOUNT_CODES }),
+                        human: $t('Je kan maximaal {max} kortingscodes hebben.', { max: DiscountCode.maxPerWebshop }),
+                    });
+                }
+
+                // Saves are not transactional, so refuse the batch before anything is written
+                const codes = puts.map(put => put.put.code);
+                const duplicate = codes.find((code, index) => codes.indexOf(code) !== index)
+                    ?? (await WebshopDiscountCode.where({ webshopId: webshop.id, code: { sign: 'IN', value: codes } }))[0]?.code;
+
+                if (duplicate !== undefined) {
+                    throw new SimpleError({
+                        code: 'used_code',
+                        message: 'Discount code already in use',
+                        human: $t(`%FK`) + ' ' + duplicate + $t(`%FL`),
                     });
                 }
             }
@@ -139,7 +151,7 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
         });
 
         return new Response(
-            discountCodes.map(d => d.getStructure()),
+            discountCodes.map(d => d.getPrivateStructure()),
         );
     }
 }
