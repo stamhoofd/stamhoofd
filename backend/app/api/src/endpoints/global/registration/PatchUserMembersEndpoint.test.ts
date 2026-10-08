@@ -5,7 +5,7 @@ import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import { GroupFactory, Member, MemberFactory, MemberResponsibilityRecordFactory, OrganizationFactory, Platform, RegistrationFactory, UserFactory } from '@stamhoofd/models';
 import type { PatchAnswers } from '@stamhoofd/structures';
-import { Address, MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, ParentType, PermissionLevel, RecordCategory, RecordSettings, RecordTextAnswer, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
+import { Address, BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, ParentType, PermissionLevel, RecordCategory, RecordSettings, RecordTextAnswer, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initUitpasApi } from '../../../../tests/init/index.js';
@@ -153,6 +153,86 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             await expect(testServer.test(endpoint, request))
                 .rejects
                 .toThrow(STExpect.errorWithCode('known_member_missing_rights'));
+        });
+
+        test('A security code is required when the user email is a parent email but parents have no access', async () => {
+            const organization = await new OrganizationFactory({ }).create();
+            const user = await new UserFactory({ email: 'parent-without-access@example.com' }).create();
+            const existingMember = await new MemberFactory({
+                firstName: 'Victim',
+                lastName: 'Member',
+                birthDay,
+                generateData: false,
+                details: MemberDetails.create({
+                    email: 'victim@example.com',
+                    parentsHaveAccess: BooleanStatus.create({ value: false }),
+                    parents: [
+                        Parent.create({
+                            firstName: 'Jane',
+                            lastName: 'Member',
+                            email: 'parent-without-access@example.com',
+                        }),
+                    ],
+                }),
+            }).create();
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            const put = MemberWithRegistrationsBlob.create({
+                details: MemberDetails.create({
+                    firstName: 'Victim',
+                    lastName: 'Member',
+                    birthDay: new Date(existingMember.details.birthDay!.getTime() + 1),
+                }),
+            });
+            arr.addPut(put);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, request))
+                .rejects
+                .toThrow(STExpect.errorWithCode('known_member_missing_rights'));
+        });
+
+        test('No security code is required when the user email is a parent email and parents have access', async () => {
+            const organization = await new OrganizationFactory({ }).create();
+            const user = await new UserFactory({ email: 'parent-with-access@example.com' }).create();
+            const existingMember = await new MemberFactory({
+                firstName: 'Victim',
+                lastName: 'Member',
+                birthDay,
+                generateData: false,
+                details: MemberDetails.create({
+                    email: 'victim@example.com',
+                    parentsHaveAccess: BooleanStatus.create({ value: true }),
+                    parents: [
+                        Parent.create({
+                            firstName: 'Jane',
+                            lastName: 'Member',
+                            email: 'parent-with-access@example.com',
+                        }),
+                    ],
+                }),
+            }).create();
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            const put = MemberWithRegistrationsBlob.create({
+                details: MemberDetails.create({
+                    firstName: 'Victim',
+                    lastName: 'Member',
+                    birthDay: new Date(existingMember.details.birthDay!.getTime() + 1),
+                }),
+            });
+            arr.addPut(put);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.members[0].id).toBe(existingMember.id);
         });
 
         test('A duplicate member with existing registrations returns those registrations after a merge', async () => {

@@ -1189,8 +1189,20 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         await log.save();
     }
 
+    /**
+     * A user whose email would get linked to the member by MemberUserSyncer anyway can merge without a code,
+     * unless the member has a responsibility. A parent email does not count when parents have no access.
+     */
+    private static async canMergeWithoutSecurityCode(member: MemberWithUsersRegistrationsAndGroups, email: string) {
+        if (!MemberUserSyncer.getLinkedEmails(member.details).includes(email.toLowerCase().trim())) {
+            return false;
+        }
+        const responsibilities = await MemberResponsibilityRecord.where({ memberId: member.id }, { limit: 1 });
+        return responsibilities.length === 0;
+    }
+
     static async checkCanAccessMember(member: MemberWithUsersRegistrationsAndGroups, securityCode: string | null | undefined, type: 'put' | 'patch' | 'direct') {
-        if ((type !== 'direct' && await member.isSafeToMergeDuplicateWithoutSecurityCode(Context.auth.user.email)) || await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
+        if ((type !== 'direct' && await this.canMergeWithoutSecurityCode(member, Context.auth.user.email)) || await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
             console.log('checkSecurityCode: without security code: allowed for ' + member.id);
         } else if (securityCode) {
             await this.checkSecurityCode(member, securityCode);

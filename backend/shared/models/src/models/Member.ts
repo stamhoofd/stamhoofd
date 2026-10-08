@@ -6,7 +6,6 @@ import basex from 'base-x';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { Group } from './Group.js';
-import { MemberResponsibilityRecord } from './MemberResponsibilityRecord.js';
 import { MemberUser } from './MemberUser.js';
 import { Registration } from './Registration.js';
 import { User } from './User.js';
@@ -507,16 +506,6 @@ export class Member extends QueryableModel {
                 lastName: registration.member.lastName,
             }),
         });
-    }
-
-    async isSafeToMergeDuplicateWithoutSecurityCode(email: string) {
-        if (this.details.hasEmail(email) || this.details.hasUnverifiedEmail(email)) {
-            const responsibilities = await MemberResponsibilityRecord.where({ memberId: this.id }, { limit: 1 });
-            if (responsibilities.length === 0) {
-                return true;
-            }
-        }
-        return false;
     }
 
     async tryUpdateLastRegisteredAt(registration: Registration) {
