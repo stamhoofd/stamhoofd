@@ -775,6 +775,24 @@ export class AdminPermissionChecker {
             return true;
         }
 
+        if (permissionLevel !== PermissionLevel.Read && balanceItems.length > 1) {
+            // Reading a payment is allowed when one of its items is accessible, but changing it (manual payments,
+            // reallocations, refunds) requires access to every item
+            const allData = data ?? await Payment.loadBalanceItemRelations(balanceItems);
+
+            for (const balanceItem of balanceItems) {
+                const itemData = {
+                    registrations: allData.registrations.filter(r => r.id === balanceItem.registrationId),
+                    orders: allData.orders.filter(o => o.id === balanceItem.orderId),
+                };
+
+                if (!await this.canAccessBalanceItems([balanceItem], permissionLevel, itemData)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         if (permissionLevel === PermissionLevel.Read) {
             for (const balanceItem of balanceItems) {
                 if (balanceItem.userId === this.user.id) {
@@ -784,7 +802,7 @@ export class AdminPermissionChecker {
         }
 
         // Slight optimization possible here
-        const { registrations, orders } = data ?? (this.user.permissions || permissionLevel === PermissionLevel.Read) ? (await Payment.loadBalanceItemRelations(balanceItems)) : { registrations: [], orders: [] };
+        const { registrations, orders } = data ?? ((this.user.permissions || permissionLevel === PermissionLevel.Read) ? await Payment.loadBalanceItemRelations(balanceItems) : { registrations: [], orders: [] });
 
         if (this.user.permissions) {
             // We grant permission for a whole payment when the user has at least permission for a part of that payment.
