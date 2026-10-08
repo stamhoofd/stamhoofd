@@ -1,9 +1,9 @@
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
-import type { MemberWithUsersRegistrationsAndGroups, RegistrationPeriod, Token } from '@stamhoofd/models';
-import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, Platform, RecordCategoryFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import type { MemberWithUsersRegistrationsAndGroups, RegistrationPeriod, Token, User } from '@stamhoofd/models';
+import { EventFactory, GroupFactory, MemberFactory, MemberResponsibilityRecordFactory, OrganizationFactory, OrganizationTagFactory, Platform, RecordCategoryFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import type { SortList, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, CountFilteredRequest, EventMeta, GroupStatus, GroupType, LimitedFilteredRequest, NamedObject, OrganizationTag, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
+import { AccessRight, CountFilteredRequest, EventMeta, GroupStatus, GroupType, LimitedFilteredRequest, NamedObject, OrganizationTag, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection, STPackageBundle, STPackageType } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Language } from '@stamhoofd/types/Language';
 import { GetMembersCountEndpoint } from './GetMembersCountEndpoint.js';
@@ -2736,41 +2736,126 @@ describe('Endpoint.GetMembersEndpoint', () => {
         });
     });
 
-    describe('Filtering on the organization of registrations', () => {
-        test('Members, admins, companies and packages of organizations cannot be filtered on', async () => {
+    describe('Filtering on the organization of registrations and responsibilities', () => {
+        const platformHost = 'platform.stamhoofd.app';
+        const fullPermissions = () => Permissions.create({ level: PermissionLevel.Full });
+
+        const relationFilters: Record<string, StamhoofdFilter> = {
+            members: { $elemMatch: { name: { $contains: 'a' } } },
+            admins: { $elemMatch: { email: { $contains: '@' } } },
+            companies: { $elemMatch: { name: { $contains: 'a' } } },
+            packages: { $elemMatch: { type: STPackageType.Members } },
+            documentTemplates: { $elemMatch: { year: 2023 } },
+            setupSteps: { $elemMatch: { periodId: 'none' } },
+            recordCategoryName: { $contains: 'a' },
+        };
+
+        const registrationOrganizationFilter = (organizationFilter: StamhoofdFilter) => ({
+            registrations: { $elemMatch: { organization: organizationFilter } },
+        });
+
+        async function fetchMemberIds(user: User, host: string, filter: StamhoofdFilter) {
+            const token = await SessionService.createSession(user);
+            const response = await testServer.test(endpoint, Request.get({
+                path: baseUrl,
+                host,
+                query: new LimitedFilteredRequest({ filter, limit: 10 }),
+                headers: { authorization: 'Bearer ' + token.accessToken },
+            }));
+            return response.body.results.members.map(m => m.id);
+        }
+
+        test('Organization admins cannot filter on relations of the organization', async () => {
             const organization = await new OrganizationFactory({ period }).create();
             const member = await new MemberFactory({}).create();
             await new RegistrationFactory({ member, organization }).create();
+            const organizationAdmin = await new UserFactory({ organization, permissions: fullPermissions() }).create();
+            const host = organization.getApiHost();
 
-            const organizationAdmin = await new UserFactory({
-                organization,
-                permissions: Permissions.create({ level: PermissionLevel.Full }),
-            }).create();
-            const platformAdmin = await new UserFactory({
-                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
-            }).create();
+            expect(await fetchMemberIds(organizationAdmin, host, registrationOrganizationFilter({ name: organization.name }))).toEqual([member.id]);
 
-            for (const [user, host] of [[organizationAdmin, organization.getApiHost()], [platformAdmin, 'platform.stamhoofd.app']] as const) {
-                const token = await SessionService.createSession(user);
-                const fetchMembers = (organizationFilter: StamhoofdFilter) => testServer.test(endpoint, Request.get({
-                    path: baseUrl,
-                    host,
-                    query: new LimitedFilteredRequest({
-                        filter: { id: member.id, registrations: { $elemMatch: { organization: organizationFilter } } },
-                        limit: 10,
-                    }),
-                    headers: { authorization: 'Bearer ' + token.accessToken },
-                }));
-
-                const response = await fetchMembers({ name: organization.name });
-                expect(response.body.results.members.map(m => m.id)).toEqual([member.id]);
-
-                for (const key of ['members', 'admins', 'companies', 'packages']) {
-                    await expect(fetchMembers({ [key]: { $elemMatch: { name: { $contains: 'a' } } } })).rejects.toThrow(
-                        STExpect.errorWithCode('unknown_filter'),
-                    );
-                }
+            for (const [key, filter] of Object.entries(relationFilters)) {
+                await expect(fetchMemberIds(organizationAdmin, host, registrationOrganizationFilter({ [key]: filter }))).rejects.toThrow(
+                    STExpect.errorWithCode('permission_denied'),
+                );
             }
+
+            await expect(fetchMemberIds(organizationAdmin, host, {
+                responsibilities: { $elemMatch: { organization: { admins: relationFilters.admins } } },
+            })).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
+        });
+
+        test('Platform admins can filter on relations of the organization', async () => {
+            const organization = await new OrganizationFactory({ period, packages: [STPackageBundle.Members] }).create();
+            const otherOrganization = await new OrganizationFactory({ period }).create();
+            const member = await new MemberFactory({}).create();
+            await new RegistrationFactory({ member, organization }).create();
+            await new MemberResponsibilityRecordFactory({ member, organizationId: organization.id }).create();
+            const otherMember = await new MemberFactory({ firstName: 'Other ' + otherOrganization.id }).create();
+            await new RegistrationFactory({ member: otherMember, organization: otherOrganization }).create();
+            await new MemberResponsibilityRecordFactory({ member: otherMember, organizationId: otherOrganization.id }).create();
+
+            const platformAdmin = await new UserFactory({ globalPermissions: fullPermissions() }).create();
+            const bothMembers = { $in: [member.id, otherMember.id] };
+
+            // Emailing organizations from the admin portal filters members on the organization of their responsibility
+            expect(await fetchMemberIds(platformAdmin, platformHost, {
+                id: bothMembers,
+                responsibilities: { $elemMatch: { endDate: null, organization: { packages: relationFilters.packages } } },
+            })).toEqual([member.id]);
+
+            expect(await fetchMemberIds(platformAdmin, platformHost, {
+                id: bothMembers,
+                ...registrationOrganizationFilter({ packages: relationFilters.packages }),
+            })).toEqual([member.id]);
+
+            expect(await fetchMemberIds(platformAdmin, platformHost, {
+                id: bothMembers,
+                ...registrationOrganizationFilter({ members: { $elemMatch: { firstName: otherMember.firstName } } }),
+            })).toEqual([otherMember.id]);
+
+            for (const [key, filter] of Object.entries(relationFilters)) {
+                await fetchMemberIds(platformAdmin, platformHost, registrationOrganizationFilter({ [key]: filter }));
+            }
+        });
+
+        test('Tag-limited platform admins only match organizations with an accessible tag', async () => {
+            const tag = await new OrganizationTagFactory({}).create();
+            // With a single tag in the platform, access to that tag equals access to all organizations
+            await new OrganizationTagFactory({}).create();
+
+            const taggedOrganization = await new OrganizationFactory({ period, tags: [tag.id] }).create();
+            const otherOrganization = await new OrganizationFactory({ period }).create();
+            const member = await new MemberFactory({}).create();
+            await new RegistrationFactory({ member, organization: taggedOrganization }).create();
+            await new RegistrationFactory({ member, organization: otherOrganization }).create();
+            const taggedMember = await new MemberFactory({ firstName: 'Tagged ' + tag.id }).create();
+            await new RegistrationFactory({ member: taggedMember, organization: taggedOrganization }).create();
+            const otherMember = await new MemberFactory({ firstName: 'Other ' + tag.id }).create();
+            await new RegistrationFactory({ member: otherMember, organization: otherOrganization }).create();
+
+            const platformAdmin = await new UserFactory({ globalPermissions: fullPermissions() }).create();
+            const tagAdmin = await new UserFactory({
+                globalPermissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources: new Map([[
+                        PermissionsResourceType.OrganizationTags,
+                        new Map([[tag.id, ResourcePermissions.create({ level: PermissionLevel.Read })]]),
+                    ]]),
+                }),
+            }).create();
+
+            // Filter the member on another member of the organization of one of their registrations
+            const fellowMemberFilter = (firstName: string): StamhoofdFilter => ({
+                id: member.id,
+                ...registrationOrganizationFilter({ members: { $elemMatch: { firstName } } }),
+            });
+
+            expect(await fetchMemberIds(platformAdmin, platformHost, fellowMemberFilter(otherMember.firstName))).toEqual([member.id]);
+            expect(await fetchMemberIds(tagAdmin, platformHost, fellowMemberFilter(taggedMember.firstName))).toEqual([member.id]);
+            expect(await fetchMemberIds(tagAdmin, platformHost, fellowMemberFilter(otherMember.firstName))).toEqual([]);
         });
     });
 });

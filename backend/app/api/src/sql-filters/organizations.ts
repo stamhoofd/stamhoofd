@@ -1,11 +1,14 @@
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLConcat, SQLNow, SQLNull, SQLScalar, SQLValueType, SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '@stamhoofd/sql';
-import { SetupStepType } from '@stamhoofd/structures';
+import { baseSQLFilterCompilers, compileToSQLFilter, createColumnFilter, createExistsFilter, SQL, SQLConcat, SQLNow, SQLNull, SQLScalar, SQLValueType, SQLWhereAnd, SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '@stamhoofd/sql';
+import { PermissionLevel, SetupStepType } from '@stamhoofd/structures';
+import { Context } from '../helpers/Context.js';
+
+type SQLFilterCompiler = ReturnType<typeof createExistsFilter>;
 
 /**
- * Only the organization's own columns. Relations to sensitive or expensive data are only available to platform admins via organizationFilterCompilers.
+ * Only the organization's own columns, which every user that can reach the organization may filter on.
  */
-export const baseOrganizationFilterCompilers: SQLFilterDefinitions = {
+const baseOrganizationFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
     id: createColumnFilter({
         expression: SQL.column('organizations', 'id'),
@@ -74,9 +77,43 @@ export const baseOrganizationFilterCompilers: SQLFilterDefinitions = {
     }),
 };
 
+/**
+ * Relations and configuration of an organization are only readable by platform admins, also when the
+ * organization is reached through a relation of another object (member, registration, webshop, ...).
+ * Platform admins limited to tags only match organizations with one of those tags, like GetOrganizationsEndpoint.
+ */
+function platformOnly(compiler: SQLFilterCompiler): SQLFilterCompiler {
+    return (filter, parentCompiler, key) => {
+        const runner = compiler(filter, parentCompiler, key);
+        if (!runner) {
+            return undefined;
+        }
+
+        return async (column) => {
+            const tags = Context.auth.getPlatformAccessibleOrganizationTags(PermissionLevel.Read);
+            if (tags !== 'all' && tags.length === 0) {
+                throw Context.auth.error({
+                    message: 'Filtering on ' + key + ' of an organization requires platform access',
+                    human: $t('Je hebt geen toegang om te filteren op gegevens van verenigingen'),
+                });
+            }
+
+            const where = await runner(column);
+            if (tags === 'all') {
+                return where;
+            }
+
+            return new SQLWhereAnd([
+                await compileToSQLFilter({ tags: { $in: tags } }, baseOrganizationFilterCompilers),
+                where,
+            ]);
+        };
+    };
+}
+
 export const organizationFilterCompilers: SQLFilterDefinitions = {
     ...baseOrganizationFilterCompilers,
-    packages: createExistsFilter(
+    packages: platformOnly(createExistsFilter(
         SQL.select()
             .from(SQL.table('stamhoofd_packages'))
             .where(
@@ -120,8 +157,8 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
                 nullable: false,
             }),
         },
-    ),
-    members: createExistsFilter(
+    )),
+    members: platformOnly(createExistsFilter(
         SQL.select()
             .from(SQL.table('members'))
             .join(
@@ -161,8 +198,8 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
                 nullable: true,
             }),
         },
-    ),
-    admins: createExistsFilter(
+    )),
+    admins: platformOnly(createExistsFilter(
         SQL.select()
             .from(SQL.table('users'))
             .where(
@@ -197,8 +234,8 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
                 nullable: false,
             }),
         },
-    ),
-    companies: createExistsFilter(
+    )),
+    companies: platformOnly(createExistsFilter(
         /**
          * There is a bug in MySQL 8 that is fixed in 9.3
          * where EXISTS (select * from json_table(...)) does not work
@@ -249,8 +286,8 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
                 nullable: true,
             }),
         },
-    ),
-    documentTemplates: createExistsFilter(
+    )),
+    documentTemplates: platformOnly(createExistsFilter(
         SQL.select()
             .from(SQL.table('document_templates'))
             .where(
@@ -285,8 +322,8 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
                 nullable: false,
             }),
         },
-    ),
-    setupSteps: createExistsFilter(
+    )),
+    setupSteps: platformOnly(createExistsFilter(
         SQL.select()
             .from(SQL.table('organization_registration_periods'))
             .where(
@@ -328,21 +365,21 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
                     }),
             ),
         },
-    ),
-    recordCategoryName: createColumnFilter({
+    )),
+    recordCategoryName: platformOnly(createColumnFilter({
         expression: SQL.jsonExtract(SQL.column('organizations', 'meta'), '$.value.recordsConfiguration.recordCategories[*].name'),
         type: SQLValueType.JSONArray,
         nullable: true,
-    }),
+    })),
     // Name of a child (sub)category in any record category, at any nesting depth
-    recordChildCategoryName: createColumnFilter({
+    recordChildCategoryName: platformOnly(createColumnFilter({
         expression: SQL.jsonExtract(SQL.column('organizations', 'meta'), '$.value.recordsConfiguration.recordCategories**.childCategories[*].name'),
         type: SQLValueType.JSONArray,
         nullable: true,
-    }),
-    recordName: createColumnFilter({
+    })),
+    recordName: platformOnly(createColumnFilter({
         expression: SQL.jsonExtract(SQL.column('organizations', 'meta'), '$.value.recordsConfiguration.recordCategories**.records[*].name'),
         type: SQLValueType.JSONArray,
         nullable: true,
-    }),
+    })),
 };

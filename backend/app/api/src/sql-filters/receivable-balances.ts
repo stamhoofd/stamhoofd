@@ -1,7 +1,7 @@
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLConcat, SQLValueType, SQLScalar } from '@stamhoofd/sql';
 import { memberFilterCompilers } from './members.js';
-import { baseOrganizationFilterCompilers } from './organizations.js';
+import { organizationFilterCompilers } from './organizations.js';
 import { EmailRelationFilterCompilers } from './shared/EmailRelationFilterCompilers.js';
 
 /**
@@ -71,7 +71,7 @@ export const receivableBalanceFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('cached_outstanding_balances', 'objectType'),
                 'organization'),
 
-        baseOrganizationFilterCompilers,
+        organizationFilterCompilers,
     ),
     members: createExistsFilter(
         SQL.select()

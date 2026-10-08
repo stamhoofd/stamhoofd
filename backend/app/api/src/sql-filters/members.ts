@@ -5,7 +5,7 @@ import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createW
 import { AccessRight } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context.js';
 import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers.js';
-import { baseOrganizationFilterCompilers } from './organizations.js';
+import { organizationFilterCompilers } from './organizations.js';
 import { userFilterCompilers } from './users.js';
 
 const membersTable = SQL.table(Member.table);
@@ -330,7 +330,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                     nullable: true,
                 }),
             },
-            organization: baseOrganizationFilterCompilers,
+            organization: organizationFilterCompilers,
         },
     ),
     'platformMemberships': createExistsFilter(
@@ -443,7 +443,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('groups', 'deletedAt'),
                 null,
             ),
-        baseOrganizationFilterCompilers,
+        organizationFilterCompilers,
     ),
     'emails': createExistsFilter(
         SQL.select()

@@ -4,7 +4,7 @@ import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJ
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { TransferSettings } from '@stamhoofd/structures';
 import { balanceItemPaymentsCompilers } from './balance-item-payments.js';
-import { baseOrganizationFilterCompilers } from './organizations.js';
+import { organizationFilterCompilers } from './organizations.js';
 import { paymentSettlementFilterCompilers } from './payment-settlement.js';
 
 /**
@@ -39,7 +39,7 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
     }),
     payingOrganization: createJoinedRelationFilter(
         SQL.join('organizations').where(SQL.column('organizations', 'id'), SQL.column(Payment.table, 'payingOrganizationId')),
-        baseOrganizationFilterCompilers,
+        organizationFilterCompilers,
     ),
     invoiceId: createColumnFilter({
         expression: SQL.column(Payment.table, 'invoiceId'),
