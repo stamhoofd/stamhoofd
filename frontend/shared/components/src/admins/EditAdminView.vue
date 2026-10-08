@@ -46,7 +46,7 @@
             </div>
         </STInputBox>
 
-        <EmailInput v-model="email" :validator="$errors.validator" :required="true" :disabled="!canEditDetails" :title="$t(`%1FK`)" :placeholder="$t(`%1FK`)" />
+        <EmailInput v-model="email" :validator="$errors.validator" :required="true" :disabled="!canEditEmail" :title="$t(`%1FK`)" :placeholder="$t(`%1FK`)" />
 
         <template v-if="getUnloadedPermissions(user)">
             <div v-if="!user.memberId || getUnloadedPermissions(user)" class="container">
@@ -136,6 +136,9 @@ const resources = computed(() => {
 const canEditDetails = computed(() => {
     return patched.value.id === $context.value?.user?.id || (!patched.value.hasAccount && (!patched.value?.permissions?.globalPermissions || $context.value.auth.hasPlatformFullAccess()));
 });
+
+// Only the account itself changes its email address; a wrong invitation is deleted and sent again
+const canEditEmail = computed(() => props.isNew || patched.value.id === $context.value?.user?.id);
 
 const { canImpersonate, impersonate } = useImpersonation();
 const showImpersonate = computed(() => canImpersonate(props.user));

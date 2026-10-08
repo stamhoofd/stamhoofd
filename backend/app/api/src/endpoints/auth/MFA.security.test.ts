@@ -516,11 +516,9 @@ describe('MFA security', () => {
     // -----------------------------------------------------------------------
     describe('merging accounts', () => {
         /**
-         * Verifying an email address that already belongs to another account merges that
-         * account into yours. Reading the victim's mailbox is a single primary credential,
-         * exactly the one a second factor exists to back up, so it must not be enough to
-         * pull an account that has a second factor (and its permissions) into an account
-         * that does not.
+         * Verifying an email address that already belongs to another account used to merge that
+         * account into yours. Reading the victim's mailbox is a single primary credential, so no
+         * account with credentials is merged any more, with or without a second factor.
          */
         async function requestEmailChange(user: User, token: Token, newEmail: string, organization: Organization): Promise<EmailVerificationCode> {
             const request = Request.patch({
@@ -561,27 +559,6 @@ describe('MFA security', () => {
             const storedAttacker = await User.getByID(attacker.id);
             expect(storedAttacker!.email).toBe(attacker.email);
             expect(storedAttacker!.permissions).toBeNull();
-        });
-
-        test('an account without a second factor can still be merged', async () => {
-            // Merging is a real feature for people who signed up twice. Without a factor,
-            // whoever reads the mailbox could take that account over with a password reset
-            // anyway, so nothing is bypassed here.
-            const organization = await new OrganizationFactory({}).create();
-            const other = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
-
-            const user = await new UserFactory({ organization, password }).create();
-            const token = await freshToken(user);
-
-            const code = await requestEmailChange(user, token, other.email, organization);
-
-            const response = await testServer.test(new VerifyEmailEndpoint(), bearer(Request.buildJson('POST', '/verify-email', organization.getApiHost(), { token: code.token, code: code.code }), token));
-            expect(response.body).toBeInstanceOf(TokenStruct);
-
-            expect(await User.getByID(other.id)).toBeUndefined();
-            const stored = await User.getByID(user.id);
-            expect(stored!.email).toBe(other.email);
-            expect(stored!.permissions).not.toBeNull();
         });
     });
 

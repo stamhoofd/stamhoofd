@@ -1,10 +1,11 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { AuditLog, EmailVerificationCode, OrganizationFactory, Token, User, UserFactory } from '@stamhoofd/models';
+import { AuditLog, EmailVerificationCode, Member, MemberFactory, OrganizationFactory, Token, User, UserFactory } from '@stamhoofd/models';
 import type { Organization } from '@stamhoofd/models';
-import { AuditLogType, PermissionLevel, PermissionRole, Permissions, Token as TokenStruct } from '@stamhoofd/structures';
+import { AuditLogType, LoginProviderType, PermissionLevel, PermissionRole, Permissions, Token as TokenStruct, UserMeta } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 
 import { testServer } from '../../../tests/helpers/TestServer.js';
+import { SessionService } from '../../services/SessionService.js';
 import { VerifyEmailEndpoint } from './VerifyEmailEndpoint.js';
 
 describe('Endpoint.VerifyEmail', () => {
@@ -26,10 +27,22 @@ describe('Endpoint.VerifyEmail', () => {
     }
 
     /**
-     * Build a verification code for the given user that will change the user's email to `newEmail`
-     * on verification, and run the endpoint with it.
+     * A user that was created for an email address (e.g. of a parent) but never signed in.
      */
-    async function verifyEmail(organization: Organization, user: User, newEmail: string) {
+    async function createPlaceholderUser(organization: Organization, email: string) {
+        return await new UserFactory({
+            organization,
+            email,
+            password: null,
+        }).create();
+    }
+
+    /**
+     * Build a verification code for the given user that will change the user's email to `newEmail`
+     * on verification, and run the endpoint with it from a session of that user (changing your own
+     * address while signed in), or without a session.
+     */
+    async function verifyEmail(organization: Organization, user: User, newEmail: string, { signedIn = true }: { signedIn?: boolean } = {}) {
         const code = await EmailVerificationCode.createFor(user, newEmail);
 
         const request = Request.buildJson('POST', '/verify-email', organization.getApiHost(), {
@@ -37,67 +50,74 @@ describe('Endpoint.VerifyEmail', () => {
             code: code.code,
         });
 
+        if (signedIn) {
+            const session = await SessionService.createSession(user);
+            request.headers.authorization = 'Bearer ' + session.accessToken;
+        }
+
         return await testServer.test(endpoint, request);
     }
 
-    test('merges the permissions of the deleted user into the kept user', async () => {
+    test('an existing account at the new address is never merged: the change is refused', async () => {
+        // The owner of that mailbox may be the one clicking a link someone else requested
         const organization = await new OrganizationFactory({}).create();
-
-        // The user that keeps existing and changes its email to the other user's email
-        const keptUser = await createUserWithPermissions(organization, 'kept@example.com', Permissions.create({
-            roles: [PermissionRole.create({ id: 'role-a', name: 'Role A' })],
-        }));
-
-        // The user that will be found by its email and merged into (and deleted)
-        const otherUser = await createUserWithPermissions(organization, 'other@example.com', Permissions.create({
+        const requester = await createUserWithPermissions(organization, 'requester@example.com');
+        const victim = await createUserWithPermissions(organization, 'victim@example.com', Permissions.create({
             level: PermissionLevel.Full,
             roles: [PermissionRole.create({ id: 'role-b', name: 'Role B' })],
         }));
+        const member = await new MemberFactory({ organization, user: victim }).create();
 
-        const response = await verifyEmail(organization, keptUser, otherUser.email);
-        expect(response.status).toBe(200);
+        await expect(verifyEmail(organization, requester, victim.email)).rejects.toMatchObject({ code: 'email_in_use' });
 
-        // The other user is deleted
-        expect(await User.getByID(otherUser.id)).toBeUndefined();
+        const refreshedVictim = await User.getByID(victim.id);
+        expect(refreshedVictim).toBeDefined();
+        expect(refreshedVictim!.permissions!.organizationPermissions.get(organization.id)?.level).toBe(PermissionLevel.Full);
+        expect((await Member.getMembersWithRegistrationForUser(refreshedVictim!)).map(m => m.id)).toEqual([member.id]);
 
-        // The kept user now holds both users' permissions for the organization
-        const refreshed = await User.getByID(keptUser.id);
-        expect(refreshed).toBeDefined();
-        expect(refreshed!.email).toBe('other@example.com');
-
-        const merged = refreshed!.permissions!.organizationPermissions.get(organization.id);
-        expect(merged).toBeDefined();
-        expect(merged!.level).toBe(PermissionLevel.Full);
-        expect(merged!.roles.map(r => r.id).sort()).toEqual(['role-a', 'role-b']);
+        const refreshedRequester = await User.getByID(requester.id);
+        expect(refreshedRequester!.email).toBe('requester@example.com');
+        expect(refreshedRequester!.permissions).toBeNull();
+        expect(await Member.getMembersWithRegistrationForUser(refreshedRequester!)).toHaveLength(0);
     });
 
-    test('adopts the permissions of the deleted user when the kept user has none', async () => {
+    test('an account that only signs in through a login provider is not merged either', async () => {
         const organization = await new OrganizationFactory({}).create();
+        const requester = await createUserWithPermissions(organization, 'requester@example.com');
+        const victim = await createPlaceholderUser(organization, 'victim@example.com');
+        victim.meta = victim.meta ?? UserMeta.create({});
+        victim.meta.loginProviderIds = new Map([[LoginProviderType.SSO, 'subject-1']]);
+        await victim.save();
+        expect(victim.hasAccount()).toBe(true);
 
-        // The kept user has no permissions
-        const keptUser = await createUserWithPermissions(organization, 'kept@example.com');
-        expect(keptUser.permissions).toBeNull();
+        await expect(verifyEmail(organization, requester, victim.email)).rejects.toMatchObject({ code: 'email_in_use' });
+        expect(await User.getByID(victim.id)).toBeDefined();
+    });
 
-        const otherUser = await createUserWithPermissions(organization, 'other@example.com', Permissions.create({
-            roles: [PermissionRole.create({ id: 'role-b', name: 'Role B' })],
+    test('a placeholder user at the new address is merged into the kept user', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const keptUser = await createUserWithPermissions(organization, 'kept@example.com', Permissions.create({
+            roles: [PermissionRole.create({ id: 'role-a', name: 'Role A' })],
         }));
+        const placeholder = await createPlaceholderUser(organization, 'parent@example.com');
+        const member = await new MemberFactory({ organization, user: placeholder }).create();
 
-        const response = await verifyEmail(organization, keptUser, otherUser.email);
+        const response = await verifyEmail(organization, keptUser, placeholder.email);
         expect(response.status).toBe(200);
 
-        expect(await User.getByID(otherUser.id)).toBeUndefined();
+        expect(await User.getByID(placeholder.id)).toBeUndefined();
 
         const refreshed = await User.getByID(keptUser.id);
-        const merged = refreshed!.permissions?.organizationPermissions.get(organization.id);
-        expect(merged).toBeDefined();
-        expect(merged!.roles.map(r => r.id)).toEqual(['role-b']);
+        expect(refreshed!.email).toBe('parent@example.com');
+        expect(refreshed!.permissions!.organizationPermissions.get(organization.id)?.roles.map(r => r.id)).toEqual(['role-a']);
+        expect((await Member.getMembersWithRegistrationForUser(refreshed!)).map(m => m.id)).toEqual([member.id]);
     });
 
-    test('reassigns audit logs of the deleted user to the kept user', async () => {
+    test('reassigns audit logs of the deleted placeholder user to the kept user', async () => {
         const organization = await new OrganizationFactory({}).create();
 
         const keptUser = await createUserWithPermissions(organization, 'kept@example.com');
-        const otherUser = await createUserWithPermissions(organization, 'other@example.com');
+        const otherUser = await createPlaceholderUser(organization, 'other@example.com');
 
         // An audit log performed by the user that will be deleted
         const auditLog = new AuditLog();
@@ -118,22 +138,13 @@ describe('Endpoint.VerifyEmail', () => {
         expect(refreshedLog!.userId).toBe(keptUser.id);
     });
 
-    test('verifies the email and returns a valid token when merging without throwing', async () => {
+    test('verifies the email and returns a valid token when merging a placeholder user', async () => {
         const organization = await new OrganizationFactory({}).create();
 
         const keptUser = await createUserWithPermissions(organization, 'kept@example.com', Permissions.create({
             roles: [PermissionRole.create({ id: 'role-a', name: 'Role A' })],
         }));
-        const otherUser = await createUserWithPermissions(organization, 'other@example.com', Permissions.create({
-            roles: [PermissionRole.create({ id: 'role-b', name: 'Role B' })],
-        }));
-
-        // Also add an audit log to exercise all merge branches together
-        const auditLog = new AuditLog();
-        auditLog.type = AuditLogType.Unknown;
-        auditLog.userId = otherUser.id;
-        auditLog.organizationId = organization.id;
-        await auditLog.save();
+        const otherUser = await createPlaceholderUser(organization, 'other@example.com');
 
         const response = await verifyEmail(organization, keptUser, otherUser.email);
 
@@ -150,6 +161,30 @@ describe('Endpoint.VerifyEmail', () => {
         const refreshed = await User.getByID(keptUser.id);
         expect(refreshed!.verified).toBe(true);
         expect(refreshed!.email).toBe('other@example.com');
+    });
+
+    test('verifying the current address without a session returns a token', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({ organization, verified: false }).create();
+
+        const response = await verifyEmail(organization, user, user.email, { signedIn: false });
+
+        expect(response.body).toBeInstanceOf(TokenStruct);
+        const token = await Token.getByAccessToken((response.body as TokenStruct).accessToken);
+        expect(token!.user.id).toBe(user.id);
+        expect((await User.getByID(user.id))!.verified).toBe(true);
+    });
+
+    test('an email change confirmed without a session returns a token', async () => {
+        // Opening the link on another device than the one the change was requested from
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({ organization, email: 'owner@example.com' }).create();
+
+        const response = await verifyEmail(organization, user, 'new@example.com', { signedIn: false });
+
+        expect(response.body).toBeInstanceOf(TokenStruct);
+        expect((await Token.getByAccessToken((response.body as TokenStruct).accessToken))!.user.id).toBe(user.id);
+        expect((await User.getByID(user.id))!.email).toBe('new@example.com');
     });
 
     test('parallel wrong guesses cannot exceed the maximum number of tries', async () => {

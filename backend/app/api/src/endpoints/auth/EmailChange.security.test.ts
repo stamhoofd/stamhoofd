@@ -4,6 +4,7 @@ import { EmailMocker } from '@stamhoofd/email';
 import type { Organization, Token, User } from '@stamhoofd/models';
 import { EmailTemplateFactory, EmailVerificationCode, OrganizationFactory, UserFactory } from '@stamhoofd/models';
 import { EmailTemplateType, NewUser, PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { TestUtils } from '@stamhoofd/test-utils';
 
 import { testServer } from '../../../tests/helpers/TestServer.js';
 import { SessionService } from '../../services/SessionService.js';
@@ -11,7 +12,8 @@ import { PatchUserEndpoint } from './PatchUserEndpoint.js';
 
 /**
  * Tests that the code for an email change can't be guessed to take over the account that owns
- * the new address. Verifying the change merges that account into the requester's account.
+ * the new address. Verifying the change merges a placeholder user without account at that
+ * address into the requester's account.
  */
 describe('Security.EmailChange', () => {
     const password = 'test-password-1234';
@@ -47,18 +49,6 @@ describe('Security.EmailChange', () => {
         expect(JSON.stringify(error)).not.toContain(code.token);
     });
 
-    test('an admin changing the email of another user doesn\'t get the token', async () => {
-        const organization = await new OrganizationFactory({}).create();
-        const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
-        const user = await new UserFactory({ organization, password }).create();
-
-        const error = await requestEmailChange(organization, user, await SessionService.createSession(admin), 'new-address@example.com');
-
-        expect(error).toMatchObject({ code: 'verify_email_link', meta: undefined });
-        const [code] = await EmailVerificationCode.where({ userId: user.id });
-        expect(JSON.stringify(error)).not.toContain(code.token);
-    });
-
     test('the email only contains the link, not the code', async () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({ organization, password }).create();
@@ -72,6 +62,64 @@ describe('Security.EmailChange', () => {
             return sent[0];
         }, { timeout: 5000 });
         expect(email.html).toContain('link only: https://');
+    });
+
+    describe('nobody changes the address of another user', () => {
+        async function expectNoEmailChange(organization: Organization, admin: User, victim: User) {
+            const error = await requestEmailChange(organization, victim, await SessionService.createSession(admin), 'attacker@example.com');
+
+            // The endpoint ignores the address when the caller may not change it
+            expect(error).toBeNull();
+            expect(await EmailVerificationCode.where({ userId: victim.id })).toHaveLength(0);
+            await victim.refresh();
+            expect(victim.email).not.toBe('attacker@example.com');
+        }
+
+        test('a full admin cannot change the email of a user with an account in their organization', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const parent = await new UserFactory({ organization, password }).create();
+
+            await expectNoEmailChange(organization, admin, parent);
+        });
+
+        test('a full admin cannot change the email of an invited administrator who never signed in', async () => {
+            // A typo in the invitation is fixed by removing the administrator and inviting again
+            const organization = await new OrganizationFactory({}).create();
+            const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const invited = await new UserFactory({ organization, password: null, permissions: Permissions.create({ level: PermissionLevel.Read }) }).create();
+
+            await expectNoEmailChange(organization, admin, invited);
+        });
+
+        test('in platform mode an organization admin cannot change the email of a platform-level user with permissions in their organization', async () => {
+            // The victim was invited as administrator of this organization (CreateAdmin on an existing user)
+            TestUtils.setEnvironment('userMode', 'platform');
+            const organization = await new OrganizationFactory({}).create();
+            const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const victim = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Read }) }).create();
+
+            await expectNoEmailChange(organization, admin, victim);
+        });
+
+        test('a platform admin cannot change the email of another user either', async () => {
+            TestUtils.setEnvironment('userMode', 'platform');
+            const organization = await new OrganizationFactory({}).create();
+            const platformAdmin = await new UserFactory({ password, globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const user = await new UserFactory({ organization, password }).create();
+
+            await expectNoEmailChange(organization, platformAdmin, user);
+        });
+
+        test('a user can still change their own email', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ organization, password }).create();
+
+            const error = await requestEmailChange(organization, user, await SessionService.createSession(user), 'new@example.com');
+
+            expect(error).toMatchObject({ code: 'verify_email_link' });
+            expect(await EmailVerificationCode.where({ userId: user.id })).toHaveLength(1);
+        });
     });
 
     test('two requests at the same time can\'t mix up the address and the code', async () => {

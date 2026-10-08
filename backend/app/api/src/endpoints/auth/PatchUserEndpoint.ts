@@ -232,7 +232,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 throw new SimpleError({
                     code: 'verify_email_link',
                     message: 'Your email address needs verification via the link in the email',
-                    human: editUser.id === user.id ? $t(`%DJ`) : $t(`%DK`) + ' ' + request.body.email + ' ' + $t(`%DL`),
+                    human: $t(`%DJ`),
                     statusCode: 403,
                 });
             }

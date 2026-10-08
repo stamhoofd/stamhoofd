@@ -933,6 +933,13 @@ export class AdminPermissionChecker {
             return false;
         }
 
+        // An impersonated session sees and edits every member of the user, so the user has to be ours through at
+        // least one of them. Permissions alone are not enough: any full admin can hand those out (CreateAdmin).
+        const relation = await this.getMemberRelation(user);
+        if (relation.managesSome === false || !relation.coversResponsibilities) {
+            return false;
+        }
+
         if (await this.canAccessUser(user, PermissionLevel.Full)) {
             // Works for admins only, so we need the next checks too
             return true;
@@ -940,36 +947,86 @@ export class AdminPermissionChecker {
 
         // For impersonating non-admins - organization mode
         if (user.organizationId) {
-            if (await this.hasFullAccess(user.organizationId)) {
-                return true;
-            }
-            return false;
+            return await this.hasFullAccess(user.organizationId);
         }
 
         // For impersonating non-admins - platform mode
-        let has = false;
+        return relation.managesSome === true;
+    }
 
-        // Note: it is important we do not allow to impersonate users who have members the current user does not have access to.
-        // Otherwise the current user gains more access than it already has
-        for (const member of await Member.getMembersWithRegistrationForUser(user)) {
-            if (member.organizationId) {
-                if (await this.hasFullAccess(member.organizationId)) {
-                    has = true;
-                } else {
-                    return false;
-                }
+    /**
+     * How this user relates to the members of the given user.
+     *
+     * `managesSome`: full access to the organization of at least one member or registration, null when the user
+     * has no members. Registrations at other organizations don't block: access to a member is per organization,
+     * and a member without registrations belongs to nobody yet.
+     *
+     * `coversResponsibilities`: every responsibility held by one of those members is in an organization this user fully
+     * controls. A user manager can add email addresses to a member, and whoever signs in with such an address
+     * inherits the responsibility's permissions, so looking through the user would hand those out.
+     */
+    private async getMemberRelation(user: User): Promise<{ managesSome: boolean | null; coversResponsibilities: boolean }> {
+        if (this.hasPlatformFullAccess()) {
+            return { managesSome: true, coversResponsibilities: true };
+        }
+
+        const members = await Member.getMembersWithRegistrationForUser(user);
+
+        if (members.length === 0) {
+            return { managesSome: null, coversResponsibilities: true };
+        }
+
+        const hasFullAccessSafe = async (organizationId: string) => {
+            try {
+                return await this.hasFullAccess(organizationId);
+            } catch (e) {
+                // An organization that no longer exists cannot be judged, so don't allow it
+                console.error('Could not check member access for organization', organizationId, e);
+                return false;
             }
+        };
 
-            for (const registration of member.registrations) {
-                if (await this.hasFullAccess(registration.organizationId)) {
-                    has = true;
-                } else {
-                    return false;
-                }
+        // In platform mode a member is only bound to an organization through its registrations, so a parent whose
+        // children have no registration anywhere is nobody's yet
+        let managesSome = false;
+        for (const organizationId of Formatter.uniqueArray(members.flatMap(m => [m.organizationId, ...m.registrations.map(r => r.organizationId)]))) {
+            if (await hasFullAccessSafe(organizationId)) {
+                managesSome = true;
+                break;
             }
         }
 
-        return has;
+        const coversResponsibilities = await this.coversResponsibilities(await this.getResponsibilitiesForMembers(members.map(m => m.id)));
+
+        return { managesSome, coversResponsibilities };
+    }
+
+    /**
+     * Whether every responsibility in the list is in an organization this user fully controls (platform-level ones
+     * require platform full access).
+     */
+    private async coversResponsibilities(responsibilities: { organizationId: string | null }[]): Promise<boolean> {
+        for (const { organizationId } of responsibilities) {
+            if (organizationId === null) {
+                if (!this.hasPlatformFullAccess()) {
+                    return false;
+                }
+
+                continue;
+            }
+
+            try {
+                if (!await this.hasFullAccess(organizationId)) {
+                    return false;
+                }
+            } catch (e) {
+                // An organization that no longer exists cannot be judged, so don't allow it
+                console.error('Could not check responsibility coverage for organization', organizationId, e);
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -988,6 +1045,12 @@ export class AdminPermissionChecker {
             return false;
         }
 
+        // The user has to be ours through at least one of their members, like for impersonation
+        const relation = await this.getMemberRelation(user);
+        if (relation.managesSome === false) {
+            return false;
+        }
+
         if (await this.canAccessUser(user, PermissionLevel.Full)) {
             // Works for admins only, so we need the next checks too
             return true;
@@ -997,28 +1060,7 @@ export class AdminPermissionChecker {
             return await this.hasFullAccess(user.organizationId);
         }
 
-        let has = false;
-
-        // Note: it is important we do not allow reading files of users who have members the current user does not have access to.
-        for (const member of await Member.getMembersWithRegistrationForUser(user)) {
-            if (member.organizationId) {
-                if (await this.hasFullAccess(member.organizationId)) {
-                    has = true;
-                } else {
-                    return false;
-                }
-            }
-
-            for (const registration of member.registrations) {
-                if (await this.hasFullAccess(registration.organizationId)) {
-                    has = true;
-                } else {
-                    return false;
-                }
-            }
-        }
-
-        return has;
+        return relation.managesSome === true;
     }
 
     /**
@@ -1083,8 +1125,17 @@ export class AdminPermissionChecker {
         return false;
     }
 
-    async canEditUserEmail(user: User) {
-        return this.canEditUserName(user);
+    /**
+     * The email address is the credential of an account: whoever controls it can reset the password. Nobody
+     * changes it for someone else, not even an administrator who covers all of that user's permissions.
+     */
+    async canEditUserEmail(user: User): Promise<boolean> {
+        if (user.hasAccount() && !user.hasPasswordBasedAccount()) {
+            // SSO-managed
+            return false;
+        }
+
+        return user.id === this.user.id;
     }
 
     private async getResponsibilitiesForMembers(memberIds: string[]) {
@@ -1101,21 +1152,7 @@ export class AdminPermissionChecker {
             responsibilities = await this.getResponsibilitiesForMembers([member.id]);
         }
 
-        for (const { organizationId } of responsibilities) {
-            if (organizationId === null) {
-                if (!this.hasPlatformFullAccess()) {
-                    return false;
-                }
-
-                continue;
-            }
-
-            if (!await this.hasFullAccess(organizationId)) {
-                return false;
-            }
-        }
-
-        return true;
+        return await this.coversResponsibilities(responsibilities);
     }
 
     /**

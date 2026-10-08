@@ -83,21 +83,18 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             const other = await User.getForAuthentication(user.organizationId, code.email, { allowWithoutAccount: true });
 
             if (other) {
-                // Merging absorbs the other account (its permissions included) and then
-                // deletes it, second factor and all. Reading the mailbox is exactly the
-                // single credential a second factor exists to back up, so an account that
-                // has one may not be taken over this way: nothing in this request proves
-                // the caller can pass it.
-                if (await TwoFactorHelper.userHasFactors(other.id)) {
+                // Opening the link only proves control over the mailbox, which may belong to someone
+                // who never asked for this change. Only placeholder users without an account are merged.
+                if (other.hasAccount()) {
                     throw new SimpleError({
                         code: 'email_in_use',
-                        message: 'This e-mail is already in use by an account with two-factor authentication',
-                        human: $t('%Zis'),
+                        message: 'This e-mail is already in use by another account',
+                        human: $t('Dit e-mailadres is al in gebruik door een ander account. Log in met dat account of kies een ander e-mailadres.'),
                         statusCode: 400,
                     });
                 }
 
-                // Delete the other user, but merge data
+                // Delete the placeholder user, but merge data
                 await user.merge(other);
                 if (user.organizationId) {
                     BalanceItemService.scheduleUserUpdate(user.organizationId, user.id);

@@ -160,6 +160,34 @@ describe('Endpoint.GetSignedFileUrl', () => {
             await expect(testServer.test(endpoint, buildRequest(await buildUserFile(user), { organization, accessToken }))).rejects.toThrow(/do not have permissions/i);
         });
 
+        test('It returns a signed url when one member of the uploader is registered at the organization, whatever the others are', async () => {
+            TestUtils.setEnvironment('userMode', 'platform');
+            const organization = await new OrganizationFactory({}).create();
+            const otherOrganization = await new OrganizationFactory({}).create();
+            const { user } = await createUser(null, null);
+            const ours = await new MemberFactory({ organization, user }).create();
+            await new RegistrationFactory({ member: ours, organization }).create();
+            const elsewhere = await new MemberFactory({ organization: otherOrganization, user }).create();
+            await new RegistrationFactory({ member: elsewhere, organization: otherOrganization }).create();
+            const { accessToken } = await createUser(organization);
+
+            const response = await testServer.test(endpoint, buildRequest(await buildUserFile(user), { organization, accessToken }));
+
+            expect(response.body.signedUrl).toEqual(expect.any(String));
+        });
+
+        test('It refuses a file of a platform-level user with members at another organization, even one with permissions in the organization', async () => {
+            TestUtils.setEnvironment('userMode', 'platform');
+            const organization = await new OrganizationFactory({}).create();
+            const otherOrganization = await new OrganizationFactory({}).create();
+            const { user } = await createUser(organization, PermissionsStruct.create({ level: PermissionLevel.Read }));
+            const member = await new MemberFactory({ organization: otherOrganization, user }).create();
+            await new RegistrationFactory({ member, organization: otherOrganization }).create();
+            const { accessToken } = await createUser(organization);
+
+            await expect(testServer.test(endpoint, buildRequest(await buildUserFile(user), { organization, accessToken }))).rejects.toThrow(/do not have permissions/i);
+        });
+
         test('It refuses a file of a user that no longer exists', async () => {
             const organization = await new OrganizationFactory({}).create();
             const { accessToken } = await createUser(organization);
