@@ -64,6 +64,7 @@ async function openDiscountCodes(page: Page, organization: Organization, webshop
     await dashboard.openTab(DashboardTab.Webshops);
     await page.getByTestId('webshop-menu-item').filter({ hasText: webshopName }).click();
     await page.locator('.st-list-item').filter({ hasText: 'Kortingen' }).click();
+    await expect(page.getByRole('link', { name: 'Meer info' })).toHaveAttribute('href', /\/persoonlijke-kortingscodes/);
     await page.locator('.st-list-item').filter({ hasText: 'Kortingscodes beheren' }).click();
     await page.getByTestId('table').waitFor();
 }

@@ -34,7 +34,7 @@
         <h2 class="style-with-button">
             <div>{{ $t('%QM') }}</div>
         </h2>
-        <p>{{ $t('%QN') }}</p>
+        <p>{{ $t('Bestellers kunnen een kortingscode inruilen door een link te gebruiken of door manueel de code in te typen bij het openen van het winkelmandje. Je kan ze ook importeren, exporteren of mailen.') }} <a class="inline-link" :href="$domains.getDocs('persoonlijke-kortingscodes')" target="_blank">{{ $t('%19t') }}</a></p>
 
         <STList>
             <STListItem :selectable="true" element-name="label">
