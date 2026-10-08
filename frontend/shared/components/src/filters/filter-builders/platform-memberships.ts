@@ -84,9 +84,7 @@ export function useGetPlatformMembershipsUIFilterBuilders(organization: Organiza
                 name: $t('%1Oi'),
                 builders: getMemberBaseFilters(platform.value.config.recordsConfiguration, { groupNameFilters: false }),
                 wrapper: {
-                    member: {
-                        $elemMatch: FilterWrapperMarker,
-                    },
+                    member: FilterWrapperMarker,
                 },
             }),
         ]);
@@ -97,9 +95,7 @@ export function useGetPlatformMembershipsUIFilterBuilders(organization: Organiza
                 description: $t('%1PD'),
                 builders: organizationFilterBuilders.getOrganizationUIFilterBuilders(),
                 wrapper: {
-                    organization: {
-                        $elemMatch: FilterWrapperMarker,
-                    },
+                    organization: FilterWrapperMarker,
                 },
             }));
         }

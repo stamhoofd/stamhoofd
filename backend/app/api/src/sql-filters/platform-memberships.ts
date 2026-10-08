@@ -1,8 +1,11 @@
 import { MemberPlatformMembership } from '@stamhoofd/models';
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLValueType } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, SQL, SQLValueType } from '@stamhoofd/sql';
 import { memberFilterCompilers } from './members.js';
 import { organizationFilterCompilers } from './organizations.js';
+
+const organizationJoin = SQL.join(SQL.table('organizations')).where(SQL.column('organizations', 'id'), SQL.column(MemberPlatformMembership.table, 'organizationId'));
+const memberJoin = SQL.join(SQL.table('members')).where(SQL.column('members', 'id'), SQL.column(MemberPlatformMembership.table, 'memberId'));
 
 export const platformMembershipFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
@@ -13,6 +16,11 @@ export const platformMembershipFilterCompilers: SQLFilterDefinitions = {
     }),
     membershipTypeId: createColumnFilter({
         expression: SQL.column(MemberPlatformMembership.table, 'membershipTypeId'),
+        type: SQLValueType.String,
+        nullable: false,
+    }),
+    organizationId: createColumnFilter({
+        expression: SQL.column(MemberPlatformMembership.table, 'organizationId'),
         type: SQLValueType.String,
         nullable: false,
     }),
@@ -51,22 +59,12 @@ export const platformMembershipFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.Number,
         nullable: false,
     }),
-    organization: createExistsFilter(
-        SQL.select()
-            .from(SQL.table('organizations'))
-            .where(
-                SQL.column('organizations', 'id'),
-                SQL.column(MemberPlatformMembership.table, 'organizationId'),
-            ),
+    organization: createJoinedRelationFilter(
+        organizationJoin,
         organizationFilterCompilers,
     ),
-    member: createExistsFilter(
-        SQL.select()
-            .from(SQL.table('members'))
-            .where(
-                SQL.column('members', 'id'),
-                SQL.column(MemberPlatformMembership.table, 'memberId'),
-            ),
+    member: createJoinedRelationFilter(
+        memberJoin,
         memberFilterCompilers(),
     ),
 };

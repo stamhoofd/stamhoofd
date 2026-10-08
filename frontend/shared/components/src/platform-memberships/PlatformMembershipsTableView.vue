@@ -80,11 +80,7 @@ const configurationId = 'platform-memberships';
 const objectFetcher = usePlatformMemberhipsObjectFetcher({
     requiredFilter: organization.value
         ? {
-                organization: {
-                    $elemMatch: {
-                        id: organization.value.id,
-                    },
-                },
+                organizationId: organization.value.id,
             }
         : null,
 });
