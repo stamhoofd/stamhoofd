@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/redirecter",
-    "version": "2.153.4",
+    "version": "2.153.5",
     "type": "module",
     "main": "index.ts",
     "scripts": {

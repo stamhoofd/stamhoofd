@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/metabase",
-    "version": "2.153.4",
+    "version": "2.153.5",
     "type": "module",
     "sideEffects": false,
     "exports": {
