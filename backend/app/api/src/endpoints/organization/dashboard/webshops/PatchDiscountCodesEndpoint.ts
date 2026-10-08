@@ -65,6 +65,9 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
                 // Saves are not transactional, so refuse the batch before anything is written.
                 // The unique index is case-insensitive.
                 const codes = puts.map(put => put.put.code);
+                if (codes.some(code => code.length === 0)) {
+                    throw emptyCodeError();
+                }
                 const lowercased = codes.map(code => code.toLowerCase());
                 const duplicate = codes.find((_, index) => lowercased.indexOf(lowercased[index]) !== index)
                     ?? (await WebshopDiscountCode.where({ webshopId: webshop.id, code: { sign: 'IN', value: codes } }))[0]?.code;
@@ -117,6 +120,9 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
                 }
 
                 model.code = patchObject(model.code, patch.code);
+                if (model.code.length === 0) {
+                    throw emptyCodeError();
+                }
                 model.description = patchObject(model.description, patch.description);
                 model.email = patchObject(model.email, patch.email);
                 model.discounts = patchObject(model.discounts, patch.discounts);
@@ -156,4 +162,13 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
             discountCodes.map(d => d.getPrivateStructure()),
         );
     }
+}
+
+function emptyCodeError() {
+    return new SimpleError({
+        code: 'invalid_field',
+        field: 'code',
+        message: 'Discount code is empty',
+        human: $t('Vul een code in.'),
+    });
 }

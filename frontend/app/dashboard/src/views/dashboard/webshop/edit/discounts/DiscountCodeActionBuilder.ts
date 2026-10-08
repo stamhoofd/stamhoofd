@@ -162,13 +162,28 @@ export class DiscountCodeActionBuilder {
         }
     }
 
+    /**
+     * EditDiscountCodeView returns a patch of the object it was given, also for a new one.
+     * The server does not merge a patch into a put, so apply it before creating the code.
+     */
+    private createDiscountCode(discountCode: PrivateDiscountCode, patch: PatchableArrayAutoEncoder<PrivateDiscountCode>) {
+        let created = discountCode;
+        for (const change of patch.getPatches()) {
+            if (change.id === discountCode.id) {
+                created = created.patch(change);
+            }
+        }
+
+        const arr: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
+        arr.addPut(created);
+        return this.patchDiscountCodes(arr);
+    }
+
     addDiscountCode() {
         const discountCode = PrivateDiscountCode.create({
             code: '',
             maximumUsage: 1,
         });
-        const arr: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
-        arr.addPut(discountCode);
 
         this.navigationActions.present({
             components: [
@@ -177,8 +192,7 @@ export class DiscountCodeActionBuilder {
                     discountCode,
                     webshop: this.webshop,
                     saveHandler: (patch: PatchableArrayAutoEncoder<PrivateDiscountCode>) => {
-                        arr.merge(patch);
-                        this.patchDiscountCodes(arr).catch(console.error);
+                        this.createDiscountCode(discountCode, patch).catch(console.error);
                     },
                 }),
             ],
@@ -216,8 +230,6 @@ export class DiscountCodeActionBuilder {
 
     duplicateOnce(discountCode: PrivateDiscountCode) {
         const cloned = this.buildClone(discountCode, '');
-        const arr: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
-        arr.addPut(cloned);
 
         this.navigationActions.present({
             components: [
@@ -226,8 +238,7 @@ export class DiscountCodeActionBuilder {
                     discountCode: cloned,
                     webshop: this.webshop,
                     saveHandler: (patch: PatchableArrayAutoEncoder<PrivateDiscountCode>) => {
-                        arr.merge(patch);
-                        this.patchDiscountCodes(arr).catch(console.error);
+                        this.createDiscountCode(cloned, patch).catch(console.error);
                     },
                 }),
             ],

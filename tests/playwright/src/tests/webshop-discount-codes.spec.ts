@@ -71,7 +71,7 @@ test.describe('Webshop discount codes @webshop-discount-codes', () => {
         TestUtils.setPermanentEnvironment('userMode', 'organization');
     });
 
-    test('lists discount codes and saves an email address for a code', async ({ browser }) => {
+    test('creates a code, lists codes and saves an email address for a code', async ({ browser }) => {
         const organization = await createWebshopOrganization('DiscountCodes');
         const { webshop } = await TestWebshops.create({
             organization,
@@ -91,6 +91,23 @@ test.describe('Webshop discount codes @webshop-discount-codes', () => {
         await expect(table.getRow('SPONSOR-2026')).toContainText('sponsor@test.be');
         await expect(table.getRow('FRIENDS')).toContainText('Geen e-mailadres');
 
+        // Create a new code with an email address and one discount
+        await table.clickAction('Nieuw');
+        const newView = page.getByTestId('save-view').filter({ hasText: 'Kortingscode toevoegen' });
+        await newView.getByPlaceholder('Bv. BLACK-FRIDAY').fill('welcome-10');
+        await newView.getByTestId('email-input').fill('welcome@test.be');
+        await newView.getByRole('button', { name: 'Korting toevoegen' }).click();
+        const discountView = page.getByTestId('save-view').filter({ hasText: 'Korting toevoegen' }).last();
+        await discountView.getByTestId('save-button').click();
+        await newView.getByTestId('save-button').click();
+        await expect(newView).not.toBeVisible();
+
+        await expect(table.getRow('WELCOME-10')).toContainText('welcome@test.be');
+        const created = await WebshopDiscountCode.where({ webshopId: webshop.id, code: 'WELCOME-10' });
+        expect(created).toHaveLength(1);
+        expect(created[0].email).toBe('welcome@test.be');
+        expect(created[0].discounts).toHaveLength(1);
+
         // Open the code and add an email address
         await table.getRow('FRIENDS').click();
         const editView = page.getByTestId('save-view').filter({ hasText: 'Kortingscode bewerken' });
@@ -104,11 +121,11 @@ test.describe('Webshop discount codes @webshop-discount-codes', () => {
         const saved = await WebshopDiscountCode.where({ webshopId: webshop.id, code: 'FRIENDS' });
         expect(saved[0].email).toBe('friends@test.be');
 
-        // Both codes now have an email, so both are recipients
+        // All three codes now have an email, so all are recipients
         await table.toggleSelectAllRows();
         await table.clickAction('E-mail versturen');
         await expect(page.getByRole('heading', { name: 'Nieuw bericht' }).first()).toBeVisible();
-        await expect(page.locator('.st-list-item').filter({ hasText: 'Aan:' })).toContainText('2');
+        await expect(page.locator('.st-list-item').filter({ hasText: 'Aan:' })).toContainText('3');
 
         await context.close();
     });

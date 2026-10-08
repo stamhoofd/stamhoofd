@@ -221,6 +221,20 @@ describe('Endpoint.WebshopDiscountCodes', () => {
             .toThrow(STExpect.errorWithCode('invalid_field'));
     });
 
+    test('rejects an empty code', async () => {
+        const putBody: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
+        putBody.addPut(PrivateDiscountCode.create({ code: '' }));
+        await expect(patch(putBody)).rejects.toThrow(STExpect.errorWithCode('invalid_field'));
+
+        const existing = await createDiscountCode({ code: 'EXISTING' });
+        const patchBody: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
+        patchBody.addPatch(PrivateDiscountCode.patch({ id: existing.id, code: '' }));
+        await expect(patch(patchBody)).rejects.toThrow(STExpect.errorWithCode('invalid_field'));
+
+        const codes = await WebshopDiscountCode.where({ webshopId: webshop.id });
+        expect(codes.map(code => code.code)).toEqual(['EXISTING']);
+    });
+
     test('refuses a batch with a duplicate code before writing anything', async () => {
         await createDiscountCode({ code: 'EXISTING' });
 
