@@ -64,7 +64,7 @@ import { sleep } from '@stamhoofd/utility';
 // QR-scanner worker
 import QrScanner from 'qr-scanner';
 
-import { computed, defineProps, onActivated, onBeforeUnmount, onDeactivated, ref } from 'vue';
+import { computed, onActivated, onBeforeUnmount, onDeactivated, ref } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
 import TicketSyncProgressRing from './TicketSyncProgressRing.vue';
 import { useTicketSync } from './useTicketSync';
