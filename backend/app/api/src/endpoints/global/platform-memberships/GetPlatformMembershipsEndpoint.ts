@@ -41,6 +41,11 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
             .setMaxExecutionTime(15 * 1000)
             .where('deletedAt', null);
 
+        // Shared members also have memberships charged to other organizations, with their balance items and payments
+        if (Context.organization) {
+            query.where('organizationId', Context.organization.id);
+        }
+
         // Read access to a member is enough to see their memberships
         if (!Context.auth.canAccessAllPlatformMembers(PermissionLevel.Read)) {
             const memberScopeFilter = await getMemberScopeFilter(PermissionLevel.Read);
