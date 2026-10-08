@@ -7,7 +7,7 @@ import type { EmailInterfaceBase } from '@stamhoofd/email';
 import { Email } from '@stamhoofd/email';
 import { AuditLog, EmailVerificationCode, Organization, OrganizationRegistrationPeriod, RegistrationPeriod, User } from '@stamhoofd/models';
 import { CreateOrganizationResponse } from '@stamhoofd/structures';
-import { AuditLogSource, AuditLogType, CreateOrganization, PermissionLevel, Permissions, SignupResponse, UserPermissions } from '@stamhoofd/structures';
+import { AuditLogSource, AuditLogType, CreateOrganization, OrganizationPackages, PermissionLevel, Permissions, SignupResponse, UitpasClientCredentialsStatus, UserPermissions } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { AuditLogService } from '../../../services/AuditLogService.js';
@@ -92,6 +92,10 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
 
         organization.uri = uri;
         organization.meta = request.body.organization.meta;
+        // Packages are paid for and only set by the billing system
+        organization.meta.packages = OrganizationPackages.create({});
+        // Only set after the credentials were checked by UitpasService
+        organization.meta.uitpasClientCredentialsStatus = UitpasClientCredentialsStatus.NotConfigured;
         organization.address = request.body.organization.address;
         organization.language = request.body.organization.language;
         organization.privateMeta.acquisitionTypes = request.body.organization.privateMeta?.acquisitionTypes ?? [];
