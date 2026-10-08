@@ -65,29 +65,31 @@ export class WebshopTicketsRepo {
     }
 
     private async fetchAllUpdatedNow(onProgress: (progress: SyncProgress) => void): Promise<void> {
-        const totalTickets: TicketPrivate[] = [];
+        let lastTicket = null as TicketPrivate | null;
 
-        const promises: Promise<void>[] = [];
         let stored = Promise.resolve();
 
         const onResultsReceived = async (tickets: TicketPrivate[]): Promise<void> => {
             if (tickets.length) {
-                totalTickets.push(...tickets);
-                const lastTicket = tickets[tickets.length - 1];
-                // Moving the cursor once this page and all pages before it are stored lets an interrupted sync resume here
-                stored = Promise.all([stored, this.store.putAll(tickets)]).then(async () => this.apiClient.state.setCursor(new Date(lastTicket.updatedAt), { isComplete: false }));
-                promises.push(stored);
+                const lastOfPage = tickets[tickets.length - 1];
+                lastTicket = lastOfPage;
+                // Offline lookups (e.g. while scanning) wait for every queued write, so never queue more than one page
+                await stored;
+                stored = this.store.putAll(tickets).then(async () => {
+                    // Moving the cursor once this page and all pages before it are stored lets an interrupted sync resume here
+                    await this.apiClient.state.setCursor(new Date(lastOfPage.updatedAt), { isComplete: false });
+
+                    // deleted tickets get handled in listener
+                    await this.eventBus.sendEvent('fetched', tickets);
+                });
             }
         };
 
         await this.apiClient.getAllUpdated({ isFetchAll: false, onResultsReceived, onProgress });
-        await Promise.all(promises);
+        await stored;
 
-        if (totalTickets.length > 0) {
-            await this.apiClient.state.setCursor(new Date(totalTickets[totalTickets.length - 1].updatedAt), { isComplete: true });
-
-            // deleted tickets get handled in listener
-            await this.eventBus.sendEvent('fetched', totalTickets);
+        if (lastTicket) {
+            await this.apiClient.state.setCursor(new Date(lastTicket.updatedAt), { isComplete: true });
         }
 
         await this.apiClient.state.setCompleted();

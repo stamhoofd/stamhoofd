@@ -249,6 +249,57 @@ async function updateTickets() {
 let readingQR = false;
 const canvas = document.createElement('canvas');
 
+type QrEngine = Awaited<ReturnType<typeof QrScanner.createQrEngine>>;
+
+// Reusing the same worker for every scan randomly breaks on iOS after a certain amount of scans
+const QR_ENGINE_MAX_SCANS = 50;
+let qrEngine: Promise<QrEngine> | null = null;
+let qrEngineScans = 0;
+
+function getQrEngine(): Promise<QrEngine> {
+    if (!qrEngine || qrEngineScans >= QR_ENGINE_MAX_SCANS) {
+        disposeQrEngine();
+        qrEngine = QrScanner.createQrEngine();
+    }
+    qrEngineScans += 1;
+    return qrEngine;
+}
+
+function disposeQrEngine() {
+    const engine = qrEngine;
+    qrEngine = null;
+    qrEngineScans = 0;
+
+    engine?.then((e) => {
+        if (e instanceof Worker) {
+            e.terminate();
+        }
+    }).catch(console.error);
+}
+
+/**
+ * Square in the center of the visible part of the video, in pixels of the camera frame (the video uses object-fit: cover).
+ */
+function getScanRegion(video: HTMLVideoElement): QrScanner.ScanRegion | null {
+    const { videoWidth, videoHeight, offsetWidth, offsetHeight } = video;
+    if (!videoWidth || !videoHeight || !offsetWidth || !offsetHeight) {
+        return null;
+    }
+
+    const displayScale = Math.max(offsetWidth / videoWidth, offsetHeight / videoHeight);
+    const size = Math.min(offsetWidth * 4 / 5 / displayScale, videoWidth, videoHeight);
+    const downScaledSize = Math.min(size, 400);
+
+    return {
+        x: Math.round((videoWidth - size) / 2),
+        y: Math.round((videoHeight - size) / 2),
+        width: Math.round(size),
+        height: Math.round(size),
+        downScaledWidth: Math.round(downScaledSize),
+        downScaledHeight: Math.round(downScaledSize),
+    };
+}
+
 function pollImage() {
     if (videoRef.value === null) {
         return;
@@ -259,29 +310,29 @@ function pollImage() {
         return;
     }
 
+    const scanRegion = getScanRegion(videoRef.value);
+    if (!scanRegion) {
+        return;
+    }
+
     readingQR = true;
 
-    const video = videoRef.value;
-
-    const w = video.offsetWidth;
-    const h = video.offsetHeight;
-
-    const scale = 4 / 5;
-    const size = w * scale;
-
-    QrScanner.scanImage(video, {
-        x: (w - size) / 2,
-        y: (h - size) / 2,
-        width: size,
-        height: size,
-    }, undefined, canvas) // reusing the worker randomly breaks on ios after a certain amount of scans, so currently not using it ? :/
+    QrScanner.scanImage(videoRef.value, {
+        scanRegion,
+        qrEngine: getQrEngine(),
+        canvas,
+        returnDetailedScanResult: true,
+    })
         .then((result) => {
             readingQR = false;
-            validateQR(result);
+            validateQR(result.data);
         })
-        .catch(() => {
-            // ignore
+        .catch((e: unknown) => {
             readingQR = false;
+            if (e !== QrScanner.NO_QR_CODE_FOUND) {
+                console.error(e);
+                disposeQrEngine();
+            }
         });
 }
 
@@ -645,6 +696,7 @@ function stopScanning() {
 
     // Kill stream
     stopStream();
+    disposeQrEngine();
 }
 
 function pauseScanning() {

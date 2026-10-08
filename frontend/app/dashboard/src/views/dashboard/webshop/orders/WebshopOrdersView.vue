@@ -613,9 +613,22 @@ function onNewTickets(tickets: TicketPrivate[]) {
 
     console.log('Received new tickets from network');
 
+    const ticketsByOrder = new Map<string, TicketPrivate[]>();
+    for (const ticket of tickets) {
+        const orderTickets = ticketsByOrder.get(ticket.orderId);
+        if (orderTickets) {
+            orderTickets.push(ticket);
+        } else {
+            ticketsByOrder.set(ticket.orderId, [ticket]);
+        }
+    }
+
     for (const order of tableObjectFetcher.objects) {
-        // also handles deleted tickets
-        order.addTickets(tickets);
+        const orderTickets = ticketsByOrder.get(order.id);
+        if (orderTickets) {
+            // also handles deleted tickets
+            order.addTickets(orderTickets);
+        }
     }
 }
 

@@ -85,7 +85,6 @@ export class WebshopOrdersRepo {
 
         const totalOrders: PrivateOrder[] = [];
 
-        const promises: Promise<void>[] = [];
         let stored = Promise.resolve();
 
         const onResultsReceived = async (orders: PrivateOrder[]) => {
@@ -98,9 +97,10 @@ export class WebshopOrdersRepo {
             if (orders.length) {
                 totalOrders.push(...orders);
                 const lastOrder = orders[orders.length - 1];
+                // Offline lookups (e.g. while scanning) wait for every queued write, so never queue more than one page
+                await stored;
                 // Moving the cursor once this page and all pages before it are stored lets an interrupted sync resume here
-                stored = Promise.all([stored, this.store.putAll(orders)]).then(async () => this.apiClient.state.setCursor(new Date(lastOrder.updatedAt), { isComplete: false }));
-                promises.push(stored);
+                stored = this.store.putAll(orders).then(async () => this.apiClient.state.setCursor(new Date(lastOrder.updatedAt), { isComplete: false }));
             }
         };
 
@@ -119,7 +119,7 @@ export class WebshopOrdersRepo {
         }
 
         // wait until all orders have been stored
-        await Promise.all(promises);
+        await stored;
 
         if (totalOrders.length > 0) {
             await this.apiClient.state.setCursor(new Date(totalOrders[totalOrders.length - 1].updatedAt), { isComplete: true });
