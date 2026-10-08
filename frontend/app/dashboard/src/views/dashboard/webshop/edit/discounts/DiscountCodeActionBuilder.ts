@@ -12,11 +12,12 @@ import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '@stamhoo
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { PrivateWebshop } from '@stamhoofd/structures';
-import { CountFilteredRequest, DiscountCode, EmailRecipientSubfilter, LimitedFilteredRequest, mergeFilters, PrivateDiscountCode, SortItemDirection } from '@stamhoofd/structures';
+import { CountFilteredRequest, DiscountCode, EmailRecipientSubfilter, ExcelExportType, LimitedFilteredRequest, mergeFilters, PrivateDiscountCode, SortItemDirection } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { generateDiscountCode } from './discountCodeGenerator';
+import { getSelectableWorkbook } from './getSelectableWorkbook';
 
 export class DiscountCodeActionBuilder {
     navigationActions: NavigationActions;
@@ -70,10 +71,20 @@ export class DiscountCodeActionBuilder {
                     await this.openMail(selection);
                 },
             }),
+            new AsyncTableAction({
+                name: $t('%V8'),
+                icon: 'download',
+                priority: 7,
+                groupIndex: 1,
+                allowAutoSelectAll: true,
+                handler: async (selection: TableActionSelection<PrivateDiscountCode>) => {
+                    await this.exportToExcel(selection);
+                },
+            }),
             new InMemoryTableAction({
                 name: $t('Bewerken'),
                 icon: 'edit',
-                priority: 7,
+                priority: 6,
                 groupIndex: 1,
                 needsSelection: true,
                 singleSelection: true,
@@ -84,7 +95,7 @@ export class DiscountCodeActionBuilder {
             new MenuTableAction({
                 name: $t('Dupliceren'),
                 icon: 'copy',
-                priority: 6,
+                priority: 5,
                 groupIndex: 2,
                 needsSelection: true,
                 singleSelection: true,
@@ -112,7 +123,7 @@ export class DiscountCodeActionBuilder {
             new InMemoryTableAction({
                 name: $t('Kopieer instellingen naar...'),
                 icon: 'sync',
-                priority: 5,
+                priority: 4,
                 groupIndex: 2,
                 needsSelection: true,
                 singleSelection: true,
@@ -325,6 +336,30 @@ export class DiscountCodeActionBuilder {
             arr.addDelete(discountCode.id);
         }
         await this.patchDiscountCodes(arr);
+    }
+
+    async exportToExcel(selection: TableActionSelection<PrivateDiscountCode>) {
+        await this.navigationActions.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
+                        type: ExcelExportType.WebshopDiscountCodes,
+                        filter: new LimitedFilteredRequest({
+                            filter: mergeFilters([selection.filter.filter, {
+                                webshopId: this.webshop.id,
+                            }]),
+                            search: selection.filter.search,
+                            sort: selection.filter.sort,
+                            limit: selection.filter.limit,
+                        }),
+                        workbook: getSelectableWorkbook(),
+                        configurationId: 'webshop-discount-codes',
+                        title: this.webshop.meta.name + ' - ' + $t('Kortingscodes'),
+                    }),
+                }),
+            ],
+            modalDisplayStyle: 'popup',
+        });
     }
 
     async openMail(selection: TableActionSelection<PrivateDiscountCode>) {

@@ -11,6 +11,8 @@ import type { User, Webshop } from '@stamhoofd/models';
 import { Organization, OrganizationFactory, UserFactory, WebshopDiscountCode } from '@stamhoofd/models';
 import { Discount, PermissionLevel, Permissions, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
+import { readFile } from 'node:fs/promises';
+import XLSX from 'xlsx';
 import { DashboardPage, DashboardTab, TableHelper, WorkerData } from '../helpers/index.js';
 import { TestWebshops } from '../helpers/test-data/TestWebshops.js';
 
@@ -179,6 +181,32 @@ test.describe('Webshop discount codes @webshop-discount-codes', () => {
         expect(updatedFriends).toHaveLength(1);
         expect(updatedFriends[0].id).toBe(friends.id);
         expect(updatedFriends[0].description).toBe('Vrienden');
+
+        // Export all codes with the same columns the import reads
+        await table.toggleSelectAllRows();
+        await table.clickAction('Exporteer naar Excel');
+        const exportView = page.getByTestId('save-view').filter({ has: page.getByRole('heading', { name: 'Exporteren naar Excel' }) });
+        await exportView.getByTestId('save-button').click();
+
+        // The file is prepared on the server and offered in a toast
+        const downloadPromise = page.waitForEvent('download');
+        await page.locator('.toast-view').filter({ hasText: 'Downloaden' }).click();
+        const download = await downloadPromise;
+        expect(await download.failure()).toBeNull();
+        const exportPath = test.info().outputPath('discount-codes.xlsx');
+        await download.saveAs(exportPath);
+
+        const workbook = XLSX.read(await readFile(exportPath));
+        const rows = XLSX.utils.sheet_to_json<(string | number | undefined)[]>(workbook.Sheets['Kortingscodes'], { header: 1 });
+        const headerIndex = rows.findIndex(row => row.includes('Code'));
+        const headers = rows[headerIndex];
+        expect(headers).toEqual(['Code', 'E-mailadres', 'Omschrijving', 'Maximum aantal keer gebruikt']);
+        const data = rows.slice(headerIndex + 1).filter(row => row.length > 0);
+        expect(data).toHaveLength(3);
+        const sponsorRow = data.find(row => row[0] === 'SPONSOR-2026')!;
+        expect(sponsorRow).toEqual(['SPONSOR-2026', 'sponsor@test.be', 'Hoofdsponsor', 5]);
+        const friendsRow = data.find(row => row[0] === 'FRIENDS')!;
+        expect(friendsRow.slice(0, 3)).toEqual(['FRIENDS', '', 'Vrienden']);
 
         await context.close();
     });

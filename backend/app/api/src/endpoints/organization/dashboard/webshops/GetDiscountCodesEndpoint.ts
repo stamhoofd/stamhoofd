@@ -1,6 +1,7 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { Webshop, WebshopDiscountCode } from '@stamhoofd/models';
 import type { CountFilteredRequest, PrivateDiscountCode, StamhoofdFilter } from '@stamhoofd/structures';
 import { assertSort, LimitedFilteredRequest, PaginatedResponse, PermissionLevel } from '@stamhoofd/structures';
@@ -19,7 +20,7 @@ type ResponseBody = PaginatedResponse<PrivateDiscountCode[], LimitedFilteredRequ
 
 const filterCompilers: SQLFilterDefinitions = discountCodeFilterCompilers;
 const sorters: SQLSortDefinitions<WebshopDiscountCode> = discountCodeSorters;
-type QueryScope = { webshopId?: string };
+type QueryScope = { webshopId?: string; webshopIds?: string[] };
 
 export class GetWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>;
@@ -37,6 +38,30 @@ export class GetWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, Bod
         return [false];
     }
 
+    /**
+     * Codes are secrets, so loaders that take the webshop from a client-supplied filter limit the
+     * query to the webshops the user fully manages.
+     */
+    static async getManagedWebshopIds(): Promise<string[]> {
+        const organization = Context.organization;
+        if (!organization) {
+            throw new SimpleError({
+                code: 'missing_organization',
+                message: 'Discount codes are scoped to an organization',
+                statusCode: 400,
+            });
+        }
+
+        const webshops = await Webshop.where({ organizationId: organization.id });
+        const ids: string[] = [];
+        for (const webshop of webshops) {
+            if (await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
+                ids.push(webshop.id);
+            }
+        }
+        return ids;
+    }
+
     static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest, scope: QueryScope = {}) {
         const organization = Context.organization!;
         const table = WebshopDiscountCode.table;
@@ -51,6 +76,14 @@ export class GetWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, Bod
         if (scope.webshopId) {
             query.where(await compileToSQLFilter({
                 webshopId: scope.webshopId,
+            }, filterCompilers));
+        }
+
+        if (scope.webshopIds) {
+            query.where(await compileToSQLFilter({
+                webshopId: {
+                    $in: scope.webshopIds,
+                },
             }, filterCompilers));
         }
 
