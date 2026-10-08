@@ -120,6 +120,7 @@ test.describe('Webshop discount codes @webshop-discount-codes', () => {
             name: `Discount codes import ${WorkerData.id}`,
         });
         const existing = await createDiscountCode(webshop, { code: 'SPONSOR-2026', email: 'sponsor@test.be' });
+        const friends = await createDiscountCode(webshop, { code: 'FRIENDS', email: null });
 
         const admin = await createAdmin(organization);
         const context = await browser.newContext();
@@ -135,7 +136,7 @@ test.describe('Webshop discount codes @webshop-discount-codes', () => {
         await importView.locator('input[type="file"]').setInputFiles({
             name: 'codes.csv',
             mimeType: 'text/csv',
-            buffer: Buffer.from('E-mailadres,Code,Omschrijving,Maximum\nsponsor@test.be,,Hoofdsponsor,5\nnew@test.be,NEW-CODE,Nieuwe sponsor,\n', 'utf-8'),
+            buffer: Buffer.from('E-mailadres,Code,Omschrijving,Maximum\nsponsor@test.be,,Hoofdsponsor,5\nnew@test.be,NEW-CODE,Nieuwe sponsor,\n,friends,Vrienden,\n', 'utf-8'),
         });
 
         // The columns are matched on their header
@@ -145,6 +146,7 @@ test.describe('Webshop discount codes @webshop-discount-codes', () => {
 
         await expect(table.getRow('NEW-CODE')).toContainText('new@test.be');
         await expect(table.getRow('SPONSOR-2026')).toContainText('Hoofdsponsor');
+        await expect(table.getRow('FRIENDS')).toContainText('Vrienden');
 
         const updated = await WebshopDiscountCode.getByID(existing.id);
         expect(updated?.code).toBe('SPONSOR-2026');
@@ -154,6 +156,12 @@ test.describe('Webshop discount codes @webshop-discount-codes', () => {
         const created = await WebshopDiscountCode.where({ webshopId: webshop.id, code: 'NEW-CODE' });
         expect(created[0].email).toBe('new@test.be');
         expect(created[0].maximumUsage).toBeNull();
+
+        // A row with an existing code updates that code instead of creating a duplicate
+        const updatedFriends = await WebshopDiscountCode.where({ webshopId: webshop.id, code: 'FRIENDS' });
+        expect(updatedFriends).toHaveLength(1);
+        expect(updatedFriends[0].id).toBe(friends.id);
+        expect(updatedFriends[0].description).toBe('Vrienden');
 
         await context.close();
     });

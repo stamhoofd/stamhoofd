@@ -480,6 +480,7 @@ async function save() {
             if (existing) {
                 patch.addPatch(PrivateDiscountCode.patch({
                     id: existing.id,
+                    code: row.code ?? existing.code,
                     email: row.email ?? existing.email,
                     description: row.description,
                     maximumUsage: row.maximumUsage,

@@ -227,7 +227,7 @@ describe('Endpoint.WebshopDiscountCodes', () => {
         const withinBatch: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
         withinBatch.addPut(PrivateDiscountCode.create({ code: 'NEW-1' }));
         withinBatch.addPut(PrivateDiscountCode.create({ code: 'NEW-2' }));
-        withinBatch.addPut(PrivateDiscountCode.create({ code: 'NEW-1' }));
+        withinBatch.addPut(PrivateDiscountCode.create({ code: 'new-1' }));
         await expect(patch(withinBatch)).rejects.toThrow(STExpect.errorWithCode('used_code'));
 
         const againstExisting: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();

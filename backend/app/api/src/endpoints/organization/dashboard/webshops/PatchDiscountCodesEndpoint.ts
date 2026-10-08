@@ -62,9 +62,11 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
                     });
                 }
 
-                // Saves are not transactional, so refuse the batch before anything is written
+                // Saves are not transactional, so refuse the batch before anything is written.
+                // The unique index is case-insensitive.
                 const codes = puts.map(put => put.put.code);
-                const duplicate = codes.find((code, index) => codes.indexOf(code) !== index)
+                const lowercased = codes.map(code => code.toLowerCase());
+                const duplicate = codes.find((_, index) => lowercased.indexOf(lowercased[index]) !== index)
                     ?? (await WebshopDiscountCode.where({ webshopId: webshop.id, code: { sign: 'IN', value: codes } }))[0]?.code;
 
                 if (duplicate !== undefined) {
