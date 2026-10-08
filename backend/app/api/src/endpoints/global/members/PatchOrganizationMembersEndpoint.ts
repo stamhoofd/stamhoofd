@@ -146,6 +146,15 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             let member = new Member()
                 .setManyRelation(Member.registrations as any as OneToManyRelation<'registrations', Member, Registration & { group: Group }>, [])
                 .setManyRelation(Member.users, []);
+            if (await Member.getByID(struct.id)) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: 'A member with this id already exists',
+                    human: $t('Er bestaat al een lid met dit ID'),
+                    field: 'id',
+                    statusCode: 400,
+                });
+            }
             member.id = struct.id;
 
             if (organization && STAMHOOFD.userMode !== 'platform') {
@@ -165,10 +174,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 // Merge data
                 member = duplicate;
             }
-
-            // We risk creating a new member without being able to access it manually afterwards
-            // Cache access to this member temporarily in memory
-            await Context.auth.temporarilyGrantMemberAccess(member, PermissionLevel.Full);
 
             if (STAMHOOFD.userMode !== 'platform' && !member.organizationId) {
                 throw new SimpleError({
@@ -197,6 +202,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             } catch (error) {
                 PatchOrganizationMembersEndpoint.throwDuplicateMemberNumberError(error);
             }
+
+            // We risk creating a new member without being able to access it manually afterwards
+            // Cache access to this member temporarily in memory. Only after a successful save: the id is chosen by the client.
+            await Context.auth.temporarilyGrantMemberAccess(member, PermissionLevel.Full);
+
             members.push(member);
             updateMembershipMemberIds.add(member.id);
 

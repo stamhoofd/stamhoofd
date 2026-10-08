@@ -16,6 +16,7 @@ import { UniqueMemberNumberService } from '../../../services/UniqueMemberNumberS
 import { PatchOrganizationMembersEndpoint } from './PatchOrganizationMembersEndpoint.js';
 import { SessionService } from '../../../services/SessionService.js';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer.js';
+import { hasTemporaryMemberAccess } from '../../../helpers/TemporaryMemberAccess.js';
 
 const baseUrl = `/organization/members`;
 const endpoint = new PatchOrganizationMembersEndpoint();
@@ -795,6 +796,145 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             // Not changed
             expect(member.details.firstName).toEqual(firstName);
+        });
+
+        test('[REGRESSION] A failed PUT with the id of an existing member does not grant temporary access to that member', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const resources = new Map();
+
+            const group = await new GroupFactory({
+                organization,
+            }).create();
+
+            const otherGroup = await new GroupFactory({
+                organization,
+            }).create();
+
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    group.id,
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Write,
+                    }),
+                ]]),
+            );
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources,
+                }),
+                organization, // since we are in platform mode, this will only set the permissions for this organization
+            }).create();
+
+            const victim = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: true,
+                generateSensitiveData: true,
+            }).create();
+
+            await new RegistrationFactory({
+                member: victim,
+                group: otherGroup,
+            }).create();
+
+            const token = await SessionService.createSession(user);
+
+            // No birthday, so the duplicate check is skipped
+            const arr: Body = new PatchableArray();
+            arr.addPut(MemberWithRegistrationsBlob.create({
+                id: victim.id,
+                details: MemberDetails.create({
+                    firstName: 'x',
+                    lastName: 'y',
+                }),
+            }));
+
+            const putRequest = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            putRequest.headers.authorization = 'Bearer ' + token.accessToken;
+            const putError = await testServer.test(endpoint, putRequest).then(() => null, (e: unknown) => e);
+            expect(putError).not.toBeNull();
+
+            // The access assertions below guard the vulnerability, whatever error the PUT produced
+            expect(hasTemporaryMemberAccess(user.id, victim.id, PermissionLevel.Read)).toBe(false);
+
+            const patchArr: Body = new PatchableArray();
+            patchArr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: victim.id,
+                details: MemberDetails.patch({
+                    email: 'attacker@example.com',
+                }),
+            }));
+
+            const patchRequest = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), patchArr);
+            patchRequest.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, patchRequest)).rejects.toThrow(STExpect.errorWithCode('not_found'));
+
+            await victim.refresh();
+            expect(victim.details.firstName).toEqual(firstName);
+            expect(victim.details.email).not.toEqual('attacker@example.com');
+
+            expect(putError).toEqual(STExpect.errorWithCode('invalid_field'));
+        });
+
+        test('A limited admin can patch a member it created in an earlier request', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const resources = new Map();
+
+            const group = await new GroupFactory({
+                organization,
+            }).create();
+
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    group.id,
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Write,
+                    }),
+                ]]),
+            );
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources,
+                }),
+                organization, // since we are in platform mode, this will only set the permissions for this organization
+            }).create();
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            const put = MemberWithRegistrationsBlob.create({
+                details: MemberDetails.create({
+                    firstName,
+                    lastName,
+                    birthDay: new Date(1993, 3, 5),
+                }),
+            });
+            arr.addPut(put);
+
+            const putRequest = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            putRequest.headers.authorization = 'Bearer ' + token.accessToken;
+            const putResponse = await testServer.test(endpoint, putRequest);
+            expect(putResponse.body.members.length).toBe(1);
+            const memberId = putResponse.body.members[0].id;
+
+            // The member has no registrations yet, so only the temporary access can grant this
+            const patchArr: Body = new PatchableArray();
+            patchArr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: memberId,
+                details: MemberDetails.patch({
+                    firstName: 'Changed',
+                }),
+            }));
+
+            const patchRequest = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), patchArr);
+            patchRequest.headers.authorization = 'Bearer ' + token.accessToken;
+            const patchResponse = await testServer.test(endpoint, patchRequest);
+            expect(patchResponse.body.members[0].details.firstName).toBe('Changed');
         });
 
         test('A full platform admin can edit members without registrations', async () => {
