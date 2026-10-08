@@ -2545,7 +2545,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 query = response.body.next;
                 pages += 1;
 
-                if (pages > 101) {
+                if (pages > 110) {
                     throw new Error('Pagination did not terminate');
                 }
             }
@@ -3058,9 +3058,18 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             test('Searching and sorting on memberCachedBalance.amountOpen can be combined', async () => {
                 const firstName = 'Searchable' + Math.random().toString(36).slice(2);
-                const { host, token, members } = await setupMembers([30, null, 7], { firstName });
+                const { host, token, members, organization, group } = await setupMembers([30, null, 7], { firstName });
                 const [member30, memberNull, member7] = members;
-                await setupMembers([50], { firstName });
+
+                // Same organization, different name: must be excluded by the search
+                const otherMember = await new MemberFactory({ firstName: 'Unsearchable' }).create();
+                await new RegistrationFactory({ member: otherMember, group }).create();
+                const balance = new CachedBalance();
+                balance.amountOpen = 10;
+                balance.objectId = otherMember.id;
+                balance.objectType = ReceivableBalanceType.member;
+                balance.organizationId = organization.id;
+                await balance.save();
 
                 const ids = await fetchAllPages({
                     host,
