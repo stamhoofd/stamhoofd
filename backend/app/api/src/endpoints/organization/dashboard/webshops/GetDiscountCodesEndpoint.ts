@@ -105,7 +105,7 @@ export class GetWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, Bod
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            applySQLSorter(query, q.sort, sorters);
+            await applySQLSorter(query, q.sort, sorters);
             query.limit(q.limit);
         }
 
