@@ -5,9 +5,10 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, Member, MemberPlatformMembership, Organization } from '@stamhoofd/models';
 import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
-import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PlatformMembershipMemberDetails, PlatformMembership, PlatformMembershipOrganizationDetails } from '@stamhoofd/structures';
+import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, PlatformMembershipMemberDetails, PlatformMembership, PlatformMembershipOrganizationDetails } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from '../../../helpers/Context.js';
+import { getMemberScopeFilter } from '../members/helpers/getMemberScopeFilter.js';
 import { platformMembershipFilterCompilers } from '../../../sql-filters/platform-memberships.js';
 import { platformMembershipSorters } from '../../../sql-sorters/platform-memberships.js';
 
@@ -36,13 +37,23 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
     }
 
     static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
-        if (!Context.auth.hasPlatformFullAccess()) {
-            throw Context.auth.error();
-        }
-
         const query = MemberPlatformMembership.select()
             .setMaxExecutionTime(15 * 1000)
             .where('deletedAt', null);
+
+        // Shared members also have memberships charged to other organizations, with their balance items and payments
+        if (Context.organization) {
+            query.where('organizationId', Context.organization.id);
+        }
+
+        // Read access to a member is enough to see their memberships
+        if (!Context.auth.canAccessAllPlatformMembers(PermissionLevel.Read)) {
+            const memberScopeFilter = await getMemberScopeFilter(PermissionLevel.Read);
+
+            if (memberScopeFilter) {
+                query.where(await compileToSQLFilter({ member: memberScopeFilter }, filterCompilers));
+            }
+        }
 
         if (q.filter) {
             query.where(await compileToSQLFilter(q.filter, filterCompilers));
@@ -60,6 +71,17 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
+
+            // The price is hidden without financial access, but the sort order would still reveal it
+            if (q.sort.some(s => s.key === 'price') && !await Context.auth.hasFinancialScopeAccess()) {
+                throw new SimpleError({
+                    code: 'permission_denied',
+                    message: 'No permissions to sort on the price of a platform membership',
+                    human: $t(`%G2`),
+                    statusCode: 400,
+                });
+            }
+
             await applySQLSorter(query, q.sort, sorters);
             query.limit(q.limit);
         }
@@ -182,11 +204,8 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
+        await Context.setOptionalOrganizationScope();
         await Context.authenticate();
-
-        if (!Context.auth.hasPlatformFullAccess()) {
-            throw Context.auth.error();
-        }
 
         const maxLimit = 1000;
 
