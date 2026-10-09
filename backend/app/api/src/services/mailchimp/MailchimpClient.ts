@@ -7,7 +7,6 @@ import type { MailchimpExistingContact, MailchimpTagChange } from './planSync.js
  */
 const MAX_CONCURRENCY = 5;
 const MAX_RETRIES = 5;
-const MAX_RETRY_AFTER_SECONDS = 60;
 const PAGE_SIZE = 1000;
 
 /**
@@ -71,6 +70,11 @@ export class MailchimpClient {
      */
     static retryDelay = 1000;
 
+    /**
+     * Cap on Retry-After: a large value would keep the organization's queue busy for hours
+     */
+    static maxRetryAfterSeconds = 60;
+
     constructor(apiKey: string) {
         const key = apiKey.trim();
         const match = /^[0-9a-f]{16,}-([a-z]{2,4}\d{1,3})$/i.exec(key);
@@ -123,9 +127,8 @@ export class MailchimpClient {
             }
 
             if ((response.status === 429 || response.status >= 500) && attempt < MAX_RETRIES) {
-                // Capped: a large Retry-After would keep the organization's queue busy for hours
                 const retryAfter = parseInt(response.headers.get('Retry-After') ?? '');
-                await sleep(Number.isFinite(retryAfter) ? Math.min(retryAfter, MAX_RETRY_AFTER_SECONDS) * 1000 : MailchimpClient.retryDelay * 2 ** attempt);
+                await sleep(Number.isFinite(retryAfter) ? Math.min(retryAfter, MailchimpClient.maxRetryAfterSeconds) * 1000 : MailchimpClient.retryDelay * 2 ** attempt);
                 continue;
             }
 

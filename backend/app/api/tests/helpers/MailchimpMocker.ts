@@ -36,6 +36,11 @@ export class MailchimpMocker {
 
     requests: { method: string; path: string; body: unknown }[] = [];
 
+    /**
+     * Responses returned before normal handling, one per request (e.g. a 429 with Retry-After)
+     */
+    forcedResponses: { status: number; body: unknown; headers?: Record<string, string> }[] = [];
+
     addList(id: string, name: string, members: Partial<MockedMailchimpMember>[] = []) {
         const list: MockedMailchimpList = {
             id,
@@ -66,6 +71,7 @@ export class MailchimpMocker {
         this.lists = [];
         this.forgotten = new Set();
         this.requests = [];
+        this.forcedResponses = [];
     }
 
     start() {
@@ -76,6 +82,11 @@ export class MailchimpMocker {
         for (const method of ['get', 'put', 'post', 'delete'] as const) {
             scope[method](/^\/3\.0\//).query(true).reply(function (uri, body) {
                 const authorization = this.req.headers.authorization as string | undefined;
+                const forced = mocker.forcedResponses.shift();
+                if (forced) {
+                    mocker.requests.push({ method: method.toUpperCase(), path: uri, body });
+                    return [forced.status, forced.body, forced.headers ?? {}];
+                }
                 return mocker.handle(method.toUpperCase(), uri, body, authorization);
             });
         }
