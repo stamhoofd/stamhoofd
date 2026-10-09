@@ -20,7 +20,10 @@
                 </div>
 
                 <div class="status-bar">
-                    <p v-if="isCatchingUp" data-testid="ticket-scanner-catching-up">
+                    <p v-if="isFetchingFromServer" data-testid="ticket-scanner-checking-ticket">
+                        <Spinner class="inline" /> {{ $t('Ticket controleren...') }}
+                    </p>
+                    <p v-else-if="isCatchingUp" data-testid="ticket-scanner-catching-up">
                         <TicketSyncProgressRing class="inline" :progress-percentage="progressPercentage" /> {{ $t('%Zti') }}<br><span class="style-description-small">{{ $t('%Ztj') }}</span>
                     </p>
                     <p v-else-if="isLoading">
@@ -113,6 +116,7 @@ const videoRef = ref<HTMLVideoElement | null>(null);
 const rootRef = ref<HTMLElement | null>(null);
 
 const checkingTicket = ref(false);
+const isFetchingFromServer = ref(false);
 // Disable scanning before this dat
 const cooldown = ref<Date | null>(null);
 const cooldownResult = ref<string | null>(null);
@@ -454,15 +458,22 @@ async function checkTicket(result: string) {
     // Fetch ticket from database
     try {
         const ticket = await getTicket(secret);
-        if (ticket === null) {
+        if (ticket === 'notDownloaded') {
             notYetDownloadedTicket();
             return;
         }
+        if (ticket === 'notChecked') {
+            notCheckedTicket();
+            return;
+        }
 
-        if (ticket) {
+        if (ticket !== 'invalid') {
             const orderId = ticket.orderId;
-            const order = await props.webshopManager.orders.get(orderId)
-                ?? (await fetchIfOnline(async () => props.webshopManager.orders.fetchById(orderId)))?.result;
+            let order = await props.webshopManager.orders.get(orderId);
+            if (!order) {
+                const fetched = await fetchIfOnline(async () => props.webshopManager.orders.fetchById(orderId));
+                order = typeof fetched === 'object' ? fetched.result : undefined;
+            }
             if (!order && mightMissTickets.value) {
                 notYetDownloadedTicket();
             } else if (!order) {
@@ -503,32 +514,44 @@ async function checkTicket(result: string) {
 
 /**
  * Get the ticket from the offline database, or from the server if it is not stored (e.g. sold after the last download).
- * @returns null when the ticket might not be downloaded yet and there is no internet connection
+ * - notDownloaded: not stored, but the download is not complete and the server could not be reached
+ * - notChecked: not stored, and the server could not be reached although the device has a connection (e.g. too slow)
  */
-async function getTicket(secret: string): Promise<TicketPrivate | undefined | null> {
+async function getTicket(secret: string): Promise<TicketPrivate | 'invalid' | 'notDownloaded' | 'notChecked'> {
     const ticket = await props.webshopManager.tickets.get(secret);
     if (ticket) {
         return ticket;
     }
 
     const fetched = await fetchIfOnline(async () => props.webshopManager.tickets.fetchBySecret(secret));
-    if (fetched) {
-        return fetched.result;
+    if (typeof fetched === 'object') {
+        return fetched.result ?? 'invalid';
     }
-    return mightMissTickets.value ? null : undefined;
+    if (mightMissTickets.value) {
+        return 'notDownloaded';
+    }
+    return fetched === 'offline' ? 'invalid' : 'notChecked';
 }
 
 /**
- * @returns null when there is no internet connection
+ * @returns offline when the device has no connection, failed when the request failed because of the connection
  */
-async function fetchIfOnline<T>(fetch: () => Promise<T>): Promise<{ result: T } | null> {
+async function fetchIfOnline<T>(fetch: () => Promise<T>): Promise<{ result: T } | 'offline' | 'failed'> {
+    // Only reliable when false: when true, the connection can still be unusable
+    if (!navigator.onLine) {
+        return 'offline';
+    }
+
+    isFetchingFromServer.value = true;
     try {
         return { result: await fetch() };
     } catch (e) {
         if (Request.isNetworkError(e as Error)) {
-            return null;
+            return 'failed';
         }
         throw e;
+    } finally {
+        isFetchingFromServer.value = false;
     }
 }
 
@@ -567,6 +590,11 @@ function disabledTicket(product: Product, scannedAt: Date | null) {
     // TODO: show invalid ticket
     new Toast('Dit is een ticket voor: ' + product.name + (scannedAt ? ', en werd bovendien al eens gescand.' : ''), 'error red').show();
     AppManager.shared.hapticError();
+}
+
+function notCheckedTicket() {
+    new Toast($t('Dit ticket staat nog niet op dit toestel en kon niet online gecontroleerd worden door een trage internetverbinding. Probeer opnieuw.'), 'warning yellow').show();
+    AppManager.shared.hapticWarning();
 }
 
 function notYetDownloadedTicket() {

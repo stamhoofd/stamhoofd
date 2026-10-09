@@ -8,7 +8,7 @@ import type { Organization, User, Webshop } from '@stamhoofd/models';
 import { Order, OrderFactory, OrganizationFactory, RegistrationPeriodFactory, Ticket, TicketFactory, UserFactory } from '@stamhoofd/models';
 import { AccessRight, Cart, CartItem, Customer, OrderData, OrderStatus, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, UserPermissions, WebshopTicketType } from '@stamhoofd/structures';
 import { WorkerData } from '../helpers/index.js';
-import { getTicketUrl, TicketScannerDevice, toOfflineTickets } from '../helpers/page/webshop/TicketScannerDevice.js';
+import { getTicketUrl, isTicketLookup, TicketScannerDevice, toOfflineTickets } from '../helpers/page/webshop/TicketScannerDevice.js';
 import { TestWebshops } from '../helpers/test-data/TestWebshops.js';
 
 // Tagged @extra so it is excluded from the default (CI) run. Run it with: pnpm stam test e2e --extra --grep @ticket-scanner
@@ -280,6 +280,167 @@ test.describe('Ticket scanner @ticket-scanner @extra', () => {
     });
 
     test.describe('Offline', () => {
+        test('Should recognize downloaded tickets without internet and reject tickets that are not downloaded', async ({ browser, storageState }) => {
+            const webshop = await createTicketWebshop('Zonder internet');
+            const downloaded = await createTicket(webshop);
+
+            const device = await TicketScannerDevice.create({ browser, storageState, organization, webshop });
+            await device.openScanner();
+            await device.waitUntilReady();
+
+            const soldAfterDownload = await createTicket(webshop);
+            await device.goOffline();
+            await device.reportNoConnection();
+
+            await device.scan(downloaded);
+            await device.expectRejected(getTicketUrl(soldAfterDownload), $t('Ongeldig ticket'));
+        });
+
+        test('Should tell that a ticket could not be checked when looking it up takes too long', async ({ browser, storageState }) => {
+            const webshop = await createTicketWebshop('Te traag');
+            await createTicket(webshop);
+
+            const device = await TicketScannerDevice.create({ browser, storageState, organization, webshop });
+            await device.openScanner();
+            await device.waitUntilReady();
+
+            const soldAfterDownload = await createTicket(webshop);
+            // Never answered
+            await device.page.route(url => isTicketLookup(url), () => {});
+
+            await device.showToCamera(getTicketUrl(soldAfterDownload));
+            await expect(device.scannerView.getByTestId('ticket-scanner-checking-ticket')).toBeVisible();
+            // Otherwise the scanner looks it up again after its cooldown
+            await device.showToCamera(null);
+            await expect(device.page.locator('.toast-view').filter({ hasText: $t('Dit ticket staat nog niet op dit toestel en kon niet online gecontroleerd worden door een trage internetverbinding. Probeer opnieuw.') }))
+                .toBeVisible({ timeout: 8_000 });
+            await expect(device.scannerView.getByTestId('ticket-scanner-checking-ticket')).toBeHidden();
+            await expect(device.page.getByTestId('valid-ticket-view')).toHaveCount(0);
+        });
+
+        test('Should warn that a ticket might not be downloaded yet when the first download did not finish', async ({ browser, storageState }) => {
+            test.setTimeout(120_000);
+
+            const webshop = await createTicketWebshop('Onvolledige download');
+            const tickets = await createManyTickets(webshop, 150);
+
+            const device = await TicketScannerDevice.create({ browser, storageState, organization, webshop });
+            // The connection drops after the first page. Every later download (also a resumed one) fails.
+            let isFirstPage = true;
+            await device.page.route(url => url.pathname.endsWith('/webshop/tickets/private') && !isTicketLookup(url), async (route) => {
+                if (isFirstPage) {
+                    isFirstPage = false;
+                    await route.continue();
+                    return;
+                }
+                await route.abort('internetdisconnected');
+            });
+            await device.openScanner();
+            await expect(device.scannerView).toContainText($t('%Ztp'), { timeout: 30_000 });
+            await device.goOffline();
+
+            await device.scan(tickets[0]);
+            await device.expectRejected(getTicketUrl(tickets[149]), $t('%Zth'));
+        });
+
+        test('Should show that there is no internet until it is back, and save the scans made in the meantime', async ({ browser, storageState }) => {
+            const webshop = await createTicketWebshop('Internet terug');
+            const ticket = await createTicket(webshop);
+
+            const device = await TicketScannerDevice.create({ browser, storageState, organization, webshop });
+            // The scanner checks the connection every 30 seconds
+            await device.page.clock.install();
+            await device.page.clock.resume();
+            await device.openScanner();
+            await device.waitUntilReady();
+
+            await device.goOffline();
+            await device.page.clock.fastForward(30_000);
+            await device.page.clock.resume();
+            await expect(device.scannerView).toContainText($t('%Vq'));
+
+            await device.scan(ticket);
+            await expect(device.scannerView).toContainText($t('%Vq'));
+            expect(await device.countOffline('ticketPatches')).toBe(1);
+
+            await device.goOnline();
+            await device.page.clock.fastForward(30_000);
+            await device.page.clock.resume();
+            await expect(device.scannerView).not.toContainText($t('%Vq'));
+            await device.waitUntilReady();
+
+            await expectScannedOnServer(ticket, true);
+            await expect.poll(async () => device.countOffline('ticketPatches')).toBe(0);
+        });
+
+        test('Should save a scan that was undone without internet', async ({ browser, storageState }) => {
+            const webshop = await createTicketWebshop('Offline ongedaan');
+            const ticket = await createTicket(webshop);
+
+            const device = await TicketScannerDevice.create({ browser, storageState, organization, webshop });
+            await device.openScanner();
+            await device.waitUntilReady();
+            await device.scan(ticket);
+            await expectScannedOnServer(ticket, true);
+
+            await device.goOffline();
+            await device.expectAlreadyScanned(ticket);
+            await device.page.getByTestId('ticket-already-scanned-view').getByRole('button', { name: $t('%Vy') }).click();
+            await device.page.getByTestId('valid-ticket-view').getByTestId('cancel-scan-button').click();
+            await expect(device.page.getByTestId('valid-ticket-view')).toBeHidden();
+            await device.dismissToasts();
+            expect(await device.countOffline('ticketPatches')).toBe(1);
+
+            await device.goOnline();
+            await device.reopenScanner();
+            await expectScannedOnServer(ticket, false);
+            await expect.poll(async () => device.countOffline('ticketPatches')).toBe(0);
+            await device.expectValid(ticket);
+        });
+
+        test('Should not look up a ticket on the server when the device has no connection', async ({ browser, storageState }) => {
+            const webshop = await createTicketWebshop('Geen verbinding');
+            await createTicket(webshop);
+
+            const device = await TicketScannerDevice.create({ browser, storageState, organization, webshop });
+            await device.openScanner();
+            await device.waitUntilReady();
+
+            const soldAfterDownload = await createTicket(webshop);
+            const lookups = device.trackTicketLookups();
+            await device.reportNoConnection();
+
+            await device.expectRejected(getTicketUrl(soldAfterDownload), $t('Ongeldig ticket'));
+            expect(lookups).toEqual([]);
+        });
+
+        test('Should show that a ticket is being checked while it is looked up on a slow connection', async ({ browser, storageState }) => {
+            const webshop = await createTicketWebshop('Trage verbinding');
+            await createTicket(webshop);
+
+            const device = await TicketScannerDevice.create({ browser, storageState, organization, webshop });
+            await device.openScanner();
+            await device.waitUntilReady();
+
+            const soldAfterDownload = await createTicket(webshop);
+            let release!: () => void;
+            const released = new Promise<void>((resolve) => {
+                release = resolve;
+            });
+            await device.page.route(url => isTicketLookup(url), async (route) => {
+                await released;
+                await route.continue();
+            });
+
+            await device.showToCamera(getTicketUrl(soldAfterDownload));
+            const checking = device.scannerView.getByTestId('ticket-scanner-checking-ticket');
+            await expect(checking).toBeVisible();
+
+            release();
+            await expect(device.page.getByTestId('valid-ticket-view')).toBeVisible();
+            await expect(checking).toBeHidden();
+        });
+
         test('Should save scans made offline once the app is opened again with internet', async ({ browser, storageState }) => {
             const webshop = await createTicketWebshop('Offline gescand');
             const tickets = [await createTicket(webshop), await createTicket(webshop)];
