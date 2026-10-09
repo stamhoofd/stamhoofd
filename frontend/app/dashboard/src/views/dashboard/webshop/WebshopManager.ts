@@ -306,6 +306,7 @@ export class WebshopManager {
         limit?: number;
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
         advanceCount?: number;
+        signal?: AbortSignal;
     }): Promise<number> {
         const db = await this.database.get();
         const openTransaction = db.transaction([OrdersStore.storeName, WebshopTicketsStore.storeName, WebshopTicketPatchesStore.storeName], 'readonly');
