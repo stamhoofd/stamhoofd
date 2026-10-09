@@ -30,6 +30,12 @@
             "import": "./dist/tests/helpers/index.js",
             "require": "./dist/tests/helpers/index.js",
             "@stamhoofd/source": "./tests/helpers/index.ts"
+        },
+        "./tests/helpers/*": {
+            "types": "./dist/tests/helpers/*.d.ts",
+            "import": "./dist/tests/helpers/*.js",
+            "require": "./dist/tests/helpers/*.js",
+            "@stamhoofd/source": "./tests/helpers/*.ts"
         }
     },
     "scripts": {

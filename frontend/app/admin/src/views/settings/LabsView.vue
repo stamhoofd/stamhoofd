@@ -120,6 +120,10 @@
         <Checkbox :model-value="getFeatureFlag('impersonation')" @update:model-value="setFeatureFlag('impersonation', !!$event)">
             {{ $t('%ZnQ') }}
         </Checkbox>
+
+        <Checkbox :model-value="getFeatureFlag('mailchimp')" @update:model-value="setFeatureFlag('mailchimp', !!$event)">
+            {{ $t('Mailchimp-koppeling') }}
+        </Checkbox>
     </SaveView>
 </template>
 

@@ -19,10 +19,12 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember } from '@stamhoofd/structures';
 import { EmailRecipientSubfilter, ExcelExportType, GroupType, MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, RegistrationInvitation, RegistrationInvitationRequest, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
+import { MailchimpSyncRequest, MailchimpSyncType } from '@stamhoofd/structures/mailchimp/MailchimpSyncRequest.js';
 import { Formatter } from '@stamhoofd/utility';
 import { markRaw } from 'vue';
 import { GlobalEventBus } from '../../EventBus';
 import type { RecipientChooseOneOption } from '../../email/EmailView.vue';
+import { isMailchimpReady } from '../../mailchimp/useMailchimp';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { Toast } from '../../overlays/Toast';
 import type { NavigationActions } from '../../types/NavigationActions';
@@ -593,6 +595,7 @@ export class MemberActionBuilder {
             }),
             this.getSmsAction(),
             this.getExportAction(),
+            ...this.getMailchimpAction(),
             ...this.getDeleteAction(),
             ...this.getUnsubscribeAction(),
             ...this.getAuditLogAction(),
@@ -982,6 +985,36 @@ export class MemberActionBuilder {
                 this.getExportToPdfAction(),
             ],
         });
+    }
+
+    private getMailchimpAction() {
+        if (!isMailchimpReady(this.context, this.platform, this.context.organization ?? null)) {
+            return [];
+        }
+        return [
+            new AsyncTableAction({
+                name: $t('Synchroniseren met Mailchimp'),
+                icon: 'sync',
+                priority: 7,
+                groupIndex: 3,
+                handler: async (selection: TableActionSelection<PlatformMember>) => {
+                    await this.present({
+                        components: [
+                            new ComponentWithProperties(NavigationController, {
+                                root: AsyncComponent(() => import('../../mailchimp/MailchimpSyncView.vue'), {
+                                    request: MailchimpSyncRequest.create({
+                                        type: MailchimpSyncType.Members,
+                                        filter: selection.filter.filter,
+                                        search: selection.filter.search,
+                                    }),
+                                }),
+                            }),
+                        ],
+                        modalDisplayStyle: 'popup',
+                    });
+                },
+            }),
+        ];
     }
 
     private getExportToExcelAction() {

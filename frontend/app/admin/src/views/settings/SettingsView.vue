@@ -260,6 +260,27 @@
                 </STList>
             </template>
 
+            <template v-if="$feature('mailchimp')">
+                <hr>
+                <h2>{{ $t('Integraties') }}</h2>
+                <STList class="illustration-list">
+                    <STListItem :selectable="true" class="left-center" data-testid="open-mailchimp-settings" @click="$navigate(Routes.Mailchimp)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/partners/mailchimp/mailchimp.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('Mailchimp') }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ $t('Synchroniseer leden van alle verenigingen naar een audience van de koepel') }}
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+                </STList>
+            </template>
+
             <hr>
             <h2>{{ $t("%HQ") }}</h2>
 
@@ -336,6 +357,7 @@ enum Routes {
     Terms = 'voorwaarden',
     Labs = 'experimenten',
     OrganizationRecordConfiguration = 'organisatie-gegevens',
+    Mailchimp = 'mailchimp',
 }
 
 const platform = usePlatform();
@@ -402,6 +424,11 @@ const unusedSettingItems = computed(() =>
 );
 
 defineRoutes([
+    {
+        url: Routes.Mailchimp,
+        present: 'popup',
+        component: async () => (await import('@stamhoofd/components/mailchimp/MailchimpSettingsView.vue')).default,
+    },
     {
         url: Routes.Admins,
         component: async () => (await import('@stamhoofd/components/admins/AdminsView.vue')).default,

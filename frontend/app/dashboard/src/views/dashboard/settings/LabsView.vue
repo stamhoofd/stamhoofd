@@ -129,6 +129,18 @@
                 </p>
             </STListItem>
 
+            <STListItem :selectable="true" element-name="label" data-testid="mailchimp-feature-checkbox">
+                <template #left>
+                    <Checkbox :model-value="getFeatureFlag('mailchimp')" @update:model-value="setFeatureFlag('mailchimp', !!$event)" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ $t('Mailchimp-koppeling') }}
+                </h3>
+                <p class="style-description-small">
+                    {{ $t('Synchroniseer leden en bestellers naar Mailchimp via Instellingen → Integraties.') }}
+                </p>
+            </STListItem>
+
             <STListItem v-if="!$isPlatform" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="disableCalendar" />
