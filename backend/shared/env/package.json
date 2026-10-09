@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/backend-env",
-    "version": "2.153.5",
+    "version": "2.154.0",
     "type": "module",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
