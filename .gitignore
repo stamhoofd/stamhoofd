@@ -244,6 +244,7 @@ __screenshots__
 
 /.opencode
 ./worktrees
+/.claude/worktrees/
 
 # vitest browser-mode test attachments (screenshots)
 .vitest-attachments
