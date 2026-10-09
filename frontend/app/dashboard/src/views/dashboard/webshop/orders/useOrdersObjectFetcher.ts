@@ -32,12 +32,35 @@ function searchToFilter(search: string | null): StamhoofdFilter | null {
     return getOrderSearchFilter(search, parsePhoneNumber);
 }
 
-export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> & { reset: () => void; lastInternetLoad: number } {
+export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> & { reset: () => void; isWaitingForInternet: boolean } {
     const objectFetcher = {
         isOffline: false,
         internetPromise: null as Promise<void> | null,
         lastInternetLoad: 0,
+        lastInternetAttempt: 0,
+        /**
+         * True while a fetch waits for the sync before reading, so it will read whatever the sync stores.
+         */
+        isWaitingForInternet: false,
         extendSort,
+        /**
+         * Only the first read waits for the network: until then the stored orders can be missing or outdated.
+         * Later reads use the stored orders right away, and the sync updates the table when it brings in changes.
+         */
+        async syncBeforeReading() {
+            if (this.lastInternetLoad === 0 && !this.isOffline) {
+                this.isWaitingForInternet = true;
+                try {
+                    await this.loadFromInternet();
+                }
+                finally {
+                    this.isWaitingForInternet = false;
+                }
+                return;
+            }
+
+            this.loadFromInternet().catch(console.error);
+        },
         async loadFromInternet() {
             if (this.internetPromise) {
                 return this.internetPromise;
@@ -51,9 +74,10 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
         },
         async doLoadFromInternet() {
             // Prevent doing multiple calls within 5 seconds (other rate limiting should happen outside of the object fetcher)
-            if (!this.isOffline && this.lastInternetLoad > Date.now() - 5_000) {
+            if (this.lastInternetAttempt > Date.now() - 5_000) {
                 return;
             }
+            this.lastInternetAttempt = Date.now();
 
             try {
                 this.isOffline = false;
@@ -88,7 +112,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 filters.unshift(data.pageFilter);
             }
             else {
-                await this.loadFromInternet();
+                await this.syncBeforeReading();
             }
 
             // validate sort
@@ -187,7 +211,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             data = toRaw(data);
             console.log('Orders(IndexedDb).fetchCount', data);
 
-            await this.loadFromInternet();
+            await this.syncBeforeReading();
 
             if (!data.search && OrderRequiredFilterHelper.isDefault(manager.preview.id, data.filter)) {
                 return await manager.orders.countAll();
@@ -221,6 +245,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
         reset() {
             this.isOffline = false;
             this.lastInternetLoad = 0;
+            this.lastInternetAttempt = 0;
             this.internetPromise = null;
             lastNextRequest = null;
             itemsToAdvanceNext = 0;
