@@ -35,12 +35,12 @@ export class MemberPlatformMembership extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder })
     @field({ ...upgradePriceFrom2To4DecimalPlaces })
-    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion, downgrade: (newValue: number | null) => newValue ?? 0 })
+    @field({ decoder: IntegerDecoder, nullable: true, version: 421, downgrade: (newValue: number | null) => newValue ?? 0 })
     price: number | null = 0; // null is used to hide the price if user lacks permission
 
     @field({ decoder: IntegerDecoder })
     @field({ ...upgradePriceFrom2To4DecimalPlaces })
-    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion, downgrade: (newValue: number | null) => newValue ?? 0 })
+    @field({ decoder: IntegerDecoder, nullable: true, version: 421, downgrade: (newValue: number | null) => newValue ?? 0 })
     priceWithoutDiscount: number | null = 0; // null is used to hide the price if user lacks permission
 
     @field({ decoder: IntegerDecoder, version: 336 })

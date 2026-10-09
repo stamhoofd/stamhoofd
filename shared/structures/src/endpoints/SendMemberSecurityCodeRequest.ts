@@ -12,13 +12,13 @@ export class SendMemberSecurityCodeRequest extends AutoEncoder {
     @field({ decoder: StringDecoder })
     memberId: string;
 
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 421 })
     firstName: string | null = null;
 
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 421 })
     lastName: string | null = null;
 
-    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: DateDecoder, nullable: true, version: 421 })
     birthDay: Date | null = null;
 
     @field({ decoder: new EnumDecoder(SecurityCodeSendMethod) })

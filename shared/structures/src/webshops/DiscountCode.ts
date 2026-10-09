@@ -45,6 +45,6 @@ export class PrivateDiscountCode extends DiscountCode {
      * Only used to email the code to someone and to match rows on import. Not unique, and not
      * checked against the email of the person placing the order.
      */
-    @field({ decoder: EmailDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: EmailDecoder, nullable: true, version: 421 })
     email: string | null = null;
 }

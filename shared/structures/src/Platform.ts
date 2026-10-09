@@ -46,7 +46,7 @@ export class PlatformPrivateConfig extends AutoEncoder {
     /**
      * Null when Mailchimp is not connected
      */
-    @field({ decoder: MailchimpSettings, nullable: true, ...NextVersion })
+    @field({ decoder: MailchimpSettings, nullable: true, version: 421 })
     mailchimp: MailchimpSettings | null = null;
 }
 
