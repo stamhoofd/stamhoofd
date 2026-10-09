@@ -143,6 +143,8 @@ function buildDevelopmentDomains(context: CliContext) {
         customDomain: appDomain('custom'),
         docs: appDomain('docs'),
         mail: `mail.${domain}`,
+        sqs: `queues.${domain}`,
+        sqsUi: `ui.queues.${domain}`,
         files: `files.${domain}`,
         filesConsole: `files-console.${domain}`,
         sso: appDomain('sso'),
