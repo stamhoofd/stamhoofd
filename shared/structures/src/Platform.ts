@@ -8,6 +8,7 @@ import { Replacement } from './endpoints/EmailRequest.js';
 import { EventNotificationType } from './EventNotificationType.js';
 import { Image } from './files/Image.js';
 import { LoginMethod, LoginMethodConfig } from './LoginMethod.js';
+import { MailchimpSettings } from './mailchimp/MailchimpSettings.js';
 import { MemberResponsibility } from './MemberResponsibility.js';
 import { DataPermissionsSettings, FinancialSupportSettings, OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
 import { OrganizationEmail } from './OrganizationEmail.js';
@@ -41,6 +42,12 @@ export class PlatformPrivateConfig extends AutoEncoder {
      */
     @field({ decoder: BooleanDecoder, version: 408 })
     requireTwoFactor = false;
+
+    /**
+     * Null when Mailchimp is not connected
+     */
+    @field({ decoder: MailchimpSettings, nullable: true, ...NextVersion })
+    mailchimp: MailchimpSettings | null = null;
 }
 
 export enum OrganizationTagType {

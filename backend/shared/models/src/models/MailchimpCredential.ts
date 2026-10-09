@@ -1,0 +1,51 @@
+import { column } from '@simonbackx/simple-database';
+import { QueryableModel } from '@stamhoofd/sql';
+import { v4 as uuidv4 } from 'uuid';
+
+export class MailchimpCredential extends QueryableModel {
+    static table = 'mailchimp_credentials';
+
+    @column({
+        primary: true, type: 'string', beforeSave(value) {
+            return value ?? uuidv4();
+        },
+    })
+    id!: string;
+
+    /**
+     * Null for the platform
+     */
+    @column({ type: 'string', nullable: true })
+    organizationId: string | null = null;
+
+    @column({ type: 'string' })
+    apiKey: string;
+
+    @column({
+        type: 'datetime', beforeSave(old?: any) {
+            if (old !== undefined) {
+                return old;
+            }
+            const date = new Date();
+            date.setMilliseconds(0);
+            return date;
+        },
+    })
+    createdAt: Date;
+
+    @column({
+        type: 'datetime', beforeSave() {
+            const date = new Date();
+            date.setMilliseconds(0);
+            return date;
+        },
+        skipUpdate: true,
+    })
+    updatedAt: Date;
+
+    static async getFor(organizationId: string | null): Promise<MailchimpCredential | null> {
+        return await MailchimpCredential.select()
+            .where('organizationId', organizationId)
+            .first(false);
+    }
+}

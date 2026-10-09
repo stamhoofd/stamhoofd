@@ -6,6 +6,7 @@ import { AsyncComponent, LoadComponent } from '@stamhoofd/components/containers/
 import type { RecipientChooseOneOption } from '@stamhoofd/components/email/EmailView.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import { isMailchimpReady } from '@stamhoofd/components/mailchimp/useMailchimp.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
@@ -14,6 +15,7 @@ import type { OrganizationManager } from '@stamhoofd/networking/OrganizationMana
 import type { ExcelWorkbookFilter, Platform, PrivateOrderWithTickets } from '@stamhoofd/structures';
 import { EmailRecipientSubfilter, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PrivateOrder, TicketPrivate } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
+import { MailchimpSyncRequest, MailchimpSyncType } from '@stamhoofd/structures/mailchimp/MailchimpSyncRequest.js';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 import type { WebshopManager } from '../WebshopManager';
 import { OrderRequiredFilterHelper } from './OrderRequiredFilterHelper';
@@ -233,6 +235,18 @@ export class OrderActionBuilder {
                 },
             }),
 
+            ...(isMailchimpReady(this.organizationManager.$context, this.platform, this.organizationManager.organization)
+                ? [new AsyncTableAction({
+                        name: $t('Synchroniseren met Mailchimp'),
+                        icon: 'sync',
+                        priority: 7,
+                        groupIndex: 3,
+                        handler: async (selection: TableActionSelection<PrivateOrder>) => {
+                            await this.syncWithMailchimp(selection);
+                        },
+                    })]
+                : []),
+
             new InMemoryTableAction({
                 name: $t(`%CJ`),
                 icon: 'trash',
@@ -247,6 +261,24 @@ export class OrderActionBuilder {
                 },
             }),
         ];
+    }
+
+    async syncWithMailchimp(selection: TableActionSelection<PrivateOrder>) {
+        await this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: AsyncComponent(() => import('@stamhoofd/components/mailchimp/MailchimpSyncView.vue'), {
+                        request: MailchimpSyncRequest.create({
+                            type: MailchimpSyncType.Orders,
+                            webshopId: this.webshopManager.preview.id,
+                            filter: selection.filter.filter,
+                            search: selection.filter.search,
+                        }),
+                    }),
+                }),
+            ],
+            modalDisplayStyle: 'popup',
+        });
     }
 
     async createOrder() {

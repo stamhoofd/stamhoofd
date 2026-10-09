@@ -219,6 +219,26 @@
                 </STList>
             </template>
 
+            <template v-if="mailchimpFeature">
+                <hr><h2>{{ $t('Integraties') }}</h2>
+                <STList class="illustration-list">
+                    <STListItem :selectable="true" class="left-center" data-testid="open-mailchimp-settings" @click="$navigate(Routes.Mailchimp)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/partners/mailchimp/mailchimp.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('Mailchimp') }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ $t('Synchroniseer leden en bestellers naar je Mailchimp-audience') }}
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+                </STList>
+            </template>
+
             <template v-if="!salesDisabled">
                 <hr><h2>{{ $t('%q') }}</h2>
                 <STList class="illustration-list">
@@ -335,6 +355,7 @@ enum Routes {
     FinancialSupport = 'financiele-ondersteuning',
     DataPermissions = 'toestemming-gegevensverzameling',
     Invoices = 'uitgaande-facturen',
+    Mailchimp = 'mailchimp',
 }
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
@@ -343,8 +364,14 @@ const platform = usePlatform();
 const organization = useRequiredOrganization();
 const patchOrganization = usePatchOrganization();
 const uitpasFeature = useFeatureFlagComputed('uitpas');
+const mailchimpFeature = useFeatureFlagComputed('mailchimp');
 
 defineRoutes([
+    {
+        url: Routes.Mailchimp,
+        present: 'popup',
+        component: async () => (await import('@stamhoofd/components/mailchimp/MailchimpSettingsView.vue')).default,
+    },
     {
         url: Routes.General,
         component: async () => (await import('@stamhoofd/components/organizations/GeneralSettingsView.vue')).default,

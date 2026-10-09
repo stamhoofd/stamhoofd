@@ -3,6 +3,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, fi
 
 import { Premise } from './addresses/Premise.js';
 import { DNSRecord } from './DNSRecord.js';
+import { MailchimpSettings } from './mailchimp/MailchimpSettings.js';
 import { StamhoofdFilterDecoder } from './filters/FilteredRequest.js';
 import { FilterWrapperMarker, unwrapFilter } from './filters/StamhoofdFilter.js';
 import { MemberResponsibility } from './MemberResponsibility.js';
@@ -338,6 +339,12 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
      */
     @field({ decoder: BooleanDecoder, version: 408 })
     requireTwoFactor = false;
+
+    /**
+     * Null when Mailchimp is not connected
+     */
+    @field({ decoder: MailchimpSettings, nullable: true, ...NextVersion })
+    mailchimp: MailchimpSettings | null = null;
 
     get actualTestPayments(): boolean {
         if (this.useTestPayments !== null) {
