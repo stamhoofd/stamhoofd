@@ -164,6 +164,26 @@ export class TicketScannerDevice {
     }
 
     /**
+     * Makes the browser report that it has no connection (navigator.onLine), while the API stays reachable
+     */
+    async reportNoConnection() {
+        await this.page.evaluate(() => Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false }));
+    }
+
+    /**
+     * Collects the URLs of the requests that look up a single scanned ticket on the server
+     */
+    trackTicketLookups() {
+        const urls: string[] = [];
+        this.page.on('request', (request) => {
+            if (isTicketLookup(new URL(request.url()))) {
+                urls.push(request.url());
+            }
+        });
+        return urls;
+    }
+
+    /**
      * Only the API stops responding, the app itself stays loaded
      */
     async goOffline() {
@@ -213,6 +233,13 @@ export class TicketScannerDevice {
     async close() {
         await this.page.context().close();
     }
+}
+
+/**
+ * A request for one scanned ticket that is not in the offline database, instead of a download of all tickets
+ */
+export function isTicketLookup(url: URL) {
+    return url.pathname.endsWith('/webshop/tickets/private') && (url.searchParams.get('filter') ?? '').includes('"secret"');
 }
 
 export function getTicketUrl(ticket: Ticket) {
