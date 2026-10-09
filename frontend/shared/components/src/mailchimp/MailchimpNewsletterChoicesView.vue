@@ -1,7 +1,7 @@
 <template>
-    <SaveView :title="$t(`Antwoorden die 'ja' betekenen`)" :loading="saving" :disabled="selectedChoiceIds.length === 0" data-testid="mailchimp-newsletter-choices-view" @save="save">
-        <h1>{{ $t(`Welk antwoord betekent 'ja'?`) }}</h1>
-        <p>{{ $t(`Contacten komen enkel in Mailchimp als minstens één gekoppeld lid één van deze antwoorden koos op '{question}'.`, { question: record.name.toString() }) }}</p>
+    <SaveView :title="$t(`%Zu1`)" :loading="saving" :disabled="selectedChoiceIds.length === 0" data-testid="mailchimp-newsletter-choices-view" @save="save">
+        <h1>{{ $t(`%ZwP`) }}</h1>
+        <p>{{ $t(`%Zx9`, { question: record.name.toString() }) }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 

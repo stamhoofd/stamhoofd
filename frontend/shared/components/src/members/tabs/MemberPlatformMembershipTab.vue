@@ -214,7 +214,7 @@ async function openMembership(membership: MemberPlatformMembership) {
                             throw new SimpleError({
                                 code: 'membership_not_found',
                                 message: 'Platform membership with id ' + membership.id + ' not found',
-                                human: $t('We konden de aansluiting niet vinden, mogelijk werd deze verwijderd.'),
+                                human: $t('%Zuq'),
                             });
                         }
                         return AsyncComponent(() => import('../../platform-memberships/PlatformMembershipView.vue'), {

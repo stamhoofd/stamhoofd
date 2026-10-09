@@ -142,11 +142,11 @@ test.describe('Ticket scanner @ticket-scanner @extra', () => {
             await device.openScanner();
             await device.waitUntilReady();
 
-            await device.expectRejected('Dit is geen ticket', $t('Ongeldig ticket'));
-            await device.expectRejected('https://example.com/zonder-ticket', $t('Ongeldig ticket'));
-            await device.expectRejected('https://example.com/tickets/onbekend', $t('Ongeldig ticket'));
-            await device.expectRejected(getTicketUrl(otherWebshopTicket), $t('Ongeldig ticket'));
-            await device.expectRejected(getTicketUrl(deletedTicket), $t('Ongeldig ticket'));
+            await device.expectRejected('Dit is geen ticket', $t('%Ztg'));
+            await device.expectRejected('https://example.com/zonder-ticket', $t('%Ztg'));
+            await device.expectRejected('https://example.com/tickets/onbekend', $t('%Ztg'));
+            await device.expectRejected(getTicketUrl(otherWebshopTicket), $t('%Ztg'));
+            await device.expectRejected(getTicketUrl(deletedTicket), $t('%Ztg'));
         });
 
         test('Should reject tickets that were canceled after the download', async ({ browser, storageState }) => {
@@ -168,7 +168,7 @@ test.describe('Ticket scanner @ticket-scanner @extra', () => {
             await device.reopenScanner();
             await device.waitUntilReady();
 
-            await device.expectRejected(getTicketUrl(deletedTicket), $t('Ongeldig ticket'));
+            await device.expectRejected(getTicketUrl(deletedTicket), $t('%Ztg'));
             await device.expectRejected(getTicketUrl(canceledOrderTicket), 'geannuleerd');
         });
 

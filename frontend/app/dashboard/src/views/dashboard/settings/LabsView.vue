@@ -134,10 +134,10 @@
                     <Checkbox :model-value="getFeatureFlag('mailchimp')" @update:model-value="setFeatureFlag('mailchimp', !!$event)" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Mailchimp-koppeling') }}
+                    {{ $t('%Zui') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Synchroniseer leden en bestellers naar Mailchimp via Instellingen → Integraties.') }}
+                    {{ $t('%ZxR') }}
                 </p>
             </STListItem>
 

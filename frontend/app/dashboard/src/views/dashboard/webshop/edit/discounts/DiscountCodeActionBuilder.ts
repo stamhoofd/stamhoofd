@@ -43,7 +43,7 @@ export class DiscountCodeActionBuilder {
     getActions(): TableAction<PrivateDiscountCode>[] {
         return [
             new InMemoryTableAction({
-                name: $t('Nieuw'),
+                name: $t('%1IY'),
                 icon: 'add',
                 priority: 10,
                 groupIndex: 1,
@@ -53,7 +53,7 @@ export class DiscountCodeActionBuilder {
                 },
             }),
             new InMemoryTableAction({
-                name: $t('Importeren'),
+                name: $t('%ZwT'),
                 icon: 'upload',
                 priority: 9,
                 groupIndex: 1,
@@ -63,7 +63,7 @@ export class DiscountCodeActionBuilder {
                 },
             }),
             new AsyncTableAction({
-                name: $t('E-mail versturen'),
+                name: $t('%Zu4'),
                 icon: 'email',
                 priority: 8,
                 groupIndex: 1,
@@ -82,7 +82,7 @@ export class DiscountCodeActionBuilder {
                 },
             }),
             new InMemoryTableAction({
-                name: $t('Bewerken'),
+                name: $t('%f9'),
                 icon: 'edit',
                 priority: 6,
                 groupIndex: 1,
@@ -93,7 +93,7 @@ export class DiscountCodeActionBuilder {
                 },
             }),
             new MenuTableAction({
-                name: $t('Dupliceren'),
+                name: $t('%KK'),
                 icon: 'copy',
                 priority: 5,
                 groupIndex: 2,
@@ -101,7 +101,7 @@ export class DiscountCodeActionBuilder {
                 singleSelection: true,
                 childActions: [
                     new InMemoryTableAction({
-                        name: $t('Eén keer'),
+                        name: $t('%sw'),
                         icon: 'copy',
                         needsSelection: true,
                         singleSelection: true,
@@ -110,7 +110,7 @@ export class DiscountCodeActionBuilder {
                         },
                     }),
                     new InMemoryTableAction({
-                        name: $t('Meerdere keren'),
+                        name: $t('%1dn'),
                         icon: 'copy',
                         needsSelection: true,
                         singleSelection: true,
@@ -121,7 +121,7 @@ export class DiscountCodeActionBuilder {
                 ],
             }),
             new InMemoryTableAction({
-                name: $t('Kopieer instellingen naar...'),
+                name: $t('%1eK'),
                 icon: 'sync',
                 priority: 4,
                 groupIndex: 2,
@@ -132,7 +132,7 @@ export class DiscountCodeActionBuilder {
                 },
             }),
             new InMemoryTableAction({
-                name: $t('Verwijderen'),
+                name: $t('%CJ'),
                 icon: 'trash',
                 destructive: true,
                 priority: 1,
@@ -260,7 +260,7 @@ export class DiscountCodeActionBuilder {
     async duplicateMultiple(discountCode: PrivateDiscountCode) {
         const remaining = DiscountCode.maxPerWebshop - await this.objectFetcher.fetchCount(new CountFilteredRequest({}));
         if (remaining <= 0) {
-            new Toast($t('Je kan maximaal {max} kortingscodes hebben.', { max: DiscountCode.maxPerWebshop }), 'error red').show();
+            new Toast($t('%1e4', { max: DiscountCode.maxPerWebshop }), 'error red').show();
             return;
         }
 
@@ -312,7 +312,7 @@ export class DiscountCodeActionBuilder {
     async deleteDiscountCodes(discountCodes: PrivateDiscountCode[]) {
         const title = discountCodes.length === 1
             ? (discountCodes[0].code ? $t('%Zn2', { name: discountCodes[0].code }) : $t('Deze kortingscode verwijderen?'))
-            : $t('{count} kortingscodes verwijderen?', { count: discountCodes.length });
+            : $t('%Zvh', { count: discountCodes.length });
         const codes = Formatter.joinLastLimited(discountCodes.map(c => c.code), {
             separator: ', ',
             lastSeparator: ' ' + $t('%M1') + ' ',
@@ -324,8 +324,8 @@ export class DiscountCodeActionBuilder {
             title,
             confirmText: $t('%CJ'),
             description: discountCodes.length === 1
-                ? $t('Je kan dit niet ongedaan maken.')
-                : $t('Volgende kortingscodes worden verwijderd: {codes}. Je kan dit niet ongedaan maken.', { codes }),
+                ? $t('%1Fc')
+                : $t('%Zw1', { codes }),
             availabilityDelay: 2_000,
         })) {
             return;
@@ -354,7 +354,7 @@ export class DiscountCodeActionBuilder {
                         }),
                         workbook: getSelectableWorkbook(),
                         configurationId: 'webshop-discount-codes',
-                        title: this.webshop.meta.name + ' - ' + $t('Kortingscodes'),
+                        title: this.webshop.meta.name + ' - ' + $t('%QM'),
                     }),
                 }),
             ],
@@ -364,7 +364,7 @@ export class DiscountCodeActionBuilder {
 
     async openMail(selection: TableActionSelection<PrivateDiscountCode>) {
         if (this.webshop.isClosed()) {
-            new Toast($t('Open de webshop om e-mails met kortingscodes te versturen.'), 'error red').show();
+            new Toast($t('%Zvi'), 'error red').show();
             return;
         }
 
@@ -374,7 +374,7 @@ export class DiscountCodeActionBuilder {
                 options: [
                     {
                         id: 'discount-codes',
-                        name: $t('Kortingscodes'),
+                        name: $t('%QM'),
                         value: [
                             EmailRecipientSubfilter.create({
                                 type: EmailRecipientFilterType.WebshopDiscountCodes,

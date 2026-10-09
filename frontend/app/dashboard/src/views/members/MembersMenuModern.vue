@@ -33,10 +33,10 @@
             </div>
 
             <p v-if="groupsWarning === 'none'" class="info-box" data-testid="period-no-groups-hint">
-                {{ $t('Er zijn nog geen inschrijvingsgroepen') }}
+                {{ $t('%ZxS') }}
             </p>
             <p v-else-if="groupsWarning === 'no-access'" class="warning-box" data-testid="period-access-hint">
-                {{ $t('Je hebt geen toegang tot inschrijvingsgroepen in dit werkjaar, vraag een hoofdbeheerder om toegang of wissel van werkjaar onderaan') }}
+                {{ $t('%ZxM') }}
             </p>
 
             <GroupCategoryMenuBox :period="period" />

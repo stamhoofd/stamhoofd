@@ -77,19 +77,19 @@ function getRecords(categories: RecordCategory[]) {
  */
 export function getMailchimpRecordGroups(organization: Organization | null, platform: Platform): MailchimpRecordGroup[] {
     const groups: MailchimpRecordGroup[] = [
-        { title: $t('Vragen van {platform}', { platform: platform.config.name }), records: getRecords(platform.config.recordsConfiguration.recordCategories) },
+        { title: $t('%Zuf', { platform: platform.config.name }), records: getRecords(platform.config.recordsConfiguration.recordCategories) },
     ];
 
     if (organization) {
-        groups.push({ title: $t('Vragen van {organization}', { organization: organization.name }), records: getRecords(organization.meta.recordsConfiguration.recordCategories) });
+        groups.push({ title: $t('%ZxC', { organization: organization.name }), records: getRecords(organization.meta.recordsConfiguration.recordCategories) });
 
         for (const group of organization.period.groups) {
-            groups.push({ title: $t('Vragen bij inschrijving voor {group}', { group: group.settings.name.toString() }), records: getRecords(group.settings.recordCategories) });
+            groups.push({ title: $t('%ZvB', { group: group.settings.name.toString() }), records: getRecords(group.settings.recordCategories) });
         }
     }
     else {
         for (const ageGroup of platform.config.defaultAgeGroups) {
-            groups.push({ title: $t('Vragen van {group}', { group: ageGroup.name }), records: getRecords(ageGroup.recordsConfiguration.recordCategories) });
+            groups.push({ title: $t('%Zua', { group: ageGroup.name }), records: getRecords(ageGroup.recordsConfiguration.recordCategories) });
         }
     }
 
@@ -126,9 +126,9 @@ export function replaceIds(patch: PatchableArray<string, string, string>, curren
 
 export function getRecordTypeName(type: RecordType) {
     switch (type) {
-        case RecordType.Checkbox: return $t('Aankruisvakje');
-        case RecordType.ChooseOne: return $t('Kies één');
-        case RecordType.MultipleChoice: return $t('Meerkeuze');
+        case RecordType.Checkbox: return $t('%115');
+        case RecordType.ChooseOne: return $t('%Zwd');
+        case RecordType.MultipleChoice: return $t('%TI');
         default: return '';
     }
 }

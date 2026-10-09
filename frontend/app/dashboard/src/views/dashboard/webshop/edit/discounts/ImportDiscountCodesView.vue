@@ -1,7 +1,7 @@
 <template>
-    <SaveView :title="$t('Kortingscodes importeren')" :save-text="$t('Importeren')" :loading="saving" :disabled="!sheet" @save="save">
-        <h1>{{ $t('Kortingscodes importeren') }}</h1>
-        <p>{{ $t('Upload een Excel- of CSV-bestand met één rij per kortingscode. Rijen zonder code krijgen automatisch een nieuwe code. Rijen met een bestaande code of een bestaand e-mailadres werken die kortingscode bij.') }}</p>
+    <SaveView :title="$t('%ZvS')" :save-text="$t('%ZwT')" :loading="saving" :disabled="!sheet" @save="save">
+        <h1>{{ $t('%ZvS') }}</h1>
+        <p>{{ $t('%Zup') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -13,10 +13,10 @@
                 </template>
 
                 <h2 class="style-title-list">
-                    {{ fileName || $t('Bestand kiezen') }}
+                    {{ fileName || $t('%ZuJ') }}
                 </h2>
                 <p class="style-description">
-                    {{ sheet ? $t('{count} rijen gevonden in dit bestand.', { count: rowCount }) : $t('Excel- of CSV-bestand') }}
+                    {{ sheet ? $t('%Zwb', { count: rowCount }) : $t('Excel- of CSV-bestand') }}
                 </p>
 
                 <template #right>
@@ -26,8 +26,8 @@
         </STList>
 
         <template v-if="sheet">
-            <hr><h2>{{ $t('Kolommen') }}</h2>
-            <p>{{ $t('Kies per veld welke kolom uit je bestand je wilt gebruiken.') }}</p>
+            <hr><h2>{{ $t('%Zv9') }}</h2>
+            <p>{{ $t('%ZuC') }}</p>
 
             <STList>
                 <STListItem v-for="field of fields" :key="field.id">
@@ -41,7 +41,7 @@
                     <template #right>
                         <Dropdown v-model="mapping[field.id]">
                             <option value="">
-                                {{ $t('Geen kolom') }}
+                                {{ $t('%Zwk') }}
                             </option>
                             <option v-for="column of columns" :key="column.key" :value="column.key">
                                 {{ column.name }}
@@ -52,12 +52,12 @@
             </STList>
 
             <template v-if="importErrors.length">
-                <hr><h2>{{ $t('Fouten') }}</h2>
+                <hr><h2>{{ $t('%Zu0') }}</h2>
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>{{ $t('Fout') }}</th>
-                            <th>{{ $t('Cel') }}</th>
+                            <th>{{ $t('%18i') }}</th>
+                            <th>{{ $t('%18j') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -123,23 +123,23 @@ const props = defineProps<{
 const fields: { id: MappingField; name: string; description: string }[] = [
     {
         id: 'email',
-        name: $t('E-mailadres'),
-        description: $t('Codes met hetzelfde e-mailadres worden bijgewerkt.'),
+        name: $t('%1FK'),
+        description: $t('%ZwW'),
     },
     {
         id: 'code',
-        name: $t('Kortingscode'),
-        description: $t('Laat leeg om automatisch codes te genereren.'),
+        name: $t('%1MX'),
+        description: $t('%ZwF'),
     },
     {
         id: 'description',
         name: $t('%6o'),
-        description: $t('Optionele interne omschrijving.'),
+        description: $t('%ZxZ'),
     },
     {
         id: 'maximumUsage',
-        name: $t('Maximum aantal keer gebruikt'),
-        description: $t('Laat leeg voor onbeperkt gebruik.'),
+        name: $t('%Zwq'),
+        description: $t('%Zvd'),
     },
 ];
 
@@ -177,7 +177,7 @@ function changedFile(event: Event) {
     const unreadableError = new SimpleError({
         code: 'invalid_file',
         message: 'Could not read the file',
-        human: $t('We konden dit bestand niet lezen. Kies een Excel- of CSV-bestand.'),
+        human: $t('%ZwG'),
     });
 
     const reader = new FileReader();
@@ -319,7 +319,7 @@ function parseMaximumUsage(value: string, row: number, column: number, rowErrors
 
     const parsed = Number(value.replace(',', '.'));
     if (!Number.isInteger(parsed) || parsed < 1) {
-        rowErrors.push(new ImportError(row, column, $t('Vul een positief geheel getal in.')));
+        rowErrors.push(new ImportError(row, column, $t('%Zw3')));
         return null;
     }
 
@@ -349,7 +349,7 @@ function parseRows(): { rows: ParsedDiscountCodeRow[]; importErrors: ImportError
         throw new SimpleError({
             code: 'required_field',
             message: 'No columns selected',
-            human: $t('Kies minstens één kolom om te importeren.'),
+            human: $t('%Zvv'),
         });
     }
 
@@ -371,11 +371,11 @@ function parseRows(): { rows: ParsedDiscountCodeRow[]; importErrors: ImportError
 
         const email = rawEmail.length > 0 ? rawEmail : null;
         if (email && !DataValidator.isEmailValid(email)) {
-            nextErrors.push(new ImportError(row, mappedColumns.email ?? range.s.c, $t('Vul een geldig e-mailadres in.')));
+            nextErrors.push(new ImportError(row, mappedColumns.email ?? range.s.c, $t('%Zxe')));
         }
 
         if (email && seenEmails.has(email)) {
-            nextErrors.push(new ImportError(row, mappedColumns.email ?? range.s.c, $t('Dit e-mailadres staat meerdere keren in het bestand.')));
+            nextErrors.push(new ImportError(row, mappedColumns.email ?? range.s.c, $t('%ZuX')));
         }
         if (email) {
             seenEmails.add(email);
@@ -383,7 +383,7 @@ function parseRows(): { rows: ParsedDiscountCodeRow[]; importErrors: ImportError
 
         const code = rawCode.length > 0 ? cleanCode(rawCode) : null;
         if (code && seenCodes.has(code)) {
-            nextErrors.push(new ImportError(row, mappedColumns.code ?? range.s.c, $t('Deze code staat meerdere keren in het bestand.')));
+            nextErrors.push(new ImportError(row, mappedColumns.code ?? range.s.c, $t('%Zx0')));
         }
         if (code) {
             seenCodes.add(code);
@@ -402,7 +402,7 @@ function parseRows(): { rows: ParsedDiscountCodeRow[]; importErrors: ImportError
         throw new SimpleError({
             code: 'empty_import',
             message: 'No rows to import',
-            human: $t('Er werden geen rijen gevonden om te importeren.'),
+            human: $t('%ZuT'),
         });
     }
 
@@ -507,7 +507,7 @@ async function save() {
         });
 
         props.afterImport(response.data);
-        new Toast(emails.length > 0 ? $t('Kortingscodes geïmporteerd. Je kan ze nu per e-mail versturen.') : $t('Kortingscodes geïmporteerd.'), 'success green').show();
+        new Toast(emails.length > 0 ? $t('%Zwt') : $t('%ZuK'), 'success green').show();
         pop({ force: true })?.catch(console.error);
     }
     catch (e) {

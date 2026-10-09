@@ -190,15 +190,15 @@ export const useBalanceItemsUIFilterBuilders: () => UIFilterBuilders = () => {
 export const getDiscountCodesUIFilterBuilders: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [
         new StringFilterBuilder({
-            name: $t('Kortingscode'),
+            name: $t('%1MX'),
             key: 'code',
         }),
         new StringFilterBuilder({
-            name: $t('E-mailadres'),
+            name: $t('%1FK'),
             key: 'email',
         }),
         new NumberFilterBuilder({
-            name: $t('Aantal keer gebruikt'),
+            name: $t('%1e8'),
             key: 'usageCount',
         }),
     ];

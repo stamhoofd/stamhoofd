@@ -34,7 +34,7 @@
         <h2 class="style-with-button">
             <div>{{ $t('%QM') }}</div>
         </h2>
-        <p>{{ $t('Bestellers kunnen een kortingscode inruilen door een link te gebruiken of door manueel de code in te typen bij het openen van het winkelmandje. Je kan ze ook importeren, exporteren of mailen.') }} <a class="inline-link" :href="$domains.getDocs('persoonlijke-kortingscodes')" target="_blank">{{ $t('%19t') }}</a></p>
+        <p>{{ $t('%Zv6') }} <a class="inline-link" :href="$domains.getDocs('persoonlijke-kortingscodes')" target="_blank">{{ $t('%19t') }}</a></p>
 
         <STList>
             <STListItem :selectable="true" element-name="label">
@@ -56,10 +56,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Kortingscodes beheren') }}
+                    {{ $t('%Zul') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Voeg persoonlijke kortingscodes toe, filter de lijst en verstuur ze per e-mail.') }}
+                    {{ $t('%Zw7') }}
                 </p>
 
                 <template #right>

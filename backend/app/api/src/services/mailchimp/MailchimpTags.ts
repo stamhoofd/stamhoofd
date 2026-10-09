@@ -35,31 +35,31 @@ export class MailchimpTags {
     }
 
     get member() {
-        return MAILCHIMP_TAG_PREFIX + this.i18n.$t('Lid');
+        return MAILCHIMP_TAG_PREFIX + this.i18n.$t('%1PM');
     }
 
     get parent() {
-        return MAILCHIMP_TAG_PREFIX + this.i18n.$t('Ouder');
+        return MAILCHIMP_TAG_PREFIX + this.i18n.$t('%14u');
     }
 
     get customer() {
-        return MAILCHIMP_TAG_PREFIX + this.i18n.$t('Besteller');
+        return MAILCHIMP_TAG_PREFIX + this.i18n.$t('%ZwU');
     }
 
     get removed() {
-        return MAILCHIMP_TAG_PREFIX + this.i18n.$t('Niet meer ingeschreven');
+        return MAILCHIMP_TAG_PREFIX + this.i18n.$t('%ZwV');
     }
 
     group(name: string) {
-        return limit(MAILCHIMP_TAG_PREFIX + this.i18n.$t('Groep') + ' – ' + name);
+        return limit(MAILCHIMP_TAG_PREFIX + this.i18n.$t('%wA') + ' – ' + name);
     }
 
     organization(name: string) {
-        return limit(MAILCHIMP_TAG_PREFIX + this.i18n.$t('Vereniging') + ' – ' + name);
+        return limit(MAILCHIMP_TAG_PREFIX + this.i18n.$t('%1PI') + ' – ' + name);
     }
 
     webshop(name: string) {
-        return limit(MAILCHIMP_TAG_PREFIX + this.i18n.$t('Webshop') + ' – ' + name);
+        return limit(MAILCHIMP_TAG_PREFIX + this.i18n.$t('%1AV') + ' – ' + name);
     }
 
     record(name: string) {

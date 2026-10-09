@@ -58,7 +58,7 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
                     throw new SimpleError({
                         code: 'too_many_discount_codes',
                         message: 'Too many discount codes',
-                        human: $t('Je kan maximaal {max} kortingscodes hebben.', { max: DiscountCode.maxPerWebshop }),
+                        human: $t('%1e4', { max: DiscountCode.maxPerWebshop }),
                     });
                 }
 
@@ -169,6 +169,6 @@ function emptyCodeError() {
         code: 'invalid_field',
         field: 'code',
         message: 'Discount code is empty',
-        human: $t('Vul een code in.'),
+        human: $t('%Zvq'),
     });
 }

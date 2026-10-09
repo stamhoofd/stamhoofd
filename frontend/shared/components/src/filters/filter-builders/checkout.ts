@@ -37,7 +37,7 @@ export function getCartFilterBuilder(webshop: Webshop) {
 
                 if (product.prices.length > 1) {
                     filters.push(new MultipleChoiceFilterBuilder({
-                        name: $t('Tarieven'),
+                        name: $t('%61'),
                         options: product.prices.map((price) => {
                             return new MultipleChoiceUIFilterOption(price.name, price.id);
                         }),

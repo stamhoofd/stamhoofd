@@ -90,7 +90,7 @@
                 {{ $t('%19y') }}
             </p>
             <p v-if="file && columns.length > 0 && !includesContactInfo" class="warning-box">
-                {{ $t('Importeer best ook minstens één e-mailadres en één telefoonnummer van leden. Zo kunnen leden of ouders automatisch toegang krijgen als ze zich aanmelden in het ledenportaal.') }}
+                {{ $t('%Zv7') }}
             </p>
             <STErrorsDefault :error-box="errors.errorBox" />
             <hr>

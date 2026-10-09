@@ -64,10 +64,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/communication.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Vraag de code aan {contact}', {contact: contactInfo.contact}) }}
+                        {{ $t('%Zuz', {contact: contactInfo.contact}) }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('{contactCan} in #platform jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf {role}, vraag het dan aan {alternative}.', contactInfo) }}
+                        {{ $t('%Zwn', contactInfo) }}
                     </p>
                 </STListItem>
 
@@ -77,10 +77,10 @@
                         <PlatformAvatar v-else />
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Vraag het lid om zichzelf in te schrijven via het ledenportaal') }}
+                        {{ $t('%ZwX') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Als het lid of diens ouders zelf inschrijven, krijg je automatisch toegang tot hun gegevens.') }}
+                        {{ $t('%Zwx') }}
                     </p>
                 </STListItem>
 
@@ -89,10 +89,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/communication.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Vraag de code aan jouw #platform-verantwoordelijke') }}
+                        {{ $t('%Zts') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Een hoofdbeheerder van {org} kan de beveiligingscode opzoeken en doorgeven, of zelfs deze inschrijving doen.', {org: organization.name}) }}
+                        {{ $t('%Zvf', {org: organization.name}) }}
                     </p>
                 </STListItem>
 
@@ -101,10 +101,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/communication.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Vraag de code aan #koepel') }}
+                        {{ $t('%ZuD') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Contacteer #koepel en verduidelijk waarom je toegang nodig hebt tot {member}.', {member: cloned.patchedMember.details.firstName}) }}
+                        {{ $t('%ZuW', {member: cloned.patchedMember.details.firstName}) }}
                     </p>
                 </STListItem>
             </STList>
@@ -385,16 +385,16 @@ const isOrgMember = computed(() => !isPlatform // in org mode, everyone is org m
 
 const contactInfo = computed(() => isPlatform
     ? {
-            contact: $t('jouw leiding'),
-            contactCan: $t('Jouw leiding kan'),
-            role: $t('leiding'),
-            alternative: $t('jouw medeleiding of #koepel'),
+            contact: $t('%Zwz'),
+            contactCan: $t('%ZuG'),
+            role: $t('%ZwH'),
+            alternative: $t('%ZxD'),
         }
     : {
-            contact: $t('de beheerders van {org}', { org: organization.value.name }),
-            contactCan: $t('De beheerders kunnen'),
-            role: $t('beheerder'),
-            alternative: $t('de hoofdbeheerder van {org}', { org: organization.value.name }),
+            contact: $t('%Zvp', { org: organization.value.name }),
+            contactCan: $t('%Zw9'),
+            role: $t('%ZuN'),
+            alternative: $t('%Zus', { org: organization.value.name }),
         });
 
 const hasChanges = computed(() => {

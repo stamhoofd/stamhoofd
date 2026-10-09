@@ -1,7 +1,7 @@
 <template>
-    <SaveView :title="$t('API-sleutel')" :loading="saving" :save-text="$t('Koppelen')" data-testid="mailchimp-api-key-view" @save="save">
-        <h1>{{ $t('Koppel je Mailchimp-account') }}</h1>
-        <p>{{ $t('Maak in Mailchimp een API-sleutel aan via je profiel → Extras → API keys → Create A Key, en plak die hieronder. De sleutel wordt enkel op onze server bewaard.') }}</p>
+    <SaveView :title="$t('%Zu2')" :loading="saving" :save-text="$t('%Zve')" data-testid="mailchimp-api-key-view" @save="save">
+        <h1>{{ $t('%Zwu') }}</h1>
+        <p>{{ $t('%Zvz') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -9,11 +9,11 @@
             v-model="apiKey"
             error-fields="apiKey"
             :error-box="errors.errorBox"
-            :title="$t('API-sleutel')"
-            :placeholder="settings ? $t('Plak een nieuwe API-sleutel') : $t('bv. a1b2c3…-us21')"
+            :title="$t('%Zu2')"
+            :placeholder="settings ? $t('%ZwD') : $t('%ZuL')"
             autocomplete="off"
-            :show-text="$t('Tonen')"
-            :hide-text="$t('Verbergen')"
+            :show-text="$t('%Zwy')"
+            :hide-text="$t('%1Ys')"
         />
     </SaveView>
 </template>
@@ -54,7 +54,7 @@ async function save() {
         errors.errorBox = new ErrorBox(new SimpleError({
             code: 'invalid_field',
             message: 'API key is required',
-            human: $t('Vul een API-sleutel in'),
+            human: $t('%Zvk'),
             field: 'apiKey',
         }));
         return;
@@ -71,7 +71,7 @@ async function save() {
             shouldRetry: false,
         });
         setSettings(response.data);
-        Toast.success($t('Mailchimp is gekoppeld')).show();
+        Toast.success($t('%ZvX')).show();
         await pop({ force: true });
     }
     catch (e) {

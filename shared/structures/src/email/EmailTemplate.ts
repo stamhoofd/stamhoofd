@@ -292,7 +292,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.DefaultOrdersEmail: return $t(`%pD`);
             case EmailTemplateType.DefaultDocumentsEmail: return $t('%1KN');
             case EmailTemplateType.DefaultPaymentsEmail: return $t('%1N4');
-            case EmailTemplateType.DefaultWebshopDiscountCodesEmail: return $t('Standaard e-mail met kortingscode');
+            case EmailTemplateType.DefaultWebshopDiscountCodesEmail: return $t('%ZuU');
 
             case EmailTemplateType.MembersExpirationReminder: return $t(`%pE`);
             case EmailTemplateType.WebshopsExpirationReminder: return $t(`%pF`);
@@ -606,7 +606,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.DefaultOrdersEmail: return $t(`%qI`);
             case EmailTemplateType.DefaultDocumentsEmail: return $t('%1KO');
             case EmailTemplateType.DefaultPaymentsEmail: return $t('%1N5');
-            case EmailTemplateType.DefaultWebshopDiscountCodesEmail: return $t('Standaard e-mail die je kan gebruiken om persoonlijke kortingscodes te versturen.');
+            case EmailTemplateType.DefaultWebshopDiscountCodesEmail: return $t('%Zx6');
 
             case EmailTemplateType.OrderNotification: return $t(`%qJ`);
             case EmailTemplateType.RegistrationConfirmation: return $t(`%qK`);

@@ -2,16 +2,16 @@
     <SaveView :title="title" :loading="saving" :save-text="saveText" data-testid="mailchimp-records-view" @save="save">
         <h1>{{ title }}</h1>
         <p v-if="mode === 'newsletter'">
-            {{ $t('Kies de vraag waarmee leden aangeven dat ze de nieuwsbrief willen ontvangen. Enkel aankruisvakjes en keuzevragen zijn mogelijk.') }}
+            {{ $t('%ZuF') }}
         </p>
         <p v-else>
-            {{ $t('Bij een aankruisvakje krijgt het contact een tag als het aangevinkt is, bij een keuzevraag een tag per gekozen antwoord.') }}
+            {{ $t('%Zx8') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <form class="search-box input-icon-container icon search small gray" @submit.prevent>
-            <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t('Zoek een vraag…')">
+            <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t('%ZuR')">
         </form>
 
         <STList v-if="mode === 'newsletter' && !searchQuery">
@@ -20,10 +20,10 @@
                     <Radio v-model="selectedRecordId" :value="null" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Geen nieuwsbriefvraag') }}
+                    {{ $t('%Zub') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Alle leden worden toegevoegd na jouw bevestiging bij het synchroniseren') }}
+                    {{ $t('%Zuh') }}
                 </p>
             </STListItem>
         </STList>
@@ -40,7 +40,7 @@
                         {{ record.name.toString() }}
                     </h3>
                     <p v-if="record.sensitive" class="style-description-small">
-                        {{ $t('Gevoelige vraag, kan niet doorgestuurd worden') }}
+                        {{ $t('%ZxN') }}
                     </p>
                     <template #right>
                         <span class="style-tag">{{ getRecordTypeName(record.type) }}</span>
@@ -50,7 +50,7 @@
         </div>
 
         <p v-if="filteredGroups.length === 0" class="info-box">
-            {{ searchQuery ? $t('Geen vragen gevonden') : $t('Er zijn nog geen vragen die je hiervoor kan gebruiken. Voeg eerst een vraag toe aan je vragenlijsten.') }}
+            {{ searchQuery ? $t('%Zum') : $t('%Zug') }}
         </p>
     </SaveView>
 </template>
@@ -90,7 +90,7 @@ const organization = useOrganization();
 const platform = usePlatform();
 const { settings, setSettings } = useMailchimpSettings();
 
-const title = computed(() => props.mode === 'newsletter' ? $t('Nieuwsbriefvraag') : $t('Extra tags uit vragen'));
+const title = computed(() => props.mode === 'newsletter' ? $t('%Zux') : $t('%ZvP'));
 const searchQuery = ref('');
 const saving = ref(false);
 
@@ -116,7 +116,7 @@ const filteredGroups = computed(() => {
 
 const selectedRecord = computed(() => groups.value.flatMap(g => g.records).find(r => r.id === selectedRecordId.value) ?? null);
 const needsChoices = computed(() => props.mode === 'newsletter' && !!selectedRecord.value && selectedRecord.value.type !== RecordType.Checkbox);
-const saveText = computed(() => needsChoices.value ? $t('Volgende') : $t('Opslaan'));
+const saveText = computed(() => needsChoices.value ? $t('%19q') : $t('%1Op'));
 
 function toggleRecord(id: string, selected: boolean) {
     selectedRecordIds.value = selected ? [...selectedRecordIds.value, id] : selectedRecordIds.value.filter(r => r !== id);

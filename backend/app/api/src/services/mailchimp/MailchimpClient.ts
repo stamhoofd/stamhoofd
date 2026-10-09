@@ -82,7 +82,7 @@ export class MailchimpClient {
             throw new SimpleError({
                 code: 'invalid_api_key',
                 message: 'Invalid Mailchimp API key format',
-                human: $t('Deze API-sleutel is ongeldig. Kopieer de volledige sleutel uit Mailchimp, inclusief het deel na het streepje (bv. -us21).'),
+                human: $t('%Zvy'),
                 field: 'apiKey',
             });
         }

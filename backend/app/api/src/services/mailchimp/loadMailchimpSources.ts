@@ -162,7 +162,7 @@ async function loadOrderSources(organization: Organization | null, request: Mail
         throw new SimpleError({
             code: 'invalid_field',
             message: 'Webshop not found',
-            human: $t('Deze webshop werd niet gevonden'),
+            human: $t('%ZuB'),
             field: 'webshopId',
         });
     }

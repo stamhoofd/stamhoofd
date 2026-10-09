@@ -899,10 +899,6 @@
     "original": "Aansluiting GSB",
     "translation": "GSB affiliation"
   },
-  "%7h": {
-    "original": "Jouw leiding kan in Jamboree jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf leiding, vraag het dan aan jouw medeleiding of GSB.",
-    "translation": "Your leader can look up your security code in Jamboree and pass it on to you. If you are a leader yourself, ask your fellow leader or GSB."
-  },
   "%7i": {
     "original": "Het bedrag zal achteraf door GSB aan {name} worden gefactureerd",
     "translation": "The amount will be invoiced to {name} by GSB afterwards"
@@ -1706,10 +1702,6 @@
   "%ZsQ": {
     "original": "Beheer hier alle personen die toegang hebben tot Jamboree, en wijzig hun toegangsrechten. <button>Meer info</button>",
     "translation": "Manage here all persons who have access to Jamboree, and adjust their access rights. <button>More info</button>"
-  },
-  "%ZsR": {
-    "original": "Je hebt geen toegang tot dit scoutsjaar. Wissel van scoutsjaar om jouw groepen te bekijken.",
-    "translation": "You do not have access to this scout year. Switch scout year to view your groups."
   },
   "%ZsX": {
     "original": "Alle categorieën van het huidige scoutsjaar",

@@ -911,10 +911,6 @@
     "original": "Aansluiting FOS Open Scouting",
     "translation": "Connexion FOS Open Scouting"
   },
-  "%7h": {
-    "original": "Jouw leiding kan in Keeo jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf leiding, vraag het dan aan jouw medeleiding of FOS Open Scouting.",
-    "translation": "Votre direction peut rechercher votre code de sécurité dans Keeo et vous le transmettre. Si vous êtes vous-même un responsable, demandez-le à vos collègues responsables ou à FOS Open Scouting."
-  },
   "%7i": {
     "original": "Het bedrag zal achteraf door FOS Open Scouting aan {name} worden gefactureerd",
     "translation": "Le montant sera facturé ultérieurement par FOS Open Scouting à {name}"
@@ -1714,10 +1710,6 @@
   "%ZsQ": {
     "original": "Beheer hier alle personen die toegang hebben tot Keeo, en wijzig hun toegangsrechten. <button>Meer info</button>",
     "translation": "Gérez ici toutes les personnes qui ont accès à Keeo et adaptez leurs droits. <button>Plus d'info</button>"
-  },
-  "%ZsR": {
-    "original": "Je hebt geen toegang tot dit scoutsjaar. Wissel van scoutsjaar om jouw groepen te bekijken.",
-    "translation": "Vous n'avez pas accès à cette année scoute. Changez d'année scoute pour consulter vos groupes."
   },
   "%ZsX": {
     "original": "Alle categorieën van het huidige scoutsjaar",

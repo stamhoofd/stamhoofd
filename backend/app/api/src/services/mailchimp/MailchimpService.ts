@@ -59,7 +59,7 @@ export class MailchimpService {
             throw new SimpleError({
                 code: 'not_available',
                 message: 'Mailchimp is not enabled',
-                human: $t('De Mailchimp-koppeling is niet beschikbaar.'),
+                human: $t('%ZwQ'),
                 statusCode: 400,
             });
         }
@@ -94,7 +94,7 @@ export class MailchimpService {
             throw new SimpleError({
                 code: 'mailchimp_not_connected',
                 message: 'Mailchimp is not connected',
-                human: $t('Mailchimp is nog niet gekoppeld.'),
+                human: $t('%Zv5'),
                 statusCode: 400,
             });
         }
@@ -109,14 +109,14 @@ export class MailchimpService {
             return new SimpleError({
                 code: 'mailchimp_unauthorized',
                 message: error.message,
-                human: $t('Mailchimp weigerde de API-sleutel. Controleer of de sleutel nog bestaat in je Mailchimp-account.'),
+                human: $t('%ZvQ'),
                 field: 'apiKey',
             });
         }
         return new SimpleError({
             code: 'mailchimp_error',
             message: error.message,
-            human: $t('Mailchimp gaf een foutmelding: {message}', { message: error.detail || error.title }),
+            human: $t('%ZxA', { message: error.detail || error.title }),
         });
     }
 
@@ -161,7 +161,7 @@ export class MailchimpService {
             throw new SimpleError({
                 code: 'sync_running',
                 message: 'A synchronisation is running',
-                human: $t('Er loopt nog een synchronisatie. Wacht tot die klaar is.'),
+                human: $t('%Zty'),
             });
         }
         const credential = await MailchimpCredential.getFor(organization?.id ?? null);
@@ -191,7 +191,7 @@ export class MailchimpService {
             throw new SimpleError({
                 code: 'mailchimp_not_connected',
                 message: 'Mailchimp is not connected',
-                human: $t('Mailchimp is nog niet gekoppeld.'),
+                human: $t('%Zv5'),
                 statusCode: 400,
             });
         }
@@ -209,7 +209,7 @@ export class MailchimpService {
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Audience not found',
-                        human: $t('Deze audience werd niet gevonden in je Mailchimp-account.'),
+                        human: $t('%ZvA'),
                         field: 'audienceId',
                     });
                 }
@@ -276,7 +276,7 @@ export class MailchimpService {
         const invalidRecord = (field: string) => new SimpleError({
             code: 'invalid_field',
             message: 'This record cannot be used for Mailchimp',
-            human: $t('Deze vraag kan je niet gebruiken voor Mailchimp. Enkel aankruisvakjes en keuzevragen die niet gevoelig zijn, zijn mogelijk.'),
+            human: $t('%ZwK'),
             field,
         });
 
@@ -295,7 +295,7 @@ export class MailchimpService {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Invalid newsletter choices',
-                    human: $t("Kies welke antwoorden 'ja' betekenen."),
+                    human: $t("%Zvj"),
                     field: 'newsletterChoiceIds',
                 });
             }
@@ -332,7 +332,7 @@ export class MailchimpService {
             throw new SimpleError({
                 code: 'mailchimp_not_connected',
                 message: 'Mailchimp is not connected',
-                human: $t('Koppel eerst Mailchimp en kies een audience.'),
+                human: $t('%ZwA'),
                 statusCode: 400,
             });
         }
@@ -342,7 +342,7 @@ export class MailchimpService {
                 throw new SimpleError({
                     code: 'not_available',
                     message: 'Members package not active',
-                    human: $t('Je kan enkel leden synchroniseren als je het ledenbeheer-pakket gebruikt.'),
+                    human: $t('%ZuA'),
                     statusCode: 400,
                 });
             }
@@ -352,7 +352,7 @@ export class MailchimpService {
                 throw new SimpleError({
                     code: 'not_available',
                     message: 'Orders can only be synced for an organization',
-                    human: $t('Bestellingen kunnen enkel per vereniging gesynchroniseerd worden.'),
+                    human: $t('%Zvn'),
                     statusCode: 400,
                 });
             }
@@ -388,7 +388,7 @@ export class MailchimpService {
             throw new SimpleError({
                 code: 'newsletter_record_missing',
                 message: 'The newsletter record no longer exists',
-                human: $t('De nieuwsbriefvraag bestaat niet meer of kan niet meer gebruikt worden. Kies een andere nieuwsbriefvraag in de Mailchimp-instellingen.'),
+                human: $t('%Zwo'),
                 statusCode: 400,
             });
         }
@@ -443,7 +443,7 @@ export class MailchimpService {
             throw new SimpleError({
                 code: 'consent_required',
                 message: 'Confirm that you have permission to email these contacts',
-                human: $t('Bevestig dat je toestemming hebt om deze personen te mailen.'),
+                human: $t('%Zur'),
                 field: 'confirmedConsent',
             });
         }
@@ -453,7 +453,7 @@ export class MailchimpService {
             throw new SimpleError({
                 code: 'sync_running',
                 message: 'A synchronisation is already running',
-                human: $t('Er loopt al een synchronisatie met Mailchimp. Wacht tot die klaar is.'),
+                human: $t('%Ztz'),
                 statusCode: 400,
             });
         }
@@ -484,7 +484,7 @@ export class MailchimpService {
         const struct = sync.getStructure();
         if (struct.isRunning && !this.runningSyncIds.has(sync.id)) {
             struct.status = MailchimpSyncStatus.Failed;
-            struct.errorMessage = $t('De synchronisatie werd onderbroken. Probeer opnieuw.');
+            struct.errorMessage = $t('%ZuS');
         }
         return struct;
     }
@@ -501,7 +501,7 @@ export class MailchimpService {
                     throw new SimpleError({
                         code: 'merge_field_conflict',
                         message: `Merge field ${field.tag} already exists with type ${current.type}`,
-                        human: $t('Het veld {tag} bestaat al in je Mailchimp-audience, maar is geen tekstveld. Wijzig of verwijder dat veld in Mailchimp en probeer opnieuw.', { tag: field.tag }),
+                        human: $t('%Zwa', { tag: field.tag }),
                     });
                 }
                 return field.tag;
@@ -527,10 +527,10 @@ export class MailchimpService {
         };
 
         if (kind === 'members') {
-            tags.members = await ensure({ tag: MAILCHIMP_MERGE_FIELDS.members, name: platformName + ' - ' + i18n.$t('Leden'), type: 'text' });
-            tags.groups = await ensure({ tag: MAILCHIMP_MERGE_FIELDS.groups, name: platformName + ' - ' + i18n.$t('Groepen'), type: 'text' });
+            tags.members = await ensure({ tag: MAILCHIMP_MERGE_FIELDS.members, name: platformName + ' - ' + i18n.$t('%1EH'), type: 'text' });
+            tags.groups = await ensure({ tag: MAILCHIMP_MERGE_FIELDS.groups, name: platformName + ' - ' + i18n.$t('%wP'), type: 'text' });
             if (!organization) {
-                tags.organizations = await ensure({ tag: MAILCHIMP_MERGE_FIELDS.organizations, name: platformName + ' - ' + i18n.$t('Verenigingen'), type: 'text' });
+                tags.organizations = await ensure({ tag: MAILCHIMP_MERGE_FIELDS.organizations, name: platformName + ' - ' + i18n.$t('%1HI'), type: 'text' });
             }
         }
         return tags;
@@ -649,7 +649,7 @@ export class MailchimpService {
         catch (e) {
             console.error('[Mailchimp] Sync failed', sync.id, e);
             sync.status = MailchimpSyncStatus.Failed;
-            sync.errorMessage = isSimpleError(e) || isSimpleErrors(e) ? e.getHuman() : $t('Er ging iets mis bij het synchroniseren met Mailchimp.');
+            sync.errorMessage = isSimpleError(e) || isSimpleErrors(e) ? e.getHuman() : $t('%ZuZ');
         }
 
         sync.finishedAt = new Date();

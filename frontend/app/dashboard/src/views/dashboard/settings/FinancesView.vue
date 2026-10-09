@@ -187,10 +187,10 @@
                                     <img src="@stamhoofd/assets/images/illustrations/membership.svg">
                                 </template>
                                 <h2 class="style-title-list">
-                                    {{ $t('Aansluitingen') }}
+                                    {{ $t('%1Nt') }}
                                 </h2>
                                 <p class="style-description">
-                                    {{ $t('Bekijk alle aansluitingen van jouw leden bij #koepel.') }}
+                                    {{ $t('%Zwp') }}
                                 </p>
                                 <template #right>
                                     <span class="icon arrow-right-small gray" />

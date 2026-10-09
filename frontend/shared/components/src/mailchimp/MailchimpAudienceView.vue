@@ -1,13 +1,13 @@
 <template>
     <LoadingViewTransition :loading="loading">
-        <SaveView :title="$t('Audience')" :loading="saving" :disabled="!selectedId" data-testid="mailchimp-audience-view" @save="save">
-            <h1>{{ $t('Kies een audience') }}</h1>
-            <p>{{ $t('Leden en bestellers komen allemaal in dezelfde audience terecht. Je kan ze in Mailchimp van elkaar onderscheiden met tags. Mailchimp raadt zelf ook één audience aan: contacten in meerdere audiences tellen dubbel mee voor je abonnement.') }}</p>
+        <SaveView :title="$t('%ZvC')" :loading="saving" :disabled="!selectedId" data-testid="mailchimp-audience-view" @save="save">
+            <h1>{{ $t('%Zx2') }}</h1>
+            <p>{{ $t('%Zu5') }}</p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <p v-if="!loading && audiences.length === 0" class="info-box">
-                {{ $t('Er staan nog geen audiences in je Mailchimp-account. Maak er eerst één aan in Mailchimp.') }}
+                {{ $t('%Zvs') }}
             </p>
 
             <STList>
@@ -19,7 +19,7 @@
                         {{ audience.name }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('{count} contacten', { count: audience.memberCount.toString() }) }}
+                        {{ $t('%ZuQ', { count: audience.memberCount.toString() }) }}
                     </p>
                 </STListItem>
             </STList>

@@ -686,7 +686,7 @@ test.describe('Webshops offline', () => {
 
         await test.step('reject an unknown ticket', async () => {
             await showQRCodeToCamera(page, 'https://example.com/tickets/unknown-secret');
-            await expect(page.locator('.toast-view')).toContainText($t('Ongeldig ticket'));
+            await expect(page.locator('.toast-view')).toContainText($t('%Ztg'));
             await showQRCodeToCamera(page, null);
         });
 

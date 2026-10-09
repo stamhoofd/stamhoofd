@@ -122,7 +122,7 @@
         </Checkbox>
 
         <Checkbox :model-value="getFeatureFlag('mailchimp')" @update:model-value="setFeatureFlag('mailchimp', !!$event)">
-            {{ $t('Mailchimp-koppeling') }}
+            {{ $t('%Zui') }}
         </Checkbox>
     </SaveView>
 </template>

@@ -1,7 +1,7 @@
 <template>
     <div class="hover-box container">
         <dl class="details-grid">
-            <dt>{{ $t('Lid') }}</dt>
+            <dt>{{ $t('%1PM') }}</dt>
             <dd>
                 <button type="button" class="inline-link" @click="showMember(platformMembership.memberId)">
                     {{ platformMembership.member.name }}

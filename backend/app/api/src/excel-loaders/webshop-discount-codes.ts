@@ -14,7 +14,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.WebshopDiscountCodes, {
     getSheets: () => [
         {
             id: 'discountCodes',
-            name: $t('Kortingscodes'),
+            name: $t('%QM'),
             columns: getColumns(),
         },
     ],
@@ -27,7 +27,7 @@ function getColumns(): XlsxTransformerConcreteColumn<PrivateDiscountCode>[] {
     return [
         {
             id: 'code',
-            name: $t('Code'),
+            name: $t('%1eg'),
             width: 30,
             getValue: (object: PrivateDiscountCode) => ({
                 value: object.code,
@@ -40,7 +40,7 @@ function getColumns(): XlsxTransformerConcreteColumn<PrivateDiscountCode>[] {
         },
         {
             id: 'email',
-            name: $t('E-mailadres'),
+            name: $t('%1FK'),
             width: 40,
             getValue: (object: PrivateDiscountCode) => ({
                 value: object.email ?? '',
@@ -56,7 +56,7 @@ function getColumns(): XlsxTransformerConcreteColumn<PrivateDiscountCode>[] {
         },
         {
             id: 'maximumUsage',
-            name: $t('Maximum aantal keer gebruikt'),
+            name: $t('%Zwq'),
             width: 30,
             getValue: (object: PrivateDiscountCode) => ({
                 value: object.maximumUsage ?? '',

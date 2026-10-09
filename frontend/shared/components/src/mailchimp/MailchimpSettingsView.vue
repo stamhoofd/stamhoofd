@@ -1,19 +1,19 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t('Mailchimp')" />
+        <STNavigationBar :title="$t('%Zuo')" />
 
         <main class="center">
-            <h1>{{ $t('Mailchimp') }}</h1>
+            <h1>{{ $t('%Zuo') }}</h1>
             <p>
-                {{ isPlatform ? $t('Stuur de leden van alle verenigingen vanuit {platform} naar een audience in Mailchimp. De synchronisatie loopt enkel van {platform} naar Mailchimp: wijzigingen in Mailchimp komen niet terug.', { platform: platform.config.name }) : $t('Stuur je leden en bestellers vanuit {platform} naar Mailchimp. De synchronisatie loopt enkel van {platform} naar Mailchimp: wijzigingen in Mailchimp komen niet terug.', { platform: platform.config.name }) }}
-                <a :href="$domains.getDocs('mailchimp')" class="inline-link" target="_blank" rel="noopener">{{ $t('Lees de handleiding') }}</a>
+                {{ isPlatform ? $t('%Zw8', { platform: platform.config.name }) : $t('Stuur je leden en bestellers vanuit {platform} naar Mailchimp. De synchronisatie loopt enkel van {platform} naar Mailchimp: wijzigingen in Mailchimp komen niet terug.', { platform: platform.config.name }) }}
+                <a :href="$domains.getDocs('mailchimp')" class="inline-link" target="_blank" rel="noopener">{{ $t('%Zw0') }}</a>
             </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <hr><h2>{{ $t('Koppeling') }}</h2>
+            <hr><h2>{{ $t('%ZvU') }}</h2>
             <STCardGroup>
-                <STCard :selectable="true" :title="$t('API-sleutel')" :description="settings ? $t(`Verbonden als '{account}' ({dataCenter})`, { account: settings.accountName, dataCenter: settings.dataCenter }) : $t('Nog niet gekoppeld')" data-testid="mailchimp-api-key" @click="openApiKey">
+                <STCard :selectable="true" :title="$t('%Zu2')" :description="settings ? $t(`%ZvN`, { account: settings.accountName, dataCenter: settings.dataCenter }) : $t('%Zuu')" data-testid="mailchimp-api-key" @click="openApiKey">
                     <template #left>
                         <IconContainer icon="key" :class="settings ? 'success' : 'gray'">
                             <template #aside>
@@ -22,11 +22,11 @@
                         </IconContainer>
                     </template>
                     <template #right>
-                        <span class="button text">{{ settings ? $t('Wijzigen') : $t('Koppelen') }}</span>
+                        <span class="button text">{{ settings ? $t('%1Ki') : $t('%Zve') }}</span>
                     </template>
                 </STCard>
 
-                <STCard :selectable="!!settings" :disabled="!settings" :title="$t('Audience')" :description="settings?.audienceName ?? $t('Kies de audience waarin je contacten terechtkomen')" data-testid="mailchimp-audience" @click="settings ? openAudience() : undefined">
+                <STCard :selectable="!!settings" :disabled="!settings" :title="$t('%ZvC')" :description="settings?.audienceName ?? $t('%ZxP')" data-testid="mailchimp-audience" @click="settings ? openAudience() : undefined">
                     <template #left>
                         <IconContainer icon="group" :class="settings?.audienceId ? 'success' : 'gray'">
                             <template #aside>
@@ -35,75 +35,75 @@
                         </IconContainer>
                     </template>
                     <template v-if="settings" #right>
-                        <span class="button text">{{ settings.audienceId ? $t('Wijzigen') : $t('Kiezen') }}</span>
+                        <span class="button text">{{ settings.audienceId ? $t('%1Ki') : $t('%a4') }}</span>
                     </template>
                 </STCard>
             </STCardGroup>
 
             <template v-if="settings?.audienceId && membersPackage">
-                <hr><h2>{{ $t('Leden') }}</h2>
+                <hr><h2>{{ $t('%1EH') }}</h2>
                 <p>
-                    {{ $t('Alle leden die in het huidige werkjaar ingeschreven zijn, en hun ouders, komen in Mailchimp met een tag per groep.') }}
-                    <a :href="$domains.getDocs('mailchimp-leden')" class="inline-link" target="_blank" rel="noopener">{{ $t('Meer info') }}</a>
+                    {{ $t('%Zvu') }}
+                    <a :href="$domains.getDocs('mailchimp-leden')" class="inline-link" target="_blank" rel="noopener">{{ $t('%19t') }}</a>
                 </p>
 
                 <STCardGroup>
-                    <STCard :selectable="true" :title="$t('Nieuwsbriefvraag')" :description="newsletterDescription" data-testid="mailchimp-newsletter-record" @click="openNewsletterRecord">
+                    <STCard :selectable="true" :title="$t('%Zux')" :description="newsletterDescription" data-testid="mailchimp-newsletter-record" @click="openNewsletterRecord">
                         <template #left>
                             <IconContainer icon="privacy" :class="settings.newsletterRecordId ? 'success' : 'gray'" />
                         </template>
                         <template #right>
-                            <span class="button text">{{ settings.newsletterRecordId ? $t('Wijzigen') : $t('Kiezen') }}</span>
+                            <span class="button text">{{ settings.newsletterRecordId ? $t('%1Ki') : $t('%a4') }}</span>
                         </template>
                     </STCard>
 
-                    <STCard v-if="newsletterRecord && newsletterRecord.type !== RecordType.Checkbox" :selectable="true" :title="$t(`Antwoorden die 'ja' betekenen`)" :description="newsletterChoiceNames.length ? newsletterChoiceNames.join(', ') : $t('Nog niet gekozen')" data-testid="mailchimp-newsletter-choices" @click="openNewsletterChoices">
+                    <STCard v-if="newsletterRecord && newsletterRecord.type !== RecordType.Checkbox" :selectable="true" :title="$t(`%Zu1`)" :description="newsletterChoiceNames.length ? newsletterChoiceNames.join(', ') : $t('%ZvY')" data-testid="mailchimp-newsletter-choices" @click="openNewsletterChoices">
                         <template #left>
                             <IconContainer icon="success" :class="newsletterChoiceNames.length ? 'success' : 'gray'" />
                         </template>
                         <template #right>
-                            <span class="button text">{{ $t('Wijzigen') }}</span>
+                            <span class="button text">{{ $t('%1Ki') }}</span>
                         </template>
                     </STCard>
 
-                    <STCard :selectable="true" :title="$t('Extra tags uit vragen')" :description="tagRecordNames.length ? tagRecordNames.join(', ') : $t('Geen: kies vragen waarvan het antwoord een tag wordt in Mailchimp')" data-testid="mailchimp-tag-records" @click="openTagRecords">
+                    <STCard :selectable="true" :title="$t('%ZvP')" :description="tagRecordNames.length ? tagRecordNames.join(', ') : $t('%Zwh')" data-testid="mailchimp-tag-records" @click="openTagRecords">
                         <template #left>
                             <IconContainer icon="label" :class="tagRecordNames.length ? 'success' : 'gray'" />
                         </template>
                         <template #right>
-                            <span class="button text">{{ $t('Kiezen') }}</span>
+                            <span class="button text">{{ $t('%a4') }}</span>
                         </template>
                     </STCard>
                 </STCardGroup>
 
-                <STCard :title="$t('Alle leden synchroniseren')" :description="$t('Stuur de huidige toestand van alle ingeschreven leden naar Mailchimp. Een selectie synchroniseer je vanuit de ledenlijst.')">
+                <STCard :title="$t('%Zws')" :description="$t('%ZwL')">
                     <template #left>
                         <IconContainer icon="sync" class="primary" />
                     </template>
                     <template #right>
                         <button class="button primary" type="button" data-testid="mailchimp-sync-all-members" @click="syncAllMembers">
                             <span class="icon sync" />
-                            <span>{{ $t('Synchroniseren') }}</span>
+                            <span>{{ $t('%Zw5') }}</span>
                         </button>
                     </template>
                 </STCard>
             </template>
 
             <template v-if="settings?.audienceId && !isPlatform">
-                <hr><h2>{{ $t('Bestellers') }}</h2>
-                <STCard :title="$t('Bestellers van een webshop')">
+                <hr><h2>{{ $t('%Zva') }}</h2>
+                <STCard :title="$t('%ZxE')">
                     <template #left>
                         <IconContainer icon="basket" class="gray" />
                     </template>
                     <template #description>
-                        {{ $t('Open de bestellingen van een webshop en kies daar de actie Synchroniseren met Mailchimp. Bestellers krijgen een tag per webshop.') }}
-                        <a :href="$domains.getDocs('mailchimp-webshops')" class="inline-link" target="_blank" rel="noopener">{{ $t('Meer info') }}</a>
+                        {{ $t('%Zw2') }}
+                        <a :href="$domains.getDocs('mailchimp-webshops')" class="inline-link" target="_blank" rel="noopener">{{ $t('%19t') }}</a>
                     </template>
                 </STCard>
             </template>
 
             <template v-if="syncs.length">
-                <hr><h2>{{ $t('Laatste synchronisaties') }}</h2>
+                <hr><h2>{{ $t('%Zuk') }}</h2>
                 <STList>
                     <STListItem v-for="sync of syncs" :key="sync.id" :selectable="true" @click="openSync(sync)">
                         <template #left>
@@ -119,7 +119,7 @@
                             {{ formatDateTime(sync.createdAt) }} · {{ getSyncSummary(sync) }}
                         </p>
                         <template #right>
-                            <span v-if="sync.isRunning" class="style-tag">{{ $t('Bezig') }}</span>
+                            <span v-if="sync.isRunning" class="style-tag">{{ $t('%Zxc') }}</span>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -127,11 +127,11 @@
             </template>
 
             <template v-if="settings">
-                <hr><h2>{{ $t('Koppeling verwijderen') }}</h2>
-                <p>{{ $t('Stamhoofd vergeet dan je API-sleutel en instellingen. Contacten die al in Mailchimp staan, blijven daar staan.') }}</p>
+                <hr><h2>{{ $t('%Zuv') }}</h2>
+                <p>{{ $t('%Zv0') }}</p>
                 <button class="button secundary danger" type="button" @click="disconnect">
                     <span class="icon trash" />
-                    <span>{{ $t('Koppeling verwijderen') }}</span>
+                    <span>{{ $t('%Zuv') }}</span>
                 </button>
             </template>
         </main>
@@ -191,9 +191,9 @@ const newsletterDescription = computed(() => {
         return newsletterRecord.value.name.toString();
     }
     if (settings.value?.newsletterRecordId) {
-        return $t('De gekozen vraag bestaat niet meer. Kies een andere vraag.');
+        return $t('%ZvL');
     }
-    return $t('Geen: alle leden worden toegevoegd na jouw bevestiging bij het synchroniseren');
+    return $t('%Zww');
 });
 
 function formatDateTime(date: Date) {
@@ -202,9 +202,9 @@ function formatDateTime(date: Date) {
 
 function getSyncTitle(sync: MailchimpSync) {
     if (sync.type === MailchimpSyncType.Orders) {
-        return $t('Bestellingen');
+        return $t('%1JX');
     }
-    return sync.full ? $t('Alle leden') : $t('Selectie van leden');
+    return sync.full ? $t('%L8') : $t('%ZwZ');
 }
 
 function getSyncSummary(sync: MailchimpSync) {
@@ -212,13 +212,13 @@ function getSyncSummary(sync: MailchimpSync) {
         return sync.errorMessage ?? '';
     }
     const r = sync.result;
-    const summary = $t('{added} toegevoegd, {updated} bijgewerkt, {skipped} overgeslagen', {
+    const summary = $t('%Zx7', {
         added: r.added.toString(),
         updated: r.updated.toString(),
         skipped: r.skipped.toString(),
     });
     if (r.failed) {
-        return summary + ', ' + $t('{failed} mislukt', { failed: r.failed.toString() });
+        return summary + ', ' + $t('%Zx1', { failed: r.failed.toString() });
     }
     return summary;
 }
@@ -315,7 +315,7 @@ async function openSync(sync: MailchimpSync) {
 }
 
 async function disconnect() {
-    if (!await CenteredMessage.confirm($t('Koppeling met Mailchimp verwijderen?'), $t('Verwijderen'), $t('Contacten die al in Mailchimp staan, blijven daar staan.'))) {
+    if (!await CenteredMessage.confirm($t('%Zv1'), $t('%CJ'), $t('%ZwR'))) {
         return;
     }
     errors.errorBox = null;
@@ -328,7 +328,7 @@ async function disconnect() {
         });
         setSettings(null);
         syncs.value = [];
-        Toast.success($t('De koppeling met Mailchimp is verwijderd')).show();
+        Toast.success($t('%ZvV')).show();
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);

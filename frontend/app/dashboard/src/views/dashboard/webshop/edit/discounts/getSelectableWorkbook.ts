@@ -7,16 +7,16 @@ export function getSelectableWorkbook() {
         sheets: [
             new SelectableSheet({
                 id: 'discountCodes',
-                name: $t('Kortingscodes'),
-                description: $t('Eén rij per kortingscode. Dit bestand kan je later opnieuw importeren.'),
+                name: $t('%QM'),
+                description: $t('%Zvm'),
                 columns: [
                     new SelectableColumn({
                         id: 'code',
-                        name: $t('Code'),
+                        name: $t('%1eg'),
                     }),
                     new SelectableColumn({
                         id: 'email',
-                        name: $t('E-mailadres'),
+                        name: $t('%1FK'),
                     }),
                     new SelectableColumn({
                         id: 'description',
@@ -24,8 +24,8 @@ export function getSelectableWorkbook() {
                     }),
                     new SelectableColumn({
                         id: 'maximumUsage',
-                        name: $t('Maximum aantal keer gebruikt'),
-                        description: $t('Leeg betekent onbeperkt.'),
+                        name: $t('%Zwq'),
+                        description: $t('%ZxJ'),
                     }),
                 ],
             }),

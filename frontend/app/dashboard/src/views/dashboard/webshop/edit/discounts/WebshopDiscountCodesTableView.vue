@@ -5,7 +5,7 @@
         :filter-builders="filterBuilders"
         :default-sort-column="allColumns.find(c => c.id === 'createdAt')"
         :default-sort-direction="SortItemDirection.DESC"
-        :title="$t('Kortingscodes')"
+        :title="$t('%QM')"
         :column-configuration-id="configurationId"
         :actions="actions"
         :all-columns="allColumns"
@@ -13,7 +13,7 @@
         @click="openDiscountCode"
     >
         <template #empty>
-            {{ $t('Er zijn nog geen kortingscodes.') }}
+            {{ $t('%Zuj') }}
         </template>
     </ModernTableView>
 </template>
@@ -70,7 +70,7 @@ function openDiscountCode(discountCode: PrivateDiscountCode) {
 const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string>({
         id: 'code',
-        name: $t('Code'),
+        name: $t('%1eg'),
         getValue: object => object.code,
         compare: (a, b) => Sorter.byStringValue(a, b),
         getStyle: () => 'code',
@@ -80,9 +80,9 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
     new Column<ObjectType, string | null>({
         id: 'email',
-        name: $t('E-mailadres'),
+        name: $t('%1FK'),
         getValue: object => object.email,
-        format: value => value || $t('Geen e-mailadres'),
+        format: value => value || $t('%Ztx'),
         compare: (a, b) => Sorter.byStringValue(a ?? '', b ?? ''),
         getStyle: value => value ? '' : 'gray',
         minimumWidth: 160,
@@ -93,7 +93,7 @@ const allColumns: Column<ObjectType, any>[] = [
         id: 'description',
         name: $t('%6o'),
         getValue: object => object.description,
-        format: value => value || $t('Geen beschrijving'),
+        format: value => value || $t('%ZwI'),
         compare: (a, b) => Sorter.byStringValue(a, b),
         getStyle: value => value ? '' : 'gray',
         minimumWidth: 150,
@@ -102,7 +102,7 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
     new Column<ObjectType, number>({
         id: 'usageCount',
-        name: $t('Gebruikt'),
+        name: $t('%Zw6'),
         getValue: object => object.usageCount,
         format: value => Formatter.integer(value),
         compare: (a, b) => Sorter.byNumberValue(a, b),
@@ -111,9 +111,9 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
     new Column<ObjectType, number | null>({
         id: 'maximumUsage',
-        name: $t('Maximum'),
+        name: $t('%Zx4'),
         getValue: object => object.maximumUsage,
-        format: value => value === null ? $t('Onbeperkt') : Formatter.integer(value),
+        format: value => value === null ? $t('%4a') : Formatter.integer(value),
         compare: (a, b) => Sorter.byNumberValue(a ?? Number.MAX_SAFE_INTEGER, b ?? Number.MAX_SAFE_INTEGER),
         getStyle: value => value === null ? 'gray' : '',
         minimumWidth: 100,

@@ -220,17 +220,17 @@
             </template>
 
             <template v-if="mailchimpFeature">
-                <hr><h2>{{ $t('Integraties') }}</h2>
+                <hr><h2>{{ $t('%ZvE') }}</h2>
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" data-testid="open-mailchimp-settings" @click="$navigate(Routes.Mailchimp)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/partners/mailchimp/mailchimp.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Mailchimp') }}
+                            {{ $t('%Zuo') }}
                         </h2>
                         <p class="style-description-small">
-                            {{ $t('Synchroniseer leden en bestellers naar je Mailchimp-audience') }}
+                            {{ $t('%ZuM') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />

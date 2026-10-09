@@ -420,7 +420,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
         },
         {
             id: 'orderNumber',
-            name: $t('Bestelnummer'),
+            name: $t('%xA'),
             width: 16,
             getValue: (object: PaymentWithItem) => {
                 const order = object.balanceItemPayment.order;
@@ -651,7 +651,7 @@ export function getOrderColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>
     return [
         {
             id: 'orderNumbers',
-            name: $t('Bestelnummer'),
+            name: $t('%xA'),
             width: 24,
             getValue: (object: PaymentGeneralWithStripeAccount) => getOrderNumberCell(object.orders),
         },

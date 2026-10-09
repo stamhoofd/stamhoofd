@@ -993,7 +993,7 @@ export class MemberActionBuilder {
         }
         return [
             new AsyncTableAction({
-                name: $t('Synchroniseren met Mailchimp'),
+                name: $t('%Zv8'),
                 icon: 'sync',
                 priority: 7,
                 groupIndex: 3,

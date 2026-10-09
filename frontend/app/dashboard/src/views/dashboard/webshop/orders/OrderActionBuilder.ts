@@ -237,7 +237,7 @@ export class OrderActionBuilder {
 
             ...(isMailchimpReady(this.organizationManager.$context, this.platform, this.organizationManager.organization)
                 ? [new AsyncTableAction({
-                        name: $t('Synchroniseren met Mailchimp'),
+                        name: $t('%Zv8'),
                         icon: 'sync',
                         priority: 7,
                         groupIndex: 3,

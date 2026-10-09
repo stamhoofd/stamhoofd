@@ -202,11 +202,11 @@ const warnings = computed(() => {
         && props.member.patchedMember.details.getPhoneNumbersForVerification().length === 0
     ) {
         const warning = RecordWarning.create({
-            text: TranslatedString.create($t('Vic kan niet worden aangemeld via het ledenportaal. Voeg een telefoonnummer of e-mailadres toe zodat men zelf de beveiliginscode kan aanvragen.')),
+            text: TranslatedString.create($t('%Zvr')),
             type: RecordWarningType.Warning,
         }) as MemberWarning;
         warning.inlineLink = {
-            text: TranslatedString.create($t('Meer info')),
+            text: TranslatedString.create($t('%19t')),
             url: LocalizedDomains.getDocs('bestaande-leden-toelaten'),
         };
         warnings.push(warning);

@@ -807,10 +807,6 @@
     "original": "Aansluiting KSA Nationaal",
     "translation": "Affiliation KSA Nationaal"
   },
-  "%7h": {
-    "original": "Jouw leiding kan in Ravot jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf leiding, vraag het dan aan jouw medeleiding of KSA Nationaal.",
-    "translation": "Votre direction peut rechercher votre code de sécurité dans Ravot et vous le communiquer. Si vous êtes vous-même un responsable, demandez-le à vos collègues responsables ou à KSA National."
-  },
   "%7i": {
     "original": "Het bedrag zal achteraf door KSA Nationaal aan {name} worden gefactureerd",
     "translation": "Le montant sera ultérieurement facturé par KSA Nationaal à {name}."

@@ -29,7 +29,7 @@ export async function applySQLSorter(selectQuery: SQLSelect<any>, sortBy: SortLi
             throw new SimpleError({
                 code: 'invalid_sort',
                 message: 'Unknown sort key ' + s.key,
-                human: $t('Sorteren op dit veld is hier niet mogelijk'),
+                human: $t('%ZvO'),
                 statusCode: 400,
             });
         }

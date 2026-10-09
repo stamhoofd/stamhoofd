@@ -1,14 +1,14 @@
 <template>
-    <SaveView :title="title" :loading="saving" :disabled="needsConsent && !confirmedConsent" :save-text="$t('Synchroniseren')" save-icon="sync" data-testid="mailchimp-sync-view" @save="start">
+    <SaveView :title="title" :loading="saving" :disabled="needsConsent && !confirmedConsent" :save-text="$t('%Zw5')" save-icon="sync" data-testid="mailchimp-sync-view" @save="start">
         <h1>{{ title }}</h1>
         <p v-if="request.full">
-            {{ $t('Dit stuurt de huidige toestand van alle leden die in het huidige werkjaar ingeschreven zijn naar Mailchimp.') }}
+            {{ $t('%Zxd') }}
         </p>
         <p v-else-if="request.type === MailchimpSyncType.Orders">
-            {{ $t('De bestellers van de geselecteerde bestellingen worden toegevoegd aan Mailchimp of bijgewerkt. Geannuleerde bestellingen worden overgeslagen.') }}
+            {{ $t('%ZwS') }}
         </p>
         <p v-else>
-            {{ $t('De geselecteerde leden en hun ouders worden toegevoegd aan Mailchimp of bijgewerkt. Een selectie ruimt niets op: gebruik daarvoor de volledige synchronisatie in de instellingen.') }}
+            {{ $t('%Zvb') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -24,7 +24,7 @@
                     <span class="icon email" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('{count} e-mailadressen gaan naar Mailchimp', { count: preview.contacts.toString() }) }}
+                    {{ $t('%ZvJ', { count: preview.contacts.toString() }) }}
                 </h3>
             </STListItem>
             <STListItem v-if="preview.withoutConsent">
@@ -32,10 +32,10 @@
                     <span class="icon warning gray" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('{count} zonder nieuwsbrief-toestemming', { count: preview.withoutConsent.toString() }) }}
+                    {{ $t('%ZxK', { count: preview.withoutConsent.toString() }) }}
                 </h3>
                 <p class="style-description-small">
-                    {{ request.full ? $t('Ze worden niet toegevoegd, en uitgeschreven als ze al in Mailchimp staan.') : $t('Ze worden overgeslagen.') }}
+                    {{ request.full ? $t('%Zx5') : $t('%Zxb') }}
                 </p>
             </STListItem>
             <STListItem v-if="preview.unsubscribed">
@@ -43,10 +43,10 @@
                     <span class="icon warning gray" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('{count} uitgeschreven voor e-mails', { count: preview.unsubscribed.toString() }) }}
+                    {{ $t('%ZwB', { count: preview.unsubscribed.toString() }) }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Ze worden niet toegevoegd, en uitgeschreven als ze al in Mailchimp staan.') }}
+                    {{ $t('%Zx5') }}
                 </p>
             </STListItem>
             <STListItem v-if="preview.blocked">
@@ -54,32 +54,32 @@
                     <span class="icon warning gray" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('{count} worden overgeslagen', { count: preview.blocked.toString() }) }}
+                    {{ $t('%ZxU', { count: preview.blocked.toString() }) }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Ongeldig of geblokkeerd e-mailadres') }}
+                    {{ $t('%Zwv') }}
                 </p>
             </STListItem>
             </STList>
         </STCard>
 
         <p v-if="request.full" class="info-box">
-            {{ $t('Contacten in Mailchimp met ledentags van {platform} die niet meer overeenkomen met een ingeschreven lid, krijgen een tag die aangeeft dat ze niet meer ingeschreven zijn. Hoeveel dat er zijn, zie je na afloop.', { platform: platform.config.name }) }}
+            {{ $t('%ZvF', { platform: platform.config.name }) }}
         </p>
 
-        <hr><h2>{{ $t('Opties') }}</h2>
+        <hr><h2>{{ $t('%Zf3') }}</h2>
         <STList>
             <STListItem v-if="needsConsent" :selectable="true" element-name="label" data-testid="mailchimp-confirm-consent">
                 <template #left>
                     <Checkbox v-model="confirmedConsent" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ request.type === MailchimpSyncType.Orders ? $t('Ik bevestig dat deze bestellers toestemming gaven om mijn nieuwsbrief te ontvangen') : $t('Ik bevestig dat ik toestemming heb om deze personen te mailen') }}
+                    {{ request.type === MailchimpSyncType.Orders ? $t('%Zuy') : $t('%Zu6') }}
                 </h3>
                 <p class="style-description-small">
                     {{ request.type === MailchimpSyncType.Orders
-                        ? $t('Wie iets bestelt, heeft daarmee nog niet ingestemd met een nieuwsbrief. Bestaande contacten die zich in Mailchimp uitschreven, blijven uitgeschreven.')
-                        : $t('Bestaande contacten die zich in Mailchimp uitschreven, blijven uitgeschreven.') }}
+                        ? $t('%ZvR')
+                        : $t('%Zw4') }}
                 </p>
             </STListItem>
 
@@ -88,10 +88,10 @@
                     <Checkbox v-model="archiveRemoved" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Ook archiveren in Mailchimp') }}
+                    {{ $t('%ZwO') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Contacten die niet meer overeenkomen worden gearchiveerd. In Mailchimp kan je dat ongedaan maken.') }}
+                    {{ $t('%Zvx') }}
                 </p>
             </STListItem>
 
@@ -100,10 +100,10 @@
                     <Checkbox v-model="doubleOptIn" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Bevestigingsmail door Mailchimp') }}
+                    {{ $t('%Ztw') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Nieuwe contacten moeten eerst bevestigen (double opt-in).') }}
+                    {{ $t('%ZvM') }}
                 </p>
             </STListItem>
         </STList>
@@ -154,7 +154,7 @@ const confirmedConsent = ref(false);
 const archiveRemoved = ref(false);
 const doubleOptIn = ref(false);
 
-const title = computed(() => props.request.full ? $t('Alle leden synchroniseren') : $t('Synchroniseren met Mailchimp'));
+const title = computed(() => props.request.full ? $t('%Zws') : $t('%Zv8'));
 
 // With a newsletter record the consent is recorded per member
 const needsConsent = computed(() => props.request.type === MailchimpSyncType.Orders || !settings.value?.newsletterRecordId);

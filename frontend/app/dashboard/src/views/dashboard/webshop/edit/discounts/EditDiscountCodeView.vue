@@ -21,9 +21,9 @@
             {{ $t('%S1') }} <span v-copyable="'https://'+link" class="style-copyable style-inline-code">{{ link }}</span>
         </p>
 
-        <EmailInput v-model="email" :required="false" :validator="errors.validator" :title="$t('E-mailadres')" :placeholder="$t('Optioneel')" />
+        <EmailInput v-model="email" :required="false" :validator="errors.validator" :title="$t('%1FK')" :placeholder="$t('%14p')" />
         <p class="style-description-small">
-            {{ $t('Enkel om de kortingscode per e-mail te versturen. De code werkt ook voor bestellers met een ander e-mailadres en wordt niet automatisch toegepast.') }}
+            {{ $t('%Zue') }}
         </p>
 
         <STInputBox class="max" error-fields="description" :error-box="errors.errorBox" :title="$t(`%6o`)">
@@ -285,7 +285,7 @@ async function deleteMe() {
     if (!await CenteredMessage.confirm({
         title: code.value ? $t('%Zn2', { name: code.value }) : $t('Deze kortingscode verwijderen?'),
         confirmText: $t('%CJ'),
-        description: $t('Je kan dit niet ongedaan maken.'),
+        description: $t('%1Fc'),
         availabilityDelay: 2_000,
     })) {
         return;

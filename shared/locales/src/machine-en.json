@@ -1787,10 +1787,6 @@
     "original": "Filter op bestellingen die minstens één artikel in het winkelmandje hebben die aan deze voorwaarden voldoet",
     "translation": "Filter on orders that have at least one item in the shopping cart that meets these conditions"
   },
-  "%17S": {
-    "original": "tarieven",
-    "translation": "tariffs"
-  },
   "%17T": {
     "original": "Aantal stuks",
     "translation": "Quantity"
@@ -8879,10 +8875,6 @@
     "original": "Wissel via de knop links bovenaan tussen het beheerdersportaal en het ledenportaal.",
     "translation": "Switch between the administrators portal and the member portal using the button at the top left."
   },
-  "%1eA": {
-    "original": "Alle zichtbare kortingscodes verwijderen",
-    "translation": "Delete all visible discount codes"
-  },
   "%1eC": {
     "original": "Alle vragenlijsten",
     "translation": "All forms"
@@ -8902,10 +8894,6 @@
   "%1eH": {
     "original": "Gedeeltelijke betaling/terugbetaling voor bestelling",
     "translation": "Partial payment/refund for order"
-  },
-  "%1eI": {
-    "original": "Alle kortingscodes verwijderen",
-    "translation": "Remove all discount codes"
   },
   "%1eK": {
     "original": "Kopieer instellingen naar...",
@@ -8946,10 +8934,6 @@
   "%1eZ": {
     "original": "Verwijder uit favorieten",
     "translation": "Remove from favorites"
-  },
-  "%1ec": {
-    "original": "Kortingscode verwijderen",
-    "translation": "Delete discount code"
   },
   "%1ed": {
     "original": "Er zijn geen andere kortingscodes om de instellingen naar te kopiëren.",
@@ -10190,10 +10174,6 @@
   "%7g": {
     "original": "Aansluiting Stamhoofd",
     "translation": "Affiliation Stamhoofd"
-  },
-  "%7h": {
-    "original": "Jouw leiding kan in Stamhoofd jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf leiding, vraag het dan aan jouw medeleiding of Stamhoofd.",
-    "translation": "Your leaders can find your security code in Stamhoofd and share it with you. If you are a leader yourself, ask your fellow leaders or Stamhoofd."
   },
   "%7i": {
     "original": "Het bedrag zal achteraf door Stamhoofd aan {name} worden gefactureerd",
@@ -14631,10 +14611,6 @@
     "original": "Kortingscodes",
     "translation": "Discount codes"
   },
-  "%QN": {
-    "original": "Bestellers kunnen een kortingscode inruilen door een link te gebruiken of door manueel de code in te typen bij het openen van het winkelmandje.",
-    "translation": "Orderers can redeem a discount code by using a link or by manually typing in the code when opening the shopping cart."
-  },
   "%QO": {
     "original": "Sta invullen van kortingscodes toe",
     "translation": "Allow filling in discount codes"
@@ -14642,14 +14618,6 @@
   "%QP": {
     "original": "Als je dit uitschakelt kunnen bestellers enkel een kortingscode gebruiken via een link.",
     "translation": "If you disable this, orderers can only use a discount code via a link."
-  },
-  "%QQ": {
-    "original": "keer gebruikt",
-    "translation": "times used"
-  },
-  "%QR": {
-    "original": "Je hebt nog geen kortingscodes aangemaakt voor deze webshop",
-    "translation": "You have not yet created any discount codes for this webshop"
   },
   "%QS": {
     "original": "Geen tickets",
@@ -19267,10 +19235,6 @@
     "original": "Vragenlijst ‘{name}’ verwijderen?",
     "translation": "Delete form '{name}'?"
   },
-  "%Zm3": {
-    "original": "Volgende kortingscodes worden verwijderd: {codes}. Ze worden pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
-    "translation": "The following discount codes will be deleted: {codes}. They will only be permanently deleted when you proceed and save all changes."
-  },
   "%Zm4": {
     "original": "‘{name}’ verwijderen en alle artikels erin behouden?",
     "translation": "Delete '{name}' but keep all articles inside?"
@@ -19366,10 +19330,6 @@
   "%ZmR": {
     "original": "Deze facturatiegegevens verwijderen?",
     "translation": "Delete these billing data?"
-  },
-  "%ZmS": {
-    "original": "De kortingscode wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
-    "translation": "The discount code will only be permanently deleted when you proceed and save all changes."
   },
   "%ZmT": {
     "original": "Bekijk het platform zoals deze beheerder het ziet. Je krijgt een link die je in een privévenster opent.",
@@ -19570,14 +19530,6 @@
   "%ZnL": {
     "original": "Inloggen als deze gebruiker",
     "translation": "Log in as this user"
-  },
-  "%ZnM": {
-    "original": "Alle kortingscodes verwijderen?",
-    "translation": "Delete all discount codes?"
-  },
-  "%ZnN": {
-    "original": "Alle zichtbare kortingscodes verwijderen?",
-    "translation": "Delete all visible discount codes?"
   },
   "%ZnO": {
     "original": "Het zaalplan wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
@@ -20395,10 +20347,6 @@
     "original": "Beheer hier alle personen die toegang hebben tot Stamhoofd, en wijzig hun toegangsrechten. <button>Meer info</button>",
     "translation": "Manage here all persons who have access to Stamhoofd, and adjust their access rights. <button>More info</button>"
   },
-  "%ZsR": {
-    "original": "Je hebt geen toegang tot dit werkjaar. Wissel van werkjaar om jouw groepen te bekijken.",
-    "translation": "You do not have access to this work year. Switch work year to view your groups."
-  },
   "%ZsS": {
     "original": "Vul hier enkel een e-mailadres van {firstName} zelf in, niet van een ouder. Laat het anders leeg.",
     "translation": "Only enter an email address belonging to {firstName} here, not that of a parent. Otherwise leave it blank."
@@ -20703,21 +20651,781 @@
     "original": "Dit e-mailadres is al in gebruik door een ander account. Log in met dat account of kies een ander e-mailadres.",
     "translation": "This email address is already in use by another account. Log in with that account or choose a different email address."
   },
+  "%Zts": {
+    "original": "Vraag de code aan jouw Stamhoofd-verantwoordelijke",
+    "translation": "Request the code from your Stamhoofd contact person"
+  },
+  "%Ztw": {
+    "original": "Bevestigingsmail door Mailchimp",
+    "translation": "Confirmation email by Mailchimp"
+  },
+  "%Ztx": {
+    "original": "Geen e-mailadres",
+    "translation": "No email address"
+  },
+  "%Zty": {
+    "original": "Er loopt nog een synchronisatie. Wacht tot die klaar is.",
+    "translation": "A synchronization is still in progress. Please wait until it is finished."
+  },
+  "%Ztz": {
+    "original": "Er loopt al een synchronisatie met Mailchimp. Wacht tot die klaar is.",
+    "translation": "A synchronization with Mailchimp is already ongoing. Please wait until it is finished."
+  },
   "%Zu": {
     "original": "De redirect URI behoud je best op de voorgestelde waarde.",
     "translation": "It is best to keep the redirect URI at the suggested value."
+  },
+  "%Zu0": {
+    "original": "Fouten",
+    "translation": "Errors"
+  },
+  "%Zu1": {
+    "original": "Antwoorden die 'ja' betekenen",
+    "translation": "Answers that mean 'yes'"
+  },
+  "%Zu2": {
+    "original": "API-sleutel",
+    "translation": "API key"
+  },
+  "%Zu4": {
+    "original": "E-mail versturen",
+    "translation": "Send email"
+  },
+  "%Zu5": {
+    "original": "Leden en bestellers komen allemaal in dezelfde audience terecht. Je kan ze in Mailchimp van elkaar onderscheiden met tags. Mailchimp raadt zelf ook één audience aan: contacten in meerdere audiences tellen dubbel mee voor je abonnement.",
+    "translation": "Members and buyers end up in the same audience. You can distinguish them in Mailchimp using tags. Mailchimp itself recommends using a single audience: contacts in multiple audiences are counted twice towards your subscription."
+  },
+  "%Zu6": {
+    "original": "Ik bevestig dat ik toestemming heb om deze personen te mailen",
+    "translation": "I confirm that I have permission to email these people"
+  },
+  "%Zu7": {
+    "original": "Geblokkeerd (hard bounce)",
+    "translation": "Blocked (hard bounce)"
+  },
+  "%ZuA": {
+    "original": "Je kan enkel leden synchroniseren als je het ledenbeheer-pakket gebruikt.",
+    "translation": "You can only synchronize members if you use the member management package."
+  },
+  "%ZuB": {
+    "original": "Deze webshop werd niet gevonden",
+    "translation": "This webshop was not found"
+  },
+  "%ZuC": {
+    "original": "Kies per veld welke kolom uit je bestand je wilt gebruiken.",
+    "translation": "Choose for each field which column from your file you want to use."
+  },
+  "%ZuD": {
+    "original": "Vraag de code aan Stamhoofd",
+    "translation": "Request the code from Stamhoofd"
+  },
+  "%ZuF": {
+    "original": "Kies de vraag waarmee leden aangeven dat ze de nieuwsbrief willen ontvangen. Enkel aankruisvakjes en keuzevragen zijn mogelijk.",
+    "translation": "Select the question that members use to indicate they want to receive the newsletter. Only checkboxes and multiple choice questions are supported."
+  },
+  "%ZuG": {
+    "original": "Jouw leiding kan",
+    "translation": "Your leaders can"
+  },
+  "%ZuJ": {
+    "original": "Bestand kiezen",
+    "translation": "Choose file"
+  },
+  "%ZuK": {
+    "original": "Kortingscodes geïmporteerd.",
+    "translation": "Discount codes imported."
+  },
+  "%ZuL": {
+    "original": "bv. a1b2c3…-us21",
+    "translation": "e.g. a1b2c3…-us21"
+  },
+  "%ZuM": {
+    "original": "Synchroniseer leden en bestellers naar je Mailchimp-audience",
+    "translation": "Synchronize members and buyers to your Mailchimp audience"
+  },
+  "%ZuN": {
+    "original": "beheerder",
+    "translation": "administrator"
+  },
+  "%ZuO": {
+    "original": "Bijgewerkt",
+    "translation": "Updated"
+  },
+  "%ZuQ": {
+    "original": "{count} contacten",
+    "translation": "{count} contacts"
+  },
+  "%ZuR": {
+    "original": "Zoek een vraag…",
+    "translation": "Find a question…"
+  },
+  "%ZuS": {
+    "original": "De synchronisatie werd onderbroken. Probeer opnieuw.",
+    "translation": "The synchronization was interrupted. Please try again."
+  },
+  "%ZuT": {
+    "original": "Er werden geen rijen gevonden om te importeren.",
+    "translation": "No rows were found to import."
+  },
+  "%ZuU": {
+    "original": "Standaard e-mail met kortingscode",
+    "translation": "Default email with discount code"
+  },
+  "%ZuW": {
+    "original": "Contacteer Stamhoofd en verduidelijk waarom je toegang nodig hebt tot {member}.",
+    "translation": "Contact Stamhoofd and clarify why you need access to {member}."
+  },
+  "%ZuX": {
+    "original": "Dit e-mailadres staat meerdere keren in het bestand.",
+    "translation": "This email address appears multiple times in the file."
+  },
+  "%ZuZ": {
+    "original": "Er ging iets mis bij het synchroniseren met Mailchimp.",
+    "translation": "Something went wrong while synchronizing with Mailchimp."
+  },
+  "%Zua": {
+    "original": "Vragen van {group}",
+    "translation": "Questions from {group}"
+  },
+  "%Zub": {
+    "original": "Geen nieuwsbriefvraag",
+    "translation": "No newsletter question"
+  },
+  "%Zue": {
+    "original": "Enkel om de kortingscode per e-mail te versturen. De code werkt ook voor bestellers met een ander e-mailadres en wordt niet automatisch toegepast.",
+    "translation": "Only to send the discount code by email. The code also works for buyers with another email address and is not automatically applied."
+  },
+  "%Zuf": {
+    "original": "Vragen van {platform}",
+    "translation": "Questions from {platform}"
+  },
+  "%Zug": {
+    "original": "Er zijn nog geen vragen die je hiervoor kan gebruiken. Voeg eerst een vraag toe aan je vragenlijsten.",
+    "translation": "There are no questions available for this yet. Please add a question to your forms first."
+  },
+  "%Zuh": {
+    "original": "Alle leden worden toegevoegd na jouw bevestiging bij het synchroniseren",
+    "translation": "All members will be added after your confirmation during synchronization"
+  },
+  "%Zui": {
+    "original": "Mailchimp-koppeling",
+    "translation": "Mailchimp connection"
+  },
+  "%Zuj": {
+    "original": "Er zijn nog geen kortingscodes.",
+    "translation": "No discount codes yet."
+  },
+  "%Zuk": {
+    "original": "Laatste synchronisaties",
+    "translation": "Latest synchronizations"
+  },
+  "%Zul": {
+    "original": "Kortingscodes beheren",
+    "translation": "Manage discount codes"
+  },
+  "%Zum": {
+    "original": "Geen vragen gevonden",
+    "translation": "No questions found"
+  },
+  "%Zun": {
+    "original": "Toegevoegd",
+    "translation": "Added"
+  },
+  "%Zuo": {
+    "original": "Mailchimp",
+    "translation": "Mailchimp"
+  },
+  "%Zup": {
+    "original": "Upload een Excel- of CSV-bestand met één rij per kortingscode. Rijen zonder code krijgen automatisch een nieuwe code. Rijen met een bestaande code of een bestaand e-mailadres werken die kortingscode bij.",
+    "translation": "Upload an Excel or CSV file with one row per discount code. Rows without a code will automatically get a new code. Rows with an existing code or email address will update that discount code."
+  },
+  "%Zuq": {
+    "original": "We konden de aansluiting niet vinden, mogelijk werd deze verwijderd.",
+    "translation": "We couldn't find the affiliation, it may have been deleted."
+  },
+  "%Zur": {
+    "original": "Bevestig dat je toestemming hebt om deze personen te mailen.",
+    "translation": "Confirm that you have permission to email these people."
+  },
+  "%Zus": {
+    "original": "de hoofdbeheerder van {org}",
+    "translation": "the main administrator of {org}"
+  },
+  "%Zut": {
+    "original": "Je kan dit venster sluiten, de synchronisatie loopt verder.",
+    "translation": "You can close this window; synchronization will continue."
+  },
+  "%Zuu": {
+    "original": "Nog niet gekoppeld",
+    "translation": "Not connected yet"
+  },
+  "%Zuv": {
+    "original": "Koppeling verwijderen",
+    "translation": "Delete connection"
+  },
+  "%Zux": {
+    "original": "Nieuwsbriefvraag",
+    "translation": "Newsletter question"
+  },
+  "%Zuy": {
+    "original": "Ik bevestig dat deze bestellers toestemming gaven om mijn nieuwsbrief te ontvangen",
+    "translation": "I confirm that these buyers gave permission to receive my newsletter"
+  },
+  "%Zuz": {
+    "original": "Vraag de code aan {contact}",
+    "translation": "Request the code from {contact}"
   },
   "%Zv": {
     "original": "bv. https://login.microsoftonline.com/contoso.onmicrosoft.com/v2.0",
     "translation": "e.g. https://login.microsoftonline.com/contoso.onmicrosoft.com/v2.0"
   },
+  "%Zv0": {
+    "original": "Stamhoofd vergeet dan je API-sleutel en instellingen. Contacten die al in Mailchimp staan, blijven daar staan.",
+    "translation": "Stamhoofd will then forget your API key and settings. Contacts already in Mailchimp will remain there."
+  },
+  "%Zv1": {
+    "original": "Koppeling met Mailchimp verwijderen?",
+    "translation": "Remove connection with Mailchimp?"
+  },
+  "%Zv5": {
+    "original": "Mailchimp is nog niet gekoppeld.",
+    "translation": "Mailchimp is not yet connected."
+  },
+  "%Zv6": {
+    "original": "Bestellers kunnen een kortingscode inruilen door een link te gebruiken of door manueel de code in te typen bij het openen van het winkelmandje. Je kan ze ook importeren, exporteren of mailen.",
+    "translation": "Buyers can redeem a discount code by clicking a link or manually entering the code when opening the cart. You can also import, export, or email them."
+  },
+  "%Zv7": {
+    "original": "Importeer best ook minstens één e-mailadres en één telefoonnummer van leden. Zo kunnen leden of ouders automatisch toegang krijgen als ze zich aanmelden in het ledenportaal.",
+    "translation": "It's best to import at least one email address and one phone number for members. This way, members or parents can automatically get access when logging into the member portal."
+  },
+  "%Zv8": {
+    "original": "Synchroniseren met Mailchimp",
+    "translation": "Synchronize with Mailchimp"
+  },
+  "%Zv9": {
+    "original": "Kolommen",
+    "translation": "Columns"
+  },
+  "%ZvA": {
+    "original": "Deze audience werd niet gevonden in je Mailchimp-account.",
+    "translation": "This audience was not found in your Mailchimp account."
+  },
+  "%ZvB": {
+    "original": "Vragen bij inschrijving voor {group}",
+    "translation": "Questions for registration for {group}"
+  },
+  "%ZvC": {
+    "original": "Audience",
+    "translation": "Audience"
+  },
+  "%ZvE": {
+    "original": "Integraties",
+    "translation": "Integrations"
+  },
+  "%ZvF": {
+    "original": "Contacten in Mailchimp met ledentags van {platform} die niet meer overeenkomen met een ingeschreven lid, krijgen een tag die aangeeft dat ze niet meer ingeschreven zijn. Hoeveel dat er zijn, zie je na afloop.",
+    "translation": "Contacts in Mailchimp with member tags from {platform} that no longer match a registered member will get a tag indicating they are no longer registered. You can see how many there are afterwards."
+  },
+  "%ZvG": {
+    "original": "Uitgeschreven voor e-mails",
+    "translation": "Unsubscribed from emails"
+  },
+  "%ZvH": {
+    "original": "Synchronisatie",
+    "translation": "Synchronization"
+  },
+  "%ZvJ": {
+    "original": "{count} e-mailadressen gaan naar Mailchimp",
+    "translation": "{count} email addresses will be sent to Mailchimp"
+  },
+  "%ZvK": {
+    "original": "{processed} van {total}",
+    "translation": "{processed} of {total}"
+  },
+  "%ZvL": {
+    "original": "De gekozen vraag bestaat niet meer. Kies een andere vraag.",
+    "translation": "The selected question no longer exists. Please choose another question."
+  },
+  "%ZvM": {
+    "original": "Nieuwe contacten moeten eerst bevestigen (double opt-in).",
+    "translation": "New contacts must confirm first (double opt-in)."
+  },
+  "%ZvN": {
+    "original": "Verbonden als '{account}' ({dataCenter})",
+    "translation": "Connected as '{account}' ({dataCenter})"
+  },
+  "%ZvO": {
+    "original": "Sorteren op dit veld is hier niet mogelijk",
+    "translation": "Sorting on this field is not possible here"
+  },
+  "%ZvP": {
+    "original": "Extra tags uit vragen",
+    "translation": "Extra tags from questions"
+  },
+  "%ZvQ": {
+    "original": "Mailchimp weigerde de API-sleutel. Controleer of de sleutel nog bestaat in je Mailchimp-account.",
+    "translation": "Mailchimp rejected the API key. Please check if the key still exists in your Mailchimp account."
+  },
+  "%ZvR": {
+    "original": "Wie iets bestelt, heeft daarmee nog niet ingestemd met een nieuwsbrief. Bestaande contacten die zich in Mailchimp uitschreven, blijven uitgeschreven.",
+    "translation": "Placing an order does not mean someone has agreed to a newsletter. Existing contacts who unsubscribed in Mailchimp will remain unsubscribed."
+  },
+  "%ZvS": {
+    "original": "Kortingscodes importeren",
+    "translation": "Import discount codes"
+  },
+  "%ZvT": {
+    "original": "Geen nieuwsbrief-toestemming",
+    "translation": "No newsletter consent"
+  },
+  "%ZvU": {
+    "original": "Koppeling",
+    "translation": "Connection"
+  },
+  "%ZvV": {
+    "original": "De koppeling met Mailchimp is verwijderd",
+    "translation": "The connection to Mailchimp has been removed"
+  },
+  "%ZvX": {
+    "original": "Mailchimp is gekoppeld",
+    "translation": "Mailchimp is connected"
+  },
+  "%ZvY": {
+    "original": "Nog niet gekozen",
+    "translation": "Not selected yet"
+  },
+  "%ZvZ": {
+    "original": "Overgeslagen en mislukte adressen",
+    "translation": "Skipped and failed addresses"
+  },
+  "%Zva": {
+    "original": "Bestellers",
+    "translation": "Buyers"
+  },
+  "%Zvb": {
+    "original": "De geselecteerde leden en hun ouders worden toegevoegd aan Mailchimp of bijgewerkt. Een selectie ruimt niets op: gebruik daarvoor de volledige synchronisatie in de instellingen.",
+    "translation": "The selected members and their parents will be added to or updated in Mailchimp. A selection does not clean up anything: use full synchronization in the settings for that."
+  },
+  "%Zvc": {
+    "original": "Synchroniseer leden van alle verenigingen naar een audience van de koepel",
+    "translation": "Sync members from all associations to an audience of the umbrella organization"
+  },
+  "%Zvd": {
+    "original": "Laat leeg voor onbeperkt gebruik.",
+    "translation": "Leave empty for unlimited use."
+  },
+  "%Zve": {
+    "original": "Koppelen",
+    "translation": "Connect"
+  },
+  "%Zvf": {
+    "original": "Een hoofdbeheerder van {org} kan de beveiligingscode opzoeken en doorgeven, of zelfs deze inschrijving doen.",
+    "translation": "A main administrator of {org} can look up and share the security code, or even complete this registration."
+  },
+  "%Zvh": {
+    "original": "{count} kortingscodes verwijderen?",
+    "translation": "Delete {count} discount codes?"
+  },
+  "%Zvi": {
+    "original": "Open de webshop om e-mails met kortingscodes te versturen.",
+    "translation": "Open the webshop to send emails with discount codes."
+  },
+  "%Zvj": {
+    "original": "Kies welke antwoorden 'ja' betekenen.",
+    "translation": "Select which answers count as 'yes'."
+  },
+  "%Zvk": {
+    "original": "Vul een API-sleutel in",
+    "translation": "Enter an API key"
+  },
+  "%Zvl": {
+    "original": "Het nummer van de webshopbestelling die werd betaald (indien van toepassing)",
+    "translation": "The order number of the webshop order that was paid (if applicable)"
+  },
+  "%Zvm": {
+    "original": "Eén rij per kortingscode. Dit bestand kan je later opnieuw importeren.",
+    "translation": "One row per discount code. You can re-import this file later if needed."
+  },
+  "%Zvn": {
+    "original": "Bestellingen kunnen enkel per vereniging gesynchroniseerd worden.",
+    "translation": "Orders can only be synchronized per association."
+  },
+  "%Zvp": {
+    "original": "de beheerders van {org}",
+    "translation": "the administrators of {org}"
+  },
+  "%Zvq": {
+    "original": "Vul een code in.",
+    "translation": "Enter a code."
+  },
+  "%Zvr": {
+    "original": "Vic kan niet worden aangemeld via het ledenportaal. Voeg een telefoonnummer of e-mailadres toe zodat men zelf de beveiliginscode kan aanvragen.",
+    "translation": "Vic cannot be registered via the member portal. Add a phone number or email address so the security code can be requested."
+  },
+  "%Zvs": {
+    "original": "Er staan nog geen audiences in je Mailchimp-account. Maak er eerst één aan in Mailchimp.",
+    "translation": "There are no audiences yet in your Mailchimp account. Please create one in Mailchimp first."
+  },
+  "%Zvu": {
+    "original": "Alle leden die in het huidige werkjaar ingeschreven zijn, en hun ouders, komen in Mailchimp met een tag per groep.",
+    "translation": "All members registered in the current work year and their parents will appear in Mailchimp with a tag for each group."
+  },
+  "%Zvv": {
+    "original": "Kies minstens één kolom om te importeren.",
+    "translation": "Select at least one column to import."
+  },
+  "%Zvw": {
+    "original": "Gearchiveerd in Mailchimp, maak dat eerst ongedaan in Mailchimp",
+    "translation": "Archived in Mailchimp, undo this in Mailchimp first"
+  },
+  "%Zvx": {
+    "original": "Contacten die niet meer overeenkomen worden gearchiveerd. In Mailchimp kan je dat ongedaan maken.",
+    "translation": "Contacts that no longer match will be archived. In Mailchimp you can undo this."
+  },
+  "%Zvy": {
+    "original": "Deze API-sleutel is ongeldig. Kopieer de volledige sleutel uit Mailchimp, inclusief het deel na het streepje (bv. -us21).",
+    "translation": "This API key is invalid. Copy the entire key from Mailchimp, including the part after the dash (e.g. -us21)."
+  },
+  "%Zvz": {
+    "original": "Maak in Mailchimp een API-sleutel aan via je profiel → Extras → API keys → Create A Key, en plak die hieronder. De sleutel wordt enkel op onze server bewaard.",
+    "translation": "Create an API key in Mailchimp via your profile → Extras → API keys → Create A Key, and paste it below. The key is only stored on our server."
+  },
   "%Zw": {
     "original": "bv. 12345678-1234-1234-1234-123456789012",
     "translation": "e.g. 12345678-1234-1234-1234-123456789012"
   },
+  "%Zw0": {
+    "original": "Lees de handleiding",
+    "translation": "Read the manual"
+  },
+  "%Zw1": {
+    "original": "Volgende kortingscodes worden verwijderd: {codes}. Je kan dit niet ongedaan maken.",
+    "translation": "The following discount codes will be deleted: {codes}. You cannot undo this."
+  },
+  "%Zw2": {
+    "original": "Open de bestellingen van een webshop en kies daar de actie Synchroniseren met Mailchimp. Bestellers krijgen een tag per webshop.",
+    "translation": "Open the orders of a webshop and select the action Synchronize with Mailchimp there. Buyers will receive a tag for each webshop."
+  },
+  "%Zw3": {
+    "original": "Vul een positief geheel getal in.",
+    "translation": "Enter a positive whole number."
+  },
+  "%Zw4": {
+    "original": "Bestaande contacten die zich in Mailchimp uitschreven, blijven uitgeschreven.",
+    "translation": "Existing contacts who unsubscribed in Mailchimp will stay unsubscribed."
+  },
+  "%Zw5": {
+    "original": "Synchroniseren",
+    "translation": "Synchronize"
+  },
+  "%Zw6": {
+    "original": "Gebruikt",
+    "translation": "Used"
+  },
+  "%Zw7": {
+    "original": "Voeg persoonlijke kortingscodes toe, filter de lijst en verstuur ze per e-mail.",
+    "translation": "Add personal discount codes, filter the list, and send them by email."
+  },
+  "%Zw9": {
+    "original": "De beheerders kunnen",
+    "translation": "The administrators can"
+  },
+  "%ZwA": {
+    "original": "Koppel eerst Mailchimp en kies een audience.",
+    "translation": "First connect Mailchimp and choose an audience."
+  },
+  "%ZwB": {
+    "original": "{count} uitgeschreven voor e-mails",
+    "translation": "{count} unsubscribed from emails"
+  },
+  "%ZwD": {
+    "original": "Plak een nieuwe API-sleutel",
+    "translation": "Paste a new API key"
+  },
+  "%ZwF": {
+    "original": "Laat leeg om automatisch codes te genereren.",
+    "translation": "Leave empty to automatically generate codes."
+  },
+  "%ZwG": {
+    "original": "We konden dit bestand niet lezen. Kies een Excel- of CSV-bestand.",
+    "translation": "We could not read this file. Please select an Excel or CSV file."
+  },
+  "%ZwH": {
+    "original": "leiding",
+    "translation": "leaders"
+  },
+  "%ZwI": {
+    "original": "Geen beschrijving",
+    "translation": "No description"
+  },
+  "%ZwK": {
+    "original": "Deze vraag kan je niet gebruiken voor Mailchimp. Enkel aankruisvakjes en keuzevragen die niet gevoelig zijn, zijn mogelijk.",
+    "translation": "You cannot use this question for Mailchimp. Only checkboxes and non-sensitive multiple choice questions are supported."
+  },
+  "%ZwL": {
+    "original": "Stuur de huidige toestand van alle ingeschreven leden naar Mailchimp. Een selectie synchroniseer je vanuit de ledenlijst.",
+    "translation": "Send the current status of all registered members to Mailchimp. You can sync a selection from the member list."
+  },
+  "%ZwM": {
+    "original": "De knop opent de webshop en past automatisch de kortingscode toe.",
+    "translation": "The button opens the webshop and automatically applies the discount code."
+  },
+  "%ZwO": {
+    "original": "Ook archiveren in Mailchimp",
+    "translation": "Also archive in Mailchimp"
+  },
+  "%ZwP": {
+    "original": "Welk antwoord betekent 'ja'?",
+    "translation": "Which answer means 'yes'?"
+  },
+  "%ZwQ": {
+    "original": "De Mailchimp-koppeling is niet beschikbaar.",
+    "translation": "The Mailchimp integration is not available."
+  },
+  "%ZwR": {
+    "original": "Contacten die al in Mailchimp staan, blijven daar staan.",
+    "translation": "Contacts already in Mailchimp will remain there."
+  },
+  "%ZwS": {
+    "original": "De bestellers van de geselecteerde bestellingen worden toegevoegd aan Mailchimp of bijgewerkt. Geannuleerde bestellingen worden overgeslagen.",
+    "translation": "The purchasers of the selected orders will be added to or updated in Mailchimp. Cancelled orders will be skipped."
+  },
+  "%ZwT": {
+    "original": "Importeren",
+    "translation": "Import"
+  },
+  "%ZwU": {
+    "original": "Besteller",
+    "translation": "Purchaser"
+  },
+  "%ZwV": {
+    "original": "Niet meer ingeschreven",
+    "translation": "No longer registered"
+  },
+  "%ZwW": {
+    "original": "Codes met hetzelfde e-mailadres worden bijgewerkt.",
+    "translation": "Codes with the same email address will be updated."
+  },
+  "%ZwX": {
+    "original": "Vraag het lid om zichzelf in te schrijven via het ledenportaal",
+    "translation": "Ask the member to register via the member portal"
+  },
+  "%ZwY": {
+    "original": "Geblokkeerd (gemarkeerd als spam)",
+    "translation": "Blocked (marked as spam)"
+  },
+  "%ZwZ": {
+    "original": "Selectie van leden",
+    "translation": "Selection of members"
+  },
+  "%Zwa": {
+    "original": "Het veld {tag} bestaat al in je Mailchimp-audience, maar is geen tekstveld. Wijzig of verwijder dat veld in Mailchimp en probeer opnieuw.",
+    "translation": "The field {tag} already exists in your Mailchimp audience, but it is not a text field. Please change or remove this field in Mailchimp and try again."
+  },
+  "%Zwb": {
+    "original": "{count} rijen gevonden in dit bestand.",
+    "translation": "{count} rows found in this file."
+  },
+  "%Zwd": {
+    "original": "Kies één",
+    "translation": "Choose one"
+  },
+  "%Zwh": {
+    "original": "Geen: kies vragen waarvan het antwoord een tag wordt in Mailchimp",
+    "translation": "None: select questions whose answers will become tags in Mailchimp"
+  },
+  "%Zwi": {
+    "original": "Kortingscode-knop",
+    "translation": "Discount code button"
+  },
+  "%Zwk": {
+    "original": "Geen kolom",
+    "translation": "No column"
+  },
+  "%Zwn": {
+    "original": "{contactCan} in Stamhoofd jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf {role}, vraag het dan aan {alternative}.",
+    "translation": "{contactCan} in Stamhoofd can look up your security code and pass it on to you. If you are the {role}, ask {alternative}."
+  },
+  "%Zwo": {
+    "original": "De nieuwsbriefvraag bestaat niet meer of kan niet meer gebruikt worden. Kies een andere nieuwsbriefvraag in de Mailchimp-instellingen.",
+    "translation": "The newsletter question no longer exists or cannot be used. Please select another newsletter question in the Mailchimp settings."
+  },
+  "%Zwp": {
+    "original": "Bekijk alle aansluitingen van jouw leden bij Stamhoofd.",
+    "translation": "View all affiliations of your members in Stamhoofd."
+  },
+  "%Zwq": {
+    "original": "Maximum aantal keer gebruikt",
+    "translation": "Maximum number of times used"
+  },
+  "%Zws": {
+    "original": "Alle leden synchroniseren",
+    "translation": "Sync all members"
+  },
+  "%Zwt": {
+    "original": "Kortingscodes geïmporteerd. Je kan ze nu per e-mail versturen.",
+    "translation": "Discount codes imported. You can now send them by email."
+  },
+  "%Zwu": {
+    "original": "Koppel je Mailchimp-account",
+    "translation": "Connect your Mailchimp account"
+  },
+  "%Zwv": {
+    "original": "Ongeldig of geblokkeerd e-mailadres",
+    "translation": "Invalid or blocked email address"
+  },
+  "%Zww": {
+    "original": "Geen: alle leden worden toegevoegd na jouw bevestiging bij het synchroniseren",
+    "translation": "None: all members will be added after your confirmation during sync"
+  },
+  "%Zwx": {
+    "original": "Als het lid of diens ouders zelf inschrijven, krijg je automatisch toegang tot hun gegevens.",
+    "translation": "If the member or their parents register themselves, you will automatically gain access to their data."
+  },
+  "%Zwy": {
+    "original": "Tonen",
+    "translation": "Show"
+  },
+  "%Zwz": {
+    "original": "jouw leiding",
+    "translation": "your leaders"
+  },
   "%Zx": {
     "original": "Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.",
     "translation": "Preferably use an email address to which we already send emails."
+  },
+  "%Zx0": {
+    "original": "Deze code staat meerdere keren in het bestand.",
+    "translation": "This code appears multiple times in the file."
+  },
+  "%Zx1": {
+    "original": "{failed} mislukt",
+    "translation": "{failed} failed"
+  },
+  "%Zx2": {
+    "original": "Kies een audience",
+    "translation": "Select an audience"
+  },
+  "%Zx3": {
+    "original": "Het nummer van de webshopbestelling waarvoor deze lijn werd betaald (indien van toepassing)",
+    "translation": "The webshop order number for which this line was paid (if applicable)"
+  },
+  "%Zx4": {
+    "original": "Maximum",
+    "translation": "Maximum"
+  },
+  "%Zx5": {
+    "original": "Ze worden niet toegevoegd, en uitgeschreven als ze al in Mailchimp staan.",
+    "translation": "They will not be added, and will be unsubscribed if already in Mailchimp."
+  },
+  "%Zx6": {
+    "original": "Standaard e-mail die je kan gebruiken om persoonlijke kortingscodes te versturen.",
+    "translation": "Default email you can use to send personal discount codes."
+  },
+  "%Zx7": {
+    "original": "{added} toegevoegd, {updated} bijgewerkt, {skipped} overgeslagen",
+    "translation": "{added} added, {updated} updated, {skipped} skipped"
+  },
+  "%Zx8": {
+    "original": "Bij een aankruisvakje krijgt het contact een tag als het aangevinkt is, bij een keuzevraag een tag per gekozen antwoord.",
+    "translation": "For a checkbox, the contact receives a tag if checked; for a multiple choice question, a tag for each selected answer."
+  },
+  "%Zx9": {
+    "original": "Contacten komen enkel in Mailchimp als minstens één gekoppeld lid één van deze antwoorden koos op '{question}'.",
+    "translation": "Contacts are only added to Mailchimp if at least one connected member gave any of these answers to '{question}'."
+  },
+  "%ZxA": {
+    "original": "Mailchimp gaf een foutmelding: {message}",
+    "translation": "Mailchimp returned an error: {message}"
+  },
+  "%ZxC": {
+    "original": "Vragen van {organization}",
+    "translation": "Questions from {organization}"
+  },
+  "%ZxD": {
+    "original": "jouw medeleiding of Stamhoofd",
+    "translation": "your fellow leaders or Stamhoofd"
+  },
+  "%ZxE": {
+    "original": "Bestellers van een webshop",
+    "translation": "Webshop purchasers"
+  },
+  "%ZxF": {
+    "original": "Enkel de eerste {count} adressen worden getoond.",
+    "translation": "Only the first {count} addresses are shown."
+  },
+  "%ZxH": {
+    "original": "Mailchimp weigerde: {reason}",
+    "translation": "Mailchimp refused: {reason}"
+  },
+  "%ZxJ": {
+    "original": "Leeg betekent onbeperkt.",
+    "translation": "Blank means unlimited."
+  },
+  "%ZxK": {
+    "original": "{count} zonder nieuwsbrief-toestemming",
+    "translation": "{count} without newsletter permission"
+  },
+  "%ZxM": {
+    "original": "Je hebt geen toegang tot inschrijvingsgroepen in dit werkjaar, vraag een hoofdbeheerder om toegang of wissel van werkjaar onderaan",
+    "translation": "You do not have access to registration groups for this work year. Ask a main administrator for access or switch work year at the bottom."
+  },
+  "%ZxN": {
+    "original": "Gevoelige vraag, kan niet doorgestuurd worden",
+    "translation": "Sensitive question, cannot be forwarded"
+  },
+  "%ZxP": {
+    "original": "Kies de audience waarin je contacten terechtkomen",
+    "translation": "Choose the audience where your contacts will be added"
+  },
+  "%ZxQ": {
+    "original": "Je hebt geen toegangsrechten om te filteren of sorteren op financiële gegevens.",
+    "translation": "You do not have access rights to filter or sort on financial data."
+  },
+  "%ZxR": {
+    "original": "Synchroniseer leden en bestellers naar Mailchimp via Instellingen → Integraties.",
+    "translation": "Sync members and purchasers to Mailchimp via Settings → Integrations."
+  },
+  "%ZxS": {
+    "original": "Er zijn nog geen inschrijvingsgroepen",
+    "translation": "There are no registration groups yet"
+  },
+  "%ZxT": {
+    "original": "Contacten worden naar Mailchimp gestuurd…",
+    "translation": "Contacts are being sent to Mailchimp…"
+  },
+  "%ZxU": {
+    "original": "{count} worden overgeslagen",
+    "translation": "{count} will be skipped"
+  },
+  "%ZxW": {
+    "original": "Synchronisatie mislukt",
+    "translation": "Sync failed"
+  },
+  "%ZxY": {
+    "original": "Bestel met je kortingscode",
+    "translation": "Order with your discount code"
+  },
+  "%ZxZ": {
+    "original": "Optionele interne omschrijving.",
+    "translation": "Optional internal description."
+  },
+  "%Zxb": {
+    "original": "Ze worden overgeslagen.",
+    "translation": "They will be skipped."
+  },
+  "%Zxc": {
+    "original": "Bezig",
+    "translation": "In progress"
+  },
+  "%Zxd": {
+    "original": "Dit stuurt de huidige toestand van alle leden die in het huidige werkjaar ingeschreven zijn naar Mailchimp.",
+    "translation": "This sends the current state of all members registered in the current work year to Mailchimp."
+  },
+  "%Zxe": {
+    "original": "Vul een geldig e-mailadres in.",
+    "translation": "Please enter a valid email address."
   },
   "%a0": {
     "original": "Kanaal",
@@ -21646,10 +22354,6 @@
   "%dz": {
     "original": "Waar vind ik deze code?",
     "translation": "Where can I find this code?"
-  },
-  "%e0": {
-    "original": "Vraag de code aan jouw leiding",
-    "translation": "Request the code from your supervisor"
   },
   "%e1": {
     "original": "Zoek de code onderaan een e-mail die je van ons kreeg",
