@@ -152,7 +152,6 @@ export class DatabaseHelper {
         );
         await Database.delete('DELETE FROM `events`');
         await Database.delete('DELETE FROM `payments`');
-        await Database.delete('OPTIMIZE TABLE organizations;'); // fix breaking of indexes due to deletes (mysql bug?)
 
         // Force reload Platform (membership organization id might be cleared)
         const { Platform } = await import('@stamhoofd/models');
