@@ -385,6 +385,8 @@ export async function buildCaddyConfig(context: CliContext, options: { setup?: b
 
         // Shared services
         route([domains.mail], ports.maildevHttp, proxyHost),
+        route([domains.sqs], ports.elasticmq, proxyHost),
+        route([domains.sqsUi], ports.elasticmqUi, proxyHost),
         route([domains.files, `*.${domains.files}`], ports.rustfs, proxyHost),
         route([domains.filesConsole], ports.rustfsConsole, proxyHost),
         route([domains.sso], ports.sso, proxyHost),
@@ -392,6 +394,8 @@ export async function buildCaddyConfig(context: CliContext, options: { setup?: b
     ];
     const subjects = [...new Set([
         domains.mail,
+        domains.sqs,
+        domains.sqsUi,
         domains.files,
         `*.${domains.files}`,
         domains.filesConsole,

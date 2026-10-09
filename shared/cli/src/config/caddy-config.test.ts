@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CliContext } from '../context/create-context.js';
 import { writeInstanceManifest, writeRouteManifest } from '../runtime/manifest-store.js';
 import { caddyAdminPort, localhostPort } from './shared-service-config.js';
@@ -17,6 +17,7 @@ describe('Caddy config', () => {
     });
 
     afterEach(async () => {
+        vi.unstubAllEnvs();
         await fs.rm(rootDir, { recursive: true, force: true });
     });
 
@@ -45,6 +46,22 @@ describe('Caddy config', () => {
         expect(hosts).toContain('*.files.stamhoofd');
         expect(subjects).toContain('files.stamhoofd');
         expect(subjects).toContain('*.files.stamhoofd');
+    });
+
+    it.each(['stamhoofd', 'custom.local'])('routes the shared SQS API and UI with TLS on %s', async (domain) => {
+        vi.stubEnv('STAMHOOFD_DOMAIN', domain);
+        vi.stubEnv('ELASTICMQ_PORT', '19324');
+        vi.stubEnv('ELASTICMQ_UI_PORT', '19325');
+        const ctx = context(rootDir);
+        ctx.instance.prefix = 'feature';
+        ctx.instance.portOffset = 100;
+        const config = JSON.parse(await fs.readFile(await writeCaddyConfig(ctx), 'utf8'));
+
+        for (const [host, port] of [[`queues.${domain}`, 19324], [`ui.queues.${domain}`, 19325]]) {
+            const route = config.apps.http.servers.stamhoofd.routes.find((route: any) => route.match?.[0]?.host?.includes(host));
+            expect(route.handle[0].upstreams).toEqual([{ dial: `127.0.0.1:${port}` }]);
+            expect(config.apps.tls.automation.policies[0].subjects).toContain(host);
+        }
     });
 
     it('routes the shared Metabase host with TLS coverage', async () => {

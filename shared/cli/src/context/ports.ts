@@ -1,5 +1,5 @@
 import type { CliContext } from './create-context.js';
-import { maildevInternalHttpPort, maildevInternalSmtpPort, mysqlInternalPort, rustfsInternalApiPort, rustfsInternalConsolePort } from '../config/shared-service-config.js';
+import { elasticmqInternalPort, maildevInternalHttpPort, maildevInternalSmtpPort, mysqlInternalPort, rustfsInternalApiPort, rustfsInternalConsolePort } from '../config/shared-service-config.js';
 
 export function buildPorts(context: CliContext) {
     const offset = context.instance.portOffset;
@@ -14,6 +14,8 @@ export function buildPorts(context: CliContext) {
         maildevHttp: Number.parseInt(process.env.MAILDEV_HTTP_PORT ?? String(maildevInternalHttpPort), 10),
         rustfs: Number.parseInt(process.env.RUSTFS_PORT ?? String(rustfsInternalApiPort), 10),
         rustfsConsole: Number.parseInt(process.env.RUSTFS_CONSOLE_PORT ?? String(rustfsInternalConsolePort), 10),
+        elasticmq: Number.parseInt(process.env.ELASTICMQ_PORT ?? String(elasticmqInternalPort), 10),
+        elasticmqUi: Number.parseInt(process.env.ELASTICMQ_UI_PORT ?? '9325', 10),
         sso: 5556 + offset,
         // Metabase listens on 3000 in the container, but that host port is contested enough on a
         // development machine that it gets its own.
