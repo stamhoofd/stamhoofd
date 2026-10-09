@@ -8,6 +8,8 @@ Run tests through `stam test e2e` (or `pnpm stam test e2e` from the repository r
 
 The CLI and Playwright global setup own the shared build, API build, migrations, Caddy, SSO, worker databases, and runner lifecycle. Frontend bundles use an uncached Turbo task filtered to `@stamhoofd/web-app` and `@stamhoofd/webshop` for `build:playwright`. Do not build or invoke Playwright manually.
 
+Each run writes test durations, retries, and results to `playwright-report/results.json`. CI uploads this report in the `playwright-traces` artifact on successful and failed runs, including runs with flaky tests. For local before/after measurements, keep the same filter and worker count and use `--skip-build` once the app build is current. Compare test durations separately from global setup time.
+
 ## Todo
 Set a fixed time. The tests should be predictable. Now the current time in tests will change depending on the date the test is run.
 

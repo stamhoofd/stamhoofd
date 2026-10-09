@@ -18,7 +18,10 @@ export default defineConfig({
     /* Must match the number of slots the global setup reserves, see WorkerCount. */
     workers: getWorkerCount(),
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-    reporter: 'line',
+    reporter: [
+        ['line'],
+        ['json', { outputFile: '../playwright-report/results.json' }],
+    ],
 
     // Suppress logs in tests
     quiet: true,
