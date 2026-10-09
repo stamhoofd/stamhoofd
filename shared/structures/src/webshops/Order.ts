@@ -112,6 +112,8 @@ export class OrderData extends Checkout {
 
         for (const item of this.cart.items) {
             item.fieldAnswers = [];
+            item.customer = null;
+            item.recordAnswers = new Map();
         }
 
         this.recordAnswers = new Map();
