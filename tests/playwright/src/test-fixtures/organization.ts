@@ -18,7 +18,8 @@ export function setup() {
         `.auth/${WorkerData.id}.json`,
     );
 
-    test.beforeAll(async ({ browser }, testInfo) => {
+    // eslint-disable-next-line no-empty-pattern
+    test.beforeAll(async ({}, testInfo) => {
         Logger.info('BEFORE ALL organization' + testInfo.file);
         const fileName = getFileName();
         if (fs.existsSync(fileName)) {
@@ -50,26 +51,21 @@ export function setup() {
 
         await WorkerData.initLoginState({ user });
 
-        // store token in local storage of context
-        const context = await browser.newContext({
-            storageState: {
-                cookies: [],
-                origins: [
-                    {
-                        origin: WorkerData.urls.dashboard,
-                        localStorage: [
-                            {
-                                name: `token-${organization.id}`,
-                                value: tokenString,
-                            },
-                        ],
-                    },
-                ],
-            },
-        });
-
-        // save the context of the local storage
-        await context.storageState({ path: fileName });
+        fs.mkdirSync(path.dirname(fileName), { recursive: true });
+        fs.writeFileSync(fileName, JSON.stringify({
+            cookies: [],
+            origins: [
+                {
+                    origin: WorkerData.urls.dashboard,
+                    localStorage: [
+                        {
+                            name: `token-${organization.id}`,
+                            value: tokenString,
+                        },
+                    ],
+                },
+            ],
+        }));
     });
 
     test.use({
