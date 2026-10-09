@@ -5,21 +5,23 @@ Supporting clubs and non-profits with great software
 
 # Folder structure
 
-We use monorepo to make it easier for new contributors to make changes without having to work in different repositories and creating multiple pull requests.
+We use a pnpm workspace monorepo to make it easier for contributors to make changes across packages in one pull request. Turbo orchestrates tasks; Lerna handles fixed versioning and npm publication.
 
 ## Frontend
 
-For everything frontend related, you can take a look at the readme in the frontend folder. We have two SPA, written with Vue + TypeScript. The frontend is build on a custom (open-source) framework 'vue-app-navigation' that makes handing responsive and app-like views/navigation/animations easy. You'll see that it is easy to learn and understand.
+`frontend/app/*` contains the Vue 3 + TypeScript applications, built with Vite, and the Capacitor mobile app. Dashboard and registration are source packages bundled by web-app; web-app and webshop own standalone builds. `frontend/shared/*` contains shared frontend packages. Navigation uses `@simonbackx/vue-app-navigation`. See the [frontend README](frontend/README.md).
 
 ## Backend
 
-Documentation and code is located in the backend folder.
+`backend/app/*` contains the Node.js + TypeScript services: API, renderer, backup, redirecter, and statistics syncer. `backend/shared/*` contains backend-only packages such as database models, SQL helpers, and email support. See the [API README](backend/app/api/README.md) for endpoint architecture.
 
 ## Shared
 
 We have some packages that are shared between the frontend and backend. The most important one is `structures`. This package contains all the data structures (communication in the API, stored in the backend, in an encrytped blob or in localstorage) and how they should be encoded and decoded. The data structures are versioned: when an old client communicates with an updated backend, everything will work as usual. If you need to add some new data, you'll probably need to make some changes in this package. Read the documantation about encoding, decoding, structures, patching, and versioning [here](https://stamhoofd.notion.site/).
 
 # Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for coding conventions, testing expectations, and validation commands. Playwright E2E tests live in [`tests/playwright`](tests/playwright/README.md).
 
 Do you want to contribute? GREAT! :D You can build features that you need for your own club or you can help the project.
 
@@ -183,7 +185,7 @@ Run `pnpm stam dev frontend` from the repository root to start the frontend appl
 
 ### Shared dependencies
 
-All shared dependencies are located in /shared. These packages are used by the backend and the frontend. If you make changes here, you must rebuild the package with `pnpm run build:shared`. You can rebuild them all at once by running the same command in the project root.
+`shared/*` contains packages used by the backend and frontend, including versioned API and localStorage structures (`@stamhoofd/structures`) and translations (`shared/locales`). Packages consume each other's built `dist/` output, not source. After changing a shared package, rebuild before using consumers: `stam build` and `stam test` do this automatically, while `stam dev` watches shared packages. See the [build-system documentation](.development/README.md) for caching and low-level diagnostics.
 
 # Support and information
 
@@ -206,6 +208,10 @@ Translations are resolved in the following order: en-NL > en. So translations fr
 During development, write new strings in Dutch, for example `$t('Opslaan')`, and commit them unchanged. Do not manually edit `shared/locales/src/nl.json`. Before a release, run `pnpm stam translate auto` from the root to register strings, generate compact keys, merge duplicates, remove unused keys, and machine-translate missing or changed strings. Review and commit those generated changes separately. Bare `pnpm stam translate` shows help; use `translate manual keys`, `manual cleanup`, or `manual machine` for individual stages. See [`shared/cli/README.md`](shared/cli/README.md#translations) for options. The .env file in the i18n-uuid directory should contain all required variables (see `.env.template`):
 
 - `OPENAI_API_KEY`, `GEMINI_API_KEY`, or `MISTRAL_API_KEY`, depending on the selected provider.
+
+All user-facing strings must use `$t(...)`. Existing calls may contain Dutch source text or generated `%XYZ` keys; look up those keys in `shared/locales/src/nl.json`. To change text, replace the call with the new Dutch source text rather than editing that JSON file.
+
+For errors, `SimpleError.message` is plain English and must not use `$t`. `SimpleError.human` is user-facing and must use `$t` with Dutch source text.
 
 # Self hosting
 
