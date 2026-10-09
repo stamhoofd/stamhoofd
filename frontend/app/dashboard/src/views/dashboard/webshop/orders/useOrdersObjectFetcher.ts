@@ -73,7 +73,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             }
         },
 
-        async fetch(data: LimitedFilteredRequest) {
+        async fetch(data: LimitedFilteredRequest, options?: { signal?: AbortSignal }) {
             data = toRaw(data);
             console.log('Orders(IndexedDb).fetch', data);
             const results: PrivateOrderWithTickets[] = [];
@@ -139,6 +139,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 limit: data.limit,
                 sortItem,
                 advanceCount,
+                signal: options?.signal,
             });
 
             // create next request
@@ -182,7 +183,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 
             return { results, next };
         },
-        async fetchCount(data: CountFilteredRequest): Promise<number> {
+        async fetchCount(data: CountFilteredRequest, options?: { signal?: AbortSignal }): Promise<number> {
             data = toRaw(data);
             console.log('Orders(IndexedDb).fetchCount', data);
 
@@ -211,6 +212,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 indexFilter: searchFilter ?? undefined,
                 // Counting never looks at an order, let alone at its tickets
                 withTickets: false,
+                signal: options?.signal,
             });
             console.log('[Done] Orders(IndexedDb).fetchCount', data, count);
 

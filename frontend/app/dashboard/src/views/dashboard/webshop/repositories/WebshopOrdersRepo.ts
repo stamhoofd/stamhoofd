@@ -228,12 +228,13 @@ export class WebshopOrdersRepo {
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
         advanceCount?: number;
         openTransaction?: IDBTransaction;
+        signal?: AbortSignal;
     },
     ): Promise<number> {
         try {
             return await this.store.streamRaw<T>(options);
         } catch (e) {
-            if (e instanceof CallbackError || e instanceof CompilerFilterError) {
+            if (e instanceof CallbackError || e instanceof CompilerFilterError || options.signal?.aborted) {
                 throw e;
             }
             console.error(e);
@@ -351,7 +352,7 @@ export class OrdersStore {
         });
     }
 
-    async streamRaw<T>({ callback, filter, indexFilter, limit, sortItem, advanceCount, transform, openTransaction }: {
+    async streamRaw<T>({ callback, filter, indexFilter, limit, sortItem, advanceCount, transform, openTransaction, signal }: {
         transform: (rawOrder: any) => Promise<T>;
         /**
          * Called for every order that matches, before the cursor moves on. Anything it awaits has to
@@ -371,8 +372,14 @@ export class OrdersStore {
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
         advanceCount?: number;
         openTransaction?: IDBTransaction;
+        /**
+         * Stops the stream and rejects with the abort reason. Checked before every cursor step.
+         */
+        signal?: AbortSignal;
     },
     ): Promise<number> {
+        signal?.throwIfAborted();
+
         // all items should be streamed again if the content of the store changed
         if (this.changeCount !== this.changeCountOnLastStream) {
             if (advanceCount) {
@@ -444,6 +451,12 @@ export class OrdersStore {
             }
 
             const onsuccess: ((this: IDBRequest<IDBCursorWithValue | null>, ev: Event) => any) | null = (event: any) => {
+                if (signal?.aborted) {
+                    // Not continuing the cursor lets the transaction complete normally
+                    reject(signal.reason);
+                    return;
+                }
+
                 if (limit && matchedItemsCount >= limit) {
                     // limit reached
                     resolve(totalIterationCount);
