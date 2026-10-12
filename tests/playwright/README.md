@@ -2,6 +2,12 @@
 
 Playwright tests for Stamhoofd.
 
+## Execution lifecycle
+
+Run tests through `stam test e2e` (or `pnpm stam test e2e` from the repository root). See the [CLI test reference](../../shared/cli/README.md#tests) for filters, build skipping, and database options.
+
+The CLI and Playwright global setup own the shared build, API build, migrations, Caddy, SSO, worker databases, and runner lifecycle. Frontend bundles use an uncached Turbo task filtered to `@stamhoofd/web-app` and `@stamhoofd/webshop` for `build:playwright`. Do not build or invoke Playwright manually.
+
 ## Todo
 Set a fixed time. The tests should be predictable. Now the current time in tests will change depending on the date the test is run.
 
