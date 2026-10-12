@@ -1,6 +1,6 @@
 import { CSP_NONCE_PLACEHOLDER, getProjectPath } from '@stamhoofd/cli';
 import { createReadStream } from 'node:fs';
-import { cp, readFile, stat, writeFile } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import type { IncomingMessage, Server, ServerResponse } from 'node:http';
 import { extname, join, resolve } from 'node:path';
@@ -31,8 +31,9 @@ export class FrontendService implements ServiceHelper {
      * @param workerIndex
      */
     async start(): Promise<ServiceProcess> {
-        await this.build();
-        const { server, sockets } = await this.startStaticServer();
+        const root = await this.getProjectDistPath();
+        const html = await this.getIndexHtml(root);
+        const { server, sockets } = await this.startStaticServer(root, html);
 
         return {
             name: 'Static frontend server ' + this.name,
@@ -65,11 +66,10 @@ export class FrontendService implements ServiceHelper {
         };
     }
 
-    private async startStaticServer(): Promise<{ server: Server; sockets: Set<Socket> }> {
-        const root = this.getDestinationDistPath(this.workerId);
+    private async startStaticServer(root: string, html: string): Promise<{ server: Server; sockets: Set<Socket> }> {
         const port = CaddyConfigHelper.getFrontendPort(this.name, this.workerId);
         const server = createServer((request, response) => {
-            void this.handleStaticRequest(root, request, response);
+            void this.handleStaticRequest(root, html, request, response);
         });
 
         // Set a timeout for all requests to make sure nothing keeps hanging for too long
@@ -106,7 +106,7 @@ export class FrontendService implements ServiceHelper {
         return { server, sockets };
     }
 
-    private async handleStaticRequest(root: string, request: IncomingMessage, response: ServerResponse) {
+    private async handleStaticRequest(root: string, html: string, request: IncomingMessage, response: ServerResponse) {
         try {
             const requestUrl = new URL(request.url ?? '/', `http://${request.headers.host ?? 'localhost'}`);
             const requestedPath = decodeURIComponent(requestUrl.pathname);
@@ -117,33 +117,14 @@ export class FrontendService implements ServiceHelper {
             const resolvedPath = fileStat?.isFile() ? filePath : join(root, 'index.html');
 
             response.setHeader('Content-Type', contentType(resolvedPath));
+            if (resolvedPath === join(root, 'index.html')) {
+                response.end(html);
+                return;
+            }
             createReadStream(resolvedPath).pipe(response);
         } catch (error) {
             response.statusCode = 500;
             response.end('Internal server error');
-        }
-    }
-
-    private async build() {
-        await this.copyProjectDist();
-        await this.injectScript();
-    }
-
-    private async copyProjectDist() {
-        const sourcePath = await this.getProjectDistPath();
-
-        const destinationPath = this.getDestinationDistPath(this.workerId);
-
-        // copy source to destination
-        try {
-            await cp(sourcePath, destinationPath, {
-                recursive: true,
-                force: true,
-            });
-        } catch (err) {
-            console.error('Failed to copy project dist');
-            console.error(err);
-            throw err; // re-throw so CI fails
         }
     }
 
@@ -156,22 +137,10 @@ export class FrontendService implements ServiceHelper {
         return resolve(import.meta.dirname, sourcePath);
     }
 
-    static getDestinationDistPath(service: FrontendProjectName, workerId: string) {
-        return resolve(import.meta.dirname, `../../../dist/${service}/${workerId}`);
-    }
-
-    getDestinationDistPath(workerId: string) {
-        return FrontendService.getDestinationDistPath(this.name, workerId);
-    }
-
-    private async injectScript() {
-        const directory = this.getDestinationDistPath(this.workerId);
+    private async getIndexHtml(directory: string) {
         const path = resolve(directory, 'index.html');
-
-        // Read the file
         let html = await readFile(path, 'utf-8');
 
-        // Define the script you want to inject
         const apiUrl = CaddyConfigHelper.getUrl('api', this.workerId);
         const scriptSrc = `${apiUrl}/frontend-environment`;
 
@@ -190,8 +159,8 @@ export class FrontendService implements ServiceHelper {
             throw new Error(`Placeholder ${placeholder} not found in ${path}`);
         }
 
-        // Write the modified file back
-        await writeFile(path, html, 'utf-8');
+        // Assets are shared read-only; only the HTML contains worker-specific configuration.
+        return html;
     }
 }
 
