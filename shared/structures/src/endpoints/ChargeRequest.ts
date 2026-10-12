@@ -1,7 +1,7 @@
 import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { VATExcemptReason } from '../BalanceItem.js';
 import { StamhoofdFilterDecoder } from '../filters/FilteredRequest.js';
-import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 
 export class ChargeRequest extends AutoEncoder {
     @field({ decoder: StringDecoder, field: 'description' })

@@ -1,4 +1,4 @@
-import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import type { RegistrationPeriodBase } from '../RegistrationPeriodBase.js';
 
 type EventDataForPeriod = {

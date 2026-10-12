@@ -15,7 +15,7 @@ import type { Platform } from '../Platform.js';
 import type { UserWithMembers } from '../UserWithMembers.js';
 import type { Address } from '../addresses/Address.js';
 import type { PropertyFilter } from '../filters/PropertyFilter.js';
-import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import { getActivePeriodIds } from '../getActivePeriods.js';
 import { MemberPlatformMembershipHelper } from '../helpers/MemberPlatformMembershipHelper.js';
 import type { EmergencyContact } from './EmergencyContact.js';

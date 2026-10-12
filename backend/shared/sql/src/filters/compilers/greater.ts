@@ -1,5 +1,5 @@
-import type { StamhoofdFilter } from '@stamhoofd/structures';
-import { assertFilterCompareValue } from '@stamhoofd/structures';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import { assertFilterCompareValue } from '@stamhoofd/filters/FilterCompilers';
 import { scalarToSQLExpression } from '../../SQLExpressions.js';
 import { SQLWhereEqual, SQLWhereSign } from '../../SQLWhere.js';
 import type { SQLCurrentColumn, SQLSyncFilterRunner } from '../SQLFilterTypes.js';

@@ -1,4 +1,5 @@
-import type { FilterCompiler, FilterDefinitions, RequiredFilterCompiler, StamhoofdFilter } from '@stamhoofd/structures';
+import type { FilterCompiler, FilterDefinitions, RequiredFilterCompiler } from '@stamhoofd/filters/FilterCompilers';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilterTypes';
 import type { SQLExpression } from '../SQLExpression.js';
 import type { SQLWhere } from '../SQLWhere.js';
 

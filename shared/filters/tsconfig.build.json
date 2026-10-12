@@ -1,0 +1,15 @@
+{
+    "extends": ["../../tsconfig.base.json", "../../tsconfig.runtime.json"],
+    "compilerOptions": {
+        "tsBuildInfoFile": ".cache/build.tsbuildinfo",
+        "rootDir": "src",
+        "outDir": "dist"
+    },
+    "include": [
+        "./src"
+    ],
+    "exclude": [
+        "./src/**/*.spec.ts",
+        "./src/**/*.test.ts"
+    ]
+}

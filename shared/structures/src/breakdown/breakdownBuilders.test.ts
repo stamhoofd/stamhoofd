@@ -1,5 +1,5 @@
 import { TestUtils } from '@stamhoofd/test-utils';
-import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import { BalanceItem, BalanceItemPaymentWithPrivatePayment, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getBalanceItemTypeName } from '../BalanceItem.js';
 import { BalanceItemPaymentDetailed } from '../BalanceItemDetailed.js';
 import { PrivatePayment, SettlementReference } from '../members/Payment.js';

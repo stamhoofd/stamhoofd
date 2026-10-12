@@ -1,6 +1,7 @@
 import type { PlainObject } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import type { SortDefinition, SortList } from '@stamhoofd/structures';
+import type { SortList } from '@stamhoofd/filters/SortList';
+import type { SortDefinition } from '@stamhoofd/filters/Sorters';
 import type { SQLExpression } from '../SQLExpression.js';
 import type { SQLJoin } from '../SQLJoin.js';
 import type { SQLOrderBy, SQLOrderByDirection } from '../SQLOrderBy.js';

@@ -7,7 +7,7 @@ import { appToUri, getAppHost } from './AppType.js';
 import { Company } from './Company.js';
 import { compileToInMemoryFilter } from './filters/InMemoryFilter.js';
 import { organizationItemInMemoryFilterCompilers } from './filters/inMemoryFilterDefinitions.js';
-import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import { Group } from './Group.js';
 import type { GroupCategoryTree } from './GroupCategory.js';
 import type { ObjectWithRecords, PatchAnswers } from './members/ObjectWithRecords.js';

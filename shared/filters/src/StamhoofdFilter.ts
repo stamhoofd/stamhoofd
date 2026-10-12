@@ -1,5 +1,3 @@
-import { Version } from '../Version.js';
-import { StamhoofdFilterDecoder } from './StamhoofdFilterDecoder.js';
 import type { AssertSortList, SortList } from './SortList.js';
 import { SortItemDirection } from './SortList.js';
 import { FilterWrapperMarker } from './StamhoofdFilterTypes.js';
@@ -64,18 +62,6 @@ export function assertSort(list: SortList, assert: AssertSortList): SortList {
     }
 
     return list;
-}
-
-export function isEqualFilter(a: StamhoofdFilter | null, b: StamhoofdFilter | null) {
-    if (a === null) {
-        return b === null;
-    }
-
-    if (b === null) {
-        return false;
-    }
-
-    return JSON.stringify(StamhoofdFilterDecoder.encode(a, { version: Version })) === JSON.stringify(StamhoofdFilterDecoder.encode(b, { version: Version }));
 }
 
 export function wrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): StamhoofdFilter {

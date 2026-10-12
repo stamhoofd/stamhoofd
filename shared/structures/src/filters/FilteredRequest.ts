@@ -1,9 +1,9 @@
 import type { Data, Decoder, Encodeable, EncodeContext, PlainObject } from '@simonbackx/simple-encoding';
 import { AutoEncoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
-import type { SortList } from './SortList.js';
-import { encodeSortList, SortListDecoder } from './SortList.js';
-import type { StamhoofdFilter } from './StamhoofdFilterTypes.js';
+import type { SortList } from '@stamhoofd/filters/SortList';
+import { encodeSortList, SortListDecoder } from '@stamhoofd/filters/SortList';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilterTypes';
 import { StamhoofdFilterJSONDecoder } from './StamhoofdFilterDecoder.js';
 
 export { StamhoofdFilterDecoder, StamhoofdFilterJSONDecoder } from './StamhoofdFilterDecoder.js';

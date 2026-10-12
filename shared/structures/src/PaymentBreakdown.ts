@@ -2,7 +2,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, fi
 import { Formatter } from '@stamhoofd/utility';
 import { BalanceItemRelation, BalanceItemRelationType } from './BalanceItem.js';
 import { StamhoofdFilterDecoder } from './filters/FilteredRequest.js';
-import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import { TranslatedString } from './TranslatedString.js';
 
 /**

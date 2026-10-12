@@ -11,6 +11,5 @@ export * from './filters/SQLSorter.js';
 export * from './SQLOrderBy.js';
 export * from './SQLInsert.js';
 export * from './QueryableModel.js';
-export * from './SQLTranslatedStringHelper.js';
 export * from './SQLLogger.js';
 export * from './ModelCache.js';
