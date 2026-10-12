@@ -1509,8 +1509,8 @@ importers:
         specifier: 8.0.3
         version: 8.0.3(@capacitor/core@8.5.2)
       '@capgo/capacitor-updater':
-        specifier: 8.51.25
-        version: 8.51.25(@capacitor/core@8.5.2)
+        specifier: 8.52.1
+        version: 8.52.1(@capacitor/core@8.5.2)
       '@plausible-analytics/tracker':
         specifier: 0.4.6
         version: 0.4.6
@@ -3029,8 +3029,8 @@ packages:
   '@capacitor/synapse@1.0.4':
     resolution: {integrity: sha512-/C1FUo8/OkKuAT4nCIu/34ny9siNHr9qtFezu4kxm6GY1wNFxrCFWjfYx5C1tUhVGz3fxBABegupkpjXvjCHrw==}
 
-  '@capgo/capacitor-updater@8.51.25':
-    resolution: {integrity: sha512-lznyAv9Ktl1CD6/OKZY+lQZl9ke+dbadLEB2XQKP7VbQO8/5D8yOHS+pysQgVnNkiZYEC3v1AxgY4a5Z+DnxXw==}
+  '@capgo/capacitor-updater@8.52.1':
+    resolution: {integrity: sha512-bvI6kUms5QJXtWznv7JoTdmKlmjobPYIW1santxgn5AZAciXpiDXXcwdaK2sjgK1NyuzREwZw68vzUCWGhrbAA==}
     peerDependencies:
       '@capacitor/core': ^8.0.0
 
@@ -15099,7 +15099,7 @@ snapshots:
 
   '@capacitor/synapse@1.0.4': {}
 
-  '@capgo/capacitor-updater@8.51.25(@capacitor/core@8.5.2)':
+  '@capgo/capacitor-updater@8.52.1(@capacitor/core@8.5.2)':
     dependencies:
       '@capacitor/core': 8.5.2
 
