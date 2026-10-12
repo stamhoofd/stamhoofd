@@ -77,7 +77,7 @@
         "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
     },
     "devDependencies": {
-        "@oxc-project/runtime": "0.147.0",
+        "@oxc-project/runtime": "0.153.0",
         "@stamhoofd/test-utils": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "@stylistic/eslint-plugin": "5.10.0",
@@ -97,11 +97,11 @@
         "lerna": "9.0.7",
         "maildev": "2.2.1",
         "nodemon": "3.1.14",
-        "oxfmt": "0.68.0",
+        "oxfmt": "0.71.0",
         "postcss-discard-duplicates": "8.0.4",
         "sass": "1.105.0",
         "terser": "5.51.2",
-        "turbo": "^2.11.2",
+        "turbo": "^2.11.7",
         "typescript": "6.0.3",
         "vite": "8.3.1",
         "vitest": "4.1.11",

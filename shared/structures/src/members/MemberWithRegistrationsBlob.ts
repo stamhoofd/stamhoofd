@@ -177,7 +177,10 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
         organization: Organization;
         now?: Date;
     }): SGVSyncStatus {
-        const activeRegistrations = this.registrations.filter(registration => registration.group.periodId === options.organization.period.period.id);
+        const activeRegistrations = this.registrations.filter(registration =>
+            registration.group.periodId === options.organization.period.period.id
+            && registration.group.type === GroupType.Membership,
+        );
 
         if (activeRegistrations.length === 0) {
             return SGVSyncStatus.Ok;

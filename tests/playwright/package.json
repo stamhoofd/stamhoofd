@@ -21,7 +21,7 @@
         "@stamhoofd/types": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
         "@simonbackx/simple-encoding": "*",
-        "pino": "10.1.1",
+        "pino": "10.4.0",
         "mysql2": "3.24.4"
     },
     "devDependencies": {
