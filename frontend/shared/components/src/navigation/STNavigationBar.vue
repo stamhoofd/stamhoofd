@@ -59,6 +59,7 @@ const footerElement = useTemplateRef('footer');
 const inheritedHeaderElement = useTemplateRef('inherited-header');
 
 const props = withDefaults(defineProps<{
+    /** Also updates the navigation URL's title. Place the bar directly before the scrollable main element. */
     title?: string;
     addShadow?: boolean;
     showTitle?: boolean;
