@@ -5,7 +5,6 @@ Stamhoofd uses MySQL. Database models live primarily in
 [QueryableModel](../../backend/shared/sql/src/QueryableModel.ts).
 `Model`, `column`, save/delete and JSON persistence are provided by simple-database;
 see its [model workflow](https://github.com/SimonBackx/simple-database/blob/master/docs/models.md).
-That guide must be published before the remote link becomes available.
 **QueryableModel and the SQL query builder are Stamhoofd APIs**, not simple-database APIs.
 
 ## Defining and saving models
@@ -30,6 +29,7 @@ await dog.delete();
 Decorated JSON columns can store shared structures using their decoder, for
 example `@column({ type: 'json', decoder: DogSettings })` with
 `settings = DogSettings.create({})`. Prefer an explicit default when appropriate.
+Read the [structures overview](../structures/README.md) before changing their format.
 The library handles versioned encoding/decoding with the Database medium;
 the API boot and migration entry points configure JSON writes with the shared Version.
 Keep frequently queried properties in suitable SQL columns. JSON can grow as

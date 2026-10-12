@@ -17,7 +17,7 @@ Documentation and code is located in the backend folder.
 
 ## Shared
 
-We have some packages that are shared between the frontend and backend. The most important one is `structures`. This package contains all the data structures (communication in the API, stored in the backend, in an encrytped blob or in localstorage) and how they should be encoded and decoded. The data structures are versioned: when an old client communicates with an updated backend, everything will work as usual. If you need to add some new data, you'll probably need to make some changes in this package. Read the documantation about encoding, decoding, structures, patching, and versioning [here](https://stamhoofd.notion.site/).
+We have some packages that are shared between the frontend and backend. The most important one is `structures`. This package contains all the data structures (communication in the API, stored in the backend, in an encrytped blob or in localstorage) and how they should be encoded and decoded. The data structures are versioned: when an old client communicates with an updated backend, everything will work as usual. If you need to add some new data, you'll probably need to make some changes in this package. Read the documantation about encoding, decoding, structures, patching, and versioning [here](contributing/structures/README.md).
 
 # Contributing
 
@@ -32,7 +32,7 @@ Do you want to contribute? GREAT! :D You can build features that you need for yo
 
 ### Developer documentation
 
-You can read the documentation of the most important building blocks of Stamhoofd [here](https://stamhoofd.notion.site/). We have some internal libraries, and those are all covered in the docs. Find something missing? Feel free to let us know.
+You can read the documentation of the most important building blocks of Stamhoofd [here](contributing/README.md). API contracts live beside the code, with reusable library guides in the owning repositories. Find something missing? Feel free to let us know.
 
 ### Installation
 

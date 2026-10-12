@@ -18,7 +18,7 @@ function clickButton() {
 
 `useContext()` reads the ancestor-provided SessionContext; `useUser()` returns a computed ref to its user or null. Use the context for [requests](requests.md). [useAuth](../../frontend/shared/components/src/hooks/useAuth.ts) returns a permission checker, not computed refs; wrap checks in `computed` when needed. Frontend checks never replace backend authorization.
 
-For computed input fields and child-to-parent edits, read [patching inside views](patching.md). The [edit-view pattern](../patterns/edit-views.md) remains TODO. See [translations](translations.md) for `$t` and Dutch source strings.
+For the core patching model, read [patching data](https://github.com/SimonBackx/simple-encoding/blob/master/docs/patching.md). For computed input fields and child-to-parent edits, read [patching inside views](patching.md). The [edit-view pattern](../patterns/edit-views.md) remains TODO. See [translations](translations.md) for `$t` and Dutch source strings.
 
 ## Formatting
 
