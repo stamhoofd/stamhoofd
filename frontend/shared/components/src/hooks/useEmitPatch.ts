@@ -2,6 +2,11 @@ import type { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods } from '@
 import type { Ref} from 'vue';
 import { computed } from 'vue';
 
+/**
+ * Read the parent's current prop and emit edits as `patch:<propName>` events.
+ * Does not accumulate or apply edits locally; the parent owns that state.
+ * Includes the current object's id when creating patches, when present.
+ */
 export function useEmitPatch<T extends AutoEncoder>(props: any, emit: any, propName: string): {
     createPatch: () => AutoEncoderPatchType<T>;
     patched: Ref<T>;

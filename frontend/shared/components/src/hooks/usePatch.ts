@@ -4,6 +4,14 @@ import { Version } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref, unref } from 'vue';
 
+/**
+ * Accumulate edits separately from an AutoEncoder and expose a computed patched copy.
+ * Pass a ref to follow replacement of the source; getters are not accepted. An
+ * initial value is required. Source replacement does not reset accumulated edits.
+ * `addPatch` applies newer edits last; `addDependingPatch` lets existing edits win.
+ * `reset` creates an empty patch for the current source (including its id).
+ * `postProcess` transforms each computed patched copy, not the stored patch.
+ */
 export function usePatch<T extends AutoEncoder>(obj: T | Ref<T>, options?: {
     postProcess?: (obj: T) => T;
 }): {
