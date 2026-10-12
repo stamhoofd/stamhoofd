@@ -35,6 +35,9 @@ class Queue {
     }
 }
 
+/**
+ * @deprecated See {@link QueueHandler} for more information.
+ */
 export type QueueHandlerOptions = {
     abort: AbortSignal;
 };
@@ -45,18 +48,30 @@ class QueueItem<T> {
     reject: (reason?: any) => void;
 }
 
+/**
+ * @deprecated See {@link QueueHandler} for more information.
+ */
 export function isDebouncedError(error: unknown) {
     return isSimpleError(error) && error.code === 'queue-debounced';
 }
 
+/**
+ * @deprecated See {@link QueueHandler} for more information.
+ */
 export function isCanceledError(error: unknown) {
     return isSimpleError(error) && error.code === 'queue-canceled';
 }
 
+/**
+ * @deprecated See {@link QueueHandler} for more information.
+ */
 export function isAbortedError(error: unknown) {
     return isSimpleError(error) && error.code === 'queue-aborted';
 }
 
+/**
+ * @deprecated See {@link QueueHandler} for more information.
+ */
 export class AbortSignal {
     protected abortWithError: unknown | null = null;
     protected listeners: ((error: unknown) => Promise<void> | void)[] = [];
@@ -110,6 +125,17 @@ export class AbortSignal {
 
 /**
  * Force the usage of a queue to prevent concurrency issues
+ *
+ * @deprecated the QueueHandler is an in-process queue. As we are aiming to
+ * scale horizontally (have more processes / hosts), we need a different way of
+ * preventing concurrent operations from corrupting the state. We should try
+ * to avoid requiring operations to run serially, but instead make it so it's
+ * safe to run them concurrently.
+ *
+ * See the "In-Process Queue Deprecation" project on Linear for more reasoning,
+ * examples, and the plan to remove the QueueHandler altogether.
+ *
+ * https://linear.app/stamhoofd/project/in-process-queue-deprecation-7a1e63f8986d/overview
  */
 export class QueueHandler {
     static queues = new Map<string, Queue>();
@@ -288,26 +314,21 @@ export class QueueHandler {
                 abort,
             }));
             // console.log("[QUEUE] ("+(q.runCount-1)+"/"+q.parallel+") Resolved "+queue+" ("+q.items.length+" remaining)")
-        }
-        catch (e) {
+        } catch (e) {
             next.reject(e);
             if (!isDebouncedError(e) && !isCanceledError(e) && !isAbortedError(e)) {
                 console.log('[QUEUE] (' + (q.runCount - 1) + '/' + q.parallel + ') Rejected ' + queue + ' (' + q.items.length + ' remaining)');
                 console.error(e);
-            }
-            else {
+            } else {
                 if (isDebouncedError(e)) {
                     console.log('[QUEUE] (' + (q.runCount - 1) + '/' + q.parallel + ') Debounced ' + queue + ' (' + q.items.length + ' remaining)');
-                }
-                else if (isCanceledError(e)) {
+                } else if (isCanceledError(e)) {
                     console.log('[QUEUE] (' + (q.runCount - 1) + '/' + q.parallel + ') Canceled ' + queue + ' (' + q.items.length + ' remaining)');
-                }
-                else if (isAbortedError(e)) {
+                } else if (isAbortedError(e)) {
                     console.log('[QUEUE] (' + (q.runCount - 1) + '/' + q.parallel + ') Aborted ' + queue + ' (' + q.items.length + ' remaining)');
                 }
             }
-        }
-        finally {
+        } finally {
             q.removeAbortSignal(abort);
         }
 
