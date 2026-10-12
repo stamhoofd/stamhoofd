@@ -614,6 +614,7 @@ export class PaymentService {
      * the total amount of balances does not match the total amount received/paid.
      *
      * To fix that, we create an extra roundingAmount with the difference. So the rounding always matches.
+     * Repeated calls round the original allocation total (`price - roundingAmount`), not the already rounded price.
      */
     static roundPayment(payment: Payment) {
         // Calculate total price of the balance items
