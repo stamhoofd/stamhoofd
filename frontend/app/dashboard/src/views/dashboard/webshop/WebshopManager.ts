@@ -7,7 +7,7 @@ import type { SortItem, StamhoofdFilter, WebshopPreview } from '@stamhoofd/struc
 import { PermissionLevel, PrivateOrderWithTickets, PrivateWebshop, Version } from '@stamhoofd/structures';
 import { IndexBoxDecoder } from './IndexBox';
 import { filterNeedsTickets } from './orderTicketFilters';
-import type { OrderIndexedDBIndex } from './ordersIndexedDBSorters';
+import type { OrderIndexedDBIndex, OrderIndexLookup } from './ordersIndexedDBSorters';
 import { WebshopDatabase } from './repositories/WebshopDatabase';
 import { OrdersStore, WebshopOrdersRepo } from './repositories/WebshopOrdersRepo';
 import { WebshopSettingsStore } from './repositories/WebshopSettingsStore';
@@ -306,6 +306,7 @@ export class WebshopManager {
         limit?: number;
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
         advanceCount?: number;
+        lookup?: OrderIndexLookup;
         signal?: AbortSignal;
     }): Promise<number> {
         const db = await this.database.get();

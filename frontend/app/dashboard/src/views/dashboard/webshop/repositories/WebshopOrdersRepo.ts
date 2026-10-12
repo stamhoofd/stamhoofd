@@ -8,7 +8,7 @@ import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { CountFilteredRequest, InMemoryFilterRunner, SortItem, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { compileToInMemoryFilter, CountResponse, LimitedFilteredRequest, OrderStatus, PaginatedResponseDecoder, PrivateOrder, privateOrderWithTicketsFilterCompilers, SortItemDirection, Version } from '@stamhoofd/structures';
 import { IndexBoxDecoder } from '../IndexBox';
-import type { OrderIndexedDBIndex } from '../ordersIndexedDBSorters';
+import type { OrderIndexedDBIndex, OrderIndexLookup } from '../ordersIndexedDBSorters';
 import { createPrivateOrderIndexBox, orderIndexesInMemoryFilterCompilers } from '../ordersIndexedDBSorters';
 import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
 import type { WebshopSettingsStore } from './WebshopSettingsStore';
@@ -227,6 +227,7 @@ export class WebshopOrdersRepo {
         limit?: number;
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
         advanceCount?: number;
+        lookup?: OrderIndexLookup;
         openTransaction?: IDBTransaction;
         signal?: AbortSignal;
     },
@@ -352,7 +353,7 @@ export class OrdersStore {
         });
     }
 
-    async streamRaw<T>({ callback, filter, indexFilter, limit, sortItem, advanceCount, transform, openTransaction, signal }: {
+    async streamRaw<T>({ callback, filter, indexFilter, limit, sortItem, advanceCount, lookup, transform, openTransaction, signal }: {
         transform: (rawOrder: any) => Promise<T>;
         /**
          * Called for every order that matches, before the cursor moves on. Anything it awaits has to
@@ -371,6 +372,10 @@ export class OrdersStore {
         limit?: number;
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
         advanceCount?: number;
+        /**
+         * Only visit the orders with this exact index value, in the order of that index (so not in sortItem order).
+         */
+        lookup?: OrderIndexLookup;
         openTransaction?: IDBTransaction;
         /**
          * Stops the stream and rejects with the abort reason. Checked before every cursor step.
@@ -410,7 +415,12 @@ export class OrdersStore {
 
             // use an index if a SortItem is defined
             try {
-                if (sortItem) {
+                if (lookup) {
+                    if (sortItem || advanceCount) {
+                        throw new Error('A lookup cannot be combined with a sortItem or advanceCount');
+                    }
+                    request = objectStore.index(lookup.index).openCursor(IDBKeyRange.only(lookup.key));
+                } else if (sortItem) {
                     let direction: IDBCursorDirection = 'next';
 
                     if (sortItem.order === SortItemDirection.DESC) {

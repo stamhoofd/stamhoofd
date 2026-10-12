@@ -5,8 +5,8 @@ import type { CountFilteredRequest, PrivateOrderWithTickets, SortItem, SortList,
 import { assertSort, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, SortItemDirection } from '@stamhoofd/structures';
 import { parsePhoneNumber } from 'libphonenumber-js';
 import { toRaw } from 'vue';
-import type { OrderIndexedDBIndex} from '../ordersIndexedDBSorters';
-import { ordersIndexedDBSorters } from '../ordersIndexedDBSorters';
+import type { OrderIndexedDBIndex } from '../ordersIndexedDBSorters';
+import { getExactIndexLookup, ordersIndexedDBSorters, sortOrdersLikeIndex } from '../ordersIndexedDBSorters';
 import type { WebshopManager } from '../WebshopManager';
 import { OrderRequiredFilterHelper } from './OrderRequiredFilterHelper';
 
@@ -100,7 +100,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
         async fetch(data: LimitedFilteredRequest, options?: { signal?: AbortSignal }) {
             data = toRaw(data);
             console.log('Orders(IndexedDb).fetch', data);
-            const results: PrivateOrderWithTickets[] = [];
+            let results: PrivateOrderWithTickets[] = [];
             const filters = [data.filter];
 
             const searchFilter = searchToFilter(data.search);
@@ -153,18 +153,36 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 }
             }
 
-            // stream
-            itemsToAdvanceNext = await manager.streamOrdersWithPatchedTickets({
-                callback: (order) => {
-                    results.push(order);
-                },
-                filter,
-                indexFilter: searchFilter ?? undefined,
-                limit: data.limit,
-                sortItem,
-                advanceCount,
-                signal: options?.signal,
-            });
+            const lookup = getExactIndexLookup(searchFilter);
+
+            if (lookup) {
+                // Only the few orders with this exact value get visited, but in lookup order: sort and page them here.
+                // The pageFilter (part of filter) already skips the orders of previous pages.
+                await manager.streamOrdersWithPatchedTickets({
+                    callback: (order) => {
+                        results.push(order);
+                    },
+                    filter,
+                    indexFilter: searchFilter ?? undefined,
+                    lookup,
+                    signal: options?.signal,
+                });
+                results = sortOrdersLikeIndex(results, sortItem).slice(0, data.limit);
+                itemsToAdvanceNext = 0;
+            }
+            else {
+                itemsToAdvanceNext = await manager.streamOrdersWithPatchedTickets({
+                    callback: (order) => {
+                        results.push(order);
+                    },
+                    filter,
+                    indexFilter: searchFilter ?? undefined,
+                    limit: data.limit,
+                    sortItem,
+                    advanceCount,
+                    signal: options?.signal,
+                });
+            }
 
             // create next request
             const lastItem = results[results.length - 1];
@@ -234,6 +252,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 },
                 filter,
                 indexFilter: searchFilter ?? undefined,
+                lookup: getExactIndexLookup(searchFilter) ?? undefined,
                 // Counting never looks at an order, let alone at its tickets
                 withTickets: false,
                 signal: options?.signal,
