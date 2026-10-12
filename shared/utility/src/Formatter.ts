@@ -320,6 +320,18 @@ export class Formatter {
     }
 
     /**
+     * Excel serial date number (days since 1899-12-30) of the date as shown in the platform timezone,
+     * so the spreadsheet shows the same date and time regardless of the timezone of the device.
+     */
+    static excelDate(date: Date, { dateOnly = false }: { dateOnly?: boolean } = {}): number {
+        const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
+        const local = dateOnly
+            ? Date.UTC(datetime.year, datetime.month - 1, datetime.day)
+            : date.getTime() + datetime.offset * 60 * 1000;
+        return local / (24 * 60 * 60 * 1000) + 25569;
+    }
+
+    /**
      * unwrapLeadingParentheses("(Hello world) (test test)"); // "Hello world (test test)"
      * unwrapLeadingParentheses("Something else (test)");      // "Something else (test)"
      */

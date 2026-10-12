@@ -35,3 +35,18 @@ describe('Formatter.price', () => {
         expect(Formatter.price(-4_13_40).startsWith('-')).toBe(true);
     });
 });
+
+describe('Formatter.excelDate', () => {
+    test('uses the date and time in the platform timezone', () => {
+        // 2010-06-15 00:00 and 2010-01-15 14:30 in Brussels
+        expect(Formatter.excelDate(new Date('2010-06-14T22:00:00Z'))).toBe(40344);
+        expect(Formatter.excelDate(new Date('2010-01-15T13:30:00Z'))).toBeCloseTo(40193 + 14.5 / 24, 8);
+    });
+
+    test('drops the time of date-only values', () => {
+        // Birth dates stored at midnight UTC are 01:00 or 02:00 in Brussels
+        expect(Formatter.excelDate(new Date('2010-06-15T00:00:00Z'), { dateOnly: true })).toBe(40344);
+        expect(Formatter.excelDate(new Date('2010-01-15T00:00:00Z'), { dateOnly: true })).toBe(40193);
+        expect(Formatter.excelDate(new Date('2010-01-14T23:00:00Z'), { dateOnly: true })).toBe(40193);
+    });
+});

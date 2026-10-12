@@ -1,5 +1,6 @@
 import type { CellValue, XlsxWriterAdapter } from '@stamhoofd/excel-writer/core';
 import { AppManager } from '@stamhoofd/networking/AppManager';
+import { Formatter } from '@stamhoofd/utility';
 import XLSX from 'xlsx';
 import { ExcelHelper } from './ExcelHelper';
 
@@ -72,13 +73,20 @@ export class SheetJsWriterAdapter implements XlsxWriterAdapter {
         // Remove columns without any data
         this.deleteEmptyColumns(rows, headerRowCount);
 
-        const worksheet = XLSX.utils.aoa_to_sheet(rows.map(row => row.map(cell => cell.value)), { cellStyles: true, cellDates: true });
+        // SheetJS converts dates using the timezone of the device and keeps the time of date-only values
+        const worksheet = XLSX.utils.aoa_to_sheet(rows.map(row => row.map((cell) => {
+            if (cell.value instanceof Date) {
+                const formatCode = cell.style?.numberFormat?.formatCode;
+                return Formatter.excelDate(cell.value, { dateOnly: !!formatCode && !/[hs]/i.test(formatCode) });
+            }
+            return cell.value;
+        })), { cellStyles: true });
 
         // Apply number formats
         for (let rowIndex = headerRowCount; rowIndex < rows.length; rowIndex++) {
             const row = rows[rowIndex];
             for (let columnIndex = 0; columnIndex < row.length; columnIndex++) {
-                const formatCode = row[columnIndex].style?.numberFormat?.formatCode;
+                const formatCode = row[columnIndex].style?.numberFormat?.formatCode ?? (row[columnIndex].value instanceof Date ? 'dd/mm/yyyy hh:mm' : null);
                 if (!formatCode) {
                     continue;
                 }
