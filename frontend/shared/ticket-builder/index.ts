@@ -8,16 +8,10 @@ import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { Buffer } from 'buffer';
 import PDFDocument from 'pdfkit';
-import * as pdfkit from 'pdfkit';
-import Helvetica from 'pdfkit/standard-fonts/Helvetica';
 import QRCode from 'qrcode';
 
 // polyfill
 globalThis.Buffer = Buffer;
-
-// PDFKit's default font; the browser build requires standard fonts to be registered explicitly
-// (@types/pdfkit does not declare registerStdFonts yet)
-(pdfkit as unknown as { registerStdFonts: (...fonts: object[]) => void }).registerStdFonts(Helvetica);
 
 // 1 mm
 const MM = 2.834666666666667;
@@ -56,7 +50,7 @@ export class TicketBuilder {
         this.webshop = webshop;
         this.organization = organization;
         this.order = order;
-        this.document = new PDFDocument({ size: [PAGE_WIDTH, PAGE_HEIGHT], margin: PAGE_MARGIN });
+        this.document = new PDFDocument({ size: [PAGE_WIDTH, PAGE_HEIGHT], margin: PAGE_MARGIN, font: null as unknown as string });
     }
 
     get primaryColor() {
