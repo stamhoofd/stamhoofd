@@ -23,7 +23,14 @@ export class MembersPdfDocument {
     }
 
     private async createDoc(): Promise<PDFKit.PDFDocument> {
-        const PDFDocument = (await import('pdfkit/js/pdfkit.standalone')).default;
+        const [pdfkit, { default: Helvetica }] = await Promise.all([
+            import('pdfkit'),
+            import('pdfkit/standard-fonts/Helvetica'),
+        ]);
+        // PDFKit's default font; the browser build requires standard fonts to be registered explicitly
+        // (@types/pdfkit does not declare registerStdFonts yet)
+        (pdfkit as unknown as { registerStdFonts: (...fonts: object[]) => void }).registerStdFonts(Helvetica);
+        const PDFDocument = pdfkit.default;
         return new PDFDocument({ size: 'A4', margin: pageMargin, bufferPages: true });
     }
 
