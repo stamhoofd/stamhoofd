@@ -110,7 +110,7 @@
         "@stamhoofd/test-utils": "workspace:*",
         "@types/cookie": "0.6.0",
         "@types/formidable": "3.5.1",
-        "@types/luxon": "3.7.5",
+        "@types/luxon": "3.7.6",
         "@types/mailparser": "3.4.6",
         "@types/node": "22.20.4",
         "@types/uuid": "8.3.4",
