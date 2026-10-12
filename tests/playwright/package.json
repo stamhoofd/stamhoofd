@@ -25,7 +25,7 @@
         "mysql2": "3.24.4"
     },
     "devDependencies": {
-        "@playwright/test": "1.60.0",
+        "@playwright/test": "1.63.0",
         "@stamhoofd/test-utils": "workspace:*",
         "eslint-plugin-stamhoofd": "workspace:*",
         "nock": "14.0.17",
