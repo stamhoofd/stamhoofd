@@ -20,6 +20,7 @@ import { computed, nextTick, ref } from 'vue';
 const props = withDefaults(
     // props
     defineProps<{
+        /** Enables the item slot and array v-model; dragging starts on a .drag handle. Cross-list reordering is not supported. */
         draggable?: boolean;
         group?: string;
         withAnimation?: boolean;

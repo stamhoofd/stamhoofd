@@ -41,6 +41,7 @@ const props = withDefaults(
     // props
     defineProps<{
         elementName?: string;
+        /** Changes the default article to a button when enabled and not disabled; explicit elementName values are preserved. */
         selectable?: boolean;
         disabled?: boolean;
     }>(),
