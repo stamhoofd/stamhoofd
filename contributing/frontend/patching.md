@@ -1,6 +1,6 @@
 # Patching inside views
 
-**Work in progress.** The editing-pattern guide is still TODO; this documents the available hook example, not a complete edit-view pattern.
+**Work in progress.** The [editing-pattern guide](../patterns/edit-views.md) is still TODO; this documents the available hook example, not a complete edit-view pattern.
 
 Keep the original structure separate from accumulated edits. Bind inputs to computed properties that read the patched copy and add patches in their setters:
 
