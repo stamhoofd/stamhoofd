@@ -1,6 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import type { FilterCompiler, FilterDefinitions, RequiredFilterCompiler, StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
-import { compileFilter, filterDefinitionsToCompiler } from '@stamhoofd/structures';
+import type { FilterCompiler, FilterDefinitions, RequiredFilterCompiler } from '@stamhoofd/filters/FilterCompilers';
+import type { StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import { compileFilter, filterDefinitionsToCompiler } from '@stamhoofd/filters/FilterCompilers';
 import type { SQLExpression, SQLExpressionOptions, SQLQuery } from '../SQLExpression.js';
 import { SQLSafeValue } from '../SQLExpressions.js';
 import type { SQLJoin } from '../SQLJoin.js';

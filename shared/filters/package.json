@@ -1,0 +1,34 @@
+{
+    "name": "@stamhoofd/filters",
+    "version": "2.154.0",
+    "type": "module",
+    "sideEffects": false,
+    "exports": {
+        "./*": {
+            "types": "./dist/*.d.ts",
+            "import": "./dist/*.js",
+            "require": "./dist/*.js"
+        }
+    },
+    "files": [
+        "dist",
+        "package.json"
+    ],
+    "scripts": {
+        "build": "tsc --build tsconfig.build.json",
+        "lint": "eslint",
+        "typecheck": "tsc --build tsconfig.test.json"
+    },
+    "dependencies": {
+        "@simonbackx/simple-encoding": "2.26.11",
+        "@simonbackx/simple-errors": "1.5.0"
+    },
+    "devDependencies": {
+        "@stamhoofd/types": "workspace:*",
+        "eslint-plugin-stamhoofd": "workspace:*"
+    },
+    "license": "UNLICENCED",
+    "publishConfig": {
+        "access": "public"
+    }
+}

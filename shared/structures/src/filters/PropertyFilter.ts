@@ -4,8 +4,9 @@ import { cloneObject } from '@simonbackx/simple-encoding';
 import { AuditLogReplacement } from '../AuditLogReplacement.js';
 import type { Filterable } from '../members/records/RecordCategory.js';
 import { StamhoofdFilterDecoder } from './FilteredRequest.js';
-import type { StamhoofdFilter } from './StamhoofdFilter.js';
-import { isEmptyFilter, isEqualFilter, mergeFilters } from './StamhoofdFilter.js';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import { isEmptyFilter, mergeFilters } from '@stamhoofd/filters/StamhoofdFilter';
+import { isEqualFilter } from './isEqualFilter.js';
 import { convertOldPropertyFilter } from './convertOldPropertyFilter.js';
 
 export class PropertyFilter implements Encodeable {

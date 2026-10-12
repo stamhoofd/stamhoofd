@@ -5,7 +5,7 @@ import { Premise } from './addresses/Premise.js';
 import { DNSRecord } from './DNSRecord.js';
 import { MailchimpSettings } from './mailchimp/MailchimpSettings.js';
 import { StamhoofdFilterDecoder } from './filters/FilteredRequest.js';
-import { FilterWrapperMarker, unwrapFilter } from './filters/StamhoofdFilter.js';
+import { FilterWrapperMarker, unwrapFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import { MemberResponsibility } from './MemberResponsibility.js';
 import type { RecordAnswer } from './members/records/RecordAnswer.js';
 import { RecordAnswerMapDecoder } from './members/records/RecordAnswer.js';

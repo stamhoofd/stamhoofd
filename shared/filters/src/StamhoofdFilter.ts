@@ -1,5 +1,3 @@
-import { Version } from '../Version.js';
-import { StamhoofdFilterDecoder } from './FilteredRequest.js';
 import type { AssertSortList, SortList } from './SortList.js';
 import { SortItemDirection } from './SortList.js';
 
@@ -35,16 +33,16 @@ export type StamhoofdCompareValue = string | number | Date | null | boolean | St
 export const FilterWrapperMarker = Symbol('FilterWrapperMarker');
 export type WrapperFilter = StamhoofdFilter<StamhoofdCompareValue | typeof FilterWrapperMarker>;
 
-export type StamhoofdKeyFilterValue<T = StamhoofdCompareValue> =
-    { $eq: T }
-    | { $in: T[] }
-    | { $neq: T }
-    | { $gt: T }
-    | { $lt: T }
-    | { $contains: string }
-    | { $length: StamhoofdFilter<T> }
-    | { $elemMatch: StamhoofdFilter<T> }
-    | T;
+export type StamhoofdKeyFilterValue<T = StamhoofdCompareValue>
+    = { $eq: T }
+        | { $in: T[] }
+        | { $neq: T }
+        | { $gt: T }
+        | { $lt: T }
+        | { $contains: string }
+        | { $length: StamhoofdFilter<T> }
+        | { $elemMatch: StamhoofdFilter<T> }
+        | T;
 
 export type StamhoofdKeyFilter<T = StamhoofdCompareValue> = {
     [k in string]: StamhoofdFilter<T>
@@ -95,18 +93,6 @@ export function assertSort(list: SortList, assert: AssertSortList): SortList {
     }
 
     return list;
-}
-
-export function isEqualFilter(a: StamhoofdFilter | null, b: StamhoofdFilter | null) {
-    if (a === null) {
-        return b === null;
-    }
-
-    if (b === null) {
-        return false;
-    }
-
-    return JSON.stringify(StamhoofdFilterDecoder.encode(a, { version: Version })) === JSON.stringify(StamhoofdFilterDecoder.encode(b, { version: Version }));
 }
 
 export function wrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): StamhoofdFilter {

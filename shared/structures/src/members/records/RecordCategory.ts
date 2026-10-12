@@ -3,7 +3,7 @@ import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-
 import { v4 as uuidv4 } from 'uuid';
 
 import { PropertyFilter } from '../../filters/PropertyFilter.js';
-import type { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import { getPermissionLevelNumber, PermissionLevel } from '../../PermissionLevel.js';
 import { TranslatedString } from '../../TranslatedString.js';
 import type { ObjectWithRecords, PatchAnswers } from '../ObjectWithRecords.js';

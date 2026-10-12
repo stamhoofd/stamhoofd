@@ -8,7 +8,7 @@ import { User } from '../User.js';
 import { EmailRecipient } from '../email/Email.js';
 import { Replacement } from '../endpoints/EmailRequest.js';
 import { compileToInMemoryFilter } from '../filters/InMemoryFilter.js';
-import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import { memberWithRegistrationsBlobInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions.js';
 import { Member } from './Member.js';
 import { MemberPlatformMembership } from './MemberPlatformMembership.js';
