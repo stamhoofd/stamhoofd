@@ -16,6 +16,7 @@ import LoadingViewTransition from './LoadingViewTransition.vue';
 
 const props = withDefaults(
     defineProps<{
+        /** Invoked on mount and reload; resolves to the view wrapper, not an import promise. Rejections render an ErrorBox. */
         promise: () => Promise<ComponentWithProperties>;
         view?: boolean;
     }>(),
