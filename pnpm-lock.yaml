@@ -460,8 +460,8 @@ importers:
         specifier: 2.26.11
         version: 2.26.11(@simonbackx/simple-errors@1.5.0)(tslib@2.8.1)
       '@simonbackx/simple-endpoints':
-        specifier: 1.22.0
-        version: 1.22.0(@simonbackx/simple-encoding@2.26.11)(@simonbackx/simple-errors@1.5.0)
+        specifier: 1.23.0
+        version: 1.23.0(@simonbackx/simple-encoding@2.26.11)(@simonbackx/simple-errors@1.5.0)
       '@simonbackx/simple-errors':
         specifier: 1.5.0
         version: 1.5.0(@simonbackx/simple-encoding@2.26.11)(uuid@14.0.2)
@@ -632,8 +632,8 @@ importers:
         specifier: 2.26.11
         version: 2.26.11(@simonbackx/simple-errors@1.5.0)(tslib@2.8.1)
       '@simonbackx/simple-endpoints':
-        specifier: 1.22.0
-        version: 1.22.0(@simonbackx/simple-encoding@2.26.11)(@simonbackx/simple-errors@1.5.0)
+        specifier: 1.23.0
+        version: 1.23.0(@simonbackx/simple-encoding@2.26.11)(@simonbackx/simple-errors@1.5.0)
       '@simonbackx/simple-errors':
         specifier: 1.5.0
         version: 1.5.0(@simonbackx/simple-encoding@2.26.11)(uuid@9.0.1)
@@ -693,8 +693,8 @@ importers:
         specifier: 1.40.1
         version: 1.40.1(@simonbackx/simple-encoding@2.26.11)(mysql2@3.24.4(@types/node@22.20.4))
       '@simonbackx/simple-endpoints':
-        specifier: 1.22.0
-        version: 1.22.0(@simonbackx/simple-encoding@2.26.11)(@simonbackx/simple-errors@1.5.0)
+        specifier: 1.23.0
+        version: 1.23.0(@simonbackx/simple-encoding@2.26.11)(@simonbackx/simple-errors@1.5.0)
       '@simonbackx/simple-logging':
         specifier: 1.0.1
         version: 1.0.1
@@ -739,8 +739,8 @@ importers:
         specifier: 2.26.11
         version: 2.26.11(@simonbackx/simple-errors@1.5.0)(tslib@2.8.1)
       '@simonbackx/simple-endpoints':
-        specifier: 1.22.0
-        version: 1.22.0(@simonbackx/simple-encoding@2.26.11)(@simonbackx/simple-errors@1.5.0)
+        specifier: 1.23.0
+        version: 1.23.0(@simonbackx/simple-encoding@2.26.11)(@simonbackx/simple-errors@1.5.0)
       '@simonbackx/simple-errors':
         specifier: 1.5.0
         version: 1.5.0(@simonbackx/simple-encoding@2.26.11)(uuid@9.0.1)
@@ -947,8 +947,8 @@ importers:
   backend/shared/i18n:
     dependencies:
       '@simonbackx/simple-endpoints':
-        specifier: 1.22.0
-        version: 1.22.0(@simonbackx/simple-encoding@2.26.11)(@simonbackx/simple-errors@1.5.0)
+        specifier: 1.23.0
+        version: 1.23.0(@simonbackx/simple-encoding@2.26.11)(@simonbackx/simple-errors@1.5.0)
       '@simonbackx/simple-logging':
         specifier: 1.0.1
         version: 1.0.1
@@ -975,8 +975,8 @@ importers:
   backend/shared/middleware:
     dependencies:
       '@simonbackx/simple-endpoints':
-        specifier: 1.22.0
-        version: 1.22.0(@simonbackx/simple-encoding@2.26.11)(@simonbackx/simple-errors@1.5.0)
+        specifier: 1.23.0
+        version: 1.23.0(@simonbackx/simple-encoding@2.26.11)(@simonbackx/simple-errors@1.5.0)
       '@simonbackx/simple-errors':
         specifier: 1.5.0
         version: 1.5.0(@simonbackx/simple-encoding@2.26.11)(uuid@9.0.1)
@@ -1005,8 +1005,8 @@ importers:
         specifier: 2.26.11
         version: 2.26.11(@simonbackx/simple-errors@1.5.0)(tslib@2.8.1)
       '@simonbackx/simple-endpoints':
-        specifier: 1.22.0
-        version: 1.22.0(@simonbackx/simple-encoding@2.26.11)(@simonbackx/simple-errors@1.5.0)
+        specifier: 1.23.0
+        version: 1.23.0(@simonbackx/simple-encoding@2.26.11)(@simonbackx/simple-errors@1.5.0)
       '@simonbackx/simple-errors':
         specifier: 1.5.0
         version: 1.5.0(@simonbackx/simple-encoding@2.26.11)(uuid@14.0.2)
@@ -6149,11 +6149,11 @@ packages:
       '@simonbackx/simple-errors': ^1.5.0
       tslib: ^2.8.1
 
-  '@simonbackx/simple-endpoints@1.22.0':
-    resolution: {integrity: sha512-VlJ7CGu39EpzUXR+cXMO6NEO/r6z8bPclBpAGkk2x7EpPRSRNmGdm1RyeFj/lrxGaL/4A6YpS89isp87NRQvPw==}
+  '@simonbackx/simple-endpoints@1.23.0':
+    resolution: {integrity: sha512-8vcKabiumqzCFVsUlpjD23vuwDZ7y/SgoPc6f2wPxkwM02OtOcwDVcxfzMH6TjFr2FxHz6HfuaK7kPfxLjW2zw==}
     peerDependencies:
-      '@simonbackx/simple-encoding': ^2.20.0
-      '@simonbackx/simple-errors': ^1.4.0
+      '@simonbackx/simple-encoding': ^2.26.0
+      '@simonbackx/simple-errors': ^1.5.0
 
   '@simonbackx/simple-errors@1.5.0':
     resolution: {integrity: sha512-UnMU3DQlO0sEGnCld9ASP9YTsTOJ5qvo6ZwyrlVEnsrGMsgaDk5TwONU7Q9kuXYykPMwen7LQPFv41xTF1+eQw==}
@@ -18438,7 +18438,7 @@ snapshots:
       '@simonbackx/simple-errors': 1.5.0(@simonbackx/simple-encoding@2.26.11)(uuid@9.0.1)
       tslib: 2.8.1
 
-  '@simonbackx/simple-endpoints@1.22.0(@simonbackx/simple-encoding@2.26.11)(@simonbackx/simple-errors@1.5.0)':
+  '@simonbackx/simple-endpoints@1.23.0(@simonbackx/simple-encoding@2.26.11)(@simonbackx/simple-errors@1.5.0)':
     dependencies:
       '@simonbackx/simple-encoding': 2.26.11(@simonbackx/simple-errors@1.5.0)(tslib@2.8.1)
       '@simonbackx/simple-errors': 1.5.0(@simonbackx/simple-encoding@2.26.11)(uuid@14.0.2)
