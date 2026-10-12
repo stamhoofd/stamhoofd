@@ -2,7 +2,7 @@
 
 ## Docs
 
-https://app.notion.com/p/Getting-started-20cc403f36798075b190c84c2c21d1ec — encoding/decoding/patching/versioning (AutoEncoder, patchable arrays/maps), vue-app-navigation views, writing endpoints, database storage, sending requests, local storage. Read the relevant docs before starting — do not guess. Ask if something is unclear and not documented in Notion.
+[Contributor documentation](contributing/README.md) — encoding/decoding/patching/versioning (AutoEncoder, patchable arrays/maps), vue-app-navigation views, writing endpoints, database storage, sending requests, local storage. Read the relevant guide and owning API docstrings before starting — do not guess. Reusable library guides are linked from the contributor documentation. Ask if something is unclear and not documented.
 
 ## Structure & architecture
 
@@ -26,7 +26,7 @@ Backend uses a custom router (`@simonbackx/simple-endpoints`), **not Express**: 
 
 ## Rules
 
-- **Never modify `@stamhoofd/structures` without first reading the versioning documentation in Notion.** Structures are versioned so old clients keep working; a change ripples across the whole codebase.
+- **Never modify `@stamhoofd/structures` without first reading [Versioning data](https://github.com/SimonBackx/simple-encoding/blob/master/docs/versioning.md).** Structures are versioned so old clients keep working; a change ripples across the whole codebase.
 - **Never change files unrelated to your current task.**
 - Write tests for all backend endpoint changes (unit + integration), and Playwright tests for new UI views (most important happy path). Cover many situations with few tests, without gigantic single tests. Use `TestUtils.setEnvironment(...)` to simulate environments.
 - For bugfixes: write a test that reproduces the bug, verify it fails before the fix and passes after.
