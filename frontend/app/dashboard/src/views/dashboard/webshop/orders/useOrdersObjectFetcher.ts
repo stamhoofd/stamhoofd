@@ -13,6 +13,11 @@ import { OrderRequiredFilterHelper } from './OrderRequiredFilterHelper';
 let lastNextRequest: LimitedFilteredRequest | null = null;
 let itemsToAdvanceNext: number = 0;
 
+/**
+ * Up to this many search matches are read directly and sorted in memory, instead of walking the whole sort index.
+ */
+const maxCandidatesToSortInMemory = 1000;
+
 type ObjectType = PrivateOrderWithTickets;
 
 function extendSort(list: SortList): SortList {
@@ -154,9 +159,10 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             }
 
             const lookup = getExactIndexLookup(searchFilter);
+            const candidateIds = (searchFilter && !lookup) ? await manager.orders.getIndexFilterCandidates(searchFilter) : null;
 
-            if (lookup) {
-                // Only the few orders with this exact value get visited, but in lookup order: sort and page them here.
+            if (lookup || (candidateIds && candidateIds.size <= maxCandidatesToSortInMemory)) {
+                // Only the few matching orders get visited, but not in sort order: sort and page them here.
                 // The pageFilter (part of filter) already skips the orders of previous pages.
                 await manager.streamOrdersWithPatchedTickets({
                     callback: (order) => {
@@ -164,7 +170,8 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                     },
                     filter,
                     indexFilter: searchFilter ?? undefined,
-                    lookup,
+                    lookup: lookup ?? undefined,
+                    candidateIds: candidateIds ?? undefined,
                     signal: options?.signal,
                 });
                 results = sortOrdersLikeIndex(results, sortItem).slice(0, data.limit);
@@ -180,6 +187,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                     limit: data.limit,
                     sortItem,
                     advanceCount,
+                    candidateIds: candidateIds ?? undefined,
                     signal: options?.signal,
                 });
             }
@@ -246,13 +254,22 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 
             const filter = mergeFilters(filters, '$and');
 
+            const lookup = getExactIndexLookup(searchFilter);
+            const candidateIds = (searchFilter && !lookup) ? await manager.orders.getIndexFilterCandidates(searchFilter) : null;
+
+            if (candidateIds && OrderRequiredFilterHelper.isDefault(manager.preview.id, data.filter)) {
+                // Every stored order passes the default filter, so every candidate matches
+                return candidateIds.size;
+            }
+
             await manager.streamOrdersWithPatchedTickets({
                 callback: () => {
                     count++;
                 },
                 filter,
                 indexFilter: searchFilter ?? undefined,
-                lookup: getExactIndexLookup(searchFilter) ?? undefined,
+                lookup: lookup ?? undefined,
+                candidateIds: candidateIds ?? undefined,
                 // Counting never looks at an order, let alone at its tickets
                 withTickets: false,
                 signal: options?.signal,

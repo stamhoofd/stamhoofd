@@ -307,6 +307,7 @@ export class WebshopManager {
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
         advanceCount?: number;
         lookup?: OrderIndexLookup;
+        candidateIds?: Set<string>;
         signal?: AbortSignal;
     }): Promise<number> {
         const db = await this.database.get();

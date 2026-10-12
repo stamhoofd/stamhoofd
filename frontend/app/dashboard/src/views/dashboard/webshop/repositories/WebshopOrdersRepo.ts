@@ -9,7 +9,7 @@ import type { CountFilteredRequest, InMemoryFilterRunner, SortItem, SortList, St
 import { compileToInMemoryFilter, CountResponse, LimitedFilteredRequest, OrderStatus, PaginatedResponseDecoder, PrivateOrder, privateOrderWithTicketsFilterCompilers, SortItemDirection, Version } from '@stamhoofd/structures';
 import { IndexBoxDecoder } from '../IndexBox';
 import type { OrderIndexedDBIndex, OrderIndexLookup } from '../ordersIndexedDBSorters';
-import { createPrivateOrderIndexBox, orderIndexesInMemoryFilterCompilers } from '../ordersIndexedDBSorters';
+import { createPrivateOrderIndexBox, getSingleIndexOfFilter, orderIndexesInMemoryFilterCompilers } from '../ordersIndexedDBSorters';
 import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
 import type { WebshopSettingsStore } from './WebshopSettingsStore';
 import type { ProgressListener, SyncProgress } from './syncProgress';
@@ -228,6 +228,7 @@ export class WebshopOrdersRepo {
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
         advanceCount?: number;
         lookup?: OrderIndexLookup;
+        candidateIds?: Set<string>;
         openTransaction?: IDBTransaction;
         signal?: AbortSignal;
     },
@@ -265,6 +266,10 @@ export class WebshopOrdersRepo {
         return this.store.get(id);
     }
 
+    async getIndexFilterCandidates(indexFilter: StamhoofdFilter): Promise<Set<string> | null> {
+        return this.store.getIndexFilterCandidates(indexFilter);
+    }
+
     async countAll() {
         return await this.store.countAll();
     }
@@ -290,6 +295,54 @@ export class OrdersStore {
 
     constructor({ database }: { database: WebshopDatabase }) {
         this.database = database;
+    }
+
+    /**
+     * The ids of the orders whose stored index value matches the indexFilter, or null if the filter is not on a single index.
+     * Only reads the stored index values, so this is much faster than visiting every order.
+     */
+    async getIndexFilterCandidates(indexFilter: StamhoofdFilter): Promise<Set<string> | null> {
+        const index = getSingleIndexOfFilter(indexFilter);
+        if (index === null) {
+            return null;
+        }
+
+        const compiledIndexFilter = compileToInMemoryFilter(indexFilter, orderIndexesInMemoryFilterCompilers);
+        const values = await this.readIndexValues(index);
+
+        const candidates = new Set<string>();
+        const indexes: Record<string, unknown> = {};
+        for (const [id, value] of values) {
+            indexes[index] = value;
+            if (compiledIndexFilter(indexes)) {
+                candidates.add(id);
+            }
+        }
+        return candidates;
+    }
+
+    /**
+     * The stored index value of every order in that index, by order id, read without loading any order data.
+     */
+    private async readIndexValues(index: OrderIndexedDBIndex): Promise<Map<string, IDBValidKey>> {
+        const db = await this.database.get();
+        const values = new Map<string, IDBValidKey>();
+
+        await new Promise<void>((resolve, reject) => {
+            const request = db.transaction([OrdersStore.storeName], 'readonly').objectStore(OrdersStore.storeName).index(index).openKeyCursor();
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => {
+                const cursor = request.result;
+                if (!cursor) {
+                    resolve();
+                    return;
+                }
+                values.set(cursor.primaryKey as string, cursor.key);
+                cursor.continue();
+            };
+        });
+
+        return values;
     }
 
     async delete(id: string): Promise<void> {
@@ -353,7 +406,7 @@ export class OrdersStore {
         });
     }
 
-    async streamRaw<T>({ callback, filter, indexFilter, limit, sortItem, advanceCount, lookup, transform, openTransaction, signal }: {
+    async streamRaw<T>({ callback, filter, indexFilter, limit, sortItem, advanceCount, lookup, candidateIds, transform, openTransaction, signal }: {
         transform: (rawOrder: any) => Promise<T>;
         /**
          * Called for every order that matches, before the cursor moves on. Anything it awaits has to
@@ -376,6 +429,11 @@ export class OrdersStore {
          * Only visit the orders with this exact index value, in the order of that index (so not in sortItem order).
          */
         lookup?: OrderIndexLookup;
+        /**
+         * Only visit these orders (see getIndexFilterCandidates). With a sortItem they are visited in that order by
+         * walking the keys of the sort index; without one, in the order of the set.
+         */
+        candidateIds?: Set<string>;
         openTransaction?: IDBTransaction;
         /**
          * Stops the stream and rejects with the abort reason. Checked before every cursor step.
@@ -411,35 +469,6 @@ export class OrdersStore {
 
             const objectStore = transaction.objectStore(OrdersStore.storeName);
 
-            let request: IDBRequest<IDBCursorWithValue | null>;
-
-            // use an index if a SortItem is defined
-            try {
-                if (lookup) {
-                    if (sortItem || advanceCount) {
-                        throw new Error('A lookup cannot be combined with a sortItem or advanceCount');
-                    }
-                    request = objectStore.index(lookup.index).openCursor(IDBKeyRange.only(lookup.key));
-                } else if (sortItem) {
-                    let direction: IDBCursorDirection = 'next';
-
-                    if (sortItem.order === SortItemDirection.DESC) {
-                        direction = 'prev';
-                    }
-
-                    if (sortItem.key === 'id') {
-                        request = objectStore.openCursor(null, direction);
-                    } else {
-                        request = objectStore.index(sortItem.key).openCursor(null, direction);
-                    }
-                } else {
-                    request = objectStore.openCursor();
-                }
-            } catch (e) {
-                reject(e);
-                return;
-            }
-
             let matchedItemsCount = 0;
             let totalIterationCount = advanceCount ?? 0;
 
@@ -460,37 +489,35 @@ export class OrdersStore {
                 return;
             }
 
-            const onsuccess: ((this: IDBRequest<IDBCursorWithValue | null>, ev: Event) => any) | null = (event: any) => {
+            /**
+             * Returns true if the stream should stop.
+             */
+            const shouldStop = (): boolean => {
                 if (signal?.aborted) {
                     // Not continuing the cursor lets the transaction complete normally
                     reject(signal.reason);
-                    return;
+                    return true;
                 }
 
                 if (limit && matchedItemsCount >= limit) {
-                    // limit reached
                     resolve(totalIterationCount);
-                    return;
+                    return true;
                 }
+                return false;
+            };
 
-                const cursor: IDBCursor & { value: any } | undefined = event.target.result;
-                if (!cursor) {
-                    // no more results
-                    resolve(totalIterationCount);
-                    return;
-                }
-
-                if (compiledIndexFilter && !compiledIndexFilter(cursor.value.indexes)) {
+            const handleValue = (value: any, next: () => void) => {
+                if (compiledIndexFilter && !compiledIndexFilter(value.indexes)) {
                     // Cannot match: skip it without decoding the order or reading its tickets.
                     totalIterationCount += 1;
-                    cursor.continue();
+                    next();
                     return;
                 }
 
-                transform(cursor.value).then(async (decodedResult) => {
+                transform(value).then(async (decodedResult) => {
                     if (compiledFilter && !compiledFilter(decodedResult)) {
-                        cursor.continue();
                         totalIterationCount += 1;
+                        next();
                         return;
                     }
 
@@ -503,19 +530,99 @@ export class OrdersStore {
                         return;
                     }
 
-                    cursor.continue();
                     totalIterationCount += 1;
                     matchedItemsCount += 1;
+                    next();
                 }).catch((e) => {
                     reject(e);
                 });
             };
 
-            if (advanceCount) {
-                request.onsuccess = (event: any) => {
-                    const cursor: IDBCursor & { value: any } | undefined = event.target.result;
-                    if (!cursor) {
+            if (candidateIds && !sortItem) {
+                const ids = [...candidateIds];
+                let position = 0;
+
+                const getNext = () => {
+                    if (shouldStop()) {
+                        return;
+                    }
+                    if (position >= ids.length) {
+                        resolve(totalIterationCount);
+                        return;
+                    }
+                    const getRequest = objectStore.get(ids[position]);
+                    position += 1;
+                    getRequest.onsuccess = () => {
+                        if (getRequest.result === undefined) {
+                            totalIterationCount += 1;
+                            getNext();
+                            return;
+                        }
+                        handleValue(getRequest.result, getNext);
+                    };
+                };
+                getNext();
+                return;
+            }
+
+            let request: IDBRequest<IDBCursor | null>;
+
+            try {
+                if (lookup) {
+                    if (sortItem || advanceCount || candidateIds) {
+                        throw new Error('A lookup cannot be combined with a sortItem, advanceCount or candidateIds');
+                    }
+                    request = objectStore.index(lookup.index).openCursor(IDBKeyRange.only(lookup.key)) as IDBRequest<IDBCursor | null>;
+                } else if (sortItem) {
+                    const direction: IDBCursorDirection = sortItem.order === SortItemDirection.DESC ? 'prev' : 'next';
+                    const source = sortItem.key === 'id' ? objectStore : objectStore.index(sortItem.key);
+
+                    // Without candidates every order has to be read anyway; with them, only the keys are walked
+                    request = candidateIds ? source.openKeyCursor(null, direction) : source.openCursor(null, direction) as IDBRequest<IDBCursor | null>;
+                } else {
+                    request = objectStore.openCursor() as IDBRequest<IDBCursor | null>;
+                }
+            } catch (e) {
+                reject(e);
+                return;
+            }
+
+            const onsuccess = () => {
+                if (shouldStop()) {
+                    return;
+                }
+
+                const cursor = request.result;
+                if (!cursor) {
                     // no more results
+                    resolve(totalIterationCount);
+                    return;
+                }
+
+                const next = () => cursor.continue();
+
+                if (!candidateIds) {
+                    handleValue((cursor as IDBCursorWithValue).value, next);
+                    return;
+                }
+
+                if (!candidateIds.has(cursor.primaryKey as string)) {
+                    totalIterationCount += 1;
+                    next();
+                    return;
+                }
+
+                const getRequest = objectStore.get(cursor.primaryKey);
+                getRequest.onsuccess = () => {
+                    handleValue(getRequest.result, next);
+                };
+            };
+
+            if (advanceCount) {
+                request.onsuccess = () => {
+                    const cursor = request.result;
+                    if (!cursor) {
+                        // no more results
                         resolve(totalIterationCount);
                         return;
                     }
