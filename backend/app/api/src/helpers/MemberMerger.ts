@@ -72,6 +72,10 @@ export async function mergeTwoMembers(base: Member, other: Member, options?: { u
 
     mergeMemberDetails(base, other);
 
+    if (other.lastRegisteredAt && (base.lastRegisteredAt === null || base.lastRegisteredAt < other.lastRegisteredAt)) {
+        base.lastRegisteredAt = new Date(other.lastRegisteredAt.getTime());
+    }
+
     if (other.existsInDatabase) {
         await mergeRegistrations(base, other);
         await mergeUsers(base, other);
