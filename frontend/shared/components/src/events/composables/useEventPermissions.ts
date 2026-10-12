@@ -21,7 +21,7 @@ export function useEventPermissions() {
     }
 
     /**
-     * Events that are writable because of a permission on the event itself, on top of the group and tag based access.
+     * Events that are accessible because of a permission on the event itself, on top of the group and tag based access.
      * Returns null when every event is writable this way.
      */
     function eventResourceFilters(): StamhoofdFilter[] | null {
@@ -29,7 +29,7 @@ export function useEventPermissions() {
             return [];
         }
 
-        if (permissions.hasAccess(PermissionLevel.Write)) {
+        if (permissions.hasAccess(PermissionLevel.Read)) {
             return null;
         }
 
@@ -37,7 +37,7 @@ export function useEventPermissions() {
         const filters: StamhoofdFilter[] = [];
 
         for (const [id, resource] of permissions.resources.get(PermissionsResourceType.Events) ?? []) {
-            if (!resource.hasAccess(PermissionLevel.Write)) {
+            if (!resource.hasAccess(PermissionLevel.Read)) {
                 continue;
             }
 
