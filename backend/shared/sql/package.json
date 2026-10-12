@@ -24,7 +24,7 @@
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "workspace:*",
-        "mysql2": "3.24.4",
+        "mysql2": "3.24.5",
         "vitest": "4.1.11"
     },
     "peerDependencies": {

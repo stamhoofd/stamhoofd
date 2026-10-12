@@ -18,7 +18,7 @@
         "@simonbackx/simple-database": "1.40.1",
         "@stamhoofd/test-utils": "workspace:*",
         "html-to-text": "10.0.1",
-        "mysql2": "3.24.4",
+        "mysql2": "3.24.5",
         "nodemailer": "10.0.15",
         "uuid": "14.0.2"
     },

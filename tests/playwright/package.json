@@ -22,7 +22,7 @@
         "@stamhoofd/utility": "workspace:*",
         "@simonbackx/simple-encoding": "*",
         "pino": "10.4.0",
-        "mysql2": "3.24.4"
+        "mysql2": "3.24.5"
     },
     "devDependencies": {
         "@playwright/test": "1.63.0",

@@ -34,7 +34,7 @@
         "formidable": "3.5.4",
         "luxon": "3.7.2",
         "mockdate": "3.0.5",
-        "mysql2": "3.24.4"
+        "mysql2": "3.24.5"
     },
     "devDependencies": {
         "@types/formidable": "3.5.1",

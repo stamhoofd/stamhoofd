@@ -47,7 +47,7 @@
         "@stamhoofd/test-utils": "workspace:*",
         "@types/luxon": "3.7.6",
         "@types/uuid": "8.3.4",
-        "mysql2": "3.24.4",
+        "mysql2": "3.24.5",
         "vitest": "4.1.11"
     },
     "peerDependencies": {
@@ -58,7 +58,7 @@
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
-        "mysql2": "3.24.4"
+        "mysql2": "3.24.5"
     },
     "license": "UNLICENCED",
     "publishConfig": {
