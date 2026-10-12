@@ -82,6 +82,7 @@ import { fetchAll } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts'
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import {
+    GroupType,
     LimitedFilteredRequest,
     Organization,
     OrganizationPrivateMetaData,
@@ -203,6 +204,10 @@ async function loadOrganizationMembers() {
                     $elemMatch: {
                         organizationId: organization.value.id,
                         periodId: organization.value.period.period.id,
+                        group: {
+                            // Waiting list and event registrations are no SGV memberships
+                            type: GroupType.Membership,
+                        },
                     },
                 },
             },
