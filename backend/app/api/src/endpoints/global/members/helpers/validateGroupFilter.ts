@@ -1,7 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { FilterWrapperMarker, unwrapFilter } from '@stamhoofd/structures';
+import { FilterWrapperMarker, unwrapFilterRecursively } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context.js';
 import { StamhoofdFilterAccessHelper } from '../../../../helpers/StamhoofdFilterAccessHelper.js';
 
@@ -19,26 +19,9 @@ export async function validateGroupFilter({ filter, permissionLevel, key }: { fi
                 groupId: FilterWrapperMarker,
             };
 
-    let unwrapped = unwrapFilter(filter, requiredFilter);
-    if (!unwrapped.match) {
-        if (typeof filter === 'object'
-            && filter !== null
-            && filter['$and']
-            && Array.isArray(filter['$and'])
-            && Object.keys(filter).length >= 1 // does not matter if more than 1, because root is always $and together
-            && filter['$and'].length > 0
-        ) {
-            for (const subFilter of filter['$and']) {
-                unwrapped = unwrapFilter(subFilter as StamhoofdFilter, requiredFilter);
-                if (unwrapped.match) {
-                    // Found!
-                    break;
-                }
-            }
-        }
+    const unwrapped = unwrapFilterRecursively(filter, requiredFilter);
         if (!unwrapped.match) {
             return false;
-        }
     }
 
     if (unwrapped.markerValue === undefined) {
