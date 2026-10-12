@@ -982,3 +982,46 @@ describe('mergeTwoMembers balance items', () => {
         expect(otherBalance?.amountOpen ?? 0).toBe(0);
     });
 });
+
+describe('mergeTwoMembers lastRegisteredAt', () => {
+    beforeEach(() => {
+        TestUtils.setEnvironment('userMode', 'platform');
+    });
+
+    const createMembers = async (baseLastRegisteredAt: Date | null, otherLastRegisteredAt: Date | null) => {
+        const organization = await new OrganizationFactory({}).create();
+        const base = await new MemberFactory({ organization }).create();
+        const other = await new MemberFactory({ organization }).create();
+
+        base.lastRegisteredAt = baseLastRegisteredAt;
+        await base.save();
+        other.lastRegisteredAt = otherLastRegisteredAt;
+        await other.save();
+
+        return { base, other };
+    };
+
+    test('takes the most recent lastRegisteredAt of both members', async () => {
+        const { base, other } = await createMembers(new Date(2024, 0, 1), new Date(2025, 0, 1));
+        await mergeTwoMembers(base, other, { updateDocuments: false });
+
+        const reloaded = await Member.getByID(base.id);
+        expect(reloaded?.lastRegisteredAt).toEqual(new Date(2025, 0, 1));
+    });
+
+    test('takes lastRegisteredAt of the other member when the base member has none', async () => {
+        const { base, other } = await createMembers(null, new Date(2025, 0, 1));
+        await mergeTwoMembers(base, other, { updateDocuments: false });
+
+        const reloaded = await Member.getByID(base.id);
+        expect(reloaded?.lastRegisteredAt).toEqual(new Date(2025, 0, 1));
+    });
+
+    test('keeps a more recent lastRegisteredAt of the base member', async () => {
+        const { base, other } = await createMembers(new Date(2025, 0, 1), new Date(2024, 0, 1));
+        await mergeTwoMembers(base, other, { updateDocuments: false });
+
+        const reloaded = await Member.getByID(base.id);
+        expect(reloaded?.lastRegisteredAt).toEqual(new Date(2025, 0, 1));
+    });
+});
