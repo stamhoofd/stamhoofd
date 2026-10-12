@@ -59,6 +59,11 @@ export class NetworkManagerStatic implements RequestMiddleware {
         }
     }
 
+    /**
+     * Retry transport failures without a count limit while the request allows it.
+     * Online delay grows linearly to 10 seconds; offline waits for connectivity or
+     * 10 seconds. Repeated failures share a loading toast. Cancellation stops retries.
+     */
     async shouldRetryNetworkError(request: Request<any>, error: Error): Promise<boolean> {
         console.error('network error', error);
         if (!(request as any).isRetrying) {

@@ -682,6 +682,7 @@ export class SessionContext implements RequestMiddleware {
         return server;
     }
 
+    /** Unauthenticated API server scoped to this context's organization, when present. */
     get server() {
         return SessionContext.serverForOrganization(this.organization?.id);
     }
@@ -694,7 +695,10 @@ export class SessionContext implements RequestMiddleware {
     }
 
     /**
-     * Doing authenticated requests
+     * Organization-scoped API server with this context's authentication middleware.
+     * Requires a token; refreshes it before attempts and may retry expired-token API
+     * errors even with shouldRetry:false while allowErrorRetry remains enabled.
+     * Invalid access/refresh tokens clear the session rather than retry indefinitely.
      */
     get authenticatedServer() {
         if (!this.hasToken()) {
