@@ -116,9 +116,7 @@ const createCategoryView = useCreateCategoryView();
 const createGroupView = useCreateGroupView();
 const rootCategory = computed(() => period.value.settings.rootCategory);
 
-const showAll = computed(() => {
-    return tree.value.categories.length > 1 || tree.value.getAllGroups().length > 1;
-});
+const showAll = computed(() => tree.value.getAllGroups().length > 1); // Ignore number of categories here, because you could have many categories, but still no access to any member
 
 const groupsWarning = computed((): 'none' | 'no-access' | null => {
     const hasGroups = period.value.groups.some(g => g.type === GroupType.Membership && g.deletedAt === null);
