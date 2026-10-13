@@ -2,7 +2,6 @@ import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-enco
 import { ArrayDecoder, EncodeMedium, ObjectData } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EventBus } from '@stamhoofd/components/EventBus.ts';
-import { AppManager } from '@stamhoofd/networking/AppManager';
 import type { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import { fetchAll } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
@@ -12,10 +11,11 @@ import { IndexBoxDecoder } from '../IndexBox';
 import type { OrderIndexedDBIndex, OrderIndexKey, OrderIndexLookup } from '../ordersIndexedDBSorters';
 import { compareIndexKeys, createPrivateOrderIndexBox, getExactIndexLookup, getFilterConjuncts, getIndexKeysOfFilter, getPrivateOrderIndexes, isIndexableValue, orderIndexesInMemoryFilterCompilers } from '../ordersIndexedDBSorters';
 import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
-import type { WebshopSettingsStore } from './WebshopSettingsStore';
+import { WebshopSettingsKeys, WebshopSettingsStore } from './WebshopSettingsStore';
 import type { ProgressListener, SyncProgress } from './syncProgress';
 import { countSyncItems, getNewItemsFilter, SharedSync, SINGLE_FETCH_TIMEOUT_MS } from './syncProgress';
 import { SyncState } from './SyncState';
+import { v4 as uuidv4 } from 'uuid';
 import type { WebshopTicketsRepo } from './WebshopTicketsRepo';
 
 class CompilerFilterError extends Error {}
@@ -282,6 +282,13 @@ export class WebshopOrdersRepo {
     }
 }
 
+function requestResult<T>(request: IDBRequest): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+        request.onsuccess = () => resolve(request.result as T);
+        request.onerror = () => reject(request.error);
+    });
+}
+
 function setIndexValue(values: Map<string, IDBValidKey>, id: string, value: unknown) {
     if (isIndexableValue(value)) {
         values.set(id, value);
@@ -316,61 +323,22 @@ export class OrdersStore {
 
     /**
      * Per index ('id' for the order ids): the stored index value of every order in that index, by order id. Read without loading
-     * any order data and kept up to date by the writes of this store. Cleared when another store (e.g. in another tab) reports a change.
+     * any order data. Only valid while the stored change token still equals indexValuesToken.
      */
     private readonly indexValues = new Map<OrderIndexKey, Map<string, IDBValidKey>>();
+    private indexValuesToken: string | null = null;
     private readonly indexValuesPromises = new Map<OrderIndexKey, Promise<Map<string, IDBValidKey>>>();
 
-    /**
-     * Tells the stores of the same webshop in other tabs (or other managers in this tab) that orders changed.
-     */
-    private channel: BroadcastChannel | null = null;
-
-    /**
-     * Increased whenever the cached index values are cleared, so a read that started before does not cache outdated values.
-     */
-    private indexValuesClearCount = 0;
-
-    /**
-     * Increased whenever an index value can have changed.
-     */
-    private indexValuesVersion = 0;
-
-    private lastCandidates: { indexFilter: string; version: number; result: { ids: Set<string>; exact: boolean } } | null = null;
+    private lastCandidates: { indexFilter: string; token: string; result: { ids: Set<string>; exact: boolean } } | null = null;
 
     constructor({ database }: { database: WebshopDatabase }) {
         this.database = database;
     }
 
-    /**
-     * Without change messages, writes in other tabs would leave the cache outdated. The app has no other tabs.
-     */
-    private get canCacheIndexValues() {
-        return typeof BroadcastChannel !== 'undefined' || AppManager.shared.isNative;
-    }
-
-    private getChannel(): BroadcastChannel | null {
-        if (typeof BroadcastChannel === 'undefined') {
-            return null;
-        }
-        if (!this.channel) {
-            this.channel = new BroadcastChannel(this.database.databaseName + '-orders');
-            this.channel.onmessage = () => {
-                // Changed by another store: start over
-                this.clearIndexValues();
-            };
-        }
-        return this.channel;
-    }
-
-    private notifyOtherStores() {
-        this.getChannel()?.postMessage('changed');
-    }
-
     private clearIndexValues() {
         this.indexValues.clear();
-        this.indexValuesClearCount++;
-        this.indexValuesVersion++;
+        this.indexValuesToken = null;
+        this.lastCandidates = null;
     }
 
     reset() {
@@ -378,9 +346,58 @@ export class OrdersStore {
     }
 
     close() {
-        this.channel?.close();
-        this.channel = null;
         this.clearIndexValues();
+    }
+
+    /**
+     * The stored change token (see WebshopSettingsKeys.OrdersChangeToken). Stores one first if there is none yet, so the
+     * index values of orders that were stored before tokens existed can be cached too.
+     */
+    private async getChangeToken(): Promise<string> {
+        const db = await this.database.get();
+        const transaction = db.transaction([WebshopSettingsStore.storeName], 'readonly');
+        const token = await requestResult<string | undefined>(transaction.objectStore(WebshopSettingsStore.storeName).get(WebshopSettingsKeys.OrdersChangeToken));
+        if (token !== undefined) {
+            return token;
+        }
+
+        return await new Promise<string>((resolve, reject) => {
+            const transaction = db.transaction([WebshopSettingsStore.storeName], 'readwrite');
+            const settings = transaction.objectStore(WebshopSettingsStore.storeName);
+            const request = settings.get(WebshopSettingsKeys.OrdersChangeToken);
+            let token: string;
+            request.onsuccess = () => {
+                token = (request.result as string | undefined) ?? uuidv4();
+                settings.put(token, WebshopSettingsKeys.OrdersChangeToken);
+            };
+            transaction.oncomplete = () => resolve(token);
+            transaction.onerror = () => reject(transaction.error);
+        });
+    }
+
+    /**
+     * Stores a new change token in the transaction of a write, and keeps the cached index values if the write is the only
+     * change since they were read: applyToIndexValues then brings them up to date. Otherwise they are cleared.
+     */
+    private replaceChangeToken(transaction: IDBTransaction, applyToIndexValues: () => void) {
+        const settings = transaction.objectStore(WebshopSettingsStore.storeName);
+        const newToken = uuidv4();
+        let previousToken: string | undefined;
+
+        const request = settings.get(WebshopSettingsKeys.OrdersChangeToken);
+        request.onsuccess = () => {
+            previousToken = request.result as string | undefined;
+        };
+        settings.put(newToken, WebshopSettingsKeys.OrdersChangeToken);
+
+        transaction.addEventListener('complete', () => {
+            if (this.indexValuesToken === null || previousToken !== this.indexValuesToken) {
+                this.clearIndexValues();
+                return;
+            }
+            applyToIndexValues();
+            this.indexValuesToken = newToken;
+        });
     }
 
     /**
@@ -391,19 +408,17 @@ export class OrdersStore {
      */
     async getCandidateIds(indexFilter: StamhoofdFilter): Promise<{ ids: Set<string>; exact: boolean }> {
         const key = JSON.stringify(indexFilter);
-        const version = this.indexValuesVersion;
-        if (this.lastCandidates && this.lastCandidates.indexFilter === key && this.lastCandidates.version === version) {
+        const token = await this.getChangeToken();
+        if (this.lastCandidates && this.lastCandidates.indexFilter === key && this.lastCandidates.token === token) {
             return this.lastCandidates.result;
         }
 
-        const result = await this.readCandidateIds(indexFilter);
-        if (this.indexValuesVersion === version) {
-            this.lastCandidates = { indexFilter: key, version, result };
-        }
+        const result = await this.readCandidateIds(indexFilter, token);
+        this.lastCandidates = { indexFilter: key, token, result };
         return result;
     }
 
-    private async readCandidateIds(indexFilter: StamhoofdFilter): Promise<{ ids: Set<string>; exact: boolean }> {
+    private async readCandidateIds(indexFilter: StamhoofdFilter, token: string): Promise<{ ids: Set<string>; exact: boolean }> {
         const conjuncts = getFilterConjuncts(indexFilter);
 
         for (const conjunct of conjuncts) {
@@ -421,8 +436,8 @@ export class OrdersStore {
 
         const compiledIndexFilter = compileToInMemoryFilter(indexFilter, orderIndexesInMemoryFilterCompilers);
         const [ids, ...keyValues] = await Promise.all([
-            this.getIndexValues('id'),
-            ...[...keys].map(async k => [k, await this.getIndexValues(k)] as const),
+            this.getIndexValues('id', token),
+            ...[...keys].map(async k => [k, await this.getIndexValues(k, token)] as const),
         ]);
 
         const candidates = new Set<string>();
@@ -460,8 +475,10 @@ export class OrdersStore {
             return direction * (c !== 0 ? c : (a.id < b.id ? -1 : (a.id > b.id ? 1 : 0)));
         };
 
-        const values = (sortItem.key === 'id' || this.indexValues.has(sortItem.key) || ids.size > maxIdsToSortWithoutIndexValues)
-            ? await this.getIndexValues(sortItem.key)
+        const token = await this.getChangeToken();
+        const isCached = this.indexValuesToken === token && this.indexValues.has(sortItem.key);
+        const values = (sortItem.key === 'id' || isCached || ids.size > maxIdsToSortWithoutIndexValues)
+            ? await this.getIndexValues(sortItem.key, token)
             : await this.readStoredIndexValues(ids, sortItem.key);
 
         const afterEntry = after === null
@@ -512,32 +529,18 @@ export class OrdersStore {
         return values;
     }
 
-    private async getIndexValues(index: OrderIndexKey): Promise<Map<string, IDBValidKey>> {
-        const db = await this.database.get();
-        if (!this.canCacheIndexValues) {
-            return this.readIndexValues(db, index);
-        }
-
+    /**
+     * @param token the current change token, which the cached values have to match
+     */
+    private async getIndexValues(index: OrderIndexKey, token: string): Promise<Map<string, IDBValidKey>> {
         const cached = this.indexValues.get(index);
-
-        if (cached) {
-            // Catches orders that other tabs added or deleted
-            const count = await new Promise<number>((resolve, reject) => {
-                const objectStore = db.transaction([OrdersStore.storeName], 'readonly').objectStore(OrdersStore.storeName);
-                const request = (index === 'id' ? objectStore : objectStore.index(index)).count();
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            });
-            if (count === cached.size) {
-                return cached;
-            }
-            this.indexValues.delete(index);
-            this.indexValuesVersion++;
+        if (cached && this.indexValuesToken === token) {
+            return cached;
         }
 
         let promise = this.indexValuesPromises.get(index);
         if (!promise) {
-            promise = this.readIndexValues(db, index).finally(() => {
+            promise = this.readIndexValues(index).finally(() => {
                 this.indexValuesPromises.delete(index);
             });
             this.indexValuesPromises.set(index, promise);
@@ -545,15 +548,16 @@ export class OrdersStore {
         return promise;
     }
 
-    private async readIndexValues(db: IDBDatabase, index: OrderIndexKey): Promise<Map<string, IDBValidKey>> {
+    private async readIndexValues(index: OrderIndexKey): Promise<Map<string, IDBValidKey>> {
+        const db = await this.database.get();
         const values = new Map<string, IDBValidKey>();
 
-        // Listen before reading, so no change made during the read goes unnoticed
-        this.getChannel();
-        const clearCountBefore = this.indexValuesClearCount;
+        // One transaction, so the token belongs to exactly these values
+        const transaction = db.transaction([OrdersStore.storeName, WebshopSettingsStore.storeName], 'readonly');
+        const tokenPromise = requestResult<string | undefined>(transaction.objectStore(WebshopSettingsStore.storeName).get(WebshopSettingsKeys.OrdersChangeToken));
 
         await new Promise<void>((resolve, reject) => {
-            const objectStore = db.transaction([OrdersStore.storeName], 'readonly').objectStore(OrdersStore.storeName);
+            const objectStore = transaction.objectStore(OrdersStore.storeName);
             const request = (index === 'id' ? objectStore : objectStore.index(index)).openKeyCursor();
             request.onerror = () => reject(request.error);
             request.onsuccess = () => {
@@ -567,8 +571,12 @@ export class OrdersStore {
             };
         });
 
-        // A change reported during the read may be missing from it: use it once, but don't keep it
-        if (this.canCacheIndexValues && this.indexValuesClearCount === clearCountBefore) {
+        const token = await tokenPromise;
+        if (token !== undefined) {
+            if (this.indexValuesToken !== token) {
+                this.indexValues.clear();
+                this.indexValuesToken = token;
+            }
             this.indexValues.set(index, values);
         }
         return values;
@@ -590,20 +598,18 @@ export class OrdersStore {
         const db = await this.database.get();
 
         return new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction([OrdersStore.storeName], 'readwrite');
+            const transaction = db.transaction([OrdersStore.storeName, WebshopSettingsStore.storeName], 'readwrite');
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
                 reject(event);
             };
 
-            transaction.oncomplete = () => {
+            this.replaceChangeToken(transaction, () => {
                 for (const values of this.indexValues.values()) {
                     values.delete(id);
                 }
-                this.indexValuesVersion++;
-                this.notifyOtherStores();
-            };
+            });
 
             // Do the actual saving
             const objectStore = transaction.objectStore(OrdersStore.storeName);
@@ -628,14 +634,15 @@ export class OrdersStore {
         const db = await this.database.get();
 
         return new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction([OrdersStore.storeName], 'readwrite');
+            const transaction = db.transaction([OrdersStore.storeName, WebshopSettingsStore.storeName], 'readwrite');
 
-            transaction.oncomplete = () => {
+            this.replaceChangeToken(transaction, () => {
                 for (const order of orders) {
                     this.updateIndexValues(order);
                 }
-                this.indexValuesVersion++;
-                this.notifyOtherStores();
+            });
+
+            transaction.oncomplete = () => {
                 resolve();
             };
 
@@ -872,7 +879,7 @@ export class OrdersStore {
         const db = await this.database.get();
 
         return new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction([OrdersStore.storeName], 'readwrite');
+            const transaction = db.transaction([OrdersStore.storeName, WebshopSettingsStore.storeName], 'readwrite');
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
@@ -882,10 +889,11 @@ export class OrdersStore {
             // Do the actual saving
             const objectStore = transaction.objectStore(OrdersStore.storeName);
 
-            transaction.oncomplete = () => {
-                this.clearIndexValues();
-                this.notifyOtherStores();
-            };
+            this.replaceChangeToken(transaction, () => {
+                for (const values of this.indexValues.values()) {
+                    values.clear();
+                }
+            });
 
             const request = objectStore.clear();
             request.onsuccess = () => {
