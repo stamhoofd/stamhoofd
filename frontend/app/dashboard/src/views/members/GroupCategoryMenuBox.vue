@@ -104,6 +104,14 @@ defineRoute({
             },
         };
     },
+    isDefault: tree.value.getAllCategories().length > 0 && menuGroups.value.length === 0
+        ? {
+                properties: {
+                    category: tree.value.getAllCategories()[0],
+                    period: props.period,
+                },
+            }
+        : undefined,
 });
 
 defineRoute({
