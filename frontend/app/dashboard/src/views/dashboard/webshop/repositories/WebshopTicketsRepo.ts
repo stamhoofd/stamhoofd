@@ -120,18 +120,11 @@ export class WebshopTicketsRepo {
             return tickets.filter(t => !t.deletedAt);
         }
 
-        const patchedTickets: TicketPrivate[] = [];
-
-        for (const ticket of tickets) {
-            const patch = await this.patchesStore.get(ticket.secret, openTransaction);
-            if (patch) {
-                const patched = ticket.patch(patch);
-                patchedTickets.push(patched);
-                continue;
-            }
-
-            patchedTickets.push(ticket);
-        }
+        const patches = await Promise.all(tickets.map(ticket => this.patchesStore.get(ticket.secret, openTransaction)));
+        const patchedTickets = tickets.map((ticket, index) => {
+            const patch = patches[index];
+            return patch ? ticket.patch(patch) : ticket;
+        });
 
         return patchedTickets.filter(t => !t.deletedAt);
     }
