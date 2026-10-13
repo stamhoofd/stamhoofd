@@ -154,21 +154,6 @@ export class TableHelper {
     }
 
     /**
-     * Add a multiple choice filter (e.g. 'Status') to the table, with the given options selected.
-     */
-    async filterOnChoices(filterName: string, choices: string[]) {
-        await this.locator.locator('button.button.text').filter({ hasText: exactText('Filter') }).click();
-        await this.page.locator('h3.style-title-list').filter({ hasText: exactText(filterName) }).click();
-
-        for (const choice of choices) {
-            await this.page.locator('label').filter({ hasText: exactText(choice) }).click();
-        }
-
-        await this.page.getByRole('button', { name: 'Toepassen' }).click();
-        await this.page.keyboard.press('Escape');
-    }
-
-    /**
      * Type a search query in the table's search field. Passing an empty string clears it again.
      */
     async search(query: string) {

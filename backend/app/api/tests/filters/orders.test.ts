@@ -3,7 +3,9 @@ import type { Organization, Webshop } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemPayment, Order, OrganizationFactory, Payment, WebshopFactory } from '@stamhoofd/models';
 import { compileToSQLFilter, SQL } from '@stamhoofd/sql';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
-import { Address, BalanceItemType, Cart, CartItem, CartItemPrice, CheckoutMethodType, compileToInMemoryFilter, Customer, DiscountCode, OrderData, OrderStatus, PaymentMethod, PaymentStatus, privateOrderWithTicketsFilterCompilers, Product, ProductPrice, RecordCheckboxAnswer, RecordChoice, RecordChooseOneAnswer, RecordDateAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
+import { parsePhoneNumber as parsePhoneNumberDashboard } from 'libphonenumber-js';
+import { parsePhoneNumber as parsePhoneNumberBackend } from 'libphonenumber-js/max';
+import { Address, BalanceItemType, Cart, CartItem, CartItemPrice, CheckoutMethodType, compileToInMemoryFilter, Customer, DiscountCode, getOrderSearchFilter, OrderData, OrderStatus, PaymentMethod, PaymentStatus, privateOrderWithTicketsFilterCompilers, Product, ProductPrice, RecordCheckboxAnswer, RecordChoice, RecordChooseOneAnswer, RecordDateAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
 import { CartItemOption } from '@stamhoofd/structures/webshops/CartItem.js';
 import { Option, OptionMenu } from '@stamhoofd/structures/webshops/Product.js';
 import { WebshopField, WebshopFieldAnswer } from '@stamhoofd/structures/webshops/WebshopField.js';
@@ -328,6 +330,66 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
             await expectFilter({ phone: { $eq: '+32412345678' } }, [a]);
             await expectFilter({ phone: { $contains: '4123' } }, [a]);
             await expectFilter({ phone: { $contains: '3' } }, [a, b]);
+        });
+    });
+
+    // --- text compared differently by MySQL and the browser --------------------------------------------
+
+    /**
+     * MySQL compares text with the utf8mb4_0900_ai_ci collation, the in-memory engine lowercases (and for $contains
+     * also removes accents). These cases are where those approaches can disagree.
+     */
+    describe('text comparisons', () => {
+        it('treat characters with a meaning in SQL LIKE as text', async () => {
+            const special = await createOrder({ data: orderData({ firstName: '100%', lastName: 'Zeker_' }) });
+            const apostrophe = await createOrder({ data: orderData({ firstName: 'Seán', lastName: 'O\'Brien' }) });
+            const backslash = await createOrder({ data: orderData({ firstName: 'Back\\slash', lastName: 'Test' }) });
+            await createOrder({ data: orderData({ firstName: 'Anna', lastName: 'Peeters' }) });
+
+            await expectFilter({ name: { $contains: '%' } }, [special]);
+            await expectFilter({ name: { $contains: '_' } }, [special]);
+            await expectFilter({ name: { $contains: 'o\'brien' } }, [apostrophe]);
+            await expectFilter({ name: { $contains: '\\' } }, [backslash]);
+        });
+    });
+
+    // --- search ----------------------------------------------------------------------------------------
+
+    /**
+     * The dashboard turns a search into a filter with the default (smaller) metadata of libphonenumber-js, the
+     * backend with the full metadata. Both must find the same orders.
+     */
+    describe('search', () => {
+        async function expectSearch(search: string, expected: Order[]) {
+            const dashboardFilter = getOrderSearchFilter(search, parsePhoneNumberDashboard);
+            const backendFilter = getOrderSearchFilter(search, parsePhoneNumberBackend);
+            expect(dashboardFilter, 'dashboard search filter').not.toBeNull();
+            expect(backendFilter, 'backend search filter').not.toBeNull();
+
+            const expectedIds = [...new Set(expected.map(o => o.id))].sort();
+            expect(await runInMemory(dashboardFilter!), 'dashboard result should match expected').toEqual(expectedIds);
+            expect(await runSQL(backendFilter!), 'backend SQL result should match expected').toEqual(expectedIds);
+        }
+
+        it('finds names, e-mail addresses and numbers', async () => {
+            const sofie = await createOrder({ number: 10, data: orderData({ firstName: 'Sofie', lastName: 'Peeters', email: 'Sofie.Peeters@Example.com' }) });
+            const jose = await createOrder({ number: 20, data: orderData({ firstName: 'José', lastName: 'Müller', email: 'jose@example.com' }) });
+
+            await expectSearch('PEETERS', [sofie]);
+            await expectSearch('jose muller', [jose]);
+            await expectSearch('sofie.peeters@example.com', [sofie]);
+            await expectSearch('peeters@', [sofie]);
+            await expectSearch('20', [jose]);
+        });
+
+        it.each([
+            ['0478 12 34 56', '+32 478 12 34 56'],
+            ['0478123456', '+32 478 12 34 56'],
+        ])('finds the phone number %s', async (search, phone) => {
+            const order = await createOrder({ data: orderData({ phone }) });
+            await createOrder({ data: orderData({ phone: '+32 499 99 99 99' }) });
+
+            await expectSearch(search, [order]);
         });
     });
 
