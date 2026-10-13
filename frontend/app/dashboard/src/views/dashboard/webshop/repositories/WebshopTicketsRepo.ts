@@ -96,12 +96,16 @@ export class WebshopTicketsRepo {
             }
         };
 
-        await this.apiClient.getAllUpdated({ isFetchAll: false, onResultsReceived, onProgress(progress) {
-            if (!showToast && progress.count > 100) showToast = true;
-            toast.setProgress(progress.total !== 0 ? (progress.count / progress.total) : 0);
+        try {
+            await this.apiClient.getAllUpdated({ isFetchAll: false, onResultsReceived, onProgress(progress) {
+                if (!showToast && progress.count > 100) showToast = true;
+                toast.setProgress(progress.total !== 0 ? (progress.count / progress.total) : 0);
 
-            onProgress(progress);
-        } });
+                onProgress(progress);
+            } });
+        } catch {
+            toast.hide();
+        }
 
         if (showToast) {
             toast.setProgress(1);

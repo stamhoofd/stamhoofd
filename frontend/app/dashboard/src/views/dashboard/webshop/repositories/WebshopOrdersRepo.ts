@@ -115,12 +115,16 @@ export class WebshopOrdersRepo {
             }
         };
 
-        await this.apiClient.getAllUpdated({ isFetchAll, onResultsReceived, onProgress(progress) {
-            if (!showToast && progress.count > 100) showToast = true;
-            toast.setProgress(progress.total !== 0 ? (progress.count / progress.total) : 0);
+        try {
+            await this.apiClient.getAllUpdated({ isFetchAll, onResultsReceived, onProgress(progress) {
+                if (!showToast && progress.count > 100) showToast = true;
+                toast.setProgress(progress.total !== 0 ? (progress.count / progress.total) : 0);
 
-            onProgress(progress);
-        } });
+                onProgress(progress);
+            } });
+        } catch {
+            toast.hide();
+        }
 
         const deletedOrders: PrivateOrder[] = [];
         const fetchedOrders: PrivateOrder[] = [];
