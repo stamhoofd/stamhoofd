@@ -306,7 +306,7 @@ async function deleteMe() {
 
 const cachedPriceBreakdown = ref<PriceBreakdown | null>(null);
 const cachedTotalPrice = ref<number | null>(null);
-watch(() => [props.item.groupPrice, props.item.options, props.item.trial], () => {
+watch(() => [props.item.groupPrice, props.item.options, props.item.trial, props.item.customStartDate, props.item.customEndDate], () => {
     // We need to do cart level calculation, because discounts might be applied
     const clonedCheckout = checkout.value.clone();
 
