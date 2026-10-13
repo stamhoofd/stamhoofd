@@ -47,7 +47,6 @@ export function filterDefinitionsToCompiler<Runner>(definitions: FilterDefinitio
                     throw new SimpleError({
                         code: 'unknown_filter',
                         message: 'Unknown filter ' + key,
-                        human: $t('%1IF'),
                     });
                 }
                 const subKey = key.substring(dotIndex + 1);
@@ -92,7 +91,6 @@ export function compileFilter<Runner>(filter: StamhoofdFilter, parentCompiler: F
                 throw new SimpleError({
                     code: 'unknown_filter',
                     message: 'Unknown filter $and',
-                    human: $t('%1IF'),
                 });
             }
             runners.push(runner);
@@ -106,7 +104,6 @@ export function compileFilter<Runner>(filter: StamhoofdFilter, parentCompiler: F
                 throw new SimpleError({
                     code: 'unknown_filter',
                     message: 'Unknown filter ' + key,
-                    human: $t('%1IF'),
                 });
             }
             runners.push(
@@ -125,7 +122,6 @@ export function getMagicValue(value: StamhoofdMagicFilter): StamhoofdCompareValu
         default: throw new SimpleError({
             code: 'unknown_filter',
             message: 'Unknown magic filter ' + specialValue,
-            human: $t('%1IF'),
         });
     }
 }
