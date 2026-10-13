@@ -878,6 +878,94 @@ function registerWebshopOrderTests() {
         await adminContext.close();
     });
 
+    test('Searching a name after a number shows every matching order', async ({ browser }) => {
+        const organization = await createWebshopOrganization('OrderSearchAfterNumber');
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Order search after number ${WorkerData.id}`,
+            ticketType: WebshopTicketType.None,
+            productCount: 1,
+            cartEnabled: false,
+        });
+        const admin = await createAdmin(organization);
+
+        const orderCount = 30;
+        for (let number = 1; number <= orderCount; number++) {
+            await new OrderFactory({
+                webshop,
+                number,
+                firstName: number <= 25 ? 'Klant' : 'Andere',
+                lastName: number.toString().padStart(2, '0'),
+            }).create();
+        }
+
+        const adminContext = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+        const adminPage = await adminContext.newPage();
+        await loginAs({ page: adminPage, user: admin });
+
+        const table = await openWebshopOrders(adminPage, organization, webshop.meta.name);
+        await expect(table.getResultCount()).toHaveText(orderCount.toString());
+
+        await table.search('5');
+        await expect(table.getResultCount()).toHaveText(`1 van ${orderCount}`);
+        await expect(table.getRows()).toHaveCount(1);
+
+        await table.search('klant');
+        await expect(table.getResultCount()).toHaveText(`25 van ${orderCount}`);
+        await expect(table.getRow('Klant 25')).toBeVisible();
+        await expect(table.getRow('Klant 20')).toBeVisible();
+
+        await adminContext.close();
+    });
+
+    test('A name search finds an order that another tab renamed', async ({ browser }) => {
+        // Name searches use cached index values. Tabs share one sync cursor, so a change that tab B synced is
+        // never fetched by tab A: tab A only learns about it through the change message of tab B.
+        const organization = await createWebshopOrganization('OrderSearchOtherTab');
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Order search other tab ${WorkerData.id}`,
+            ticketType: WebshopTicketType.None,
+            productCount: 1,
+            cartEnabled: false,
+        });
+        const admin = await createAdmin(organization);
+
+        const orders: Order[] = [];
+        for (let number = 1; number <= 3; number++) {
+            orders.push(await new OrderFactory({ webshop, number, firstName: 'Klant', lastName: `0${number}` }).create());
+        }
+        await new OrderFactory({ webshop, number: 4, firstName: 'Andere', lastName: '04' }).create();
+
+        const adminContext = await browser.newContext();
+        const pageA = await adminContext.newPage();
+        await loginAs({ page: pageA, user: admin });
+
+        const tableA = await openWebshopOrders(pageA, organization, webshop.meta.name);
+        await tableA.search('klant');
+        await expect(tableA.getResultCount()).toHaveText('3 van 4');
+
+        // From now on, tab A can only learn about changes from tab B
+        await pageA.route(/\/webshop\/orders/, route => route.abort());
+
+        const order = orders[0];
+        const data = order.data.clone();
+        data.customer.firstName = 'Hernoemd';
+        order.data = data;
+        order.updatedAt = new Date();
+        await order.save();
+
+        const pageB = await adminContext.newPage();
+        const tableB = await openWebshopOrders(pageB, organization, webshop.meta.name);
+        await expect(tableB.getRow('Hernoemd 01')).toBeVisible();
+
+        await tableA.search('hernoemd');
+        await expect(tableA.getRow('Hernoemd 01')).toBeVisible();
+        await expect(tableA.getResultCount()).toHaveText('1 van 4');
+
+        await adminContext.close();
+    });
+
     test('Searching the orders keeps the tickets of the rows it returns', async ({ browser }) => {
         // The tickets of an order are stored apart from the order itself, so reading them costs an extra
         // lookup per order. Only the orders that the filter keeps get one, which means a search must not

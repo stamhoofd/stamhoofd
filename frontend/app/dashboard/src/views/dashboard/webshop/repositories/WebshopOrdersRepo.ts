@@ -2,6 +2,7 @@ import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-enco
 import { ArrayDecoder, EncodeMedium, ObjectData } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EventBus } from '@stamhoofd/components/EventBus.ts';
+import { AppManager } from '@stamhoofd/networking/AppManager';
 import type { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import { fetchAll } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
@@ -9,7 +10,7 @@ import type { CountFilteredRequest, InMemoryFilterRunner, SortItem, SortList, St
 import { compileToInMemoryFilter, CountResponse, LimitedFilteredRequest, OrderStatus, PaginatedResponseDecoder, PrivateOrder, privateOrderWithTicketsFilterCompilers, SortItemDirection, Version } from '@stamhoofd/structures';
 import { IndexBoxDecoder } from '../IndexBox';
 import type { OrderIndexedDBIndex, OrderIndexLookup } from '../ordersIndexedDBSorters';
-import { createPrivateOrderIndexBox, getSingleIndexOfFilter, orderIndexesInMemoryFilterCompilers } from '../ordersIndexedDBSorters';
+import { createPrivateOrderIndexBox, getPrivateOrderIndexes, getSingleIndexOfFilter, orderIndexesInMemoryFilterCompilers } from '../ordersIndexedDBSorters';
 import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
 import type { WebshopSettingsStore } from './WebshopSettingsStore';
 import type { ProgressListener, SyncProgress } from './syncProgress';
@@ -64,6 +65,11 @@ export class WebshopOrdersRepo {
 
     reset() {
         this.apiClient.reset();
+        this.store.reset();
+    }
+
+    close() {
+        this.store.close();
     }
 
     /**
@@ -275,6 +281,16 @@ export class WebshopOrdersRepo {
     }
 }
 
+
+function setIndexValue(values: Map<string, IDBValidKey>, id: string, value: unknown) {
+    if (value === null || value === undefined) {
+        // Like IndexedDB, leave out orders without a value for the index
+        values.delete(id);
+    } else {
+        values.set(id, value as IDBValidKey);
+    }
+}
+
 /**
  * Responsible for offline storage of webshop orders.
  */
@@ -293,8 +309,61 @@ export class OrdersStore {
      */
     private changeCountOnLastStream = 0;
 
+    /**
+     * Per index: the stored index value of every order in that index, by order id. Read without loading any order
+     * data and kept up to date by the writes of this store. Cleared when another store (e.g. in another tab) reports a change.
+     */
+    private readonly indexValues = new Map<OrderIndexedDBIndex, Map<string, IDBValidKey>>();
+    private readonly indexValuesPromises = new Map<OrderIndexedDBIndex, Promise<Map<string, IDBValidKey>>>();
+
+    /**
+     * Tells the stores of the same webshop in other tabs (or other managers in this tab) that orders changed.
+     */
+    private channel: BroadcastChannel | null = null;
+
+    /**
+     * Times another store reported a change.
+     */
+    private externalChangeCount = 0;
+
     constructor({ database }: { database: WebshopDatabase }) {
         this.database = database;
+    }
+
+    /**
+     * Without change messages, writes in other tabs would leave the cache outdated. The app has no other tabs.
+     */
+    private get canCacheIndexValues() {
+        return typeof BroadcastChannel !== 'undefined' || AppManager.shared.isNative;
+    }
+
+    private getChannel(): BroadcastChannel | null {
+        if (typeof BroadcastChannel === 'undefined') {
+            return null;
+        }
+        if (!this.channel) {
+            this.channel = new BroadcastChannel(this.database.databaseName + '-orders');
+            this.channel.onmessage = () => {
+                // Changed by another store: start over
+                this.externalChangeCount++;
+                this.indexValues.clear();
+            };
+        }
+        return this.channel;
+    }
+
+    private notifyOtherStores() {
+        this.getChannel()?.postMessage('changed');
+    }
+
+    reset() {
+        this.indexValues.clear();
+    }
+
+    close() {
+        this.channel?.close();
+        this.channel = null;
+        this.indexValues.clear();
     }
 
     /**
@@ -308,7 +377,7 @@ export class OrdersStore {
         }
 
         const compiledIndexFilter = compileToInMemoryFilter(indexFilter, orderIndexesInMemoryFilterCompilers);
-        const values = await this.readIndexValues(index);
+        const values = await this.getIndexValues(index);
 
         const candidates = new Set<string>();
         const indexes: Record<string, unknown> = {};
@@ -321,12 +390,43 @@ export class OrdersStore {
         return candidates;
     }
 
-    /**
-     * The stored index value of every order in that index, by order id, read without loading any order data.
-     */
-    private async readIndexValues(index: OrderIndexedDBIndex): Promise<Map<string, IDBValidKey>> {
+    private async getIndexValues(index: OrderIndexedDBIndex): Promise<Map<string, IDBValidKey>> {
         const db = await this.database.get();
+        if (!this.canCacheIndexValues) {
+            return this.readIndexValues(db, index);
+        }
+
+        const cached = this.indexValues.get(index);
+
+        if (cached) {
+            // Catches orders that other tabs added or deleted
+            const count = await new Promise<number>((resolve, reject) => {
+                const request = db.transaction([OrdersStore.storeName], 'readonly').objectStore(OrdersStore.storeName).index(index).count();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+            if (count === cached.size) {
+                return cached;
+            }
+            this.indexValues.delete(index);
+        }
+
+        let promise = this.indexValuesPromises.get(index);
+        if (!promise) {
+            promise = this.readIndexValues(db, index).finally(() => {
+                this.indexValuesPromises.delete(index);
+            });
+            this.indexValuesPromises.set(index, promise);
+        }
+        return promise;
+    }
+
+    private async readIndexValues(db: IDBDatabase, index: OrderIndexedDBIndex): Promise<Map<string, IDBValidKey>> {
         const values = new Map<string, IDBValidKey>();
+
+        // Listen before reading, so no change made during the read goes unnoticed
+        this.getChannel();
+        const externalChangeCountBefore = this.externalChangeCount;
 
         await new Promise<void>((resolve, reject) => {
             const request = db.transaction([OrdersStore.storeName], 'readonly').objectStore(OrdersStore.storeName).index(index).openKeyCursor();
@@ -342,7 +442,22 @@ export class OrdersStore {
             };
         });
 
+        // A change reported during the read may be missing from it: use it once, but don't keep it
+        if (this.canCacheIndexValues && this.externalChangeCount === externalChangeCountBefore) {
+            this.indexValues.set(index, values);
+        }
         return values;
+    }
+
+    private updateIndexValues(order: PrivateOrder) {
+        if (this.indexValues.size === 0) {
+            return;
+        }
+
+        const indexes = order.status === OrderStatus.Deleted ? null : getPrivateOrderIndexes(order);
+        for (const [index, values] of this.indexValues) {
+            setIndexValue(values, order.id, indexes?.[index]);
+        }
     }
 
     async delete(id: string): Promise<void> {
@@ -355,6 +470,13 @@ export class OrdersStore {
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
                 reject(event);
+            };
+
+            transaction.oncomplete = () => {
+                for (const values of this.indexValues.values()) {
+                    values.delete(id);
+                }
+                this.notifyOtherStores();
             };
 
             // Do the actual saving
@@ -383,6 +505,10 @@ export class OrdersStore {
             const transaction = db.transaction([OrdersStore.storeName], 'readwrite');
 
             transaction.oncomplete = () => {
+                for (const order of orders) {
+                    this.updateIndexValues(order);
+                }
+                this.notifyOtherStores();
                 resolve();
             };
 
@@ -673,6 +799,11 @@ export class OrdersStore {
 
             // Do the actual saving
             const objectStore = transaction.objectStore(OrdersStore.storeName);
+
+            transaction.oncomplete = () => {
+                this.indexValues.clear();
+                this.notifyOtherStores();
+            };
 
             const request = objectStore.clear();
             request.onsuccess = () => {

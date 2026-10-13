@@ -145,6 +145,7 @@ export class WebshopManager {
      */
     closeDatabase() {
         this.closeRequests();
+        this.orders.close();
         this.database.close();
     }
 

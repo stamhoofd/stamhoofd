@@ -224,7 +224,7 @@ export class PrivateOrderEncodeableIndexes extends AutoEncoder implements Record
     timeSlotTime: string = '';
 }
 
-function getPrivateOrderIndexes(order: PrivateOrder): PrivateOrderEncodeableIndexes {
+export function getPrivateOrderIndexes(order: PrivateOrder): PrivateOrderEncodeableIndexes {
     return PrivateOrderEncodeableIndexes.create(
         Object.fromEntries(
             Object.values(OrderIndexedDBIndex).map((generatedIndex) => {
