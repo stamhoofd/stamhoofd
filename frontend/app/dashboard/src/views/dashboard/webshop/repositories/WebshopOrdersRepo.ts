@@ -303,6 +303,8 @@ function setIndexValue(values: Map<string, IDBValidKey>, id: string, value: unkn
  */
 const maxIdsToSortWithoutIndexValues = 100;
 
+type SortEntry = { value: IDBValidKey; id: string };
+
 /**
  * Responsible for offline storage of webshop orders.
  */
@@ -331,6 +333,11 @@ export class OrdersStore {
 
     private lastCandidates: { indexFilter: string; token: string; result: Promise<{ ids: Set<string>; exact: boolean }> } | null = null;
 
+    /**
+     * The last candidate ids that sortIds sorted, so the next pages of the same sort only need to find where they start.
+     */
+    private lastSorted: { ids: Set<string>; sortKey: string; token: string; entries: SortEntry[] } | null = null;
+
     constructor({ database }: { database: WebshopDatabase }) {
         this.database = database;
     }
@@ -339,6 +346,7 @@ export class OrdersStore {
         this.indexValues.clear();
         this.indexValuesToken = null;
         this.lastCandidates = null;
+        this.lastSorted = null;
     }
 
     reset() {
@@ -477,36 +485,53 @@ export class OrdersStore {
      */
     async sortIds(ids: Set<string>, sortItem: SortItem & { key: OrderIndexKey }, after: IDBValidKey | null): Promise<string[]> {
         const direction = sortItem.order === SortItemDirection.DESC ? -1 : 1;
-        const compare = (a: { value: IDBValidKey; id: string }, b: { value: IDBValidKey; id: string }) => {
+        const compare = (a: SortEntry, b: SortEntry) => {
             const c = compareIndexKeys(a.value, b.value);
             return direction * (c !== 0 ? c : (a.id < b.id ? -1 : (a.id > b.id ? 1 : 0)));
         };
 
         const token = await this.getChangeToken();
-        const isCached = this.indexValuesToken === token && this.indexValues.has(sortItem.key);
-        const values = (sortItem.key === 'id' || isCached || ids.size > maxIdsToSortWithoutIndexValues)
-            ? await this.getIndexValues(sortItem.key, token)
-            : await this.readStoredIndexValues(ids, sortItem.key);
+        const sortKey = sortItem.key + ' ' + direction;
+        let entries: SortEntry[];
 
-        const afterEntry = after === null
-            ? null
-            : (sortItem.key === 'id' ? { value: after, id: after as string } : { value: (after as IDBValidKey[])[0], id: (after as IDBValidKey[])[1] as string });
+        if (this.lastSorted && this.lastSorted.ids === ids && this.lastSorted.sortKey === sortKey && this.lastSorted.token === token) {
+            entries = this.lastSorted.entries;
+        }
+        else {
+            const isCached = this.indexValuesToken === token && this.indexValues.has(sortItem.key);
+            const values = (sortItem.key === 'id' || isCached || ids.size > maxIdsToSortWithoutIndexValues)
+                ? await this.getIndexValues(sortItem.key, token)
+                : await this.readStoredIndexValues(ids, sortItem.key);
 
-        const entries: { value: IDBValidKey; id: string }[] = [];
-        for (const id of ids) {
-            const value = values.get(id);
-            if (value === undefined) {
-                continue;
+            entries = [];
+            for (const id of ids) {
+                const value = values.get(id);
+                if (value !== undefined) {
+                    entries.push({ value, id });
+                }
             }
-            const entry = { value, id };
-            if (afterEntry && compare(entry, afterEntry) <= 0) {
-                continue;
-            }
-            entries.push(entry);
+            entries.sort(compare);
+            this.lastSorted = { ids, sortKey, token, entries };
         }
 
-        entries.sort(compare);
-        return entries.map(e => e.id);
+        let start = 0;
+        if (after !== null) {
+            const afterEntry: SortEntry = sortItem.key === 'id' ? { value: after, id: after as string } : { value: (after as IDBValidKey[])[0], id: (after as IDBValidKey[])[1] as string };
+
+            // First entry after afterEntry
+            let end = entries.length;
+            while (start < end) {
+                const middle = (start + end) >>> 1;
+                if (compare(entries[middle], afterEntry) <= 0) {
+                    start = middle + 1;
+                }
+                else {
+                    end = middle;
+                }
+            }
+        }
+
+        return entries.slice(start).map(e => e.id);
     }
 
     /**
