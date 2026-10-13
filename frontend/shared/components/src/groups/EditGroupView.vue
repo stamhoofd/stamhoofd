@@ -65,7 +65,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('%1GC') }}
+                            {{ $t('Andere start- of einddatum dan werkjaar') }}
                         </h3>
 
                         <template v-if="hasCustomDates">
