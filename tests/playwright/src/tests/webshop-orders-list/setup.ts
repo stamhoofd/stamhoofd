@@ -63,11 +63,12 @@ export async function createOrdersListWebshop(prefix: string, options: { ticketT
 /**
  * Opens the orders table of the webshop in a new browser context (its own local order database).
  */
-export async function openOrdersList(browser: Browser, shop: OrdersListWebshop, device: TestDevice = 'desktop'): Promise<{ context: BrowserContext; page: Page; table: OrdersTable; backend: BackendOrders }> {
+export async function openOrdersList(browser: Browser, shop: OrdersListWebshop, device: TestDevice = 'desktop', options: { beforeOpen?: (page: Page) => Promise<unknown>; waitForFirstRow?: boolean } = {}): Promise<{ context: BrowserContext; page: Page; table: OrdersTable; backend: BackendOrders }> {
     const context = await browser.newContext({ ...testDevices[device] });
     await login(context, shop);
     const page = await context.newPage();
-    const table = await openOrdersTable(page, shop);
+    await options.beforeOpen?.(page);
+    const table = await openOrdersTable(page, shop, options.waitForFirstRow ?? true);
     return { context, page, table, backend: new BackendOrders(page, shop.organization, shop.admin) };
 }
 
@@ -80,7 +81,7 @@ export async function openOrdersTab(context: BrowserContext, shop: OrdersListWeb
     return { page, table };
 }
 
-async function openOrdersTable(page: Page, shop: OrdersListWebshop): Promise<OrdersTable> {
+async function openOrdersTable(page: Page, shop: OrdersListWebshop, waitForFirstRow = true): Promise<OrdersTable> {
     const dashboard = new DashboardPage(page);
     await dashboard.openOrganizationDashboard({ organizationUri: shop.organization.uri });
     await dashboard.openTab(DashboardTab.Webshops);
@@ -88,7 +89,9 @@ async function openOrdersTable(page: Page, shop: OrdersListWebshop): Promise<Ord
     await page.getByTestId('open-orders-button').click();
 
     const table = new OrdersTable(page);
-    await table.waitForFirstRow();
+    if (waitForFirstRow) {
+        await table.waitForFirstRow();
+    }
     return table;
 }
 

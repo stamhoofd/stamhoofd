@@ -121,6 +121,27 @@ test.describe('Orders list changes @webshop-orders-list', () => {
         await context.close();
     });
 
+    test('Retrying right after the first sync failed fetches the orders', async ({ browser }) => {
+        let failNext = true;
+        const { context, table } = await openOrdersList(browser, shop, 'desktop', {
+            waitForFirstRow: false,
+            beforeOpen: page => page.route(/\/webshop\/orders(\?|$)/, async (route) => {
+                if (!failNext) {
+                    return route.fallback();
+                }
+                failNext = false;
+                await route.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ errors: [{ id: 'test-error', code: 'test_error', message: 'Test error' }] }) });
+            }),
+        });
+
+        await expect(table.getErrorBox()).toBeVisible();
+        await table.getErrorBox().getByRole('button').click();
+        await table.expectCount(30);
+        await expect(table.getErrorBox()).toHaveCount(0);
+
+        await context.close();
+    });
+
     test('Changing an order in a filtered table moves it out of the filter right away @extra', async ({ browser }) => {
         const { context, table, backend } = await openOrdersList(browser, shop);
         await table.addChoiceFilter('Status', [statusNames[OrderStatus.Created]]);

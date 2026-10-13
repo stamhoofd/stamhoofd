@@ -88,8 +88,9 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             return this.internetPromise;
         },
         async doLoadFromInternet() {
-            // Prevent doing multiple calls within 5 seconds (other rate limiting should happen outside of the object fetcher)
-            if (this.lastInternetAttempt > Date.now() - 5_000) {
+            // Prevent doing multiple calls within 5 seconds (other rate limiting should happen outside of the object fetcher).
+            // Until a sync succeeded, the stored orders can be missing, so a retry always fetches.
+            if (this.lastInternetLoad !== 0 && this.lastInternetAttempt > Date.now() - 5_000) {
                 return;
             }
             this.lastInternetAttempt = Date.now();
