@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import type { StamhoofdFilter } from '@stamhoofd/structures';
+import type { StamhoofdFilter } from '@stamhoofd/structures/filters/StamhoofdFilter.js';
 import type { BackendOrders, TestOrder } from '../../helpers/index.js';
 import type { OrdersTable } from '../../helpers/page/webshop/OrdersTable.js';
 

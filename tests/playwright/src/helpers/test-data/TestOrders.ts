@@ -1,7 +1,13 @@
 import { Database } from '@simonbackx/simple-database';
 import type { Order, Webshop } from '@stamhoofd/models';
 import { BalanceItem, OrderFactory, Ticket, TicketFactory } from '@stamhoofd/models';
-import { BalanceItemType, Cart, CartItem, CartItemPrice, Customer, OrderData, OrderStatus, PaymentMethod, Product, ProductPrice } from '@stamhoofd/structures';
+import { BalanceItemType } from '@stamhoofd/structures/BalanceItem.js';
+import { PaymentMethod } from '@stamhoofd/structures/PaymentMethod.js';
+import { Cart } from '@stamhoofd/structures/webshops/Cart.js';
+import { CartItem, CartItemPrice } from '@stamhoofd/structures/webshops/CartItem.js';
+import { Customer } from '@stamhoofd/structures/webshops/Customer.js';
+import { OrderData, OrderStatus } from '@stamhoofd/structures/webshops/Order.js';
+import { Product, ProductPrice } from '@stamhoofd/structures/webshops/Product.js';
 
 export interface TestOrderSeed {
     number: number;

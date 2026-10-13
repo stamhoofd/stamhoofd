@@ -3,7 +3,9 @@ import { setup, test } from '../../test-fixtures/base.js';
 setup();
 
 import { expect } from '@playwright/test';
-import { OrderStatus, SortItemDirection, WebshopTicketType } from '@stamhoofd/structures';
+import { SortItemDirection } from '@stamhoofd/structures/filters/SortList.js';
+import { OrderStatus } from '@stamhoofd/structures/webshops/Order.js';
+import { WebshopTicketType } from '@stamhoofd/structures/webshops/WebshopMetaData.js';
 import { TestUtils } from '@stamhoofd/test-utils';
 import type { TestOrder } from '../../helpers/index.js';
 import { TestOrders } from '../../helpers/index.js';

@@ -1,5 +1,5 @@
-import type { StamhoofdFilter } from '@stamhoofd/structures';
-import { privateOrderFilterCompilers, privateOrderWithTicketsFilterCompilers } from '@stamhoofd/structures';
+import type { StamhoofdFilter } from '@stamhoofd/structures/filters/StamhoofdFilter.js';
+import { privateOrderFilterCompilers, privateOrderWithTicketsFilterCompilers } from '@stamhoofd/structures/filters/inMemoryFilterDefinitions.js';
 
 /**
  * The keys that can only be answered once the tickets of an order are loaded: everything

@@ -1,4 +1,5 @@
-import { OrderStatus, PaymentMethod } from '@stamhoofd/structures';
+import { PaymentMethod } from '@stamhoofd/structures/PaymentMethod.js';
+import { OrderStatus } from '@stamhoofd/structures/webshops/Order.js';
 import type { TestOrderSeed } from '../../helpers/index.js';
 
 // Lengths without common factors, so every combination of name, status, payment method and tickets occurs
