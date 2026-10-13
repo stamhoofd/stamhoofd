@@ -9,8 +9,8 @@ import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { CountFilteredRequest, InMemoryFilterRunner, SortItem, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { compileToInMemoryFilter, CountResponse, LimitedFilteredRequest, OrderStatus, PaginatedResponseDecoder, PrivateOrder, privateOrderWithTicketsFilterCompilers, SortItemDirection, Version } from '@stamhoofd/structures';
 import { IndexBoxDecoder } from '../IndexBox';
-import type { OrderIndexedDBIndex, OrderIndexLookup } from '../ordersIndexedDBSorters';
-import { createPrivateOrderIndexBox, getPrivateOrderIndexes, getSingleIndexOfFilter, orderIndexesInMemoryFilterCompilers } from '../ordersIndexedDBSorters';
+import type { OrderIndexedDBIndex, OrderIndexKey, OrderIndexLookup } from '../ordersIndexedDBSorters';
+import { compareIndexKeys, createPrivateOrderIndexBox, getExactIndexLookup, getFilterConjuncts, getIndexKeysOfFilter, getPrivateOrderIndexes, isIndexableValue, orderIndexesInMemoryFilterCompilers } from '../ordersIndexedDBSorters';
 import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
 import type { WebshopSettingsStore } from './WebshopSettingsStore';
 import type { ProgressListener, SyncProgress } from './syncProgress';
@@ -201,7 +201,6 @@ export class WebshopOrdersRepo {
     async stream(options: {
         callback: (data: PrivateOrder) => void;
         filter?: StamhoofdFilter;
-        indexFilter?: StamhoofdFilter;
         limit?: number;
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
         advanceCount?: number;
@@ -229,12 +228,10 @@ export class WebshopOrdersRepo {
         transform: (rawOrder: any) => Promise<T>;
         callback: (data: T) => void | Promise<void>;
         filter?: StamhoofdFilter;
-        indexFilter?: StamhoofdFilter;
         limit?: number;
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
         advanceCount?: number;
-        lookup?: OrderIndexLookup;
-        candidateIds?: Set<string>;
+        ids?: string[];
         openTransaction?: IDBTransaction;
         signal?: AbortSignal;
     },
@@ -272,8 +269,12 @@ export class WebshopOrdersRepo {
         return this.store.get(id);
     }
 
-    async getIndexFilterCandidates(indexFilter: StamhoofdFilter): Promise<Set<string> | null> {
-        return this.store.getIndexFilterCandidates(indexFilter);
+    async getCandidateIds(indexFilter: StamhoofdFilter): Promise<{ ids: Set<string>; exact: boolean }> {
+        return this.store.getCandidateIds(indexFilter);
+    }
+
+    async sortIds(ids: Set<string>, sortItem: SortItem & { key: OrderIndexKey }, after: IDBValidKey | null): Promise<string[]> {
+        return this.store.sortIds(ids, sortItem, after);
     }
 
     async countAll() {
@@ -281,15 +282,19 @@ export class WebshopOrdersRepo {
     }
 }
 
-
 function setIndexValue(values: Map<string, IDBValidKey>, id: string, value: unknown) {
-    if (value === null || value === undefined) {
+    if (isIndexableValue(value)) {
+        values.set(id, value);
+    } else {
         // Like IndexedDB, leave out orders without a value for the index
         values.delete(id);
-    } else {
-        values.set(id, value as IDBValidKey);
     }
 }
+
+/**
+ * Up to this many orders are sorted by reading their own stored index values, if the values of the whole sort index are not cached yet.
+ */
+const maxIdsToSortWithoutIndexValues = 100;
 
 /**
  * Responsible for offline storage of webshop orders.
@@ -310,11 +315,11 @@ export class OrdersStore {
     private changeCountOnLastStream = 0;
 
     /**
-     * Per index: the stored index value of every order in that index, by order id. Read without loading any order
-     * data and kept up to date by the writes of this store. Cleared when another store (e.g. in another tab) reports a change.
+     * Per index ('id' for the order ids): the stored index value of every order in that index, by order id. Read without loading
+     * any order data and kept up to date by the writes of this store. Cleared when another store (e.g. in another tab) reports a change.
      */
-    private readonly indexValues = new Map<OrderIndexedDBIndex, Map<string, IDBValidKey>>();
-    private readonly indexValuesPromises = new Map<OrderIndexedDBIndex, Promise<Map<string, IDBValidKey>>>();
+    private readonly indexValues = new Map<OrderIndexKey, Map<string, IDBValidKey>>();
+    private readonly indexValuesPromises = new Map<OrderIndexKey, Promise<Map<string, IDBValidKey>>>();
 
     /**
      * Tells the stores of the same webshop in other tabs (or other managers in this tab) that orders changed.
@@ -322,9 +327,16 @@ export class OrdersStore {
     private channel: BroadcastChannel | null = null;
 
     /**
-     * Times another store reported a change.
+     * Increased whenever the cached index values are cleared, so a read that started before does not cache outdated values.
      */
-    private externalChangeCount = 0;
+    private indexValuesClearCount = 0;
+
+    /**
+     * Increased whenever an index value can have changed.
+     */
+    private indexValuesVersion = 0;
+
+    private lastCandidates: { indexFilter: string; version: number; result: { ids: Set<string>; exact: boolean } } | null = null;
 
     constructor({ database }: { database: WebshopDatabase }) {
         this.database = database;
@@ -345,8 +357,7 @@ export class OrdersStore {
             this.channel = new BroadcastChannel(this.database.databaseName + '-orders');
             this.channel.onmessage = () => {
                 // Changed by another store: start over
-                this.externalChangeCount++;
-                this.indexValues.clear();
+                this.clearIndexValues();
             };
         }
         return this.channel;
@@ -356,41 +367,152 @@ export class OrdersStore {
         this.getChannel()?.postMessage('changed');
     }
 
-    reset() {
+    private clearIndexValues() {
         this.indexValues.clear();
+        this.indexValuesClearCount++;
+        this.indexValuesVersion++;
+    }
+
+    reset() {
+        this.clearIndexValues();
     }
 
     close() {
         this.channel?.close();
         this.channel = null;
-        this.indexValues.clear();
+        this.clearIndexValues();
     }
 
     /**
-     * The ids of the orders whose stored index value matches the indexFilter, or null if the filter is not on a single index.
-     * Only reads the stored index values, so this is much faster than visiting every order.
+     * The ids of the orders that can match the indexFilter, which may only read the keys of orderIndexesInMemoryFilterCompilers.
+     * Only reads stored index values, so this is much faster than visiting every order.
+     *
+     * exact is false if the ids can also contain orders that do not match.
      */
-    async getIndexFilterCandidates(indexFilter: StamhoofdFilter): Promise<Set<string> | null> {
-        const index = getSingleIndexOfFilter(indexFilter);
-        if (index === null) {
-            return null;
+    async getCandidateIds(indexFilter: StamhoofdFilter): Promise<{ ids: Set<string>; exact: boolean }> {
+        const key = JSON.stringify(indexFilter);
+        const version = this.indexValuesVersion;
+        if (this.lastCandidates && this.lastCandidates.indexFilter === key && this.lastCandidates.version === version) {
+            return this.lastCandidates.result;
+        }
+
+        const result = await this.readCandidateIds(indexFilter);
+        if (this.indexValuesVersion === version) {
+            this.lastCandidates = { indexFilter: key, version, result };
+        }
+        return result;
+    }
+
+    private async readCandidateIds(indexFilter: StamhoofdFilter): Promise<{ ids: Set<string>; exact: boolean }> {
+        const conjuncts = getFilterConjuncts(indexFilter);
+
+        for (const conjunct of conjuncts) {
+            const lookup = getExactIndexLookup(conjunct);
+            if (lookup) {
+                // Typically a handful of orders: the other parts are left to the filter on the decoded orders
+                return { ids: await this.lookupIds(lookup), exact: conjuncts.length === 1 };
+            }
+        }
+
+        const keys = getIndexKeysOfFilter(indexFilter);
+        if (!keys) {
+            throw new Error('The index filter reads keys without stored index values');
         }
 
         const compiledIndexFilter = compileToInMemoryFilter(indexFilter, orderIndexesInMemoryFilterCompilers);
-        const values = await this.getIndexValues(index);
+        const [ids, ...keyValues] = await Promise.all([
+            this.getIndexValues('id'),
+            ...[...keys].map(async k => [k, await this.getIndexValues(k)] as const),
+        ]);
 
         const candidates = new Set<string>();
         const indexes: Record<string, unknown> = {};
-        for (const [id, value] of values) {
-            indexes[index] = value;
+        for (const id of ids.keys()) {
+            for (const [k, values] of keyValues) {
+                indexes[k] = values.get(id) ?? null;
+            }
             if (compiledIndexFilter(indexes)) {
                 candidates.add(id);
             }
         }
-        return candidates;
+        return { ids: candidates, exact: true };
     }
 
-    private async getIndexValues(index: OrderIndexedDBIndex): Promise<Map<string, IDBValidKey>> {
+    private async lookupIds(lookup: OrderIndexLookup): Promise<Set<string>> {
+        const db = await this.database.get();
+        return await new Promise<Set<string>>((resolve, reject) => {
+            const request = db.transaction([OrdersStore.storeName], 'readonly').objectStore(OrdersStore.storeName).index(lookup.index).getAllKeys(IDBKeyRange.only(lookup.key));
+            request.onsuccess = () => resolve(new Set(request.result as string[]));
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    /**
+     * Sorts the ids in the order a cursor on the index of the sortItem visits them: by index value, then by id.
+     * Like that cursor, it leaves out orders that are not in the index (e.g. without a number).
+     *
+     * @param after only keep the orders the cursor visits after the order with this key ([index value, id], or the id when sorting on id)
+     */
+    async sortIds(ids: Set<string>, sortItem: SortItem & { key: OrderIndexKey }, after: IDBValidKey | null): Promise<string[]> {
+        const direction = sortItem.order === SortItemDirection.DESC ? -1 : 1;
+        const compare = (a: { value: IDBValidKey; id: string }, b: { value: IDBValidKey; id: string }) => {
+            const c = compareIndexKeys(a.value, b.value);
+            return direction * (c !== 0 ? c : (a.id < b.id ? -1 : (a.id > b.id ? 1 : 0)));
+        };
+
+        const values = (sortItem.key === 'id' || this.indexValues.has(sortItem.key) || ids.size > maxIdsToSortWithoutIndexValues)
+            ? await this.getIndexValues(sortItem.key)
+            : await this.readStoredIndexValues(ids, sortItem.key);
+
+        const afterEntry = after === null
+            ? null
+            : (sortItem.key === 'id' ? { value: after, id: after as string } : { value: (after as IDBValidKey[])[0], id: (after as IDBValidKey[])[1] as string });
+
+        const entries: { value: IDBValidKey; id: string }[] = [];
+        for (const id of ids) {
+            const value = values.get(id);
+            if (value === undefined) {
+                continue;
+            }
+            const entry = { value, id };
+            if (afterEntry && compare(entry, afterEntry) <= 0) {
+                continue;
+            }
+            entries.push(entry);
+        }
+
+        entries.sort(compare);
+        return entries.map(e => e.id);
+    }
+
+    /**
+     * The index values of these orders, read from their records.
+     */
+    private async readStoredIndexValues(ids: Set<string>, index: OrderIndexedDBIndex): Promise<Map<string, IDBValidKey>> {
+        const db = await this.database.get();
+        const values = new Map<string, IDBValidKey>();
+
+        await new Promise<void>((resolve, reject) => {
+            const transaction = db.transaction([OrdersStore.storeName], 'readonly');
+            const objectStore = transaction.objectStore(OrdersStore.storeName);
+            transaction.oncomplete = () => resolve();
+            transaction.onerror = () => reject(transaction.error);
+
+            for (const id of ids) {
+                const request = objectStore.get(id);
+                request.onsuccess = () => {
+                    const value: unknown = request.result?.indexes?.[index];
+                    if (isIndexableValue(value)) {
+                        values.set(id, value);
+                    }
+                };
+            }
+        });
+
+        return values;
+    }
+
+    private async getIndexValues(index: OrderIndexKey): Promise<Map<string, IDBValidKey>> {
         const db = await this.database.get();
         if (!this.canCacheIndexValues) {
             return this.readIndexValues(db, index);
@@ -401,7 +523,8 @@ export class OrdersStore {
         if (cached) {
             // Catches orders that other tabs added or deleted
             const count = await new Promise<number>((resolve, reject) => {
-                const request = db.transaction([OrdersStore.storeName], 'readonly').objectStore(OrdersStore.storeName).index(index).count();
+                const objectStore = db.transaction([OrdersStore.storeName], 'readonly').objectStore(OrdersStore.storeName);
+                const request = (index === 'id' ? objectStore : objectStore.index(index)).count();
                 request.onsuccess = () => resolve(request.result);
                 request.onerror = () => reject(request.error);
             });
@@ -409,6 +532,7 @@ export class OrdersStore {
                 return cached;
             }
             this.indexValues.delete(index);
+            this.indexValuesVersion++;
         }
 
         let promise = this.indexValuesPromises.get(index);
@@ -421,15 +545,16 @@ export class OrdersStore {
         return promise;
     }
 
-    private async readIndexValues(db: IDBDatabase, index: OrderIndexedDBIndex): Promise<Map<string, IDBValidKey>> {
+    private async readIndexValues(db: IDBDatabase, index: OrderIndexKey): Promise<Map<string, IDBValidKey>> {
         const values = new Map<string, IDBValidKey>();
 
         // Listen before reading, so no change made during the read goes unnoticed
         this.getChannel();
-        const externalChangeCountBefore = this.externalChangeCount;
+        const clearCountBefore = this.indexValuesClearCount;
 
         await new Promise<void>((resolve, reject) => {
-            const request = db.transaction([OrdersStore.storeName], 'readonly').objectStore(OrdersStore.storeName).index(index).openKeyCursor();
+            const objectStore = db.transaction([OrdersStore.storeName], 'readonly').objectStore(OrdersStore.storeName);
+            const request = (index === 'id' ? objectStore : objectStore.index(index)).openKeyCursor();
             request.onerror = () => reject(request.error);
             request.onsuccess = () => {
                 const cursor = request.result;
@@ -443,7 +568,7 @@ export class OrdersStore {
         });
 
         // A change reported during the read may be missing from it: use it once, but don't keep it
-        if (this.canCacheIndexValues && this.externalChangeCount === externalChangeCountBefore) {
+        if (this.canCacheIndexValues && this.indexValuesClearCount === clearCountBefore) {
             this.indexValues.set(index, values);
         }
         return values;
@@ -456,7 +581,7 @@ export class OrdersStore {
 
         const indexes = order.status === OrderStatus.Deleted ? null : getPrivateOrderIndexes(order);
         for (const [index, values] of this.indexValues) {
-            setIndexValue(values, order.id, indexes?.[index]);
+            setIndexValue(values, order.id, index === 'id' ? (indexes && order.id) : indexes?.[index]);
         }
     }
 
@@ -476,6 +601,7 @@ export class OrdersStore {
                 for (const values of this.indexValues.values()) {
                     values.delete(id);
                 }
+                this.indexValuesVersion++;
                 this.notifyOtherStores();
             };
 
@@ -508,6 +634,7 @@ export class OrdersStore {
                 for (const order of orders) {
                     this.updateIndexValues(order);
                 }
+                this.indexValuesVersion++;
                 this.notifyOtherStores();
                 resolve();
             };
@@ -532,7 +659,7 @@ export class OrdersStore {
         });
     }
 
-    async streamRaw<T>({ callback, filter, indexFilter, limit, sortItem, advanceCount, lookup, candidateIds, transform, openTransaction, signal }: {
+    async streamRaw<T>({ callback, filter, limit, sortItem, advanceCount, ids, transform, openTransaction, signal }: {
         transform: (rawOrder: any) => Promise<T>;
         /**
          * Called for every order that matches, before the cursor moves on. Anything it awaits has to
@@ -540,26 +667,13 @@ export class OrdersStore {
          */
         callback: (data: T) => void | Promise<void>;
         filter?: StamhoofdFilter;
-        /**
-         * Filter evaluated on the stored index values (see orderIndexesInMemoryFilterCompilers) before an
-         * order is decoded, to skip orders that cannot match without paying for their decode.
-         *
-         * It may never exclude an order that `filter` would have matched; `filter` stays authoritative, so
-         * matching too many orders here only costs performance.
-         */
-        indexFilter?: StamhoofdFilter;
         limit?: number;
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
         advanceCount?: number;
         /**
-         * Only visit the orders with this exact index value, in the order of that index (so not in sortItem order).
+         * Only visit these orders, in this order. Cannot be combined with a sortItem or advanceCount.
          */
-        lookup?: OrderIndexLookup;
-        /**
-         * Only visit these orders (see getIndexFilterCandidates). With a sortItem they are visited in that order by
-         * walking the keys of the sort index; without one, in the order of the set.
-         */
-        candidateIds?: Set<string>;
+        ids?: string[];
         openTransaction?: IDBTransaction;
         /**
          * Stops the stream and rejects with the abort reason. Checked before every cursor step.
@@ -599,15 +713,10 @@ export class OrdersStore {
             let totalIterationCount = advanceCount ?? 0;
 
             let compiledFilter: InMemoryFilterRunner | undefined;
-            let compiledIndexFilter: InMemoryFilterRunner | undefined;
 
             try {
                 if (filter) {
                     compiledFilter = compileToInMemoryFilter(filter, privateOrderWithTicketsFilterCompilers);
-                }
-
-                if (indexFilter) {
-                    compiledIndexFilter = compileToInMemoryFilter(indexFilter, orderIndexesInMemoryFilterCompilers);
                 }
             } catch (e: any) {
                 console.error('Compile filter failed', e);
@@ -633,13 +742,6 @@ export class OrdersStore {
             };
 
             const handleValue = (value: any, next: () => void) => {
-                if (compiledIndexFilter && !compiledIndexFilter(value.indexes)) {
-                    // Cannot match: skip it without decoding the order or reading its tickets.
-                    totalIterationCount += 1;
-                    next();
-                    return;
-                }
-
                 transform(value).then(async (decodedResult) => {
                     if (compiledFilter && !compiledFilter(decodedResult)) {
                         totalIterationCount += 1;
@@ -664,8 +766,11 @@ export class OrdersStore {
                 });
             };
 
-            if (candidateIds && !sortItem) {
-                const ids = [...candidateIds];
+            if (ids) {
+                if (sortItem || advanceCount) {
+                    reject(new Error('ids cannot be combined with a sortItem or advanceCount'));
+                    return;
+                }
                 let position = 0;
 
                 const getNext = () => {
@@ -691,22 +796,15 @@ export class OrdersStore {
                 return;
             }
 
-            let request: IDBRequest<IDBCursor | null>;
+            let request: IDBRequest<IDBCursorWithValue | null>;
 
             try {
-                if (lookup) {
-                    if (sortItem || advanceCount || candidateIds) {
-                        throw new Error('A lookup cannot be combined with a sortItem, advanceCount or candidateIds');
-                    }
-                    request = objectStore.index(lookup.index).openCursor(IDBKeyRange.only(lookup.key)) as IDBRequest<IDBCursor | null>;
-                } else if (sortItem) {
+                if (sortItem) {
                     const direction: IDBCursorDirection = sortItem.order === SortItemDirection.DESC ? 'prev' : 'next';
                     const source = sortItem.key === 'id' ? objectStore : objectStore.index(sortItem.key);
-
-                    // Without candidates every order has to be read anyway; with them, only the keys are walked
-                    request = candidateIds ? source.openKeyCursor(null, direction) : source.openCursor(null, direction) as IDBRequest<IDBCursor | null>;
+                    request = source.openCursor(null, direction);
                 } else {
-                    request = objectStore.openCursor() as IDBRequest<IDBCursor | null>;
+                    request = objectStore.openCursor();
                 }
             } catch (e) {
                 reject(e);
@@ -725,23 +823,7 @@ export class OrdersStore {
                     return;
                 }
 
-                const next = () => cursor.continue();
-
-                if (!candidateIds) {
-                    handleValue((cursor as IDBCursorWithValue).value, next);
-                    return;
-                }
-
-                if (!candidateIds.has(cursor.primaryKey as string)) {
-                    totalIterationCount += 1;
-                    next();
-                    return;
-                }
-
-                const getRequest = objectStore.get(cursor.primaryKey);
-                getRequest.onsuccess = () => {
-                    handleValue(getRequest.result, next);
-                };
+                handleValue(cursor.value, () => cursor.continue());
             };
 
             if (advanceCount) {
@@ -801,7 +883,7 @@ export class OrdersStore {
             const objectStore = transaction.objectStore(OrdersStore.storeName);
 
             transaction.oncomplete = () => {
-                this.indexValues.clear();
+                this.clearIndexValues();
                 this.notifyOtherStores();
             };
 

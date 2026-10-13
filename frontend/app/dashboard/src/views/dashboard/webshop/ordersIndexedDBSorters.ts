@@ -1,6 +1,6 @@
 import { AutoEncoder, field, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import type { InMemoryFilterDefinitions, PrivateOrder, SortDefinitions, SortItem, StamhoofdFilter } from '@stamhoofd/structures';
-import { baseInMemoryFilterCompilers, createInMemoryFilterCompiler, SortItemDirection } from '@stamhoofd/structures';
+import type { InMemoryFilterDefinitions, PrivateOrder, SortDefinitions, StamhoofdFilter } from '@stamhoofd/structures';
+import { baseInMemoryFilterCompilers, createInMemoryFilterCompiler } from '@stamhoofd/structures';
 import type { IndexedDbIndexValue } from './IndexBox';
 import { IndexBox } from './IndexBox';
 
@@ -78,54 +78,141 @@ export const ordersIndexedDBSorters: SortDefinitions<PrivateOrder> = {
     },
 };
 
+export type OrderIndexKey = OrderIndexedDBIndex | 'id';
+
 /**
- * Compilers for filtering on the index values that are stored alongside each order (IndexBox.indexes),
- * instead of on a decoded order.
+ * The keys whose stored index value is the lowercased value a filter on that key reads from a decoded order.
+ * Every in-memory comparison lowercases both of its sides, so filtering these keys on the stored index values
+ * matches the same orders as filtering them on decoded orders. A missing index value means the order has null there.
  *
- * The stored values are lowercased copies of the values the equally named sorter reads from an order.
- * Every in-memory comparison lowercases both of its sides, so filtering an index key matches the same
- * orders as filtering the same key on a decoded order - without paying for the decode.
- *
- * Only the keys in OrderIndexedDBIndex exist here: anything else (items, payments, recordAnswers, the
- * ticket keys, ...) has to be filtered on a decoded order.
+ * Other indexes are left out: when an order has no value (e.g. no time slot), PrivateOrderEncodeableIndexes
+ * stores its default (0 or '') instead of leaving the order out of the index.
+ */
+const filterableIndexKeys: OrderIndexKey[] = [
+    'id',
+    OrderIndexedDBIndex.Number,
+    OrderIndexedDBIndex.CreatedAt,
+    OrderIndexedDBIndex.Status,
+    OrderIndexedDBIndex.PaymentMethod,
+    OrderIndexedDBIndex.Name,
+    OrderIndexedDBIndex.Email,
+    OrderIndexedDBIndex.Phone,
+    OrderIndexedDBIndex.TotalPrice,
+    OrderIndexedDBIndex.Amount,
+];
+
+/**
+ * Compilers for filtering on the index values stored alongside each order (IndexBox.indexes), plus its id.
  */
 export const orderIndexesInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
     ...Object.fromEntries(
-        Object.values(OrderIndexedDBIndex).map(index => [index, createInMemoryFilterCompiler(index)]),
+        filterableIndexKeys.map(key => [key, createInMemoryFilterCompiler(key)]),
     ),
 };
+
+const logicalOperators = ['$and', '$or', '$not'];
+
+/**
+ * The filter split in parts that all have to match ($and), e.g. { a: 1, $and: [{ b: 2 }, { c: 3 }] } gives { a: 1 }, { b: 2 } and { c: 3 }.
+ */
+export function getFilterConjuncts(filter: StamhoofdFilter | null): StamhoofdFilter[] {
+    if (filter === null) {
+        return [];
+    }
+    if (Array.isArray(filter)) {
+        return filter.flatMap(getFilterConjuncts);
+    }
+    if (typeof filter !== 'object') {
+        return [filter];
+    }
+
+    const entries = Object.entries(filter);
+    if (entries.length === 1 && entries[0][0] === '$and') {
+        return getFilterConjuncts(entries[0][1] as StamhoofdFilter);
+    }
+    if (entries.length > 1) {
+        return entries.flatMap(([key, value]) => getFilterConjuncts({ [key]: value } as StamhoofdFilter));
+    }
+    return [filter];
+}
+
+/**
+ * The keys the filter reads, or null if it reads a key that cannot be filtered on the stored index values.
+ */
+export function getIndexKeysOfFilter(filter: StamhoofdFilter | null): Set<OrderIndexKey> | null {
+    const keys = new Set<OrderIndexKey>();
+
+    const collect = (f: StamhoofdFilter | null): boolean => {
+        if (Array.isArray(f)) {
+            return f.every(collect);
+        }
+        if (f === null || typeof f !== 'object') {
+            return false;
+        }
+        return Object.entries(f).every(([key, value]) => {
+            if (logicalOperators.includes(key)) {
+                return collect(value as StamhoofdFilter);
+            }
+            if (!(filterableIndexKeys as string[]).includes(key)) {
+                return false;
+            }
+            keys.add(key as OrderIndexKey);
+            return true;
+        });
+    };
+
+    return collect(filter) && keys.size > 0 ? keys : null;
+}
+
+/**
+ * Splits off the parts of the filter that can be evaluated on the stored index values.
+ *
+ * @param alwaysMatching parts that every stored order matches, which can be left out of both
+ * @returns indexFilter: an $and of those parts, which every order that matches the filter also matches
+ * @returns coversFilter: true if the indexFilter matches exactly the same orders as the filter
+ */
+export function splitIndexFilter(filter: StamhoofdFilter | null, alwaysMatching: StamhoofdFilter | null): { indexFilter: StamhoofdFilter | null; coversFilter: boolean } {
+    const ignored = new Set(getFilterConjuncts(alwaysMatching).map(c => JSON.stringify(c)));
+    const indexConjuncts: StamhoofdFilter[] = [];
+    let coversFilter = true;
+
+    for (const conjunct of getFilterConjuncts(filter)) {
+        if (ignored.has(JSON.stringify(conjunct))) {
+            continue;
+        }
+        if (getIndexKeysOfFilter(conjunct)) {
+            indexConjuncts.push(conjunct);
+        } else {
+            coversFilter = false;
+        }
+    }
+
+    return {
+        indexFilter: indexConjuncts.length === 0 ? null : (indexConjuncts.length === 1 ? indexConjuncts[0] : { $and: indexConjuncts }),
+        coversFilter,
+    };
+}
 
 export type OrderIndexLookup = { index: OrderIndexedDBIndex; key: number | string };
 
 const exactLookupIndexes: OrderIndexedDBIndex[] = [OrderIndexedDBIndex.Number, OrderIndexedDBIndex.Email, OrderIndexedDBIndex.Phone];
 
 /**
- * Returns the index if the filter only filters on that one stored index value, e.g. { name: { $contains: 'x' } }.
+ * Returns the index key to look up if the filter only matches orders with one exact value for an index,
+ * e.g. { email: { $eq: 'x@y.be' } }, so the index can return just those orders.
  */
-export function getSingleIndexOfFilter(filter: StamhoofdFilter | null): OrderIndexedDBIndex | null {
+export function getExactIndexLookup(filter: StamhoofdFilter | null): OrderIndexLookup | null {
     if (filter === null || typeof filter !== 'object' || Array.isArray(filter)) {
         return null;
     }
 
-    const keys = Object.keys(filter);
-    if (keys.length !== 1 || !(Object.values(OrderIndexedDBIndex) as string[]).includes(keys[0])) {
+    const entries = Object.entries(filter);
+    if (entries.length !== 1 || !(exactLookupIndexes as string[]).includes(entries[0][0])) {
         return null;
     }
-    return keys[0] as OrderIndexedDBIndex;
-}
+    const [index, condition] = entries[0] as [OrderIndexedDBIndex, unknown];
 
-/**
- * Returns the index key to look up if the filter only matches orders with one exact value for an index,
- * so a cursor on that index can visit just those orders instead of every order.
- */
-export function getExactIndexLookup(filter: StamhoofdFilter | null): OrderIndexLookup | null {
-    const index = getSingleIndexOfFilter(filter);
-    if (index === null || !exactLookupIndexes.includes(index)) {
-        return null;
-    }
-
-    const condition = (filter as Record<string, unknown>)[index];
     if (condition === null || typeof condition !== 'object') {
         return null;
     }
@@ -147,26 +234,29 @@ export function getExactIndexLookup(filter: StamhoofdFilter | null): OrderIndexL
 }
 
 /**
- * Sorts orders in the order a cursor on the sortItem index returns them: by stored index value, then by id.
- * Like that cursor, it leaves out orders without a value for the index (e.g. a null number).
+ * Whether IndexedDB stores the value as a key in an index. Orders without one are left out of that index.
  */
-export function sortOrdersLikeIndex<O extends PrivateOrder>(orders: O[], sortItem: SortItem & { key: OrderIndexedDBIndex | 'id' }): O[] {
-    const withKeys: { order: O; key: IDBValidKey }[] = [];
-    for (const order of orders) {
-        if (sortItem.key === 'id') {
-            withKeys.push({ order, key: order.id });
-            continue;
-        }
-        const value: unknown = getPrivateOrderIndexes(order)[sortItem.key];
-        if (value === null || value === undefined || (typeof value === 'number' && Number.isNaN(value))) {
-            continue;
-        }
-        withKeys.push({ order, key: [value as IDBValidKey, order.id] });
-    }
+export function isIndexableValue(value: unknown): value is IDBValidKey {
+    return value !== null && value !== undefined && !(typeof value === 'number' && Number.isNaN(value));
+}
 
-    const direction = sortItem.order === SortItemDirection.DESC ? -1 : 1;
-    withKeys.sort((a, b) => direction * indexedDB.cmp(a.key, b.key));
-    return withKeys.map(o => o.order);
+/**
+ * The key of the order in the index of a sort key, or null if the order is not in that index.
+ */
+export function getOrderIndexKey(order: PrivateOrder, key: OrderIndexKey): IDBValidKey | null {
+    const value: unknown = key === 'id' ? order.id : getPrivateOrderIndexes(order)[key];
+    return isIndexableValue(value) ? value : null;
+}
+
+/**
+ * Compares index keys like indexedDB.cmp, but much faster for the numbers and strings that the indexes contain.
+ */
+export function compareIndexKeys(a: IDBValidKey, b: IDBValidKey): number {
+    const typeA = typeof a;
+    if (typeA === typeof b && (typeA === 'string' || typeA === 'number')) {
+        return a < b ? -1 : (a > b ? 1 : 0);
+    }
+    return indexedDB.cmp(a, b);
 }
 
 /**

@@ -12,6 +12,7 @@ import { Order, OrderFactory, Organization, OrganizationFactory, Payment, Ticket
 import {
     MollieOnboarding,
     MollieStatus,
+    OrderStatus,
     PaymentMethod,
     PaymentProvider,
     PaymentStatus,
@@ -914,6 +915,68 @@ function registerWebshopOrderTests() {
         await expect(table.getResultCount()).toHaveText(`25 van ${orderCount}`);
         await expect(table.getRow('Klant 25')).toBeVisible();
         await expect(table.getRow('Klant 20')).toBeVisible();
+
+        await adminContext.close();
+    });
+
+    test('A search with a status filter loads every page while scrolling', async ({ browser }) => {
+        // A search or a filter on a key with a stored index (status, name, number, ...) is matched and
+        // sorted on the stored index values: each page only decodes its own orders and continues after
+        // the sort key of the last order of the previous page.
+        const organization = await createWebshopOrganization('SearchFilterScroll');
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Search filter scroll ${WorkerData.id}`,
+            ticketType: WebshopTicketType.None,
+            productCount: 1,
+            cartEnabled: false,
+        });
+        const admin = await createAdmin(organization);
+
+        // Every third order is canceled: 10 of the 30 'Klant' orders, and 3 of the 10 'Andere' orders
+        const orderCount = 40;
+        for (let number = 1; number <= orderCount; number++) {
+            await new OrderFactory({
+                webshop,
+                number,
+                firstName: number <= 30 ? 'Klant' : 'Andere',
+                lastName: number.toString().padStart(2, '0'),
+                status: number % 3 === 0 ? OrderStatus.Canceled : OrderStatus.Created,
+            }).create();
+        }
+
+        const adminContext = await browser.newContext();
+        const adminPage = await adminContext.newPage();
+        await loginAs({ page: adminPage, user: admin });
+
+        const table = await openWebshopOrders(adminPage, organization, webshop.meta.name);
+        await expect(table.getResultCount()).toHaveText(orderCount.toString());
+
+        await table.search('klant');
+        await expect(table.getResultCount()).toHaveText(`30 van ${orderCount}`);
+
+        // The table sorts descending on '#', and sorting on another column keeps that direction: reaching the
+        // lowest order means every page in between loaded
+        for (const columnName of ['Naam', '#']) {
+            await table.scrollToTop();
+            await table.sortBy(columnName);
+            await table.waitForFirstRow();
+            await table.scrollToBottom();
+            await expect(table.getRow('Klant 01')).toBeVisible();
+            await expect(table.getErrorBox()).toHaveCount(0);
+        }
+
+        await table.filterOnChoices('Status', ['Geannuleerd']);
+        await expect(table.getResultCount()).toHaveText(`10 van ${orderCount}`);
+        await table.scrollToBottom();
+        await expect(table.getRow('Klant 03')).toBeVisible();
+        await expect(table.getRow('Klant 01')).toHaveCount(0);
+
+        await table.search('');
+        await expect(table.getResultCount()).toHaveText(`13 van ${orderCount}`);
+        await table.scrollToTop();
+        await expect(table.getRow('Andere 39')).toBeVisible();
+        await expect(table.getErrorBox()).toHaveCount(0);
 
         await adminContext.close();
     });

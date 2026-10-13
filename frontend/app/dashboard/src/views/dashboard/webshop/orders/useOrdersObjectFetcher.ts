@@ -6,7 +6,7 @@ import { assertSort, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest
 import { parsePhoneNumber } from 'libphonenumber-js';
 import { toRaw } from 'vue';
 import type { OrderIndexedDBIndex } from '../ordersIndexedDBSorters';
-import { getExactIndexLookup, ordersIndexedDBSorters, sortOrdersLikeIndex } from '../ordersIndexedDBSorters';
+import { getOrderIndexKey, ordersIndexedDBSorters, splitIndexFilter } from '../ordersIndexedDBSorters';
 import type { WebshopManager } from '../WebshopManager';
 import { OrderRequiredFilterHelper } from './OrderRequiredFilterHelper';
 
@@ -14,9 +14,9 @@ let lastNextRequest: LimitedFilteredRequest | null = null;
 let itemsToAdvanceNext: number = 0;
 
 /**
- * Up to this many search matches are read directly and sorted in memory, instead of walking the whole sort index.
+ * The sort index key of the last order of the previous page, if that page was read with OrdersStore.sortIds.
  */
-const maxCandidatesToSortInMemory = 1000;
+let indexKeyToResumeAfterNext: IDBValidKey | null = null;
 
 type ObjectType = PrivateOrderWithTickets;
 
@@ -30,11 +30,21 @@ function extendSort(list: SortList): SortList {
 }
 
 /**
- * The keys this builds (number, email, phone, name) all have a stored IndexedDB index, so the result is
- * also passed as the indexFilter of a stream: it then skips non-matching orders before they get decoded.
+ * The keys this builds (number, email, phone, name) can all be filtered on the stored index values.
  */
 function searchToFilter(search: string | null): StamhoofdFilter | null {
     return getOrderSearchFilter(search, parsePhoneNumber);
+}
+
+/**
+ * The key of the order in the sort index, as OrdersStore.sortIds expects it.
+ */
+function getSortIndexKey(order: PrivateOrderWithTickets, sortItem: SortItem & { key: OrderIndexedDBIndex | 'id' }): IDBValidKey | null {
+    const value = getOrderIndexKey(order, sortItem.key);
+    if (value === null || sortItem.key === 'id') {
+        return value;
+    }
+    return [value, order.id];
 }
 
 export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> & { reset: () => void; isWaitingForInternet: boolean } {
@@ -105,7 +115,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
         async fetch(data: LimitedFilteredRequest, options?: { signal?: AbortSignal }) {
             data = toRaw(data);
             console.log('Orders(IndexedDb).fetch', data);
-            let results: PrivateOrderWithTickets[] = [];
+            const results: PrivateOrderWithTickets[] = [];
             const filters = [data.filter];
 
             const searchFilter = searchToFilter(data.search);
@@ -145,36 +155,27 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 
             console.log('Orders(IndexedDb).fetch', 'streamOrders, filter', filter, 'sortItem', sortItem, 'limit', data.limit);
 
-            // set advance count
-            let advanceCount = 0;
+            const isNextPage = lastNextRequest !== null && lastNextRequest === data;
+            const advanceCount = isNextPage ? itemsToAdvanceNext : 0;
+            const indexKeyToResumeAfter = isNextPage ? indexKeyToResumeAfterNext : null;
 
-            if (lastNextRequest !== null) {
-                if (lastNextRequest === data) {
-                    advanceCount = itemsToAdvanceNext;
-                }
-                else {
-                    lastNextRequest = null;
-                    itemsToAdvanceNext = 0;
-                }
-            }
+            // Without the pageFilter, so every page uses the same candidates
+            const { indexFilter } = splitIndexFilter(mergeFilters([data.filter, searchFilter], '$and'), OrderRequiredFilterHelper.getDefault(manager.preview.id));
 
-            const lookup = getExactIndexLookup(searchFilter);
-            const candidateIds = (searchFilter && !lookup) ? await manager.orders.getIndexFilterCandidates(searchFilter) : null;
+            if (indexFilter) {
+                // Find and sort the matching orders on their stored index values, so only the orders of this page get decoded
+                const { ids } = await manager.orders.getCandidateIds(indexFilter);
+                const sortedIds = await manager.orders.sortIds(ids, sortItem, indexKeyToResumeAfter);
 
-            if (lookup || (candidateIds && candidateIds.size <= maxCandidatesToSortInMemory)) {
-                // Only the few matching orders get visited, but not in sort order: sort and page them here.
-                // The pageFilter (part of filter) already skips the orders of previous pages.
                 await manager.streamOrdersWithPatchedTickets({
                     callback: (order) => {
                         results.push(order);
                     },
                     filter,
-                    indexFilter: searchFilter ?? undefined,
-                    lookup: lookup ?? undefined,
-                    candidateIds: candidateIds ?? undefined,
+                    limit: data.limit,
+                    ids: sortedIds,
                     signal: options?.signal,
                 });
-                results = sortOrdersLikeIndex(results, sortItem).slice(0, data.limit);
                 itemsToAdvanceNext = 0;
             }
             else {
@@ -183,17 +184,16 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                         results.push(order);
                     },
                     filter,
-                    indexFilter: searchFilter ?? undefined,
                     limit: data.limit,
                     sortItem,
                     advanceCount,
-                    candidateIds: candidateIds ?? undefined,
                     signal: options?.signal,
                 });
             }
 
             // create next request
             const lastItem = results[results.length - 1];
+            indexKeyToResumeAfterNext = (indexFilter && lastItem) ? getSortIndexKey(lastItem, sortItem) : null;
             let next: LimitedFilteredRequest | undefined = undefined;
 
             if (lastItem && results.length >= data.limit) {
@@ -229,6 +229,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             else {
                 lastNextRequest = null;
                 itemsToAdvanceNext = 0;
+                indexKeyToResumeAfterNext = null;
             }
 
             return { results, next };
@@ -253,13 +254,11 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             }
 
             const filter = mergeFilters(filters, '$and');
+            const { indexFilter, coversFilter } = splitIndexFilter(filter, OrderRequiredFilterHelper.getDefault(manager.preview.id));
+            const candidates = indexFilter ? await manager.orders.getCandidateIds(indexFilter) : null;
 
-            const lookup = getExactIndexLookup(searchFilter);
-            const candidateIds = (searchFilter && !lookup) ? await manager.orders.getIndexFilterCandidates(searchFilter) : null;
-
-            if (candidateIds && OrderRequiredFilterHelper.isDefault(manager.preview.id, data.filter)) {
-                // Every stored order passes the default filter, so every candidate matches
-                return candidateIds.size;
+            if (candidates && candidates.exact && coversFilter) {
+                return candidates.ids.size;
             }
 
             await manager.streamOrdersWithPatchedTickets({
@@ -267,9 +266,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                     count++;
                 },
                 filter,
-                indexFilter: searchFilter ?? undefined,
-                lookup: lookup ?? undefined,
-                candidateIds: candidateIds ?? undefined,
+                ids: candidates ? [...candidates.ids] : undefined,
                 // Counting never looks at an order, let alone at its tickets
                 withTickets: false,
                 signal: options?.signal,
@@ -285,6 +282,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             this.internetPromise = null;
             lastNextRequest = null;
             itemsToAdvanceNext = 0;
+            indexKeyToResumeAfterNext = null;
         },
         ...overrides,
     };

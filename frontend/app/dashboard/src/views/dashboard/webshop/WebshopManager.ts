@@ -7,7 +7,7 @@ import type { SortItem, StamhoofdFilter, WebshopPreview } from '@stamhoofd/struc
 import { PermissionLevel, PrivateOrderWithTickets, PrivateWebshop, Version } from '@stamhoofd/structures';
 import { IndexBoxDecoder } from './IndexBox';
 import { filterNeedsTickets } from './orderTicketFilters';
-import type { OrderIndexedDBIndex, OrderIndexLookup } from './ordersIndexedDBSorters';
+import type { OrderIndexedDBIndex } from './ordersIndexedDBSorters';
 import { WebshopDatabase } from './repositories/WebshopDatabase';
 import { OrdersStore, WebshopOrdersRepo } from './repositories/WebshopOrdersRepo';
 import { WebshopSettingsStore } from './repositories/WebshopSettingsStore';
@@ -302,13 +302,11 @@ export class WebshopManager {
     async streamOrdersWithPatchedTickets(options: {
         callback: (data: PrivateOrderWithTickets) => void;
         filter?: StamhoofdFilter;
-        indexFilter?: StamhoofdFilter;
         withTickets?: boolean;
         limit?: number;
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
         advanceCount?: number;
-        lookup?: OrderIndexLookup;
-        candidateIds?: Set<string>;
+        ids?: string[];
         signal?: AbortSignal;
     }): Promise<number> {
         const db = await this.database.get();
