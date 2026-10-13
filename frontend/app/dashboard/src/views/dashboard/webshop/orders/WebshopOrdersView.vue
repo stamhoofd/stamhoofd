@@ -586,7 +586,7 @@ function putOrder(order: PrivateOrder) {
 }
 
 function onNewOrders(orders: PrivateOrder[]) {
-    if (objectFetcher.lastInternetLoad === 0) {
+    if (objectFetcher.isWaitingForInternet) {
         return;
     }
 
@@ -600,14 +600,14 @@ function onNewOrders(orders: PrivateOrder[]) {
 }
 
 function onDeleteOrders(_orders: PrivateOrder[]) {
-    if (objectFetcher.lastInternetLoad === 0) {
+    if (objectFetcher.isWaitingForInternet) {
         return;
     }
     tableObjectFetcher.reset();
 }
 
 function onNewTickets(tickets: TicketPrivate[]) {
-    if (objectFetcher.lastInternetLoad === 0) {
+    if (objectFetcher.isWaitingForInternet) {
         return;
     }
 
