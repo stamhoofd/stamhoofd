@@ -2403,9 +2403,6 @@ importers:
         specifier: 1.5.0
         version: 1.5.0(@simonbackx/simple-encoding@2.26.11)(uuid@9.0.1)
     devDependencies:
-      '@stamhoofd/types':
-        specifier: workspace:*
-        version: link:../types
       eslint-plugin-stamhoofd:
         specifier: workspace:*
         version: link:../eslint

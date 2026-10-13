@@ -5,8 +5,7 @@
         "outDir": "dist"
     },
     "include": [
-        "./src",
-        "../stamhoofd.d.ts"
+        "./src"
     ],
     "exclude": [
         "./src/**/*.spec.ts",
