@@ -43,7 +43,6 @@ const props = withDefaults(
         elementName?: string;
         selectable?: boolean;
         disabled?: boolean;
-        compact?: boolean;
     }>(),
     // default values
     {
