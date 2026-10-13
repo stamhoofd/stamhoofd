@@ -36,6 +36,10 @@
         </h2>
         <p>{{ $t('%Zv6') }} <a class="inline-link" :href="$domains.getDocs('persoonlijke-kortingscodes')" target="_blank">{{ $t('%19t') }}</a></p>
 
+        <div v-if="webshop.canEnableCart && !webshop.shouldEnableCart" class="warning-box">
+            <p>{{ $t('Zonder winkelmandje kunnen er geen kortingscodes worden ingevoerd bij een bestelling.') }}</p>
+        </div>
+
         <STList>
             <STListItem :selectable="true" element-name="label">
                 <template #left>

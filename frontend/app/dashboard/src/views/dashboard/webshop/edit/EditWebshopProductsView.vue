@@ -54,10 +54,6 @@
                     </h3>
                 </STListItem>
             </STList>
-
-            <div v-if="!cartEnabled" class="warning-box">
-                <p>{{ $t('Zonder winkelmandje kunnen er geen kortingscodes worden ingevoerd bij een bestelling.') }}</p>
-            </div>
         </template>
     </SaveView>
 </template>
