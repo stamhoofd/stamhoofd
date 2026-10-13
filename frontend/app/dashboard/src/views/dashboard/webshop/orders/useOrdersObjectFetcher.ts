@@ -10,13 +10,17 @@ import { getOrderIndexKey, ordersIndexedDBSorters, splitIndexFilter } from '../o
 import type { WebshopManager } from '../WebshopManager';
 import { OrderRequiredFilterHelper } from './OrderRequiredFilterHelper';
 
-let lastNextRequest: LimitedFilteredRequest | null = null;
-let itemsToAdvanceNext: number = 0;
-
 /**
- * The sort index key of the last order of the previous page, if that page was read with OrdersStore.sortIds.
+ * Where to continue for a next request that fetch returned: by its identity, so tables and exports that fetch at the same
+ * time each continue their own pages.
  */
-let indexKeyToResumeAfterNext: IDBValidKey | null = null;
+const resumeStates = new WeakMap<LimitedFilteredRequest, {
+    itemsToAdvance: number;
+    /**
+     * The sort index key of the last order of the previous page, if that page was read with OrdersStore.sortIds.
+     */
+    indexKeyToResumeAfter: IDBValidKey | null;
+}>();
 
 type ObjectType = PrivateOrderWithTickets;
 
@@ -156,9 +160,10 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 
             console.log('Orders(IndexedDb).fetch', 'streamOrders, filter', filter, 'sortItem', sortItem, 'limit', data.limit);
 
-            const isNextPage = lastNextRequest !== null && lastNextRequest === data;
-            const advanceCount = isNextPage ? itemsToAdvanceNext : 0;
-            const indexKeyToResumeAfter = isNextPage ? indexKeyToResumeAfterNext : null;
+            const resumeState = resumeStates.get(data);
+            const advanceCount = resumeState?.itemsToAdvance ?? 0;
+            const indexKeyToResumeAfter = resumeState?.indexKeyToResumeAfter ?? null;
+            let itemsToAdvance = 0;
 
             // Without the pageFilter, so every page uses the same candidates
             const { indexFilter } = splitIndexFilter(mergeFilters([data.filter, searchFilter], '$and'), OrderRequiredFilterHelper.getDefault(manager.preview.id));
@@ -177,10 +182,9 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                     ids: sortedIds,
                     signal: options?.signal,
                 });
-                itemsToAdvanceNext = 0;
             }
             else {
-                itemsToAdvanceNext = await manager.streamOrdersWithPatchedTickets({
+                itemsToAdvance = await manager.streamOrdersWithPatchedTickets({
                     callback: (order) => {
                         results.push(order);
                     },
@@ -194,7 +198,6 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 
             // create next request
             const lastItem = results[results.length - 1];
-            indexKeyToResumeAfterNext = (indexFilter && lastItem) ? getSortIndexKey(lastItem, sortItem) : null;
             let next: LimitedFilteredRequest | undefined = undefined;
 
             if (lastItem && results.length >= data.limit) {
@@ -225,12 +228,10 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             }
 
             if (next) {
-                lastNextRequest = next;
-            }
-            else {
-                lastNextRequest = null;
-                itemsToAdvanceNext = 0;
-                indexKeyToResumeAfterNext = null;
+                resumeStates.set(next, {
+                    itemsToAdvance,
+                    indexKeyToResumeAfter: indexFilter ? getSortIndexKey(lastItem, sortItem) : null,
+                });
             }
 
             return { results, next };
@@ -281,9 +282,6 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             this.lastInternetLoad = 0;
             this.lastInternetAttempt = 0;
             this.internetPromise = null;
-            lastNextRequest = null;
-            itemsToAdvanceNext = 0;
-            indexKeyToResumeAfterNext = null;
         },
         ...overrides,
     };
