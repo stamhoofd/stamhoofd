@@ -329,7 +329,7 @@ export class OrdersStore {
     private indexValuesToken: string | null = null;
     private readonly indexValuesPromises = new Map<OrderIndexKey, Promise<Map<string, IDBValidKey>>>();
 
-    private lastCandidates: { indexFilter: string; token: string; result: { ids: Set<string>; exact: boolean } } | null = null;
+    private lastCandidates: { indexFilter: string; token: string; result: Promise<{ ids: Set<string>; exact: boolean }> } | null = null;
 
     constructor({ database }: { database: WebshopDatabase }) {
         this.database = database;
@@ -413,8 +413,15 @@ export class OrdersStore {
             return this.lastCandidates.result;
         }
 
-        const result = await this.readCandidateIds(indexFilter, token);
-        this.lastCandidates = { indexFilter: key, token, result };
+        // Stored before it resolves, so a count and a fetch of the same new filter share one read
+        const result = this.readCandidateIds(indexFilter, token);
+        const candidates = { indexFilter: key, token, result };
+        this.lastCandidates = candidates;
+        result.catch(() => {
+            if (this.lastCandidates === candidates) {
+                this.lastCandidates = null;
+            }
+        });
         return result;
     }
 
