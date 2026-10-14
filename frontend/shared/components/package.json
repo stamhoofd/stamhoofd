@@ -16,6 +16,7 @@
     },
     "scripts": {
         "lint": "eslint",
+        "test": "vitest run",
         "typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {

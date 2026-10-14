@@ -50,6 +50,8 @@ Shared builds use `^build` for normal dependencies and explicit task dependencie
 
 `pnpm stam` first runs cached Turbo builds for the CLI and its dependencies through `.development/stam.mjs`. When `devops/tsconfig.cli.json` exists, it also runs the cached root `build:stam-devops` task; `devops` remains a separate repository outside the workspace. Successful bootstrap builds are silent; failed builds print diagnostics to stderr. CLI arguments and exit status are preserved. There is no separate `stam-dev` command.
 
+CI discovers test scripts through Turbo directory filters for backend apps, backend shared packages, shared packages (plus i18n-uuid), and frontend shared packages. Tests remain uncached and use loose environment mode for the CI-provisioned services. Backend and browser suites run serially within their job; shared suites run with concurrency 2. Add a `test` script to include a package in its CI group; frontend app typecheck aliases and Playwright are outside these filters.
+
 `pnpm run clear:shared` removes build outputs but retains the Turbo cache. To rebuild without reading cache, run `pnpm run clear:shared && pnpm run build:shared --force`. Use `--dry=json` on the build command to inspect task dependencies and cache inputs.
 
 Packages consume each other's **built `dist/` output**, not source. After changing a shared package, consumers see stale code until you run `pnpm run build:shared`. Almost every "type error after editing a shared package", "test fails on module load", or "cached code keeps running" is fixed by running it first. Full reset when badly out of sync:
@@ -65,7 +67,7 @@ From repo root: `pnpm run lint` · `pnpm run typecheck`. Both dispatch every pac
 ```bash
 pnpm stam test unit                 # every unit package (excludes Playwright)
 pnpm stam test coverage             # coverage packages with the same isolated MySQL lifecycle
-pnpm stam test api                  # one package: api models vies sql statistics-syncer structures renderer redirecter queues utility sgv object-differ eslint vite-config metabase i18n-uuid cli components networking
+pnpm stam test api                  # one package: api models vies sql statistics-syncer structures renderer redirecter queues utility sgv stdsync object-differ eslint vite-config metabase i18n-uuid cli components networking
 pnpm stam test api --coverage       # collect coverage for one package
 pnpm stam test unit SomeFile        # filename filter across all packages
 pnpm stam test structures bundle-discounts          # package + filename filter
