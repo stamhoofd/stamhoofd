@@ -1,4 +1,5 @@
-import { baseSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/SQLFilter.js';
+import { baseSQLFilterCompilers, createColumnFilter } from '../../src/filters/SQLFilter.js';
+import { SQLValueType } from '../../src/filters/SQLFilterTypes.js';
 import { SQL } from '../../src/SQL.js';
 import type { TableDefinition} from '../utils/index.js';
 import { test, testMatch, testMultipleErrors } from '../utils/index.js';
