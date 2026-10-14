@@ -5,7 +5,6 @@ import { v4 as uuidv4 } from 'uuid';
 import type { DNSRecord } from '../DNSRecord.js';
 
 import { appToUri } from '../AppType.js';
-import type { Organization } from '../Organization.js';
 import { Category } from './Category.js';
 import { Product } from './Product.js';
 import { WebshopMetaData, WebshopOrderMode, WebshopPrivateMetaData, WebshopStatus } from './WebshopMetaData.js';
@@ -84,7 +83,7 @@ export class WebshopPreview extends AutoEncoder {
         return this.getDefaultUrl(organization);
     }
 
-    getLegacyUrl(organization: Organization): string | null {
+    getLegacyUrl(organization: { uri: string }): string | null {
         if (!STAMHOOFD.domains.legacyWebshop || this.legacyUri === null) {
             return null;
         }
@@ -285,7 +284,7 @@ export class Webshop extends AutoEncoder {
         return this.getDefaultUrl(organization);
     }
 
-    getLegacyUrl(organization: Organization): string | null {
+    getLegacyUrl(organization: { uri: string }): string | null {
         if (!STAMHOOFD.domains.legacyWebshop || this.legacyUri === null) {
             return null;
         }
