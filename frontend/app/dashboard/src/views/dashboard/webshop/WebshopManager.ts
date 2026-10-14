@@ -305,7 +305,7 @@ export class WebshopManager {
         withTickets?: boolean;
         limit?: number;
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
-        advanceCount?: number;
+        after?: IDBValidKey | null;
         ids?: string[];
         signal?: AbortSignal;
     }): Promise<number> {
