@@ -65,7 +65,8 @@ export async function expectOrders(options: {
     expect(await table.readNames(names(all)), 'orders in the table').toEqual(names(sorted));
 
     if (options.backendFilter !== undefined) {
-        const query = { webshopId: options.webshopId, filter: options.backendFilter, search: options.search ?? null };
+        // The table trims the search before using it, also for the backend
+        const query = { webshopId: options.webshopId, filter: options.backendFilter, search: options.search?.trim() ?? null };
         expect(await backend.getNumbers(query), 'orders of the backend').toEqual(numbers(sorted));
         expect(await backend.getCount(query), 'count of the backend').toBe(sorted.length);
     }

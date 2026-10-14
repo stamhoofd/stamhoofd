@@ -3,8 +3,7 @@ import type { Organization, Webshop } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemPayment, Order, OrganizationFactory, Payment, WebshopFactory } from '@stamhoofd/models';
 import { compileToSQLFilter, SQL } from '@stamhoofd/sql';
 import type { StamhoofdFilter } from '@stamhoofd/structures/filters/StamhoofdFilter.js';
-import { parsePhoneNumber as parsePhoneNumberDashboard } from 'libphonenumber-js';
-import { parsePhoneNumber as parsePhoneNumberBackend } from 'libphonenumber-js/max';
+import { parsePhoneNumber } from 'libphonenumber-js/max';
 import { BalanceItemType } from '@stamhoofd/structures/BalanceItem.js';
 import { PaymentMethod } from '@stamhoofd/structures/PaymentMethod.js';
 import { PaymentStatus } from '@stamhoofd/structures/PaymentStatus.js';
@@ -353,6 +352,47 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
      * also removes accents). These cases are where those approaches can disagree.
      */
     describe('text comparisons', () => {
+        it('ignore casing and accents', async () => {
+            const accents = await createOrder({ data: orderData({ firstName: 'José', lastName: 'Müller', email: 'Jose.Muller@Example.com' }) });
+            const plain = await createOrder({ data: orderData({ firstName: 'Jose', lastName: 'Muller', email: 'jose.muller@example.com' }) });
+            const other = await createOrder({ data: orderData({ firstName: 'Anna', lastName: 'Peeters', email: 'anna@example.com' }) });
+
+            await expectFilter({ name: { $contains: 'MÜLLER' } }, [accents, plain]);
+            await expectFilter({ name: { $contains: 'muller' } }, [accents, plain]);
+            await expectFilter({ name: { $eq: 'jose muller' } }, [accents, plain]);
+            await expectFilter({ name: { $eq: 'JOSÉ MÜLLER' } }, [accents, plain]);
+            await expectFilter({ $not: { name: { $eq: 'josé müller' } } }, [other]);
+            await expectFilter({ email: { $eq: 'JOSE.MULLER@example.com' } }, [accents, plain]);
+        });
+
+        it('ignore accents on letters without a separate accent', async () => {
+            const order = await createOrder({ data: orderData({ firstName: 'Øystein', lastName: 'Ørsted' }) });
+            await createOrder({ data: orderData({ firstName: 'Anna', lastName: 'Peeters' }) });
+
+            await expectFilter({ name: { $contains: 'orsted' } }, [order]);
+            await expectFilter({ name: { $contains: 'ørsted' } }, [order]);
+            await expectFilter({ name: { $eq: 'oystein orsted' } }, [order]);
+        });
+
+        it('compare letters that MySQL writes as two letters only for equality', async () => {
+            const order = await createOrder({ data: orderData({ firstName: 'Æsa', lastName: 'Strauß' }) });
+            await createOrder({ data: orderData({ firstName: 'Anna', lastName: 'Peeters' }) });
+
+            await expectFilter({ name: { $eq: 'aesa strauss' } }, [order]);
+            await expectFilter({ name: { $contains: 'strauss' } }, []);
+            await expectFilter({ name: { $contains: 'strauß' } }, [order]);
+        });
+
+        it('keep spaces inside the value', async () => {
+            const doubleSpace = await createOrder({ data: orderData({ firstName: 'Jean-Claude', lastName: 'Van  Damme' }) });
+            const singleSpace = await createOrder({ data: orderData({ firstName: 'Lisa', lastName: 'Van Damme' }) });
+
+            await expectFilter({ name: { $contains: 'van  damme' } }, [doubleSpace]);
+            await expectFilter({ name: { $contains: 'van damme' } }, [singleSpace]);
+            await expectFilter({ name: { $contains: ' damme' } }, [doubleSpace, singleSpace]);
+            await expectFilter({ name: { $contains: 'damme ' } }, []);
+        });
+
         it('treat characters with a meaning in SQL LIKE as text', async () => {
             const special = await createOrder({ data: orderData({ firstName: '100%', lastName: 'Zeker_' }) });
             const apostrophe = await createOrder({ data: orderData({ firstName: 'Seán', lastName: 'O\'Brien' }) });
@@ -369,19 +409,14 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
     // --- search ----------------------------------------------------------------------------------------
 
     /**
-     * The dashboard turns a search into a filter with the default (smaller) metadata of libphonenumber-js, the
-     * backend with the full metadata. Both must find the same orders.
+     * The dashboard and the backend turn a search into the same filter (both with the full metadata of
+     * libphonenumber-js), which the in-memory engine and MySQL must run alike.
      */
     describe('search', () => {
         async function expectSearch(search: string, expected: Order[]) {
-            const dashboardFilter = getOrderSearchFilter(search, parsePhoneNumberDashboard);
-            const backendFilter = getOrderSearchFilter(search, parsePhoneNumberBackend);
-            expect(dashboardFilter, 'dashboard search filter').not.toBeNull();
-            expect(backendFilter, 'backend search filter').not.toBeNull();
-
-            const expectedIds = [...new Set(expected.map(o => o.id))].sort();
-            expect(await runInMemory(dashboardFilter!), 'dashboard result should match expected').toEqual(expectedIds);
-            expect(await runSQL(backendFilter!), 'backend SQL result should match expected').toEqual(expectedIds);
+            const filter = getOrderSearchFilter(search, parsePhoneNumber);
+            expect(filter, 'search filter').not.toBeNull();
+            await expectFilter(filter!, expected);
         }
 
         it('finds names, e-mail addresses and numbers', async () => {
@@ -395,9 +430,22 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
             await expectSearch('20', [jose]);
         });
 
+        it('only searches an order number when the search is only digits', async () => {
+            const hundred = await createOrder({ number: 100, data: orderData({ firstName: 'Klant', lastName: 'Honderd' }) });
+            const percent = await createOrder({ number: 7, data: orderData({ firstName: '100%', lastName: 'Zeker' }) });
+            const twelve = await createOrder({ number: 12, data: orderData({ firstName: 'Klant', lastName: '12 34' }) });
+            const phone = await createOrder({ number: 32, data: orderData({ firstName: 'Klant', lastName: 'Telefoon', phone: '+32 478 12 34 56' }) });
+
+            await expectSearch('100', [hundred]);
+            await expectSearch('100%', [percent]);
+            await expectSearch('12 34', [twelve]);
+            await expectSearch('+32 478 12 34 56', [phone]);
+        });
+
         it.each([
             ['0478 12 34 56', '+32 478 12 34 56'],
             ['0478123456', '+32 478 12 34 56'],
+            ['02 511 11 11', '+32 2 511 11 11'],
         ])('finds the phone number %s', async (search, phone) => {
             const order = await createOrder({ data: orderData({ phone }) });
             await createOrder({ data: orderData({ phone: '+32 499 99 99 99' }) });
@@ -504,6 +552,16 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
             await expectFilter({ discountCodes: { code: { $in: ['SUMMER', 'WINTER'] } } }, [summer, summerLower, summerCombination, winter]);
             await expectFilter({ discountCodes: { code: { $in: ['suMmer', 'winTEr'] } } }, [summer, summerLower, summerCombination, winter]);
             expect(none.id).toBeDefined();
+        });
+
+        it('only ignore casing, not accents, in the array', async () => {
+            const accents = await createOrder({ data: orderData({ discountCodes: [DiscountCode.create({ code: 'ÉTÉ' })] }) });
+            const plain = await createOrder({ data: orderData({ discountCodes: [DiscountCode.create({ code: 'ETE' })] }) });
+
+            await expectFilter({ discountCodes: { code: { $eq: 'été' } } }, [accents]);
+            await expectFilter({ discountCodes: { code: { $in: ['ete'] } } }, [plain]);
+            await expectFilter({ discountCodes: { code: { $contains: 'té' } } }, [accents]);
+            await expectFilter({ discountCodes: { code: { $contains: 'te' } } }, [plain]);
         });
     });
 

@@ -90,4 +90,13 @@ describe('TableObjectFetcher', () => {
         expect(fetchSignals[0].aborted).toBe(true);
         expect(errorSpy).not.toHaveBeenCalled();
     });
+
+    test('the search query is trimmed', () => {
+        const { objectFetcher } = controllableFetcher();
+        const fetcher = new TableObjectFetcher<Item>({ objectFetcher });
+
+        fetcher.setSearchQuery('  abc ');
+        expect(fetcher.searchQuery).toBe('abc');
+        fetcher.destroy();
+    });
 });

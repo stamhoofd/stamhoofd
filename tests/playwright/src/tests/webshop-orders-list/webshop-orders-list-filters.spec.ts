@@ -99,12 +99,15 @@ test.describe('Orders list filters @webshop-orders-list @extra', () => {
             // Casing and accents
             { filter: 'Naam', key: 'name', mode: 'Bevat...', value: 'MÜLLER', expected: [1, 2] },
             { filter: 'Naam', key: 'name', mode: 'Bevat...', value: 'muller', expected: [1, 2] },
+            { filter: 'Naam', key: 'name', mode: 'Is gelijk aan...', value: 'jose muller', expected: [1, 2] },
+            { filter: 'Naam', key: 'name', mode: 'Bevat...', value: 'orsted', expected: [9] },
             // Characters with a meaning in SQL LIKE
             { filter: 'Naam', key: 'name', mode: 'Bevat...', value: '%', expected: [7] },
             { filter: 'Naam', key: 'name', mode: 'Bevat...', value: '_', expected: [7] },
             { filter: 'Naam', key: 'name', mode: 'Bevat...', value: 'o\'brien', expected: [8] },
             // Negations
             { filter: 'Naam', key: 'name', mode: 'Bevat niet...', value: 'klant', expected: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] },
+            { filter: 'Naam', key: 'name', mode: 'Is niet gelijk aan...', value: 'josé müller', expected: [3, 4, 5, 6, 7, 8, 9, 10, 11, 20, 100, 1000] },
             // E-mail addresses are stored with any casing
             { filter: 'E-mailadres', key: 'email', mode: 'Is gelijk aan...', value: 'jose.muller@example.com', expected: [1, 2] },
             { filter: 'E-mailadres', key: 'email', mode: 'Bevat...', value: 'PEETERS@EXAMPLE', expected: [10] },
@@ -128,7 +131,12 @@ test.describe('Orders list filters @webshop-orders-list @extra', () => {
             // A name, in another casing and without accents
             { search: 'MÜLLER', expected: [1, 2] },
             { search: 'jose muller', expected: [1, 2] },
+            // Spaces around the search are ignored, spaces inside it count
+            { search: ' jose ', expected: [1, 2] },
+            { search: 'van  damme', expected: [6] },
+            { search: 'van damme', expected: [] },
             // Characters with a meaning in SQL LIKE
+            { search: '100%', expected: [7] },
             { search: 'o\'brien', expected: [8] },
             // A complete e-mail address is looked up exactly, part of one with a contains
             { search: 'JOSE.MULLER@example.com', expected: [1, 2] },
@@ -136,6 +144,8 @@ test.describe('Orders list filters @webshop-orders-list @extra', () => {
             // Phone numbers, in another notation than they are stored
             { search: '0478 12 34 56', expected: [10] },
             { search: '0478123456', expected: [10] },
+            // Not an assigned number: searched as a name
+            { search: '0412345678', expected: [] },
             // An order number
             { search: '20', expected: [20] },
             { search: '1000', expected: [1000] },

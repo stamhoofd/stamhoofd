@@ -3,7 +3,7 @@ import { Request } from '@simonbackx/simple-networking';
 import type { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import type { CountFilteredRequest, PrivateOrderWithTickets, SortItem, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { assertSort, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, SortItemDirection } from '@stamhoofd/structures';
-import { parsePhoneNumber } from 'libphonenumber-js';
+import { parsePhoneNumber } from 'libphonenumber-js/max';
 import { toRaw } from 'vue';
 import type { OrderIndexedDBIndex } from '../ordersIndexedDBSorters';
 import { getOrderIndexKey, ordersIndexedDBSorters, splitIndexFilter } from '../ordersIndexedDBSorters';

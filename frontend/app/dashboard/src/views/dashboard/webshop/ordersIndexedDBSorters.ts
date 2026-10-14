@@ -199,11 +199,14 @@ export function splitIndexFilter(filter: StamhoofdFilter | null, alwaysMatching:
 
 export type OrderIndexLookup = { index: OrderIndexedDBIndex; key: number | string };
 
-const exactLookupIndexes: OrderIndexedDBIndex[] = [OrderIndexedDBIndex.Number, OrderIndexedDBIndex.Email, OrderIndexedDBIndex.Phone];
+/**
+ * An e-mail address is left out: equality ignores accents, a lookup of the index key does not.
+ */
+const exactLookupIndexes: OrderIndexedDBIndex[] = [OrderIndexedDBIndex.Number, OrderIndexedDBIndex.Phone];
 
 /**
  * Returns the index key to look up if the filter only matches orders with one exact value for an index,
- * e.g. { email: { $eq: 'x@y.be' } }, so the index can return just those orders.
+ * e.g. { number: { $eq: 12 } }, so the index can return just those orders.
  */
 export function getExactIndexLookup(filter: StamhoofdFilter | null): OrderIndexLookup | null {
     if (filter === null || typeof filter !== 'object' || Array.isArray(filter)) {
