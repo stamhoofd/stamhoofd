@@ -38,6 +38,7 @@ import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
 import { useMemberActions } from './classes/MemberActionBuilder';
 import { useEditMember } from './composables/useEditMember';
 import TableActionsContextMenu from '#tables/TableActionsContextMenu.vue';
+import { useMemberViewLoaders } from '#members/memberViewLoaders.ts';
 
 type PropType = {
     initialTab?: number | null;
@@ -74,11 +75,12 @@ const dismiss = useDismiss();
 const present = usePresent();
 const editMember = useEditMember();
 const organization = useOrganization();
+const memberViewLoaders = useMemberViewLoaders();
 
 const tabs = computed(() => {
     const base = [{
         name: $t(`%zM`),
-        component: AsyncComponent(() => import('./tabs/MemberDetailsTab.vue'), {}),
+        component: AsyncComponent(memberViewLoaders.details, {}),
     }];
 
     if (STAMHOOFD.userMode === 'platform') {

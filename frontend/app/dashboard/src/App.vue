@@ -18,8 +18,10 @@ import { computed, ref } from 'vue';
 import { WhatsNewCount } from './classes/WhatsNewCount';
 import { buildTranslatedUrl } from '@stamhoofd/components/containers/TranslatedUrl.ts';
 import { useProvideEventWebshopViews } from './providers/provideEventWebshopViews';
+import { useProvideMemberViews } from '@stamhoofd/components/members/provideMemberViews';
 
 useProvideEventWebshopViews();
+useProvideMemberViews();
 
 const context = useContext();
 const platform = usePlatform();
