@@ -54,7 +54,7 @@ import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatch
 import { Group, GroupPrice, GroupSettings, OrganizationRegistrationPeriod, ReduceablePrice } from '@stamhoofd/structures';
 import { computed, reactive, ref } from 'vue';
 import { useGroupActions } from '../members/useGroupActions';
-import type { OnboardingStepProps } from './useMemberAdministrationOnboarding';
+import type { OnboardingStepProps } from './OnboardingStepProps';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 
 const props = defineProps<OnboardingStepProps>();

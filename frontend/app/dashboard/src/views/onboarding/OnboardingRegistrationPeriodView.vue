@@ -106,7 +106,7 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { RegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch } from 'vue';
-import type { OnboardingStepProps } from './useMemberAdministrationOnboarding';
+import type { OnboardingStepProps } from './OnboardingStepProps';
 import { clearOrganizationPeriodsCache } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
 import { clearRegistrationPeriodsCache } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
 
