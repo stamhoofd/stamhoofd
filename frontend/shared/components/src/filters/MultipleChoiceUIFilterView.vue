@@ -32,9 +32,10 @@ import STErrorsDefault from '../errors/STErrorsDefault.vue';
 import Checkbox from '../inputs/Checkbox.vue';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
-import type { MultipleChoiceUIFilter, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
+import type { MultipleChoiceUIFilterEditor } from './MultipleChoiceUIFilterTypes';
+import type { MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilterTypes';
 
-const props = defineProps<{ filter: MultipleChoiceUIFilter }>();
+const props = defineProps<{ filter: MultipleChoiceUIFilterEditor }>();
 
 const isSelectAll = ref(false);
 const errorBox = ref<ErrorBox | null>(null);
