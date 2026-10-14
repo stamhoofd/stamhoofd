@@ -6,6 +6,7 @@
  */
 
 import { ManyToOneRelation } from '@simonbackx/simple-database';
+import { balanceItemPaymentRelations, ticketOrderRelation } from '../services/PaymentRelations.js';
 import { Order } from './Order.js';
 import { Organization } from './Organization.js';
 import { STPendingInvoice } from './STPendingInvoice.js';
@@ -41,9 +42,8 @@ Ticket.webshop = new ManyToOneRelation(Webshop, 'webshop');
 Ticket.webshop.foreignKey = 'webshopId';
 Ticket.relations.push(Ticket.webshop);
 
-Ticket.order = new ManyToOneRelation(Order, 'order');
-Ticket.order.foreignKey = 'orderId';
-Ticket.relations.push(Ticket.order);
+Object.assign(Ticket, { order: ticketOrderRelation });
+Ticket.relations.push(ticketOrderRelation);
 
 Ticket.organization = new ManyToOneRelation(Organization, 'organization');
 Ticket.organization.foreignKey = 'organizationId';
@@ -108,13 +108,9 @@ InvoicedBalanceItem.relations.push(InvoicedBalanceItem.balanceItem);
 if (!BalanceItemPayment.relations) {
     BalanceItemPayment.relations = [];
 }
-BalanceItemPayment.balanceItem = new ManyToOneRelation(BalanceItem, 'balanceItem');
-BalanceItemPayment.balanceItem.foreignKey = 'balanceItemId';
-BalanceItemPayment.relations.push(BalanceItemPayment.balanceItem);
-
-BalanceItemPayment.payment = new ManyToOneRelation(Payment, 'payment');
-BalanceItemPayment.payment.foreignKey = 'paymentId';
-BalanceItemPayment.relations.push(BalanceItemPayment.payment);
+Object.assign(BalanceItemPayment, balanceItemPaymentRelations);
+BalanceItemPayment.relations.push(balanceItemPaymentRelations.balanceItem);
+BalanceItemPayment.relations.push(balanceItemPaymentRelations.payment);
 
 if (!Registration.relations) {
     Registration.relations = [];

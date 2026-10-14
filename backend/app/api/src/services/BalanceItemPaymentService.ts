@@ -1,27 +1,28 @@
 import type { ManyToOneRelation } from '@simonbackx/simple-database';
+import { balanceItemPaymentRelations } from '@stamhoofd/models/services/PaymentRelations.js';
 import type { BalanceItemPayment, Organization } from '@stamhoofd/models';
 import { BalanceItemService } from './BalanceItemService.js';
 
 type Loaded<T> = (T) extends ManyToOneRelation<infer Key, infer Model> ? Record<Key, Model> : never;
 
 export const BalanceItemPaymentService = {
-    async markPaid(balanceItemPayment: BalanceItemPayment & Loaded<typeof BalanceItemPayment.balanceItem> & Loaded<typeof BalanceItemPayment.payment>, organization: Organization) {
+    async markPaid(balanceItemPayment: BalanceItemPayment & Loaded<typeof balanceItemPaymentRelations.balanceItem> & Loaded<typeof balanceItemPaymentRelations.payment>, organization: Organization) {
         await BalanceItemService.markPaid(balanceItemPayment.balanceItem, balanceItemPayment.payment, organization);
     },
 
     /**
      * Call balanceItemPayment once a earlier succeeded payment is no longer succeeded
      */
-    async undoPaid(balanceItemPayment: BalanceItemPayment & Loaded<typeof BalanceItemPayment.balanceItem> & Loaded<typeof BalanceItemPayment.payment>, organization: Organization) {
+    async undoPaid(balanceItemPayment: BalanceItemPayment & Loaded<typeof balanceItemPaymentRelations.balanceItem> & Loaded<typeof balanceItemPaymentRelations.payment>, organization: Organization) {
         await BalanceItemService.undoPaid(balanceItemPayment.balanceItem, balanceItemPayment.payment, organization);
     },
 
-    async markFailed(balanceItemPayment: BalanceItemPayment & Loaded<typeof BalanceItemPayment.balanceItem> & Loaded<typeof BalanceItemPayment.payment>, organization: Organization) {
+    async markFailed(balanceItemPayment: BalanceItemPayment & Loaded<typeof balanceItemPaymentRelations.balanceItem> & Loaded<typeof balanceItemPaymentRelations.payment>, organization: Organization) {
         // Do logic of balance item
         await BalanceItemService.markFailed(balanceItemPayment.balanceItem, balanceItemPayment.payment, organization);
     },
 
-    async undoFailed(balanceItemPayment: BalanceItemPayment & Loaded<typeof BalanceItemPayment.balanceItem> & Loaded<typeof BalanceItemPayment.payment>, organization: Organization) {
+    async undoFailed(balanceItemPayment: BalanceItemPayment & Loaded<typeof balanceItemPaymentRelations.balanceItem> & Loaded<typeof balanceItemPaymentRelations.payment>, organization: Organization) {
         // Reactivate deleted items
         await BalanceItemService.undoFailed(balanceItemPayment.balanceItem, balanceItemPayment.payment, organization);
     },
