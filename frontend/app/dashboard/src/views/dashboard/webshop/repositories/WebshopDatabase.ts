@@ -3,6 +3,11 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { Version } from '@stamhoofd/structures';
 import { OrderIndexedDBIndex } from '../ordersIndexedDBSorters';
 
+/**
+ * Raise this when the stores change without a new structures Version: IndexedDB only upgrades a database when its version increases.
+ */
+const storesRevision = 1;
+
 type ObjectStoreInitFunction = (options: { oldVersion: number; database: IDBDatabase; transaction: IDBTransaction | null }) => void;
 
 /**
@@ -47,7 +52,7 @@ export class WebshopDatabase {
 
         // Open a connection with our database
         this.getPromise = new Promise<IDBDatabase>((resolve, reject) => {
-            const version = Version;
+            const version = Version + storesRevision;
             let resolved = false;
 
             const DBOpenRequest = window.indexedDB.open(this.databaseName, version);
@@ -236,7 +241,7 @@ export class WebshopDatabase {
      * Init all the stores in the database.
      */
     private initStores({ database, transaction, event }: { database: IDBDatabase; transaction: IDBTransaction | null; event: IDBVersionChangeEvent }) {
-        const storeInitializers: ObjectStoreInitFunction[] = [initOrdersStore, initWebshopTicketsStore, initWebshopTicketPatchesStore, initWebshopSettingsStore];
+        const storeInitializers: ObjectStoreInitFunction[] = [initOrdersStore, initOrderIndexValuesStore, initWebshopTicketsStore, initWebshopTicketPatchesStore, initWebshopSettingsStore];
 
         for (const initStore of storeInitializers) {
             initStore({ oldVersion: event.oldVersion, database, transaction });
@@ -244,7 +249,7 @@ export class WebshopDatabase {
     }
 }
 
-export type WebshopStoreName = 'orders' | 'tickets' | 'ticketPatches' | 'settings';
+export type WebshopStoreName = 'orders' | 'orderIndexValues' | 'tickets' | 'ticketPatches' | 'settings';
 
 function initOrdersStore({ oldVersion, database, transaction }: { oldVersion: number; database: IDBDatabase; transaction: IDBTransaction | null }) {
     const storeName: WebshopStoreName = 'orders';
@@ -272,6 +277,18 @@ function initOrdersStore({ oldVersion, database, transaction }: { oldVersion: nu
         Object.entries(indexes).forEach(([index, options]) => {
             newStore.createIndex(index, options.keyPath ?? index, options);
         });
+    }
+    else if (transaction) {
+        const storeToClear = transaction.objectStore(storeName);
+        storeToClear.clear();
+    }
+}
+
+function initOrderIndexValuesStore({ database, transaction }: { oldVersion: number; database: IDBDatabase; transaction: IDBTransaction | null }) {
+    const storeName: WebshopStoreName = 'orderIndexValues';
+
+    if (!database.objectStoreNames.contains(storeName)) {
+        database.createObjectStore(storeName, { keyPath: 'id' });
     }
     else if (transaction) {
         const storeToClear = transaction.objectStore(storeName);

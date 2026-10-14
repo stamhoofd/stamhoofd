@@ -306,10 +306,20 @@ const maxIdsToSortWithoutIndexValues = 100;
 type SortEntry = { value: IDBValidKey; id: string };
 
 /**
+ * A record of OrdersStore.indexValuesStoreName: the stored index values of one order, without its data.
+ */
+type StoredOrderIndexValues = { id: string; indexes: Record<string, unknown> };
+
+/**
  * Responsible for offline storage of webshop orders.
  */
 export class OrdersStore {
     static readonly storeName: WebshopStoreName = 'orders';
+    /**
+     * The index values of every order, so they can be read with a single getAll instead of one cursor step per order.
+     * Written in the same transactions as the orders.
+     */
+    static readonly indexValuesStoreName: WebshopStoreName = 'orderIndexValues';
     private readonly database: WebshopDatabase;
 
     /**
@@ -439,10 +449,8 @@ export class OrdersStore {
         }
 
         const compiledIndexFilter = compileToInMemoryFilter(indexFilter, orderIndexesInMemoryFilterCompilers);
-        const [ids, ...keyValues] = await Promise.all([
-            this.getIndexValues('id', token),
-            ...[...keys].map(async k => [k, await this.getIndexValues(k, token)] as const),
-        ]);
+        const [ids, ...values] = await this.getIndexValues(['id', ...keys], token);
+        const keyValues = [...keys].map((k, i) => [k, values[i]] as const);
 
         const candidates = new Set<string>();
         const indexes: Record<string, unknown> = {};
@@ -489,7 +497,7 @@ export class OrdersStore {
         else {
             const isCached = this.indexValuesToken === token && this.indexValues.has(sortItem.key);
             const values = (sortItem.key === 'id' || isCached || ids.size > maxIdsToSortWithoutIndexValues)
-                ? await this.getIndexValues(sortItem.key, token)
+                ? (await this.getIndexValues([sortItem.key], token))[0]
                 : await this.readStoredIndexValues(ids, sortItem.key);
 
             entries = [];
@@ -531,15 +539,15 @@ export class OrdersStore {
         const values = new Map<string, IDBValidKey>();
 
         await new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction([OrdersStore.storeName], 'readonly');
-            const objectStore = transaction.objectStore(OrdersStore.storeName);
+            const transaction = db.transaction([OrdersStore.indexValuesStoreName], 'readonly');
+            const objectStore = transaction.objectStore(OrdersStore.indexValuesStoreName);
             transaction.oncomplete = () => resolve();
             transaction.onerror = () => reject(transaction.error);
 
             for (const id of ids) {
                 const request = objectStore.get(id);
                 request.onsuccess = () => {
-                    const value: unknown = request.result?.indexes?.[index];
+                    const value: unknown = (request.result as StoredOrderIndexValues | undefined)?.indexes[index];
                     if (isIndexableValue(value)) {
                         values.set(id, value);
                     }
@@ -551,46 +559,58 @@ export class OrdersStore {
     }
 
     /**
+     * Per index ('id' for the order ids): the stored index value of every order in that index, by order id.
+     * Indexes that are not cached yet are read together.
+     *
      * @param token the current change token, which the cached values have to match
      */
-    private async getIndexValues(index: OrderIndexKey, token: string): Promise<Map<string, IDBValidKey>> {
-        const cached = this.indexValues.get(index);
-        if (cached && this.indexValuesToken === token) {
-            return cached;
+    private async getIndexValues(indexes: OrderIndexKey[], token: string): Promise<Map<string, IDBValidKey>[]> {
+        const promises = new Map<OrderIndexKey, Promise<Map<string, IDBValidKey>>>();
+        const missing: OrderIndexKey[] = [];
+
+        for (const index of indexes) {
+            const cached = this.indexValues.get(index);
+            const promise = (cached && this.indexValuesToken === token) ? Promise.resolve(cached) : this.indexValuesPromises.get(index);
+            if (promise) {
+                promises.set(index, promise);
+            }
+            else if (!missing.includes(index)) {
+                missing.push(index);
+            }
         }
 
-        let promise = this.indexValuesPromises.get(index);
-        if (!promise) {
-            promise = this.readIndexValues(index).finally(() => {
-                this.indexValuesPromises.delete(index);
-            });
-            this.indexValuesPromises.set(index, promise);
+        if (missing.length > 0) {
+            const read = this.readIndexValues(missing);
+            for (const index of missing) {
+                const promise = read.then(values => values.get(index)!).finally(() => {
+                    this.indexValuesPromises.delete(index);
+                });
+                this.indexValuesPromises.set(index, promise);
+                promises.set(index, promise);
+            }
         }
-        return promise;
+
+        return await Promise.all(indexes.map(async index => promises.get(index)!));
     }
 
-    private async readIndexValues(index: OrderIndexKey): Promise<Map<string, IDBValidKey>> {
+    private async readIndexValues(indexes: OrderIndexKey[]): Promise<Map<OrderIndexKey, Map<string, IDBValidKey>>> {
         const db = await this.database.get();
-        const values = new Map<string, IDBValidKey>();
 
         // One transaction, so the token belongs to exactly these values
-        const transaction = db.transaction([OrdersStore.storeName, WebshopSettingsStore.storeName], 'readonly');
+        const transaction = db.transaction([OrdersStore.indexValuesStoreName, WebshopSettingsStore.storeName], 'readonly');
         const tokenPromise = requestResult<string | undefined>(transaction.objectStore(WebshopSettingsStore.storeName).get(WebshopSettingsKeys.OrdersChangeToken));
+        const records = await requestResult<StoredOrderIndexValues[]>(transaction.objectStore(OrdersStore.indexValuesStoreName).getAll());
 
-        await new Promise<void>((resolve, reject) => {
-            const objectStore = transaction.objectStore(OrdersStore.storeName);
-            const request = (index === 'id' ? objectStore : objectStore.index(index)).openKeyCursor();
-            request.onerror = () => reject(request.error);
-            request.onsuccess = () => {
-                const cursor = request.result;
-                if (!cursor) {
-                    resolve();
-                    return;
+        const result = new Map(indexes.map(index => [index, new Map<string, IDBValidKey>()]));
+        for (const record of records) {
+            for (const [index, values] of result) {
+                const value = index === 'id' ? record.id : record.indexes[index];
+                // Like IndexedDB, leave out orders without a value for the index
+                if (isIndexableValue(value)) {
+                    values.set(record.id, value);
                 }
-                values.set(cursor.primaryKey as string, cursor.key);
-                cursor.continue();
-            };
-        });
+            }
+        }
 
         const token = await tokenPromise;
         if (token !== undefined) {
@@ -598,9 +618,11 @@ export class OrdersStore {
                 this.indexValues.clear();
                 this.indexValuesToken = token;
             }
-            this.indexValues.set(index, values);
+            for (const [index, values] of result) {
+                this.indexValues.set(index, values);
+            }
         }
-        return values;
+        return result;
     }
 
     private updateIndexValues(order: PrivateOrder) {
@@ -618,7 +640,7 @@ export class OrdersStore {
         const db = await this.database.get();
 
         return new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction([OrdersStore.storeName, WebshopSettingsStore.storeName], 'readwrite');
+            const transaction = db.transaction([OrdersStore.storeName, OrdersStore.indexValuesStoreName, WebshopSettingsStore.storeName], 'readwrite');
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
@@ -632,6 +654,7 @@ export class OrdersStore {
             });
 
             // Do the actual saving
+            transaction.objectStore(OrdersStore.indexValuesStoreName).delete(id);
             const objectStore = transaction.objectStore(OrdersStore.storeName);
             const request = objectStore.delete(id);
             request.onsuccess = () => {
@@ -653,7 +676,7 @@ export class OrdersStore {
         const db = await this.database.get();
 
         return new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction([OrdersStore.storeName, WebshopSettingsStore.storeName], 'readwrite');
+            const transaction = db.transaction([OrdersStore.storeName, OrdersStore.indexValuesStoreName, WebshopSettingsStore.storeName], 'readwrite');
 
             this.replaceChangeToken(transaction, () => {
                 for (const order of orders) {
@@ -673,13 +696,16 @@ export class OrdersStore {
 
             // Do the actual saving
             const objectStore = transaction.objectStore(OrdersStore.storeName);
+            const indexValuesStore = transaction.objectStore(OrdersStore.indexValuesStoreName);
 
             for (const order of orders) {
                 if (order.status === OrderStatus.Deleted) {
                     objectStore.delete(order.id);
+                    indexValuesStore.delete(order.id);
                 } else {
-                    const indexBox = createPrivateOrderIndexBox(order);
-                    objectStore.put(indexBox.encode({ version: Version, medium: EncodeMedium.Database }));
+                    const encoded = createPrivateOrderIndexBox(order).encode({ version: Version, medium: EncodeMedium.Database });
+                    objectStore.put(encoded);
+                    indexValuesStore.put({ id: order.id, indexes: encoded.indexes as Record<string, unknown> } satisfies StoredOrderIndexValues);
                 }
             }
         });
@@ -914,7 +940,7 @@ export class OrdersStore {
         const db = await this.database.get();
 
         return new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction([OrdersStore.storeName, WebshopSettingsStore.storeName], 'readwrite');
+            const transaction = db.transaction([OrdersStore.storeName, OrdersStore.indexValuesStoreName, WebshopSettingsStore.storeName], 'readwrite');
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
@@ -922,6 +948,7 @@ export class OrdersStore {
             };
 
             // Do the actual saving
+            transaction.objectStore(OrdersStore.indexValuesStoreName).clear();
             const objectStore = transaction.objectStore(OrdersStore.storeName);
 
             this.replaceChangeToken(transaction, () => {
