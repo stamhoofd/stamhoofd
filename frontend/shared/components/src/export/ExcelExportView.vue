@@ -45,24 +45,24 @@
 import type { Decoder} from '@simonbackx/simple-encoding';
 import { ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
-import { useErrors } from '@stamhoofd/components/errors/useErrors';
-import DataSelector from '@stamhoofd/components/export/DataSelector.vue';
-import { useContext } from '@stamhoofd/components/hooks/useContext';
-import ScrollableSegmentedControl from '@stamhoofd/components/inputs/ScrollableSegmentedControl.vue';
-import { Toast, ToastButton } from '@stamhoofd/components/overlays/Toast';
-import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
-import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import STList from '@stamhoofd/components/layout/STList.vue';
-import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import { ErrorBox } from '#errors/ErrorBox';
+import { useErrors } from '#errors/useErrors';
+import DataSelector from './DataSelector.vue';
+import { useContext } from '#hooks/useContext';
+import ScrollableSegmentedControl from '#inputs/ScrollableSegmentedControl.vue';
+import { Toast, ToastButton } from '#overlays/Toast';
+import Checkbox from '#inputs/Checkbox.vue';
+import SaveView from '#navigation/SaveView.vue';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import STList from '#layout/STList.vue';
+import STListItem from '#layout/STListItem.vue';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { Storage } from '@stamhoofd/networking/Storage';
 import type { ExcelExportType, LimitedFilteredRequest} from '@stamhoofd/structures';
 import { ExcelExportRequest, ExcelExportResponse, ExcelWorkbookFilter, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { onMounted, ref } from 'vue';
-import type { SelectableWorkbook } from './SelectableWorkbook';
+import type { SelectableWorkbook } from '@stamhoofd/frontend-excel-export/SelectableWorkbook';
 
 const props = withDefaults(
     defineProps<{
