@@ -21,9 +21,7 @@
     "dependencies": {
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/vue-app-navigation": "2.25.1",
-        "@stamhoofd/components": "workspace:*",
         "@stamhoofd/excel-writer": "workspace:*",
-        "@stamhoofd/networking": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
         "vue": "3.5.43"

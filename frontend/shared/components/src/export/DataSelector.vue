@@ -32,7 +32,7 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue';
-import type { SelectableData } from './SelectableData';
+import type { SelectableData } from '@stamhoofd/frontend-excel-export/SelectableData';
 
 const props = defineProps<{
     name: string;

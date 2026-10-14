@@ -389,7 +389,7 @@ export class OrderActionBuilder {
         await this.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
-                    root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
+                    root: AsyncComponent(() => import('@stamhoofd/components/export/ExcelExportView.vue'), {
                         workbook: getSelectableWorkbook(webshop, orders, organization),
                         configurationId: 'webshop-orders-' + webshop.id,
                         localExporter: async (workbookFilter: ExcelWorkbookFilter) => {
