@@ -23,10 +23,12 @@ import { buildTranslatedUrl } from '@stamhoofd/components/containers/TranslatedU
 import { useProvideEventWebshopViews } from './providers/provideEventWebshopViews';
 import { useProvideMemberViews } from '@stamhoofd/components/members/provideMemberViews';
 import { useProvideEventViews } from '@stamhoofd/components/events/provideEventViews';
+import { useProvidePaymentViews } from '@stamhoofd/components/payments/providePaymentViews';
 
 useProvideEventWebshopViews();
 useProvideMemberViews();
 useProvideEventViews();
+useProvidePaymentViews();
 
 const context = useContext();
 const platform = usePlatform();
