@@ -1,6 +1,7 @@
 import { defineRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import type { SGVSyncWarning } from '@stamhoofd/components/members/sgvSync';
 import type {
     MemberWithRegistrationsBlob,
     Organization,
@@ -17,13 +18,7 @@ enum Routes {
     SGV = 'sgv',
 }
 
-export type SGVSyncWarning = {
-    status:
-        | SGVSyncStatus.Never
-        | SGVSyncStatus.Outdated
-        | SGVSyncStatus.Changed;
-    text: string;
-};
+export type { SGVSyncWarning } from '@stamhoofd/components/members/sgvSync';
 
 export type UseSGVSyncReturn = {
     /** Opens the SGV group administration sync popup when SGV sync is enabled. */

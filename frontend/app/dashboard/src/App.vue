@@ -27,6 +27,7 @@ import { useProvideEventViews } from '@stamhoofd/components/events/provideEventV
 import { useProvideGroupViews } from '@stamhoofd/components/groups/provideGroupViews';
 import { useProvidePaymentViews } from '@stamhoofd/components/payments/providePaymentViews';
 import { useProvideBreakdownViews } from './views/dashboard/breakdown/provideBreakdownViews';
+import { useProvideSGVSync } from '@stamhoofd/sgv-frontend/provideSGVSync';
 
 useProvideEventWebshopViews();
 useProvideMemberViews();
@@ -34,6 +35,7 @@ useProvideEventViews();
 useProvideGroupViews();
 useProvidePaymentViews();
 useProvideBreakdownViews();
+useProvideSGVSync();
 useOpenPendingNoltLogin();
 
 const context = useContext();

@@ -1,6 +1,7 @@
 import {
     Group,
     GroupPrice,
+    GroupSettings,
     GroupType,
     MemberDetails,
     MemberWithRegistrationsBlob,
@@ -11,27 +12,18 @@ import {
     Registration,
     RegistrationPeriod,
     SGVSyncStatus,
+    TranslatedString,
     UmbrellaOrganization,
 } from '@stamhoofd/structures';
-import { Country } from '@stamhoofd/types/Country';
+import { TestUtils } from '@stamhoofd/test-utils';
 import { getSGVSyncWarning } from './useSGVSync';
-
-(globalThis as any).$t = (
-    text: string,
-    replacements?: Record<string, string>,
-) => {
-    if (text === '%tN') {
-        return replacements?.singular ?? text;
-    }
-    if (text === '%2d') {
-        return replacements?.number ?? text;
-    }
-    return text;
-};
-(globalThis as any).$getCountry = () => Country.Belgium;
 
 describe('useSGVSync.getSGVSyncWarning', () => {
     const now = new Date(2026, 5, 1, 12);
+
+    beforeEach(() => {
+        TestUtils.setEnvironment('userMode', 'organization');
+    });
 
     function createOrganization({
         type = OrganizationType.Youth,
@@ -56,6 +48,7 @@ describe('useSGVSync.getSGVSyncWarning', () => {
             id: `${type}-${periodId}`,
             type,
             periodId,
+            settings: GroupSettings.create({ name: TranslatedString.create('Kapoenen') }),
         });
     }
 
@@ -73,6 +66,7 @@ describe('useSGVSync.getSGVSyncWarning', () => {
         return MemberWithRegistrationsBlob.create({
             updatedAt,
             details: MemberDetails.create({
+                birthDay: new Date(1990, 0, 1),
                 lastExternalSync,
             }),
             registrations: [

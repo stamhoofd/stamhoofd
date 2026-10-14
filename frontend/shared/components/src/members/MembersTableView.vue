@@ -45,7 +45,7 @@ import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
 import ModernTableView from '#tables/ModernTableView.vue';
 import type { ComponentExposed } from '#VueGlobalHelper.ts';
-import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync';
+import { useSGVSync } from '#members/sgvSync.ts';
 import type { Group, GroupCategoryTree, MemberResponsibility, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
