@@ -39,7 +39,8 @@ import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityCh
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Group, MemberResponsibility, Organization, PlatformMember } from '@stamhoofd/structures';
-import { GroupType, LimitedFilteredRequest, MembersBlob, PaginatedResponseDecoder, PlatformFamily, SetupStepType, SortItemDirection } from '@stamhoofd/structures';
+import { GroupType, LimitedFilteredRequest, MembersBlob, PaginatedResponseDecoder, SetupStepType, SortItemDirection } from '@stamhoofd/structures';
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref } from 'vue';
 import ResponsibilityReview from './ResponsibilityReview.vue';
@@ -181,7 +182,7 @@ async function getAllMembersWithResponsibilities(responsibilities: MemberRespons
 
     const blob = response.data.results;
 
-    const results: PlatformMember[] = PlatformFamily.createSingles(blob, {
+    const results: PlatformMember[] = PlatformFamilyHelper.createSingles(blob, {
         contextOrganization: $context.value.organization,
         platform: platform.value,
     });

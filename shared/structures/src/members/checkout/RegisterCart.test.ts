@@ -1,3 +1,4 @@
+import { PlatformFamilyHelper } from '../../helpers/PlatformFamilyHelper.js';
 import { BundleDiscountGroupPriceSettings } from '../../BundleDiscountGroupPriceSettings.js';
 import { Group } from '../../Group.js';
 import { GroupPriceDiscount, GroupPriceDiscountType } from '../../GroupPriceDiscount.js';
@@ -9,7 +10,6 @@ import { OrganizationRegistrationPeriod, RegistrationPeriod } from '../../Regist
 import { TranslatedString } from '../../TranslatedString.js';
 import { BooleanStatus, MemberDetails } from '../MemberDetails.js';
 import { MembersBlob, MemberWithRegistrationsBlob } from '../MemberWithRegistrationsBlob.js';
-import { PlatformFamily } from '../PlatformMember.js';
 import { RegisterItem } from './RegisterItem.js';
 
 // Should be last because of circular dependencies
@@ -93,7 +93,7 @@ function createTestFamily(memberCount = 3) {
         members,
     });
 
-    return PlatformFamily.create(blob, { platform: Platform.create({}) });
+    return PlatformFamilyHelper.fromBlob(blob, { platform: Platform.create({}) });
 }
 
 function setupDiscountTest({
@@ -177,7 +177,7 @@ describe('Unit.RegisterCart', () => {
             const itemC = RegisterItem.defaultFor(memberC, groupB, organization);
 
             // Add to a single cart
-            const checkout = family.checkout;
+            const checkout = PlatformFamilyHelper.getCheckout(family);
             const cart = checkout.cart;
             cart.add(itemA);
             cart.add(itemB);
@@ -240,7 +240,7 @@ describe('Unit.RegisterCart', () => {
             const itemC = RegisterItem.defaultFor(memberC, groupB, organization);
 
             // Add to a single cart
-            const checkout = family.checkout;
+            const checkout = PlatformFamilyHelper.getCheckout(family);
             const cart = checkout.cart;
             cart.add(itemA);
             cart.add(itemB);
@@ -294,7 +294,7 @@ describe('Unit.RegisterCart', () => {
             const itemC = RegisterItem.defaultFor(memberC, groupB, organization);
 
             // Add to a single cart
-            const checkout = family.checkout;
+            const checkout = PlatformFamilyHelper.getCheckout(family);
             const cart = checkout.cart;
             cart.add(itemA);
             cart.add(itemB);
@@ -350,7 +350,7 @@ describe('Unit.RegisterCart', () => {
             const itemC = RegisterItem.defaultFor(memberC, groupB, organization);
 
             // Add to a single cart
-            const checkout = family.checkout;
+            const checkout = PlatformFamilyHelper.getCheckout(family);
             const cart = checkout.cart;
             cart.add(itemB);
             cart.add(itemC);
@@ -424,7 +424,7 @@ describe('Unit.RegisterCart', () => {
             const itemB = RegisterItem.defaultFor(memberB, groupB, organization);
             const itemC = RegisterItem.defaultFor(memberC, groupB, organization);
 
-            const checkout = family.checkout;
+            const checkout = PlatformFamilyHelper.getCheckout(family);
             const cart = checkout.cart;
             cart.add(itemB);
             cart.add(itemC);
@@ -474,7 +474,7 @@ describe('Unit.RegisterCart', () => {
             ]));
 
             // If we delete registration B, the discount won't be visible in the cart because it is included in the registration
-            const checkout = family.checkout;
+            const checkout = PlatformFamilyHelper.getCheckout(family);
             const cart = checkout.cart;
             cart.removeRegistration(
                 new RegistrationWithPlatformMember({
@@ -569,7 +569,7 @@ describe('Unit.RegisterCart', () => {
             ]));
 
             // If we delete registration B, the discount won't be visible in the cart because it is included in the registration
-            const checkout = family.checkout;
+            const checkout = PlatformFamilyHelper.getCheckout(family);
             checkout.cancellationFeePercentage = 50_00;
             const cart = checkout.cart;
             cart.removeRegistration(
@@ -686,7 +686,7 @@ describe('Unit.RegisterCart', () => {
                 }),
             });
 
-            const checkout = family.checkout;
+            const checkout = PlatformFamilyHelper.getCheckout(family);
             const cart = checkout.cart;
 
             const itemA = RegisterItem.defaultFor(memberA, groupC, organization);
@@ -815,7 +815,7 @@ describe('Unit.RegisterCart', () => {
                 }),
             });
 
-            const checkout = family.checkout;
+            const checkout = PlatformFamilyHelper.getCheckout(family);
             const cart = checkout.cart;
 
             const itemA = RegisterItem.defaultFor(memberA, groupC, organization);
@@ -916,7 +916,7 @@ describe('Unit.RegisterCart', () => {
             const itemC = RegisterItem.defaultFor(memberC, groupB, organization);
 
             // Add to a single cart
-            const checkout = family.checkout;
+            const checkout = PlatformFamilyHelper.getCheckout(family);
             const cart = checkout.cart;
             cart.add(itemA);
             cart.add(itemB);
@@ -995,7 +995,7 @@ describe('Unit.RegisterCart', () => {
             }));
 
             // Add to a single cart
-            const checkout = family.checkout;
+            const checkout = PlatformFamilyHelper.getCheckout(family);
             const cart = checkout.cart;
             cart.add(itemA);
             cart.add(itemB);
@@ -1072,7 +1072,7 @@ describe('Unit.RegisterCart', () => {
             }));
 
             // Add to a single cart
-            const checkout = family.checkout;
+            const checkout = PlatformFamilyHelper.getCheckout(family);
             const cart = checkout.cart;
 
             const itemA = RegisterItem.defaultFor(memberA, campA, organization);
@@ -1163,7 +1163,7 @@ describe('Unit.RegisterCart', () => {
             const itemC = RegisterItem.defaultFor(memberA, groupB, organization);
 
             // Add to a single cart
-            const checkout = family.checkout;
+            const checkout = PlatformFamilyHelper.getCheckout(family);
             const cart = checkout.cart;
             cart.add(itemC);
             cart.calculatePrices();
@@ -1218,7 +1218,7 @@ describe('Unit.RegisterCart', () => {
             const itemC = RegisterItem.defaultFor(memberC, groupB, organization);
 
             // Add to a single cart
-            const checkout = family.checkout;
+            const checkout = PlatformFamilyHelper.getCheckout(family);
             const cart = checkout.cart;
             cart.add(itemA);
             cart.add(itemB);
@@ -1288,7 +1288,7 @@ describe('Unit.RegisterCart', () => {
             const itemC = RegisterItem.defaultFor(memberC, groupB, organization);
 
             // Add to a single cart
-            const checkout = family.checkout;
+            const checkout = PlatformFamilyHelper.getCheckout(family);
             const cart = checkout.cart;
             cart.add(itemA);
             cart.add(itemB);
@@ -1366,7 +1366,7 @@ describe('Unit.RegisterCart', () => {
             const itemC = RegisterItem.defaultFor(memberB, groupA, organization);
 
             // Add to a single cart
-            const checkout = family.checkout;
+            const checkout = PlatformFamilyHelper.getCheckout(family);
             const cart = checkout.cart;
             cart.add(itemA);
             cart.add(itemB);
@@ -1442,7 +1442,7 @@ describe('Unit.RegisterCart', () => {
             const itemB = RegisterItem.defaultFor(memberB, groupB, organization);
 
             // Add to a single cart
-            const checkout = family.checkout;
+            const checkout = PlatformFamilyHelper.getCheckout(family);
             const cart = checkout.cart;
             cart.add(itemA);
             cart.add(itemB);
@@ -1520,7 +1520,7 @@ describe('Unit.RegisterCart', () => {
             const itemC = RegisterItem.defaultFor(memberB, groupA, organization);
 
             // Add to a single cart
-            const checkout = family.checkout;
+            const checkout = PlatformFamilyHelper.getCheckout(family);
             const cart = checkout.cart;
             cart.add(itemA);
             cart.add(itemB);
@@ -1603,7 +1603,7 @@ describe('Unit.RegisterCart', () => {
             const itemC = RegisterItem.defaultFor(memberA, groupC, organization);
 
             // Add to a single cart
-            const checkout = family.checkout;
+            const checkout = PlatformFamilyHelper.getCheckout(family);
             const cart = checkout.cart;
             cart.add(itemC);
             cart.calculatePrices();
@@ -1668,7 +1668,7 @@ describe('Unit.RegisterCart', () => {
             const itemB = RegisterItem.defaultFor(memberB, groupB, organization);
 
             // Add to a single cart
-            const checkout = family.checkout;
+            const checkout = PlatformFamilyHelper.getCheckout(family);
             const cart = checkout.cart;
             cart.add(itemA);
             cart.add(itemB);

@@ -1,3 +1,5 @@
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
+import { PlatformMemberRegistrationHelper } from '@stamhoofd/structures/helpers/PlatformMemberRegistrationHelper.js';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
@@ -34,7 +36,7 @@ import RegistrationInvitationIcon from '../RegistrationInvitationIcon.vue';
 
 export function useRegistrationQuickActions(): QuickActions {
     const memberManager = useMemberManager();
-    const checkout = computed(() => memberManager.family.checkout);
+    const checkout = computed(() => PlatformFamilyHelper.getCheckout(memberManager.family));
     const context = useContext();
     const navigate = useNavigationActions();
     const user = useUser();
@@ -211,7 +213,7 @@ export function useRegistrationQuickActions(): QuickActions {
                         }];
                     })
                     .filter(({ group, organization }) => {
-                        return member.canRegister(group, organization);
+                        return PlatformMemberRegistrationHelper.canRegister(member, group, organization);
                     });
 
                 if (invitationData.length === 0) {
@@ -351,7 +353,7 @@ function canRegisterForEvent({ event, memberManager }: { event: Event; memberMan
             return false;
         }
         const canSomeMemberRegister = memberManager.family.members.some((member) => {
-            if (member.canRegister(group, organization) || member.canRegisterForWaitingList(group, organization)) {
+            if (PlatformMemberRegistrationHelper.canRegister(member, group, organization) || PlatformMemberRegistrationHelper.canRegisterForWaitingList(member, group, organization)) {
                 return true;
             }
 

@@ -2,8 +2,9 @@ import type { Decoder} from '@simonbackx/simple-encoding';
 import { ArrayDecoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { Storage } from './Storage';
 import type { SessionContext } from './SessionContext';
-import type { BalanceItem, Platform, RegisterCheckout} from '@stamhoofd/structures';
-import { DetailedPayableBalanceCollection, Document as DocumentStruct, Group, IDRegisterCheckout, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, PlatformFamily, Version } from '@stamhoofd/structures';
+import type { BalanceItem, Platform, PlatformFamily, RegisterCheckout} from '@stamhoofd/structures';
+import { DetailedPayableBalanceCollection, Document as DocumentStruct, Group, IDRegisterCheckout, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, Version } from '@stamhoofd/structures';
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import { inject, reactive, watch } from 'vue';
 
 export function useMemberManager() {
@@ -24,7 +25,7 @@ export class MemberManager {
     constructor($context: SessionContext, platform: Platform) {
         this.$context = $context;
         this.family = reactive(
-            new PlatformFamily({
+            PlatformFamilyHelper.create({
                 contextOrganization: $context.organization,
                 platform,
             }) as any,
@@ -191,7 +192,7 @@ export class MemberManager {
     async saveCheckout() {
         console.log('Saving checkout');
         try {
-            const versionBox = new VersionBox(this.family.checkout.convert());
+            const versionBox = new VersionBox(PlatformFamilyHelper.getCheckout(this.family).convert());
             const encoded = JSON.stringify(versionBox.encode({ version: Version }));
             await Storage.keyValue.setItem(this.storageKey, encoded);
         }

@@ -1,3 +1,4 @@
+import { PlatformFamilyHelper } from '../helpers/PlatformFamilyHelper.js';
 import { MembersBlob, MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob.js';
 import { MemberPlatformMembership } from './MemberPlatformMembership.js';
 import { Platform } from '../Platform.js';
@@ -9,7 +10,6 @@ import { OrganizationRecordsConfiguration } from './OrganizationRecordsConfigura
 import { RecordCategory } from './records/RecordCategory.js';
 import { TranslatedString } from '../TranslatedString.js';
 import {
-    PlatformFamily,
     PlatformMember,
 } from './PlatformMember.js';
 
@@ -45,7 +45,7 @@ describe('PlatformMember', () => {
                 details: MemberDetails.create({}),
             });
 
-            const family = new PlatformFamily({
+            const family = PlatformFamilyHelper.create({
                 platform: Platform.create({}),
                 contextOrganization: organization,
             });
@@ -128,7 +128,7 @@ describe('PlatformMember', () => {
                     details: MemberDetails.create({}),
                 });
 
-                const family = new PlatformFamily({
+                const family = PlatformFamilyHelper.create({
                     platform: Platform.create({}),
                     contextOrganization: organization,
                 });
@@ -234,7 +234,7 @@ describe('PlatformMember', () => {
                     details: MemberDetails.create({}),
                 });
 
-                const family = new PlatformFamily({
+                const family = PlatformFamilyHelper.create({
                     platform: Platform.create({}),
                     contextOrganization: organization,
                 });
@@ -279,7 +279,7 @@ describe('PlatformMember', () => {
                 ],
             });
 
-            const family = PlatformFamily.create(blob, { platform: Platform.create({}), contextOrganization: organization });
+            const family = PlatformFamilyHelper.fromBlob(blob, { platform: Platform.create({}), contextOrganization: organization });
             const member = family.members[0];
 
             const categories = member.getAllRecordCategories({ scopeOrganization: organization });

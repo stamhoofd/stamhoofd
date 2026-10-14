@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import type { BalanceItem } from '../../BalanceItem.js';
-import type { BundleDiscountCalculation } from '../../BundleDiscount.js';
+import { BundleDiscountHelper, type BundleDiscountCalculation } from '../../helpers/BundleDiscountHelper.js';
 import { BalanceItemCartItem } from './BalanceItemCartItem.js';
 import { IDRegisterItem } from './RegisterItem.js';
 import type { RegisterItem } from './RegisterItem.js';
@@ -97,7 +97,7 @@ export class RegisterCart {
         this.bundleDiscounts = [];
         if (this.singleOrganization) {
             for (const bundleDiscount of this.singleOrganization.period.settings.bundleDiscounts) {
-                const grouped = bundleDiscount.calculate(this, this.singleOrganization.period.period.id);
+                const grouped = BundleDiscountHelper.calculate(bundleDiscount, this, this.singleOrganization.period.period.id);
                 for (const [_, calculation] of grouped.calculations) {
                     if (calculation.netTotal !== 0) {
                         this.bundleDiscounts.push(calculation);

@@ -1,10 +1,11 @@
+import { PlatformFamilyHelper } from '../helpers/PlatformFamilyHelper.js';
 import { Organization } from '../Organization.js';
 import { Platform } from '../Platform.js';
 import { MemberDetails } from './MemberDetails.js';
 import { MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob.js';
 import { NationalRegisterNumberOptOut } from './NationalRegisterNumberOptOut.js';
 import { Parent } from './Parent.js';
-import { PlatformFamily, PlatformMember } from './PlatformMember.js';
+import { PlatformMember } from './PlatformMember.js';
 
 describe('PlatformMember.hasRequiredParentNationalRegisterNumbers', () => {
     function build(parents: Parent[], nationalRegisterNumber: string | typeof NationalRegisterNumberOptOut | null = null) {
@@ -12,7 +13,7 @@ describe('PlatformMember.hasRequiredParentNationalRegisterNumbers', () => {
         const member = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({ firstName: 'Child', lastName: 'Doe', parents, nationalRegisterNumber }),
         });
-        const family = new PlatformFamily({ platform: Platform.create({}), contextOrganization: organization });
+        const family = PlatformFamilyHelper.create({ platform: Platform.create({}), contextOrganization: organization });
         return new PlatformMember({ member, family });
     }
 

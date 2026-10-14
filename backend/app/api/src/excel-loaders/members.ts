@@ -1,8 +1,9 @@
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import type { XlsxTransformerColumn, XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { Platform } from '@stamhoofd/models';
 import type { LimitedFilteredRequest, PlatformMember, Platform as PlatformStruct } from '@stamhoofd/structures';
-import { ExcelExportType, Gender, GroupType, LanguageHelper, MembershipStatus, PlatformFamily, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
+import { ExcelExportType, Gender, GroupType, LanguageHelper, MembershipStatus, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetMembersEndpoint } from '../endpoints/global/members/GetMembersEndpoint.js';
@@ -486,7 +487,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Members, {
         const result = await GetMembersEndpoint.buildData(query);
 
         return new UnencodeablePaginatedResponse({
-            results: PlatformFamily.createSingles(result.results, {
+            results: PlatformFamilyHelper.createSingles(result.results, {
                 contextOrganization: Context.organization ? (await AuthenticatedStructures.organization(Context.organization)) : null,
                 platform: await Platform.getSharedStruct(),
             }),

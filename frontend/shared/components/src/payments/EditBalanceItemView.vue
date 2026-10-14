@@ -178,6 +178,7 @@
 </template>
 
 <script lang="ts" setup>
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { useContext } from '#hooks/useContext.ts';
@@ -584,7 +585,7 @@ async function loadMember() {
     }
     try {
         const familyBlob = await loadFamilyFromId(props.balanceItem.memberId);
-        family.value = PlatformFamily.create(familyBlob, {
+        family.value = PlatformFamilyHelper.fromBlob(familyBlob, {
             contextOrganization: organization.value,
             platform: platform.value,
         });
@@ -614,7 +615,7 @@ async function loadFamilyFromUser() {
         blob.markReceivedFromBackend();
 
         user.value = response.data;
-        family.value = PlatformFamily.create(blob, {
+        family.value = PlatformFamilyHelper.fromBlob(blob, {
             contextOrganization: organization.value,
             platform: platform.value,
         });
