@@ -2,6 +2,7 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { LimitedFilteredRequest } from '@stamhoofd/structures';
 import { useBalanceItemsFetcher } from '#fetchers/useBalanceItemsObjectFetcher.ts';
+import { usePaymentViewLoaders } from '#payments/paymentViewLoaders.ts';
 import { Toast } from '#overlays/Toast.ts';
 
 import PromiseView from '#containers/PromiseView.vue';
@@ -9,6 +10,7 @@ import PromiseView from '#containers/PromiseView.vue';
 export function useShowBalanceItem() {
     const present = usePresent();
     const fetcher = useBalanceItemsFetcher();
+    const loaders = usePaymentViewLoaders();
 
     return async (balanceItemId: string) => {
         const component = new ComponentWithProperties(NavigationController, {
@@ -24,7 +26,7 @@ export function useShowBalanceItem() {
                         Toast.error($t('%ZoF')).show();
                         throw new Error('Balance item not found');
                     }
-                    return AsyncComponent(() => import('#payments/EditBalanceItemView.vue'), {
+                    return AsyncComponent(loaders.editBalanceItem, {
                         balanceItem: balanceItems.results[0],
                         isNew: false,
                     });
