@@ -1,6 +1,7 @@
 import { Column } from '#tables/classes/Column.ts';
 import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
-import type { AppType, Group, GroupCategoryTree, GroupPrice, Organization, Platform, PlatformMember, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
+import type { AppType, Group, GroupCategoryTree, GroupPrice, Organization, Platform, PlatformMember, RecordAnswer } from '@stamhoofd/structures';
+import type { RegisterItemOption } from '@stamhoofd/structures/members/checkout/RegisterItemOption.js';
 import type { Language } from '@stamhoofd/types/Language';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { ContinuousMembershipStatus, GroupType, LanguageHelper, MembershipStatus } from '@stamhoofd/structures';

@@ -6,7 +6,8 @@ import { BalanceItem, BalanceItemFactory, EventFactory, Group, GroupFactory, Mem
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { StockReservation, TranslatedString, GroupPrice, BalanceItemCartItem, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, Company, EventMeta, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, Permissions, ReduceablePrice, RegisterItemOption, ResourcePermissions, GroupType, STPackageStatus, STPackageType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, UserPermissions, Version } from '@stamhoofd/structures';
+import { StockReservation, TranslatedString, GroupPrice, BalanceItemCartItem, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, Company, EventMeta, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, Permissions, ReduceablePrice, ResourcePermissions, GroupType, STPackageStatus, STPackageType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, UserPermissions, Version } from '@stamhoofd/structures';
+import { RegisterItemOption } from '@stamhoofd/structures/members/checkout/RegisterItemOption.js';
 import { QueueHandler } from '@stamhoofd/queues';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';

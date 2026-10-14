@@ -3,26 +3,18 @@ import { AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, String
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 import type { BalanceItem } from '../../BalanceItem.js';
-import type { Group } from '../../Group.js';
 import type { Organization } from '../../Organization.js';
 import { PaymentCustomer } from '../../PaymentCustomer.js';
 import { PaymentMethod } from '../../PaymentMethod.js';
 import type { PriceBreakdown, PriceBreakdownAction } from '../../PriceBreakdown.js';
-import type { PlatformMember } from '../PlatformMember.js';
 import { BalanceItemCartItem } from './BalanceItemCartItem.js';
 import { IDRegisterCart, RegisterCart } from './RegisterCart.js';
 import type { RegisterItem } from './RegisterItem.js';
+import type { RegisterContext } from './RegisterContext.js';
 import type { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
-import type { Registration } from '../Registration.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../../upgradePriceFrom2To4DecimalPlaces.js';
 
-type RegistrationWithMember = RegistrationWithPlatformMember<Registration, PlatformMember>;
-
-export type RegisterContext = {
-    members: PlatformMember[];
-    groups: Group[];
-    organizations: Organization[];
-};
+export type { RegisterContext } from './RegisterContext.js';
 
 export class IDRegisterCheckout extends AutoEncoder {
     @field({ decoder: IDRegisterCart })
@@ -222,7 +214,7 @@ export class RegisterCheckout {
         }
     }
 
-    removeRegistration(registration: RegistrationWithMember, options?: { calculate?: boolean }) {
+    removeRegistration(registration: RegistrationWithPlatformMember, options?: { calculate?: boolean }) {
         this.cart.removeRegistration(registration);
 
         if (this.cart.deleteRegistrations.length === 1) {
@@ -245,7 +237,7 @@ export class RegisterCheckout {
         }
     }
 
-    unremoveRegistration(registration: RegistrationWithMember, options?: { calculate?: boolean }) {
+    unremoveRegistration(registration: RegistrationWithPlatformMember, options?: { calculate?: boolean }) {
         this.cart.unremoveRegistration(registration);
 
         if (this.cart.isEmpty) {

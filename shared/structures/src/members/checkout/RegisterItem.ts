@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -8,7 +8,7 @@ import { registerItemInMemoryFilterCompilers } from '../../filters/inMemoryFilte
 import type { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
 import type { Group } from '../../Group.js';
 import type { GroupCategory } from '../../GroupCategory.js';
-import { GroupOption, GroupOptionMenu, GroupPrice, WaitingListType } from '../../GroupSettings.js';
+import { GroupOptionMenu, GroupPrice, WaitingListType } from '../../GroupSettings.js';
 import { GroupType } from '../../GroupType.js';
 import type { Organization } from '../../Organization.js';
 import { PlatformMembershipTypeBehaviour } from '../../PlatformMembershipTypeBehaviour.js';
@@ -24,22 +24,16 @@ import { RecordAnswerMapDecoder } from '../records/RecordAnswer.js';
 import { RecordCategory } from '../records/RecordCategory.js';
 import type { RecordSettings } from '../records/RecordSettings.js';
 import type { Registration } from '../Registration.js';
-import type { RegisterCart } from './RegisterCart.js';
-import type { RegisterContext } from './RegisterCheckout.js';
+import { RegisterItemOption } from './RegisterItemOption.js';
+import type { RegisterContext } from './RegisterContext.js';
 import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
 
-type RegistrationWithMember = RegistrationWithPlatformMember<Registration, PlatformMember>;
-
-export class RegisterItemOption extends AutoEncoder {
-    @field({ decoder: GroupOption })
-    option: GroupOption;
-
-    @field({ decoder: GroupOptionMenu })
-    optionMenu: GroupOptionMenu;
-
-    @field({ decoder: IntegerDecoder })
-    amount = 1;
-}
+type RegisterItemDiscountCart = {
+    bundleDiscounts: {
+        name: string;
+        getTotalFor(item: RegisterItem | RegistrationWithPlatformMember): number;
+    }[];
+};
 
 export class IDRegisterItem extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -112,7 +106,7 @@ export class RegisterItem implements ObjectWithRecords {
     /**
      * These registrations will be replaced as part of this new registration (moving or updating a registration is possible this way)
      */
-    replaceRegistrations: RegistrationWithMember[] = [];
+    replaceRegistrations: RegistrationWithPlatformMember[] = [];
 
     /**
      * Show an error in the cart for recovery
@@ -148,7 +142,7 @@ export class RegisterItem implements ObjectWithRecords {
         groupPrice?: GroupPrice;
         options?: RegisterItemOption[];
         recordAnswers?: Map<string, RecordAnswer>;
-        replaceRegistrations?: RegistrationWithMember[];
+        replaceRegistrations?: RegistrationWithPlatformMember[];
         cartError?: SimpleError | SimpleErrors | null;
         calculatedPrice?: number;
         calculatedRefund?: number;
@@ -315,7 +309,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new Error('Group not found: ' + idRegisterItem.groupId);
         }
 
-        const replaceRegistrations: RegistrationWithMember[] = [];
+        const replaceRegistrations: RegistrationWithPlatformMember[] = [];
 
         for (const registrationId of idRegisterItem.replaceRegistrationIds) {
             const registration = member.patchedMember.registrations.find(r => r.id === registrationId);
@@ -402,7 +396,7 @@ export class RegisterItem implements ObjectWithRecords {
         return this.getPriceBreakown(null);
     }
 
-    getPriceBreakown(cart: RegisterCart | null): PriceBreakdown {
+    getPriceBreakown(cart: RegisterItemDiscountCart | null): PriceBreakdown {
         let all: PriceBreakdown = [];
 
         for (const { registration } of this.replaceRegistrations) {
