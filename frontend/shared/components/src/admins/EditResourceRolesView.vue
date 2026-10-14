@@ -33,6 +33,7 @@ import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import type { AccessRight, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType } from '@stamhoofd/structures';
 import { MemberResponsibility } from '@stamhoofd/structures';
+import { Group } from '@stamhoofd/structures/Group.js';
 import { computed } from 'vue';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { Toast } from '../overlays/Toast';
@@ -78,7 +79,7 @@ const groupedResponsibilites = computed(() => {
 
     for (const { responsibility, group, role } of inheritedResponsibilitiesWithGroup.value) {
         groupedPlatformResponsibilities.push({
-            role: role ?? responsibility.createDefaultPermissions(group),
+            role: role ?? Group.createDefaultResponsibilityPermissions(group, responsibility),
             inheritedRole: responsibility.getPermissions(group?.id ?? null), // todo: also implement group level ones
             patch: (patch: AutoEncoderPatchType<PermissionRoleForResponsibility>) => patchInheritedResponsibilityRole(patch, responsibility.id, group?.id ?? null),
         });
@@ -87,7 +88,7 @@ const groupedResponsibilites = computed(() => {
     for (const responsibility of applicableResponsibilities.value) {
         if (responsibility.defaultAgeGroupIds === null) {
             groupedOrganizationResponsibilities.push({
-                role: responsibility.permissions ?? responsibility.createDefaultPermissions(null),
+                role: responsibility.permissions ?? Group.createDefaultResponsibilityPermissions(null, responsibility),
                 inheritedRole: null,
                 patch: (patch: AutoEncoderPatchType<PermissionRoleForResponsibility>) => patchResponsibilityRole(patch, responsibility.id),
             });
@@ -126,7 +127,7 @@ function patchInheritedResponsibilityRole(patch: AutoEncoderPatchType<Permission
 
     if (!inheritedRole) {
         // Create a new one
-        const role = responsibility.responsibility.createDefaultPermissions(responsibility.group);
+        const role = Group.createDefaultResponsibilityPermissions(responsibility.group, responsibility.responsibility);
         const patched = role.patch(patch);
         arr.addPut(patched);
     } else {
@@ -154,7 +155,7 @@ function patchResponsibilityRole(patch: AutoEncoderPatchType<PermissionRoleForRe
         // Create
         const p = MemberResponsibility.patch({
             id: responsibility.id,
-            permissions: responsibility.createDefaultPermissions(null).patch(patch),
+            permissions: Group.createDefaultResponsibilityPermissions(null, responsibility).patch(patch),
         });
         arr.addPatch(p);
     }
