@@ -4,6 +4,8 @@ import type { CliContext } from '../context/create-context.js';
 import { buildPorts } from '../context/ports.js';
 import { buildDomains } from './build-config.js';
 import type { CaddyRouteOptions } from '../runtime/manifest-store.js';
+import type { CaddyHandler, CaddyRoute } from './caddy-types.js';
+export type { CaddyRoute } from './caddy-types.js';
 import { listActiveRouteManifests, sharedDir } from '../runtime/manifest-store.js';
 import { caddyAdminPort, caddyHttpPort, caddyHttpsPort, caddySetupAdminPort, caddySetupHttpPort, caddySetupHttpsPort, localIpv4Host, localhostPort } from './shared-service-config.js';
 
@@ -99,52 +101,6 @@ const resourcesPathMatchers = [
     '*.mov',
     '*.wmv',
 ];
-
-type CaddyHeaderOps = {
-    add?: Record<string, string[]>;
-    set?: Record<string, string[]>;
-    delete?: string[];
-    replace?: Record<string, { search?: string; search_regexp?: string; replace: string }[]>;
-};
-
-type CaddyMatcher = {
-    host?: string[];
-    header?: Record<string, string[]>;
-    header_regexp?: unknown;
-    path?: string[];
-    not?: CaddyMatcher[];
-};
-
-type CaddyHandler
-    = | {
-        handler: 'reverse_proxy';
-        upstreams: Array<{ dial: string }>;
-        stream_close_delay?: string;
-        headers?: {
-            request?: CaddyHeaderOps;
-            response?: CaddyHeaderOps;
-        };
-    }
-    | {
-        handler: 'headers';
-        request?: CaddyHeaderOps;
-        response?: CaddyHeaderOps;
-    }
-    | {
-        handler: 'replace_response';
-        replacements: Array<{ search?: string; search_regexp?: string; replace: string }>;
-    }
-    | {
-        handler: 'subroute';
-        routes: Array<{ match?: CaddyMatcher[]; handle: CaddyHandler[]; terminal?: boolean }>;
-    };
-
-export type CaddyRoute = {
-    group?: string;
-    match: CaddyMatcher[];
-    handle: CaddyHandler[];
-    terminal?: boolean;
-};
 
 /**
  * Subroute that applies the per-request-nonce CSP based on the request path, mirroring production
