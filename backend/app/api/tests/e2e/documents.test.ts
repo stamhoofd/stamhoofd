@@ -2,6 +2,7 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { Group, Member, Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
 import { Document, DocumentTemplateFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { IDRegisterCart, IDRegisterCheckout, IDRegisterItem, MemberDetails, MemberWithRegistrationsBlob, PaymentMethod } from '@stamhoofd/structures';
+import { IDDeleteRegisterItem } from '@stamhoofd/structures/members/checkout/DeleteRegisterItem.js';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Formatter } from '@stamhoofd/utility';
 import { RegisterMembersEndpoint } from '../../src/endpoints/global/registration/RegisterMembersEndpoint.js';
@@ -393,7 +394,7 @@ describe('E2E.Documents', () => {
         // Move
         const checkout2 = IDRegisterCheckout.create({
             cart: IDRegisterCart.create({
-                deleteRegistrationIds: [registration.id],
+                deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration.id })],
             }),
             paymentMethod: PaymentMethod.PointOfSale,
             asOrganizationId: organization.id,

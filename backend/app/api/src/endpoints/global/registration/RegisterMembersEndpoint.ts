@@ -144,7 +144,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         // Update balances before we start
         await BalanceItemService.flushCaches(organization.id);
 
-        const deleteRegistrationIds = request.body.cart.deleteRegistrationIds;
+        const deleteRegistrationIds = request.body.cart.deleteRegistrations.map(i => i.registrationId);
         const deleteRegistrationModels = (deleteRegistrationIds.length ? (await Registration.getByIDs(...deleteRegistrationIds)) : []).filter(r => r.organizationId === organization.id);
 
         // Validate balance items (can only happen serverside)
