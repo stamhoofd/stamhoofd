@@ -294,7 +294,7 @@ import type { Organization, OrganizationRegistrationPeriod } from '@stamhoofd/st
 import { AccessRight, EmailTemplate, EmailTemplateType, Event, getAppHost, Group, GroupSettings, GroupStatus, LimitedFilteredRequest, mergeFilters, PermissionsResourceType, PrivateWebshop, TranslatedString, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { computed, inject, nextTick, onMounted, ref, watch } from 'vue';
 import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';
 import LoadingViewTransition from '../containers/LoadingViewTransition.vue';
 
@@ -326,11 +326,14 @@ import { useCreateEventGroup } from './composables/createEventGroup';
 import type { EventPeriodProblem } from './composables/useEventPeriodProblem';
 import { useGetEventPeriodProblem } from './composables/useEventPeriodProblem';
 import { buildTranslatedUrl } from '#containers/TranslatedUrl.ts';
+import { eventWebshopViewsKey } from './EventWebshopViews';
 
 const props = defineProps<{
     event: Event;
     onSaveDuplicate?: (event: Event) => void;
 }>();
+
+const webshopViews = inject(eventWebshopViewsKey, null);
 
 const title = computed(() => props.event.name);
 const $navigate = useNavigate();
@@ -366,7 +369,7 @@ function setOrganization(o: Organization) {
 }
 
 const canEditWebshopHere = computed(() => {
-    return !!props.event.webshopId && !!webshop.value && webshop.value.organizationId === organization.value?.id;
+    return !!webshopViews && !!props.event.webshopId && !!webshop.value && webshop.value.organizationId === organization.value?.id;
 });
 
 watch(() => props.event.webshopId, () => {
@@ -656,27 +659,31 @@ defineRoute({
     },
 });
 
-defineRoute({
-    url: Routes.Webshop,
-    component: async () => {
-        return (await import('@stamhoofd/dashboard/src/views/dashboard/webshop/WebshopOverview.vue')).default;
-    },
-    defaultProperties: () => {
-        if (!webshop.value) {
-            throw new Error('Webshop not found');
-        }
+if (webshopViews) {
+    defineRoute({
+        url: Routes.Webshop,
+        // eslint-disable-next-line stamhoofd/async-route-components -- Keep the injected import loader intact for chunk retries.
+        component: webshopViews.overview,
+        defaultProperties: () => {
+            if (!webshop.value) {
+                throw new Error('Webshop not found');
+            }
 
-        return {
-            preview: webshop.value,
-        };
-    },
-});
+            return {
+                preview: webshop.value,
+            };
+        },
+    });
+}
 
 const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup();
 const prepareOrganizationPeriod = useFetchOrganizationPeriodForGroup();
 
 const present = usePresent();
 async function createWebshop() {
+    if (!webshopViews) {
+        return;
+    }
     if (!auth.hasAccessRight(AccessRight.OrganizationCreateWebshops)) {
         Toast.warning($t('%1Am')).show();
         return;
@@ -685,7 +692,7 @@ async function createWebshop() {
     await present({
         components: [
             await LoadComponent(
-                () => import('@stamhoofd/dashboard/src/views/dashboard/webshop/edit/EditWebshopGeneralView.vue'),
+                webshopViews.edit,
                 {
                     initialWebshop: PrivateWebshop.create({
                         meta: WebshopMetaData.create({
@@ -747,6 +754,7 @@ async function linkWebshop(event: MouseEvent) {
             new ContextMenuItem({
                 icon: 'add',
                 name: 'Nieuwe webshop',
+                disabled: !webshopViews,
                 action: async () => {
                     await createWebshop();
                 },
