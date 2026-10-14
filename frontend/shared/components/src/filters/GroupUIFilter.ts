@@ -7,11 +7,9 @@ import { markRaw } from 'vue';
 import type { StyledDescription, UIFilterBuilder, UIFilterWrapper } from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
 import { UnknownFilterBuilder, UnknownUIFilter } from './UnknownUIFilter';
-
-export enum GroupUIFilterMode {
-    Or = 'Or',
-    And = 'And',
-}
+import { GroupUIFilterMode } from './GroupUIFilterTypes';
+import type { GroupUIFilterEditorProperties } from './GroupUIFilterTypes';
+export { GroupUIFilterMode } from './GroupUIFilterTypes';
 
 export class GroupUIFilter extends UIFilter<GroupUIFilterBuilder> {
     filters: UIFilter[] = [];
@@ -77,7 +75,9 @@ export class GroupUIFilter extends UIFilter<GroupUIFilterBuilder> {
     getComponent(): ComponentWithProperties {
         return AsyncComponent(() => import('./GroupUIFilterView.vue'), {
             filter: this,
-        });
+            isGroupFilter: (filter: UIFilter): filter is GroupUIFilter => filter instanceof GroupUIFilter,
+            isGroupBuilder: (builder: UIFilterBuilder) => builder instanceof GroupUIFilterBuilder,
+        } satisfies GroupUIFilterEditorProperties);
     }
 
     override get styledDescription(): StyledDescription {

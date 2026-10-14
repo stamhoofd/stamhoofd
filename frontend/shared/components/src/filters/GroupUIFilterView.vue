@@ -8,7 +8,7 @@
             {{ $t("%AE") }}
         </p>
 
-        <GroupUIFilterList v-if="filters.length" :filter="filter" @replace="copyFromChanged($event)" />
+        <GroupUIFilterList v-if="filters.length" :filter="filter" :is-group-filter="isGroupFilter" @replace="copyFromChanged($event)" />
 
         <hr v-if="filters.length">
 
@@ -36,14 +36,12 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { computed } from 'vue';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
-import { GroupUIFilter, GroupUIFilterBuilder } from './GroupUIFilter';
 import type { UIFilter, UIFilterBuilder } from './UIFilter';
+import type { GroupUIFilterEditorProperties } from './GroupUIFilterTypes';
 
 import GroupUIFilterList from './components/GroupUIFilterList.vue';
 
-const props = defineProps<{
-    filter: GroupUIFilter;
-}>();
+const props = defineProps<GroupUIFilterEditorProperties>();
 
 const show = useShow();
 const canPop = useCanPop();
@@ -55,8 +53,7 @@ function filterBuilders(builders: UIFilterBuilder[]) {
 }
 
 const builders = computed(() => {
-    if (props.filter.builders.length > 1 && props.filter.builders[0] instanceof GroupUIFilterBuilder && !props.filter.builders[0].wrapper) {
-        // Remove first
+    if (props.filter.builders.length > 1 && props.isGroupBuilder(props.filter.builders[0]) && !props.filter.builders[0].wrapper) {
         return filterBuilders(props.filter.builders.slice(1));
     }
     return filterBuilders(props.filter.builders).filter(b => b !== props.filter.builder);
@@ -87,7 +84,7 @@ function copyFromChanged(filter: UIFilter | null) {
         return;
     }
 
-    if (filter instanceof GroupUIFilter && filter.builder === props.filter.builder) {
+    if (props.isGroupFilter(filter) && filter.builder === props.filter.builder) {
         props.filter.filters = filter.filters;
         props.filter.mode = filter.mode;
         return;
