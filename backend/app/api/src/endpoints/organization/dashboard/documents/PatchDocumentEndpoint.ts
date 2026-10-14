@@ -4,6 +4,7 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Document, DocumentTemplate, Member, Registration } from '@stamhoofd/models';
+import { DocumentService } from '../../../../services/DocumentService.js';
 import { DocumentStatus, Document as DocumentStruct, PermissionLevel } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
@@ -74,7 +75,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                 document.status = template.status;
             }
 
-            await document.updateData();
+            await DocumentService.updateData(document);
             await document.save();
 
             // Return in response
@@ -125,7 +126,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                 document.memberId = put.memberId;
             }
 
-            await document.updateData();
+            await DocumentService.updateData(document);
             await document.save();
 
             // Return in response
