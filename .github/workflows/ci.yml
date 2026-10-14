@@ -295,10 +295,7 @@ jobs:
               # Production grants the same exception via /etc/apparmor.d/chrome-dev-builds.
               run: sudo sysctl -e -w kernel.apparmor_restrict_unprivileged_userns=0
             - name: Run tests
-              run: |
-                  for package in backend/app/renderer backend/app/redirecter backend/app/api; do
-                    pnpm --dir "$package" run test --bail=1
-                  done
+              run: pnpm exec turbo run test --filter='./backend/app/*' --concurrency=1 --env-mode=loose -- --run --bail=1
 
     job_test_backend_shared:
         name: "Backend Shared Tests"
@@ -326,10 +323,7 @@ jobs:
               with:
                   name: shared-dist
             - name: Run tests
-              run: |
-                  for package in backend/shared/queues backend/shared/logging backend/shared/models backend/shared/vies backend/shared/sql; do
-                    pnpm --dir "$package" run test --bail=1
-                  done
+              run: pnpm exec turbo run test --filter='./backend/shared/*' --concurrency=1 --env-mode=loose -- --run --bail=1
 
     job_test_shared:
         name: "Shared Package Tests"
@@ -344,10 +338,7 @@ jobs:
               with:
                   name: shared-dist
             - name: Run tests
-              run: |
-                  for package in shared/structures shared/utility shared/cli shared/object-differ shared/sgv shared/eslint; do
-                    pnpm --dir "$package" run test --bail=1
-                  done
+              run: pnpm exec turbo run test --filter='./shared/*' --filter=i18n-uuid --concurrency=2 --env-mode=loose -- --run --bail=1
 
     job_boot:
         name: "API boot and shutdown"
@@ -424,10 +415,8 @@ jobs:
               uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
               with:
                   name: shared-dist
-            - name: Run components browser tests
-              run: pnpm --dir frontend/shared/components exec vitest run
-            - name: Run networking browser tests
-              run: pnpm --dir frontend/shared/networking exec vitest run
+            - name: Run frontend shared tests
+              run: pnpm exec turbo run test --filter='./frontend/shared/*' --concurrency=1 --env-mode=loose -- --run --bail=1
 
     job_test_playwright:
         name: "Playwright Tests"
