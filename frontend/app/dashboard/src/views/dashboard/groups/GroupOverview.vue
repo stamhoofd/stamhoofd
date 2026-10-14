@@ -193,7 +193,7 @@ import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.
 
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 
-import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
@@ -208,9 +208,9 @@ import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vu
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 
-import { useGetGroupsById } from '@stamhoofd/networking/hooks/useGetGroups';
-import { useGetPeriods } from '@stamhoofd/networking/hooks/useGetPeriods';
-import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
+import { useGetGroupsById } from '@stamhoofd/components/hooks/useGetGroups';
+import { useGetPeriods } from '@stamhoofd/components/hooks/useGetPeriods';
+import { usePatchOrganizationPeriod } from '@stamhoofd/components/hooks/usePatchOrganizationPeriod';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import type { Group, MemberResponsibility, Organization, OrganizationRegistrationPeriod, RegistrationPeriod, TranslatedString } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

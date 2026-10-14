@@ -74,7 +74,7 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 
-import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods.ts';
+import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/components/hooks/useFetchOrganizationRegistrationPeriods';
 import { GroupType } from '@stamhoofd/structures/GroupType.js';
 import { Organization } from '@stamhoofd/structures/Organization.js';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

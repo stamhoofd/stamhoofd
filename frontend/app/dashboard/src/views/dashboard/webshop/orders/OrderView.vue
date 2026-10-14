@@ -326,7 +326,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import EmailAddress from '@stamhoofd/components/email/EmailAddress.vue';
-import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useBackForward } from '@stamhoofd/components/hooks/useBackForward.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';

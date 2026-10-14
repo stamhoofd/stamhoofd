@@ -9,7 +9,7 @@ import { useContextOptions } from '#context/hooks/useContextOptions.ts';
 import PlatformAvatar from '../../context/PlatformAvatar.vue';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { useErrors } from '../../errors/useErrors';
-import { GlobalEventBus } from '../../EventBus';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';

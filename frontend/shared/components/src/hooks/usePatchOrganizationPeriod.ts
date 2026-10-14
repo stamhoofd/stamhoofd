@@ -1,7 +1,7 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import type { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import { usePatchOrganizationPeriods } from './usePatchOrganizationPeriods';
+import { usePatchOrganizationPeriods } from '#hooks/usePatchOrganizationPeriods.ts';
 
 export function usePatchOrganizationPeriod() {
     const patchOrganizationPeriods = usePatchOrganizationPeriods();

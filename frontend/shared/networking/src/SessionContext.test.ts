@@ -1,13 +1,13 @@
 import { UrlHelper } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
+import type { NetworkingConfirmation } from '#NetworkingPresentation.ts';
+import { NetworkingPresentation } from '#NetworkingPresentation.ts';
 import { Platform } from '@stamhoofd/structures';
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { SessionContext } from './SessionContext.ts';
 
 describe('SessionContext.checkImpersonation', () => {
-    const owner = {};
     const originalHash = UrlHelper.initial.url.hash;
-    let questions: CenteredMessage[] = [];
+    let questions: NetworkingConfirmation[] = [];
 
     /**
      * Answer every confirmation with 'no': nobody is signed in, so no request is made and the
@@ -15,15 +15,14 @@ describe('SessionContext.checkImpersonation', () => {
      */
     beforeEach(() => {
         questions = [];
-        CenteredMessage.addListener(owner, (message) => {
+        vi.spyOn(NetworkingPresentation, 'confirm').mockImplementation(async (message) => {
             questions.push(message);
-            const cancel = message.buttons[message.buttons.length - 1];
-            cancel.action?.().catch(console.error);
+            return false;
         });
     });
 
     afterEach(() => {
-        CenteredMessage.removeListener(owner);
+        vi.restoreAllMocks();
         UrlHelper.initial.url.hash = originalHash;
     });
 

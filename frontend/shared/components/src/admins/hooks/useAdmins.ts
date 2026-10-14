@@ -1,4 +1,4 @@
-import { GlobalEventBus } from '#EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';

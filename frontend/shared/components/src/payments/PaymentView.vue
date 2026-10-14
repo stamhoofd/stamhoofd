@@ -296,7 +296,7 @@
 import { useAppContext } from '#context/appContext.ts';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
 import { useErrors } from '#errors/useErrors.ts';
-import { GlobalEventBus } from '#EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useBackForward } from '#hooks/useBackForward.ts';
 import { useContext } from '#hooks/useContext.ts';

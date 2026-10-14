@@ -1,9 +1,9 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useContext } from '#hooks/useContext.ts';
 import { LimitedFilteredRequest, PaginatedResponseDecoder, RegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { useRequestOwner } from './useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 
 export function useGetPeriods() {
     const context = useContext();

@@ -142,7 +142,7 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatchArray } from '#hooks/usePatchArray.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
+import { usePatchOrganizationPeriod } from '#hooks/usePatchOrganizationPeriod.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import { Group, GroupPrivateSettings, OrganizationEmail, OrganizationPrivateMetaData, OrganizationRegistrationPeriod, Platform, PlatformPrivateConfig, WebshopPreview, WebshopPrivateMetaData } from '@stamhoofd/structures';

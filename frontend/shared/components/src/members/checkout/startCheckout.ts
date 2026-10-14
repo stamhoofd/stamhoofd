@@ -5,7 +5,7 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { PlatformMember, RegisterCheckout, RegistrationWithTinyMember } from '@stamhoofd/structures';
 import { GroupType, PaymentStatus, PlatformFamily, RegisterResponse } from '@stamhoofd/structures';
-import { GlobalEventBus } from '../../EventBus';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 import { Toast } from '../../overlays/Toast';
 
 import type { DisplayOptions, NavigationActions } from '../../types/NavigationActions';

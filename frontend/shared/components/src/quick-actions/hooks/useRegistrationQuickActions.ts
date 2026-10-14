@@ -11,7 +11,7 @@ import type { Ref } from 'vue';
 import { computed, onActivated, onMounted, ref } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { useErrors } from '../../errors/useErrors';
-import { GlobalEventBus } from '../../EventBus';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 import { useContext } from '#hooks/useContext.ts';
 import { useUser } from '#hooks/useUser.ts';
 import { useChooseGroupForMember } from '#members/checkout/useCheckoutRegisterItem.ts';

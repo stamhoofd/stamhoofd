@@ -8,7 +8,7 @@ import { GroupType, Organization, RegisterCheckout, RegisterItem } from '@stamho
 
 import { loadFamilyIfNeeded } from '#members/hooks/useLoadFamily.ts';
 import { useAppContext } from '../../context/appContext';
-import { GlobalEventBus } from '../../EventBus';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 import { useContext } from '#hooks/useContext.ts';
 import { Toast } from '../../overlays/Toast';
 import type { DisplayOptions, NavigationActions } from '../../types/NavigationActions';

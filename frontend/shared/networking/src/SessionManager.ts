@@ -7,7 +7,7 @@ import { Organization, User, Version } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 
-import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { NetworkingPresentation } from '#NetworkingPresentation.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { isReactive } from 'vue';
 import { SessionContext } from './SessionContext';
@@ -184,7 +184,7 @@ export class SessionManagerStatic {
                             message: e.message,
                             human: $t(`%kz`),
                         });
-                        Toast.fromError(error).show();
+                        NetworkingPresentation.notifyError(error);
                         session.setLoadingError(error);
                         session.preventComplete = true;
                         return;

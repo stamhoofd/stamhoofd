@@ -2,7 +2,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';

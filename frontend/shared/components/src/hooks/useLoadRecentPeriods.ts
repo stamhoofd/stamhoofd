@@ -1,7 +1,7 @@
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { Toast } from '#overlays/Toast.ts';
 import { Sorter } from '@stamhoofd/utility';
-import { useOrganizationManager } from '../OrganizationManager';
-import { useFetchOrganizationRegistrationPeriods } from './useFetchOrganizationRegistrationPeriods';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useFetchOrganizationRegistrationPeriods } from '#hooks/useFetchOrganizationRegistrationPeriods.ts';
 import type { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 
 export function useLoadRecentPeriods() {

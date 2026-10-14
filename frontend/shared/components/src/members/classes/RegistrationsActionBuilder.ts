@@ -1,6 +1,6 @@
 import { usePresent } from '@simonbackx/vue-app-navigation';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
+import { useFetchOrganizationRegistrationPeriods } from '#hooks/useFetchOrganizationRegistrationPeriods.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, PlatformMember, Registration } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

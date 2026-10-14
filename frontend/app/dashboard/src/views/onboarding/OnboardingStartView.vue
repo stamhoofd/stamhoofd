@@ -44,7 +44,7 @@
 <script setup lang="ts">
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { GlobalEventBus } from '@stamhoofd/components/EventBus';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import { useUser } from '@stamhoofd/components/hooks/useUser';

@@ -4,8 +4,7 @@ import type { SimpleErrors } from '@simonbackx/simple-errors';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import type { RequestMiddleware } from '@simonbackx/simple-networking';
 import { Request } from '@simonbackx/simple-networking';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
-import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { NetworkingPresentation } from '#NetworkingPresentation.ts';
 import type { LoginProviderType } from '@stamhoofd/structures';
 import { ImpersonationTicketGrant, OpenIDAuthTokenResponse, Organization, Platform, Token, UserWithMembers, Version } from '@stamhoofd/structures';
 import { isReactive, reactive } from 'vue';
@@ -381,7 +380,7 @@ export class SessionContext implements RequestMiddleware {
                     console.warn('SSO state didn\'t match');
 
                     if (!this.canGetCompleted()) {
-                        new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show();
+                        NetworkingPresentation.notify('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red', 20000);
                     }
                     return false;
                 }
@@ -391,7 +390,7 @@ export class SessionContext implements RequestMiddleware {
                 console.error(e);
 
                 if (!this.canGetCompleted()) {
-                    new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show();
+                    NetworkingPresentation.notify('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red', 20000);
                 }
                 return false;
             }
@@ -450,7 +449,7 @@ export class SessionContext implements RequestMiddleware {
                     console.warn('SSO state didn\'t match');
 
                     if (!this.canGetCompleted()) {
-                        new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show();
+                        NetworkingPresentation.notify('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red', 20000);
                     }
                     return;
                 }
@@ -458,18 +457,18 @@ export class SessionContext implements RequestMiddleware {
             } catch (e) {
                 console.error(e);
                 if (!this.canGetCompleted()) {
-                    new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show();
+                    NetworkingPresentation.notify('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red', 20000);
                 }
                 return;
             }
 
-            new Toast(error, 'error red').setHide(20000).show();
+            NetworkingPresentation.notify(error, 'error red', 20000);
         } else {
             if (error) {
                 search.delete('error');
 
                 // Message not authorized
-                new Toast($t(`%kv`), 'error red').setHide(20000).show();
+                NetworkingPresentation.notify($t(`%kv`), 'error red', 20000);
             }
         }
 
@@ -485,7 +484,7 @@ export class SessionContext implements RequestMiddleware {
                     // Don't show msg
                     return;
                 }
-                Toast.success(msg).show();
+                NetworkingPresentation.notify(msg, 'success green');
                 Storage.secure.removeItem('oid-state').catch(console.error);
             } catch (e) {
                 console.error(e);
@@ -521,11 +520,11 @@ export class SessionContext implements RequestMiddleware {
         UrlHelper.initial.url.hash = hash.toString();
 
         if (this.hasToken()) {
-            new Toast($t(`%Zm9`), 'error red').setHide(30000).show();
+            NetworkingPresentation.notify($t(`%Zm9`), 'error red', 30000);
             return;
         }
 
-        if (!await CenteredMessage.confirm({
+        if (!await NetworkingPresentation.confirm({
             title: $t(`%ZnG`),
             confirmText: $t(`%ZmZ`),
             description: $t(`%ZmW`),
@@ -545,7 +544,7 @@ export class SessionContext implements RequestMiddleware {
             await this.setToken(response.data);
         } catch (e) {
             console.error(e);
-            Toast.fromError(e).setHide(30000).show();
+            NetworkingPresentation.notifyError(e, 30000);
         }
     }
 
@@ -560,7 +559,7 @@ export class SessionContext implements RequestMiddleware {
             await Storage.secure.setItem('oid-state', spaState);
         } catch (e) {
             console.error('Could not save state in local storage');
-            new Toast($t(`%kw`), 'error red').setHide(20000).show();
+            NetworkingPresentation.notify($t(`%kw`), 'error red', 20000);
             return;
         }
 
@@ -816,7 +815,7 @@ export class SessionContext implements RequestMiddleware {
             this.clearAuthCache();
 
             if (this.user.impersonatedBy) {
-                Toast.success($t('%Zma', { name: this.user.name || this.user.email })).show();
+                NetworkingPresentation.notify($t('%Zma', { name: this.user.name || this.user.email }), 'success green');
             }
         }
         console.log('Fetched session user');

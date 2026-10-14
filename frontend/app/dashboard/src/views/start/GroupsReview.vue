@@ -28,7 +28,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
+import { usePatchOrganizationPeriod } from '@stamhoofd/components/hooks/usePatchOrganizationPeriod';
 import type { Group, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { GroupStatus, SetupStepType } from '@stamhoofd/structures';
 import { computed } from 'vue';

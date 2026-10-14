@@ -2073,9 +2073,6 @@ importers:
       '@simplewebauthn/browser':
         specifier: 13.3.0
         version: 13.3.0
-      '@stamhoofd/components':
-        specifier: workspace:*
-        version: link:../components
       '@stamhoofd/frontend-i18n':
         specifier: workspace:*
         version: link:../i18n

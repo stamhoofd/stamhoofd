@@ -44,7 +44,7 @@ import { Editor, EditorContent } from '@tiptap/vue-3';
 import { nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue';
 import type { Ref } from 'vue';
 
-import { ColorHelper } from '../ColorHelper';
+import { ColorHelper } from '@stamhoofd/networking/ColorHelper';
 import { WarningBox } from '../editor/EditorWarningBox';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
