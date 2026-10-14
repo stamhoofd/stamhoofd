@@ -1267,8 +1267,8 @@ export class RegisterItem implements ObjectWithRecords {
 
             // Check if it fits
             if (this.member.member.details) {
-                if (!this.member.member.details.doesMatchGroup(this.group)) {
-                    const error = this.member.member.details.getMatchingError(this.group);
+                if (!this.member.member.details.doesMatchGroup(this.group.settings)) {
+                    const error = this.member.member.details.getMatchingError(this.group.settings);
                     throw new SimpleError({
                         code: 'not_matching',
                         message: 'Not matching: memberDetails',

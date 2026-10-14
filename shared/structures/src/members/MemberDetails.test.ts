@@ -1,8 +1,48 @@
 import { ObjectData } from '@simonbackx/simple-encoding';
+import { GroupGenderType } from '../GroupGenderType.js';
+import { GroupSettings } from '../GroupSettings.js';
 import { Address } from '../addresses/Address.js';
+import { Gender } from './Gender.js';
 import { MemberDetails } from './MemberDetails.js';
 import { Parent } from './Parent.js';
 import { UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from './UitpasNumberDetails.js';
+
+describe('Group matching', () => {
+    const member = MemberDetails.create({
+        firstName: 'Robot',
+        birthDay: new Date('2010-06-01'),
+        gender: Gender.Male,
+    });
+
+    test.each([
+        { minAge: 16, maxAge: 16, genderType: GroupGenderType.Mixed, matches: true },
+        { minAge: 17, maxAge: null, genderType: GroupGenderType.Mixed, matches: false },
+        { minAge: null, maxAge: 15, genderType: GroupGenderType.Mixed, matches: false },
+        { minAge: null, maxAge: null, genderType: GroupGenderType.OnlyFemale, matches: false },
+        { minAge: null, maxAge: null, genderType: GroupGenderType.OnlyMale, matches: true },
+    ])('matches settings %j', ({ minAge, maxAge, genderType, matches }) => {
+        const settings = GroupSettings.create({
+            startDate: new Date('2026-09-01'),
+            minAge,
+            maxAge,
+            genderType,
+        });
+
+        expect(member.doesMatchGroup(settings)).toBe(matches);
+        expect(member.getMatchingError(settings) === null).toBe(matches);
+    });
+
+    test('filters groups while preserving their objects and additional properties', () => {
+        const matching = { id: 'matching', settings: GroupSettings.create({}) };
+        const other = { id: 'other', settings: GroupSettings.create({ genderType: GroupGenderType.OnlyFemale }) };
+
+        const groups = member.getMatchingGroups([matching, other]);
+
+        expect(groups).toEqual([matching]);
+        expect(groups[0]).toBe(matching);
+        expect(groups[0].id).toBe('matching');
+    });
+});
 
 describe('Correctly merge multiple details together', () => {
     test('Merge', () => {

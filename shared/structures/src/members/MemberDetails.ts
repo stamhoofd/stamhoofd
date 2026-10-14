@@ -7,7 +7,7 @@ import { Address } from '../addresses/Address.js';
 import { Replacement } from '../endpoints/EmailRequest.js';
 
 import { AuditLogReplacement } from '../AuditLogReplacement.js';
-import type { Group } from '../Group.js';
+import type { GroupSettings } from '../GroupSettings.js';
 import { GroupGenderType } from '../GroupGenderType.js';
 import { EmergencyContact } from './EmergencyContact.js';
 import { Gender } from './Gender.js';
@@ -524,48 +524,48 @@ export class MemberDetails extends AutoEncoder {
     /**
      * Check if this member could fit a group, ignoring dates and waiting lists
      */
-    doesMatchGroup(group: Group) {
-        return this.getMatchingError(group) === null;
+    doesMatchGroup(settings: GroupSettings) {
+        return this.getMatchingError(settings) === null;
     }
 
-    getMatchingError(group: Group): { message: string; description: string } | null {
-        if (group.settings.minAge || group.settings.maxAge) {
-            const age = this.trackedAgeForYear(Formatter.luxon(group.settings.startDate ?? new Date()).year);
+    getMatchingError(settings: GroupSettings): { message: string; description: string } | null {
+        if (settings.minAge || settings.maxAge) {
+            const age = this.trackedAgeForYear(Formatter.luxon(settings.startDate ?? new Date()).year);
             if (age) {
-                if (group.settings.minAge && age < group.settings.minAge) {
+                if (settings.minAge && age < settings.minAge) {
                     return {
                         message: $t(`%qX`),
                         description: $t(`%15K`, {
                             'firstName': this.firstName,
-                            'born-in-after-1995': group.settings.getAgeGenderDescription({ includeAge: true }) ?? '',
+                            'born-in-after-1995': settings.getAgeGenderDescription({ includeAge: true }) ?? '',
                         }),
                     };
                 }
 
-                if (group.settings.maxAge && age > group.settings.maxAge) {
+                if (settings.maxAge && age > settings.maxAge) {
                     return {
                         message: $t(`%qY`),
                         description: $t(`%15K`, {
                             'firstName': this.firstName,
-                            'born-in-after-1995': group.settings.getAgeGenderDescription({ includeAge: true }) ?? '',
+                            'born-in-after-1995': settings.getAgeGenderDescription({ includeAge: true }) ?? '',
                         }),
                     };
                 }
             }
         }
 
-        if ((this.gender === Gender.Male && group.settings.genderType === GroupGenderType.OnlyFemale) || (this.gender === Gender.Female && group.settings.genderType === GroupGenderType.OnlyMale)) {
+        if ((this.gender === Gender.Male && settings.genderType === GroupGenderType.OnlyFemale) || (this.gender === Gender.Female && settings.genderType === GroupGenderType.OnlyMale)) {
             return {
-                message: $t(`%15I`, { gender: group.settings.getAgeGenderDescription({ includeGender: true })! }),
-                description: $t(`%15J`, { gender: group.settings.getAgeGenderDescription({ includeGender: true })! }),
+                message: $t(`%15I`, { gender: settings.getAgeGenderDescription({ includeGender: true })! }),
+                description: $t(`%15J`, { gender: settings.getAgeGenderDescription({ includeGender: true })! }),
             };
         }
 
         return null;
     }
 
-    getMatchingGroups(groups: Group[]) {
-        return groups.filter(g => this.doesMatchGroup(g));
+    getMatchingGroups<T extends { settings: GroupSettings }>(groups: T[]): T[] {
+        return groups.filter(g => this.doesMatchGroup(g.settings));
     }
 
     updateAddress(oldValue: Address, newValue: Address) {
