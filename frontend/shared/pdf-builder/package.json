@@ -13,7 +13,6 @@
     },
     "dependencies": {
         "@stamhoofd/assets": "workspace:*",
-        "@stamhoofd/components": "workspace:*",
         "@stamhoofd/networking": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
