@@ -3,7 +3,7 @@ import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-a
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
-import type { Group, PlatformFamily, PlatformMember, RegistrationWithPlatformMember } from '@stamhoofd/structures';
+import type { Group, PlatformFamily, PlatformMember, Registration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { GroupType, Organization, RegisterCheckout, RegisterItem } from '@stamhoofd/structures';
 
 import { loadFamilyIfNeeded } from '#members/hooks/useLoadFamily.ts';
@@ -366,7 +366,7 @@ export async function chooseOrganizationMembersForGroup({ members, group, organi
     organization?: Organization;
     context: SessionContext;
     items?: RegisterItem[];
-    deleteRegistrations?: RegistrationWithPlatformMember[];
+    deleteRegistrations?: RegistrationWithPlatformMember<Registration, PlatformMember>[];
     navigate: NavigationActions;
     owner: any;
 }) {

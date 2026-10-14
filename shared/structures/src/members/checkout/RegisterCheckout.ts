@@ -13,7 +13,10 @@ import { BalanceItemCartItem } from './BalanceItemCartItem.js';
 import { IDRegisterCart, RegisterCart } from './RegisterCart.js';
 import type { RegisterItem } from './RegisterItem.js';
 import type { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
+import type { Registration } from '../Registration.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../../upgradePriceFrom2To4DecimalPlaces.js';
+
+type RegistrationWithMember = RegistrationWithPlatformMember<Registration, PlatformMember>;
 
 export type RegisterContext = {
     members: PlatformMember[];
@@ -219,7 +222,7 @@ export class RegisterCheckout {
         }
     }
 
-    removeRegistration(registration: RegistrationWithPlatformMember, options?: { calculate?: boolean }) {
+    removeRegistration(registration: RegistrationWithMember, options?: { calculate?: boolean }) {
         this.cart.removeRegistration(registration);
 
         if (this.cart.deleteRegistrations.length === 1) {
@@ -242,7 +245,7 @@ export class RegisterCheckout {
         }
     }
 
-    unremoveRegistration(registration: RegistrationWithPlatformMember, options?: { calculate?: boolean }) {
+    unremoveRegistration(registration: RegistrationWithMember, options?: { calculate?: boolean }) {
         this.cart.unremoveRegistration(registration);
 
         if (this.cart.isEmpty) {
