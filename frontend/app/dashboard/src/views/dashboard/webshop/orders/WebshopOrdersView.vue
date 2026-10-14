@@ -46,10 +46,13 @@ import { OrderActionBuilder } from './OrderActionBuilder';
 import { OrderRequiredFilterHelper } from './OrderRequiredFilterHelper';
 
 import { useOrdersObjectFetcher } from './useOrdersObjectFetcher';
+import { useOrdersSyncToast } from './useOrdersSyncToast';
 
 const props = defineProps<{ webshopManager: WebshopManager }>();
 
 const title = $t('%1JX');
+
+useOrdersSyncToast(() => props.webshopManager);
 
 const objectFetcher = useOrdersObjectFetcher(props.webshopManager, {
     requiredFilter: OrderRequiredFilterHelper.getDefault(props.webshopManager.preview.id),
