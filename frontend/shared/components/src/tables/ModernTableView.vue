@@ -1868,7 +1868,8 @@ function updateVisibleRows() {
         totalItems = props.tableObjectFetcher.totalFilteredCount;
         cachedProvisionalTotalItems = null;
     } else if (lastFilteredCount.value !== null) {
-        totalItems = lastFilteredCount.value;
+        // The count of the previous search or filter, but at least the rows that already loaded for this one
+        totalItems = Math.max(lastFilteredCount.value, values.value.length);
         cachedProvisionalTotalItems = totalItems;
     } else {
         totalItems = totalFilteredCount.value;
