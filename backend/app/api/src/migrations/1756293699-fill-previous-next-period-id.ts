@@ -1,6 +1,7 @@
 import { Migration } from '@simonbackx/simple-database';
 import { logger } from '@simonbackx/simple-logging';
-import { Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
+import { Organization, Platform } from '@stamhoofd/models';
+import { RegistrationPeriodService } from '@stamhoofd/models/services/RegistrationPeriodService.js';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment == 'test') {
@@ -12,10 +13,10 @@ export default new Migration(async () => {
 
     await logger.setContext({ tags: ['seed'] }, async () => {
         if (STAMHOOFD.userMode === 'platform') {
-            await RegistrationPeriod.updatePreviousNextPeriods(null);
+            await RegistrationPeriodService.updatePreviousNextPeriods(null);
         } else {
             for await (const organization of Organization.select().all()) {
-                await RegistrationPeriod.updatePreviousNextPeriods(organization.id);
+                await RegistrationPeriodService.updatePreviousNextPeriods(organization.id);
             }
         }
     });
