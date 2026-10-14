@@ -4,13 +4,12 @@ import { Formatter } from '@stamhoofd/utility';
 import type { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery } from './SQLExpression.js';
 import { joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
 import { SQLAlias, SQLColumnExpression, SQLCount, SQLSelectAs, SQLSum, SQLTableExpression } from './SQLExpressions.js';
-import type { SQLJoin } from './SQLJoin.js';
+import type { SQLJoinExpression } from './SQLQueryContracts.js';
+import { SQLSelectBase } from './SQLQueryContracts.js';
 import { SQLLogger } from './SQLLogger.js';
 import { Orderable } from './SQLOrderBy.js';
 import type { SQLWhere } from './SQLWhere.js';
 import { Whereable } from './SQLWhere.js';
-
-class EmptyClass {}
 
 export function parseTable(tableOrExpression: SQLNamedExpression | string, asNamespace?: string): SQLNamedExpression {
     if (typeof tableOrExpression === 'string') {
@@ -35,7 +34,7 @@ export type IterableSQLSelectOptions = {
 
 export type SQLNamedSelect<T extends object = SQLResultNamespacedRow> = SQLSelect<T> & { getName(): string };
 
-export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Whereable(Orderable(EmptyClass)) implements SQLExpression {
+export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Whereable(Orderable(SQLSelectBase)) implements SQLExpression {
     _columns: SQLExpression[];
     _from: SQLNamedExpression;
 
@@ -43,7 +42,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     _offset: number | null = null;
     _groupBy: SQLExpression[] = [];
     _having: SQLWhere | null = null;
-    _joins: (InstanceType<typeof SQLJoin>)[] = [];
+    _joins: SQLJoinExpression[] = [];
     _max_execution_time: number | null = null;
     _log = false;
 
@@ -99,7 +98,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         return this;
     }
 
-    join(join: InstanceType<typeof SQLJoin>): this {
+    join(join: SQLJoinExpression): this {
         // prevent duplicate joins (reference of join should be the same)
         if (!this._joins.includes(join)) {
             this._joins.push(join);
