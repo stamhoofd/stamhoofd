@@ -84,11 +84,13 @@ export async function tailSharedLogs(verbosity: RunVerbosity = RunVerbosity.Outp
         'exec',
         'concurrently',
         '-n',
-        'MySQL,MailDev,RustFS,CoreDNS,Caddy',
+        'MySQL,MailDev,RustFS,CoreDNS,Caddy,ElasticMQ,ElasticMQ UI',
         `${runtime} logs -f stamhoofd-mysql`,
         `${runtime} logs -f stamhoofd-maildev`,
         `${runtime} logs -f stamhoofd-rustfs`,
         `${runtime} logs -f stamhoofd-coredns`,
         `${runtime} logs -f stamhoofd-caddy`,
+        `${runtime} logs -f stamhoofd-elasticmq`,
+        `${runtime} logs -f stamhoofd-elasticmq-ui`,
     ], { allowFailure: true, verbosity });
 }
