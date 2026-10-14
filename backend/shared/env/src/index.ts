@@ -1,4 +1,5 @@
 import type { StatisticsEnvironment } from '@stamhoofd/types/Environment';
+import { BackendApp } from '@stamhoofd/types/BackendApp';
 import chalk from 'chalk';
 import crypto from 'crypto';
 import fs, { promises } from 'fs';
@@ -12,7 +13,7 @@ async function fileExists(path: string): Promise<boolean> {
     }
 }
 
-export async function load(settings?: { path?: string; service?: 'redirecter' | 'api' | 'renderer' | 'backup' | 'statistics-syncer' }) {
+export async function load(settings?: { path?: string; service?: BackendApp }) {
     let env: any;
 
     if (process.env.NODE_ENV && process.env.NODE_ENV === 'test') {
@@ -23,7 +24,7 @@ export async function load(settings?: { path?: string; service?: 'redirecter' | 
     } else if (!settings?.path && (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') && process.env.STAMHOOFD_ENV) {
         const builder = await import('@stamhoofd/cli');
         env = await builder.buildDevelopmentEnvironment(process.env.STAMHOOFD_ENV ?? '', {
-            backend: settings?.service ?? 'api',
+            backend: settings?.service ?? BackendApp.Api,
         });
 
         if (await fileExists(settings?.path ?? '.env.json')) {
@@ -39,17 +40,17 @@ export async function load(settings?: { path?: string; service?: 'redirecter' | 
     // Mapping out environment for dependencies that need environment variables
     process.env.NODE_ENV = STAMHOOFD.environment === 'production' ? 'production' : 'development';
 
-    if (settings?.service === 'redirecter') {
+    if (settings?.service === BackendApp.Redirecter) {
         return;
     }
-    if (settings?.service === 'renderer') {
+    if (settings?.service === BackendApp.Renderer) {
         return;
     }
 
     // The syncer reads the administration through the models, so the shared connection is pointed at
     // the database it was given. It writes to the statistics database, which lives on the Metabase
     // server and which it connects to separately.
-    if (settings?.service === 'statistics-syncer') {
+    if (settings?.service === BackendApp.StatisticsSyncer) {
         const database = (env as StatisticsEnvironment).stamhoofdDatabase;
 
         if (!database?.DB_DATABASE) {
@@ -68,7 +69,7 @@ export async function load(settings?: { path?: string; service?: 'redirecter' | 
         return;
     }
 
-    if (settings?.service === 'api') {
+    if (settings?.service === BackendApp.Api) {
         if (!STAMHOOFD.domains) {
             console.error('env', env);
             throw new Error('Expected environment variable domains');

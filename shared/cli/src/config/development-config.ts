@@ -8,31 +8,9 @@ import { buildPorts } from '../context/ports.js';
 import { applyInternalSecrets } from './internal-secrets.js';
 import { defaultDomain, localFilesAccessKey, localFilesSecretKey, localIpv4Host, localPrimaryBucket, maildevPassword, maildevUsername, mysqlInternalPort } from './shared-service-config.js';
 import type { Language } from '@stamhoofd/types/Language';
-
-export type AppService
-    = | BackendAppService
-        | FrontendAppService;
-
-export enum BackendApp {
-    Api = 'api',
-    Renderer = 'renderer',
-    Redirecter = 'redirecter',
-    Backup = 'backup',
-    StatisticsSyncer = 'statistics-syncer',
-}
-
-export enum FrontendApp {
-    Webshop = 'webshop',
-    Calculator = 'calculator',
-    Mobile = 'mobile',
-    WebApp = 'web-app',
-}
-
-export type BackendAppName = `${BackendApp}`;
-export type FrontendAppName = `${FrontendApp}`;
-
-export type BackendAppService = { backend: BackendAppName };
-export type FrontendAppService = { frontend: FrontendAppName };
+import type { AppEnvironment, AppService, BackendAppService, FrontendAppService } from './development-config-types.js';
+import { BackendApp } from '@stamhoofd/types/BackendApp';
+import { FrontendApp } from '@stamhoofd/types/FrontendApp';
 
 export type DevelopmentDomains = ReturnType<typeof buildDevelopmentDomains>;
 export type DevelopmentDatabases = ReturnType<typeof buildDevelopmentDatabases>;
@@ -44,12 +22,6 @@ export type DevelopmentConfig = {
     backendEnv: NodeJS.ProcessEnv;
     appEnv: AppEnvironment;
 };
-
-/**
- * The statistics syncer is the one service that runs on none of the platform configuration: it moves
- * rows between two databases and needs nothing else.
- */
-export type AppEnvironment = SharedEnvironment | StatisticsEnvironment;
 
 type EnvironmentPreset = {
     userMode: SharedEnvironment['userMode'];
@@ -113,7 +85,7 @@ function buildDevelopmentDatabases(context: CliContext) {
     };
 }
 
-export async function buildDevelopmentEnvironment(env: string, service: { backend: 'statistics-syncer' }): Promise<StatisticsEnvironment>;
+export async function buildDevelopmentEnvironment(env: string, service: { backend: BackendApp.StatisticsSyncer }): Promise<StatisticsEnvironment>;
 export async function buildDevelopmentEnvironment(env: string, service: BackendAppService): Promise<BackendEnvironment>;
 export async function buildDevelopmentEnvironment(env: string, service: FrontendAppService): Promise<FrontendEnvironment>;
 export async function buildDevelopmentEnvironment(env: string, service: AppService): Promise<AppEnvironment> {
@@ -154,7 +126,7 @@ function buildDevelopmentDomains(context: CliContext) {
 function buildAppEnvironment(context: CliContext, domains: DevelopmentDomains, databases: DevelopmentDatabases, ports: ReturnType<typeof buildPorts>, backendEnv: NodeJS.ProcessEnv, service: AppService): AppEnvironment {
     const preset = environmentPreset(context.env);
 
-    if ('backend' in service && (service.backend as BackendApp) === BackendApp.StatisticsSyncer) {
+    if ('backend' in service && service.backend === BackendApp.StatisticsSyncer) {
         return buildStatisticsEnvironment(databases, ports, backendEnv, preset);
     }
 
@@ -250,13 +222,10 @@ function buildStatisticsEnvironment(databases: DevelopmentDatabases, ports: Retu
 }
 
 function frontendPort(service: FrontendAppService['frontend'], ports: ReturnType<typeof buildPorts>): number | undefined {
-    // Keep the public API string-compatible while using enum values internally for comparisons.
-    const app = service as FrontendApp;
-
-    if (app === FrontendApp.WebApp) {
+    if (service === FrontendApp.WebApp) {
         return ports.webApp;
     }
-    if (app === FrontendApp.Webshop) {
+    if (service === FrontendApp.Webshop) {
         return ports.webshop;
     }
     return undefined;
@@ -279,10 +248,7 @@ function buildStamhoofdDomains(domains: DevelopmentDomains, preset: EnvironmentP
 }
 
 function backendPort(service: BackendAppService['backend'], ports: ReturnType<typeof buildPorts>): number {
-    // Keep the public API string-compatible while using enum values internally for comparisons.
-    const app = service as BackendApp;
-
-    if (app === BackendApp.Renderer) {
+    if (service === BackendApp.Renderer) {
         return ports.renderer;
     }
     return ports.api;

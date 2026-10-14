@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import { buildConfig } from '@stamhoofd/vite-config';
+import { FrontendApp } from '@stamhoofd/types/FrontendApp';
 
 // Set timezone!
 process.env.TZ = 'UTC';
@@ -9,7 +10,7 @@ process.env.TZ = 'UTC';
 // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 export default defineConfig({
     ...await buildConfig({
-        name: 'calculator',
+        name: FrontendApp.Calculator,
         port: 8083,
         frontendDir: resolve(import.meta.dirname, '../..'),
     }),

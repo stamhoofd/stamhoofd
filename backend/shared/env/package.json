@@ -14,10 +14,8 @@
     },
     "dependencies": {
         "@stamhoofd/test-utils": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
         "chalk": "5.6.2"
-    },
-    "devDependencies": {
-        "@stamhoofd/types": "workspace:*"
     },
     "peerDependencies": {
         "@stamhoofd/cli": "workspace:*"

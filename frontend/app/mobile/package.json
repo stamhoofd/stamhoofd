@@ -54,6 +54,7 @@
     },
     "devDependencies": {
         "@capacitor/cli": "8.5.2",
+        "@stamhoofd/types": "workspace:*",
         "@stamhoofd/vite-config": "workspace:*",
         "@trapezedev/configure": "7.1.10",
         "eslint-plugin-stamhoofd": "workspace:*",
