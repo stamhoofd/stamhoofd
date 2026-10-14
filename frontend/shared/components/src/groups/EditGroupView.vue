@@ -757,6 +757,7 @@
 <script setup lang="ts">
 
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import { useGroupViewLoaders } from './groupViewLoaders';
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import OrganizationAvatar from '#context/OrganizationAvatar.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';
@@ -1002,6 +1003,7 @@ const { priceName: reducedPriceName } = useFinancialSupportSettings({
     group: patchedGroup,
 });
 const present = usePresent();
+const groupViewLoaders = useGroupViewLoaders();
 const didSetAutomaticGroup = ref(false);
 
 const availableWaitingLists = computed(() => {
@@ -1666,7 +1668,7 @@ async function addWaitingList() {
     // Edit the group
     await present({
         components: [
-            AsyncComponent(() => import('./EditGroupView.vue'), {
+            AsyncComponent(groupViewLoaders.editGroup, {
                 initialPatch: basePatch,
                 period: patchedPeriod.value,
                 groupId: waitingList.id,
@@ -1707,7 +1709,7 @@ async function editWaitingList(waitingList: Group) {
 
     await present({
         components: [
-            AsyncComponent(() => import('./EditGroupView.vue'), {
+            AsyncComponent(groupViewLoaders.editGroup, {
                 period: patchedPeriod.value,
                 groupId: waitingList.id,
                 isNew: false,
