@@ -5,6 +5,7 @@ import { TableHelper, waitForAnimationEnd } from '../TableHelper.js';
 
 export type StringFilterMode = 'Is gelijk aan...' | 'Is niet gelijk aan...' | 'Bevat...' | 'Bevat niet...' | 'Is leeg' | 'Is niet leeg';
 export type NumberFilterMode = 'Gelijk aan...' | 'Niet gelijk aan...' | 'Groter dan...' | 'Groter dan of gelijk aan...' | 'Kleiner dan...' | 'Kleiner dan of gelijk aan...';
+export type DateFilterMode = 'Gelijk aan...' | 'Niet gelijk aan...' | 'Groter dan...' | 'Kleiner dan...';
 
 /**
  * The orders table of a webshop, read and driven like a user would.
@@ -142,6 +143,19 @@ export class OrdersTable extends TableHelper {
         const input = this.page.locator('.option input').first();
         await input.fill(value.toString());
         await input.blur();
+        await this.applyFilterEditor();
+    }
+
+    async addDateFilter(filterName: string, mode: DateFilterMode, date: Date) {
+        await this.openFilterEditor(filterName);
+        // The label of the selected mode also contains its input
+        await this.page.locator('label').filter({ hasText: new RegExp('^\\s*' + Formatter.escapeRegex(mode)) }).click();
+        const inputs = this.page.locator('.date-selection-container.option').first().locator('input');
+        await inputs.nth(0).fill(String(date.getDate()).padStart(2, '0'));
+        await inputs.nth(1).fill(String(date.getMonth() + 1).padStart(2, '0'));
+        await inputs.nth(2).fill(String(date.getFullYear()));
+        // The value is only stored once the inputs lose focus
+        await inputs.nth(2).evaluate((element: HTMLInputElement) => element.blur());
         await this.applyFilterEditor();
     }
 

@@ -72,7 +72,8 @@ export async function createOrdersListWebshop(prefix: string, options: { ticketT
  * Opens the orders table of the webshop in a new browser context (its own local order database).
  */
 export async function openOrdersList(browser: Browser, shop: OrdersListWebshop, device: TestDevice = 'desktop', options: { beforeOpen?: (page: Page) => Promise<unknown>; waitForFirstRow?: boolean } = {}): Promise<{ context: BrowserContext; page: Page; table: OrdersTable; backend: BackendOrders }> {
-    const context = await browser.newContext({ ...testDevices[device] });
+    // The dashboard picks dates in Belgian time, like its users
+    const context = await browser.newContext({ ...testDevices[device], timezoneId: 'Europe/Brussels' });
     await login(context, shop);
     const page = await context.newPage();
     await options.beforeOpen?.(page);
