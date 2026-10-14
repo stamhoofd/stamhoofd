@@ -31,33 +31,15 @@ Follow the [translation conventions](contributing/frontend/translations.md) for 
 
 Read the [build-system guide](.development/README.md) when changing build configuration or investigating stale outputs. Packages consume built `dist/` output, not source; rebuild shared packages before using consumers. `pnpm stam test` manages its own prerequisite builds.
 
-`pnpm stam dev` runs API, renderer, statistics syncer, web-app, and webshop development scripts through explicit Turbo filters. These tasks are persistent and uncached. Development uses Turbo's loose environment mode so the CLI-generated backend, frontend, and Stripe environment reaches package processes. The docs server remains a direct Nuxt process because it does not consume shared build output.
-
-`pnpm stam build` builds shared packages, then those same five executable app owners through explicit uncached Turbo filters. Dashboard and registration are source packages bundled by web-app, not standalone build owners. `pnpm run build:backend:apps` explicitly builds API, renderer, backup, redirecter, and statistics syncer. Migrations run the API and statistics-syncer owners explicitly and serially.
-
-`pnpm stam` first runs cached Turbo builds for the CLI and its dependencies through `.development/stam.mjs`. When `devops/tsconfig.cli.json` exists, it also runs the cached root `build:stam-devops` task; `devops` remains a separate repository outside the workspace. Successful bootstrap builds are silent; failed builds print diagnostics to stderr. CLI arguments and exit status are preserved. There is no separate `stam-dev` command.
-
 ## Commands
 
-From repo root: `pnpm run lint` · `pnpm run typecheck`. Both dispatch every package-owned check through Turbo and remain uncached. `pnpm run lint` forwards `--quiet` to ESLint. **`pnpm stam test` is the one go-to way to run unit tests** — it runs `build:shared` first and only starts an isolated MySQL when a selected package needs one. Prefer it over your own commands; it does all required setup and teardown.
+Always prefer `stam` over lower-level scripts or commands. Use `pnpm stam` from the repository root when the shortcut is unavailable. Read the [CLI guide](shared/cli/README.md) for commands, app ownership, bootstrap, and troubleshooting.
 
-```bash
-pnpm stam test unit                 # every unit package (excludes Playwright)
-pnpm stam test coverage             # coverage packages with the same isolated MySQL lifecycle
-pnpm stam test api                  # one package: api models vies sql statistics-syncer structures renderer redirecter queues utility sgv stdsync object-differ eslint vite-config metabase i18n-uuid cli components networking
-pnpm stam test api --coverage       # collect coverage for one package
-pnpm stam test unit SomeFile        # filename filter across all packages
-pnpm stam test structures bundle-discounts          # package + filename filter
-pnpm stam test structures -t 'partial test name'    # package + test-name filter (-t → vitest -t)
-pnpm stam test api --skip-build     # skip the automatic build:shared
-pnpm stam test api --clear          # reset the test database (drop its volume) before running
-```
+Run tests only through `stam test`, including `stam test e2e` for Playwright. Never invoke or build test runners manually. See the [test command reference](shared/cli/README.md#tests) for package selection, filters, and prerequisites.
 
 For running tests, your sandbox needs permission to open ports.
 
-The DB MySQL container is shut down after each run, but its data volume persists (per worktree) so migrations aren't reinitialized every time — use `--clear` for a clean database.
-
-**Never hand-roll test infrastructure.** The isolated MySQL, migrations, `build:shared`, and env are all provisioned by `pnpm stam test` — don't spin up Docker, create databases, run `build:shared`, or set `DB_PORT`/env vars yourself. If it doesn't work, STOP and ask the user. Tests use **Vitest**; `api`, `models`, `sql`, `statistics-syncer`, and `vies` need MySQL. `components` and `networking` are vitest browser-mode tests and need a Playwright Chromium (`pnpm exec playwright install chromium`). The frontend dashboard/web-app "test" is a `vue-tsc` typecheck (run via `pnpm run typecheck`); UI behavior is covered by Playwright.
+**Never hand-roll test infrastructure.** Let `stam test` provision shared builds, MySQL, migrations, and environment variables; do not separately start Docker containers, create databases, build shared packages, or override database environment variables for tests. If managed test infrastructure fails, stop and ask the user to fix the environment.
 
 ### Playwright
 
