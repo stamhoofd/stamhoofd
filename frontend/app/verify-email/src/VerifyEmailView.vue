@@ -44,6 +44,7 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent';
+import { useFreshAction } from '@stamhoofd/components/auth/useFreshAction';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useAppNavigate } from '@stamhoofd/components/hooks/useAppNavigate';
@@ -72,6 +73,7 @@ const props = withDefaults(
 );
 
 const context = useContext();
+const runFresh = useFreshAction();
 const appNavigate = useAppNavigate();
 const show = useShow();
 
@@ -193,6 +195,7 @@ async function presentMFAFlow(result: { mfaChallenge?: MFAChallengeResponse; mfa
                     })
                 : AsyncComponent(() => import('@stamhoofd/components/auth/SetupMFAView.vue'), {
                         setupToken: result.mfaSetup?.setupToken,
+                        runFresh,
                         canUsePasskeys: result.mfaSetup?.canUsePasskeys ?? false,
                         onCompleted,
                     }),
