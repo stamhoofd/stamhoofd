@@ -3,6 +3,8 @@ import { inject, provide } from 'vue';
 
 export type MemberViewLoaders = {
     details: () => Promise<{ default: Component }>;
+    member: () => Promise<{ default: Component }>;
+    messages: () => Promise<{ default: Component }>;
 };
 
 export const memberViewLoadersKey: InjectionKey<MemberViewLoaders> = Symbol('memberViewLoaders');
