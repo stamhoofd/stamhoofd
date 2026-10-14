@@ -19,9 +19,11 @@ import { WhatsNewCount } from './classes/WhatsNewCount';
 import { buildTranslatedUrl } from '@stamhoofd/components/containers/TranslatedUrl.ts';
 import { useProvideEventWebshopViews } from './providers/provideEventWebshopViews';
 import { useProvideMemberViews } from '@stamhoofd/components/members/provideMemberViews';
+import { useProvideEventViews } from '@stamhoofd/components/events/provideEventViews';
 
 useProvideEventWebshopViews();
 useProvideMemberViews();
+useProvideEventViews();
 
 const context = useContext();
 const platform = usePlatform();

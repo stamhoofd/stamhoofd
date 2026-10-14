@@ -14,6 +14,7 @@ import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useProvideMemberViews } from '@stamhoofd/components/members/provideMemberViews';
+import { useProvideEventViews } from '@stamhoofd/components/events/provideEventViews';
 import { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useProvideEventWebshopViews } from '@stamhoofd/dashboard/providers/provideEventWebshopViews.ts';
@@ -22,6 +23,7 @@ import { useAdminAuditLogRenderers } from './views/organizations/useAdminAuditLo
 const getLoginRoot = useLoginRoot();
 useProvideEventWebshopViews();
 useProvideMemberViews();
+useProvideEventViews();
 const context = useContext();
 const platform = usePlatform();
 const auditLogRenderers = useAdminAuditLogRenderers();
