@@ -10,7 +10,7 @@ export class RegistrationWithPlatformMember {
         this.member = options.member;
     }
 
-    clone() {
+    clone(): RegistrationWithPlatformMember {
         return new RegistrationWithPlatformMember({
             registration: this.registration.clone(),
             member: this.member, // no need to clone because it is a reference
