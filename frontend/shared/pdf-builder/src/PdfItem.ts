@@ -1,24 +1,6 @@
 import type { PdfDocWrapper } from './PdfDocWrapper';
 import type { PdfFont } from './PdfFont';
-
-export type PdfItemDrawOptions = {
-    /**
-     * The maximum width of the item.
-     */
-    maxWidth?: number;
-    /**
-     * The position on the page where
-     * the item should be drawn. Defaults to the current position.
-     */
-    position?: {
-        x?: number;
-        y?: number;
-    };
-};
-
-export type PdfItemGetHeightOptions = {
-    maxWidth?: number;
-};
+import type { PdfItemDrawOptions, PdfItemGetHeightOptions } from './PdfItemOptions';
 
 /**
  * An interface with methods that can be used to draw something on a pdf document
