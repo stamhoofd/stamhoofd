@@ -7,7 +7,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import type { MemberWithUsersRegistrationsAndGroups, Registration } from '@stamhoofd/models';
 import { AuditLog, BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, Organization, Platform, RateLimiter, RegistrationPeriod, User } from '@stamhoofd/models';
 import type { MemberResponsibility, MembersBlob } from '@stamhoofd/structures';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, EmergencyContact, GroupType, MemberDetails, MemberWithRegistrationsBlob, Parent, PermissionLevel, PlatformMembershipTypeBehaviour, SetupStepType } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, EmergencyContact, GroupType, MemberDetails, MemberWithRegistrationsBlob, Parent, PlatformMembershipTypeBehaviour, SetupStepType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Email } from '@stamhoofd/email';

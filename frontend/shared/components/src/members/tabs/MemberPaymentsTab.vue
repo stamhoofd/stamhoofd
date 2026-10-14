@@ -27,7 +27,8 @@ import { useAuth } from '#hooks/useAuth.ts';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import type { PlatformMember } from '@stamhoofd/structures';
-import { PermissionLevel, ReceivableBalance, ReceivableBalanceObject, ReceivableBalanceType } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { ReceivableBalance, ReceivableBalanceObject, ReceivableBalanceType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 

@@ -1,7 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { AuditLog, EmailVerificationCode, Member, MemberFactory, OrganizationFactory, Token, User, UserFactory } from '@stamhoofd/models';
 import type { Organization } from '@stamhoofd/models';
-import { AuditLogType, LoginProviderType, PermissionLevel, PermissionRole, Permissions, Token as TokenStruct, UserMeta } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { AuditLogType, LoginProviderType, PermissionRole, Permissions, Token as TokenStruct, UserMeta } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 
 import { testServer } from '../../../tests/helpers/TestServer.js';

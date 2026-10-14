@@ -1,6 +1,6 @@
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { markRaw } from 'vue';
 import type { NavigationActions } from '../../../types/NavigationActions';
 import EditMemberUitpasBox from '../../components/edit/EditMemberUitpasBox.vue';

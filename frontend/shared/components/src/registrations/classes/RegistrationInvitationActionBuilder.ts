@@ -6,7 +6,7 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { Group, OrganizationRegistrationPeriod, RegistrationInvitation, RegistrationInvitationRequest } from '@stamhoofd/structures';
-import { PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { Toast } from '../../overlays/Toast';
 import type { RegistrationInvitationEvenOrigin } from './useRegistrationInvitationEventListener';

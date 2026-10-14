@@ -2,7 +2,8 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization } from '@stamhoofd/models';
 import { OrganizationFactory, Token, User, UserFactory, UserSession } from '@stamhoofd/models';
 import { SESSION_DURATIONS } from '@stamhoofd/models/constants/sessions.js';
-import { PermissionLevel, Permissions, SessionClientType, Token as TokenStruct } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Permissions, SessionClientType, Token as TokenStruct } from '@stamhoofd/structures';
 import { SessionService } from '../../services/SessionService.js';
 
 import { testServer } from '../../../tests/helpers/TestServer.js';

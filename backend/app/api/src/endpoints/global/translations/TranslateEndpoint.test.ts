@@ -1,7 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Token } from '@stamhoofd/models';
 import { OrganizationFactory, UserFactory } from '@stamhoofd/models';
-import { PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Permissions } from '@stamhoofd/structures';
 import { TranslateRequest } from '@stamhoofd/structures/endpoints/TranslateRequest.js';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Language } from '@stamhoofd/types/Language';

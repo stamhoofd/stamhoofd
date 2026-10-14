@@ -1,6 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
-import { Organization, PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Organization, Permissions } from '@stamhoofd/structures';
 import { SessionService } from '../../../../services/SessionService.js';
 
 import { TestUtils } from '@stamhoofd/test-utils';

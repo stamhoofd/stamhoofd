@@ -4,7 +4,8 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Webshop, WebshopDiscountCode } from '@stamhoofd/models';
 import type { CountFilteredRequest, PrivateDiscountCode, StamhoofdFilter } from '@stamhoofd/structures';
-import { assertSort, LimitedFilteredRequest, PaginatedResponse, PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { assertSort, LimitedFilteredRequest, PaginatedResponse } from '@stamhoofd/structures';
 import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { applySQLSorter, compileToSQLFilter, SQL } from '@stamhoofd/sql';
 

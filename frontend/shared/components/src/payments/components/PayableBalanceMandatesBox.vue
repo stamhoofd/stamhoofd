@@ -7,7 +7,7 @@ import { useAuth } from '#hooks/useAuth.ts';
 import { useRequiredOrganization } from '#hooks/useOrganization';
 import PaymentMandatesBox from '#mandates/PaymentMandatesBox.vue';
 import type { DetailedPayableBalance } from '@stamhoofd/structures';
-import { AccessRight } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
 
 const props = defineProps<{
     item: DetailedPayableBalance;

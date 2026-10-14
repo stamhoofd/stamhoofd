@@ -1,6 +1,7 @@
 import { EmailMocker } from '@stamhoofd/email';
 import { EmailTemplateFactory, OrganizationFactory, STPackage, UserFactory } from '@stamhoofd/models';
-import { EmailTemplateType, PermissionLevel, Permissions, STPackageMeta, STPackageType } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { EmailTemplateType, Permissions, STPackageMeta, STPackageType } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';

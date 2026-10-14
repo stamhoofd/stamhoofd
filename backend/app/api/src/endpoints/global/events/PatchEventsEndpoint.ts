@@ -3,7 +3,8 @@ import { PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/s
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Event, Group, Platform, RegistrationPeriod, Webshop } from '@stamhoofd/models';
-import { AuditLogSource, Event as EventStruct, Group as GroupStruct, GroupType, NamedObject, OrganizationEventType, PermissionLevel, PlatformEventType } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { AuditLogSource, Event as EventStruct, Group as GroupStruct, GroupType, NamedObject, OrganizationEventType, PlatformEventType } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';

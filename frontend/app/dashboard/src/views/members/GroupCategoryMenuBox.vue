@@ -45,7 +45,7 @@ import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import STMenuCategory from '@stamhoofd/components/menu/STMenuCategory.vue';
 import type { Group, GroupCategory, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import { PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import GroupCategoryBox from './GroupCategoryBox.vue';

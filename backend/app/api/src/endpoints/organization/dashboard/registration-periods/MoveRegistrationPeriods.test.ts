@@ -1,7 +1,9 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, OrganizationRegistrationPeriod, RegistrationPeriod, Token } from '@stamhoofd/models';
 import { GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import { Group, GroupCategory, GroupCategorySettings, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, OrganizationRegistrationPeriodSettings, PermissionLevel, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { Group, GroupCategory, GroupCategorySettings, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, OrganizationRegistrationPeriodSettings, Permissions, PermissionsResourceKey, ResourcePermissions, Version } from '@stamhoofd/structures';
 import { PatchOrganizationRegistrationPeriodsEndpoint } from './PatchOrganizationRegistrationPeriodsEndpoint.js';
 import { SessionService } from '../../../../services/SessionService.js';
 

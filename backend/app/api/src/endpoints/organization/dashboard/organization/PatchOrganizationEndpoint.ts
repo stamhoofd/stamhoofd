@@ -4,8 +4,10 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Organization, OrganizationRegistrationPeriod, PayconiqPayment, Platform, RegistrationPeriod, StripeAccount, Webshop } from '@stamhoofd/models';
-import type { Company, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
-import { BuckarooSettings, MemberResponsibility, OrganizationMetaData, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, UitpasClientCredentialsStatus } from '@stamhoofd/structures';
+import type { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import type { Company, ResourcePermissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { BuckarooSettings, MemberResponsibility, OrganizationMetaData, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionRoleDetailed, PermissionRoleForResponsibility, UitpasClientCredentialsStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';

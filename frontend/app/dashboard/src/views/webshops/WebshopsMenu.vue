@@ -51,8 +51,8 @@ import type {
     PrivateWebshop,
     WebshopPreview,
 } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
 import {
-    AccessRight,
     WebshopStatus,
 } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';

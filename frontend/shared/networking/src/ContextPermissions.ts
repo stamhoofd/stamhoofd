@@ -1,5 +1,8 @@
 import type { EmailPreview, Event, Group, GroupCategory, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationRegistrationPeriod, OrganizationTag, PaymentGeneral, Permissions, Platform, PlatformMember, Registration, RegistrationPeriodBase, UserWithMembers } from '@stamhoofd/structures';
-import { AccessRight, EventPeriodHelper, EventPermissionChecker, GroupType, PermissionLevel, PermissionsResourceKey, PermissionsResourceType } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { EventPeriodHelper, EventPermissionChecker, GroupType, PermissionsResourceKey } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { toRaw, unref } from 'vue';
 

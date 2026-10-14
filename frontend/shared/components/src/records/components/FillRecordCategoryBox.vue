@@ -61,7 +61,7 @@
 <script lang="ts" setup generic="T extends ObjectWithRecords">
 import { PatchMap } from '@simonbackx/simple-encoding';
 import type { ObjectWithRecords, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
-import { PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { computed } from 'vue';
 import { useAppContext } from '../../context/appContext';
 import type { ErrorBox } from '../../errors/ErrorBox';

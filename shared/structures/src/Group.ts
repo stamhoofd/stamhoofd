@@ -13,8 +13,8 @@ import { GroupSettings, WaitingListType } from './GroupSettings.js';
 import { GroupType } from './GroupType.js';
 import { Gender } from './members/Gender.js';
 import type { Organization } from './Organization.js';
-import { PermissionLevel } from './PermissionLevel.js';
-import { PermissionsResourceType } from './PermissionsResourceType.js';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import { StockReservation } from './StockReservation.js';
 
 export type GroupTagItem = {

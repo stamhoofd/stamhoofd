@@ -1,6 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { OrganizationFactory, STPackageFactory } from '@stamhoofd/models';
-import { AccessRight, LimitedFilteredRequest, STPackageBundle, STPackageType } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { LimitedFilteredRequest, STPackageBundle, STPackageType } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { initAdmin } from '../../../../../tests/init/index.js';

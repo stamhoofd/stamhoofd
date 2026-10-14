@@ -77,7 +77,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods.ts';
 import { GroupType } from '@stamhoofd/structures/GroupType.js';
 import { Organization } from '@stamhoofd/structures/Organization.js';
-import { PermissionLevel } from '@stamhoofd/structures/PermissionLevel.js';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import type { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures/RegistrationPeriod.js';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onActivated, resolveComponent, watch } from 'vue';

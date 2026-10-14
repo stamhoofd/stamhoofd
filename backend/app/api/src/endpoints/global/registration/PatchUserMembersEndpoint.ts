@@ -6,7 +6,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import type { Group, Registration } from '@stamhoofd/models';
 import { Document, Member, RateLimiter } from '@stamhoofd/models';
 import type { MemberDetails, MembersBlob } from '@stamhoofd/structures';
-import { BooleanStatus, MemberWithRegistrationsBlob, PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { BooleanStatus, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 
 import type { OneToManyRelation } from '@simonbackx/simple-database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';

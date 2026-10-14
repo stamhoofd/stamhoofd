@@ -291,7 +291,9 @@ import { useFetchOrganizationPeriodForGroup } from '@stamhoofd/networking/hooks/
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import { AccessRight, EmailTemplate, EmailTemplateType, Event, getAppHost, Group, GroupSettings, GroupStatus, LimitedFilteredRequest, mergeFilters, PermissionsResourceType, PrivateWebshop, TranslatedString, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { EmailTemplate, EmailTemplateType, Event, getAppHost, Group, GroupSettings, GroupStatus, LimitedFilteredRequest, mergeFilters, PrivateWebshop, TranslatedString, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';

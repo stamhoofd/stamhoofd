@@ -7,7 +7,8 @@ import { expect } from '@playwright/test';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization, User } from '@stamhoofd/models';
 import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
-import { PermissionLevel, Permissions, Token as TokenStruct, Version } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Permissions, Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WorkerData } from '../helpers/worker/WorkerData.js';
 

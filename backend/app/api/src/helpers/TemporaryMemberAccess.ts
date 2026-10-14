@@ -1,4 +1,4 @@
-import type { PermissionLevel } from '@stamhoofd/structures';
+import type { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { getPermissionLevelNumber } from '@stamhoofd/structures';
 
 const userMemberTemporaryAccessCache = new Map<string, { memberId: string; level: PermissionLevel; validUntil: Date }[]>();

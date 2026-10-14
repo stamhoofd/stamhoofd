@@ -1,6 +1,7 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { AccessRight, PayableBalanceCollection } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PayableBalanceCollection } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, onActivated, onMounted, ref, unref } from 'vue';

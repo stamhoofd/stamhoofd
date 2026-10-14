@@ -4,7 +4,7 @@ import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import type { User, Webshop } from '@stamhoofd/models';
 import { Organization, OrganizationFactory, UserFactory } from '@stamhoofd/models';
-import { PermissionLevel } from '@stamhoofd/structures/PermissionLevel.js';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { Permissions } from '@stamhoofd/structures/Permissions.js';
 import { Token as TokenStruct } from '@stamhoofd/structures/Token.js';
 import { Version } from '@stamhoofd/structures/Version.js';

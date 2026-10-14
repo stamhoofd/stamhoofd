@@ -1,7 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, User } from '@stamhoofd/models';
 import { MFATOTP, OrganizationFactory, Token, UserFactory, WebauthnCredential } from '@stamhoofd/models';
-import { OrganizationAdmins, PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { OrganizationAdmins, Permissions } from '@stamhoofd/structures';
 import crypto from 'crypto';
 import { SessionService } from '../../../../services/SessionService.js';
 

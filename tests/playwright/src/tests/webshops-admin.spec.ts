@@ -7,7 +7,8 @@ import { expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import type { Organization } from '@stamhoofd/models';
 import { OrganizationFactory, WebshopFactory } from '@stamhoofd/models';
-import { PermissionLevel, Permissions, UserPermissions, WebshopMetaData, WebshopStatus } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Permissions, UserPermissions, WebshopMetaData, WebshopStatus } from '@stamhoofd/structures';
 import { TableHelper, WorkerData } from '../helpers/index.js';
 
 /**

@@ -8,7 +8,8 @@ import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/Con
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useLoadRecentPeriods } from '@stamhoofd/networking/hooks/useLoadRecentPeriods';
 import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';
-import { Group, GroupCategory, GroupSettings, GroupStatus, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, TranslatedString } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Group, GroupCategory, GroupSettings, GroupStatus, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 /**

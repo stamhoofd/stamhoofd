@@ -1,6 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
-import { FilterWrapperMarker, PermissionLevel, unwrapFilter } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { FilterWrapperMarker, unwrapFilter } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context.js';
 import { StamhoofdFilterAccessHelper } from '../../../../helpers/StamhoofdFilterAccessHelper.js';
 

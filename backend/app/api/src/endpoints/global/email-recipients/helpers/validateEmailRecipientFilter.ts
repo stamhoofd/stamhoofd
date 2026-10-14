@@ -1,6 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/models';
-import type { PermissionLevel, StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
+import type { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 import { FilterWrapperMarker, unwrapFilter } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context.js';
 

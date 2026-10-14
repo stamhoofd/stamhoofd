@@ -12,7 +12,8 @@ import { EmailVerificationCode, MFARecoveryCode, MFATOTP, OrganizationFactory, P
 import { PasswordForgotService } from '@stamhoofd/backend/services/PasswordForgotService';
 import { VerificationCodeService } from '@stamhoofd/backend/services/VerificationCodeService';
 import { MFATestHelper, STPackageService } from '@stamhoofd/backend/tests/helpers';
-import { PermissionLevel, PermissionRoleDetailed, Permissions, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionRoleDetailed, Permissions, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { TwoFactorFlow } from '../flows/TwoFactorFlow.js';
 import { WorkerData } from '../helpers/index.js';

@@ -1,13 +1,13 @@
 import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
 
-import { AccessRight } from '../AccessRight.js';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
 import type { Group } from '../Group.js';
 import { GroupType } from '../GroupType.js';
 
 import type { Organization } from '../Organization.js';
-import { PermissionLevel } from '../PermissionLevel.js';
-import { PermissionsResourceType } from '../PermissionsResourceType.js';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import { PlatformMembershipTypeBehaviour } from '../PlatformMembershipTypeBehaviour.js';
 
 import type { Document as DocumentStruct } from '../Document.js';

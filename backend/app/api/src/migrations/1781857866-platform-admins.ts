@@ -1,7 +1,8 @@
 import { column, Migration } from '@simonbackx/simple-database';
 import { User } from '@stamhoofd/models';
 import { QueryableModel } from '@stamhoofd/sql';
-import { PermissionLevel, Permissions, UserPermissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Permissions, UserPermissions } from '@stamhoofd/structures';
 
 export class Admin extends QueryableModel {
     static table = 'admins';

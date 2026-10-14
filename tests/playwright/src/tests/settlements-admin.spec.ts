@@ -10,9 +10,9 @@ import { EmailMocker } from '@stamhoofd/email';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization, User } from '@stamhoofd/models';
 import { STPackageFactory, Token, UserFactory } from '@stamhoofd/models';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import {
     appToUri,
-    PermissionLevel,
     Permissions,
     STPackageBundle,
     Token as TokenStruct,

@@ -13,7 +13,8 @@ import { buildTranslatedUrl } from '@stamhoofd/components/containers/TranslatedU
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import { computed } from 'vue';
 import { useAdminAuditLogRenderers } from './views/organizations/useAdminAuditLogRenderers';
 

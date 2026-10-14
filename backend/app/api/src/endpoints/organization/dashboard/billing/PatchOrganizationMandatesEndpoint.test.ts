@@ -3,7 +3,7 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Token } from '@stamhoofd/models';
 import { BlockedPaymentMandate, Organization, OrganizationFactory } from '@stamhoofd/models';
-import { AccessRight } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { MollieMocker } from '../../../../../tests/helpers/MollieMocker.js';

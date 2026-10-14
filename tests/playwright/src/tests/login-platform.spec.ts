@@ -14,7 +14,8 @@ import {
 import { expect } from '@playwright/test';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import { MFARecoveryCode, MFATOTP } from '@stamhoofd/models';
-import { PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Permissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { TwoFactorFlow } from '../flows/TwoFactorFlow.js';
 import { WorkerData } from '../helpers/index.js';

@@ -6,7 +6,8 @@ import { Organization } from '@stamhoofd/models';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest, Organization as OrganizationStruct, StamhoofdFilter } from '@stamhoofd/structures';
 import { UnencodeablePaginatedResponse } from '@stamhoofd/structures';
-import { LimitedFilteredRequest, PaginatedResponse, PermissionLevel, assertSort, getSortFilter } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { LimitedFilteredRequest, PaginatedResponse, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';

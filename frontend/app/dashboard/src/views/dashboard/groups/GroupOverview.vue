@@ -213,7 +213,9 @@ import { useGetPeriods } from '@stamhoofd/networking/hooks/useGetPeriods';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import type { Group, MemberResponsibility, Organization, OrganizationRegistrationPeriod, RegistrationPeriod, TranslatedString } from '@stamhoofd/structures';
-import { EmailTemplateType, Event, EventLocation, EventMeta, GroupStatus, GroupType, NamedObject, PermissionLevel, PermissionsResourceType, RichText } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { EmailTemplateType, Event, EventLocation, EventMeta, GroupStatus, GroupType, NamedObject, RichText } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 

@@ -31,7 +31,9 @@
 <script setup lang="ts">
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import type { AccessRight, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType } from '@stamhoofd/structures';
+import type { AccessRight } from '@stamhoofd/types/AccessRight';
+import type { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import type { PermissionRoleDetailed, PermissionRoleForResponsibility } from '@stamhoofd/structures';
 import { MemberResponsibility } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useOrganization } from '#hooks/useOrganization.ts';

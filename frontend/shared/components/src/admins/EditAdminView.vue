@@ -89,7 +89,8 @@ import { useContext } from '#hooks/useContext.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { useUninheritedPermissions } from '#hooks/useUninheritedPermissions.ts';
-import type { Permissions, PermissionsResourceType } from '@stamhoofd/structures';
+import type { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import type { Permissions } from '@stamhoofd/structures';
 import { User, UserWithMembers } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 

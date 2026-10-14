@@ -9,6 +9,7 @@ import { MollieMocker, STPackageService } from '@stamhoofd/backend/tests/helpers
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Group, User } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemFactory, BalanceItemPayment, CachedBalance, GroupFactory, MemberFactory, MolliePayment, OrganizationFactory, Payment, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import {
     appToUri,
     BalanceItemRelation,
@@ -19,7 +20,6 @@ import {
     PaymentProvider,
     PaymentStatus,
     PaymentType,
-    PermissionLevel,
     Permissions,
     ReceivableBalanceType,
     STPackageBundle,

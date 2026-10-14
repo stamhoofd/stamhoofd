@@ -1,9 +1,12 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, MapDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
-import { AccessRight, AccessRightHelper } from './AccessRight.js';
-import { PermissionLevel, getPermissionLevelNumber } from './PermissionLevel.js';
-import { downgradeResourceKeys, isPeriodScopedResourceType, PermissionsResourceKey, PermissionsResourceType, upgradeResourceKeys } from './PermissionsResourceType.js';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { AccessRightHelper } from './AccessRight.js';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { getPermissionLevelNumber } from './PermissionLevel.js';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { downgradeResourceKeys, isPeriodScopedResourceType, PermissionsResourceKey, upgradeResourceKeys } from './PermissionsResourceType.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 
 export class PermissionRole extends AutoEncoder {

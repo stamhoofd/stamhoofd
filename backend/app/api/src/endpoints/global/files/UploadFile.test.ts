@@ -1,7 +1,8 @@
 import type { PutObjectCommand } from '@aws-sdk/client-s3';
 import { Request } from '@simonbackx/simple-endpoints';
 import { Image, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
-import { PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Permissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { promises as fs } from 'fs';
 import type { IncomingMessage } from 'node:http';

@@ -8,7 +8,8 @@ import type { MemberWithUsersRegistrationsAndGroups, Organization, Payment, User
 import { BalanceItem, CachedBalance, Group, Member, Platform, RateLimiter, Registration, RegistrationPeriod } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import type { BalanceItem as BalanceItemStruct, PlatformMember, RegisterItem } from '@stamhoofd/structures';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, IDRegisterCheckout, Payment as PaymentStruct, PermissionLevel, PlatformFamily, ReceivableBalanceType, RegisterResponse, TranslatedString } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, IDRegisterCheckout, Payment as PaymentStruct, PlatformFamily, ReceivableBalanceType, RegisterResponse, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';

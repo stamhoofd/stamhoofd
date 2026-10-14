@@ -4,7 +4,8 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Document, DocumentTemplate, Member, Registration } from '@stamhoofd/models';
-import { DocumentStatus, Document as DocumentStruct, PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { DocumentStatus, Document as DocumentStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
 

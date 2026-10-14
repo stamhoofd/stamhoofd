@@ -1,11 +1,11 @@
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 
 import type { NavigationActions } from '../../../types/NavigationActions';
 import EditEmergencyContactsBox from '../../components/edit/EditEmergencyContactsBox.vue';
 import type { EditMemberStep, MemberStepManager } from '../MemberStepManager';
 import { markRaw } from 'vue';
-import { PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import type { MemberSharedStepOptions } from './MemberSharedStepOptions';
 
 export class MemberEmergencyContactsStep implements EditMemberStep {

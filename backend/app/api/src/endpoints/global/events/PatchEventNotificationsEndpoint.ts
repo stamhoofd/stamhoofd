@@ -3,7 +3,8 @@ import { PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/s
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Event, EventNotification, Platform, RegistrationPeriod } from '@stamhoofd/models';
-import { EmailTemplateType, EventNotificationStatus, EventNotification as EventNotificationStruct, PermissionLevel, RecordCategory } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { EmailTemplateType, EventNotificationStatus, EventNotification as EventNotificationStruct, RecordCategory } from '@stamhoofd/structures';
 
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';

@@ -5,7 +5,8 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Webshop, WebshopDiscountCode } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { DiscountCode, PermissionLevel, PrivateDiscountCode } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { DiscountCode, PrivateDiscountCode } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
 

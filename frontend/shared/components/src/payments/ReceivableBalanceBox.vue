@@ -177,7 +177,8 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { BaseOrganization, PlatformMember, ReceivableBalance } from '@stamhoofd/structures';
-import { AccessRight, BalanceItemWithPayments, DetailedReceivableBalance, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, PaymentTypeHelper, ReceivableBalanceType } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { BalanceItemWithPayments, DetailedReceivableBalance, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, PaymentTypeHelper, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref } from 'vue';

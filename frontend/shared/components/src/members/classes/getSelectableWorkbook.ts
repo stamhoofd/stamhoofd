@@ -3,7 +3,8 @@ import { SelectableSheet } from '@stamhoofd/frontend-excel-export/SelectableShee
 import { SelectableWorkbook } from '@stamhoofd/frontend-excel-export/SelectableWorkbook';
 import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
 import type { Group, Organization, Platform } from '@stamhoofd/structures';
-import { AccessRight, getFinancialSupportSettingsOrDefault, RecordCategory } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { getFinancialSupportSettingsOrDefault, RecordCategory } from '@stamhoofd/structures';
 
 export function getSelectableColumns({ platform, organization, auth, groupColumns }: { platform: Platform; organization: Organization | null; auth: ContextPermissions; groupColumns?: SelectableColumn[] }) {
     const recordCategories = [

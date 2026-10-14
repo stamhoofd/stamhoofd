@@ -15,10 +15,10 @@ import {
     Token,
     UserFactory,
 } from '@stamhoofd/models';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import {
     EventMeta,
     GroupType,
-    PermissionLevel,
     Permissions,
 } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';

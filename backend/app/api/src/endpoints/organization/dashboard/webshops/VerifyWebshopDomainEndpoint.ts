@@ -3,7 +3,8 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Token, Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { PermissionLevel, PrivateWebshop, WebshopPrivateMetaData } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PrivateWebshop, WebshopPrivateMetaData } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
 

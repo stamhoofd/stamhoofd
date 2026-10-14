@@ -310,7 +310,9 @@ import { Toast } from '#overlays/Toast.ts';
 import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import type { BalanceItem } from '@stamhoofd/structures';
-import { AccessRight, BalanceItemPaymentDetailed, BalanceItemRelationType, Company, DetailedReceivableBalance, getReceivableBalanceTypeName, Invoice, LimitedFilteredRequest, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel, ReceivableBalanceType } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { BalanceItemPaymentDetailed, BalanceItemRelationType, Company, DetailedReceivableBalance, getReceivableBalanceTypeName, Invoice, LimitedFilteredRequest, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, PaymentTypeHelper, ReceivableBalanceType } from '@stamhoofd/structures';
 
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import PromiseView from '#containers/PromiseView.vue';

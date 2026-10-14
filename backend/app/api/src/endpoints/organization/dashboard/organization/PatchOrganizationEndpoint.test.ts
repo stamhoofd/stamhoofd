@@ -1,7 +1,10 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, User, Webshop, Token } from '@stamhoofd/models';
 import { GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, RegistrationPeriodFactory, UserFactory, WebshopFactory } from '@stamhoofd/models';
-import { AccessRight, Address, Company, MemberResponsibility, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PeppolEndointId, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { Address, Company, MemberResponsibility, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PeppolEndointId, PermissionRoleDetailed, PermissionRoleForResponsibility, Permissions, ResourcePermissions, Version } from '@stamhoofd/structures';
 import { SessionService } from '../../../../services/SessionService.js';
 
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';

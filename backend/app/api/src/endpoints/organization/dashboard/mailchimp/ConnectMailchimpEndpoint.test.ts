@@ -1,6 +1,7 @@
 import { Platform } from '@stamhoofd/models';
 import { MailchimpCredential } from '@stamhoofd/models/models/MailchimpCredential.js';
-import { PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Permissions } from '@stamhoofd/structures';
 import type { MailchimpSettings } from '@stamhoofd/structures/mailchimp/MailchimpSettings.js';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import type { MailchimpMocker } from '../../../../../tests/helpers/MailchimpMocker.js';

@@ -341,7 +341,9 @@ import type { TableActionSelection } from '@stamhoofd/components/tables/classes/
 import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
 import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
 import type { BalanceItemWithPrivatePayments, PrivateOrder, PrivateOrderWithTickets, PrivatePayment, TicketPrivate, WebshopTakeoutMethod } from '@stamhoofd/structures';
-import { AccessRight, Gender, LanguageHelper, LimitedFilteredRequest, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, PermissionLevel, ProductType, RecordCategory, RecordWarning, WebshopTicketType } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Gender, LanguageHelper, LimitedFilteredRequest, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, ProductType, RecordCategory, RecordWarning, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
