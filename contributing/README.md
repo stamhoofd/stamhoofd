@@ -45,4 +45,11 @@ API contracts are documented beside their owning code. Reusable npm-library conc
 - [Webshop checkout introduction](patterns/webshop-checkout.md) (WIP)
 - [Testing on iOS](testing/ios.md)
 
-Use [AGENTS.md](../AGENTS.md) for repository rules, build ordering, and validation commands. For undocumented behavior, inspect the owning implementation and ask before guessing.
+## Development workflow
+
+- [Development guidelines](development-guidelines.md) — coding conventions, imports, reviewable commits, testing expectations, and validation
+- [Development CLI](../shared/cli/README.md) — setup, commands, shared services, and test infrastructure
+- [Build system](../.development/README.md) — shared-build ordering, caching, and stale-output diagnostics
+- [Playwright tests](../tests/playwright/README.md) — E2E lifecycle, fixtures, worker domains, and databases
+
+[AGENTS.md](../AGENTS.md) is the agent entry point for required reading and execution rules. Contributor-facing workflows live in the guides above. For undocumented behavior, inspect the owning implementation and ask before guessing.
