@@ -30,6 +30,7 @@ import {
 import { Formatter, sleep } from '@stamhoofd/utility';
 
 import type { SGVOAuth } from './SGVOAuth.ts';
+import { SGVOldMemberAction } from './SGVOldMemberAction.ts';
 import type { GroepFunctie, SGVSyncReport } from './SGVSyncReport.ts';
 import {
     createStamhoofdFunctie,
@@ -45,10 +46,7 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { Sorter } from '@stamhoofd/utility';
 
-export enum SGVOldMemberAction {
-    Delete = 'delete',
-    Nothing = 'nothing',
-}
+export { SGVOldMemberAction } from './SGVOldMemberAction.ts';
 
 export class SGVGroupAdministration implements RequestMiddleware {
     /**
