@@ -31,4 +31,11 @@ describe('StringCompare', () => {
         expect(StringCompare.typoCount('Simon', '')).toEqual(5);
         expect(StringCompare.typoCount('', 'simon')).toEqual(5);
     });
+
+    test('normalize compares like the utf8mb4_0900_ai_ci collation of MySQL', () => {
+        expect(StringCompare.normalize('José MÜLLER')).toEqual('jose muller');
+        expect(StringCompare.normalize('Øystein Łukasz Đorđe')).toEqual('oystein lukasz dorde');
+        expect(StringCompare.normalize('Strauß Æsa')).toEqual('strauß æsa');
+        expect(StringCompare.normalizeForEquality('Strauß Æsa Œuvre')).toEqual('strauss aesa oeuvre');
+    });
 });

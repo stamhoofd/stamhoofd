@@ -7,7 +7,8 @@ export function getOrderSearchFilter(search: string | null, parsePhoneNumber: Pa
         return null;
     }
 
-    const numberFilter = SearchFilterFactory.getIntegerFilter(search);
+    // Only digits: '100%', '12 34' or '+32 478 12 34 56' are no order number
+    const numberFilter = /^\d+$/.test(search) ? SearchFilterFactory.getIntegerFilter(search) : null;
 
     if (numberFilter) {
         return {

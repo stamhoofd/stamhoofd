@@ -79,6 +79,52 @@ describe('InMemoryFilter', () => {
             });
         });
 
+        it('Filtering strings ignores accents, like the utf8mb4_0900_ai_ci collation of MySQL', async () => {
+            const filters = {
+                ...baseInMemoryFilterCompilers,
+                name: createInMemoryFilterCompiler('name'),
+            };
+
+            test({
+                filter: { name: 'jose muller' },
+                filters,
+                objects: [{ name: 'José Müller' }, { name: 'JOSE MULLER' }],
+                doNotMatch: [{ name: 'Jose Mueller' }],
+            });
+            test({
+                filter: { name: { $neq: 'josé müller' } },
+                filters,
+                objects: [{ name: 'Anna' }],
+                doNotMatch: [{ name: 'Jose Muller' }],
+            });
+            test({
+                filter: { name: { $in: ['anna', 'jose muller'] } },
+                filters,
+                objects: [{ name: 'José Müller' }],
+                doNotMatch: [{ name: 'Jan' }],
+            });
+        });
+
+        it('Values of arrays only ignore casing, like JSON arrays in MySQL', async () => {
+            const filters = {
+                ...baseInMemoryFilterCompilers,
+                codes: createInMemoryFilterCompiler('codes'),
+            };
+
+            test({
+                filter: { codes: 'ÉTÉ' },
+                filters,
+                objects: [{ codes: ['été'] }],
+                doNotMatch: [{ codes: ['ete'] }],
+            });
+            test({
+                filter: { codes: { $in: ['été'] } },
+                filters,
+                objects: [{ codes: ['ÉTÉ'] }],
+                doNotMatch: [{ codes: ['ete'] }],
+            });
+        });
+
         it('Filtering numbers', async () => {
             const filters = {
                 ...baseInMemoryFilterCompilers,
@@ -120,6 +166,44 @@ describe('InMemoryFilter', () => {
                     { name: 'TEST' },
                     { name: 'dit is een test' },
                 ],
+            });
+        });
+
+        it('Filtering strings ignores accents and keeps spaces, like LIKE in MySQL', async () => {
+            const filters = {
+                ...baseInMemoryFilterCompilers,
+                name: createInMemoryFilterCompiler('name'),
+            };
+
+            test({
+                filter: { name: { $contains: 'muller' } },
+                filters,
+                objects: [{ name: 'José Müller' }],
+            });
+            test({
+                filter: { name: { $contains: 'van  damme' } },
+                filters,
+                objects: [{ name: 'Jean-Claude Van  Damme' }],
+                doNotMatch: [{ name: 'Lisa Van Damme' }],
+            });
+            test({
+                filter: { name: { $contains: 'damme ' } },
+                filters,
+                doNotMatch: [{ name: 'Lisa Van Damme' }],
+            });
+        });
+
+        it('Values of arrays only ignore casing, like JSON arrays in MySQL', async () => {
+            const filters = {
+                ...baseInMemoryFilterCompilers,
+                codes: createInMemoryFilterCompiler('codes'),
+            };
+
+            test({
+                filter: { codes: { $contains: 'TÉ' } },
+                filters,
+                objects: [{ codes: ['été'] }],
+                doNotMatch: [{ codes: ['ete'] }],
             });
         });
 
