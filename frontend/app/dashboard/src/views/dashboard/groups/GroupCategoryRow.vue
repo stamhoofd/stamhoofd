@@ -20,9 +20,11 @@ import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import type { GroupCategory, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useGroupCategoryActions } from '../../members/useGroupCategoryActions';
+import type { CategoryEditorLoader } from './CategoryEditorLoader';
 
 const props = defineProps<{
     category: GroupCategory;
+    categoryEditorLoader: CategoryEditorLoader;
     organization: Organization;
     period: OrganizationRegistrationPeriod;
     periods: OrganizationRegistrationPeriod[];
@@ -33,6 +35,7 @@ const emit = defineEmits<{
 }>();
 
 const { showMenu: showContextMenu, editCategory, canShowMenu, canManage } = useGroupCategoryActions(
+    props.categoryEditorLoader,
     (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => emit('patch:periods', patch),
 )(props);
 

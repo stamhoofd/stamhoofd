@@ -70,7 +70,7 @@ defineEmits<{
     open: [value: MouseEvent];
 }>();
 
-const getCategoryActions = useGroupCategoryActions();
+const getCategoryActions = useGroupCategoryActions(() => import('../dashboard/groups/EditCategoryGroupsView.vue'));
 
 function getCategoryIcon(category: GroupCategoryTree) {
     if (category.settings.name.toLocaleLowerCase().includes('lessen') || category.settings.name.toLocaleLowerCase().includes('proefles')) {
