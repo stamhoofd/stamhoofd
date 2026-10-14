@@ -88,7 +88,7 @@ export class PlatformMembershipActionBuilder {
         await this.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
-                    root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
+                    root: AsyncComponent(() => import('#export/ExcelExportView.vue'), {
                         type: ExcelExportType.PlatformMemberships,
                         filter: selection.filter,
                         workbook: getSelectableWorkbook(this.organization, this.financialAccess),

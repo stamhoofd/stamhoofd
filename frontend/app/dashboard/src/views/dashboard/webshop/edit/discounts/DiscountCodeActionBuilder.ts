@@ -342,7 +342,7 @@ export class DiscountCodeActionBuilder {
         await this.navigationActions.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
-                    root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
+                    root: AsyncComponent(() => import('@stamhoofd/components/export/ExcelExportView.vue'), {
                         type: ExcelExportType.WebshopDiscountCodes,
                         filter: new LimitedFilteredRequest({
                             filter: mergeFilters([selection.filter.filter, {
