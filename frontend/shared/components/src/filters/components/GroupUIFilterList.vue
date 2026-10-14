@@ -16,7 +16,7 @@
                     </template>
                 </div>
                 <div v-else>
-                    <GroupUIFilterList :filter="child" @click.stop @replace="setFilter(index, child, $event)" />
+                    <GroupUIFilterList :filter="child" :is-group-filter="isGroupFilter" @click.stop @replace="setFilter(index, child, $event)" />
                 </div>
 
                 <div v-if="index > 0 && index <= filters.length - 1" class="group-ui-filter-mode" @click.stop>
@@ -49,11 +49,13 @@ import { useShow } from '@simonbackx/vue-app-navigation';
 import { computed } from 'vue';
 import Dropdown from '../../inputs/Dropdown.vue';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
-import { GroupUIFilter, GroupUIFilterMode } from '../GroupUIFilter';
+import { GroupUIFilterMode } from '../GroupUIFilterTypes';
 import type { StyledDescriptionChoice, UIFilter } from '../UIFilter';
+import type { GroupUIFilterEditor } from '../GroupUIFilterTypes';
 
 const props = defineProps<{
-    filter: GroupUIFilter;
+    filter: GroupUIFilterEditor;
+    isGroupFilter: (filter: UIFilter) => filter is GroupUIFilterEditor;
 }>();
 const show = useShow();
 
@@ -128,8 +130,8 @@ function setFilter(index: number, oldFilter: UIFilter, newFilter: UIFilter | nul
     emit('replace', clone.flatten());
 }
 
-function isGroup(filter: UIFilter): filter is GroupUIFilter {
-    return (filter instanceof GroupUIFilter) && !filter.builder.wrapFilter && !filter.builder.wrapper;
+function isGroup(filter: UIFilter): filter is GroupUIFilterEditor {
+    return props.isGroupFilter(filter) && !filter.builder.wrapFilter && !filter.builder.wrapper;
 }
 
 function setFilterMode(mode: GroupUIFilterMode, index: number) {
