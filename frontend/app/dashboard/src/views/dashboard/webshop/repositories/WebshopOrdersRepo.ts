@@ -93,9 +93,12 @@ export class WebshopOrdersRepo {
 
         let stored = Promise.resolve();
 
+        const assertDatabaseKept = await this.apiClient.state.startSync();
+
         const onResultsReceived = async (orders: PrivateOrder[]) => {
             if (isFetchAll && !hadSuccessfulFetch) {
                 hadSuccessfulFetch = true;
+                assertDatabaseKept();
                 await this.store.clear();
                 await this.apiClient.clearLastFetchedOrder();
             }
@@ -105,8 +108,12 @@ export class WebshopOrdersRepo {
                 const lastOrder = orders[orders.length - 1];
                 // Offline lookups (e.g. while scanning) wait for every queued write, so never queue more than one page
                 await stored;
+                assertDatabaseKept();
                 // Moving the cursor once this page and all pages before it are stored lets an interrupted sync resume here
-                stored = this.store.putAll(orders).then(async () => this.apiClient.state.setCursor(new Date(lastOrder.updatedAt), { isComplete: false }));
+                stored = this.store.putAll(orders).then(async () => {
+                    assertDatabaseKept();
+                    await this.apiClient.state.setCursor(new Date(lastOrder.updatedAt), { isComplete: false });
+                });
             }
         };
 
@@ -128,6 +135,7 @@ export class WebshopOrdersRepo {
         await stored;
 
         if (totalOrders.length > 0) {
+            assertDatabaseKept();
             await this.apiClient.state.setCursor(new Date(totalOrders[totalOrders.length - 1].updatedAt), { isComplete: true });
         }
 
@@ -139,6 +147,7 @@ export class WebshopOrdersRepo {
             await this.eventBus.sendEvent('deleted', deletedOrders);
         }
 
+        assertDatabaseKept();
         await this.apiClient.state.setCompleted();
     }
 

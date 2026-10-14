@@ -15,6 +15,12 @@ export class WebshopDatabase {
     private _database: IDBDatabase | null = null;
     private isDeleting = false;
 
+    /**
+     * Increases when a deletion starts, so work that started before it can stop instead of writing to the new database.
+     * Also increases when the deletion fails, which only makes that work start over.
+     */
+    deletionCount = 0;
+
     constructor({ webshopId }: { webshopId: string }) {
         this.databaseName = 'webshop-' + webshopId;
     }
@@ -160,6 +166,7 @@ export class WebshopDatabase {
         }
         try {
             this.isDeleting = true;
+            this.deletionCount++;
             this.close();
             const request = window.indexedDB.deleteDatabase(this.databaseName);
 

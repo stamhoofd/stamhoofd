@@ -34,6 +34,11 @@ export class SyncState {
     private _hasCompletedSync = false;
     private lastSyncedAt: Date | null = null;
 
+    /**
+     * The deletionCount of the database when this state was loaded from it
+     */
+    private loadedDeletionCount: number | null = null;
+
     constructor(private readonly settingsStore: WebshopSettingsStore, private readonly keys: SyncStateKeys) {}
 
     get syncCursor(): SyncCursor | null {
@@ -55,12 +60,31 @@ export class SyncState {
         this.cursor = undefined;
         this._hasCompletedSync = false;
         this.lastSyncedAt = null;
+        this.loadedDeletionCount = null;
+    }
+
+    /**
+     * Loads the state for a sync. The returned check throws once the database is deleted after this call: the sync has
+     * to stop then, because the new database does not contain the items it stored before.
+     */
+    async startSync(): Promise<() => void> {
+        const deletionCount = this.settingsStore.database.deletionCount;
+        await this.load();
+        return () => {
+            if (this.settingsStore.database.deletionCount !== deletionCount) {
+                throw new Error('The offline database was deleted during the sync');
+            }
+        };
     }
 
     async load() {
-        if (this.cursor !== undefined) {
+        const deletionCount = this.settingsStore.database.deletionCount;
+        if (this.cursor !== undefined && this.loadedDeletionCount === deletionCount) {
             return;
         }
+
+        this.reset();
+        this.loadedDeletionCount = deletionCount;
 
         try {
             this.cursor = await this.settingsStore.get<SyncCursor>(this.keys.cursor) ?? null;

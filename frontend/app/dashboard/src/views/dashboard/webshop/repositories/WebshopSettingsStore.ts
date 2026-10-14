@@ -25,7 +25,7 @@ type WebshopSettingsKey = `${WebshopSettingsKeys}`;
 export class WebshopSettingsStore {
     static readonly storeName: WebshopStoreName = 'settings';
 
-    constructor(private readonly database: WebshopDatabase) {
+    constructor(readonly database: WebshopDatabase) {
     }
 
     async set(key: WebshopSettingsKey, value: any) {

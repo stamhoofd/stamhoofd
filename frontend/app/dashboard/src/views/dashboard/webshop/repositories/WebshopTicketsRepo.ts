@@ -69,13 +69,17 @@ export class WebshopTicketsRepo {
 
         let stored = Promise.resolve();
 
+        const assertDatabaseKept = await this.apiClient.state.startSync();
+
         const onResultsReceived = async (tickets: TicketPrivate[]): Promise<void> => {
             if (tickets.length) {
                 const lastOfPage = tickets[tickets.length - 1];
                 lastTicket = lastOfPage;
                 // Offline lookups (e.g. while scanning) wait for every queued write, so never queue more than one page
                 await stored;
+                assertDatabaseKept();
                 stored = this.store.putAll(tickets).then(async () => {
+                    assertDatabaseKept();
                     // Moving the cursor once this page and all pages before it are stored lets an interrupted sync resume here
                     await this.apiClient.state.setCursor(new Date(lastOfPage.updatedAt), { isComplete: false });
 
@@ -89,9 +93,11 @@ export class WebshopTicketsRepo {
         await stored;
 
         if (lastTicket) {
+            assertDatabaseKept();
             await this.apiClient.state.setCursor(new Date(lastTicket.updatedAt), { isComplete: true });
         }
 
+        assertDatabaseKept();
         await this.apiClient.state.setCompleted();
     }
 
