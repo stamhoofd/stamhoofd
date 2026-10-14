@@ -52,6 +52,7 @@ import type { Ref} from 'vue';
 import { computed, onBeforeUnmount, ref } from 'vue';
 
 import type { WebshopManager } from '../WebshopManager';
+import { createTicketPresenter } from '../tickets/createTicketPresenter';
 
 
 const props = defineProps<{
@@ -358,6 +359,7 @@ function openOrder(order: PrivateOrderWithTickets) {
         root: AsyncComponent(() => import('./OrderView.vue'), {
             initialOrder: order,
             webshopManager: props.webshopManager,
+            openTicketHandler: createTicketPresenter(props.webshopManager),
         }),
     });
 
