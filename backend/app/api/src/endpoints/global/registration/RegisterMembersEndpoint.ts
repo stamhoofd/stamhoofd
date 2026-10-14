@@ -16,6 +16,7 @@ import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructure
 import { Context } from '../../../helpers/Context.js';
 import { updateMemberDetailsUitpasNumber } from '../../../helpers/updateMemberDetailsUitpasNumber.js';
 import { BalanceItemService } from '../../../services/BalanceItemService.js';
+import { GroupService } from '../../../services/GroupService.js';
 import { PaymentService } from '../../../services/PaymentService.js';
 import { RegistrationService } from '../../../services/RegistrationService.js';
 type Params = Record<string, never>;
@@ -927,7 +928,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         // Update occupancy
         for (const group of groups) {
             if ([...registrations, ...deactivatedRegistrations].some(r => r.groupId === group.id)) {
-                await group.updateOccupancy();
+                await GroupService.refreshOccupancy(group);
                 await group.save();
             }
         }

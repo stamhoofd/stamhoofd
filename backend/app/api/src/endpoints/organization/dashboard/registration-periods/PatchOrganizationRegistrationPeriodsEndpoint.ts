@@ -13,6 +13,7 @@ import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStruct
 import { Context } from '../../../../helpers/Context.js';
 import { RecordAnswerHelper } from '../../../../helpers/RecordAnswerHelper.js';
 import { SetupStepUpdater } from '../../../../helpers/SetupStepUpdater.js';
+import { GroupService } from '../../../../services/GroupService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -659,7 +660,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         }
 
         model.settings.throwIfInvalidPrices();
-        await model.updateOccupancy();
+        await GroupService.refreshOccupancy(model);
         await model.save();
 
         if (model.eventId && syncGroupWithEvent) {

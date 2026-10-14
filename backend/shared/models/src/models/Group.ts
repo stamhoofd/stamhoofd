@@ -1,16 +1,16 @@
-import { column, Database } from '@simonbackx/simple-database';
-import type { GroupCategory } from '@stamhoofd/structures';
+import { column } from '@simonbackx/simple-database';
+import type { GroupCategory, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { GroupPrivateSettings, GroupSettings, GroupStatus, Group as GroupStruct, GroupType, StockReservation } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel } from '@stamhoofd/sql';
-import type { OrganizationRegistrationPeriod } from './OrganizationRegistrationPeriod.js';
-import { Registration } from './Registration.js';
 
-if (Registration === undefined) {
-    throw new Error('Import Registration is undefined');
+export interface GroupRegistrationPeriod {
+    id: string;
+    periodId: string;
+    settings: OrganizationRegistrationPeriodSettings;
 }
 
 export class Group extends QueryableModel {
@@ -169,30 +169,7 @@ export class Group extends QueryableModel {
         return GroupStruct.create(this);
     }
 
-    private static async getCount(where: string, params: any[]) {
-        const query = `select count(*) as c from \`${Registration.table}\` where ${where}`;
-
-        const [results] = await Database.select(query, params);
-        const count = results[0]['']['c'];
-        if (Number.isInteger(count)) {
-            return count as number;
-        }
-        return null;
-    }
-
-    async updateOccupancy() {
-        this.settings.registeredMembers = await Group.getCount(
-            'groupId = ? and registeredAt is not null AND deactivatedAt is null',
-            [this.id],
-        );
-
-        this.settings.reservedMembers = await Group.getCount(
-            'groupId = ? and registeredAt is null AND (canRegister = 1 OR reservedUntil >= ?)',
-            [this.id, new Date()],
-        );
-    }
-
-    static async deleteUnreachable(organizationId: string, period: OrganizationRegistrationPeriod, allGroups: Group[]) {
+    static async deleteUnreachable(organizationId: string, period: GroupRegistrationPeriod, allGroups: Group[]) {
         const reachable = new Map<string, boolean>();
 
         const visited = new Map<string, boolean>();
