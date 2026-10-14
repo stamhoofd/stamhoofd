@@ -1,14 +1,13 @@
 // i18n-setup.js
-import { HistoryManager } from '@simonbackx/vue-app-navigation';
+import { HistoryManager, UrlHelper } from '@simonbackx/vue-app-navigation';
 import { countries, languages } from '@stamhoofd/locales';
-import { Storage } from '@stamhoofd/networking/Storage';
-import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { countryToCode } from '@stamhoofd/structures';
 import type { CountryCode } from '@stamhoofd/types/Country';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import type { LocalizedDomain } from '@stamhoofd/types/Localized';
 import { I18n } from './I18n';
+import { LocalizationStorage } from './LocalizationStorage';
 
 export function useTranslate(): typeof I18n.prototype.$t {
     const i18n = I18nController.getI18n();
@@ -249,9 +248,9 @@ export class I18nController {
     }
 
     static async getLocaleFromStorage(): Promise<{ language?: Language; country?: Country }> {
-        const country = await Storage.keyValue.getItem('country');
-        const language = await Storage.keyValue.getItem('language');
-        const version = await Storage.keyValue.getItem('i18n-version');
+        const country = await LocalizationStorage.keyValue.getItem('country');
+        const language = await LocalizationStorage.keyValue.getItem('language');
+        const version = await LocalizationStorage.keyValue.getItem('i18n-version');
 
         return {
             country: country && version !== null && this.isValidCountry(country) ? country : undefined,
@@ -260,9 +259,9 @@ export class I18nController {
     }
 
     async saveLocaleToStorage() {
-        await Storage.keyValue.setItem('language', this.language);
-        await Storage.keyValue.setItem('country', this.countryCode);
-        await Storage.keyValue.setItem('i18n-version', '2');
+        await LocalizationStorage.keyValue.setItem('language', this.language);
+        await LocalizationStorage.keyValue.setItem('country', this.countryCode);
+        await LocalizationStorage.keyValue.setItem('i18n-version', '2');
 
         this.usingStoredLanguage = true;
 
