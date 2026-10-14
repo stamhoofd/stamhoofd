@@ -2,9 +2,9 @@ import type { Data, Encodeable, EncodeContext, PlainObject } from '@simonbackx/s
 import { cloneObject } from '@simonbackx/simple-encoding';
 
 import { AuditLogReplacement } from '../AuditLogReplacement.js';
-import type { Filterable } from '../members/records/RecordCategory.js';
-import { StamhoofdFilterDecoder } from './FilteredRequest.js';
-import type { StamhoofdFilter } from './StamhoofdFilter.js';
+import type { Filterable } from './Filterable.js';
+import { StamhoofdFilterDecoder } from './StamhoofdFilterDecoder.js';
+import type { StamhoofdFilter } from './StamhoofdFilterTypes.js';
 import { isEmptyFilter, isEqualFilter, mergeFilters } from './StamhoofdFilter.js';
 import { convertOldPropertyFilter } from './convertOldPropertyFilter.js';
 
@@ -62,7 +62,8 @@ export class PropertyFilter implements Encodeable {
     static decode<T>(data: Data): PropertyFilter {
         if (data.context.version < 251) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            return convertOldPropertyFilter(data.value);
+            const filter = convertOldPropertyFilter(data.value);
+            return new PropertyFilter(filter.enabledWhen, filter.requiredWhen);
         }
 
         return new PropertyFilter(
