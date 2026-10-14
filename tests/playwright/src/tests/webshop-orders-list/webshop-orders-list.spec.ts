@@ -101,4 +101,20 @@ test.describe('Orders list @webshop-orders-list', () => {
 
         await context.close();
     });
+
+    test('A phone search with more matches than one page keeps every order in a sort on name', async ({ browser }) => {
+        // A complete phone number is looked up in the index: its matches are sorted in memory and paged after the last order
+        const phoneShop = await createOrdersListWebshop('OrdersPhone');
+        const seeds = mixedOrderSeeds(135).map((seed, i) => (i < 130 ? { ...seed, phone: '+32 478 12 34 56' } : seed));
+        const phoneOrders = await TestOrders.create(phoneShop.webshop, seeds);
+        const matches = phoneOrders.filter(o => o.seed.phone);
+
+        const { context, table } = await openOrdersList(browser, phoneShop);
+        await table.search('0478 12 34 56');
+        await table.expectCount(matches.length, phoneOrders.length);
+        await table.sortOn('Naam', 'ASC');
+        expect(await table.readNames(names(phoneOrders))).toEqual(names(sortOrders(matches, o => o.name, 'ASC')));
+
+        await context.close();
+    });
 });
