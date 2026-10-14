@@ -57,6 +57,7 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'structures', path: 'shared/structures', needsDatabase: false, typecheck: true },
     { name: 'object-differ', path: 'shared/object-differ', needsDatabase: false },
     { name: 'sgv', path: 'shared/sgv', needsDatabase: false },
+    { name: 'stdsync', path: 'shared/stdsync', needsDatabase: false },
     { name: 'eslint', path: 'shared/eslint', needsDatabase: false },
     { name: 'utility', path: 'shared/utility', needsDatabase: false },
     { name: 'vite-config', path: 'frontend/shared/vite-config', needsDatabase: false },
