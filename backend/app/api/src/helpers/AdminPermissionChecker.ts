@@ -1,4 +1,5 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { PaymentRelationsService } from '@stamhoofd/models/services/PaymentRelationsService.js';
 import { isEmptyPatch, PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, User } from '@stamhoofd/models';
@@ -728,7 +729,7 @@ export class AdminPermissionChecker {
             return true;
         }
 
-        const { balanceItems } = await Payment.loadBalanceItems(payments);
+        const { balanceItems } = await PaymentRelationsService.loadBalanceItems(payments);
 
         if (balanceItems.length === 0) {
             return false;
@@ -782,7 +783,7 @@ export class AdminPermissionChecker {
         if (permissionLevel !== PermissionLevel.Read && balanceItems.length > 1) {
             // Reading a payment is allowed when one of its items is accessible, but changing it (manual payments,
             // reallocations, refunds) requires access to every item
-            const allData = data ?? await Payment.loadBalanceItemRelations(balanceItems);
+            const allData = data ?? await PaymentRelationsService.loadBalanceItemRelations(balanceItems);
 
             for (const balanceItem of balanceItems) {
                 const itemData = {
@@ -806,7 +807,7 @@ export class AdminPermissionChecker {
         }
 
         // Slight optimization possible here
-        const { registrations, orders } = data ?? ((this.user.permissions || permissionLevel === PermissionLevel.Read) ? await Payment.loadBalanceItemRelations(balanceItems) : { registrations: [], orders: [] });
+        const { registrations, orders } = data ?? ((this.user.permissions || permissionLevel === PermissionLevel.Read) ? await PaymentRelationsService.loadBalanceItemRelations(balanceItems) : { registrations: [], orders: [] });
 
         if (this.user.permissions) {
             // We grant permission for a whole payment when the user has at least permission for a part of that payment.

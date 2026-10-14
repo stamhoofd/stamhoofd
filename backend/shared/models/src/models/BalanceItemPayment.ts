@@ -1,9 +1,5 @@
-import type { ManyToOneRelation } from '@simonbackx/simple-database';
 import { column } from '@simonbackx/simple-database';
 import { v4 as uuidv4 } from 'uuid';
-
-import type {BalanceItem} from './BalanceItem.js';
-import type {Payment} from './Payment.js';
 
 import { QueryableModel } from '@stamhoofd/sql';
 
@@ -57,7 +53,4 @@ export class BalanceItemPayment extends QueryableModel {
         skipUpdate: true,
     })
     updatedAt: Date;
-
-    static balanceItem: ManyToOneRelation<'balanceItem', BalanceItem>;
-    static payment: ManyToOneRelation<'payment', Payment>;
 }

@@ -1,4 +1,5 @@
 import { Migration } from '@simonbackx/simple-database';
+import { PaymentRelationsService } from '@stamhoofd/models/services/PaymentRelationsService.js';
 import { Payment } from '@stamhoofd/models';
 import { QueryableModel, scalarToSQLExpression, SQL, SQLWhereLike } from '@stamhoofd/sql';
 import { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
@@ -29,7 +30,7 @@ export default new Migration(async () => {
             .where(new SQLWhereLike(SQL.column(Payment.table, 'reference'), scalarToSQLExpression(FEE_PAYMENT_REFERENCE_PREFIX + '%'))),
         batchSize: 100,
         batchAction: async (payments: Payment[]) => {
-            const { balanceItemPayments, balanceItems } = await Payment.loadBalanceItems(payments);
+            const { balanceItemPayments, balanceItems } = await PaymentRelationsService.loadBalanceItems(payments);
 
             for (const payment of payments) {
                 const day = parseDay(payment.reference);
