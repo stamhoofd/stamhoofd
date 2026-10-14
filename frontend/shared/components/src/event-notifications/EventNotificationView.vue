@@ -218,6 +218,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import { useEventViewLoaders } from '#events/eventViewLoaders.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { ContextMenu } from '#overlays/ContextMenu.ts';
 import { ContextMenuItem } from '#overlays/ContextMenu.ts';
@@ -253,6 +254,7 @@ const notification = props.viewModel.useNotification();
 const errors = useErrors();
 const type = props.viewModel.useType();
 const present = usePresent();
+const eventViewLoaders = useEventViewLoaders();
 const auth = useAuth();
 const app = useAppContext();
 const pop = usePop();
@@ -351,7 +353,7 @@ async function openEvent(event: Event | null) {
 
     await present({
         components: [
-            AsyncComponent(() => import('#events/EventOverview.vue'), {
+            AsyncComponent(eventViewLoaders.overview, {
                 event: event,
             }),
         ],
