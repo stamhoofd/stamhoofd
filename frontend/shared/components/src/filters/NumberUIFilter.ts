@@ -8,8 +8,9 @@ import { NumberFilterFormat } from './NumberFilterFormat.ts';
 import type { UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper } from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
 import { UINumberFilterMode } from './UINumberFilterMode.ts';
+import type { NumberUIFilterEditor } from './NumberUIFilterTypes.ts';
 
-export class NumberUIFilter extends UIFilter<NumberFilterBuilder> {
+export class NumberUIFilter extends UIFilter<NumberFilterBuilder> implements NumberUIFilterEditor {
     value = 0;
     mode: UINumberFilterMode = UINumberFilterMode.Equals;
 
