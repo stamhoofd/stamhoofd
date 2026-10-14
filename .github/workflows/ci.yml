@@ -232,8 +232,23 @@ jobs:
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
             - uses: ./.github/actions/setup
+            - name: Cache shared Turbo tasks
+              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: .turbo/cache
+                  key: turbo-shared-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-${{ github.sha }}-${{ github.run_attempt }}
+                  restore-keys: |
+                      turbo-shared-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-
             - name: Build shared packages
-              run: pnpm run build:shared
+              run: pnpm run build:shared --summarize
+            - name: Upload Turbo build summary
+              if: always()
+              uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+              with:
+                  name: turbo-shared-summary
+                  path: .turbo/runs/*.json
+                  include-hidden-files: true
+                  retention-days: 7
             - name: Upload shared build output
               uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
               with:
