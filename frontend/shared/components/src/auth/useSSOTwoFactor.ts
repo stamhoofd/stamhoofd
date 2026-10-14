@@ -4,6 +4,7 @@ import type { MFAChallengeResponse } from '@stamhoofd/structures';
 
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useContext } from '#hooks/useContext.ts';
+import { useFreshAction } from './useFreshAction';
 
 /**
  * Presenting the two-factor step of a login that was held back by the backend.
@@ -16,6 +17,7 @@ import { useContext } from '#hooks/useContext.ts';
 export function useSSOTwoFactor() {
     const show = useShow();
     const $context = useContext();
+    const runFresh = useFreshAction();
 
     /**
      * Completing the second factor completes the session, after which the app replaces the
@@ -48,6 +50,7 @@ export function useSSOTwoFactor() {
             components: [
                 AsyncComponent(() => import('./SetupMFAView.vue'), {
                     setupToken: setup.setupToken,
+                    runFresh,
                     canUsePasskeys: setup.canUsePasskeys,
                     onCompleted,
                 }),

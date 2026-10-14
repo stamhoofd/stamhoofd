@@ -76,12 +76,14 @@ import { useContext } from '../hooks/useContext';
 import { useOrganization } from '../hooks/useOrganization';
 import { usePlatform } from '../hooks/usePlatform';
 import SignupPoliciesBox from './components/SignupPoliciesBox.vue';
+import { useFreshAction } from './useFreshAction';
 
 const props = defineProps<{
     token: string;
 }>();
 
 const context = useContext();
+const runFresh = useFreshAction();
 const organization = useOrganization();
 const platform = usePlatform();
 const dismiss = useDismiss();
@@ -220,6 +222,7 @@ async function presentMFASetup(setup: MFASetupResponse) {
         components: [
             AsyncComponent(() => import('./SetupMFAView.vue'), {
                 setupToken: setup.setupToken,
+                runFresh,
                 canUsePasskeys: setup.canUsePasskeys,
                 // We opened this flow in a sheet, so we close it again before moving on.
                 onCompleted: async (_: NavigationActions) => {

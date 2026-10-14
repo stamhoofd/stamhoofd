@@ -4,6 +4,7 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useContext } from '#hooks/useContext.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
+import type { FreshAction } from './FreshAction';
 
 /**
  * Wraps a sensitive action that requires a "fresh" access token.
@@ -13,18 +14,19 @@ import type { NavigationActions } from '#types/NavigationActions.ts';
  * action is retried exactly once. When the token is already fresh, the action runs
  * directly with no extra prompt.
  */
-export function useFreshAction() {
+export function useFreshAction(): FreshAction {
     const present = usePresent();
     const $context = useContext();
 
-    return async function runFresh<T>(action: () => Promise<T>): Promise<T> {
+    return async function runFresh<T>(action: () => Promise<T>, options?: Parameters<FreshAction>[1]): Promise<T> {
         try {
             return await action();
         } catch (e) {
             if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode('require_fresh_auth')) {
-                await $context.value.renewToken();
+                const context = options?.context ?? $context.value;
+                await context.renewToken();
                 const c = await new Promise<boolean>((resolve, reject) => {
-                    present({
+                    (options?.navigation.present ?? present)({
                         components: [
                             // Two-factor authentication adds views on top of the first one. They
                             // need a navigation controller of their own, because a sheet only gets
@@ -33,6 +35,7 @@ export function useFreshAction() {
                             // of closing the flow.
                             new ComponentWithProperties(NavigationController, {
                                 root: AsyncComponent(() => import('./ReauthenticateView.vue'), {
+                                    runFresh,
                                     // We opened this flow in a sheet, so we are the one that closes
                                     // it again - using the actions of the view that finished it,
                                     // which can sit deeper than the root of the sheet.
