@@ -102,8 +102,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             try {
                 this.isOffline = false;
 
-                await manager.orders.fetchAllUpdated();
-                await manager.tickets.fetchAllUpdated();
+                await manager.syncAll();
                 this.lastInternetLoad = Date.now();
             }
             catch (e) {

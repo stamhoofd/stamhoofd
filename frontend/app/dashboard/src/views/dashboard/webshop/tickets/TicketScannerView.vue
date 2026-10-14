@@ -232,7 +232,7 @@ function toggleFlash() {
 
 async function updateTickets() {
     try {
-        await props.webshopManager.syncForScanner();
+        await props.webshopManager.syncAll();
 
         hadNetworkError.value = false;
 
