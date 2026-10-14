@@ -1,4 +1,5 @@
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner.ts';
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import { useAppContext } from '#context/appContext.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
@@ -36,7 +37,7 @@ export function useChooseGroupForMemberHandler(handler: ChooseGroupForMemberHand
 
     return async ({ customNavigate, ...options }: Omit<ChooseGroupForMemberOptions, 'context' | 'navigate' | 'admin'> & { customNavigate?: NavigationActions }) => {
         if (app !== 'registration') {
-            options.member.family.checkout.clear();
+            PlatformFamilyHelper.getCheckout(options.member.family).clear();
         }
 
         await handler({

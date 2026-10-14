@@ -19,6 +19,7 @@
 </template>
 
 <script lang="ts" setup>
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import { useContext } from '#hooks/useContext.ts';
 import STToolbar from '#navigation/STToolbar.vue';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
@@ -48,7 +49,7 @@ const context = useContext();
 const memberManager = useMemberManager();
 
 onMounted(() => {
-    memberManager.family.checkout.clear();
+    PlatformFamilyHelper.getCheckout(memberManager.family).clear();
 
     // Force reload organization
     context.value.updateData(true, false, false).catch(console.error);

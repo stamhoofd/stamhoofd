@@ -35,6 +35,7 @@
 </template>
 
 <script setup lang="ts">
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import type { Group, Organization, PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
 import { GroupType, RegisterItem } from '@stamhoofd/structures';
 import { computed } from 'vue';
@@ -54,8 +55,8 @@ const app = useAppContext();
 const checkoutRegisterItem = useRegisterItemCheckoutHandler(options => props.checkoutRegisterItemHandler(options));
 
 // We do some caching here to prevent too many calculations on cart changes
-const inCartRegisterItem = computed(() => props.member.family.checkout.cart.getMemberAndGroup(props.member.id, props.group.id));
-const inCartRegisterWaitingListItem = computed(() => props.group.waitingList ? props.member.family.checkout.cart.getMemberAndGroup(props.member.id, props.group.waitingList.id) : null);
+const inCartRegisterItem = computed(() => PlatformFamilyHelper.getCheckout(props.member.family).cart.getMemberAndGroup(props.member.id, props.group.id));
+const inCartRegisterWaitingListItem = computed(() => props.group.waitingList ? PlatformFamilyHelper.getCheckout(props.member.family).cart.getMemberAndGroup(props.member.id, props.group.waitingList.id) : null);
 
 // If the system decides that you should register for the waiting list, we should still show the correct error messages from the original register item
 const validateRegisterItem = computed(() => inCartRegisterItem.value ?? RegisterItem.defaultFor(props.member, props.group, props.groupOrganization));
@@ -86,9 +87,9 @@ const checked = computed({
     get: () => !!inCartRegisterItem.value || !!inCartRegisterWaitingListItem.value,
     set: (value: boolean) => {
         if (!value) {
-            props.member.family.checkout.removeMemberAndGroup(props.member.id, props.group.id);
+            PlatformFamilyHelper.getCheckout(props.member.family).removeMemberAndGroup(props.member.id, props.group.id);
             if (props.group.waitingList) {
-                props.member.family.checkout.removeMemberAndGroup(props.member.id, props.group.waitingList.id);
+                PlatformFamilyHelper.getCheckout(props.member.family).removeMemberAndGroup(props.member.id, props.group.waitingList.id);
             }
         } else {
             const item = registerItem.value;

@@ -1,3 +1,4 @@
+import { PlatformFamilyHelper } from '../helpers/PlatformFamilyHelper.js';
 import { PropertyFilter } from '../filters/PropertyFilter.js';
 import { Group } from '../Group.js';
 import { GroupPrice, GroupSettings } from '../GroupSettings.js';
@@ -12,7 +13,7 @@ import { MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob.js';
 import { NationalRegisterNumberOptOut } from './NationalRegisterNumberOptOut.js';
 import { OrganizationRecordsConfiguration } from './OrganizationRecordsConfiguration.js';
 import type { Parent } from './Parent.js';
-import { PlatformFamily, PlatformMember } from './PlatformMember.js';
+import { PlatformMember } from './PlatformMember.js';
 import { Registration } from './Registration.js';
 
 function yearsAgo(years: number) {
@@ -63,7 +64,7 @@ function build({ age, taxCertificates = true, nationalRegisterNumberFilter = nul
         }),
     });
 
-    const family = new PlatformFamily({ platform: Platform.create({}), contextOrganization: organization });
+    const family = PlatformFamilyHelper.create({ platform: Platform.create({}), contextOrganization: organization });
     const platformMember = new PlatformMember({ member, family });
     family.members.push(platformMember);
 

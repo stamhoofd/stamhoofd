@@ -1,3 +1,4 @@
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
@@ -85,15 +86,15 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
 
     // Add it to the platform member
     member.family.pendingRegisterItems = [item];
-    member.family.checkout.defaultOrganization = item.organization;
+    PlatformFamilyHelper.getCheckout(member.family).defaultOrganization = item.organization;
 
     if (admin) {
         if (!context.organization) {
             // Administration panel: register as organizing organization
-            member.family.checkout.asOrganizationId = item.organization.id;
+            PlatformFamilyHelper.getCheckout(member.family).asOrganizationId = item.organization.id;
         }
         else {
-            member.family.checkout.asOrganizationId = context.organization.id;
+            PlatformFamilyHelper.getCheckout(member.family).asOrganizationId = context.organization.id;
         }
     }
 
@@ -102,7 +103,7 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
         new RegisterItemStep(item, { willStartCheckoutFlow: startCheckoutFlow ?? false }),
     ];
 
-    if (!member.family.checkout.isAdminFromSameOrganization) {
+    if (!PlatformFamilyHelper.getCheckout(member.family).isAdminFromSameOrganization) {
         // For admins: skip filled steps, because we won't mark anything reviewed here
         // (we only do when members are filling things in)
         // Otherwise admins will have to review all the steps every time.
@@ -111,10 +112,10 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
     else {
         if (item.replaceRegistrations.length > 0) {
             // By default never send emails for moves or edits
-            member.family.checkout.sendConfirmationEmail = false;
+            PlatformFamilyHelper.getCheckout(member.family).sendConfirmationEmail = false;
         }
         else {
-            member.family.checkout.sendConfirmationEmail = item.group.privateSettings?.sendConfirmationEmailForManualRegistrations ?? false;
+            PlatformFamilyHelper.getCheckout(member.family).sendConfirmationEmail = item.group.privateSettings?.sendConfirmationEmailForManualRegistrations ?? false;
         }
     }
 
@@ -124,12 +125,12 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
 
         // Move the item to the cart (replace if it already exists)
         if (item !== originalItem) {
-            member.family.checkout.remove(originalItem);
+            PlatformFamilyHelper.getCheckout(member.family).remove(originalItem);
         }
-        member.family.checkout.add(item); // With price calculation
+        PlatformFamilyHelper.getCheckout(member.family).add(item); // With price calculation
         member.family.pendingRegisterItems = [];
 
-        if (!member.family.checkout.cart.contains(item)) {
+        if (!PlatformFamilyHelper.getCheckout(member.family).cart.contains(item)) {
             Toast.error($t(`%ec`)).show();
             return;
         }
@@ -139,7 +140,7 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
             // If needed, we'll need to start the normal checkout flow where we'll invoice between organizations (in case of registering members for other organizations)
             try {
                 return await startCheckout({
-                    checkout: member.family.checkout,
+                    checkout: PlatformFamilyHelper.getCheckout(member.family),
                     context,
                     displayOptions: { action: 'show' },
                 }, navigate);

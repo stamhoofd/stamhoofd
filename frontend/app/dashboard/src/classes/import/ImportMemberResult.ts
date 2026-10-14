@@ -1,7 +1,8 @@
 import type { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
 import { patchContainsChanges } from '@simonbackx/simple-encoding';
 import type { EmergencyContact, Group, Organization, Parent, Platform, PlatformMember, RecordAnswer } from '@stamhoofd/structures';
-import { MemberDetails, PlatformFamily, Version } from '@stamhoofd/structures';
+import { MemberDetails, Version } from '@stamhoofd/structures';
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import { ImportRegistrationResult } from './ImportRegistrationResult';
 
 /**
@@ -171,7 +172,7 @@ export class ImportMemberResult {
             return this.existingMember;
         }
 
-        const family = new PlatformFamily({ contextOrganization: this.organization, platform });
+        const family = PlatformFamilyHelper.create({ contextOrganization: this.organization, platform });
         const newMember = family.newMember();
         this._newPlatformMember = newMember;
         return newMember;

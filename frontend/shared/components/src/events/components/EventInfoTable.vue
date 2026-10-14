@@ -97,6 +97,7 @@
 </template>
 
 <script setup lang="ts">
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import { useAppContext } from '#context/appContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
@@ -127,7 +128,7 @@ const googleMapsUrl = computed(() => {
     }
     return null;
 });
-const differentOrganization = computed(() => props.event.group && (!props.family || (props.family.checkout.cart.isEmpty && props.family.checkout.singleOrganization?.id !== props.event.group.organizationId)));
+const differentOrganization = computed(() => props.event.group && (!props.family || (PlatformFamilyHelper.getCheckout(props.family).cart.isEmpty && PlatformFamilyHelper.getCheckout(props.family).singleOrganization?.id !== props.event.group.organizationId)));
 
 const ageGroups = computed(() => {
     const prefixes: string[] = [];

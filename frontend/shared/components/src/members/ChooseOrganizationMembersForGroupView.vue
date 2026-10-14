@@ -67,6 +67,7 @@
 </template>
 
 <script setup lang="ts">
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
 import { useErrors } from '#errors/useErrors.ts';
@@ -76,7 +77,6 @@ import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { Group, Organization, PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
-import { PlatformFamily } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 import { startCheckout } from '#members/checkout/startCheckout.ts';
 import type { ChooseGroupForMemberHandler, DefaultRegisterItemHandler, RegisterItemCheckoutHandler } from '#members/checkout/CheckoutSelectionHandlers.ts';
@@ -136,7 +136,7 @@ const hadPaidByOrganization = computed(() => props.checkout.cart.deleteRegistrat
 let added = false;
 
 async function addMember() {
-    const family = new PlatformFamily({
+    const family = PlatformFamilyHelper.create({
         contextOrganization: contextOrganization.value,
         platform: platform.value,
     });

@@ -1,5 +1,6 @@
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import type { NationalRegisterNumberOptOut, Parent } from '@stamhoofd/structures';
-import { Address, BooleanStatus, Group, GroupPrice, GroupSettings, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, Platform, PlatformFamily, PlatformMember, PropertyFilter, Registration } from '@stamhoofd/structures';
+import { Address, BooleanStatus, Group, GroupPrice, GroupSettings, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, Platform, PlatformMember, PropertyFilter, Registration } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { reactive } from 'vue';
 
@@ -38,7 +39,7 @@ export function createTaxCertificateMember(options: TaxCertificateMemberOptions 
         nationalRegisterNumber: options.nationalRegisterNumberEnabled ? PropertyFilter.createDefault() : null,
     });
 
-    const family = new PlatformFamily({ platform, contextOrganization: organization });
+    const family = PlatformFamilyHelper.create({ platform, contextOrganization: organization });
     const registeredAt = yearsAgo(1);
 
     const member = new PlatformMember({
