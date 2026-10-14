@@ -4,7 +4,7 @@ import { EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
-import type {Invoice} from './Invoice.js';
+import type { InvoiceRelation } from './InvoiceRelation.js';
 import type {BalanceItem} from './BalanceItem.js';
 import type { VATExcemptReason } from '@stamhoofd/structures';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType } from '@stamhoofd/structures';
@@ -133,5 +133,5 @@ export class InvoicedBalanceItem extends QueryableModel {
     updatedAt: Date;
 
     static balanceItem: ManyToOneRelation<'balanceItem', BalanceItem>;
-    static invoice: ManyToOneRelation<'invoice', Invoice>;
+    static invoice: ManyToOneRelation<'invoice', InvoiceRelation>;
 }
