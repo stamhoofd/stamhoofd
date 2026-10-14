@@ -134,7 +134,7 @@ jobs:
                         - 'tsconfig*.json'
                         - 'jest-extended.d.ts'
                         - '.development/i18n-uuid/**'
-                        - 'turbo.json'
+                        - 'turbo.json*'
                         - '.github/workflows/ci.yml'
                         - '.github/actions/**'
 
@@ -166,7 +166,7 @@ jobs:
                       frontend/*) frontend=true; playwright=true ;;
                       tests/playwright/*|.development/Corefile|.development/loadenv.sh) playwright=true ;;
                       .development/stam.mjs) shared=true ;;
-                      .nvmrc|tsconfig*.json|jest-extended.d.ts|.development/i18n-uuid/*|turbo.json|.github/workflows/ci.yml|.github/actions/*) ci=true ;;
+                      .nvmrc|tsconfig*.json|jest-extended.d.ts|.development/i18n-uuid/*|turbo.json*|.github/workflows/ci.yml|.github/actions/*) ci=true ;;
                     esac
                   done < "$RUNNER_TEMP/stack-files"
 
