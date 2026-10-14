@@ -1,10 +1,12 @@
-import { AccessRight, AccessRightHelper } from './AccessRight.js';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { AccessRightHelper } from './AccessRight.js';
 import { MemberResponsibility } from './MemberResponsibility.js';
 import { MemberResponsibilityRecordBase } from './members/MemberResponsibilityRecord.js';
-import { PermissionLevel } from './PermissionLevel.js';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionRole, PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole.js';
 import { Permissions } from './Permissions.js';
-import { PermissionsResourceKey, PermissionsResourceType } from './PermissionsResourceType.js';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { PermissionsResourceKey } from './PermissionsResourceType.js';
 import { Platform, PlatformConfig, PlatformPrivateConfig } from './Platform.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 import type { OrganizationForPermissionCalculation } from './UserPermissions.js';

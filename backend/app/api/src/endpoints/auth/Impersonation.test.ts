@@ -4,7 +4,8 @@ import type { SimpleError } from '@simonbackx/simple-errors';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import type { Organization } from '@stamhoofd/models';
 import { AuditLog, ImpersonationToken, MemberFactory, MemberResponsibilityRecordFactory, OrganizationFactory, Platform, RegistrationFactory, Token, User, UserFactory, UserSession } from '@stamhoofd/models';
-import { AuditLogType, BooleanStatus, NewUser, PermissionLevel, Permissions, Token as TokenStruct, UserPermissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { AuditLogType, BooleanStatus, NewUser, Permissions, Token as TokenStruct, UserPermissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 
 import { testServer } from '../../../tests/helpers/TestServer.js';

@@ -5,7 +5,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization, Webshop } from '@stamhoofd/models';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
-import { LimitedFilteredRequest, PaginatedResponse, PermissionLevel, WebshopWithOrganization, assertSort, getSortFilter } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { LimitedFilteredRequest, PaginatedResponse, WebshopWithOrganization, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { Formatter } from '@stamhoofd/utility';

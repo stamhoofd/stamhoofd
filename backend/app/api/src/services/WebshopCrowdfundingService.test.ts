@@ -4,7 +4,8 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, StripeAccount, Token } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemFactory, BalanceItemPayment, Order, OrderFactory, OrganizationFactory, Payment, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
 import type { OrderResponse } from '@stamhoofd/structures';
-import { BalanceItemStatus, Cart, CartItem, Customer, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, PaymentStatus, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductPrice, TransferSettings, WebshopCrowdfunding, WebshopMetaData, WebshopPrivateMetaData } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { BalanceItemStatus, Cart, CartItem, Customer, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, PaymentStatus, Permissions, PrivateOrder, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductPrice, TransferSettings, WebshopCrowdfunding, WebshopMetaData, WebshopPrivateMetaData } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { SessionService } from './SessionService.js';
 

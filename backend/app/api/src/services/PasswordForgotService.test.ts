@@ -1,6 +1,7 @@
 import { I18n } from '@stamhoofd/backend-i18n';
 import { Organization, OrganizationFactory, PasswordToken, User, UserFactory } from '@stamhoofd/models';
-import { Address, OrganizationMetaData, PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Address, OrganizationMetaData, Permissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { PasswordForgotService } from './PasswordForgotService.js';

@@ -18,7 +18,8 @@ import {
     Ticket,
     TicketFactory,
 } from '@stamhoofd/models';
-import { PaymentMethod, PermissionLevel, Permissions, PropertyFilter, UserPermissions, WebshopTicketType } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PaymentMethod, Permissions, PropertyFilter, UserPermissions, WebshopTicketType } from '@stamhoofd/structures';
 import {
     DashboardPage,
     DashboardTab,

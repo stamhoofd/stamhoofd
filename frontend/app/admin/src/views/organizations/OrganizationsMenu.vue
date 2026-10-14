@@ -50,7 +50,8 @@ import { defineRoute, useCheckRoute, useNavigate } from '@simonbackx/vue-app-nav
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useCollapsed } from '@stamhoofd/components/menu/useCollapsed';
-import { OrganizationTag, OrganizationTagType, PermissionLevel, TagHelper } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { OrganizationTag, OrganizationTagType, TagHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 

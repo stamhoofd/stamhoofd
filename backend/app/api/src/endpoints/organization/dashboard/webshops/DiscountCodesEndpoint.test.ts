@@ -5,7 +5,8 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, User, Webshop } from '@stamhoofd/models';
 import type { Token } from '@stamhoofd/models';
 import { OrganizationFactory, UserFactory, WebshopDiscountCode, WebshopFactory } from '@stamhoofd/models';
-import { CountFilteredRequest, DiscountCode, LimitedFilteredRequest, PermissionLevel, Permissions, PrivateDiscountCode, SortItemDirection } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { CountFilteredRequest, DiscountCode, LimitedFilteredRequest, Permissions, PrivateDiscountCode, SortItemDirection } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
 

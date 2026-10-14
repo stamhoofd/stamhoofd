@@ -39,14 +39,16 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useEmitPatch } from '#hooks/useEmitPatch.ts';
-import type { AccessRight, PermissionsResourceType} from '@stamhoofd/structures';
-import { AccessRightHelper, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ResourcePermissions, getConfigurableAccessRightsForResourceType, getConfigurablePermissionLevelsForResourceType, getDefaultAccessRightsForResourceType, getDefaultPermissionLevelForResourceType, getPermissionLevelName, getPermissionLevelNumber, getPermissionResourceTypeName, getWildcardResourceKeys, maximumPermissionlevel } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { AccessRight } from '@stamhoofd/types/AccessRight';
+import type { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { AccessRightHelper, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ResourcePermissions, getConfigurableAccessRightsForResourceType, getConfigurablePermissionLevelsForResourceType, getDefaultAccessRightsForResourceType, getDefaultPermissionLevelForResourceType, getPermissionLevelName, getPermissionLevelNumber, getPermissionResourceTypeName, getWildcardResourceKeys, maximumPermissionlevel } from '@stamhoofd/structures';
+import type { Ref } from 'vue';
 import { computed } from 'vue';
 
 const props = withDefaults(defineProps<{

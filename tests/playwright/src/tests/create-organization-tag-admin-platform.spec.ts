@@ -8,12 +8,12 @@ import { expect } from '@playwright/test';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { User } from '@stamhoofd/models';
 import { Organization, Platform, UserFactory } from '@stamhoofd/models';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import {
-    AccessRight,
     OrganizationTag,
-    PermissionLevel,
     Permissions,
-    PermissionsResourceType,
     ResourcePermissions,
     Token as TokenStruct,
     Version,

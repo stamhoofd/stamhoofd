@@ -1,6 +1,7 @@
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { DetailedReceivableBalance, PaymentStatus, PermissionLevel, ReceivableBalanceType } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { DetailedReceivableBalance, PaymentStatus, ReceivableBalanceType } from '@stamhoofd/structures';
 
 import type { MemberWithUsersAndRegistrations } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemPayment, CachedBalance, Invoice, InvoicedBalanceItem, Member, MemberUser, Payment, Registration } from '@stamhoofd/models';

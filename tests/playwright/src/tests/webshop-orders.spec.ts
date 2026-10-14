@@ -9,6 +9,7 @@ import { MollieMocker, PayconiqMocker, STPackageService, StripeMocker } from '@s
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { User } from '@stamhoofd/models';
 import { Order, OrderFactory, Organization, OrganizationFactory, Payment, TicketFactory, Token, UserFactory, Webshop } from '@stamhoofd/models';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import {
     MollieOnboarding,
     MollieStatus,
@@ -16,7 +17,6 @@ import {
     PaymentProvider,
     PaymentStatus,
     PaymentType,
-    PermissionLevel,
     Permissions,
     ProductPrice,
     STPackageBundle,

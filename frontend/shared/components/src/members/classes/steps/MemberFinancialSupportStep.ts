@@ -1,7 +1,8 @@
 
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { getFinancialSupportSettingsOrDefault, PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { getFinancialSupportSettingsOrDefault } from '@stamhoofd/structures';
 import { markRaw } from 'vue';
 import type { NavigationActions } from '../../../types/NavigationActions';
 import EditMemberFinancialSupportBox from '../../components/edit/EditMemberFinancialSupportBox.vue';

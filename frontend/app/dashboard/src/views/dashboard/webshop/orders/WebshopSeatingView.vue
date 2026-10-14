@@ -45,10 +45,11 @@ import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useIsMobile } from '@stamhoofd/components/hooks/useIsMobile.ts';
 import type { PrivateOrder, PrivateWebshop, Product, ReservedSeat } from '@stamhoofd/structures';
-import { PermissionLevel, PrivateOrderWithTickets } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PrivateOrderWithTickets } from '@stamhoofd/structures';
 
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, onBeforeUnmount, ref } from 'vue';
 
 import type { WebshopManager } from '../WebshopManager';

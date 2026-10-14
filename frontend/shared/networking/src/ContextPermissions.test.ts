@@ -1,4 +1,7 @@
-import { AccessRight, Group, GroupCategory, GroupCategorySettings, GroupSettings, GroupType, Organization, OrganizationMetaData, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, PermissionsResourceKey, PermissionsResourceType, Permissions, Platform, RegistrationPeriod, ResourcePermissions, TranslatedString, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { Group, GroupCategory, GroupCategorySettings, GroupSettings, GroupType, Organization, OrganizationMetaData, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionsResourceKey, Permissions, Platform, RegistrationPeriod, ResourcePermissions, TranslatedString, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { describe, expect, test } from 'vitest';
 import { ContextPermissions } from './ContextPermissions.ts';
 

@@ -9,7 +9,8 @@ import { MFATestHelper, STPackageService } from '@stamhoofd/backend/tests/helper
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import { EmailMocker } from '@stamhoofd/email';
 import { EmailTemplateFactory, EmailVerificationCode, Organization, OrganizationFactory, Token, User, UserFactory } from '@stamhoofd/models';
-import { AcquisitionType, EmailTemplateType, PermissionLevel, Permissions, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { AcquisitionType, EmailTemplateType, Permissions, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { OnboardingScenario } from '../flows/OnboardingScenario.js';
 import { WorkerData } from '../helpers/index.js';

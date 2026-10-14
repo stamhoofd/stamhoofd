@@ -1,6 +1,7 @@
 import { Migration } from '@simonbackx/simple-database';
 import { User } from '@stamhoofd/models';
-import { NewUser, PermissionLevel, Permissions, UserPermissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { NewUser, Permissions, UserPermissions } from '@stamhoofd/structures';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment !== 'development') {

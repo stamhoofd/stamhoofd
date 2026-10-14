@@ -4,7 +4,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { ResolutionRequest } from '../../files/ResolutionRequest.js';
 import { PropertyFilter } from '../../filters/PropertyFilter.js';
-import { getPermissionLevelNumber, PermissionLevel } from '../../PermissionLevel.js';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { getPermissionLevelNumber } from '../../PermissionLevel.js';
 import type { ObjectWithRecords } from '../ObjectWithRecords.js';
 import type { RecordAnswer } from './RecordAnswer.js';
 import { TranslatedString } from '../../TranslatedString.js';

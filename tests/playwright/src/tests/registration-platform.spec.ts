@@ -18,11 +18,11 @@ import {
     OrganizationRegistrationPeriodFactory,
     RegistrationPeriodFactory,
 } from '@stamhoofd/models';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import {
     BalanceItemType,
     MemberDetails,
     PaymentMethod,
-    PermissionLevel,
     Permissions,
     PropertyFilter,
     UitpasNumberDetails,

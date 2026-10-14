@@ -77,7 +77,8 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { ObjectWithRecords, RecordAnswer, RecordCategory } from '@stamhoofd/structures';
-import { File, PermissionLevel, RecordCheckboxAnswer, RecordFileAnswer, RecordImageAnswer } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { File, RecordCheckboxAnswer, RecordFileAnswer, RecordImageAnswer } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import Spinner from '#Spinner.vue';
 import { useAppContext } from '#context/appContext.ts';

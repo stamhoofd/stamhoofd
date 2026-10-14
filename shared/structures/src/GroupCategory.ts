@@ -1,11 +1,11 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { AccessRight } from './AccessRight.js';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { Group } from './Group.js';
 import { PermissionRole } from './PermissionRole.js';
 import { PermissionsByRole } from './PermissionsByRole.js';
-import { PermissionsResourceType } from './PermissionsResourceType.js';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import type { OrganizationRegistrationPeriod } from './RegistrationPeriod.js';
 
 /**

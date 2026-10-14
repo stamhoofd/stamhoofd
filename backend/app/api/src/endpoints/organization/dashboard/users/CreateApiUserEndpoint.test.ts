@@ -5,7 +5,8 @@ import { SessionService } from '../../../../services/SessionService.js';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { PatchApiUserEndpoint } from './PatchApiUserEndpoint.js';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
-import { ApiUser, ApiUserRateLimits, PermissionLevel, Permissions, UserMeta, UserPermissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { ApiUser, ApiUserRateLimits, Permissions, UserMeta, UserPermissions } from '@stamhoofd/structures';
 import { CreateApiUserEndpoint } from './CreateApiUserEndpoint.js';
 
 describe('Endpoint.CreateApiUserEndpoint', () => {

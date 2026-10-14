@@ -5,7 +5,8 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, Member, Order, User } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { BalanceItemStatus, BalanceItemType, BalanceItemWithPayments } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
 import { BalanceItemService } from '../../../../services/BalanceItemService.js';

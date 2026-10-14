@@ -1,4 +1,6 @@
-import { AccessRight, PermissionLevel, PermissionRoleDetailed, Permissions } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionRoleDetailed, Permissions } from '@stamhoofd/structures';
 import { OrganizationFactory, UserFactory } from '@stamhoofd/models';
 import { OrganizationAdminService } from './OrganizationAdminService.js';
 

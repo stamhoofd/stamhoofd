@@ -50,7 +50,8 @@ import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue
 import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { MemberRegistrationInvitation, PlatformMember, Registration, RegistrationPeriod } from '@stamhoofd/structures';
-import { InvitationMemberData, LimitedFilteredRequest, PermissionLevel, RegistrationInvitation } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { InvitationMemberData, LimitedFilteredRequest, RegistrationInvitation } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';

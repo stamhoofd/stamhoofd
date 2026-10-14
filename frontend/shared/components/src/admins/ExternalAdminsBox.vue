@@ -81,7 +81,8 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { useUser } from '#hooks/useUser.ts';
 import { defineRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import type { User } from '@stamhoofd/structures';
-import { PermissionLevel, Permissions, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Permissions, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 import { getLastActiveDescription, INACTIVE_ADMIN_MONTHS, isInactiveAdmin } from '#auth/userActivity.ts';

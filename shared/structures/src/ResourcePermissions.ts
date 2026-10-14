@@ -1,8 +1,10 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { AutoEncoder, field, StringDecoder, EnumDecoder, ArrayDecoder, PatchMap } from '@simonbackx/simple-encoding';
-import { AccessRight, AccessRightHelper } from './AccessRight.js';
-import { PermissionLevel, getPermissionLevelNumber } from './PermissionLevel.js';
-import type { PermissionsResourceType } from './PermissionsResourceType.js';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { AccessRightHelper } from './AccessRight.js';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { getPermissionLevelNumber } from './PermissionLevel.js';
+import type { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import { getPermissionResourceTypeName, PermissionsResourceKey } from './PermissionsResourceType.js';
 import { Formatter } from '@stamhoofd/utility';
 

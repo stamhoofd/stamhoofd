@@ -1,6 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { MollieToken, OrganizationFactory, UserFactory } from '@stamhoofd/models';
-import { PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Permissions } from '@stamhoofd/structures';
 import { MollieRequiredScopes } from '@stamhoofd/structures/MollieScopes.js';
 import { TestUtils } from '@stamhoofd/test-utils';
 

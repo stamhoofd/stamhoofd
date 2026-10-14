@@ -4,8 +4,8 @@ import { PermissionRoleForResponsibility } from './PermissionRole.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 
 import type { Group } from './Group.js';
-import { PermissionLevel } from './PermissionLevel.js';
-import { PermissionsResourceType } from './PermissionsResourceType.js';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 
 export class MemberResponsibility extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

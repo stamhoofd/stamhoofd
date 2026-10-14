@@ -9,6 +9,7 @@ import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Group, Member, Organization, User } from '@stamhoofd/models';
 import { BalanceItemFactory, BalanceItemPayment, GroupFactory, MemberFactory, Order, OrganizationFactory, Payment, RegistrationFactory, UserFactory } from '@stamhoofd/models';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import {
     appToUri,
     BalanceItemRelation,
@@ -18,7 +19,6 @@ import {
     PaymentMethod,
     PaymentStatus,
     PaymentType,
-    PermissionLevel,
     Permissions,
     STPackageBundle,
     Token as TokenStruct,

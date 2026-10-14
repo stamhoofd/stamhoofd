@@ -1,5 +1,6 @@
 import { Token, UserFactory } from '@stamhoofd/models';
-import { PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Permissions } from '@stamhoofd/structures';
 import { SessionService } from '../../src/services/SessionService.js';
 
 export async function initPlatformAdmin() {

@@ -8,7 +8,8 @@ import type { Page } from '@playwright/test';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import type { Member } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemFactory, BalanceItemPayment, CachedBalance, MemberFactory, Organization, Payment, STPackageFactory } from '@stamhoofd/models';
-import { Company, PaymentCustomer, PaymentMethod, PaymentStatus, PaymentType, PermissionLevel, Permissions, STPackageBundle, UserPermissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Company, PaymentCustomer, PaymentMethod, PaymentStatus, PaymentType, Permissions, STPackageBundle, UserPermissions } from '@stamhoofd/structures';
 import { WorkerData } from '../helpers/index.js';
 
 /**

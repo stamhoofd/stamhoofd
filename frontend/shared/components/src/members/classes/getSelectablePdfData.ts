@@ -1,7 +1,8 @@
 import type { SelectableColumn } from '@stamhoofd/frontend-excel-export/SelectableColumn';
 import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
 import type { EmergencyContact, Group, Organization, Parent, Platform, PlatformMember, RecordSettings } from '@stamhoofd/structures';
-import { AccessRight, getFinancialSupportSettingsOrDefault, getGenderName, GroupType, ParentTypeHelper, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordType } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { getFinancialSupportSettingsOrDefault, getGenderName, GroupType, ParentTypeHelper, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { SelectablePdfData } from '../../export/SelectablePdfData';
 

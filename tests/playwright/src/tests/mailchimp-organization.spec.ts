@@ -10,7 +10,8 @@ import { STPackageService } from '@stamhoofd/backend/services/STPackageService';
 import { MailchimpMocker } from '@stamhoofd/backend/tests/helpers/MailchimpMocker';
 import type { User } from '@stamhoofd/models';
 import { GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, UserFactory } from '@stamhoofd/models';
-import { appToUri, MemberDetails, Parent, PermissionLevel, Permissions, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { appToUri, MemberDetails, Parent, Permissions, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WorkerData } from '../helpers/index.js';
 

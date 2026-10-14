@@ -3,7 +3,8 @@ import { PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encodin
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import type { RegistrationInvitation as RegistrationInvitationStruct } from '@stamhoofd/structures';
-import { GroupType, PermissionLevel, RegistrationInvitationRequest } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { GroupType, RegistrationInvitationRequest } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Group, Member, RegistrationInvitation } from '@stamhoofd/models';

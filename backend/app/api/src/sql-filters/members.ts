@@ -2,7 +2,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Email, Member, MemberUser } from '@stamhoofd/models';
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJoinedRelationFilter, createWildcardColumnFilter, SQL, SQLAge, SQLCast, SQLConcat, SQLIfNull, SQLJsonExtract, SQLScalar, SQLValueType } from '@stamhoofd/sql';
-import { AccessRight } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { Context } from '../helpers/Context.js';
 import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers.js';
 import { organizationFilterCompilers } from './organizations.js';
