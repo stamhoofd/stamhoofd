@@ -3,6 +3,7 @@ import { inject, provide } from 'vue';
 
 export type EventViewLoaders = {
     overview: () => Promise<{ default: Component }>;
+    notification: () => Promise<{ default: Component }>;
 };
 
 export const eventViewLoadersKey: InjectionKey<EventViewLoaders> = Symbol('eventViewLoaders');

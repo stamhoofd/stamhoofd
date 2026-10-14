@@ -3,6 +3,8 @@ import { inject, provide } from 'vue';
 
 export type PaymentViewLoaders = {
     asyncPayment: () => Promise<Component>;
+    payment: () => Promise<{ default: Component }>;
+    editBalanceItem: () => Promise<{ default: Component }>;
 };
 
 export const paymentViewLoadersKey: InjectionKey<PaymentViewLoaders> = Symbol('paymentViewLoaders');
