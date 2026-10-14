@@ -371,7 +371,7 @@ export class BundleDiscountCalculation {
 
         for (const item of arr) {
             // We always use the group price here, because this is safer, also for registrations (in case we have deactivated registrations with cancallation fees)
-            const price = item instanceof RegisterItem ? (item.groupPrice.price.forMember(item.member)) : item.registration.groupPrice.price.forMember(item.member);
+            const price = item instanceof RegisterItem ? (item.groupPrice.price.getPrice(item.member.patchedMember.details.shouldApplyReducedPrice)) : item.registration.groupPrice.price.getPrice(item.member.patchedMember.details.shouldApplyReducedPrice);
             const discounts = item instanceof RegisterItem
                 ? (item.groupPrice.bundleDiscounts.get(this.bundle.id)?.customDiscounts ?? this.bundle.discounts)
                 : (item.registration.groupPrice.bundleDiscounts.get(this.bundle.id)?.customDiscounts ?? this.bundle.discounts);

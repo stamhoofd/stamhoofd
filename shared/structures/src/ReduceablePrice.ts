@@ -1,6 +1,5 @@
 import { AutoEncoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
 
-import type { PlatformMember } from './members/PlatformMember.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 export class ReduceablePrice extends AutoEncoder {
@@ -18,9 +17,5 @@ export class ReduceablePrice extends AutoEncoder {
         }
 
         return isReduced ? this.reducedPrice : this.price;
-    }
-
-    forMember(member: PlatformMember) {
-        return this.getPrice(member.patchedMember.details.shouldApplyReducedPrice);
     }
 }

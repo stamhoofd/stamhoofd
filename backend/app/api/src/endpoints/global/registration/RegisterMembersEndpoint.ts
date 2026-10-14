@@ -657,7 +657,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             await createBalanceItem({
                 registration,
                 periodId: item.group.periodId,
-                unitPrice: item.groupPrice.price.forMember(item.member),
+                unitPrice: item.groupPrice.price.getPrice(item.member.patchedMember.details.shouldApplyReducedPrice),
                 type: BalanceItemType.Registration,
                 skipZero: false, // Always create at least one balance item for each registration - even when the price is zero
                 name: `${item.member.patchedMember.name} bij ${item.group.settings.name.toString()}`,
@@ -672,7 +672,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     registration,
                     periodId: item.group.periodId,
                     amount: option.amount,
-                    unitPrice: option.option.price.forMember(item.member),
+                    unitPrice: option.option.price.getPrice(item.member.patchedMember.details.shouldApplyReducedPrice),
                     skipZero: true, // Do not create for zero option prices
                     type: BalanceItemType.Registration,
                     name: `${option.optionMenu.name}: ${option.option.name}`,

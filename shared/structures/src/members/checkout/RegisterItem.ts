@@ -368,11 +368,12 @@ export class RegisterItem implements ObjectWithRecords {
     }
 
     calculatePrice() {
-        this.calculatedPrice = this.groupPrice.price.forMember(this.member);
+        const isReduced = this.member.patchedMember.details.shouldApplyReducedPrice;
+        this.calculatedPrice = this.groupPrice.price.getPrice(isReduced);
         this.calculatedRefund = 0;
 
         for (const option of this.options) {
-            this.calculatedPrice += option.option.price.forMember(this.member) * option.amount;
+            this.calculatedPrice += option.option.price.getPrice(isReduced) * option.amount;
         }
 
         for (const { registration } of this.replaceRegistrations) {

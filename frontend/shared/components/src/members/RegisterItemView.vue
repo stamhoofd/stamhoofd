@@ -96,7 +96,7 @@
                     </p>
 
                     <template #right>
-                        <span class="style-price-base">{{ formatPrice(price.price.forMember(item.member)) }}</span>
+                        <span class="style-price-base">{{ formatPrice(price.price.getPrice(isReduced)) }}</span>
                     </template>
                 </STListItem>
             </STList>
@@ -117,8 +117,8 @@
                     <h4 class="style-title-list">
                         {{ option.name || 'Naamloos' }}
                     </h4>
-                    <p v-if="option.allowAmount && option.price.forMember(item.member)" class="style-description-small">
-                        {{ $t('%eE', {price: formatPrice(option.price.forMember(item.member))}) }}
+                    <p v-if="option.allowAmount && option.price.getPrice(isReduced)" class="style-description-small">
+                        {{ $t('%eE', {price: formatPrice(option.price.getPrice(isReduced))}) }}
                     </p>
 
                     <p v-if="option.getRemainingStock(item) && (option.maximum === null || option.getRemainingStock(item)! < option.maximum) && option.allowAmount" class="style-description-small">
@@ -135,8 +135,8 @@
                                 <NumberInput :model-value="getOptionAmount(menu, option)" suffix="stuks" suffix-singular="stuk" :max="option.getMaximumSelection(item)" :min="1" :stepper="true" @update:model-value="setOptionAmount(menu, option, $event)" />
                             </template>
                         </template>
-                        <span v-else-if="option.price.forMember(item.member)" class="style-price-base">
-                            {{ formatPrice(option.price.forMember(item.member)) }}
+                        <span v-else-if="option.price.getPrice(isReduced)" class="style-price-base">
+                            {{ formatPrice(option.price.getPrice(isReduced)) }}
                         </span>
                     </template>
                 </STListItem>
@@ -188,6 +188,7 @@ const navigationActions = useNavigationActions();
 const isInCart = checkout.value.cart.contains(props.item); // only check on mount to avoid rendering change on save
 const pop = usePop();
 const admin = computed(() => checkout.value.isAdminFromSameOrganization);
+const isReduced = computed(() => props.item.member.patchedMember.details.shouldApplyReducedPrice);
 const validationWarning = ref(null) as Ref<string | null>;
 const contextOrganization = useOrganization();
 
