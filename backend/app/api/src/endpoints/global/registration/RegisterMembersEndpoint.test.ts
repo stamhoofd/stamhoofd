@@ -3311,9 +3311,8 @@ describe('Endpoint.RegisterMembers', () => {
                             }),
                         ],
                         balanceItems: [],
-                        deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration.id })],
+                        deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration.id, cancellationFeePercentage })],
                     }),
-                    cancellationFeePercentage,
                     administrationFee: 0,
                     freeContribution: 0,
                     paymentMethod: PaymentMethod.PointOfSale,
@@ -3325,7 +3324,7 @@ describe('Endpoint.RegisterMembers', () => {
                 await expect(post(body2, organization, token))
                     .rejects
                     .toThrow(STExpect.simpleError({
-                        field: 'cancellationFeePercentage',
+                        field: 'deleteRegistrations.cancellationFeePercentage',
                         code: 'invalid_field',
                     }));
             }

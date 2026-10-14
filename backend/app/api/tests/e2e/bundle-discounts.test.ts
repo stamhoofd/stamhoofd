@@ -3078,11 +3078,10 @@ describe('E2E.Bundle Discounts', () => {
             // Now delete registration 1, which has discount
             const checkout = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration1.id })],
+                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration1.id, cancellationFeePercentage: 0 })],
                 }),
                 asOrganizationId: organization.id,
                 totalPrice: -25_0000 + 5_0000,
-                cancellationFeePercentage: 0,
             });
 
             await post(checkout, organization, adminToken);
@@ -3133,11 +3132,10 @@ describe('E2E.Bundle Discounts', () => {
             // Now delete registration 1, which has discount
             const checkout = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration1.id })],
+                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration1.id, cancellationFeePercentage: 100_00 })],
                 }),
                 asOrganizationId: organization.id,
                 totalPrice: 0, // no change in outstanding balance, because we charge a cancellation fee
-                cancellationFeePercentage: 100_00,
             });
 
             await post(checkout, organization, adminToken);
@@ -3193,11 +3191,10 @@ describe('E2E.Bundle Discounts', () => {
             // Now delete registration 2, which does not have a discount
             const checkout = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration2.id })],
+                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration2.id, cancellationFeePercentage: 0 })],
                 }),
                 asOrganizationId: organization.id,
                 totalPrice: -15_0000 + 5_0000, // -15 back, but also lose discount on registration 1, so add 5
-                cancellationFeePercentage: 0,
             });
 
             await post(checkout, organization, adminToken);
@@ -3268,11 +3265,10 @@ describe('E2E.Bundle Discounts', () => {
             // Now delete registration 2, which does not have a discount
             const checkout = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration2.id })],
+                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration2.id, cancellationFeePercentage: 100_00 })], // we charge a cancellation fee
                 }),
                 asOrganizationId: organization.id,
                 totalPrice: 5_0000, // Positive 5 because we lose the discount on registration 1
-                cancellationFeePercentage: 100_00, // we charge a cancellation fee
             });
 
             await post(checkout, organization, adminToken);
