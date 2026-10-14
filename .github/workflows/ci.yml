@@ -13,7 +13,7 @@ on:
         branches: [main, ci-test, "renovate/**"]
     pull_request:
         branches: [main]
-        types: [opened, synchronize, reopened, labeled]
+        types: [opened, synchronize, reopened, labeled, stacked]
 
 # Cancel superseded runs on the same ref. We only cancel on pull_request events so
 # that pushes to main always run to completion (and keep their full check history).
