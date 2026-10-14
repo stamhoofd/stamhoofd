@@ -17,11 +17,7 @@ Backend uses a custom router (`@simonbackx/simple-endpoints`), **not Express**: 
 
 ### Translations
 
-- All user-facing strings use `$t(...)`, written in **Dutch**: `$t('Welkom {firstName},', { firstName: user.firstName })`
-- The build system replaces `$t('Iets in het Nederlands')` with `$t('%XYZ')` on release. So you can find both patterns in the codebase. You can look `%XYZ` keys up in `shared/locales/src/nl.json`.
-- Write new text by wrapping it with $t(...) (keep it in Dutch). e.g. $t('Opslaan'). Keep it like that in your commits. The build script will replace this later in separate commits on release with % prefixed keys.
-- Do not alter `shared/locales/src/nl.json`. If text needs changes, replace the existing $t with a new one with the new Dutch text. Our scripts will deduplicate and merge as required on release.
-- `SimpleError.message` should not use $t. It should be plain text in English. `SimpleError.human` on the other hand should use `$t` and is translated automatically.
+Follow the [translation conventions](contributing/frontend/translations.md) for user-facing text and errors. Keep new `$t(...)` strings in Dutch; do not edit `shared/locales/src/nl.json`.
 
 ## Rules
 

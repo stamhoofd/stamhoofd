@@ -16,4 +16,4 @@ Install the recommended VS Code **i18n Ally** extension. The repository's [edito
 
 The [global declarations](../../shared/types/src/global.ts) provide types, not runtime initialization. Tests must use their package's existing translation setup/wrappers; a missing `$t` at runtime is not a reason to replace translations with hard-coded text. Ask the repository maintainers when the existing test setup or translation automation is unclear.
 
-The release workflow is described by the [translation command](../../shared/cli/src/commands/translate/index.ts).
+Before release, maintainers run `pnpm stam translate auto`, review the generated keys and translations, and commit them separately. The workflow also merges duplicates and removes unused keys. See the [CLI translation guide](../../shared/cli/README.md#translations) for command options and the [translation command](../../shared/cli/src/commands/translate/index.ts) for its implementation.
