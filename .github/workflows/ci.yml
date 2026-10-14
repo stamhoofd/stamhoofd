@@ -281,7 +281,7 @@ jobs:
               run: sudo sysctl -e -w kernel.apparmor_restrict_unprivileged_userns=0
             - name: Run tests
               run: |
-                  for package in backend/app/renderer backend/app/redirecter backend/app/api; do
+                  for package in backend/app/renderer backend/app/redirecter backend/app/api backend/app/statistics-syncer; do
                     pnpm --dir "$package" run test --bail=1
                   done
 
@@ -330,7 +330,7 @@ jobs:
                   name: shared-dist
             - name: Run tests
               run: |
-                  for package in shared/structures shared/utility shared/cli shared/object-differ shared/sgv shared/eslint; do
+                  for package in shared/structures shared/utility shared/cli shared/object-differ shared/sgv shared/eslint shared/metabase .development/i18n-uuid; do
                     pnpm --dir "$package" run test --bail=1
                   done
 
@@ -413,6 +413,8 @@ jobs:
               run: pnpm --dir frontend/shared/components exec vitest run
             - name: Run networking browser tests
               run: pnpm --dir frontend/shared/networking exec vitest run
+            - name: Run Vite config tests
+              run: pnpm --dir frontend/shared/vite-config exec vitest run
 
     job_test_playwright:
         name: "Playwright Tests"
