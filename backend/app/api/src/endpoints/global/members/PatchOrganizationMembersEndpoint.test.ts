@@ -558,7 +558,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             }).create();
 
             // The admin is also a user manager of this member
-            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false, user: admin }).create();
+            const member = await new MemberFactory({ organization, firstName, lastName, birthDay, generateData: false, user: admin }).create();
             await new RegistrationFactory({ member, organization }).create();
 
             const token = await SessionService.createSession(admin);
