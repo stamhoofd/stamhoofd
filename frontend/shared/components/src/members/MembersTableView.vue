@@ -17,8 +17,8 @@
                 {{ $t('%1HO') }}
             </p>
 
-            <p v-if="(false as any) && sgvSyncWarning" :class="sgvSyncWarning.status === SGVSyncStatus.Never ? 'error-box icon sync' : 'info-box icon sync'" @click="sgvSyncOpen">
-                {{ sgvSyncWarning.text }}
+            <p v-if="(false as any) && syncWarning" :class="syncWarning.isError ? 'error-box icon sync' : 'info-box icon sync'" @click="syncOpen">
+                {{ syncWarning.text }}
                 <button v-if="auth.hasFullAccess()" class="button text" type="button">
                     {{ $t('%1XD') }}
                 </button>
@@ -45,9 +45,9 @@ import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
 import ModernTableView from '#tables/ModernTableView.vue';
 import type { ComponentExposed } from '#VueGlobalHelper.ts';
-import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync';
+import { useMemberSync } from '#members/memberSync.ts';
 import type { Group, GroupCategoryTree, MemberResponsibility, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, GroupType, PermissionLevel, SGVSyncStatus } from '@stamhoofd/structures';
+import { AccessRight, GroupType, PermissionLevel } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
@@ -243,7 +243,7 @@ const objectFetcher = useMembersObjectFetcher({
 });
 
 const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
-const { sgvSyncOpen, sgvSyncWarning } = useSGVSync(computed(() => tableObjectFetcher.objects.map(member => member.member)));
+const { open: syncOpen, warning: syncWarning } = useMemberSync(computed(() => tableObjectFetcher.objects.map(member => member.member)));
 
 const allColumns = getMemberColumns({
     platform: platform.value,

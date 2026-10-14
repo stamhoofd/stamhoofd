@@ -33,7 +33,6 @@
         "@stamhoofd/networking": "workspace:*",
         "@stamhoofd/object-differ": "workspace:*",
         "@stamhoofd/scss": "workspace:*",
-        "@stamhoofd/sgv-frontend": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/ticket-builder": "workspace:*",
         "@stamhoofd/types": "workspace:*",

@@ -17,6 +17,7 @@ import { useProvideMemberViews } from '@stamhoofd/components/members/provideMemb
 import { useProvideEventViews } from '@stamhoofd/components/events/provideEventViews';
 import { useProvideGroupViews } from '@stamhoofd/components/groups/provideGroupViews';
 import { useProvidePaymentViews } from '@stamhoofd/components/payments/providePaymentViews';
+import { useProvideSGVMemberSync } from '@stamhoofd/sgv-frontend/provideSGVMemberSync';
 import { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useProvideEventWebshopViews } from '@stamhoofd/dashboard/providers/provideEventWebshopViews.ts';
@@ -28,6 +29,7 @@ useProvideMemberViews();
 useProvideEventViews();
 useProvideGroupViews();
 useProvidePaymentViews();
+useProvideSGVMemberSync();
 const context = useContext();
 const platform = usePlatform();
 const auditLogRenderers = useAdminAuditLogRenderers();

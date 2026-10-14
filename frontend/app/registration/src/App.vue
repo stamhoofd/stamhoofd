@@ -17,11 +17,13 @@ import { useEventsEnabled } from '@stamhoofd/components/hooks/useEventsEnabled.t
 import { useMembersPackage } from '@stamhoofd/components/hooks/useMembersPackage.ts';
 import { useProvidePaymentViews } from '@stamhoofd/components/payments/providePaymentViews';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
+import { useProvideSGVMemberSync } from '@stamhoofd/sgv-frontend/provideSGVMemberSync';
 import { AppRoute } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const context = useContext();
 useProvidePaymentViews();
+useProvideSGVMemberSync();
 const memberManager = useMemberManager();
 const getLoginRoot = useLoginRoot();
 const eventsEnabled = useEventsEnabled();
