@@ -6,6 +6,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Document, DocumentTemplate, Member, Registration } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { DocumentStatus, Document as DocumentStruct } from '@stamhoofd/structures';
+import { DocumentService } from '../../../../services/DocumentService.js';
 
 import { Context } from '../../../../helpers/Context.js';
 
@@ -75,7 +76,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                 document.status = template.status;
             }
 
-            await document.updateData();
+            await DocumentService.updateData(document);
             await document.save();
 
             // Return in response
@@ -126,7 +127,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                 document.memberId = put.memberId;
             }
 
-            await document.updateData();
+            await DocumentService.updateData(document);
             await document.save();
 
             // Return in response

@@ -5,7 +5,8 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { MemberWithUsersRegistrationsAndGroups, Registration } from '@stamhoofd/models';
-import { AuditLog, BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, Organization, Platform, RateLimiter, RegistrationPeriod, User } from '@stamhoofd/models';
+import { AuditLog, BalanceItem, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, Organization, Platform, RateLimiter, RegistrationPeriod, User } from '@stamhoofd/models';
+import { DocumentService } from '../../../services/DocumentService.js';
 import type { MemberResponsibility, MembersBlob } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, EmergencyContact, GroupType, MemberDetails, MemberWithRegistrationsBlob, Parent, PlatformMembershipTypeBehaviour, SetupStepType } from '@stamhoofd/structures';
@@ -283,7 +284,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     members.push(duplicate);
 
                     await MemberUserSyncer.onChangeMember(duplicate);
-                    await Document.updateForMember(duplicate);
+                    await DocumentService.updateForMember(duplicate);
                     continue;
                 }
             }
@@ -300,7 +301,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
 
             // Update documents
-            await Document.updateForMember(member);
+            await DocumentService.updateForMember(member);
 
             // Update responsibilities
             for (const patchResponsibility of patch.responsibilities.getPatches()) {
@@ -1101,7 +1102,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     await MemberUserSyncer.onChangeMember(m);
 
                     // Update documents
-                    await Document.updateForMember(m);
+                    await DocumentService.updateForMember(m);
                 }
             }
         }

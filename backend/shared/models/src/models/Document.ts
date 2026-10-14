@@ -1,12 +1,10 @@
 import { column } from '@simonbackx/simple-database';
 import { DocumentData, DocumentStatus, Document as DocumentStruct } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel } from '@stamhoofd/sql';
-import type { Member, MemberWithRegistrations, RegistrationWithMember } from './Member.js';
-import { Registration } from './Registration.js';
+import type { Registration } from './Registration.js';
 
 export class Document extends QueryableModel {
     static table = 'documents';
@@ -87,76 +85,6 @@ export class Document extends QueryableModel {
         return DocumentStruct.create(this);
     }
 
-    async updateData(): Promise<void> {
-        if (this.isLocked) {
-            console.log('Document is locked, skipping update');
-            return;
-        }
-
-        const DocumentTemplate = (await import('./DocumentTemplate.js')).DocumentTemplate;
-        const template = await DocumentTemplate.getByID(this.templateId);
-        if (!template) {
-            console.log('No template, skipping update');
-            return;
-        }
-
-        if (!template.updatesEnabled) {
-            console.log('No updates enabled when updating document', this.id);
-            // do update, without taking new data from the registration into account
-            await template.updateDocumentWithAnswers(this, this.data.fieldAnswers);
-            return;
-        }
-
-        if (!this.registrationId) {
-            console.log('No registration id when updating document', this.id);
-            await template.updateDocumentWithAnswers(this, this.data.fieldAnswers);
-            return;
-        }
-
-        const Member = (await import('./Member.js')).Member;
-        const registration = await Registration.getByID(this.registrationId);
-        if (!registration) {
-            console.log('No registration when updating document', this.id);
-            await template.updateDocumentWithAnswers(this, this.data.fieldAnswers);
-            return;
-        }
-
-        const [loadedRegistration] = await Member.loadMembersForRegistrations([registration]);
-        await template.updateDocumentFor(this, loadedRegistration);
-    }
-
-    static async updateForMember(memberOrId: string | Member | MemberWithRegistrations) {
-        try {
-            console.log('Updating documents for member', typeof memberOrId === 'string' ? memberOrId : memberOrId.id);
-            const Member = (await import('./Member.js')).Member;
-            const member = typeof memberOrId === 'string' ? await Member.getByID(memberOrId) : memberOrId;
-            if (member) {
-                const [loadedMember] = await Member.loadRegistrations([member]);
-                const organizationIds = Formatter.uniqueArray(loadedMember.registrations.map(r => r.organizationId));
-                for (const organizationId of organizationIds) {
-                    await this.updateForRegistrations(loadedMember.registrations.filter(r => r.registeredAt && r.deactivatedAt === null && r.organizationId === organizationId).map(r => r.id), organizationId);
-                }
-            }
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-    static async updateForRegistration(registration: RegistrationWithMember) {
-        try {
-            console.log('Updating documents for registration', registration.id);
-
-            const DocumentTemplate = (await import('./DocumentTemplate.js')).DocumentTemplate;
-            const templates = await DocumentTemplate.where({ updatesEnabled: 1, isLocked: 0, organizationId: registration.organizationId });
-
-            for (const template of templates) {
-                await template.updateForRegistration(registration);
-            }
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
     static async deleteForRegistrations(registrations: Registration[]) {
         if (registrations.length === 0) {
             return [];
@@ -167,50 +95,6 @@ export class Document extends QueryableModel {
         for (const document of existingDocuments) {
             console.log('Deleting document for registration', document.registrationId);
             await document.delete();
-        }
-    }
-
-    static async updateForRegistrations(registrationIds: string[] | Registration[], organizationId: string) {
-        if (!registrationIds.length) {
-            return;
-        }
-        try {
-            console.log('Updating documents for updateForRegistrations', registrationIds, organizationId);
-
-            const DocumentTemplate = (await import('./DocumentTemplate.js')).DocumentTemplate;
-            const templates = await DocumentTemplate.where({ updatesEnabled: 1, isLocked: 0, organizationId });
-
-            if (templates.length) {
-                const Member = (await import('./Member.js')).Member;
-                const registrations = registrationIds.length === 0 || typeof registrationIds[0] !== 'string' ? (registrationIds as Registration[]) : await Member.getRegistrationWithMembersByIDs(registrationIds as string[]);
-                const loadedRegistrations = await Member.loadMembersForRegistrations(registrations);
-
-                for (const template of templates) {
-                    await template.updateForRegistrations(loadedRegistrations);
-                }
-            }
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-    static async updateForGroup(groupId: string, organizationId: string) {
-        try {
-            console.log('Updating documents for group', groupId);
-
-            const DocumentTemplate = (await import('./DocumentTemplate.js')).DocumentTemplate;
-            const templates = await DocumentTemplate.where({ updatesEnabled: 1, isLocked: 0, organizationId });
-
-            if (templates.length) {
-                const Member = (await import('./Member.js')).Member;
-                const registrations = await Member.getRegistrationWithMembersForGroup(groupId);
-
-                for (const template of templates) {
-                    await template.updateForRegistrations(registrations);
-                }
-            }
-        } catch (e) {
-            console.error(e);
         }
     }
 }
