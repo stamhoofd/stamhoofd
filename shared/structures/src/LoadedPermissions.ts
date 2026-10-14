@@ -1,15 +1,32 @@
 import { Formatter } from '@stamhoofd/utility';
 import type { AccessRight } from '@stamhoofd/types/AccessRight';
 import { AccessRightHelper } from './AccessRight.js';
-import type { MemberResponsibility } from './MemberResponsibility.js';
-import type { MemberResponsibilityRecordBase } from './members/MemberResponsibilityRecord.js';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { getPermissionLevelNumber } from './PermissionLevel.js';
 import type { PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole.js';
-import type { Permissions } from './Permissions.js';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import { isPeriodScopedResourceType, PermissionsResourceKey } from './PermissionsResourceType.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
+
+type ResponsibilityRecordForPermissions = {
+    responsibilityId: string;
+    groupId: string | null;
+    startDate: Date;
+    endDate: Date | null;
+};
+
+type ResponsibilityForPermissions = {
+    id: string;
+    permissions: PermissionRoleDetailed | null;
+    groupPermissionLevel: PermissionLevel;
+};
+
+type PermissionsForLoading = {
+    level: PermissionLevel;
+    resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>>;
+    roles: { id: string }[];
+    responsibilities: ResponsibilityRecordForPermissions[];
+};
 
 /**
  * Identical to Permissions but with detailed roles, loaded from the organization or platform
@@ -90,7 +107,7 @@ export class LoadedPermissions {
         return permissions;
     }
 
-    static fromResponsibilityRecord(responsibilityRecord: MemberResponsibilityRecordBase, inheritedResponsibilityRoles: PermissionRoleForResponsibility[], allResponsibilites: MemberResponsibility[]) {
+    static fromResponsibilityRecord(responsibilityRecord: ResponsibilityRecordForPermissions, inheritedResponsibilityRoles: PermissionRoleForResponsibility[], allResponsibilites: ResponsibilityForPermissions[]) {
         const responsibility = allResponsibilites.find(r => r.id === responsibilityRecord.responsibilityId);
         if (!responsibility) {
             return LoadedPermissions.create({});
@@ -101,7 +118,7 @@ export class LoadedPermissions {
     /**
      * old name: buildRoleForResponsibility
      */
-    static fromResponsibility(responsibility: MemberResponsibility, groupId: string | null, inheritedResponsibilityRoles: PermissionRoleForResponsibility[]) {
+    static fromResponsibility(responsibility: ResponsibilityForPermissions, groupId: string | null, inheritedResponsibilityRoles: PermissionRoleForResponsibility[]) {
         const permissions = responsibility.permissions
             ? this.fromRole(responsibility.permissions)
             : LoadedPermissions.create({});
@@ -121,7 +138,7 @@ export class LoadedPermissions {
         return permissions;
     }
 
-    static from(permissions: Permissions, allRoles: PermissionRoleDetailed[], inheritedResponsibilityRoles: PermissionRoleForResponsibility[], allResponsibilites: MemberResponsibility[]) {
+    static from(permissions: PermissionsForLoading, allRoles: PermissionRoleDetailed[], inheritedResponsibilityRoles: PermissionRoleForResponsibility[], allResponsibilites: ResponsibilityForPermissions[]) {
         const loaded = LoadedPermissions.create({
             level: permissions.level,
             accessRights: [],
