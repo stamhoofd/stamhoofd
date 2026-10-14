@@ -3,6 +3,7 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { useAppContext } from '#context/appContext.ts';
 import { EventNotificationViewModel } from '#event-notifications/classes/EventNotificationViewModel.ts';
 import { useShowEvent } from '#events/hooks/useShowEvent.ts';
+import { useEventViewLoaders } from '#events/eventViewLoaders.ts';
 import { useEventNotificationsObjectFetcher } from '#fetchers/useEventNotificationsObjectFetcher.ts';
 import type { useEventsObjectFetcher } from '#fetchers/useEventsObjectFetcher.ts';
 import type { useMembersObjectFetcher } from '#fetchers/useMembersObjectFetcher.ts';
@@ -119,6 +120,7 @@ export function renderAny(obj: unknown, customRenderers?: AuditLogCustomRenderer
             const present = usePresent();
             const platform = usePlatform();
             const fetcher = useEventNotificationsObjectFetcher();
+            const loaders = useEventViewLoaders();
 
             return () => h('button', {
                 class: 'style-inline-resource button simple',
@@ -140,7 +142,7 @@ export function renderAny(obj: unknown, customRenderers?: AuditLogCustomRenderer
                                             throw new Error('Event notification not found');
                                         }
 
-                                        return AsyncComponent(() => import('../../event-notifications/EventNotificationView.vue'), {
+                                        return AsyncComponent(loaders.notification, {
                                             viewModel: EventNotificationViewModel.edit({
                                                 eventNotification: notifications.results[0],
                                                 platform: platform.value,
