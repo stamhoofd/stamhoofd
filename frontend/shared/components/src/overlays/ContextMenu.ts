@@ -4,40 +4,12 @@ import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import GeneralContextMenuView from './GeneralContextMenuView.vue';
 import { ModalStackEventBus } from './ModalStackEventBus';
 import { markRaw } from 'vue';
+import { ContextMenuItem } from './ContextMenuTypes';
+import type { ContextMenuLike } from './ContextMenuTypes';
 
-export class ContextMenuItem {
-    name: string;
-    description?: string;
+export { ContextMenuItem } from './ContextMenuTypes';
 
-    rightText: string | null = null;
-    icon: string | null = null;
-
-    /**
-     * Shows a checkbox on the left if true/false.
-     * You can  alter the selected value in action() to adjust it.
-     */
-    selected: boolean | null = null;
-    disabled: boolean | string = false;
-    destructive = false;
-
-    /**
-     * Called with this item as `this`. The menu closes after a leaf click;
-     * return values are ignored and returned promises are not awaited by the view.
-     */
-    action: ((this: ContextMenuItem) => unknown | Promise<void>) | null = null;
-
-    /**
-     * Context menu to show when hovered
-     */
-    childMenu: ContextMenu | null = null;
-
-    constructor(settings: Partial<ContextMenuItem>) {
-        markRaw(this);
-        Object.assign(this, settings);
-    }
-}
-
-export class ContextMenu {
+export class ContextMenu implements ContextMenuLike {
     /**
      * Prevent the default behaviour of click on the item, e.g. to keep the focus on an input element
      */
