@@ -67,7 +67,7 @@ From repo root: `pnpm run lint` · `pnpm run typecheck`. Both dispatch every pac
 ```bash
 pnpm stam test unit                 # every unit package (excludes Playwright)
 pnpm stam test coverage             # coverage packages with the same isolated MySQL lifecycle
-pnpm stam test api                  # one package: api models vies sql statistics-syncer structures renderer redirecter queues utility sgv stdsync object-differ eslint vite-config metabase i18n-uuid cli components networking
+pnpm stam test api                  # one package: api models vies sql statistics-syncer structures renderer redirecter queues utility sgv stdsync object-differ eslint vite-config metabase i18n-uuid cli components networking sgv-frontend
 pnpm stam test api --coverage       # collect coverage for one package
 pnpm stam test unit SomeFile        # filename filter across all packages
 pnpm stam test structures bundle-discounts          # package + filename filter
@@ -80,7 +80,7 @@ For running tests, your sandbox needs permission to open ports.
 
 The DB MySQL container is shut down after each run, but its data volume persists (per worktree) so migrations aren't reinitialized every time — use `--clear` for a clean database.
 
-**Never hand-roll test infrastructure.** The isolated MySQL, migrations, `build:shared`, and env are all provisioned by `pnpm stam test` — don't spin up Docker, create databases, run `build:shared`, or set `DB_PORT`/env vars yourself. If it doesn't work, STOP and ask the user. Tests use **Vitest**; `api`, `models`, `sql`, `statistics-syncer`, and `vies` need MySQL. `components` and `networking` are vitest browser-mode tests and need a Playwright Chromium (`pnpm exec playwright install chromium`). The frontend dashboard/web-app "test" is a `vue-tsc` typecheck (run via `pnpm run typecheck`); UI behavior is covered by Playwright.
+**Never hand-roll test infrastructure.** The isolated MySQL, migrations, `build:shared`, and env are all provisioned by `pnpm stam test` — don't spin up Docker, create databases, run `build:shared`, or set `DB_PORT`/env vars yourself. If it doesn't work, STOP and ask the user. Tests use **Vitest**; `api`, `models`, `sql`, `statistics-syncer`, and `vies` need MySQL. `components`, `networking`, and `sgv-frontend` are vitest browser-mode tests and need a Playwright Chromium (`pnpm exec playwright install chromium`). The frontend dashboard/web-app "test" is a `vue-tsc` typecheck (run via `pnpm run typecheck`); UI behavior is covered by Playwright.
 
 ### Playwright
 

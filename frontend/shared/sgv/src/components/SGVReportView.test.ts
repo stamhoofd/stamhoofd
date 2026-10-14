@@ -4,27 +4,12 @@ import {
     MemberDetails,
     MemberWithRegistrationsBlob,
 } from '@stamhoofd/structures';
-import { Country } from '@stamhoofd/types/Country';
 import { mount } from '@vue/test-utils';
+import { h } from 'vue';
 import { SGVSyncReport } from '../SGVSyncReport.ts';
 import SGVReportView from './SGVReportView.vue';
 
-(globalThis as any).$t = (
-    text: string,
-    replacements?: Record<string, string>,
-) => {
-    if (!replacements) {
-        return text;
-    }
-    return Object.entries(replacements).reduce(
-        (result, [key, value]) => result.replace(`{${key}}`, value),
-        text,
-    );
-};
-(globalThis as any).$getCountry = () => Country.Belgium;
-
 describe('SGVReportView', () => {
-    const $t = (globalThis as any).$t;
 
     function createMember(name: string) {
         const [firstName, lastName] = name.split(' ');
@@ -59,12 +44,12 @@ describe('SGVReportView', () => {
         return mount(SGVReportView, {
             props: { report },
             global: {
-                mocks: { $t },
+                mocks: { $t: (...args: Parameters<typeof $t>) => $t(...args) },
                 stubs: {
                     STNavigationBar: true,
-                    STToolbar: { template: '<div><slot name="right" /></div>' },
-                    STList: { template: '<ul><slot /></ul>' },
-                    STListItem: { template: '<li><slot /></li>' },
+                    STToolbar: { setup: (_, { slots }) => () => h('div', slots.right?.()) },
+                    STList: { setup: (_, { slots }) => () => h('ul', slots.default?.()) },
+                    STListItem: { setup: (_, { slots }) => () => h('li', slots.default?.()) },
                 },
             },
         });
@@ -121,9 +106,9 @@ describe('SGVReportView', () => {
         expect(text).toContain('Geschrapt Lid');
         expect(text).toContain('Overgeslagen');
         expect(text).toContain('Overgeslagen Lid');
-        expect(text).toContain('Leiding in Stamhoofd');
+        expect(text).toContain($t('%1W6'));
         expect(text).toContain('Leiding Stamhoofd: Leiding');
-        expect(text).toContain('Leiding niet in Stamhoofd');
+        expect(text).toContain($t('%1YV'));
         expect(text).toContain('Leiding SGV: Leiding');
     });
 
