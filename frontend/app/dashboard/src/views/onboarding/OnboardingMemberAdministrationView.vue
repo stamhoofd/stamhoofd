@@ -50,7 +50,7 @@ import { useNavigationActions } from '@stamhoofd/components/types/NavigationActi
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { Organization, OrganizationMetaData, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization, UmbrellaOrganizationHelper } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
-import type { OnboardingStepProps } from './useMemberAdministrationOnboarding';
+import type { OnboardingStepProps } from './OnboardingStepProps';
 
 const props = defineProps<OnboardingStepProps>();
 const navigationActions = useNavigationActions();
