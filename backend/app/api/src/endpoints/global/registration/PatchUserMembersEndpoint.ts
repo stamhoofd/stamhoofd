@@ -4,7 +4,8 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { Group, Registration } from '@stamhoofd/models';
-import { Document, Member, RateLimiter } from '@stamhoofd/models';
+import { Member, RateLimiter } from '@stamhoofd/models';
+import { DocumentService } from '../../../services/DocumentService.js';
 import type { MemberDetails, MembersBlob } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { BooleanStatus, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
@@ -179,7 +180,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             await MemberUserSyncer.onChangeMember(member);
 
             // Update documents
-            await Document.updateForMember(member);
+            await DocumentService.updateForMember(member);
         }
 
         await PatchOrganizationMembersEndpoint.deleteMembers(request.body.getDeletes());
@@ -198,7 +199,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 await MemberUserSyncer.linkUser(user.email, updatedMember, true);
             }
 
-            await Document.updateForMember(updatedMember);
+            await DocumentService.updateForMember(updatedMember);
         }
         members = await Member.getMembersWithRegistrationForUser(user);
 
