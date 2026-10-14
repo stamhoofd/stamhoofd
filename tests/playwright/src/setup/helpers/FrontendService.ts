@@ -6,10 +6,11 @@ import type { IncomingMessage, Server, ServerResponse } from 'node:http';
 import { extname, join, resolve } from 'node:path';
 import { CaddyConfigHelper } from './CaddyConfigHelper.js';
 import { NetworkHelper } from './NetworkHelper.js';
+import type { FrontendProjectName } from './frontend-project-name.js';
 import type { ServiceHelper, ServiceProcess } from './ServiceHelper.js';
 import type { Socket } from 'node:net';
 
-export type FrontendProjectName = 'dashboard' | 'registration' | 'webshop';
+export type { FrontendProjectName } from './frontend-project-name.js';
 
 /**
  * The unified web-app now serves both the dashboard and registration apps.
