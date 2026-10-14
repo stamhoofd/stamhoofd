@@ -3,7 +3,7 @@ import { Database } from '@simonbackx/simple-database';
 import type { PlainObject } from '@simonbackx/simple-encoding';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
-import type { SQLFilterDefinitions } from '../../src/filters/SQLFilter.js';
+import type { SQLFilterDefinitions } from '../../src/filters/SQLFilterTypes.js';
 import { compileToSQLFilter } from '../../src/filters/SQLFilter.js';
 import { SQL } from '../../src/SQL.js';
 import type { NormalizedSQLQuery, SQLQuery } from '../../src/SQLExpression.js';

@@ -1,5 +1,5 @@
 import type { StamhoofdCompareValue } from '@stamhoofd/structures';
-import { SQLValueType } from '../SQLFilter.js';
+import { SQLValueType } from '../SQLFilterTypes.js';
 
 /**
  * Prepares a compare value so we can compare it, given a certain column type.
