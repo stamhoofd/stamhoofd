@@ -6,7 +6,7 @@ import { Address } from '../addresses/Address.js';
 import { UitpasEventResponse } from '../endpoints/UitpasEventsResponse.js';
 import { Image } from '../files/Image.js';
 import { ReservedSeat } from '../SeatingPlan.js';
-import type { Webshop } from './Webshop.js';
+import type { SeatingPlanWebshop } from '../SeatingPlan.js';
 import { WebshopField } from './WebshopField.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 
@@ -416,7 +416,7 @@ export class Product extends AutoEncoder {
         return false;
     }
 
-    getRemainingSeats(webshop: Webshop, isAdmin: boolean): number | null {
+    getRemainingSeats(webshop: SeatingPlanWebshop, isAdmin: boolean): number | null {
         if (this.seatingPlanId === null) {
             return null;
         }
