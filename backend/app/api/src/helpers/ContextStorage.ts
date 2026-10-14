@@ -1,5 +1,9 @@
 import { AsyncLocalStorage } from 'async_hooks';
 
-import type { ContextInstance } from './Context.js';
+import type { SessionContextStorageValue } from './SessionContextStorageValue.js';
 
-export const contextStorage = new AsyncLocalStorage<ContextInstance>();
+export const contextStorage = new AsyncLocalStorage<SessionContextStorageValue>();
+
+export function getSessionContextRequest() {
+    return contextStorage.getStore()?.request;
+}

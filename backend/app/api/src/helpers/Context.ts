@@ -87,7 +87,14 @@ export class ContextInstance {
         this.request = request;
     }
 
-    static asyncLocalStorage = contextStorage;
+    static asyncLocalStorage = {
+        getStore(): ContextInstance | undefined {
+            return contextStorage.getStore() as ContextInstance | undefined;
+        },
+        run<T>(context: ContextInstance, callback: () => T): T {
+            return contextStorage.run(context, callback);
+        },
+    };
 
     static get optional(): ContextInstance | null {
         const c = this.asyncLocalStorage.getStore();
