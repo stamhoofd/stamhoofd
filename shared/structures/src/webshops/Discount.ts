@@ -3,10 +3,24 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, IntegerDecoder,
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
-import type { CartItem, CartItemPrice } from './CartItem.js';
-import type { Checkout } from './Checkout.js';
-import type { Option, OptionMenu } from './Product.js';
-import type { Webshop } from './Webshop.js';
+type DiscountPrice = { price: number; fixedDiscount: number; percentageDiscount: number; discountedPrice: number; clone(): DiscountPrice };
+type DiscountCartItem = {
+    product: { id: string };
+    productPrice: { id: string };
+    options: { option: { id: string }; optionMenu: { multipleChoice: boolean; options: { id: string }[] } }[];
+    amount: number;
+    calculatedPrices: DiscountPrice[];
+    discounts: ProductDiscountSettings[];
+};
+type DiscountWebshop = {
+    products: {
+        id: string;
+        name: string;
+        filteredPrices(options: { admin: boolean }): { id: string; name: string }[];
+        optionMenus: { multipleChoice: boolean; options: { id: string; name: string }[] }[];
+    }[];
+};
+type DiscountCheckout = { cart: { items: DiscountCartItem[] }; fixedDiscount: number; percentageDiscount: number };
 
 export enum OptionSelectionRequirement {
     Required = 'Required',
@@ -48,7 +62,7 @@ export class ProductSelector extends AutoEncoder {
     @field({ decoder: new MapDecoder(StringDecoder, new EnumDecoder(OptionSelectionRequirement)) })
     optionIds: Map<string, OptionSelectionRequirement> = new Map();
 
-    getOptionRequirement(optionMenu: OptionMenu, option: Option): OptionSelectionRequirement {
+    getOptionRequirement(optionMenu: { multipleChoice: boolean; options: { id: string }[] }, option: { id: string }): OptionSelectionRequirement {
         const value = this.optionIds.get(option.id);
         if (!value) {
             if (optionMenu.multipleChoice) {
@@ -65,7 +79,7 @@ export class ProductSelector extends AutoEncoder {
         return value;
     }
 
-    doesMatch(cartItem: CartItem) {
+    doesMatch(cartItem: DiscountCartItem) {
         if (cartItem.product.id !== this.productId) {
             return false;
         }
@@ -94,7 +108,7 @@ export class ProductSelector extends AutoEncoder {
         return true;
     }
 
-    getName(webshop: Webshop, isAdmin = false): { name: string; footnote: string } {
+    getName(webshop: DiscountWebshop, isAdmin = false): { name: string; footnote: string } {
         const product = webshop.products.find(p => p.id === this.productId);
         if (!product) {
             return {
@@ -139,7 +153,7 @@ export class ProductsSelector extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(ProductSelector) })
     products: ProductSelector[] = [];
 
-    doesMatch(cartItem: CartItem) {
+    doesMatch(cartItem: DiscountCartItem) {
         for (const product of this.products) {
             if (product.doesMatch(cartItem)) {
                 return true;
@@ -149,7 +163,7 @@ export class ProductsSelector extends AutoEncoder {
         return false;
     }
 
-    getName(webshop: Webshop, isAdmin = false): { name: string; footnote: string } {
+    getName(webshop: DiscountWebshop, isAdmin = false): { name: string; footnote: string } {
         const names: string[] = [];
         const footnotes: string[] = [];
 
@@ -210,7 +224,7 @@ export class DiscountRequirement extends AutoEncoder {
     /**
      * Requirements can match multiple times (for X + Y discount systems)
      */
-    getMatchCount(checkout: Checkout) {
+    getMatchCount(checkout: DiscountCheckout) {
         if (this.amount === 0) {
             return 0;
         }
@@ -275,13 +289,13 @@ export class ProductDiscount extends AutoEncoder {
         return price;
     }
 
-    applyTo(item: CartItemPrice) {
+    applyTo(item: DiscountPrice) {
         // Percentage discounts are always applied to the original price without other discounts
         item.percentageDiscount = Math.min(10000, item.percentageDiscount + this.percentageDiscount);
         item.fixedDiscount = item.fixedDiscount + this.discountPerPiece;
     }
 
-    calculatePotential(item: CartItemPrice): number {
+    calculatePotential(item: DiscountPrice): number {
         const current = item;
         const potential = item.clone();
         this.applyTo(potential);
@@ -330,7 +344,7 @@ export class ProductDiscountSettings extends AutoEncoder {
         return d.slice(offset, offset + amount);
     }
 
-    getTitle(webshop: Webshop, isAdmin = false): { title: string; description: string; footnote: string } {
+    getTitle(webshop: DiscountWebshop, isAdmin = false): { title: string; description: string; footnote: string } {
         const n = this.product.getName(webshop, isAdmin);
 
         const titles: string[] = [n.name];
@@ -428,7 +442,7 @@ export class ProductDiscountSettings extends AutoEncoder {
 export class ProductDiscountTracker {
     discount: ProductDiscountSettings;
     usageCount = 0;
-    cartItemQueue: { price: CartItemPrice; item: CartItem }[] = [];
+    cartItemQueue: { price: DiscountPrice; item: DiscountCartItem }[] = [];
 
     constructor(discount: ProductDiscountSettings) {
         this.discount = discount;
@@ -474,7 +488,7 @@ export class ProductDiscountTracker {
         }
     }
 
-    addItemToQueue(cartItem: CartItem) {
+    addItemToQueue(cartItem: DiscountCartItem) {
         this.cartItemQueue.push(...cartItem.calculatedPrices.map((price) => {
             return { price, item: cartItem };
         }));
@@ -520,7 +534,7 @@ export class Discount extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(ProductDiscountSettings) })
     productDiscounts: ProductDiscountSettings[] = [];
 
-    getTitle(webshop: Webshop, isAdmin = false): { title: string; description: string; footnote: string } {
+    getTitle(webshop: DiscountWebshop, isAdmin = false): { title: string; description: string; footnote: string } {
         const titles: string[] = [];
         const footnotes: string[] = [];
         const descriptions: string[] = [];
@@ -590,7 +604,7 @@ export class Discount extends AutoEncoder {
         };
     }
 
-    applyToCheckout(checkout: Checkout): ProductDiscountTracker[] {
+    applyToCheckout(checkout: DiscountCheckout): ProductDiscountTracker[] {
         let matchCount: null | number = null;
         if (this.requirements.length > 0) {
             for (const requirement of this.requirements) {
