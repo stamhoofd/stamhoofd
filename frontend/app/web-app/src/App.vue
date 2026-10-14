@@ -16,6 +16,7 @@ import CenteredMessageView from '@stamhoofd/components/overlays/CenteredMessageV
 import { ModalStackEventBus, ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import ToastBox from '@stamhoofd/components/overlays/ToastBox.vue';
+import { useProvidePaymentViews } from '@stamhoofd/components/payments/providePaymentViews';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Storage } from '@stamhoofd/networking/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
@@ -27,6 +28,7 @@ import RouterAppView from './RouterAppView.vue';
 const modalStack = useTemplateRef<InstanceType<typeof ModalStackComponent>>('modalStack');
 useProvideMemberViews();
 useProvideEventViews();
+useProvidePaymentViews();
 HistoryManager.activate();
 HistoryManager.debug = STAMHOOFD.environment === 'test';
 
