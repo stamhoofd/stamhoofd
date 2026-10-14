@@ -2123,9 +2123,6 @@ importers:
       '@stamhoofd/assets':
         specifier: workspace:*
         version: link:../assets
-      '@stamhoofd/components':
-        specifier: workspace:*
-        version: link:../components
       '@stamhoofd/networking':
         specifier: workspace:*
         version: link:../networking
