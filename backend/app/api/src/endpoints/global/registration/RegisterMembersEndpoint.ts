@@ -202,7 +202,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // update uitpas social tariff
             if (!isBulkUpdate && member.details.uitpasNumberDetails
-                && member.details.uitpasNumberDetails.socialTariff.shouldUpdateForRegsitration(member.details.requiresFinancialSupport)
+                && member.details.uitpasNumberDetails.socialTariff.shouldUpdateForRegistration(member.details.requiresFinancialSupport?.value)
             ) {
                 let isUpdated: boolean = false;
 
