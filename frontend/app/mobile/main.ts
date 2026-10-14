@@ -15,7 +15,7 @@ import { ViewportHelper } from '@stamhoofd/components/ViewportHelper.ts';
 import { VueGlobalHelper } from '@stamhoofd/components/VueGlobalHelper.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { AppManager } from '@stamhoofd/networking/AppManager';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { ReviewSessionContext } from '@stamhoofd/networking/ReviewSessionContext';
 import { Storage } from '@stamhoofd/networking/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { throttle } from '@stamhoofd/utility';
@@ -169,7 +169,7 @@ AppManager.shared.hapticTap = () => {
     Haptics.notification({ type: NotificationType.Success }).catch(console.error);
 };
 
-async function markReviewMoment($context: SessionContext) {
+async function markReviewMoment($context: ReviewSessionContext) {
     // 1. Check if we are signed in.
     if (!$context) {
         return;
@@ -208,7 +208,7 @@ async function markReviewMoment($context: SessionContext) {
     }
 }
 
-AppManager.shared.markReviewMoment = ($context: SessionContext) => {
+AppManager.shared.markReviewMoment = ($context: ReviewSessionContext) => {
     markReviewMoment($context).catch(console.error);
 };
 
