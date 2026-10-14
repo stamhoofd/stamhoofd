@@ -9,6 +9,7 @@
 import type { PushOptions } from '@simonbackx/vue-app-navigation';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, useManualPresent } from '@simonbackx/vue-app-navigation';
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
+import { useProvideMemberViews } from '@stamhoofd/components/members/provideMemberViews';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import CenteredMessageView from '@stamhoofd/components/overlays/CenteredMessageView.vue';
 import { ModalStackEventBus, ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
@@ -23,6 +24,7 @@ import { onMounted, useTemplateRef } from 'vue';
 import RouterAppView from './RouterAppView.vue';
 
 const modalStack = useTemplateRef<InstanceType<typeof ModalStackComponent>>('modalStack');
+useProvideMemberViews();
 HistoryManager.activate();
 HistoryManager.debug = STAMHOOFD.environment === 'test';
 
