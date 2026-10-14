@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import type { CliContext } from './create-context.js';
+import type { CliContext } from './cli-context.js';
 import { buildPorts } from './ports.js';
 
 describe('buildPorts', () => {

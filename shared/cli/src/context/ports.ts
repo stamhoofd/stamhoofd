@@ -1,4 +1,4 @@
-import type { CliContext } from './create-context.js';
+import type { CliContext } from './cli-context.js';
 import { maildevInternalHttpPort, maildevInternalSmtpPort, mysqlInternalPort, rustfsInternalApiPort, rustfsInternalConsolePort } from '../config/shared-service-config.js';
 
 export function buildPorts(context: CliContext) {

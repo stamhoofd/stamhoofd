@@ -1,4 +1,4 @@
-import type { CliContext } from './create-context.js';
+import type { CliContext } from './cli-context.js';
 import { isPortAvailable } from '../runtime/port-probe.js';
 import { buildPorts } from './ports.js';
 

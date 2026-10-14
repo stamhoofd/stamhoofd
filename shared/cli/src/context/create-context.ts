@@ -3,22 +3,9 @@ import { resolvePrimaryInstance, resolvePrimaryWorkspaceRoot, resolveWorkspaceNa
 import { buildInstance } from './instance.js';
 import { getProjectPath } from './project-path.js';
 import { resolvePortOffset } from './port-allocation.js';
-import type { RunVerbosity } from '../runtime/command-runner.js';
+import type { CliContext } from './cli-context.js';
 
-export type CliContext = {
-    rootDir: string;
-    generatedDir: string;
-    env: string;
-    workspace: string;
-    verbose: boolean;
-    verbosity?: RunVerbosity;
-    instance: {
-        name: string;
-        prefix: string;
-        primary: boolean;
-        portOffset: number;
-    };
-};
+export type { CliContext } from './cli-context.js';
 
 export async function createContext(options: { env: string; instanceName?: string; verbose: boolean }): Promise<CliContext> {
     const rootDir = path.resolve(getProjectPath());
