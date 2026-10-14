@@ -2,6 +2,16 @@
 
 Playwright tests for Stamhoofd.
 
+## Execution lifecycle
+
+Run tests through `pnpm stam test e2e` from the repository root (or `stam test e2e` with the shortcut installed). See the [CLI test reference](../../shared/cli/README.md#tests) for filters, build skipping, and database options.
+
+The CLI and Playwright global setup own shared builds, the API build, migrations, Caddy, SSO, worker databases, and the runner lifecycle. Frontend bundles use an uncached Turbo task filtered to `@stamhoofd/web-app` and `@stamhoofd/webshop` for `build:playwright`. Do not build or invoke Playwright manually.
+
+Use `--grep @tag` to select tests, and add `--skip-build` only when the application build is still current (for example, only test files changed since the last run). Use `--local-db` to connect to an already running MySQL; see [databases](#databases).
+
+On environment problems such as DNS failures, SSL errors, or blank pages, stop and ask for help rather than provisioning alternative test infrastructure.
+
 ## Todo
 Set a fixed time. The tests should be predictable. Now the current time in tests will change depending on the date the test is run.
 
