@@ -21,7 +21,7 @@
 
             <template v-else>
                 <STList>
-                    <RegisterItemRow v-for="item in cart.items" :key="item.id" class="right-stack" :item="item" />
+                    <RegisterItemRow v-for="item in cart.items" :key="item.id" class="right-stack" :item="item" :checkout-register-item-handler="checkoutRegisterItem" />
                     <BalanceItemCartItemRow v-for="item in visibleBalanceItems" :key="item.id" class="right-stack" :item="item" :checkout="checkout" />
                 </STList>
                 <PriceBreakdownBox :price-breakdown="checkout.getPriceBreakown({balanceItemDiscountsAction: {icon: 'info-circle', handler: showDiscountSheet}})" />
@@ -47,6 +47,7 @@ import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
 import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
 import RegisterItemRow from '@stamhoofd/components/members/components/group/RegisterItemRow.vue';
 import { startCheckout } from '@stamhoofd/components/members/checkout/startCheckout.ts';
+import { checkoutRegisterItem } from '@stamhoofd/components/members/checkout/useCheckoutRegisterItem.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { useErrors } from '@stamhoofd/components/errors/useErrors';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';

@@ -38,7 +38,9 @@
 import type { Group, Organization, PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
 import { GroupType, RegisterItem } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { useCheckoutRegisterItem } from '#members/checkout/useCheckoutRegisterItem.ts';
+import type { RegisterItemCheckoutHandler } from '#members/checkout/CheckoutSelectionHandlers.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { useNavigationActions } from '#types/NavigationActions.ts';
 import { useAppContext } from '#context/appContext.ts';
 
 const props = defineProps<{
@@ -46,9 +48,12 @@ const props = defineProps<{
     member: PlatformMember;
     groupOrganization: Organization;
     checkout: RegisterCheckout;
+    checkoutRegisterItemHandler: RegisterItemCheckoutHandler;
 }>();
 
 const app = useAppContext();
+const context = useContext();
+const navigate = useNavigationActions();
 
 // We do some caching here to prevent too many calculations on cart changes
 const inCartRegisterItem = computed(() => props.member.family.checkout.cart.getMemberAndGroup(props.member.id, props.group.id));
@@ -78,7 +83,6 @@ const validationWarning = computed(() => validationError.value ? null : register
 const disabled = computed(() => {
     return !canRegister.value;
 });
-const checkoutRegisterItem = useCheckoutRegisterItem();
 
 const checked = computed({
     get: () => !!inCartRegisterItem.value || !!inCartRegisterWaitingListItem.value,
@@ -118,8 +122,11 @@ async function editRegisterItem() {
         return;
     }
 
-    await checkoutRegisterItem({
+    await props.checkoutRegisterItemHandler({
         item: registerItem.value,
+        context: context.value,
+        navigate,
+        admin: app === 'dashboard' || app === 'admin',
         startCheckoutFlow: false,
         displayOptions: { action: 'present', modalDisplayStyle: 'popup' },
     });
