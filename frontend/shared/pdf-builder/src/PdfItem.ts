@@ -1,24 +1,7 @@
-import type { PdfDocWrapper } from './PdfDocWrapper';
 import type { PdfFont } from './PdfFont';
+import type { PdfDocWrapperContract, PdfItemDrawOptions, PdfItemGetHeightOptions } from './PdfContracts';
 
-export type PdfItemDrawOptions = {
-    /**
-     * The maximum width of the item.
-     */
-    maxWidth?: number;
-    /**
-     * The position on the page where
-     * the item should be drawn. Defaults to the current position.
-     */
-    position?: {
-        x?: number;
-        y?: number;
-    };
-};
-
-export type PdfItemGetHeightOptions = {
-    maxWidth?: number;
-};
+export type { PdfItemDrawOptions, PdfItemGetHeightOptions } from './PdfContracts';
 
 /**
  * An interface with methods that can be used to draw something on a pdf document
@@ -30,26 +13,26 @@ export interface PdfItem {
      * @param docWrapper
      * @param options
      */
-    draw(docWrapper: PdfDocWrapper, options: PdfItemDrawOptions): void;
+    draw(docWrapper: PdfDocWrapperContract, options: PdfItemDrawOptions): void;
 
     /**
      * Returns the height if the item would be drawn on the document. The return value of this function should be independent of external PdfItems such as a parent item. It can be dependent on child items.
      * @param docWrapper
      * @param options
      */
-    getHeight(docWrapper: PdfDocWrapper, options: PdfItemGetHeightOptions): number;
+    getHeight(docWrapper: PdfDocWrapperContract, options: PdfItemGetHeightOptions): number;
 
     /**
      * Returns the width if the item would be drawn on the document. The return value of this function should be independent of external PdfItems such as a parent item. It can be dependent on child items.
      * @param docWrapper
      */
-    getWidth(docWrapper: PdfDocWrapper): number | undefined;
+    getWidth(docWrapper: PdfDocWrapperContract): number | undefined;
 
     /**
      * The minimum width of the item
      * @param docWrapper
      */
-    getMinWidth?(docWrapper: PdfDocWrapper): number | undefined;
+    getMinWidth?(docWrapper: PdfDocWrapperContract): number | undefined;
 
     /**
      * Returns the fonts that should be registered before drawing the item.

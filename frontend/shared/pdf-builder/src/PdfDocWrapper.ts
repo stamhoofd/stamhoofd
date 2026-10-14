@@ -1,5 +1,5 @@
 import { getLastPageIndex, getLastPageNumber } from './pdf-helpers';
-import type { PdfItemDrawOptions } from './PdfItem';
+import type { PdfItemDrawOptions } from './PdfContracts';
 
 /**
  * Wrapper around the pdf document to make it easier to draw things on the pdf document.
