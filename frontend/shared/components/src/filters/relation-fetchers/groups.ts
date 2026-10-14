@@ -2,7 +2,7 @@ import { useFetchRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetc
 import type { Group, GroupType, StamhoofdFilter } from '@stamhoofd/structures';
 import { SortItemDirection } from '@stamhoofd/structures';
 import { useGroupsObjectFetcher } from '../../fetchers/useGroupsObjectsFetcher';
-import { RelationFetcher, RelationFetcherSubFilter } from '../RelationUIFilter';
+import { RelationFetcher, RelationFetcherSubFilter } from '../RelationFetcher';
 
 type ObjectType = Group;
 
