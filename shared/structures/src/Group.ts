@@ -13,11 +13,12 @@ import { GroupSettings, WaitingListType } from './GroupSettings.js';
 import { GroupType } from './GroupType.js';
 import type { MemberResponsibility } from './MemberResponsibility.js';
 import { Gender } from './members/Gender.js';
-import type { Organization } from './Organization.js';
 import { PermissionLevel } from './PermissionLevel.js';
 import { PermissionRoleForResponsibility } from './PermissionRole.js';
 import { PermissionsResourceType } from './PermissionsResourceType.js';
 import { StockReservation } from './StockReservation.js';
+
+type GroupOrganization = NonNullable<Parameters<typeof getActivePeriods>[1]> & { id: string };
 
 export type GroupTagItem = {
     icon?: string;
@@ -347,7 +348,7 @@ export class Group extends AutoEncoder {
      * Return the period ids that we consider as active for a given
      * group and organization combination.
      */
-    getActivePeriodIds(organization: Organization | null) {
+    getActivePeriodIds(organization: GroupOrganization | null) {
         return getActivePeriodIds(this.periodId, organization);
     }
 
@@ -355,11 +356,11 @@ export class Group extends AutoEncoder {
      * Return the period ids that we consider as active for a given
      * group and organization combination.
      */
-    getActivePeriods(organization: Organization | null) {
+    getActivePeriods(organization: GroupOrganization | null) {
         return getActivePeriods(this.settings.period ?? { id: this.periodId, name: $t('%8X') }, organization);
     }
 
-    getRecommendedFilter(organization?: Organization | null): StamhoofdFilter {
+    getRecommendedFilter(organization?: GroupOrganization | null): StamhoofdFilter {
         const filter: StamhoofdFilter = [];
 
         const periods = this.getActivePeriods(organization ?? null).map((p) => {
@@ -550,7 +551,7 @@ export class Group extends AutoEncoder {
         return filter;
     }
 
-    getTags(options: { app: AppType; now?: Date; organization: Organization | null; blockCreatingNewMembers?: boolean }): GroupTagItem[] {
+    getTags(options: { app: AppType; now?: Date; organization: GroupOrganization | null; blockCreatingNewMembers?: boolean }): GroupTagItem[] {
         const tags: GroupTagItem[] = [];
         const now = options.now ?? new Date();
         const remainingStock = this.settings.getRemainingStockIncludingPricesAndOptions(this);
