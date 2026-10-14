@@ -3,13 +3,18 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import type { BalanceItem } from '../../BalanceItem.js';
 import type { BundleDiscountCalculation } from '../../BundleDiscount.js';
 import { BalanceItemCartItem } from './BalanceItemCartItem.js';
-import type { RegisterCheckout, RegisterContext } from './RegisterCheckout.js';
 import { IDRegisterItem } from './RegisterItem.js';
 import type { RegisterItem } from './RegisterItem.js';
 import type { Registration } from '../Registration.js';
 import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
 
-type RegistrationWithMember = RegistrationWithPlatformMember<Registration, RegisterContext['members'][number]>;
+type RegisterCartHydrationContext = Parameters<IDRegisterItem['hydrate']>[0];
+type RegistrationWithMember = RegistrationWithPlatformMember<Registration, RegisterCartHydrationContext['members'][number]>;
+
+type RegisterCartCheckout = {
+    singleOrganizationId: string | null | undefined;
+    singleOrganization: { period: { period: { id: string; locked: boolean; nameShort: string } } } | null;
+};
 
 export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(IDRegisterItem) })
@@ -36,7 +41,7 @@ export class IDRegisterCart extends AutoEncoder {
         return null;
     }
 
-    hydrate(context: RegisterContext) {
+    hydrate(context: RegisterCartHydrationContext) {
         const cart = new RegisterCart();
         cart.items = this.items.map(i => i.hydrate(context));
         cart.balanceItems = this.balanceItems;
@@ -306,7 +311,7 @@ export class RegisterCart {
         return this.items[0].organization;
     }
 
-    validate(checkout: RegisterCheckout, data?: { memberBalanceItems?: BalanceItem[] }) {
+    validate(checkout: RegisterCartCheckout, data?: { memberBalanceItems?: BalanceItem[] }) {
         const newItems: RegisterItem[] = [];
         const errors = new SimpleErrors();
         for (const item of this.items) {
