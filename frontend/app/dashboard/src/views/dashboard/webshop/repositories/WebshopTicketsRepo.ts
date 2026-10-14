@@ -277,22 +277,20 @@ export class WebshopTicketsStore {
         await new Promise<void>((resolve, reject) => {
             const transaction = openTransaction ?? db.transaction([WebshopTicketsStore.storeName], 'readonly');
 
-            transaction.onerror = (event) => {
-                // Don't forget to handle errors!
-                if (openTransaction && openTransaction.onerror) {
-                    openTransaction.onerror(event);
-                }
+            // The error of a request also reaches the onerror of its transaction, which an openTransaction's owner handles
+            if (!openTransaction) {
+                transaction.onerror = (event) => {
+                    reject(event);
+                };
+            }
 
-                reject(event);
-            };
-
-            // Do the actual saving
             const objectStore = transaction.objectStore(WebshopTicketsStore.storeName);
 
             const orderIndex = objectStore.index('orderId');
 
             const range = IDBKeyRange.only(orderId);
             const request = orderIndex.openCursor(range);
+            request.onerror = () => reject(request.error);
 
             request.onsuccess = (event: any) => {
                 const cursor = event.target.result;

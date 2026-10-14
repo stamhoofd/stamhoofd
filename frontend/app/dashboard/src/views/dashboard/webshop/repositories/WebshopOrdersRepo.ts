@@ -738,10 +738,6 @@ export class OrdersStore {
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
-                if (openTransaction && openTransaction.onerror) {
-                    openTransaction.onerror(event);
-                }
-
                 this.database.delete().catch(console.error);
                 reject(event);
             };
