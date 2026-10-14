@@ -184,6 +184,43 @@ test.describe('Switching the current period from the members menu @members-perio
         await page.getByTestId('centered-message').getByRole('button', { name: 'Overschakelen' }).click();
     }
 
+    for (const viewport of [
+        { name: 'desktop', width: 1280, height: 800 },
+        { name: 'mobile', width: 400, height: 850 },
+    ]) {
+        test(`on ${viewport.name} period navigation survives reload and browser history`, async ({ page }) => {
+            const scenario = await seedScenario(`navigation-${viewport.name}`);
+            await page.setViewportSize({ width: viewport.width, height: viewport.height });
+            await openMembersMenu({ page, scenario });
+            await expect(page).toHaveURL(viewport.name === 'desktop' ? /\/leden\/instellingen$/ : /\/leden$/);
+            const originalUrl = page.url();
+            await page.getByTestId('members-menu').locator('.footer button').first().click();
+            await page.getByTestId('context-menu-item-title').filter({ hasText: scenario.otherPeriodName }).click();
+
+            const menu = page.getByTestId('members-menu').filter({ visible: true }).last();
+            await expect(menu.getByRole('heading', { name: scenario.otherPeriodName, exact: true }).last()).toBeVisible();
+            await expect(menu.getByRole('button', { name: 'Andere tak' })).toBeVisible();
+            const periodUrl = page.url();
+            expect(periodUrl).not.toBe(originalUrl);
+
+            await page.reload();
+            await expect(menu.getByRole('button', { name: 'Andere tak' })).toBeVisible();
+            await expect(menu.getByRole('heading', { name: scenario.otherPeriodName, exact: true }).last()).toBeVisible();
+
+            await page.goBack();
+            await expect(page).toHaveURL(originalUrl);
+            await expect(menu.getByRole('button', { name: 'Huidige tak' })).toBeVisible();
+            await page.goForward();
+            await expect(page).toHaveURL(periodUrl);
+            await menu.getByRole('button', { name: 'Andere tak' }).click();
+            await page.locator('.st-list-item', { hasText: 'Ingeschreven leden' }).first().click();
+
+            const rows = page.getByTestId('table').locator('[data-testid="table-row"]:visible');
+            await expect(rows.filter({ hasText: scenario.names.otherPeriod })).toHaveCount(1);
+            await expect(rows.filter({ hasText: scenario.names.currentPeriod })).toHaveCount(0);
+        });
+    }
+
     test('on desktop it opens the members overview of the new period', async ({ page }) => {
         test.setTimeout(90_000);
         const scenario = await seedScenario('desktop');
