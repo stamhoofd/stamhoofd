@@ -2,7 +2,6 @@ import { column, Database } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
-import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel, SQL, SQLWhereExists } from '@stamhoofd/sql';
 import type { OrganizationEmail, PrivatePaymentConfiguration } from '@stamhoofd/structures';
 import { AccessRight, Address, Company, getAppHost, GroupType, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, Recipient, TransferSettings } from '@stamhoofd/structures';
@@ -303,28 +302,28 @@ export class Organization extends QueryableModel {
             return this._cachedPeriod;
         }
 
-        const oPeriods = await OrganizationRegistrationPeriod.where({ periodId: this.periodId, organizationId: this.id }, { limit: 1 });
+        let oPeriod = await OrganizationRegistrationPeriod.select()
+            .where('periodId', this.periodId)
+            .andWhere('organizationId', this.id)
+            .first(false);
 
-        let oPeriod: OrganizationRegistrationPeriod;
-        if (oPeriods.length == 0) {
-            // Automatically create a period
-            oPeriod = await QueueHandler.schedule('create-missing-organization-period', async () => {
-                // Race condition check
-                const updatedPeriods = await OrganizationRegistrationPeriod.where({ periodId: this.periodId, organizationId: this.id }, { limit: 1 });
-
-                if (updatedPeriods.length) {
-                    return updatedPeriods[0];
+        if (!oPeriod) {
+            console.log('Automatically creating new organization registration period for organization ' + this.id + ' and period ' + this.periodId + ' - organization period is missing');
+            oPeriod = new OrganizationRegistrationPeriod();
+            oPeriod.organizationId = this.id;
+            oPeriod.periodId = this.periodId;
+            try {
+                await oPeriod.save();
+            }
+            catch (error) {
+                oPeriod = await OrganizationRegistrationPeriod.select()
+                    .where('periodId', this.periodId)
+                    .andWhere('organizationId', this.id)
+                    .first(false);
+                if (!oPeriod) {
+                    throw error;
                 }
-
-                console.log('Automatically creating new organization registration period for organization ' + this.id + ' and period ' + this.periodId + ' - organization period is missing');
-                const created = new OrganizationRegistrationPeriod();
-                created.organizationId = this.id;
-                created.periodId = this.periodId;
-                await created.save();
-                return created;
-            });
-        } else {
-            oPeriod = oPeriods[0];
+            }
         }
 
         this._cachedPeriod = oPeriod;
