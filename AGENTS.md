@@ -6,12 +6,7 @@
 
 ## Structure & architecture
 
-pnpm monorepo (Lerna + workspaces). Node.js + TypeScript backend · Vue 3 + Vite + Capacitor frontend.
-
-- `shared/*` — packages used by frontend + backend. `shared/structures` (`@stamhoofd/structures`) defines all data structures as versioned AutoEncoders (`@simonbackx/simple-encoding`): the single source of truth for API bodies and localStorage. `shared/locales` — i18n.
-- `backend/app/*` — `api` (main API server), `renderer`, `backup`, `redirecter`. `backend/shared/*` — backend-only packages (`models` = database models, `sql`, `email`, ...).
-- `frontend/app/*` — `dashboard`, `registration`, `webshop`, `mobile` SPAs. `frontend/shared/*` — shared frontend packages. Navigation uses `@simonbackx/vue-app-navigation`.
-- `tests/playwright` — E2E tests.
+See the [repository structure](README.md#folder-structure) for package ownership and the application stack.
 
 Read the [endpoint guide](contributing/backend/endpoints.md) before changing backend endpoints, including its architecture, authorization, and testing requirements.
 
