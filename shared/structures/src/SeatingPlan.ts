@@ -2,8 +2,12 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerD
 import { v4 as uuidv4 } from 'uuid';
 
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
-import type { Product } from './webshops/Product.js';
-import type { Webshop, WebshopPreview } from './webshops/Webshop.js';
+type SeatingPlanProduct = { seatingPlanId: string | null };
+export type SeatingPlanWebshop = {
+    meta: {
+        seatingPlans: SeatingPlan[];
+    };
+};
 
 export class SeatingSizeConfiguration {
     seatWidth = 30;
@@ -526,7 +530,7 @@ export class ReservedSeat extends AutoEncoder {
     @field({ decoder: StringDecoder, field: 's' })
     seat = '';
 
-    getName(webshop: Webshop | WebshopPreview, product: Product): { title: string; value: string }[] {
+    getName(webshop: SeatingPlanWebshop, product: SeatingPlanProduct): { title: string; value: string }[] {
         if (!product.seatingPlanId) {
             return [];
         }
@@ -571,7 +575,7 @@ export class ReservedSeat extends AutoEncoder {
         ];
     }
 
-    getNameString(webshop: Webshop | WebshopPreview, product: Product) {
+    getNameString(webshop: SeatingPlanWebshop, product: SeatingPlanProduct) {
         if (!product.seatingPlanId) {
             return '';
         }
@@ -599,7 +603,7 @@ export class ReservedSeat extends AutoEncoder {
         return this.getName(webshop, product).map(p => p.title + ': ' + p.value).join(', ');
     }
 
-    getShortName(product: Product) {
+    getShortName(product: SeatingPlanProduct) {
         if (!product.seatingPlanId) {
             return '';
         }
