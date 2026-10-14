@@ -18,6 +18,7 @@
         "@simonbackx/vue-app-navigation": "2.25.1",
         "@stamhoofd/assets": "workspace:*",
         "@stamhoofd/components": "workspace:*",
+        "@stamhoofd/dashboard": "workspace:*",
         "@stamhoofd/document-helper": "workspace:*",
         "@stamhoofd/frontend-excel-export": "workspace:*",
         "@stamhoofd/frontend-i18n": "workspace:*",

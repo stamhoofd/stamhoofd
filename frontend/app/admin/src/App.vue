@@ -16,9 +16,11 @@ import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import { computed } from 'vue';
+import { useProvideEventWebshopViews } from '@stamhoofd/dashboard/providers/provideEventWebshopViews.ts';
 import { useAdminAuditLogRenderers } from './views/organizations/useAdminAuditLogRenderers';
 
 const getLoginRoot = useLoginRoot();
+useProvideEventWebshopViews();
 const context = useContext();
 const platform = usePlatform();
 const auditLogRenderers = useAdminAuditLogRenderers();
