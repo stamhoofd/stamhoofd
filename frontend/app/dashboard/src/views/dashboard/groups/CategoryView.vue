@@ -116,10 +116,12 @@ import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/Con
 
 import type { Group, GroupCategory, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { GroupCategoryTree } from '@stamhoofd/structures';
-import { computed } from 'vue';
+import { computed, resolveComponent } from 'vue';
 import { useGroupActions } from '../../members/useGroupActions';
 import { useGroupCategoryActions } from '../../members/useGroupCategoryActions';
 import { useCreateGroupView } from '../settings/hooks/useCreateGroupView';
+
+defineOptions({ name: 'CategoryView' });
 
 const props = defineProps<{
     category: GroupCategory;
@@ -132,6 +134,7 @@ const organization = useRequiredOrganization();
 const show = useShow();
 const navigationController = useNavigationController();
 const context = useContext();
+const currentComponent = resolveComponent('CategoryView');
 
 // show registrations if maximum registrations in category is 1
 const shouldShowRegistrations = computed(() => props.category.settings.maximumRegistrations === 1);
@@ -180,7 +183,7 @@ function openCategorySelector(event: MouseEvent) {
 
 function swapCategory(category: GroupCategory) {
     show({
-        components: [AsyncComponent(() => import('./CategoryView.vue'), {
+        components: [new ComponentWithProperties(currentComponent, {
             category,
             period: props.period,
         })],
@@ -224,7 +227,7 @@ const groups = computed(() => tree.value.groups);
 const subCategories = computed(() => tree.value.categories);
 
 function openCategory(category: GroupCategory) {
-    show(AsyncComponent(() => import('./CategoryView.vue'), {
+    show(new ComponentWithProperties(currentComponent, {
         category,
         period: props.period,
     })).catch(console.error);
