@@ -44,6 +44,8 @@ export interface OrdersListWebshop {
 export async function createOrdersListWebshop(prefix: string, options: { ticketType?: WebshopTicketType } = {}): Promise<OrdersListWebshop> {
     const created = await new OrganizationFactory({
         name: `${prefix}${WorkerData.id}`,
+        // A worker can run several tests of a file before its database is reset
+        uri: `${prefix.toLowerCase()}-${WorkerData.id}-${crypto.randomUUID()}`,
         packages: [STPackageBundle.Webshops],
     }).create();
     await STPackageService.updateOrganizationPackages(created.id);
