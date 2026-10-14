@@ -3,6 +3,7 @@
 </template>
 
 <script lang="ts" setup>
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import { ComponentWithProperties, ComponentWithPropertiesInstance, ModalStackComponent, NavigationController, useCurrentComponent } from '@simonbackx/vue-app-navigation';
 import { useLoginRoot } from '@stamhoofd/components/auth/useLoginRoot.ts';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
@@ -105,7 +106,7 @@ function getRoot() {
                         name: $t(`%X5`),
                         url: buildTranslatedUrl({ nl: 'mandje', fr: 'panier', en: 'basket' }),
                         component: cartRoot,
-                        badge: computed(() => memberManager.family.checkout.cart.count === 0 ? '' : memberManager.family.checkout.cart.count.toFixed(0)),
+                        badge: computed(() => PlatformFamilyHelper.getCheckout(memberManager.family).cart.count === 0 ? '' : PlatformFamilyHelper.getCheckout(memberManager.family).cart.count.toFixed(0)),
                     }),
                 ],
             });

@@ -12,6 +12,7 @@ import { PlatformMembershipTypeBehaviour } from '../PlatformMembershipTypeBehavi
 
 import type { Document as DocumentStruct } from '../Document.js';
 import type { Platform } from '../Platform.js';
+import type { StockReservation } from '../StockReservation.js';
 import type { UserWithMembers } from '../UserWithMembers.js';
 import type { Address } from '../addresses/Address.js';
 import type { PropertyFilter } from '../filters/PropertyFilter.js';
@@ -31,11 +32,36 @@ import { OrganizationRecordsConfiguration } from './OrganizationRecordsConfigura
 import type { Parent } from './Parent.js';
 import { Registration } from './Registration.js';
 import type { RegistrationsBlob } from './RegistrationsBlob.js';
-import { RegisterCheckout } from './checkout/RegisterCheckout.js';
-import { RegisterItem } from './checkout/RegisterItem.js';
 import type { RecordAnswer } from './records/RecordAnswer.js';
 import type { RecordCategory } from './records/RecordCategory.js';
 import type { RecordSettings } from './records/RecordSettings.js';
+
+type FamilyRegistrationItem = {
+    id: string;
+    member: PlatformMember;
+    group: Group;
+    groupId: string;
+    organization: Organization;
+    calculatedStartDate: Date;
+    getPendingStockReservations(): StockReservation[];
+};
+
+type FamilyCheckout = {
+    asOrganizationId: string | null;
+    readonly isAdminFromSameOrganization: boolean;
+    readonly singleOrganization: Organization | null;
+    cart: {
+        items: FamilyRegistrationItem[];
+        deleteRegistrations: { registration: Registration }[];
+        contains(item: { id: string; member: PlatformMember; groupId: string }): boolean;
+    };
+};
+
+export type PlatformFamilyContext = {
+    contextOrganization?: Organization | null;
+    platform: Platform;
+    createCheckout: () => FamilyCheckout;
+};
 
 export class PlatformFamily {
     members: PlatformMember[] = [];
@@ -44,12 +70,12 @@ export class PlatformFamily {
     /**
      * Checkout is required for the member to know whether certain fields are required to get collected
      */
-    checkout = new RegisterCheckout();
+    checkout: FamilyCheckout;
 
     /**
      * Items that have not been added to the cart/checkout, but will be - and for which data has to be collected
      */
-    pendingRegisterItems: RegisterItem[] = [];
+    pendingRegisterItems: FamilyRegistrationItem[] = [];
 
     platform: Platform;
     organizations: Organization[] = [];
@@ -62,9 +88,10 @@ export class PlatformFamily {
      */
     _isSingle = false;
 
-    constructor(context: { contextOrganization?: Organization | null; platform: Platform }) {
+    constructor(context: PlatformFamilyContext) {
         this.platform = context.platform;
         this.organizations = context.contextOrganization ? [context.contextOrganization] : [];
+        this.checkout = context.createCheckout();
     }
 
     /**
@@ -108,7 +135,7 @@ export class PlatformFamily {
         }
     }
 
-    static create(blob: MembersBlob, context: { contextOrganization?: Organization | null; platform: Platform }): PlatformFamily {
+    static create(blob: MembersBlob, context: PlatformFamilyContext): PlatformFamily {
         const family = new PlatformFamily(context);
         family.insertFromBlob(blob);
         return family;
@@ -184,7 +211,7 @@ export class PlatformFamily {
         return member;
     }
 
-    static createSingles(blob: MembersBlob, context: { contextOrganization?: Organization | null; platform: Platform }): PlatformMember[] {
+    static createSingles(blob: MembersBlob, context: PlatformFamilyContext): PlatformMember[] {
         const memberList: PlatformMember[] = [];
 
         for (const member of blob.members) {
@@ -224,6 +251,7 @@ export class PlatformFamily {
     clone() {
         const family = new PlatformFamily({
             platform: this.platform,
+            createCheckout: () => this.checkout,
         });
         family.organizations = this.organizations;
         family.checkout = this.checkout;
@@ -577,7 +605,7 @@ export class PlatformRegistration extends Registration {
         this.member.family.copyFromClone(object.member.family);
     }
 
-    static createSingles(blob: RegistrationsBlob, context: { contextOrganization?: Organization | null; platform: Platform }): PlatformRegistration[] {
+    static createSingles(blob: RegistrationsBlob, context: PlatformFamilyContext): PlatformRegistration[] {
         const results: PlatformRegistration[] = [];
 
         for (const registration of blob.registrations) {
@@ -1583,28 +1611,6 @@ export class PlatformMember implements ObjectWithRecords {
 
     insertOrganization(organization: Organization) {
         this.family.insertOrganization(organization);
-    }
-
-    canRegister(group: Group, organization: Organization) {
-        const item = RegisterItem.defaultFor(this, group, organization);
-
-        const error = item.validationError;
-        if (error === null) {
-            return true;
-        }
-
-        return false;
-    }
-
-    canRegisterForWaitingList(group: Group, organization: Organization) {
-        const item = RegisterItem.defaultFor(this, group, organization);
-
-        const error = item.validationErrorForWaitingList;
-        if (error === null) {
-            return true;
-        }
-
-        return false;
     }
 
     get patchedMember() {

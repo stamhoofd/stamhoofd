@@ -74,6 +74,7 @@
 </template>
 
 <script setup lang="ts">
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 import { PatchMap } from '@simonbackx/simple-encoding';
@@ -86,7 +87,7 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { Toast } from '#overlays/Toast.ts';
 import type { MemberPropertyWithFilter, Organization, OrganizationRecordsConfiguration, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
-import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, PlatformFamily, PlatformMember, PropertyFilter } from '@stamhoofd/structures';
+import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, PlatformMember, PropertyFilter } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { getMemberFilterBuildersForInheritedRecords } from '../../filters/filter-builders/members';
 
@@ -117,7 +118,7 @@ const filterBuilders = getMemberFilterBuildersForInheritedRecords();
 const filterBuilder = filterBuilders[0];
 const { financialSupportSettings } = useFinancialSupportSettings();
 
-const family = new PlatformFamily({
+const family = PlatformFamilyHelper.create({
     platform: platform.value,
     contextOrganization: organization.value,
 });

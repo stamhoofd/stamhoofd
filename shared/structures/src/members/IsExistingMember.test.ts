@@ -4,9 +4,10 @@ import { GroupType } from '../GroupType.js';
 import { Organization } from '../Organization.js';
 import { Platform } from '../Platform.js';
 import { OrganizationRegistrationPeriod, RegistrationPeriod } from '../RegistrationPeriod.js';
+import { PlatformFamilyHelper } from '../helpers/PlatformFamilyHelper.js';
 import { MemberDetails } from './MemberDetails.js';
 import { MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob.js';
-import { PlatformFamily, PlatformMember } from './PlatformMember.js';
+import { PlatformMember } from './PlatformMember.js';
 import { Registration } from './Registration.js';
 
 describe('PlatformMember.isExistingMember', () => {
@@ -35,7 +36,7 @@ describe('PlatformMember.isExistingMember', () => {
             })],
             details: MemberDetails.create({}),
         });
-        const family = new PlatformFamily({ platform: Platform.create({}), contextOrganization: organization });
+        const family = PlatformFamilyHelper.create({ platform: Platform.create({}), contextOrganization: organization });
         return new PlatformMember({ member, family });
     }
 

@@ -3,8 +3,29 @@ import { v4 as uuidv4 } from 'uuid';
 import { AuditLogReplacement } from '../AuditLogReplacement.js';
 import { Group } from '../Group.js';
 import { GroupType } from '../GroupType.js';
-import type { PlatformMember } from './PlatformMember.js';
-import type { Registration } from './Registration.js';
+
+type ResponsibilityRegistration = {
+    organizationId: string;
+    registeredAt: Date | null;
+    endDate: Date | null;
+    deactivatedAt: Date | null;
+    group: {
+        type: GroupType;
+        periodId: string;
+        defaultAgeGroupId: string | null;
+        deletedAt: Date | null;
+    };
+};
+
+type ResponsibilityMember = {
+    family: {
+        platform: { config: { responsibilities: { id: string; name: string }[] } };
+        getOrganization(id: string): {
+            name: string;
+            privateMeta: { responsibilities: { id: string; name: string }[] } | null;
+        } | undefined;
+    };
+};
 
 /** A member keeps a responsibility for 14 days after their last registration ends, unless we just started a new period. */
 export const AUTO_REMOVE_GRACE_MS = 1000 * 60 * 60 * 24 * 14;
@@ -45,7 +66,7 @@ export class MemberResponsibilityRecordBase extends AutoEncoder {
         return AuditLogReplacement.uuid(this.responsibilityId);
     }
 
-    getAutoRemoveDate(registrations: Registration[], currentPeriod: { id: string; startDate: Date; endDate: Date }, platformResponsibilityIds: string[]): Date | null {
+    getAutoRemoveDate(registrations: ResponsibilityRegistration[], currentPeriod: { id: string; startDate: Date; endDate: Date }, platformResponsibilityIds: string[]): Date | null {
         const now = new Date();
 
         // Rule A: Global (not organization-scoped) responsibilities are never auto-removed
@@ -58,7 +79,7 @@ export class MemberResponsibilityRecordBase extends AutoEncoder {
             return null;
         }
 
-        const isRegistrationRelevant = (registration: Registration) => {
+        const isRegistrationRelevant = (registration: ResponsibilityRegistration) => {
             if (registration.organizationId !== this.organizationId) {
                 return false; // other org
             }
@@ -125,7 +146,7 @@ export class MemberResponsibilityRecord extends MemberResponsibilityRecordBase {
     @field({ decoder: Group, nullable: true, version: 328 })
     group: Group | null = null;
 
-    getName(member: PlatformMember, includeOrganization = true) {
+    getName(member: ResponsibilityMember, includeOrganization = true) {
         let allResponsibilities = member.family.platform.config.responsibilities;
 
         let suffix = (this.group ? ' ' + $t(`%wR`) + ' ' + this.group.settings.name : '');

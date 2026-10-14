@@ -1,5 +1,6 @@
 import { SessionContext } from '@stamhoofd/networking/SessionContext.ts';
 import { Group, GroupSettings, MemberDetails, MembersBlob, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, Platform, PlatformFamily, RegisterItem, RegistrationPeriod, TranslatedString } from '@stamhoofd/structures';
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import { flushPromises, shallowMount } from '@vue/test-utils';
 import { afterEach, expect, test, vi } from 'vitest';
 import { reactive, shallowRef, toRaw } from 'vue';
@@ -42,11 +43,12 @@ function createSelection(app = 'registration') {
         periodId: period.id,
         settings: GroupSettings.create({ description: new TranslatedString('Registration details') }),
     });
-    const family = reactive(PlatformFamily.create(MembersBlob.create({
+    const family = reactive(PlatformFamilyHelper.fromBlob(MembersBlob.create({
         members: [MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({ firstName: 'Jan', lastName: 'Peeters' }),
         })],
     }), { platform, contextOrganization: organization })) as PlatformFamily;
+    const checkout = PlatformFamilyHelper.getCheckout(family);
     const member = family.members[0];
     const context = new SessionContext(organization, platform);
     const navigation = createNavigation();
@@ -64,7 +66,7 @@ function createSelection(app = 'registration') {
             reactive_navigationController: shallowRef(null),
         },
     };
-    return { organization, group, family, member, context, navigation, checkoutRegisterItemHandler, global };
+    return { organization, group, family, checkout, member, context, navigation, checkoutRegisterItemHandler, global };
 }
 
 test.each([
@@ -94,9 +96,9 @@ test.each([
 });
 
 test('selecting a member invokes checkout and deselecting removes the item without invoking checkout again', async () => {
-    const { member, group, organization, family, context, navigation, checkoutRegisterItemHandler, global } = createSelection();
+    const { member, group, organization, checkout, context, navigation, checkoutRegisterItemHandler, global } = createSelection();
     const wrapper = shallowMount(RegisterItemCheckboxRow, {
-        props: { member, group, groupOrganization: organization, checkout: family.checkout, checkoutRegisterItemHandler },
+        props: { member, group, groupOrganization: organization, checkout, checkoutRegisterItemHandler },
         global,
     });
 
@@ -113,30 +115,30 @@ test('selecting a member invokes checkout and deselecting removes the item witho
     await options.navigate.present({ components: [] });
     expect(navigation.present).toHaveBeenCalledOnce();
 
-    family.checkout.add(options.item);
+    checkout.add(options.item);
     await wrapper.findComponent(STListItem).trigger('click');
     await flushPromises();
 
-    expect(family.checkout.cart.getMemberAndGroup(member.id, group.id)).toBeNull();
+    expect(checkout.cart.getMemberAndGroup(member.id, group.id)).toBeNull();
     expect(checkoutRegisterItemHandler).toHaveBeenCalledOnce();
     wrapper.unmount();
 });
 
 test('adding a member uses the loaded group organization and the edit continuation navigation without clearing the shared cart', async () => {
-    const { member, group, organization, family, context, navigation, checkoutRegisterItemHandler, global } = createSelection('dashboard');
+    const { member, group, organization, checkout, context, navigation, checkoutRegisterItemHandler, global } = createSelection('dashboard');
     const existingItem = RegisterItem.defaultFor(member, group, organization);
-    family.checkout.add(existingItem);
+    checkout.add(existingItem);
     const addNavigation = createNavigation();
     const editNavigation = createNavigation();
     const wrapper = shallowMount(ChooseOrganizationMembersForGroupView, {
-        props: { group, groupOrganization: organization, checkout: family.checkout, checkoutRegisterItemHandler },
+        props: { group, groupOrganization: organization, checkout, checkoutRegisterItemHandler },
         global,
     });
 
     await wrapper.find('button:has(.icon.add)').trigger('click');
     expect(addMember).toHaveBeenCalledOnce();
     const [newFamily, addOptions] = addMember.mock.calls[0];
-    expect(toRaw(newFamily.checkout)).toBe(toRaw(family.checkout));
+    expect(toRaw(newFamily.checkout)).toBe(toRaw(checkout));
     const newMember = newFamily.newMember();
     await addOptions.finishHandler(newMember, addNavigation);
 
@@ -147,17 +149,17 @@ test('adding a member uses the loaded group organization and the edit continuati
     const item = newMember.family.pendingRegisterItems[0];
     expect(toRaw(item.group)).toBe(group);
     expect(toRaw(item.organization)).toBe(organization);
-    expect(toRaw(item.checkout)).toBe(toRaw(family.checkout));
     expect(checkoutRegisterItemHandler).not.toHaveBeenCalled();
 
     await editOptions.finishHandler!(editNavigation);
     expect(checkoutRegisterItemHandler).toHaveBeenCalledOnce();
     const options = checkoutRegisterItemHandler.mock.calls[0][0];
     expect(toRaw(options.item)).toBe(toRaw(item));
+    expect(toRaw(options.item.checkout)).toBe(toRaw(checkout));
     expect(options.context).toBe(context);
     expect(options.navigate).toBe(editNavigation);
     expect(options).toMatchObject({ admin: true, startCheckoutFlow: false, displayOptions: { action: 'show' } });
-    expect(family.checkout.cart.contains(existingItem)).toBe(true);
+    expect(checkout.cart.contains(existingItem)).toBe(true);
     expect(navigation.show).not.toHaveBeenCalled();
     expect(navigation.present).not.toHaveBeenCalled();
     wrapper.unmount();

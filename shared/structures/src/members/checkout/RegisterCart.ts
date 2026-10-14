@@ -1,19 +1,17 @@
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import type { BalanceItem } from '../../BalanceItem.js';
-import type { BundleDiscountCalculation } from '../../BundleDiscount.js';
+import type { RegistrationPeriodBase } from '../../RegistrationPeriodBase.js';
+import { BundleDiscountHelper, type BundleDiscountCalculation } from '../../helpers/BundleDiscountHelper.js';
 import { BalanceItemCartItem } from './BalanceItemCartItem.js';
 import { IDRegisterItem } from './RegisterItem.js';
 import type { RegisterItem } from './RegisterItem.js';
-import type { Registration } from '../Registration.js';
+import type { RegisterContext } from './RegisterContext.js';
 import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
-
-type RegisterCartHydrationContext = Parameters<IDRegisterItem['hydrate']>[0];
-type RegistrationWithMember = RegistrationWithPlatformMember<Registration, RegisterCartHydrationContext['members'][number]>;
 
 type RegisterCartCheckout = {
     singleOrganizationId: string | null | undefined;
-    singleOrganization: { period: { period: { id: string; locked: boolean; nameShort: string } } } | null;
+    singleOrganization: { period: { period: Pick<RegistrationPeriodBase, 'id' | 'locked' | 'nameShort'> } } | null;
 };
 
 export class IDRegisterCart extends AutoEncoder {
@@ -41,12 +39,12 @@ export class IDRegisterCart extends AutoEncoder {
         return null;
     }
 
-    hydrate(context: RegisterCartHydrationContext) {
+    hydrate(context: RegisterContext) {
         const cart = new RegisterCart();
         cart.items = this.items.map(i => i.hydrate(context));
         cart.balanceItems = this.balanceItems;
 
-        const registrations: RegistrationWithMember[] = [];
+        const registrations: RegistrationWithPlatformMember[] = [];
         for (const registrationId of this.deleteRegistrationIds) {
             let found = false;
             for (const member of context.members) {
@@ -85,7 +83,7 @@ export class RegisterCart {
     /**
      * You can define which registrations you want remove as part of this register operation.
      */
-    deleteRegistrations: RegistrationWithMember[] = [];
+    deleteRegistrations: RegistrationWithPlatformMember[] = [];
     bundleDiscounts: BundleDiscountCalculation[] = [];
 
     calculatePrices() {
@@ -97,7 +95,7 @@ export class RegisterCart {
         this.bundleDiscounts = [];
         if (this.singleOrganization) {
             for (const bundleDiscount of this.singleOrganization.period.settings.bundleDiscounts) {
-                const grouped = bundleDiscount.calculate(this, this.singleOrganization.period.period.id);
+                const grouped = BundleDiscountHelper.calculate(bundleDiscount, this, this.singleOrganization.period.period.id);
                 for (const [_, calculation] of grouped.calculations) {
                     if (calculation.netTotal !== 0) {
                         this.bundleDiscounts.push(calculation);
@@ -188,14 +186,14 @@ export class RegisterCart {
         }
     }
 
-    removeRegistration(registration: RegistrationWithMember) {
+    removeRegistration(registration: RegistrationWithPlatformMember) {
         const index = this.deleteRegistrations.findIndex(r => r.registration.id === registration.registration.id);
         if (index === -1) {
             this.deleteRegistrations.push(registration);
         }
     }
 
-    unremoveRegistration(registration: RegistrationWithMember) {
+    unremoveRegistration(registration: RegistrationWithPlatformMember) {
         const index = this.deleteRegistrations.findIndex(r => r.registration.id === registration.registration.id);
         if (index !== -1) {
             this.deleteRegistrations.splice(index, 1);
@@ -370,7 +368,7 @@ export class RegisterCart {
             }
         }
 
-        const cleanedRegistrations: RegistrationWithMember[] = [];
+        const cleanedRegistrations: RegistrationWithPlatformMember[] = [];
         const singleOrganization = checkout.singleOrganization;
 
         for (const registration of this.deleteRegistrations) {

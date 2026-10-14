@@ -1,3 +1,4 @@
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import type { XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import type { PlatformMember } from '@stamhoofd/structures';
 import {
@@ -13,7 +14,6 @@ import {
     OrganizationRegistrationPeriod,
     OrganizationRegistrationPeriodSettings,
     Platform,
-    PlatformFamily,
     Registration,
     RegistrationPeriod,
     TranslatedString,
@@ -85,7 +85,7 @@ describe('XlsxTransformerColumnHelper', () => {
                 ],
             });
 
-            const family = PlatformFamily.create(blob, { platform: Platform.create({}), contextOrganization: organization });
+            const family = PlatformFamilyHelper.fromBlob(blob, { platform: Platform.create({}), contextOrganization: organization });
             return family.members[0];
         }
 
@@ -180,7 +180,7 @@ describe('XlsxTransformerColumnHelper', () => {
                 ],
             });
 
-            const family = PlatformFamily.create(blob, { platform: Platform.create({}), contextOrganization: organization });
+            const family = PlatformFamilyHelper.fromBlob(blob, { platform: Platform.create({}), contextOrganization: organization });
             return family.members[0];
         }
 

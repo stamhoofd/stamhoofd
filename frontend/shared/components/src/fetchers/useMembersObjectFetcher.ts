@@ -1,5 +1,6 @@
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import type { CountFilteredRequest, PlatformMember, SortList } from '@stamhoofd/structures';
-import { assertSort, CountResponse, LimitedFilteredRequest, MembersBlob, PaginatedResponseDecoder, PlatformFamily, SortItemDirection } from '@stamhoofd/structures';
+import { assertSort, CountResponse, LimitedFilteredRequest, MembersBlob, PaginatedResponseDecoder, SortItemDirection } from '@stamhoofd/structures';
 import type { ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { useContext } from '#hooks/useContext.ts';
@@ -52,7 +53,7 @@ export function useMembersObjectFetcher(overrides?: Partial<ObjectFetcher<Object
             const blob = response.data.results;
 
             return {
-                results: PlatformFamily.createSingles(blob, {
+                results: PlatformFamilyHelper.createSingles(blob, {
                     contextOrganization: context.value.organization,
                     platform: platform.value,
                 }),

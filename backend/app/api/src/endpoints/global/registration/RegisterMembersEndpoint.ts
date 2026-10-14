@@ -9,7 +9,8 @@ import { BalanceItem, CachedBalance, Group, Member, Platform, RateLimiter, Regis
 import { QueueHandler } from '@stamhoofd/queues';
 import type { BalanceItem as BalanceItemStruct, PlatformMember, RegisterItem } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, IDRegisterCheckout, Payment as PaymentStruct, PlatformFamily, ReceivableBalanceType, RegisterResponse, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, IDRegisterCheckout, Payment as PaymentStruct, ReceivableBalanceType, RegisterResponse, TranslatedString } from '@stamhoofd/structures';
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
@@ -239,7 +240,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 const familyMembers = (await Member.getFamilyWithRegistrations(memberId));
                 members.push(...familyMembers);
                 const blob = await AuthenticatedStructures.membersBlob(familyMembers, true, undefined, { forAdminCartCalculation: true });
-                const family = PlatformFamily.create(blob, {
+                const family = PlatformFamilyHelper.fromBlob(blob, {
                     platform: platformStruct,
                     contextOrganization,
                 });
@@ -267,7 +268,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         } else {
             const blob = await AuthenticatedStructures.membersBlob(members, true);
-            const family = PlatformFamily.create(blob, {
+            const family = PlatformFamilyHelper.fromBlob(blob, {
                 platform: await Platform.getSharedStruct(),
                 contextOrganization: await AuthenticatedStructures.organization(organization),
             });

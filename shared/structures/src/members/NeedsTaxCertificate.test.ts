@@ -1,3 +1,4 @@
+import { PlatformFamilyHelper } from '../helpers/PlatformFamilyHelper.js';
 import { Group } from '../Group.js';
 import { GroupSettings } from '../GroupSettings.js';
 import { GroupType } from '../GroupType.js';
@@ -5,7 +6,7 @@ import { Organization } from '../Organization.js';
 import { Platform } from '../Platform.js';
 import { BooleanStatus, MemberDetails } from './MemberDetails.js';
 import { MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob.js';
-import { PlatformFamily, PlatformMember } from './PlatformMember.js';
+import { PlatformMember } from './PlatformMember.js';
 import { GroupPrice } from '../GroupSettings.js';
 import { RegisterItem } from './checkout/RegisterItem.js';
 import { Registration } from './Registration.js';
@@ -53,7 +54,7 @@ describe('PlatformMember.needsTaxCertificate', () => {
             }),
         });
 
-        const family = new PlatformFamily({ platform: Platform.create({}), contextOrganization: organization });
+        const family = PlatformFamilyHelper.create({ platform: Platform.create({}), contextOrganization: organization });
         return new PlatformMember({ member, family });
     }
 
@@ -134,7 +135,7 @@ describe('PlatformMember.needsTaxCertificate', () => {
     describe('without any registration yet', () => {
         function buildWithItem({ birthDay, groupType, groupStartDate, pending = false, forOtherMember = false }: { birthDay: Date; groupType?: GroupType; groupStartDate?: Date; pending?: boolean; forOtherMember?: boolean }) {
             const organization = Organization.create({});
-            const family = new PlatformFamily({ platform: Platform.create({}), contextOrganization: organization });
+            const family = PlatformFamilyHelper.create({ platform: Platform.create({}), contextOrganization: organization });
 
             const create = (details: MemberDetails) => {
                 const member = new PlatformMember({
@@ -162,7 +163,7 @@ describe('PlatformMember.needsTaxCertificate', () => {
                 family.pendingRegisterItems.push(item);
             }
             else {
-                family.checkout.cart.items.push(item);
+                PlatformFamilyHelper.getCheckout(family).cart.items.push(item);
             }
 
             return member;

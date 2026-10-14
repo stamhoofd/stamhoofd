@@ -1,3 +1,4 @@
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import type { XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { Platform } from '@stamhoofd/models';
@@ -343,7 +344,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Registrations, {
         const result = await GetRegistrationsEndpoint.buildData(query);
 
         return new UnencodeablePaginatedResponse({
-            results: PlatformRegistration.createSingles(result.results, {
+            results: PlatformFamilyHelper.createRegistrationSingles(result.results, {
                 contextOrganization: Context.organization ? (await AuthenticatedStructures.organization(Context.organization)) : null,
                 platform: await Platform.getSharedStruct(),
             }),

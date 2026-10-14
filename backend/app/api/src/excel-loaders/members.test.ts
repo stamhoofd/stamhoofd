@@ -1,7 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import type { XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import type { PlatformMember } from '@stamhoofd/structures';
-import { EmergencyContact, Group, GroupPrice, GroupSettings, MemberDetails, MembersBlob, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, Platform, PlatformFamily, Registration, RegistrationPeriod } from '@stamhoofd/structures';
+import { EmergencyContact, Group, GroupPrice, GroupSettings, MemberDetails, MembersBlob, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, Platform, Registration, RegistrationPeriod } from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';
 import { ContextInstance } from '../helpers/Context.js';
 import { getBaseMemberColumns } from './members.js';
@@ -19,7 +20,7 @@ describe('Member excel export', () => {
                 ],
             });
 
-            const family = PlatformFamily.create(blob, { platform: Platform.create({}), contextOrganization: organization });
+            const family = PlatformFamilyHelper.fromBlob(blob, { platform: Platform.create({}), contextOrganization: organization });
             return family.members[0];
         }
 
@@ -72,7 +73,7 @@ describe('Member excel export', () => {
                 ],
             });
 
-            const family = PlatformFamily.create(blob, { platform: Platform.create({}), contextOrganization: organization });
+            const family = PlatformFamilyHelper.fromBlob(blob, { platform: Platform.create({}), contextOrganization: organization });
             return family.members[0];
         }
 
@@ -117,7 +118,7 @@ describe('Member excel export', () => {
                 organizations: [national, groupA, groupB],
                 members: [MemberWithRegistrationsBlob.create({ details: MemberDetails.create({}), registrations })],
             });
-            const member = PlatformFamily.create(blob, { platform }).members[0];
+            const member = PlatformFamilyHelper.fromBlob(blob, { platform }).members[0];
 
             return Object.fromEntries(['organization', 'uri', 'organizations', 'uris'].map((id) => {
                 const column = getBaseMemberColumns(platform).find(c => 'id' in c && c.id === id) as XlsxTransformerConcreteColumn<PlatformMember>;

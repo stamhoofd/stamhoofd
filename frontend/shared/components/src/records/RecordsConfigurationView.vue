@@ -56,6 +56,7 @@
 </template>
 
 <script setup lang="ts">
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
@@ -66,7 +67,7 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import type { PropertyFilter, RecordCategory } from '@stamhoofd/structures';
-import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
+import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, PlatformMember } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { usePlatformMemberFilterBuilders } from '../filters/filter-builders/members';
 import { RecordEditorSettings, RecordEditorType } from './RecordEditorSettings';
@@ -97,7 +98,7 @@ const app = useAppContext();
 const getPlatformMemberFilterBuilders = usePlatformMemberFilterBuilders();
 
 const settings = computed(() => {
-    const family = new PlatformFamily({
+    const family = PlatformFamilyHelper.create({
         platform: platform.value,
         contextOrganization: organization.value,
     });

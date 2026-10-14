@@ -5,6 +5,7 @@
 </template>
 
 <script setup lang="ts">
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, useDismiss, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
@@ -64,7 +65,7 @@ async function checkout(item: DetailedPayableBalance) {
     loadingCheckout = true;
 
     try {
-        const checkout = memberManager.family.checkout;
+        const checkout = PlatformFamilyHelper.getCheckout(memberManager.family);
         const items = item.payableBalanceItems;
 
         if (items.length > 1) {

@@ -1,6 +1,8 @@
 import type { XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import { isXlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
-import { Group, GroupPrice, GroupSettings, GroupType, MemberDetails, MemberWithRegistrationsBlob, Organization, Platform, PlatformRegistration, Registration, RegistrationPeriod, RegistrationsBlob, RegistrationWithMemberBlob } from '@stamhoofd/structures';
+import type { PlatformRegistration } from '@stamhoofd/structures';
+import { Group, GroupPrice, GroupSettings, GroupType, MemberDetails, MemberWithRegistrationsBlob, Organization, Platform, Registration, RegistrationPeriod, RegistrationsBlob, RegistrationWithMemberBlob } from '@stamhoofd/structures';
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import { getSheet } from './registrations.js';
 
 describe('Registrations excel export', () => {
@@ -23,7 +25,7 @@ describe('Registrations excel export', () => {
             registrations: [event, createRegistration(groupA, GroupType.Membership)],
         });
 
-        const [registration] = PlatformRegistration.createSingles(RegistrationsBlob.create({
+        const [registration] = PlatformFamilyHelper.createRegistrationSingles(RegistrationsBlob.create({
             registrations: [RegistrationWithMemberBlob.create({ ...event, member })],
             organizations: [national, groupA],
         }), { platform });

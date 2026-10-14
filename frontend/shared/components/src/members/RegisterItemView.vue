@@ -154,6 +154,7 @@
 </template>
 
 <script setup lang="ts">
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
@@ -182,7 +183,7 @@ const props = defineProps<{
     willStartCheckoutFlow?: boolean;
 }>();
 
-const checkout = computed(() => props.item.member.family.checkout);
+const checkout = computed(() => PlatformFamilyHelper.getCheckout(props.item.member.family));
 const errors = useErrors();
 const saving = ref(false);
 const navigationActions = useNavigationActions();
@@ -302,7 +303,7 @@ function setOptionAmount(menu: GroupOptionMenu, option: GroupOption, amount: num
 }
 
 async function deleteMe() {
-    props.item.checkout.cart.remove(props.item);
+    PlatformFamilyHelper.getCheckout(props.item.family).cart.remove(props.item);
     await pop({ force: true });
 }
 

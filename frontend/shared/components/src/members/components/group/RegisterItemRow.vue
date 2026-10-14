@@ -62,6 +62,7 @@
 </template>
 
 <script setup lang="ts">
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import type { RegisterItem } from '@stamhoofd/structures';
 import { GroupType } from '@stamhoofd/structures';
 import { computed } from 'vue';
@@ -87,7 +88,7 @@ const canEdit = computed(() => props.item.showItemView);
 const checkoutRegisterItem = useRegisterItemCheckoutHandler(options => props.checkoutRegisterItemHandler(options));
 
 async function deleteMe() {
-    props.item.checkout.remove(props.item);
+    PlatformFamilyHelper.getCheckout(props.item.family).remove(props.item);
 }
 
 async function editMe() {

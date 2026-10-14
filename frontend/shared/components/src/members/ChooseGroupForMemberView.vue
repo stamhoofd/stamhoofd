@@ -60,6 +60,8 @@
 </template>
 
 <script setup lang="ts">
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
+import { PlatformMemberRegistrationHelper } from '@stamhoofd/structures/helpers/PlatformMemberRegistrationHelper.js';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useAppContext } from '#context/appContext.ts';
 import { useScopedAuth } from '#hooks/useAuth.ts';
@@ -93,7 +95,7 @@ const app = useAppContext();
 const searchOrganizationTitle = computed(() => $t('%5G', { firstName: props.member.patchedMember.firstName }));
 const navigate = useNavigationActions();
 const organization = useOrganization();
-const differentOrganization = computed(() => selectedOrganization.value && !props.member.family.checkout.cart.isEmpty && props.member.family.checkout.singleOrganization?.id !== selectedOrganization.value.id);
+const differentOrganization = computed(() => selectedOrganization.value && !PlatformFamilyHelper.getCheckout(props.member.family).cart.isEmpty && PlatformFamilyHelper.getCheckout(props.member.family).singleOrganization?.id !== selectedOrganization.value.id);
 
 watch(selectedOrganization, () => {
     checkOrganization();
@@ -103,11 +105,11 @@ function checkOrganization() {
     if (app !== 'registration') {
         if (!organization.value) {
             // Administration panel: register as organizing organization
-            props.member.family.checkout.asOrganizationId = selectedOrganization.value?.id ?? null;
+            PlatformFamilyHelper.getCheckout(props.member.family).asOrganizationId = selectedOrganization.value?.id ?? null;
         } else {
-            props.member.family.checkout.asOrganizationId = organization.value.id;
+            PlatformFamilyHelper.getCheckout(props.member.family).asOrganizationId = organization.value.id;
         }
-        props.member.family.checkout.defaultOrganization = selectedOrganization.value;
+        PlatformFamilyHelper.getCheckout(props.member.family).defaultOrganization = selectedOrganization.value;
     }
 }
 
@@ -174,7 +176,7 @@ const selectedControlTab = computed<string>({
 
 const tree = computed(() => treeFactory({
     filterGroups: (g) => {
-        return props.member.family.checkout.isAdminFromSameOrganization || props.member.canRegister(g, selectedOrganization.value!) || props.member.canRegisterForWaitingList(g, selectedOrganization.value!);
+        return props.member.family.checkout.isAdminFromSameOrganization || PlatformMemberRegistrationHelper.canRegister(props.member, g, selectedOrganization.value!) || PlatformMemberRegistrationHelper.canRegisterForWaitingList(props.member, g, selectedOrganization.value!);
     },
 }));
 
@@ -208,7 +210,7 @@ const alreadyRegisteredGroups = computed(() => {
 });
 
 const alreadyRegisteredMessage = computed(() => {
-    if (props.member.family.checkout.isAdminFromSameOrganization) {
+    if (PlatformFamilyHelper.getCheckout(props.member.family).isAdminFromSameOrganization) {
         return null;
     }
 

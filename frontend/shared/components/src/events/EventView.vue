@@ -70,6 +70,8 @@
 </template>
 
 <script setup lang="ts">
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
+import { PlatformMemberRegistrationHelper } from '@stamhoofd/structures/helpers/PlatformMemberRegistrationHelper.js';
 import ExternalOrganizationContainer from '#containers/ExternalOrganizationContainer.vue';
 import EventInfoTable from '#events/components/EventInfoTable.vue';
 import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
@@ -95,7 +97,7 @@ const platform = usePlatform();
 const title = computed(() => props.event.name);
 const memberManager = useMemberManager();
 const groupOrganization = ref<Organization | null>(null) as Ref<Organization | null>;
-const differentOrganization = computed(() => props.event.group && !memberManager.family.checkout.cart.isEmpty && memberManager.family.checkout.singleOrganization?.id !== props.event.group.organizationId);
+const differentOrganization = computed(() => props.event.group && !PlatformFamilyHelper.getCheckout(memberManager.family).cart.isEmpty && PlatformFamilyHelper.getCheckout(memberManager.family).singleOrganization?.id !== props.event.group.organizationId);
 const loadedWebshop = ref<Webshop | WebshopPreview | null>(null);
 const context = useContext();
 let didLoadWebshop = false;
@@ -150,7 +152,7 @@ const canRegister = computed(() => {
             }
 
             // extra check if can register (prevent showing the button if the member cannot register next)
-            return member.canRegister(group, org);
+            return PlatformMemberRegistrationHelper.canRegister(member, group, org);
         });
 
         if (canRegister) {

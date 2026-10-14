@@ -1,0 +1,355 @@
+import { Sorter } from '@stamhoofd/utility';
+import type { BundleDiscount } from '../BundleDiscount.js';
+import type { Group } from '../Group.js';
+import { RegisterItem } from '../members/checkout/RegisterItem.js';
+import { RegistrationWithPlatformMember } from '../members/checkout/RegistrationWithPlatformMember.js';
+import type { PlatformFamily, PlatformMember } from '../members/PlatformMember.js';
+import { calculateHungarianAlgorithm } from './calculateHungarianAlgorithm.js';
+
+type BundleDiscountCart = {
+    items: RegisterItem[];
+    deleteRegistrations: RegistrationWithPlatformMember[];
+};
+
+export class BundleDiscountHelper {
+    static calculate(bundle: BundleDiscount, cart: BundleDiscountCart, periodId: string): BundleDiscountCalculationGroup {
+        const group = new BundleDiscountCalculationGroup({
+            bundle,
+            periodId,
+        });
+
+        for (const item of cart.items) {
+            const calculation = group.getCalculationFor(item);
+            calculation?.add(item);
+
+            for (const deletedRegistration of item.replaceRegistrations) {
+                const cc = group.getCalculationFor(deletedRegistration);
+                cc?.remove(deletedRegistration);
+            }
+        }
+
+        for (const deletedRegistration of cart.deleteRegistrations) {
+            const cc = group.getCalculationFor(deletedRegistration);
+            cc?.remove(deletedRegistration);
+        }
+
+        // Loop all existing registrations that are not deleted - if they are already in a calculation group
+        const loopedFamilies = new Set<PlatformFamily>();
+        const loopedMembers = new Set<string>();
+
+        for (const family of [
+            ...cart.items.map(item => item.member.family),
+            ...cart.deleteRegistrations.map(registration => registration.member.family),
+        ]) {
+            if (loopedFamilies.has(family)) {
+                continue;
+            }
+            loopedFamilies.add(family);
+
+            for (const member of family.members) {
+                if (loopedMembers.has(member.id)) {
+                    continue;
+                }
+                loopedMembers.add(member.id);
+
+                for (const registration of member.filterRegistrations({ periodId: periodId })) {
+                    const registrationWithPlatformMember = new RegistrationWithPlatformMember({
+                        registration,
+                        member,
+                    });
+                    const cc = group.getCalculationFor(registrationWithPlatformMember, {
+                        // Only add it to the calculation if this registration is relevant for a new or removed registration that was added earlier
+                        onlyExisting: true,
+                    });
+                    cc?.addIfNotBeingRemoved(registrationWithPlatformMember);
+                }
+            }
+        }
+
+        group.calculate();
+        return group;
+    }
+
+    static applyableTo(bundle: BundleDiscount, item: RegisterItem | RegistrationWithPlatformMember, periodId: string) {
+        // A bundle discount only applies to registrations of the period it belongs to.
+        // Historically, duplicating a period re-used the same discount id across periods,
+        // so we have to filter on the period to avoid mixing registrations from other periods.
+        if (item.group.periodId !== periodId) {
+            return false;
+        }
+
+        const groupPrice = item instanceof RegistrationWithPlatformMember ? item.registration.updatedGroupPrice : item.groupPrice;
+        if (groupPrice.bundleDiscounts.has(bundle.id)) {
+            return true;
+        }
+        if (item instanceof RegistrationWithPlatformMember) {
+            if (item.registration.discounts.has(bundle.id)) {
+                // This registration received the discount in the past, so it is still applyable
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+class BundleDiscountCalculationGroup {
+    bundle: BundleDiscount;
+    periodId: string;
+
+    calculations: Map<string, BundleDiscountCalculation> = new Map();
+
+    constructor(options: {
+        bundle: BundleDiscount;
+        periodId: string;
+    }) {
+        this.bundle = options.bundle;
+        this.periodId = options.periodId;
+    }
+
+    calculate() {
+        for (const calculation of this.calculations.values()) {
+            calculation.calculate();
+        }
+    }
+
+    getCalculationFor(item: RegisterItem | RegistrationWithPlatformMember, options?: { onlyExisting?: boolean }) {
+        if (!BundleDiscountHelper.applyableTo(this.bundle, item, this.periodId)) {
+            return null;
+        }
+        let groupingCode = 'family-' + item.member.family.uuid + '-';
+        let group: Group | null = null;
+        let member: PlatformMember | null = null;
+
+        if (this.bundle.countWholeFamily) {
+            if (this.bundle.countPerGroup) {
+                groupingCode += item.group.id;
+                group = item.group;
+            } else {
+                // Group by family objects (for admins)
+            }
+        } else {
+            member = item.member;
+            groupingCode += item.member.id;
+        }
+        const existing = this.calculations.get(groupingCode);
+        if (!existing) {
+            if (options?.onlyExisting) {
+                return null;
+            }
+
+            const n = new BundleDiscountCalculation({
+                bundle: this.bundle,
+                group,
+                member,
+            });
+            this.calculations.set(groupingCode, n);
+            return n;
+        }
+        return existing;
+    }
+}
+
+export class BundleDiscountCalculation {
+    bundle: BundleDiscount;
+    member: PlatformMember | null; // Only set when it is scoped to single members, not a family
+    group: Group | null; // Only set when scoped to a single group, not multiple groups
+
+    /**
+     *  Keep track of the distribution of discounts.
+     *  This will set the 'applied discounts' for these items once their registration is created in the database
+     */
+    items: Map<RegisterItem, number>;
+
+    /**
+     *  Existing registations that cause a discount.
+     *  The value contains the new calculated discount for this registration
+     */
+    registrations: Map<RegistrationWithPlatformMember, number>;
+
+    /**
+     * Keeps track of the deleted registrations so we can exclude these registrations from the calculation
+    */
+    deleteRegistrations: RegistrationWithPlatformMember[];
+
+    constructor(options: {
+        bundle: BundleDiscount;
+        group?: Group | null;
+        member?: PlatformMember | null;
+    }) {
+        this.bundle = options.bundle;
+        this.group = options.group ?? null;
+        this.member = options.member ?? null;
+
+        this.items = new Map();
+        this.registrations = new Map();
+        this.deleteRegistrations = [];
+    }
+
+    get name() {
+        const suffix: string[] = [];
+
+        if (this.group) {
+            suffix.push(this.group.settings.name.toString());
+        }
+
+        if (this.member) {
+            suffix.push(this.member.patchedMember.firstName);
+        }
+        return this.bundle.name + (suffix.length > 0 ? ' (' + suffix.join(', ') + ')' : '');
+    }
+
+    /**
+        The total dicount, not taking into account what has already been given in the past
+    */
+    get total() {
+        return [...this.items.values()].reduce((a, b) => a + b, 0)
+            + [...this.registrations.values()].reduce((a, b) => a + b, 0);
+    }
+
+    get totalAlreadyApplied() {
+        let c = 0;
+        for (const registration of this.registrations.keys()) {
+            c += registration.registration.discounts.get(this.bundle.id)?.amount ?? 0;
+        }
+
+        // Note: do not subtract the discounts on the deleted registrations
+        // These registrations will be deleted anyway, so their balance will be cancelled, that balance includes their discounts
+        // the bundle discounts only reflect the situation without all the deleted registrations
+        return c;
+    }
+
+    get netTotal() {
+        return this.total - this.totalAlreadyApplied;
+    }
+
+    get netTotalDueLater() {
+        let sum = 0;
+        for (const [item, value] of this.items) {
+            if (item.calculatedTrialUntil) {
+                // Due later
+                sum += value;
+            }
+        }
+        return sum;
+    }
+
+    get netTotalDueNow() {
+        return this.netTotal - this.netTotalDueLater;
+    }
+
+    getTotalFor(item: RegisterItem | RegistrationWithPlatformMember) {
+        if (item instanceof RegisterItem) {
+            return this.items.get(item) ?? 0;
+        } else if (item instanceof RegistrationWithPlatformMember) {
+            return (this.registrations.get(item) ?? 0);
+        }
+        return 0;
+    }
+
+    addIfNotBeingRemoved(item: RegisterItem | RegistrationWithPlatformMember) {
+        // Only add if it is not being removed at the same time
+        if (item instanceof RegistrationWithPlatformMember) {
+            if (this.deleteRegistrations.find(r => r.registration.id === item.registration.id)) {
+                return;
+            }
+        }
+
+        this.add(item);
+    }
+
+    add(item: RegisterItem | RegistrationWithPlatformMember) {
+        if (item instanceof RegistrationWithPlatformMember) {
+            this.registrations.set(item, 0);
+        } else if (item instanceof RegisterItem) {
+            this.items.set(item, 0);
+        }
+    }
+
+    remove(registration: RegistrationWithPlatformMember) {
+        this.deleteRegistrations.push(registration);
+    }
+
+    get itemsAndRegistrations() {
+        // Return the items in such an order that the first ones should receive the highest discount
+        // The first ones that should receive the highest discount are:
+        // - the newest items
+        // - registrations or items that edit a registration, in order of the already applied discount
+
+        const itemsOrder = [...this.items.keys()].reverse();
+        const registrations = [...this.registrations.keys()];
+        const now = new Date();
+
+        const itemsWithSortingData = itemsOrder.map((item) => {
+            return {
+                item,
+                appliedDiscount: item.replaceRegistrations.length >= 1 ? (item.replaceRegistrations[0].registration.discounts.get(this.bundle.id)?.amount ?? 0) : 0,
+                createdAt: item.replaceRegistrations.length >= 1 ? (item.replaceRegistrations[0].registration.createdAt) : now,
+            };
+        });
+
+        const registrationsWithSortingData = registrations.map((registration) => {
+            return {
+                item: registration,
+                appliedDiscount: registration.registration.discounts.get(this.bundle.id)?.amount ?? 0,
+                createdAt: registration.registration.createdAt,
+            };
+        });
+
+        const base = [
+            ...itemsWithSortingData,
+            ...registrationsWithSortingData,
+        ].sort((a, b) => {
+            return Sorter.stack(
+                Sorter.byNumberValue(a.appliedDiscount, b.appliedDiscount),
+                Sorter.byDateValue(a.createdAt, b.createdAt),
+            );
+        });
+
+        return base.map(b => b.item);
+    }
+
+    calculate() {
+        // For each item and registration, calculate the price matrix
+        // Price if used as first item, second item, third item
+        // We'll then calculate the optimal order using the Hungarian Algorithm
+        const arr = this.itemsAndRegistrations;
+        const priceMatrix: number[][] = [];
+
+        for (const item of arr) {
+            // We always use the group price here, because this is safer, also for registrations (in case we have deactivated registrations with cancallation fees)
+            const isReduced = item.member.patchedMember.details.shouldApplyReducedPrice;
+            const price = item instanceof RegisterItem ? item.groupPrice.price.getPrice(isReduced) : item.registration.groupPrice.price.getPrice(isReduced);
+            const discounts = item instanceof RegisterItem
+                ? (item.groupPrice.bundleDiscounts.get(this.bundle.id)?.customDiscounts ?? this.bundle.discounts)
+                : (item.registration.groupPrice.bundleDiscounts.get(this.bundle.id)?.customDiscounts ?? this.bundle.discounts);
+
+            const row: number[] = [];
+
+            for (const [index] of arr.entries()) {
+                if (index === 0) {
+                    row.push(0);
+                    continue;
+                }
+
+                const discount = discounts[index - 1] ?? discounts[discounts.length - 1]; // Repeat last
+                const calculated = discount.calculateDiscount(price, isReduced);
+                row.push(calculated);
+            }
+
+            priceMatrix.push(row);
+        }
+
+        const solved = calculateHungarianAlgorithm(priceMatrix);
+
+        for (const [index, item] of arr.entries()) {
+            const nth = solved[index];
+            const discount = priceMatrix[index][nth];
+
+            if (item instanceof RegistrationWithPlatformMember) {
+                this.registrations.set(item, discount);
+            } else {
+                this.items.set(item, discount);
+            }
+        }
+    }
+}

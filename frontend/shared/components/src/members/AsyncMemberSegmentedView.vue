@@ -5,9 +5,9 @@
 </template>
 
 <script lang="ts" setup>
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import type { PlatformMember } from '@stamhoofd/structures';
-import { PlatformFamily } from '@stamhoofd/structures';
 import { ref } from 'vue';
 import LoadingViewTransition from '../containers/LoadingViewTransition.vue';
 import { useOrganization } from '#hooks/useOrganization.ts';
@@ -29,7 +29,7 @@ const organization = useOrganization();
 
 async function fetchMember(id: string): Promise<PlatformMember> {
     const blob = await loadFamilyFromId(id);
-    const family = PlatformFamily.create(blob, {
+    const family = PlatformFamilyHelper.fromBlob(blob, {
         platform: platform.value,
         contextOrganization: organization.value,
     });

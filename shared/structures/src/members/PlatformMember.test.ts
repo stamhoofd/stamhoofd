@@ -1,3 +1,4 @@
+import { PlatformFamilyHelper } from '../helpers/PlatformFamilyHelper.js';
 import { MembersBlob, MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob.js';
 import { MemberPlatformMembership } from './MemberPlatformMembership.js';
 import { Platform, PlatformConfig, PlatformMembershipType } from '../Platform.js';
@@ -15,7 +16,6 @@ import { OrganizationRecordsConfiguration } from './OrganizationRecordsConfigura
 import { RecordCategory } from './records/RecordCategory.js';
 import { TranslatedString } from '../TranslatedString.js';
 import {
-    PlatformFamily,
     PlatformMember,
 } from './PlatformMember.js';
 
@@ -51,7 +51,7 @@ describe('PlatformMember', () => {
                 details: MemberDetails.create({}),
             });
 
-            const family = new PlatformFamily({
+            const family = PlatformFamilyHelper.create({
                 platform: Platform.create({}),
                 contextOrganization: organization,
             });
@@ -134,7 +134,7 @@ describe('PlatformMember', () => {
                     details: MemberDetails.create({}),
                 });
 
-                const family = new PlatformFamily({
+                const family = PlatformFamilyHelper.create({
                     platform: Platform.create({}),
                     contextOrganization: organization,
                 });
@@ -240,7 +240,7 @@ describe('PlatformMember', () => {
                     details: MemberDetails.create({}),
                 });
 
-                const family = new PlatformFamily({
+                const family = PlatformFamilyHelper.create({
                     platform: Platform.create({}),
                     contextOrganization: organization,
                 });
@@ -285,7 +285,7 @@ describe('PlatformMember', () => {
                 ],
             });
 
-            const family = PlatformFamily.create(blob, { platform: Platform.create({}), contextOrganization: organization });
+            const family = PlatformFamilyHelper.fromBlob(blob, { platform: Platform.create({}), contextOrganization: organization });
             const member = family.members[0];
 
             const categories = member.getAllRecordCategories({ scopeOrganization: organization });
@@ -343,7 +343,7 @@ describe('PlatformMember', () => {
                 organizations: [national, groupA, groupB],
                 members: [MemberWithRegistrationsBlob.create({ details: MemberDetails.create({}), registrations, platformMemberships })],
             });
-            const family = PlatformFamily.create(blob, { platform });
+            const family = PlatformFamilyHelper.fromBlob(blob, { platform });
             return family.members[0].getPrimaryOrganization({ periodId })?.uri ?? null;
         }
 
@@ -418,7 +418,7 @@ describe('PlatformMember', () => {
                 organizations: [groupA, groupB],
                 members: [MemberWithRegistrationsBlob.create({ details: MemberDetails.create({}), registrations: [registration(groupA, twoYearsAgo), registration(groupB, previous)] })],
             });
-            const family = PlatformFamily.create(blob, { platform, contextOrganization: Organization.create({ period: OrganizationRegistrationPeriod.create({ period: organizationPeriod }) }) });
+            const family = PlatformFamilyHelper.fromBlob(blob, { platform, contextOrganization: Organization.create({ period: OrganizationRegistrationPeriod.create({ period: organizationPeriod }) }) });
             expect(family.members[0].getPrimaryOrganization({ periodId: organizationPeriod.id })?.uri).toBe('A');
         });
 
@@ -457,7 +457,7 @@ describe('PlatformMember', () => {
                 organizations: [groupA, groupB],
                 members: [MemberWithRegistrationsBlob.create({ details: MemberDetails.create({}), organizationId: groupA.id, registrations: [registration(groupB, current)] })],
             });
-            const family = PlatformFamily.create(blob, { platform });
+            const family = PlatformFamilyHelper.fromBlob(blob, { platform });
             expect(family.members[0].getPrimaryOrganization({ periodId: current.id })?.uri).toBe('A');
         });
     });

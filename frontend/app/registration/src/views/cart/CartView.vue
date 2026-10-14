@@ -42,6 +42,7 @@
 </template>
 
 <script setup lang="ts">
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import BalanceItemCartItemRow from '@stamhoofd/components/members/components/group/BalanceItemCartItemRow.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
 import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
@@ -60,7 +61,7 @@ import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 
 const memberManager = useMemberManager();
-const checkout = computed(() => memberManager.family.checkout);
+const checkout = computed(() => PlatformFamilyHelper.getCheckout(memberManager.family));
 const cart = computed(() => checkout.value.cart);
 const errors = useErrors();
 const context = useContext();

@@ -28,6 +28,7 @@
 </template>
 
 <script setup lang="ts">
+import { PlatformMemberRegistrationHelper } from '@stamhoofd/structures/helpers/PlatformMemberRegistrationHelper.js';
 import type { Group, Organization, PlatformMember } from '@stamhoofd/structures';
 import { RegisterItem } from '@stamhoofd/structures';
 import { computed } from 'vue';
@@ -41,7 +42,7 @@ const props = defineProps<{
 }>();
 
 const willChangeToWaitingList = computed(() => {
-    return !props.member.canRegister(props.group, props.organization) && props.member.canRegisterForWaitingList(props.group, props.organization);
+    return !PlatformMemberRegistrationHelper.canRegister(props.member, props.group, props.organization) && PlatformMemberRegistrationHelper.canRegisterForWaitingList(props.member, props.group, props.organization);
 });
 
 const item = RegisterItem.defaultFor(props.member, props.group, props.organization);
