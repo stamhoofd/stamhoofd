@@ -3,12 +3,14 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { LimitedFilteredRequest } from '@stamhoofd/structures';
 import PromiseView from '#containers/PromiseView.vue';
 import { useMembersObjectFetcher } from '#fetchers/useMembersObjectFetcher.ts';
+import { useMemberViewLoaders } from '#members/memberViewLoaders.ts';
 import { Toast } from '../../overlays/Toast';
 
 
 export function useShowMember() {
     const memberFetcher = useMembersObjectFetcher();
     const present = usePresent();
+    const memberViewLoaders = useMemberViewLoaders();
 
     return async (memberId: string) => {
         const component = new ComponentWithProperties(NavigationController, {
@@ -24,7 +26,7 @@ export function useShowMember() {
                         Toast.error($t(`%yX`)).show();
                         throw new Error('Member not found');
                     }
-                    return AsyncComponent(() => import('../MemberSegmentedView.vue'), {
+                    return AsyncComponent(memberViewLoaders.member, {
                         member: members.results[0],
                     });
                 },
