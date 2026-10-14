@@ -299,7 +299,7 @@
                 <div v-for="optionMenu of patchedGroup.settings.optionMenus" :key="optionMenu.id" class="container">
                     <hr>
 
-                    <GroupOptionMenuBox :option-menu="optionMenu" :group="patchedGroup" :errors="errors" :level="2" @patch:group="addGroupPatch" @patch:option-menu="addOptionMenuPatch" @delete="addOptionMenuDelete(optionMenu.id)" />
+                    <GroupOptionMenuBox :option-menu="optionMenu" :group="patchedGroup" :errors="errors" :level="2" @patch:group="addGroupPatch" @patch:option-menu="addOptionMenuPatch" @delete="addOptionMenuDelete(optionMenu.id)" @edit="editGroupOptionMenu" />
                 </div>
             </CategorizedBox>
 
@@ -1615,6 +1615,25 @@ async function addGroupOptionMenu() {
                 isNew: true,
                 saveHandler: async (patch: AutoEncoderPatchType<GroupOptionMenu>) => {
                     addOptionMenuPut(optionMenu.patch(patch));
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
+
+async function editGroupOptionMenu(optionMenu: GroupOptionMenu) {
+    await present({
+        components: [
+            AsyncComponent(() => import('./components/GroupOptionMenuView.vue'), {
+                optionMenu,
+                group: patchedGroup.value,
+                isNew: false,
+                saveHandler: async (patch: AutoEncoderPatchType<GroupOptionMenu>) => {
+                    addOptionMenuPatch(patch);
+                },
+                deleteHandler: async () => {
+                    addOptionMenuDelete(optionMenu.id);
                 },
             }),
         ],
