@@ -3,6 +3,7 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailVerificationCode, User } from '@stamhoofd/models';
+import { UserService } from '@stamhoofd/models/services/UserService.js';
 import { SessionLoginMethod, Token as TokenStruct, VerifyEmailRequest } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';
@@ -95,7 +96,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 }
 
                 // Delete the placeholder user, but merge data
-                await user.merge(other);
+                await UserService.merge(user, other);
                 if (user.organizationId) {
                     BalanceItemService.scheduleUserUpdate(user.organizationId, user.id);
                 }
