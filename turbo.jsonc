@@ -1,9 +1,12 @@
 {
     "$schema": "https://turborepo.com/schema.json",
-    "globalDependencies": ["tsconfig*.json", "jest-extended.d.ts", "shared/stamhoofd.d.ts", "backend/stamhoofd.d.ts", ".nvmrc"],
+    "globalDependencies": ["tsconfig*.json", "shared/tsconfig*.json", "backend/tsconfig*.json", "frontend/tsconfig*.json", "jest-extended.d.ts", "shared/*.d.ts", "backend/*.d.ts", "frontend/*.d.ts", ".nvmrc"],
     "cacheDir": ".turbo/cache",
     "tasks": {
         "build": {
+            // Frontend package cycles prevent a global ^build dependency.
+            // Once cycles are removed and build-time peers are declared as devDependencies,
+            // builds can use ^build instead of package-specific dependency edges.
             "cache": false,
             "outputs": ["dist/**", "*.tsbuildinfo"]
         },
@@ -129,6 +132,11 @@
             "persistent": true
         },
         "lint": {
+            // Checks always run: recursive dependency hashing would follow frontend cycles.
+            // With an acyclic, complete manifest graph, use a scriptless transit task
+            // (dependsOn: ["^transit"]) and depend on it to cache checks in parallel.
+            // Cached checks must also hash inherited configs and lint's NODE_ENV;
+            // emitting typechecks must declare dist/** and *.tsbuildinfo outputs.
             "cache": false
         },
         "typecheck": {

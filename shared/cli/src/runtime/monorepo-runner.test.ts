@@ -108,7 +108,7 @@ describe('shared build orchestration', () => {
         expect(watch).toContain(`--exec 'pnpm run build:shared && touch ${readyFile} || exit 0'`);
         expect(watch).toContain('--signal SIGTERM');
         expect(watch).toContain('--watch shared --watch backend/shared');
-        expect(watch).toContain('--watch turbo.json');
+        expect(watch).toContain('--watch turbo.jsonc');
         expect(watch).toContain("--ignore './shared/*/dist/' --ignore './backend/shared/*/dist/'");
     });
 });
