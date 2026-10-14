@@ -328,11 +328,14 @@ import { useCreateEventGroup } from './composables/createEventGroup';
 import type { EventPeriodProblem } from './composables/useEventPeriodProblem';
 import { useGetEventPeriodProblem } from './composables/useEventPeriodProblem';
 import { buildTranslatedUrl } from '#containers/TranslatedUrl.ts';
+import { useEventWebshopViewLoaders } from './eventWebshopViewLoaders.ts';
 
 const props = defineProps<{
     event: Event;
     onSaveDuplicate?: (event: Event) => void;
 }>();
+
+const webshopViewLoaders = useEventWebshopViewLoaders();
 
 const title = computed(() => props.event.name);
 const $navigate = useNavigate();
@@ -660,9 +663,8 @@ defineRoute({
 
 defineRoute({
     url: Routes.Webshop,
-    component: async () => {
-        return (await import('@stamhoofd/dashboard/src/views/dashboard/webshop/WebshopOverview.vue')).default;
-    },
+    // eslint-disable-next-line stamhoofd/async-route-components -- Keep the injected import loader intact for chunk retries.
+    component: webshopViewLoaders.overview,
     defaultProperties: () => {
         if (!webshop.value) {
             throw new Error('Webshop not found');
@@ -687,7 +689,7 @@ async function createWebshop() {
     await present({
         components: [
             await LoadComponent(
-                () => import('@stamhoofd/dashboard/src/views/dashboard/webshop/edit/EditWebshopGeneralView.vue'),
+                webshopViewLoaders.edit,
                 {
                     initialWebshop: PrivateWebshop.create({
                         meta: WebshopMetaData.create({

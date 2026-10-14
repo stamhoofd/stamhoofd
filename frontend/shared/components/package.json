@@ -26,7 +26,6 @@
         "@simonbackx/vue-app-navigation": "2.25.1",
         "@simplewebauthn/browser": "13.3.0",
         "@stamhoofd/assets": "workspace:*",
-        "@stamhoofd/dashboard": "workspace:*",
         "@stamhoofd/frontend-excel-export": "workspace:*",
         "@stamhoofd/frontend-i18n": "workspace:*",
         "@stamhoofd/frontend-pdf-builder": "workspace:*",

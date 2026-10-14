@@ -20,9 +20,11 @@ import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import { onMounted, useTemplateRef } from 'vue';
+import { useProvideEventWebshopViews } from '@stamhoofd/dashboard/providers/provideEventWebshopViews.ts';
 import RouterAppView from './RouterAppView.vue';
 
 const modalStack = useTemplateRef<InstanceType<typeof ModalStackComponent>>('modalStack');
+useProvideEventWebshopViews();
 HistoryManager.activate();
 HistoryManager.debug = STAMHOOFD.environment === 'test';
 
