@@ -459,8 +459,8 @@ jobs:
               run: coredns -version
             - name: Disable default DNS
               run: |
+                  sudo cp -L /etc/resolv.conf "$RUNNER_TEMP/original-resolv.conf"
                   sudo systemctl stop systemd-resolved
-                  sudo systemctl disable systemd-resolved
                   sudo rm /etc/resolv.conf
                   echo "nameserver 127.0.0.1" | sudo tee /etc/resolv.conf
             - name: Run coredns
@@ -553,6 +553,13 @@ jobs:
               run: pnpm --dir backend/app/api run build:playwright:pre
             - name: Run Playwright tests
               run: pnpm --dir tests/playwright run test
+            - name: Restore runner DNS
+              if: always()
+              run: |
+                  if [ -f "$RUNNER_TEMP/original-resolv.conf" ]; then
+                      sudo systemctl start systemd-resolved
+                      sudo cp "$RUNNER_TEMP/original-resolv.conf" /etc/resolv.conf
+                  fi
             - name: Upload Playwright artifacts
               if: failure()
               uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
