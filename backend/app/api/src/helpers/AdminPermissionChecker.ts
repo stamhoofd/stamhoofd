@@ -2204,9 +2204,8 @@ export class AdminPermissionChecker {
 
         const isUserManager = this.isUserManager(member);
 
-        // Do not allow setting the member number
-        if (isUserManager || STAMHOOFD.userMode === 'platform') {
-            // A user manager cannot choose the member number + in platform mode, nobody can choose the member number
+        // In platform mode member numbers are assigned automatically. User managers can only set it when they also have admin access to the member.
+        if (STAMHOOFD.userMode === 'platform' || (isUserManager && !(await this.canAccessMember(member, PermissionLevel.Full)))) {
             delete data.details.memberNumber;
         }
 

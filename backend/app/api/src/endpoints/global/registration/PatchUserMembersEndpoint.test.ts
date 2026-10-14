@@ -399,6 +399,38 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
         });
     });
 
+    describe('Member number', () => {
+        test('A user manager without admin access cannot set the member number in organization mode', async () => {
+            TestUtils.setEnvironment('userMode', 'organization');
+
+            const organization = await new OrganizationFactory({ }).create();
+            const user = await new UserFactory({ organization }).create();
+            const existingMember = await new MemberFactory({
+                organization,
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+                user,
+            }).create();
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: existingMember.id,
+                details: MemberDetails.patch({ memberNumber: 'LID-300' }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await testServer.test(endpoint, request);
+
+            const member = await Member.getByID(existingMember.id);
+            expect(member!.details.memberNumber).toBeNull();
+        });
+    });
+
     describe('Record answers', () => {
         test('A user can save answers of records of an organization it has not yet registered for', async () => {
             const commentsRecord = RecordSettings.create({
