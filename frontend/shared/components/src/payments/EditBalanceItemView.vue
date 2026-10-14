@@ -221,7 +221,7 @@ const props = withDefaults(defineProps<{
     saveHandler: null,
 });
 
-const balanceItemWithPayments = ref<null | BalanceItemWithPayments>(null);
+const balanceItemWithPayments = ref(null) as Ref<null | BalanceItemWithPayments>;
 const balanceItem = computed(() => {
     return balanceItemWithPayments.value ?? props.balanceItem;
 });
