@@ -8,7 +8,7 @@ import { GenericBalance } from '../GenericBalance.js';
 import { Group } from '../Group.js';
 import { GroupPrice } from '../GroupSettings.js';
 import { StockReservation } from '../StockReservation.js';
-import { RegisterItemOption } from './checkout/RegisterItem.js';
+import { RegisterItemOption } from './checkout/RegisterItemOption.js';
 import type { ObjectWithRecords, PatchAnswers } from './ObjectWithRecords.js';
 import type { RecordAnswer } from './records/RecordAnswer.js';
 import { RecordAnswerMapDecoder } from './records/RecordAnswer.js';

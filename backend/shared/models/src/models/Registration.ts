@@ -1,7 +1,8 @@
 import type { ManyToOneRelation } from '@simonbackx/simple-database';
 import { column } from '@simonbackx/simple-database';
 import type { RecordAnswer } from '@stamhoofd/structures';
-import { AppliedRegistrationDiscount, GroupPrice, RecordAnswerMapDecoder, RegisterItemOption, Registration as RegistrationStructure, StockReservation } from '@stamhoofd/structures';
+import { AppliedRegistrationDiscount, GroupPrice, RecordAnswerMapDecoder, Registration as RegistrationStructure, StockReservation } from '@stamhoofd/structures';
+import { RegisterItemOption } from '@stamhoofd/structures/members/checkout/RegisterItemOption.js';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
