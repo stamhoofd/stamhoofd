@@ -30,8 +30,6 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { AuditLog } from '@stamhoofd/structures';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -49,6 +47,7 @@ const props = withDefaults(
         log: AuditLog;
         canFilter?: boolean;
         customRenderers?: AuditLogCustomRenderers;
+        openLogs: (objectId: string) => Promise<void>;
     }>(), {
         canFilter: true,
         customRenderers: undefined,
@@ -82,10 +81,9 @@ if (props.log.user) {
     userDescription.push($t(`%ud`));
 }
 
-const present = usePresent();
-
 async function showContext(event: MouseEvent) {
-    if (!props.log.objectId) {
+    const objectId = props.log.objectId;
+    if (!objectId) {
         return;
     }
     const menu = new ContextMenu([
@@ -93,15 +91,7 @@ async function showContext(event: MouseEvent) {
             new ContextMenuItem({
                 name: $t(`%ue`),
                 action: async () => {
-                    await present({
-                        components: [
-                            AsyncComponent(() => import('../AuditLogsView.vue'), {
-                                objectIds: [props.log.objectId],
-                                customRenderers: props.customRenderers,
-                            }),
-                        ],
-                        modalDisplayStyle: 'popup',
-                    });
+                    await props.openLogs(objectId);
                 },
             }),
         ],
