@@ -50,7 +50,7 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
+import { usePatchOrganizationPeriod } from '@stamhoofd/components/hooks/usePatchOrganizationPeriod';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { GroupCategoryTree } from '@stamhoofd/structures';
 import { Group, GroupCategory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';

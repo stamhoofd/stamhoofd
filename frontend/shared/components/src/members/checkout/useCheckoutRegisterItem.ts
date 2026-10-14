@@ -7,7 +7,7 @@ import type { Group, PlatformFamily, PlatformMember, Registration, RegistrationW
 import { GroupType, Organization, RegisterCheckout, RegisterItem } from '@stamhoofd/structures';
 
 import { loadFamilyIfNeeded } from '#members/hooks/useLoadFamily.ts';
-import { GlobalEventBus } from '../../EventBus';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 import { useContext } from '#hooks/useContext.ts';
 import { Toast } from '../../overlays/Toast';
 import type { DisplayOptions, NavigationActions } from '../../types/NavigationActions';

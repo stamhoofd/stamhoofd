@@ -107,8 +107,8 @@ import { RegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch } from 'vue';
 import type { OnboardingStepProps } from './OnboardingStepProps';
-import { clearOrganizationPeriodsCache } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
-import { clearRegistrationPeriodsCache } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
+import { clearOrganizationPeriodsCache } from '@stamhoofd/components/hooks/useFetchOrganizationRegistrationPeriods';
+import { clearRegistrationPeriodsCache } from '@stamhoofd/components/hooks/useFetchRegistrationPeriods';
 
 type ConfigType = 'year' | 'semester' | 'custom';
 

@@ -4,7 +4,7 @@ import type { usePresent } from '@simonbackx/vue-app-navigation';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent, LoadComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { RecipientChooseOneOption } from '@stamhoofd/components/email/EmailView.vue';
-import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { isMailchimpReady } from '@stamhoofd/components/mailchimp/useMailchimp.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';

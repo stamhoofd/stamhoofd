@@ -1,13 +1,13 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { useOrganization } from '@stamhoofd/components/hooks/useOrganization';
-import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
+import { useContext } from '#hooks/useContext.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import type { Organization } from '@stamhoofd/structures';
 import { LimitedFilteredRequest, PaginatedResponseDecoder, RegistrationPeriod, SortItemDirection } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { ref } from 'vue';
-import { useRequestOwner } from './useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 
 /**
  * All registration periods, cached at module level so every consumer shares one list and one

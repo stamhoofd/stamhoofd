@@ -8,7 +8,7 @@ import type { NavigationActions } from '../types/NavigationActions';
 
 
 
-import { GlobalEventBus } from '../EventBus';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 import { Toast } from '../overlays/Toast';
 
 export class PaymentHandler {

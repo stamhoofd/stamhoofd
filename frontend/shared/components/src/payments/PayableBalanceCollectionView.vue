@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { GlobalEventBus } from '#EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 import { useVisibilityChange } from '#hooks/useVisibilityChange';
 import { Toast } from '#overlays/Toast';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';

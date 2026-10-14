@@ -1,9 +1,9 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import { useContext } from '@stamhoofd/components/hooks/useContext';
+import { useContext } from '#hooks/useContext.ts';
 import type { RegistrationPeriodBase, StamhoofdFilter } from '@stamhoofd/structures';
 import { Event, EventPeriodHelper, LimitedFilteredRequest, mergeFilters, PaginatedResponseDecoder, SortItemDirection } from '@stamhoofd/structures';
-import { useRequestOwner } from './useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 
 function useFetchEvents() {
     const context = useContext();

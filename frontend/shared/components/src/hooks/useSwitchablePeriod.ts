@@ -3,8 +3,8 @@ import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
 
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
-import { useFetchRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
+import { useFetchOrganizationRegistrationPeriods } from '#hooks/useFetchOrganizationRegistrationPeriods.ts';
+import { useFetchRegistrationPeriods } from '#hooks/useFetchRegistrationPeriods.ts';
 import type { OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { ref } from 'vue';

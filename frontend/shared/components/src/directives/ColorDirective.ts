@@ -1,6 +1,6 @@
 import { Colors, Formatter } from '@stamhoofd/utility';
 import type { ObjectDirective } from 'vue';
-import { ColorHelper } from '../ColorHelper.ts';
+import { ColorHelper } from '@stamhoofd/networking/ColorHelper';
 
 export const ColorDirective: ObjectDirective<HTMLElement, string | {id: string}> = {
     // called right before the element is inserted into the DOM.

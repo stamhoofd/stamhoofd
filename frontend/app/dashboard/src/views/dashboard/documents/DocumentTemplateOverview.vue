@@ -84,7 +84,7 @@ import { ArrayDecoder, PatchableArray, PatchMap } from '@simonbackx/simple-encod
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import ActionButtonsBox from '@stamhoofd/components/payments/components/ActionButtonsBox.vue';

@@ -58,7 +58,7 @@ import { EmailPreview, EmailStatus } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { usePatchEmail } from '../communication/hooks/usePatchEmail';
 import { useErrors } from '../errors/useErrors';
-import { GlobalEventBus } from '../EventBus';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 import { useContext } from '#hooks/useContext.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { CenteredMessage } from '../overlays/CenteredMessage';

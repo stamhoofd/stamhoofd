@@ -1,7 +1,8 @@
 import type { SimpleErrors } from '@simonbackx/simple-errors';
 import type { Request, RequestMiddleware} from '@simonbackx/simple-networking';
 import { Server } from '@simonbackx/simple-networking';
-import { Toast } from '@stamhoofd/components/overlays/Toast';
+import type { NetworkingNotification } from '#NetworkingPresentation.ts';
+import { NetworkingPresentation } from '#NetworkingPresentation.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Version } from '@stamhoofd/structures';
 
@@ -14,7 +15,7 @@ export function sleep(ms: number) {
 }
 
 export class NetworkManagerStatic implements RequestMiddleware {
-    networkErrorToast: Toast | null = null;
+    networkErrorToast: NetworkingNotification | null = null;
     platformLatestVersion: number | null = null;
     serverName: string | null = null;
 
@@ -68,7 +69,7 @@ export class NetworkManagerStatic implements RequestMiddleware {
 
         if ((request as any).retryCount > 1 && !this.networkErrorToast) {
             // Only on second try
-            this.networkErrorToast = new Toast($t(`%ks`), 'spinner').setHide(null).show();
+            this.networkErrorToast = NetworkingPresentation.notify($t(`%ks`), 'spinner', null);
         }
 
         if (navigator.onLine) {
@@ -96,7 +97,7 @@ export class NetworkManagerStatic implements RequestMiddleware {
 
         try {
             if (error.hasCode('client_update_required')) {
-                Toast.fromError(error).show();
+                NetworkingPresentation.notifyError(error);
 
                 if (!AppManager.shared.isNative && !UrlHelper.initial.getSearchParams().has('forceClientUpdate')) {
                     const url = new URL(window.location.href);
@@ -152,14 +153,14 @@ export class NetworkManagerStatic implements RequestMiddleware {
 
                 if (this.platformLatestVersion > Version) {
                     if (AppManager.shared.isNative) {
-                        new Toast($t(`%kt`), 'yellow download').setHide(null).show();
+                        NetworkingPresentation.notify($t(`%kt`), 'yellow download', null);
                         AppManager.shared.checkUpdates({
                             checkTimeout: 20 * 1000,
                         }).catch(console.error);
                     }
                     else {
                         console.info('Received latest version: ', latestVersion, 'got', Version);
-                        new Toast($t(`%ku`), 'yellow download').setHide(null).show();
+                        NetworkingPresentation.notify($t(`%ku`), 'yellow download', null);
                     }
                 }
             }
