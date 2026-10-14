@@ -549,6 +549,47 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
         });
     });
 
+    describe('Member number', () => {
+        const patchMemberNumberAsLinkedAdmin = async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const admin = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization,
+            }).create();
+
+            // The admin is also a user manager of this member
+            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false, user: admin }).create();
+            await new RegistrationFactory({ member, organization }).create();
+
+            const token = await SessionService.createSession(admin);
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ memberNumber: 'LID-200' }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await testServer.test(endpoint, request);
+
+            return (await Member.getByID(member.id))!;
+        };
+
+        test('An admin who is also a user manager of the member can set the member number in organization mode', async () => {
+            TestUtils.setEnvironment('userMode', 'organization');
+            await UniqueMemberNumberService.check();
+
+            const member = await patchMemberNumberAsLinkedAdmin();
+            expect(member.details.memberNumber).toBe('LID-200');
+        });
+
+        test('The member number cannot be set in platform mode', async () => {
+            const member = await patchMemberNumberAsLinkedAdmin();
+            expect(member.details.memberNumber).toBeNull();
+        });
+    });
+
     describe('Language', () => {
         test('Changing the language of a member also changes the language of its users', async () => {
             const organization = await new OrganizationFactory({}).create();
