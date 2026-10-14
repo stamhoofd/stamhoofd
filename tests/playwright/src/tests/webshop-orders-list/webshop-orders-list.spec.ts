@@ -117,4 +117,21 @@ test.describe('Orders list @webshop-orders-list', () => {
 
         await context.close();
     });
+
+    test('A search after a search with one result shows every row on a phone', async ({ browser }) => {
+        // While the count of a new search loads, the table must draw every row that already loaded
+        const { context, table } = await openOrdersList(browser, shop, 'phone');
+
+        await table.search('5');
+        await table.expectCount(1, orders.length);
+        await expect(table.getRows()).toHaveCount(1);
+
+        const annas = sortOrders(orders.filter(o => o.name.toLowerCase().includes('anna')), o => o.seed.number, 'DESC');
+        await table.search('anna');
+        await expect(table.getOrderRow(annas[0].name)).toBeVisible();
+        await expect(table.getOrderRow(annas[1].name)).toBeVisible();
+        await table.expectCount(annas.length, orders.length);
+
+        await context.close();
+    });
 });
