@@ -1,4 +1,5 @@
 import { SimpleError } from '@simonbackx/simple-errors';
+import { PaymentRelationsService } from '@stamhoofd/models/services/PaymentRelationsService.js';
 import type { AuditLog, Document, EventNotification, MemberWithUsersRegistrationsAndGroups, Order, Ticket } from '@stamhoofd/models';
 import { BalanceItem, CachedBalance, EmailRecipient, Event, Group, Invoice, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Platform as PlatformModel, Registration, RegistrationInvitation, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
 import type { EmailRecipient as EmailRecipientStruct, PaymentGeneral } from '@stamhoofd/structures';
@@ -31,7 +32,7 @@ export class AuthenticatedStructures {
             return [];
         }
 
-        const { balanceItemPayments, balanceItems } = await Payment.loadBalanceItems(payments);
+        const { balanceItemPayments, balanceItems } = await PaymentRelationsService.loadBalanceItems(payments);
 
         if (checkPermissions) {
             // Note: permission checking is moved here for performacne to avoid loading the data multiple times
@@ -56,10 +57,10 @@ export class AuthenticatedStructures {
                 ),
             )).every(allowed => allowed);
 
-        const { payingOrganizations } = await Payment.loadPayingOrganizations(payments);
-        const { paymentSettlements, settlements } = includeSettlements ? await Payment.loadSettlements(payments) : { paymentSettlements: [], settlements: [] };
+        const { payingOrganizations } = await PaymentRelationsService.loadPayingOrganizations(payments);
+        const { paymentSettlements, settlements } = includeSettlements ? await PaymentRelationsService.loadSettlements(payments) : { paymentSettlements: [], settlements: [] };
 
-        return Payment.getGeneralStructureFromRelations({
+        return PaymentRelationsService.getGeneralStructureFromRelations({
             payments,
             balanceItemPayments,
             balanceItems,
