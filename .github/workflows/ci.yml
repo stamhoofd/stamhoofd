@@ -121,6 +121,11 @@ jobs:
                         - 'pnpm-workspace.yaml'
                         - '.npmrc'
                         - 'tests/playwright/**'
+                        - 'shared/**'
+                        - 'frontend/**'
+                        - 'backend/**'
+                        - '.development/Corefile'
+                        - '.development/loadenv.sh'
                       # Changing the workflow itself (or the shared setup action) can affect
                       # any job, so all of them run.
                       ci:
@@ -150,11 +155,11 @@ jobs:
                       package.json|pnpm-lock.yaml|pnpm-workspace.yaml|.npmrc)
                         backend_apps=true; backend_shared=true; frontend=true; shared=true; playwright=true ;;
                       shared/*)
-                        backend_apps=true; backend_shared=true; frontend=true; shared=true ;;
-                      backend/shared/*) backend_apps=true; backend_shared=true ;;
-                      backend/*) backend_apps=true ;;
-                      frontend/*) frontend=true ;;
-                      tests/playwright/*) playwright=true ;;
+                        backend_apps=true; backend_shared=true; frontend=true; shared=true; playwright=true ;;
+                      backend/shared/*) backend_apps=true; backend_shared=true; playwright=true ;;
+                      backend/*) backend_apps=true; playwright=true ;;
+                      frontend/*) frontend=true; playwright=true ;;
+                      tests/playwright/*|.development/Corefile|.development/loadenv.sh) playwright=true ;;
                       turbo.json|.github/workflows/ci.yml|.github/actions/*) ci=true ;;
                     esac
                   done < "$RUNNER_TEMP/stack-files"
@@ -408,7 +413,7 @@ jobs:
         timeout-minutes: 60
         runs-on: ubuntu-latest
         needs: [job_setup, job_build_shared]
-        if: needs.job_setup.outputs.in_stack_range == 'true' && (needs.job_setup.outputs.changed_backend_apps == 'true' || needs.job_setup.outputs.changed_frontend == 'true' || needs.job_setup.outputs.rerun_playwright == 'true')
+        if: needs.job_setup.outputs.in_stack_range == 'true' && needs.job_setup.outputs.rerun_playwright == 'true'
         permissions:
             contents: read
             pull-requests: write
