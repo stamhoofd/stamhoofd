@@ -936,13 +936,12 @@ importers:
       '@stamhoofd/test-utils':
         specifier: workspace:*
         version: link:../../../shared/test-utils
-      chalk:
-        specifier: 5.6.2
-        version: 5.6.2
-    devDependencies:
       '@stamhoofd/types':
         specifier: workspace:*
         version: link:../../../shared/types
+      chalk:
+        specifier: 5.6.2
+        version: 5.6.2
 
   backend/shared/i18n:
     dependencies:
@@ -1572,6 +1571,9 @@ importers:
       '@capacitor/cli':
         specifier: 8.5.2
         version: 8.5.2(supports-color@10.2.2)
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../../../shared/types
       '@stamhoofd/vite-config':
         specifier: workspace:*
         version: link:../../shared/vite-config
