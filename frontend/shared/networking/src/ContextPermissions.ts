@@ -1,5 +1,6 @@
 import type { EmailPreview, Event, Group, GroupCategory, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationRegistrationPeriod, OrganizationTag, PaymentGeneral, Permissions, Platform, PlatformMember, Registration, RegistrationPeriodBase, UserWithMembers } from '@stamhoofd/structures';
 import { AccessRight, EventPeriodHelper, EventPermissionChecker, GroupType, PermissionLevel, PermissionsResourceKey, PermissionsResourceType } from '@stamhoofd/structures';
+import type { EventPeriodPermissionData } from '@stamhoofd/structures/EventPermissionData.js';
 import type { Ref } from 'vue';
 import { toRaw, unref } from 'vue';
 
@@ -485,7 +486,7 @@ export class ContextPermissions {
         return this.canWriteEventForOrganization(event, this.organization);
     }
 
-    canWriteEventForOrganization(event: Event, organization: Organization | null) {
+    canWriteEventForOrganization(event: EventPeriodPermissionData, organization: Organization | null) {
         return EventPermissionChecker.hasPermissionToWriteEvent(
             event,
             {
@@ -496,7 +497,7 @@ export class ContextPermissions {
             });
     }
 
-    isEventPeriodInUse(event: Event, organization: Organization | null): boolean {
+    isEventPeriodInUse(event: { startDate: Date }, organization: Organization | null): boolean {
         return EventPeriodHelper.isInAnyPeriod(event, this.getPeriodsInUse(organization));
     }
 
@@ -517,7 +518,7 @@ export class ContextPermissions {
         return periods;
     }
 
-    private canAccessEventForOrganization(event: Event, permissions: LoadedPermissions, permissionLevel: PermissionLevel, organization: Organization, isPeriodInUse: boolean) {
+    private canAccessEventForOrganization(event: EventPeriodPermissionData, permissions: LoadedPermissions, permissionLevel: PermissionLevel, organization: Organization, isPeriodInUse: boolean) {
         if (permissions.hasResourceAccess(PermissionsResourceType.Events, event.id, permissionLevel)) {
             return true;
         }

@@ -5,17 +5,15 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BundleDiscountGroupPriceSettings } from './BundleDiscountGroupPriceSettings.js';
-import { Group } from './Group.js';
+import type { GroupStock, RegistrationStock } from './GroupStock.js';
 import { GroupGenderType } from './GroupGenderType.js';
 import { OldGroupPrices } from './OldGroupPrices.js';
 import { ReduceablePrice } from './ReduceablePrice.js';
-import type { OrganizationRegistrationPeriodSettings } from './RegistrationPeriod.js';
 import { RegistrationPeriodBase } from './RegistrationPeriodBase.js';
 import { StockReservation } from './StockReservation.js';
 import { TranslatedString } from './TranslatedString.js';
 import { Image } from './files/Image.js';
 import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
-import type { RegisterItem } from './members/checkout/RegisterItem.js';
 import { RecordCategory } from './members/records/RecordCategory.js';
 
 export class GroupPrice extends AutoEncoder {
@@ -62,7 +60,7 @@ export class GroupPrice extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: true, version: 378 })
     endDate: Date | null;
 
-    getUsedStock(group: Group) {
+    getUsedStock(group: GroupStock) {
         const groupStockReservations = group.stockReservations;
         return StockReservation.getAmount('GroupPrice', this.id, groupStockReservations);
     }
@@ -70,7 +68,7 @@ export class GroupPrice extends AutoEncoder {
     /**
      * Can be negative is we are editing items, positive if other items in the cart cause stock changes
      */
-    getPendingStock(item: RegisterItem) {
+    getPendingStock(item: RegistrationStock) {
         const stock = item.getCartPendingStockReservations(); // this is positive if it will be used
         return StockReservation.getAmount(
             'GroupPrice',
@@ -79,21 +77,21 @@ export class GroupPrice extends AutoEncoder {
         );
     }
 
-    isSoldOut(item: RegisterItem | Group): boolean {
+    isSoldOut(item: RegistrationStock | GroupStock): boolean {
         if (this.stock === null) {
             return false;
         }
-        if (item instanceof Group) {
+        if (!('group' in item)) {
             return this.getUsedStock(item) >= this.stock;
         }
         return this.getUsedStock(item.group) + this.getPendingStock(item) >= this.stock;
     }
 
-    getRemainingStock(item: RegisterItem | Group): number | null {
+    getRemainingStock(item: RegistrationStock | GroupStock): number | null {
         if (this.stock === null) {
             return null;
         }
-        if (item instanceof Group) {
+        if (!('group' in item)) {
             return Math.max(0, this.stock - this.getUsedStock(item));
         }
         return Math.max(0, this.stock - this.getPendingStock(item) - this.getUsedStock(item.group));
@@ -111,7 +109,7 @@ export class GroupPrice extends AutoEncoder {
         return true;
     }
 
-    hasBundleDiscounts(period: { settings: OrganizationRegistrationPeriodSettings }): boolean {
+    hasBundleDiscounts(period: { settings: { bundleDiscounts: { id: string }[] } }): boolean {
         for (const key of this.bundleDiscounts.keys()) {
             if (period.settings.bundleDiscounts.find(b => b.id === key)) {
                 return true;
@@ -169,7 +167,7 @@ export class GroupOption extends AutoEncoder {
     @field({ decoder: IntegerDecoder, optional: true, field: 'reserved' })
     _reserved = 0;
 
-    getUsedStock(group: Group) {
+    getUsedStock(group: GroupStock) {
         const groupStockReservations = group.stockReservations;
         return StockReservation.getAmount('GroupOption', this.id, groupStockReservations);
     }
@@ -177,7 +175,7 @@ export class GroupOption extends AutoEncoder {
     /**
      * Can be negative is we are editing items, positive if other items in the cart cause stock changes
      */
-    getPendingStock(item: RegisterItem) {
+    getPendingStock(item: RegistrationStock) {
         const stock = item.getCartPendingStockReservations(); // this is positive if it will be used
         return StockReservation.getAmount(
             'GroupOption',
@@ -186,27 +184,27 @@ export class GroupOption extends AutoEncoder {
         );
     }
 
-    isSoldOut(item: RegisterItem | Group): boolean {
+    isSoldOut(item: RegistrationStock | GroupStock): boolean {
         if (this.stock === null) {
             return false;
         }
-        if (item instanceof Group) {
+        if (!('group' in item)) {
             return this.getUsedStock(item) >= this.stock;
         }
         return this.getUsedStock(item.group) + this.getPendingStock(item) >= this.stock;
     }
 
-    getRemainingStock(item: RegisterItem | Group): number | null {
+    getRemainingStock(item: RegistrationStock | GroupStock): number | null {
         if (this.stock === null) {
             return null;
         }
-        if (item instanceof Group) {
+        if (!('group' in item)) {
             return Math.max(0, this.stock - this.getUsedStock(item));
         }
         return Math.max(0, this.stock - this.getPendingStock(item) - this.getUsedStock(item.group));
     }
 
-    getMaximumSelection(item: RegisterItem) {
+    getMaximumSelection(item: RegistrationStock) {
         if (this.maximum === null) {
             return this.getRemainingStock(item);
         }
@@ -529,7 +527,7 @@ export class GroupSettings extends AutoEncoder {
         return false;
     }
 
-    getUsedStock(group: Group) {
+    getUsedStock(group: GroupStock) {
         const groupStockReservations = group.stockReservations;
         return StockReservation.getAmount('GroupPrice', null, groupStockReservations);
     }
@@ -537,7 +535,7 @@ export class GroupSettings extends AutoEncoder {
     /**
      * Can be negative is we are editing items, positive if other items in the cart cause stock changes
      */
-    getPendingStock(item: RegisterItem) {
+    getPendingStock(item: RegistrationStock) {
         const stock = item.getCartPendingStockReservations(); // this is positive if it will be used
         return StockReservation.getAmount(
             'Group',
@@ -546,21 +544,21 @@ export class GroupSettings extends AutoEncoder {
         );
     }
 
-    isSoldOut(item: RegisterItem | Group): boolean {
+    isSoldOut(item: RegistrationStock | GroupStock): boolean {
         if (this.maxMembers === null) {
             return false;
         }
-        if (item instanceof Group) {
+        if (!('group' in item)) {
             return this.getUsedStock(item) >= this.maxMembers;
         }
         return this.getUsedStock(item.group) + this.getPendingStock(item) >= this.maxMembers;
     }
 
-    getRemainingStock(item: RegisterItem | Group): number | null {
+    getRemainingStock(item: RegistrationStock | GroupStock): number | null {
         if (this.maxMembers === null) {
             return null;
         }
-        if (item instanceof Group) {
+        if (!('group' in item)) {
             return Math.max(0, this.maxMembers - this.getUsedStock(item));
         }
         return Math.max(0, this.maxMembers - this.getPendingStock(item) - this.getUsedStock(item.group));
@@ -571,7 +569,7 @@ export class GroupSettings extends AutoEncoder {
      * account. Returns null if no price imposes a limit (at least one selectable price has unlimited
      * stock). Hidden prices are ignored since they cannot be selected for new registrations.
      */
-    getTotalRemainingPricesStock(item: RegisterItem | Group): number | null {
+    getTotalRemainingPricesStock(item: RegistrationStock | GroupStock): number | null {
         let total: number | null = null;
         for (const price of this.prices) {
             if (price.hidden) {
@@ -591,7 +589,7 @@ export class GroupSettings extends AutoEncoder {
      * Total amount per menu that can still be registered taking the stock of the individual options into
      * account. Only includes menu if it imposes a limit. Hidden options are ignored since they cannot be selected for new registrations.
      */
-    getTotalRemainingMenuOptionsStock(item: RegisterItem | Group): (number)[] {
+    getTotalRemainingMenuOptionsStock(item: RegistrationStock | GroupStock): (number)[] {
         const results: (number)[] = [];
 
         for (const menu of this.optionMenus) {
@@ -633,7 +631,7 @@ export class GroupSettings extends AutoEncoder {
      * Remaining stock taking both the group its own stock (maxMembers), the stock of the
      * individual prices and the stock of the options into account. Returns the minimum of both, or null if neither imposes a limit.
      */
-    getRemainingStockIncludingPricesAndOptions(item: RegisterItem | Group): number | null {
+    getRemainingStockIncludingPricesAndOptions(item: RegistrationStock | GroupStock): number | null {
         const groupStock = this.getRemainingStock(item);
         const pricesStock = this.getTotalRemainingPricesStock(item);
         const optionsStock = this.getTotalRemainingMenuOptionsStock(item);
@@ -662,7 +660,7 @@ export class GroupSettings extends AutoEncoder {
         return this.maxMembers - this.registeredMembers - (this.reservedMembers ?? 0);
     }
 
-    hasBundleDiscounts(period: { settings: OrganizationRegistrationPeriodSettings }): boolean {
+    hasBundleDiscounts(period: { settings: { bundleDiscounts: { id: string }[] } }): boolean {
         return this.prices.some(price => price.hasBundleDiscounts(period));
     }
 
