@@ -199,6 +199,7 @@ async function addAuthenticator() {
                 new ComponentWithProperties(NavigationController, {
                     root: AsyncComponent(() => import('./SetupTOTPView.vue'), {
                         totpSetup,
+                        runFresh,
                         setupToken: null,
                         // We opened this flow in a sheet, so we are the one that closes it
                         // again and shows the updated list behind it.
