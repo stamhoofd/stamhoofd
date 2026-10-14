@@ -1,6 +1,6 @@
 import { Database } from '@simonbackx/simple-database';
 import type { Organization, Webshop } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemPayment, Order, OrganizationFactory, Payment, WebshopFactory } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Order, OrganizationFactory, Payment, Ticket, TicketFactory, WebshopFactory } from '@stamhoofd/models';
 import { compileToSQLFilter, SQL } from '@stamhoofd/sql';
 import type { StamhoofdFilter } from '@stamhoofd/structures/filters/StamhoofdFilter.js';
 import { parsePhoneNumber } from 'libphonenumber-js/max';
@@ -17,8 +17,9 @@ import { Cart } from '@stamhoofd/structures/webshops/Cart.js';
 import { CartItem, CartItemOption, CartItemPrice } from '@stamhoofd/structures/webshops/CartItem.js';
 import { Customer } from '@stamhoofd/structures/webshops/Customer.js';
 import { DiscountCode } from '@stamhoofd/structures/webshops/DiscountCode.js';
-import { OrderData, OrderStatus } from '@stamhoofd/structures/webshops/Order.js';
+import { OrderData, OrderStatus, PrivateOrderWithTickets } from '@stamhoofd/structures/webshops/Order.js';
 import { Option, OptionMenu, Product, ProductPrice } from '@stamhoofd/structures/webshops/Product.js';
+import { TicketPrivate } from '@stamhoofd/structures/webshops/Ticket.js';
 import { CheckoutMethodType, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures/webshops/WebshopMetaData.js';
 import { WebshopField, WebshopFieldAnswer } from '@stamhoofd/structures/webshops/WebshopField.js';
 import { Country } from '@stamhoofd/types/Country';
@@ -35,7 +36,7 @@ import { orderFilterCompilers } from '../../src/sql-filters/orders.js';
  * the endpoint builds its query.
  *
  * Filters that only exist in one engine are intentionally not covered here (no counterpart to compare to):
- * - in-memory only: location, openBalance, ticketScanStatus, ticketScannedAt, ticketCount
+ * - in-memory only: location, openBalance
  * - SQL only: organizationId, updatedAt
  */
 describe('Order filters (in-memory vs backend SQL parity)', () => {
@@ -53,6 +54,7 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
         await Database.delete('DELETE FROM `balance_item_payments`');
         await Database.delete('DELETE FROM `payments`');
         await Database.delete('DELETE FROM `balance_items`');
+        await Database.delete('DELETE FROM `webshop_tickets`');
         await Database.delete('DELETE FROM `webshop_orders`');
         nextNumber = 1;
     });
@@ -167,13 +169,31 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
         return payment;
     }
 
+    /** Adds one ticket per entry: scanned at that date, or not scanned (null). */
+    async function addTickets(order: Order, scannedAts: (Date | null)[], options: { deleted?: boolean } = {}): Promise<void> {
+        for (const scannedAt of scannedAts) {
+            const ticket = await new TicketFactory({ order }).create();
+            ticket.scannedAt = scannedAt;
+            if (options.deleted) {
+                ticket.deletedAt = new Date();
+            }
+            await ticket.save();
+        }
+    }
+
     // --- parity harness --------------------------------------------------------------------------------
 
     async function runInMemory(filter: StamhoofdFilter): Promise<string[]> {
         const orders = await Order.where({ organizationId: organization.id });
         const structures = await Order.getPrivateStructures(orders);
+        // Like the dashboard, which removes deleted tickets from its local orders
+        const tickets = await Ticket.where({ organizationId: organization.id, deletedAt: null });
+        const withTickets = structures.map(s => PrivateOrderWithTickets.create({
+            ...s,
+            tickets: tickets.filter(t => t.orderId === s.id).map(t => TicketPrivate.create({ ...t })),
+        }));
         const runner = compileToInMemoryFilter(filter, privateOrderWithTicketsFilterCompilers);
-        return structures.filter(s => s.number !== null && runner(s)).map(s => s.id).sort();
+        return withTickets.filter(s => s.number !== null && runner(s)).map(s => s.id).sort();
     }
 
     async function runSQL(filter: StamhoofdFilter): Promise<string[]> {
@@ -852,6 +872,58 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
             await expectFilter({ amountToPay: { $eq: 0 } }, [fullyPaid]);
             await expectFilter({ amountToPay: { $gt: 0 } }, [partlyPaid, unpaid]);
             await expectFilter({ amountToPay: { $eq: 10_00 } }, [unpaid]);
+        });
+    });
+
+    describe('tickets', () => {
+        const early = new Date('2026-03-01T10:00:00Z');
+        const late = new Date('2026-03-01T12:00:00Z');
+        const between = new Date('2026-03-01T11:00:00Z');
+
+        async function createOrdersWithTickets() {
+            const withoutTickets = await createOrder();
+
+            const unscanned = await createOrder();
+            await addTickets(unscanned, [null, null]);
+
+            const partial = await createOrder();
+            await addTickets(partial, [late, null]);
+
+            const all = await createOrder();
+            await addTickets(all, [late, early, late]);
+
+            // Deleted tickets do not count
+            const unscannedWithDeletedScan = await createOrder();
+            await addTickets(unscannedWithDeletedScan, [null]);
+            await addTickets(unscannedWithDeletedScan, [early], { deleted: true });
+
+            return { withoutTickets, unscanned, partial, all, unscannedWithDeletedScan };
+        }
+
+        it('ticketScanStatus', async () => {
+            const o = await createOrdersWithTickets();
+
+            await expectFilter({ ticketScanStatus: { $in: ['none'] } }, [o.withoutTickets, o.unscanned, o.unscannedWithDeletedScan]);
+            await expectFilter({ ticketScanStatus: { $in: ['partial'] } }, [o.partial]);
+            await expectFilter({ ticketScanStatus: { $in: ['all'] } }, [o.all]);
+            await expectFilter({ ticketScanStatus: { $in: ['partial', 'all'] } }, [o.partial, o.all]);
+        });
+
+        it('ticketScannedAt is the first scan, or null without scans', async () => {
+            const o = await createOrdersWithTickets();
+
+            await expectFilter({ ticketScannedAt: { $lt: between } }, [o.all, o.withoutTickets, o.unscanned, o.unscannedWithDeletedScan]);
+            await expectFilter({ ticketScannedAt: { $gt: between } }, [o.partial]);
+            await expectFilter({ ticketScannedAt: { $eq: null } }, [o.withoutTickets, o.unscanned, o.unscannedWithDeletedScan]);
+            await expectFilter({ ticketScannedAt: { $neq: null } }, [o.partial, o.all]);
+        });
+
+        it('ticketCount', async () => {
+            const o = await createOrdersWithTickets();
+
+            await expectFilter({ ticketCount: { $eq: 0 } }, [o.withoutTickets]);
+            await expectFilter({ ticketCount: { $eq: 1 } }, [o.unscannedWithDeletedScan]);
+            await expectFilter({ ticketCount: { $gt: 1 } }, [o.unscanned, o.partial, o.all]);
         });
     });
 });
