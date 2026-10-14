@@ -2,9 +2,8 @@ import type { SQLExpression, SQLExpressionOptions, SQLQuery } from './SQLExpress
 import { joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
 import type { SQLDynamicExpression } from './SQLExpressions.js';
 import { SQLArray, SQLColumnExpression, SQLNull, readDynamicSQLExpression } from './SQLExpressions.js';
-import type { SQLJoin } from './SQLJoin.js';
-import { SQLJoinType } from './SQLJoin.js';
-import { SQLSelect } from './SQLSelect.js';
+import type { SQLJoinExpression } from './SQLQueryContracts.js';
+import { SQLJoinType, SQLSelectBase } from './SQLQueryContracts.js';
 
 type Constructor<T = object> = new (...args: any[]) => T;
 
@@ -138,7 +137,7 @@ export abstract class SQLWhere implements SQLExpression {
     }
 
     abstract getSQL(options?: SQLExpressionOptions): SQLQuery;
-    getJoins(): SQLJoin[] {
+    getJoins(): SQLJoinExpression[] {
         return [];
     }
 
@@ -511,7 +510,7 @@ export class SQLWhereExists extends SQLWhere {
     }
 
     get isAlways(): boolean | null {
-        if (this.subquery instanceof SQLSelect) {
+        if (this.subquery instanceof SQLSelectBase) {
             const value = this.subquery.isAlways;
             if (this.notExists) {
                 if (value === true) {
@@ -541,7 +540,7 @@ export class SQLWhereExists extends SQLWhere {
  * Convenience helper which also caries a separate join that should be injected in the query for the where to work
  */
 export class SQLWhereJoin extends SQLWhere {
-    join: SQLJoin;
+    join: SQLJoinExpression;
     where: SQLWhere;
 
     /**
@@ -551,7 +550,7 @@ export class SQLWhereJoin extends SQLWhere {
      */
     doesRelationAlwaysExist = false;
 
-    constructor(join: SQLJoin, where: SQLWhere, options?: { doesRelationAlwaysExist?: boolean }) {
+    constructor(join: SQLJoinExpression, where: SQLWhere, options?: { doesRelationAlwaysExist?: boolean }) {
         super();
         this.join = join;
         this.where = where;
@@ -578,7 +577,7 @@ export class SQLWhereJoin extends SQLWhere {
         });
     }
 
-    getJoins(): SQLJoin[] {
+    getJoins(): SQLJoinExpression[] {
         if (this.where.isAlways !== null && (this.doesRelationAlwaysExist || this.join.type === SQLJoinType.Left)) {
             return [];
         }
@@ -621,7 +620,7 @@ export class SQLWhereAnd extends SQLWhere {
         return this.children.filter(c => c.isAlways !== true).flatMap(c => c instanceof SQLWhereAnd ? c.filteredChildren : [c]);
     }
 
-    getJoins(): SQLJoin[] {
+    getJoins(): SQLJoinExpression[] {
         return this.children.flatMap(c => c.getJoins()); // note: keep all joins
     }
 
@@ -681,7 +680,7 @@ export class SQLWhereOr extends SQLWhere {
         );
     }
 
-    getJoins(): SQLJoin[] {
+    getJoins(): SQLJoinExpression[] {
         return this.children.flatMap(c => c.getJoins());
     }
 
@@ -751,7 +750,7 @@ export class SQLWhereNot extends SQLWhere {
         };
     }
 
-    getJoins(): SQLJoin[] {
+    getJoins(): SQLJoinExpression[] {
         return this.a.getJoins();
     }
 

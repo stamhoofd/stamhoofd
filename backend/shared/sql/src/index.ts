@@ -1,6 +1,7 @@
 export * from './SQL.js';
 export * from './SQLExpression.js';
 export * from './SQLExpressions.js';
+export { SQLIf } from './SQLIf.js';
 export * from './SQLJsonExpressions.js';
 export * from './SQLWhere.js';
 export * from './SQLSelect.js';
