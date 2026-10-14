@@ -25,12 +25,14 @@ import { useProvideMemberViews } from '@stamhoofd/components/members/provideMemb
 import { useProvideEventViews } from '@stamhoofd/components/events/provideEventViews';
 import { useProvideGroupViews } from '@stamhoofd/components/groups/provideGroupViews';
 import { useProvidePaymentViews } from '@stamhoofd/components/payments/providePaymentViews';
+import { useProvideBreakdownViews } from './views/dashboard/breakdown/provideBreakdownViews';
 
 useProvideEventWebshopViews();
 useProvideMemberViews();
 useProvideEventViews();
 useProvideGroupViews();
 useProvidePaymentViews();
+useProvideBreakdownViews();
 
 const context = useContext();
 const platform = usePlatform();

@@ -1,5 +1,6 @@
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent';
+import { useBreakdownViewLoaders } from './breakdownViewLoaders';
 import type { BreakdownViewProps } from './useBreakdownView';
 
 export type BreakdownOptions = BreakdownViewProps & {
@@ -14,6 +15,7 @@ export type BreakdownOptions = BreakdownViewProps & {
  * down and export it to Excel.
  */
 export function useBreakdown() {
+    const loaders = useBreakdownViewLoaders();
     const present = usePresent();
     const show = useShow();
 
@@ -34,14 +36,14 @@ export function useBreakdown() {
     return {
         async openPayments(options: BreakdownOptions) {
             await open(
-                AsyncComponent(() => import('./PaymentBreakdownView.vue'), toProps(options)),
+                AsyncComponent(loaders.payments, toProps(options)),
                 options,
             );
         },
 
         async openBalanceItems(options: BreakdownOptions) {
             await open(
-                AsyncComponent(() => import('./BalanceItemBreakdownView.vue'), toProps(options)),
+                AsyncComponent(loaders.balanceItems, toProps(options)),
                 options,
             );
         },
