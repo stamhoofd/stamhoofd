@@ -1,5 +1,4 @@
-import { PropertyFilter } from './PropertyFilter.js';
-import type { StamhoofdFilter } from './StamhoofdFilter.js';
+import type { StamhoofdFilter } from './StamhoofdFilterTypes.js';
 
 // todo: remove after migration
 
@@ -943,7 +942,7 @@ function filterGroupToStamhoofdFilter(filter: FilterGroup): StamhoofdFilter {
     return groupFilterHelper(filter.mode, filters);
 }
 
-export function convertOldPropertyFilter(filter: OldPropertyFilter): PropertyFilter {
+export function convertOldPropertyFilter(filter: OldPropertyFilter): { enabledWhen: StamhoofdFilter | null; requiredWhen: StamhoofdFilter | null } {
     let newEnabledWhen: StamhoofdFilter | null = null;
     let newRequiredWhen: StamhoofdFilter | null = {};
 
@@ -957,7 +956,7 @@ export function convertOldPropertyFilter(filter: OldPropertyFilter): PropertyFil
         newRequiredWhen = filterToStamhoofdFilter(filter.requiredWhen.data);
     }
 
-    return new PropertyFilter(newEnabledWhen, newRequiredWhen);
+    return { enabledWhen: newEnabledWhen, requiredWhen: newRequiredWhen };
 }
 
 function registrationsFilterToStamhoofdFilter(filter: RegistrationsFilter): StamhoofdFilter {

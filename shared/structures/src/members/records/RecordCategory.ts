@@ -3,17 +3,12 @@ import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-
 import { v4 as uuidv4 } from 'uuid';
 
 import { PropertyFilter } from '../../filters/PropertyFilter.js';
-import type { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
 import { getPermissionLevelNumber, PermissionLevel } from '../../PermissionLevel.js';
 import { TranslatedString } from '../../TranslatedString.js';
 import type { ObjectWithRecords, PatchAnswers } from '../ObjectWithRecords.js';
 import type { RecordAnswer } from './RecordAnswer.js';
 import type { RecordFilterOptions } from './RecordSettings.js';
 import { RecordSettings } from './RecordSettings.js';
-
-export interface Filterable {
-    doesMatchFilter(filter: StamhoofdFilter): boolean;
-}
 
 export class RecordCategory extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
