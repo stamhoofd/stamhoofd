@@ -11,10 +11,6 @@ export enum WebshopSettingsKeys {
     TicketsSyncCompleted = 'ticketsSyncCompleted',
     OrdersLastSyncedAt = 'ordersLastSyncedAt',
     TicketsLastSyncedAt = 'ticketsLastSyncedAt',
-    /**
-     * Replaced by a new random value on every write to the orders store.
-     */
-    OrdersChangeToken = 'ordersChangeToken',
 }
 
 type WebshopSettingsKey = `${WebshopSettingsKeys}`;
