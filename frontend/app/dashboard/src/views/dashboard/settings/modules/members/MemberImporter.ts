@@ -4,7 +4,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import type { PlatformFamilyManager } from '@stamhoofd/components/members/PlatformFamilyManager.ts';
 import { startSilentRegister } from '@stamhoofd/components/members/checkout/startCheckout.ts';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
-import type { BalanceItem, Group, Organization, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, Registration} from '@stamhoofd/structures';
+import type { BalanceItem, Group, GroupCategory, Organization, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, Registration} from '@stamhoofd/structures';
 import { BalanceItemPaymentDetailed, DetailedReceivableBalance, GroupPrice, GroupType, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, ReceivableBalanceType, RegisterCheckout, RegisterItem, RegistrationWithPlatformMember, TranslatedString } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 import type { ImportMemberResult } from '../../../../../classes/import/ImportMemberResult';
@@ -186,7 +186,7 @@ export class MemberImporter {
         const group = registration.group;
         const periodId = this.period.period.id;
 
-        const parents = group.getParentCategories(this.period.availableCategories, false);
+        const parents = group.getParentCategories<GroupCategory>(this.period.availableCategories, false);
 
         for (const parent of parents) {
             const groupsInParent = parent.groupIds.map(id => this.period.groups.find(g => g.id === id)).filter(g => !!g) as Group[];

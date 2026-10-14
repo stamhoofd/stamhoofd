@@ -3,10 +3,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Formatter } from '@stamhoofd/utility';
 import type { AppType } from './AppType.js';
-import type { Event } from './Event.js';
+import type { EventPeriodPermissionData } from './EventPermissionData.js';
 import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
 import { getActivePeriodIds, getActivePeriods } from './getActivePeriods.js';
-import type { GroupCategory } from './GroupCategory.js';
+import type { GroupCategoryForGroup } from './GroupCategoryForGroup.js';
 import { GroupGenderType } from './GroupGenderType.js';
 import { GroupPrivateSettings } from './GroupPrivateSettings.js';
 import { GroupSettings, WaitingListType } from './GroupSettings.js';
@@ -114,7 +114,7 @@ export class Group extends AutoEncoder {
     status = GroupStatus.Open;
 
     // Permission checking cache:
-    event: Event | null = null;
+    event: EventPeriodPermissionData | null = null;
 
     // Permission checking cache (waiting list -> group -> event)
     parentGroup: Group | null = null;
@@ -246,8 +246,8 @@ export class Group extends AutoEncoder {
     /**
      * Returns all parent and grandparents of this group
      */
-    getParentCategories(all: GroupCategory[], recursive = true): GroupCategory[] {
-        const map = new Map<string, GroupCategory>();
+    getParentCategories<T extends GroupCategoryForGroup<T>>(all: T[], recursive = true): T[] {
+        const map = new Map<string, T>();
 
         const parents = all.filter(g => g.groupIds.includes(this.id));
         for (const parent of parents) {
@@ -264,7 +264,7 @@ export class Group extends AutoEncoder {
         return [...map.values()];
     }
 
-    hasAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | null, allCategories: GroupCategory[], permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    hasAccess<T extends GroupCategoryForGroup<T>>(permissions: import('./LoadedPermissions.js').LoadedPermissions | null, allCategories: T[], permissionLevel: PermissionLevel = PermissionLevel.Read) {
         if (!permissions) {
             return false;
         }
@@ -284,7 +284,7 @@ export class Group extends AutoEncoder {
         return false;
     }
 
-    isPublic(allCategories: GroupCategory[]): boolean {
+    isPublic<T extends GroupCategoryForGroup<T>>(allCategories: T[]): boolean {
         for (const parent of this.getParentCategories(allCategories)) {
             if (!parent.settings.public) {
                 return false;
@@ -293,15 +293,15 @@ export class Group extends AutoEncoder {
         return true;
     }
 
-    hasReadAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | null, allCategories: GroupCategory[]): boolean {
+    hasReadAccess<T extends GroupCategoryForGroup<T>>(permissions: import('./LoadedPermissions.js').LoadedPermissions | null, allCategories: T[]): boolean {
         return this.hasAccess(permissions, allCategories, PermissionLevel.Read);
     }
 
-    hasWriteAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | null, allCategories: GroupCategory[]): boolean {
+    hasWriteAccess<T extends GroupCategoryForGroup<T>>(permissions: import('./LoadedPermissions.js').LoadedPermissions | null, allCategories: T[]): boolean {
         return this.hasAccess(permissions, allCategories, PermissionLevel.Write);
     }
 
-    hasFullAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | null, allCategories: GroupCategory[]): boolean {
+    hasFullAccess<T extends GroupCategoryForGroup<T>>(permissions: import('./LoadedPermissions.js').LoadedPermissions | null, allCategories: T[]): boolean {
         return this.hasAccess(permissions, allCategories, PermissionLevel.Full);
     }
 
@@ -309,7 +309,7 @@ export class Group extends AutoEncoder {
      * True when the user has any grant relevant to this group — a level, an access right, or a grant on a parent category.
      * Used for coarse gates like "does this user have any reason to reach this group at all?".
      */
-    hasSomeAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | null, allCategories: GroupCategory[]): boolean {
+    hasSomeAccess<T extends GroupCategoryForGroup<T>>(permissions: import('./LoadedPermissions.js').LoadedPermissions | null, allCategories: T[]): boolean {
         if (!permissions) {
             return false;
         }

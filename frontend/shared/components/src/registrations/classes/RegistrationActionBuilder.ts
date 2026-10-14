@@ -17,7 +17,7 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember, PlatformRegistration } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { EmailRecipientSubfilter, ExcelExportType, GroupType, mergeFilters, RegistrationWithPlatformMember } from '@stamhoofd/structures';
+import { EmailRecipientSubfilter, Event, ExcelExportType, GroupType, mergeFilters, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { Formatter } from '@stamhoofd/utility';
 import { RegistrationsActionBuilder } from '../../members/classes/RegistrationsActionBuilder';
@@ -487,7 +487,8 @@ export class RegistrationActionBuilder {
         let suggestedGroups = this.groups.map(g => g.waitingList).filter(g => g !== null);
 
         for (const g of this.groups) {
-            const add = [g.event?.group, g.parentGroup, g.event?.group?.waitingList];
+            const eventGroup = g.event instanceof Event ? g.event.group : null;
+            const add = [eventGroup, g.parentGroup, eventGroup?.waitingList];
             for (const a of add) {
                 if (a) {
                     if (suggestedGroups.find(gg => gg.id === a.id)) {
