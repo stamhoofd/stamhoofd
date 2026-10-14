@@ -21,6 +21,7 @@ import { useProvidePaymentViews } from '@stamhoofd/components/payments/providePa
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Storage } from '@stamhoofd/networking/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
+import { useProvideSGVSync } from '@stamhoofd/sgv-frontend/provideSGVSync';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import { onMounted, useTemplateRef } from 'vue';
@@ -33,6 +34,7 @@ useProvideMemberViews();
 useProvideEventViews();
 useProvideGroupViews();
 useProvidePaymentViews();
+useProvideSGVSync();
 HistoryManager.activate();
 HistoryManager.debug = STAMHOOFD.environment === 'test';
 

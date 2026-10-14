@@ -180,6 +180,7 @@ web_modules/
 # Nuxt.js build / generate output
 .nuxt
 dist
+dist-types/
 
 # Gatsby files
 .cache/

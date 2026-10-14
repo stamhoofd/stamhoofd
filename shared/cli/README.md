@@ -340,7 +340,7 @@ pnpm stam clean metabase
 ```bash
 pnpm stam test unit                                 # every unit package (excludes Playwright)
 pnpm stam test coverage                             # package coverage with the same isolated MySQL lifecycle
-pnpm stam test api                                  # one package (api, models, vies, sql, statistics-syncer, structures, renderer, redirecter, queues, utility, sgv, object-differ, eslint, vite-config, metabase, i18n-uuid, cli, components, networking)
+pnpm stam test api                                  # one package (api, models, vies, sql, statistics-syncer, structures, renderer, redirecter, queues, utility, sgv, object-differ, eslint, vite-config, metabase, i18n-uuid, cli, components, networking, sgv-frontend)
 pnpm stam test api --coverage                       # collect coverage for one package
 pnpm stam test unit SomeFile                         # filter by filename across all packages
 pnpm stam test structures bundle-discounts           # package + filename filter
@@ -350,7 +350,7 @@ pnpm stam test api --clear                           # reset the test database (
 pnpm stam test components ImageComponent             # frontend browser tests (vitest browser mode)
 ```
 
-`components` and `networking` run in vitest browser mode and need a Playwright Chromium (`pnpm exec playwright install chromium`); they are part of `stam test unit` too.
+`components`, `networking`, and `sgv-frontend` run in vitest browser mode and need a Playwright Chromium (`pnpm exec playwright install chromium`); they are part of `stam test unit` too.
 
 The root `pnpm test` and `pnpm run test:coverage` commands delegate to `stam test unit` and `stam test coverage`, so package selection, failure propagation, MySQL ownership, and teardown stay consistent. Coverage runs serially and is uncached.
 

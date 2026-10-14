@@ -73,6 +73,7 @@ export const unitTestPackages: UnitTestPackage[] = [
     // Browser tests (vitest browser mode); need a Playwright Chromium: `pnpm --dir tests/playwright exec playwright install chromium`.
     { name: 'components', path: 'frontend/shared/components', needsDatabase: false },
     { name: 'networking', path: 'frontend/shared/networking', needsDatabase: false },
+    { name: 'sgv-frontend', path: 'frontend/shared/sgv', needsDatabase: false },
 ];
 export const coverageTestPackages: UnitTestPackage[] = [
     { name: 'i18n-uuid', path: '.development/i18n-uuid', needsDatabase: false },
