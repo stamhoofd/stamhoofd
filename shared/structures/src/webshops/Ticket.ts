@@ -4,8 +4,16 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { CartReservedSeat } from '../SeatingPlan.js';
 import { CartItem } from './CartItem.js';
-import type { Order } from './Order.js';
 import type { Webshop, WebshopPreview } from './Webshop.js';
+
+type TicketOrderData = {
+    data: {
+        totalPrice: number;
+        cart: {
+            items: CartItem[];
+        };
+    };
+};
 
 export class Ticket extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -53,7 +61,7 @@ export class TicketPublic extends Ticket {
         return this.items.length === 1 && this.items[0].product.isTicket;
     }
 
-    getPrice(order?: Order | null) {
+    getPrice(order?: TicketOrderData | null) {
         if (!this.isSingle) {
             if (order) {
                 return order.data.totalPrice;
@@ -188,7 +196,7 @@ export class TicketOrder extends Ticket {
     @field({ decoder: StringDecoder, nullable: true })
     itemId: string | null = null;
 
-    getPublic(order: Order): TicketPublic {
+    getPublic(order: TicketOrderData): TicketPublic {
         if (this.itemId) {
             const item = order.data.cart.items.find(i => i.id === this.itemId);
             return TicketPublic.create({
@@ -232,7 +240,7 @@ export class TicketPrivate extends TicketOrder {
     @field({ decoder: DateDecoder, nullable: true, version: 229 })
     deletedAt: Date | null = null;
 
-    getPublic(order: Order): TicketPublicPrivate {
+    getPublic(order: TicketOrderData): TicketPublicPrivate {
         return TicketPublicPrivate.create({
             ...super.getPublic(order),
             scannedBy: this.scannedBy,
