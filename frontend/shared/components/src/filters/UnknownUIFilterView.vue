@@ -6,10 +6,10 @@
 
 
 <script lang="ts" setup>
-import type { UnknownUIFilter } from './UnknownUIFilter';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
 
 const props = defineProps<{
-    filter: UnknownUIFilter
+    filter: { value: StamhoofdFilter }
 }>()
 
 const encodedJson = JSON.stringify(
