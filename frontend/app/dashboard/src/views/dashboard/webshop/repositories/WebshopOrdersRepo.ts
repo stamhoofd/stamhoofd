@@ -666,8 +666,8 @@ export class OrdersStore {
             };
 
             transaction.onerror = (event) => {
-                // Don't forget to handle errors!
-                this.database.delete().catch(console.error);
+                // Reconnect on the next use. Deleting the database would lose orders that the sync cursor counts as stored.
+                this.database.close();
                 reject(event);
             };
 
@@ -719,8 +719,8 @@ export class OrdersStore {
             const transaction = openTransaction ?? db.transaction([OrdersStore.storeName], 'readonly');
 
             transaction.onerror = (event) => {
-                // Don't forget to handle errors!
-                this.database.delete().catch(console.error);
+                // Reconnect on the next use. Deleting the database would lose orders that the sync cursor counts as stored.
+                this.database.close();
                 reject(event);
             };
 
@@ -895,8 +895,8 @@ export class OrdersStore {
             const transaction = db.transaction([OrdersStore.storeName], 'readonly');
 
             transaction.onerror = (event) => {
-                // Don't forget to handle errors!
-                this.database.delete().catch(console.error);
+                // Reconnect on the next use. Deleting the database would lose orders that the sync cursor counts as stored.
+                this.database.close();
                 reject(event);
             };
 
