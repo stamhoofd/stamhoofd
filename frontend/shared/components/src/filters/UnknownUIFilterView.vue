@@ -6,10 +6,10 @@
 
 
 <script lang="ts" setup>
-import type { UnknownUIFilter } from './UnknownUIFilter';
+import type { UnknownUIFilterData } from './UnknownUIFilterData';
 
 const props = defineProps<{
-    filter: UnknownUIFilter
+    filter: UnknownUIFilterData
 }>()
 
 const encodedJson = JSON.stringify(

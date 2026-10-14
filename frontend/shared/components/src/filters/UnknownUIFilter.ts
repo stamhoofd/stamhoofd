@@ -4,10 +4,11 @@ import type { StamhoofdFilter } from '@stamhoofd/structures';
 
 import type { UIFilterBuilder } from './UIFilter';
 import { UIFilter } from './UIFilter';
+import type { UnknownUIFilterData } from './UnknownUIFilterData';
 
 
-export class UnknownUIFilter extends UIFilter<UnknownFilterBuilder> {
-    value: StamhoofdFilter
+export class UnknownUIFilter extends UIFilter<UnknownFilterBuilder> implements UnknownUIFilterData {
+    value: UnknownUIFilterData['value']
 
     constructor(data: Partial<UnknownUIFilter>, options: {isInverted?: boolean} = {}) {
         super(data, options)
