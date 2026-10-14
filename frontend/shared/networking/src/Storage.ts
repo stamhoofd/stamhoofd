@@ -1,3 +1,5 @@
+import { LocalizationStorage } from '@stamhoofd/frontend-i18n/LocalizationStorage';
+
 export interface KeyValueContainer {
     setItem(key: string, value: string): Promise<void>;
     getItem(key: string): Promise<string | null>;
@@ -26,7 +28,13 @@ export class Storage {
     /**
      * For general data that could be lost
      */
-    static keyValue: KeyValueContainer = new LocalStorage();
+    static get keyValue(): KeyValueContainer {
+        return LocalizationStorage.keyValue;
+    }
+
+    static set keyValue(value: KeyValueContainer) {
+        LocalizationStorage.keyValue = value;
+    }
 
     /**
      * Use for access tokens and keys
