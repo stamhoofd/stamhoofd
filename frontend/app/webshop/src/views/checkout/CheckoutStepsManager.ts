@@ -82,7 +82,9 @@ export class CheckoutStepsManager {
                     this.$checkoutManager.checkout.checkoutMethod = this.$webshopManager.webshop.meta.checkoutMethods.length == 0 ? null : this.$webshopManager.webshop.meta.checkoutMethods[0];
                     this.$checkoutManager.saveCheckout();
                 },
-                getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CheckoutMethodSelectionView.vue').then(m => new ComponentWithProperties(m.default, {})),
+                getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CheckoutMethodSelectionView.vue').then(m => new ComponentWithProperties(m.default, {
+                    continueCheckout: (navigate: NavigationActions) => this.goNext(CheckoutStepType.Method, navigate),
+                })),
                 validate: (checkout, webshop, organizationMeta) => checkout.validateCheckoutMethod(webshop, organizationMeta),
             }),
         );
@@ -102,7 +104,9 @@ export class CheckoutStepsManager {
 
                     this.$checkoutManager.saveCheckout();
                 },
-                getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './TimeSelectionView.vue').then(m => new ComponentWithProperties(m.default, {})),
+                getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './TimeSelectionView.vue').then(m => new ComponentWithProperties(m.default, {
+                    continueCheckout: (navigate: NavigationActions) => this.goNext(CheckoutStepType.Time, navigate),
+                })),
                 validate: (checkout, webshop, organizationMeta) => checkout.validateTimeSlot(webshop, organizationMeta),
             }),
         );
@@ -118,7 +122,9 @@ export class CheckoutStepsManager {
                     this.$checkoutManager.checkout.address = null;
                     this.$checkoutManager.saveCheckout();
                 },
-                getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './AddressSelectionView.vue').then(m => new ComponentWithProperties(m.default, {})),
+                getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './AddressSelectionView.vue').then(m => new ComponentWithProperties(m.default, {
+                    continueCheckout: (navigate: NavigationActions) => this.goNext(CheckoutStepType.Address, navigate),
+                })),
                 validate: (checkout, webshop, organizationMeta) => checkout.validateDeliveryAddress(webshop, organizationMeta),
             }),
         );
@@ -136,7 +142,9 @@ export class CheckoutStepsManager {
             id: CheckoutStepType.Customer,
             url: '/checkout/' + CheckoutStepType.Customer.toLowerCase(),
             active: !loggedIn || asks(customerSettings.phone) || asks(customerSettings.birthDay) || asks(customerSettings.gender) || (asks(customerSettings.address) && !hasDeliveryAddress) || !user?.firstName || !user?.lastName,
-            getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CustomerView.vue').then(m => new ComponentWithProperties(m.default, {})),
+            getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CustomerView.vue').then(m => new ComponentWithProperties(m.default, {
+                continueCheckout: (navigate: NavigationActions) => this.goNext(CheckoutStepType.Customer, navigate),
+            })),
             validate: (checkout, webshop, organizationMeta) => checkout.validateCustomer(webshop, organizationMeta, I18nController.i18n, false, loggedIn ? (this.$context.user ?? null) : null),
         }));
 
@@ -181,7 +189,13 @@ export class CheckoutStepsManager {
         steps.push(new CheckoutStep({
             id: CheckoutStepType.Payment,
             url: '/checkout/' + CheckoutStepType.Payment.toLowerCase(),
-            getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './PaymentSelectionView.vue').then(m => new ComponentWithProperties(m.default, {})),
+            getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './PaymentSelectionView.vue').then(m => new ComponentWithProperties(m.default, {
+                handleCheckoutError: async (error: unknown, navigate: NavigationActions) => {
+                    if (CheckoutStepsManager.isCartError(error)) {
+                        await this.handleCartError(error, navigate);
+                    }
+                },
+            })),
             validate: (checkout, webshop, organizationMeta) => checkout.validate(webshop, organizationMeta, I18nController.i18n),
         }));
 

@@ -16,6 +16,7 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import CustomerInputs from '@stamhoofd/components/views/CustomerInputs.vue';
 import FieldBox from '@stamhoofd/components/views/FieldBox.vue';
@@ -25,7 +26,10 @@ import type { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSe
 import { computed, ref } from 'vue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
 import { useWebshopManager } from '../../composables/useWebshopManager';
-import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
+
+const props = defineProps<{
+    continueCheckout: (navigate: NavigationActions) => Promise<void>;
+}>();
 
 const loading = ref(false);
 const errors = useErrors();
@@ -80,7 +84,7 @@ async function goNext() {
     errors.errorBox = null;
 
     try {
-        await CheckoutStepsManager.for(checkoutManager).goNext(CheckoutStepType.Customer, navigationActions);
+        await props.continueCheckout(navigationActions);
     }
     catch (e) {
         console.error(e);

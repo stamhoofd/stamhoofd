@@ -43,12 +43,16 @@ import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { CheckoutMethodType, WebshopTimeSlot } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
-import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
+
+const props = defineProps<{
+    continueCheckout: (navigate: NavigationActions) => Promise<void>;
+}>();
 
 const loading = ref(false);
 const errors = useErrors();
@@ -93,7 +97,7 @@ async function goNext() {
     errors.errorBox = null;
 
     try {
-        await CheckoutStepsManager.for(checkoutManager).goNext(CheckoutStepType.Time, navigationActions);
+        await props.continueCheckout(navigationActions);
     }
     catch (e) {
         console.error(e);
