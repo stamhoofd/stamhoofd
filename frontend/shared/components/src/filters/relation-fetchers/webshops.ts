@@ -1,6 +1,6 @@
 import { SortItemDirection } from '@stamhoofd/structures';
 import { useWebshopsObjectFetcher } from '../../fetchers/useWebshopsObjectFetcher';
-import { RelationFetcher } from '../RelationUIFilter';
+import { RelationFetcher } from '../RelationFetcher';
 
 export function useWebshopsRelationFetcher() {
     const fetcher = useWebshopsObjectFetcher();

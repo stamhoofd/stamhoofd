@@ -1,4 +1,4 @@
-import type { RelationFilterOption } from './RelationUIFilter';
+import type { RelationFilterOption } from './RelationFilterTypes';
 
 function hasOption<T extends string | number | Date | null | boolean>(options: RelationFilterOption<T>[], option: RelationFilterOption<T>) {
     return options.some(o => o.value === option.value);
