@@ -15,11 +15,14 @@ on:
         branches: [main]
         types: [opened, synchronize, reopened, labeled]
 
-# Cancel superseded runs on the same ref. We only cancel on pull_request events so
-# that pushes to main always run to completion (and keep their full check history).
-# concurrency:
-#   group: ci-${{ github.workflow }}-${{ github.ref }}
-#   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+# Unrelated labels must not cancel active PR checks. Pushes and merge groups use
+# unique groups so GitHub does not replace their pending runs.
+concurrency:
+    group: >-
+        ci-${{ github.workflow }}-${{ github.event_name == 'pull_request' &&
+        (github.event.action != 'labeled' || github.event.label.name == 'ci: force run' || github.event.label.name == 'ci: force run all') &&
+        github.ref || github.run_id }}
+    cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
     job_setup:
