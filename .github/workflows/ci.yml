@@ -115,6 +115,7 @@ jobs:
                         - 'pnpm-workspace.yaml'
                         - '.npmrc'
                         - 'shared/**'
+                        - '.development/stam.mjs'
                       playwright:
                         - 'package.json'
                         - 'pnpm-lock.yaml'
@@ -129,6 +130,10 @@ jobs:
                       # Changing the workflow itself (or the shared setup action) can affect
                       # any job, so all of them run.
                       ci:
+                        - '.nvmrc'
+                        - 'tsconfig*.json'
+                        - 'jest-extended.d.ts'
+                        - '.development/i18n-uuid/**'
                         - 'turbo.json'
                         - '.github/workflows/ci.yml'
                         - '.github/actions/**'
@@ -160,7 +165,8 @@ jobs:
                       backend/*) backend_apps=true; playwright=true ;;
                       frontend/*) frontend=true; playwright=true ;;
                       tests/playwright/*|.development/Corefile|.development/loadenv.sh) playwright=true ;;
-                      turbo.json|.github/workflows/ci.yml|.github/actions/*) ci=true ;;
+                      .development/stam.mjs) shared=true ;;
+                      .nvmrc|tsconfig*.json|jest-extended.d.ts|.development/i18n-uuid/*|turbo.json|.github/workflows/ci.yml|.github/actions/*) ci=true ;;
                     esac
                   done < "$RUNNER_TEMP/stack-files"
 
