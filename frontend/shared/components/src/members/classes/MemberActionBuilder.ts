@@ -5,6 +5,8 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { checkoutDefaultItem, chooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import EditMemberAllBox from '#members/components/edit/EditMemberAllBox.vue';
+import type { MemberViewLoaders } from '#members/memberViewLoaders.ts';
+import { useMemberViewLoaders } from '#members/memberViewLoaders.ts';
 import { RegistrationInvitationEventBus } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
 import type { TableAction, TableActionSelection } from '#tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
@@ -48,6 +50,7 @@ export function useMemberActions() {
     const organization = useOrganization();
     const platform = usePlatform();
     const fetchOrganizationPeriods = useFetchOrganizationRegistrationPeriods();
+    const memberViewLoaders = useMemberViewLoaders();
 
     return (options?: { groups?: Group[]; organizations?: Organization[]; categories?: GroupCategoryTree[]; forceWriteAccess?: boolean | null; organizationPeriod?: OrganizationRegistrationPeriod | null }) => {
         return new MemberActionBuilder({
@@ -62,6 +65,7 @@ export function useMemberActions() {
             forceWriteAccess: options?.forceWriteAccess,
             organizationPeriod: options?.organizationPeriod,
             fetchOrganizationPeriods,
+            memberViewLoaders,
         });
     };
 }
@@ -80,6 +84,7 @@ export class MemberActionBuilder {
     categories: GroupCategoryTree[];
 
     present: ReturnType<typeof usePresent>;
+    memberViewLoaders: Pick<MemberViewLoaders, 'member' | 'messages'>;
     context: SessionContext;
     platformFamilyManager: PlatformFamilyManager;
     owner: any;
@@ -102,6 +107,7 @@ export class MemberActionBuilder {
 
     constructor(settings: {
         present: ReturnType<typeof usePresent>;
+        memberViewLoaders: Pick<MemberViewLoaders, 'member' | 'messages'>;
         context: SessionContext;
         groups: Group[];
         platform: Platform;
@@ -114,6 +120,7 @@ export class MemberActionBuilder {
         organizationPeriod?: OrganizationRegistrationPeriod | null;
     }) {
         this.present = settings.present;
+        this.memberViewLoaders = settings.memberViewLoaders;
         this.context = settings.context;
         this.organizationPeriod = settings.organizationPeriod ?? null;
         this.platform = settings.platform;
@@ -454,7 +461,7 @@ export class MemberActionBuilder {
                     await this.present({
                         components: [
                             new ComponentWithProperties(NavigationController, {
-                                root: AsyncComponent(() => import('../../communication/CommunicationView.vue'), {
+                                root: AsyncComponent(this.memberViewLoaders.messages, {
                                     members,
                                 }),
                             }),
@@ -965,7 +972,7 @@ export class MemberActionBuilder {
 
     async showMember(member: PlatformMember) {
         const component = new ComponentWithProperties(NavigationController, {
-            root: AsyncComponent(() => import('#members/MemberSegmentedView.vue'), {
+            root: AsyncComponent(this.memberViewLoaders.member, {
                 member,
             }),
         });
