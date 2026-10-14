@@ -391,9 +391,11 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { OrderActionBuilder } from '../../orders/OrderActionBuilder';
 
 import type { WebshopManager } from '../../WebshopManager';
+import type { OpenTicketHandler } from '../TicketNavigation';
 
 const props = defineProps<{
     webshopManager: WebshopManager;
+    openTicketHandler: OpenTicketHandler;
     ticket: TicketPrivate | TicketPublicPrivate;
     order: PrivateOrder;
 }>();
@@ -555,6 +557,7 @@ function openOrder() {
             AsyncComponent(() => import('../../orders/OrderView.vue'), {
                 initialOrder: PrivateOrderWithTickets.create(props.order),
                 webshopManager: props.webshopManager,
+                openTicketHandler: props.openTicketHandler,
             }),
         ],
         modalDisplayStyle: 'popup',

@@ -61,9 +61,11 @@ import { Formatter } from '@stamhoofd/utility';
 
 import { ref, watch } from 'vue';
 import type { WebshopManager } from '../../WebshopManager';
+import type { OpenTicketHandler } from '../TicketNavigation';
 
 const props = defineProps<{
     webshopManager: WebshopManager;
+    openTicketHandler: OpenTicketHandler;
     ticket: TicketPrivate | TicketPublicPrivate;
     order: PrivateOrder;
 }>();
@@ -89,6 +91,7 @@ function viewTicket() {
         components: [
             AsyncComponent(() => import('./ValidTicketView.vue'), {
                 webshopManager: props.webshopManager,
+                openTicketHandler: props.openTicketHandler,
                 ticket: props.ticket,
                 order: props.order,
             }),
