@@ -385,7 +385,7 @@ export class BundleDiscountCalculation {
                 }
 
                 const discount = discounts[index - 1] ?? discounts[discounts.length - 1]; // Repeat last
-                const calculated = discount.calculateDiscount(price, item.member);
+                const calculated = discount.calculateDiscount(price, item.member.patchedMember.details.shouldApplyReducedPrice);
                 row.push(calculated);
             }
 
