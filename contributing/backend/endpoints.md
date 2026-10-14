@@ -71,5 +71,7 @@ Release tooling replaces Dutch source strings with translation keys: do not edit
 
 Endpoint changes need unit and integration coverage. Follow neighboring endpoint
 tests, using `TestUtils.setEnvironment(...)` for environment-specific behavior.
+Cover multiple situations with focused tests, including unauthorized access;
+see the [contributor testing expectations](../development-guidelines.md#test-the-behavior-you-change).
 Run `pnpm stam test api` (or its filename filter) from the repository root; it
 owns shared builds and the isolated database. Never provision test databases manually.
