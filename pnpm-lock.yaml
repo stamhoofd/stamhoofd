@@ -1207,6 +1207,9 @@ importers:
       '@stamhoofd/components':
         specifier: workspace:*
         version: link:../../shared/components
+      '@stamhoofd/dashboard':
+        specifier: workspace:*
+        version: link:../dashboard
       '@stamhoofd/document-helper':
         specifier: workspace:*
         version: link:../../shared/document-helper
@@ -1821,9 +1824,6 @@ importers:
       '@stamhoofd/assets':
         specifier: workspace:*
         version: link:../assets
-      '@stamhoofd/dashboard':
-        specifier: workspace:*
-        version: link:../../app/dashboard
       '@stamhoofd/frontend-excel-export':
         specifier: workspace:*
         version: link:../excel-export
