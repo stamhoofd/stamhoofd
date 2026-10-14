@@ -3,7 +3,6 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel, SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { RegistrationPeriodBase, RegistrationPeriodSettings, RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
-import { Platform } from './Platform.js';
 
 export class RegistrationPeriod extends QueryableModel {
     static table = 'registration_periods';
@@ -105,53 +104,5 @@ export class RegistrationPeriod extends QueryableModel {
         }
 
         return RegistrationPeriod.fromRow(result[this.table]) ?? null;
-    }
-
-    async updatePreviousNextPeriods() {
-        return await RegistrationPeriod.updatePreviousNextPeriods(this.organizationId, this);
-    }
-
-    static async updatePreviousNextPeriods(organizationId: string | null, existingReference?: RegistrationPeriod) {
-        const allPeriods = await RegistrationPeriod.select().where('organizationId', organizationId).fetch();
-
-        // Include self if not yet in database
-        if (existingReference) {
-            if (!existingReference.existsInDatabase) {
-                allPeriods.push(existingReference);
-            } else {
-            // Replace self with this
-                const index = allPeriods.findIndex(p => p.id === existingReference.id);
-                if (index !== -1) {
-                    allPeriods[index] = existingReference;
-                }
-            }
-        }
-
-        // Sort by start date
-        allPeriods.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
-
-        // Take the one before this.periodId
-        let previousPeriod: RegistrationPeriod | null = null;
-
-        for (const period of allPeriods) {
-            period.previousPeriodId = previousPeriod?.id ?? null;
-            period.nextPeriodId = null;
-
-            if (previousPeriod) {
-                previousPeriod.nextPeriodId = period.id;
-            }
-            previousPeriod = period;
-        }
-
-        // Save all
-        for (const period of allPeriods) {
-            await period.save();
-        }
-
-        if (organizationId === null) {
-            const e = await Platform.getForEditing();
-            await e.setPreviousPeriodId();
-            await e.save();
-        }
     }
 }
