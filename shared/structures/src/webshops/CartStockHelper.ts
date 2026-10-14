@@ -1,15 +1,24 @@
 import { Formatter } from '@stamhoofd/utility';
-
-import type { Cart } from './Cart.js';
-import type { CartItem, CartItemOption } from './CartItem.js';
+import type { SeatingPlanWebshop } from '../SeatingPlan.js';
 import type { Option, Product, ProductPrice } from './Product.js';
-import type { Webshop } from './Webshop.js';
+
+type StockCartItem = {
+    id: string;
+    code: string;
+    product: { id: string };
+    productPrice: { id: string };
+    amount: number;
+    reservedAmount: number;
+    options: { option: { id: string } }[];
+    seats: unknown[];
+    reservedSeats: unknown[];
+};
 
 export type StockLookupData = {
     product: Product;
-    oldItem?: CartItem | null | undefined;
-    cart: Cart;
-    webshop: Webshop;
+    oldItem?: StockCartItem | null | undefined;
+    cart: { items: StockCartItem[] };
+    webshop: SeatingPlanWebshop;
     admin: boolean;
     amount?: number;
 };
@@ -166,7 +175,7 @@ export class CartStockHelper {
             return null;
         }
 
-        function hasOption(item: CartItem) {
+        function hasOption(item: StockCartItem) {
             return item.options.some(o => o.option.id === option.id);
         }
 
@@ -418,7 +427,7 @@ export class CartStockHelper {
      * Return all the stock definitions for this cart item with the currently selected options
      * = calculate how much you can order with these options
      */
-    static getAvailableStock(data: StockLookupData & { productPrice: ProductPrice; options: CartItemOption[] }): StockDefinition[] {
+    static getAvailableStock(data: StockLookupData & { productPrice: ProductPrice; options: { option: Option }[] }): StockDefinition[] {
         const definitions: StockDefinition[] = this.getFixedStockDefinitions(data);
 
         const priceStock = CartStockHelper.getPriceStock(data);
