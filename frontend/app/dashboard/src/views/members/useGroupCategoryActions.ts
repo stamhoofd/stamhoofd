@@ -12,6 +12,7 @@ import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatc
 import { Group, GroupCategory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { useCreateCategoryView } from '../dashboard/settings/hooks/useCreateCategoryView';
 import { useCreateGroupView } from '../dashboard/settings/hooks/useCreateGroupView';
+import type { CategoryEditorLoader } from '../dashboard/groups/CategoryEditorLoader';
 
 /**
  * Actions for a single group category (edit, create, reorder, move, merge, delete).
@@ -19,13 +20,13 @@ import { useCreateGroupView } from '../dashboard/settings/hooks/useCreateGroupVi
  * By default the changes are saved straight to the API. Pass a `saveHandler` to keep the
  * patch in memory instead (e.g. when collecting multiple changes before saving them in one go).
  */
-export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => Promise<void> | void) {
+export function useGroupCategoryActions(categoryEditorLoader: CategoryEditorLoader, saveHandler?: (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => Promise<void> | void) {
     const present = usePresent();
     const auth = useAuth();
     const organization = useRequiredOrganization();
     const patchOrganizationPeriods = usePatchOrganizationPeriods();
     const getPeriods = useLoadRecentPeriods();
-    const createCategoryView = useCreateCategoryView(saveHandler);
+    const createCategoryView = useCreateCategoryView(categoryEditorLoader, saveHandler);
     const createGroupView = useCreateGroupView(saveHandler
         ? async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
             const arr = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>;
@@ -124,8 +125,9 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
 
             await present({
                 components: [
-                    AsyncComponent(() => import('../dashboard/groups/EditCategoryGroupsView.vue'), {
+                    AsyncComponent(categoryEditorLoader, {
                         category: props.category,
+                        categoryEditorLoader,
                         organization: organization.value,
                         period: props.period,
                         periods,
