@@ -65,13 +65,15 @@
 import type { RegisterItem } from '@stamhoofd/structures';
 import { GroupType } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { useCheckoutRegisterItem } from '#members/checkout/useCheckoutRegisterItem.ts';
+import type { RegisterItemCheckoutHandler } from '#members/checkout/CheckoutSelectionHandlers.ts';
+import { useRegisterItemCheckoutHandler } from '#members/checkout/useCheckoutSelectionHandlers.ts';
 import MemberIcon from '../MemberIcon.vue';
 import GroupIconWithWaitingList from './GroupIconWithWaitingList.vue';
 
 const props = withDefaults(
     defineProps<{
         item: RegisterItem;
+        checkoutRegisterItemHandler: RegisterItemCheckoutHandler;
         showGroup?: boolean;
     }>(),
     {
@@ -82,7 +84,7 @@ const props = withDefaults(
 // We do some caching here to prevent too many calculations on cart changes
 const canEdit = computed(() => props.item.showItemView);
 
-const checkoutRegisterItem = useCheckoutRegisterItem();
+const checkoutRegisterItem = useRegisterItemCheckoutHandler(options => props.checkoutRegisterItemHandler(options));
 
 async function deleteMe() {
     props.item.checkout.remove(props.item);

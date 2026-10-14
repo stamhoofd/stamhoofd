@@ -38,7 +38,8 @@
 import type { Group, Organization, PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
 import { GroupType, RegisterItem } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { useCheckoutRegisterItem } from '#members/checkout/useCheckoutRegisterItem.ts';
+import type { RegisterItemCheckoutHandler } from '#members/checkout/CheckoutSelectionHandlers.ts';
+import { useRegisterItemCheckoutHandler } from '#members/checkout/useCheckoutSelectionHandlers.ts';
 import { useAppContext } from '#context/appContext.ts';
 
 const props = defineProps<{
@@ -46,9 +47,11 @@ const props = defineProps<{
     member: PlatformMember;
     groupOrganization: Organization;
     checkout: RegisterCheckout;
+    checkoutRegisterItemHandler: RegisterItemCheckoutHandler;
 }>();
 
 const app = useAppContext();
+const checkoutRegisterItem = useRegisterItemCheckoutHandler(options => props.checkoutRegisterItemHandler(options));
 
 // We do some caching here to prevent too many calculations on cart changes
 const inCartRegisterItem = computed(() => props.member.family.checkout.cart.getMemberAndGroup(props.member.id, props.group.id));
@@ -78,7 +81,6 @@ const validationWarning = computed(() => validationError.value ? null : register
 const disabled = computed(() => {
     return !canRegister.value;
 });
-const checkoutRegisterItem = useCheckoutRegisterItem();
 
 const checked = computed({
     get: () => !!inCartRegisterItem.value || !!inCartRegisterWaitingListItem.value,

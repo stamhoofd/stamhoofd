@@ -32,7 +32,7 @@
             </p>
 
             <STList v-if="fetcher.objects.length">
-                <RegisterItemCheckboxRow v-for="member in fetcher.objects" :key="member.id" :member="member" :group="group" :group-organization="groupOrganization" :checkout="props.checkout" />
+                <RegisterItemCheckboxRow v-for="member in fetcher.objects" :key="member.id" :member="member" :group="group" :group-organization="groupOrganization" :checkout="props.checkout" :checkout-register-item-handler="checkoutRegisterItemHandler" />
             </STList>
             <InfiniteObjectFetcherEnd :empty-message="$t('%eI')" :fetcher="fetcher">
                 <template #empty>
@@ -77,12 +77,14 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import type { NavigationActions } from '../types/NavigationActions';
 import { useNavigationActions } from '../types/NavigationActions';
 import RegisterItemCheckboxRow from './components/group/RegisterItemCheckboxRow.vue';
+import type { RegisterItemCheckoutHandler } from './checkout/CheckoutSelectionHandlers.ts';
 
 type ObjectType = PlatformMember;
 
 const props = defineProps<{
     members: PlatformMember[];
     group: Group;
+    checkoutRegisterItemHandler: RegisterItemCheckoutHandler;
     checkout: RegisterCheckout; // we should auto assign this checkout to all search results and newly created members
     saveHandler: (navigate: NavigationActions) => void | Promise<void>;
 }>();

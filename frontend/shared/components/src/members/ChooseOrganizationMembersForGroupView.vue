@@ -27,7 +27,7 @@
 
         <STList>
             <DeleteRegistrationRow v-for="registration in checkout.cart.deleteRegistrations" :key="registration.registration.id" class="right-stack" :registration="registration" :checkout="checkout" />
-            <RegisterItemRow v-for="item in checkout.cart.items" :key="item.id" class="right-stack" :item="item" :show-group="false" />
+            <RegisterItemRow v-for="item in checkout.cart.items" :key="item.id" class="right-stack" :item="item" :show-group="false" :checkout-register-item-handler="checkoutRegisterItemHandler" />
             <BalanceItemCartItemRow v-for="item in checkout.cart.balanceItems" :key="item.id" class="right-stack" :item="item" :checkout="checkout" />
         </STList>
 
@@ -76,10 +76,11 @@ import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { Group, Organization, PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
-import { PlatformFamily } from '@stamhoofd/structures';
+import { PlatformFamily, RegisterItem } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 import { startCheckout } from '#members/checkout/startCheckout.ts';
-import { useCheckoutRegisterItem, useChooseGroupForMember, useGetDefaultItem } from '#members/checkout/useCheckoutRegisterItem.ts';
+import type { RegisterItemCheckoutHandler } from '#members/checkout/CheckoutSelectionHandlers.ts';
+import { useRegisterItemCheckoutHandler } from '#members/checkout/useCheckoutSelectionHandlers.ts';
 import { useAddMember } from '#members/hooks/useAddMember.ts';
 import { useEditMember } from '#members/hooks/useEditMember.ts';
 import { useContext } from '#hooks/useContext.ts';
@@ -99,6 +100,7 @@ const props = defineProps<{
     group?: Group; // If you want to add new members to the cart
     groupOrganization: Organization;
     members?: PlatformMember[]; // Optional: used to update the members after the checkout
+    checkoutRegisterItemHandler: RegisterItemCheckoutHandler;
 }>();
 
 onMounted(() => {
@@ -121,9 +123,7 @@ const saving = ref(false);
 const cartLength = computed(() => props.checkout.cart.count);
 const doAddMember = useAddMember();
 const editMember = useEditMember();
-const checkoutRegisterItem = useCheckoutRegisterItem();
-const getDefaultItem = useGetDefaultItem();
-const chooseGroupForMember = useChooseGroupForMember();
+const checkoutRegisterItem = useRegisterItemCheckoutHandler(options => props.checkoutRegisterItemHandler(options));
 
 const isOnlyDeleting = computed(() => props.checkout.cart.items.length === 0 && props.checkout.cart.balanceItems.length === 0 && props.checkout.cart.deleteRegistrations.length > 0);
 const hasDeleteRegistrations = computed(() => props.checkout.cart.deleteRegistrations.length > 0);
@@ -132,6 +132,11 @@ const hadPaidByOrganization = computed(() => props.checkout.cart.deleteRegistrat
 let added = false;
 
 async function addMember() {
+    const group = props.group;
+    if (!group) {
+        return;
+    }
+
     const family = new PlatformFamily({
         contextOrganization: contextOrganization.value,
         platform: platform.value,
@@ -142,25 +147,7 @@ async function addMember() {
     await doAddMember(family, {
         displayOptions: { action: 'present', modalDisplayStyle: 'popup' },
         async finishHandler(member, navigate) {
-            if (!props.group) {
-                await chooseGroupForMember({
-                    member,
-                    displayOptions: { action: 'show', replace: 100, force: true },
-                    customNavigate: navigate,
-                    startCheckoutFlow: false,
-                });
-                return;
-            }
-
-            const item = await getDefaultItem({
-                member,
-                group: props.group,
-            });
-
-            if (!item) {
-                // Something went wrong (toast already shown in getDefaultItem)
-                return;
-            }
+            const item = RegisterItem.defaultFor(member, group, props.groupOrganization);
 
             const isExistingMember = member.patchedMember.details.oldIds.length > 0;
 
@@ -197,11 +184,17 @@ async function addMember() {
 }
 
 async function searchMembers() {
+    if (!props.group) {
+        return;
+    }
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: AsyncComponent(() => import('./SearchOrganizationMembersForGroupView.vue'), {
-                    ...props,
+                    members: props.members ?? [],
+                    group: props.group,
+                    checkout: props.checkout,
+                    checkoutRegisterItemHandler: props.checkoutRegisterItemHandler,
                     saveHandler: async (navigate: NavigationActions) => {
                         added = true;
                         await navigate.dismiss({ force: true });
