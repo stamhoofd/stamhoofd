@@ -16,7 +16,6 @@ Error.stackTraceLimit = Infinity;
 
 beforeAll(async () => {
     await I18nController.loadDefault({
-        $context: null,
         defaultCountry: Country.Belgium,
         defaultLanguage: Language.Dutch,
         country: Country.Belgium,

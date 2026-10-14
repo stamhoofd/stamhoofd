@@ -11,6 +11,7 @@ import { NetworkingPresentation } from '#NetworkingPresentation.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { isReactive } from 'vue';
 import { SessionContext } from './SessionContext';
+import { loadSessionLocale } from './SessionLocalization';
 import { Storage } from './Storage';
 
 class SessionStorage extends AutoEncoder {
@@ -228,8 +229,7 @@ export class SessionManagerStatic {
         });
 
         await session.saveToStorage();
-        await I18nController.loadDefault({
-            $context: session,
+        await loadSessionLocale(session, {
             defaultCountry: Country.Belgium,
             defaultLanguage: Language.Dutch,
             country: session?.organization?.address?.country,

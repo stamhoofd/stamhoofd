@@ -14,7 +14,7 @@ import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-enco
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { markReviewMoment } from '@stamhoofd/networking/markReviewMoment';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useFetchOrganizationRegistrationPeriods } from '#hooks/useFetchOrganizationRegistrationPeriods.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
@@ -1239,7 +1239,7 @@ export async function presentEditMember({ member, present, context }: { member: 
                     await dismiss({ force: true });
 
                     // Mark review moment
-                    AppManager.shared.markReviewMoment(context);
+                    markReviewMoment(context.organization);
                 },
             }),
         ],

@@ -15,7 +15,6 @@ import { ViewportHelper } from '@stamhoofd/components/ViewportHelper.ts';
 import { VueGlobalHelper } from '@stamhoofd/components/VueGlobalHelper.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { AppManager } from '@stamhoofd/networking/AppManager';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { Storage } from '@stamhoofd/networking/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { throttle } from '@stamhoofd/utility';
@@ -169,47 +168,43 @@ AppManager.shared.hapticTap = () => {
     Haptics.notification({ type: NotificationType.Success }).catch(console.error);
 };
 
-async function markReviewMoment($context: SessionContext) {
-    // 1. Check if we are signed in.
-    if (!$context) {
+async function markReviewMoment({ eligible }: { eligible: boolean }) {
+    if (!eligible) {
         return;
     }
 
-    // Check if at least one package active (only ask reviews to organizations who bought the app)
-    if (!$context.organization || ($context.organization.meta.packages.useMembers && !$context.organization.meta.packages.isMembersTrial) || ($context.organization.meta.packages.useWebshops && !$context.organization.meta.packages.isWebshopsTrial)) {
-        // Use a counter, that can only increment once a day
-        const counterRaw = await Storage.keyValue.getItem('reviewCounter');
-        let counter = counterRaw ? parseInt(counterRaw) : 0;
-        if (isNaN(counter)) {
+    // Use a counter, that can only increment once a day
+    const counterRaw = await Storage.keyValue.getItem('reviewCounter');
+    let counter = counterRaw ? parseInt(counterRaw) : 0;
+    if (isNaN(counter)) {
+        counter = 0;
+    }
+    const lastDateRaw = await Storage.keyValue.getItem('reviewLastCounterIncrease');
+    const lastDate = lastDateRaw && STAMHOOFD.environment === 'production' ? new Date(parseInt(lastDateRaw)) : new Date(0);
+    const lastReviewRaw = await Storage.keyValue.getItem('lastReviewRequested');
+    const lastReview = lastReviewRaw && STAMHOOFD.environment === 'production' ? new Date(parseInt(lastReviewRaw)) : new Date(0);
+
+    // Only increase counter if last counter increase was at least 2 hours ago and only start recounting if last review was over a month ago
+    if (lastDate < new Date(Date.now() - 2 * 60 * 60 * 1000) && lastReview < new Date(Date.now() - 24 * 60 * 60 * 1000 * 31)) {
+        counter++;
+
+        // When the counter reaches 4, we'll ask for a review and reset the counter
+        if (counter >= 4) {
+            // Ask for a review
+            InAppReview.requestReview().catch(console.error);
+            await Storage.keyValue.setItem('lastReviewRequested', Date.now().toString());
             counter = 0;
         }
-        const lastDateRaw = await Storage.keyValue.getItem('reviewLastCounterIncrease');
-        const lastDate = lastDateRaw && STAMHOOFD.environment === 'production' ? new Date(parseInt(lastDateRaw)) : new Date(0);
-        const lastReviewRaw = await Storage.keyValue.getItem('lastReviewRequested');
-        const lastReview = lastReviewRaw && STAMHOOFD.environment === 'production' ? new Date(parseInt(lastReviewRaw)) : new Date(0);
 
-        // Only increase counter if last counter increase was at least 2 hours ago and only start recounting if last review was over a month ago
-        if (lastDate < new Date(Date.now() - 2 * 60 * 60 * 1000) && lastReview < new Date(Date.now() - 24 * 60 * 60 * 1000 * 31)) {
-            counter++;
-
-            // When the counter reaches 4, we'll ask for a review and reset the counter
-            if (counter >= 4) {
-                // Ask for a review
-                InAppReview.requestReview().catch(console.error);
-                await Storage.keyValue.setItem('lastReviewRequested', Date.now().toString());
-                counter = 0;
-            }
-
-            // Save this date
-            await Storage.keyValue.setItem('reviewLastCounterIncrease', Date.now().toString());
-        }
-
-        await Storage.keyValue.setItem('reviewCounter', counter.toString());
+        // Save this date
+        await Storage.keyValue.setItem('reviewLastCounterIncrease', Date.now().toString());
     }
+
+    await Storage.keyValue.setItem('reviewCounter', counter.toString());
 }
 
-AppManager.shared.markReviewMoment = ($context: SessionContext) => {
-    markReviewMoment($context).catch(console.error);
+AppManager.shared.markReviewMoment = (options) => {
+    markReviewMoment(options).catch(console.error);
 };
 
 window.addEventListener('statusTap', () => {

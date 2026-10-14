@@ -24,6 +24,7 @@ import ToastBox from '@stamhoofd/components/overlays/ToastBox.vue';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { loadPlatform } from '@stamhoofd/networking/loadPlatform';
+import { loadSessionLocale } from '@stamhoofd/networking/SessionLocalization';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
@@ -103,8 +104,7 @@ const root = new ComponentWithProperties(PromiseView, {
             const session = new SessionContext(response.data.organization, platform);
             await session.loadFromStorage();
 
-            await I18nController.loadDefault({
-                $context: session,
+            await loadSessionLocale(session, {
                 defaultCountry: response.data.organization.address.country,
                 defaultLanguage: webshopLanguage,
                 country: response.data.organization.address.country,
@@ -150,8 +150,7 @@ const root = new ComponentWithProperties(PromiseView, {
             // Check if we have an organization on this domain
             if (!I18nController.shared) {
                 try {
-                    await I18nController.loadDefault({
-                        $context: null,
+                    await loadSessionLocale(null, {
                         defaultLanguage: Language.Dutch,
                     });
                 } catch (e) {
