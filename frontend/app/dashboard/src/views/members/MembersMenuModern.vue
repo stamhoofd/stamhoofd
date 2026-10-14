@@ -115,7 +115,7 @@ const navigationController = useNavigationController();
 const hasFeature = useFeatureFlag();
 const setFeature = useSetFeatureFlag();
 
-const createCategoryView = useCreateCategoryView();
+const createCategoryView = useCreateCategoryView(() => import('../dashboard/groups/EditCategoryGroupsView.vue'));
 const createGroupView = useCreateGroupView();
 const rootCategory = computed(() => period.value.settings.rootCategory);
 

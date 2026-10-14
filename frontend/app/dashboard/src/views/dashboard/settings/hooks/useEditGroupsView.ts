@@ -44,6 +44,7 @@ export function useEditGroupsView() {
                     period: period,
                     periods,
                     category: category,
+                    categoryEditorLoader: () => import('../../groups/EditCategoryGroupsView.vue'),
                     organization,
                     isNew: false,
                     saveHandler: async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
@@ -77,6 +78,7 @@ export function useEditGroupsView() {
                     period,
                     periods,
                     category: cat,
+                    categoryEditorLoader: () => import('../../groups/EditCategoryGroupsView.vue'),
                     organization,
                     isNew: false,
                     saveHandler: async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {

@@ -6,8 +6,9 @@ import { useLoadRecentPeriods } from '@stamhoofd/components/hooks/useLoadRecentP
 import { usePatchOrganizationPeriods } from '@stamhoofd/components/hooks/usePatchOrganizationPeriods';
 import { GroupCategory, GroupCategorySettings, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { PromiseComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+import type { CategoryEditorLoader } from '../../groups/CategoryEditorLoader';
 
-export function useCreateCategoryView(saveHandler?: (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => Promise<void> | void) {
+export function useCreateCategoryView(categoryEditorLoader: CategoryEditorLoader, saveHandler?: (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => Promise<void> | void) {
     const present = usePresent();
     const organization = useRequiredOrganization();
     const patchOrganizationPeriods = usePatchOrganizationPeriods();
@@ -61,13 +62,11 @@ export function useCreateCategoryView(saveHandler?: (patch: PatchableArrayAutoEn
                             throw new Error('Uneexpected missing period in periods list');
                         }
 
-                        // Imported dynamically to break the recursive dependency between
-                        // EditCategoryGroupsView and this hook (the view presents this same view
-                        // again for subcategories).
-                        const { default: EditCategoryGroupsView } = await import('../../groups/EditCategoryGroupsView.vue');
+                        const { default: EditCategoryGroupsView } = await categoryEditorLoader();
 
                         return new ComponentWithProperties(EditCategoryGroupsView, {
                             category: category,
+                            categoryEditorLoader,
                             organization: organization.value,
                             periods: loadedPeriods,
                             period,

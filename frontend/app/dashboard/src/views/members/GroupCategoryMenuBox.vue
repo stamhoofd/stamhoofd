@@ -65,7 +65,7 @@ const tree = computed(() => {
         permissions: context.value?.organizationPermissions,
     });
 });
-const getCategoryActions = useGroupCategoryActions();
+const getCategoryActions = useGroupCategoryActions(() => import('../dashboard/groups/EditCategoryGroupsView.vue'));
 // Same rule as the category tree above: only list waiting lists the admin can open
 const filteredWaitingLists = computed(() => props.period.waitingLists.filter(w => w.eventId === null && w.deletedAt === null && auth.canAccessGroup(w, PermissionLevel.Read, undefined, props.period)));
 
