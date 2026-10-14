@@ -1,7 +1,6 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import type {ViewStep} from '#steps/ViewStep.ts';
-import type {ViewStepsManager} from '#steps/ViewStepsManager.ts';
+import type {ViewStep, ViewStepNavigation} from '#steps/ViewStep.ts';
 import type { RegisterCheckout } from '@stamhoofd/structures';
 import type { NavigationActions } from '../../../types/NavigationActions';
 
@@ -13,7 +12,7 @@ export class PaymentSelectionStep implements ViewStep {
         this.checkout = checkout;
     }
 
-    isEnabled(_manager: ViewStepsManager) {
+    isEnabled() {
         if (this.checkout.isAdminFromSameOrganization) {
             return false;
         }
@@ -21,11 +20,11 @@ export class PaymentSelectionStep implements ViewStep {
         return true;
     }
 
-    getComponent(manager: ViewStepsManager): ComponentWithProperties {
+    getComponent(navigation: ViewStepNavigation): ComponentWithProperties {
         return AsyncComponent(() => import('../PaymentSelectionView.vue'), {
             checkout: this.checkout,
             saveHandler: async (navigate: NavigationActions) => {
-                await manager.saveHandler(this, navigate);
+                await navigation.saveHandler(this, navigate);
             },
         });
     }
