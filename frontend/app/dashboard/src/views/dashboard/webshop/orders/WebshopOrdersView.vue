@@ -42,6 +42,7 @@ import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManage
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
+import { createTicketPresenter } from '../tickets/createTicketPresenter';
 import { OrderActionBuilder } from './OrderActionBuilder';
 import { OrderRequiredFilterHelper } from './OrderRequiredFilterHelper';
 
@@ -77,6 +78,7 @@ const route = {
     objectKey: 'initialOrder',
     getProperties: () => ({
         webshopManager: props.webshopManager,
+        openTicketHandler: createTicketPresenter(props.webshopManager),
     }),
 };
 
@@ -556,6 +558,7 @@ function openOrder(order: PrivateOrder) {
         root: AsyncComponent(() => import('./OrderView.vue'), {
             initialOrder: order,
             webshopManager: props.webshopManager,
+            openTicketHandler: createTicketPresenter(props.webshopManager),
             getNext: (order: PrivateOrder) => {
                 const currentIndex = getCurrentIndex(order);
                 return tableObjectFetcher.objects[currentIndex + 1];

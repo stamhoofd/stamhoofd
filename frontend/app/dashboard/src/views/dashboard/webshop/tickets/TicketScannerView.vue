@@ -69,6 +69,7 @@ import QrScanner from 'qr-scanner';
 
 import { computed, onActivated, onBeforeUnmount, onDeactivated, ref } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
+import { createTicketPresenter } from './createTicketPresenter';
 import TicketSyncProgressRing from './TicketSyncProgressRing.vue';
 import { useTicketSync } from './useTicketSync';
 
@@ -565,6 +566,7 @@ function alreadyScannedTicket(ticket: TicketPrivate, order: Order) {
         webshopManager: props.webshopManager,
         ticket,
         order,
+        openTicketHandler: createTicketPresenter(props.webshopManager),
     })).catch(console.error);
 }
 
@@ -578,6 +580,7 @@ function validTicket(ticket: TicketPrivate, order: PrivateOrder) {
         webshopManager: props.webshopManager,
         ticket,
         order,
+        openTicketHandler: createTicketPresenter(props.webshopManager),
     })).catch(console.error);
 }
 
