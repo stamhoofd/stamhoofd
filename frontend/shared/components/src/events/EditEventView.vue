@@ -277,7 +277,7 @@
 
 import OrganizationAvatar from '#context/OrganizationAvatar.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';
-import { GlobalEventBus } from '#EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
 import { useEventTypes } from '#hooks/useEventTypes.ts';
 import AddressInput from '#inputs/AddressInput.vue';

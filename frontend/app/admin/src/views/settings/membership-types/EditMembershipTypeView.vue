@@ -110,7 +110,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { useFetchAllRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
+import { useFetchAllRegistrationPeriods } from '@stamhoofd/components/hooks/useFetchRegistrationPeriods';
 import type { PlatformMembershipType, RegistrationPeriod } from '@stamhoofd/structures';
 import { PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';

@@ -7,8 +7,8 @@ import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganiza
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
-import { useLoadRecentPeriods } from '@stamhoofd/networking/hooks/useLoadRecentPeriods';
-import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';
+import { useLoadRecentPeriods } from '@stamhoofd/components/hooks/useLoadRecentPeriods';
+import { usePatchOrganizationPeriods } from '@stamhoofd/components/hooks/usePatchOrganizationPeriods';
 import { Group, GroupCategory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { useCreateCategoryView } from '../dashboard/settings/hooks/useCreateCategoryView';
 import { useCreateGroupView } from '../dashboard/settings/hooks/useCreateGroupView';

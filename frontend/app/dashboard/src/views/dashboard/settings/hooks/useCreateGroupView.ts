@@ -4,7 +4,7 @@ import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigat
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
-import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
+import { usePatchOrganizationPeriod } from '@stamhoofd/components/hooks/usePatchOrganizationPeriod';
 import { Group, GroupCategory, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 
 export function useCreateGroupView(saveHandler?: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => Promise<void> | void) {

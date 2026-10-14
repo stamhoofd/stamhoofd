@@ -11,12 +11,13 @@ import { useAppContext } from '#context/appContext.ts';
 import CopyableDirective from '#directives/Copyable.ts';
 import LongPressDirective from '#directives/LongPress.ts';
 import TooltipDirective from '#directives/Tooltip.ts';
-import { GlobalEventBus } from '#EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 import { useContext } from '#hooks/useContext.ts';
 import { useFeatureFlag } from '#hooks/useFeatureFlag.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useUser } from '#hooks/useUser.ts';
+import { setupNetworkingPresentation } from '#overlays/setupNetworkingPresentation.ts';
 import Checkbox from '#inputs/Checkbox.vue';
 import Radio from '#inputs/Radio.vue';
 import STList from '#layout/STList.vue';
@@ -103,6 +104,7 @@ function focusNextElement() {
 
 export class VueGlobalHelper {
     static setup(app: App<Element>) {
+        setupNetworkingPresentation();
         (window as any).PromiseComponent = PromiseView;
         (window as any)._importWithRetry = importWithRetry;
 

@@ -3,7 +3,7 @@ import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { UrlHelper } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods.ts';
+import { useFetchOrganizationRegistrationPeriods } from '#hooks/useFetchOrganizationRegistrationPeriods.ts';
 import type { Organization } from '@stamhoofd/structures';
 import { AppRoute, appToUri, Group as GroupStruct, GroupType, LimitedFilteredRequest, PaginatedResponseDecoder } from '@stamhoofd/structures';
 import { NotificationSubjectType } from '@stamhoofd/structures/notifications/NotificationSubjectType.js';

@@ -51,7 +51,7 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, useCanPop, usePop, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
+import { ColorHelper } from '@stamhoofd/networking/ColorHelper';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';

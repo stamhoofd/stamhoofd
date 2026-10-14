@@ -1,5 +1,5 @@
-import { ColorHelper } from '@stamhoofd/components/ColorHelper';
-import { GlobalEventBus } from '@stamhoofd/components/EventBus';
+import { ColorHelper } from '#ColorHelper.ts';
+import { GlobalEventBus } from '#EventBus.ts';
 import type { AppType, Platform } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { inject, toRef } from 'vue';

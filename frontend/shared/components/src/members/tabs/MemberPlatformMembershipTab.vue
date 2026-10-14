@@ -111,7 +111,7 @@ import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { useAllRegistrationPeriods, useFetchAllRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
+import { useAllRegistrationPeriods, useFetchAllRegistrationPeriods } from '#hooks/useFetchRegistrationPeriods.ts';
 import type { PlatformMember, RegistrationPeriod } from '@stamhoofd/structures';
 import { GroupType, LimitedFilteredRequest, MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMembershipType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
