@@ -502,8 +502,8 @@ function registerWebshopOrderTests() {
         // (updatedAt of the last fetched order) and later fetches orders with updatedAt > watermark.
         // updatedAt has a one-second resolution, so an order created in the same second as the
         // watermark — but after the client already synced — would be skipped forever by a strict
-        // cursor. The client guards against this by capping the stored watermark to (now - 30s), so
-        // recent seconds keep being re-fetched until they are safely in the past.
+        // cursor. The client guards against this by starting one second before the watermark until
+        // that second is more than an hour old (WATERMARK_SAFETY_MARGIN_MS in SyncState).
         const organization = await createWebshopOrganization('SameSecondSync');
         const { webshop } = await TestWebshops.create({
             organization,
@@ -514,9 +514,10 @@ function registerWebshopOrderTests() {
         });
         const admin = await createAdmin(organization);
 
-        // updatedAt is server-stamped. X is "now" (to the second). We mock the dashboard's browser
-        // clock so we can fast-forward past the 30s safety margin without waiting in real time.
-        const X = new Date();
+        // X lies two hours in the past, and the browser clock starts at X: fast-forwarding past the safety
+        // margin then keeps the browser behind the server. A browser clock ahead of the server would make
+        // every access token look expired, so the dashboard would renew it before every request.
+        const X = new Date(Date.now() - 2 * 60 * 60 * 1_000);
         X.setMilliseconds(0);
 
         // The first order already exists when the admin opens the table.
@@ -530,8 +531,8 @@ function registerWebshopOrderTests() {
         await adminPage.clock.resume();
         await loginAs({ page: adminPage, user: admin });
 
-        // First load: the client fetches Alice and stores its watermark, capped to (now - 30s),
-        // i.e. below X (the sync happens far less than 30s after X).
+        // First load: the client fetches Alice and stores a watermark one second before X (X is
+        // less than an hour ago).
         let table = await openWebshopOrders(adminPage, organization, webshop.meta.name);
         await expect(table.getRow('Alice')).toBeVisible();
 
@@ -539,11 +540,11 @@ function registerWebshopOrderTests() {
         // already synced. A strict `updatedAt > X` cursor would never fetch it.
         await new OrderFactory({ webshop, firstName: 'Bob', lastName: 'Second', updatedAt: X }).create();
 
-        // Fast-forward past the 30s safety margin, then let time keep flowing again.
-        await adminPage.clock.fastForward(24 * 60 * 60 * 1_000 + 1_000);
+        // Fast-forward past the safety margin, then let time keep flowing again
+        await adminPage.clock.fastForward(60 * 60 * 1_000 + 1_000);
         await adminPage.clock.resume();
 
-        // Reload the table: the capped watermark (X - 30s) still re-fetches the same-second order.
+        // Reload the table: the watermark one second before X still re-fetches the same-second order.
         table = await openWebshopOrders(adminPage, organization, webshop.meta.name);
         await expect(table.getRow('Bob')).toBeVisible();
         await expect(table.getRow('Alice')).toBeVisible();
