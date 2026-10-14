@@ -15,9 +15,9 @@ import { OrderRequiredFilterHelper } from './OrderRequiredFilterHelper';
  * time each continue their own pages.
  */
 const resumeStates = new WeakMap<LimitedFilteredRequest, {
-    itemsToAdvance: number;
     /**
-     * The sort index key of the last order of the previous page, if that page was read with OrdersStore.sortIds.
+     * The sort index key of the last order of the previous page: the next page continues after it, also when other tabs
+     * changed the stored orders in between.
      */
     indexKeyToResumeAfter: IDBValidKey | null;
 }>();
@@ -128,10 +128,8 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 filters.push(searchFilter);
             }
 
-            if (data.pageFilter) {
-                filters.unshift(data.pageFilter);
-            }
-            else {
+            // A next page continues after the order in resumeStates: its pageFilter is not needed to read it
+            if (!data.pageFilter) {
                 await this.syncBeforeReading();
             }
 
@@ -160,13 +158,9 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 
             console.log('Orders(IndexedDb).fetch', 'streamOrders, filter', filter, 'sortItem', sortItem, 'limit', data.limit);
 
-            const resumeState = resumeStates.get(data);
-            const advanceCount = resumeState?.itemsToAdvance ?? 0;
-            const indexKeyToResumeAfter = resumeState?.indexKeyToResumeAfter ?? null;
-            let itemsToAdvance = 0;
+            const indexKeyToResumeAfter = resumeStates.get(data)?.indexKeyToResumeAfter ?? null;
 
-            // Without the pageFilter, so every page uses the same candidates
-            const { indexFilter } = splitIndexFilter(mergeFilters([data.filter, searchFilter], '$and'), OrderRequiredFilterHelper.getDefault(manager.preview.id));
+            const { indexFilter } = splitIndexFilter(filter, OrderRequiredFilterHelper.getDefault(manager.preview.id));
 
             if (indexFilter) {
                 // Find and sort the matching orders on their stored index values, so only the orders of this page get decoded
@@ -184,14 +178,14 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 });
             }
             else {
-                itemsToAdvance = await manager.streamOrdersWithPatchedTickets({
+                await manager.streamOrdersWithPatchedTickets({
                     callback: (order) => {
                         results.push(order);
                     },
                     filter,
                     limit: data.limit,
                     sortItem,
-                    advanceCount,
+                    after: indexKeyToResumeAfter,
                     signal: options?.signal,
                 });
             }
@@ -229,8 +223,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 
             if (next) {
                 resumeStates.set(next, {
-                    itemsToAdvance,
-                    indexKeyToResumeAfter: indexFilter ? getSortIndexKey(lastItem, sortItem) : null,
+                    indexKeyToResumeAfter: getSortIndexKey(lastItem, sortItem),
                 });
             }
 

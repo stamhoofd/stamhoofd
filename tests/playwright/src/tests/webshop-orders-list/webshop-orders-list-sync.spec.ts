@@ -12,7 +12,7 @@ import type { TestOrder } from '../../helpers/index.js';
 import { TestOrders } from '../../helpers/index.js';
 import type { OrdersTable } from '../../helpers/page/webshop/OrdersTable.js';
 import { mixedOrderSeeds } from './data.js';
-import { expectOrders, names, ticketScanStatus } from './expected.js';
+import { expectOrders, names, sortOrders, ticketScanStatus } from './expected.js';
 import type { OrdersListWebshop } from './setup.js';
 import { createOrdersListWebshop, openOrdersList, openOrdersTab, statusNames } from './setup.js';
 
@@ -118,6 +118,26 @@ test.describe('Orders list changes @webshop-orders-list', () => {
         await tableA.search('hernoemd');
         await tableA.expectCount(1, 30);
         await expect(tableA.getOrderRow(data.customer.name)).toBeVisible();
+
+        await context.close();
+    });
+
+    test('Scrolling continues after the last loaded order when another tab removed an order before it', async ({ browser }) => {
+        // Without a filter, the next page continues where the previous one ended in the shared local database
+        const big = await createOrdersListWebshop('OrdersScrollSync');
+        const bigOrders = await TestOrders.create(big.webshop, mixedOrderSeeds(150));
+        const { context, table } = await openOrdersList(browser, big);
+        await table.expectCount(150);
+
+        // The first row (highest number) is deleted on the server, and tab B stores that deletion locally
+        const first = bigOrders[bigOrders.length - 1];
+        first.order.status = OrderStatus.Deleted;
+        await first.order.save();
+        const tabB = await openOrdersTab(context, big);
+        await tabB.table.expectCount(149);
+
+        // Tab A still shows the order it loaded before, and every order after it
+        expect(await table.readNames(names(bigOrders))).toEqual(names(sortOrders(bigOrders, o => o.seed.number, 'DESC')));
 
         await context.close();
     });
