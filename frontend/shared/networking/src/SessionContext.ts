@@ -1,5 +1,5 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import { ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { EncodeMedium, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import type { SimpleErrors } from '@simonbackx/simple-errors';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import type { RequestMiddleware } from '@simonbackx/simple-networking';
@@ -205,7 +205,7 @@ export class SessionContext implements RequestMiddleware {
             if (json) {
                 try {
                     const parsed = JSON.parse(json);
-                    const token = Token.decode(new ObjectData(parsed, { version: Version }));
+                    const token = Token.decode(new ObjectData(parsed, { version: Version, medium: EncodeMedium.Database }));
                     if (!await this.dropExpiredStoredToken(token, key)) {
                         this.setTokenWithoutSaving(token, usePlatformStorage);
                         return;
@@ -222,7 +222,7 @@ export class SessionContext implements RequestMiddleware {
                 if (json2) {
                     try {
                         const parsed = JSON.parse(json2);
-                        const token = Token.decode(new ObjectData(parsed, { version: Version }));
+                        const token = Token.decode(new ObjectData(parsed, { version: Version, medium: EncodeMedium.Database }));
                         if (!await this.dropExpiredStoredToken(token, 'token-platform')) {
                             this.setTokenWithoutSaving(token, usePlatformStorage);
                         }
@@ -293,7 +293,7 @@ export class SessionContext implements RequestMiddleware {
                     await Storage.secure.removeItem('user-platform');
                 }
 
-                await Storage.secure.setItem('token-' + suffix, JSON.stringify(this.token.token.encode({ version: Version })));
+                await Storage.secure.setItem('token-' + suffix, JSON.stringify(this.token.token.encode({ version: Version, medium: EncodeMedium.Database })));
 
                 if (this.user) {
                     await Storage.secure.setItem('user-' + suffix, JSON.stringify(new VersionBox(this.user).encode({ version: Version })));
