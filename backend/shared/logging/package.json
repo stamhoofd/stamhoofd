@@ -34,6 +34,7 @@
         "access": "public"
     },
     "devDependencies": {
+        "@stamhoofd/types": "workspace:*",
         "vitest": "4.1.11"
     }
 }

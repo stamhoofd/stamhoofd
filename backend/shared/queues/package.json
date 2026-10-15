@@ -18,6 +18,7 @@
         "@simonbackx/simple-errors": "1.5.0"
     },
     "devDependencies": {
+        "@stamhoofd/types": "workspace:*",
         "vitest": "4.1.11"
     },
     "license": "UNLICENCED",

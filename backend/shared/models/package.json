@@ -44,7 +44,14 @@
         "uuid": "14.0.2"
     },
     "devDependencies": {
+        "@stamhoofd/backend-i18n": "workspace:*",
+        "@stamhoofd/email": "workspace:*",
+        "@stamhoofd/queues": "workspace:*",
+        "@stamhoofd/sql": "workspace:*",
+        "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "@types/luxon": "3.7.6",
         "@types/uuid": "8.3.4",
         "mysql2": "3.24.5",
