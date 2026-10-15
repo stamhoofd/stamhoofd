@@ -140,9 +140,9 @@ export class Cart extends AutoEncoder {
     }
 
     /**
-     * In bulk order mode the seats and the item details (option menus, custom fields, UiTPAS numbers) are entered
-     * in separate checkout steps after the items are chosen. Pass validateSeats or validateDetails = false while
-     * that step hasn't been reached yet, so items aren't rejected for data the customer still has to enter.
+     * In bulk order mode the seats and the item details are entered in separate checkout steps after the items
+     * are chosen. Pass validateSeats or validateDetails = false while that step hasn't been reached yet, so items
+     * aren't rejected for data the customer still has to enter. See CartItem.validate for what validateDetails covers.
      */
     validate(webshop: Webshop, asAdmin = false, { validateSeats = true, validateDetails = true }: { validateSeats?: boolean; validateDetails?: boolean } = {}) {
         const newItems: CartItem[] = [];

@@ -3,12 +3,14 @@ import { describe, expect, it } from 'vitest';
 
 import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';
 import { CustomerSettings } from './CustomerSettings.js';
+import { Version } from '../Version.js';
 import { WebshopMetaData, WebshopOrderMode } from './WebshopMetaData.js';
 
 const { Required, Optional, Disabled } = CustomerFieldRequirement;
 
 /**
- * customerSettings replaces the phoneEnabled / birthDayEnabled / addressEnabled / genderEnabled flags in 419.
+ * 418 predates both migrations tested here: customerSettings replaces the phoneEnabled / birthDayEnabled / addressEnabled /
+ * genderEnabled flags in 419, orderMode replaces cartEnabled in NextVersion.
  */
 const oldVersion = 418;
 const newVersion = 419;
@@ -209,6 +211,10 @@ describe('WebshopMetaData.orderMode <-> cartEnabled', () => {
         expect(decode({ cartEnabled: false }, oldVersion).orderMode).toBe(WebshopOrderMode.Single);
         // Before 180 there was no flag: every webshop had a cart
         expect(decode({}, 179).orderMode).toBe(WebshopOrderMode.Cart);
+    });
+
+    it('ignores a stale cartEnabled flag on data that already has the order mode', () => {
+        expect(decode({ orderMode: WebshopOrderMode.Bulk, cartEnabled: false }, Version).orderMode).toBe(WebshopOrderMode.Bulk);
     });
 
     it('downgrades the order mode to the cartEnabled flag for an older client', () => {

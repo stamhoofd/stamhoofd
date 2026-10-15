@@ -760,7 +760,7 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
             const orderData = buildOrderData([
                 buildItem(1, radioOption1),
                 buildItem(1, radioOption1),
-                buildItem(1, radioOption2),
+                buildItem(2, radioOption2),
                 CartItem.create({ product: personProduct, productPrice: personProductPrice, amount: 1 }),
             ]);
 
@@ -769,7 +769,7 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
 
             const order = response.body.order;
             expect(order.data.cart.items).toHaveLength(4);
-            expect(order.data.cart.items.every(i => i.amount === 1)).toBe(true);
+            expect(order.data.cart.items.map(i => i.amount)).toEqual([1, 1, 2, 1]);
             expect(order.data.cart.items.map(i => i.options[0]?.option.id)).toEqual([radioOption1.id, radioOption1.id, radioOption2.id, undefined]);
         });
 
