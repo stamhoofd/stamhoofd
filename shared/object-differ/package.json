@@ -28,7 +28,10 @@
         "uuid": "14.0.2"
     },
     "devDependencies": {
+        "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "@types/uuid": "8.3.4",
         "uuid": "14.0.2",
         "vitest": "4.1.11"

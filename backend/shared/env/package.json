@@ -17,6 +17,7 @@
         "chalk": "5.6.2"
     },
     "devDependencies": {
+        "@stamhoofd/cli": "workspace:*",
         "@stamhoofd/types": "workspace:*"
     },
     "peerDependencies": {
