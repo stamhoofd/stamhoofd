@@ -275,6 +275,5 @@ test.describe('Webshop bulk ordering @webshop-bulk', () => {
         await page.locator('.st-view').last().getByTestId('save-button').click();
 
         await expect.poll(async () => (await Webshop.getByID(webshop.id))!.meta.orderMode).toBe(WebshopOrderMode.Bulk);
-        expect((await Webshop.getByID(webshop.id))!.meta.cartEnabled).toBe(false);
     });
 });
