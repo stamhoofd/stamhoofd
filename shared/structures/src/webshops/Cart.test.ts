@@ -40,21 +40,12 @@ describe('Cart.validate', () => {
         expect(cart.items[0].product.id).toBe(productA.id);
     });
 
-    it('keeps all amount-1 items in Bulk mode, also for the same product', () => {
+    it('keeps all items in Bulk mode, also for the same product', () => {
         const { webshop, productA, productB } = createWebshop(WebshopOrderMode.Bulk);
-        const cart = Cart.create({ items: [item(productA), item(productA), item(productB)] });
+        const cart = Cart.create({ items: [item(productA), item(productA), item(productB, 2)] });
 
         cart.validate(webshop);
         expect(cart.items).toHaveLength(3);
-    });
-
-    it('rejects items with an amount other than 1 in Bulk mode', () => {
-        const { webshop, productA } = createWebshop(WebshopOrderMode.Bulk);
-        const cart = Cart.create({ items: [item(productA, 2)] });
-
-        expect(() => cart.validate(webshop)).toThrow(/amount 1/);
-        // Not recoverable: the item is dropped
-        expect(cart.items).toHaveLength(0);
     });
 });
 

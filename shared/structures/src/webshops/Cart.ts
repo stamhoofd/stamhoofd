@@ -140,24 +140,17 @@ export class Cart extends AutoEncoder {
     }
 
     /**
-     * validateSeats / validateDetails: false while those still have to be chosen (bulk checkout before the seat and details steps)
+     * In bulk order mode the seats and the item details (option menus, custom fields, UiTPAS numbers) are entered
+     * in separate checkout steps after the items are chosen. Pass validateSeats or validateDetails = false while
+     * that step hasn't been reached yet, so items aren't rejected for data the customer still has to enter.
      */
     validate(webshop: Webshop, asAdmin = false, { validateSeats = true, validateDetails = true }: { validateSeats?: boolean; validateDetails?: boolean } = {}) {
         const newItems: CartItem[] = [];
         const errors = new SimpleErrors();
         const singleItem = webshop.orderMode === WebshopOrderMode.Single;
-        const bulk = webshop.orderMode === WebshopOrderMode.Bulk;
 
         for (const item of this.items) {
             try {
-                if (bulk && !asAdmin && item.amount !== 1) {
-                    throw new SimpleError({
-                        code: 'invalid_amount',
-                        message: 'Cart items must have amount 1 in bulk order mode',
-                        human: $t('Er ging iets mis met de hoeveelheid van {product}. Probeer opnieuw.', { product: item.product.name }),
-                    });
-                }
-
                 item.validate(webshop, this, {
                     refresh: true,
                     admin: asAdmin,

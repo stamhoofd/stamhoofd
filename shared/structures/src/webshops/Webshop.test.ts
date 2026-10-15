@@ -4,12 +4,9 @@ import { Product, ProductPrice } from './Product.js';
 import { Webshop } from './Webshop.js';
 import { WebshopMetaData, WebshopOrderMode } from './WebshopMetaData.js';
 
-function createWebshop({ orderMode, cartEnabled, products }: { orderMode?: WebshopOrderMode | null; cartEnabled?: boolean; products?: Product[] }) {
+function createWebshop({ orderMode, products }: { orderMode: WebshopOrderMode; products?: Product[] }) {
     return Webshop.create({
-        meta: WebshopMetaData.create({
-            cartEnabled: cartEnabled ?? true,
-            orderMode: orderMode ?? null,
-        }),
+        meta: WebshopMetaData.create({ orderMode }),
         products: products ?? [
             Product.create({ name: 'A', prices: [ProductPrice.create({ name: 'A1' }), ProductPrice.create({ name: 'A2' })] }),
             Product.create({ name: 'B' }),
@@ -18,17 +15,12 @@ function createWebshop({ orderMode, cartEnabled, products }: { orderMode?: Websh
 }
 
 describe('Webshop.orderMode', () => {
-    it('falls back to the deprecated cartEnabled flag', () => {
-        expect(createWebshop({ cartEnabled: true }).orderMode).toBe(WebshopOrderMode.Cart);
-        expect(createWebshop({ cartEnabled: false }).orderMode).toBe(WebshopOrderMode.Single);
-        expect(createWebshop({ cartEnabled: true }).shouldEnableCart).toBe(true);
-        expect(createWebshop({ cartEnabled: false }).shouldEnableCart).toBe(false);
-    });
-
-    it('prefers an explicit order mode', () => {
-        expect(createWebshop({ cartEnabled: true, orderMode: WebshopOrderMode.Bulk }).orderMode).toBe(WebshopOrderMode.Bulk);
-        expect(createWebshop({ cartEnabled: false, orderMode: WebshopOrderMode.Cart }).orderMode).toBe(WebshopOrderMode.Cart);
-        expect(createWebshop({ cartEnabled: true, orderMode: WebshopOrderMode.Bulk }).shouldEnableCart).toBe(false);
+    it('follows the order mode of the settings', () => {
+        expect(createWebshop({ orderMode: WebshopOrderMode.Cart }).orderMode).toBe(WebshopOrderMode.Cart);
+        expect(createWebshop({ orderMode: WebshopOrderMode.Cart }).shouldEnableCart).toBe(true);
+        expect(createWebshop({ orderMode: WebshopOrderMode.Single }).orderMode).toBe(WebshopOrderMode.Single);
+        expect(createWebshop({ orderMode: WebshopOrderMode.Bulk }).orderMode).toBe(WebshopOrderMode.Bulk);
+        expect(createWebshop({ orderMode: WebshopOrderMode.Bulk }).shouldEnableCart).toBe(false);
     });
 
     it('behaves as Single for a Cart webshop with a single unique product', () => {

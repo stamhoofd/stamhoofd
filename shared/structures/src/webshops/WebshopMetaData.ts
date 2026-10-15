@@ -736,17 +736,16 @@ export class WebshopMetaData extends AutoEncoder {
     expandLogo = false;
 
     /**
-     * @deprecated
-     * Use orderMode instead. Still written by the dashboard (= orderMode === Cart) so older clients keep working.
+     * Older clients only know the cartEnabled flag: true = Cart, false = Single. Bulk is sent to them as cartEnabled = true.
      */
-    @field({ decoder: BooleanDecoder, version: 180 })
-    cartEnabled = true;
-
-    /**
-     * null = derive from the deprecated cartEnabled flag
-     */
-    @field({ decoder: new EnumDecoder(WebshopOrderMode), nullable: true, ...NextVersion })
-    orderMode: WebshopOrderMode | null = null;
+    @field({ decoder: BooleanDecoder, version: 180, field: 'cartEnabled', upgrade: () => true })
+    @field({
+        decoder: new EnumDecoder(WebshopOrderMode),
+        ...NextVersion,
+        upgrade: (cartEnabled: boolean) => (cartEnabled ? WebshopOrderMode.Cart : WebshopOrderMode.Single),
+        downgrade: (orderMode: WebshopOrderMode) => orderMode !== WebshopOrderMode.Single,
+    })
+    orderMode = WebshopOrderMode.Cart;
 
     /**
      * Whether the domain name has been validated and is active. Only used to know if this domain should get used emails and in the dashboard.
@@ -788,10 +787,6 @@ export class WebshopMetaData extends AutoEncoder {
 
     get isRegistrations() {
         return this.type === WebshopType.Registrations;
-    }
-
-    get resolvedOrderMode(): WebshopOrderMode {
-        return this.orderMode ?? (this.cartEnabled ? WebshopOrderMode.Cart : WebshopOrderMode.Single);
     }
 
     get hasTickets() {

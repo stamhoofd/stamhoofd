@@ -754,7 +754,7 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
             });
         }
 
-        test('Bulk mode stores every single-unit item, also of the same product', async () => {
+        test('Bulk mode stores every item separately, also of the same product', async () => {
             await setOrderMode(WebshopOrderMode.Bulk);
 
             const orderData = buildOrderData([
@@ -771,13 +771,6 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
             expect(order.data.cart.items).toHaveLength(4);
             expect(order.data.cart.items.every(i => i.amount === 1)).toBe(true);
             expect(order.data.cart.items.map(i => i.options[0]?.option.id)).toEqual([radioOption1.id, radioOption1.id, radioOption2.id, undefined]);
-        });
-
-        test('Bulk mode rejects items with an amount other than 1', async () => {
-            await setOrderMode(WebshopOrderMode.Bulk);
-
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildOrderData([buildItem(2)]));
-            await expect(testServer.test(endpoint, r)).rejects.toThrow(STExpect.errorWithCode('invalid_amount'));
         });
 
         test('Single mode only keeps the first item', async () => {

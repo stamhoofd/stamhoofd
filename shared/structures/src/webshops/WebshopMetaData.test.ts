@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';
 import { CustomerSettings } from './CustomerSettings.js';
-import { WebshopMetaData } from './WebshopMetaData.js';
+import { WebshopMetaData, WebshopOrderMode } from './WebshopMetaData.js';
 
 const { Required, Optional, Disabled } = CustomerFieldRequirement;
 
@@ -197,5 +197,38 @@ describe('WebshopMetaData.customerSettings 418 <-> 419', () => {
             expect(patched.customerSettings.phone).toBe(Disabled);
             expect(patched.customerSettings.birthDay).toBe(Required);
         });
+    });
+});
+
+/**
+ * orderMode replaces the cartEnabled flag: true = Cart, false = Single. Bulk is new and unknown to older clients.
+ */
+describe('WebshopMetaData.orderMode <-> cartEnabled', () => {
+    it('upgrades the cartEnabled flag of an older client', () => {
+        expect(decode({ cartEnabled: true }, oldVersion).orderMode).toBe(WebshopOrderMode.Cart);
+        expect(decode({ cartEnabled: false }, oldVersion).orderMode).toBe(WebshopOrderMode.Single);
+        // Before 180 there was no flag: every webshop had a cart
+        expect(decode({}, 179).orderMode).toBe(WebshopOrderMode.Cart);
+    });
+
+    it('downgrades the order mode to the cartEnabled flag for an older client', () => {
+        expect(encode(WebshopMetaData.create({ orderMode: WebshopOrderMode.Cart }), oldVersion)).toMatchObject({ cartEnabled: true });
+        expect(encode(WebshopMetaData.create({ orderMode: WebshopOrderMode.Bulk }), oldVersion)).toMatchObject({ cartEnabled: true });
+        expect(encode(WebshopMetaData.create({ orderMode: WebshopOrderMode.Single }), oldVersion)).toMatchObject({ cartEnabled: false });
+        expect(encode(WebshopMetaData.create({ orderMode: WebshopOrderMode.Bulk }), oldVersion).orderMode).toBeUndefined();
+    });
+
+    it('upgrades a cartEnabled patch of an older client', () => {
+        const meta = WebshopMetaData.create({ orderMode: WebshopOrderMode.Bulk });
+
+        expect(meta.patch(decodePatch({ cartEnabled: false }, oldVersion)).orderMode).toBe(WebshopOrderMode.Single);
+        expect(meta.patch(decodePatch({ cartEnabled: true }, oldVersion)).orderMode).toBe(WebshopOrderMode.Cart);
+        expect(meta.patch(decodePatch({ name: 'Nieuwe naam' }, oldVersion)).orderMode).toBe(WebshopOrderMode.Bulk);
+    });
+
+    it('downgrades an order mode patch for an older client', () => {
+        expect(encodePatch(WebshopMetaData.patch({ orderMode: WebshopOrderMode.Single }), oldVersion)).toMatchObject({ cartEnabled: false });
+        expect(encodePatch(WebshopMetaData.patch({ orderMode: WebshopOrderMode.Bulk }), oldVersion)).toMatchObject({ cartEnabled: true });
+        expect(encodePatch(WebshopMetaData.patch({ name: 'Nieuwe naam' }), oldVersion).cartEnabled).toBeUndefined();
     });
 });

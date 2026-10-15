@@ -245,7 +245,7 @@ export class Webshop extends AutoEncoder {
      * A Cart webshop with a single unique product behaves as Single
      */
     get orderMode(): WebshopOrderMode {
-        const mode = this.meta.resolvedOrderMode;
+        const mode = this.meta.orderMode;
         if (mode === WebshopOrderMode.Cart && !this.canEnableCart) {
             return WebshopOrderMode.Single;
         }

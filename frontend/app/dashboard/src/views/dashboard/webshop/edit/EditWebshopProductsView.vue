@@ -100,9 +100,9 @@ const viewTitle = computed(() => {
 const isTickets = computed(() => webshop.value.meta.ticketType === WebshopTicketType.Tickets);
 
 const cartEnabled = computed({
-    get: () => webshop.value.meta.cartEnabled,
+    get: () => webshop.value.meta.orderMode === WebshopOrderMode.Cart,
     set: (cartEnabled: boolean) => {
-        const patch = WebshopMetaData.patch({ cartEnabled, orderMode: cartEnabled ? WebshopOrderMode.Cart : WebshopOrderMode.Single });
+        const patch = WebshopMetaData.patch({ orderMode: cartEnabled ? WebshopOrderMode.Cart : WebshopOrderMode.Single });
         addPatch(PrivateWebshop.patch({ meta: patch }));
     },
 });
