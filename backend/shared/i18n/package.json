@@ -27,6 +27,11 @@
     "dependencies": {
         "@simonbackx/simple-logging": "1.0.1"
     },
+    "devDependencies": {
+        "@stamhoofd/locales": "workspace:*",
+        "@stamhoofd/structures": "workspace:*",
+        "@stamhoofd/types": "workspace:*"
+    },
     "peerDependencies": {
         "@simonbackx/simple-endpoints": "1.23.0",
         "@stamhoofd/locales": "workspace:*",

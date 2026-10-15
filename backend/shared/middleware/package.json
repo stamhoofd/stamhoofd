@@ -18,6 +18,10 @@
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-logging": "1.0.1"
     },
+    "devDependencies": {
+        "@stamhoofd/structures": "workspace:*",
+        "@stamhoofd/types": "workspace:*"
+    },
     "peerDependencies": {
         "@stamhoofd/structures": "workspace:*"
     },

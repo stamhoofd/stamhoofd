@@ -23,7 +23,10 @@
         "lru-cache": "11.5.3"
     },
     "devDependencies": {
+        "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "mysql2": "3.24.5",
         "vitest": "4.1.11"
     },

@@ -17,6 +17,10 @@
         "@simonbackx/simple-logging": "1.0.1",
         "mysql2": "3.24.5"
     },
+    "devDependencies": {
+        "@stamhoofd/types": "workspace:*",
+        "@stamhoofd/utility": "workspace:*"
+    },
     "peerDependencies": {
         "@stamhoofd/utility": "workspace:*"
     },
