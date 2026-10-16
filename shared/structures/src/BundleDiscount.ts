@@ -1,10 +1,8 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
-import type { Group } from './Group.js';
 import { GroupPriceDiscount } from './GroupPriceDiscount.js';
 import { calculateHungarianAlgorithm } from './helpers/calculateHungarianAlgorithm.js';
-import type { RegisterCart } from './members/checkout/RegisterCart.js';
 import { RegisterItem } from './members/checkout/RegisterItem.js';
 import { RegistrationWithPlatformMember } from './members/checkout/RegistrationWithPlatformMember.js';
 import type { PlatformFamily, PlatformMember } from './members/PlatformMember.js';
@@ -12,6 +10,18 @@ import type { Registration } from './members/Registration.js';
 import { TranslatedString } from './TranslatedString.js';
 
 type RegistrationWithMember = RegistrationWithPlatformMember<Registration, PlatformMember>;
+
+type BundleDiscountGroup = {
+    id: string;
+    settings: {
+        name: { toString(): string };
+    };
+};
+
+type BundleDiscountCart = {
+    items: RegisterItem[];
+    deleteRegistrations: RegistrationWithMember[];
+};
 
 export class BundleDiscount extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -69,7 +79,7 @@ export class BundleDiscount extends AutoEncoder {
         return BundleDiscount.discountsToText(this.discounts);
     }
 
-    calculate(cart: RegisterCart, periodId: string): BundleDiscountCalculationGroup {
+    calculate(cart: BundleDiscountCart, periodId: string): BundleDiscountCalculationGroup {
         const group = new BundleDiscountCalculationGroup({
             bundle: this,
             periodId,
@@ -174,7 +184,7 @@ class BundleDiscountCalculationGroup {
             return null;
         }
         let groupingCode = 'family-' + item.member.family.uuid + '-';
-        let group: Group | null = null;
+        let group: BundleDiscountGroup | null = null;
         let member: PlatformMember | null = null;
 
         if (this.bundle.countWholeFamily) {
@@ -209,7 +219,7 @@ class BundleDiscountCalculationGroup {
 export class BundleDiscountCalculation {
     bundle: BundleDiscount;
     member: PlatformMember | null; // Only set when it is scoped to single members, not a family
-    group: Group | null; // Only set when scoped to a single group, not multiple groups
+    group: BundleDiscountGroup | null; // Only set when scoped to a single group, not multiple groups
 
     /**
      *  Keep track of the distribution of discounts.
@@ -230,7 +240,7 @@ export class BundleDiscountCalculation {
 
     constructor(options: {
         bundle: BundleDiscount;
-        group?: Group | null;
+        group?: BundleDiscountGroup | null;
         member?: PlatformMember | null;
     }) {
         this.bundle = options.bundle;
