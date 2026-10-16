@@ -1,4 +1,4 @@
-import { Group, GroupCategory, GroupSettings, GroupType, Organization, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, RegistrationPeriod } from '@stamhoofd/structures';
+import { Event, Group, GroupCategory, GroupSettings, GroupType, Organization, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, RegistrationPeriod, TranslatedString } from '@stamhoofd/structures';
 import { describe, expect, test } from 'vitest';
 import { RegistrationActionBuilder } from '#registrations/classes/RegistrationActionBuilder.ts';
 import { MemberActionBuilder } from './MemberActionBuilder';
@@ -67,6 +67,40 @@ const builderFactories = {
 function getInviteActions(builder: MemberActionBuilder | RegistrationActionBuilder) {
     return (builder as any).getInviteMemberForGroupActionsWithGroups() as { name: string }[];
 }
+
+describe('MemberActionBuilder.getMoveAction', () => {
+    test('retains event and parent group suggestions without duplicates or the selected group', () => {
+        const period = RegistrationPeriod.create({});
+        const organization = buildOrganization(period);
+        const { eventGroup, waitingList } = buildEventWaitingList(organization.id, period.id);
+        eventGroup.settings.name = TranslatedString.create('Event registration');
+        waitingList.settings.name = TranslatedString.create('Waiting list');
+        waitingList.event = Event.create({ group: eventGroup });
+        const builder = builderFactories.MemberActionBuilder(waitingList, [organization]);
+
+        const suggestions = builder.getMoveAction()[0].getChildActions().filter(action => action.groupIndex === 0);
+
+        expect(suggestions.map(action => action.name)).toEqual(['Event registration']);
+    });
+
+    test('accepts permission-only event data without requiring registration relationships', () => {
+        const period = RegistrationPeriod.create({});
+        const organization = buildOrganization(period);
+        const { eventGroup, waitingList } = buildEventWaitingList(organization.id, period.id);
+        waitingList.event = {
+            id: 'event',
+            organizationId: organization.id,
+            startDate: new Date(),
+            meta: { defaultAgeGroupIds: null, groups: null, organizationTagIds: null },
+        };
+        eventGroup.settings.name = TranslatedString.create('Parent registration');
+        const builder = builderFactories.MemberActionBuilder(waitingList, [organization]);
+
+        const suggestions = builder.getMoveAction()[0].getChildActions().filter(action => action.groupIndex === 0);
+
+        expect(suggestions.map(action => action.name)).toEqual(['Parent registration']);
+    });
+});
 
 describe.each(Object.entries(builderFactories))('%s.getInviteMemberForGroupActionsWithGroups', (_name, buildBuilder) => {
     test('offers invite actions for an event waiting list in an unresolvable period', () => {

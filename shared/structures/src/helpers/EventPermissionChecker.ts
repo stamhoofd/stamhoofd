@@ -1,21 +1,11 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { AccessRight } from '../AccessRight.js';
-import type { NamedObject } from '../Event.js';
+import type { EventPermissionData } from '../EventPermissionData.js';
 import type { LoadedPermissions } from '../LoadedPermissions.js';
 import { PermissionLevel } from '../PermissionLevel.js';
 import { PermissionsResourceKey, PermissionsResourceType } from '../PermissionsResourceType.js';
 import type { Platform } from '../Platform.js';
 import type { OrganizationForPermissionCalculation, UserPermissions } from '../UserPermissions.js';
-
-interface EventDataForPermission {
-    id: string;
-    organizationId: string | null;
-    meta: {
-        defaultAgeGroupIds: string[] | null;
-        groups: NamedObject[] | null;
-        organizationTagIds: string[] | null;
-    };
-}
 
 export class EventPermissionChecker {
     /**
@@ -25,7 +15,7 @@ export class EventPermissionChecker {
      * @throws error if not allowed to write this event
      */
     static async checkEventAccessAsync<O extends OrganizationForPermissionCalculation>(
-        event: EventDataForPermission,
+        event: EventPermissionData,
         {
             getOrganization,
             userPermissions,
@@ -80,7 +70,7 @@ export class EventPermissionChecker {
      * @throws error if not allowed to write this event
      */
     static throwIfNoPermissionToWriteEvent<O extends OrganizationForPermissionCalculation>(
-        event: EventDataForPermission,
+        event: EventPermissionData,
         {
             organization,
             userPermissions,
@@ -119,7 +109,7 @@ export class EventPermissionChecker {
     }
 
     static hasPermissionToWriteEvent<O extends OrganizationForPermissionCalculation>(
-        event: EventDataForPermission,
+        event: EventPermissionData,
         options: {
             organization: O | null;
             userPermissions: UserPermissions | null;
@@ -140,7 +130,7 @@ export class EventPermissionChecker {
     }
 
     private static throwIfNoPermissionToWriteEventForOrganization<O extends OrganizationForPermissionCalculation>(
-        event: EventDataForPermission,
+        event: EventPermissionData,
         organization: O,
         platform: Platform,
         userPermissions: UserPermissions,
@@ -216,7 +206,7 @@ export class EventPermissionChecker {
     }
 
     private static throwIfNoPermissionToWriteNationalOrRegionalEvent(
-        event: EventDataForPermission,
+        event: EventPermissionData,
         userPermissions: UserPermissions,
         platform: Platform,
         isPeriodInUse: boolean,

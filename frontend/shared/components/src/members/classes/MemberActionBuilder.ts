@@ -17,7 +17,7 @@ import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember } from '@stamhoofd/structures';
-import { EmailRecipientSubfilter, ExcelExportType, GroupType, MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, RegistrationInvitation, RegistrationInvitationRequest, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
+import { EmailRecipientSubfilter, Event, ExcelExportType, GroupType, MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, RegistrationInvitation, RegistrationInvitationRequest, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { MailchimpSyncRequest, MailchimpSyncType } from '@stamhoofd/structures/mailchimp/MailchimpSyncRequest.js';
 import { Formatter } from '@stamhoofd/utility';
@@ -309,7 +309,8 @@ export class MemberActionBuilder {
         let suggestedGroups = this.groups.map(g => g.waitingList).filter(g => g !== null);
 
         for (const g of this.groups) {
-            const add = [g.event?.group, g.parentGroup, g.event?.group?.waitingList];
+            const eventGroup = g.event instanceof Event ? g.event.group : null;
+            const add = [eventGroup, g.parentGroup, eventGroup?.waitingList];
             for (const a of add) {
                 if (a) {
                     if (suggestedGroups.find(gg => gg.id === a.id)) {

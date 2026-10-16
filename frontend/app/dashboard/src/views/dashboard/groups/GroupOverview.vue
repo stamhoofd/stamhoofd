@@ -212,7 +212,7 @@ import { useGetGroupsById } from '@stamhoofd/networking/hooks/useGetGroups';
 import { useGetPeriods } from '@stamhoofd/networking/hooks/useGetPeriods';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import type { Group, MemberResponsibility, Organization, OrganizationRegistrationPeriod, RegistrationPeriod, TranslatedString } from '@stamhoofd/structures';
+import type { Group, GroupCategory, MemberResponsibility, Organization, OrganizationRegistrationPeriod, RegistrationPeriod, TranslatedString } from '@stamhoofd/structures';
 import { EmailTemplateType, Event, EventLocation, EventMeta, GroupStatus, GroupType, NamedObject, PermissionLevel, PermissionsResourceType, RichText } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -235,7 +235,7 @@ const props = defineProps<{
     period: OrganizationRegistrationPeriod;
 }>();
 
-const isPublic = computed(() => props.group.isPublic(props.period.availableCategories));
+const isPublic = computed(() => props.group.isPublic<GroupCategory>(props.period.availableCategories));
 const title = computed(() => props.group.settings.name.toString());
 const isArchive = computed(() => props.group.status === GroupStatus.Archived);
 const isOpen = computed(() => !props.group.closed);
