@@ -1,15 +1,40 @@
 import { Formatter } from '@stamhoofd/utility';
 
-import type { Cart } from './Cart.js';
-import type { CartItem, CartItemOption } from './CartItem.js';
-import type { Option, Product, ProductPrice } from './Product.js';
-import type { Webshop } from './Webshop.js';
+type StockCartItem = {
+    id: string;
+    code: string;
+    product: { id: string };
+    productPrice: { id: string };
+    amount: number;
+    reservedAmount: number;
+    options: { option: { id: string } }[];
+    seats: unknown[];
+    reservedSeats: unknown[];
+};
+type StockCart = { items: StockCartItem[] };
+type StockPrice = { id: string; name: string; remainingStock: number | null };
+type StockOption = StockPrice;
+type StockWebshop = { meta: { seatingPlans: unknown[] } };
+type StockProduct = {
+    id: string;
+    name: string;
+    remainingStock: number | null;
+    showStockBelow: number | null;
+    maxPerOrder: number | null;
+    allowMultiple: boolean;
+    reservedSeats: unknown[];
+    optionMenus: { multipleChoice: boolean; options: StockOption[] }[];
+    filteredPrices(options: { admin: boolean }): StockPrice[];
+    getRemainingStockText(stock: number): string;
+    getRemainingSeats(webshop: StockWebshop, isAdmin: boolean): number | null;
+};
+type StockItemOption = { option: StockOption };
 
 export type StockLookupData = {
-    product: Product;
-    oldItem?: CartItem | null | undefined;
-    cart: Cart;
-    webshop: Webshop;
+    product: StockProduct;
+    oldItem?: StockCartItem | null | undefined;
+    cart: StockCart;
+    webshop: StockWebshop;
     admin: boolean;
     amount?: number;
 };
@@ -89,7 +114,7 @@ export class CartStockHelper {
         };
     }
 
-    static getPriceStock({ productPrice, oldItem, cart, product, admin, amount }: StockLookupData & { productPrice: ProductPrice }): StockDefinition | null {
+    static getPriceStock({ productPrice, oldItem, cart, product, admin, amount }: StockLookupData & { productPrice: StockPrice }): StockDefinition | null {
         if (productPrice.remainingStock === null) {
             return null;
         }
@@ -161,12 +186,12 @@ export class CartStockHelper {
         };
     }
 
-    static getOptionStock({ option, oldItem, cart, product, admin, amount }: StockLookupData & { option: Option }): StockDefinition | null {
+    static getOptionStock({ option, oldItem, cart, product, admin, amount }: StockLookupData & { option: StockOption }): StockDefinition | null {
         if (option.remainingStock === null) {
             return null;
         }
 
-        function hasOption(item: CartItem) {
+        function hasOption(item: StockCartItem) {
             return item.options.some(o => o.option.id === option.id);
         }
 
@@ -418,7 +443,7 @@ export class CartStockHelper {
      * Return all the stock definitions for this cart item with the currently selected options
      * = calculate how much you can order with these options
      */
-    static getAvailableStock(data: StockLookupData & { productPrice: ProductPrice; options: CartItemOption[] }): StockDefinition[] {
+    static getAvailableStock(data: StockLookupData & { productPrice: StockPrice; options: StockItemOption[] }): StockDefinition[] {
         const definitions: StockDefinition[] = this.getFixedStockDefinitions(data);
 
         const priceStock = CartStockHelper.getPriceStock(data);
