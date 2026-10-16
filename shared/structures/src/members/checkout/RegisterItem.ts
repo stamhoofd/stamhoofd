@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -8,7 +8,7 @@ import { registerItemInMemoryFilterCompilers } from '../../filters/inMemoryFilte
 import type { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
 import type { Group } from '../../Group.js';
 import type { GroupCategory } from '../../GroupCategory.js';
-import { GroupOption, GroupOptionMenu, GroupPrice, WaitingListType } from '../../GroupSettings.js';
+import { GroupOptionMenu, GroupPrice, WaitingListType } from '../../GroupSettings.js';
 import { GroupType } from '../../GroupType.js';
 import type { Organization } from '../../Organization.js';
 import { PlatformMembershipTypeBehaviour } from '../../PlatformMembershipTypeBehaviour.js';
@@ -24,22 +24,23 @@ import { RecordAnswerMapDecoder } from '../records/RecordAnswer.js';
 import { RecordCategory } from '../records/RecordCategory.js';
 import type { RecordSettings } from '../records/RecordSettings.js';
 import type { Registration } from '../Registration.js';
-import type { RegisterCart } from './RegisterCart.js';
-import type { RegisterContext } from './RegisterCheckout.js';
+import { RegisterItemOption } from './RegisterItemOption.js';
 import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
 
 type RegistrationWithMember = RegistrationWithPlatformMember<Registration, PlatformMember>;
 
-export class RegisterItemOption extends AutoEncoder {
-    @field({ decoder: GroupOption })
-    option: GroupOption;
+type RegisterItemHydrationContext = {
+    members: PlatformMember[];
+    groups: Group[];
+    organizations: Organization[];
+};
 
-    @field({ decoder: GroupOptionMenu })
-    optionMenu: GroupOptionMenu;
-
-    @field({ decoder: IntegerDecoder })
-    amount = 1;
-}
+type RegisterItemDiscountCart = {
+    bundleDiscounts: {
+        name: string;
+        getTotalFor(item: RegisterItem | RegistrationWithMember): number;
+    }[];
+};
 
 export class IDRegisterItem extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -75,7 +76,7 @@ export class IDRegisterItem extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: true, version: 391 })
     customEndDate: Date | null = null;
 
-    hydrate(context: RegisterContext) {
+    hydrate(context: RegisterItemHydrationContext) {
         return RegisterItem.fromId(this, context);
     }
 }
@@ -299,7 +300,7 @@ export class RegisterItem implements ObjectWithRecords {
         this.customEndDate = item.customEndDate;
     }
 
-    static fromId(idRegisterItem: IDRegisterItem, context: RegisterContext) {
+    static fromId(idRegisterItem: IDRegisterItem, context: RegisterItemHydrationContext) {
         const member = context.members.find(m => m.member.id === idRegisterItem.memberId);
         if (!member) {
             throw new Error('Member not found: ' + idRegisterItem.memberId);
@@ -401,7 +402,7 @@ export class RegisterItem implements ObjectWithRecords {
         return this.getPriceBreakown(null);
     }
 
-    getPriceBreakown(cart: RegisterCart | null): PriceBreakdown {
+    getPriceBreakown(cart: RegisterItemDiscountCart | null): PriceBreakdown {
         let all: PriceBreakdown = [];
 
         for (const { registration } of this.replaceRegistrations) {
