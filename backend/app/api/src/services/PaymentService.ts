@@ -1,4 +1,6 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { balanceItemPaymentRelations } from '@stamhoofd/models/services/PaymentRelations.js';
+import { PaymentRelationsService } from '@stamhoofd/models/services/PaymentRelationsService.js';
 import type { Member, User } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemPayment, Group, MolliePayment, Organization, PayconiqPayment, Payment, Platform, UsedRegisterCode } from '@stamhoofd/models';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
@@ -62,8 +64,8 @@ export class PaymentService {
 
                 // Prevent concurrency issues
                 await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
-                    const unloaded = (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment));
-                    const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
+                    const unloaded = (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(balanceItemPaymentRelations.payment, payment));
+                    const balanceItemPayments = await balanceItemPaymentRelations.balanceItem.load(
                         unloaded,
                     );
 
@@ -122,8 +124,8 @@ export class PaymentService {
             if (oldStatus === PaymentStatus.Succeeded) {
             // No longer succeeded
                 await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
-                    const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
-                        (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment)),
+                    const balanceItemPayments = await balanceItemPaymentRelations.balanceItem.load(
+                        (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(balanceItemPaymentRelations.payment, payment)),
                     );
 
                     for (const balanceItemPayment of balanceItemPayments) {
@@ -146,8 +148,8 @@ export class PaymentService {
             if (status === PaymentStatus.Failed) {
                 console.log('Marking as failed', payment.id);
                 await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
-                    const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
-                        (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment)),
+                    const balanceItemPayments = await balanceItemPaymentRelations.balanceItem.load(
+                        (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(balanceItemPaymentRelations.payment, payment)),
                     );
 
                     for (const balanceItemPayment of balanceItemPayments) {
@@ -173,8 +175,8 @@ export class PaymentService {
             // If OLD status was FAILED, we need to revert the actions
             if (oldStatus === PaymentStatus.Failed) { // OLD FAILED!! -> NOW PENDING
                 await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
-                    const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
-                        (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment)),
+                    const balanceItemPayments = await balanceItemPaymentRelations.balanceItem.load(
+                        (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(balanceItemPaymentRelations.payment, payment)),
                     );
 
                     for (const balanceItemPayment of balanceItemPayments) {
@@ -201,8 +203,8 @@ export class PaymentService {
     static async handlePaymentCreated(payment: Payment, organization: Organization) {
         await AuditLogService.setContext({ fallbackUserId: payment.payingUserId, source: AuditLogSource.Payment, fallbackOrganizationId: payment.organizationId }, async () => {
             await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
-                const unloaded = (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment));
-                const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
+                const unloaded = (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(balanceItemPaymentRelations.payment, payment));
+                const balanceItemPayments = await balanceItemPaymentRelations.balanceItem.load(
                     unloaded,
                 );
                 await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
@@ -224,8 +226,8 @@ export class PaymentService {
     static async handlePaymentUpdated(payment: Payment, organization: Organization) {
         await AuditLogService.setContext({ fallbackUserId: payment.payingUserId, source: AuditLogSource.Payment, fallbackOrganizationId: payment.organizationId }, async () => {
             await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
-                const unloaded = (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment));
-                const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
+                const unloaded = (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(balanceItemPaymentRelations.payment, payment));
+                const balanceItemPayments = await balanceItemPaymentRelations.balanceItem.load(
                     unloaded,
                 );
 
@@ -1569,7 +1571,7 @@ export class PaymentService {
             console.warn('Skipped sending transfer email because of missing email address', payment.id);
             return;
         }
-        const paymentGeneral = await payment.getGeneralStructure();
+        const paymentGeneral = (await PaymentRelationsService.getGeneralStructure([payment]))[0];
         const groupIds = paymentGeneral.groupIds;
 
         const replacements = getEmailReplacementsForPayment(paymentGeneral, await buildReplacementOptions([paymentGeneral]));

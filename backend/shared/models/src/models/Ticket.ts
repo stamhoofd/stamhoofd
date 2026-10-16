@@ -5,7 +5,6 @@ import { CartReservedSeat } from '@stamhoofd/structures';
 import basex from 'base-x';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-import type {Order} from './Order.js';
 import type {Organization} from './Organization.js';
 import type {Webshop} from './Webshop.js';
 
@@ -124,7 +123,6 @@ export class Ticket extends QueryableModel {
     scannedBy: string | null = null;
 
     static webshop: ManyToOneRelation<'webshop', Webshop>;
-    static order: ManyToOneRelation<'order', Order>;
     static organization: ManyToOneRelation<'organization', Organization>;
 
     getUrl(this: Ticket & { webshop: Webshop & { organization: Organization } }) {
