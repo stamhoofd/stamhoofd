@@ -8,6 +8,7 @@ import type { SQLInsert } from './SQLInsert.js';
 import type { SQLExpression } from './SQLExpression.js';
 import type { ModelCache } from './ModelCache.js';
 
+/** Stamhoofd's Model extension with typed SQL builders; schema migrations remain explicit. */
 export class QueryableModel extends Model {
     rawSelectedRow: SQLResultNamespacedRow | null = null;
     static cache: ModelCache<QueryableModel> | null = null;
@@ -18,6 +19,7 @@ export class QueryableModel extends Model {
      */
     static shutdownMigrations = false;
 
+    /** Selects all columns by default. Custom selections must include the primary key for model hydration. */
     static select<T extends typeof Model & typeof QueryableModel>(this: T, ...columns: (SQLExpression | string)[]): SQLSelect<InstanceType<T>> {
         const transformer = (row: SQLResultNamespacedRow): InstanceType<T> => {
             const d = (this as T).fromRow(row[this.table]) as InstanceType<T> | undefined;
@@ -43,6 +45,7 @@ export class QueryableModel extends Model {
         return select.from(SQL.table(this.table)).primaryKey(this.primary.name);
     }
 
+    /** Builds a thenable delete query; awaiting without a where clause deletes every row in the table. */
     static delete(): SQLDelete {
         return SQL.delete().from(SQL.table(this.table));
     }
@@ -90,7 +93,7 @@ export class QueryableModel extends Model {
     }
 
     /**
-     * Get a model by its primary key
+     * Get a model by its primary key; returns undefined when absent, or throws when required is true.
      * @param id primary key
      */
     static override async getByID<T extends typeof Model>(this: T & typeof QueryableModel, id: number | string, required: true): Promise<InstanceType<T>>;
