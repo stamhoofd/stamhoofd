@@ -23,6 +23,7 @@
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
         "vitest": "4.1.11"
     },
     "license": "UNLICENCED",
