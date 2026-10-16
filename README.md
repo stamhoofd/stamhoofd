@@ -5,21 +5,23 @@ Supporting clubs and non-profits with great software
 
 # Folder structure
 
-We use monorepo to make it easier for new contributors to make changes without having to work in different repositories and creating multiple pull requests.
+We use a pnpm workspace monorepo to make it easier for contributors to make changes across packages in one pull request. Turbo orchestrates tasks; Lerna handles fixed versioning and npm publication.
 
 ## Frontend
 
-For everything frontend related, you can take a look at the readme in the frontend folder. We have two SPA, written with Vue + TypeScript. The frontend is build on a custom (open-source) framework 'vue-app-navigation' that makes handing responsive and app-like views/navigation/animations easy. You'll see that it is easy to learn and understand.
+`frontend/app/*` contains the Vue 3 + TypeScript applications, built with Vite, and the Capacitor mobile app. Dashboard and registration are source packages bundled by web-app; web-app and webshop own standalone builds. `frontend/shared/*` contains shared frontend packages. Navigation uses `@simonbackx/vue-app-navigation`. See the [frontend README](frontend/README.md).
 
 ## Backend
 
-Documentation and code is located in the backend folder.
+`backend/app/*` contains the Node.js + TypeScript services: API, renderer, backup, redirecter, and statistics syncer. `backend/shared/*` contains backend-only packages such as database models, SQL helpers, and email support. See the [endpoint guide](contributing/backend/endpoints.md) for architecture and the [API README](backend/app/api/README.md) for running the API.
 
 ## Shared
 
 We have some packages that are shared between the frontend and backend. The most important one is `structures`. This package contains all the data structures (communication in the API, stored in the backend, in an encrytped blob or in localstorage) and how they should be encoded and decoded. The data structures are versioned: when an old client communicates with an updated backend, everything will work as usual. If you need to add some new data, you'll probably need to make some changes in this package. Read the documantation about encoding, decoding, structures, patching, and versioning [here](contributing/structures/README.md).
 
 # Contributing
+
+See the [development guidelines](contributing/development-guidelines.md) for coding conventions, testing expectations, and validation commands. Playwright E2E tests live in [`tests/playwright`](tests/playwright/README.md).
 
 Do you want to contribute? GREAT! :D You can build features that you need for your own club or you can help the project.
 
@@ -183,7 +185,7 @@ Run `pnpm stam dev frontend` from the repository root to start the frontend appl
 
 ### Shared dependencies
 
-All shared dependencies are located in /shared. These packages are used by the backend and the frontend. If you make changes here, you must rebuild the package with `pnpm run build:shared`. You can rebuild them all at once by running the same command in the project root.
+`shared/*` contains packages used by the backend and frontend, including versioned API and localStorage structures (`@stamhoofd/structures`) and translations (`shared/locales`). Packages consume each other's built `dist/` output, not source. After changing a shared package, rebuild before using consumers: `pnpm stam build` and `pnpm stam test` do this automatically, while `pnpm stam dev` watches shared packages. See the [build-system guide](.development/README.md) for caching and low-level diagnostics.
 
 # Support and information
 
