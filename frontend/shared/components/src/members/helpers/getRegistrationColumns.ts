@@ -306,8 +306,38 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
         );
 
         allColumns.push(
-            new Column<ObjectType, Organization[]>({
+            new Column<ObjectType, Organization | null>({
                 id: 'member.organization',
+                allowSorting: false,
+                name: $t('#Groep van het lid'),
+                description: $t('De #groep waartoe het lid hoort'),
+                getValue: registration => registration.member.getPrimaryOrganization({ periodId: filterPeriodId }),
+                format: organization => organization?.name ?? $t('%5D'),
+                getStyle: organization => !organization ? 'gray' : '',
+                minimumWidth: 100,
+                recommendedWidth: 300,
+                enabled: app === 'admin',
+            }),
+        );
+
+        allColumns.push(
+            new Column<ObjectType, Organization | null>({
+                id: 'member.uri',
+                allowSorting: false,
+                name: $t('Groepsnummer van het lid'),
+                description: $t('Het nummer van de #groep waartoe het lid hoort'),
+                getValue: registration => registration.member.getPrimaryOrganization({ periodId: filterPeriodId }),
+                format: organization => organization?.uri ?? $t('%1FW'),
+                getStyle: organization => !organization ? 'gray' : '',
+                minimumWidth: 50,
+                recommendedWidth: 100,
+                enabled: false,
+            }),
+        );
+
+        allColumns.push(
+            new Column<ObjectType, Organization[]>({
+                id: 'member.organizations',
                 allowSorting: false,
                 name: $t('%1KQ'),
                 description: $t('%1Jj'),
@@ -316,13 +346,13 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
                 getStyle: organizations => organizations.length === 0 ? 'gray' : '',
                 minimumWidth: 100,
                 recommendedWidth: 300,
-                enabled: app === 'admin',
+                enabled: false,
             }),
         );
 
         allColumns.push(
             new Column<ObjectType, Organization[]>({
-                id: 'member.uri',
+                id: 'member.uris',
                 allowSorting: false,
                 name: $t('%1KR'),
                 description: $t('%1Jk'),

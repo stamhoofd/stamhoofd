@@ -186,12 +186,24 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                     }),
                     new SelectableColumn({
                         id: 'member.organization',
-                        name: $t('%1KQ'),
-                        description: $t('%1KF'),
+                        name: $t('#Groep van het lid'),
+                        description: $t('De #groep waartoe het lid hoort'),
                         enabled: false,
                     }),
                     new SelectableColumn({
                         id: 'member.uri',
+                        name: $t('Groepsnummer van het lid'),
+                        description: $t('Het nummer van de #groep waartoe het lid hoort'),
+                        enabled: false,
+                    }),
+                    new SelectableColumn({
+                        id: 'member.organizations',
+                        name: $t('%1KQ'),
+                        description: $t('%1Jj'),
+                        enabled: false,
+                    }),
+                    new SelectableColumn({
+                        id: 'member.uris',
                         name: $t('%1KR'),
                         description: $t('%1Jk'),
                         enabled: false,

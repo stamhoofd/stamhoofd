@@ -138,6 +138,18 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
                         id: 'organization',
                         name: $t(`%ey`),
                         enabled: false,
+                        getValue: (member: PlatformMember) => member.getPrimaryOrganization({ periodId: platform.period.id })?.name ?? $t('%5D'),
+                    }),
+                    new SelectablePdfData<PlatformMember>({
+                        id: 'uri',
+                        name: $t(`%1O1`),
+                        enabled: false,
+                        getValue: (member: PlatformMember) => member.getPrimaryOrganization({ periodId: platform.period.id })?.uri ?? $t('%5D'),
+                    }),
+                    new SelectablePdfData<PlatformMember>({
+                        id: 'organizations',
+                        name: $t('%1KQ'),
+                        enabled: false,
                         getValue: (member: PlatformMember) => {
                             const organizations = member.filterOrganizations({
                                 currentPeriod: true,
@@ -155,8 +167,8 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
                         },
                     }),
                     new SelectablePdfData<PlatformMember>({
-                        id: 'uri',
-                        name: $t(`%1O1`),
+                        id: 'uris',
+                        name: $t('%1KR'),
                         enabled: false,
                         getValue: (member: PlatformMember) => {
                             const organizations = member.filterOrganizations({

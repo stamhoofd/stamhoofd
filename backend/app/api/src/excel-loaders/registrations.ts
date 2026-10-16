@@ -11,7 +11,7 @@ import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHel
 import { getBaseMemberColumns } from './members.js';
 
 // Assign to a typed variable to assure we have correct type checking in place
-const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember, PlatformRegistration> => ({
+export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember, PlatformRegistration> => ({
     id: 'registrations',
     name: $t('%1EI'),
     columns: [
@@ -299,26 +299,6 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
             key: 'member',
             getPropertyValue: (registration: PlatformRegistration) => registration.member,
         })),
-        {
-            id: 'organization',
-            name: $t(`%wA`),
-            width: 40,
-            getValue: (registration: PlatformRegistration) => {
-                return {
-                    value: registration.member.organizations.find(o => o.id === registration.organizationId)?.name ?? '',
-                };
-            },
-        },
-        {
-            id: 'uri',
-            name: $t(`%1O1`),
-            width: 30,
-            getValue: (registration: PlatformRegistration) => {
-                return {
-                    value: registration.member.organizations.find(o => o.id === registration.organizationId)?.uri ?? '',
-                };
-            },
-        },
         {
             id: 'group',
             name: $t(`%wH`),
