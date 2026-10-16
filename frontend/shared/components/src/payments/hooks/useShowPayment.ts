@@ -2,6 +2,7 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { LimitedFilteredRequest } from '@stamhoofd/structures';
 import { usePaymentsObjectFetcher } from '#fetchers/usePaymentsObjectFetcher.ts';
+import { usePaymentViewLoaders } from '#payments/paymentViewLoaders.ts';
 import { Toast } from '../../overlays/Toast';
 
 import PromiseView from '#containers/PromiseView.vue';
@@ -9,6 +10,7 @@ import PromiseView from '#containers/PromiseView.vue';
 export function useShowPayment() {
     const present = usePresent();
     const paymentFetcher = usePaymentsObjectFetcher();
+    const loaders = usePaymentViewLoaders();
 
     return async (paymentId: string) => {
         const component = new ComponentWithProperties(NavigationController, {
@@ -24,7 +26,7 @@ export function useShowPayment() {
                         Toast.error($t(`%yW`)).show();
                         throw new Error('Payment not found');
                     }
-                    return AsyncComponent(() => import('../PaymentView.vue'), {
+                    return AsyncComponent(loaders.payment, {
                         payment: payments.results[0],
                     });
                 },
