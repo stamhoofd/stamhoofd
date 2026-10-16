@@ -211,7 +211,7 @@ export function useBreakdownView<T extends PaymentBreakdown | BalanceItemBreakdo
         try {
             await show({
                 components: [
-                    AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
+                    AsyncComponent(() => import('@stamhoofd/components/export/ExcelExportView.vue'), {
                         type: target.type,
                         filter: new LimitedFilteredRequest({
                             filter: target.filter,

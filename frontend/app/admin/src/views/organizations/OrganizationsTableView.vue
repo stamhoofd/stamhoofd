@@ -577,7 +577,7 @@ async function exportToExcel(selection: TableActionSelection<ObjectType>) {
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
+                root: AsyncComponent(() => import('@stamhoofd/components/export/ExcelExportView.vue'), {
                     type: ExcelExportType.Organizations,
                     filter: selection.filter,
                     workbook: getSelectableWorkbook(platform.value),
