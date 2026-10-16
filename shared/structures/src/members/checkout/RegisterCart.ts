@@ -6,7 +6,10 @@ import { BalanceItemCartItem } from './BalanceItemCartItem.js';
 import type { RegisterCheckout, RegisterContext } from './RegisterCheckout.js';
 import { IDRegisterItem } from './RegisterItem.js';
 import type { RegisterItem } from './RegisterItem.js';
+import type { Registration } from '../Registration.js';
 import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
+
+type RegistrationWithMember = RegistrationWithPlatformMember<Registration, RegisterContext['members'][number]>;
 
 export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(IDRegisterItem) })
@@ -38,7 +41,7 @@ export class IDRegisterCart extends AutoEncoder {
         cart.items = this.items.map(i => i.hydrate(context));
         cart.balanceItems = this.balanceItems;
 
-        const registrations: RegistrationWithPlatformMember[] = [];
+        const registrations: RegistrationWithMember[] = [];
         for (const registrationId of this.deleteRegistrationIds) {
             let found = false;
             for (const member of context.members) {
@@ -77,7 +80,7 @@ export class RegisterCart {
     /**
      * You can define which registrations you want remove as part of this register operation.
      */
-    deleteRegistrations: RegistrationWithPlatformMember[] = [];
+    deleteRegistrations: RegistrationWithMember[] = [];
     bundleDiscounts: BundleDiscountCalculation[] = [];
 
     calculatePrices() {
@@ -180,14 +183,14 @@ export class RegisterCart {
         }
     }
 
-    removeRegistration(registration: RegistrationWithPlatformMember) {
+    removeRegistration(registration: RegistrationWithMember) {
         const index = this.deleteRegistrations.findIndex(r => r.registration.id === registration.registration.id);
         if (index === -1) {
             this.deleteRegistrations.push(registration);
         }
     }
 
-    unremoveRegistration(registration: RegistrationWithPlatformMember) {
+    unremoveRegistration(registration: RegistrationWithMember) {
         const index = this.deleteRegistrations.findIndex(r => r.registration.id === registration.registration.id);
         if (index !== -1) {
             this.deleteRegistrations.splice(index, 1);
@@ -362,7 +365,7 @@ export class RegisterCart {
             }
         }
 
-        const cleanedRegistrations: RegistrationWithPlatformMember[] = [];
+        const cleanedRegistrations: RegistrationWithMember[] = [];
         const singleOrganization = checkout.singleOrganization;
 
         for (const registration of this.deleteRegistrations) {

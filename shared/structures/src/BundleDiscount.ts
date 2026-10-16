@@ -8,7 +8,10 @@ import type { RegisterCart } from './members/checkout/RegisterCart.js';
 import { RegisterItem } from './members/checkout/RegisterItem.js';
 import { RegistrationWithPlatformMember } from './members/checkout/RegistrationWithPlatformMember.js';
 import type { PlatformFamily, PlatformMember } from './members/PlatformMember.js';
+import type { Registration } from './members/Registration.js';
 import { TranslatedString } from './TranslatedString.js';
+
+type RegistrationWithMember = RegistrationWithPlatformMember<Registration, PlatformMember>;
 
 export class BundleDiscount extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -124,7 +127,7 @@ export class BundleDiscount extends AutoEncoder {
         return group;
     }
 
-    applyableTo(item: RegisterItem | RegistrationWithPlatformMember, periodId: string) {
+    applyableTo(item: RegisterItem | RegistrationWithMember, periodId: string) {
         // A bundle discount only applies to registrations of the period it belongs to.
         // Historically, duplicating a period re-used the same discount id across periods,
         // so we have to filter on the period to avoid mixing registrations from other periods.
@@ -166,7 +169,7 @@ class BundleDiscountCalculationGroup {
         }
     }
 
-    getCalculationFor(item: RegisterItem | RegistrationWithPlatformMember, options?: { onlyExisting?: boolean }) {
+    getCalculationFor(item: RegisterItem | RegistrationWithMember, options?: { onlyExisting?: boolean }) {
         if (!this.bundle.applyableTo(item, this.periodId)) {
             return null;
         }
@@ -218,12 +221,12 @@ export class BundleDiscountCalculation {
      *  Existing registations that cause a discount.
      *  The value contains the new calculated discount for this registration
      */
-    registrations: Map<RegistrationWithPlatformMember, number>;
+    registrations: Map<RegistrationWithMember, number>;
 
     /**
      * Keeps track of the deleted registrations so we can exclude these registrations from the calculation
     */
-    deleteRegistrations: RegistrationWithPlatformMember[];
+    deleteRegistrations: RegistrationWithMember[];
 
     constructor(options: {
         bundle: BundleDiscount;
@@ -291,7 +294,7 @@ export class BundleDiscountCalculation {
         return this.netTotal - this.netTotalDueLater;
     }
 
-    getTotalFor(item: RegisterItem | RegistrationWithPlatformMember) {
+    getTotalFor(item: RegisterItem | RegistrationWithMember) {
         if (item instanceof RegisterItem) {
             return this.items.get(item) ?? 0;
         } else if (item instanceof RegistrationWithPlatformMember) {
@@ -300,7 +303,7 @@ export class BundleDiscountCalculation {
         return 0;
     }
 
-    addIfNotBeingRemoved(item: RegisterItem | RegistrationWithPlatformMember) {
+    addIfNotBeingRemoved(item: RegisterItem | RegistrationWithMember) {
         // Only add if it is not being removed at the same time
         if (item instanceof RegistrationWithPlatformMember) {
             if (this.deleteRegistrations.find(r => r.registration.id === item.registration.id)) {
@@ -311,7 +314,7 @@ export class BundleDiscountCalculation {
         this.add(item);
     }
 
-    add(item: RegisterItem | RegistrationWithPlatformMember) {
+    add(item: RegisterItem | RegistrationWithMember) {
         if (item instanceof RegistrationWithPlatformMember) {
             this.registrations.set(item, 0);
         } else if (item instanceof RegisterItem) {
@@ -319,7 +322,7 @@ export class BundleDiscountCalculation {
         }
     }
 
-    remove(registration: RegistrationWithPlatformMember) {
+    remove(registration: RegistrationWithMember) {
         this.deleteRegistrations.push(registration);
     }
 

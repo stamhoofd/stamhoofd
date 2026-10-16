@@ -28,6 +28,8 @@ import type { RegisterCart } from './RegisterCart.js';
 import type { RegisterContext } from './RegisterCheckout.js';
 import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
 
+type RegistrationWithMember = RegistrationWithPlatformMember<Registration, PlatformMember>;
+
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
     option: GroupOption;
@@ -110,7 +112,7 @@ export class RegisterItem implements ObjectWithRecords {
     /**
      * These registrations will be replaced as part of this new registration (moving or updating a registration is possible this way)
      */
-    replaceRegistrations: RegistrationWithPlatformMember[] = [];
+    replaceRegistrations: RegistrationWithMember[] = [];
 
     /**
      * Show an error in the cart for recovery
@@ -146,7 +148,7 @@ export class RegisterItem implements ObjectWithRecords {
         groupPrice?: GroupPrice;
         options?: RegisterItemOption[];
         recordAnswers?: Map<string, RecordAnswer>;
-        replaceRegistrations?: RegistrationWithPlatformMember[];
+        replaceRegistrations?: RegistrationWithMember[];
         cartError?: SimpleError | SimpleErrors | null;
         calculatedPrice?: number;
         calculatedRefund?: number;
@@ -313,7 +315,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new Error('Group not found: ' + idRegisterItem.groupId);
         }
 
-        const replaceRegistrations: RegistrationWithPlatformMember[] = [];
+        const replaceRegistrations: RegistrationWithMember[] = [];
 
         for (const registrationId of idRegisterItem.replaceRegistrationIds) {
             const registration = member.patchedMember.registrations.find(r => r.id === registrationId);

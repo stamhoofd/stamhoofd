@@ -23,13 +23,13 @@
 </template>
 
 <script setup lang="ts">
-import type { RegisterCheckout, RegistrationWithPlatformMember } from '@stamhoofd/structures';
+import type { PlatformMember, RegisterCheckout, Registration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import MemberIcon from '../MemberIcon.vue';
 
 const props = withDefaults(
     defineProps<{
-        registration: RegistrationWithPlatformMember;
+        registration: RegistrationWithPlatformMember<Registration, PlatformMember>;
         checkout: RegisterCheckout;
     }>(),
     {
