@@ -1,9 +1,9 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import type { Replacement } from '../endpoints/EmailRequest.js';
 import { Recipient } from '../endpoints/EmailRequest.js';
-import { EditorSmartButton } from './EditorSmartButton.js';
 import { EmailRecipient } from './Email.js';
 import { ExampleReplacements } from './exampleReplacements.js';
+import { filterReplacements } from './filterReplacements.js';
 
 export class EditorSmartVariable extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -35,50 +35,20 @@ export class EditorSmartVariable extends AutoEncoder {
         return this.fillExamples(this.all.map(v => v.clone()), replacements);
     }
 
-    static fillExamples<T extends EditorSmartVariable | EditorSmartButton>(list: T[], replacements: Replacement[]) {
-        return list.filter((variable) => {
-            // Always supported: signInUrl + unsubscribeUrl
-            if (variable.id === 'signInUrl' || variable.id === 'unsubscribeUrl') {
-                return true;
-            }
-
+    static fillExamples(list: EditorSmartVariable[], replacements: Replacement[]) {
+        return filterReplacements(list, replacements).filter((variable) => {
             const replacement = replacements.find(r => r.token === variable.id && (r.value || r.html));
-            if (!replacement) {
-                // Not found
+            if (replacement?.html) {
+                variable.html = replacement.getHtmlForWebDisplay();
+                variable.example = '';
+            } else if (replacement?.value) {
+                variable.example = replacement.value;
+                variable.html = undefined;
+            }
+
+            if (variable.id === 'outstandingBalance' && replacements.find(r => r.token === 'priceToPay' && (r.value || r.html))) {
                 return false;
-            } else {
-                if (variable instanceof EditorSmartVariable) {
-                    if (replacement.html) {
-                        variable.html = replacement.getHtmlForWebDisplay();
-                        variable.example = '';
-                    } else if (replacement.value) {
-                        variable.example = replacement.value;
-                        variable.html = undefined;
-                    }
-                } else {
-                    // Do not change text
-                }
             }
-
-            if (variable instanceof EditorSmartVariable) {
-                if (variable.id === 'outstandingBalance') {
-                    // Hide outstandingBalance in combination with priceToPay - becuase these can be confused very easily.
-                    // Although technically supported, we just hide it in the UI
-                    if (replacements.find(r => r.token === 'priceToPay' && (r.value || r.html))) {
-                        return false;
-                    }
-                }
-            }
-
-            if (variable.id === 'paymentUrl' && variable instanceof EditorSmartButton) {
-                if (replacements.find(r => r.token === 'paymentTable' && (r.value || r.html))) {
-                    // Rename default button in the case of mailing to payments
-                    variable.text = $t('%1Mw');
-                    variable.name = $t('%1Mx');
-                    variable.hint = $t('%1My');
-                }
-            }
-
             return true;
         });
     }
