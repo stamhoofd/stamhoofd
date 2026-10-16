@@ -348,11 +348,13 @@ import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManage
 import type { ComputedRef } from 'vue';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
+import type { OpenTicketHandler } from '../tickets/TicketNavigation';
 import { OrderActionBuilder } from './OrderActionBuilder';
 
 const props = withDefaults(defineProps<{
     initialOrder: PrivateOrderWithTickets;
     webshopManager: WebshopManager;
+    openTicketHandler: OpenTicketHandler;
     getNext?: ((order: PrivateOrderWithTickets) => PrivateOrderWithTickets) | null;
     getPrevious?: ((order: PrivateOrderWithTickets) => PrivateOrderWithTickets) | null;
 }>(), {
@@ -414,6 +416,7 @@ function openTickets() {
             AsyncComponent(() => import('./OrderTicketsView.vue'), {
                 initialOrder: order.value,
                 webshopManager: props.webshopManager,
+                openTicketHandler: props.openTicketHandler,
             }),
         ],
         modalDisplayStyle: 'popup',
