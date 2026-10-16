@@ -4,9 +4,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { ResolutionRequest } from '../../files/ResolutionRequest.js';
 import { PropertyFilter } from '../../filters/PropertyFilter.js';
+import type { Filterable } from '../../filters/Filterable.js';
 import { getPermissionLevelNumber, PermissionLevel } from '../../PermissionLevel.js';
-import type { ObjectWithRecords } from '../ObjectWithRecords.js';
-import type { RecordAnswer } from './RecordAnswer.js';
 import { TranslatedString } from '../../TranslatedString.js';
 
 export type RecordFilterOptions = { level?: PermissionLevel; additionalFilter?: (record: RecordSettings) => boolean };
@@ -279,7 +278,7 @@ export class RecordSettings extends BaseRecordSettings {
         return type;
     }
 
-    validate(answers: Map<string, RecordAnswer>, requiredCategory = true) {
+    validate(answers: Map<string, { settings: RecordSettings; readonly isEmpty: boolean; validate(): void }>, requiredCategory = true) {
         const answer = answers.get(this.id);
 
         if (!requiredCategory && (!answer || answer.isEmpty)) {
@@ -370,7 +369,7 @@ export class RecordSettings extends BaseRecordSettings {
         }];
     }
 
-    isEnabled<T extends ObjectWithRecords>(filterValue: T, options?: RecordFilterOptions): boolean {
+    isEnabled<T extends Filterable & { isRecordEnabled(record: RecordSettings): boolean }>(filterValue: T, options?: RecordFilterOptions): boolean {
         if (options?.level) {
             const level = options?.level;
             if (!this.checkPermissionForUserManager(level)) {
