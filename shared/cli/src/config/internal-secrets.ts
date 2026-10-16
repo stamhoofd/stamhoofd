@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { CliContext } from '../context/create-context.js';
 import { read1PasswordCli } from '../runtime/one-password.js';
-import type { AppEnvironment, AppService } from './development-config.js';
+import type { AppEnvironment, AppService } from './development-config-types.js';
 
 /**
  * Internal contributors mark their checkout with a `.internal-contributor` file at the
