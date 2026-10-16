@@ -1,7 +1,6 @@
 // i18n-setup.js
 import { HistoryManager } from '@simonbackx/vue-app-navigation';
 import { countries, languages } from '@stamhoofd/locales';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { Storage } from '@stamhoofd/networking/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { countryToCode } from '@stamhoofd/structures';
@@ -10,6 +9,7 @@ import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import type { LocalizedDomain } from '@stamhoofd/types/Localized';
 import { I18n } from './I18n';
+import type { LocalizationSessionContext } from './LocalizationSessionContext';
 
 export function useTranslate(): typeof I18n.prototype.$t {
     const i18n = I18nController.getI18n();
@@ -54,13 +54,13 @@ export class I18nController {
     // Allows you to set and remove meta data
     // vueMetaApp?: VueMetaApp
 
-    $context: SessionContext | null | undefined;
+    $context: LocalizationSessionContext | null | undefined;
 
     get locale() {
         return this.language + '-' + this.countryCode;
     }
 
-    constructor($context: SessionContext | undefined | null, language: Language, country: Country, namespace: string) {
+    constructor($context: LocalizationSessionContext | undefined | null, language: Language, country: Country, namespace: string) {
         this.$context = $context;
         this.namespace = namespace;
         this.language = language;
@@ -292,7 +292,7 @@ export class I18nController {
     }
 
     static async loadDefault({ $context, defaultCountry, defaultLanguage, country, locales }: {
-        $context: SessionContext | null | undefined;
+        $context: LocalizationSessionContext | null | undefined;
         defaultCountry?: Country;
         defaultLanguage?: Language;
         country?: Country;

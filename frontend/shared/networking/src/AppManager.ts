@@ -1,7 +1,7 @@
 import { UrlHelper } from '@simonbackx/vue-app-navigation';
 import { SessionDeviceType, SessionOS } from '@stamhoofd/structures';
 import type { SessionMetaData } from '@stamhoofd/structures';
-import type { SessionContext } from './SessionContext';
+import type { ReviewSessionContext } from './ReviewSessionContext';
 
 // TODO: remove duplicate type definitions, but need to check if capacitor won't get loaded on the web...
 type PermissionState = 'prompt' | 'prompt-with-rationale' | 'granted' | 'denied';
@@ -148,7 +148,7 @@ export class AppManager {
     /**
      * Mark a place in the app where an app review is appropriate.
      */
-    markReviewMoment = (_: SessionContext) => {
+    markReviewMoment = (_: ReviewSessionContext) => {
         // No default implementation
     };
 
