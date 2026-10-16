@@ -42,7 +42,7 @@ export class PackagePurchases extends AutoEncoder {
                     human: $t('%1L1'),
                 });
             }
-            const renewed = pack.createRenewed();
+            const renewed = STPackageBundleHelper.createRenewed(pack);
 
             packages.push(renewed);
         }
