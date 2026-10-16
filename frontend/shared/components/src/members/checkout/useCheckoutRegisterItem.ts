@@ -19,6 +19,7 @@ import { MemberStepManager } from '../classes/MemberStepManager';
 import { getAllMemberSteps } from '#members/classes/steps/getAllMemberSteps.ts';
 import { RegisterItemStep } from '../classes/steps/RegisterItemStep';
 import { startCheckout } from './startCheckout';
+import type { ChooseGroupForMemberOptions, DefaultRegisterItemOptions, RegisterItemCheckoutOptions } from './CheckoutSelectionHandlers';
 
 export async function loadGroupOrganization(context: SessionContext, organizationId: string, owner: any) {
     if (organizationId === context.organization?.id) {
@@ -66,15 +67,7 @@ export async function loadGroupOrganization(context: SessionContext, organizatio
 // ----------------------------
 // --------- Flow 1 -----------
 
-export async function checkoutRegisterItem({ item: originalItem, admin, context, displayOptions, navigate, startCheckoutFlow, finishHandler }: {
-    item: RegisterItem;
-    navigate: NavigationActions;
-    context: SessionContext;
-    admin?: boolean;
-    displayOptions?: DisplayOptions;
-    startCheckoutFlow?: boolean;
-    finishHandler?: () => Promise<void> | void;
-}) {
+export async function checkoutRegisterItem({ item: originalItem, admin, context, displayOptions, navigate, startCheckoutFlow, finishHandler }: RegisterItemCheckoutOptions) {
     let item = originalItem;
 
     if (item.group.waitingList && item.validationError && !item.validationErrorForWaitingList) {
@@ -177,13 +170,7 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
     await manager.saveHandler(null, navigate);
 }
 
-export async function getDefaultItem({ group, member, groupOrganization, context, owner }: {
-    group: Group;
-    member: PlatformMember;
-    groupOrganization?: Organization;
-    context: SessionContext;
-    owner?: any;
-}) {
+export async function getDefaultItem({ group, member, groupOrganization, context, owner }: DefaultRegisterItemOptions) {
     if (!groupOrganization) {
         try {
             groupOrganization = await loadGroupOrganization(context, group.organizationId, owner);
@@ -289,6 +276,7 @@ export async function chooseFamilyMembersForGroup({ navigate, group, family, dis
                 root: AsyncComponent(() => import('../ChooseFamilyMembersForGroupView.vue'), {
                     family,
                     group,
+                    checkoutRegisterItemHandler: checkoutRegisterItem,
                 }),
             }),
         ],
@@ -344,6 +332,9 @@ export async function openOrganizationCart({ organization, checkout, context, na
                     checkout,
                     group,
                     members,
+                    checkoutRegisterItemHandler: checkoutRegisterItem,
+                    getDefaultItemHandler: getDefaultItem,
+                    chooseGroupForMemberHandler: chooseGroupForMember,
                 }),
             }),
         ],
@@ -428,7 +419,7 @@ export function useChooseOrganizationMembersForGroup() {
 // ----------------------------
 // --------- Flow 4 -----------
 
-export async function chooseGroupForMember({ member, navigate, context, displayOptions, startCheckoutFlow, admin, defaultOrganization }: { admin?: boolean; member: PlatformMember; navigate: NavigationActions; context: SessionContext; displayOptions?: DisplayOptions; startCheckoutFlow?: boolean, defaultOrganization?: Organization }) {
+export async function chooseGroupForMember({ member, navigate, context, displayOptions, startCheckoutFlow, admin, defaultOrganization }: ChooseGroupForMemberOptions) {
     await runDisplayOptions({
         components: [
             new ComponentWithProperties(NavigationController, {

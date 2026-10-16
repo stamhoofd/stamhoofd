@@ -11,7 +11,7 @@
             </p>
 
             <STList>
-                <RegisterItemCheckboxRow v-for="member in family.members" :key="member.id" :checkout="checkout" :member="member" :group="group" :group-organization="groupOrganization" />
+                <RegisterItemCheckboxRow v-for="member in family.members" :key="member.id" :checkout="checkout" :member="member" :group="group" :group-organization="groupOrganization" :checkout-register-item-handler="checkoutRegisterItemHandler" />
             </STList>
         </SaveView>
     </ExternalOrganizationContainer>
@@ -24,10 +24,12 @@ import { GlobalEventBus } from '#EventBus.ts';
 import type { Group, Organization, PlatformFamily } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import RegisterItemCheckboxRow from './components/group/RegisterItemCheckboxRow.vue';
+import type { RegisterItemCheckoutHandler } from './checkout/CheckoutSelectionHandlers';
 
 const props = defineProps<{
     family: PlatformFamily;
     group: Group;
+    checkoutRegisterItemHandler: RegisterItemCheckoutHandler;
 }>();
 
 const hasNoMembers = computed(() => props.family.members.length === 0);

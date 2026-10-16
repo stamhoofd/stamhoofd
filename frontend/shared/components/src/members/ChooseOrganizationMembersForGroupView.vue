@@ -27,7 +27,7 @@
 
         <STList>
             <DeleteRegistrationRow v-for="registration in checkout.cart.deleteRegistrations" :key="registration.registration.id" class="right-stack" :registration="registration" :checkout="checkout" />
-            <RegisterItemRow v-for="item in checkout.cart.items" :key="item.id" class="right-stack" :item="item" :show-group="false" />
+            <RegisterItemRow v-for="item in checkout.cart.items" :key="item.id" class="right-stack" :item="item" :show-group="false" :checkout-register-item-handler="checkoutRegisterItemHandler" />
             <BalanceItemCartItemRow v-for="item in checkout.cart.balanceItems" :key="item.id" class="right-stack" :item="item" :checkout="checkout" />
         </STList>
 
@@ -79,7 +79,9 @@ import type { Group, Organization, PlatformMember, RegisterCheckout } from '@sta
 import { PlatformFamily } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 import { startCheckout } from '#members/checkout/startCheckout.ts';
-import { useCheckoutRegisterItem, useChooseGroupForMember, useGetDefaultItem } from '#members/checkout/useCheckoutRegisterItem.ts';
+import type { ChooseGroupForMemberHandler, DefaultRegisterItemHandler, RegisterItemCheckoutHandler } from '#members/checkout/CheckoutSelectionHandlers.ts';
+import { useAppContext } from '#context/appContext.ts';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { useAddMember } from '#members/hooks/useAddMember.ts';
 import { useEditMember } from '#members/hooks/useEditMember.ts';
 import { useContext } from '#hooks/useContext.ts';
@@ -99,6 +101,9 @@ const props = defineProps<{
     group?: Group; // If you want to add new members to the cart
     groupOrganization: Organization;
     members?: PlatformMember[]; // Optional: used to update the members after the checkout
+    checkoutRegisterItemHandler: RegisterItemCheckoutHandler;
+    getDefaultItemHandler: DefaultRegisterItemHandler;
+    chooseGroupForMemberHandler: ChooseGroupForMemberHandler;
 }>();
 
 onMounted(() => {
@@ -121,9 +126,8 @@ const saving = ref(false);
 const cartLength = computed(() => props.checkout.cart.count);
 const doAddMember = useAddMember();
 const editMember = useEditMember();
-const checkoutRegisterItem = useCheckoutRegisterItem();
-const getDefaultItem = useGetDefaultItem();
-const chooseGroupForMember = useChooseGroupForMember();
+const app = useAppContext();
+const owner = useRequestOwner();
 
 const isOnlyDeleting = computed(() => props.checkout.cart.items.length === 0 && props.checkout.cart.balanceItems.length === 0 && props.checkout.cart.deleteRegistrations.length > 0);
 const hasDeleteRegistrations = computed(() => props.checkout.cart.deleteRegistrations.length > 0);
@@ -143,18 +147,25 @@ async function addMember() {
         displayOptions: { action: 'present', modalDisplayStyle: 'popup' },
         async finishHandler(member, navigate) {
             if (!props.group) {
-                await chooseGroupForMember({
+                if (app !== 'registration') {
+                    member.family.checkout.clear();
+                }
+                await props.chooseGroupForMemberHandler({
                     member,
+                    context: context.value,
+                    admin: app === 'dashboard' || app === 'admin',
                     displayOptions: { action: 'show', replace: 100, force: true },
-                    customNavigate: navigate,
+                    navigate,
                     startCheckoutFlow: false,
                 });
                 return;
             }
 
-            const item = await getDefaultItem({
+            const item = await props.getDefaultItemHandler({
                 member,
                 group: props.group,
+                context: context.value,
+                owner,
             });
 
             if (!item) {
@@ -182,13 +193,15 @@ async function addMember() {
                 finishHandler: async (navigate: NavigationActions) => {
                     added = true;
 
-                    await checkoutRegisterItem({
+                    await props.checkoutRegisterItemHandler({
                         item,
+                        context: context.value,
+                        admin: app === 'dashboard' || app === 'admin',
                         startCheckoutFlow: false,
 
                         // Here you'll still be able to go back
                         displayOptions: { action: 'show' },
-                        customNavigate: navigate,
+                        navigate,
                     });
                 },
             });
