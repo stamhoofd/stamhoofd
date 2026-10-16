@@ -12,7 +12,7 @@ import { globals } from '../shared/globals.js';
 import type { ConsistentWords } from '../types/ConsistentWords.js';
 import type { TranslationDictionary } from '../types/TranslationDictionary.js';
 import type { Translations } from '../types/Translations.js';
-import type { MachineTranslationComparison } from './MachineTranslationComparer.js';
+import type { MachineTranslationComparison } from './MachineTranslationComparison.js';
 
 export class TranslationManager {
     readonly namespaces: string[];
