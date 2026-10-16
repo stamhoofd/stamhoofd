@@ -20,8 +20,10 @@ export class Cart extends AutoEncoder {
             return;
         }
         const c = item.code;
+        // One person per item: never merge items with a customer, even with identical data
+        const merge = allowMerge && !item.product.enableCustomer;
         for (const i of this.items) {
-            if (i.code === c && allowMerge) {
+            if (i.code === c && merge) {
                 i.amount += item.amount;
                 i.seats.push(...item.seats);
                 i.uitpasNumbers.push(...item.uitpasNumbers);
@@ -47,7 +49,7 @@ export class Cart extends AutoEncoder {
         const oldCode = old.code;
 
         for (const i of this.items) {
-            if (i.code === c && i.code !== oldCode) {
+            if (i.code === c && i.code !== oldCode && !item.product.enableCustomer) {
                 i.amount += item.amount;
                 i.seats.push(...item.seats);
                 i.uitpasNumbers.push(...item.uitpasNumbers);

@@ -1,4 +1,11 @@
+import { TranslatedString } from '../TranslatedString.js';
+import { RecordTextAnswer } from '../members/records/RecordAnswer.js';
+import { RecordCategory } from '../members/records/RecordCategory.js';
+import { RecordSettings, RecordType } from '../members/records/RecordSettings.js';
 import { Cart } from './Cart.js';
+import { Customer } from './Customer.js';
+import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';
+import { CustomerSettings } from './CustomerSettings.js';
 import { CartItem, CartItemOption } from './CartItem.js';
 import { Option, OptionMenu, Product, ProductPrice } from './Product.js';
 import { Webshop } from './Webshop.js';
@@ -179,6 +186,81 @@ describe('Structure.CartItem', () => {
             expect(cart.items).toHaveLength(1);
             expect(cart.items[0].amount).toBe(2);
             expect(cart.items[0].productPrice.price).toBe(20_00_00);
+        });
+    });
+
+    describe('per-item customer', () => {
+        function buildWebshop(settings?: Partial<CustomerSettings>) {
+            const product = Product.create({
+                name: 'Ticket',
+                enableCustomer: true,
+                customerSettings: settings ? CustomerSettings.create(settings) : null,
+            });
+            const webshop = Webshop.create({ products: [product] });
+            return { webshop, product };
+        }
+
+        function buildCartItem(product: Product, customer: Customer | null, amount = 1) {
+            return CartItem.create({ product, productPrice: product.prices[0], amount, customer });
+        }
+
+        it('requires a customer with a name and forces amount 1', () => {
+            const { webshop, product } = buildWebshop();
+            const cart = Cart.create({});
+
+            expect(() => buildCartItem(product, null).validate(webshop, cart)).toThrow(/customer/i);
+            expect(() => buildCartItem(product, Customer.create({ firstName: 'J', lastName: 'Doe' })).validate(webshop, cart)).toThrow(/first name/i);
+
+            const item = buildCartItem(product, Customer.create({ firstName: 'John', lastName: 'Doe', email: 'john@example.com' }), 3);
+            item.validate(webshop, cart);
+            expect(item.amount).toBe(1);
+            // Email is disabled by default: only the name is kept
+            expect(item.customer!.email).toBe('');
+        });
+
+        it('applies the product customer settings', () => {
+            const { webshop, product } = buildWebshop({ email: CustomerFieldRequirement.Required });
+            const cart = Cart.create({});
+
+            expect(() => buildCartItem(product, Customer.create({ firstName: 'John', lastName: 'Doe' })).validate(webshop, cart)).toThrow(/email/i);
+            expect(() => buildCartItem(product, Customer.create({ firstName: 'John', lastName: 'Doe', email: 'john@example.com' })).validate(webshop, cart)).not.toThrow();
+        });
+
+        it('validates the inline record category', () => {
+            const record = RecordSettings.create({ name: TranslatedString.create('Allergieën'), type: RecordType.Text, required: true });
+            const { webshop, product } = buildWebshop({ recordCategory: RecordCategory.create({ name: TranslatedString.create('Extra'), records: [record] }) });
+            const cart = Cart.create({});
+            const item = buildCartItem(product, Customer.create({ firstName: 'John', lastName: 'Doe' }));
+
+            expect(() => item.validate(webshop, cart)).toThrow();
+
+            item.recordAnswers.set(record.id, RecordTextAnswer.create({ settings: record, value: 'Noten' }));
+            expect(() => item.validate(webshop, cart)).not.toThrow();
+        });
+
+        it('clears the customer when the product does not collect one', () => {
+            const product = Product.create({ name: 'Ticket' });
+            const webshop = Webshop.create({ products: [product] });
+            const item = buildCartItem(product, Customer.create({ firstName: 'John', lastName: 'Doe' }), 2);
+
+            item.validate(webshop, Cart.create({}));
+            expect(item.customer).toBeNull();
+            expect(item.amount).toBe(2);
+        });
+
+        it('never merges people into one cart item, and keeps the customer out of the product code used for totals', () => {
+            const { product } = buildWebshop();
+            const cart = Cart.create({});
+            const john = buildCartItem(product, Customer.create({ firstName: 'John', lastName: 'Doe' }));
+            cart.addItem(john);
+            cart.addItem(buildCartItem(product, Customer.create({ firstName: 'Jane', lastName: 'Doe' })));
+            // Same name twice: still two people
+            cart.addItem(buildCartItem(product, Customer.create({ firstName: 'John', lastName: 'Doe' })));
+
+            expect(cart.items).toHaveLength(3);
+            expect(cart.items.every(i => i.amount === 1)).toBe(true);
+            expect(cart.items[1].codeWithoutFields).toBe(john.codeWithoutFields);
+            expect(product.isUnique).toBe(false);
         });
     });
 });
