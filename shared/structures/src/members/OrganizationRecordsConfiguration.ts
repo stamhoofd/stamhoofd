@@ -2,11 +2,25 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { PropertyFilter } from '../filters/PropertyFilter.js';
-import type { Group } from '../Group.js';
 import { GroupType } from '../GroupType.js';
-import type { Organization } from '../Organization.js';
-import type { Platform } from '../Platform.js';
 import { RecordCategory } from './records/RecordCategory.js';
+
+type OrganizationRecordsGroup = {
+    defaultAgeGroupId: string | null;
+    type: GroupType;
+    settings: { recordsConfiguration: OrganizationRecordsConfiguration };
+};
+
+type OrganizationRecordsOrganization = {
+    meta: { recordsConfiguration: OrganizationRecordsConfiguration };
+};
+
+type OrganizationRecordsPlatform = {
+    config: {
+        recordsConfiguration: OrganizationRecordsConfiguration;
+        defaultAgeGroups: { id: string; recordsConfiguration: OrganizationRecordsConfiguration }[];
+    };
+};
 
 export enum AskRequirement {
     NotAsked = 'NotAsked',
@@ -243,9 +257,9 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     freeContribution: FreeContributionSettings | null = null;
 
     static build(options: {
-        platform: Platform;
-        organization?: Organization | null;
-        group?: Group | null;
+        platform: OrganizationRecordsPlatform;
+        organization?: OrganizationRecordsOrganization | null;
+        group?: OrganizationRecordsGroup | null;
 
         /**
          * When configuring default age groups, this has to be set to true so the platform record categories
