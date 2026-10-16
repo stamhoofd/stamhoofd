@@ -1,3 +1,4 @@
+import { PlatformFamilyHelper } from '../../helpers/PlatformFamilyHelper.js';
 import { Group } from '../../Group.js';
 import { GroupSettings } from '../../GroupSettings.js';
 import { GroupType } from '../../GroupType.js';
@@ -7,7 +8,6 @@ import { OrganizationRegistrationPeriod, RegistrationPeriod } from '../../Regist
 import { TranslatedString } from '../../TranslatedString.js';
 import { MemberDetails } from '../MemberDetails.js';
 import { MembersBlob, MemberWithRegistrationsBlob } from '../MemberWithRegistrationsBlob.js';
-import { PlatformFamily } from '../PlatformMember.js';
 import { Registration } from '../Registration.js';
 import { RegisterItem } from './RegisterItem.js';
 
@@ -33,7 +33,7 @@ describe('Unit.RegisterItem', () => {
             organizationId: organization.id,
             periodId: period.id,
         });
-        const family = PlatformFamily.create(blob, { platform: Platform.create({}) });
+        const family = PlatformFamilyHelper.fromBlob(blob, { platform: Platform.create({}) });
         const member = family.members[0];
         const item = RegisterItem.defaultFor(member, group, organization);
 
@@ -66,7 +66,7 @@ describe('Unit.RegisterItem', () => {
                     requireDefaultAgeGroupIds: ['default-age-group'],
                 }),
             });
-            const family = PlatformFamily.create(blob, { platform: Platform.create({}) });
+            const family = PlatformFamilyHelper.fromBlob(blob, { platform: Platform.create({}) });
             const member = family.members[0];
             const item = RegisterItem.defaultFor(member, group, organization);
 
@@ -112,7 +112,7 @@ describe('Unit.RegisterItem', () => {
                     requireDefaultAgeGroupIds: ['default-age-group'],
                 }),
             });
-            const family = PlatformFamily.create(blob, { platform: Platform.create({}) });
+            const family = PlatformFamilyHelper.fromBlob(blob, { platform: Platform.create({}) });
             const member = family.members[0];
             const item = RegisterItem.defaultFor(member, group, organization);
 
@@ -159,7 +159,7 @@ describe('Unit.RegisterItem', () => {
                     requireDefaultAgeGroupIds: ['default-age-group'],
                 }),
             });
-            const family = PlatformFamily.create(blob, { platform: Platform.create({}) });
+            const family = PlatformFamilyHelper.fromBlob(blob, { platform: Platform.create({}) });
             const member = family.members[0];
             const item = RegisterItem.defaultFor(member, group, organization);
 
@@ -211,7 +211,7 @@ describe('Unit.RegisterItem', () => {
                     period: period, // This cache is required to know whether the group should be locked or not
                 }),
             });
-            const family = PlatformFamily.create(blob, { platform });
+            const family = PlatformFamilyHelper.fromBlob(blob, { platform });
             const member = family.members[0];
             const item = RegisterItem.defaultFor(member, group, organization);
 
@@ -252,7 +252,7 @@ describe('Unit.RegisterItem', () => {
                     period: period, // This cache is required to know whether the group should be locked or not
                 }),
             });
-            const family = PlatformFamily.create(blob, { platform });
+            const family = PlatformFamilyHelper.fromBlob(blob, { platform });
             const member = family.members[0];
             const item = RegisterItem.defaultFor(member, group, organization);
 
@@ -292,7 +292,7 @@ describe('Unit.RegisterItem', () => {
                     period: futurePeriod, // This cache is required to know whether the group should be locked or not
                 }),
             });
-            const family = PlatformFamily.create(blob, { platform });
+            const family = PlatformFamilyHelper.fromBlob(blob, { platform });
             const member = family.members[0];
             const item = RegisterItem.defaultFor(member, group, organization);
 
@@ -334,7 +334,7 @@ describe('Unit.RegisterItem', () => {
                     period: futurePeriod, // This cache is required to know whether the group should be locked or not
                 }),
             });
-            const family = PlatformFamily.create(blob, { platform });
+            const family = PlatformFamilyHelper.fromBlob(blob, { platform });
             const member = family.members[0];
             const item = RegisterItem.defaultFor(member, group, organization);
 
@@ -374,7 +374,7 @@ describe('Unit.RegisterItem', () => {
                     period: futurePeriod, // This cache is required to know whether the group should be locked or not
                 }),
             });
-            const family = PlatformFamily.create(blob, { platform });
+            const family = PlatformFamilyHelper.fromBlob(blob, { platform });
             const member = family.members[0];
             const item = RegisterItem.defaultFor(member, group, organization);
 

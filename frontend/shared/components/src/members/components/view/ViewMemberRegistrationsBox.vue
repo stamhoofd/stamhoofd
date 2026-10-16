@@ -10,7 +10,7 @@
             </div>
         </h2>
 
-        <button v-if="!member.family.checkout.cart.isEmpty && app === 'registration'" class="info-box selectable icon" type="button" @click="openCart">
+        <button v-if="!PlatformFamilyHelper.getCheckout(member.family).cart.isEmpty && app === 'registration'" class="info-box selectable icon" type="button" @click="openCart">
             <span>{{ $t('%fw') }}</span>
             <span class="button icon arrow-right-small" />
         </button>
@@ -41,6 +41,7 @@
 </template>
 
 <script lang="ts" setup>
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';

@@ -1,6 +1,7 @@
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import type { XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import type { PlatformMember } from '@stamhoofd/structures';
-import { EmergencyContact, MemberDetails, MembersBlob, MemberWithRegistrationsBlob, Organization, Platform, PlatformFamily } from '@stamhoofd/structures';
+import { EmergencyContact, MemberDetails, MembersBlob, MemberWithRegistrationsBlob, Organization, Platform } from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';
 import { getBaseMemberColumns } from './members.js';
 
@@ -17,7 +18,7 @@ describe('Member excel export', () => {
                 ],
             });
 
-            const family = PlatformFamily.create(blob, { platform: Platform.create({}), contextOrganization: organization });
+            const family = PlatformFamilyHelper.fromBlob(blob, { platform: Platform.create({}), contextOrganization: organization });
             return family.members[0];
         }
 
@@ -70,7 +71,7 @@ describe('Member excel export', () => {
                 ],
             });
 
-            const family = PlatformFamily.create(blob, { platform: Platform.create({}), contextOrganization: organization });
+            const family = PlatformFamilyHelper.fromBlob(blob, { platform: Platform.create({}), contextOrganization: organization });
             return family.members[0];
         }
 

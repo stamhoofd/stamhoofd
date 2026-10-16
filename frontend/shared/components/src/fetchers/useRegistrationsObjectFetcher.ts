@@ -1,3 +1,4 @@
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import type { CountFilteredRequest, SortList } from '@stamhoofd/structures';
 import { assertSort, CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, PlatformRegistration, RegistrationsBlob, SortItemDirection } from '@stamhoofd/structures';
@@ -49,7 +50,7 @@ export function useRegistrationsObjectFetcher(overrides?: Partial<ObjectFetcher<
 
             console.log('[Done] Registrations.fetch', data, response.data);
 
-            const results = PlatformRegistration.createSingles(response.data.results, {
+            const results = PlatformFamilyHelper.createRegistrationSingles(response.data.results, {
                 contextOrganization: context.value.organization,
                 platform: platform.value,
             });

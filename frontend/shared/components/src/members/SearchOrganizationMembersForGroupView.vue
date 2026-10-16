@@ -53,6 +53,8 @@
 </template>
 
 <script setup lang="ts">
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
+import { PlatformMemberRegistrationHelper } from '@stamhoofd/structures/helpers/PlatformMemberRegistrationHelper.js';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
@@ -66,7 +68,7 @@ import { useErrors } from '#errors/useErrors.ts';
 import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
 import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
 import type { Group, Organization, PlatformMember, RegisterCheckout, SortList } from '@stamhoofd/structures';
-import { assertSort, isEmptyFilter, LimitedFilteredRequest, MembersBlob, PaginatedResponseDecoder, PlatformFamily, RegisterItem, SortItemDirection } from '@stamhoofd/structures';
+import { assertSort, isEmptyFilter, LimitedFilteredRequest, MembersBlob, PaginatedResponseDecoder, RegisterItem, SortItemDirection } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref, watchEffect } from 'vue';
 import { useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '../filters/filter-builders/members';
@@ -173,7 +175,7 @@ const fetcher = useInfiniteObjectFetcher<ObjectType>({
 
         const blob = response.data.results;
 
-        const results = PlatformFamily.createSingles(blob, {
+        const results = PlatformFamilyHelper.createSingles(blob, {
             contextOrganization: context.value.organization,
             platform: platform.value,
         });
@@ -217,7 +219,7 @@ const canSelectAll = computed(() => {
 
     for (const member of fetcher.objects) {
         if (!props.checkout.cart.containsMemberAndGroup(member.id, props.group.id)) {
-            if (member.canRegister(props.group, props.checkout.singleOrganization)) {
+            if (PlatformMemberRegistrationHelper.canRegister(member, props.group, props.checkout.singleOrganization)) {
                 return true;
             }
         }
@@ -233,7 +235,7 @@ const canUnselectAll = computed(() => {
 
     for (const member of fetcher.objects) {
         if (!props.checkout.cart.containsMemberAndGroup(member.id, props.group.id)) {
-            if (member.canRegister(props.group, props.checkout.singleOrganization)) {
+            if (PlatformMemberRegistrationHelper.canRegister(member, props.group, props.checkout.singleOrganization)) {
                 return false;
             }
         }

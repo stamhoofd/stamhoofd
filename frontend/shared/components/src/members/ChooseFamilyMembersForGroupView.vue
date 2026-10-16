@@ -18,6 +18,7 @@
 </template>
 
 <script setup lang="ts">
+import { PlatformFamilyHelper } from '@stamhoofd/structures/helpers/PlatformFamilyHelper.js';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import ExternalOrganizationContainer from '#containers/ExternalOrganizationContainer.vue';
 import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
@@ -34,7 +35,7 @@ const props = defineProps<{
 
 const hasNoMembers = computed(() => props.family.members.length === 0);
 
-const checkout = computed(() => props.family.checkout);
+const checkout = computed(() => PlatformFamilyHelper.getCheckout(props.family));
 const dismiss = useDismiss();
 
 function setOrganization(groupOrganization: Organization) {
