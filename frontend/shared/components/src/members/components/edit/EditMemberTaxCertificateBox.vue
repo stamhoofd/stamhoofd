@@ -179,6 +179,10 @@ useValidation(props.validator, () => {
         }
         return;
     }
+    if (!props.member.needsTaxCertificate) {
+        // Matches the template: the debtor question is not shown
+        return;
+    }
     if (parents.value.filter(p => p.isMemberTaxDependent).length === 0 && !isAdmin) {
         throw new SimpleError({
             code: 'invalid_field',
