@@ -17,9 +17,9 @@ The detailed generic API contracts live in the [library source](https://github.c
 
 Prefer the existing helpers instead of manually encoding/decoding at every call site:
 
-- **Frontend requests:** [SessionContext](../../frontend/shared/networking/src/SessionContext.ts) provides servers that send encodable request bodies and decode responses with the supplied decoder. [NetworkManager](../../frontend/shared/networking/src/NetworkManager.ts) owns the application's networking middleware.
-- **Local persistence:** [Storage](../../frontend/shared/networking/src/Storage.ts) abstracts browser/app storage. Store versioned JSON explicitly; do not assume a later app version can decode data without its original encoding version.
-- **Database persistence:** [models](../../backend/shared/models/src/models) can store structures in JSON columns through `@simonbackx/simple-database`. Stamhoofd's [QueryableModel](../../backend/shared/sql/src/QueryableModel.ts) supplies its additional query-building API.
-- **Backend endpoints:** [endpoint classes](../../backend/app/api/src/endpoints) declare typed input decoders and return structures through the endpoint framework. Do not replace this with unvalidated JSON or Express-style handlers.
+- **Frontend requests:** the [request guide](../frontend/requests.md) covers servers that send encodable request bodies and decode responses with the supplied decoder. [NetworkManager](../../frontend/shared/networking/src/NetworkManager.ts) owns the application's networking middleware.
+- **Local persistence:** the [storage guide](../frontend/local-storage.md) covers browser/app storage. Store versioned JSON explicitly; do not assume a later app version can decode data without its original encoding version.
+- **Database persistence:** the [database guide](../backend/database.md) covers structures in JSON columns through `@simonbackx/simple-database`. Stamhoofd's [QueryableModel](../../backend/shared/sql/src/QueryableModel.ts) supplies its additional query-building API.
+- **Backend endpoints:** the [endpoint guide](../backend/endpoints.md) covers typed input decoders and structure responses. Do not replace this with unvalidated JSON or Express-style handlers.
 
 Keep the encoding version and medium appropriate to the boundary. For persisted envelopes, `VersionBoxDecoder` returns a wrapper whose restored value is `.data`; it does not return the structure directly.

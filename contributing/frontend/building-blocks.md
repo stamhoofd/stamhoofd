@@ -126,6 +126,8 @@ helpers translate reordering into patches. Given a patch helper's `patched` and
 `useDraggableArray(() => patched.value, addArrayPatch)`. Read their declarations
 for the supported record/ID types. STList's cross-list update path is not supported.
 
+See [patching inside views](patching.md) for the editing hooks used by patch-backed lists.
+
 ## Icons and buttons
 
 Icons inherit the text color and use the generated `.icon` plus icon-name classes,
@@ -157,3 +159,5 @@ Select inputs from [components/src/inputs](../../frontend/shared/components/src/
 For example, `PhoneInput` supports `v-model="phone"` and `:validator="validator"`;
 import it from `@stamhoofd/components/inputs/PhoneInput.vue` and consult its props
 for required/nullable behavior. Input validation is not replaced by a visual box.
+
+The [form validation and errors guide](form-validation.md) remains TODO.

@@ -64,8 +64,7 @@ show, present, navigate, pop and dismiss when sequencing navigation.
 ## Reading path
 
 1. [Building blocks](building-blocks.md): full-view anatomy, lists, forms and styles.
-2. [View helpers](../../frontend/shared/components/src/hooks) and
-   [overlays](../../frontend/shared/components/src/overlays): application APIs.
+2. [View APIs](view-apis.md): application hooks, formatting, and overlays.
 3. [Navigation concepts](https://github.com/SimonBackx/vue-app-navigation/blob/main/docs/navigation-concepts.md):
    show/pop versus present/dismiss, with stack diagrams and videos.
 4. [Navigation actions](https://github.com/SimonBackx/vue-app-navigation/blob/main/docs/navigation-api.md):

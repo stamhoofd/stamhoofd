@@ -4,8 +4,7 @@ Stamhoofd uses `@simonbackx/simple-endpoints`, not Express. Endpoint classes liv
 in `backend/app/<app>/src/endpoints`; the main API is in
 [`backend/app/api/src/endpoints`](../../backend/app/api/src/endpoints).
 See the library's [endpoint lifecycle and example](https://github.com/SimonBackx/simple-endpoints/blob/master/docs/endpoints.md)
-for matching methods/paths, decoders and responses. That guide is part of this
-documentation migration and must be published before the link is available remotely.
+for matching methods/paths, decoders and responses.
 
 ## Inputs and responses
 
@@ -66,7 +65,7 @@ throw new SimpleError({
 `field` and `statusCode` are optional. Context configures request-local translation
 preferences; see its i18n setup rather than implementing header parsing in endpoints.
 Release tooling replaces Dutch source strings with translation keys: do not edit
-`shared/locales/src/nl.json` manually.
+`shared/locales/src/nl.json` manually. See [translations](../frontend/translations.md).
 
 ## Tests
 
