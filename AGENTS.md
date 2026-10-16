@@ -27,31 +27,15 @@ Follow the [translation conventions](contributing/frontend/translations.md) for 
 - For bugfixes: write a test that reproduces the bug, verify it fails before the fix and passes after.
 - Always run all linting, typechecking and tests before considering your work done.
 
-## Build ordering (the #1 source of confusing errors)
+## Build ordering
 
-### Turbo task graph
-
-`turbo.jsonc` enables local caching only for shared TypeScript builds. Outputs include `dist/**` (including locales, assets and migrations) and package-root `*.tsbuildinfo`. Inherited TypeScript configuration and shared global declarations are cache inputs. `.turbo/cache` is local to each checkout; remote caching is not configured.
-
-Shared builds use `^build` for normal dependencies and explicit task dependencies for internal peers and global type declarations. Turbo does not include peer dependencies in `^build`. Frontend source packages have dependency cycles: do not enable `^build` globally. Application builds, Playwright builds, tests, migrations, lint and typecheck are uncached; development tasks are persistent and uncached.
-
-`pnpm run build:shared` runs the shared Turbo graph. For a narrower build use `pnpm run build:global:shared` (only `./shared/*`) or `pnpm run build:backend:shared` (only `./backend/shared/*`); prerequisites are included automatically. CI persists `.turbo/cache` across shared-build jobs and uploads Turbo run summaries for cache diagnostics. It also uploads and downloads `shared-dist` to transfer the current build outputs between jobs. Lerna remains installed only for fixed versioning and npm publication.
+Read the [build-system guide](.development/README.md) when changing build configuration or investigating stale outputs. Packages consume built `dist/` output, not source; rebuild shared packages before using consumers. `pnpm stam test` manages its own prerequisite builds.
 
 `pnpm stam dev` runs API, renderer, statistics syncer, web-app, and webshop development scripts through explicit Turbo filters. These tasks are persistent and uncached. Development uses Turbo's loose environment mode so the CLI-generated backend, frontend, and Stripe environment reaches package processes. The docs server remains a direct Nuxt process because it does not consume shared build output.
 
 `pnpm stam build` builds shared packages, then those same five executable app owners through explicit uncached Turbo filters. Dashboard and registration are source packages bundled by web-app, not standalone build owners. `pnpm run build:backend:apps` explicitly builds API, renderer, backup, redirecter, and statistics syncer. Migrations run the API and statistics-syncer owners explicitly and serially.
 
 `pnpm stam` first runs cached Turbo builds for the CLI and its dependencies through `.development/stam.mjs`. When `devops/tsconfig.cli.json` exists, it also runs the cached root `build:stam-devops` task; `devops` remains a separate repository outside the workspace. Successful bootstrap builds are silent; failed builds print diagnostics to stderr. CLI arguments and exit status are preserved. There is no separate `stam-dev` command.
-
-CI discovers test scripts through Turbo directory filters for backend apps, backend shared packages, shared packages (plus i18n-uuid), and frontend shared packages. Tests remain uncached and use loose environment mode for the CI-provisioned services. Backend and browser suites run serially within their job; shared suites run with concurrency 2. Add a `test` script to include a package in its CI group; frontend app typecheck aliases and Playwright are outside these filters.
-
-`pnpm run clear:shared` removes build outputs but retains the Turbo cache. To rebuild without reading cache, run `pnpm run clear:shared && pnpm run build:shared --force`. Use `--dry=json` on the build command to inspect task dependencies and cache inputs.
-
-Packages consume each other's **built `dist/` output**, not source. After changing a shared package, consumers see stale code until you run `pnpm run build:shared`. Almost every "type error after editing a shared package", "test fails on module load", or "cached code keeps running" is fixed by running it first. Full reset when badly out of sync:
-
-```bash
-pnpm run clear && pnpm run clear-vite-cache && pnpm install && pnpm run build:shared
-```
 
 ## Commands
 
