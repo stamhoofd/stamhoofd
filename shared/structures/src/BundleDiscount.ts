@@ -82,7 +82,7 @@ export class BundleDiscount extends AutoEncoder {
             }
         }
 
-        for (const deletedRegistration of cart.deleteRegistrations) {
+        for (const { registration: deletedRegistration } of cart.deleteRegistrations) {
             const cc = group.getCalculationFor(deletedRegistration);
             cc?.remove(deletedRegistration);
         }
@@ -93,7 +93,7 @@ export class BundleDiscount extends AutoEncoder {
 
         for (const family of [
             ...cart.items.map(item => item.member.family),
-            ...cart.deleteRegistrations.map(registration => registration.member.family),
+            ...cart.deleteRegistrations.map(item => item.registration.member.family),
         ]) {
             if (loopedFamilies.has(family)) {
                 continue;

@@ -1474,7 +1474,7 @@ export class RegisterItem implements ObjectWithRecords {
      */
     getCartPendingStockReservations() {
         const deleteRegistrations = [
-            ...this.checkout.cart.deleteRegistrations.filter(r => r.registration.groupId === this.group.id),
+            ...this.checkout.cart.deleteRegistrations.map(r => r.registration).filter(r => r.registration.groupId === this.group.id),
             ...this.replaceRegistrations.filter(r => r.registration.groupId === this.group.id),
         ];
 

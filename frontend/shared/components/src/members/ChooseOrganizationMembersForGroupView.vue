@@ -26,7 +26,7 @@
         <SendConfirmationEmailBox v-if="checkout.cart.items.length" :checkout="checkout" :group="group" :group-organization="props.groupOrganization" :validator="errors.validator" />
 
         <STList>
-            <DeleteRegistrationRow v-for="registration in checkout.cart.deleteRegistrations" :key="registration.registration.id" class="right-stack" :registration="registration" :checkout="checkout" />
+            <DeleteRegistrationRow v-for="item in checkout.cart.deleteRegistrations" :key="item.id" class="right-stack" :registration="item.registration" :checkout="checkout" />
             <RegisterItemRow v-for="item in checkout.cart.items" :key="item.id" class="right-stack" :item="item" :show-group="false" />
             <BalanceItemCartItemRow v-for="item in checkout.cart.balanceItems" :key="item.id" class="right-stack" :item="item" :checkout="checkout" />
         </STList>
@@ -127,8 +127,8 @@ const chooseGroupForMember = useChooseGroupForMember();
 
 const isOnlyDeleting = computed(() => props.checkout.cart.items.length === 0 && props.checkout.cart.balanceItems.length === 0 && props.checkout.cart.deleteRegistrations.length > 0);
 const hasDeleteRegistrations = computed(() => props.checkout.cart.deleteRegistrations.length > 0);
-const hasPaidRegistrationDelete = computed(() => props.checkout.cart.deleteRegistrations.some(r => r.registration.balances.some(b => b.amountOpen > 0 || b.amountPaid > 0 || b.amountPending > 0)));
-const hadPaidByOrganization = computed(() => props.checkout.cart.deleteRegistrations.some(r => r.registration.payingOrganizationId && r.registration.balances.some(b => b.amountOpen > 0 || b.amountPaid > 0 || b.amountPending > 0)));
+const hasPaidRegistrationDelete = computed(() => props.checkout.cart.deleteRegistrations.some(r => r.registration.registration.balances.some(b => b.amountOpen > 0 || b.amountPaid > 0 || b.amountPending > 0)));
+const hadPaidByOrganization = computed(() => props.checkout.cart.deleteRegistrations.some(r => r.registration.registration.payingOrganizationId && r.registration.registration.balances.some(b => b.amountOpen > 0 || b.amountPaid > 0 || b.amountPending > 0)));
 let added = false;
 
 async function addMember() {
