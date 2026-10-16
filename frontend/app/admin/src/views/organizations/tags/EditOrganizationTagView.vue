@@ -61,12 +61,13 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { getOrganizationTagTypeName, OrganizationTag } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
-import { computed, ref } from 'vue';
+import { computed, getCurrentInstance, ref } from 'vue';
 import TagRow from './components/TagRow.vue';
 
 
 const errors = useErrors();
 const present = usePresent();
+const currentComponent = getCurrentInstance()!.type;
 const saving = ref(false);
 const deleting = ref(false);
 
@@ -190,7 +191,7 @@ async function editTag(tag: OrganizationTag) {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            AsyncComponent(() => import('./EditOrganizationTagView.vue'), {
+            AsyncComponent(() => Promise.resolve(currentComponent), {
                 allTags: allPatchedTags.value,
                 tag,
                 isNew: false,
@@ -208,7 +209,7 @@ async function addTag() {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            AsyncComponent(() => import('./EditOrganizationTagView.vue'), {
+            AsyncComponent(() => Promise.resolve(currentComponent), {
                 allTags: allPatchedTags.value,
                 tag,
                 isNew: true,
