@@ -1,13 +1,12 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { RegistrationPeriod } from '@stamhoofd/models';
-import { Group, Member, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Platform } from '@stamhoofd/models';
+import { Group, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { AuditLogSource, Group as GroupStruct, PermissionLevel } from '@stamhoofd/structures';
 import { PatchOrganizationRegistrationPeriodsEndpoint } from '../endpoints/organization/dashboard/registration-periods/PatchOrganizationRegistrationPeriodsEndpoint.js';
 import { AuditLogService } from '../services/AuditLogService.js';
-import { AuthenticatedStructures } from './AuthenticatedStructures.js';
-import { MemberUserSyncer } from './MemberUserSyncer.js';
 import { SetupStepUpdater } from './SetupStepUpdater.js';
+import { StartOrganizationRegistrationPeriodsEndpoint } from '../endpoints/organization/dashboard/registration-periods/StartOrganizationRegistrationPeriodsEndpoint.js';
 
 export class PeriodHelper {
     static async moveOrganizationToPeriod(organization: Organization, period: RegistrationPeriod) {
@@ -74,10 +73,11 @@ export class PeriodHelper {
             return currentPeriod;
         }
 
-        const struct = await AuthenticatedStructures.organizationRegistrationPeriod(currentPeriod);
-
-        const duplicate = struct.duplicate(period.getStructure());
-        return await PatchOrganizationRegistrationPeriodsEndpoint.createOrganizationPeriod(organization, duplicate);
+        return await StartOrganizationRegistrationPeriodsEndpoint.duplicateOrganizationRegistrationPeriod(
+            currentPeriod.id,
+            period,
+            organization,
+        );
     }
 
     static async moveAllOrganizationsToPeriod(period: RegistrationPeriod) {
