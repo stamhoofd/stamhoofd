@@ -174,6 +174,22 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
         id: 'organization',
         name: $t(`%wA`),
         width: 40,
+        getValue: (member: PlatformMember) => ({
+            value: member.getPrimaryOrganization({ periodId: platform.period.id })?.name ?? Context.i18n.$t('%5D'),
+        }),
+    },
+    {
+        id: 'uri',
+        name: $t(`%1O1`),
+        width: 30,
+        getValue: (member: PlatformMember) => ({
+            value: member.getPrimaryOrganization({ periodId: platform.period.id })?.uri ?? Context.i18n.$t('%5D'),
+        }),
+    },
+    {
+        id: 'organizations',
+        name: $t('%1KQ'),
+        width: 40,
         getValue: (member: PlatformMember) => {
             const organizations = member.filterOrganizations({ currentPeriod: true, types: [GroupType.Membership] });
             const str = Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' ' + $t(`%M1`) + ' ') || Context.i18n.$t('%5D');
@@ -184,8 +200,8 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
         },
     },
     {
-        id: 'uri',
-        name: $t(`%1O1`),
+        id: 'uris',
+        name: $t('%1KR'),
         width: 30,
         getValue: (member: PlatformMember) => {
             const organizations = member.filterOrganizations({ currentPeriod: true, types: [GroupType.Membership] });

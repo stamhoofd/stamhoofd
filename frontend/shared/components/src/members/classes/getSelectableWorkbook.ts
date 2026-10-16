@@ -117,6 +117,18 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
                         name: $t(`%1O1`),
                         enabled: false,
                     }),
+                    new SelectableColumn({
+                        id: 'organizations',
+                        name: $t('%1KQ'),
+                        description: $t('%1Jj'),
+                        enabled: false,
+                    }),
+                    new SelectableColumn({
+                        id: 'uris',
+                        name: $t('%1KR'),
+                        description: $t('%1Jk'),
+                        enabled: false,
+                    }),
                 ]
             : []),
         ...(platform.config.defaultAgeGroups.length > 0
