@@ -55,9 +55,9 @@
                 {{ $t('%8r') }}
             </p>
 
-            <PermyriadInputBox v-model="checkout.cancellationFeePercentage" :title="$t(`%2I`)" :min="0" :max="10000" :placeholder="$t(`%L`)" :validator="errors.validator" :error-box="errors.errorBox" />
+            <PermyriadInputBox v-model="cancellationFeePercentage" :title="$t(`%2I`)" :min="0" :max="10000" :placeholder="$t(`%L`)" :validator="errors.validator" :error-box="errors.errorBox" />
 
-            <p v-if="checkout.cancellationFeePercentage !== 0 && checkout.cancellationFeePercentage !== 10000" class="style-description-small">
+            <p v-if="cancellationFeePercentage !== 0 && cancellationFeePercentage !== 10000" class="style-description-small">
                 {{ $t('%dt') }}
             </p>
         </div>
@@ -129,6 +129,14 @@ const isOnlyDeleting = computed(() => props.checkout.cart.items.length === 0 && 
 const hasDeleteRegistrations = computed(() => props.checkout.cart.deleteRegistrations.length > 0);
 const hasPaidRegistrationDelete = computed(() => props.checkout.cart.deleteRegistrations.some(r => r.registration.registration.balances.some(b => b.amountOpen > 0 || b.amountPaid > 0 || b.amountPending > 0)));
 const hadPaidByOrganization = computed(() => props.checkout.cart.deleteRegistrations.some(r => r.registration.registration.payingOrganizationId && r.registration.registration.balances.some(b => b.amountOpen > 0 || b.amountPaid > 0 || b.amountPending > 0)));
+const cancellationFeePercentage = computed({
+    get: () => props.checkout.cart.deleteRegistrations[0]?.cancellationFeePercentage ?? 0,
+    set: (value: number) => {
+        for (const item of props.checkout.cart.deleteRegistrations) {
+            item.cancellationFeePercentage = value;
+        }
+    },
+});
 let added = false;
 
 async function addMember() {
