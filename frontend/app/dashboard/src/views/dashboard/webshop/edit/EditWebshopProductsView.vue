@@ -62,7 +62,7 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { Category, PrivateWebshop, Product, ProductType, WebshopMetaData, WebshopTicketType } from '@stamhoofd/structures';
+import { Category, PrivateWebshop, Product, ProductType, WebshopMetaData, WebshopOrderMode, WebshopTicketType } from '@stamhoofd/structures';
 import CategoryRow from './categories/CategoryRow.vue';
 import ProductRow from './products/ProductRow.vue';
 
@@ -100,9 +100,9 @@ const viewTitle = computed(() => {
 const isTickets = computed(() => webshop.value.meta.ticketType === WebshopTicketType.Tickets);
 
 const cartEnabled = computed({
-    get: () => webshop.value.meta.cartEnabled,
+    get: () => webshop.value.meta.orderMode === WebshopOrderMode.Cart,
     set: (cartEnabled: boolean) => {
-        const patch = WebshopMetaData.patch({ cartEnabled });
+        const patch = WebshopMetaData.patch({ orderMode: cartEnabled ? WebshopOrderMode.Cart : WebshopOrderMode.Single });
         addPatch(PrivateWebshop.patch({ meta: patch }));
     },
 });

@@ -235,7 +235,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         this.fieldAnswers = newAnswers;
     }
 
-    validateCart(webshop: Webshop, organizationMeta: OrganizationMetaData, asAdmin = false) {
+    validateCart(webshop: Webshop, organizationMeta: OrganizationMetaData, asAdmin = false, options: { validateSeats?: boolean; validateDetails?: boolean } = {}) {
         if (this.cart.items.length === 0) {
             throw new SimpleError({
                 code: 'cart_empty',
@@ -260,7 +260,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         }
 
         try {
-            this.cart.validate(webshop, asAdmin);
+            this.cart.validate(webshop, asAdmin, options);
         } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 e.addNamespace('cart');
