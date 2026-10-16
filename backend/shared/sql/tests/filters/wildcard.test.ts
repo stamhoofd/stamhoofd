@@ -1,5 +1,6 @@
-import type { SQLFilterDefinitions} from '../../src/filters/SQLFilter.js';
-import { baseSQLFilterCompilers, createColumnFilter, createWildcardColumnFilter, SQLValueType } from '../../src/filters/SQLFilter.js';
+import { baseSQLFilterCompilers, createColumnFilter, createWildcardColumnFilter } from '../../src/filters/SQLFilter.js';
+import type { SQLFilterDefinitions } from '../../src/filters/SQLFilterTypes.js';
+import { SQLValueType } from '../../src/filters/SQLFilterTypes.js';
 import { SQL } from '../../src/SQL.js';
 import { test } from '../utils/index.js';
 
