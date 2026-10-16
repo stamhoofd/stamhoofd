@@ -410,7 +410,7 @@ export enum WebshopOrderMode {
     Single = 'Single',
 
     /**
-     * All products are listed with an amount input, no cart. Every cart item is one unit (amount 1).
+     * All products are listed with an amount input, no cart.
      */
     Bulk = 'Bulk',
 }

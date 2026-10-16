@@ -414,7 +414,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
         );
     }
 
-    if (preview.value.meta.orderMode !== WebshopOrderMode.Cart) {
+    if (preview.value.meta.orderMode === WebshopOrderMode.Single) {
         cols.push(
             new Column<PrivateOrderWithTickets, string>({
                 name: $t('%Sc'),
