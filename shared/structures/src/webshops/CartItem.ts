@@ -5,7 +5,6 @@ import { DataValidator, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { CartReservedSeat, ReservedSeat } from '../SeatingPlan.js';
-import type { Cart } from './Cart.js';
 import type { StockDefinition } from './CartStockHelper.js';
 import { CartStockHelper } from './CartStockHelper.js';
 import { ProductDiscountSettings } from './Discount.js';
@@ -14,6 +13,20 @@ import type { Webshop } from './Webshop.js';
 import { WebshopFieldAnswer } from './WebshopField.js';
 import { UitpasNumberAndPrice } from './UitpasNumberAndPrice.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
+
+type CartItemCart = {
+    items: {
+        id: string;
+        code: string;
+        product: { id: string };
+        productPrice: { id: string };
+        amount: number;
+        reservedAmount: number;
+        options: { option: { id: string } }[];
+        seats: CartReservedSeat[];
+        reservedSeats: CartReservedSeat[];
+    }[];
+};
 
 export class CartItemPrice extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
@@ -173,7 +186,7 @@ export class CartItem extends AutoEncoder {
         return this.reservedOptions.get(optionId) || 0;
     }
 
-    static createDefault(product: Product, cart: Cart, webshop: Webshop, data: { admin: boolean }): CartItem {
+    static createDefault(product: Product, cart: CartItemCart, webshop: Webshop, data: { admin: boolean }): CartItem {
         // Return the first that still has stock or the first if none has stock
         const options: CartItemOption[] = [];
 
@@ -270,7 +283,7 @@ export class CartItem extends AutoEncoder {
     /**
      * Return total amount of same product in the given cart. Always includes the current item, even when it isn't in the cart. Doesn't count it twice
      */
-    getTotalAmount(cart: Cart) {
+    getTotalAmount(cart: CartItemCart) {
         return cart.items.reduce((c, item) => {
             if (item.product.id !== this.product.id) {
                 return c;
@@ -286,7 +299,7 @@ export class CartItem extends AutoEncoder {
     /**
      * Note: this resets any discounts that are applied to the cart item
      */
-    calculatePrices(cart: Cart) {
+    calculatePrices(cart: CartItemCart) {
         const prices: CartItemPrice[] = [];
         const unitPrice = this.calculateUnitPrice(cart);
         for (let i = 0; i < this.amount; i++) {
@@ -313,7 +326,7 @@ export class CartItem extends AutoEncoder {
         this.calculatedPrices = prices;
     }
 
-    private calculateUnitPrice(cart: Cart): number {
+    private calculateUnitPrice(cart: CartItemCart): number {
         const amount = this.getTotalAmount(cart);
         let price = this.productPrice.price;
 
@@ -324,7 +337,7 @@ export class CartItem extends AutoEncoder {
         return this.unitPrice;
     }
 
-    calculateOptionsPrice(cart: Cart, priceBeforeOptions: number): number {
+    calculateOptionsPrice(cart: CartItemCart, priceBeforeOptions: number): number {
         let price = priceBeforeOptions;
         for (const option of this.options) {
             price += option.option.price;
@@ -339,7 +352,7 @@ export class CartItem extends AutoEncoder {
      * @deprecated
      * Use this method if you need temporary prices in case it is not yet calculated
      */
-    getUnitPrice(cart: Cart): number {
+    getUnitPrice(cart: CartItemCart): number {
         if (this.unitPrice) {
             return this.unitPrice;
         }
@@ -358,7 +371,7 @@ export class CartItem extends AutoEncoder {
      * @deprecated: use other systems
      * Prices that are only applicable to some amount, but not all (e.g. seat extra prices)
      */
-    getPartialExtraPrice(cart: Cart) {
+    getPartialExtraPrice(cart: CartItemCart) {
         const unitPrice = this.getUnitPrice(cart);
         const expectedPrice = unitPrice * this.amount;
         const actualPrice = this.getPriceWithoutDiscounts();
@@ -662,7 +675,7 @@ export class CartItem extends AutoEncoder {
         errors.throwIfNotEmpty();
     }
 
-    getFixedStockDefinitions(oldItem: CartItem | null | undefined, cart: Cart, webshop: Webshop, admin: boolean): StockDefinition[] {
+    getFixedStockDefinitions(oldItem: CartItem | null | undefined, cart: CartItemCart, webshop: Webshop, admin: boolean): StockDefinition[] {
         return CartStockHelper.getFixedStockDefinitions({ oldItem, cart, product: this.product, webshop, admin, amount: this.amount });
     }
 
@@ -670,11 +683,11 @@ export class CartItem extends AutoEncoder {
      * Return all the stock definitions for this cart item with the currently selected options
      * = calculate how much you can order with these options
      */
-    getAvailableStock(oldItem: CartItem | null | undefined, cart: Cart, webshop: Webshop, admin: boolean): StockDefinition[] {
+    getAvailableStock(oldItem: CartItem | null | undefined, cart: CartItemCart, webshop: Webshop, admin: boolean): StockDefinition[] {
         return CartStockHelper.getAvailableStock({ oldItem, cart, product: this.product, webshop, admin, amount: this.amount, productPrice: this.productPrice, options: this.options });
     }
 
-    getMaximumRemaining(oldItem: CartItem | null | undefined, cart: Cart, webshop: Webshop, admin: boolean) {
+    getMaximumRemaining(oldItem: CartItem | null | undefined, cart: CartItemCart, webshop: Webshop, admin: boolean) {
         return CartStockHelper.getRemaining(this.getAvailableStock(oldItem, cart, webshop, admin));
     }
 
@@ -737,7 +750,7 @@ export class CartItem extends AutoEncoder {
     /**
      * Update self to the newest available data and throw if it was not able to recover
      */
-    validate(webshop: Webshop, cart: Cart, { refresh, admin, validateSeats }: { refresh?: boolean; admin?: boolean; validateSeats?: boolean } = { refresh: true, admin: false, validateSeats: true }) {
+    validate(webshop: Webshop, cart: CartItemCart, { refresh, admin, validateSeats }: { refresh?: boolean; admin?: boolean; validateSeats?: boolean } = { refresh: true, admin: false, validateSeats: true }) {
         this.cartError = null;
 
         if (admin === undefined) {
