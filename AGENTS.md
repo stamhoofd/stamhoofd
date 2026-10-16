@@ -13,7 +13,7 @@ pnpm monorepo (Lerna + workspaces). Node.js + TypeScript backend · Vue 3 + Vite
 - `frontend/app/*` — `dashboard`, `registration`, `webshop`, `mobile` SPAs. `frontend/shared/*` — shared frontend packages. Navigation uses `@simonbackx/vue-app-navigation`.
 - `tests/playwright` — E2E tests.
 
-Backend uses a custom router (`@simonbackx/simple-endpoints`), **not Express**: each endpoint is a class in `backend/app/api/src/endpoints/**` with typed input decoders, returning structures. Errors use `@simonbackx/simple-errors`. Endpoints translate between database models and structures.
+Read the [endpoint guide](contributing/backend/endpoints.md) before changing backend endpoints, including its architecture, authorization, and testing requirements.
 
 ### Translations
 
@@ -24,7 +24,6 @@ Follow the [translation conventions](contributing/frontend/translations.md) for 
 - Read and follow the [development guidelines](contributing/development-guidelines.md) for coding conventions, imports, testing expectations, and validation.
 - **Never modify `@stamhoofd/structures` without first reading [Stamhoofd's versioning policy](contributing/structures/versioning.md) and the linked library versioning guide.** Structures are versioned so old clients keep working; a change ripples across the whole codebase.
 - **Never change files unrelated to your current task.**
-- Write tests for all backend endpoint changes (unit + integration), and Playwright tests for new UI views (most important happy path). Cover many situations with few tests, without gigantic single tests. Use `TestUtils.setEnvironment(...)` to simulate environments.
 - For bugfixes: write a test that reproduces the bug, verify it fails before the fix and passes after.
 - Always run all linting, typechecking and tests before considering your work done.
 
