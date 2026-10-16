@@ -1,5 +1,6 @@
 import {
     BalanceItem,
+    Document,
     Member,
     MemberPlatformMembership,
     MemberResponsibilityRecord,
