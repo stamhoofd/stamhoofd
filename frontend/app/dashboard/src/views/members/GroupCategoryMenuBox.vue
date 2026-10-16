@@ -68,6 +68,8 @@ const tree = computed(() => {
 const getCategoryActions = useGroupCategoryActions();
 // Same rule as the category tree above: only list waiting lists the admin can open
 const filteredWaitingLists = computed(() => props.period.waitingLists.filter(w => w.eventId === null && w.deletedAt === null && auth.canAccessGroup(w, PermissionLevel.Read, undefined, props.period)));
+// Waiting lists are not part of the category tree, but open through the same group route
+const menuGroups = computed(() => [...tree.value.getAllGroups(), ...filteredWaitingLists.value]);
 
 enum Routes {
     Checklist = 'checklist',
@@ -104,6 +106,14 @@ defineRoute({
             },
         };
     },
+    isDefault: tree.value.getAllCategories().length > 0 && menuGroups.value.length === 0
+        ? {
+                properties: {
+                    category: tree.value.getAllCategories()[0],
+                    period: props.period,
+                },
+            }
+        : undefined,
 });
 
 defineRoute({
@@ -115,7 +125,7 @@ defineRoute({
     show: 'detail',
     component: async () => ((await import('../dashboard/groups/GroupOverview.vue')).default),
     paramsToProps: (params) => {
-        const group = tree.value.getAllGroups().find(g => Formatter.slug(g.settings.name) === params.slug);
+        const group = menuGroups.value.find(g => Formatter.slug(g.settings.name) === params.slug);
         if (!group) {
             throw new Error('Group not found');
         }
@@ -131,10 +141,10 @@ defineRoute({
             },
         };
     },
-    isDefault: tree.value.getAllGroups().length
+    isDefault: menuGroups.value.length
         ? {
                 properties: {
-                    group: tree.value.getAllGroups()[0],
+                    group: menuGroups.value[0],
                     period: props.period,
                 },
             }
