@@ -3,6 +3,7 @@ import { PatchMap, patchObject } from '@simonbackx/simple-encoding';
 import type { Ref} from 'vue';
 import { computed, ref, unref } from 'vue';
 
+/** Accumulate map edits over a value or ref; null entries delete keys. `hasChanges` checks patch size, not equality. */
 export function usePatchMap<K, T>(obj: Map<K, T> | Ref<Map<K, T>>): {
     patched: Ref<Map<K, T>>;
     patch: Ref<PatchMap<K, T | ConvertArrayToPatchableArray<T> | null>>;
