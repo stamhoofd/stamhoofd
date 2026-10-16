@@ -22,17 +22,15 @@ Backend uses a custom router (`@simonbackx/simple-endpoints`), **not Express**: 
 - Write new text by wrapping it with $t(...) (keep it in Dutch). e.g. $t('Opslaan'). Keep it like that in your commits. The build script will replace this later in separate commits on release with % prefixed keys.
 - Do not alter `shared/locales/src/nl.json`. If text needs changes, replace the existing $t with a new one with the new Dutch text. Our scripts will deduplicate and merge as required on release.
 - `SimpleError.message` should not use $t. It should be plain text in English. `SimpleError.human` on the other hand should use `$t` and is translated automatically.
-- Test names, methods, properties and code comments should be in English.
 
 ## Rules
 
+- Read and follow the [development guidelines](contributing/development-guidelines.md) for coding conventions, imports, testing expectations, and validation.
 - **Never modify `@stamhoofd/structures` without first reading [Stamhoofd's versioning policy](contributing/structures/versioning.md) and the linked library versioning guide.** Structures are versioned so old clients keep working; a change ripples across the whole codebase.
 - **Never change files unrelated to your current task.**
 - Write tests for all backend endpoint changes (unit + integration), and Playwright tests for new UI views (most important happy path). Cover many situations with few tests, without gigantic single tests. Use `TestUtils.setEnvironment(...)` to simulate environments.
 - For bugfixes: write a test that reproduces the bug, verify it fails before the fix and passes after.
 - Always run all linting, typechecking and tests before considering your work done.
-
-- Comments must make code faster to understand, so keep them short and only document what a reader cannot infer from the code: a non-obvious invariant, an external constraint, a gotcha. **Never comment your own reasoning** — why you chose a design, what the code used to be, what a refactor moved. That belongs in the PR description. Strip such comments when you encounter them.
 
 ## Build ordering (the #1 source of confusing errors)
 
@@ -95,27 +93,9 @@ E2E setup uses an uncached Turbo task filtered to `@stamhoofd/web-app` and `@sta
 
 Never use different commands to run tests. On environment issues (domains don't resolve, SSL errors, blank pages): STOP and ask the user to fix it.
 
-### Imports
-
-Prefer modern exports and imports in package.json.
-
-```ts
-// ✅ Same package, higher in the folder tree
-import { Foo } from '#components/Foo.js';
-
-// ✅ Other package (skip 'src/', no extension for .ts)
-import { Bar } from '@stamhoofd/package-name/components/Bar';
-
-// ✅ Vue files always need the extension
-import MyView from '@stamhoofd/package-name/views/MyView.vue';
-
-// 🚫 Never create, extend, or reference barrel files (legacy pattern)
-```
-
 # Writing style
 
 - Keep responses focused, brief, and concise. Avoid metaphors and buzzwords.
-- Avoid adding comments in code that are obvious or are not useful to other people in the future.
 - Match the length of written documents to what the task needs: cover the substance, but do not pad with filler sections, redundant summaries, or boilerplate.
 
 <!-- BEGIN:turborepo-agent-rules -->

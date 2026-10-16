@@ -39,6 +39,30 @@ Use `ref #STA-ID`, `fixes #STA-ID`, or `closes #STA-ID` as appropriate; omit the
 
 Keep refactoring, feature/fix work, and generated release/translation updates separate so reviewers and release-note writers can identify each change.
 
+## Coding conventions
+
+- Write test names, methods, properties, and code comments in English.
+- Follow the [translation conventions](frontend/translations.md) for user-facing text and errors.
+- Before changing structures, read [Stamhoofd's versioning policy](structures/versioning.md) and its linked library guide. Preserve compatibility with older clients.
+- Keep comments short and document only what a reader cannot infer from the code: a non-obvious invariant, external constraint, or gotcha. Design decisions and explanations of what a change moved or replaced belong in the PR description. Apply this standard to code touched by the contribution.
+
+### Imports
+
+Prefer modern package exports and imports in `package.json`:
+
+```ts
+// Same package, higher in the folder tree
+import { Foo } from '#components/Foo.js';
+
+// Other package: omit src/ and the .ts extension
+import { Bar } from '@stamhoofd/package-name/components/Bar';
+
+// Vue files always need the extension
+import MyView from '@stamhoofd/package-name/views/MyView.vue';
+```
+
+Never create, extend, or reference barrel files; they are a legacy pattern.
+
 ## Test the behavior you change
 
 For a bugfix, **write a regression test first**, run it to verify that it fails for the intended reason, and commit it as proof of the bug. Then fix the implementation in a following commit and verify that the same test passes. Keep the regression test.
@@ -49,14 +73,24 @@ For a bugfix, **write a regression test first**, run it to verify that it fails 
 - Test permissions, including unauthorized access. UI gating does not replace backend authorization.
 - Backend endpoint changes need unit and integration tests. Cover multiple situations with focused tests rather than one enormous test.
 
-Follow [AGENTS.md](../AGENTS.md) for repository-specific requirements and the [CLI test guide](../shared/cli/README.md#tests) for available options. From the repository root, the final checks are:
+### Validation
+
+Always prefer `stam` over lower-level scripts or commands. Use `pnpm stam` from the repository root when the shortcut is unavailable. See the [CLI test guide](../shared/cli/README.md#tests) for options.
+
+Run all linting, typechecking, and tests before considering a contribution complete. The full validation command builds applications, then runs lint, typecheck, unit tests, and E2E tests:
 
 ```sh
-pnpm run lint
-pnpm run typecheck
+pnpm stam check all
+```
+
+For individual checks during development:
+
+```sh
+pnpm stam check lint
+pnpm stam check typecheck
 pnpm stam test unit
 ```
 
 Use `pnpm stam test api` for focused API tests and `pnpm stam test e2e` for Playwright. The CLI owns shared builds, isolated database setup, migrations, environment configuration, and teardown. Do not provision an alternative test database or invoke/build Playwright manually. On infrastructure problems, stop and ask for help; do not present a failed or skipped check as successful.
 
-Shared packages are consumed through built `dist/` output. For development after shared source changes, follow the build-order instructions in [AGENTS.md](../AGENTS.md); the test CLI performs its own prerequisite builds.
+Shared packages are consumed through built `dist/` output. For development after shared source changes, follow the [CLI build workflow](../shared/cli/README.md#development-configuration); the test CLI performs its own prerequisite builds.
