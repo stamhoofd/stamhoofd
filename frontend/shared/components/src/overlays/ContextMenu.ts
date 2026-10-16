@@ -21,7 +21,8 @@ export class ContextMenuItem {
     destructive = false;
 
     /**
-     * Return true when the context menu should get closed.
+     * Called with this item as `this`. The menu closes after a leaf click;
+     * return values are ignored and returned promises are not awaited by the view.
      */
     action: ((this: ContextMenuItem) => unknown | Promise<void>) | null = null;
 
@@ -55,6 +56,11 @@ export class ContextMenu {
         return new ComponentWithProperties(GeneralContextMenuView, { menu: this });
     }
 
+    /**
+     * Present at an event position or button bounds; defaults to right/bottom placement.
+     * Mutates the position options. Resolves with this menu after dispatching presentation,
+     * not after selecting an item or closing it.
+     */
     async show(position: { component?: typeof NavigationMixin; clickEvent?: TouchEvent | MouseEvent; button?: HTMLElement; x?: number; y?: number; xPlacement?: 'right' | 'left'; yPlacement?: 'bottom' | 'top'; wrapWidth?: number; wrapHeight?: number; yOffset?: number; xOffset?: number }) {
         if (position.button) {
             const bounds = position.button.getBoundingClientRect();

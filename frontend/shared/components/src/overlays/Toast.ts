@@ -103,6 +103,7 @@ export class Toast {
         return this;
     }
 
+    /** Set the autohide delay in milliseconds (default 8,000); null keeps it visible until manually hidden. */
     setHide(ms: number | null) {
         this.autohideAfter = ms;
         return this;
@@ -147,6 +148,7 @@ export class Toast {
         }
     }
 
+    /** Notify the UI listener (retrying until one exists) and return this toast, not a dismissal promise. */
     show() {
         if (Toast.listeners.size === 0) {
             console.log('Delayed Toast show');

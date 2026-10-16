@@ -125,8 +125,9 @@ export class CenteredMessage {
     }
 
     /**
-     * @param requireCheckbox if a text is provided a checkbox has to be checked first before the message can be confirmed
-     * @returns
+     * Show confirm/cancel buttons and resolve true/false when a button is chosen.
+     * Destructive styling defaults to true. requireCheckbox supplies text for a
+     * checkbox that must be accepted before confirming. Requires a message listener.
      */
     static confirm(options: ConfirmOptions): Promise<boolean>;
     /** @deprecated, use options variant */ static confirm(text: string, confirmText: string, description?: string, cancelText?: string, destructive?: boolean, requireCheckbox?: string): Promise<boolean>;
@@ -167,6 +168,7 @@ export class CenteredMessage {
         });
     }
 
+    /** Resolve the chosen button's value; displaying/hiding the message alone does not resolve the promise. */
     static show<
         // Some magic to make sure TypeScript infers the return type of the promise based on the value of the buttons
         const Buttons extends readonly {
