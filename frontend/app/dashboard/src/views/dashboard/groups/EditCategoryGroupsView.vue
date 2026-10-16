@@ -42,7 +42,7 @@
             <hr><h2>{{ $t('%LL') }}</h2>
             <STList v-model="draggableCategories" :draggable="true">
                 <template #item="{item: category}">
-                    <GroupCategoryRow :category="category" :periods="patchedPeriods" :period="patchedPeriod" :organization="organization" @patch:periods="addPeriodsArrayPatch" />
+                    <GroupCategoryRow :category="category" :periods="patchedPeriods" :period="patchedPeriod" :organization="organization" :category-editor-loader="categoryEditorLoader" @patch:periods="addPeriodsArrayPatch" />
                 </template>
             </STList>
         </template>
@@ -99,9 +99,11 @@ import { useCreateCategoryView } from '../settings/hooks/useCreateCategoryView';
 import { useCreateGroupView } from '../settings/hooks/useCreateGroupView';
 import GroupCategoryRow from './GroupCategoryRow.vue';
 import GroupRow from './GroupRow.vue';
+import type { CategoryEditorLoader } from './CategoryEditorLoader';
 
 const props = defineProps<{
     organization: Organization;
+    categoryEditorLoader: CategoryEditorLoader;
     category: GroupCategory;
     isNew: boolean;
     period: OrganizationRegistrationPeriod;
@@ -253,7 +255,7 @@ async function createGroup() {
     await createGroupView(patchedPeriod.value, patchedCategory.value);
 }
 
-const createCategoryView = useCreateCategoryView((patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
+const createCategoryView = useCreateCategoryView(props.categoryEditorLoader, (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
     addPeriodsArrayPatch(patch);
 });
 

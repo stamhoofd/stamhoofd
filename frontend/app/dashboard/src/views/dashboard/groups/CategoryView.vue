@@ -265,5 +265,5 @@ async function createGroup() {
 
 // Right-click actions on the rows (saved straight to the API)
 const getGroupActions = useGroupActions();
-const getCategoryActions = useGroupCategoryActions();
+const getCategoryActions = useGroupCategoryActions(() => import('./EditCategoryGroupsView.vue'));
 </script>

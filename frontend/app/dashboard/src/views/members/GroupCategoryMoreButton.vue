@@ -16,6 +16,6 @@ const props = withDefaults(
     },
 );
 
-const { showMenu, canShowMenu } = useGroupCategoryActions()(props);
+const { showMenu, canShowMenu } = useGroupCategoryActions(() => import('../dashboard/groups/EditCategoryGroupsView.vue'))(props);
 
 </script>
