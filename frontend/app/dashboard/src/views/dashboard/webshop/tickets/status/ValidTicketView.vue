@@ -368,9 +368,9 @@
 
 <script lang="ts" setup>
 import { useCanPop, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
+import { ColorHelper } from '@stamhoofd/networking/ColorHelper';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';

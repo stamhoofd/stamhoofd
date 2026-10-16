@@ -27,7 +27,7 @@ import type { PaymentGeneral } from '@stamhoofd/structures';
 import { BalanceItemRelationType, BalanceItemType, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { onMounted } from 'vue';
-import { GlobalEventBus } from '../EventBus';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 
 // We only pass in the payment for compatibility with URL handling
 const props = withDefaults(

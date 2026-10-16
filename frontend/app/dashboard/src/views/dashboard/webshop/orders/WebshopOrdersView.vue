@@ -20,7 +20,7 @@
 
 <script lang="ts" setup>
 import { Request } from '@simonbackx/simple-networking';
-import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 import { getWebshopOrderUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/orders.ts';
 import type { UIFilterBuilders } from '@stamhoofd/components/filters/UIFilter.ts';
 import { useIsMobile } from '@stamhoofd/components/hooks/useIsMobile.ts';

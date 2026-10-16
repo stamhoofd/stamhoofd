@@ -25,7 +25,7 @@
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 
-import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 import SetupStepRows from '@stamhoofd/components/setupSteps/SetupStepRows.vue';
 import TransitionFade from '@stamhoofd/components/transitions/TransitionFade.vue';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';

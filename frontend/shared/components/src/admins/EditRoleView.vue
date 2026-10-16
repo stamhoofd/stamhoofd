@@ -261,7 +261,7 @@ import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import type { OrganizationRegistrationPeriod, PermissionRoleDetailed, RegistrationPeriod, User, WebshopPreview } from '@stamhoofd/structures';
 import { AccessRight, getGroupTypeName, getPermissionLevelName, getPermissionLevelNumber, getUnlistedResources, GroupType, maximumPermissionlevel, PermissionLevel, PermissionRoleForResponsibility, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
-import { useSearchEventsInPeriod } from '@stamhoofd/networking/hooks/useGetEvents';
+import { useSearchEventsInPeriod } from '#hooks/useGetEvents.ts';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import AccessRightPermissionRow from './components/AccessRightPermissionRow.vue';

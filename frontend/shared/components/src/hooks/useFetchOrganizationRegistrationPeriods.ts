@@ -1,12 +1,12 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { useRequiredOrganization } from '#hooks/useOrganization.ts';
 import type { Organization } from '@stamhoofd/structures';
 import { LimitedFilteredRequest, OrganizationRegistrationPeriod, PaginatedResponseDecoder, RegistrationPeriodList, SortItemDirection } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
-import { useFetchRegistrationPeriods } from './useFetchRegistrationPeriods';
-import { useRequestOwner } from './useRequestOwner';
+import { useFetchRegistrationPeriods } from '#hooks/useFetchRegistrationPeriods.ts';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { reactive } from 'vue';
 import type { Ref } from 'vue';
 

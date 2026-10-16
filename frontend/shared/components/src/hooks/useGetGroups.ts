@@ -1,9 +1,9 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import { useContext } from '@stamhoofd/components/hooks/useContext';
+import { useContext } from '#hooks/useContext.ts';
 import { Group, LimitedFilteredRequest, PaginatedResponseDecoder } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { useRequestOwner } from './useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 
 export function useGetGroupsById() {
     const context = useContext();

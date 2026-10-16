@@ -9,7 +9,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, useDismiss, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions';
-import { GlobalEventBus } from '@stamhoofd/components/EventBus';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useLoadOrganization } from '@stamhoofd/components/groups/hooks/useExternalOrganization';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';

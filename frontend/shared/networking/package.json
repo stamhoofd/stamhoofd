@@ -25,7 +25,6 @@
         "@simonbackx/simple-networking": "1.23.0",
         "@simonbackx/vue-app-navigation": "2.25.1",
         "@simplewebauthn/browser": "13.3.0",
-        "@stamhoofd/components": "workspace:*",
         "@stamhoofd/frontend-i18n": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/types": "workspace:*",

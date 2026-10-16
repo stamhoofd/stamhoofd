@@ -1,7 +1,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 
 import { ViewportHelper } from '../ViewportHelper';
-import { GlobalEventBus } from '../EventBus';
+import { GlobalEventBus } from '@stamhoofd/networking/EventBus';
 /***
  * Distributes errors to components that ask for it. The first that asks receives
  */
