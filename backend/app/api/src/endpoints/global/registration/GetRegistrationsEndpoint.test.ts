@@ -1042,6 +1042,100 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
                 STExpect.errorWithCode('permission_denied'),
             );
         });
+
+        test('A platform role on a national event grants access to the registrations of its group and waiting list', async () => {
+            const organization = await new OrganizationFactory({ period }).create();
+            const waitingList = await new GroupFactory({ organization, period, type: GroupType.WaitingList }).create();
+            const group = await new GroupFactory({ organization, period, type: GroupType.EventRegistration, waitingListId: waitingList.id }).create();
+            const event = await new EventFactory({
+                group,
+                startDate: period.startDate,
+                endDate: period.endDate,
+            }).create();
+            expect(event.organizationId).toBeNull();
+
+            const registration = await new RegistrationFactory({ member: await new MemberFactory({}).create(), group }).create();
+            const waitingListRegistration = await new RegistrationFactory({ member: await new MemberFactory({}).create(), group: waitingList }).create();
+
+            const role = PermissionRoleDetailed.create({
+                name: 'National event role',
+                resources: new Map([[
+                    PermissionsResourceType.Events,
+                    new Map([[event.id, ResourcePermissions.create({ level: PermissionLevel.Read })]]),
+                ]]),
+            });
+            const platform = await Platform.getForEditing();
+            platform.privateConfig.roles.push(role);
+            await platform.save();
+
+            const user = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.None, roles: [role] }),
+            }).create();
+            const userWithoutRole = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.None }),
+            }).create();
+
+            const fetchRegistrations = async (token: Token, groupId: string) => await testServer.test(endpoint, Request.get({
+                path: baseUrl,
+                query: new LimitedFilteredRequest({ filter: { groupId }, limit: 10 }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            }));
+
+            const token = await SessionService.createSession(user);
+            const response = await fetchRegistrations(token, group.id);
+            expect(response.body.results.registrations.map(r => r.id)).toEqual([registration.id]);
+
+            const waitingListResponse = await fetchRegistrations(token, waitingList.id);
+            expect(waitingListResponse.body.results.registrations.map(r => r.id)).toEqual([waitingListRegistration.id]);
+
+            const tokenWithoutRole = await SessionService.createSession(userWithoutRole);
+            await expect(fetchRegistrations(tokenWithoutRole, group.id)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
+        });
+
+        test('Not allowed: An organization role on a national event does not grant access to its registrations', async () => {
+            const role = PermissionRoleDetailed.create({
+                name: 'Organization role with national event',
+            });
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
+
+            const group = await new GroupFactory({ organization, period, type: GroupType.EventRegistration }).create();
+            const event = await new EventFactory({
+                group,
+                startDate: period.startDate,
+                endDate: period.endDate,
+            }).create();
+            expect(event.organizationId).toBeNull();
+            await new RegistrationFactory({ member: await new MemberFactory({}).create(), group }).create();
+
+            role.resources.set(
+                PermissionsResourceType.Events,
+                new Map([[event.id, ResourcePermissions.create({ level: PermissionLevel.Full })]]),
+            );
+            organization.privateMeta.roles = [role];
+            await organization.save();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.None, roles: [role] }),
+            }).create();
+            const token = await SessionService.createSession(user);
+
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({ filter: { groupId: group.id }, limit: 10 }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
+        });
     });
 
     describe('Tag-scoped platform admins', () => {
