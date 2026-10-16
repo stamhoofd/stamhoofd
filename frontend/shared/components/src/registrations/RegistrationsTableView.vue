@@ -21,8 +21,8 @@
             <p v-if="app === 'admin' && !group" class="style-description-block">
                 {{ $t('%1GG') }}
             </p>
-            <p v-if="(false as any) && sgvSyncWarning" :class="sgvSyncWarning.status === SGVSyncStatus.Never ? 'error-box icon sync' : 'info-box icon sync'" @click="sgvSyncOpen">
-                {{ sgvSyncWarning.text }}
+            <p v-if="(false as any) && syncWarning" :class="syncWarning.isError ? 'error-box icon sync' : 'info-box icon sync'" @click="syncOpen">
+                {{ syncWarning.text }}
                 <button v-if="auth.hasFullAccess()" class="button text" type="button">
                     {{ $t('%1XD') }}
                 </button>
@@ -50,9 +50,9 @@ import type { Column } from '#tables/classes/Column.ts';
 import type { TableAction } from '#tables/classes/TableAction.ts';
 import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
-import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync';
+import { useMemberSync } from '#members/memberSync.ts';
 import type { Group, GroupCategoryTree, MemberResponsibility, Organization, OrganizationRegistrationPeriod, PlatformRegistration, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, GroupType, mergeFilters, PermissionLevel, SGVSyncStatus, SortItemDirection } from '@stamhoofd/structures';
+import { AccessRight, GroupType, mergeFilters, PermissionLevel, SortItemDirection } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useRegistrationsObjectFetcher } from '../fetchers/useRegistrationsObjectFetcher';
@@ -314,7 +314,7 @@ const objectFetcher = useRegistrationsObjectFetcher({
 });
 
 const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
-const { sgvSyncOpen, sgvSyncWarning } = useSGVSync(
+const { open: syncOpen, warning: syncWarning } = useMemberSync(
     computed(() => tableObjectFetcher.objects.map(registration => registration.member.member)),
     computed(() => props.organization ?? organizationScope.value),
 );

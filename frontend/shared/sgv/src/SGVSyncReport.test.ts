@@ -1,12 +1,15 @@
 import {
     Group,
     GroupPrice,
+    GroupSettings,
     GroupType,
+    MemberDetails,
     MemberWithRegistrationsBlob,
     Organization,
     OrganizationRegistrationPeriod,
     Registration,
     RegistrationPeriod,
+    TranslatedString,
 } from '@stamhoofd/structures';
 import { isMemberManaged } from './SGVSyncReport';
 
@@ -24,6 +27,7 @@ describe('SGVSyncReport.isMemberManaged', () => {
             id: `${type}-${periodId}`,
             type,
             periodId,
+            settings: GroupSettings.create({ name: TranslatedString.create('Kapoenen') }),
         });
     }
 
@@ -35,6 +39,7 @@ describe('SGVSyncReport.isMemberManaged', () => {
         group?: Group;
     } = {}) {
         return MemberWithRegistrationsBlob.create({
+            details: MemberDetails.create({ birthDay: new Date(1990, 0, 1) }),
             registrations: [Registration.create({
                 group,
                 groupPrice: GroupPrice.create({}),

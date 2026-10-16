@@ -22,12 +22,14 @@ import { useProvideMemberViews } from '@stamhoofd/components/members/provideMemb
 import { useProvideEventViews } from '@stamhoofd/components/events/provideEventViews';
 import { useProvideGroupViews } from '@stamhoofd/components/groups/provideGroupViews';
 import { useProvidePaymentViews } from '@stamhoofd/components/payments/providePaymentViews';
+import { useProvideSGVMemberSync } from '@stamhoofd/sgv-frontend/provideSGVMemberSync';
 
 useProvideEventWebshopViews();
 useProvideMemberViews();
 useProvideEventViews();
 useProvideGroupViews();
 useProvidePaymentViews();
+useProvideSGVMemberSync();
 
 const context = useContext();
 const platform = usePlatform();

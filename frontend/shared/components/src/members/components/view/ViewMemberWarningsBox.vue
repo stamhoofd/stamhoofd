@@ -24,10 +24,9 @@ import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSe
 import { useAuth } from '#hooks/useAuth.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
-import { isMemberManaged } from '@stamhoofd/sgv-frontend/SGVSyncReport';
-import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync';
+import { useMemberSync } from '#members/memberSync.ts';
 import type { MemberPlatformMembership, PlatformMember } from '@stamhoofd/structures';
-import { MembershipStatus, PermissionLevel, RecordAnswer, RecordWarning, RecordWarningType, SGVSyncStatus, TranslatedString } from '@stamhoofd/structures';
+import { MembershipStatus, PermissionLevel, RecordAnswer, RecordWarning, RecordWarningType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useIsPropertyEnabled } from '../../hooks/useIsPropertyRequired';
@@ -42,7 +41,7 @@ const props = defineProps<{
 const auth = useAuth();
 const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), false);
 const organization = useOrganization();
-const { sgvSyncOpen } = useSGVSync(computed(() => [props.member.member]));
+const sync = useMemberSync(computed(() => [props.member.member]));
 
 // Possible the member didn't fill in the answers yet
 const autoCompletedAnswers = computed(() => {
@@ -175,27 +174,7 @@ const warnings = computed(() => {
         }
     }
 
-    if (organization.value?.isSGVSyncOrganization && isMemberManaged(props.member.member, organization.value)) {
-        const status = props.member.member.getSGVSyncStatus({ organization: organization.value });
-        const actionText = auth.hasFullAccess() ? $t('%1Z6') : $t('%1b9');
-
-        if (status === SGVSyncStatus.Never) {
-            warnings.push(RecordWarning.create({
-                text: TranslatedString.create($t('%1Xa', { action: actionText })),
-                type: RecordWarningType.Error,
-            }));
-        } else if (status === SGVSyncStatus.Outdated) {
-            warnings.push(RecordWarning.create({
-                text: TranslatedString.create($t('%1Us', { action: actionText })),
-                type: RecordWarningType.Warning,
-            }));
-        } else if (status === SGVSyncStatus.Changed) {
-            warnings.push(RecordWarning.create({
-                text: TranslatedString.create($t('%1X3', { action: actionText })),
-                type: RecordWarningType.Info,
-            }));
-        }
-    }
+    warnings.push(...sync.memberWarnings.value);
 
     if (
         props.member.patchedMember.details.getNotificationEmails().length === 0
@@ -238,16 +217,6 @@ function handleWarningClick(warning: MemberWarning) {
         return;
     }
 
-    if (!auth.hasFullAccess() || !organization.value || !isMemberManaged(props.member.member, organization.value)) {
-        return;
-    }
-
-    const status = props.member.member.getSGVSyncStatus({ organization: organization.value });
-    if (status === SGVSyncStatus.Never || status === SGVSyncStatus.Outdated || status === SGVSyncStatus.Changed) {
-        const text = warning.text.toString();
-        if (text.includes('groepsadministratie') || text.includes('synchronisatie')) {
-            sgvSyncOpen().catch(console.error);
-        }
-    }
+    sync.handleWarningClick(warning);
 }
 </script>

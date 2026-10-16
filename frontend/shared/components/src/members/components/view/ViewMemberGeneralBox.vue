@@ -16,7 +16,7 @@
                 </dd>
             </template>
 
-            <template v-if="sgvSyncIsEnabled">
+            <template v-if="syncIsEnabled">
                 <dt>{{ $t('%1Yp') }}</dt>
                 <dd>
                     <span v-tooltip="$t('%1Wg')" class="style-tooltip">
@@ -105,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync.ts';
+import { useMemberSync } from '#members/memberSync.ts';
 import type { PlatformMember } from '@stamhoofd/structures';
 import { LanguageHelper, NationalRegisterNumberOptOut } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -128,6 +128,6 @@ const isAdmin = auth.hasFullAccess();
 
 const currentCountry = useCountry();
 const showLanguage = useShowMemberLanguage(computed(() => props.member));
-const { sgvSyncIsEnabled } = useSGVSync([props.member.member]);
+const { isEnabled: syncIsEnabled } = useMemberSync([props.member.member]);
 const sgvSyncDate = computed(() => props.member.patchedMember.details.lastExternalSync ? Formatter.date(props.member.patchedMember.details.lastExternalSync, true) : $t('%1Io'));
 </script>

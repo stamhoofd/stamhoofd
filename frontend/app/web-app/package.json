@@ -32,6 +32,7 @@
         "@stamhoofd/networking": "workspace:*",
         "@stamhoofd/registration": "workspace:*",
         "@stamhoofd/scss": "workspace:*",
+        "@stamhoofd/sgv-frontend": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/ticket-builder": "workspace:*",
         "@stamhoofd/types": "workspace:*",

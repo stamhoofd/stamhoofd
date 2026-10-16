@@ -24,6 +24,7 @@
         "@stamhoofd/frontend-pdf-builder": "workspace:*",
         "@stamhoofd/networking": "workspace:*",
         "@stamhoofd/scss": "workspace:*",
+        "@stamhoofd/sgv-frontend": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/ticket-builder": "workspace:*",
         "@stamhoofd/types": "workspace:*",
