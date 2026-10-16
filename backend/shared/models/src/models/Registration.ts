@@ -7,9 +7,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { ArrayDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { Group } from './Group.js';
+import { registrationTable } from './registration-contract.js';
 
 export class Registration extends QueryableModel {
-    static table = 'registrations';
+    static table = registrationTable;
 
     @column({
         primary: true, type: 'string', beforeSave(value) {

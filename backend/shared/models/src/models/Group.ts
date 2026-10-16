@@ -6,12 +6,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel } from '@stamhoofd/sql';
-import type { OrganizationRegistrationPeriod } from './OrganizationRegistrationPeriod.js';
-import { Registration } from './Registration.js';
-
-if (Registration === undefined) {
-    throw new Error('Import Registration is undefined');
-}
+import type { GroupRegistrationPeriod } from './registration-contract.js';
+import { registrationTable } from './registration-contract.js';
 
 export class Group extends QueryableModel {
     static table = 'groups';
@@ -170,7 +166,7 @@ export class Group extends QueryableModel {
     }
 
     private static async getCount(where: string, params: any[]) {
-        const query = `select count(*) as c from \`${Registration.table}\` where ${where}`;
+        const query = `select count(*) as c from \`${registrationTable}\` where ${where}`;
 
         const [results] = await Database.select(query, params);
         const count = results[0]['']['c'];
@@ -192,7 +188,7 @@ export class Group extends QueryableModel {
         );
     }
 
-    static async deleteUnreachable(organizationId: string, period: OrganizationRegistrationPeriod, allGroups: Group[]) {
+    static async deleteUnreachable(organizationId: string, period: GroupRegistrationPeriod, allGroups: Group[]) {
         const reachable = new Map<string, boolean>();
 
         const visited = new Map<string, boolean>();
