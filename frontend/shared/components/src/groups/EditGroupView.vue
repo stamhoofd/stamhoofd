@@ -588,7 +588,7 @@
                 <p>{{ $t('%cm') }}</p>
 
                 <p v-if="waitingListType === WaitingListType.PreRegistrations || waitingListType === WaitingListType.ExistingMembersFirst" class="info-box">
-                    {{ $t('%8V') }}
+                    {{ $t('Leden worden als bestaand beschouwd als ze ingeschreven zijn voor gelijk welke inschrijvingsgroep van het vorige, huidige of volgende werkjaar.') }}
                 </p>
 
                 <STList>
