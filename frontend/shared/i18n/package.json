@@ -21,7 +21,6 @@
     "dependencies": {
         "@simonbackx/vue-app-navigation": "2.25.1",
         "@stamhoofd/locales": "workspace:*",
-        "@stamhoofd/networking": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "@stamhoofd/utility": "workspace:*",

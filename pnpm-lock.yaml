@@ -2034,9 +2034,6 @@ importers:
       '@stamhoofd/locales':
         specifier: workspace:*
         version: link:../../../shared/locales
-      '@stamhoofd/networking':
-        specifier: workspace:*
-        version: link:../networking
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
