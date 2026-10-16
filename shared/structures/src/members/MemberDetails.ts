@@ -7,7 +7,7 @@ import { Address } from '../addresses/Address.js';
 import { Replacement } from '../endpoints/EmailRequest.js';
 
 import { AuditLogReplacement } from '../AuditLogReplacement.js';
-import type { Group } from '../Group.js';
+import type { MatchingGroup } from './MatchingGroup.js';
 import { GroupGenderType } from '../GroupGenderType.js';
 import { EmergencyContact } from './EmergencyContact.js';
 import { Gender } from './Gender.js';
@@ -524,11 +524,11 @@ export class MemberDetails extends AutoEncoder {
     /**
      * Check if this member could fit a group, ignoring dates and waiting lists
      */
-    doesMatchGroup(group: Group) {
+    doesMatchGroup(group: MatchingGroup) {
         return this.getMatchingError(group) === null;
     }
 
-    getMatchingError(group: Group): { message: string; description: string } | null {
+    getMatchingError(group: MatchingGroup): { message: string; description: string } | null {
         if (group.settings.minAge || group.settings.maxAge) {
             const age = this.trackedAgeForYear(Formatter.luxon(group.settings.startDate ?? new Date()).year);
             if (age) {
@@ -564,7 +564,7 @@ export class MemberDetails extends AutoEncoder {
         return null;
     }
 
-    getMatchingGroups(groups: Group[]) {
+    getMatchingGroups<T extends MatchingGroup>(groups: T[]): T[] {
         return groups.filter(g => this.doesMatchGroup(g));
     }
 
