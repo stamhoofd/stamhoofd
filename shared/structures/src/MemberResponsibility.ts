@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { PermissionRoleForResponsibility } from './PermissionRole.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 
-import type { Group } from './Group.js';
 import { PermissionLevel } from './PermissionLevel.js';
 import { PermissionsResourceType } from './PermissionsResourceType.js';
 
@@ -59,14 +58,6 @@ export class MemberResponsibility extends AutoEncoder {
 
     compress() {
         this.permissions?.compress();
-    }
-
-    createDefaultPermissions(group: Group | null) {
-        return PermissionRoleForResponsibility.create({
-            name: this.name + (group ? ` van ${group.settings.name.toString()}` : ''),
-            responsibilityId: this.id,
-            responsibilityGroupId: group?.id ?? null,
-        });
     }
 
     getPermissions(groupId: string | null) {
