@@ -1,6 +1,6 @@
 import type { Language } from '@stamhoofd/types/Language';
 import type { Address } from './addresses/Address.js';
-import type { Organization } from './Organization.js';
+import type { AppTypeOrganization } from './AppTypeOrganization.js';
 import { TranslatedString } from './TranslatedString.js';
 
 export type AppType = 'registration' | 'dashboard' | 'admin' | 'webshop' | 'auto' | 'verify-email';
@@ -102,7 +102,7 @@ export const getAppNameDescription = (app: AppType) => {
  */
 export type AppDisplayPosition = 'bar' | 'small-bar' | 'current' | 'other';
 
-export const getAppTitle = (app: AppType | 'auto', organization: Organization | undefined | null, displayPosition: AppDisplayPosition = 'other') => {
+export const getAppTitle = (app: AppType | 'auto', organization: AppTypeOrganization | undefined | null, displayPosition: AppDisplayPosition = 'other') => {
     if (displayPosition === 'current' && app !== 'auto') {
         return getAppName(app);
     }
@@ -114,7 +114,7 @@ export const getAppTitle = (app: AppType | 'auto', organization: Organization | 
     return organization.name;
 };
 
-export const getAppDescription = (app: AppType | 'auto', organization: Organization | undefined | null, displayPosition: AppDisplayPosition = 'other') => {
+export const getAppDescription = (app: AppType | 'auto', organization: AppTypeOrganization | undefined | null, displayPosition: AppDisplayPosition = 'other') => {
     if (displayPosition === 'bar') {
         if (organization) {
             return getAppName(app);
