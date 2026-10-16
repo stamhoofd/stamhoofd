@@ -39,6 +39,7 @@ body.modern.web-iOS {
     }
 }
 
+// Full-view root; its direct main child owns scrolling and the shared content spacing.
 .st-view {
     display: flex;
     flex-direction: column;

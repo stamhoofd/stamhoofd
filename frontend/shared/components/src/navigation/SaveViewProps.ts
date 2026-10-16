@@ -1,6 +1,7 @@
 import type { TranslatedString } from '@stamhoofd/structures';
 import type { ErrorBox } from '../errors/ErrorBox';
 
+/** Props for the responsive save/delete form container; button placement follows the device's platform conventions. */
 export type SaveViewProps = {
     loading?: boolean;
     loadingView?: boolean;
