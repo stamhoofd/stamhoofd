@@ -4,6 +4,7 @@ import type { ComponentPublicInstance, Ref } from 'vue';
 import { markRaw, unref } from 'vue';
 import type { TranslatedUrl } from './TranslatedUrl';
 
+/** A stable tab identity. Reuse items and their component wrappers to retain view state when switching tabs. */
 export class TabBarItem {
     id: string;
     name: string = '';
