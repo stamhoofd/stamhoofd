@@ -1,6 +1,5 @@
 import {
     BalanceItem,
-    Document,
     Member,
     MemberPlatformMembership,
     MemberResponsibilityRecord,
@@ -9,6 +8,7 @@ import {
     Registration,
     User,
 } from '@stamhoofd/models';
+import { DocumentService } from '../services/DocumentService.js';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import type {
     Address,
@@ -112,7 +112,7 @@ export async function mergeTwoMembers(base: Member, other: Member, options?: { u
     await PlatformMembershipService.updateMembershipsForId(base.id);
 
     if (options?.updateDocuments !== false) {
-        await Document.updateForMember(base);
+        await DocumentService.updateForMember(base);
     }
 }
 
