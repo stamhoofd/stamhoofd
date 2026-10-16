@@ -17,6 +17,9 @@ import { AccessRight, getEventTypes, PermissionLevel, PermissionsResourceType } 
 import { computed, ref } from 'vue';
 import { WhatsNewCount } from './classes/WhatsNewCount';
 import { buildTranslatedUrl } from '@stamhoofd/components/containers/TranslatedUrl.ts';
+import { useProvideEventWebshopViews } from './providers/provideEventWebshopViews';
+
+useProvideEventWebshopViews();
 
 const context = useContext();
 const platform = usePlatform();
