@@ -291,6 +291,14 @@ describe('validation', () => {
         await expect(validator.validate()).rejects.toThrow(/schuldenaar/);
     });
 
+    test('no debtor is required when the member does not need a certificate', async () => {
+        const { validator } = renderBox({ app: 'registration', parents: [mother(), father()], age: 19 });
+        await nextTick();
+
+        expect(debtorRows()).toHaveLength(0);
+        await expect(validator.validate()).resolves.toBe(true);
+    });
+
     test('an administrator can leave the debtor open', async () => {
         const { validator } = renderBox({ parents: [mother(), father()] });
         await nextTick();
