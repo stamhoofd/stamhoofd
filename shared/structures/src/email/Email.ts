@@ -7,8 +7,6 @@ import { EmailContent, getEmailContentForLanguage } from './EmailContent.js';
 import { StamhoofdFilterDecoder } from '../filters/FilteredRequest.js';
 import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import { TinyMember } from '../members/Member.js';
-import { MemberDetails } from '../members/MemberDetails.js';
-import { MemberWithRegistrationsBlob } from '../members/MemberWithRegistrationsBlob.js';
 import { BaseOrganization } from '../Organization.js';
 import type { OrganizationMetaData } from '../OrganizationMetaData.js';
 import type { OrganizationPrivateMetaData } from '../OrganizationPrivateMetaData.js';
@@ -16,16 +14,6 @@ import type { Platform } from '../Platform.js';
 import { User } from '../User.js';
 import { EmailTemplate } from './EmailTemplate.js';
 import { EmailRecipientFilterType } from './EmailRecipientFilterType.js';
-
-export function getExampleRecipient(type: EmailRecipientFilterType | null = null) {
-    return MemberWithRegistrationsBlob.create({
-        details: MemberDetails.create({
-            firstName: $t(`%13h`),
-            lastName: $t(`%13i`),
-            email: $t(`%13a`),
-        }),
-    }).getEmailRecipients(['member'])[0];
-}
 
 export enum EmailStatus {
     Draft = 'Draft',
