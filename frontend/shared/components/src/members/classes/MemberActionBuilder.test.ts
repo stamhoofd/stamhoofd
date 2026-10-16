@@ -44,6 +44,7 @@ function buildEventWaitingList(organizationId: string, periodId: string) {
 const builderFactories = {
     MemberActionBuilder: (waitingList: Group, organizations: Organization[]) => new MemberActionBuilder({
         present: (async () => {}) as any,
+        memberViewLoaders: {} as any,
         context: {} as any,
         groups: [waitingList],
         platform: {} as any,
