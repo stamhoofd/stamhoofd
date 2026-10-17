@@ -80,7 +80,7 @@ import { Organization } from '@stamhoofd/structures/Organization.js';
 import { PermissionLevel } from '@stamhoofd/structures/PermissionLevel.js';
 import type { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures/RegistrationPeriod.js';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, onActivated, watch } from 'vue';
+import { computed, getCurrentInstance, onActivated, watch } from 'vue';
 
 import { useCreateCategoryView } from '../dashboard/settings/hooks/useCreateCategoryView';
 import { useCreateGroupView } from '../dashboard/settings/hooks/useCreateGroupView';
@@ -91,6 +91,7 @@ const props = withDefaults(defineProps<{
 }>(), {
     period: null,
 });
+const currentComponent = getCurrentInstance()!.type;
 
 const context = useContext();
 const $navigate = useNavigate();
@@ -155,7 +156,7 @@ defineRoute({
     },
     component: (props: { period: OrganizationRegistrationPeriod }) => {
         return new ComponentWithProperties(SplitViewController, {
-            root: AsyncComponent(() => import('./MembersMenuModern.vue'), props),
+            root: AsyncComponent(() => Promise.resolve(currentComponent), props),
         });
     },
     show: {
