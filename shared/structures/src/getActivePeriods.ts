@@ -1,13 +1,21 @@
 import { Formatter } from '@stamhoofd/utility';
-import type { Organization } from './Organization.js';
-import type { Platform } from './Platform.js';
 
 type NamedPeriod = {
     name: string;
     id: string;
 };
 
-export function getActivePeriods(period: NamedPeriod | null, organization: Organization | null, platform: Platform | null = null): NamedPeriod[] {
+type PeriodDetails = NamedPeriod & {
+    startDate: Date;
+    endDate: Date;
+    nextPeriodId: string | null;
+    previousPeriodId: string | null;
+};
+
+type OrganizationPeriodSource = { period: { period: PeriodDetails } };
+type PlatformPeriodSource = { period: PeriodDetails };
+
+export function getActivePeriods(period: NamedPeriod | null, organization: OrganizationPeriodSource | null, platform: PlatformPeriodSource | null = null): NamedPeriod[] {
     const periods = new Map<string, NamedPeriod>();
 
     if (period) {
@@ -58,6 +66,6 @@ export function getActivePeriods(period: NamedPeriod | null, organization: Organ
     return [...periods.values()];
 }
 
-export function getActivePeriodIds(periodId: string | null, organization: Organization | null, platform: Platform | null = null): string[] {
+export function getActivePeriodIds(periodId: string | null, organization: OrganizationPeriodSource | null, platform: PlatformPeriodSource | null = null): string[] {
     return getActivePeriods(periodId ? { id: periodId, name: '' } : null, organization, platform).map(p => p.id);
 }
