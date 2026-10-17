@@ -313,7 +313,7 @@ export class RegistrationsActionBuilder {
     }
 
     async deleteRegistration() {
-        const deleteRegistrations: RegistrationWithPlatformMember[] = [];
+        const deleteRegistrations: RegistrationWithPlatformMember<Registration, PlatformMember>[] = [];
 
         for (const registration of this.registrations) {
             const member = this.members.find(m => m.id === registration.memberId);
