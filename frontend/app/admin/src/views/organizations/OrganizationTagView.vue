@@ -49,7 +49,7 @@ import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vu
 import type { OrganizationTag } from '@stamhoofd/structures';
 import { OrganizationTagType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed } from 'vue';
+import { computed, getCurrentInstance } from 'vue';
 import OrganizationsTableView from './OrganizationsTableView.vue';
 
 const props = defineProps<{
@@ -58,6 +58,7 @@ const props = defineProps<{
 
 const navigate = useNavigate();
 const platform = usePlatform();
+const currentComponent = getCurrentInstance()!.type;
 
 enum Routes {
     All = 'all',
@@ -102,10 +103,10 @@ defineRoute({
     },
 });
 
-defineRoute({
+defineRoute<{ slug: StringConstructor }, { tag: OrganizationTag }>({
     url: 'tag/@slug',
     name: Routes.Tag,
-    component: async () => (await import('./OrganizationTagView.vue')).default,
+    component: 'self',
     params: {
         slug: String,
     },
