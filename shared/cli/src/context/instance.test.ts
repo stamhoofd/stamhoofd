@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { buildInstance } from './instance.js';
 import { buildPorts } from './ports.js';
 import { slug } from './workspace.js';
-import type { CliContext } from './create-context.js';
+import type { CliContext } from './cli-context.js';
 import { resolvePortOffset } from './port-allocation.js';
 
 const freeTestPortOffset = 10000;
