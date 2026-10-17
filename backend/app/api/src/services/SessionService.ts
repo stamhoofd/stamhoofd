@@ -9,7 +9,7 @@ import type { SessionMetaData } from '@stamhoofd/structures';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 
-import { contextStorage } from '../helpers/ContextStorage.js';
+import { getSessionContextRequest } from '../helpers/ContextStorage.js';
 
 const DAY = 24 * 60 * 60 * 1000;
 const MAX_SESSIONS = 15;
@@ -335,7 +335,7 @@ export class SessionService {
      * has to keep the value of the login instead of trusting the header again.
      */
     private static getClientType(): SessionClientType {
-        const platform = contextStorage.getStore()?.request.headers['x-platform'];
+        const platform = getSessionContextRequest()?.headers['x-platform'];
         if (platform === 'ios') {
             return SessionClientType.iOS;
         }
@@ -385,7 +385,7 @@ export class SessionService {
     }
 
     static getMetaData(): SessionMetaData {
-        const value = contextStorage.getStore()?.request.headers['x-session-metadata'];
+        const value = getSessionContextRequest()?.headers['x-session-metadata'];
         return this.parseMetaData(typeof value === 'string' ? value : null);
     }
 
