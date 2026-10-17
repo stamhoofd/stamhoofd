@@ -2,7 +2,7 @@ import { AutoEncoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simp
 import type { Replacement } from '../endpoints/EmailRequest.js';
 import { Recipient } from '../endpoints/EmailRequest.js';
 import { EmailRecipient } from './Email.js';
-import { EditorSmartVariable } from './EditorSmartVariable.js';
+import { filterReplacements } from './filterReplacements.js';
 
 export class EditorSmartButton extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -24,7 +24,14 @@ export class EditorSmartButton extends AutoEncoder {
     type: 'block' | 'inline' = 'block';
 
     static forReplacements(replacements: Replacement[]) {
-        return EditorSmartVariable.fillExamples(this.all.map(v => v.clone()), replacements);
+        return filterReplacements(this.all.map(v => v.clone()), replacements).map((button) => {
+            if (button.id === 'paymentUrl' && replacements.some(r => r.token === 'paymentTable' && (r.value || r.html))) {
+                button.text = $t('%1Mw');
+                button.name = $t('%1Mx');
+                button.hint = $t('%1My');
+            }
+            return button;
+        });
     }
 
     static get all() {
