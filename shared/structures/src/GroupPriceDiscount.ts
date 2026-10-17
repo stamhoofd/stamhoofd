@@ -1,6 +1,6 @@
 import { AutoEncoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
 import { ReduceablePrice } from './ReduceablePrice.js';
-import type { PlatformMember } from './members/PlatformMember.js';
+import type { ReduceablePriceMember } from './members/ReduceablePriceMember.js';
 import { Formatter } from '@stamhoofd/utility';
 
 export enum GroupPriceDiscountType {
@@ -40,7 +40,7 @@ export class GroupPriceDiscount extends AutoEncoder {
     @field({ decoder: new EnumDecoder(GroupPriceDiscountType) })
     type = GroupPriceDiscountType.Percentage;
 
-    calculateDiscount(price: number, member: PlatformMember) {
+    calculateDiscount(price: number, member: ReduceablePriceMember) {
         if (this.type === GroupPriceDiscountType.Fixed) {
             return Math.max(0, Math.min(price, this.value.forMember(member)));
         }
