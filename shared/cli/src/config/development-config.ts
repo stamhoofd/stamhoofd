@@ -8,10 +8,9 @@ import { buildPorts } from '../context/ports.js';
 import { applyInternalSecrets } from './internal-secrets.js';
 import { defaultDomain, localFilesAccessKey, localFilesSecretKey, localIpv4Host, localPrimaryBucket, maildevPassword, maildevUsername, mysqlInternalPort } from './shared-service-config.js';
 import type { Language } from '@stamhoofd/types/Language';
+import type { AppEnvironment, AppService, BackendAppService, FrontendAppService } from './development-config-types.js';
 
-export type AppService
-    = | BackendAppService
-        | FrontendAppService;
+export type { AppEnvironment, AppService, BackendAppName, BackendAppService, FrontendAppName, FrontendAppService } from './development-config-types.js';
 
 export enum BackendApp {
     Api = 'api',
@@ -28,12 +27,6 @@ export enum FrontendApp {
     WebApp = 'web-app',
 }
 
-export type BackendAppName = `${BackendApp}`;
-export type FrontendAppName = `${FrontendApp}`;
-
-export type BackendAppService = { backend: BackendAppName };
-export type FrontendAppService = { frontend: FrontendAppName };
-
 export type DevelopmentDomains = ReturnType<typeof buildDevelopmentDomains>;
 export type DevelopmentDatabases = ReturnType<typeof buildDevelopmentDatabases>;
 
@@ -49,8 +42,6 @@ export type DevelopmentConfig = {
  * The statistics syncer is the one service that runs on none of the platform configuration: it moves
  * rows between two databases and needs nothing else.
  */
-export type AppEnvironment = SharedEnvironment | StatisticsEnvironment;
-
 type EnvironmentPreset = {
     userMode: SharedEnvironment['userMode'];
     translationNamespace: string;
