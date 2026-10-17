@@ -6,7 +6,11 @@ import { Group } from './Group.js';
 import { PermissionRole } from './PermissionRole.js';
 import { PermissionsByRole } from './PermissionsByRole.js';
 import { PermissionsResourceType } from './PermissionsResourceType.js';
-import type { OrganizationRegistrationPeriod } from './RegistrationPeriod.js';
+
+type OrganizationRegistrationPeriodForGroupCategory = {
+    settings: { categories: GroupCategory[] };
+    groups: Group[];
+};
 
 /**
  * Give access to a given resouce based by the roles of a user
@@ -199,7 +203,7 @@ export class GroupCategoryTree extends GroupCategory {
         return count;
     }
 
-    static build(root: GroupCategory, organizationPeriod: OrganizationRegistrationPeriod, options: { permissions?: import('./LoadedPermissions.js').LoadedPermissions | null; maxDepth?: number | null; smartCombine?: boolean; groups?: Group[] } = {}): GroupCategoryTree {
+    static build(root: GroupCategory, organizationPeriod: OrganizationRegistrationPeriodForGroupCategory, options: { permissions?: import('./LoadedPermissions.js').LoadedPermissions | null; maxDepth?: number | null; smartCombine?: boolean; groups?: Group[] } = {}): GroupCategoryTree {
         const categories = organizationPeriod.settings.categories;
         const groups = options?.groups ?? organizationPeriod.groups;
 
