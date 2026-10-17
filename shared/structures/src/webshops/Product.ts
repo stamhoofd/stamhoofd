@@ -6,9 +6,14 @@ import { Address } from '../addresses/Address.js';
 import { UitpasEventResponse } from '../endpoints/UitpasEventsResponse.js';
 import { Image } from '../files/Image.js';
 import { ReservedSeat } from '../SeatingPlan.js';
-import type { Webshop } from './Webshop.js';
 import { WebshopField } from './WebshopField.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
+
+type ProductWebshop = {
+    meta: {
+        seatingPlans: { id: string; seatCount: number; adminSeatCount: number; isAdminSeat(seat: ReservedSeat): boolean }[];
+    };
+};
 
 export class ProductPrice extends AutoEncoder {
     /**
@@ -416,7 +421,7 @@ export class Product extends AutoEncoder {
         return false;
     }
 
-    getRemainingSeats(webshop: Webshop, isAdmin: boolean): number | null {
+    getRemainingSeats(webshop: ProductWebshop, isAdmin: boolean): number | null {
         if (this.seatingPlanId === null) {
             return null;
         }
