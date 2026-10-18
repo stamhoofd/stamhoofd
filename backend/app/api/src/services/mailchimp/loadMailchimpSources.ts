@@ -6,6 +6,7 @@ import type { MailchimpSettings } from '@stamhoofd/structures/mailchimp/Mailchim
 import { GroupType, LimitedFilteredRequest, OrderStatus, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, SortItemDirection } from '@stamhoofd/structures';
 import type { MailchimpSyncRequest } from '@stamhoofd/structures/mailchimp/MailchimpSyncRequest.js';
 import { MailchimpSyncType } from '@stamhoofd/structures/mailchimp/MailchimpSyncRequest.js';
+import { Formatter } from '@stamhoofd/utility';
 import { GetMembersEndpoint } from '../../endpoints/global/members/GetMembersEndpoint.js';
 import { GetWebshopOrdersEndpoint } from '../../endpoints/organization/dashboard/webshops/GetWebshopOrdersEndpoint.js';
 import type { MailchimpContactSource } from './buildContacts.js';
@@ -13,6 +14,31 @@ import type { MailchimpAbortSignal } from './MailchimpClient.js';
 import type { MailchimpTags } from './MailchimpTags.js';
 
 const PAGE_SIZE = 100;
+
+/**
+ * Group and responsibility tags of a platform sync only use names the platform defines, so a tag means the same for every organization.
+ */
+type PlatformNames = {
+    defaultAgeGroups: Map<string, string>;
+    responsibilities: Map<string, string>;
+};
+
+async function loadPlatformNames(tags: MailchimpTags): Promise<PlatformNames> {
+    const platform = await Platform.getSharedStruct();
+    // Same as DefaultAgeGroup.name, but in the language of the tags instead of the global $t
+    const or = ' ' + tags.i18n.$t('%GT') + ' ';
+    const defaultAgeGroups = new Map<string, string>();
+    for (const group of platform.config.defaultAgeGroups) {
+        const names = group.names.filter(n => n.trim().length > 0);
+        if (names.length > 0) {
+            defaultAgeGroups.set(group.id, Formatter.joinLast(names, ', ', or));
+        }
+    }
+    return {
+        defaultAgeGroups,
+        responsibilities: new Map(platform.config.responsibilities.map(r => [r.id, r.name])),
+    };
+}
 
 async function getCurrentPeriodId(organization: Organization | null) {
     if (organization) {
@@ -68,10 +94,21 @@ function hasConsent(answer: RecordAnswer | undefined, settings: MailchimpSetting
     return false;
 }
 
+function getResponsibilityTags(member: MemberWithRegistrationsBlob, platformNames: PlatformNames, tags: MailchimpTags): string[] {
+    return member.responsibilities.filter(r => r.isActive).flatMap((record) => {
+        const name = platformNames.responsibilities.get(record.responsibilityId);
+        if (!name) {
+            return [];
+        }
+        const ageGroup = platformNames.defaultAgeGroups.get(record.group?.defaultAgeGroupId ?? '');
+        return ageGroup ? [tags.responsibility(name), tags.responsibility(name, ageGroup)] : [tags.responsibility(name)];
+    });
+}
+
 function getMemberSources(
     member: MemberWithRegistrationsBlob,
     organizationNames: Map<string, string>,
-    options: { organization: Organization | null; periodId: string; settings: MailchimpSettings; tags: MailchimpTags },
+    options: { organization: Organization | null; periodId: string; settings: MailchimpSettings; tags: MailchimpTags; platformNames: PlatformNames | null },
 ): MailchimpContactSource[] {
     const registrations = member.registrations.filter(r =>
         r.registeredAt !== null
@@ -84,11 +121,14 @@ function getMemberSources(
     // Group records are answered per registration
     const findAnswer = (recordId: string) => member.details.recordAnswers.get(recordId) ?? registrations.find(r => r.recordAnswers.has(recordId))?.recordAnswers.get(recordId);
 
-    const groups = registrations.map(r => r.group.settings.name.toString());
+    const platformNames = options.platformNames;
+    const groups = platformNames
+        ? registrations.flatMap(r => platformNames.defaultAgeGroups.get(r.group.defaultAgeGroupId ?? '') ?? [])
+        : registrations.map(r => r.group.settings.name.toString());
     const organizations = options.organization ? [] : registrations.map(r => organizationNames.get(r.organizationId) ?? '').filter(n => !!n);
 
     const tags = [
-        ...groups.map(g => options.tags.group(g)),
+        ...groups.map(g => platformNames ? options.tags.ageGroup(g) : options.tags.group(g)),
         ...organizations.map(o => options.tags.organization(o)),
     ];
     for (const recordId of options.settings.tagRecordIds) {
@@ -115,7 +155,7 @@ function getMemberSources(
             email: member.details.email,
             firstName: member.details.firstName,
             lastName: member.details.lastName,
-            tags: [options.tags.member, ...tags],
+            tags: [options.tags.member, ...tags, ...(platformNames ? getResponsibilityTags(member, platformNames, options.tags) : [])],
         });
     }
     for (const parent of member.details.parents) {
@@ -134,6 +174,7 @@ function getMemberSources(
 
 async function loadMemberSources(organization: Organization | null, request: MailchimpSyncRequest, settings: MailchimpSettings, tags: MailchimpTags, signal?: MailchimpAbortSignal) {
     const periodId = await getCurrentPeriodId(organization);
+    const platformNames = organization ? null : await loadPlatformNames(tags);
     const sources: MailchimpContactSource[] = [];
 
     let query: LimitedFilteredRequest | null = new LimitedFilteredRequest({
@@ -149,7 +190,7 @@ async function loadMemberSources(organization: Organization | null, request: Mai
         const organizationNames = new Map(response.results.organizations.map(o => [o.id, o.name]));
 
         for (const member of response.results.members) {
-            sources.push(...getMemberSources(member, organizationNames, { organization, periodId, settings, tags }));
+            sources.push(...getMemberSources(member, organizationNames, { organization, periodId, settings, tags, platformNames }));
         }
         query = response.next ?? null;
     }

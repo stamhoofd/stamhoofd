@@ -43,7 +43,7 @@
             <template v-if="settings?.audienceId && membersPackage">
                 <hr><h2>{{ $t('%1EH') }}</h2>
                 <p>
-                    {{ $t('%Zvu') }}
+                    {{ isPlatform ? $t('Alle leden die in het huidige werkjaar ingeschreven zijn, en hun ouders, komen in Mailchimp met een tag per standaard leeftijdsgroep en per vereniging. Leden met een functie van {platform} krijgen ook een tag per functie.', { platform: platform.config.name }) : $t('%Zvu') }}
                     <a :href="$domains.getDocs('mailchimp-leden')" class="inline-link" target="_blank" rel="noopener">{{ $t('%19t') }}</a>
                 </p>
 

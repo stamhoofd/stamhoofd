@@ -5,7 +5,7 @@ import type { MailchimpContactSource } from './buildContacts.js';
 import { buildContacts } from './buildContacts.js';
 import { MailchimpTags } from './MailchimpTags.js';
 
-const tags = new MailchimpTags(new I18n(Language.Dutch, Country.Belgium));
+const tags = new MailchimpTags(new I18n(Language.Dutch, Country.Belgium), 'Stamhoofd');
 
 function source(data: Partial<MailchimpContactSource> & { email: string; sortKey: string }): MailchimpContactSource {
     return {
