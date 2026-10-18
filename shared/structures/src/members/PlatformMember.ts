@@ -8,6 +8,7 @@ import { GroupType } from '../GroupType.js';
 import type { Organization } from '../Organization.js';
 import { PermissionLevel } from '../PermissionLevel.js';
 import { PermissionsResourceType } from '../PermissionsResourceType.js';
+import { PlatformMembershipTypeBehaviour } from '../PlatformMembershipTypeBehaviour.js';
 
 import type { Document as DocumentStruct } from '../Document.js';
 import type { Platform } from '../Platform.js';
@@ -1392,6 +1393,93 @@ export class PlatformMember implements ObjectWithRecords {
 
         // We merge here because that should offer better performance and less loops later on
         return [OrganizationRecordsConfiguration.mergeChildren(...configurations)];
+    }
+
+    /**
+     * The single local organization to show for this member, e.g. in exports.
+     * Searches `periodId` first and then each earlier period, so members who have not re-registered yet keep their group from an earlier period.
+     * Only falls back to the platform's own organization when the member has no local registration in `periodId` or an earlier period.
+     */
+    getPrimaryOrganization({ periodId }: { periodId: string }): Organization | null {
+        if (this.patchedMember.organizationId) {
+            return this.family.getOrganization(this.patchedMember.organizationId) ?? null;
+        }
+
+        const platformOrganizationId = this.platform.membershipOrganizationId;
+        const cutoff = this.getPeriodStartDate(periodId);
+        const getPeriodTime = (registration: Registration) => registration.group.periodId === periodId ? Infinity : registration.group.settings.period!.startDate.getTime();
+
+        const registrations = this.filterRegistrations({ types: [GroupType.Membership] }).filter((registration) => {
+            if (!this.family.getOrganization(registration.organizationId)) {
+                return false;
+            }
+            if (registration.group.periodId === periodId) {
+                return true;
+            }
+            // Unknown start date: only search the requested period, never a later one
+            return !!cutoff && !!registration.group.settings.period && registration.group.settings.period.startDate < cutoff;
+        });
+
+        const local = registrations
+            .filter(r => r.organizationId !== platformOrganizationId)
+            .map(registration => ({ registration, membership: this.getMembershipPriority(registration.organizationId, registration.group.periodId) }));
+
+        local.sort(({ registration: a, membership: membershipA }, { registration: b, membership: membershipB }) => {
+            if (a.group.periodId !== b.group.periodId) {
+                return getPeriodTime(b) - getPeriodTime(a) || a.group.periodId.localeCompare(b.group.periodId);
+            }
+
+            return (membershipB.rank - membershipA.rank)
+                || (membershipB.temporaryStartTime - membershipA.temporaryStartTime)
+                || (Number(!!b.group.defaultAgeGroupId) - Number(!!a.group.defaultAgeGroupId))
+                || ((b.registeredAt?.getTime() ?? 0) - (a.registeredAt?.getTime() ?? 0));
+        });
+
+        const registration = local[0]?.registration ?? registrations.find(r => r.organizationId === platformOrganizationId);
+        return registration ? (this.family.getOrganization(registration.organizationId) ?? null) : null;
+    }
+
+    private getPeriodStartDate(periodId: string): Date | null {
+        if (this.platform.period.id === periodId) {
+            return this.platform.period.startDate;
+        }
+        for (const organization of this.organizations) {
+            if (organization.period.period.id === periodId) {
+                return organization.period.period.startDate;
+            }
+        }
+        for (const registration of this.patchedMember.registrations) {
+            if (registration.group.periodId === periodId && registration.group.settings.period) {
+                return registration.group.settings.period.startDate;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * rank 2: full-period membership through this organization, 1: only temporary ones, 0: none.
+     * A membership with a type that no longer exists counts as full-period.
+     * The member blob only contains memberships of recent periods, so older periods always get rank 0.
+     */
+    private getMembershipPriority(organizationId: string, periodId: string) {
+        let rank = 0;
+        let temporaryStartTime = 0;
+
+        for (const membership of this.patchedMember.platformMemberships) {
+            if (membership.organizationId !== organizationId || membership.periodId !== periodId) {
+                continue;
+            }
+            const type = this.platform.config.membershipTypes.find(t => t.id === membership.membershipTypeId);
+            if (type?.behaviour === PlatformMembershipTypeBehaviour.Days) {
+                rank = Math.max(rank, 1);
+                temporaryStartTime = Math.max(temporaryStartTime, membership.startDate.getTime());
+            }
+            else {
+                rank = 2;
+            }
+        }
+
+        return { rank, temporaryStartTime: rank === 2 ? 0 : temporaryStartTime };
     }
 
     filterOrganizations(filters: {
