@@ -3,6 +3,13 @@ import { AccessRight, EventPeriodHelper, EventPermissionChecker, GroupType, Perm
 import type { Ref } from 'vue';
 import { toRaw, unref } from 'vue';
 
+/**
+ * Frontend permission checks for a user, organization scope and platform.
+ * Accepts values or refs; checks return plain values. Loaded permissions are cached
+ * and organization/platform internals are read raw, so not every permission edit
+ * is reactive. Reload the context/page to refresh cached permissions.
+ * These checks control UI availability only; endpoints must authorize requests too.
+ */
 export class ContextPermissions {
     reactiveUser: UserWithMembers | null | Ref<UserWithMembers | null>;
     reactiveOrganization: Organization | null | Ref<Organization | null>;
