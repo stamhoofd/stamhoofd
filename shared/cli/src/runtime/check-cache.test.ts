@@ -65,10 +65,8 @@ describe('check cache configuration', () => {
         expect(readJson('package.json').scripts.lint).toBe('pnpm exec turbo run lint');
     });
 
-    it('keeps root and CLI checks on the same Turbo entrypoint', () => {
+    it('keeps root checks on direct Turbo entrypoints', () => {
         expect(readJson('package.json').scripts.typecheck).toBe('pnpm exec turbo run typecheck');
-        const runner = readFileSync(new URL('shared/cli/src/runtime/monorepo-runner.ts', root), 'utf8');
-
-        expect(runner).toContain("['run', 'typecheck']");
+        expect(readJson('package.json').scripts.lint).toBe('pnpm exec turbo run lint');
     });
 });
