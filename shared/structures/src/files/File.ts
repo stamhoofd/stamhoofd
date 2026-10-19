@@ -345,6 +345,11 @@ export class File implements Encodeable {
         return await File.getWithSignedUrl(this);
     }
 
+    /**
+     * Discards stale database signed URLs. Private network files require a signature
+     * when signing is enabled; its presence is not proof of validity. Asynchronous
+     * verification is performed by withSignedUrl before requesting access.
+     */
     static decode(data: Data): File {
         const file = new File({
             id: data.field('id').string,

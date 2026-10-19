@@ -1,8 +1,9 @@
 import type { Data, Encodeable, EncodeContext } from '@simonbackx/simple-encoding';
 
 /**
- * This is a custom encoded implementation since we need to follow the OAuth2 specification, which for some reason
- * returns a relative "expires_in" timestamp instead of an absolute value.
+ * OAuth2 token data with absolute expiration dates in memory and snake_case wire keys.
+ * Relative expires_in values and absolute expires_on extensions are both in seconds;
+ * decoding prefers a supplied, nonzero absolute timestamp.
  */
 export class Token implements Encodeable {
     accessToken: string;

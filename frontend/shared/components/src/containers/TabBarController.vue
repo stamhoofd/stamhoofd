@@ -90,6 +90,7 @@ import InheritComponent from './InheritComponent.vue';
 import { TabBarItem, TabBarItemGroup } from './TabBarItem';
 
 const props = defineProps<{
+    /** Reusable tab items; switching preserves mounted state and internal scroll positions. Reselecting can scroll to top or reset the tab. */
     tabs: ((TabBarItem | TabBarItemGroup)[]) | Ref<(TabBarItem | TabBarItemGroup)[]>;
 }>();
 

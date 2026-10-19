@@ -22,7 +22,9 @@ import { useContext } from '../hooks/useContext';
 import LoadingViewTransition from './LoadingViewTransition.vue';
 
 const props = defineProps<{
+    /** Displayed after the session is complete, and has nonempty permissions when noPermissionsRoot is supplied. */
     root: ComponentWithProperties;
+    /** Displayed when the session has no token; a token with an incomplete session keeps the loading state. */
     loginRoot: ComponentWithProperties;
     /**
      * Set this as the root when the user doesn't have permissions (don't set if permissions are not needed)
