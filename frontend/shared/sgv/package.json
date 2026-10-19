@@ -18,7 +18,7 @@
     "scripts": {
         "lint": "eslint --quiet",
         "test": "vitest run",
-        "typecheck": "vue-tsc --noEmit"
+        "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "dependencies": {
         "@stamhoofd/frontend-application": "workspace:*",

@@ -12,7 +12,7 @@
         "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=production vite build",
         "dev": "NODE_ENV=development ENV_FILE=../../.env.json vite",
         "lint": "eslint --quiet",
-        "typecheck": "vue-tsc --noEmit"
+        "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "dependencies": {
         "@stamhoofd/frontend-application": "workspace:*",

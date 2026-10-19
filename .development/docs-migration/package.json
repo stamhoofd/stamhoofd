@@ -8,7 +8,7 @@
     "scripts": {
         "start": "jiti src/migrate-ghost.ts",
         "lint": "eslint --quiet",
-        "typecheck": "tsc --noEmit"
+        "typecheck": "tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "devDependencies": {
         "@types/node": "22.20.4",

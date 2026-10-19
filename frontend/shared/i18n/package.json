@@ -16,7 +16,7 @@
     },
     "scripts": {
         "lint": "eslint --quiet",
-        "typecheck": "vue-tsc --noEmit"
+        "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "dependencies": {
         "@stamhoofd/frontend-storage": "workspace:*",

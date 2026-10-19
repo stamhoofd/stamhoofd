@@ -27,7 +27,7 @@ describe('check cache configuration', () => {
         expect(tasks.typecheck).toEqual({
             dependsOn: ['build:types', 'check-inputs', '@stamhoofd/components#build:types', '@stamhoofd/components#check-inputs'],
             cache: true,
-            outputs: [],
+            outputs: ['.cache/typecheck*.tsbuildinfo'],
         });
         expect(tasks['build:types']).toEqual({
             dependsOn: ['^build:types'],
@@ -45,7 +45,7 @@ describe('check cache configuration', () => {
     it.each(typecheckPackages)('%s checks production in build:types and tests without emitting', (packagePath) => {
         const { scripts } = readJson(`${packagePath}/package.json`);
         expect(scripts['build:types']).toMatch(/^tsc --project tsconfig.types.json/);
-        expect(scripts.typecheck).toBe('tsc --project tsconfig.test.json --noEmit --composite false --incremental false');
+        expect(scripts.typecheck).toBe('tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo');
         expect(readJson(`${packagePath}/tsconfig.test.json`).references).toEqual([{ path: './tsconfig.types.json' }]);
     });
 

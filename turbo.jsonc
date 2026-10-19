@@ -149,7 +149,7 @@
         "typecheck": {
             "dependsOn": ["build:types", "check-inputs", "@stamhoofd/components#build:types", "@stamhoofd/components#check-inputs"],
             "cache": true,
-            "outputs": []
+            "outputs": [".cache/typecheck*.tsbuildinfo"]
         },
         "test": {
             "cache": false
