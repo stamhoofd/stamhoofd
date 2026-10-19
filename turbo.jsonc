@@ -8,6 +8,11 @@
             "cache": false,
             "outputs": ["dist/**", "*.tsbuildinfo"]
         },
+        "@stamhoofd/backend#build": {
+            "dependsOn": ["^build"],
+            "outputs": ["dist/**", "*.tsbuildinfo"],
+            "cache": true
+        },
         "@stamhoofd/types#build": {
             "dependsOn": ["^build"],
             "outputs": ["dist/**", "*.tsbuildinfo"],
