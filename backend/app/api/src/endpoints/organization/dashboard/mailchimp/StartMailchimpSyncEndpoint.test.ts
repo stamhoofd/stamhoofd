@@ -1,8 +1,8 @@
 import { EmailAddress } from '@stamhoofd/email';
-import { GroupFactory, MemberFactory, OrderFactory, Organization, OrganizationFactory, Platform, RegistrationFactory, RegistrationPeriod, WebshopFactory } from '@stamhoofd/models';
+import { GroupFactory, MemberFactory, MemberResponsibilityRecordFactory, OrderFactory, Organization, OrganizationFactory, Platform, RegistrationFactory, RegistrationPeriod, WebshopFactory } from '@stamhoofd/models';
 import { MailchimpCredential } from '@stamhoofd/models/models/MailchimpCredential.js';
 import { QueueHandler } from '@stamhoofd/queues';
-import { MemberDetails, OrderStatus, Parent, PermissionLevel, Permissions, RecordCategory, RecordCheckboxAnswer, RecordSettings, RecordType, TranslatedString, Version } from '@stamhoofd/structures';
+import { DefaultAgeGroup, MemberDetails, MemberResponsibility, OrderStatus, Parent, PermissionLevel, Permissions, RecordCategory, RecordCheckboxAnswer, RecordSettings, RecordType, TranslatedString, Version } from '@stamhoofd/structures';
 import { MailchimpSettings } from '@stamhoofd/structures/mailchimp/MailchimpSettings.js';
 import { MailchimpSyncIssueReason, MailchimpSyncStatus } from '@stamhoofd/structures/mailchimp/MailchimpSync.js';
 import { MailchimpSyncRequest, MailchimpSyncType } from '@stamhoofd/structures/mailchimp/MailchimpSyncRequest.js';
@@ -222,29 +222,94 @@ describe('Endpoint.StartMailchimpSync', () => {
             TestUtils.setEnvironment('userMode', 'platform');
             const platform = await Platform.getForEditing();
             const period = await RegistrationPeriod.getByID(platform.periodId);
+            const original = { name: platform.config.name, defaultAgeGroups: platform.config.defaultAgeGroups, responsibilities: platform.config.responsibilities };
+
+            const welpenAgeGroup = DefaultAgeGroup.create({ names: ['Welpen', 'Kabouters'] });
+            const leiding = MemberResponsibility.create({ name: 'Leiding', defaultAgeGroupIds: [welpenAgeGroup.id] });
+            const groepsleiding = MemberResponsibility.create({ name: 'Groepsleiding' });
+            platform.config.defaultAgeGroups = [...platform.config.defaultAgeGroups, welpenAgeGroup];
+            platform.config.responsibilities = [...platform.config.responsibilities, leiding, groepsleiding];
             platform.config.featureFlags = [...platform.config.featureFlags, 'mailchimp'];
+            platform.config.name = 'Ravot';
             await platform.save();
 
             try {
+                const tags = await MailchimpTags.forScope(null);
                 const organization = await new OrganizationFactory({ name: 'Scouts Gent', period: period! }).create();
-                const group = await new GroupFactory({ organization, period: period!, name: TranslatedString.create('Welpen') }).create();
-                const member = await new MemberFactory({ organization, details: MemberDetails.create({ firstName: 'Emma', lastName: 'Peeters', email: 'emma-platform@example.com' }) }).create();
-                await new RegistrationFactory({ member, group }).create();
+                const materiaalmeester = MemberResponsibility.create({ name: 'Materiaalmeester' });
+                organization.privateMeta.responsibilities = [materiaalmeester];
+                await organization.save();
+
+                const wolfjes = await new GroupFactory({ organization, period: period!, name: TranslatedString.create('Wolfjes') }).create();
+                wolfjes.defaultAgeGroupId = welpenAgeGroup.id;
+                await wolfjes.save();
+                const dansgroep = await new GroupFactory({ organization, period: period!, name: TranslatedString.create('Dansgroep') }).create();
+
+                const emma = await new MemberFactory({
+                    organization,
+                    details: MemberDetails.create({
+                        firstName: 'Emma',
+                        lastName: 'Peeters',
+                        email: 'emma-platform@example.com',
+                        parents: [Parent.create({ firstName: 'An', lastName: 'Peeters', email: 'an-platform@example.com' })],
+                    }),
+                }).create();
+                await new RegistrationFactory({ member: emma, group: wolfjes }).create();
+                const leidingRecord = await new MemberResponsibilityRecordFactory({ member: emma, responsibility: leiding, organizationId: organization.id }).create();
+                leidingRecord.groupId = wolfjes.id;
+                await leidingRecord.save();
+                await new MemberResponsibilityRecordFactory({ member: emma, responsibility: groepsleiding, organizationId: organization.id }).create();
+                await new MemberResponsibilityRecordFactory({ member: emma, responsibility: materiaalmeester, organizationId: organization.id }).create();
+
+                const noor = await new MemberFactory({ organization, details: MemberDetails.create({ firstName: 'Noor', lastName: 'Janssens', email: 'noor-platform@example.com' }) }).create();
+                await new RegistrationFactory({ member: noor, group: dansgroep }).create();
 
                 const { adminToken } = await initPlatformAdmin();
                 const context = { organization: null, token: adminToken, host: STAMHOOFD.domains.api };
                 await connectMailchimp(mailchimp, context);
+                mailchimp.addMember('list1', { email: 'emma-platform@example.com', tags: [tags.member, tags.group('Wolfjes'), 'Stamhoofd: Groep – Wolfjes', 'Eigen tag'] });
 
                 const result = await runMailchimpSync(context, MailchimpSyncRequest.create({ full: true, confirmedConsent: true }));
                 expect(result.status).toBe(MailchimpSyncStatus.Done);
 
-                const contact = mailchimp.getMember('list1', 'emma-platform@example.com')!;
-                expect(contact.mergeFields).toMatchObject({ SH_LEDEN: 'Emma', SH_GROEPEN: 'Welpen', SH_VERENIG: 'Scouts Gent' });
-                expect(contact.tags).toEqual(expect.arrayContaining([tags.member, tags.group('Welpen'), tags.organization('Scouts Gent')]));
+                const sorted = (list: string[]) => [...list].sort((a, b) => a.localeCompare(b));
+
+                // Only the names of the platform: the default age group instead of the group name, and no responsibilities of the organization
+                const member = mailchimp.getMember('list1', 'emma-platform@example.com')!;
+                expect(member.mergeFields).toMatchObject({ SH_LEDEN: 'Emma', SH_GROEPEN: 'Welpen of Kabouters', SH_VERENIG: 'Scouts Gent' });
+                expect(sorted(member.tags)).toEqual(sorted([
+                    tags.member,
+                    tags.ageGroup('Welpen of Kabouters'),
+                    tags.organization('Scouts Gent'),
+                    tags.responsibility('Leiding'),
+                    tags.responsibility('Leiding', 'Welpen of Kabouters'),
+                    tags.responsibility('Groepsleiding'),
+                    'Eigen tag',
+                ]));
+                expect(tags.responsibility('Leiding', 'Welpen of Kabouters')).toBe('Ravot: Functie – Leiding van Welpen of Kabouters');
+                expect(tags.ageGroup('Welpen of Kabouters')).toBe('Ravot: Leeftijdsgroep – Welpen of Kabouters');
+
+                // Responsibilities belong to the member, not to their parents
+                const parent = mailchimp.getMember('list1', 'an-platform@example.com')!;
+                expect(sorted(parent.tags)).toEqual(sorted([tags.parent, tags.ageGroup('Welpen of Kabouters'), tags.organization('Scouts Gent')]));
+
+                const noorContact = mailchimp.getMember('list1', 'noor-platform@example.com')!;
+                expect(sorted(noorContact.tags)).toEqual(sorted([tags.member, tags.organization('Scouts Gent')]));
+                expect(mailchimp.lists[0].mergeFields.map(f => f.name)).toEqual(['First Name', 'Last Name', 'Ravot - Leden', 'Ravot - Leeftijdsgroepen', 'Ravot - ' + tags.i18n.$t('%1HI')]);
+
+                // A second sync only sends what changed
+                const requestsBefore = mailchimp.requests.length;
+                const second = await runMailchimpSync(context, MailchimpSyncRequest.create({ full: true, confirmedConsent: true }));
+                expect(second.result.processed).toBe(second.result.total);
+                expect(second.result).toMatchObject({ added: 0, updated: 3, failed: 0 });
+                expect(mailchimp.requests.slice(requestsBefore).filter(r => r.method === 'PUT' || r.path.endsWith('/tags'))).toEqual([]);
             }
             finally {
                 const editing = await Platform.getForEditing();
                 editing.config.featureFlags = editing.config.featureFlags.filter(f => f !== 'mailchimp');
+                editing.config.name = original.name;
+                editing.config.defaultAgeGroups = original.defaultAgeGroups;
+                editing.config.responsibilities = original.responsibilities;
                 editing.privateConfig.mailchimp = null;
                 await editing.save();
                 await (await MailchimpCredential.getFor(null))?.delete();

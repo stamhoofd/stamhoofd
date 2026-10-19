@@ -13,7 +13,10 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <p v-if="!preview && !errors.errorBox" class="style-description">
+        <p v-if="isPlatform" class="style-description">
+            {{ $t('Hoeveel e-mailadressen naar Mailchimp gaan en hoeveel er worden overgeslagen, zie je na afloop van de synchronisatie.') }}
+        </p>
+        <p v-else-if="!preview && !errors.errorBox" class="style-description">
             <Spinner />
         </p>
 
@@ -146,7 +149,7 @@ const context = useContext();
 const owner = useRequestOwner();
 const errors = useErrors();
 const platform = usePlatform();
-const { settings } = useMailchimpSettings();
+const { settings, isPlatform } = useMailchimpSettings();
 
 const preview = ref<MailchimpSyncPreview | null>(null);
 const saving = ref(false);
@@ -168,6 +171,10 @@ function buildRequest() {
 }
 
 onMounted(async () => {
+    // The preview loads every member in one request, which takes too long for a whole platform
+    if (isPlatform.value) {
+        return;
+    }
     try {
         const response = await context.value.authenticatedServer.request({
             method: 'POST',

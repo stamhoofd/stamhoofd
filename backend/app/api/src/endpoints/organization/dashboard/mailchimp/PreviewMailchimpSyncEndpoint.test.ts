@@ -1,13 +1,14 @@
 import { EmailAddress } from '@stamhoofd/email';
-import { GroupFactory, MemberFactory, RegistrationFactory } from '@stamhoofd/models';
+import { GroupFactory, MemberFactory, Platform, RegistrationFactory } from '@stamhoofd/models';
 import { MemberDetails, Parent, RecordCategory, RecordCheckboxAnswer, RecordSettings, RecordType, TranslatedString, Version } from '@stamhoofd/structures';
 import { MailchimpSettings } from '@stamhoofd/structures/mailchimp/MailchimpSettings.js';
 import type { MailchimpSyncPreview } from '@stamhoofd/structures/mailchimp/MailchimpSyncPreview.js';
 import { MailchimpSyncRequest } from '@stamhoofd/structures/mailchimp/MailchimpSyncRequest.js';
-import { TestUtils } from '@stamhoofd/test-utils';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import type { MailchimpMocker } from '../../../../../tests/helpers/MailchimpMocker.js';
 import { initMailchimpApi } from '../../../../../tests/init/initMailchimpApi.js';
 import { connectMailchimp, initMailchimpOrganization, mailchimpRequest } from '../../../../../tests/init/initMailchimpOrganization.js';
+import { initPlatformAdmin } from '../../../../../tests/init/initPlatformAdmin.js';
 import { PatchMailchimpSettingsEndpoint } from './PatchMailchimpSettingsEndpoint.js';
 import { PreviewMailchimpSyncEndpoint } from './PreviewMailchimpSyncEndpoint.js';
 
@@ -69,5 +70,23 @@ describe('Endpoint.PreviewMailchimpSync', () => {
 
         const response = await mailchimpRequest<MailchimpSyncPreview>(endpoint, 'POST', '/mailchimp/syncs/preview', context.host, context.token, MailchimpSyncRequest.create({ full: true }).encode({ version: Version }));
         expect(response.body).toMatchObject({ contacts: 1, withoutConsent: 1, usesNewsletterRecord: true });
+    });
+
+    test('is not available for a platform, because it would load every member in one request', async () => {
+        TestUtils.setEnvironment('userMode', 'platform');
+        const platform = await Platform.getForEditing();
+        platform.config.featureFlags = [...platform.config.featureFlags, 'mailchimp'];
+        await platform.save();
+
+        try {
+            const { adminToken } = await initPlatformAdmin();
+            await expect(mailchimpRequest(endpoint, 'POST', '/mailchimp/syncs/preview', STAMHOOFD.domains.api, adminToken, MailchimpSyncRequest.create({ full: true }).encode({ version: Version })))
+                .rejects.toThrow(STExpect.simpleError({ code: 'not_available', message: 'A preview is only available for an organization' }));
+        }
+        finally {
+            const editing = await Platform.getForEditing();
+            editing.config.featureFlags = editing.config.featureFlags.filter(f => f !== 'mailchimp');
+            await editing.save();
+        }
     });
 });
