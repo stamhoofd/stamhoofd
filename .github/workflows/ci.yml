@@ -15,11 +15,10 @@ on:
         branches: [main]
         types: [opened, synchronize, reopened, labeled, stacked]
 
-# Cancel superseded runs on the same ref. We only cancel on pull_request events so
-# that pushes to main always run to completion (and keep their full check history).
-# concurrency:
-#   group: ci-${{ github.workflow }}-${{ github.ref }}
-#   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+# Group PR runs by ref; unique groups preserve every non-PR run, including pending runs.
+concurrency:
+    group: ci-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+    cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
     job_setup:
