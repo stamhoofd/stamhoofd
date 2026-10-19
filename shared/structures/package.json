@@ -35,7 +35,7 @@
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
         "build:types": "tsc --project tsconfig.types.json",
-        "lint": "eslint",
+        "lint": "eslint --quiet",
         "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental false",
         "test": "vitest",
         "test:coverage": "vitest --coverage"

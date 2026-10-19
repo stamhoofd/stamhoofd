@@ -7,7 +7,7 @@
     "license": "MIT",
     "scripts": {
         "start": "jiti src/migrate-ghost.ts",
-        "lint": "eslint",
+        "lint": "eslint --quiet",
         "typecheck": "tsc --noEmit"
     },
     "devDependencies": {

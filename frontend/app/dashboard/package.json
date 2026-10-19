@@ -12,7 +12,7 @@
         "dist"
     ],
     "scripts": {
-        "lint": "eslint",
+        "lint": "eslint --quiet",
         "test": "pnpm run typecheck",
         "typecheck": "vue-tsc --noEmit"
     },

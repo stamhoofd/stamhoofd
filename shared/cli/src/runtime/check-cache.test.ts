@@ -62,7 +62,7 @@ describe('check cache configuration', () => {
             'frontend/eslint.config.js',
             'backend/eslint.config.js',
         ]));
-        expect(readJson('package.json').scripts.lint).toBe('pnpm exec turbo run lint -- --quiet');
+        expect(readJson('package.json').scripts.lint).toBe('pnpm exec turbo run lint');
     });
 
     it('keeps root and CLI checks on the same Turbo entrypoint', () => {

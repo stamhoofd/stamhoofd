@@ -16,7 +16,7 @@
         "build": "tsc --build tsconfig.build.json && pnpm run copy-assets",
         "build:full": "rm -rf ./dist && rm -f *.tsbuildinfo && pnpm run build",
         "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/ ./dist/",
-        "lint": "eslint",
+        "lint": "eslint --quiet",
         "start": "pnpm run build && node ./dist/index.js",
         "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental false",
         "test": "vitest",

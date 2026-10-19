@@ -149,6 +149,8 @@ The root and `stam check` lint and typecheck commands use Turbo to select all pa
 
 The scriptless `check-inputs` task propagates transitive source fingerprints without running dependency checks. Checks also prepare declarations and fingerprint components and its dependencies because shared Vue ambient declarations import them implicitly. Shared TypeScript configurations and ambient declarations are global cache inputs. Lint uses type-aware rules, so it tracks dependency source and declarations too. It additionally fingerprints `eslint-plugin-stamhoofd` and its dependencies; inherited root, frontend, and backend ESLint configurations are global cache inputs. ESLint's per-file cache is not enabled because changes to imported types can affect unchanged files. Only successful checks are cached; failures always run again. A failure in any package fails the root command. Direct package scripts bypass Turbo's prerequisites and check cache.
 
+Lint scripts include `--quiet` themselves, keeping the existing repo-wide errors-only behavior consistent with direct package scripts. The root command does not forward arguments through Turbo, so lint and typechecking share declaration cache keys. To include warnings when debugging a package, run `pnpm --filter <package> exec eslint .` directly.
+
 `shared/cli` owns local development configuration. Backend and frontend development builds load domains, ports, database settings, storage settings, and app environment values from `@stamhoofd/cli`.
 
 The main config contract lives in `src/config/development-config.ts`. Keep local-development settings there first, then consume the resolved config from commands, workflows, Caddy, SSO, Stripe, status output, or app bootstrapping.
