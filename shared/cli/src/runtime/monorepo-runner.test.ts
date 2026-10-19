@@ -100,6 +100,17 @@ describe('shared build orchestration', () => {
         expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', ['run', script], { cwd: '/repo', verbosity: RunVerbosity.Output });
     });
 
+    it.each([
+        ['lint', lint],
+        ['typecheck', typecheck],
+    ] as const)('forwards %s selectors to Turbo without changing check prerequisites', async (script, check) => {
+        await check(context, ['@stamhoofd/mobile', './backend/shared/*']);
+
+        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', [
+            'run', script, '--filter=@stamhoofd/mobile', '--filter=./backend/shared/*',
+        ], { cwd: '/repo', verbosity: RunVerbosity.Output });
+    });
+
     it('only publishes readiness after a successful build and keeps watching after errors', () => {
         const readyFile = sharedBuildReadyCommand().split(' ')[1];
         const watch = sharedBuildWatchCommand();
