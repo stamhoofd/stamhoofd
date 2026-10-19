@@ -49,6 +49,22 @@ describe('check cache configuration', () => {
         expect(readJson(`${packagePath}/tsconfig.test.json`).references ?? []).toEqual([]);
     });
 
+    it('invalidates typed lint checks for dependency types, shared rules, and inherited configs', () => {
+        const { tasks, globalDependencies } = readJson('turbo.jsonc');
+
+        expect(tasks.lint).toEqual({
+            dependsOn: ['^build', 'check-inputs', 'eslint-plugin-stamhoofd#check-inputs', '@stamhoofd/components#check-inputs'],
+            cache: true,
+            outputs: [],
+        });
+        expect(globalDependencies).toEqual(expect.arrayContaining([
+            'eslint.config.js',
+            'frontend/eslint.config.js',
+            'backend/eslint.config.js',
+        ]));
+        expect(readJson('package.json').scripts.lint).toBe('pnpm exec turbo run lint -- --quiet');
+    });
+
     it('keeps root and CLI checks on the same Turbo entrypoint', () => {
         expect(readJson('package.json').scripts.typecheck).toBe('pnpm exec turbo run typecheck');
         const runner = readFileSync(new URL('shared/cli/src/runtime/monorepo-runner.ts', root), 'utf8');
