@@ -4,9 +4,13 @@
     "cacheDir": ".turbo/cache",
     "tasks": {
         "build": {
-            "dependsOn": ["^build"],
+            "dependsOn": ["^build", "build:types"],
             "cache": false,
             "outputs": ["dist/**", "*.tsbuildinfo"]
+        },
+        "build:types": {
+            "dependsOn": ["^build:types"],
+            "outputs": ["dist-types/**", ".cache/types.tsbuildinfo"]
         },
         "@stamhoofd/backend#build": {
             "dependsOn": ["^build"],
@@ -14,7 +18,7 @@
             "cache": true
         },
         "@stamhoofd/types#build": {
-            "dependsOn": ["^build"],
+            "dependsOn": ["^build", "build:types"],
             "outputs": ["dist/**", "*.tsbuildinfo"],
             "cache": true
         },
@@ -24,7 +28,7 @@
             "cache": true
         },
         "@stamhoofd/utility#build": {
-            "dependsOn": ["^build"],
+            "dependsOn": ["^build", "build:types"],
             "outputs": ["dist/**", "*.tsbuildinfo"],
             "cache": true
         },
