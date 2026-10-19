@@ -3,13 +3,15 @@
     "version": "2.155.0",
     "type": "module",
     "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "types": "./dist-types/index.d.ts",
     "sideEffects": false,
     "files": [
-        "dist"
+        "dist",
+        "dist-types"
     ],
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
+        "build:types": "tsc --project tsconfig.types.json",
         "lint": "eslint"
     },
     "dependencies": {

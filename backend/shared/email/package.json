@@ -4,14 +4,16 @@
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "types": "./dist-types/index.d.ts",
     "sideEffects": false,
     "files": [
         "dist",
+        "dist-types",
         "migrations"
     ],
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
+        "build:types": "tsc --project tsconfig.types.json",
         "lint": "eslint"
     },
     "dependencies": {

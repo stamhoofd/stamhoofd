@@ -4,26 +4,28 @@
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "types": "./dist-types/index.d.ts",
     "sideEffects": false,
     "exports": {
         ".": {
-            "types": "./dist/index.d.ts",
+            "types": "./dist-types/index.d.ts",
             "import": "./dist/index.js",
             "require": "./dist/index.js"
         },
         "./*": {
-            "types": "./dist/*.d.ts",
+            "types": "./dist-types/*.d.ts",
             "import": "./dist/*.js",
             "require": "./dist/*.js"
         }
     },
     "files": [
         "dist",
+        "dist-types",
         "package.json"
     ],
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
+        "build:types": "tsc --project tsconfig.types.json",
         "lint": "eslint .",
         "test": "vitest"
     },

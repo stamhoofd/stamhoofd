@@ -4,6 +4,7 @@
         "rootDir": ".",
         "outDir": "dist"
     },
+    "references": [{ "path": "./tsconfig.types.json" }],
     "include": [
         "../../stamhoofd.d.ts",
         "../../../jest-extended.d.ts",

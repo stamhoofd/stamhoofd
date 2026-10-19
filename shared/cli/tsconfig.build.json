@@ -1,6 +1,7 @@
 {
-    "extends": "../../tsconfig.base.json",
+    "extends": ["../../tsconfig.base.json", "../../tsconfig.runtime.json"],
     "compilerOptions": {
+        "tsBuildInfoFile": ".cache/build.tsbuildinfo",
         "rootDir": "src",
         "outDir": "dist"
     },
@@ -10,16 +11,16 @@
     ],
     "references": [
         {
-            "path": "../types/tsconfig.build.json"
+            "path": "../types/tsconfig.types.json"
         },
         {
-            "path": "../metabase/tsconfig.build.json"
+            "path": "../metabase/tsconfig.types.json"
         },
         {
-            "path": "../stdsync/tsconfig.build.json"
+            "path": "../stdsync/tsconfig.types.json"
         },
         {
-            "path": "../../.development/i18n-uuid/tsconfig.build.json"
+            "path": "../../.development/i18n-uuid/tsconfig.types.json"
         }
     ],
     "exclude": [
