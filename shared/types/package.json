@@ -4,17 +4,19 @@
     "type": "module",
     "exports": {
         "./*": {
-            "types": "./dist/*.d.ts",
+            "types": "./dist-types/*.d.ts",
             "import": "./dist/*.js",
             "require": "./dist/*.js"
         }
     },
     "files": [
         "dist",
+        "dist-types",
         "package.json"
     ],
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
+        "build:types": "tsc --project tsconfig.types.json",
         "lint": "eslint"
     },
     "dependencies": {
