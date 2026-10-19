@@ -221,8 +221,8 @@ jobs:
             in_stack_range: ${{ steps.stack.outputs.run }}
 
     # Build all shared TypeScript packages exactly once and share the compiled output
-    # (dist + tsbuildinfo) with every downstream job via an artifact. This removes the
-    # duplicated `pnpm run build:shared` step from each consumer job.
+    # (dist, dist-types, and .cache build metadata) with every downstream job via an
+    # artifact. This removes the duplicated `pnpm run build:shared` step from each consumer job.
     job_build_shared:
         name: "Build shared packages"
         runs-on: ubuntu-latest
@@ -257,11 +257,14 @@ jobs:
                   include-hidden-files: true
                   path: |
                       shared/*/dist
-                      shared/*/*.tsbuildinfo
+                      shared/*/dist-types
+                      shared/*/.cache/*.tsbuildinfo
                       backend/shared/*/dist
-                      backend/shared/*/*.tsbuildinfo
+                      backend/shared/*/dist-types
+                      backend/shared/*/.cache/*.tsbuildinfo
                       .development/i18n-uuid/dist
-                      .development/i18n-uuid/*.tsbuildinfo
+                      .development/i18n-uuid/dist-types
+                      .development/i18n-uuid/.cache/*.tsbuildinfo
 
     job_test_backend_apps:
         name: "Backend App Tests"

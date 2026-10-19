@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "tsBuildInfoFile": ".cache/build.tsbuildinfo",
         "outDir": "dist",
         "rootDir": "./src"
     },
@@ -7,7 +8,7 @@
         "./src/**/*.spec.ts", 
         "./src/**/*.test.ts"
     ],
-    "extends": "../../tsconfig.base.json",
+    "extends": ["../../tsconfig.base.json", "../../tsconfig.runtime.json"],
     "include": [
         "./src"
     ]

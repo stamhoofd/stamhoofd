@@ -257,12 +257,14 @@ export async function cleanBuild(context: CliContext, options: { dryRun?: boolea
         'tests',
         'shared',
         'frontend/app',
+        'frontend/shared',
         'backend/shared',
         'backend/app',
+        '.development',
     ];
 
     if (options.dryRun) {
-        console.log('Would remove dist, dist-playwright, and *.tsbuildinfo from:');
+        console.log('Would remove dist, dist-types, dist-playwright, and TypeScript build metadata from:');
         roots.forEach(root => console.log(`  ${root}/*`));
         return;
     }
@@ -273,11 +275,11 @@ export async function cleanBuild(context: CliContext, options: { dryRun?: boolea
 }
 
 export function sharedBuildWatchCommand(): string {
-    return `mkdir -p .development/cli/generated && rm -f ${sharedBuildReadyFile} && pnpm exec nodemon --quiet --signal SIGTERM --watch shared --watch backend/shared --watch backend/stamhoofd.d.ts --watch turbo.jsonc --watch tsconfig.base.json --watch tsconfig.test.json --watch jest-extended.d.ts --ignore './shared/*/dist/' --ignore './backend/shared/*/dist/' --ext .ts,.json,.jsonc,.sql,.mjs,.js --exec 'pnpm run build:shared && touch ${sharedBuildReadyFile} || exit 0'`;
+    return `mkdir -p .development/cli/generated && rm -f ${sharedBuildReadyFile} && pnpm exec nodemon --quiet --signal SIGTERM --watch shared --watch backend/shared --watch backend/stamhoofd.d.ts --watch turbo.jsonc --watch tsconfig.base.json --watch tsconfig.test.json --watch tsconfig.runtime.json --watch tsconfig.types.json --watch jest-extended.d.ts --ignore './shared/*/dist/' --ignore './backend/shared/*/dist/' --ignore './shared/*/dist-types/' --ignore './backend/shared/*/dist-types/' --ext .ts,.json,.jsonc,.sql,.mjs,.js --exec 'pnpm run build:shared && touch ${sharedBuildReadyFile} || exit 0'`;
 }
 
 export function sharedBuildReadyCommand(): string {
-    return `wait-on ${sharedBuildReadyFile} shared/cli/dist/index.js shared/locales/dist/index.d.ts`;
+    return `wait-on ${sharedBuildReadyFile} shared/cli/dist/index.js shared/locales/dist-types/index.d.ts`;
 }
 
 async function cleanPackageChildren(root: string): Promise<void> {
@@ -295,8 +297,10 @@ async function cleanPackageChildren(root: string): Promise<void> {
             return;
         }
         await fs.rm(path.join(packagePath, 'dist'), { recursive: true, force: true });
+        await fs.rm(path.join(packagePath, 'dist-types'), { recursive: true, force: true });
         await fs.rm(path.join(packagePath, 'dist-playwright'), { recursive: true, force: true });
         await removeTsBuildInfo(packagePath);
+        await removeTsBuildInfo(path.join(packagePath, '.cache'));
     }));
 }
 

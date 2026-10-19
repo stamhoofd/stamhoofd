@@ -3,15 +3,17 @@
     "version": "2.155.0",
     "type": "module",
     "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "types": "./dist-types/index.d.ts",
     "sideEffects": false,
     "files": [
-        "dist"
+        "dist",
+        "dist-types"
     ],
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
+        "build:types": "tsc --project tsconfig.types.json",
         "lint": "eslint",
-        "typecheck": "tsc --project tsconfig.build.json --noEmit --composite false --incremental false && tsc --project tsconfig.test.json --noEmit --composite false --incremental false",
+        "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental false",
         "test": "vitest",
         "test:coverage": "vitest --coverage"
     },

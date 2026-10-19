@@ -5,10 +5,20 @@
     "main": "./dist/index.js",
     "exports": {
         ".": {
+            "types": "./dist-types/index.d.ts",
             "require": "./dist/index.js"
         }
     },
+    "types": "./dist-types/index.d.ts",
+    "files": [
+        "dist",
+        "dist-types",
+        "src",
+        "*.ts",
+        "tsconfig*.json"
+    ],
     "scripts": {
+        "build:types": "tsc --project tsconfig.types.json",
         "build": "tsc --build tsconfig.build.json && mkdir -p ./dist/src/migrations && rsync --delete --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/migrations/ ./dist/src/migrations/",
         "build:watch": "pnpm run build && tsc --build tsconfig.build.json --watch --preserveWatchOutput",
         "build:full": "pnpm run clear && pnpm run build",
@@ -17,7 +27,7 @@
         "lint": "eslint",
         "migrations": "pnpm run build:full && node ./dist/migrations.js",
         "start": "pnpm run build && node --enable-source-maps ./dist/index.js",
-        "typecheck": "tsc --project tsconfig.build.json --noEmit --composite false --incremental false && tsc --project tsconfig.test.json --noEmit --composite false --incremental false",
+        "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental false",
         "test": "vitest",
         "test:coverage": "vitest --coverage"
     },

@@ -20,14 +20,18 @@ const typecheckPackages = [
 ];
 
 describe('check cache configuration', () => {
-    it('prepares dependency builds and fingerprints transitive source and Vue globals', () => {
+    it('prepares declarations without runtime builds and fingerprints transitive source and Vue globals', () => {
         const { tasks, globalDependencies } = readJson('turbo.jsonc');
 
         expect(tasks['check-inputs']).toEqual({ dependsOn: ['^check-inputs'] });
         expect(tasks.typecheck).toEqual({
-            dependsOn: ['^build', 'check-inputs', '@stamhoofd/components#check-inputs'],
+            dependsOn: ['build:types', 'check-inputs', '@stamhoofd/components#build:types', '@stamhoofd/components#check-inputs'],
             cache: true,
             outputs: [],
+        });
+        expect(tasks['build:types']).toEqual({
+            dependsOn: ['^build:types'],
+            outputs: ['dist-types/**', '.cache/types*.tsbuildinfo'],
         });
         expect(globalDependencies).toEqual(expect.arrayContaining([
             'tsconfig*.json',
@@ -38,22 +42,18 @@ describe('check cache configuration', () => {
         ]));
     });
 
-    it.each(typecheckPackages)('%s checks production and tests without emitting', (packagePath) => {
+    it.each(typecheckPackages)('%s checks production in build:types and tests without emitting', (packagePath) => {
         const { scripts } = readJson(`${packagePath}/package.json`);
-        const commands = scripts.typecheck.split(' && ');
-
-        expect(commands).toEqual([
-            'tsc --project tsconfig.build.json --noEmit --composite false --incremental false',
-            'tsc --project tsconfig.test.json --noEmit --composite false --incremental false',
-        ]);
-        expect(readJson(`${packagePath}/tsconfig.test.json`).references ?? []).toEqual([]);
+        expect(scripts['build:types']).toMatch(/^tsc --project tsconfig.types.json/);
+        expect(scripts.typecheck).toBe('tsc --project tsconfig.test.json --noEmit --composite false --incremental false');
+        expect(readJson(`${packagePath}/tsconfig.test.json`).references).toEqual([{ path: './tsconfig.types.json' }]);
     });
 
     it('invalidates typed lint checks for dependency types, shared rules, and inherited configs', () => {
         const { tasks, globalDependencies } = readJson('turbo.jsonc');
 
         expect(tasks.lint).toEqual({
-            dependsOn: ['^build', 'check-inputs', 'eslint-plugin-stamhoofd#check-inputs', '@stamhoofd/components#check-inputs'],
+            dependsOn: ['build:types', 'check-inputs', 'eslint-plugin-stamhoofd#check-inputs', '@stamhoofd/components#build:types', '@stamhoofd/components#check-inputs'],
             cache: true,
             outputs: [],
         });

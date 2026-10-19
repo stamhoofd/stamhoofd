@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "composite": false,
+        "declaration": false,
+        "declarationMap": false,
+        "incremental": true,
+        "noEmit": false
+    }
+}

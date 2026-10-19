@@ -1,0 +1,12 @@
+{
+    "extends": "./tsconfig.test.json",
+    "compilerOptions": {
+        "composite": false,
+        "declaration": false,
+        "declarationMap": false,
+        "incremental": true,
+        "noEmit": false,
+        "tsBuildInfoFile": ".cache/test-build.tsbuildinfo"
+    },
+    "references": [{ "path": "./tsconfig.types.json" }]
+}

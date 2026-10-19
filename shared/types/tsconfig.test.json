@@ -5,7 +5,7 @@
         "outDir": "dist"
     },
     "references": [
-        { "path": "./tsconfig.build.json" }
+        { "path": "./tsconfig.types.json" }
     ],
     "include": [
         "../../jest-extended.d.ts",
