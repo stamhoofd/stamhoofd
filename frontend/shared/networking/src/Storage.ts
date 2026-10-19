@@ -1,9 +1,11 @@
+/** Async-shaped string storage; missing keys return null. Implementations may throw/reject on storage failures. */
 export interface KeyValueContainer {
     setItem(key: string, value: string): Promise<void>;
     getItem(key: string): Promise<string | null>;
     removeItem(key: string): Promise<void>;
 }
 
+/** Browser localStorage adapter; operations run synchronously before returning a resolved promise. */
 export class LocalStorage implements KeyValueContainer {
     setItem(key: string, value: string) {
         localStorage.setItem(key, value);
@@ -20,7 +22,9 @@ export class LocalStorage implements KeyValueContainer {
 }
 
 /**
- * Allow to explicitly override storage container depending on environment
+ * Overridable storage roles, not isolated namespaces: browser defaults all use the
+ * same localStorage keys. Native bootstrap may replace containers. The `secure`
+ * name expresses intended use, not a browser encryption/security guarantee.
  */
 export class Storage {
     /**
