@@ -22,7 +22,7 @@
         "build:types": "tsc --project tsconfig.types.json",
         "build:full": "pnpm run clear && pnpm run build",
         "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
-        "lint": "eslint",
+        "lint": "eslint --quiet",
         "start": "pnpm run build && node --enable-source-maps ./dist/index.js"
     },
     "dependencies": {

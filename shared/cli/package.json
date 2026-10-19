@@ -25,7 +25,7 @@
     "scripts": {
         "build": "rm -rf dist .cache/build.tsbuildinfo && tsc --build tsconfig.build.json",
         "build:types": "tsc --project tsconfig.types.json",
-        "lint": "eslint .",
+        "lint": "eslint . --quiet",
         "test": "vitest run",
         "test:coverage": "vitest --coverage"
     },

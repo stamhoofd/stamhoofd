@@ -8,7 +8,7 @@
         "dist"
     ],
     "scripts": {
-        "lint": "eslint",
+        "lint": "eslint --quiet",
         "typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {

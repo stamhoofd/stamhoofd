@@ -24,7 +24,7 @@
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
         "build:types": "tsc --project tsconfig.types.json",
-        "lint": "eslint"
+        "lint": "eslint --quiet"
     },
     "dependencies": {
         "@simonbackx/simple-logging": "1.0.1"

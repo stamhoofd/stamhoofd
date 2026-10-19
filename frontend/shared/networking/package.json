@@ -15,7 +15,7 @@
         "#*": "./src/*.ts"
     },
     "scripts": {
-        "lint": "eslint",
+        "lint": "eslint --quiet",
         "test": "vitest run",
         "typecheck": "vue-tsc --noEmit"
     },

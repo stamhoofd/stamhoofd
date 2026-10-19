@@ -21,7 +21,7 @@
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
         "build:types": "tsc --project tsconfig.types.json",
-        "lint": "eslint ."
+        "lint": "eslint . --quiet"
     },
     "devDependencies": {
         "@stamhoofd/types": "workspace:*"

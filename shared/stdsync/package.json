@@ -19,7 +19,7 @@
         "build": "tsc --build tsconfig.build.json",
         "build:types": "tsc --project tsconfig.types.json",
         "example": "pnpm run build && node examples/live-output.mjs",
-        "lint": "eslint .",
+        "lint": "eslint . --quiet",
         "test": "vitest run"
     },
     "devDependencies": {
