@@ -20,6 +20,10 @@ const typecheckPackages = [
 ];
 
 describe('check cache configuration', () => {
+    it('keeps runtime CLI builds from regenerating dependency declarations', () => {
+        expect(readJson('shared/cli/tsconfig.build.json').references ?? []).toEqual([]);
+    });
+
     it('prepares declarations without runtime builds and fingerprints transitive source and Vue globals', () => {
         const { tasks, globalDependencies } = readJson('turbo.jsonc');
 
