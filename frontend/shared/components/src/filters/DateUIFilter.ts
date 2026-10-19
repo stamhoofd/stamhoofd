@@ -18,14 +18,14 @@ function getBeginningOfDay(date: Date | null): Date | null {
     if (date === null) {
         return null;
     }
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    return Formatter.luxon(date).startOf('day').toJSDate();
 }
 
 function getEndOfDay(date: Date | null): Date | null {
     if (date === null) {
         return null;
     }
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+    return Formatter.luxon(date).endOf('day').toJSDate();
 }
 
 export class DateUIFilter extends UIFilter<DateFilterBuilder> {
