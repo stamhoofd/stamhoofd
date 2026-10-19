@@ -14,7 +14,7 @@
         "sync": "cap sync",
         "sync:production": "pnpm run trapeze && cap sync",
         "trapeze": "trapeze run config.yaml -y && trapeze run entitlements.yaml -y && trapeze run display-name.yaml -y",
-        "typecheck": "vue-tsc --noEmit"
+        "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "dependencies": {
         "@stamhoofd/frontend-platform": "workspace:*",
