@@ -1,6 +1,6 @@
 {
     "$schema": "https://turborepo.com/schema.json",
-    "globalDependencies": ["tsconfig*.json", "shared/tsconfig*.json", "backend/tsconfig*.json", "frontend/tsconfig*.json", "jest-extended.d.ts", "shared/*.d.ts", "backend/*.d.ts", "frontend/*.d.ts", ".nvmrc"],
+    "globalDependencies": ["tsconfig*.json", "shared/tsconfig*.json", "backend/tsconfig*.json", "frontend/tsconfig*.json", "jest-extended.d.ts", "shared/*.d.ts", "backend/*.d.ts", "frontend/*.d.ts", ".nvmrc", "eslint.config.js", "frontend/eslint.config.js", "backend/eslint.config.js"],
     "cacheDir": ".turbo/cache",
     "tasks": {
         "build": {
@@ -130,7 +130,9 @@
             "persistent": true
         },
         "lint": {
-            "cache": false
+            "dependsOn": ["^build", "check-inputs", "eslint-plugin-stamhoofd#check-inputs", "@stamhoofd/components#check-inputs"],
+            "cache": true,
+            "outputs": []
         },
         "check-inputs": {
             "dependsOn": ["^check-inputs"]
