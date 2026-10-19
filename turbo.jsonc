@@ -132,8 +132,13 @@
         "lint": {
             "cache": false
         },
+        "check-inputs": {
+            "dependsOn": ["^check-inputs"]
+        },
         "typecheck": {
-            "cache": false
+            "dependsOn": ["^build", "check-inputs", "@stamhoofd/components#check-inputs"],
+            "cache": true,
+            "outputs": []
         },
         "test": {
             "cache": false
