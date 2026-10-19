@@ -133,7 +133,7 @@ These defaults are not an access-control boundary. Explicit remote/refspec argum
 
 ### Development Configuration
 
-All builds use `^build` over the acyclic workspace dependency graph. Internal build-time peers are mirrored in `devDependencies` while retaining their published `peerDependencies`; global type declarations are also declared as build-time dependencies. Turbo does not include peer dependencies alone in `^build`. Source-only frontend packages have no build script: Turbo traverses them as transit nodes to build their prerequisites without bundling them separately. Package-specific task entries replace the default task configuration, so cached shared entries must keep their own `dependsOn` and `outputs`. Application builds, Playwright builds, tests, migrations, lint and typecheck are uncached; development tasks are persistent and uncached.
+All builds use `^build` over the acyclic workspace dependency graph. Internal build-time peers are mirrored in `devDependencies` while retaining their published `peerDependencies`; global type declarations are also declared as build-time dependencies. Turbo does not include peer dependencies alone in `^build`. Source-only frontend packages have no build script: Turbo traverses them as transit nodes to build their prerequisites without bundling them separately. Package-specific task entries replace the default task configuration, so cached shared entries must keep their own `dependsOn` and `outputs`. Application builds, Playwright builds, tests, migrations and lint are uncached; development tasks are persistent and uncached.
 
 Shared builds in `stam build`, tests, migrations, and development sessions call the root `build:shared` Turbo graph. The development watcher uses nodemon and marks the shared build ready only after success; failed compilations can recover on the next edit. App startup waits for that ready marker. Use `stam dev` instead of the removed `build:shared:watch` script. `stam clean build` removes outputs but retains the local Turbo cache; use `pnpm run clear:shared && pnpm run build:shared --force` for a fresh compilation.
 
@@ -143,7 +143,9 @@ Development sessions use explicit Turbo filters for the API, renderer, statistic
 
 Task orchestration uses pnpm, Turbo, and `stam`. Lerna remains installed only for fixed versioning and npm publication until release tooling is migrated.
 
-The root and `stam check` lint and typecheck commands use Turbo to select all package scripts. These checks are intentionally uncached because backend TypeScript configurations can emit build metadata and declarations. A failure in any package fails the root command.
+The root and `stam check` lint and typecheck commands use Turbo to select all package scripts. Typechecks are cached and do not emit JavaScript, declarations, or build metadata. Backend/shared checks validate production and test configurations separately; their test configurations do not reference emitting builds. The `^build` prerequisites prepare dependency outputs first, including application builds where required by the package graph. Application builds remain uncached even when the following check hits cache.
+
+The scriptless `check-inputs` task propagates transitive source fingerprints without running dependency checks. Checks also fingerprint components and its dependencies because shared Vue ambient declarations import them implicitly. Shared TypeScript configurations and ambient declarations are global cache inputs. Only successful checks are cached; failures always run again. Lint remains uncached. A failure in any package fails the root command. Direct package scripts bypass Turbo's check cache.
 
 `shared/cli` owns local development configuration. Backend and frontend development builds load domains, ports, database settings, storage settings, and app environment values from `@stamhoofd/cli`.
 

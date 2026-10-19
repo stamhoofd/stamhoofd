@@ -9,7 +9,7 @@
         "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/ ./dist/",
         "lint": "eslint",
         "start": "pnpm run build && node ./dist/index.js",
-        "typecheck": "tsc --build tsconfig.test.json",
+        "typecheck": "tsc --project tsconfig.build.json --noEmit --composite false --incremental false && tsc --project tsconfig.test.json --noEmit --composite false --incremental false",
         "test": "vitest",
         "test:coverage": "vitest --coverage"
     },

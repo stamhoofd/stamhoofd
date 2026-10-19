@@ -17,7 +17,7 @@
         "lint": "eslint",
         "migrations": "pnpm run build:full && node ./dist/migrations.js",
         "start": "pnpm run build && node --enable-source-maps ./dist/index.js",
-        "typecheck": "tsc --build tsconfig.test.json",
+        "typecheck": "tsc --project tsconfig.build.json --noEmit --composite false --incremental false && tsc --project tsconfig.test.json --noEmit --composite false --incremental false",
         "test": "vitest",
         "test:coverage": "vitest --coverage"
     },
