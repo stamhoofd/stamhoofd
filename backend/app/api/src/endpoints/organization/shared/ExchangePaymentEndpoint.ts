@@ -63,8 +63,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Skip check permissions if order and created less than hour ago
         let checkPermissions = true;
-        const hourAgo = new Date();
-        hourAgo.setHours(-2);
+        const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
         if (payment.createdAt > hourAgo) {
             if (payment.payingOrganizationId) {
