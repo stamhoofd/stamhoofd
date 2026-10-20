@@ -1852,6 +1852,54 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 expect(memberWithFunction.details.getParentEmails()).toEqual(['linda@example.com']);
                 expect(memberWithFunction.details.parents[0].phone).toBe(null);
             });
+
+            test('A parent phone change by a non-full admin does not reach a family member with a function', async () => {
+                const organization = await new OrganizationFactory({}).create();
+                const group = await new GroupFactory({ organization }).create();
+
+                const admin = await new UserFactory({
+                    permissions: Permissions.create({ level: PermissionLevel.Write }),
+                    organization,
+                }).create();
+
+                const familyUser = await new UserFactory({}).create();
+                const parent = Parent.create({ firstName: 'Linda', lastName: 'Doe', email: 'linda@example.com', phone: '+32470000000' });
+
+                const member = await new MemberFactory({
+                    user: familyUser,
+                    details: MemberDetails.create({ firstName: 'John', lastName: 'Doe', parents: [parent] }),
+                }).create();
+                await new RegistrationFactory({ member, group }).create();
+
+                const memberWithFunction = await new MemberFactory({
+                    user: familyUser,
+                    details: MemberDetails.create({ firstName: 'Jane', lastName: 'Doe', parents: [parent.clone()] }),
+                }).create();
+                await new RegistrationFactory({ member: memberWithFunction, group }).create();
+                await addResponsibility(memberWithFunction, PermissionLevel.Full, organization.id);
+
+                const token = await SessionService.createSession(admin);
+                const parents = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+                parents.addPatch(Parent.patch({ id: parent.id, phone: '+32412345678' }));
+
+                const arr: Body = new PatchableArray();
+                arr.addPatch(MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ parents }),
+                }));
+
+                const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                request.headers.authorization = 'Bearer ' + token.accessToken;
+                const response = await testServer.test(endpoint, request);
+                expect(response.status).toBe(200);
+
+                await member.refresh();
+                expect(member.details.parents[0].phone).toBe('+32412345678');
+
+                await memberWithFunction.refresh();
+                expect(memberWithFunction.details.parents[0].phone).toBe('+32470000000');
+                expect(memberWithFunction.details.getPhoneNumbersForVerification()).toEqual(['+32470000000']);
+            });
         });
     });
 
