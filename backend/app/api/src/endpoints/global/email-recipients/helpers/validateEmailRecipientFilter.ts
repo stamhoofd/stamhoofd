@@ -2,7 +2,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/models';
 import type { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
-import { FilterWrapperMarker, unwrapFilter } from '@stamhoofd/structures';
+import { FilterWrapperMarker, unwrapFilter, unwrapFilterRecursively } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context.js';
 
 export async function validateEmailRecipientFilter({ filter, permissionLevel }: { filter: StamhoofdFilter; permissionLevel: PermissionLevel }) {
@@ -11,26 +11,9 @@ export async function validateEmailRecipientFilter({ filter, permissionLevel }: 
         emailId: FilterWrapperMarker,
     };
 
-    let unwrapped = unwrapFilter(filter, requiredFilter);
-    if (!unwrapped.match) {
-        if (typeof filter === 'object'
-            && filter !== null
-            && filter['$and']
-            && Array.isArray(filter['$and'])
-            && Object.keys(filter).length >= 1 // does not matter if more than 1, because root is always $and together
-            && filter['$and'].length > 0
-        ) {
-            for (const subFilter of filter['$and']) {
-                unwrapped = unwrapFilter(subFilter as StamhoofdFilter, requiredFilter);
-                if (unwrapped.match) {
-                    // Found!
-                    break;
-                }
-            }
-        }
+    const unwrapped = unwrapFilterRecursively(filter, requiredFilter);
         if (!unwrapped.match) {
             return false;
-        }
     }
 
     const emailIds = typeof unwrapped.markerValue === 'string'
@@ -44,7 +27,7 @@ export async function validateEmailRecipientFilter({ filter, permissionLevel }: 
             code: 'invalid_field',
             field: 'filter',
             message: 'You must filter on an email id of the email recipients you are trying to access',
-            human: $t(`%1E1`),
+            human: $t('%1E1'),
         });
     }
 

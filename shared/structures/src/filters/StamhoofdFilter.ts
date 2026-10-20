@@ -309,3 +309,31 @@ export function unwrapFilterByPath(filter: StamhoofdFilter, keyPath: (string | n
 
     return undefined;
 }
+
+/**
+ * Does unwrapFilter(filter, wrap) but if filter is an array or an $and filter, it will recursively check all subfilters for a match
+ */
+export function unwrapFilterRecursively(filter: StamhoofdFilter, wrap: WrapperFilter): { match: boolean; markerValue?: StamhoofdFilter | undefined; leftOver?: StamhoofdFilter } {
+    const result = unwrapFilter(filter, wrap);
+    if (result.match) {
+        return result;
+    }
+    let subFilters: StamhoofdFilter[] = [];
+    if (Array.isArray(filter)) {
+        subFilters = filter;
+    } else if (typeof filter === 'object'
+        && filter !== null
+        && Array.isArray(filter['$and'])
+    ) {
+        subFilters = filter['$and'];
+    }
+    for (const subFilter of subFilters) {
+        const subResult = unwrapFilterRecursively(subFilter, wrap);
+        if (subResult.match) {
+            return subResult;
+        }
+    }
+    return {
+        match: false,
+    };
+}
