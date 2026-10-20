@@ -59,7 +59,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             throw new SimpleError({
                 code: 'permission_denied',
                 message: 'You do not have permissions to edit an inactive organization',
-                human: $t(`%EV`),
+                human: $t('%EV'),
                 statusCode: 403,
             });
         }
@@ -81,6 +81,17 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
         if (await Context.auth.hasFullAccess(organization.id)) {
             if (request.body.name) {
+                const platform = await Platform.getSharedStruct();
+                const onlyPlatformAdmin = platform.config.featureFlags.includes('edit-organization-name-admin');
+
+                if (onlyPlatformAdmin && !Context.auth.hasPlatformFullAccess())
+                    throw new SimpleError({
+                        code: 'permission_denied',
+                        message: 'Only platform admin can change organization name',
+                        field: 'name',
+                        human: $t('Enkel een platformbeheerder kan de naam van een vereniging aanpassen'),
+                    });
+
                 if (request.body.name.length < 2) {
                     throw new SimpleError({
                         code: 'invalid_field',
@@ -110,7 +121,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Field is too long',
-                        human: $t(`%EW`),
+                        human: $t('%EW'),
                         field: 'uri',
                     });
                 }
@@ -119,7 +130,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Field is too short',
-                        human: $t(`%EX`),
+                        human: $t('%EX'),
                         field: 'uri',
                     });
                 }
@@ -129,7 +140,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'name_taken',
                         message: 'An organization with the same URI already exists',
-                        human: $t(`%EY`),
+                        human: $t('%EY'),
                         field: 'uri',
                     });
                 }
@@ -381,7 +392,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
             if (request.body.active !== undefined) {
                 if (!Context.auth.hasPlatformFullAccess()) {
-                    throw Context.auth.error($t(`%EZ`));
+                    throw Context.auth.error($t('%EZ'));
                 }
                 organization.active = request.body.active;
             }
@@ -397,7 +408,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'name_taken',
                         message: 'An organization with the same name already exists',
-                        human: $t(`%D2`),
+                        human: $t('%D2'),
                         field: 'name',
                     });
                 }
@@ -619,7 +630,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
             if (!model || !await Context.auth.canAccessWebshop(model, PermissionLevel.Full)) {
                 errors.addError(
-                    Context.auth.error($t(`%Ea`)),
+                    Context.auth.error($t('%Ea')),
                 );
                 continue;
             }
@@ -714,7 +725,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Too many companies',
-                        human: $t(`%Eb`),
+                        human: $t('%Eb'),
                         field: 'companies',
                     });
                 }
@@ -730,7 +741,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Too many companies',
-                    human: $t(`%Eb`),
+                    human: $t('%Eb'),
                     field: 'companies',
                 });
             }

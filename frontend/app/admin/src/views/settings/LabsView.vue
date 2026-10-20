@@ -124,6 +124,10 @@
         <Checkbox :model-value="getFeatureFlag('mailchimp')" @update:model-value="setFeatureFlag('mailchimp', !!$event)">
             {{ $t('%Zui') }}
         </Checkbox>
+
+        <Checkbox :model-value="getFeatureFlag('edit-organization-name-admin')" @update:model-value="setFeatureFlag('edit-organization-name-admin', !!$event)">
+            {{ $t('Naam vereniging enkel aanpasbaar door platformbeheerders') }}
+        </Checkbox>
     </SaveView>
 </template>
 
@@ -139,6 +143,7 @@ import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePatchPlatform } from '@stamhoofd/components/hooks/usePatchPlatform.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import CheckboxListItem from '@stamhoofd/components/inputs/CheckboxListItem.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
@@ -297,14 +302,14 @@ function getLoginMethodProvider(loginMethod: LoginMethod) {
 
 function getLoginMethodTitle(loginMethod: LoginMethod) {
     if (loginMethod === LoginMethod.Password) {
-        return $t(`%HK`);
+        return $t('%HK');
     }
 
     if (loginMethod === LoginMethod.Google) {
-        return $t(`%1p`);
+        return $t('%1p');
     }
 
-    return $t(`%2b`);
+    return $t('%2b');
 }
 
 async function save() {
@@ -324,7 +329,7 @@ async function save() {
         const startedRequiringTwoFactor = !platform.value.privateConfig?.requireTwoFactor && requireTwoFactor.value;
 
         await patchPlatform(patch.value);
-        new Toast($t(`%HA`), 'success green').show();
+        new Toast($t('%HA'), 'success green').show();
 
         if (startedRequiringTwoFactor) {
             // After the patch, so the admins that sign in again already meet the new requirement

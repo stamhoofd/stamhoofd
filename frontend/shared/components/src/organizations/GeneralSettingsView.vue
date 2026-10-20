@@ -13,7 +13,7 @@
         <div class="split-inputs">
             <div>
                 <STInputBox :title="$t('%8D')" error-fields="name" :error-box="errors.errorBox">
-                    <input id="organization-name" ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('%8C')" autocomplete="organization">
+                    <input id="organization-name" ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('%8C')" autocomplete="organization" :disabled="!canEditOrganizationName">
                 </STInputBox>
 
                 <AddressInput v-model="address" :title="$t('%8a')" :validator="errors.validator" :link-country-to-locale="true" :optional-except-city="STAMHOOFD.userMode !== 'platform'" />
@@ -107,13 +107,15 @@ import { computed, ref, watch } from 'vue';
 import ReviewCheckbox from '../ReviewCheckbox.vue';
 
 import CompanyRow from '../companies/CompanyRow.vue';
+import { useFeatureFlag } from '#hooks/useFeatureFlag.ts';
 
 const props = defineProps<{ isReview?: boolean }>();
 
-const title = computed(() => props.isReview ? $t('%4d') : $t(`%10T`));
+const title = computed(() => props.isReview ? $t('%4d') : $t('%10T'));
 const organizationManager = useOrganizationManager();
 const platform = usePlatform();
 const auth = useAuth();
+const $feature = useFeatureFlag();
 
 // Not released yet: only platform admins can set the language of an organization
 const availableLanguages = I18nController.shared.availableLanguages;
@@ -125,6 +127,12 @@ const present = usePresent();
 const { patched, hasChanges, addPatch, patch } = usePatch(computed(() => organizationManager.value.organization));
 
 const { overrideIsDone, hasChanges: hasReviewChanges, save: saveReview, reviewCheckboxData } = useReview(SetupStepType.Companies);
+
+const canEditOrganizationName = computed(() => {
+    if (!$feature('edit-organization-name-admin')) return true;
+
+    return auth.hasPlatformFullAccess();
+});
 
 const hasSomeChanges = computed(() => {
     if (props.isReview) {
