@@ -113,7 +113,7 @@ describe('Endpoint.PatchOrganization', () => {
             expect(response.body.name).toEqual('My crazy name');
         });
 
-        test('Changing the name fails if only platform admins can change it', async () => {
+        test('Changing the name fails if only platform admins can change it (non-admin)', async () => {
             const platform = await Platform.getForEditing();
             platform.config.featureFlags = ['edit-organization-name-admin'];
             await platform.save();
@@ -129,6 +129,34 @@ describe('Endpoint.PatchOrganization', () => {
             r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await expect(testServer.test(endpoint, r)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+        });
+
+        test('Change the name of the organization if only platform admins can change it (admin)', async () => {
+            const platform = await Platform.getForEditing();
+            platform.config.featureFlags = [];
+            await platform.save();
+
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ organization, globalPermissions: Permissions.create({
+                level: PermissionLevel.Full,
+            }) }).create();
+            const token = await SessionService.createSession(user);
+
+            const r = Request.buildJson('PATCH', '/v2/organization', organization.getApiHost(), {
+                id: organization.id,
+                name: 'My crazy name',
+            });
+            r.headers.authorization = 'Bearer ' + token.accessToken;
+
+            const response = await testServer.test(endpoint, r);
+            expect(response.body).toBeDefined();
+
+            if (!(response.body instanceof OrganizationStruct)) {
+                throw new Error('Expected Organization');
+            }
+
+            expect(response.body.id).toEqual(organization.id);
+            expect(response.body.name).toEqual('My crazy name');
         });
     });
 
