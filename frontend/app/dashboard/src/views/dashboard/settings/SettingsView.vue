@@ -89,21 +89,6 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="uitpasFeature" :selectable="true" class="left-center" @click="$navigate(Routes.Uitpas)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/uitpas.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ true ? $t('%1Bf') : $t('%1Bg') }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ $t('%1Bh') }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
                 <STListItem v-if="isShowPremises" :selectable="true" class="left-center" @click="$navigate(Routes.Premises)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/house.svg">
@@ -219,10 +204,10 @@
                 </STList>
             </template>
 
-            <template v-if="mailchimpFeature">
+            <template v-if="mailchimpFeature || uitpasFeature">
                 <hr><h2>{{ $t('%ZvE') }}</h2>
                 <STList class="illustration-list">
-                    <STListItem :selectable="true" class="left-center" data-testid="open-mailchimp-settings" @click="$navigate(Routes.Mailchimp)">
+                    <STListItem v-if="mailchimpFeature" :selectable="true" class="left-center" data-testid="open-mailchimp-settings" @click="$navigate(Routes.Mailchimp)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/partners/mailchimp/mailchimp.svg">
                         </template>
@@ -231,6 +216,21 @@
                         </h2>
                         <p class="style-description-small">
                             {{ $t('%ZuM') }}
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-if="uitpasFeature" :selectable="true" class="left-center" @click="$navigate(Routes.Uitpas)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/uitpas.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ true ? $t('%1Bf') : $t('%1Bg') }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ $t('%1Bh') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
