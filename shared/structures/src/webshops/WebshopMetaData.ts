@@ -741,7 +741,7 @@ export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: BooleanDecoder, version: 180, field: 'cartEnabled', upgrade: () => true })
     @field({
         decoder: new EnumDecoder(WebshopOrderMode),
-        ...NextVersion,
+        version: 422,
         upgrade: (cartEnabled: boolean) => (cartEnabled ? WebshopOrderMode.Cart : WebshopOrderMode.Single),
         downgrade: (orderMode: WebshopOrderMode) => orderMode !== WebshopOrderMode.Single,
     })
