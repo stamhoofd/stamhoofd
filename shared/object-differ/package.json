@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/object-differ",
-    "version": "2.154.0",
+    "version": "2.155.0",
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
