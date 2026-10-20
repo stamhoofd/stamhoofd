@@ -56,10 +56,28 @@ describe('MemoryService', () => {
         });
 
         test('reports a system error when the average leaves little memory', () => {
-            MemoryService.record(sample({ systemAvailable: 1.2 * GiB }));
+            for (let i = 0; i < 11; i++) {
+                MemoryService.record(sample({ systemAvailable: 300 * MiB }));
+            }
+            MemoryService.record(sample({ systemAvailable: 800 * MiB }));
             expect(MemoryService.getErrors()).toEqual([
-                'System memory is almost exhausted: 1.2 GiB available of 16.0 GiB (93% used on average)',
+                'System memory is almost exhausted: 342 MiB available of 16.0 GiB on average (98% used)',
             ]);
+        });
+
+        test('does not report a system error above 90% usage while more than 500 MiB is available', () => {
+            for (let i = 0; i < 12; i++) {
+                MemoryService.record(sample({ systemTotal: 15.2 * GiB, systemAvailable: 1.4 * GiB }));
+            }
+            expect(MemoryService.getSystemUsedRatio()).toBeGreaterThan(MemoryService.systemUsedWarningRatio);
+            expect(MemoryService.getErrors()).toEqual([]);
+        });
+
+        test('does not report a system error on a small host below 90% usage with less than 500 MiB available', () => {
+            for (let i = 0; i < 12; i++) {
+                MemoryService.record(sample({ systemTotal: 2 * GiB, systemAvailable: 450 * MiB }));
+            }
+            expect(MemoryService.getErrors()).toEqual([]);
         });
 
         test('a single peak below the critical ratio inside a healthy window does not trigger an error', () => {
@@ -98,27 +116,41 @@ describe('MemoryService', () => {
 
         test('reports a system error on the first sample where another process took the memory', () => {
             recordHealthyMinute();
-            MemoryService.record(sample({ systemAvailable: 500 * MiB }));
+            MemoryService.record(sample({ systemAvailable: 400 * MiB }));
 
             expect(MemoryService.getSystemUsedRatio()).toBeLessThan(MemoryService.systemUsedWarningRatio);
             expect(MemoryService.getErrors()).toEqual([
-                'System memory is exhausted: 500 MiB available of 16.0 GiB (97% used)',
+                'System memory is exhausted: 400 MiB available of 16.0 GiB (98% used)',
             ]);
+        });
+
+        test('does not report a critical system error while more than 500 MiB is available', () => {
+            recordHealthyMinute();
+            MemoryService.record(sample({ systemAvailable: 600 * MiB }));
+
+            expect(MemoryService.getErrors()).toEqual([]);
+        });
+
+        test('does not report a critical system error on a small host below 95% usage with less than 500 MiB available', () => {
+            recordHealthyMinute();
+            MemoryService.record(sample({ systemTotal: 2 * GiB, systemAvailable: 450 * MiB }));
+
+            expect(MemoryService.getErrors()).toEqual([]);
         });
 
         test('reports each problem once when both the last sample and the average are bad', () => {
             for (let i = 0; i < 12; i++) {
-                MemoryService.record(sample({ heapUsed: 3.9 * GiB, systemAvailable: 500 * MiB }));
+                MemoryService.record(sample({ heapUsed: 3.9 * GiB, systemAvailable: 400 * MiB }));
             }
 
             expect(MemoryService.getErrors()).toEqual([
                 'Heap memory usage is critical: 3.9 GiB of 4.0 GiB (98%)',
-                'System memory is exhausted: 500 MiB available of 16.0 GiB (97% used)',
+                'System memory is exhausted: 400 MiB available of 16.0 GiB (98% used)',
             ]);
         });
 
         test('clears again as soon as the memory is released', () => {
-            MemoryService.record(sample({ systemAvailable: 500 * MiB }));
+            MemoryService.record(sample({ systemAvailable: 400 * MiB }));
             expect(MemoryService.getErrors()).toHaveLength(1);
 
             MemoryService.record(sample());
