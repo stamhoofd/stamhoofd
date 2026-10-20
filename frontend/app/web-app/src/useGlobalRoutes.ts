@@ -2,6 +2,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoute, NavigationController, onCheckRoutes, ReactiveUrl, UrlHelper, useModalStackComponent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { rememberPendingNoltLogin } from '@stamhoofd/components/helpers/nolt.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
@@ -115,6 +116,10 @@ export function useGlobalRoutes() {
             if (id && token && ['all', 'marketing'].includes(type)) {
                 await unsubscribe(id, token, type as 'all' | 'marketing', platform.value);
             }
+        }
+
+        if (rememberPendingNoltLogin()) {
+            new Toast($t('Kies een vereniging waarvan je beheerder bent. Daarna word je automatisch ingelogd in het feedbacksysteem.'), 'info').setHide(15 * 1000).show();
         }
 
         await context.value.checkSSO();
