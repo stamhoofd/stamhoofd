@@ -29,7 +29,7 @@ Email.recipientLoaders.set(EmailRecipientFilterType.Orders, {
                 throw new Error('Webshop is undefined');
             }
 
-            webshopPreviewMap.set(webshopId, AuthenticatedStructures.webshopPreview(webshop));
+            webshopPreviewMap.set(webshopId, await AuthenticatedStructures.webshopPreview(webshop));
         }
 
         const recipients: EmailRecipient[] = [];

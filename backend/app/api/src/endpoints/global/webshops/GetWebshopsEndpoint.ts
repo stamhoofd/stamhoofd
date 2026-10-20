@@ -173,7 +173,7 @@ export class GetWebshopsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 continue;
             }
 
-            const webshopStruct = AuthenticatedStructures.webshopPreview(webshop);
+            const webshopStruct = await AuthenticatedStructures.webshopPreview(webshop);
             results.push(WebshopWithOrganization.create({
                 webshop: webshopStruct,
                 organization: organizationModel.getBaseStructure(),

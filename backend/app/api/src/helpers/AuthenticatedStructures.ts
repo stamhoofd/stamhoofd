@@ -4,7 +4,7 @@ import { BalanceItem, CachedBalance, EmailRecipient, Event, Group, Invoice, Memb
 import type { EmailRecipient as EmailRecipientStruct, PaymentGeneral } from '@stamhoofd/structures';
 import { BaseOrganization, getAppHost, ImpersonatedBy, OrganizationPrivateMetaData } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { Payment as PaymentStruct, AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, BalanceItem as BalanceItemStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, InvitationGroupData, InvitationMemberData, InvoicedBalanceItem, InvoiceStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberRegistrationInvitation, MembersBlob, MemberWithRegistrationsBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentCustomer, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationInvitation as RegistrationInvitationStruct, RegistrationsBlob, RegistrationWithMemberBlob, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { Payment as PaymentStruct, AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, BalanceItem as BalanceItemStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, InvitationGroupData, InvitationMemberData, InvoicedBalanceItem, InvoiceStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberRegistrationInvitation, MembersBlob, MemberWithRegistrationsBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentCustomer, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationInvitation as RegistrationInvitationStruct, RegistrationsBlob, RegistrationWithMemberBlob, TicketPrivate, UserWithMembers, WebshopPreview, WebshopPrivateMetaData, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
 import { SQL } from '@stamhoofd/sql';
@@ -251,8 +251,12 @@ export class AuthenticatedStructures {
         return (await this.organizations([organization]))[0];
     }
 
-    static webshopPreview(webshop: Webshop) {
-        return WebshopPreview.create(webshop);
+    static async webshopPreview(webshop: Webshop) {
+        const preview = WebshopPreview.create(webshop);
+        if (!await Context.optionalAuth?.canAccessWebshop(webshop)) {
+            preview.privateMeta = WebshopPrivateMetaData.create({});
+        }
+        return preview;
     }
 
     static async baseOrganizations(organizations: Organization[]): Promise<BaseOrganization[]> {
@@ -360,7 +364,7 @@ export class AuthenticatedStructures {
 
             const organizationId = w.organizationId;
             const array = webshopPreviews.get(organizationId);
-            const preview = this.webshopPreview(w);
+            const preview = await this.webshopPreview(w);
 
             if (array) {
                 array.push(preview);
