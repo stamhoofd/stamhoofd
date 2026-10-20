@@ -4,6 +4,7 @@ import type { CycleInformation } from '@stamhoofd/structures';
 import { GroupCategory, GroupCategorySettings, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, RegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
 import { LoggingTools } from '@stamhoofd/utility';
 import { SeedTools } from '../helpers/SeedTools.js';
+import { GroupService } from '../services/GroupService.js';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment === 'test') {
@@ -78,7 +79,7 @@ async function cleanupGroup(group: Group, dryRun: boolean) {
     }
 
     if (!dryRun) {
-        await group.updateOccupancy();
+        await GroupService.refreshOccupancy(group);
         await group.save();
     }
 }

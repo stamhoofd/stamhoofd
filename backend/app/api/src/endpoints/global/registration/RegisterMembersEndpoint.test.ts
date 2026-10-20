@@ -15,6 +15,7 @@ import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initAdmin, initPermissionRole, initUitpasApi } from '../../../../tests/init/index.js';
 import { initPayconiq } from '../../../../tests/init/initPayconiq.js';
 import { BalanceItemService } from '../../../services/BalanceItemService.js';
+import { GroupService } from '../../../services/GroupService.js';
 import { RegisterMembersEndpoint } from './RegisterMembersEndpoint.js';
 import { SessionService } from '../../../services/SessionService.js';
 
@@ -2785,7 +2786,7 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            await group1.updateOccupancy();
+            await GroupService.refreshOccupancy(group1);
             expect(group1.settings.registeredMembers).toBe(1);
 
             // send request and check occupancy
@@ -3104,7 +3105,7 @@ describe('Endpoint.RegisterMembers', () => {
             // #region act and assert
 
             // update occupancy to be sure occupancy is 1
-            await group1.updateOccupancy();
+            await GroupService.refreshOccupancy(group1);
             expect(group1.settings.registeredMembers).toBe(1);
 
             // send request and check occupancy

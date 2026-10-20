@@ -22,6 +22,7 @@ import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer.js';
 import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater.js';
 import { didUitpasReviewChange, updateMemberDetailsUitpasNumber, updateMemberDetailsUitpasNumberForPatch } from '../../../helpers/updateMemberDetailsUitpasNumber.js';
 import { MemberNumberService } from '../../../services/MemberNumberService.js';
+import { GroupService } from '../../../services/GroupService.js';
 import { PlatformMembershipService } from '../../../services/PlatformMembershipService.js';
 import { RegistrationService } from '../../../services/RegistrationService.js';
 import { shouldCheckIfMemberIsDuplicateForPatch } from './shouldCheckIfMemberIsDuplicate.js';
@@ -933,7 +934,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
         // Loop all groups and update occupancy if needed
         for (const group of groups) {
-            await group.updateOccupancy();
+            await GroupService.refreshOccupancy(group);
             await group.save();
         }
 
