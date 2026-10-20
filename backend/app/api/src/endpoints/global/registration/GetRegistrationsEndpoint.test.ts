@@ -1,13 +1,14 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Registration, RegistrationPeriod, Token } from '@stamhoofd/models';
+import type { Group, Organization, Registration, RegistrationPeriod, Token } from '@stamhoofd/models';
 import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Platform, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import type { SortList } from '@stamhoofd/structures';
+import type { SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { EventMeta, GroupCategory, GroupCategorySettings, GroupPrice, GroupStatus, GroupType, LimitedFilteredRequest, NamedObject, OrganizationTag, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ResourcePermissions, SortItemDirection, TranslatedString } from '@stamhoofd/structures';
+import { CountFilteredRequest, EventMeta, GroupCategory, GroupCategorySettings, GroupPrice, GroupStatus, GroupType, LimitedFilteredRequest, NamedObject, OrganizationTag, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ResourcePermissions, SortItemDirection, TranslatedString } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { GetRegistrationsCountEndpoint } from './GetRegistrationsCountEndpoint.js';
 import { GetRegistrationsEndpoint } from './GetRegistrationsEndpoint.js';
 import { SessionService } from '../../../services/SessionService.js';
 
@@ -1454,6 +1455,160 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             expect(response.body.results.registrations).toIncludeSameMembers([
                 expect.objectContaining({ id: dayRegistration.id }),
             ]);
+        });
+    });
+
+    describe('Handcrafted filters', () => {
+        // A user with read access to a single group. The validator may skip the scope filter only when
+        // the request filter is guaranteed to narrow the results to that group.
+        let organization: Organization;
+        let allowedGroup: Group;
+        let forbiddenGroup: Group;
+        let allowedRegistration: Registration;
+        let headers: { authorization: string };
+
+        beforeAll(async () => {
+            organization = await new OrganizationFactory({ period }).create();
+            allowedGroup = await new GroupFactory({ organization, period }).create();
+            forbiddenGroup = await new GroupFactory({ organization, period }).create();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources: new Map([[
+                        PermissionsResourceType.Groups,
+                        new Map([[allowedGroup.id, ResourcePermissions.create({ level: PermissionLevel.Read })]]),
+                    ]]),
+                }),
+            }).create();
+            const token = await SessionService.createSession(user);
+            headers = { authorization: 'Bearer ' + token.accessToken };
+
+            const allowedMember = await new MemberFactory({ firstName: 'Allowed', lastName: 'Member' }).create();
+            const hiddenMember = await new MemberFactory({ firstName: 'Hidden', lastName: 'Member' }).create();
+
+            allowedRegistration = await new RegistrationFactory({ member: allowedMember, group: allowedGroup }).create();
+            await new RegistrationFactory({ member: hiddenMember, group: forbiddenGroup }).create();
+        });
+
+        const fetchIds = async (filter: StamhoofdFilter) => {
+            const response = await testServer.test(endpoint, Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({ filter, limit: 10 }),
+                headers,
+            }));
+            expect(response.status).toBe(200);
+            return response.body.results.registrations.map(r => r.id);
+        };
+
+        const count = async (filter: StamhoofdFilter) => {
+            const response = await testServer.test(new GetRegistrationsCountEndpoint(), Request.get({
+                path: `${baseUrl}/count`,
+                host: organization.getApiHost(),
+                query: new CountFilteredRequest({ filter }),
+                headers,
+            }));
+            return response.body.count;
+        };
+
+        const expectDenied = async (filter: StamhoofdFilter) => {
+            await expect(fetchIds(filter)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(count(filter)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+        };
+
+        const expectVisible = async (filter: StamhoofdFilter, registrationIds: string[]) => {
+            expect(await fetchIds(filter)).toIncludeSameMembers(registrationIds);
+            expect(await count(filter)).toBe(registrationIds.length);
+        };
+
+        test('A group filter wrapped in a top-level array or $and returns the same registrations as the plain object', async () => {
+            const expected = [allowedRegistration.id];
+            await expectVisible({ groupId: allowedGroup.id }, expected);
+            await expectVisible([{ groupId: allowedGroup.id }], expected);
+            await expectVisible([{ groupId: allowedGroup.id, deactivatedAt: null }], expected);
+            await expectVisible({ $and: [{ groupId: allowedGroup.id }] }, expected);
+            await expectVisible({ $and: [[{ groupId: allowedGroup.id }]] }, expected);
+            await expectVisible([{ $and: [{ groupId: allowedGroup.id }] }, { member: { $elemMatch: { lastName: 'Member' } } }], expected);
+            await expectVisible([{ groupId: { $: '$rel', value: allowedGroup.id, name: 'Allowed' } }], expected);
+        });
+
+        test('A group filter inside an $or does not lift the scope filter', async () => {
+            const orFilter: StamhoofdFilter = { $or: [{ groupId: allowedGroup.id }, { member: { $elemMatch: { firstName: 'Hidden' } } }] };
+            const expected = [allowedRegistration.id];
+
+            await expectVisible(orFilter, expected);
+            await expectVisible([orFilter], expected);
+            await expectVisible({ $and: [orFilter] }, expected);
+            await expectVisible({ $and: [[orFilter]] }, expected);
+            await expectVisible({ $or: [{ $and: [{ groupId: allowedGroup.id }] }, { member: { $elemMatch: { firstName: 'Hidden' } } }] }, expected);
+            await expectVisible([{ member: { $elemMatch: { firstName: 'Hidden' } } }], []);
+        });
+
+        test('A negated group filter does not lift the scope filter', async () => {
+            await expectVisible({ $not: { groupId: allowedGroup.id } }, []);
+            await expectVisible({ $and: [{ $not: { groupId: allowedGroup.id } }] }, []);
+            await expectVisible([{ $not: { groupId: allowedGroup.id } }], []);
+            await expectVisible({ $not: { member: { $elemMatch: { firstName: 'Hidden' } } } }, [allowedRegistration.id]);
+        });
+
+        test('An $and object is applied as a normal conjunction', async () => {
+            await expectVisible({ $and: { groupId: allowedGroup.id } }, [allowedRegistration.id]);
+            await expectDenied({ $and: { groupId: forbiddenGroup.id } });
+        });
+
+        test('Extra conditions next to the group filter can only narrow the result', async () => {
+            await expectVisible({
+                $and: [{ groupId: allowedGroup.id }],
+                $or: [{ member: { $elemMatch: { firstName: 'Hidden' } } }, { member: { $elemMatch: { firstName: 'Allowed' } } }],
+            }, [allowedRegistration.id]);
+            await expectVisible([{ groupId: allowedGroup.id }, { member: { $elemMatch: { firstName: 'Hidden' } } }], []);
+            await expectVisible([{ groupId: { $in: [allowedGroup.id], $neq: allowedGroup.id } }], []);
+        });
+
+        test('groupId only accepts a plain id or an $in list', async () => {
+            await expect(fetchIds([{ groupId: allowedGroup.id }, { groupId: { $neq: allowedGroup.id } }])).rejects.toThrow(STExpect.errorWithCode('invalid_field'));
+            await expect(fetchIds([{ groupId: { $eq: forbiddenGroup.id } }])).rejects.toThrow(STExpect.errorWithCode('invalid_field'));
+            await expect(fetchIds([{ groupId: { $in: [] } }])).rejects.toThrow(STExpect.errorWithCode('invalid_field'));
+        });
+
+        test('A forbidden group anywhere in the filter is rejected', async () => {
+            await expectDenied([{ groupId: forbiddenGroup.id }]);
+            await expectDenied([{ groupId: allowedGroup.id }, { groupId: forbiddenGroup.id }]);
+            await expectDenied({ $and: [{ groupId: allowedGroup.id }, { groupId: forbiddenGroup.id }] });
+            await expectDenied({ $and: [{ groupId: allowedGroup.id }], $or: [{ groupId: forbiddenGroup.id }, { groupId: allowedGroup.id }] });
+            await expectDenied({ $or: [{ groupId: allowedGroup.id }, { groupId: forbiddenGroup.id }] });
+            await expectDenied([{ $or: [{ groupId: allowedGroup.id }, { groupId: forbiddenGroup.id }] }]);
+            await expectDenied({ $not: { groupId: forbiddenGroup.id } });
+            await expectDenied([{ groupId: { $in: [allowedGroup.id, forbiddenGroup.id] } }]);
+            await expectDenied([{ groupId: { $: '$rel', value: forbiddenGroup.id, name: 'Forbidden' } }]);
+            await expectDenied([{ groupId: { $in: [{ $: '$rel', value: forbiddenGroup.id, name: 'Forbidden' }] } }]);
+            await expectDenied([{ groupId: allowedGroup.id }, { member: { $elemMatch: { registrations: { $elemMatch: { groupId: forbiddenGroup.id } } } } }]);
+        });
+
+        test('A user without any group access cannot use a wrapped filter to see registrations', async () => {
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.None }),
+            }).create();
+            const token = await SessionService.createSession(user);
+            const noAccessHeaders = { authorization: 'Bearer ' + token.accessToken };
+
+            const filters: StamhoofdFilter[] = [
+                [{ groupId: allowedGroup.id }],
+                { $or: [{ groupId: allowedGroup.id }] },
+                [{ $or: [{ groupId: allowedGroup.id }, { member: { $elemMatch: { firstName: 'Hidden' } } }] }],
+                { $not: { groupId: allowedGroup.id } },
+            ];
+            for (const filter of filters) {
+                await expect(testServer.test(endpoint, Request.get({
+                    path: baseUrl,
+                    host: organization.getApiHost(),
+                    query: new LimitedFilteredRequest({ filter, limit: 10 }),
+                    headers: noAccessHeaders,
+                }))).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            }
         });
     });
 });

@@ -1,12 +1,13 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, User } from '@stamhoofd/models';
+import type { Group, Member, Organization, User } from '@stamhoofd/models';
 import { GroupFactory, MemberFactory, OrganizationFactory, RegistrationInvitation, RegistrationInvitationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import type { PaginatedResponse, RegistrationInvitation as RegistrationInvitationStruct, StamhoofdFilter } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { LimitedFilteredRequest, Permissions, ResourcePermissions, TranslatedString } from '@stamhoofd/structures';
-import { TestUtils } from '@stamhoofd/test-utils';
+import { CountFilteredRequest, LimitedFilteredRequest, Permissions, ResourcePermissions, TranslatedString } from '@stamhoofd/structures';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { GetRegistrationInvitationsCountEndpoint } from './GetRegistrationInvitationsCountEndpoint.js';
 import { GetRegistrationInvitationsEndpoint } from './GetRegistrationInvitationsEndpoint.js';
 import { SessionService } from '../../../services/SessionService.js';
 
@@ -492,6 +493,142 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                     user,
                 })).rejects.toThrow('You do not have permissions for this action');
             });
+        });
+    });
+
+    describe('Handcrafted filters', () => {
+        // The invitation groupId filter has no permission check of its own, so the scope filter and
+        // validateGroupFilter are the only things keeping invitations of other groups out of the result.
+        // Fixtures are recreated per test because the suite deletes all invitations after each test.
+        let organization: Organization;
+        let allowedGroup: Group;
+        let forbiddenGroup: Group;
+        let member: Member;
+        let headers: { authorization: string };
+        let allowedInvitation: RegistrationInvitation;
+        let otherAllowedInvitation: RegistrationInvitation;
+
+        beforeEach(async () => {
+            organization = await new OrganizationFactory({}).create();
+            allowedGroup = await new GroupFactory({ organization }).create();
+            forbiddenGroup = await new GroupFactory({ organization }).create();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources: new Map([[
+                        PermissionsResourceType.Groups,
+                        new Map([[allowedGroup.id, ResourcePermissions.create({ level: PermissionLevel.Write })]]),
+                    ]]),
+                }),
+            }).create();
+            const token = await SessionService.createSession(user);
+            headers = { authorization: 'Bearer ' + token.accessToken };
+
+            member = await new MemberFactory({ organization, user, firstName: 'John', lastName: 'Doe', birthDay: { year: 1994, month: 6, day: 24 } }).create();
+            const member2 = await new MemberFactory({ organization, user, firstName: 'Jane', lastName: 'Doe', birthDay: { year: 1998, month: 3, day: 1 } }).create();
+
+            allowedInvitation = await new RegistrationInvitationFactory({ group: allowedGroup, member, organization }).create();
+            otherAllowedInvitation = await new RegistrationInvitationFactory({ group: allowedGroup, member: member2, organization }).create();
+            await new RegistrationInvitationFactory({ group: forbiddenGroup, member, organization }).create();
+        });
+
+        const fetchIds = async (filter: StamhoofdFilter) => {
+            const response = await testServer.test(endpoint, Request.get({
+                path: '/registration-invitations',
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({ filter, limit: 10 }),
+                headers,
+            }));
+            expect(response.status).toBe(200);
+            return response.body.results.map(r => r.id);
+        };
+
+        const count = async (filter: StamhoofdFilter) => {
+            const response = await testServer.test(new GetRegistrationInvitationsCountEndpoint(), Request.get({
+                path: '/registration-invitations/count',
+                host: organization.getApiHost(),
+                query: new CountFilteredRequest({ filter }),
+                headers,
+            }));
+            return response.body.count;
+        };
+
+        const expectDenied = async (filter: StamhoofdFilter) => {
+            await expect(fetchIds(filter)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(count(filter)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+        };
+
+        const expectVisible = async (filter: StamhoofdFilter, invitationIds: string[]) => {
+            expect(await fetchIds(filter)).toIncludeSameMembers(invitationIds);
+            expect(await count(filter)).toBe(invitationIds.length);
+        };
+
+        test('A group filter wrapped in a top-level array or $and returns the same invitations as the plain object', async () => {
+            const expected = [allowedInvitation.id, otherAllowedInvitation.id];
+            await expectVisible({ groupId: allowedGroup.id }, expected);
+            await expectVisible([{ groupId: allowedGroup.id }], expected);
+            await expectVisible({ $and: [{ groupId: allowedGroup.id }] }, expected);
+            await expectVisible({ $and: [[{ groupId: allowedGroup.id }]] }, expected);
+            await expectVisible([{ $and: [{ groupId: allowedGroup.id }] }, { memberId: member.id }], [allowedInvitation.id]);
+            await expectVisible([{ groupId: { $: '$rel', value: allowedGroup.id, name: 'Allowed' } }], expected);
+        });
+
+        test('A group filter inside an $or does not lift the scope filter', async () => {
+            const expected = [allowedInvitation.id, otherAllowedInvitation.id];
+            await expectVisible({ $or: [{ groupId: allowedGroup.id }, { groupId: forbiddenGroup.id }] }, expected);
+            await expectVisible([{ $or: [{ groupId: allowedGroup.id }, { groupId: forbiddenGroup.id }] }], expected);
+            await expectVisible({ $and: [{ $or: [{ groupId: allowedGroup.id }, { groupId: forbiddenGroup.id }] }] }, expected);
+            await expectVisible({ $and: [[{ $or: [{ groupId: allowedGroup.id }, { memberId: member.id }] }]] }, expected);
+            await expectVisible({ $or: [{ $and: [{ groupId: allowedGroup.id }] }, { groupId: forbiddenGroup.id }] }, expected);
+            await expectVisible([{ memberId: member.id }], [allowedInvitation.id]);
+        });
+
+        test('A negated group filter does not lift the scope filter', async () => {
+            await expectVisible({ $not: { groupId: allowedGroup.id } }, []);
+            await expectVisible([{ $not: { groupId: allowedGroup.id } }], []);
+            await expectVisible({ $and: [{ $not: { groupId: allowedGroup.id } }] }, []);
+        });
+
+        test('An $and that is an object instead of an array does not lift the scope filter', async () => {
+            await expectVisible({ $and: { groupId: forbiddenGroup.id } }, []);
+        });
+
+        test('Extra conditions next to the group filter can only narrow the result', async () => {
+            await expectVisible([{ groupId: allowedGroup.id }, { groupId: forbiddenGroup.id }], []);
+            await expectVisible({ $and: [{ groupId: allowedGroup.id }, { groupId: forbiddenGroup.id }] }, []);
+            await expectVisible({ groupId: allowedGroup.id, $or: [{ groupId: forbiddenGroup.id }, { memberId: member.id }] }, [allowedInvitation.id]);
+            await expectVisible({ $and: [{ groupId: allowedGroup.id }], $or: [{ groupId: forbiddenGroup.id }, { memberId: member.id }] }, [allowedInvitation.id]);
+            await expectVisible([{ groupId: allowedGroup.id }, { $or: [{ groupId: forbiddenGroup.id }, { memberId: member.id }] }], [allowedInvitation.id]);
+            await expectVisible([{ groupId: allowedGroup.id }, { groupId: { $neq: allowedGroup.id } }], []);
+            await expectVisible([{ groupId: { $in: [allowedGroup.id], $neq: allowedGroup.id } }], []);
+            await expectVisible([{ groupId: { $in: [allowedGroup.id], $or: [{ $eq: forbiddenGroup.id }] } }], []);
+        });
+
+        test('A forbidden group in the required position is rejected', async () => {
+            await expectDenied([{ groupId: forbiddenGroup.id }]);
+            await expectDenied([{ groupId: { $in: [allowedGroup.id, forbiddenGroup.id] } }]);
+            await expectDenied({ $and: [[{ groupId: { $in: [forbiddenGroup.id, allowedGroup.id] } }]] });
+            await expectDenied([{ groupId: { $: '$rel', value: forbiddenGroup.id, name: 'Forbidden' } }]);
+            await expectDenied([{ groupId: { $in: [{ $: '$rel', value: forbiddenGroup.id, name: 'Forbidden' }] } }]);
+        });
+
+        test('A user without any group access cannot use a wrapped filter to see invitations', async () => {
+            const noAccessUser = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.None }),
+            }).create();
+
+            const filters: StamhoofdFilter[] = [
+                [{ groupId: allowedGroup.id }],
+                { $or: [{ groupId: allowedGroup.id }] },
+                { $not: { groupId: allowedGroup.id } },
+                [{ memberId: member.id }],
+            ];
+            for (const filter of filters) {
+                await expect(getInvitations({ filter, organization, user: noAccessUser })).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            }
         });
     });
 });
