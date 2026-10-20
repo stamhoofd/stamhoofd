@@ -234,7 +234,12 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         organization.privateMeta.buckarooSettings = null;
                     } else {
                         organization.privateMeta.buckarooSettings = organization.privateMeta.buckarooSettings ?? BuckarooSettings.create({});
+                        const originalSecret = organization.privateMeta.buckarooSettings.secret;
                         organization.privateMeta.buckarooSettings.patchOrPut(request.body.privateMeta.buckarooSettings);
+
+                        if (organization.privateMeta.buckarooSettings.secret === BuckarooSettings.placeholderSecret) {
+                            organization.privateMeta.buckarooSettings.secret = originalSecret;
+                        }
 
                         // Validate buckaroo settings
                         const buckaroo = new BuckarooHelper(organization.privateMeta.buckarooSettings.key, organization.privateMeta.buckarooSettings.secret, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production');

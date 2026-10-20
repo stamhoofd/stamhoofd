@@ -1,7 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { Organization, Permissions } from '@stamhoofd/structures';
+import { BuckarooSettings, Organization, Permissions, Version } from '@stamhoofd/structures';
 import { SessionService } from '../../../../services/SessionService.js';
 
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -58,6 +58,28 @@ describe('Endpoint.GetOrganization', () => {
 
         expect(response.body.id).toEqual(organization.id);
         expect(response.body.privateMeta).not.toEqual(null);
+    });
+
+    test('The Buckaroo secret is not returned to admins', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        organization.privateMeta.buckarooSettings = BuckarooSettings.create({ key: 'website-key', secret: 'buckaroo-secret' });
+        await organization.save();
+
+        const user = await new UserFactory({
+            organization,
+            permissions: Permissions.create({
+                level: PermissionLevel.Read,
+            }),
+        }).create();
+        const token = await SessionService.createSession(user);
+
+        const r = Request.buildJson('GET', '/v3/organization', organization.getApiHost());
+        r.headers.authorization = 'Bearer ' + token.accessToken;
+
+        const response = await testServer.test(endpoint, r);
+        expect(response.body.privateMeta?.buckarooSettings?.key).toEqual('website-key');
+        expect(response.body.privateMeta?.buckarooSettings?.secret).toEqual(BuckarooSettings.placeholderSecret);
+        expect(JSON.stringify(response.body.encode({ version: Version }))).not.toContain('buckaroo-secret');
     });
 
     test('Get organization as admin of a different organization', async () => {
