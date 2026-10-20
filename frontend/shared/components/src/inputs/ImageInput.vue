@@ -108,7 +108,7 @@ function changedFile(event: Event) {
     if (file.size > 5 * 1024 * 1024) {
         errorBox.value = new ErrorBox(new SimpleError({
             code: 'file_too_large',
-            message: $t(`%z3`),
+            message: $t('%z3'),
         }));
         return;
     }
@@ -211,6 +211,7 @@ function changedFile(event: Event) {
 
     .image-component {
         width: 100%;
+        height: 100%;
         border-radius: $border-radius;
     }
 
