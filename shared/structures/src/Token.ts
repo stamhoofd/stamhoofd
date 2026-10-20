@@ -1,4 +1,5 @@
 import type { Data, Encodeable, EncodeContext } from '@simonbackx/simple-encoding';
+import { EncodeMedium } from '@simonbackx/simple-encoding';
 
 /**
  * OAuth2 token data with absolute expiration dates in memory and snake_case wire keys.
@@ -24,18 +25,35 @@ export class Token implements Encodeable {
         this.refreshTokenValidUntil = token.refreshTokenValidUntil ?? null;
     }
 
+    /**
+     * Relative expiry times are preferred, so the expiry is expressed in the device clock instead of the server clock.
+     * Stored tokens (EncodeMedium.Database) use the absolute times, because the relative ones are outdated by then.
+     */
     static decode(data: Data): Token {
+        const preferAbsolute = data.context.medium === EncodeMedium.Database;
+        const now = Date.now();
+
         const expiresOn = data.optionalField('expires_on')?.integer;
+        const expiresIn = data.optionalField('expires_in')?.integer;
         const refreshExpiresOn = data.optionalField('refresh_expires_on')?.integer;
         const refreshExpiresIn = data.optionalField('refresh_expires_in')?.integer;
+
+        const accessTokenValidUntil = (expiresOn !== undefined && (preferAbsolute || expiresIn === undefined))
+            ? new Date(expiresOn * 1000)
+            : new Date(now + data.field('expires_in').integer * 1000);
+
+        let refreshTokenValidUntil: Date | null = null;
+        if (refreshExpiresOn !== undefined && (preferAbsolute || refreshExpiresIn === undefined)) {
+            refreshTokenValidUntil = new Date(refreshExpiresOn * 1000);
+        } else if (refreshExpiresIn !== undefined) {
+            refreshTokenValidUntil = new Date(now + refreshExpiresIn * 1000);
+        }
 
         return new Token({
             accessToken: data.field('access_token').string,
             refreshToken: data.field('refresh_token').string,
-            accessTokenValidUntil: new Date(expiresOn ? (expiresOn * 1000) : new Date().getTime() + data.field('expires_in').integer * 1000),
-            refreshTokenValidUntil: refreshExpiresOn
-                ? new Date(refreshExpiresOn * 1000)
-                : (refreshExpiresIn !== undefined ? new Date(new Date().getTime() + refreshExpiresIn * 1000) : null),
+            accessTokenValidUntil,
+            refreshTokenValidUntil,
         });
     }
 
