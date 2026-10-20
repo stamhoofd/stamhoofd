@@ -163,10 +163,6 @@
     "original": "In sommige situaties (bv. in combinatie met artikelvoorwaarden), is het mogelijk dat er meerdere productkortingen in een winkelmandje actief zijn. Jamboree kan dan de korting op hetzelfde item geven, als dat voordeliger zou zijn.",
     "translation": "In some situations (e.g. with product conditions), it's possible that multiple product discounts are active in a shopping cart. Jamboree can apply the discount on the same item if that would be more advantageous."
   },
-  "%1GC": {
-    "original": "Andere start eind/datum dan scoutsjaar",
-    "translation": "Other start/end date than scouts year"
-  },
   "%1GR": {
     "original": "Je moet een platformbeheerder zijn om inactieve eenheden te bekijken",
     "translation": "You need to be a platform administrator to view inactive units."
@@ -234,10 +230,6 @@
   "%1Jk": {
     "original": "Alle nummers van de eenheden waarvoor het lid is ingeschreven",
     "translation": "All numbers of the units the member is registered for"
-  },
-  "%1KF": {
-    "original": "Alle eenheden waarvoor het lid is ingeschreven",
-    "translation": "All units where the member is registered"
   },
   "%1KQ": {
     "original": "Alle eenheden",
@@ -1019,10 +1011,6 @@
     "original": "Filter op leden die een inschrijving (zowel huidig scoutsjaar of in een afgelopen scoutsjaar) heeft die aan deze voorwaarden voldoet.",
     "translation": "Filter on members who have a registration (both current scout year or in a past scout year) that meets these conditions."
   },
-  "%8V": {
-    "original": "Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorig scoutsjaar van gelijk welke inschrijvingsgroep.",
-    "translation": "Members are considered existing if they are registered for a previous scout year of any registration group."
-  },
   "%8X": {
     "original": "Onbekend scoutsjaar",
     "translation": "Unknown scout year"
@@ -1750,6 +1738,90 @@
   "%Ztn": {
     "original": "Je hebt geen toegang om te filteren op gegevens van eenheden",
     "translation": "You don't have access to filter unit data."
+  },
+  "%Zts": {
+    "original": "Vraag de code aan jouw Jamboree-verantwoordelijke",
+    "translation": "Request the code from your Jamboree contact person"
+  },
+  "%ZuD": {
+    "original": "Vraag de code aan GSB",
+    "translation": "Request the code from GSB"
+  },
+  "%ZuW": {
+    "original": "Contacteer GSB en verduidelijk waarom je toegang nodig hebt tot {member}.",
+    "translation": "Contact GSB and clarify why you need access to {member}."
+  },
+  "%Zv0": {
+    "original": "Jamboree vergeet dan je API-sleutel en instellingen. Contacten die al in Mailchimp staan, blijven daar staan.",
+    "translation": "Jamboree will then forget your API key and settings. Contacts already in Mailchimp will remain there."
+  },
+  "%Zvc": {
+    "original": "Synchroniseer leden van alle eenheden naar een audience van de koepel",
+    "translation": "Sync members from all units to an audience of the umbrella organization"
+  },
+  "%Zvn": {
+    "original": "Bestellingen kunnen enkel per eenheid gesynchroniseerd worden.",
+    "translation": "Orders can only be synchronized per unit."
+  },
+  "%Zvu": {
+    "original": "Alle leden die in het huidige scoutsjaar ingeschreven zijn, en hun ouders, komen in Mailchimp met een tag per groep.",
+    "translation": "All members registered in the current scouts year and their parents will appear in Mailchimp with a tag for each group."
+  },
+  "%Zw8": {
+    "original": "Stuur de leden van alle eenheden vanuit {platform} naar een audience in Mailchimp. De synchronisatie loopt enkel van {platform} naar Mailchimp: wijzigingen in Mailchimp komen niet terug.",
+    "translation": "Send the members of all units from {platform} to an audience in Mailchimp. Synchronization only goes from {platform} to Mailchimp: changes made in Mailchimp will not sync back."
+  },
+  "%Zwn": {
+    "original": "{contactCan} in Jamboree jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf {role}, vraag het dan aan {alternative}.",
+    "translation": "{contactCan} in Jamboree can look up your security code and pass it on to you. If you are the {role}, ask {alternative}."
+  },
+  "%Zwp": {
+    "original": "Bekijk alle aansluitingen van jouw leden bij GSB.",
+    "translation": "View all affiliations of your members in GSB."
+  },
+  "%ZxD": {
+    "original": "jouw medeleiding of GSB",
+    "translation": "your fellow leaders or GSB"
+  },
+  "%ZxM": {
+    "original": "Je hebt geen toegang tot inschrijvingsgroepen in dit scoutsjaar, vraag een hoofdbeheerder om toegang of wissel van scoutsjaar onderaan",
+    "translation": "You do not have access to registration groups for this scouts year. Ask a main administrator for access or switch scouts year at the bottom."
+  },
+  "%Zxd": {
+    "original": "Dit stuurt de huidige toestand van alle leden die in het huidige scoutsjaar ingeschreven zijn naar Mailchimp.",
+    "translation": "This sends the current state of all members registered in the current scouts year to Mailchimp."
+  },
+  "%Zxi": {
+    "original": "Het nummer van de eenheid waartoe het lid hoort",
+    "translation": "The unit number to which the member belongs"
+  },
+  "%Zxj": {
+    "original": "Andere start- of einddatum dan scoutsjaar",
+    "translation": "Different start or end date than the scouts year"
+  },
+  "%Zxk": {
+    "original": "De eenheid waartoe het lid hoort",
+    "translation": "The unit the member belongs to"
+  },
+  "%Zxl": {
+    "original": "Eenheid van het lid",
+    "translation": "Unit of the member"
+  },
+  "%Zxm": {
+    "original": "Leden worden als bestaand beschouwd als ze ingeschreven zijn voor gelijk welke inschrijvingsgroep van het vorige, huidige of volgende scoutsjaar.",
+    "translation": "Members are considered existing if they are registered for any registration group in the previous, current, or next scouts year."
+  },
+  "%Zxn": {
+    "original": "Eenheidsnummer van het lid",
+    "translation": "Unit number of the member"
+  },
+  "%Zxo": {
+    "original": "Alle leden die in het huidige scoutsjaar ingeschreven zijn, en hun ouders, komen in Mailchimp met een tag per standaard leeftijdsgroep en per eenheid. Leden met een functie van {platform} krijgen ook een tag per functie.",
+    "translation": "All members who are registered in the current scouts year, along with their parents, will appear in Mailchimp with a tag for each default age group and unit. Members with a role from {platform} also receive a tag per role."
+  },
+  "%Zxq": {
+    "original": "Een voorbeeld is enkel beschikbaar bij het synchroniseren van één eenheid.",
+    "translation": "An example is only available when synchronizing a single unit."
   },
   "%ad": {
     "original": "Een hoofdbeheerder van jouw eenheid moet eerst een afzender toevoegen die je kan gebruiken voor je een bericht kan versturen.",

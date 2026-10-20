@@ -310,8 +310,8 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
             new Column<ObjectType, Organization | null>({
                 id: 'member.organization',
                 allowSorting: false,
-                name: $t('#Groep van het lid'),
-                description: $t('De #groep waartoe het lid hoort'),
+                name: $t('%Zxl'),
+                description: $t('%Zxk'),
                 getValue: registration => registration.member.getPrimaryOrganization({ periodId: filterPeriodId }),
                 format: organization => organization?.name ?? $t('%5D'),
                 getStyle: organization => !organization ? 'gray' : '',
@@ -325,8 +325,8 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
             new Column<ObjectType, Organization | null>({
                 id: 'member.uri',
                 allowSorting: false,
-                name: $t('Groepsnummer van het lid'),
-                description: $t('Het nummer van de #groep waartoe het lid hoort'),
+                name: $t('%Zxn'),
+                description: $t('%Zxi'),
                 getValue: registration => registration.member.getPrimaryOrganization({ periodId: filterPeriodId }),
                 format: organization => organization?.uri ?? $t('%1FW'),
                 getStyle: organization => !organization ? 'gray' : '',

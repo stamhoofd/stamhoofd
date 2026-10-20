@@ -21,7 +21,7 @@
 
                 <div class="status-bar">
                     <p v-if="isFetchingFromServer" data-testid="ticket-scanner-checking-ticket">
-                        <Spinner class="inline" /> {{ $t('Ticket controleren...') }}
+                        <Spinner class="inline" /> {{ $t('%Zxv') }}
                     </p>
                     <p v-else-if="isCatchingUp" data-testid="ticket-scanner-catching-up">
                         <TicketSyncProgressRing class="inline" :progress-percentage="progressPercentage" /> {{ $t('%Zti') }}<br><span class="style-description-small">{{ $t('%Ztj') }}</span>
@@ -596,7 +596,7 @@ function disabledTicket(product: Product, scannedAt: Date | null) {
 }
 
 function notCheckedTicket() {
-    new Toast($t('Dit ticket staat nog niet op dit toestel en kon niet online gecontroleerd worden door een trage internetverbinding. Probeer opnieuw.'), 'warning yellow').show();
+    new Toast($t('%Zxr'), 'warning yellow').show();
     AppManager.shared.hapticWarning();
 }
 

@@ -434,9 +434,9 @@ export function getWebshopTypeName(type: WebshopType): string {
 
 export function getWebshopOrderModeName(mode: WebshopOrderMode): string {
     switch (mode) {
-        case WebshopOrderMode.Cart: return $t('Winkelmandje');
-        case WebshopOrderMode.Single: return $t('Eén artikel per bestelling');
-        case WebshopOrderMode.Bulk: return $t('Snel bestellen zonder winkelmandje');
+        case WebshopOrderMode.Cart: return $t('%1DQ');
+        case WebshopOrderMode.Single: return $t('%Zxs');
+        case WebshopOrderMode.Bulk: return $t('%Zxt');
     }
 }
 

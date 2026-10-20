@@ -211,10 +211,6 @@
     "original": "Alle nummers van de groepen waarvoor het lid is ingeschreven",
     "translation": "Tous les numéros des groupes dans lesquels le membre est inscrit"
   },
-  "%1KF": {
-    "original": "Alle groepen waarvoor het lid is ingeschreven",
-    "translation": "Tous les groupes pour lesquels le membre est inscrit"
-  },
   "%1KQ": {
     "original": "Alle groepen",
     "translation": "Tous les groupes"
@@ -1594,6 +1590,78 @@
   "%Ztn": {
     "original": "Je hebt geen toegang om te filteren op gegevens van groepen",
     "translation": "Vous n'avez pas accès pour filtrer les données des groupes."
+  },
+  "%Zts": {
+    "original": "Vraag de code aan jouw Ravot-verantwoordelijke",
+    "translation": "Demandez le code à votre responsable Ravot"
+  },
+  "%ZuD": {
+    "original": "Vraag de code aan KSA Nationaal",
+    "translation": "Demandez le code à KSA Nationaal"
+  },
+  "%ZuW": {
+    "original": "Contacteer KSA Nationaal en verduidelijk waarom je toegang nodig hebt tot {member}.",
+    "translation": "Contactez KSA Nationaal et expliquez pourquoi vous avez besoin d'accéder à {member}."
+  },
+  "%Zv0": {
+    "original": "Ravot vergeet dan je API-sleutel en instellingen. Contacten die al in Mailchimp staan, blijven daar staan.",
+    "translation": "Ravot oubliera alors votre clé API et vos paramètres. Les contacts déjà présents dans Mailchimp y resteront."
+  },
+  "%Zv7": {
+    "original": "Importeer best ook minstens één e-mailadres en één telefoonnummer van leden. Zo kunnen leden of ouders automatisch toegang krijgen als ze zich aanmelden in ‘Mijn account’.",
+    "translation": "Importez au moins une adresse e-mail et un numéro de téléphone de membres. Ainsi, les membres ou les parents peuvent accéder automatiquement en se connectant à « Mon compte »."
+  },
+  "%Zvc": {
+    "original": "Synchroniseer leden van alle groepen naar een audience van de koepel",
+    "translation": "Synchronisez les membres de tous les groupes vers une audience de la coupole."
+  },
+  "%Zvn": {
+    "original": "Bestellingen kunnen enkel per groep gesynchroniseerd worden.",
+    "translation": "Les commandes ne peuvent être synchronisées que par groupe."
+  },
+  "%Zw8": {
+    "original": "Stuur de leden van alle groepen vanuit {platform} naar een audience in Mailchimp. De synchronisatie loopt enkel van {platform} naar Mailchimp: wijzigingen in Mailchimp komen niet terug.",
+    "translation": "Envoyez les membres de tous les groupes depuis {platform} vers une audience dans Mailchimp. La synchronisation se fait uniquement de {platform} vers Mailchimp : les modifications dans Mailchimp ne sont pas renvoyées."
+  },
+  "%ZwX": {
+    "original": "Vraag het lid om zichzelf in te schrijven via ‘Mijn account’",
+    "translation": "Demandez au membre de s'inscrire lui-même via « Mon compte »"
+  },
+  "%Zwn": {
+    "original": "{contactCan} in Ravot jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf {role}, vraag het dan aan {alternative}.",
+    "translation": "{contactCan} dans Ravot peut consulter votre code de sécurité et vous le communiquer. Si vous êtes vous-même {role}, demandez-le à {alternative}."
+  },
+  "%Zwp": {
+    "original": "Bekijk alle aansluitingen van jouw leden bij KSA Nationaal.",
+    "translation": "Consultez toutes les affiliations de vos membres chez KSA Nationaal."
+  },
+  "%ZxD": {
+    "original": "jouw medeleiding of KSA Nationaal",
+    "translation": "votre équipe dirigeante ou KSA Nationaal"
+  },
+  "%Zxf": {
+    "original": "{firstName} kan niet worden aangemeld via ‘Mijn account’. Voeg een telefoonnummer of e-mailadres toe zodat men zelf de beveiliginscode kan aanvragen.",
+    "translation": "{firstName} ne peut pas être connecté via « Mon compte ». Ajoutez un numéro de téléphone ou une adresse e-mail afin que la personne puisse demander elle-même le code de sécurité."
+  },
+  "%Zxi": {
+    "original": "Het nummer van de groep waartoe het lid hoort",
+    "translation": "Le numéro du groupe auquel appartient le membre"
+  },
+  "%Zxk": {
+    "original": "De groep waartoe het lid hoort",
+    "translation": "Le groupe auquel appartient le membre"
+  },
+  "%Zxl": {
+    "original": "Groep van het lid",
+    "translation": "Groupe du membre"
+  },
+  "%Zxo": {
+    "original": "Alle leden die in het huidige werkjaar ingeschreven zijn, en hun ouders, komen in Mailchimp met een tag per standaard leeftijdsgroep en per groep. Leden met een functie van {platform} krijgen ook een tag per functie.",
+    "translation": "Tous les membres inscrits pour l'année associative en cours, ainsi que leurs parents, apparaîtront dans Mailchimp avec une étiquette pour chaque groupe d'âge standard et chaque groupe. Les membres avec une fonction sur {platform} recevront également une étiquette par fonction."
+  },
+  "%Zxq": {
+    "original": "Een voorbeeld is enkel beschikbaar bij het synchroniseren van één groep.",
+    "translation": "Un exemple n'est disponible que lors de la synchronisation d'un seul groupe."
   },
   "%a6": {
     "original": "Portaal voor beroepsmedewerkers",

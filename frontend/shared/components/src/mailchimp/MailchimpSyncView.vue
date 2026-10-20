@@ -14,7 +14,7 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="isPlatform" class="style-description">
-            {{ $t('Hoeveel e-mailadressen naar Mailchimp gaan en hoeveel er worden overgeslagen, zie je na afloop van de synchronisatie.') }}
+            {{ $t('%Zxp') }}
         </p>
         <p v-else-if="!preview && !errors.errorBox" class="style-description">
             <Spinner />

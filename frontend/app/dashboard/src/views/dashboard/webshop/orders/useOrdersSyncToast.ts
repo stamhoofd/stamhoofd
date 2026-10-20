@@ -23,8 +23,8 @@ export function useOrdersSyncToast(getWebshopManager: () => WebshopManager) {
 
         if (!toast) {
             const message = hasNeverSynced.value
-                ? $t('Bestellingen ophalen... Dit gebeurt eenmalig, daarna zijn ze offline beschikbaar en laden ze sneller.')
-                : $t('Bestellingen ophalen...');
+                ? $t('%Zxu')
+                : $t('%Zxg');
             toast = new Toast(message, 'spinner').setHide(null).show();
         }
 

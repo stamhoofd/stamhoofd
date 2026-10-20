@@ -65,7 +65,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Andere start- of einddatum dan werkjaar') }}
+                            {{ $t('%Zxj') }}
                         </h3>
 
                         <template v-if="hasCustomDates">
@@ -588,7 +588,7 @@
                 <p>{{ $t('%cm') }}</p>
 
                 <p v-if="waitingListType === WaitingListType.PreRegistrations || waitingListType === WaitingListType.ExistingMembersFirst" class="info-box">
-                    {{ $t('Leden worden als bestaand beschouwd als ze ingeschreven zijn voor gelijk welke inschrijvingsgroep van het vorige, huidige of volgende werkjaar.') }}
+                    {{ $t('%Zxm') }}
                 </p>
 
                 <STList>

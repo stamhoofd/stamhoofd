@@ -414,7 +414,7 @@ export class MailchimpService {
             throw new SimpleError({
                 code: 'not_available',
                 message: 'A preview is only available for an organization',
-                human: $t('Een voorbeeld is enkel beschikbaar bij het synchroniseren van één vereniging.'),
+                human: $t('%Zxq'),
                 statusCode: 400,
             });
         }
