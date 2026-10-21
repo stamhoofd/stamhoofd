@@ -214,26 +214,32 @@ Toasts are small messages that are displayed at the bottom right corner of the d
 **Auto hiding Toast**
 
 ```typescript
-Toast.info('Informative note').show();
-Toast.success('Hello world').show();
-Toast.warning('Warning: do this').show();
-Toast.error('Something went wrong').show();
+import { Toast } from '@stamhoofd/frontend-notifications/Toast';
+
+Toast.info($t('Ter informatie')).show();
+Toast.success($t('Opgeslagen')).show();
+Toast.warning($t('Let op')).show();
+Toast.error($t('Er is iets misgelopen')).show();
 Toast.fromError(e).show();
 ```
 
 **Manually hiding a Toast**
 
 ```typescript
-const toast = Toast.success('Hello world').setHide(null);
-toast.show();
+const pending = new Toast($t('Downloaden...'), 'spinner').setHide(null);
+pending.show();
 
 //
 
 // ...
-toast.hide();
+pending.hide();
 ```
 
-*Full API: `frontend/shared/components/src/overlays/Toast.ts`*
+The same API works outside Vue setup without component context. Import `ToastButton` from the same module to create a button for `setButton(...)`. Creation does not display a toast until `show()` is called; shown toasts remain visible after the calling component unmounts unless explicitly hidden or automatically dismissed (8 seconds by default, `setHide(null)` disables this).
+
+The old `Toast`, `ToastButton`, and `ToastListener` imports from `components/overlays/Toast` are deprecated but continue to work. Only the import path needs to change. Migrate them when touching a caller, rather than changing unrelated files.
+
+*Full API: `frontend/shared/notifications/src/Toast.ts`*
 
 ---
 

@@ -350,6 +350,7 @@ pnpm stam test api --clear                           # reset the test database (
 pnpm stam test components ImageComponent             # frontend browser tests (vitest browser mode)
 pnpm stam test platform                              # browser/native platform metadata
 pnpm stam test session                               # session infrastructure
+pnpm stam test notifications                         # shared toast service
 pnpm stam test application                           # login and session coordination
 ```
 

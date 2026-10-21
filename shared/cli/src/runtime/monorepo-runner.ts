@@ -74,6 +74,7 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'components', path: 'frontend/shared/components', needsDatabase: false },
     { name: 'networking', path: 'frontend/shared/networking', needsDatabase: false },
     { name: 'sgv-frontend', path: 'frontend/shared/sgv', needsDatabase: false },
+    { name: 'notifications', path: 'frontend/shared/notifications', needsDatabase: false },
     { name: 'platform', path: 'frontend/shared/platform', needsDatabase: false },
     { name: 'session', path: 'frontend/shared/session', needsDatabase: false },
     { name: 'application', path: 'frontend/shared/application', needsDatabase: false },
