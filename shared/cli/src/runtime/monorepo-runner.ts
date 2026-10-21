@@ -355,7 +355,9 @@ async function ensureTestMysql(context: CliContext, names: { container: string; 
     if (!await docker.containerIsRunning(container)) {
         await docker.removeContainer(container, context.verbose);
         await docker.createVolume(volume, context.verbose);
-        await docker.run(['run', '-d', '--name', container, '-e', `MYSQL_ROOT_PASSWORD=${mysqlRootPassword}`, '-p', localhostPortMappingDynamic(mysqlInternalPort), '-v', `${volume}:/var/lib/mysql`, process.env.CI_MYSQL_IMAGE ?? mysqlImage, ...mysqlServerArgs()], { verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
+        // Test data is rebuildable: keep transactions and redo, without per-commit fsync or replication logs.
+        const serverArgs = [...mysqlServerArgs(), '--innodb-flush-log-at-trx-commit=2', '--skip-log-bin'];
+        await docker.run(['run', '-d', '--name', container, '-e', `MYSQL_ROOT_PASSWORD=${mysqlRootPassword}`, '-p', localhostPortMappingDynamic(mysqlInternalPort), '-v', `${volume}:/var/lib/mysql`, process.env.CI_MYSQL_IMAGE ?? mysqlImage, ...serverArgs], { verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
     }
 
     await docker.waitForMysql(container);

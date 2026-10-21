@@ -351,6 +351,8 @@ pnpm stam clean metabase
 
 `pnpm stam test` runs `build:shared` first and only starts a MySQL container when a selected package needs one. That container runs off a data volume that persists between runs (so the data dir + migrations are reused, mapped `DB_PORT`), and it is shut down after the run. Both the container and volume are namespaced per worktree so runs don't collide:
 
+CLI-managed test MySQL disables binary logging and uses `innodb_flush_log_at_trx_commit=2` to avoid syncing every fixture write to disk. Transactions, redo recovery, constraints, and collations are unchanged, but a host failure can lose recent test writes. Test data is rebuildable; use `--clear` if necessary. Shared development MySQL and servers selected with `--local-db` keep their own durability settings.
+
 ```bash
 pnpm stam test unit                                 # every unit package (excludes Playwright)
 pnpm stam test coverage                             # package coverage with the same isolated MySQL lifecycle
