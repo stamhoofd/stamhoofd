@@ -382,6 +382,8 @@ CI runs the API across two machines, uploads these reports for timing comparison
 
 Use `STAMHOOFD_TEST_PROFILE=1 pnpm stam test api <filename>` to print the slowest imports. Vitest's `setup` timing measures setup-file imports/evaluation; database cleanup, initialization, and teardown hooks are counted under `tests`. Profiling is opt-in and does not change isolation or database cleanup.
 
+The API setup has an explicit allowlist of database-free tests in `backend/app/api/tests/vitest.setup.ts`. They keep isolated modules, UTC, network blocking, real translations, and queue draining, without importing application startup or clearing database tables. Every other file keeps the full integration setup. Only extend the allowlist after checking the exercised paths do not use persistence or initialized application services.
+
 Run Playwright tests with:
 
 ```bash
