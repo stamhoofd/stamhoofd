@@ -1,0 +1,19 @@
+# Frontend services
+
+The networking package is being split without changing storage formats, authentication behavior, locale precedence, or review timing. Consumer APIs remain stable; imports move to the owning package.
+
+| Owner | Responsibilities |
+| --- | --- |
+| `@stamhoofd/networking` | Transport configuration, middleware, retries and connectivity |
+| `@stamhoofd/frontend-storage` | Storage contracts and browser adapters; native bootstrap replaces adapters |
+| `@stamhoofd/frontend-platform` | Platform metadata and native capability contracts |
+| `@stamhoofd/frontend-session` | Session state, authentication middleware, tokens, permissions and platform loading |
+| `@stamhoofd/frontend-application` | Session preparation and login orchestration, locale/theme coordination, review policy and domain managers |
+| `@stamhoofd/frontend-i18n` | Translation loading and locale handling |
+| `@stamhoofd/components` | Concrete presentation and Vue lifecycle hooks |
+
+Application services may use sessions, networking, storage, platform capabilities and localization. Those lower layers must not import application services or components. Concrete presentation callbacks are installed by application bootstrap before requests or authentication flows start.
+
+Session preparation continues to initialize the interface locale during this migration. Making activation explicit, changing locale policy, and fixing concurrency behavior are separate changes.
+
+All consumers must import the canonical implementation of `Storage`, `AppManager`, `SessionManager` and `NetworkManager`; copying singleton implementations would break native overrides and shared state.

@@ -44,6 +44,8 @@ Please check our [README.md](https://github.com/stamhoofd/stamhoofd)
 
 [Storing data locally in the browser/app](frontend/local-storage.md)
 
+[Frontend service ownership](frontend/services.md)
+
 ## Backend guides
 
 
