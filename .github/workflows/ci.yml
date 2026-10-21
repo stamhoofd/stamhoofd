@@ -467,11 +467,16 @@ jobs:
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
             - uses: ./.github/actions/setup
+            - name: Determine Playwright version
+              id: playwright-version
+              run: |
+                  version=$(pnpm --dir tests/playwright exec node -p "require('@playwright/test/package.json').version")
+                  echo "version=$version" >> "$GITHUB_OUTPUT"
             - name: Cache Playwright browsers
               uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: ~/.cache/ms-playwright
-                  key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+                  key: playwright-v2-${{ runner.os }}-${{ runner.arch }}-chromium-with-shell-${{ steps.playwright-version.outputs.version }}
             - name: Install Playwright Browsers
               run: pnpm --dir tests/playwright exec playwright install --with-deps chromium
             - name: Download shared build output
@@ -580,11 +585,16 @@ jobs:
             # Now Caddy certificates are trusted by the system. Now we need to add it to Chromium as well.
             - name: Install libnss3-tools
               run: sudo apt-get update && sudo apt-get install -y libnss3-tools
+            - name: Determine Playwright version
+              id: playwright-version
+              run: |
+                  version=$(pnpm --dir tests/playwright exec node -p "require('@playwright/test/package.json').version")
+                  echo "version=$version" >> "$GITHUB_OUTPUT"
             - name: Cache Playwright browsers
               uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: ~/.cache/ms-playwright
-                  key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+                  key: playwright-v2-${{ runner.os }}-${{ runner.arch }}-chromium-no-shell-${{ steps.playwright-version.outputs.version }}
             - name: Install Playwright Browsers
               run: pnpm --dir tests/playwright exec playwright install --with-deps --no-shell chromium
             - name: Cache Caddy
