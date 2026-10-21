@@ -380,6 +380,8 @@ Unit `--shard <index>/<total>` splits test files while preserving each package's
 
 CI runs the API across two machines, uploads these reports for timing comparisons, and runs the other backend apps once. The CLI owns MySQL and uses the workflow's pinned `CI_MYSQL_IMAGE`. The aggregate `Backend App Tests` check fails if either shard fails. The separate Typecheck job checks test types.
 
+Use `STAMHOOFD_TEST_PROFILE=1 pnpm stam test api <filename>` to print the slowest imports. Vitest's `setup` timing measures setup-file imports/evaluation; database cleanup, initialization, and teardown hooks are counted under `tests`. Profiling is opt-in and does not change isolation or database cleanup.
+
 Run Playwright tests with:
 
 ```bash

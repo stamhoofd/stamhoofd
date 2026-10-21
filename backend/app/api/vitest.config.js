@@ -11,6 +11,9 @@ export default defineConfig({
         isolate: true,
         testTimeout: 10_000, // required for slow CI
         maxWorkers: 1, // For now we can't run parallel because all test files use the same database
+        experimental: process.env.STAMHOOFD_TEST_PROFILE === '1'
+            ? { importDurations: { print: true, limit: 30 } }
+            : undefined,
         coverage: {
             provider: 'v8',
             include: ['src/**'],
