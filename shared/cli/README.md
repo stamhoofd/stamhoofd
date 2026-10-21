@@ -386,6 +386,8 @@ Use `STAMHOOFD_TEST_PROFILE=1 pnpm stam test api <filename>` to print the slowes
 
 The API setup has an explicit allowlist of database-free tests in `backend/app/api/tests/vitest.setup.ts`. They keep isolated modules, UTC, network blocking, real translations, and queue draining, without importing application startup or clearing database tables. Every other file keeps the full integration setup. Only extend the allowlist after checking the exercised paths do not use persistence or initialized application services.
 
+API global setup prepares the real locale entries once. Each test file reconstructs fresh locale maps instead of importing and flattening the JSON files again. Explicit calls to the production locale loader still behave normally.
+
 Run Playwright tests with:
 
 ```bash
