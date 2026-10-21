@@ -4,7 +4,7 @@ import { UrlHelper } from '@simonbackx/vue-app-navigation';
 import { useContext } from '#hooks/useContext.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { onBeforeUnmount, onMounted } from 'vue';
 
 class ResponseBody extends AutoEncoder {

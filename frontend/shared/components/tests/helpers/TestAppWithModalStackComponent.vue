@@ -17,7 +17,7 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import CenteredMessageView from '#overlays/CenteredMessageView.vue';
 import { ModalStackEventBus, ReplaceRootEventBus } from '#overlays/ModalStackEventBus.ts';
 import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { ThemeManager } from '@stamhoofd/networking/ThemeManager';
 import { Platform } from '@stamhoofd/structures';
 import type { Ref } from 'vue';

@@ -75,6 +75,7 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'networking', path: 'frontend/shared/networking', needsDatabase: false },
     { name: 'sgv-frontend', path: 'frontend/shared/sgv', needsDatabase: false },
     { name: 'platform', path: 'frontend/shared/platform', needsDatabase: false },
+    { name: 'session', path: 'frontend/shared/session', needsDatabase: false },
 ];
 export const coverageTestPackages: UnitTestPackage[] = [
     { name: 'i18n-uuid', path: '.development/i18n-uuid', needsDatabase: false },

@@ -100,7 +100,7 @@ import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/Con
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Organization } from '@stamhoofd/structures';

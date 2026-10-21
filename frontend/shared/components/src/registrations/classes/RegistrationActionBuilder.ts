@@ -11,7 +11,7 @@ import { canDeleteMembersInBulk, deleteInvitationsForMembers, getActionsForCateg
 import type { TableAction, TableActionSelection } from '#tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember, PlatformRegistration } from '@stamhoofd/structures';

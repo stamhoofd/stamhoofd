@@ -1,5 +1,5 @@
 import { Column } from '#tables/classes/Column.ts';
-import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
+import type { ContextPermissions } from '@stamhoofd/frontend-session/ContextPermissions';
 import type { AppType, Group, GroupCategoryTree, Organization, Platform, PlatformRegistration, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

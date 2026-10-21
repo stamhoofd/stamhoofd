@@ -66,7 +66,7 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import { Validator } from '#errors/Validator.ts';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 import type { MFASetupResponse } from '@stamhoofd/structures';

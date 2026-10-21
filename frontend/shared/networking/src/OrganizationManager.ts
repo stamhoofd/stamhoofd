@@ -6,7 +6,7 @@ import { Group, LimitedFilteredRequest, Organization, OrganizationAdmins, Organi
 import { Sorter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { inject, toRef } from 'vue';
-import type { SessionContext } from './SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { SessionManager } from './SessionManager';
 
 export function useOrganizationManager(): Ref<OrganizationManager> {

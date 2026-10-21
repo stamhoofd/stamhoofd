@@ -2,7 +2,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { Group, PlatformFamily, PlatformMember, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { GroupType, Organization, RegisterCheckout, RegisterItem } from '@stamhoofd/structures';
 

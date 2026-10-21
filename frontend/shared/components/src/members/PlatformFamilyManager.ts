@@ -5,7 +5,7 @@ import type { RequestResult } from '@simonbackx/simple-networking';
 import { Request } from '@simonbackx/simple-networking';
 import { useAppContext } from '#context/appContext.ts';
 import { useContext } from '#hooks/useContext.ts';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { AppType, PlatformMember, Registration} from '@stamhoofd/structures';
 import { MemberWithRegistrationsBlob, MembersBlob, PlatformFamily, Version } from '@stamhoofd/structures';
 import { onBeforeUnmount, unref } from 'vue';

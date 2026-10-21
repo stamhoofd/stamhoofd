@@ -1,6 +1,6 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { CountFilteredRequest, SortList } from '@stamhoofd/structures';
 import { assertSort, CountResponse, Invoice, LimitedFilteredRequest, PaginatedResponseDecoder } from '@stamhoofd/structures';
 import type { Ref } from 'vue';

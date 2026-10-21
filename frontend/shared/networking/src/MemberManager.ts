@@ -1,7 +1,7 @@
 import type { Decoder} from '@simonbackx/simple-encoding';
 import { ArrayDecoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
-import type { SessionContext } from './SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { BalanceItem, Platform, RegisterCheckout} from '@stamhoofd/structures';
 import { DetailedPayableBalanceCollection, Document as DocumentStruct, Group, IDRegisterCheckout, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, PlatformFamily, Version } from '@stamhoofd/structures';
 import { inject, reactive, watch } from 'vue';

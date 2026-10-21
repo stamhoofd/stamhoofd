@@ -3,7 +3,7 @@ import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.
 import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
 import ContextProvider from '@stamhoofd/components/containers/ContextProvider.vue';
 import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { ThemeManager } from '@stamhoofd/networking/ThemeManager';
 import type { Webshop } from '@stamhoofd/structures';
 import { WebshopAuthType } from '@stamhoofd/structures';

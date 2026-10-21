@@ -10,7 +10,7 @@ import { Language } from '@stamhoofd/types/Language';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { isReactive } from 'vue';
-import { SessionContext } from './SessionContext';
+import { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
 
 class SessionStorage extends AutoEncoder {

@@ -3,7 +3,7 @@ import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { MemberManager } from '@stamhoofd/networking/MemberManager';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { Group, MemberRegistrationInvitation, Organization, PlatformFamily, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
 import { Event, getActivePeriodIds, GroupStatus, GroupType, LimitedFilteredRequest, PaginatedResponseDecoder, PayableBalanceCollection, SortItemDirection, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

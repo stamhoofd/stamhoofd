@@ -1,7 +1,7 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Organization, PlatformMembership } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';

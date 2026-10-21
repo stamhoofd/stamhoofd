@@ -4,7 +4,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import type { RequestInitializer } from '@simonbackx/simple-networking';
 import { MFAEnrollmentResult, MFAStatus, RecoveryCodes, TOTPSetupResponse, WebauthnAttestationResponseData, WebauthnRegistrationCredential, WebauthnRegistrationOptions, WebauthnRegistrationRequest } from '@stamhoofd/structures';
 
-import type { SessionContext } from './SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { SessionManager } from './SessionManager';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 

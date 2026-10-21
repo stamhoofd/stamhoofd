@@ -12,7 +12,7 @@ import { ViewStepsManager } from '@stamhoofd/components/steps/ViewStepsManager';
 import type { DisplayOptions, NavigationActions } from '@stamhoofd/components/types/NavigationActions';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions';
 import { PaymentHandler } from '@stamhoofd/components/views/PaymentHandler';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { BaseOrganization, CheckoutResponse, DetailedPayableBalance, OrganizationCheckout, OrganizationPackagesStatus } from '@stamhoofd/structures';
 import { Organization, PaymentStatus } from '@stamhoofd/structures';

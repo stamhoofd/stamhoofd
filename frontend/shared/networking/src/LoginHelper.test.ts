@@ -2,7 +2,7 @@ import { Platform } from '@stamhoofd/structures';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { reactive } from 'vue';
 import { LoginHelper } from './LoginHelper.ts';
-import { SessionContext } from './SessionContext.ts';
+import { SessionContext } from '@stamhoofd/frontend-session/SessionContext.ts';
 
 describe('LoginHelper.verifyMfaPasskey', () => {
     afterEach(() => {

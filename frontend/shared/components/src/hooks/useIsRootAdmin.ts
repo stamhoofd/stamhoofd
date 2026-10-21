@@ -1,5 +1,5 @@
 import { useContext } from './useContext';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { Ref } from 'vue';
 import { computed } from 'vue';
 

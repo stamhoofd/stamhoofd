@@ -2,7 +2,7 @@ import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
 import { EncodeMedium, ObjectData } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { SortItem, StamhoofdFilter, WebshopPreview } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PrivateOrderWithTickets, PrivateWebshop, Version } from '@stamhoofd/structures';

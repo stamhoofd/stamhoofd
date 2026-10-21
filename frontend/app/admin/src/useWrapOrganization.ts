@@ -4,7 +4,7 @@ import { useAppContext } from '@stamhoofd/components/context/appContext';
 import { MemberManager } from '@stamhoofd/networking/MemberManager';
 import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import type { Organization, Platform } from '@stamhoofd/structures';
 import { markRaw } from 'vue';

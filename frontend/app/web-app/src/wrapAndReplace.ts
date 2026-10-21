@@ -7,7 +7,7 @@ import OrganizationSwitcher from '@stamhoofd/components/context/OrganizationSwit
 import NotificationsButton from '@stamhoofd/components/notifications/NotificationsButton.vue';
 import { MemberManager } from '@stamhoofd/networking/MemberManager';
 import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { loadPlatform } from '@stamhoofd/networking/loadPlatform';
+import { loadPlatform } from '@stamhoofd/frontend-session/loadPlatform';
 import { ThemeManager } from '@stamhoofd/networking/ThemeManager';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import type { AppType, Organization } from '@stamhoofd/structures';

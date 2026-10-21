@@ -5,7 +5,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { EventBus } from '@stamhoofd/components/EventBus.ts';
 import type { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import { fetchAll } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { CountFilteredRequest, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, TicketPrivate, Version } from '@stamhoofd/structures';
 import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';

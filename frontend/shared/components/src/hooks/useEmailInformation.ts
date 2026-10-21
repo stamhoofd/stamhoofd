@@ -1,6 +1,6 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { EmailInformation } from '@stamhoofd/structures';
 import { Formatter, throttle } from '@stamhoofd/utility';
 import type { ComputedRef, Ref} from 'vue';
