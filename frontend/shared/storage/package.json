@@ -9,8 +9,8 @@
         "./*.ts": "./src/*.ts"
     },
     "scripts": {
-        "lint": "eslint",
-        "typecheck": "vue-tsc --noEmit"
+        "lint": "eslint --quiet",
+        "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "devDependencies": {
         "eslint-plugin-stamhoofd": "workspace:*"

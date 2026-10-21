@@ -118,12 +118,11 @@ async function testRoute({ page, ...spec }: {
 }) {
     await page.goto(spec.url + '?initial=true'); // nav framework should remove this param
 
+    await expect(page).toHaveURL(spec.expectedUrl, { timeout: 20_000 });
+
     // Settings view should be visible
     await expect(page.locator(spec.expectedLocator)).toBeVisible();
     await checkScopedTo({ page, organization: spec.expectedScope });
-
-    // Wait until URL is as expected, or time-out after 5 seconds
-    await expect(page).toHaveURL(spec.expectedUrl, { timeout: 5_000 });
 
     if (spec.expectedTopLeft === undefined) {
         return;

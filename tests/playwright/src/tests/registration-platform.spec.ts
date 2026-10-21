@@ -921,7 +921,11 @@ test.describe('Registration', () => {
                 ]);
 
                 // go to checkout
+                const registrationResponse = page.waitForResponse(response =>
+                    response.request().method() === 'POST' && new URL(response.url()).pathname.endsWith('/members/register'),
+                );
                 await page.getByTestId('save-button').click();
+                test.expect((await registrationResponse).ok()).toBe(true);
 
                 await test.step('should show success view listing every registered member', async () => {
                     const toast = page.getByTestId('registration-checkout-succeeded');

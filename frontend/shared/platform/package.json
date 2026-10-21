@@ -9,9 +9,9 @@
         "./*.ts": "./src/*.ts"
     },
     "scripts": {
-        "lint": "eslint",
+        "lint": "eslint --quiet",
         "test": "vitest run",
-        "typecheck": "vue-tsc --noEmit"
+        "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "dependencies": {
         "@simonbackx/vue-app-navigation": "2.25.1",
