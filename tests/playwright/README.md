@@ -16,6 +16,12 @@ On environment problems such as DNS failures, SSL errors, or blank pages, stop a
 
 In CI, `shared/cli/bin/ci-mysql.mjs` starts pulling and provisioning the pinned MySQL image immediately after checkout, alongside dependency installation and app setup. The workflow waits for an authenticated TCP query before running Playwright. The GitHub-hosted runner is discarded at job completion, so MySQL needs no explicit cleanup. This bootstrap uses only Node built-ins because dependencies and the compiled CLI are not available yet. Local test database ownership is unchanged.
 
+## CI reports
+
+CI produces a mergeable Playwright blob report alongside the console output. Each shard must upload its blob report and failure attachments under unique artifact names. Download the blobs into `tests/playwright/blob-report`, then run `pnpm --dir tests/playwright run merge-reports` to produce a combined HTML report and `playwright-report/results.json`. This command only merges reports; it does not start tests or application services.
+
+Keep downloaded failure artifacts in separate subdirectories under `tests/playwright/test-results`. The trace publisher searches recursively, so one aggregation job can publish all trace links and post a single PR comment without shards overwriting each other's output.
+
 ## Todo
 Set a fixed time. The tests should be predictable. Now the current time in tests will change depending on the date the test is run.
 
