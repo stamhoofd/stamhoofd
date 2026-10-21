@@ -10,9 +10,12 @@ The networking package is being split without changing storage formats, authenti
 | `@stamhoofd/frontend-session` | Session state, authentication middleware, tokens, permissions and platform loading |
 | `@stamhoofd/frontend-application` | Session preparation and login orchestration, locale/theme coordination, review policy and domain managers |
 | `@stamhoofd/frontend-i18n` | Translation loading and locale handling |
+| `@stamhoofd/frontend-notifications` | Reactive toast handles, factories, error formatting and delivery |
 | `@stamhoofd/components` | Concrete presentation and Vue lifecycle hooks |
 
 Application services may use sessions, networking, storage, platform capabilities and localization. Those lower layers must not import application services or components. Concrete presentation callbacks are installed by application bootstrap before requests or authentication flows start.
+
+Import `Toast`, `ToastButton`, and `ToastListener` from `@stamhoofd/frontend-notifications/Toast` in both Vue components and standalone frontend TypeScript. The existing API and listener state are unchanged; `ToastBox` and `ToastView` remain component-owned renderers. Call `show()` explicitly and retain the toast for progress updates or manual dismissal. Toasts are not dismissed on caller unmount. Legacy `components/overlays/Toast` exports and `components/errors/isModuleImportError` are deprecated compatibility aliases; update their imports to the notifications package when touching a caller. Run notification tests with `stam test notifications`.
 
 Session preparation continues to initialize the interface locale during this migration. Making activation explicit, changing locale policy, and fixing concurrency behavior are separate changes.
 

@@ -21,7 +21,7 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import { computed, onMounted, ref } from 'vue';
 
 import Spinner from '../Spinner.vue';
-import type { Toast } from './Toast';
+import type { Toast } from '@stamhoofd/frontend-notifications/Toast';
 
 /**
  * This component will automatically show the root if we have a valid token. If the user logs out, we'll automatically show the login view

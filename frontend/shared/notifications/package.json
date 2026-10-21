@@ -1,0 +1,28 @@
+{
+    "name": "@stamhoofd/frontend-notifications",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "sideEffects": false,
+    "exports": {
+        "./*": "./src/*.ts",
+        "./*.ts": "./src/*.ts"
+    },
+    "scripts": {
+        "lint": "eslint",
+        "test": "vitest run",
+        "typecheck": "vue-tsc --noEmit"
+    },
+    "dependencies": {
+        "@simonbackx/simple-errors": "1.5.0",
+        "@simonbackx/simple-networking": "1.23.0",
+        "@stamhoofd/types": "workspace:*",
+        "vue": "3.5.43"
+    },
+    "devDependencies": {
+        "@stamhoofd/vite-config": "workspace:*",
+        "eslint-plugin-stamhoofd": "workspace:*",
+        "vite": "8.3.2",
+        "vitest": "4.1.11"
+    }
+}
