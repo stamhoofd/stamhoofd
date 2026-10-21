@@ -14,11 +14,11 @@
         "typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {
+        "@stamhoofd/frontend-notifications": "workspace:*",
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-networking": "1.23.0",
         "@simonbackx/vue-app-navigation": "2.25.1",
-        "@stamhoofd/components": "workspace:*",
         "@stamhoofd/frontend-platform": "workspace:*",
         "@stamhoofd/frontend-storage": "workspace:*",
         "@stamhoofd/networking": "workspace:*",

@@ -4,8 +4,8 @@ import type { SimpleErrors } from '@simonbackx/simple-errors';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import type { RequestMiddleware } from '@simonbackx/simple-networking';
 import { Request } from '@simonbackx/simple-networking';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
-import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { Toast } from '@stamhoofd/frontend-notifications/Toast';
+import { getSessionPresentation } from './SessionPresentation';
 import type { LoginProviderType } from '@stamhoofd/structures';
 import { ImpersonationTicketGrant, OpenIDAuthTokenResponse, Organization, Platform, Token, UserWithMembers, Version } from '@stamhoofd/structures';
 import { isReactive, reactive } from 'vue';
@@ -381,7 +381,7 @@ export class SessionContext implements RequestMiddleware {
                     console.warn('SSO state didn\'t match');
 
                     if (!this.canGetCompleted()) {
-                        new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show();
+                        Toast.error('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.').setHide(20000).show();
                     }
                     return false;
                 }
@@ -391,7 +391,7 @@ export class SessionContext implements RequestMiddleware {
                 console.error(e);
 
                 if (!this.canGetCompleted()) {
-                    new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show();
+                    Toast.error('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.').setHide(20000).show();
                 }
                 return false;
             }
@@ -450,7 +450,7 @@ export class SessionContext implements RequestMiddleware {
                     console.warn('SSO state didn\'t match');
 
                     if (!this.canGetCompleted()) {
-                        new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show();
+                        Toast.error('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.').setHide(20000).show();
                     }
                     return;
                 }
@@ -458,18 +458,18 @@ export class SessionContext implements RequestMiddleware {
             } catch (e) {
                 console.error(e);
                 if (!this.canGetCompleted()) {
-                    new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show();
+                    Toast.error('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.').setHide(20000).show();
                 }
                 return;
             }
 
-            new Toast(error, 'error red').setHide(20000).show();
+            Toast.error(error).setHide(20000).show();
         } else {
             if (error) {
                 search.delete('error');
 
                 // Message not authorized
-                new Toast($t(`%kv`), 'error red').setHide(20000).show();
+                Toast.error($t(`%kv`)).setHide(20000).show();
             }
         }
 
@@ -521,11 +521,11 @@ export class SessionContext implements RequestMiddleware {
         UrlHelper.initial.url.hash = hash.toString();
 
         if (this.hasToken()) {
-            new Toast($t(`%Zm9`), 'error red').setHide(30000).show();
+            Toast.error($t(`%Zm9`)).setHide(30000).show();
             return;
         }
 
-        if (!await CenteredMessage.confirm({
+        if (!await getSessionPresentation().confirm({
             title: $t(`%ZnG`),
             confirmText: $t(`%ZmZ`),
             description: $t(`%ZmW`),
@@ -560,7 +560,7 @@ export class SessionContext implements RequestMiddleware {
             await Storage.secure.setItem('oid-state', spaState);
         } catch (e) {
             console.error('Could not save state in local storage');
-            new Toast($t(`%kw`), 'error red').setHide(20000).show();
+            Toast.error($t(`%kw`)).setHide(20000).show();
             return;
         }
 
