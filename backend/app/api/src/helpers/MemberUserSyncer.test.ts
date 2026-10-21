@@ -1320,7 +1320,7 @@ describe('Helpers.MemberUserSyncer', () => {
             expect(other.permissions).toBeNull();
         });
 
-        test('Subdomains of a whitelisted domain inherit platform permissions', async () => {
+        test('Subdomains of a whitelisted domain do not inherit platform permissions', async () => {
             await setDomains(['ksa.be']);
             const member = await new MemberFactory({
                 details: MemberDetails.create({
@@ -1334,7 +1334,7 @@ describe('Helpers.MemberUserSyncer', () => {
             await MemberUserSyncer.onChangeMember(member);
             const users = await Member.users.load(member);
 
-            expect(users.find(u => u.email === 'john@gent.ksa.be')!.permissions?.globalPermissions?.responsibilities).toHaveLength(1);
+            expect(users.find(u => u.email === 'john@gent.ksa.be')!.permissions).toBeNull();
             expect(users.find(u => u.email === 'john@notksa.be')!.permissions).toBeNull();
         });
 

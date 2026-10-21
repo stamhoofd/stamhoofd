@@ -55,7 +55,7 @@
         <template v-if="!organization && auth.hasPlatformFullAccess()">
             <hr>
             <h2>{{ $t('Toegestane e-maildomeinen voor nationale functies') }}</h2>
-            <p>{{ $t('Leden met een nationale functie krijgen enkel de rechten van die functie via e-mailadressen op deze domeinen (of hun subdomeinen). Andere e-mailadressen van hetzelfde lid krijgen geen rechten. Laat leeg om geen beperkingen in te stellen.') }}</p>
+            <p>{{ $t('Leden met een nationale functie krijgen enkel de rechten van die functie via e-mailadressen op exact deze domeinen. Subdomeinen (bv. gent.ksa.be) moet je apart toevoegen. Andere e-mailadressen van hetzelfde lid krijgen geen rechten. Laat leeg om geen beperkingen in te stellen.') }}</p>
 
             <ArrayInput v-model="responsibilityEmailDomains" :default-value="() => ''" :title="$t('Domeinnamen')" error-fields="privateConfig.responsibilityEmailDomains" :error-box="errors.errorBox">
                 <template #item="{index, modelValue, updateModelValue}">

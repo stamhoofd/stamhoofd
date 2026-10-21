@@ -113,20 +113,21 @@ describe('PlatformPrivateConfig.canInheritPlatformResponsibilityPermissions', ()
         expect(config.canInheritPlatformResponsibilityPermissions('john@gmail.com')).toBe(true);
     });
 
-    test('allows the domain and its subdomains only', () => {
+    test('only allows exact domain matches', () => {
         const config = PlatformPrivateConfig.create({ responsibilityEmailDomains: ['KSA.be'] });
         expect(config.canInheritPlatformResponsibilityPermissions('john@ksa.be')).toBe(true);
         expect(config.canInheritPlatformResponsibilityPermissions('John@KSA.BE')).toBe(true);
-        expect(config.canInheritPlatformResponsibilityPermissions('john@gent.ksa.be')).toBe(true);
+        expect(config.canInheritPlatformResponsibilityPermissions('john@gent.ksa.be')).toBe(false);
         expect(config.canInheritPlatformResponsibilityPermissions('john@notksa.be')).toBe(false);
         expect(config.canInheritPlatformResponsibilityPermissions('john@ksa.be.evil.com')).toBe(false);
         expect(config.canInheritPlatformResponsibilityPermissions('john@gmail.com')).toBe(false);
         expect(config.canInheritPlatformResponsibilityPermissions('ksa.be')).toBe(false);
     });
 
-    test('ignores a leading @ or wildcard in the configured domains', () => {
-        const config = PlatformPrivateConfig.create({ responsibilityEmailDomains: ['@ksa.be', '*.fos.be'] });
+    test('subdomains need to be added separately', () => {
+        const config = PlatformPrivateConfig.create({ responsibilityEmailDomains: ['@ksa.be', 'gent.ksa.be'] });
         expect(config.canInheritPlatformResponsibilityPermissions('john@ksa.be')).toBe(true);
-        expect(config.canInheritPlatformResponsibilityPermissions('john@fos.be')).toBe(true);
+        expect(config.canInheritPlatformResponsibilityPermissions('john@gent.ksa.be')).toBe(true);
+        expect(config.canInheritPlatformResponsibilityPermissions('john@brugge.ksa.be')).toBe(false);
     });
 });

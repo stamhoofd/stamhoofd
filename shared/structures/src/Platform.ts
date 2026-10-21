@@ -51,14 +51,14 @@ export class PlatformPrivateConfig extends AutoEncoder {
 
     /**
      * Users only inherit platform permissions from platform responsibilities (not organization based)
-     * when their email address is on one of these domains or one of their subdomains.
+     * when the domain of their email address exactly matches one of these domains (subdomains need to be added separately).
      * When empty, there are no restrictions.
      */
     @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
     responsibilityEmailDomains: string[] = [];
 
     static normalizeEmailDomain(domain: string) {
-        return domain.trim().toLocaleLowerCase().replace(/^@/, '').replace(/^\*\./, '');
+        return domain.trim().toLocaleLowerCase().replace(/^@/, '');
     }
 
     canInheritPlatformResponsibilityPermissions(email: string) {
@@ -72,7 +72,7 @@ export class PlatformPrivateConfig extends AutoEncoder {
         const emailDomain = email.slice(at + 1).trim().toLocaleLowerCase();
         return this.responsibilityEmailDomains.some((d) => {
             const domain = PlatformPrivateConfig.normalizeEmailDomain(d);
-            return domain.length > 0 && (emailDomain === domain || emailDomain.endsWith('.' + domain));
+            return domain.length > 0 && emailDomain === domain;
         });
     }
 }

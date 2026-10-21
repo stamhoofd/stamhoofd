@@ -85,14 +85,14 @@ describe('Endpoint.PatchPlatform', () => {
             const response = await patchPlatform({
                 patch: PlatformStruct.patch({
                     privateConfig: PlatformPrivateConfig.patch({
-                        responsibilityEmailDomains: [' @KSA.be', '*.fos.be', 'ksa.be', ''] as any,
+                        responsibilityEmailDomains: [' @KSA.be', 'gent.ksa.be', 'ksa.be', ''] as any,
                     }),
                 }),
                 organization,
                 token,
             });
 
-            expect(response.body.privateConfig?.responsibilityEmailDomains).toEqual(['ksa.be', 'fos.be']);
+            expect(response.body.privateConfig?.responsibilityEmailDomains).toEqual(['ksa.be', 'gent.ksa.be']);
             expect((await User.getByID(user.id))!.permissions).toBeNull();
         });
 
@@ -107,6 +107,17 @@ describe('Endpoint.PatchPlatform', () => {
                 patch: PlatformStruct.patch({
                     privateConfig: PlatformPrivateConfig.patch({
                         responsibilityEmailDomains: ['john@ksa.be'] as any,
+                    }),
+                }),
+                organization,
+                token,
+            })).rejects.toThrow(/Invalid domain name/);
+
+            // No wildcard support: subdomains need to be added one by one
+            await expect(patchPlatform({
+                patch: PlatformStruct.patch({
+                    privateConfig: PlatformPrivateConfig.patch({
+                        responsibilityEmailDomains: ['*.ksa.be'] as any,
                     }),
                 }),
                 organization,
