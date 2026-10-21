@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CliContext } from '../context/create-context.js';
 import { run, RunVerbosity } from './command-runner.js';
-import { buildAll, buildShared, coverageTestPackages, lint, migrate, runUnitTests, sharedBuildReadyCommand, sharedBuildWatchCommand, testE2e, typecheck } from './monorepo-runner.js';
+import { buildAll, buildShared, coverageTestPackages, lint, migrate, runUnitTests, sharedBuildReadyCommand, sharedBuildWatchCommand, testE2e, typecheck, unitTestPackages } from './monorepo-runner.js';
 import { isPortListening } from './port-probe.js';
 import { CaddyService } from '../services/definitions/caddy-service.js';
 
@@ -125,6 +125,12 @@ describe('shared build orchestration', () => {
             env: { CI: undefined, DB_PORT: undefined },
             verbosity: RunVerbosity.Output,
         });
+    });
+
+    it('runs unit tests without typechecking', async () => {
+        const pkg = unitTestPackages.find(pkg => pkg.name === 'structures')!;
+        await runUnitTests(context, { packages: [pkg], skipBuild: true });
+        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', ['exec', 'vitest', 'run'], expect.anything());
     });
 
     it.each([
