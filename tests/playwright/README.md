@@ -14,6 +14,8 @@ Use `--grep @tag` to select tests, and add `--skip-build` only when the applicat
 
 On environment problems such as DNS failures, SSL errors, or blank pages, stop and ask for help rather than provisioning alternative test infrastructure.
 
+In CI, `shared/cli/bin/ci-mysql.mjs` starts pulling and provisioning the pinned MySQL image immediately after checkout, alongside dependency installation and app setup. The workflow waits for an authenticated TCP query before running Playwright. The GitHub-hosted runner is discarded at job completion, so MySQL needs no explicit cleanup. This bootstrap uses only Node built-ins because dependencies and the compiled CLI are not available yet. Local test database ownership is unchanged.
+
 ## Todo
 Set a fixed time. The tests should be predictable. Now the current time in tests will change depending on the date the test is run.
 
