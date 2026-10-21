@@ -73,7 +73,7 @@
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
 import { defineRoute, onCheckRoutes, UrlHelper, useNavigate } from '@simonbackx/vue-app-navigation';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 import { computed, ref } from 'vue';
 

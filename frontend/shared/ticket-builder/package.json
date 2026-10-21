@@ -8,6 +8,7 @@
         "typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {
+        "@stamhoofd/frontend-platform": "workspace:*",
         "@stamhoofd/assets": "workspace:*",
         "@stamhoofd/frontend-i18n": "workspace:*",
         "@stamhoofd/networking": "workspace:*",
