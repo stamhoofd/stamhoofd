@@ -387,7 +387,8 @@ jobs:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
             - uses: ./.github/actions/setup
             - name: Cache typecheck Turbo tasks
-              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              id: turbo-cache
+              uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: .turbo/cache
                   key: turbo-typecheck-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-${{ github.sha }}-${{ github.run_attempt }}
@@ -399,6 +400,12 @@ jobs:
                   name: shared-dist
             - name: Run type checking
               run: pnpm run typecheck
+            - name: Save typecheck Turbo tasks
+              if: ${{ !cancelled() && steps.turbo-cache.outputs.cache-primary-key != '' && steps.turbo-cache.outputs.cache-hit != 'true' }}
+              uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: .turbo/cache
+                  key: ${{ steps.turbo-cache.outputs.cache-primary-key }}
 
     job_test_lint:
         name: "Lint"
@@ -409,7 +416,8 @@ jobs:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
             - uses: ./.github/actions/setup
             - name: Cache lint Turbo tasks
-              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              id: turbo-cache
+              uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: .turbo/cache
                   key: turbo-lint-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-${{ github.sha }}-${{ github.run_attempt }}
@@ -421,6 +429,12 @@ jobs:
                   name: shared-dist
             - name: Run type linting
               run: pnpm run lint
+            - name: Save lint Turbo tasks
+              if: ${{ !cancelled() && steps.turbo-cache.outputs.cache-primary-key != '' && steps.turbo-cache.outputs.cache-hit != 'true' }}
+              uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: .turbo/cache
+                  key: ${{ steps.turbo-cache.outputs.cache-primary-key }}
             # Temporarily disabled until everything is formatted.
             # - name: Check formatting
             #   run: pnpm stam check format
