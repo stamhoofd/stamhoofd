@@ -25,7 +25,7 @@ export default class Test extends BaseCommand {
         'stam test structures bundle-discounts -t "Only these tests"',
         'stam test structures -t "Only these tests"',
         'stam test api --skip-build',
-        'stam test api --shard 1/2',
+        'stam test api --shard 1/2 --json-report /reports/api-1.json',
         'stam test components ImageComponent',
     ];
 
@@ -46,6 +46,7 @@ export default class Test extends BaseCommand {
         'test-name': Flags.string({ char: 't', description: 'Only run tests whose name matches this text (vitest -t)' }),
         'skip-build': Flags.boolean({ default: false, description: 'Skip the automatic build:shared step' }),
         'shard': Flags.string({ description: 'Run one shard of the suite on a separate machine (1-based index/total, e.g. 1/2)' }),
+        'json-report': Flags.string({ description: 'Write a Vitest JSON report with per-file timings (single package only)' }),
     };
 
     async run(): Promise<void> {
@@ -85,6 +86,7 @@ export default class Test extends BaseCommand {
             clear: flags.clear,
             coverage: target === 'coverage' || flags.coverage,
             shard: flags.shard,
+            jsonReport: flags['json-report'],
         });
     }
 }
