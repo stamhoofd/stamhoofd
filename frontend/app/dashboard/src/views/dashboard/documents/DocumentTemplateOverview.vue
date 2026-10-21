@@ -103,7 +103,7 @@ import { computed, ref } from 'vue';
 
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 
 import { fiscal } from './definitions/fiscal';

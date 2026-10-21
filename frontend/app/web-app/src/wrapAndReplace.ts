@@ -15,7 +15,7 @@ import { markRaw } from 'vue';
 import type { Ref } from 'vue';
 import { sessionFromOrganization, sessionGlobal } from './sessionBuilders';
 import { useGlobalRoutes } from './useGlobalRoutes';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 
 function wrapWithModalStack(component: ComponentWithProperties) {
     return new ComponentWithProperties(ModalStackComponent, { root: component });

@@ -8,7 +8,7 @@
 import type { PushOptions } from '@simonbackx/vue-app-navigation';
 import { ComponentWithProperties, ModalStackComponent, useManualPresent } from '@simonbackx/vue-app-navigation';
 import { MobileRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { App as WebApp } from '@stamhoofd/web-app';
 import { onMounted, useTemplateRef } from 'vue';
 

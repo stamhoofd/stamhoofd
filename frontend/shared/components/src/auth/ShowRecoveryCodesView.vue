@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts" setup>
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { onUnmounted } from 'vue';
 
 import { printRecoveryCodes } from '#auth/printRecoveryCodes.ts';

@@ -1,0 +1,30 @@
+{
+    "name": "@stamhoofd/frontend-platform",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "sideEffects": false,
+    "exports": {
+        "./*": "./src/*.ts",
+        "./*.ts": "./src/*.ts"
+    },
+    "scripts": {
+        "lint": "eslint",
+        "test": "vitest run",
+        "typecheck": "vue-tsc --noEmit"
+    },
+    "dependencies": {
+        "@simonbackx/vue-app-navigation": "2.25.1",
+        "@stamhoofd/networking": "workspace:*",
+        "@stamhoofd/structures": "workspace:*",
+        "file-saver": "2.0.5"
+    },
+    "devDependencies": {
+        "@stamhoofd/vite-config": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
+        "@types/file-saver": "2.0.7",
+        "eslint-plugin-stamhoofd": "workspace:*",
+        "vite": "8.3.2",
+        "vitest": "4.1.11"
+    }
+}

@@ -4,7 +4,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Version } from '@stamhoofd/structures';
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { AppManager } from './AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { NetworkManagerStatic } from './NetworkManager';
 
 afterEach(() => {

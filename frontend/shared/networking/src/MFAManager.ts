@@ -6,7 +6,7 @@ import { MFAEnrollmentResult, MFAStatus, RecoveryCodes, TOTPSetupResponse, Webau
 
 import type { SessionContext } from './SessionContext';
 import { SessionManager } from './SessionManager';
-import { AppManager } from '#AppManager.ts';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 
 /**
  * Client for the 2FA enrollment/management endpoints.

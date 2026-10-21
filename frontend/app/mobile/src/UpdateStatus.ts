@@ -6,7 +6,7 @@ import { Server } from '@simonbackx/simple-networking';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { MobileRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
 import { Toast, ToastButton } from '@stamhoofd/components/overlays/Toast.ts';
-import type { UpdateOptions } from '@stamhoofd/networking/AppManager';
+import type { UpdateOptions } from '@stamhoofd/frontend-platform/AppManager';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import { sleep } from '@stamhoofd/utility/Sleep.js';
 import CheckUpdateView from './CheckUpdateView.vue';

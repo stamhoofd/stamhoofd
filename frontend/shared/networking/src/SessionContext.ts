@@ -9,7 +9,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast';
 import type { LoginProviderType } from '@stamhoofd/structures';
 import { ImpersonationTicketGrant, OpenIDAuthTokenResponse, Organization, Platform, Token, UserWithMembers, Version } from '@stamhoofd/structures';
 import { isReactive, reactive } from 'vue';
-import { AppManager } from './AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { ContextPermissions } from './ContextPermissions';
 import { loadPlatform, savePlatformToStorage } from './loadPlatform';
 import { ManagedToken } from './ManagedToken';

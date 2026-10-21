@@ -56,7 +56,7 @@ import SaveView from '#navigation/SaveView.vue';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import type { ExcelExportType, LimitedFilteredRequest} from '@stamhoofd/structures';
 import { ExcelExportRequest, ExcelExportResponse, ExcelWorkbookFilter, Version } from '@stamhoofd/structures';

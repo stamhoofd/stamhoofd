@@ -1,4 +1,4 @@
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import type { PlatformMember } from '@stamhoofd/structures';
 import { afterEach, describe, expect, it } from 'vitest';
 import { SelectablePdfData } from '../SelectablePdfData';

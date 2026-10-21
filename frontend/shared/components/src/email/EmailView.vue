@@ -121,7 +121,7 @@ import type { AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArr
 import { encodeObject, PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { EmailContent, EmailRecipientSubfilter, File } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';

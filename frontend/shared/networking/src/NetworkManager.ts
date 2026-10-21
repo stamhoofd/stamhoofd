@@ -5,7 +5,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Version } from '@stamhoofd/structures';
 
-import { AppManager } from './AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { UrlHelper } from './UrlHelper';
 import { waitForNetworkOnline } from './utility/waitForNetworkOnline';
 

@@ -8,6 +8,7 @@
         "typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {
+        "@stamhoofd/frontend-platform": "workspace:*",
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-networking": "1.23.0",
         "@stamhoofd/assets": "workspace:*",

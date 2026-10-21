@@ -1,5 +1,5 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 
 /**
  * Downloads a file that is shown in the UI, instead of opening its url.

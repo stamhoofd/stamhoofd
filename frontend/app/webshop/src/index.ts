@@ -7,7 +7,7 @@ import 'virtual:vite-svg-2-webfont.css';
 import { ViewportHelper } from '@stamhoofd/components/ViewportHelper.ts';
 import { VueGlobalHelper } from '@stamhoofd/components/VueGlobalHelper.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { createApp } from 'vue';
 
 const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;

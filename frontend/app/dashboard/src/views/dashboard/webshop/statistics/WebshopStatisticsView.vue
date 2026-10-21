@@ -82,7 +82,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { DateOption } from '@stamhoofd/components/views/DateRange.ts';
 import GraphView from '@stamhoofd/components/views/GraphView.vue';
 import { GraphViewConfiguration } from '@stamhoofd/components/views/GraphViewConfiguration.ts';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import type { Category, Order, TicketPrivate } from '@stamhoofd/structures';
 import { Graph, GraphData, OrderStatus, ProductType, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

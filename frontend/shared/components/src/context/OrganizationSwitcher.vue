@@ -26,7 +26,7 @@ import { useAppContext, useAppData } from './appContext';
 import ContextLogo from './ContextLogo.vue';
 import { useContextOptions } from './hooks/useContextOptions';
 
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import OrganizationLogo from './OrganizationLogo.vue';
 import PlatformLogo from './PlatformLogo.vue';
 

@@ -19,3 +19,5 @@ Session preparation continues to initialize the interface locale during this mig
 All consumers must import the canonical implementation of `Storage`, `AppManager`, `SessionManager` and `NetworkManager`; copying singleton implementations would break native overrides and shared state.
 
 Import storage from `@stamhoofd/frontend-storage/Storage`. Its roles are replaceable adapters, not separate key namespaces. Browser defaults use localStorage; `secure` does not imply browser encryption. Native bootstrap must install replacements before restoring sessions.
+
+Import `AppManager` and its capability types from `@stamhoofd/frontend-platform/AppManager`. Native bootstrap continues to replace callbacks on the same singleton. This extraction preserves the existing APIs and temporarily retains its session type dependency; dependency boundaries are separate work. Run its tests with `stam test platform`.

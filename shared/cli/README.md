@@ -348,6 +348,7 @@ pnpm stam test structures -t 'partial test name'     # package + test-name filte
 pnpm stam test api --skip-build                      # skip the automatic build:shared step
 pnpm stam test api --clear                           # reset the test database (drop its volume) before running
 pnpm stam test components ImageComponent             # frontend browser tests (vitest browser mode)
+pnpm stam test platform                              # browser/native platform metadata
 ```
 
 `components`, `networking`, and `sgv-frontend` run in vitest browser mode and need a Playwright Chromium (`pnpm exec playwright install chromium`); they are part of `stam test unit` too.
