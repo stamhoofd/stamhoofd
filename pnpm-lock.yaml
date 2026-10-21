@@ -1930,6 +1930,9 @@ importers:
         specifier: 3.5.43
         version: 3.5.43(typescript@6.0.3)
     devDependencies:
+      '@simonbackx/vue-app-navigation':
+        specifier: 2.25.1
+        version: 2.25.1(tslib@2.8.1)(vue@3.5.43(typescript@6.0.3))
       '@stamhoofd/vite-config':
         specifier: workspace:*
         version: link:../vite-config
@@ -2184,18 +2187,12 @@ importers:
       '@simonbackx/vue-app-navigation':
         specifier: 2.25.1
         version: 2.25.1(tslib@2.8.1)(vue@3.5.43(typescript@6.0.3))
-      '@stamhoofd/frontend-session':
-        specifier: workspace:*
-        version: link:../session
       '@stamhoofd/frontend-storage':
         specifier: workspace:*
         version: link:../storage
       '@stamhoofd/locales':
         specifier: workspace:*
         version: link:../../../shared/locales
-      '@stamhoofd/networking':
-        specifier: workspace:*
-        version: link:../networking
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
@@ -2582,6 +2579,9 @@ importers:
       '@stamhoofd/components':
         specifier: workspace:*
         version: link:../shared/components
+      '@stamhoofd/frontend-application':
+        specifier: workspace:*
+        version: link:../shared/application
       '@stamhoofd/frontend-i18n':
         specifier: workspace:*
         version: link:../shared/i18n
