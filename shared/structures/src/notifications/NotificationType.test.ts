@@ -7,18 +7,21 @@ import { NotificationAudience, NotificationType, NotificationTypeHelper } from '
 describe('Unit.NotificationTypeHelper', () => {
     const platform = Platform.create({});
 
-    const member = { permissions: null };
+    const member = { email: 'member@example.com', permissions: null };
     const organizationAdmin = {
+        email: 'organizationadmin@example.com',
         permissions: UserPermissions.create({
             organizationPermissions: new Map([['organization-1', Permissions.create({ level: PermissionLevel.Read })]]),
         }),
     };
     const platformAdmin = {
+        email: 'platformadmin@example.com',
         permissions: UserPermissions.create({
             globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
         }),
     };
     const limitedPlatformAdmin = {
+        email: 'limitedplatformadmin@example.com',
         permissions: UserPermissions.create({
             globalPermissions: Permissions.create({ level: PermissionLevel.Read }),
         }),

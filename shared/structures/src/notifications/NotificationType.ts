@@ -36,7 +36,7 @@ export class NotificationTypeHelper {
         return Object.values(NotificationType).includes(type as NotificationType);
     }
 
-    static isRelevantFor(type: NotificationType, user: { permissions: UserPermissions | null }, platform: Platform): boolean {
+    static isRelevantFor(type: NotificationType, user: { email: string; permissions: UserPermissions | null }, platform: Platform): boolean {
         const permissions = user.permissions;
 
         switch (this.getAudience(type)) {
@@ -46,11 +46,11 @@ export class NotificationTypeHelper {
                 // Only administrators with permissions in an organization receive these notifications
                 return !!permissions && permissions.organizationPermissions.size > 0;
             case NotificationAudience.PlatformAdmins:
-                return !!permissions?.forPlatform(platform)?.hasFullAccess();
+                return !!permissions?.forPlatform(platform, user.email)?.hasFullAccess();
         }
     }
 
-    static getRelevantTypes(user: { permissions: UserPermissions | null }, platform: Platform): NotificationType[] {
+    static getRelevantTypes(user: { email: string; permissions: UserPermissions | null }, platform: Platform): NotificationType[] {
         return Object.values(NotificationType).filter(type => this.isRelevantFor(type, user, platform));
     }
 }

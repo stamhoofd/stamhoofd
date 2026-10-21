@@ -70,7 +70,7 @@ export class ContextPermissions {
     }
 
     get _platformPermissions() {
-        return unref(this.userPermissions)?.forPlatform(this.platform) ?? null;
+        return unref(this.userPermissions)?.forPlatform(this.platform, this.user?.email ?? null) ?? null;
     }
 
     _cachedPermissions: LoadedPermissions | null = null;
@@ -93,11 +93,11 @@ export class ContextPermissions {
         if (!this.organization) {
             return this.platformPermissions;
         }
-        return unref(this.userPermissions)?.forOrganization(this.organization, this.platform, { inheritFromPlatform: this.allowInheritingPermissions }) ?? null;
+        return unref(this.userPermissions)?.forOrganization(this.organization, this.platform, this.user?.email ?? null, { inheritFromPlatform: this.allowInheritingPermissions }) ?? null;
     }
 
     getPermissionsForOrganization(organization: OrganizationForPermissionCalculation) {
-        return unref(this.userPermissions)?.forOrganization(organization, this.platform, { inheritFromPlatform: this.allowInheritingPermissions }) ?? null;
+        return unref(this.userPermissions)?.forOrganization(organization, this.platform, this.user?.email ?? null, { inheritFromPlatform: this.allowInheritingPermissions }) ?? null;
     }
 
     get unloadedPermissions(): Permissions | null {
@@ -500,6 +500,7 @@ export class ContextPermissions {
             event,
             {
                 userPermissions: this.userPermissions,
+                userEmail: this.user?.email ?? null,
                 platform: this.platform,
                 organization,
                 isPeriodInUse: this.isEventPeriodInUse(event, organization),

@@ -56,7 +56,6 @@ export class PatchPlatformEndpoint extends Endpoint<
 
         const platform = await Platform.getForEditing();
         let shouldUpdateUserPermissions = false;
-        let shouldUpdateResponsibilityPermissions = false;
 
         if (request.body.privateConfig) {
             // Did we patch roles?
@@ -116,7 +115,6 @@ export class PatchPlatformEndpoint extends Endpoint<
                 }
 
                 platform.privateConfig.responsibilityEmailDomains = Formatter.uniqueArray(domains);
-                shouldUpdateResponsibilityPermissions = true;
             }
         }
 
@@ -303,10 +301,6 @@ export class PatchPlatformEndpoint extends Endpoint<
 
         if (shouldUpdateUserPermissions) {
             await MemberUserSyncer.updatePermissionsForPlatform();
-        }
-
-        if (shouldUpdateResponsibilityPermissions) {
-            await MemberUserSyncer.updatePermissionsForPlatformResponsibilities();
         }
 
         return new Response(await Platform.getSharedPrivateStruct());

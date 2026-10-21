@@ -111,7 +111,7 @@ export class SessionContext implements RequestMiddleware {
         if (!this.organization) {
             return null;
         }
-        return this.user?.permissions?.forOrganization(this.organization, this.platform) ?? null;
+        return this.user?.permissions?.forOrganization(this.organization, this.platform, this.user?.email ?? null) ?? null;
     }
 
     /**

@@ -2,7 +2,7 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, Token } from '@stamhoofd/models';
 import { MemberFactory, MemberResponsibilityRecordFactory, OrganizationFactory, Platform, RegistrationPeriod, RegistrationPeriodFactory, User, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { MemberDetails, Permissions, PlatformConfig, PlatformPrivateConfig, Platform as PlatformStruct, Version } from '@stamhoofd/structures';
+import { MemberDetails, MemberResponsibility, PermissionRoleForResponsibility, Permissions, PlatformConfig, PlatformPrivateConfig, Platform as PlatformStruct, Version } from '@stamhoofd/structures';
 import { SessionService } from '../../../services/SessionService.js';
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
@@ -67,20 +67,12 @@ describe('Endpoint.PatchPlatform', () => {
             await platform.save();
         });
 
-        test('Full platform admins can set normalized domains and permissions are recalculated', async () => {
+        test('Full platform admins can set normalized domains', async () => {
             const organization = await new OrganizationFactory({ }).create();
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
             const token = await SessionService.createSession(admin);
-
-            const member = await new MemberFactory({
-                details: MemberDetails.create({ firstName: 'John', lastName: 'Doe', email: 'john@gmail.com' }),
-            }).create();
-            await new MemberResponsibilityRecordFactory({ member }).create();
-            await MemberUserSyncer.onChangeMember(member);
-            const user = (await User.select().where('memberId', member.id).first(true));
-            expect(user.permissions?.globalPermissions?.responsibilities).toHaveLength(1);
 
             const response = await patchPlatform({
                 patch: PlatformStruct.patch({
@@ -93,7 +85,45 @@ describe('Endpoint.PatchPlatform', () => {
             });
 
             expect(response.body.privateConfig?.responsibilityEmailDomains).toEqual(['ksa.be', 'gent.ksa.be']);
-            expect((await User.getByID(user.id))!.permissions).toBeNull();
+        });
+
+        test('Platform responsibilities only grant access to users with a whitelisted email domain', async () => {
+            const organization = await new OrganizationFactory({ }).create();
+
+            const responsibility = MemberResponsibility.create({
+                name: 'Koepelbeheerder',
+                organizationBased: false,
+                permissions: PermissionRoleForResponsibility.create({ level: PermissionLevel.Full }),
+            });
+            const platform = await Platform.getForEditing();
+            platform.config.responsibilities.push(responsibility);
+            platform.privateConfig.responsibilityEmailDomains = ['ksa.be'];
+            await platform.save();
+
+            const allowed = await new UserFactory({ email: 'john@ksa.be' }).create();
+            const other = await new UserFactory({ email: 'john@gmail.com' }).create();
+
+            const member = await new MemberFactory({
+                details: MemberDetails.create({ firstName: 'John', lastName: 'Doe', email: 'john@ksa.be', alternativeEmails: ['john@gmail.com'] }),
+            }).create();
+            await new MemberResponsibilityRecordFactory({ member, responsibility }).create();
+            await MemberUserSyncer.onChangeMember(member);
+
+            // The responsibility is still linked to both users
+            for (const user of [allowed, other]) {
+                expect((await User.getByID(user.id))!.permissions?.globalPermissions?.responsibilities).toHaveLength(1);
+            }
+
+            const patch = PlatformStruct.patch({
+                privateConfig: PlatformPrivateConfig.patch({
+                    responsibilityEmailDomains: ['ksa.be', 'fos.be'] as any,
+                }),
+            });
+
+            await expect(patchPlatform({ patch, organization, token: await SessionService.createSession(other) })).rejects.toThrow(/permission/i);
+
+            const response = await patchPlatform({ patch, organization, token: await SessionService.createSession(allowed) });
+            expect(response.body.privateConfig?.responsibilityEmailDomains).toEqual(['ksa.be', 'fos.be']);
         });
 
         test('Invalid domains are rejected', async () => {

@@ -1,5 +1,5 @@
 import { Database } from '@simonbackx/simple-database';
-import { Member, MemberFactory, MemberResponsibilityRecordFactory, MemberUser, OrganizationFactory, Platform, User, UserFactory } from '@stamhoofd/models';
+import { Member, MemberFactory, MemberResponsibilityRecordFactory, MemberUser, User, UserFactory } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { BooleanStatus, MemberDetails, Parent, UserPermissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -1279,93 +1279,6 @@ describe('Helpers.MemberUserSyncer', () => {
                     permissions: expect.any(UserPermissions),
                 }),
             ]);
-        });
-    });
-
-    describe('Platform responsibility email domains', () => {
-        const setDomains = async (domains: string[]) => {
-            const platform = await Platform.getForEditing();
-            platform.privateConfig.responsibilityEmailDomains = domains;
-            await platform.save();
-        };
-
-        afterEach(async () => {
-            // The platform row is shared by every test file
-            await setDomains([]);
-        });
-
-        const createMemberWithResponsibility = async (organizationId?: string) => {
-            const member = await new MemberFactory({
-                details: MemberDetails.create({
-                    firstName: 'John',
-                    lastName: 'Doe',
-                    email: 'john@ksa.be',
-                    alternativeEmails: ['john@gmail.com'],
-                }),
-            }).create();
-            await new MemberResponsibilityRecordFactory({ member, organizationId }).create();
-            await MemberUserSyncer.onChangeMember(member);
-            const users = await Member.users.load(member);
-            return {
-                allowed: users.find(u => u.email === 'john@ksa.be')!,
-                other: users.find(u => u.email === 'john@gmail.com')!,
-            };
-        };
-
-        test('Only users with a whitelisted email domain inherit platform permissions', async () => {
-            await setDomains(['KSA.be']);
-            const { allowed, other } = await createMemberWithResponsibility();
-
-            expect(allowed.permissions?.globalPermissions?.responsibilities).toHaveLength(1);
-            expect(other.permissions).toBeNull();
-        });
-
-        test('Subdomains of a whitelisted domain do not inherit platform permissions', async () => {
-            await setDomains(['ksa.be']);
-            const member = await new MemberFactory({
-                details: MemberDetails.create({
-                    firstName: 'John',
-                    lastName: 'Doe',
-                    email: 'john@gent.ksa.be',
-                    alternativeEmails: ['john@notksa.be'],
-                }),
-            }).create();
-            await new MemberResponsibilityRecordFactory({ member }).create();
-            await MemberUserSyncer.onChangeMember(member);
-            const users = await Member.users.load(member);
-
-            expect(users.find(u => u.email === 'john@gent.ksa.be')!.permissions).toBeNull();
-            expect(users.find(u => u.email === 'john@notksa.be')!.permissions).toBeNull();
-        });
-
-        test('updatePermissionsForPlatformResponsibilities applies a changed whitelist to existing users', async () => {
-            const { allowed, other } = await createMemberWithResponsibility();
-            expect(other.permissions?.globalPermissions?.responsibilities).toHaveLength(1);
-
-            await setDomains(['ksa.be']);
-            await MemberUserSyncer.updatePermissionsForPlatformResponsibilities();
-
-            expect((await User.getByID(allowed.id))!.permissions?.globalPermissions?.responsibilities).toHaveLength(1);
-            expect((await User.getByID(other.id))!.permissions).toBeNull();
-
-            await setDomains([]);
-            await MemberUserSyncer.updatePermissionsForPlatformResponsibilities();
-            expect((await User.getByID(other.id))!.permissions?.globalPermissions?.responsibilities).toHaveLength(1);
-        });
-
-        test('All users inherit platform permissions without whitelist', async () => {
-            const { allowed, other } = await createMemberWithResponsibility();
-
-            expect(allowed.permissions?.globalPermissions?.responsibilities).toHaveLength(1);
-            expect(other.permissions?.globalPermissions?.responsibilities).toHaveLength(1);
-        });
-
-        test('Organization responsibilities are not restricted', async () => {
-            await setDomains(['ksa.be']);
-            const organization = await new OrganizationFactory({}).create();
-            const { other } = await createMemberWithResponsibility(organization.id);
-
-            expect(other.permissions?.organizationPermissions.get(organization.id)?.responsibilities).toHaveLength(1);
         });
     });
 });

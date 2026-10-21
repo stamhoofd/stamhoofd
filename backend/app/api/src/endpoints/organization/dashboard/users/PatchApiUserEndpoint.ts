@@ -64,7 +64,7 @@ export class PatchApiUserEndpoint extends Endpoint<Params, Query, Body, Response
                 if (organization) {
                     editUser.permissions = UserPermissions.limitedPatch(editUser.permissions, request.body.permissions, organization.id);
 
-                    if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.forOrganization(organization, platform, { inheritFromPlatform: false })?.hasFullAccess())) {
+                    if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.forOrganization(organization, platform, editUser.email, { inheritFromPlatform: false })?.hasFullAccess())) {
                         throw new SimpleError({
                             code: 'permission_denied',
                             message: 'Je kan jezelf niet verwijderen als hoofdbeheerder',
@@ -77,7 +77,7 @@ export class PatchApiUserEndpoint extends Endpoint<Params, Query, Body, Response
                         editUser.permissions = request.body.permissions.isPut() ? request.body.permissions : null;
                     }
 
-                    if (editUser.id === user.id && !editUser.permissions?.forPlatform(platform)?.hasFullAccess()) {
+                    if (editUser.id === user.id && !editUser.permissions?.forPlatform(platform, editUser.email)?.hasFullAccess()) {
                         throw new SimpleError({
                             code: 'permission_denied',
                             message: 'Je kan jezelf niet verwijderen als hoofdbeheerder',

@@ -11,7 +11,7 @@ import { OrganizationAdminService } from '../services/OrganizationAdminService.j
 function userToFilterableAdmin(user: User, platform: PlatformStruct, organization: Organization) {
     return {
         id: user.id,
-        permissions: user.permissions?.forOrganization(organization, platform),
+        permissions: user.permissions?.forOrganization(organization, platform, user.email),
     };
 }
 const filterableAdminFilterCompilers: InMemoryFilterDefinitions = {

@@ -213,28 +213,6 @@ export class MemberUserSyncerStatic {
         }
     }
 
-    /**
-     * Recalculate the users that can inherit permissions from an active platform responsibility
-     * (e.g. after changing PlatformPrivateConfig.responsibilityEmailDomains)
-     */
-    async updatePermissionsForPlatformResponsibilities() {
-        const rows = await SQL.select(SQL.column('memberId'))
-            .from(SQL.table(MemberResponsibilityRecord.table))
-            .where(SQL.column('organizationId'), null)
-            .where(SQL.column('endDate'), null)
-            .fetch();
-
-        const memberIds = Formatter.uniqueArray(rows.map(r => r[MemberResponsibilityRecord.table]['memberId'] as string));
-        if (memberIds.length === 0) {
-            return;
-        }
-
-        const users = await User.select().where('memberId', memberIds).fetch();
-        for (const user of users) {
-            await this.updateInheritedPermissions(user);
-        }
-    }
-
     async updateInheritedPermissions(user: User) {
         // Fetch all members for this user
         const responsibilities = user.memberId ? (await this.getResponsibilitiesForMembers([user.memberId])) : [];
@@ -254,14 +232,7 @@ export class MemberUserSyncerStatic {
             responsibilitiesByOrganization.set(organizationId, []);
         }
 
-        const canInheritPlatformPermissions = responsibilities.some(r => r.organizationId === null)
-            ? (await Platform.getSharedPrivateStruct()).privateConfig.canInheritPlatformResponsibilityPermissions(user.email)
-            : true;
-
         for (const responsibility of responsibilities) {
-            if (responsibility.organizationId === null && !canInheritPlatformPermissions) {
-                continue;
-            }
             const v = responsibilitiesByOrganization.get(responsibility.organizationId) ?? [];
             responsibilitiesByOrganization.set(responsibility.organizationId, v);
             v.push(responsibility);

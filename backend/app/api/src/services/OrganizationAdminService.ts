@@ -41,7 +41,7 @@ export class OrganizationAdminService {
         const platform = await Platform.getSharedStruct();
 
         // Only full access
-        return admins.filter(a => a.permissions && a.permissions.forOrganization(organization, platform, { inheritFromPlatform: false })?.hasFullAccess());
+        return admins.filter(a => a.permissions && a.permissions.forOrganization(organization, platform, a.email, { inheritFromPlatform: false })?.hasFullAccess());
     }
 
     /**
@@ -50,7 +50,7 @@ export class OrganizationAdminService {
     static async getFinanceAdmins(organization: Organization) {
         const admins = await this.getAdmins(organization);
         const platform = await Platform.getSharedStruct();
-        const filtered = admins.filter(a => a.permissions && (a.permissions.forOrganization(organization, platform, { inheritFromPlatform: false })?.hasFullAccess() || a.permissions.forOrganization(organization, platform, { inheritFromPlatform: false })?.hasAccessRight(AccessRight.OrganizationFinanceDirector)));
+        const filtered = admins.filter(a => a.permissions && (a.permissions.forOrganization(organization, platform, a.email, { inheritFromPlatform: false })?.hasFullAccess() || a.permissions.forOrganization(organization, platform, a.email, { inheritFromPlatform: false })?.hasAccessRight(AccessRight.OrganizationFinanceDirector)));
 
         // Only full access
         return filtered;
@@ -126,12 +126,12 @@ export class OrganizationAdminService {
         });
 
         const platform = await Platform.getSharedStruct();
-        const filtered = admins.filter(a => a.verified && a.permissions && !a.email.endsWith('@stamhoofd.be') && (a.permissions.forOrganization(organization, platform, { inheritFromPlatform: false })?.hasFullAccess() || a.permissions.forOrganization(organization, platform, { inheritFromPlatform: false })?.hasAccessRight(AccessRight.OrganizationFinanceDirector)));
+        const filtered = admins.filter(a => a.verified && a.permissions && !a.email.endsWith('@stamhoofd.be') && (a.permissions.forOrganization(organization, platform, a.email, { inheritFromPlatform: false })?.hasFullAccess() || a.permissions.forOrganization(organization, platform, a.email, { inheritFromPlatform: false })?.hasAccessRight(AccessRight.OrganizationFinanceDirector)));
 
         if (filtered.length > 0) {
             return filtered.map(f => f.email)[0];
         }
-        const filtered2 = admins.filter(a => a.verified && a.permissions && (a.permissions.forOrganization(organization, platform, { inheritFromPlatform: false })?.hasFullAccess() || a.permissions.forOrganization(organization, platform, { inheritFromPlatform: false })?.hasAccessRight(AccessRight.OrganizationFinanceDirector)));
+        const filtered2 = admins.filter(a => a.verified && a.permissions && (a.permissions.forOrganization(organization, platform, a.email, { inheritFromPlatform: false })?.hasFullAccess() || a.permissions.forOrganization(organization, platform, a.email, { inheritFromPlatform: false })?.hasAccessRight(AccessRight.OrganizationFinanceDirector)));
 
         if (filtered2.length > 0) {
             return filtered2.map(f => f.email)[0];

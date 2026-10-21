@@ -50,8 +50,9 @@ export class PlatformPrivateConfig extends AutoEncoder {
     mailchimp: MailchimpSettings | null = null;
 
     /**
-     * Users only inherit platform permissions from platform responsibilities (not organization based)
-     * when the domain of their email address exactly matches one of these domains (subdomains need to be added separately).
+     * Platform responsibilities (not organization based) only resolve to platform permissions for users
+     * whose email domain exactly matches one of these domains (subdomains need to be added separately).
+     * The responsibilities are still linked to the user, they are only ignored when calculating permissions.
      * When empty, there are no restrictions.
      */
     @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
@@ -61,9 +62,12 @@ export class PlatformPrivateConfig extends AutoEncoder {
         return domain.trim().toLocaleLowerCase().replace(/^@/, '');
     }
 
-    canInheritPlatformResponsibilityPermissions(email: string) {
+    canInheritPlatformResponsibilityPermissions(email: string | null) {
         if (this.responsibilityEmailDomains.length === 0) {
             return true;
+        }
+        if (!email) {
+            return false;
         }
         const at = email.lastIndexOf('@');
         if (at === -1) {

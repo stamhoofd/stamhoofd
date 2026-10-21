@@ -344,7 +344,7 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
             })),
         ];
 
-        if (user?.permissions?.forPlatform(platform.value) !== null) {
+        if (user?.permissions?.forPlatform(platform.value, user?.email ?? null) !== null) {
             all.push(
                 new MultipleChoiceFilterBuilder({
                     name: $t('%3G'),
