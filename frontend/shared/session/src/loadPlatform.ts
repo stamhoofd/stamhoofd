@@ -2,7 +2,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { AuditLogReplacementDependencies, Platform, Version } from '@stamhoofd/structures';
 import { uuidToName } from '@stamhoofd/structures/helpers/uuidToName.js';
-import { NetworkManager } from './NetworkManager';
+import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
 
 /**

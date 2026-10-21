@@ -1,4 +1,4 @@
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { Platform } from '@stamhoofd/structures';
 import { Organization, OrganizationPrivateMetaData } from '@stamhoofd/structures';
 import type { ComputedRef } from 'vue';

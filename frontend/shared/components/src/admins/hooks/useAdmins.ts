@@ -3,7 +3,7 @@ import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
+import { ContextPermissions } from '@stamhoofd/frontend-session/ContextPermissions';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { LoadedPermissions, Permissions, User } from '@stamhoofd/structures';
 import { ApiUser, MemberAdmin, UserPermissions, UserWithMembers } from '@stamhoofd/structures';

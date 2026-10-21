@@ -3,7 +3,7 @@ import { Platform } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { SessionContext } from './SessionContext';
+import { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { SessionManagerStatic } from './SessionManager';
 
 afterEach(() => {

@@ -3,7 +3,7 @@ import type { Server } from '@simonbackx/simple-networking';
 import { Request } from '@simonbackx/simple-networking';
 import { Token } from '@stamhoofd/structures';
 
-import { waitForNetworkOnline } from './utility/waitForNetworkOnline';
+import { waitForNetworkOnline } from '@stamhoofd/networking/utility/waitForNetworkOnline';
 
 /**
  * A token that can get saved and refreshed

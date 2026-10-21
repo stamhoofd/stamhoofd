@@ -12,7 +12,7 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { Organization, Platform } from '@stamhoofd/structures';
 import { EmailRecipientSubfilter, ExcelExportType, mergeFilters, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';

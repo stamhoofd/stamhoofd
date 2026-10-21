@@ -13,10 +13,10 @@ import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { ContextPermissions } from './ContextPermissions';
 import { loadPlatform, savePlatformToStorage } from './loadPlatform';
 import { ManagedToken } from './ManagedToken';
-import { NetworkManager } from './NetworkManager';
+import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { QueueHandler } from './QueueHandler';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
-import { UrlHelper } from './UrlHelper';
+import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 
 type AuthenticationStateListener = (changed: 'user' | 'organization' | 'platform' | 'token' | 'preventComplete') => void;
 

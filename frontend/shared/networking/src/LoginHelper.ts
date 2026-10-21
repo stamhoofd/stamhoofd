@@ -8,7 +8,7 @@ import type { Organization } from '@stamhoofd/structures';
 import { CreateOrganization, CreateOrganizationResponse, MFAChallengeRequest, MFAChallengeResponse, MFAMethodType, MFASetupResponse, NewUser, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 
 import { NetworkManager } from './NetworkManager';
-import type { SessionContext } from './SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { SessionManager } from './SessionManager';
 
 export type LoginResult = {

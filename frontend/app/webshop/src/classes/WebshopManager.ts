@@ -2,7 +2,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
 import { setFavicon } from '@stamhoofd/components/helpers/favicon.ts';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { Platform} from '@stamhoofd/structures';
 import { DarkMode, Webshop } from '@stamhoofd/structures';
 

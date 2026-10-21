@@ -1,5 +1,5 @@
 import type { SelectableColumn } from '@stamhoofd/frontend-excel-export/SelectableColumn';
-import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
+import type { ContextPermissions } from '@stamhoofd/frontend-session/ContextPermissions';
 import type { EmergencyContact, Group, Organization, Parent, Platform, PlatformMember, RecordSettings } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { getFinancialSupportSettingsOrDefault, getGenderName, GroupType, ParentTypeHelper, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordType } from '@stamhoofd/structures';

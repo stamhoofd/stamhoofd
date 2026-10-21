@@ -15,7 +15,7 @@ import { ViewportHelper } from '@stamhoofd/components/ViewportHelper.ts';
 import { VueGlobalHelper } from '@stamhoofd/components/VueGlobalHelper.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { throttle } from '@stamhoofd/utility';

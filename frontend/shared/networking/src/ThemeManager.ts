@@ -3,7 +3,7 @@ import { GlobalEventBus } from '@stamhoofd/components/EventBus';
 import type { AppType, Platform } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { inject, toRef } from 'vue';
-import type { SessionContext } from './SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 
 export function useThemeManager(): Ref<ThemeManager> {
     return toRef(inject<ThemeManager>('$themeManager', null as unknown as ThemeManager)) as any as Ref<ThemeManager>;

@@ -1,0 +1,35 @@
+{
+    "name": "@stamhoofd/frontend-session",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "sideEffects": false,
+    "exports": {
+        "./*": "./src/*.ts",
+        "./*.ts": "./src/*.ts"
+    },
+    "scripts": {
+        "lint": "eslint",
+        "test": "vitest run",
+        "typecheck": "vue-tsc --noEmit"
+    },
+    "dependencies": {
+        "@simonbackx/simple-encoding": "2.26.11",
+        "@simonbackx/simple-errors": "1.5.0",
+        "@simonbackx/simple-networking": "1.23.0",
+        "@simonbackx/vue-app-navigation": "2.25.1",
+        "@stamhoofd/components": "workspace:*",
+        "@stamhoofd/frontend-platform": "workspace:*",
+        "@stamhoofd/frontend-storage": "workspace:*",
+        "@stamhoofd/networking": "workspace:*",
+        "@stamhoofd/structures": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
+        "vue": "3.5.43"
+    },
+    "devDependencies": {
+        "@stamhoofd/vite-config": "workspace:*",
+        "eslint-plugin-stamhoofd": "workspace:*",
+        "vite": "8.3.2",
+        "vitest": "4.1.11"
+    }
+}

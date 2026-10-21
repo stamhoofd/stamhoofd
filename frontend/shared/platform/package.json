@@ -15,7 +15,7 @@
     },
     "dependencies": {
         "@simonbackx/vue-app-navigation": "2.25.1",
-        "@stamhoofd/networking": "workspace:*",
+        "@stamhoofd/frontend-session": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "file-saver": "2.0.5"
     },

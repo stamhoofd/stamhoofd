@@ -1,4 +1,4 @@
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { MembersBlob, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 
 /**

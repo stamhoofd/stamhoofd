@@ -4,7 +4,7 @@ import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { Group, OrganizationRegistrationPeriod, RegistrationInvitation, RegistrationInvitationRequest } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { CenteredMessage } from '../../overlays/CenteredMessage';

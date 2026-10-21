@@ -1,4 +1,4 @@
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import type { Organization, Platform } from '@stamhoofd/structures';
 
