@@ -1100,6 +1100,8 @@ describe('Helpers.MemberUserSyncer', () => {
                     email: 'john@example.com',
                 }),
             }).create();
+            member1.createdAt = new Date('2024-01-01T00:00:00Z');
+            await member1.save();
             await MemberUserSyncer.onChangeMember(member1);
             const users1 = await Member.users.load(member1);
             expect(users1).toIncludeSameMembers([
@@ -1112,9 +1114,6 @@ describe('Helpers.MemberUserSyncer', () => {
                 }),
             ]);
 
-            // Wait 1 second to make sure we save a new timestamp
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
             // member2 should not seize the memberId
             const member2 = await new MemberFactory({
                 details: MemberDetails.create({
@@ -1124,6 +1123,8 @@ describe('Helpers.MemberUserSyncer', () => {
                     email: 'john@example.com',
                 }),
             }).create();
+            member2.createdAt = new Date('2024-01-02T00:00:00Z');
+            await member2.save();
 
             await MemberUserSyncer.onChangeMember(member2);
             const users2 = await Member.users.load(member2);
@@ -1160,6 +1161,8 @@ describe('Helpers.MemberUserSyncer', () => {
                     email: 'john@example.com',
                 }),
             }).create();
+            member1.createdAt = new Date('2024-01-01T00:00:00Z');
+            await member1.save();
             await new MemberResponsibilityRecordFactory({
                 member: member1,
             }).create();
@@ -1176,7 +1179,6 @@ describe('Helpers.MemberUserSyncer', () => {
                     permissions: expect.any(UserPermissions),
                 }),
             ]);
-            await new Promise(resolve => setTimeout(resolve, 2000));
 
             // member2 should not seize the memberId
             const member2 = await new MemberFactory({
@@ -1187,6 +1189,8 @@ describe('Helpers.MemberUserSyncer', () => {
                     email: 'john@example.com',
                 }),
             }).create();
+            member2.createdAt = new Date('2024-01-02T00:00:00Z');
+            await member2.save();
             await new MemberResponsibilityRecordFactory({
                 member: member2,
             }).create();
