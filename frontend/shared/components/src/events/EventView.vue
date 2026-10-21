@@ -80,7 +80,7 @@ import { useChooseFamilyMembersForGroup } from '#members/checkout/useCheckoutReg
 import ImageComponent from '#views/ImageComponent.vue';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { useMemberManager } from '@stamhoofd/frontend-application/MemberManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Event, Organization, WebshopPreview } from '@stamhoofd/structures';
 import { Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

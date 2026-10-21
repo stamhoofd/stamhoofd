@@ -56,7 +56,7 @@ import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionab
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 
 const memberManager = useMemberManager();
 const checkout = computed(() => memberManager.family.checkout);

@@ -4,7 +4,7 @@ import { Toast } from '#overlays/Toast.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type {
     SetupStep,
     SetupStepType} from '@stamhoofd/structures';

@@ -40,7 +40,7 @@ import { AsyncTableAction, InMemoryTableAction } from '@stamhoofd/components/tab
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import type { ReceivableBalance, StamhoofdFilter } from '@stamhoofd/structures';
 import { BalanceItemPaymentDetailed, CountFilteredRequest, DetailedReceivableBalance, EmailRecipientSubfilter, ExcelExportType, getReceivableBalanceTypeName, mergeFilters, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, ReceivableBalanceType } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';

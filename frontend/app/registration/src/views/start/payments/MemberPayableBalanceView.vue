@@ -20,7 +20,7 @@ import { useContext } from '@stamhoofd/components/hooks/useContext';
 import PayableBalanceCollectionView from '@stamhoofd/components/payments/PayableBalanceCollectionView.vue';
 
 import { useMemberManager } from '@stamhoofd/frontend-application/MemberManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import type { BalanceItem, BalanceItemPaymentDetailed, DetailedPayableBalance, RegisterCheckout } from '@stamhoofd/structures';
 import { DetailedPayableBalanceCollection } from '@stamhoofd/structures';
 import type { Ref } from 'vue';

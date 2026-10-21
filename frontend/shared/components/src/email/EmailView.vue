@@ -122,7 +122,7 @@ import { encodeObject, PatchableArray, PatchMap } from '@simonbackx/simple-encod
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { markReviewMoment } from '@stamhoofd/frontend-application/markReviewMoment';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { EmailContent, EmailRecipientSubfilter, File } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';

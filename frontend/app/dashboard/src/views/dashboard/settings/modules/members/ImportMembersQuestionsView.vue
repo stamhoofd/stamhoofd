@@ -220,7 +220,7 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { usePlatformFamilyManager } from '@stamhoofd/components/members/PlatformFamilyManager.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import type { EmergencyContact, Group, OrganizationRegistrationPeriod, Parent, Registration } from '@stamhoofd/structures';
 import { getGenderName, GroupType, ParentTypeHelper } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';

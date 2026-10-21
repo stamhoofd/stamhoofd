@@ -32,7 +32,7 @@ import LoadingBoxTransition from '#containers/LoadingBoxTransition.vue';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { GroupType, NamedObject, RegistrationPeriodList } from '@stamhoofd/structures';
 import type { Ref} from 'vue';
 import { computed, ref, watch, watchEffect } from 'vue';

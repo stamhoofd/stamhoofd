@@ -208,7 +208,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { EmailPreview } from '@stamhoofd/structures';
 import { bounceErrorToHuman, EmailAddressSettings, EmailRecipient, EmailStatus, isSoftEmailRecipientError, LimitedFilteredRequest } from '@stamhoofd/structures';
 import type { Ref } from 'vue';

@@ -48,7 +48,7 @@ import type { PrivateOrder, PrivateWebshop, Product, ReservedSeat } from '@stamh
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PrivateOrderWithTickets } from '@stamhoofd/structures';
 
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import type { Ref } from 'vue';
 import { computed, onBeforeUnmount, ref } from 'vue';
 
