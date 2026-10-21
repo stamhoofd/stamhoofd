@@ -8,6 +8,8 @@ Run tests through `pnpm stam test e2e` from the repository root (or `stam test e
 
 The CLI and Playwright global setup own shared builds, the API build, migrations, Caddy, SSO, worker databases, and the runner lifecycle. Frontend bundles use an uncached Turbo task filtered to `@stamhoofd/web-app` and `@stamhoofd/webshop` for `build:playwright`. Do not build or invoke Playwright manually.
 
+API startup clears each worker database once, including the initial organization-index rebuild. Every test group still resets its database and login state; fully parallel groups do not share fixture data.
+
 Use `--grep @tag` to select tests, and add `--skip-build` only when the application build is still current (for example, only test files changed since the last run). Use `--local-db` to connect to an already running MySQL; see [databases](#databases).
 
 On environment problems such as DNS failures, SSL errors, or blank pages, stop and ask for help rather than provisioning alternative test infrastructure.
