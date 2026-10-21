@@ -69,7 +69,6 @@ beforeAll(async () => {
     await Database.update('UPDATE registration_periods set organizationId = null, customName = ? where organizationId is not null', ['delete']);
     await Database.delete('DELETE FROM `organizations`');
     await Database.delete('DELETE FROM `registration_periods` where customName = ?', ['delete']);
-    await Database.delete('OPTIMIZE TABLE organizations;'); // fix breaking of indexes due to deletes (mysql bug?)
 
     // Use random file keys in tests
     const alg = 'ES256';
