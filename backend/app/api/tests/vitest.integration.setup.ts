@@ -15,6 +15,8 @@ import { BalanceItemService } from '../src/services/BalanceItemService.js';
 import { WebshopCrowdfundingService } from '../src/services/WebshopCrowdfundingService.js';
 import { PayconiqMocker } from './helpers/PayconiqMocker.js';
 import { resetNock } from './helpers/resetNock.js';
+import { I18n } from '@stamhoofd/backend-i18n';
+import { loadTestLocales } from './test-locales.js';
 
 Error.stackTraceLimit = 100;
 
@@ -82,7 +84,12 @@ beforeAll(async () => {
     TestUtils.setPermanentEnvironment('FILE_SIGNING_PUBLIC_KEY', exportedPublicKey);
     TestUtils.setPermanentEnvironment('FILE_SIGNING_PRIVATE_KEY', exportedPrivateKey);
 
-    await GlobalHelper.load();
+    const localeLoader = vi.spyOn(I18n, 'load').mockImplementation(async () => loadTestLocales());
+    try {
+        await GlobalHelper.load();
+    } finally {
+        localeLoader.mockRestore();
+    }
 
     // Override default $t handlers
     TestUtils.loadEnvironment();
