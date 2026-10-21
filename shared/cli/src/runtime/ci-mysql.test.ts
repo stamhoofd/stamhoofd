@@ -112,7 +112,7 @@ if (args[0] === 'exec' && !fs.existsSync(file('queried'))) {
 
     it('launches before dependency setup and relies on hosted runner teardown', async () => {
         const workflow = await readFile(new URL('.github/workflows/ci.yml', root), 'utf8');
-        const job = workflow.split('    job_test_playwright:')[1].split('    # ---------------------------------------------------------------------------')[0];
+        const job = workflow.split('    job_test_playwright_shards:')[1].split('    job_test_playwright:')[0];
         expect(job).not.toContain('        services:');
         expect(job).toContain('runs-on: ubuntu-latest');
         expect(job.indexOf('ci-mysql.mjs start')).toBeLessThan(job.indexOf('uses: ./.github/actions/setup'));

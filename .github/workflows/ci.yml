@@ -200,6 +200,7 @@ jobs:
                   echo "Failed jobs in that run: ${failed:-none}"
 
                   has() { printf '%s\n' "$failed" | grep -qxF "$1"; }
+                  has_playwright() { printf '%s\n' "$failed" | grep -qE '^Playwright Tests( \(shard [1-4]/4\))?$'; }
 
                   # If setup or the shared build failed, the conditional jobs were all
                   # skipped and their state is unknown: re-run everything.
@@ -212,7 +213,7 @@ jobs:
                     echo "backend_shared=$(has 'Backend Shared Tests' && echo true || echo false)"
                     echo "shared=$(has 'Shared Package Tests' && echo true || echo false)"
                     echo "frontend=$(has 'Components Browser Tests' && echo true || echo false)"
-                    echo "playwright=$(has 'Playwright Tests' && echo true || echo false)"
+                    echo "playwright=$(has_playwright && echo true || echo false)"
                   } >> "$GITHUB_OUTPUT"
 
         outputs:
@@ -502,19 +503,19 @@ jobs:
             - name: Run frontend shared tests
               run: pnpm exec turbo run test --filter='./frontend/shared/*' --concurrency=1 --env-mode=loose -- --run --bail=1
 
-    job_test_playwright:
-        name: "Playwright Tests"
+    job_test_playwright_shards:
+        name: "Playwright Tests (shard ${{ matrix.shard }}/4)"
         timeout-minutes: 60
         runs-on: ubuntu-latest
         needs: [job_setup, job_build_shared]
         if: needs.job_setup.outputs.in_stack_range == 'true' && needs.job_setup.outputs.rerun_playwright == 'true'
-        permissions:
-            contents: read
-            pull-requests: write
+        strategy:
+            fail-fast: false
+            matrix:
+                shard: [1, 2, 3, 4]
         env:
-            SPACES_CI_BUCKET: stamhoofd-ci-traces
-            SPACES_CI_REGION: ams3
             CI_MYSQL_IMAGE: mysql:8.4@sha256:0744ee5ef89ce6ccfa13de3e579fe6b9e27f93dd70da9c06d2c908b1b193fb8d
+            PLAYWRIGHT_WORKER_COUNT: '2'
             # The SSO tests start a Keycloak container from the CLI. Runners ship both docker and
             # podman, and the auto-detection prefers podman, so pin the runtime we actually verified.
             STAMHOOFD_CONTAINER_RUNTIME: docker
@@ -650,7 +651,7 @@ jobs:
             - name: Build API
               run: pnpm exec turbo run build --filter=@stamhoofd/backend
             - name: Save API Turbo tasks
-              if: steps.api-cache.outputs.cache-hit != 'true'
+              if: matrix.shard == 1 && steps.api-cache.outputs.cache-hit != 'true'
               uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: .turbo/cache
@@ -660,7 +661,7 @@ jobs:
             - name: Wait for MySQL
               run: node shared/cli/bin/ci-mysql.mjs wait
             - name: Run Playwright tests
-              run: pnpm --dir tests/playwright run test
+              run: pnpm --dir tests/playwright run test --shard ${{ matrix.shard }}/4
             - name: Restore runner DNS
               if: always()
               run: |
@@ -668,15 +669,83 @@ jobs:
                       sudo systemctl start systemd-resolved
                       sudo cp "$RUNNER_TEMP/original-resolv.conf" /etc/resolv.conf
                   fi
+            - name: Upload Playwright blob report
+              if: ${{ !cancelled() }}
+              uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+              with:
+                  name: playwright-blob-${{ matrix.shard }}
+                  path: tests/playwright/blob-report
+                  if-no-files-found: error
+                  overwrite: true
+                  compression-level: 0
+                  retention-days: 1
             - name: Upload Playwright artifacts
               if: failure()
               uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
               with:
-                  name: playwright-traces
+                  name: playwright-traces-${{ github.run_attempt }}-${{ matrix.shard }}
                   path: |
                       tests/playwright/playwright-report
                       tests/playwright/test-results
                   retention-days: 1
+
+    job_test_playwright:
+        name: "Playwright Tests"
+        runs-on: ubuntu-latest
+        needs: [job_setup, job_test_playwright_shards]
+        if: >-
+            !cancelled() &&
+            needs.job_setup.outputs.in_stack_range == 'true' &&
+            needs.job_setup.outputs.rerun_playwright == 'true' &&
+            needs.job_test_playwright_shards.result != 'skipped'
+        permissions:
+            contents: read
+            pull-requests: write
+        env:
+            SPACES_CI_BUCKET: stamhoofd-ci-traces
+            SPACES_CI_REGION: ams3
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/setup
+            - name: Download Playwright blob reports
+              uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+              with:
+                  pattern: playwright-blob-*
+                  path: tests/playwright/blob-report
+                  merge-multiple: true
+            - name: Download Playwright failure artifacts
+              if: ${{ !cancelled() && needs.job_test_playwright_shards.result != 'success' }}
+              uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+              with:
+                  pattern: playwright-traces-${{ github.run_attempt }}-*
+                  path: tests/playwright/test-results
+            - name: Merge Playwright reports
+              if: ${{ !cancelled() }}
+              run: pnpm --dir tests/playwright run merge-reports
+            - name: Upload combined Playwright report
+              if: ${{ !cancelled() }}
+              uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+              with:
+                  name: playwright-traces
+                  overwrite: true
+                  path: |
+                      tests/playwright/playwright-report
+                      tests/playwright/test-results
+                  retention-days: 1
+            - name: Check all Playwright shards succeeded
+              if: ${{ !cancelled() }}
+              env:
+                  SHARD_RESULT: ${{ needs.job_test_playwright_shards.result }}
+              run: |
+                  if [ "$SHARD_RESULT" != "success" ]; then
+                      echo "Playwright shards finished with: $SHARD_RESULT"
+                      exit 1
+                  fi
+                  count=$(find tests/playwright/blob-report -maxdepth 1 -name '*.zip' | wc -l)
+                  if [ "$count" -ne 4 ]; then
+                      echo "Expected 4 shard reports, found $count"
+                      exit 1
+                  fi
             - name: Publish traces to Spaces & build notifications
               id: publish_traces
               if: failure()
