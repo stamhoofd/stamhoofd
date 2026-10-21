@@ -28,7 +28,7 @@
         "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
         "test": "vitest",
         "test:coverage": "vitest --coverage",
-        "postinstall": "puppeteer browsers install chrome"
+        "postinstall": "node -e \"if (process.env.PUPPETEER_SKIP_DOWNLOAD !== 'true') require('node:child_process').execSync('puppeteer browsers install chrome', { stdio: 'inherit' })\""
     },
     "dependencies": {
         "@simonbackx/simple-database": "1.40.1",
