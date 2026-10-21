@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 const root = new URL('../../../../', import.meta.url);
@@ -19,7 +19,19 @@ const typecheckPackages = [
     'backend/app/statistics-syncer',
 ];
 
+const frontendPackages = readdirSync(new URL('frontend/shared/', root))
+    .filter(name => readJson(`frontend/shared/${name}/package.json`).scripts?.typecheck)
+    .map(name => `frontend/shared/${name}`);
+
 describe('check cache configuration', () => {
+    it.each(frontendPackages)('%s caches incremental source-only checks without runtime builds', (packagePath) => {
+        const { scripts } = readJson(`${packagePath}/package.json`);
+        expect(scripts.typecheck).toBe('vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo');
+        expect(scripts.lint).toBe('eslint --quiet');
+        expect(scripts.build).toBeUndefined();
+        expect(scripts['build:types']).toBeUndefined();
+    });
+
     it('keeps runtime CLI builds from regenerating dependency declarations', () => {
         expect(readJson('shared/cli/tsconfig.build.json').references ?? []).toEqual([]);
     });
@@ -60,6 +72,7 @@ describe('check cache configuration', () => {
             dependsOn: ['build:types', 'check-inputs', 'eslint-plugin-stamhoofd#check-inputs', '@stamhoofd/components#build:types', '@stamhoofd/components#check-inputs'],
             cache: true,
             outputs: [],
+            env: ['NODE_ENV'],
         });
         expect(globalDependencies).toEqual(expect.arrayContaining([
             'eslint.config.js',
