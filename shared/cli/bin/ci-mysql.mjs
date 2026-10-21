@@ -2,7 +2,7 @@
 
 // Runs before dependencies and the compiled CLI are available on GitHub runners.
 import { execFile, spawn } from 'node:child_process';
-import { mkdir, open, readFile, rename, writeFile } from 'node:fs/promises';
+import { appendFile, mkdir, open, readFile, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { setTimeout } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
@@ -90,11 +90,11 @@ async function provision() {
                 await setTimeout(1000);
             }
         }
-        result = { ready: true };
+        result = { ready: true, durationMs: Date.now() - startedAt };
     }
     catch (error) {
         console.error(error);
-        result = { ready: false, error: error.message };
+        result = { ready: false, error: error.message, durationMs: Date.now() - startedAt };
     }
     await writeFile(`${statusPath}.tmp`, JSON.stringify(result));
     await rename(`${statusPath}.tmp`, statusPath);
@@ -108,6 +108,12 @@ async function wait() {
             throw new Error('Timed out waiting for background MySQL provisioning.');
         }
         await setTimeout(250);
+    }
+    console.log(await readFile(logPath, 'utf8'));
+    const timing = `MySQL provisioning: ${(result.durationMs / 1000).toFixed(1)}s; remaining wait: ${((Date.now() - startedAt) / 1000).toFixed(1)}s.`;
+    console.log(timing);
+    if (process.env.GITHUB_STEP_SUMMARY) {
+        await appendFile(process.env.GITHUB_STEP_SUMMARY, `${timing}\n`);
     }
     if (!result.ready) {
         throw new Error(`MySQL provisioning failed: ${result.error}`);
