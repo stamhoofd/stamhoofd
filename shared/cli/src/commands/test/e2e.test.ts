@@ -1,12 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { testE2e } from '../../runtime/monorepo-runner.js';
 import TestE2e from './e2e.js';
+import { Parser } from '@oclif/core';
 
 vi.mock('../../runtime/monorepo-runner.js', () => ({ testE2e: vi.fn() }));
 
 describe('e2e shard selection', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+    });
+
+    it('accepts --verbose and rejects combining it with --quiet', async () => {
+        expect((await Parser.parse(['--verbose'], TestE2e)).flags.verbose).toBe(true);
+        await expect(Parser.parse(['--verbose', '--quiet'], TestE2e)).rejects.toThrow();
     });
 
     it.each([undefined, '1/1', '1/4', '4/4'])('forwards shard %s and the worker count', async (shard) => {

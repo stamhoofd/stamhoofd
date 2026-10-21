@@ -235,7 +235,30 @@ export async function testE2e(context: CliContext, options: { ci: boolean; clear
         if (!options.skipBuild) {
             await run('pnpm', ['--dir', 'backend/app/api', 'run', 'build:playwright:pre'], { cwd: context.rootDir, env: databaseEnv, verbosity: context.verbosity ?? RunVerbosity.Output });
         }
-        await run('pnpm', ['--dir', 'tests/playwright', 'run', 'test', ...(options.ui ? ['--ui'] : []), ...(options.grep === undefined ? [] : ['--grep', options.grep]), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)]), ...(options.shard === undefined ? [] : ['--shard', options.shard])], { cwd: context.rootDir, env: { ...databaseEnv, CI: options.ci ? 'true' : undefined, NODE_EXTRA_CA_CERTS: caddyRootCaPath(), PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined, PLAYWRIGHT_WORKER_COUNT: options.workers === undefined ? undefined : String(options.workers), STAMHOOFD_SKIP_FRONTEND_BUILD: options.skipBuild ? 'true' : undefined }, verbosity: context.verbosity ?? RunVerbosity.Output });
+        const verbosity = context.verbosity ?? RunVerbosity.Output;
+        const args = ['--dir', 'tests/playwright', 'run', 'test', ...(options.ui ? ['--ui'] : []), ...(options.grep === undefined ? [] : ['--grep', options.grep]), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)]), ...(options.shard === undefined ? [] : ['--shard', options.shard])];
+        const runOptions = {
+            cwd: context.rootDir,
+            env: {
+                ...databaseEnv,
+                CI: options.ci ? 'true' : undefined,
+                NODE_EXTRA_CA_CERTS: caddyRootCaPath(),
+                PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined,
+                PLAYWRIGHT_WORKER_COUNT: options.workers === undefined ? undefined : String(options.workers),
+                PLAYWRIGHT_VERBOSE: context.verbose ? '1' : undefined,
+                STAMHOOFD_SKIP_FRONTEND_BUILD: options.skipBuild ? 'true' : undefined,
+            },
+            verbosity,
+        };
+        if (verbosity === RunVerbosity.Output) {
+            await run('pnpm', args, runOptions);
+        }
+        else {
+            const result = await run('pnpm', args, { ...runOptions, capture: true, allowFailure: true });
+            if (result.status !== 0) {
+                throw new Error(`Playwright exited with status ${result.status}\n${result.stdout}${result.stderr}`);
+            }
+        }
     } finally {
         // Shut down the e2e MySQL container after the run; the data volume is kept for the next run.
         // A MySQL that was already running is left alone: it is not ours to stop.
