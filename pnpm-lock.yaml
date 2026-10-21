@@ -203,9 +203,6 @@ importers:
       '@simplewebauthn/server':
         specifier: 13.3.3
         version: 13.3.3
-      '@stamhoofd/cli':
-        specifier: workspace:*
-        version: link:shared/cli
       '@xmldom/xmldom':
         specifier: ^0.9.10
         version: 0.9.12
@@ -279,9 +276,6 @@ importers:
       '@oxc-project/runtime':
         specifier: 0.153.0
         version: 0.153.0
-      '@stamhoofd/test-utils':
-        specifier: workspace:*
-        version: link:shared/test-utils
       '@stamhoofd/types':
         specifier: workspace:*
         version: link:shared/types

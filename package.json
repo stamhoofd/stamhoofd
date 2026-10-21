@@ -51,7 +51,6 @@
         "@simonbackx/vue-app-navigation": "2.25.1",
         "@simplewebauthn/browser": "13.3.0",
         "@simplewebauthn/server": "13.3.3",
-        "@stamhoofd/cli": "workspace:*",
         "@xmldom/xmldom": "^0.9.10",
         "@zxcvbn-ts/core": "0.3.0",
         "@zxcvbn-ts/language-common": "0.1.2",
@@ -78,7 +77,6 @@
     },
     "devDependencies": {
         "@oxc-project/runtime": "0.153.0",
-        "@stamhoofd/test-utils": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "@stylistic/eslint-plugin": "5.10.0",
         "@testing-library/dom": "10.4.2",
