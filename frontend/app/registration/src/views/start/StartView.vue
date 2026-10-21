@@ -175,7 +175,7 @@ import { useRegistrationQuickActions } from '@stamhoofd/components/quick-actions
 import { downloadDocument } from '@stamhoofd/document-helper';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
-import { Storage } from '@stamhoofd/networking/Storage';
+import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Document, PlatformMember } from '@stamhoofd/structures';
 import { DocumentStatus, GroupType, TranslatedString } from '@stamhoofd/structures';

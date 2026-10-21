@@ -3,7 +3,7 @@ import { ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-en
 import { AuditLogReplacementDependencies, Platform, Version } from '@stamhoofd/structures';
 import { uuidToName } from '@stamhoofd/structures/helpers/uuidToName.js';
 import { NetworkManager } from './NetworkManager';
-import { Storage } from './Storage';
+import { Storage } from '@stamhoofd/frontend-storage/Storage';
 
 /**
  * Write the platform to local storage, so the next boot can start from it (see loadPlatform)

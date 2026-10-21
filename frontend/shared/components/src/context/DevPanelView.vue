@@ -38,7 +38,7 @@ import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import { Toast } from '#overlays/Toast.ts';
 import { AppManager } from '@stamhoofd/networking/AppManager';
-import { Storage } from '@stamhoofd/networking/Storage';
+import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import { onMounted, ref } from 'vue';
 
 const dismiss = useDismiss();

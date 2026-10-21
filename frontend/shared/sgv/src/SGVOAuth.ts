@@ -2,7 +2,7 @@ import { AutoEncoder, encodeObject, field, IntegerDecoder, ObjectData, StringDec
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { RequestResult } from '@simonbackx/simple-networking';
 import { Server } from '@simonbackx/simple-networking';
-import { Storage } from '@stamhoofd/networking/Storage';
+import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import type { SGVTokenResponse } from '@stamhoofd/sgv';
 import {
     SGV_LOGIN_AUTHORIZE_PATH,
