@@ -1,5 +1,5 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { AuditLog, EmailVerificationCode, Member, MemberFactory, MemberResponsibilityRecordFactory, OrganizationFactory, Token, User, UserFactory } from '@stamhoofd/models';
+import { AuditLog, EmailVerificationCode, Member, MemberFactory, MemberResponsibilityRecordFactory, OrganizationFactory, Platform, Token, User, UserFactory } from '@stamhoofd/models';
 import type { Organization } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { AuditLogType, LoginProviderType, PermissionRole, Permissions, Token as TokenStruct, UserMeta } from '@stamhoofd/structures';
@@ -191,20 +191,31 @@ describe('Endpoint.VerifyEmail', () => {
 
     test('changing to an email outside the platform responsibility domains removes inherited platform permissions', async () => {
         TestUtils.setEnvironment('userMode', 'platform');
-        TestUtils.setEnvironment('PLATFORM_RESPONSIBILITY_EMAIL_DOMAINS', ['ksa.be']);
-        const organization = await new OrganizationFactory({}).create();
-        const user = await new UserFactory({ email: 'john@ksa.be' }).create();
-        const member = await new MemberFactory({ user }).create();
-        await new MemberResponsibilityRecordFactory({ member }).create();
-        user.memberId = member.id;
-        await MemberUserSyncer.updateInheritedPermissions(user);
-        expect(user.permissions?.globalPermissions?.responsibilities).toHaveLength(1);
+        const setDomains = async (domains: string[]) => {
+            const platform = await Platform.getForEditing();
+            platform.privateConfig.responsibilityEmailDomains = domains;
+            await platform.save();
+        };
+        await setDomains(['ksa.be']);
 
-        await verifyEmail(organization, user, 'john@gmail.com');
+        try {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ email: 'john@ksa.be' }).create();
+            const member = await new MemberFactory({ user }).create();
+            await new MemberResponsibilityRecordFactory({ member }).create();
+            user.memberId = member.id;
+            await MemberUserSyncer.updateInheritedPermissions(user);
+            expect(user.permissions?.globalPermissions?.responsibilities).toHaveLength(1);
 
-        const refreshed = await User.getByID(user.id);
-        expect(refreshed!.email).toBe('john@gmail.com');
-        expect(refreshed!.permissions).toBeNull();
+            await verifyEmail(organization, user, 'john@gmail.com');
+
+            const refreshed = await User.getByID(user.id);
+            expect(refreshed!.email).toBe('john@gmail.com');
+            expect(refreshed!.permissions).toBeNull();
+        } finally {
+            // The platform row is shared by every test file
+            await setDomains([]);
+        }
     });
 
     test('parallel wrong guesses cannot exceed the maximum number of tries', async () => {

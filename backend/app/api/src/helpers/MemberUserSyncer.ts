@@ -213,17 +213,26 @@ export class MemberUserSyncerStatic {
         }
     }
 
-    canInheritPlatformPermissions(email: string) {
-        const domains = STAMHOOFD.PLATFORM_RESPONSIBILITY_EMAIL_DOMAINS;
-        if (!domains) {
-            return true;
+    /**
+     * Recalculate the users that can inherit permissions from an active platform responsibility
+     * (e.g. after changing PlatformPrivateConfig.responsibilityEmailDomains)
+     */
+    async updatePermissionsForPlatformResponsibilities() {
+        const rows = await SQL.select(SQL.column('memberId'))
+            .from(SQL.table(MemberResponsibilityRecord.table))
+            .where(SQL.column('organizationId'), null)
+            .where(SQL.column('endDate'), null)
+            .fetch();
+
+        const memberIds = Formatter.uniqueArray(rows.map(r => r[MemberResponsibilityRecord.table]['memberId'] as string));
+        if (memberIds.length === 0) {
+            return;
         }
-        const at = email.lastIndexOf('@');
-        if (at === -1) {
-            return false;
+
+        const users = await User.select().where('memberId', memberIds).fetch();
+        for (const user of users) {
+            await this.updateInheritedPermissions(user);
         }
-        const emailDomain = email.slice(at + 1).toLocaleLowerCase();
-        return domains.some(domain => domain.toLocaleLowerCase() === emailDomain);
     }
 
     async updateInheritedPermissions(user: User) {
@@ -245,8 +254,12 @@ export class MemberUserSyncerStatic {
             responsibilitiesByOrganization.set(organizationId, []);
         }
 
+        const canInheritPlatformPermissions = responsibilities.some(r => r.organizationId === null)
+            ? (await Platform.getSharedPrivateStruct()).privateConfig.canInheritPlatformResponsibilityPermissions(user.email)
+            : true;
+
         for (const responsibility of responsibilities) {
-            if (responsibility.organizationId === null && !this.canInheritPlatformPermissions(user.email)) {
+            if (responsibility.organizationId === null && !canInheritPlatformPermissions) {
                 continue;
             }
             const v = responsibilitiesByOrganization.get(responsibility.organizationId) ?? [];

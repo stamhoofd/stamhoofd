@@ -4,7 +4,8 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import type { EventNotificationType, MemberResponsibility, PlatformConfig, PlatformPremiseType } from '@stamhoofd/structures';
-import { Platform as PlatformStruct } from '@stamhoofd/structures';
+import { Platform as PlatformStruct, PlatformPrivateConfig } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { isAbortedError, isCanceledError, QueueHandler } from '@stamhoofd/queues';
@@ -55,6 +56,7 @@ export class PatchPlatformEndpoint extends Endpoint<
 
         const platform = await Platform.getForEditing();
         let shouldUpdateUserPermissions = false;
+        let shouldUpdateResponsibilityPermissions = false;
 
         if (request.body.privateConfig) {
             // Did we patch roles?
@@ -89,6 +91,32 @@ export class PatchPlatformEndpoint extends Endpoint<
                 }
 
                 platform.privateConfig.requireTwoFactor = request.body.privateConfig.requireTwoFactor;
+            }
+
+            if (request.body.privateConfig.responsibilityEmailDomains !== undefined) {
+                if (!Context.auth.hasPlatformFullAccess()) {
+                    throw Context.auth.error();
+                }
+
+                const patchedDomains: string[] = patchObject(
+                    platform.privateConfig.responsibilityEmailDomains,
+                    request.body.privateConfig.responsibilityEmailDomains,
+                );
+                const domains = patchedDomains.map(d => PlatformPrivateConfig.normalizeEmailDomain(d)).filter(d => d.length > 0);
+
+                for (const domain of domains) {
+                    if (!/^[a-z0-9-]+(?:\.[a-z0-9-]+)+$/.test(domain)) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'Invalid domain name: ' + domain,
+                            human: $t('Ongeldige domeinnaam: {domain}', { domain }),
+                            field: 'privateConfig.responsibilityEmailDomains',
+                        });
+                    }
+                }
+
+                platform.privateConfig.responsibilityEmailDomains = Formatter.uniqueArray(domains);
+                shouldUpdateResponsibilityPermissions = true;
             }
         }
 
@@ -275,6 +303,10 @@ export class PatchPlatformEndpoint extends Endpoint<
 
         if (shouldUpdateUserPermissions) {
             await MemberUserSyncer.updatePermissionsForPlatform();
+        }
+
+        if (shouldUpdateResponsibilityPermissions) {
+            await MemberUserSyncer.updatePermissionsForPlatformResponsibilities();
         }
 
         return new Response(await Platform.getSharedPrivateStruct());

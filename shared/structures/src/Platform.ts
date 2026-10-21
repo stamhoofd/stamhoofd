@@ -48,6 +48,33 @@ export class PlatformPrivateConfig extends AutoEncoder {
      */
     @field({ decoder: MailchimpSettings, nullable: true, version: 421 })
     mailchimp: MailchimpSettings | null = null;
+
+    /**
+     * Users only inherit platform permissions from platform responsibilities (not organization based)
+     * when their email address is on one of these domains or one of their subdomains.
+     * When empty, there are no restrictions.
+     */
+    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    responsibilityEmailDomains: string[] = [];
+
+    static normalizeEmailDomain(domain: string) {
+        return domain.trim().toLocaleLowerCase().replace(/^@/, '').replace(/^\*\./, '');
+    }
+
+    canInheritPlatformResponsibilityPermissions(email: string) {
+        if (this.responsibilityEmailDomains.length === 0) {
+            return true;
+        }
+        const at = email.lastIndexOf('@');
+        if (at === -1) {
+            return false;
+        }
+        const emailDomain = email.slice(at + 1).trim().toLocaleLowerCase();
+        return this.responsibilityEmailDomains.some((d) => {
+            const domain = PlatformPrivateConfig.normalizeEmailDomain(d);
+            return domain.length > 0 && (emailDomain === domain || emailDomain.endsWith('.' + domain));
+        });
+    }
 }
 
 export enum OrganizationTagType {

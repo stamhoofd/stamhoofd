@@ -185,13 +185,6 @@ export type BackendSpecificEnvironment = {
     readonly INVOICE_BCC?: string[];
 
     readonly WHITELISTED_EMAIL_DESTINATIONS?: string[]; // E-mails we are allowed to send e-mails to in case of staging or development environment
-
-    /**
-     * Email domains (e.g. `ksa.be`) a user needs to inherit platform permissions from the responsibilities of their member.
-     * Users with another email address don't receive those permissions. Organization-level responsibilities are not affected.
-     * Not set = no restrictions.
-     */
-    readonly PLATFORM_RESPONSIBILITY_EMAIL_DOMAINS?: string[] | null;
     readonly CACHE_PATH: string;
 
     readonly MEMBER_NUMBER_ALGORITHM?: MemberNumberAlgorithm;

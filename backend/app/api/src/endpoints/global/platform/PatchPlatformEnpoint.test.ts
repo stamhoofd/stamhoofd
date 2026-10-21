@@ -1,14 +1,15 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, Token } from '@stamhoofd/models';
-import { OrganizationFactory, Platform, RegistrationPeriod, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import { MemberFactory, MemberResponsibilityRecordFactory, OrganizationFactory, Platform, RegistrationPeriod, RegistrationPeriodFactory, User, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { Permissions, PlatformConfig, PlatformPrivateConfig, Platform as PlatformStruct, Version } from '@stamhoofd/structures';
+import { MemberDetails, Permissions, PlatformConfig, PlatformPrivateConfig, Platform as PlatformStruct, Version } from '@stamhoofd/structures';
 import { SessionService } from '../../../services/SessionService.js';
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Language } from '@stamhoofd/types/Language';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer.js';
 import { PatchPlatformEndpoint } from './PatchPlatformEnpoint.js';
 
 describe('Endpoint.PatchPlatform', () => {
@@ -56,6 +57,82 @@ describe('Endpoint.PatchPlatform', () => {
             // The platform row is shared by every test file
             await setPlatformRequiresTwoFactor(false);
         }
+    });
+
+    describe('responsibilityEmailDomains', () => {
+        afterEach(async () => {
+            // The platform row is shared by every test file
+            const platform = await Platform.getForEditing();
+            platform.privateConfig.responsibilityEmailDomains = [];
+            await platform.save();
+        });
+
+        test('Full platform admins can set normalized domains and permissions are recalculated', async () => {
+            const organization = await new OrganizationFactory({ }).create();
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await SessionService.createSession(admin);
+
+            const member = await new MemberFactory({
+                details: MemberDetails.create({ firstName: 'John', lastName: 'Doe', email: 'john@gmail.com' }),
+            }).create();
+            await new MemberResponsibilityRecordFactory({ member }).create();
+            await MemberUserSyncer.onChangeMember(member);
+            const user = (await User.select().where('memberId', member.id).first(true));
+            expect(user.permissions?.globalPermissions?.responsibilities).toHaveLength(1);
+
+            const response = await patchPlatform({
+                patch: PlatformStruct.patch({
+                    privateConfig: PlatformPrivateConfig.patch({
+                        responsibilityEmailDomains: [' @KSA.be', '*.fos.be', 'ksa.be', ''] as any,
+                    }),
+                }),
+                organization,
+                token,
+            });
+
+            expect(response.body.privateConfig?.responsibilityEmailDomains).toEqual(['ksa.be', 'fos.be']);
+            expect((await User.getByID(user.id))!.permissions).toBeNull();
+        });
+
+        test('Invalid domains are rejected', async () => {
+            const organization = await new OrganizationFactory({ }).create();
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await SessionService.createSession(admin);
+
+            await expect(patchPlatform({
+                patch: PlatformStruct.patch({
+                    privateConfig: PlatformPrivateConfig.patch({
+                        responsibilityEmailDomains: ['john@ksa.be'] as any,
+                    }),
+                }),
+                organization,
+                token,
+            })).rejects.toThrow(/Invalid domain name/);
+            expect((await Platform.getForEditing()).privateConfig.responsibilityEmailDomains).toEqual([]);
+        });
+
+        test('Platform admins without full access cannot change the domains', async () => {
+            const organization = await new OrganizationFactory({ }).create();
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Write }),
+            }).create();
+            const token = await SessionService.createSession(admin);
+
+            await expect(patchPlatform({
+                patch: PlatformStruct.patch({
+                    privateConfig: PlatformPrivateConfig.patch({
+                        responsibilityEmailDomains: ['ksa.be'] as any,
+                    }),
+                }),
+                organization,
+                token,
+            })).rejects.toThrow(/permission/i);
+            expect((await Platform.getForEditing()).privateConfig.responsibilityEmailDomains).toEqual([]);
+        });
     });
 
     test('Should save the platform language', async () => {
