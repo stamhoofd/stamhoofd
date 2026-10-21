@@ -378,20 +378,47 @@ jobs:
             - name: Run boot test
               run: NODE_ENV=test bash tests/boot/boot-test.sh
 
-    job_test_lint_typecheck_checking:
-        name: "Lint and Typecheck"
+    job_test_typecheck:
+        name: "Typecheck"
         runs-on: ubuntu-latest
         needs: [job_setup, job_build_shared]
         if: needs.job_setup.outputs.in_stack_range == 'true'
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
             - uses: ./.github/actions/setup
+            - name: Cache typecheck Turbo tasks
+              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: .turbo/cache
+                  key: turbo-typecheck-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-${{ github.sha }}-${{ github.run_attempt }}
+                  restore-keys: |
+                      turbo-typecheck-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-
             - name: Download shared build output
               uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
               with:
                   name: shared-dist
             - name: Run type checking
               run: pnpm run typecheck
+
+    job_test_lint:
+        name: "Lint"
+        runs-on: ubuntu-latest
+        needs: [job_setup, job_build_shared]
+        if: needs.job_setup.outputs.in_stack_range == 'true'
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/setup
+            - name: Cache lint Turbo tasks
+              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: .turbo/cache
+                  key: turbo-lint-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-${{ github.sha }}-${{ github.run_attempt }}
+                  restore-keys: |
+                      turbo-lint-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-
+            - name: Download shared build output
+              uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+              with:
+                  name: shared-dist
             - name: Run type linting
               run: pnpm run lint
             # Temporarily disabled until everything is formatted.
@@ -678,10 +705,10 @@ jobs:
                   state-key: incidents/${{ github.ref_name }}.json
 
     notify_lint:
-        name: "Notify · Lint and Typecheck"
+        name: "Notify · Lint"
         runs-on: ubuntu-latest
-        needs: [job_test_lint_typecheck_checking, notify_shared]
-        if: ${{ !cancelled() && needs.job_test_lint_typecheck_checking.result == 'failure' && github.event_name == 'push' }}
+        needs: [job_test_lint, notify_shared]
+        if: ${{ !cancelled() && needs.job_test_lint.result == 'failure' && github.event_name == 'push' }}
         permissions:
             contents: read
         steps:
@@ -689,7 +716,28 @@ jobs:
             - uses: ./.github/actions/slack-notify
               with:
                   mode: report-failure
-                  job-label: "Lint and Typecheck"
+                  job-label: "Lint"
+                  slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+                  slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+                  spaces-key: ${{ secrets.SPACES_CI_KEY }}
+                  spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+                  spaces-bucket: stamhoofd-ci-traces
+                  spaces-region: ams3
+                  state-key: incidents/${{ github.ref_name }}.json
+
+    notify_typecheck:
+        name: "Notify · Typecheck"
+        runs-on: ubuntu-latest
+        needs: [job_test_typecheck, notify_lint]
+        if: ${{ !cancelled() && needs.job_test_typecheck.result == 'failure' && github.event_name == 'push' }}
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/slack-notify
+              with:
+                  mode: report-failure
+                  job-label: "Typecheck"
                   slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
                   slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
                   spaces-key: ${{ secrets.SPACES_CI_KEY }}
@@ -701,7 +749,7 @@ jobs:
     notify_backend_shared:
         name: "Notify · Backend Shared Tests"
         runs-on: ubuntu-latest
-        needs: [job_test_backend_shared, notify_lint]
+        needs: [job_test_backend_shared, notify_typecheck]
         if: ${{ !cancelled() && needs.job_test_backend_shared.result == 'failure' && github.event_name == 'push' }}
         permissions:
             contents: read
@@ -814,7 +862,8 @@ jobs:
             - job_setup
             - job_build_shared
             - job_test_shared
-            - job_test_lint_typecheck_checking
+            - job_test_lint
+            - job_test_typecheck
             - job_test_backend_shared
             - job_test_backend_apps
             - job_test_components_vitest
@@ -855,7 +904,8 @@ jobs:
             - job_setup
             - job_build_shared
             - job_test_shared
-            - job_test_lint_typecheck_checking
+            - job_test_lint
+            - job_test_typecheck
             - job_test_backend_shared
             - job_test_backend_apps
             - job_test_components_vitest
