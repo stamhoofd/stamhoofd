@@ -17,3 +17,5 @@ Application services may use sessions, networking, storage, platform capabilitie
 Session preparation continues to initialize the interface locale during this migration. Making activation explicit, changing locale policy, and fixing concurrency behavior are separate changes.
 
 All consumers must import the canonical implementation of `Storage`, `AppManager`, `SessionManager` and `NetworkManager`; copying singleton implementations would break native overrides and shared state.
+
+Import storage from `@stamhoofd/frontend-storage/Storage`. Its roles are replaceable adapters, not separate key namespaces. Browser defaults use localStorage; `secure` does not imply browser encryption. Native bootstrap must install replacements before restoring sessions.

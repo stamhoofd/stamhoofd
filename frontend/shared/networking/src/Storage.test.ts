@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Language } from '@stamhoofd/types/Language';
-import { LocalStorage, Storage } from './Storage';
+import { LocalStorage, Storage } from '@stamhoofd/frontend-storage/Storage';
 
 const originalStorage = Storage.keyValue;
 

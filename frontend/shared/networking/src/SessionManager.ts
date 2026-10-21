@@ -11,7 +11,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { isReactive } from 'vue';
 import { SessionContext } from './SessionContext';
-import { Storage } from './Storage';
+import { Storage } from '@stamhoofd/frontend-storage/Storage';
 
 class SessionStorage extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(Organization) })

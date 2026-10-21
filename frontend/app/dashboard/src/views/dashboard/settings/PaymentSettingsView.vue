@@ -352,7 +352,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { Storage } from '@stamhoofd/networking/Storage';
+import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import type { MollieProfile } from '@stamhoofd/structures';
 import { BuckarooSettings, CheckMollieResponse, Organization, OrganizationPrivateMetaData, PayconiqAccount, PaymentMethod, StripeAccount } from '@stamhoofd/structures';

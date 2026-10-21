@@ -1282,6 +1282,9 @@ importers:
       '@stamhoofd/frontend-pdf-builder':
         specifier: workspace:*
         version: link:../../shared/pdf-builder
+      '@stamhoofd/frontend-storage':
+        specifier: workspace:*
+        version: link:../../shared/storage
       '@stamhoofd/networking':
         specifier: workspace:*
         version: link:../../shared/networking
@@ -1401,6 +1404,9 @@ importers:
       '@stamhoofd/frontend-pdf-builder':
         specifier: workspace:*
         version: link:../../shared/pdf-builder
+      '@stamhoofd/frontend-storage':
+        specifier: workspace:*
+        version: link:../../shared/storage
       '@stamhoofd/networking':
         specifier: workspace:*
         version: link:../../shared/networking
@@ -1549,6 +1555,9 @@ importers:
       '@stamhoofd/frontend-pdf-builder':
         specifier: workspace:*
         version: link:../../shared/pdf-builder
+      '@stamhoofd/frontend-storage':
+        specifier: workspace:*
+        version: link:../../shared/storage
       '@stamhoofd/networking':
         specifier: workspace:*
         version: link:../../shared/networking
@@ -1619,6 +1628,9 @@ importers:
       '@stamhoofd/frontend-i18n':
         specifier: workspace:*
         version: link:../../shared/i18n
+      '@stamhoofd/frontend-storage':
+        specifier: workspace:*
+        version: link:../../shared/storage
       '@stamhoofd/networking':
         specifier: workspace:*
         version: link:../../shared/networking
@@ -1714,6 +1726,9 @@ importers:
       '@stamhoofd/frontend-pdf-builder':
         specifier: workspace:*
         version: link:../../shared/pdf-builder
+      '@stamhoofd/frontend-storage':
+        specifier: workspace:*
+        version: link:../../shared/storage
       '@stamhoofd/networking':
         specifier: workspace:*
         version: link:../../shared/networking
@@ -1844,6 +1859,9 @@ importers:
       '@stamhoofd/frontend-pdf-builder':
         specifier: workspace:*
         version: link:../pdf-builder
+      '@stamhoofd/frontend-storage':
+        specifier: workspace:*
+        version: link:../storage
       '@stamhoofd/locales':
         specifier: workspace:*
         version: link:../../../shared/locales
@@ -2033,6 +2051,9 @@ importers:
       '@simonbackx/vue-app-navigation':
         specifier: 2.25.1
         version: 2.25.1(tslib@2.8.1)(vue@3.5.43(typescript@6.0.3))
+      '@stamhoofd/frontend-storage':
+        specifier: workspace:*
+        version: link:../storage
       '@stamhoofd/locales':
         specifier: workspace:*
         version: link:../../../shared/locales
@@ -2079,6 +2100,9 @@ importers:
       '@stamhoofd/frontend-i18n':
         specifier: workspace:*
         version: link:../i18n
+      '@stamhoofd/frontend-storage':
+        specifier: workspace:*
+        version: link:../storage
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
@@ -2168,6 +2192,9 @@ importers:
       '@stamhoofd/components':
         specifier: workspace:*
         version: link:../components
+      '@stamhoofd/frontend-storage':
+        specifier: workspace:*
+        version: link:../storage
       '@stamhoofd/networking':
         specifier: workspace:*
         version: link:../networking
@@ -2208,6 +2235,12 @@ importers:
       vitest-browser-vue:
         specifier: 2.1.0
         version: 2.1.0(@vue/compiler-dom@3.5.43)(@vue/server-renderer@3.5.40)(vitest@4.1.11)(vue@3.5.43(typescript@6.0.3))
+
+  frontend/shared/storage:
+    devDependencies:
+      eslint-plugin-stamhoofd:
+        specifier: workspace:*
+        version: link:../../../shared/eslint
 
   frontend/shared/ticket-builder:
     dependencies:

@@ -15,7 +15,7 @@ import { loadPlatform, savePlatformToStorage } from './loadPlatform';
 import { ManagedToken } from './ManagedToken';
 import { NetworkManager } from './NetworkManager';
 import { QueueHandler } from './QueueHandler';
-import { Storage } from './Storage';
+import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import { UrlHelper } from './UrlHelper';
 
 type AuthenticationStateListener = (changed: 'user' | 'organization' | 'platform' | 'token' | 'preventComplete') => void;

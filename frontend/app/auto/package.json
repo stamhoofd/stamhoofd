@@ -12,6 +12,7 @@
         "typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {
+        "@stamhoofd/frontend-storage": "workspace:*",
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-networking": "1.23.0",

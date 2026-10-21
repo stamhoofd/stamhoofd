@@ -16,7 +16,7 @@ import { VueGlobalHelper } from '@stamhoofd/components/VueGlobalHelper.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { Storage } from '@stamhoofd/networking/Storage';
+import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { throttle } from '@stamhoofd/utility';
 import { init as initPlausible, track } from '@plausible-analytics/tracker';
