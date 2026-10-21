@@ -18,6 +18,8 @@ In CI, `shared/cli/bin/ci-mysql.mjs` starts pulling and provisioning the pinned 
 
 ## CI reports
 
+GitHub Actions runs four shards with two workers per shard. Each runner owns its MySQL, Caddy, DNS, and SSO services. The aggregate `Playwright Tests` check fails if any shard fails or a shard report is missing; other shards continue so their results are still available.
+
 CI produces a mergeable Playwright blob report alongside the console output. Each shard must upload its blob report and failure attachments under unique artifact names. Download the blobs into `tests/playwright/blob-report`, then run `pnpm --dir tests/playwright run merge-reports` to produce a combined HTML report and `playwright-report/results.json`. This command only merges reports; it does not start tests or application services.
 
 Keep downloaded failure artifacts in separate subdirectories under `tests/playwright/test-results`. The trace publisher searches recursively, so one aggregation job can publish all trace links and post a single PR comment without shards overwriting each other's output.
