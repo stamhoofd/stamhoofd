@@ -25,7 +25,7 @@ Import storage from `@stamhoofd/frontend-storage/Storage`. Its roles are replace
 
 Import `AppManager` and its capability types from `@stamhoofd/frontend-platform/AppManager`. Native bootstrap replaces callbacks on the same singleton. Review eligibility belongs to `@stamhoofd/frontend-application/markReviewMoment`; the native callback receives eligibility, not a session, and retains review timing and counters. Run platform tests with `stam test platform`.
 
-Import `SessionContext`, `ContextPermissions`, `ManagedToken`, `QueueHandler`, and `loadPlatform` from `@stamhoofd/frontend-session`. This whole-file extraction preserves their existing APIs, including concrete presentation dependencies. Run their tests with `stam test session`; separating presentation callbacks is later work.
+Import `SessionContext`, `ContextPermissions`, `ManagedToken`, `QueueHandler`, and `loadPlatform` from `@stamhoofd/frontend-session`. Interactive authentication uses the shared toast service for notifications and `configureSessionPresentation` for confirmations instead of component imports. The frontend startup adapter installs confirmations without changing authentication or storage behavior. Run session tests with `stam test session`.
 
 Import `LoginHelper`, `MFAManager`, `SessionManager`, `ThemeManager`, `MemberManager`, `OrganizationManager`, and `EventBus` from `@stamhoofd/frontend-application`. These files retain their existing APIs, locale coordination, and presentation dependencies. All event-bus consumers use the same application-owned singleton. Run application tests with `stam test application`.
 

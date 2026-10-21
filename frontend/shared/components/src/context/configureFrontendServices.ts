@@ -2,11 +2,16 @@ import { UrlHelper } from '@simonbackx/vue-app-navigation';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Toast } from '@stamhoofd/frontend-notifications/Toast';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
+import { configureSessionPresentation } from '@stamhoofd/frontend-session/SessionPresentation';
 import { configureNetworking } from '@stamhoofd/networking/NetworkingConfiguration';
 import { Version } from '@stamhoofd/structures';
+import { CenteredMessage } from '../overlays/CenteredMessage';
 
 /** Install concrete frontend service adapters before requests or authentication flows start. */
 export function configureFrontendServices() {
+    configureSessionPresentation({
+        confirm: options => CenteredMessage.confirm(options),
+    });
     configureNetworking({
         async getRequestHeaders() {
             const headers: Record<string, string> = {

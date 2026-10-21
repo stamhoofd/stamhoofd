@@ -2393,9 +2393,9 @@ importers:
       '@simonbackx/vue-app-navigation':
         specifier: 2.25.1
         version: 2.25.1(tslib@2.8.1)(vue@3.5.43(typescript@6.0.3))
-      '@stamhoofd/components':
+      '@stamhoofd/frontend-notifications':
         specifier: workspace:*
-        version: link:../components
+        version: link:../notifications
       '@stamhoofd/frontend-platform':
         specifier: workspace:*
         version: link:../platform
