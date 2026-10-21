@@ -7,6 +7,7 @@ import { UserService } from '@stamhoofd/models/services/UserService.js';
 import { SessionLoginMethod, Token as TokenStruct, VerifyEmailRequest } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';
+import { MemberUserSyncer } from '../../helpers/MemberUserSyncer.js';
 import { TwoFactorHelper } from '../../helpers/TwoFactorHelper.js';
 import { BalanceItemService } from '../../services/BalanceItemService.js';
 import { SessionService } from '../../services/SessionService.js';
@@ -80,7 +81,8 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             });
         }
 
-        if (user.email !== code.email) {
+        const emailChanged = user.email !== code.email;
+        if (emailChanged) {
             const other = await User.getForAuthentication(user.organizationId, code.email, { allowWithoutAccount: true });
 
             if (other) {
@@ -122,6 +124,11 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 });
             }
             throw e;
+        }
+
+        if (emailChanged && user.memberId) {
+            // Inherited platform permissions can depend on the email domain
+            await MemberUserSyncer.updateInheritedPermissions(user);
         }
 
         // Verifying an email is a single primary credential: if this user already has a

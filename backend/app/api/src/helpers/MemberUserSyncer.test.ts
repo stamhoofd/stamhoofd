@@ -1,5 +1,5 @@
 import { Database } from '@simonbackx/simple-database';
-import { Member, MemberFactory, MemberResponsibilityRecordFactory, MemberUser, User, UserFactory } from '@stamhoofd/models';
+import { Member, MemberFactory, MemberResponsibilityRecordFactory, MemberUser, OrganizationFactory, User, UserFactory } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { BooleanStatus, MemberDetails, Parent, UserPermissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -1279,6 +1279,50 @@ describe('Helpers.MemberUserSyncer', () => {
                     permissions: expect.any(UserPermissions),
                 }),
             ]);
+        });
+    });
+
+    describe('Platform responsibility email domains', () => {
+        const createMemberWithResponsibility = async (organizationId?: string) => {
+            const member = await new MemberFactory({
+                details: MemberDetails.create({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    email: 'john@ksa.be',
+                    alternativeEmails: ['john@gmail.com'],
+                }),
+            }).create();
+            await new MemberResponsibilityRecordFactory({ member, organizationId }).create();
+            await MemberUserSyncer.onChangeMember(member);
+            const users = await Member.users.load(member);
+            return {
+                allowed: users.find(u => u.email === 'john@ksa.be')!,
+                other: users.find(u => u.email === 'john@gmail.com')!,
+            };
+        };
+
+        test('Only users with a whitelisted email domain inherit platform permissions', async () => {
+            TestUtils.setEnvironment('PLATFORM_RESPONSIBILITY_EMAIL_DOMAINS', ['KSA.be']);
+            const { allowed, other } = await createMemberWithResponsibility();
+
+            expect(allowed.permissions?.globalPermissions?.responsibilities).toHaveLength(1);
+            expect(other.permissions).toBeNull();
+        });
+
+        test('All users inherit platform permissions without whitelist', async () => {
+            TestUtils.setEnvironment('PLATFORM_RESPONSIBILITY_EMAIL_DOMAINS', null);
+            const { allowed, other } = await createMemberWithResponsibility();
+
+            expect(allowed.permissions?.globalPermissions?.responsibilities).toHaveLength(1);
+            expect(other.permissions?.globalPermissions?.responsibilities).toHaveLength(1);
+        });
+
+        test('Organization responsibilities are not restricted', async () => {
+            TestUtils.setEnvironment('PLATFORM_RESPONSIBILITY_EMAIL_DOMAINS', ['ksa.be']);
+            const organization = await new OrganizationFactory({}).create();
+            const { other } = await createMemberWithResponsibility(organization.id);
+
+            expect(other.permissions?.organizationPermissions.get(organization.id)?.responsibilities).toHaveLength(1);
         });
     });
 });

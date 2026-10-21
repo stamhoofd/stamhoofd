@@ -213,6 +213,19 @@ export class MemberUserSyncerStatic {
         }
     }
 
+    canInheritPlatformPermissions(email: string) {
+        const domains = STAMHOOFD.PLATFORM_RESPONSIBILITY_EMAIL_DOMAINS;
+        if (!domains) {
+            return true;
+        }
+        const at = email.lastIndexOf('@');
+        if (at === -1) {
+            return false;
+        }
+        const emailDomain = email.slice(at + 1).toLocaleLowerCase();
+        return domains.some(domain => domain.toLocaleLowerCase() === emailDomain);
+    }
+
     async updateInheritedPermissions(user: User) {
         // Fetch all members for this user
         const responsibilities = user.memberId ? (await this.getResponsibilitiesForMembers([user.memberId])) : [];
@@ -233,6 +246,9 @@ export class MemberUserSyncerStatic {
         }
 
         for (const responsibility of responsibilities) {
+            if (responsibility.organizationId === null && !this.canInheritPlatformPermissions(user.email)) {
+                continue;
+            }
             const v = responsibilitiesByOrganization.get(responsibility.organizationId) ?? [];
             responsibilitiesByOrganization.set(responsibility.organizationId, v);
             v.push(responsibility);
