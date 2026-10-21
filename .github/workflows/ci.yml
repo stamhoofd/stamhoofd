@@ -368,12 +368,27 @@ jobs:
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
             - uses: ./.github/actions/setup
+            - name: Restore API Turbo tasks
+              id: api-cache
+              uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: .turbo/cache
+                  key: turbo-api-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-${{ github.job }}-${{ github.sha }}-${{ github.run_attempt }}
+                  restore-keys: |
+                      turbo-api-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-
+                      turbo-shared-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-
             - name: Download shared build output
               uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
               with:
                   name: shared-dist
             - name: Build API
-              run: pnpm --dir backend/app/api run build
+              run: pnpm exec turbo run build --filter=@stamhoofd/backend
+            - name: Save API Turbo tasks
+              if: steps.api-cache.outputs.cache-hit != 'true'
+              uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: .turbo/cache
+                  key: ${{ steps.api-cache.outputs.cache-primary-key }}
             - name: Remove all installed dependencies
               run: pnpm run clear-dependencies
             - name: Install production dependencies only
@@ -497,6 +512,15 @@ jobs:
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
             - uses: ./.github/actions/setup
+            - name: Restore API Turbo tasks
+              id: api-cache
+              uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: .turbo/cache
+                  key: turbo-api-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-${{ github.job }}-${{ github.sha }}-${{ github.run_attempt }}
+                  restore-keys: |
+                      turbo-api-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-
+                      turbo-shared-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-
             - name: Restore CoreDNS cache
               id: cache-coredns
               uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -608,7 +632,15 @@ jobs:
               with:
                   name: shared-dist
             - name: Build API
-              run: pnpm --dir backend/app/api run build:playwright:pre
+              run: pnpm exec turbo run build --filter=@stamhoofd/backend
+            - name: Save API Turbo tasks
+              if: steps.api-cache.outputs.cache-hit != 'true'
+              uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: .turbo/cache
+                  key: ${{ steps.api-cache.outputs.cache-primary-key }}
+            - name: Compile API test helpers
+              run: pnpm --dir backend/app/api exec tsc --build tsconfig.test.build.json
             - name: Run Playwright tests
               run: pnpm --dir tests/playwright run test
             - name: Restore runner DNS
