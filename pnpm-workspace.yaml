@@ -10,6 +10,7 @@ packages:
   - 'docs'
 
 verifyDepsBeforeRun: false
+disallowWorkspaceCycles: true
 linkWorkspacePackages: true
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
