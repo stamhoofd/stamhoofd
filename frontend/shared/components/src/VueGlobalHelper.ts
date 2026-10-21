@@ -37,6 +37,7 @@ import TTextarea from './inputs/TTextarea.vue';
 import STListItem from './layout/STListItem.vue';
 import LoadingButton from './navigation/LoadingButton.vue';
 import STNavigationBar from './navigation/STNavigationBar.vue';
+import { configureFrontendServices } from './context/configureFrontendServices';
 
 export type ComponentExposed<T>
     = T extends new (...args: any[]) => infer E ? E
@@ -103,6 +104,7 @@ function focusNextElement() {
 
 export class VueGlobalHelper {
     static setup(app: App<Element>) {
+        configureFrontendServices();
         (window as any).PromiseComponent = PromiseView;
         (window as any)._importWithRetry = importWithRetry;
 

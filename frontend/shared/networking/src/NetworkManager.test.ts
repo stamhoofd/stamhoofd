@@ -1,79 +1,83 @@
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { Toast } from '@stamhoofd/components/overlays/Toast';
-import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
+import { Toast } from '@stamhoofd/frontend-notifications/Toast';
 import { Version } from '@stamhoofd/structures';
-import { afterEach, describe, expect, test, vi } from 'vitest';
-import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { NetworkManagerStatic } from './NetworkManager';
+import { configureNetworking, getNetworkingConfiguration } from './NetworkingConfiguration';
 
-afterEach(() => {
-    vi.restoreAllMocks();
-    vi.useRealTimers();
-});
+describe('transport callbacks', () => {
+    let restore: ReturnType<typeof getNetworkingConfiguration>;
+    const headers = vi.fn(async () => ({ 'X-Locale': 'nl-BE' }));
+    const onClientUpdateRequired = vi.fn();
+    const onNewerVersion = vi.fn();
 
-describe('networking application integration', () => {
-    test('each attempt reads current locale and platform metadata', async () => {
-        const manager = new NetworkManagerStatic();
-        const request = new Request(manager.server, { method: 'GET', path: '/platform' });
-        const metadata = await AppManager.shared.getSessionMetaData();
-        vi.spyOn(AppManager.shared, 'getSessionMetaData').mockResolvedValue(metadata);
-        const locale = vi.spyOn(I18nController.shared, 'locale', 'get').mockReturnValue('nl-BE');
-
-        await manager.onBeforeRequest(request);
-        expect(request.version).toBe(Version);
-        expect(request.headers['X-Platform']).toBe(AppManager.shared.platform);
-        expect(JSON.parse(decodeURIComponent(request.headers['X-Session-Metadata']))).toEqual(metadata);
-        expect(request.headers['X-Locale']).toBe('nl-BE');
-
-        locale.mockReturnValue('fr-BE');
-        await manager.onBeforeRequest(request);
-        expect(request.headers['X-Locale']).toBe('fr-BE');
+    beforeEach(() => {
+        restore = getNetworkingConfiguration();
+        configureNetworking({ getRequestHeaders: headers, onClientUpdateRequired, onNewerVersion });
     });
 
-    test('retrying requests share a notification until all finish', async () => {
+    afterEach(() => {
+        configureNetworking(restore);
+        vi.restoreAllMocks();
+        vi.clearAllMocks();
+        vi.useRealTimers();
+    });
+
+    test('reads configured headers for each attempt', async () => {
+        const manager = new NetworkManagerStatic();
+        const request = new Request(manager.server, { method: 'GET', path: '/platform' });
+        await manager.onBeforeRequest(request);
+        expect(request.version).toBe(Version);
+        expect(request.headers['X-Locale']).toBe('nl-BE');
+        headers.mockResolvedValueOnce({ 'X-Locale': 'fr-BE' });
+        await manager.onBeforeRequest(request);
+        expect(request.headers['X-Locale']).toBe('fr-BE');
+        expect(headers).toHaveBeenCalledTimes(2);
+    });
+
+    test('shares a retry notification until all requests finish', async () => {
         vi.useFakeTimers();
         vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(true);
         vi.spyOn(console, 'error').mockImplementation(() => {});
         const show = vi.spyOn(Toast.prototype, 'show').mockImplementation(function (this: Toast) { return this; });
         const manager = new NetworkManagerStatic();
-        const first = new Request(manager.server, { method: 'GET', path: '/platform' });
-        const second = new Request(manager.server, { method: 'GET', path: '/platform' });
-
-        for (const request of [first, second]) {
+        const requests = [0, 1].map(() => new Request(manager.server, { method: 'GET', path: '/platform' }));
+        for (const request of requests) {
             await manager.onBeforeRequest(request);
             await manager.onBeforeRequest(request);
             const retry = manager.shouldRetryNetworkError(request, new Error('offline'));
             await vi.runAllTimersAsync();
             expect(await retry).toBe(true);
         }
-
         expect(show).toHaveBeenCalledOnce();
         const notification = manager.networkErrorToast!;
+        expect(notification).toMatchObject({ message: $t('%ks'), icon: 'spinner', autohideAfter: null });
         const hide = vi.spyOn(notification, 'hide');
-        expect(notification.autohideAfter).toBeNull();
-        manager.onNetworkResponse(first, new XMLHttpRequest());
+        manager.onNetworkResponse(requests[0], new XMLHttpRequest());
         expect(hide).not.toHaveBeenCalled();
-        manager.onFatalNetworkError(second, new Error('cancelled'));
+        manager.onFatalNetworkError(requests[1], new Error('cancelled'));
         expect(hide).toHaveBeenCalledOnce();
         expect(manager.networkErrorToast).toBeNull();
         expect(manager.retryingRequestsCount).toBe(0);
     });
 
-    test('native update-required errors invoke the updater without retrying', async () => {
+    test('reports update-required errors without retrying', async () => {
         vi.spyOn(console, 'error').mockImplementation(() => {});
-        vi.spyOn(Toast.prototype, 'show').mockImplementation(function (this: Toast) { return this; });
-        vi.spyOn(AppManager.shared, 'isNative', 'get').mockReturnValue(true);
-        const update = vi.spyOn(AppManager.shared, 'checkUpdates').mockResolvedValue();
         const manager = new NetworkManagerStatic();
         const request = new Request(manager.server, { method: 'GET', path: '/platform' });
         const error = new SimpleErrors(new SimpleError({ code: 'client_update_required', message: 'Update required' }));
-
         expect(await manager.shouldRetryError(request, new XMLHttpRequest(), error)).toBe(false);
-        expect(update).toHaveBeenCalledExactlyOnceWith({
-            visibleCheck: 'text',
-            visibleDownload: true,
-            installAutomatically: true,
-        });
+        expect(onClientUpdateRequired).toHaveBeenCalledExactlyOnceWith(error);
+    });
+
+    test('reports each newer server version once', () => {
+        const manager = new NetworkManagerStatic();
+        const request = new Request(manager.server, { method: 'GET', path: '/platform' });
+        const response = new XMLHttpRequest();
+        vi.spyOn(response, 'getResponseHeader').mockImplementation(name => name === 'X-Platform-Latest-Version' ? String(Version + 1) : null);
+        manager.onNetworkResponse(request, response);
+        manager.onNetworkResponse(request, response);
+        expect(onNewerVersion).toHaveBeenCalledExactlyOnceWith(Version + 1);
     });
 });

@@ -20,6 +20,7 @@
         "typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {
+        "@stamhoofd/frontend-notifications": "workspace:*",
         "@stamhoofd/frontend-application": "workspace:*",
         "@stamhoofd/frontend-session": "workspace:*",
         "@stamhoofd/frontend-platform": "workspace:*",

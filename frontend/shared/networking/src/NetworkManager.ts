@@ -1,12 +1,10 @@
 import type { SimpleErrors } from '@simonbackx/simple-errors';
 import type { Request, RequestMiddleware} from '@simonbackx/simple-networking';
 import { Server } from '@simonbackx/simple-networking';
-import { Toast } from '@stamhoofd/components/overlays/Toast';
-import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
+import { Toast } from '@stamhoofd/frontend-notifications/Toast';
 import { Version } from '@stamhoofd/structures';
 
-import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
-import { UrlHelper } from './UrlHelper';
+import { getNetworkingConfiguration } from './NetworkingConfiguration';
 import { waitForNetworkOnline } from './utility/waitForNetworkOnline';
 
 export function sleep(ms: number) {
@@ -51,12 +49,7 @@ export class NetworkManagerStatic implements RequestMiddleware {
         request.version = Version;
         (request as any).retryCount = ((request as any).retryCount ?? 0) + 1;
 
-        request.headers['X-Platform'] = AppManager.shared.platform;
-        request.headers['X-Session-Metadata'] = encodeURIComponent(JSON.stringify(await AppManager.shared.getSessionMetaData()));
-
-        if (I18nController.shared) {
-            request.headers['X-Locale'] = I18nController.shared.locale;
-        }
+        Object.assign(request.headers, await getNetworkingConfiguration().getRequestHeaders());
     }
 
     /**
@@ -101,20 +94,7 @@ export class NetworkManagerStatic implements RequestMiddleware {
 
         try {
             if (error.hasCode('client_update_required')) {
-                Toast.fromError(error).show();
-
-                if (!AppManager.shared.isNative && !UrlHelper.initial.getSearchParams().has('forceClientUpdate')) {
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('forceClientUpdate', new Date().getTime() + '');
-                    window.location.href = url.toString();
-                }
-                else {
-                    AppManager.shared.checkUpdates({
-                        visibleCheck: 'text',
-                        visibleDownload: true,
-                        installAutomatically: true,
-                    }).catch(console.error);
-                }
+                getNetworkingConfiguration().onClientUpdateRequired(error);
             }
         }
         catch (e) {
@@ -156,16 +136,7 @@ export class NetworkManagerStatic implements RequestMiddleware {
                 this.platformLatestVersion = latestVersion;
 
                 if (this.platformLatestVersion > Version) {
-                    if (AppManager.shared.isNative) {
-                        new Toast($t(`%kt`), 'yellow download').setHide(null).show();
-                        AppManager.shared.checkUpdates({
-                            checkTimeout: 20 * 1000,
-                        }).catch(console.error);
-                    }
-                    else {
-                        console.info('Received latest version: ', latestVersion, 'got', Version);
-                        new Toast($t(`%ku`), 'yellow download').setHide(null).show();
-                    }
+                    getNetworkingConfiguration().onNewerVersion(this.platformLatestVersion);
                 }
             }
         }

@@ -2236,6 +2236,9 @@ importers:
       '@stamhoofd/frontend-i18n':
         specifier: workspace:*
         version: link:../i18n
+      '@stamhoofd/frontend-notifications':
+        specifier: workspace:*
+        version: link:../notifications
       '@stamhoofd/frontend-platform':
         specifier: workspace:*
         version: link:../platform
@@ -2576,6 +2579,9 @@ importers:
 
   frontend/tests:
     devDependencies:
+      '@stamhoofd/components':
+        specifier: workspace:*
+        version: link:../shared/components
       '@stamhoofd/frontend-i18n':
         specifier: workspace:*
         version: link:../shared/i18n
