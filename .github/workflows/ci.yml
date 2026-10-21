@@ -419,7 +419,15 @@ jobs:
               with:
                   name: shared-dist
             - name: Run type checking
-              run: pnpm run typecheck
+              run: pnpm run typecheck --summarize
+            - name: Upload typecheck Turbo summary
+              if: always()
+              uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+              with:
+                  name: turbo-typecheck-summary
+                  path: .turbo/runs/*.json
+                  include-hidden-files: true
+                  retention-days: 7
             - name: Save typecheck Turbo tasks
               if: ${{ !cancelled() && steps.turbo-cache.outputs.cache-primary-key != '' && steps.turbo-cache.outputs.cache-hit != 'true' }}
               uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -448,7 +456,15 @@ jobs:
               with:
                   name: shared-dist
             - name: Run type linting
-              run: pnpm run lint
+              run: pnpm run lint --summarize
+            - name: Upload lint Turbo summary
+              if: always()
+              uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+              with:
+                  name: turbo-lint-summary
+                  path: .turbo/runs/*.json
+                  include-hidden-files: true
+                  retention-days: 7
             - name: Save lint Turbo tasks
               if: ${{ !cancelled() && steps.turbo-cache.outputs.cache-primary-key != '' && steps.turbo-cache.outputs.cache-hit != 'true' }}
               uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
