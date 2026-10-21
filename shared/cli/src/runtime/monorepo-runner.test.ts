@@ -41,6 +41,27 @@ describe('shared build orchestration', () => {
         expect(CaddyService.reload).toHaveBeenCalledWith(context);
     });
 
+    it.each([false, true])('only enables migration diagnostics when verbose is %s', async (verbose) => {
+        vi.mocked(isPortListening).mockResolvedValue(true);
+
+        await testE2e({ ...context, verbose }, { ci: false, clear: false, ui: false, skipBuild: true, localDb: true });
+
+        expect(run).toHaveBeenCalledWith('pnpm', expect.any(Array), expect.objectContaining({
+            env: expect.objectContaining({ PLAYWRIGHT_VERBOSE: verbose ? '1' : undefined }),
+            verbosity: RunVerbosity.Output,
+        }));
+    });
+
+    it.each([RunVerbosity.Command, RunVerbosity.Quiet])('preserves migration failure output in reduced-output mode %s', async (verbosity) => {
+        vi.mocked(isPortListening).mockResolvedValue(true);
+        vi.mocked(run).mockResolvedValueOnce({ stdout: '[Migration] Running broken.sql\n', stderr: 'Invalid SQL', status: 1 } as any);
+
+        await expect(testE2e({ ...context, verbose: false, verbosity }, { ci: false, clear: false, ui: false, skipBuild: true, localDb: true }))
+            .rejects.toThrow('[Migration] Running broken.sql\nInvalid SQL');
+
+        expect(CaddyService.reload).toHaveBeenCalledWith(expect.objectContaining({ verbosity }));
+    });
+
     it('propagates a failed shared build', async () => {
         vi.mocked(run).mockRejectedValueOnce(new Error('Compilation failed'));
 

@@ -23,7 +23,7 @@ export default class TestE2e extends BaseCommand {
     ];
 
     static flags = {
-        ...this.verbosityFlags(),
+        ...this.verbosityFlags(RunVerbosity.Command),
         'ci': ciFlag,
         'clear': Flags.boolean({ default: false, description: 'Clear the persistent e2e database before running tests' }),
         'extra': Flags.boolean({ default: false, description: 'Include Playwright tests tagged @extra' }),

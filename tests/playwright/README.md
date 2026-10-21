@@ -12,6 +12,8 @@ API startup clears each worker database once, including the initial organization
 
 Use `--grep @tag` to select tests, and add `--skip-build` only when the application build is still current (for example, only test files changed since the last run). Use `--local-db` to connect to an already running MySQL; see [databases](#databases).
 
+Database names and successful migration logs are hidden by default, including on CI. Use `stam test e2e --verbose` to show them (`PLAYWRIGHT_VERBOSE=1` when CI invokes the package directly). Failures show their errors and captured migration output. This does not change manual or production migration logging.
+
 On environment problems such as DNS failures, SSL errors, or blank pages, stop and ask for help rather than provisioning alternative test infrastructure.
 
 In CI, `shared/cli/bin/ci-mysql.mjs` starts pulling and provisioning the pinned MySQL image immediately after checkout, alongside dependency installation and app setup. The workflow waits for an authenticated TCP query before running Playwright. The GitHub-hosted runner is discarded at job completion, so MySQL needs no explicit cleanup. The job summary reports total provisioning time and the remaining wait; the `playwright-mysql-startup-<shard>` artifact contains startup logs and status. This bootstrap uses only Node built-ins because dependencies and the compiled CLI are not available yet. Local test database ownership is unchanged.
