@@ -23,7 +23,7 @@ All consumers must import the canonical implementation of `Storage`, `AppManager
 
 Import storage from `@stamhoofd/frontend-storage/Storage`. Its roles are replaceable adapters, not separate key namespaces. Browser defaults use localStorage; `secure` does not imply browser encryption. Native bootstrap must install replacements before restoring sessions.
 
-Import `AppManager` and its capability types from `@stamhoofd/frontend-platform/AppManager`. Native bootstrap continues to replace callbacks on the same singleton. This extraction preserves the existing APIs and temporarily retains its session type dependency; dependency boundaries are separate work. Run its tests with `stam test platform`.
+Import `AppManager` and its capability types from `@stamhoofd/frontend-platform/AppManager`. Native bootstrap replaces callbacks on the same singleton. Review eligibility belongs to `@stamhoofd/frontend-application/markReviewMoment`; the native callback receives eligibility, not a session, and retains review timing and counters. Run platform tests with `stam test platform`.
 
 Import `SessionContext`, `ContextPermissions`, `ManagedToken`, `QueueHandler`, and `loadPlatform` from `@stamhoofd/frontend-session`. This whole-file extraction preserves their existing APIs, including concrete presentation dependencies. Run their tests with `stam test session`; separating presentation callbacks is later work.
 

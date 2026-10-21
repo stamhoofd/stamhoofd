@@ -15,7 +15,6 @@ import { ViewportHelper } from '@stamhoofd/components/ViewportHelper.ts';
 import { VueGlobalHelper } from '@stamhoofd/components/VueGlobalHelper.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
-import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { throttle } from '@stamhoofd/utility';
@@ -169,14 +168,8 @@ AppManager.shared.hapticTap = () => {
     Haptics.notification({ type: NotificationType.Success }).catch(console.error);
 };
 
-async function markReviewMoment($context: SessionContext) {
-    // 1. Check if we are signed in.
-    if (!$context) {
-        return;
-    }
-
-    // Check if at least one package active (only ask reviews to organizations who bought the app)
-    if (!$context.organization || ($context.organization.meta.packages.useMembers && !$context.organization.meta.packages.isMembersTrial) || ($context.organization.meta.packages.useWebshops && !$context.organization.meta.packages.isWebshopsTrial)) {
+async function markReviewMoment({ eligible }: { eligible: boolean }) {
+    if (eligible) {
         // Use a counter, that can only increment once a day
         const counterRaw = await Storage.keyValue.getItem('reviewCounter');
         let counter = counterRaw ? parseInt(counterRaw) : 0;
@@ -208,8 +201,8 @@ async function markReviewMoment($context: SessionContext) {
     }
 }
 
-AppManager.shared.markReviewMoment = ($context: SessionContext) => {
-    markReviewMoment($context).catch(console.error);
+AppManager.shared.markReviewMoment = (options) => {
+    markReviewMoment(options).catch(console.error);
 };
 
 window.addEventListener('statusTap', () => {

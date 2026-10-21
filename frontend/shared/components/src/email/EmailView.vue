@@ -121,7 +121,7 @@ import type { AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArr
 import { encodeObject, PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
+import { markReviewMoment } from '@stamhoofd/frontend-application/markReviewMoment';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { EmailContent, EmailRecipientSubfilter, File } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
@@ -745,7 +745,7 @@ async function doSend(): Promise<boolean> {
         await pop({ force: true });
 
         // Mark review moment
-        AppManager.shared.markReviewMoment(context.value);
+        markReviewMoment(context.value.organization);
         sending.value = false;
         return true;
     } catch (e) {

@@ -65,7 +65,7 @@ import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
 import { Formatter } from '@stamhoofd/utility';
 import { ErrorBox } from '../errors/ErrorBox';
-import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
+import { markReviewMoment } from '@stamhoofd/frontend-application/markReviewMoment';
 
 const props = withDefaults(defineProps<{
     editEmail: EmailPreview;
@@ -149,7 +149,7 @@ async function save() {
             await GlobalEventBus.sendEvent('selectTabById', 'communication');
 
             // Mark review moment
-            AppManager.shared.markReviewMoment(context.value);
+            markReviewMoment(context.value.organization);
         }
         await dismiss({ force: true });
     }
