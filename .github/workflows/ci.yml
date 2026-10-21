@@ -6,6 +6,9 @@ name: CI
 permissions:
     contents: read
 
+env:
+    PUPPETEER_SKIP_DOWNLOAD: 'true'
+
 on:
     merge_group:
         types: [checks_requested]
@@ -271,6 +274,8 @@ jobs:
         runs-on: ubuntu-latest
         needs: [job_setup, job_build_shared]
         if: needs.job_setup.outputs.in_stack_range == 'true' && needs.job_setup.outputs.changed_backend_apps == 'true'
+        env:
+            PUPPETEER_SKIP_DOWNLOAD: 'false'
         services:
             mysql:
                 image: mysql:8.4@sha256:0744ee5ef89ce6ccfa13de3e579fe6b9e27f93dd70da9c06d2c908b1b193fb8d
