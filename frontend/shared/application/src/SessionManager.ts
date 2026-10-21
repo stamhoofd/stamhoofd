@@ -7,7 +7,7 @@ import { Organization, User, Version } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 
-import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { Toast } from '@stamhoofd/frontend-notifications/Toast';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { isReactive } from 'vue';
 import { SessionContext } from '@stamhoofd/frontend-session/SessionContext';

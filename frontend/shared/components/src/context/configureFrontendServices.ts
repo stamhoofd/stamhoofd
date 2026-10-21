@@ -3,12 +3,17 @@ import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Toast } from '@stamhoofd/frontend-notifications/Toast';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { configureSessionPresentation } from '@stamhoofd/frontend-session/SessionPresentation';
+import { configureApplicationPresentation } from '@stamhoofd/frontend-application/ApplicationPresentation';
 import { configureNetworking } from '@stamhoofd/networking/NetworkingConfiguration';
 import { Version } from '@stamhoofd/structures';
 import { CenteredMessage } from '../overlays/CenteredMessage';
+import { ColorHelper } from '../ColorHelper';
 
 /** Install concrete frontend service adapters before requests or authentication flows start. */
 export function configureFrontendServices() {
+    configureApplicationPresentation({
+        setPrimaryColor: color => { ColorHelper.setColor(color); },
+    });
     configureSessionPresentation({
         confirm: options => CenteredMessage.confirm(options),
     });

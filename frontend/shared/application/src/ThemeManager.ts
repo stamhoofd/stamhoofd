@@ -1,4 +1,4 @@
-import { ColorHelper } from '@stamhoofd/components/ColorHelper';
+import { getApplicationPresentation } from './ApplicationPresentation';
 import { GlobalEventBus } from './EventBus';
 import type { AppType, Platform } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
@@ -43,7 +43,7 @@ export class ThemeManager {
     updateStyles() {
         // Set color
         if (this.$platform.config.color && this.$app !== 'webshop') {
-            ColorHelper.setColor(this.$platform.config.color);
+            getApplicationPresentation().setPrimaryColor(this.$platform.config.color);
         }
         this.setFavicon();
     }
