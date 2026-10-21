@@ -79,8 +79,8 @@ import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import { usePatchOrganization } from '@stamhoofd/components/organizations/usePatchOrganization.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { fetchAll } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
-import { useMemberManager } from '@stamhoofd/networking/MemberManager';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useMemberManager } from '@stamhoofd/frontend-application/MemberManager';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import {
     GroupType,
     LimitedFilteredRequest,

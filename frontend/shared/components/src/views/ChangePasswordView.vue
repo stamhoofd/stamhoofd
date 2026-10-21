@@ -30,7 +30,7 @@ import SaveView from '#navigation/SaveView.vue';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
 import STInputBox from '#inputs/STInputBox.vue';
 import { Toast } from '#overlays/Toast.ts';
-import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
+import { LoginHelper } from '@stamhoofd/frontend-application/LoginHelper';
 import { computed, ref } from 'vue';
 import { useContext } from '../hooks/useContext';
 

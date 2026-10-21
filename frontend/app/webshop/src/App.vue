@@ -26,7 +26,7 @@ import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { loadPlatform } from '@stamhoofd/frontend-session/loadPlatform';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
-import { SessionManager } from '@stamhoofd/networking/SessionManager';
+import { SessionManager } from '@stamhoofd/frontend-application/SessionManager';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { GetWebshopFromDomainResult } from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';

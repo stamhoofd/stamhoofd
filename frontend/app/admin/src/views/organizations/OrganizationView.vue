@@ -219,7 +219,7 @@ import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, defineRoutes, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { CenteredMessage, CenteredMessageButton } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import MemberCountSpan from '@stamhoofd/components/members/components/MemberCountSpan.vue';
 import SetupStepRows from '@stamhoofd/components/setupSteps/SetupStepRows.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';

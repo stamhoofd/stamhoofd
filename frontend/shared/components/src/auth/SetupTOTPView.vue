@@ -62,7 +62,7 @@
 
 <script lang="ts" setup>
 import { useShow } from '@simonbackx/vue-app-navigation';
-import { MFAManager } from '@stamhoofd/networking/MFAManager';
+import { MFAManager } from '@stamhoofd/frontend-application/MFAManager';
 import type { TOTPSetupResponse } from '@stamhoofd/structures';
 import { onMounted, ref } from 'vue';
 

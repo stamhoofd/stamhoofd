@@ -174,7 +174,7 @@ import QuickActionsBox from '@stamhoofd/components/quick-actions/QuickActionsBox
 import { useRegistrationQuickActions } from '@stamhoofd/components/quick-actions/hooks/useRegistrationQuickActions.ts';
 import { downloadDocument } from '@stamhoofd/document-helper';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
-import { useMemberManager } from '@stamhoofd/networking/MemberManager';
+import { useMemberManager } from '@stamhoofd/frontend-application/MemberManager';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Document, PlatformMember } from '@stamhoofd/structures';

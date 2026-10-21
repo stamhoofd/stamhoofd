@@ -1,5 +1,5 @@
 import { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
-import { SessionManager } from '@stamhoofd/networking/SessionManager';
+import { SessionManager } from '@stamhoofd/frontend-application/SessionManager';
 import type { Organization, Platform } from '@stamhoofd/structures';
 
 export async function sessionFromOrganization(organization: Organization, platform: Platform) {

@@ -50,7 +50,7 @@ import { startCheckout } from '@stamhoofd/components/members/checkout/startCheck
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { useErrors } from '@stamhoofd/components/errors/useErrors';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import { useMemberManager } from '@stamhoofd/networking/MemberManager';
+import { useMemberManager } from '@stamhoofd/frontend-application/MemberManager';
 import { computed, onActivated, onMounted, ref } from 'vue';
 import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';

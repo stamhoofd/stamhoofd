@@ -1,5 +1,5 @@
 import { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
-import { SessionManager } from '@stamhoofd/networking/SessionManager';
+import { SessionManager } from '@stamhoofd/frontend-application/SessionManager';
 import type { AppType, Organization, User, UserWithMembers } from '@stamhoofd/structures';
 import { AppRoute } from '@stamhoofd/structures';
 

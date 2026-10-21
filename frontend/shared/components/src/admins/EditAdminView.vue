@@ -82,7 +82,7 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import EditUserPermissionsBox from '#admins/components/EditUserPermissionsBox.vue';
 import EmailInput from '#inputs/EmailInput.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';
-import { GlobalEventBus } from '#EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import SaveView from '#navigation/SaveView.vue';
 import { Toast } from '#overlays/Toast.ts';
 import { useContext } from '#hooks/useContext.ts';

@@ -113,7 +113,7 @@ import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.
 import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import type { Event, Group, StamhoofdFilter } from '@stamhoofd/structures';
 import { isEmptyFilter, SortItemDirection } from '@stamhoofd/structures';
 import type { Ref } from 'vue';

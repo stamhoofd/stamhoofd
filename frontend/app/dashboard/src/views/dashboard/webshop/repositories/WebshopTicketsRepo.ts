@@ -2,7 +2,7 @@ import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
 import { ArrayDecoder, ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { EventBus } from '@stamhoofd/components/EventBus.ts';
+import { EventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import type { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import { fetchAll } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';

@@ -56,7 +56,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
-import { MFAManager } from '@stamhoofd/networking/MFAManager';
+import { MFAManager } from '@stamhoofd/frontend-application/MFAManager';
 import { computed, ref } from 'vue';
 
 import { canUsePasskeysOnThisDomain } from './passkeyAvailability.ts';

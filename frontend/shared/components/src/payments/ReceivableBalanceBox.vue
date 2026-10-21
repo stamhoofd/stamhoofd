@@ -160,7 +160,7 @@ import LoadingBoxTransition from '#containers/LoadingBoxTransition.vue';
 import { useAppContext } from '#context/appContext.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
-import { GlobalEventBus } from '#EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import IconContainer from '#icons/IconContainer.vue';

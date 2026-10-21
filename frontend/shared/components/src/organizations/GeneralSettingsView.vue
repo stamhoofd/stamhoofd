@@ -99,7 +99,7 @@ import { useReview } from '#useReview.ts';
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import type { PatchAnswers } from '@stamhoofd/structures';
 import { Company, LanguageHelper, OrganizationMetaData, OrganizationPrivateMetaData, SetupStepType } from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';

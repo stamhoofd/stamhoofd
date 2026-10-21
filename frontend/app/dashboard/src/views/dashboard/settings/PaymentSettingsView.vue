@@ -351,7 +351,7 @@ import { CenteredMessage, CenteredMessageButton } from '@stamhoofd/components/ov
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import type { MollieProfile } from '@stamhoofd/structures';

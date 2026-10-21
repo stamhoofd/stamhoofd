@@ -1,6 +1,6 @@
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { Sorter } from '@stamhoofd/utility';
-import { useOrganizationManager } from '../OrganizationManager';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import { useFetchOrganizationRegistrationPeriods } from './useFetchOrganizationRegistrationPeriods';
 import type { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 
