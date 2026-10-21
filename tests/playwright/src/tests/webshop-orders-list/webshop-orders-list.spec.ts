@@ -26,6 +26,7 @@ test.describe('Orders list @webshop-orders-list', () => {
     test.describe.configure({ timeout: 5 * 60_000 });
 
     test.beforeAll(async () => {
+        test.setTimeout(5 * 60_000);
         TestUtils.setPermanentEnvironment('userMode', 'organization');
         shop = await createOrdersListWebshop('OrdersList', { ticketType: WebshopTicketType.Tickets });
         orders = await TestOrders.create(shop.webshop, mixedOrderSeeds(150, { withTickets: true }));

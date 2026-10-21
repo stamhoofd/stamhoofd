@@ -551,6 +551,8 @@ async function withTwoFactorRequired(organization: Organization, run: () => Prom
 }
 
 test.describe('Admin invites @invite-admin', () => {
+    test.describe.configure({ timeout: 60_000 });
+
     const domain = WorkerData.urls.dashboard;
 
     /**

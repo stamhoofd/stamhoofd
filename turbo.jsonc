@@ -141,7 +141,8 @@
         "lint": {
             "dependsOn": ["build:types", "check-inputs", "eslint-plugin-stamhoofd#check-inputs", "@stamhoofd/components#build:types", "@stamhoofd/components#check-inputs"],
             "cache": true,
-            "outputs": []
+            "outputs": [],
+            "env": ["NODE_ENV"]
         },
         "check-inputs": {
             "dependsOn": ["^check-inputs"]
