@@ -171,6 +171,8 @@ export type UnitTestOptions = {
     /** Drop the persistent test database volume before running (fresh start). */
     clear?: boolean;
     coverage?: boolean;
+    /** Vitest shard selection; each shard must run on a separate machine/worktree. */
+    shard?: string;
 };
 
 export async function runUnitTests(context: CliContext, options: UnitTestOptions = {}): Promise<void> {
@@ -193,6 +195,9 @@ export async function runUnitTests(context: CliContext, options: UnitTestOptions
     try {
         for (const pkg of packages) {
             const args = ['exec', 'vitest', 'run'];
+            if (options.shard !== undefined) {
+                args.push('--shard', options.shard);
+            }
             if (options.coverage) {
                 args.push('--coverage');
             }
@@ -342,7 +347,7 @@ async function ensureTestMysql(context: CliContext, names: { container: string; 
     if (!await docker.containerIsRunning(container)) {
         await docker.removeContainer(container, context.verbose);
         await docker.createVolume(volume, context.verbose);
-        await docker.run(['run', '-d', '--name', container, '-e', `MYSQL_ROOT_PASSWORD=${mysqlRootPassword}`, '-p', localhostPortMappingDynamic(mysqlInternalPort), '-v', `${volume}:/var/lib/mysql`, mysqlImage, ...mysqlServerArgs()], { verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
+        await docker.run(['run', '-d', '--name', container, '-e', `MYSQL_ROOT_PASSWORD=${mysqlRootPassword}`, '-p', localhostPortMappingDynamic(mysqlInternalPort), '-v', `${volume}:/var/lib/mysql`, process.env.CI_MYSQL_IMAGE ?? mysqlImage, ...mysqlServerArgs()], { verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
     }
 
     await docker.waitForMysql(container);
