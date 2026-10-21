@@ -6,7 +6,6 @@
     "devDependencies": {
         "@stamhoofd/frontend-application": "workspace:*",
         "@stamhoofd/components": "workspace:*",
-        "@stamhoofd/frontend-i18n": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "vitest": "4.1.11"
