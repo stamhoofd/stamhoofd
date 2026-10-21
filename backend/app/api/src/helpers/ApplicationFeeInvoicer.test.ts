@@ -8,6 +8,7 @@ import { Address, BalanceItemType, Company, PaymentMethod, PaymentProvider, Paym
 import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { Country } from '@stamhoofd/types/Country';
+import * as utility from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { StripeMocker } from '../../tests/helpers/StripeMocker.js';
@@ -52,6 +53,11 @@ describe('ApplicationFeeInvoicer', () => {
     });
 
     beforeEach(async () => {
+        // Advance the snapshot boundary without faking database/network timers.
+        vitest.useFakeTimers({ toFake: ['Date'] });
+        vi.spyOn(utility, 'sleep').mockImplementation(async (ms) => {
+            vitest.setSystemTime(Date.now() + ms);
+        });
         stripeMocker.clear();
         ApplicationFeeService.resetWarnings();
 
@@ -61,6 +67,11 @@ describe('ApplicationFeeInvoicer', () => {
             .where('occurredAt', '<', new Date(Date.UTC(2024, 7, 1)));
         await ApplicationFee.delete()
             .where('payingStripeAccountId', null);
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+        vitest.useRealTimers();
     });
 
     const init = async () => {
