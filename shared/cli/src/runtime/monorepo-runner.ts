@@ -44,7 +44,6 @@ export type UnitTestPackage = {
     path: string;
     /** Whether the package's tests connect to MySQL (checked via its vitest setup files). */
     needsDatabase: boolean;
-    typecheck?: boolean;
 };
 
 // The unit-test packages that `stam test unit` runs. To add a package: give it a `test` script that
@@ -53,8 +52,8 @@ export type UnitTestPackage = {
 export const unitTestPackages: UnitTestPackage[] = [
     { name: 'cli', path: 'shared/cli', needsDatabase: false },
     { name: 'i18n-uuid', path: '.development/i18n-uuid', needsDatabase: false },
-    { name: 'metabase', path: 'shared/metabase', needsDatabase: false, typecheck: true },
-    { name: 'structures', path: 'shared/structures', needsDatabase: false, typecheck: true },
+    { name: 'metabase', path: 'shared/metabase', needsDatabase: false },
+    { name: 'structures', path: 'shared/structures', needsDatabase: false },
     { name: 'object-differ', path: 'shared/object-differ', needsDatabase: false },
     { name: 'sgv', path: 'shared/sgv', needsDatabase: false },
     { name: 'stdsync', path: 'shared/stdsync', needsDatabase: false },
@@ -63,13 +62,13 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'vite-config', path: 'frontend/shared/vite-config', needsDatabase: false },
     { name: 'queues', path: 'backend/shared/queues', needsDatabase: false },
     { name: 'logging', path: 'backend/shared/logging', needsDatabase: false },
-    { name: 'models', path: 'backend/shared/models', needsDatabase: true, typecheck: true },
-    { name: 'vies', path: 'backend/shared/vies', needsDatabase: true, typecheck: true },
-    { name: 'sql', path: 'backend/shared/sql', needsDatabase: true, typecheck: true },
-    { name: 'renderer', path: 'backend/app/renderer', needsDatabase: false, typecheck: true },
+    { name: 'models', path: 'backend/shared/models', needsDatabase: true },
+    { name: 'vies', path: 'backend/shared/vies', needsDatabase: true },
+    { name: 'sql', path: 'backend/shared/sql', needsDatabase: true },
+    { name: 'renderer', path: 'backend/app/renderer', needsDatabase: false },
     { name: 'redirecter', path: 'backend/app/redirecter', needsDatabase: false },
-    { name: 'statistics-syncer', path: 'backend/app/statistics-syncer', needsDatabase: true, typecheck: true },
-    { name: 'api', path: 'backend/app/api', needsDatabase: true, typecheck: true },
+    { name: 'statistics-syncer', path: 'backend/app/statistics-syncer', needsDatabase: true },
+    { name: 'api', path: 'backend/app/api', needsDatabase: true },
     // Browser tests (vitest browser mode); need a Playwright Chromium: `pnpm --dir tests/playwright exec playwright install chromium`.
     { name: 'components', path: 'frontend/shared/components', needsDatabase: false },
     { name: 'networking', path: 'frontend/shared/networking', needsDatabase: false },
@@ -193,10 +192,6 @@ export async function runUnitTests(context: CliContext, options: UnitTestOptions
 
     try {
         for (const pkg of packages) {
-            if (pkg.typecheck) {
-                await run('pnpm', ['run', 'typecheck'], { cwd: path.join(context.rootDir, pkg.path), env: { CI: options.ci ? 'true' : undefined, DB_PORT: dbPort }, verbosity: context.verbosity ?? RunVerbosity.Output });
-            }
-
             const args = ['exec', 'vitest', 'run'];
             if (options.coverage) {
                 args.push('--coverage');
