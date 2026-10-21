@@ -2344,9 +2344,6 @@ importers:
       '@simonbackx/vue-app-navigation':
         specifier: 2.25.1
         version: 2.25.1(tslib@2.8.1)(vue@3.5.43(typescript@6.0.3))
-      '@stamhoofd/frontend-session':
-        specifier: workspace:*
-        version: link:../session
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
