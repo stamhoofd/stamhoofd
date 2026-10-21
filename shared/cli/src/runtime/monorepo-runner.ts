@@ -222,7 +222,7 @@ export async function testUnit(context: CliContext, ci: boolean): Promise<void> 
     await runUnitTests(context, { ci });
 }
 
-export async function testE2e(context: CliContext, options: { ci: boolean; clear: boolean; extra?: boolean; ui: boolean; workers?: number; grep?: string; skipBuild?: boolean; localDb?: boolean }): Promise<void> {
+export async function testE2e(context: CliContext, options: { ci: boolean; clear: boolean; extra?: boolean; ui: boolean; workers?: number; shard?: string; grep?: string; skipBuild?: boolean; localDb?: boolean }): Promise<void> {
     const mysql = resolveE2eMysqlTarget({ localDb: options.localDb });
     const databaseEnv = await prepareE2eDatabase(context, mysql, options.clear);
     let shouldRestoreCaddy = false;
@@ -235,7 +235,7 @@ export async function testE2e(context: CliContext, options: { ci: boolean; clear
         if (!options.skipBuild) {
             await run('pnpm', ['--dir', 'backend/app/api', 'run', 'build:playwright:pre'], { cwd: context.rootDir, env: databaseEnv, verbosity: context.verbosity ?? RunVerbosity.Output });
         }
-        await run('pnpm', ['--dir', 'tests/playwright', 'run', 'test', ...(options.ui ? ['--ui'] : []), ...(options.grep === undefined ? [] : ['--grep', options.grep]), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)])], { cwd: context.rootDir, env: { ...databaseEnv, CI: options.ci ? 'true' : undefined, NODE_EXTRA_CA_CERTS: caddyRootCaPath(), PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined, PLAYWRIGHT_WORKER_COUNT: options.workers === undefined ? undefined : String(options.workers), STAMHOOFD_SKIP_FRONTEND_BUILD: options.skipBuild ? 'true' : undefined }, verbosity: context.verbosity ?? RunVerbosity.Output });
+        await run('pnpm', ['--dir', 'tests/playwright', 'run', 'test', ...(options.ui ? ['--ui'] : []), ...(options.grep === undefined ? [] : ['--grep', options.grep]), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)]), ...(options.shard === undefined ? [] : ['--shard', options.shard])], { cwd: context.rootDir, env: { ...databaseEnv, CI: options.ci ? 'true' : undefined, NODE_EXTRA_CA_CERTS: caddyRootCaPath(), PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined, PLAYWRIGHT_WORKER_COUNT: options.workers === undefined ? undefined : String(options.workers), STAMHOOFD_SKIP_FRONTEND_BUILD: options.skipBuild ? 'true' : undefined }, verbosity: context.verbosity ?? RunVerbosity.Output });
     } finally {
         // Shut down the e2e MySQL container after the run; the data volume is kept for the next run.
         // A MySQL that was already running is left alone: it is not ours to stop.
