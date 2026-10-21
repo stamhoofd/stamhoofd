@@ -28,7 +28,6 @@ function renderPhoneInput() {
 
 test('Automatically formats the phone number on blur', async () => {
     await I18nController.loadDefault({
-        $context: null,
         defaultCountry: Country.Belgium,
         defaultLanguage: Language.Dutch,
         country: Country.Belgium,
@@ -54,7 +53,6 @@ test('Automatically formats the phone number on blur', async () => {
 
 test('Automatically formats the phone number as you type', async () => {
     await I18nController.loadDefault({
-        $context: null,
         defaultCountry: Country.Belgium,
         defaultLanguage: Language.Dutch,
         country: Country.Belgium,
@@ -107,7 +105,6 @@ test('Automatically formats the phone number as you type', async () => {
 test('Automatically formats phone numbers using configured locale on blur', async () => {
     TestUtils.setEnvironment('fixedCountry', Country.Netherlands);
     await I18nController.loadDefault({
-        $context: null,
         defaultCountry: Country.Netherlands,
         defaultLanguage: Language.Dutch,
         country: Country.Netherlands,

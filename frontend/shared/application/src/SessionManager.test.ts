@@ -7,8 +7,10 @@ import { Language } from '@stamhoofd/types/Language';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { SessionManagerStatic } from './SessionManager';
+import { loadSessionLocale } from './SessionLocalization';
 
-afterEach(() => {
+afterEach(async () => {
+    await loadSessionLocale(null);
     vi.restoreAllMocks();
 });
 
@@ -51,7 +53,9 @@ describe('session preparation', () => {
 
         expect(await manager.prepareSessionForUsage(session)).toBe(session);
         expect(load).toHaveBeenCalledExactlyOnceWith({
-            $context: session,
+            preferredLanguage: undefined,
+            fallbackLanguage: session.platform.language,
+            fallbackCountry: undefined,
             defaultCountry: Country.Belgium,
             defaultLanguage: Language.Dutch,
             country: undefined,

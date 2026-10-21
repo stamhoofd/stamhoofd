@@ -12,6 +12,7 @@ import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { isReactive } from 'vue';
 import { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
+import { loadSessionLocale } from './SessionLocalization';
 
 class SessionStorage extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(Organization) })
@@ -228,8 +229,7 @@ export class SessionManagerStatic {
         });
 
         await session.saveToStorage();
-        await I18nController.loadDefault({
-            $context: session,
+        await loadSessionLocale(session, {
             defaultCountry: Country.Belgium,
             defaultLanguage: Language.Dutch,
             country: session?.organization?.address?.country,
