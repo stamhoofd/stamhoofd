@@ -164,6 +164,34 @@ test.describe('Orders list changes @webshop-orders-list', () => {
         await context.close();
     });
 
+    test('An open tab lets a tab with a newer version upgrade the local database', async ({ browser }) => {
+        const { context, page, table } = await openOrdersList(browser, shop);
+        await table.expectCount(30);
+
+        const databaseName = 'webshop-' + shop.webshop.id;
+        const getVersion = async () => page.evaluate(async name => (await indexedDB.databases()).find(d => d.name === name)?.version, databaseName);
+        const newVersion = (await getVersion())! + 1;
+
+        // Like a tab that runs a newer release of the dashboard
+        const upgrade = await page.evaluate(async ({ name, version }) => new Promise<string>((resolve) => {
+            const request = indexedDB.open(name, version);
+            request.onblocked = () => resolve('blocked');
+            request.onerror = () => resolve('error');
+            request.onsuccess = () => {
+                request.result.close();
+                resolve('upgraded');
+            };
+        }), { name: databaseName, version: newVersion });
+        expect(upgrade).toBe('upgraded');
+
+        // The outdated tab can no longer read, but keeps the upgraded database
+        await table.search('klant');
+        await expect(table.getErrorBox()).toBeVisible();
+        expect(await getVersion()).toBe(newVersion);
+
+        await context.close();
+    });
+
     test('Retrying after storing a page of the sync failed keeps the orders of the pages before it', async ({ browser }) => {
         // Like a lost IndexedDB connection after the screen of a phone locked
         const big = await createOrdersListWebshop('OrdersFailedWrite');

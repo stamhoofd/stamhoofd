@@ -57,8 +57,30 @@ export class WebshopDatabase {
 
             const DBOpenRequest = window.indexedDB.open(this.databaseName, version);
 
+            // Timeout
+            // Sometimes a browser hangs when trying to open a database. We cannot wait forever...
+            const timeout = setTimeout(() => {
+                if (!resolved) {
+                    resolved = true;
+                    // Abort
+                    reject(new SimpleError({
+                        code: 'not_supported',
+                        message: $t('%PV'),
+                    }));
+                }
+            }, 2000);
+
             DBOpenRequest.onsuccess = () => {
-                this._database = DBOpenRequest.result;
+                const database = DBOpenRequest.result;
+                this._database = database;
+
+                // Otherwise this connection blocks the upgrade of a tab with a newer version until this tab closes
+                database.onversionchange = () => {
+                    database.close();
+                    if (this._database === database) {
+                        this._database = null;
+                    }
+                };
 
                 if (resolved) {
                     return;
@@ -78,11 +100,21 @@ export class WebshopDatabase {
                 if (resolved) {
                     return;
                 }
+                resolved = true;
+
+                if (DBOpenRequest.error?.name === 'VersionError') {
+                    // Another tab upgraded the database: deleting it would delete the orders of that tab
+                    reject(new SimpleError({
+                        code: 'outdated_version',
+                        message: 'The database has a newer version than this tab',
+                        human: $t('Er staat een ander tabblad open van Stamhoofd die werkt in een nieuwere versie. Herlaad deze pagina.'),
+                    }));
+                    return;
+                }
 
                 // Try to delete this database if something goes wrong
                 this.delete().catch(console.error);
 
-                resolved = true;
                 reject(new SimpleError({
                     code: 'not_supported',
                     message: $t('%PU'),
@@ -94,26 +126,16 @@ export class WebshopDatabase {
 
                 console.info('Database upgrade', event.oldVersion, event.newVersion);
 
+                // Clearing the stores can take longer than the timeout, which is only meant for an open that hangs
+                clearTimeout(timeout);
+
                 this.initStores({ database, transaction: DBOpenRequest.transaction, event });
             };
-
-            // Timeout
-            // Sometimes a browser hangs when trying to open a database. We cannot wait forever...
-            setTimeout(() => {
-                if (!resolved) {
-                    resolved = true;
-                    // Abort
-                    reject(new SimpleError({
-                        code: 'not_supported',
-                        message: $t('%PV'),
-                    }));
-                }
-            }, 2000);
         });
 
-        return this.getPromise.then((database) => {
+        return this.getPromise.finally(() => {
+            // A failed open is retried on the next call
             this.getPromise = null;
-            return database;
         });
     }
 
