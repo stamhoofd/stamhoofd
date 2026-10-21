@@ -1,6 +1,6 @@
 import type { CountFilteredRequest } from '@stamhoofd/structures';
 import { useContext } from '../../hooks/useContext';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 
 export function useChargeReceivableBalances() {
     const context = useContext();

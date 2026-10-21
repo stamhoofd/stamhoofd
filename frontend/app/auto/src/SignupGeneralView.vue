@@ -133,7 +133,7 @@ import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import { AcquisitionType, Address, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, RecordConfigurationFactory, RegisterCode } from '@stamhoofd/structures';

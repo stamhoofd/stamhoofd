@@ -306,7 +306,7 @@ import type {
 } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { LoginMethod } from '@stamhoofd/structures';
 import {
     LoginMethodConfig,

@@ -326,7 +326,7 @@ import type { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder } from
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 
 import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import type { LoginMethodConfig } from '@stamhoofd/structures';
 import { DataPermissionsSettings, DetailedPayableBalance, EmailTemplate, EmailTemplateType, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, LoginMethod, LoginProviderType, Organization, OrganizationMetaData } from '@stamhoofd/structures';
 import { computed } from 'vue';

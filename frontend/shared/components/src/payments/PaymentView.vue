@@ -319,7 +319,7 @@ import PromiseView from '#containers/PromiseView.vue';
 import { useInvoicesObjectFetcher } from '#fetchers/useInvoicesObjectFetcher.ts';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import OrganizationAvatar from '../context/OrganizationAvatar.vue';

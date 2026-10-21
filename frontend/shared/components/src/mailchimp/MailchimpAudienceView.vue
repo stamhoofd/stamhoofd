@@ -32,7 +32,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { MailchimpAudience } from '@stamhoofd/structures/mailchimp/MailchimpAudience.js';
 import { MailchimpSettings } from '@stamhoofd/structures/mailchimp/MailchimpSettings.js';
 import { onMounted, ref } from 'vue';

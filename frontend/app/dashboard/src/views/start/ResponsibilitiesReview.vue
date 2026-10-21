@@ -37,7 +37,7 @@ import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts'
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityChange.ts';
 import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import type { Group, MemberResponsibility, Organization, PlatformMember } from '@stamhoofd/structures';
 import { GroupType, LimitedFilteredRequest, MembersBlob, PaginatedResponseDecoder, PlatformFamily, SetupStepType, SortItemDirection } from '@stamhoofd/structures';
 import type { Ref } from 'vue';

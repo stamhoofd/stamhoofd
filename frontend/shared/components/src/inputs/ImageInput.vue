@@ -18,7 +18,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { Image, ResolutionRequest, Version } from '@stamhoofd/structures';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { computed, ref } from 'vue';
 
 import { useContext } from '#hooks/useContext.ts';

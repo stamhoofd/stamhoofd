@@ -1,8 +1,8 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { useOrganization } from '@stamhoofd/components/hooks/useOrganization';
-import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
+import { useContext } from '../useContext';
+import { useOrganization } from '../useOrganization';
+import { usePlatform } from '../usePlatform';
 import type { Organization } from '@stamhoofd/structures';
 import { LimitedFilteredRequest, PaginatedResponseDecoder, RegistrationPeriod, SortItemDirection } from '@stamhoofd/structures';
 import type { Ref } from 'vue';

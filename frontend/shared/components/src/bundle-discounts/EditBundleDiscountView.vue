@@ -145,7 +145,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useGroupViewLoaders } from '#groups/groupViewLoaders.ts';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { BundleDiscount, Group, LimitedFilteredRequest, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PaginatedResponseDecoder } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';

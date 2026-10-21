@@ -112,7 +112,7 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
 import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import type { Event, Group, StamhoofdFilter } from '@stamhoofd/structures';
 import { isEmptyFilter, SortItemDirection } from '@stamhoofd/structures';

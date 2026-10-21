@@ -45,7 +45,7 @@ import { useErrors } from '#errors/useErrors.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { Organization } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';
 import type { Ref } from 'vue';

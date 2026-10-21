@@ -1,4 +1,4 @@
-import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
+import { useFetchOrganizationRegistrationPeriods } from '#hooks/networking/useFetchOrganizationRegistrationPeriods';
 import type { Organization } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { ref, watch } from 'vue';

@@ -1,7 +1,7 @@
 import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Event, Platform } from '@stamhoofd/structures';
 import { BaseOrganization, EventNotification, EventNotificationType } from '@stamhoofd/structures';
 import { computed } from 'vue';

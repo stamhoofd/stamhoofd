@@ -208,9 +208,9 @@ import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vu
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 
-import { useGetGroupsById } from '@stamhoofd/networking/hooks/useGetGroups';
-import { useGetPeriods } from '@stamhoofd/networking/hooks/useGetPeriods';
-import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
+import { useGetGroupsById } from '@stamhoofd/components/hooks/networking/useGetGroups';
+import { useGetPeriods } from '@stamhoofd/components/hooks/networking/useGetPeriods';
+import { usePatchOrganizationPeriod } from '@stamhoofd/components/hooks/networking/usePatchOrganizationPeriod';
 import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import type { Group, MemberResponsibility, Organization, OrganizationRegistrationPeriod, RegistrationPeriod, TranslatedString } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

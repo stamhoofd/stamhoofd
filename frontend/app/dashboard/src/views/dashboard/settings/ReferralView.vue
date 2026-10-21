@@ -137,7 +137,7 @@ import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import { RegisterCodeStatus } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';

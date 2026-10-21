@@ -1,4 +1,4 @@
-import { useAllRegistrationPeriods, useFetchAllRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
+import { useAllRegistrationPeriods, useFetchAllRegistrationPeriods } from '#hooks/networking/useFetchRegistrationPeriods';
 import type { Ref} from 'vue';
 import { computed, onMounted, unref } from 'vue';
 import { Toast } from '../../overlays/Toast';

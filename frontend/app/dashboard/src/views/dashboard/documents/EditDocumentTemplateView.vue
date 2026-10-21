@@ -149,7 +149,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import type { DocumentTemplateGroup, PatchAnswers, RecordAnswer } from '@stamhoofd/structures';
 import { CountFilteredRequest, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplatePrivate, RecordAddressAnswer, RecordAnswerDecoder, RecordCategory, RecordChoice, RecordChooseOneAnswer, RecordSettings, RecordTextAnswer, RecordType, TranslatedString } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';

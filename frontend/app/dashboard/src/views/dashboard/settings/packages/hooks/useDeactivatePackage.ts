@@ -4,7 +4,7 @@ import { ref } from 'vue';
 import { useOrganizationPackages } from './useOrganizationPackages';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import { updateNow } from '@stamhoofd/components/hooks/useNow';
 
 /**

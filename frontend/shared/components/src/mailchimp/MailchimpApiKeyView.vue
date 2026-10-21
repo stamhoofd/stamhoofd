@@ -22,7 +22,7 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { MailchimpConnectRequest } from '@stamhoofd/structures/mailchimp/MailchimpConnectRequest.js';
 import { MailchimpSettings } from '@stamhoofd/structures/mailchimp/MailchimpSettings.js';
 import { ref } from 'vue';

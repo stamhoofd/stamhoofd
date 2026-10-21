@@ -37,7 +37,7 @@ import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/Custome
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount } from 'vue';

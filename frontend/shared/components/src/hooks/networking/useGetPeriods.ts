@@ -1,33 +1,36 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import { useContext } from '@stamhoofd/components/hooks/useContext';
-import { Group, LimitedFilteredRequest, PaginatedResponseDecoder } from '@stamhoofd/structures';
+import { useContext } from '../useContext';
+import { LimitedFilteredRequest, PaginatedResponseDecoder, RegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { useRequestOwner } from './useRequestOwner';
 
-export function useGetGroupsById() {
+export function useGetPeriods() {
     const context = useContext();
     const owner = useRequestOwner();
 
-    const getGroupsById = async (groupIds: string[], shouldRetry?: boolean) => {
-        if (groupIds.length === 0) {
+    return async (periodIds: string[], shouldRetry?: boolean) => {
+        if (periodIds.length === 0) {
             return [];
         }
 
-        const uniqueIds = Formatter.uniqueArray(groupIds);
+        const uniqueIds = Formatter.uniqueArray(periodIds);
 
         const response = await context.value.authenticatedServer.request({
             method: 'GET',
-            path: '/groups',
+            path: '/registration-periods',
             query: new LimitedFilteredRequest({
-                limit: uniqueIds.length,
                 filter: {
                     id: {
                         $in: uniqueIds,
                     },
                 },
+                limit: uniqueIds.length,
             }),
-            decoder: new PaginatedResponseDecoder(new ArrayDecoder(Group as Decoder<Group>), LimitedFilteredRequest),
+            decoder: new PaginatedResponseDecoder(
+                new ArrayDecoder(RegistrationPeriod as Decoder<RegistrationPeriod>),
+                LimitedFilteredRequest,
+            ),
             owner,
             shouldRetry,
         });
@@ -35,5 +38,4 @@ export function useGetGroupsById() {
         return response.data.results;
     };
 
-    return getGroupsById;
 }
