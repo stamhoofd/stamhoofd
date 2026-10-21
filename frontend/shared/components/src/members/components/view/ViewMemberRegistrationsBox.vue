@@ -56,7 +56,7 @@ import { Sorter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useAppContext } from '../../../context/appContext';
-import { GlobalEventBus } from '../../../EventBus';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';
 import { useMembersObjectFetcher } from '../../../fetchers/useMembersObjectFetcher';
 import { useRegistrationInvitationsObjectFetcher } from '../../../fetchers/useRegistrationInvitationsObjectFetcher';
 import { ContextMenu, ContextMenuItem } from '../../../overlays/ContextMenu';

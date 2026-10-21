@@ -101,7 +101,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
-import { SessionManager } from '@stamhoofd/networking/SessionManager';
+import { SessionManager } from '@stamhoofd/frontend-application/SessionManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Organization } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';

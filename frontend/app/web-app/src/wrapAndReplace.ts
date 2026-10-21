@@ -5,10 +5,10 @@ import ContextProvider from '@stamhoofd/components/containers/ContextProvider.vu
 import CustomHooksContainer from '@stamhoofd/components/containers/CustomHooksContainer.vue';
 import OrganizationSwitcher from '@stamhoofd/components/context/OrganizationSwitcher.vue';
 import NotificationsButton from '@stamhoofd/components/notifications/NotificationsButton.vue';
-import { MemberManager } from '@stamhoofd/networking/MemberManager';
-import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { MemberManager } from '@stamhoofd/frontend-application/MemberManager';
+import { OrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import { loadPlatform } from '@stamhoofd/frontend-session/loadPlatform';
-import { ThemeManager } from '@stamhoofd/networking/ThemeManager';
+import { ThemeManager } from '@stamhoofd/frontend-application/ThemeManager';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import type { AppType, Organization } from '@stamhoofd/structures';
 import { markRaw } from 'vue';

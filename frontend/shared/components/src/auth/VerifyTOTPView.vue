@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts" setup>
-import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
+import { LoginHelper } from '@stamhoofd/frontend-application/LoginHelper';
 import { ref } from 'vue';
 
 import { ErrorBox } from '#errors/ErrorBox.ts';

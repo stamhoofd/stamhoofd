@@ -1,5 +1,5 @@
 import { onMounted, onUnmounted } from 'vue';
-import { EventBus } from '../../EventBus';
+import { EventBus } from '@stamhoofd/frontend-application/EventBus';
 
 type RegistrationInvitationEventName = 'updated';
 

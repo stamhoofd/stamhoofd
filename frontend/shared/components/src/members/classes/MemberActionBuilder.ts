@@ -26,7 +26,7 @@ import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecip
 import { MailchimpSyncRequest, MailchimpSyncType } from '@stamhoofd/structures/mailchimp/MailchimpSyncRequest.js';
 import { Formatter } from '@stamhoofd/utility';
 import { markRaw } from 'vue';
-import { GlobalEventBus } from '../../EventBus';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';
 import type { RecipientChooseOneOption } from '../../email/EmailView.vue';
 import { isMailchimpReady } from '../../mailchimp/useMailchimp';
 import { CenteredMessage } from '../../overlays/CenteredMessage';

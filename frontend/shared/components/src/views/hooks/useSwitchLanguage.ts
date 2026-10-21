@@ -1,6 +1,6 @@
 import { useContext } from '#hooks/useContext.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
+import { LoginHelper } from '@stamhoofd/frontend-application/LoginHelper';
 import { LanguageHelper, User } from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';

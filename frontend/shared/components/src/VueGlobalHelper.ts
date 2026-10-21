@@ -11,7 +11,7 @@ import { useAppContext } from '#context/appContext.ts';
 import CopyableDirective from '#directives/Copyable.ts';
 import LongPressDirective from '#directives/LongPress.ts';
 import TooltipDirective from '#directives/Tooltip.ts';
-import { GlobalEventBus } from '#EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useFeatureFlag } from '#hooks/useFeatureFlag.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';

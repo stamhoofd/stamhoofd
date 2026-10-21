@@ -204,7 +204,7 @@ import { computed, onMounted, ref } from 'vue';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useInvoicesObjectFetcher } from '#fetchers/useInvoicesObjectFetcher.ts';
 import { useAuth } from '#hooks/useAuth.ts';
-import { GlobalEventBus } from '../EventBus';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';
 import NumberInputBox from '../inputs/NumberInputBox.vue';
 import { useLoadFamilyFromId } from '../members/hooks/useLoadFamily';
 import ActionButtonsBox from './components/ActionButtonsBox.vue';

@@ -7,7 +7,7 @@ import type { RequestResult } from '@simonbackx/simple-networking';
 import type { Organization } from '@stamhoofd/structures';
 import { CreateOrganization, CreateOrganizationResponse, MFAChallengeRequest, MFAChallengeResponse, MFAMethodType, MFASetupResponse, NewUser, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 
-import { NetworkManager } from './NetworkManager';
+import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { SessionManager } from './SessionManager';
 

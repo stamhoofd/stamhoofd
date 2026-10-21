@@ -1,7 +1,7 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoute, NavigationController, onCheckRoutes, ReactiveUrl, UrlHelper, useModalStackComponent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import { rememberPendingNoltLogin } from '@stamhoofd/components/helpers/nolt.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';

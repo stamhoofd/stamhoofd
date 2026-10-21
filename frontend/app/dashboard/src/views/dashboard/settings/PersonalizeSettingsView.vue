@@ -110,7 +110,7 @@ import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { Validator } from '@stamhoofd/components/errors/Validator.ts';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import type { Image } from '@stamhoofd/structures';
 import { Organization, OrganizationMetaData, ResolutionFit, ResolutionRequest, Version } from '@stamhoofd/structures';
 import { computed, ref, shallowRef } from 'vue';

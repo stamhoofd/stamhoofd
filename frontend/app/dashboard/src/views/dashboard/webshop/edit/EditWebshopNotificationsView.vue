@@ -35,7 +35,7 @@ import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { PrivateWebshop, WebshopPrivateMetaData } from '@stamhoofd/structures';
 
 import EmailAddressWarning from '@stamhoofd/components/email/EmailAddressWarning.vue';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import { computed } from 'vue';
 import type { UseEditWebshopProps } from './useEditWebshop';
 import { useEditWebshop } from './useEditWebshop';

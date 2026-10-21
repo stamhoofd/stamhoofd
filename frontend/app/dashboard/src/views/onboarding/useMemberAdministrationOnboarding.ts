@@ -15,7 +15,7 @@ import type { OnboardingStepProps } from './OnboardingStepProps';
 import type { Organization } from '@stamhoofd/structures';
 import { OrganizationCheckout, OrganizationType, OrganizationTypeHelper, PackagePurchases, PaymentCustomer, PaymentMethod, STPackageBundle } from '@stamhoofd/structures';
 import { useActivatePackages } from '../dashboard/settings/packages/hooks/useActivatePackages';
-import { GlobalEventBus } from '@stamhoofd/components/EventBus';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';
 import { useUser } from '@stamhoofd/components/hooks/useUser';
 
 /**

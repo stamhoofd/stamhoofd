@@ -3,7 +3,7 @@ import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
 import { SimpleError } from '@simonbackx/simple-errors';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Organization } from '@stamhoofd/structures';
-import { GlobalEventBus } from '../EventBus';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';
 import { useContext } from '../hooks/useContext';
 
 export function usePatchOrganization() {

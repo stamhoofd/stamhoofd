@@ -47,7 +47,7 @@ import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { Validator } from '@stamhoofd/components/errors/Validator.ts';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import type { File } from '@stamhoofd/structures';
 import { Organization, OrganizationMetaData, Version } from '@stamhoofd/structures';
 import { computed, ref, shallowRef } from 'vue';

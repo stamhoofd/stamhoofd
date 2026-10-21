@@ -79,7 +79,7 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import { useChooseFamilyMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import ImageComponent from '#views/ImageComponent.vue';
 import type { Decoder } from '@simonbackx/simple-encoding';
-import { useMemberManager } from '@stamhoofd/networking/MemberManager';
+import { useMemberManager } from '@stamhoofd/frontend-application/MemberManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Event, Organization, WebshopPreview } from '@stamhoofd/structures';
 import { Webshop } from '@stamhoofd/structures';

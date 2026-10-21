@@ -23,3 +23,5 @@ Import storage from `@stamhoofd/frontend-storage/Storage`. Its roles are replace
 Import `AppManager` and its capability types from `@stamhoofd/frontend-platform/AppManager`. Native bootstrap continues to replace callbacks on the same singleton. This extraction preserves the existing APIs and temporarily retains its session type dependency; dependency boundaries are separate work. Run its tests with `stam test platform`.
 
 Import `SessionContext`, `ContextPermissions`, `ManagedToken`, `QueueHandler`, and `loadPlatform` from `@stamhoofd/frontend-session`. This whole-file extraction preserves their existing APIs, including concrete presentation dependencies. Run their tests with `stam test session`; separating presentation callbacks is later work.
+
+Import `LoginHelper`, `MFAManager`, `SessionManager`, `ThemeManager`, `MemberManager`, `OrganizationManager`, and `EventBus` from `@stamhoofd/frontend-application`. These files retain their existing APIs, locale coordination, and presentation dependencies. All event-bus consumers use the same application-owned singleton. Run application tests with `stam test application`.

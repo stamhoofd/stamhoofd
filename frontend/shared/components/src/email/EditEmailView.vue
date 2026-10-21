@@ -141,7 +141,7 @@ import { usePatchPlatform } from '#hooks/usePatchPlatform.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatchArray } from '#hooks/usePatchArray.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';

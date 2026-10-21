@@ -1,7 +1,7 @@
 import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, EncodeMedium, ObjectData } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EventBus } from '@stamhoofd/components/EventBus.ts';
+import { EventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import type { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import { fetchAll } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';

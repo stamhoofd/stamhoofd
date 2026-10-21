@@ -1,4 +1,4 @@
-import { MFAManager } from '@stamhoofd/networking/MFAManager';
+import { MFAManager } from '@stamhoofd/frontend-application/MFAManager';
 import { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { MFAEnrollmentResult, Platform, TOTPSetupResponse } from '@stamhoofd/structures';
 import { flushPromises, shallowMount } from '@vue/test-utils';
