@@ -522,6 +522,7 @@ jobs:
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
             - name: Start MySQL in background
+              id: mysql
               run: node shared/cli/bin/ci-mysql.mjs start
             - uses: ./.github/actions/setup
             - name: Restore API Turbo tasks
@@ -669,6 +670,13 @@ jobs:
                       sudo systemctl start systemd-resolved
                       sudo cp "$RUNNER_TEMP/original-resolv.conf" /etc/resolv.conf
                   fi
+            - name: Upload MySQL startup diagnostics
+              if: ${{ !cancelled() && steps.mysql.outcome && steps.mysql.outcome != 'skipped' }}
+              uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+              with:
+                  name: playwright-mysql-startup-${{ matrix.shard }}
+                  path: ${{ runner.temp }}/stamhoofd-ci-mysql
+                  retention-days: 7
             - name: Upload Playwright blob report
               if: ${{ !cancelled() }}
               uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0

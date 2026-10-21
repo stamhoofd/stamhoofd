@@ -42,6 +42,7 @@ describe('CI MySQL bootstrap', () => {
             RUNNER_TEMP: directory,
             PATH: `${directory}:${process.env.PATH}`,
             CI_MYSQL_IMAGE: image,
+            GITHUB_STEP_SUMMARY: path.join(directory, 'summary'),
         };
         await writeFile(path.join(directory, 'docker'), `#!/usr/bin/env node
 const fs = require('node:fs');
@@ -90,7 +91,9 @@ if (args[0] === 'exec' && !fs.existsSync(file('queried'))) {
         expect((await calls()).some(args => args[0] === 'run')).toBe(false);
 
         await writeFile(path.join(directory, 'release'), '');
-        await run('wait');
+        const result = await run('wait');
+        expect(result.stdout).toContain('remaining wait:');
+        expect(await readFile(env.GITHUB_STEP_SUMMARY!, 'utf8')).toContain('MySQL provisioning:');
         const commands = await calls();
         expect(commands[0]).toEqual(['pull', image]);
         expect(commands.find(args => args[0] === 'run')).toEqual([
@@ -104,10 +107,12 @@ if (args[0] === 'exec' && !fs.existsSync(file('queried'))) {
         expect(JSON.parse(await readFile(path.join(directory, 'stamhoofd-ci-mysql/status.json'), 'utf8')).ready).toBe(true);
     });
 
-    it.each(['fail-pull', 'fail-run'])('propagates %s failures', async (mode) => {
+    it.each(['fail-pull', 'fail-run'])('propagates %s failures and retains diagnostics', async (mode) => {
         env.TEST_MYSQL_MODE = mode;
         await run('start');
         await expect(run('wait')).rejects.toThrow('MySQL provisioning failed');
+        const log = await readFile(path.join(directory, 'stamhoofd-ci-mysql/startup.log'), 'utf8');
+        expect(log).toContain(mode === 'fail-pull' ? 'Registry unavailable' : 'Container creation failed');
     });
 
     it('launches before dependency setup and relies on hosted runner teardown', async () => {
