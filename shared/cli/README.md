@@ -360,6 +360,7 @@ pnpm stam test unit SomeFile                         # filter by filename across
 pnpm stam test structures bundle-discounts           # package + filename filter
 pnpm stam test structures -t 'partial test name'     # package + test-name filter (passed to vitest -t)
 pnpm stam test api --skip-build                      # skip the automatic build:shared step
+pnpm stam test api --shard 1/2                        # one API shard, on a separate machine/worktree
 pnpm stam test api --clear                           # reset the test database (drop its volume) before running
 pnpm stam test components ImageComponent             # frontend browser tests (vitest browser mode)
 pnpm stam test platform                              # browser/native platform metadata
@@ -373,6 +374,10 @@ pnpm stam test application                           # login and session coordin
 The root `pnpm test` and `pnpm run test:coverage` commands delegate to `stam test unit` and `stam test coverage`, so package selection, failure propagation, MySQL ownership, and teardown stay consistent. Coverage runs serially and is uncached.
 
 Test commands do not run a separate typecheck step. Use `stam check typecheck` to check types, including test files; `stam check all` includes that check. The automatic shared build still checks the production code it compiles.
+
+Unit `--shard <index>/<total>` splits test files while preserving each package's worker limit. Run shards on separate machines or worktrees: shards in the same worktree share the test database.
+
+CI runs the API across two machines and runs the other backend apps once. The CLI owns MySQL and uses the workflow's pinned `CI_MYSQL_IMAGE`. The aggregate `Backend App Tests` check fails if either shard fails. The separate Typecheck job checks test types.
 
 Run Playwright tests with:
 

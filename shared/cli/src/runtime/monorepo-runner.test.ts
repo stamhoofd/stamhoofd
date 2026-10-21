@@ -127,6 +127,18 @@ describe('shared build orchestration', () => {
         });
     });
 
+    it('forwards unit sharding', async () => {
+        await runUnitTests(context, {
+            packages: [{ name: 'utility', path: 'shared/utility', needsDatabase: false }],
+            skipBuild: true,
+            shard: '2/2',
+        });
+
+        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', [
+            'exec', 'vitest', 'run', '--shard', '2/2',
+        ], expect.objectContaining({ cwd: '/repo/shared/utility' }));
+    });
+
     it('runs unit tests without typechecking', async () => {
         const pkg = unitTestPackages.find(pkg => pkg.name === 'structures')!;
         await runUnitTests(context, { packages: [pkg], skipBuild: true });
