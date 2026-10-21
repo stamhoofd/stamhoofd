@@ -27,6 +27,21 @@ describe('unit test options', () => {
         expect(runUnitTests).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ shard }));
     });
 
+    it('parses the report flag without treating it as a filename filter', async () => {
+        const parsed = await Parser.parse(['api', '--json-report', '/reports/api.json'], Test);
+
+        expect(parsed.argv).toEqual(['api']);
+        expect(parsed.flags).toMatchObject({ 'json-report': '/reports/api.json' });
+    });
+
+    it('forwards the report path', async () => {
+        const command = createCommand(undefined);
+        (command as any).parse = vi.fn(async () => ({ argv: ['api'], flags: { 'json-report': '/reports/api.json' } }));
+        await command.run();
+
+        expect(runUnitTests).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ jsonReport: '/reports/api.json' }));
+    });
+
     it.each(['', '0/2', '1/0', '3/2', '-1/2', '1.5/2', '1', '1/2/3', '1/2foo', ' 1/2', '01/2', '1/9007199254740992'])('rejects invalid shard %s before starting services', async (shard) => {
         await expect(createCommand(shard).run()).rejects.toThrow('--shard must be index/total');
 

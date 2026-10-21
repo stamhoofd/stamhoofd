@@ -302,6 +302,15 @@ jobs:
               run: >-
                   pnpm stam test api --ci --skip-build
                   --shard ${{ matrix.shard }}/2
+                  --json-report "${{ runner.temp }}/api-test-reports/api-${{ matrix.shard }}.json"
+            - name: Upload API test timings
+              if: ${{ !cancelled() }}
+              uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+              with:
+                  name: api-test-report-${{ matrix.shard }}
+                  path: ${{ runner.temp }}/api-test-reports/*.json
+                  if-no-files-found: error
+                  retention-days: 7
             - name: Run other backend app tests once
               if: ${{ !cancelled() && matrix.shard == 1 }}
               run: |

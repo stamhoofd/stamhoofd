@@ -139,6 +139,30 @@ describe('shared build orchestration', () => {
         ], expect.objectContaining({ cwd: '/repo/shared/utility' }));
     });
 
+    it('forwards JSON reporting while retaining console output', async () => {
+        await runUnitTests(context, {
+            packages: [{ name: 'utility', path: 'shared/utility', needsDatabase: false }],
+            skipBuild: true,
+            jsonReport: '/reports/api.json',
+        });
+
+        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', [
+            'exec', 'vitest', 'run', '--reporter=default', '--reporter=json', '--outputFile=/reports/api.json',
+        ], expect.objectContaining({ cwd: '/repo/shared/utility' }));
+    });
+
+    it('rejects a shared JSON report path for multiple packages before building or starting services', async () => {
+        await expect(runUnitTests(context, {
+            packages: [
+                { name: 'utility', path: 'shared/utility', needsDatabase: false },
+                { name: 'queues', path: 'backend/shared/queues', needsDatabase: false },
+            ],
+            jsonReport: '/reports/api.json',
+        })).rejects.toThrow('--json-report requires a single package');
+
+        expect(run).not.toHaveBeenCalled();
+    });
+
     it('runs unit tests without typechecking', async () => {
         const pkg = unitTestPackages.find(pkg => pkg.name === 'structures')!;
         await runUnitTests(context, { packages: [pkg], skipBuild: true });

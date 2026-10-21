@@ -173,12 +173,17 @@ export type UnitTestOptions = {
     coverage?: boolean;
     /** Vitest shard selection; each shard must run on a separate machine/worktree. */
     shard?: string;
+    /** JSON report path for a single package, in addition to the console reporter. */
+    jsonReport?: string;
 };
 
 export async function runUnitTests(context: CliContext, options: UnitTestOptions = {}): Promise<void> {
     const packages = options.packages ?? unitTestPackages;
     if (packages.length === 0) {
         throw new Error('No test packages selected.');
+    }
+    if (options.jsonReport !== undefined && packages.length !== 1) {
+        throw new Error('--json-report requires a single package');
     }
 
     if (!options.skipBuild) {
@@ -197,6 +202,9 @@ export async function runUnitTests(context: CliContext, options: UnitTestOptions
             const args = ['exec', 'vitest', 'run'];
             if (options.shard !== undefined) {
                 args.push('--shard', options.shard);
+            }
+            if (options.jsonReport !== undefined) {
+                args.push('--reporter=default', '--reporter=json', `--outputFile=${options.jsonReport}`);
             }
             if (options.coverage) {
                 args.push('--coverage');
