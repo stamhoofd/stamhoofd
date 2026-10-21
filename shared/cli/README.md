@@ -390,6 +390,8 @@ pnpm stam test e2e --clear
 Use `--workers <number>` to override Playwright's default worker count for a run.
 Use `--extra` to include tests tagged `@extra`.
 
+Use `--shard <index>/<total>` to run one part of the suite on a separate machine, for example `pnpm stam test e2e --shard 1/4 --workers 2`. Shard indices start at 1. Locally, prefer a single run with `--workers 4` or another explicit worker count; multiple shards in the same checkout share report paths and other run resources. The local default remains half the available logical CPUs, with a minimum of one worker.
+
 #### Running e2e tests without a MySQL container
 
 A MySQL that is already running on this machine can serve the e2e tests instead, which skips both the e2e MySQL container and the shared `stamhoofd-mysql` container (the e2e tests never use the development database):

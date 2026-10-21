@@ -1,9 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CliContext } from '../context/create-context.js';
 import { run, RunVerbosity } from './command-runner.js';
-import { buildAll, buildShared, coverageTestPackages, lint, migrate, runUnitTests, sharedBuildReadyCommand, sharedBuildWatchCommand, typecheck } from './monorepo-runner.js';
+import { buildAll, buildShared, coverageTestPackages, lint, migrate, runUnitTests, sharedBuildReadyCommand, sharedBuildWatchCommand, testE2e, typecheck } from './monorepo-runner.js';
+import { isPortListening } from './port-probe.js';
+import { CaddyService } from '../services/definitions/caddy-service.js';
 
 vi.mock('./command-runner.js', async importOriginal => ({ ...await importOriginal<typeof import('./command-runner.js')>(), run: vi.fn() }));
+vi.mock('./port-probe.js', () => ({ isPortListening: vi.fn() }));
+vi.mock('../services/shared-services.js', () => ({ startSharedServices: vi.fn() }));
+vi.mock('../services/definitions/caddy-service.js', () => ({ CaddyService: { reload: vi.fn() } }));
 
 const context: CliContext = {
     rootDir: '/repo',
@@ -23,6 +28,17 @@ describe('shared build orchestration', () => {
         await buildShared(context);
 
         expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', ['run', 'build:shared'], { cwd: '/repo', verbosity: RunVerbosity.Output });
+    });
+
+    it.each([undefined, '3/4'])('passes shard %s to Playwright without changing its reserved worker count', async (shard) => {
+        vi.mocked(isPortListening).mockResolvedValue(true);
+
+        await testE2e(context, { ci: true, clear: false, ui: false, skipBuild: true, localDb: true, workers: 2, shard });
+
+        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', [
+            '--dir', 'tests/playwright', 'run', 'test', '--workers', '2', ...(shard === undefined ? [] : ['--shard', shard]),
+        ], expect.objectContaining({ env: expect.objectContaining({ PLAYWRIGHT_WORKER_COUNT: '2', CI: 'true' }) }));
+        expect(CaddyService.reload).toHaveBeenCalledWith(context);
     });
 
     it('propagates a failed shared build', async () => {
