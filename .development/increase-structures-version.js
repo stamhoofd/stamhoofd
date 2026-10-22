@@ -196,7 +196,7 @@ async function loopFolder(folderPath) {
 }
 
 /**
- * Git worktrees (e.g. .claude/worktrees/*) and submodules contain a .git entry and have their own pending fields
+ * Nested git checkouts (worktrees, submodules) contain a .git entry and have their own pending fields
  */
 async function isNestedCheckout(folderPath) {
     try {

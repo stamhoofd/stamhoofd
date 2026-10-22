@@ -114,6 +114,16 @@ Run `pnpm stam config explain` or `pnpm stam config print` to inspect the resolv
 
 - Install all needed vscode extensions: [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar), [eslint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and [i18n Ally](https://marketplace.visualstudio.com/items?itemName=Lokalise.i18n-ally). Please use VSCode because that makes sure all the developer tools are the same (e.g. eslint).
 
+#### Git worktrees (optional)
+
+Keep worktrees outside the repository: a checkout nested inside another one breaks `pnpm clear` and other scripts that glob the whole repo. Claude Code creates its worktrees in `../stamhoofd-worktrees/<name>` through the `WorktreeCreate` hook in `.claude/settings.json`, which also disables commit signing there and runs `pnpm install`. To use another folder:
+
+```bash
+git config --global stamhoofd.worktreesDir ~/worktrees/stamhoofd
+```
+
+Drop `--global` to set it for this clone only. Every worktree needs its own `pnpm install`, and `stam` gives each one its own ports and databases based on the folder name.
+
 ### Building locally
 
 To run everything locally, use:

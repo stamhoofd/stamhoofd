@@ -15,6 +15,7 @@
 ## Scope and verification
 
 - Never change files unrelated to the current task.
+- Git worktrees live next to the main checkout in `../stamhoofd-worktrees/<name>`, or in the folder set with `git config stamhoofd.worktreesDir`; the `WorktreeCreate` hook in `.claude/settings.json` puts them there. Never create a worktree inside the repository (such as `.claude/worktrees`): nested checkouts break `pnpm clear` and other repo-wide scripts.
 - For bugfixes, verify a regression test fails before the fix and passes afterward.
 - Run all linting, typechecking, and tests before considering the work done. Follow the [development guidelines](contributing/development-guidelines.md) and [test command reference](shared/cli/README.md#tests). Report any checks that could not complete.
 
