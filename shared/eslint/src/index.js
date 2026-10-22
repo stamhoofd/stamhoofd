@@ -13,6 +13,7 @@ import node from './configs/node.js';
 import typescript from './configs/typescript.js';
 import asyncComponentWithProperties from './rules/async-component-with-properties.js';
 import asyncRouteComponents from './rules/async-route-components.js';
+import hrOnOwnLine from './rules/hr-on-own-line.js';
 import noPackageSelfImport from './rules/no-package-self-import.js';
 import noTRouteUrl from './rules/no-t-route-url.js';
 import preferDefineRoute from './rules/prefer-define-route.js';
@@ -20,6 +21,7 @@ import preferDefineRoute from './rules/prefer-define-route.js';
 const rules = {
     'async-component-with-properties': asyncComponentWithProperties,
     'async-route-components': asyncRouteComponents,
+    'hr-on-own-line': hrOnOwnLine,
     'no-package-self-import': noPackageSelfImport,
     'no-t-route-url': noTRouteUrl,
     'prefer-define-route': preferDefineRoute,
@@ -182,6 +184,8 @@ export default {
                         ],
                     }],
                     'stamhoofd/async-route-components': 'error',
+                    // TODO: change to 'error' once the existing violations are fixed.
+                    'stamhoofd/hr-on-own-line': 'warn',
                     'stamhoofd/no-t-route-url': 'error',
                     'stamhoofd/prefer-define-route': 'warn',
                     // TODO: restore to 'error' once the existing dependency cycles are resolved.
