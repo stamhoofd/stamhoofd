@@ -1663,6 +1663,10 @@
     "original": "Een voorbeeld is enkel beschikbaar bij het synchroniseren van één groep.",
     "translation": "Un exemple n'est disponible que lors de la synchronisation d'un seul groupe."
   },
+  "%Zy3": {
+    "original": "Kies een groep waarvan je beheerder bent. Daarna word je automatisch ingelogd in het feedbacksysteem.",
+    "translation": "Choisissez un groupe dont vous êtes gestionnaire. Vous serez ensuite connecté automatiquement au système de feedback."
+  },
   "%a6": {
     "original": "Portaal voor beroepsmedewerkers",
     "translation": "Portail pour les employés professionnels"

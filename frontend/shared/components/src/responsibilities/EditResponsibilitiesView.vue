@@ -54,17 +54,17 @@
 
         <template v-if="!organization && auth.hasPlatformFullAccess()">
             <hr>
-            <h2>{{ $t('Toegestane e-maildomeinen voor nationale functies') }}</h2>
-            <p>{{ $t('Leden met een nationale functie krijgen enkel de rechten van die functie via e-mailadressen op exact deze domeinen. Subdomeinen (bv. afdeling.voorbeeld.be) moet je apart toevoegen. Andere e-mailadressen van hetzelfde lid krijgen geen rechten. Laat leeg om geen beperkingen in te stellen.') }}</p>
+            <h2>{{ $t('%Zxy') }}</h2>
+            <p>{{ $t('%Zxz') }}</p>
 
-            <ArrayInput v-model="responsibilityEmailDomains" :default-value="() => ''" :title="$t('Domeinnamen')" error-fields="config.responsibilityEmailDomains" :error-box="errors.errorBox">
+            <ArrayInput v-model="responsibilityEmailDomains" :default-value="() => ''" :title="$t('%Zy1')" error-fields="config.responsibilityEmailDomains" :error-box="errors.errorBox">
                 <template #item="{index, modelValue, updateModelValue}">
                     <input :value="modelValue" class="input" type="text" inputmode="url" :placeholder="$t('%NE') + ' ' + (index + 1)" autocomplete="off" autocapitalize="off" spellcheck="false" @input="updateModelValue(($event.target as HTMLInputElement).value || '')">
                 </template>
 
                 <template #empty>
                     <p class="style-description-small">
-                        {{ $t('Alle e-mailadressen krijgen de rechten van nationale functies') }}
+                        {{ $t('%Zy4') }}
                     </p>
                 </template>
             </ArrayInput>

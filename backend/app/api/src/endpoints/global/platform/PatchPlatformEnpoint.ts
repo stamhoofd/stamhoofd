@@ -157,7 +157,7 @@ export class PatchPlatformEndpoint extends Endpoint<
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid domain name: ' + domain,
-                            human: $t('Ongeldige domeinnaam: {domain}', { domain }),
+                            human: $t('%Zxw', { domain }),
                             field: 'config.responsibilityEmailDomains',
                         });
                     }
@@ -174,7 +174,7 @@ export class PatchPlatformEndpoint extends Endpoint<
                     throw new SimpleError({
                         code: 'locked_out',
                         message: 'The email domain of the current user is not in the list, which would remove their platform access',
-                        human: $t('Je kan je eigen e-maildomein niet uitsluiten, anders verlies je zelf de toegang tot het platform.'),
+                        human: $t('%Zxx'),
                         field: 'config.responsibilityEmailDomains',
                     });
                 }

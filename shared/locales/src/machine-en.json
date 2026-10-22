@@ -21479,6 +21479,50 @@
     "original": "Ticket controleren...",
     "translation": "Checking ticket..."
   },
+  "%Zxw": {
+    "original": "Ongeldige domeinnaam: {domain}",
+    "translation": "Invalid domain name: {domain}"
+  },
+  "%Zxx": {
+    "original": "Je kan je eigen e-maildomein niet uitsluiten, anders verlies je zelf de toegang tot het platform.",
+    "translation": "You cannot exclude your own email domain, otherwise you will lose access to the platform yourself."
+  },
+  "%Zxy": {
+    "original": "Toegestane e-maildomeinen voor nationale functies",
+    "translation": "Allowed email domains for national roles"
+  },
+  "%Zxz": {
+    "original": "Leden met een nationale functie krijgen enkel de rechten van die functie via e-mailadressen op exact deze domeinen. Subdomeinen (bv. afdeling.voorbeeld.be) moet je apart toevoegen. Andere e-mailadressen van hetzelfde lid krijgen geen rechten. Laat leeg om geen beperkingen in te stellen.",
+    "translation": "Members with a national role only receive the permissions of that role through email addresses exactly matching these domains. Subdomains (e.g. department.example.be) need to be added separately. Other email addresses of the same member will not get permissions. Leave empty if you do not want to set any restrictions."
+  },
+  "%Zy0": {
+    "original": "Zonder winkelmandje kunnen er geen kortingscodes worden ingevoerd bij een bestelling, enkel de link kan dan gebruikt worden.",
+    "translation": "Without a shopping cart, discount codes can't be applied during checkout; only the link can be used."
+  },
+  "%Zy1": {
+    "original": "Domeinnamen",
+    "translation": "Domains"
+  },
+  "%Zy2": {
+    "original": "Ga naar het beheerdersportaal van {organization} om het toegangsbeheer van deze activiteit aan te passen.",
+    "translation": "Go to the administrator portal of {organization} to adjust access management for this activity."
+  },
+  "%Zy3": {
+    "original": "Kies een vereniging waarvan je beheerder bent. Daarna word je automatisch ingelogd in het feedbacksysteem.",
+    "translation": "Choose an association for which you are an administrator. Afterwards, you will be automatically logged into the feedback system."
+  },
+  "%Zy4": {
+    "original": "Alle e-mailadressen krijgen de rechten van nationale functies",
+    "translation": "All email addresses receive the permissions for national roles."
+  },
+  "%Zy5": {
+    "original": "Je hebt geen toegang om deze activiteit te bewerken, vraag het aan een beheerder.",
+    "translation": "You do not have access to edit this activity. Please ask an administrator."
+  },
+  "%Zy6": {
+    "original": "Ga naar het administratieportaal om het toegangsbeheer van deze nationale activiteit aan te passen.",
+    "translation": "Go to the administration portal to change the access management for this national activity."
+  },
   "%a0": {
     "original": "Kanaal",
     "translation": "Channel"

@@ -1839,6 +1839,10 @@
     "original": "Een voorbeeld is enkel beschikbaar bij het synchroniseren van één eenheid.",
     "translation": "Un exemple n'est disponible que lors de la synchronisation d'une seule unité."
   },
+  "%Zy3": {
+    "original": "Kies een eenheid waarvan je beheerder bent. Daarna word je automatisch ingelogd in het feedbacksysteem.",
+    "translation": "Choisissez une unité dont vous êtes administrateur. Vous serez ensuite automatiquement connecté au système de feedback."
+  },
   "%ad": {
     "original": "Een hoofdbeheerder van jouw eenheid moet eerst een afzender toevoegen die je kan gebruiken voor je een bericht kan versturen.",
     "translation": "Un administrateur principal de votre unité doit d'abord ajouter un expéditeur que vous pourrez utiliser pour envoyer un message."

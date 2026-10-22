@@ -7038,5 +7038,16 @@
   "%Zxs": "Eén artikel per bestelling",
   "%Zxt": "Snel bestellen zonder winkelmandje",
   "%Zxu": "Bestellingen ophalen... Dit gebeurt eenmalig, daarna zijn ze offline beschikbaar en laden ze sneller.",
-  "%Zxv": "Ticket controleren..."
+  "%Zxv": "Ticket controleren...",
+  "%Zxw": "Ongeldige domeinnaam: {domain}",
+  "%Zxx": "Je kan je eigen e-maildomein niet uitsluiten, anders verlies je zelf de toegang tot het platform.",
+  "%Zxy": "Toegestane e-maildomeinen voor nationale functies",
+  "%Zxz": "Leden met een nationale functie krijgen enkel de rechten van die functie via e-mailadressen op exact deze domeinen. Subdomeinen (bv. afdeling.voorbeeld.be) moet je apart toevoegen. Andere e-mailadressen van hetzelfde lid krijgen geen rechten. Laat leeg om geen beperkingen in te stellen.",
+  "%Zy0": "Zonder winkelmandje kunnen er geen kortingscodes worden ingevoerd bij een bestelling, enkel de link kan dan gebruikt worden.",
+  "%Zy1": "Domeinnamen",
+  "%Zy2": "Ga naar het beheerdersportaal van {organization} om het toegangsbeheer van deze activiteit aan te passen.",
+  "%Zy3": "Kies een vereniging waarvan je beheerder bent. Daarna word je automatisch ingelogd in het feedbacksysteem.",
+  "%Zy4": "Alle e-mailadressen krijgen de rechten van nationale functies",
+  "%Zy5": "Je hebt geen toegang om deze activiteit te bewerken, vraag het aan een beheerder.",
+  "%Zy6": "Ga naar het administratieportaal om het toegangsbeheer van deze nationale activiteit aan te passen."
 }

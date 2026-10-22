@@ -434,7 +434,7 @@ const canWriteEvent = computed(() => auth.canWriteEventForOrganization(props.eve
 // Roles are edited in the scope the event belongs to: organization roles for an organization event, platform roles for a national event.
 async function editPermissions() {
     if (!canWriteEvent.value) {
-        Toast.error($t('Je hebt geen toegang om deze activiteit te bewerken, vraag het aan een beheerder.')).show();
+        Toast.error($t('%Zy5')).show();
         return;
     }
     if (props.event.organizationId === (organization.value?.id ?? null)) {
@@ -442,10 +442,10 @@ async function editPermissions() {
         return;
     }
     if (props.event.organizationId === null) {
-        Toast.info($t('Ga naar het administratieportaal om het toegangsbeheer van deze nationale activiteit aan te passen.')).show();
+        Toast.info($t('%Zy6')).show();
         return;
     }
-    Toast.info($t('Ga naar het beheerdersportaal van {organization} om het toegangsbeheer van deze activiteit aan te passen.', { organization: eventOrganization.value?.name ?? $t('de organiserende #groep') })).show();
+    Toast.info($t('%Zy2', { organization: eventOrganization.value?.name ?? $t('de organiserende #groep') })).show();
 }
 
 const patchOrganizationPeriod = usePatchOrganizationPeriod();

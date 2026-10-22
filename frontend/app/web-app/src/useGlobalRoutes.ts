@@ -119,7 +119,7 @@ export function useGlobalRoutes() {
         }
 
         if (rememberPendingNoltLogin()) {
-            new Toast($t('Kies een vereniging waarvan je beheerder bent. Daarna word je automatisch ingelogd in het feedbacksysteem.'), 'info').setHide(15 * 1000).show();
+            new Toast($t('%Zy3'), 'info').setHide(15 * 1000).show();
         }
 
         await context.value.checkSSO();

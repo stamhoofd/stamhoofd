@@ -21663,6 +21663,50 @@
     "original": "Ticket controleren...",
     "translation": "Vérification du ticket..."
   },
+  "%Zxw": {
+    "original": "Ongeldige domeinnaam: {domain}",
+    "translation": "Nom de domaine invalide : {domain}"
+  },
+  "%Zxx": {
+    "original": "Je kan je eigen e-maildomein niet uitsluiten, anders verlies je zelf de toegang tot het platform.",
+    "translation": "Vous ne pouvez pas exclure votre propre domaine e-mail, sinon vous perdrez l'accès à la plateforme."
+  },
+  "%Zxy": {
+    "original": "Toegestane e-maildomeinen voor nationale functies",
+    "translation": "Domaines e-mail autorisés pour les fonctions nationales"
+  },
+  "%Zxz": {
+    "original": "Leden met een nationale functie krijgen enkel de rechten van die functie via e-mailadressen op exact deze domeinen. Subdomeinen (bv. afdeling.voorbeeld.be) moet je apart toevoegen. Andere e-mailadressen van hetzelfde lid krijgen geen rechten. Laat leeg om geen beperkingen in te stellen.",
+    "translation": "Les membres ayant une fonction nationale obtiennent les droits liés à cette fonction uniquement via des adresses e-mail qui utilisent précisément ces domaines. Les sous-domaines (par exemple, section.exemple.be) doivent être ajoutés séparément. Les autres adresses e-mail du même membre n'auront pas de droits. Laissez vide pour ne pas appliquer de restriction."
+  },
+  "%Zy0": {
+    "original": "Zonder winkelmandje kunnen er geen kortingscodes worden ingevoerd bij een bestelling, enkel de link kan dan gebruikt worden.",
+    "translation": "Sans panier, il n'est pas possible d'entrer des codes de réduction lors d'une commande, seule le lien peut être utilisé."
+  },
+  "%Zy1": {
+    "original": "Domeinnamen",
+    "translation": "Noms de domaine"
+  },
+  "%Zy2": {
+    "original": "Ga naar het beheerdersportaal van {organization} om het toegangsbeheer van deze activiteit aan te passen.",
+    "translation": "Allez dans le portail d'administration de {organization} pour modifier la gestion d'accès de cette activité."
+  },
+  "%Zy3": {
+    "original": "Kies een vereniging waarvan je beheerder bent. Daarna word je automatisch ingelogd in het feedbacksysteem.",
+    "translation": "Choisissez une association dont vous êtes administrateur. Vous serez ensuite automatiquement connecté au système de feedback."
+  },
+  "%Zy4": {
+    "original": "Alle e-mailadressen krijgen de rechten van nationale functies",
+    "translation": "Toutes les adresses e-mail reçoivent les droits des fonctions nationales"
+  },
+  "%Zy5": {
+    "original": "Je hebt geen toegang om deze activiteit te bewerken, vraag het aan een beheerder.",
+    "translation": "Vous n'avez pas accès pour modifier cette activité, veuillez en faire la demande à un administrateur."
+  },
+  "%Zy6": {
+    "original": "Ga naar het administratieportaal om het toegangsbeheer van deze nationale activiteit aan te passen.",
+    "translation": "Rendez-vous sur le portail d'administration pour gérer l'accès à cette activité nationale."
+  },
   "%a": {
     "original": "Extra Stripe account",
     "translation": "Compte Stripe supplémentaire"
