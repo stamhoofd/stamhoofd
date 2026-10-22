@@ -1,3 +1,4 @@
+import { ObjectData } from '@simonbackx/simple-encoding';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { AccessRightHelper } from './AccessRight.js';
 import { MemberResponsibility } from './MemberResponsibility.js';
@@ -14,7 +15,7 @@ import { UserPermissions } from './UserPermissions.js';
 
 /**
  * Build the resources map that grants platform level permissions per organization tag.
- * The empty string key means 'all tags'.
+ * The PermissionsResourceKey.All key means 'all tags'.
  */
 function createTagResources(tagPermissions: Record<string, ResourcePermissions>) {
     return new Map([
@@ -173,6 +174,27 @@ describe('Unit.UserPermissions', () => {
             const tagged = userPermissions.forOrganization(createOrganization({ tags: ['tag-a'] }), platform);
             expect(tagged).not.toBeNull();
             expect(tagged!.hasReadAccess()).toBe(true);
+        });
+
+        test('applies legacy platform permissions stored with the empty string key to an organization without tags', () => {
+            // Before version 418 the empty string was the key for 'all tags'
+            const encoded = {
+                globalPermissions: {
+                    level: PermissionLevel.None,
+                    resources: {
+                        [PermissionsResourceType.OrganizationTags]: {
+                            '': ResourcePermissions.create({ level: PermissionLevel.Read }).encode({ version: 417 }),
+                        },
+                    },
+                },
+                organizationPermissions: {},
+            };
+            const userPermissions = UserPermissions.decode(new ObjectData(encoded, { version: 417 }));
+
+            const result = userPermissions.forOrganization(createOrganization({ tags: [] }), createPlatform());
+            expect(result).not.toBeNull();
+            expect(result!.hasReadAccess()).toBe(true);
+            expect(result!.hasWriteAccess()).toBe(false);
         });
 
         test('does not apply platform permissions of a specific tag to an organization without tags', () => {
