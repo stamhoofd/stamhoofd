@@ -1,23 +1,33 @@
 {
     "name": "@stamhoofd/backend-statistics-syncer",
-    "version": "2.154.0",
+    "version": "2.155.0",
     "type": "module",
     "main": "./dist/index.js",
     "exports": {
         ".": {
+            "types": "./dist-types/index.d.ts",
             "require": "./dist/index.js"
         }
     },
+    "types": "./dist-types/index.d.ts",
+    "files": [
+        "dist",
+        "dist-types",
+        "src",
+        "*.ts",
+        "tsconfig*.json"
+    ],
     "scripts": {
+        "build:types": "tsc --project tsconfig.types.json",
         "build": "tsc --build tsconfig.build.json && mkdir -p ./dist/src/migrations && rsync --delete --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/migrations/ ./dist/src/migrations/",
         "build:watch": "pnpm run build && tsc --build tsconfig.build.json --watch --preserveWatchOutput",
         "build:full": "pnpm run clear && pnpm run build",
         "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
         "dev": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'pnpm run build:watch' \"wait-on ./dist/index.js && nodemon --quiet --inspect=5859 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
-        "lint": "eslint",
+        "lint": "eslint --quiet",
         "migrations": "pnpm run build:full && node ./dist/migrations.js",
         "start": "pnpm run build && node --enable-source-maps ./dist/index.js",
-        "typecheck": "tsc --build tsconfig.test.json",
+        "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
         "test": "vitest",
         "test:coverage": "vitest --coverage"
     },
@@ -35,7 +45,7 @@
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
-        "mysql2": "3.24.4"
+        "mysql2": "3.24.5"
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "workspace:*",

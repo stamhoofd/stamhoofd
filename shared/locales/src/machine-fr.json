@@ -3923,10 +3923,6 @@
     "original": "Inhoud",
     "translation": "Contenu"
   },
-  "%1GC": {
-    "original": "Andere start eind/datum dan werkjaar",
-    "translation": "Autre date de début/fin que l'année associative"
-  },
   "%1GD": {
     "original": "Tijdstip",
     "translation": "Heure"
@@ -4878,10 +4874,6 @@
   "%1KE": {
     "original": "Een geannuleerde betaling zorgt ervoor dat een nieuwe poging tot betaling ondernomen kan worden - eventueel via een andere betaalmethode. Gebruik het om een betaling definitief als niet-betaald te markeren. De openstaande schuld van de schuldenaar stijgt dan opnieuw en het deel ‘in verwerking’ daalt terug.",
     "translation": "L'annulation d'un paiement permet de tenter un nouveau paiement, éventuellement avec une autre méthode. Utilisez cette option pour indiquer qu'un paiement reste définitivement impayé. La dette ouverte du débiteur augmentera à nouveau et la partie « en traitement » diminuera."
-  },
-  "%1KF": {
-    "original": "Alle verenigingen waarvoor het lid is ingeschreven",
-    "translation": "Toutes les associations pour lesquelles le membre est inscrit"
   },
   "%1KG": {
     "original": "factuur",
@@ -10486,10 +10478,6 @@
   "%8U": {
     "original": "Filter op leden die een inschrijving (zowel huidig werkjaar of in een afgelopen werkjaar) heeft die aan deze voorwaarden voldoet.",
     "translation": "Filtrer sur les membres ayant une inscription (année associative en cours ou année associative passée) qui répond aux conditions."
-  },
-  "%8V": {
-    "original": "Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorig werkjaar van gelijk welke inschrijvingsgroep.",
-    "translation": "Les membres sont considérés comme existants s'ils sont inscrits pour une année associative précédente de n'importe quel groupe d'inscription."
   },
   "%8X": {
     "original": "Onbekend werkjaar",
@@ -21243,10 +21231,6 @@
     "original": "Vul een code in.",
     "translation": "Entrez un code."
   },
-  "%Zvr": {
-    "original": "Vic kan niet worden aangemeld via het ledenportaal. Voeg een telefoonnummer of e-mailadres toe zodat men zelf de beveiliginscode kan aanvragen.",
-    "translation": "Vic ne peut pas être inscrit via le portail des membres. Ajoutez un numéro de téléphone ou une adresse e-mail afin que le code de sécurité puisse être demandé."
-  },
   "%Zvs": {
     "original": "Er staan nog geen audiences in je Mailchimp-account. Maak er eerst één aan in Mailchimp.",
     "translation": "Il n'y a pas encore d'audiences dans votre compte Mailchimp. Créez-en une d'abord dans Mailchimp."
@@ -21614,6 +21598,70 @@
   "%Zxe": {
     "original": "Vul een geldig e-mailadres in.",
     "translation": "Veuillez saisir une adresse e-mail valide."
+  },
+  "%Zxf": {
+    "original": "{firstName} kan niet worden aangemeld via het ledenportaal. Voeg een telefoonnummer of e-mailadres toe zodat men zelf de beveiliginscode kan aanvragen.",
+    "translation": "{firstName} ne peut pas être connecté via le portail des membres. Ajoutez un numéro de téléphone ou une adresse e-mail afin que la personne puisse demander elle-même le code de sécurité."
+  },
+  "%Zxg": {
+    "original": "Bestellingen ophalen...",
+    "translation": "Chargement des commandes..."
+  },
+  "%Zxi": {
+    "original": "Het nummer van de vereniging waartoe het lid hoort",
+    "translation": "Le numéro de l'association à laquelle appartient le membre"
+  },
+  "%Zxj": {
+    "original": "Andere start- of einddatum dan werkjaar",
+    "translation": "Date de début ou de fin différente de l'année associative"
+  },
+  "%Zxk": {
+    "original": "De vereniging waartoe het lid hoort",
+    "translation": "L'association à laquelle appartient le membre"
+  },
+  "%Zxl": {
+    "original": "Vereniging van het lid",
+    "translation": "Association du membre"
+  },
+  "%Zxm": {
+    "original": "Leden worden als bestaand beschouwd als ze ingeschreven zijn voor gelijk welke inschrijvingsgroep van het vorige, huidige of volgende werkjaar.",
+    "translation": "Les membres sont considérés comme existants s'ils sont inscrits dans n'importe quel groupe d'inscription de l'année associative précédente, actuelle ou suivante."
+  },
+  "%Zxn": {
+    "original": "Groepsnummer van het lid",
+    "translation": "Numéro de groupe du membre"
+  },
+  "%Zxo": {
+    "original": "Alle leden die in het huidige werkjaar ingeschreven zijn, en hun ouders, komen in Mailchimp met een tag per standaard leeftijdsgroep en per vereniging. Leden met een functie van {platform} krijgen ook een tag per functie.",
+    "translation": "Tous les membres inscrits pour l'année associative en cours, ainsi que leurs parents, sont ajoutés à Mailchimp avec un tag pour chaque groupe d'âge standard et chaque association. Les membres exerçant une fonction sur {platform} reçoivent également un tag pour chaque fonction."
+  },
+  "%Zxp": {
+    "original": "Hoeveel e-mailadressen naar Mailchimp gaan en hoeveel er worden overgeslagen, zie je na afloop van de synchronisatie.",
+    "translation": "Après la synchronisation, vous verrez combien d’adresses e-mail ont été envoyées à Mailchimp et combien ont été ignorées."
+  },
+  "%Zxq": {
+    "original": "Een voorbeeld is enkel beschikbaar bij het synchroniseren van één vereniging.",
+    "translation": "Un exemple n'est disponible que lors de la synchronisation d'une seule association."
+  },
+  "%Zxr": {
+    "original": "Dit ticket staat nog niet op dit toestel en kon niet online gecontroleerd worden door een trage internetverbinding. Probeer opnieuw.",
+    "translation": "Ce ticket n'est pas encore enregistré sur cet appareil et n’a pas pu être vérifié en ligne à cause d'une connexion internet lente. Veuillez réessayer."
+  },
+  "%Zxs": {
+    "original": "Eén artikel per bestelling",
+    "translation": "Un article par commande"
+  },
+  "%Zxt": {
+    "original": "Snel bestellen zonder winkelmandje",
+    "translation": "Commander rapidement sans panier"
+  },
+  "%Zxu": {
+    "original": "Bestellingen ophalen... Dit gebeurt eenmalig, daarna zijn ze offline beschikbaar en laden ze sneller.",
+    "translation": "Chargement des commandes... Cette opération n’est effectuée qu’une seule fois, ensuite elles sont disponibles hors ligne et se chargent plus rapidement."
+  },
+  "%Zxv": {
+    "original": "Ticket controleren...",
+    "translation": "Vérification du ticket..."
   },
   "%a": {
     "original": "Extra Stripe account",

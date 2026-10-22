@@ -2,10 +2,10 @@ import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
 import { ArrayDecoder, ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { EventBus } from '@stamhoofd/components/EventBus.ts';
+import { EventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import type { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import { fetchAll } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { CountFilteredRequest, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, TicketPrivate, Version } from '@stamhoofd/structures';
 import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
@@ -120,18 +120,11 @@ export class WebshopTicketsRepo {
             return tickets.filter(t => !t.deletedAt);
         }
 
-        const patchedTickets: TicketPrivate[] = [];
-
-        for (const ticket of tickets) {
-            const patch = await this.patchesStore.get(ticket.secret, openTransaction);
-            if (patch) {
-                const patched = ticket.patch(patch);
-                patchedTickets.push(patched);
-                continue;
-            }
-
-            patchedTickets.push(ticket);
-        }
+        const patches = await Promise.all(tickets.map(ticket => this.patchesStore.get(ticket.secret, openTransaction)));
+        const patchedTickets = tickets.map((ticket, index) => {
+            const patch = patches[index];
+            return patch ? ticket.patch(patch) : ticket;
+        });
 
         return patchedTickets.filter(t => !t.deletedAt);
     }
@@ -284,22 +277,20 @@ export class WebshopTicketsStore {
         await new Promise<void>((resolve, reject) => {
             const transaction = openTransaction ?? db.transaction([WebshopTicketsStore.storeName], 'readonly');
 
-            transaction.onerror = (event) => {
-                // Don't forget to handle errors!
-                if (openTransaction && openTransaction.onerror) {
-                    openTransaction.onerror(event);
-                }
+            // The error of a request also reaches the onerror of its transaction, which an openTransaction's owner handles
+            if (!openTransaction) {
+                transaction.onerror = (event) => {
+                    reject(event);
+                };
+            }
 
-                reject(event);
-            };
-
-            // Do the actual saving
             const objectStore = transaction.objectStore(WebshopTicketsStore.storeName);
 
             const orderIndex = objectStore.index('orderId');
 
             const range = IDBKeyRange.only(orderId);
             const request = orderIndex.openCursor(range);
+            request.onerror = () => reject(request.error);
 
             request.onsuccess = (event: any) => {
                 const cursor = event.target.result;

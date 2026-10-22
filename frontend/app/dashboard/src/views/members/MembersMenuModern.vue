@@ -74,23 +74,26 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 
-import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods.ts';
+import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/components/hooks/networking/useFetchOrganizationRegistrationPeriods.ts';
 import { GroupType } from '@stamhoofd/structures/GroupType.js';
 import { Organization } from '@stamhoofd/structures/Organization.js';
-import { PermissionLevel } from '@stamhoofd/structures/PermissionLevel.js';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import type { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures/RegistrationPeriod.js';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, onActivated, watch } from 'vue';
+import { computed, onActivated, resolveComponent, watch } from 'vue';
 
 import { useCreateCategoryView } from '../dashboard/settings/hooks/useCreateCategoryView';
 import { useCreateGroupView } from '../dashboard/settings/hooks/useCreateGroupView';
 import GroupCategoryMenuBox from './GroupCategoryMenuBox.vue';
+
+defineOptions({ name: 'MembersMenuModern' });
 
 const props = withDefaults(defineProps<{
     period?: OrganizationRegistrationPeriod | null;
 }>(), {
     period: null,
 });
+const currentComponent = resolveComponent('MembersMenuModern');
 
 const context = useContext();
 const $navigate = useNavigate();
@@ -116,9 +119,7 @@ const createCategoryView = useCreateCategoryView();
 const createGroupView = useCreateGroupView();
 const rootCategory = computed(() => period.value.settings.rootCategory);
 
-const showAll = computed(() => {
-    return tree.value.categories.length > 1 || tree.value.getAllGroups().length > 1;
-});
+const showAll = computed(() => tree.value.getAllGroups().length > 1); // Ignore number of categories here, because you could have many categories, but still no access to any member
 
 const groupsWarning = computed((): 'none' | 'no-access' | null => {
     const hasGroups = period.value.groups.some(g => g.type === GroupType.Membership && g.deletedAt === null);
@@ -155,7 +156,7 @@ defineRoute({
     },
     component: (props: { period: OrganizationRegistrationPeriod }) => {
         return new ComponentWithProperties(SplitViewController, {
-            root: AsyncComponent(() => import('./MembersMenuModern.vue'), props),
+            root: new ComponentWithProperties(currentComponent, props),
         });
     },
     show: {

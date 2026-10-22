@@ -1,10 +1,12 @@
 export * from './SQL.js';
 export * from './SQLExpression.js';
 export * from './SQLExpressions.js';
+export { SQLIf } from './SQLIf.js';
 export * from './SQLJsonExpressions.js';
 export * from './SQLWhere.js';
 export * from './SQLSelect.js';
-export { createColumnFilter, createWildcardColumnFilter, createExistsFilter, createJoinedRelationFilter, SQLValueType, compileToSQLFilter, baseSQLFilterCompilers, type SQLFilterDefinitions } from './filters/SQLFilter.js';
+export { createColumnFilter, createWildcardColumnFilter, createExistsFilter, createJoinedRelationFilter, compileToSQLFilter, baseSQLFilterCompilers } from './filters/SQLFilter.js';
+export { SQLValueType, type SQLFilterDefinitions } from './filters/SQLFilterTypes.js';
 export * from './filters/SQLSorter.js';
 export * from './SQLOrderBy.js';
 export * from './SQLInsert.js';

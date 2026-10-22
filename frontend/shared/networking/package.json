@@ -15,30 +15,27 @@
         "#*": "./src/*.ts"
     },
     "scripts": {
-        "lint": "eslint",
-        "typecheck": "vue-tsc --noEmit"
+        "lint": "eslint --quiet",
+        "test": "vitest run",
+        "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "dependencies": {
+        "@stamhoofd/frontend-notifications": "workspace:*",
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-networking": "1.23.0",
         "@simonbackx/vue-app-navigation": "2.25.1",
-        "@simplewebauthn/browser": "13.3.0",
-        "@stamhoofd/components": "workspace:*",
-        "@stamhoofd/frontend-i18n": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
-        "vue": "3.5.43",
-        "file-saver": "2.0.5"
+        "vue": "3.5.43"
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "workspace:*",
         "@stamhoofd/vite-config": "workspace:*",
-        "@types/file-saver": "2.0.7",
         "@vitest/browser": "4.1.11",
         "eslint-plugin-stamhoofd": "workspace:*",
-        "vite": "8.3.1",
+        "vite": "8.3.2",
         "vitest": "4.1.11",
         "vitest-browser-vue": "2.1.0"
     }

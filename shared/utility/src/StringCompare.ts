@@ -1,6 +1,25 @@
 import { Formatter } from './Formatter.js';
 
+const baseLetters: Record<string, string> = { ø: 'o', đ: 'd', ł: 'l', ħ: 'h', ð: 'd', ŀ: 'l' };
+const expandedLetters: Record<string, string> = { æ: 'ae', ß: 'ss', œ: 'oe', ĳ: 'ij', ﬁ: 'fi' };
+
 export class StringCompare {
+    /**
+     * Lowercases the text and removes its accents, so it compares like MySQL's utf8mb4_0900_ai_ci collation.
+     * That collation also treats a few letters without a separate accent (like ø) as their base letter.
+     */
+    static normalize(text: string): string {
+        return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[øđłħðŀ]/g, letter => baseLetters[letter]);
+    }
+
+    /**
+     * Like normalize, but also writes the letters that MySQL considers equal to two letters (like æ and ae) as those
+     * two letters. MySQL only does this for equality, not for LIKE.
+     */
+    static normalizeForEquality(text: string): string {
+        return this.normalize(text).replace(/[æßœĳﬁ]/g, letter => expandedLetters[letter]);
+    }
+
     /**
      * Return the search score = percentage (floating point) that matches.
      * Returns zero if no match is found or if minimum percentage is not met

@@ -4,14 +4,14 @@ import type { usePresent } from '@simonbackx/vue-app-navigation';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent, LoadComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { RecipientChooseOneOption } from '@stamhoofd/components/email/EmailView.vue';
-import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { isMailchimpReady } from '@stamhoofd/components/mailchimp/useMailchimp.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
-import type { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import type { OrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import type { ExcelWorkbookFilter, Platform, PrivateOrderWithTickets } from '@stamhoofd/structures';
 import { EmailRecipientSubfilter, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PrivateOrder, TicketPrivate } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
@@ -389,7 +389,7 @@ export class OrderActionBuilder {
         await this.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
-                    root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
+                    root: AsyncComponent(() => import('@stamhoofd/components/export/ExcelExportView.vue'), {
                         workbook: getSelectableWorkbook(webshop, orders, organization),
                         configurationId: 'webshop-orders-' + webshop.id,
                         localExporter: async (workbookFilter: ExcelWorkbookFilter) => {

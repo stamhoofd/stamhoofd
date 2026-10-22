@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { RelationFilterOption } from './RelationUIFilter';
+import type { RelationFilterOption } from './RelationFilterTypes';
 import { getRelationFilterDisplayOptions } from './relationFilterOptions';
 
 function option(name: string, value = name): RelationFilterOption<string> {

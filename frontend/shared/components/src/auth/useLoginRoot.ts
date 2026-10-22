@@ -6,7 +6,7 @@ import type { TranslatedUrl } from '#containers/TranslatedUrl.ts';
 import { useAppContext } from '#context/appContext';
 import { useContext } from '#hooks/useContext.ts';
 import { ComponentWithProperties, NavigationController, UrlHelper } from '@simonbackx/vue-app-navigation';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 
 export function useLoginRoot() {
     const context = useContext();

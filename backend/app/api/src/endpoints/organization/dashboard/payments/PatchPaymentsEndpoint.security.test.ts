@@ -3,7 +3,10 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { BalanceItem, Organization, User } from '@stamhoofd/models';
 import { BalanceItemFactory, BalanceItemPayment, GroupFactory, MemberFactory, OrganizationFactory, Payment, RegistrationFactory, UserFactory } from '@stamhoofd/models';
-import { AccessRight, BalanceItemDetailed, BalanceItemPaymentDetailed, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { BalanceItemDetailed, BalanceItemPaymentDetailed, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, Permissions, ResourcePermissions, Version } from '@stamhoofd/structures';
 import { STExpect } from '@stamhoofd/test-utils';
 
 import { testServer } from '../../../../../tests/helpers/TestServer.js';

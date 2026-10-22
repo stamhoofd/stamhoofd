@@ -1,4 +1,6 @@
 import { Formatter } from '@stamhoofd/utility';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { v4 as uuidv4 } from 'uuid';
 import { STPackage, STPackageMeta, STPackageType, STPricingType } from './STPackage.js';
 
 /**
@@ -19,6 +21,76 @@ export enum STPackageBundle {
 }
 
 export class STPackageBundleHelper {
+    /**
+     * Used for renewal. Should this package renew as what bundle?
+     */
+    static getBundle(type: STPackageType): STPackageBundle {
+        switch (type) {
+            case STPackageType.LegacyMembers:
+            case STPackageType.Members:
+                return STPackageBundle.Members;
+
+            case STPackageType.Webshops:
+            case STPackageType.SingleWebshop:
+                return STPackageBundle.Webshops;
+
+            case STPackageType.TrialMembers:
+                return STPackageBundle.TrialMembers;
+
+            case STPackageType.TrialWebshops:
+                return STPackageBundle.TrialWebshops;
+        }
+    }
+
+    /**
+     * Package as if it has been renewed
+     */
+    static createRenewed(original: STPackage): STPackage {
+        if (!original.meta.allowRenew) {
+            throw new SimpleError({
+                code: 'not_allowed',
+                message: 'Not allowed',
+                human: $t(`%x7`),
+            });
+        }
+
+        if (!original.meta.keepPricesOnRenewal) {
+            return this.getCurrentPackage(
+                this.getBundle(original.meta.type),
+                new Date(Math.max(new Date().getTime(), original.validUntil?.getTime() ?? 0)),
+            );
+        }
+
+        const pack = original.clone();
+        pack.id = uuidv4();
+
+        // Not yet valid / active (ignored until valid)
+        pack.validAt = null;
+
+        const start = Formatter.luxon(new Date(Math.max(new Date().getTime(), original.endDate?.getTime() ?? 0) + 1_000)).startOf('day');
+        const validUntil = start.plus({ years: 1 }).endOf('day');
+        const removeAt = validUntil.plus({ months: 1 }).endOf('day');
+
+        pack.meta.paidAmount = 0;
+        pack.meta.paidPrice = 0;
+        pack.meta.firstFailedPayment = null;
+        pack.meta.didRenewId = original.id;
+
+        // Duration for renewals is always a year ATM
+        pack.meta.startDate = start.toJSDate();
+        pack.validUntil = validUntil.toJSDate();
+
+        // Remove (= not renewable) if not renewed after 3 months
+        pack.removeAt = removeAt.toJSDate();
+
+        if (original.meta.type === STPackageType.SingleWebshop) {
+            // Deprecated package
+            pack.meta.type = STPackageType.Webshops;
+        }
+
+        return pack;
+    }
+
     static getTitle(bundle: STPackageBundle): string {
         switch (bundle) {
             case STPackageBundle.Members: return $t(`%Om`);

@@ -1,6 +1,6 @@
 import type { Organization } from '@stamhoofd/models';
 import { Platform } from '@stamhoofd/models';
-import type { AccessRight } from '@stamhoofd/structures';
+import type { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionRoleDetailed } from '@stamhoofd/structures';
 
 export async function initPermissionRole(

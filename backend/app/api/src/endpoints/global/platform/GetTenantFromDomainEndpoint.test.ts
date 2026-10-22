@@ -2,7 +2,8 @@ import { Database } from '@simonbackx/simple-database';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Token } from '@stamhoofd/models';
 import { Platform, ROOT_TENANT_ID, UserFactory } from '@stamhoofd/models';
-import { PermissionLevel, Permissions, PlatformPrivateConfig, Version } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Permissions, PlatformPrivateConfig, Version } from '@stamhoofd/structures';
 import { STExpect } from '@stamhoofd/test-utils';
 
 import { testServer } from '../../../../tests/helpers/TestServer.js';

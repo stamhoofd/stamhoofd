@@ -193,7 +193,7 @@ import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.
 
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 
-import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
@@ -208,12 +208,14 @@ import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vu
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 
-import { useGetGroupsById } from '@stamhoofd/networking/hooks/useGetGroups';
-import { useGetPeriods } from '@stamhoofd/networking/hooks/useGetPeriods';
-import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useGetGroupsById } from '@stamhoofd/components/hooks/networking/useGetGroups';
+import { useGetPeriods } from '@stamhoofd/components/hooks/networking/useGetPeriods';
+import { usePatchOrganizationPeriod } from '@stamhoofd/components/hooks/networking/usePatchOrganizationPeriod';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import type { Group, MemberResponsibility, Organization, OrganizationRegistrationPeriod, RegistrationPeriod, TranslatedString } from '@stamhoofd/structures';
-import { EmailTemplateType, Event, EventLocation, EventMeta, GroupStatus, GroupType, NamedObject, PermissionLevel, PermissionsResourceType, RichText } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { EmailTemplateType, Event, EventLocation, EventMeta, GroupStatus, GroupType, NamedObject, RichText } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 

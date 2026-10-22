@@ -114,7 +114,7 @@ function created() {
 
         if (isSupported) {
             // Start downloading before the scanner opens, so tickets are available sooner
-            props.webshopManager.syncForScanner().catch(console.error);
+            props.webshopManager.syncAll().catch(console.error);
         }
     }).catch(console.error);
 }

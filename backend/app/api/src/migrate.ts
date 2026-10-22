@@ -12,6 +12,7 @@ import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import { QueryableModel } from '@stamhoofd/sql';
 import { createRequire } from 'node:module';
 import { GlobalHelper } from './helpers/GlobalHelper.js';
+import { withMigrationOutput } from './helpers/migrationOutput.js';
 const require = createRequire(import.meta.url);
 
 const emailPath = require.resolve('@stamhoofd/email');
@@ -83,8 +84,9 @@ const start = async () => {
     }
 };
 
-export async function run() {
-    await start()
+/** Manual and production migrations stay verbose; test callers can opt out of successful output. */
+export async function run({ verbose = true }: { verbose?: boolean } = {}) {
+    await withMigrationOutput(start, verbose)
         .catch((error) => {
             console.error('unhandledRejection', error);
             process.exit(1);

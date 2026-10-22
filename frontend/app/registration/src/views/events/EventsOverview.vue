@@ -52,7 +52,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useInfiniteObjectFetcher } from '@stamhoofd/components/tables/classes/InfiniteObjectFetcher.ts';
 import InfiniteObjectFetcherEnd from '@stamhoofd/components/tables/InfiniteObjectFetcherEnd.vue';
 import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet.ts';
-import { useMemberManager } from '@stamhoofd/networking/MemberManager';
+import { useMemberManager } from '@stamhoofd/frontend-application/MemberManager';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { Event, isEmptyFilter, isEqualFilter, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

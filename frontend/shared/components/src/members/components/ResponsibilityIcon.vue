@@ -11,8 +11,9 @@
 </template>
 
 <script lang="ts" setup>
-import type { Group, MemberResponsibility, Organization} from '@stamhoofd/structures';
-import { LoadedPermissions, PermissionLevel } from '@stamhoofd/structures';
+import type { Group, MemberResponsibility, Organization } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { LoadedPermissions } from '@stamhoofd/structures';
 
 const props = withDefaults(
     defineProps<{

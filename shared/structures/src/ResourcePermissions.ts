@@ -1,13 +1,20 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { AutoEncoder, field, StringDecoder, EnumDecoder, ArrayDecoder, PatchMap } from '@simonbackx/simple-encoding';
-import { AccessRight, AccessRightHelper } from './AccessRight.js';
-import { PermissionLevel, getPermissionLevelNumber } from './PermissionLevel.js';
-import type { PermissionRoleDetailed } from './PermissionRole.js';
-import type { PermissionsResourceType } from './PermissionsResourceType.js';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { AccessRightHelper } from './AccessRight.js';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { getPermissionLevelNumber } from './PermissionLevel.js';
+import type { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import { getPermissionResourceTypeName, PermissionsResourceKey } from './PermissionsResourceType.js';
 import { Formatter } from '@stamhoofd/utility';
 
 type ResourceLike = { accessRights: AccessRight[]; level: PermissionLevel; isEmpty: boolean; resourceName?: string };
+type ResourcePermissionsInsertPatchMap = PatchMap<
+    PermissionsResourceType,
+    Map<string, ResourcePermissions>
+    | PatchMap<string, ResourcePermissions | AutoEncoderPatchType<ResourcePermissions> | null>
+    | null
+>;
 
 /**
  * More granular access rights to specific things in the system
@@ -56,22 +63,21 @@ export class ResourcePermissions extends AutoEncoder {
         return ResourcePermissions.create({ level: source.level, accessRights: source.accessRights });
     }
 
-    createInsertPatch(type: PermissionsResourceType, resourceId: string, roleOrPermissions: PermissionRoleDetailed): AutoEncoderPatchType<PermissionRoleDetailed>;
-    createInsertPatch(type: PermissionsResourceType, resourceId: string, roleOrPermissions: import('./Permissions.js').Permissions): AutoEncoderPatchType<import('./Permissions.js').Permissions>;
-    createInsertPatch(type: PermissionsResourceType, resourceId: string, roleOrPermissions: PermissionRoleDetailed | import('./Permissions.js').Permissions): AutoEncoderPatchType<PermissionRoleDetailed> | AutoEncoderPatchType<import('./Permissions.js').Permissions> {
-        const patch = roleOrPermissions.static.patch({}) as AutoEncoderPatchType<PermissionRoleDetailed> | AutoEncoderPatchType<import('./Permissions.js').Permissions>;
+    createInsertPatch<T extends AutoEncoder & { resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> }>(type: PermissionsResourceType, resourceId: string, roleOrPermissions: T): AutoEncoderPatchType<T> {
+        const patch = roleOrPermissions.static.patch({}) as AutoEncoderPatchType<T>;
+        const resources = patch.resources as ResourcePermissionsInsertPatchMap;
 
         // First check if we need to insert the type
         if (roleOrPermissions.resources.get(type)) {
             // We need to patch
             const p = new PatchMap<string, ResourcePermissions | AutoEncoderPatchType<ResourcePermissions> | null>();
             p.set(resourceId, this);
-            patch.resources.set(type, p);
+            resources.set(type, p);
         } else {
             // No resources with this type yet
             const p = new Map<string, ResourcePermissions>();
             p.set(resourceId, this);
-            patch.resources.set(type, p);
+            resources.set(type, p);
         }
 
         return patch;
@@ -146,8 +152,11 @@ export class ResourcePermissions extends AutoEncoder {
 
                 const name = getPermissionResourceTypeName(type, true) + (key === PermissionsResourceKey.CurrentPeriod ? ' ' + $t('%Zrx') : '');
                 const accessRights = all.accessRights.map(a => AccessRightHelper.getDescription(a));
+                allDescriptions.push(resourceDescription(all));
+
                 if (all.level === PermissionLevel.None) {
                     stack.push($t(`%nF`) + ' ' + name + ': ' + Formatter.joinLast(accessRights, ', ', ' ' + $t(`%M1`) + ' '));
+                    continue;
                 }
 
                 let prefix = $t(`%nF`) + ' ';
@@ -161,7 +170,6 @@ export class ResourcePermissions extends AutoEncoder {
                 }
 
                 stack.push(prefix + name + suffix + (accessRights.length > 0 ? ' ' + $t(`%nE`) + ' ' + Formatter.joinLast(accessRights, ', ', ' ' + $t(`%M1`) + ' ') : ''));
-                allDescriptions.push(resourceDescription(all));
             }
 
             const countsPer = new Map<string, { count: number; firstName: string | null }>();

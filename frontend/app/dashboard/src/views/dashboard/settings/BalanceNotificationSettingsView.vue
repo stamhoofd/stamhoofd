@@ -88,8 +88,8 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import { BalanceNotificationSettings, FilterWrapperMarker, OrganizationPrivateMetaData, unwrapFilter } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 

@@ -5,7 +5,10 @@ import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, Memb
 import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Webshop } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import type { GroupCategory, MemberDetails, MemberWithRegistrationsBlob, Platform as PlatformStruct, RecordAnswer, RecordSettings, RegistrationPeriodBase, ResourcePermissions } from '@stamhoofd/structures';
-import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPeriodHelper, EventPermissionChecker, FinancialSupportSettings, GroupStatus, GroupType, PermissionLevel, PermissionsResourceKey, PermissionsResourceType, ReceivableBalanceType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { EmailTemplate as EmailTemplateStruct, EventPeriodHelper, EventPermissionChecker, FinancialSupportSettings, GroupStatus, GroupType, PermissionsResourceKey, ReceivableBalanceType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { RecordCacheEntry } from '../services/MemberRecordStore.js';
 import { MemberRecordStore } from '../services/MemberRecordStore.js';
@@ -2223,9 +2226,8 @@ export class AdminPermissionChecker {
 
         const isUserManager = this.isUserManager(member);
 
-        // Do not allow setting the member number
-        if (isUserManager || STAMHOOFD.userMode === 'platform') {
-            // A user manager cannot choose the member number + in platform mode, nobody can choose the member number
+        // In platform mode member numbers are assigned automatically. User managers can only set it when they also have admin access to the member.
+        if (STAMHOOFD.userMode === 'platform' || (isUserManager && !(await this.canAccessMember(member, PermissionLevel.Full)))) {
             delete data.details.memberNumber;
         }
 

@@ -1,10 +1,11 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Organization, PlatformMembership } from '@stamhoofd/structures';
-import { AccessRight, ExcelExportType } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { ExcelExportType } from '@stamhoofd/structures';
 import { useContext } from '#hooks/useContext.ts';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
@@ -87,7 +88,7 @@ export class PlatformMembershipActionBuilder {
         await this.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
-                    root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
+                    root: AsyncComponent(() => import('#export/ExcelExportView.vue'), {
                         type: ExcelExportType.PlatformMemberships,
                         filter: selection.filter,
                         workbook: getSelectableWorkbook(this.organization, this.financialAccess),

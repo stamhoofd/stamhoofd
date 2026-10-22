@@ -1,4 +1,4 @@
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { afterEach, expect, test, vi } from 'vitest';
 import { render } from 'vitest-browser-vue';
 import ShowRecoveryCodesView from '#auth/ShowRecoveryCodesView.vue';

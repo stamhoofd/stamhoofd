@@ -3,12 +3,14 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { LimitedFilteredRequest } from '@stamhoofd/structures';
 import PromiseView from '#containers/PromiseView.vue';
 import { useEventsObjectFetcher } from '#fetchers/useEventsObjectFetcher.ts';
+import { useEventViewLoaders } from '#events/eventViewLoaders.ts';
 import { Toast } from '../../overlays/Toast';
 
 
 export function useShowEvent() {
     const present = usePresent();
     const eventFetcher = useEventsObjectFetcher();
+    const loaders = useEventViewLoaders();
 
     return async (eventId: string) => {
         const component = new ComponentWithProperties(NavigationController, {
@@ -24,7 +26,7 @@ export function useShowEvent() {
                         Toast.error($t(`%yY`)).show();
                         throw new Error('Event not found');
                     }
-                    return AsyncComponent(() => import('../EventOverview.vue'), {
+                    return AsyncComponent(loaders.overview, {
                         event: events.results[0],
                     });
                 },

@@ -1,6 +1,6 @@
-import { Payment } from '@stamhoofd/models';
+import { Payment, Ticket } from '@stamhoofd/models';
 import type { SQLExpression, SQLFilterDefinitions } from '@stamhoofd/sql';
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createWildcardColumnFilter, SQL, SQLCast, SQLConcat, SQLCount, SQLJsonExtract, SQLJsonUnquote, SQLScalar, SQLSum, SQLValueType } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createWildcardColumnFilter, SQL, SQLCast, SQLConcat, SQLCount, SQLIf, SQLJsonExtract, SQLJsonUnquote, SQLMin, SQLScalar, SQLSum, SQLValueType } from '@stamhoofd/sql';
 import { PaymentStatus } from '@stamhoofd/structures';
 import { paymentFilterCompilers } from './payments.js';
 
@@ -366,7 +366,38 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.Number,
         nullable: false,
     }),
+    // Same as PrivateOrderWithTickets.ticketScanStatus: 'none' for an order without tickets
+    ticketScanStatus: createColumnFilter({
+        expression: getTicketsSubQuery(
+            new SQLIf(new SQLCount(SQL.column(Ticket.table, 'scannedAt')), 0)
+                .then(new SQLScalar('none'))
+                .else(
+                    new SQLIf(new SQLCount(SQL.column(Ticket.table, 'scannedAt')), new SQLCount())
+                        .then(new SQLScalar('all'))
+                        .else(new SQLScalar('partial')),
+                ),
+        ),
+        type: SQLValueType.String,
+        nullable: false,
+    }),
+    ticketScannedAt: createColumnFilter({
+        expression: getTicketsSubQuery(new SQLMin(SQL.column(Ticket.table, 'scannedAt'))),
+        type: SQLValueType.Datetime,
+        nullable: true,
+    }),
+    ticketCount: createColumnFilter({
+        expression: getTicketsSubQuery(new SQLCount()),
+        type: SQLValueType.Number,
+        nullable: false,
+    }),
 };
+
+function getTicketsSubQuery(expression: SQLExpression): SQLExpression {
+    return SQL.subQuery(SQL.select(expression)
+        .from(SQL.table(Ticket.table))
+        .where(SQL.column(Ticket.table, 'orderId'), SQL.column('webshop_orders', 'id'))
+        .where(SQL.column(Ticket.table, 'deletedAt'), null));
+}
 
 function getPricePaidSubQuery(): SQLExpression {
     return SQL.subQuery(SQL.select(new SQLSum(SQL.column('balance_items', 'pricePaid')))

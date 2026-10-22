@@ -326,7 +326,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import EmailAddress from '@stamhoofd/components/email/EmailAddress.vue';
-import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useBackForward } from '@stamhoofd/components/hooks/useBackForward.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
@@ -341,18 +341,22 @@ import type { TableActionSelection } from '@stamhoofd/components/tables/classes/
 import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
 import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
 import type { BalanceItemWithPrivatePayments, PrivateOrder, PrivateOrderWithTickets, PrivatePayment, TicketPrivate, WebshopTakeoutMethod } from '@stamhoofd/structures';
-import { AccessRight, Gender, LanguageHelper, LimitedFilteredRequest, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, PermissionLevel, ProductType, RecordCategory, RecordWarning, WebshopTicketType } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Gender, LanguageHelper, LimitedFilteredRequest, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, ProductType, RecordCategory, RecordWarning, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import type { ComputedRef } from 'vue';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
+import type { OpenTicketHandler } from '../tickets/TicketNavigation';
 import { OrderActionBuilder } from './OrderActionBuilder';
 
 const props = withDefaults(defineProps<{
     initialOrder: PrivateOrderWithTickets;
     webshopManager: WebshopManager;
+    openTicketHandler: OpenTicketHandler;
     getNext?: ((order: PrivateOrderWithTickets) => PrivateOrderWithTickets) | null;
     getPrevious?: ((order: PrivateOrderWithTickets) => PrivateOrderWithTickets) | null;
 }>(), {
@@ -414,6 +418,7 @@ function openTickets() {
             AsyncComponent(() => import('./OrderTicketsView.vue'), {
                 initialOrder: order.value,
                 webshopManager: props.webshopManager,
+                openTicketHandler: props.openTicketHandler,
             }),
         ],
         modalDisplayStyle: 'popup',

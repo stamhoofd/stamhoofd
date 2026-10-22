@@ -13,8 +13,9 @@ import { useAuth } from '#hooks/useAuth.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import type { Decoder } from '@simonbackx/simple-encoding';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { AccessRight, StripeAccount } from '@stamhoofd/structures';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { StripeAccount } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import type { Ref } from 'vue';
 

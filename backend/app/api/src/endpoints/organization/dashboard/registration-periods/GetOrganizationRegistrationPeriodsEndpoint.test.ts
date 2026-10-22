@@ -1,7 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
 import { GroupFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import { GroupType, LimitedFilteredRequest, PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { GroupType, LimitedFilteredRequest, Permissions } from '@stamhoofd/structures';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { GetOrganizationRegistrationPeriodsEndpoint } from './GetOrganizationRegistrationPeriodsEndpoint.js';
 import { SessionService } from '../../../../services/SessionService.js';

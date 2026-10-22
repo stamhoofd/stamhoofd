@@ -1,7 +1,8 @@
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { StripeAccount } from '@stamhoofd/models';
-import { AuditLogType, PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { AuditLogType } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
 import { StripeHelper } from '../../../../helpers/StripeHelper.js';

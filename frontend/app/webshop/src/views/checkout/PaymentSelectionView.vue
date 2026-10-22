@@ -38,7 +38,10 @@ import { OrderData, OrderResponse, PaymentMethod, WebshopType } from '@stamhoofd
 import { computed, ref } from 'vue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
 import { useWebshopManager } from '../../composables/useWebshopManager';
-import { CheckoutStepsManager } from './CheckoutStepsManager';
+
+const props = defineProps<{
+    handleCheckoutError: (error: unknown, navigate: NavigationActions) => Promise<void>;
+}>();
 
 const loading = ref(false);
 const errors = useErrors();
@@ -177,9 +180,7 @@ async function goNext() {
         loading.value = false;
         await goToOrder(response.data.order.id, navigationActions);
     } catch (e) {
-        if (CheckoutStepsManager.isCartError(e)) {
-            await CheckoutStepsManager.for(checkoutManager).handleCartError(e, navigationActions);
-        }
+        await props.handleCheckoutError(e, navigationActions);
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;

@@ -3,7 +3,8 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, StripeAccount, Webshop, Token } from '@stamhoofd/models';
 import { OrganizationFactory, Ticket, UserFactory, WebshopFactory } from '@stamhoofd/models';
-import { Cart, CartItem, CartReservedSeat, Customer, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopMetaData, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Cart, CartItem, CartReservedSeat, Customer, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopMetaData, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
 import { SessionService } from '../../src/services/SessionService.js';
 
 import { PatchWebshopOrdersEndpoint } from '../../src/endpoints/organization/dashboard/webshops/PatchWebshopOrdersEndpoint.js';

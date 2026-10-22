@@ -4,7 +4,8 @@ import { useRegistrationPeriodsRelationFetcher } from '#filters/relation-fetcher
 import { useAuth } from '#hooks/useAuth.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import type { Organization } from '@stamhoofd/structures';
-import { AccessRight, FilterWrapperMarker } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { FilterWrapperMarker } from '@stamhoofd/structures';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';

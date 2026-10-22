@@ -8,9 +8,9 @@ import { Request, Server } from '@simonbackx/simple-networking';
 import type { ComponentWithProperties, PushOptions } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import type { MemberManager } from '@stamhoofd/networking/MemberManager';
-import type { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { MemberManager } from '@stamhoofd/frontend-application/MemberManager';
+import type { OrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { SGVGroep, SGVLedenLijstFilterResponse, SGVLid, SGVLidBevestig, SGVLidGet, SGVLidMatch, SGVLidMatchVerify, SGVZoekLid } from '@stamhoofd/sgv';
 import {
     SGVFoutenDecoder, SGVFunctie, SGVGFunctieResponse, SGVGroepResponse, SGVLedenLijstResponse, SGVMemberError,
@@ -30,6 +30,7 @@ import {
 import { Formatter, sleep } from '@stamhoofd/utility';
 
 import type { SGVOAuth } from './SGVOAuth.ts';
+import { SGVOldMemberAction } from './SGVOldMemberAction.ts';
 import type { GroepFunctie, SGVSyncReport } from './SGVSyncReport.ts';
 import {
     createStamhoofdFunctie,
@@ -45,10 +46,7 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { Sorter } from '@stamhoofd/utility';
 
-export enum SGVOldMemberAction {
-    Delete = 'delete',
-    Nothing = 'nothing',
-}
+export { SGVOldMemberAction } from './SGVOldMemberAction.ts';
 
 export class SGVGroupAdministration implements RequestMiddleware {
     /**

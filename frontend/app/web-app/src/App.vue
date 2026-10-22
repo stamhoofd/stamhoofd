@@ -9,20 +9,32 @@
 import type { PushOptions } from '@simonbackx/vue-app-navigation';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, useManualPresent } from '@simonbackx/vue-app-navigation';
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
+import { useProvideEventViews } from '@stamhoofd/components/events/provideEventViews';
+import { useProvideGroupViews } from '@stamhoofd/components/groups/provideGroupViews';
+import { useProvideMemberViews } from '@stamhoofd/components/members/provideMemberViews';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import CenteredMessageView from '@stamhoofd/components/overlays/CenteredMessageView.vue';
 import { ModalStackEventBus, ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import ToastBox from '@stamhoofd/components/overlays/ToastBox.vue';
-import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { Storage } from '@stamhoofd/networking/Storage';
+import { useProvidePaymentViews } from '@stamhoofd/components/payments/providePaymentViews';
+import { loadSessionLocale } from '@stamhoofd/frontend-application/SessionLocalization';
+import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
+import { useProvideSGVSync } from '@stamhoofd/sgv-frontend/provideSGVSync';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import { onMounted, useTemplateRef } from 'vue';
+import { useProvideEventWebshopViews } from '@stamhoofd/dashboard/providers/provideEventWebshopViews.ts';
 import RouterAppView from './RouterAppView.vue';
 
 const modalStack = useTemplateRef<InstanceType<typeof ModalStackComponent>>('modalStack');
+useProvideEventWebshopViews();
+useProvideMemberViews();
+useProvideEventViews();
+useProvideGroupViews();
+useProvidePaymentViews();
+useProvideSGVSync();
 HistoryManager.activate();
 HistoryManager.debug = STAMHOOFD.environment === 'test';
 
@@ -34,8 +46,7 @@ const root = new ComponentWithProperties(PromiseView, {
     promise: async () => {
         // Load locales first
         try {
-            await I18nController.loadDefault({
-                $context: null,
+            await loadSessionLocale(null, {
                 defaultCountry: Country.Belgium,
                 defaultLanguage: Language.Dutch,
             });

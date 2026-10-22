@@ -9,7 +9,8 @@ import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization, User } from '@stamhoofd/models';
 import { GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { appToUri, GroupCategory, GroupCategorySettings, PermissionLevel, Permissions, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { appToUri, GroupCategory, GroupCategorySettings, Permissions, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WorkerData } from '../helpers/index.js';
 
@@ -182,6 +183,43 @@ test.describe('Switching the current period from the members menu @members-perio
 
         // Confirm the switch in the centered message dialog
         await page.getByTestId('centered-message').getByRole('button', { name: 'Overschakelen' }).click();
+    }
+
+    for (const viewport of [
+        { name: 'desktop', width: 1280, height: 800 },
+        { name: 'mobile', width: 400, height: 850 },
+    ]) {
+        test(`on ${viewport.name} period navigation survives reload and browser history`, async ({ page }) => {
+            const scenario = await seedScenario(`navigation-${viewport.name}`);
+            await page.setViewportSize({ width: viewport.width, height: viewport.height });
+            await openMembersMenu({ page, scenario });
+            await expect(page).toHaveURL(viewport.name === 'desktop' ? /\/leden\/instellingen$/ : /\/leden$/);
+            const originalUrl = page.url();
+            await page.getByTestId('members-menu').locator('.footer button').first().click();
+            await page.getByTestId('context-menu-item-title').filter({ hasText: scenario.otherPeriodName }).click();
+
+            const menu = page.getByTestId('members-menu').filter({ visible: true }).last();
+            await expect(menu.getByRole('heading', { name: scenario.otherPeriodName, exact: true }).last()).toBeVisible();
+            await expect(menu.getByRole('button', { name: 'Andere tak' })).toBeVisible();
+            await expect(page).not.toHaveURL(originalUrl);
+            const periodUrl = page.url();
+
+            await page.reload();
+            await expect(menu.getByRole('button', { name: 'Andere tak' })).toBeVisible();
+            await expect(menu.getByRole('heading', { name: scenario.otherPeriodName, exact: true }).last()).toBeVisible();
+
+            await page.goBack();
+            await expect(page).toHaveURL(originalUrl);
+            await expect(menu.getByRole('button', { name: 'Huidige tak' })).toBeVisible();
+            await page.goForward();
+            await expect(page).toHaveURL(periodUrl);
+            await menu.getByRole('button', { name: 'Andere tak' }).click();
+            await page.locator('.st-list-item', { hasText: 'Ingeschreven leden' }).first().click();
+
+            const rows = page.getByTestId('table').locator('[data-testid="table-row"]:visible');
+            await expect(rows.filter({ hasText: scenario.names.otherPeriod })).toHaveCount(1);
+            await expect(rows.filter({ hasText: scenario.names.currentPeriod })).toHaveCount(0);
+        });
     }
 
     test('on desktop it opens the members overview of the new period', async ({ page }) => {

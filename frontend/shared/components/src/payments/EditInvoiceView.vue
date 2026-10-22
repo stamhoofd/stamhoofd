@@ -174,7 +174,7 @@ import { Invoice, InvoiceTypeHelper } from '@stamhoofd/structures';
 
 import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { computed, ref } from 'vue';
 import InvoiceItemsBox from './InvoiceItemsBox.vue';
 import LoadingButton from '#navigation/LoadingButton.vue';

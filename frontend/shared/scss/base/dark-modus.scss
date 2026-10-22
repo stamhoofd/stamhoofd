@@ -16,7 +16,7 @@ body.light, :host.light {
 }
 
 @media (prefers-color-scheme: dark) {
-    body:not(.light), :host:not(.light), :root:not(:has(body.light)), :root:not(:has(:host.light)) {
+    body:not(.light), :host:not(.light), :root:not(:has(body.light)) {
         @include dark-modus;
 
         .st-color-directive {
@@ -25,7 +25,7 @@ body.light, :host.light {
         }
 
     }
-    img[src*=".svg"] {
+    body:not(.light) img[src*=".svg"], :host(:not(.light)) img[src*=".svg"] {
         filter: contrast(0.7);
     }
 
@@ -36,4 +36,8 @@ body.dark, :host.dark {
         // Colors need to be recalculated using the local color hue and saturation
         @include dark-modus;
     }
+}
+
+body.dark img[src*=".svg"], :host(.dark) img[src*=".svg"] {
+    filter: contrast(0.7);
 }

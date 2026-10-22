@@ -1,14 +1,14 @@
 {
     "name": "@stamhoofd/locales",
-    "version": "2.154.0",
+    "version": "2.155.0",
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "types": "./dist-types/index.d.ts",
     "sideEffects": false,
     "exports": {
         ".": {
-            "types": "./dist/index.d.ts",
+            "types": "./dist-types/index.d.ts",
             "import": "./dist/index.js",
             "require": "./dist/index.js"
         },
@@ -20,10 +20,12 @@
     },
     "files": [
         "dist",
+        "dist-types",
         "package.json"
     ],
     "scripts": {
-        "build": "tsc --build tsconfig.build.json && node build.js"
+        "build": "tsc --build tsconfig.build.json && node build.js",
+        "build:types": "tsc --project tsconfig.types.json"
     },
     "dependencies": {
         "@stamhoofd/types": "workspace:*"

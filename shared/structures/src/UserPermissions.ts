@@ -4,10 +4,10 @@ import { AutoEncoder, field, MapDecoder, StringDecoder } from '@simonbackx/simpl
 import { AccessRightHelper } from './AccessRight.js';
 import { LoadedPermissions } from './LoadedPermissions.js';
 import type { MemberResponsibility } from './MemberResponsibility.js';
-import { PermissionLevel } from './PermissionLevel.js';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import type { PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole.js';
 import { Permissions } from './Permissions.js';
-import { PermissionsResourceType } from './PermissionsResourceType.js';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import type { Platform } from './Platform.js';
 
 export type OrganizationForPermissionCalculation = {

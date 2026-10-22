@@ -6,7 +6,10 @@ setup();
 import { expect } from '@playwright/test';
 import type { Organization, User, Webshop } from '@stamhoofd/models';
 import { Order, OrderFactory, OrganizationFactory, RegistrationPeriodFactory, Ticket, TicketFactory, UserFactory } from '@stamhoofd/models';
-import { AccessRight, Cart, CartItem, Customer, OrderData, OrderStatus, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, UserPermissions, WebshopTicketType } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { Cart, CartItem, Customer, OrderData, OrderStatus, Permissions, ResourcePermissions, UserPermissions, WebshopTicketType } from '@stamhoofd/structures';
 import { WorkerData } from '../helpers/index.js';
 import { getTicketUrl, isTicketLookup, TicketScannerDevice, toOfflineTickets } from '../helpers/page/webshop/TicketScannerDevice.js';
 import { TestWebshops } from '../helpers/test-data/TestWebshops.js';
@@ -293,7 +296,7 @@ test.describe('Ticket scanner @ticket-scanner @extra', () => {
             await device.reportNoConnection();
 
             await device.scan(downloaded);
-            await device.expectRejected(getTicketUrl(soldAfterDownload), $t('Ongeldig ticket'));
+            await device.expectRejected(getTicketUrl(soldAfterDownload), $t('%Ztg'));
         });
 
         test('Should tell that a ticket could not be checked when looking it up takes too long', async ({ browser, storageState }) => {
@@ -312,7 +315,7 @@ test.describe('Ticket scanner @ticket-scanner @extra', () => {
             await expect(device.scannerView.getByTestId('ticket-scanner-checking-ticket')).toBeVisible();
             // Otherwise the scanner looks it up again after its cooldown
             await device.showToCamera(null);
-            await expect(device.page.locator('.toast-view').filter({ hasText: $t('Dit ticket staat nog niet op dit toestel en kon niet online gecontroleerd worden door een trage internetverbinding. Probeer opnieuw.') }))
+            await expect(device.page.locator('.toast-view').filter({ hasText: $t('%Zxr') }))
                 .toBeVisible({ timeout: 8_000 });
             await expect(device.scannerView.getByTestId('ticket-scanner-checking-ticket')).toBeHidden();
             await expect(device.page.getByTestId('valid-ticket-view')).toHaveCount(0);
@@ -410,7 +413,7 @@ test.describe('Ticket scanner @ticket-scanner @extra', () => {
             const lookups = device.trackTicketLookups();
             await device.reportNoConnection();
 
-            await device.expectRejected(getTicketUrl(soldAfterDownload), $t('Ongeldig ticket'));
+            await device.expectRejected(getTicketUrl(soldAfterDownload), $t('%Ztg'));
             expect(lookups).toEqual([]);
         });
 

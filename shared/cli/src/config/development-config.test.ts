@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { localFilesAccessKey, localFilesSecretKey, localIpv4Host, maildevPassword, maildevUsername } from './shared-service-config.js';
 import type { CliContext } from '../context/create-context.js';
-import { buildDevelopmentConfig, FrontendApp } from './development-config.js';
+import { buildDevelopmentConfig } from './development-config.js';
+import { BackendApp } from '@stamhoofd/types/BackendApp';
+import { FrontendApp } from '@stamhoofd/types/FrontendApp';
 
 function context(partial: Partial<CliContext> = {}): CliContext {
     return {
@@ -88,7 +90,7 @@ describe('buildDevelopmentConfig', () => {
     });
 
     // Skipped: pre-existing failure on main, unrelated to this PR. The shared/cli suite is not run in CI.
-    it.skip('assigns the resolved frontend port to dashboard apps', () => {
+    it.skip('assigns the resolved frontend port to web apps', () => {
         const config = buildDevelopmentConfig(context({
             env: 'keeo',
             instance: {
@@ -97,7 +99,7 @@ describe('buildDevelopmentConfig', () => {
                 primary: false,
                 portOffset: 1200,
             },
-        }), { frontend: FrontendApp.Dashboard });
+        }), { frontend: FrontendApp.WebApp });
 
         expect(config.appEnv.PORT).toBe(9280);
     });
@@ -128,7 +130,7 @@ describe('buildDevelopmentConfig', () => {
     });
 
     it('gives the syncer both databases, which it moves rows between', () => {
-        const config = buildDevelopmentConfig(context({ env: 'ravot' }), { backend: 'statistics-syncer' });
+        const config = buildDevelopmentConfig(context({ env: 'ravot' }), { backend: BackendApp.StatisticsSyncer });
 
         expect(config.appEnv).toHaveProperty('statisticsDatabase.DB_DATABASE', 'statistics-ravot');
         expect(config.appEnv).toHaveProperty('stamhoofdDatabase.DB_DATABASE', config.backendEnv.DB_DATABASE);

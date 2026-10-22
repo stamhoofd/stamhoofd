@@ -4,7 +4,7 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { StripeAccount } from '@stamhoofd/models';
-import { PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 
 import { Context } from '../../../../helpers/Context.js';
 import { StripeHelper } from '../../../../helpers/StripeHelper.js';

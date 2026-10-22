@@ -63,7 +63,8 @@ import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonback
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import type { Group, PermissionRoleForResponsibility } from '@stamhoofd/structures';
+import { Group } from '@stamhoofd/structures/Group.js';
+import type { PermissionRoleForResponsibility } from '@stamhoofd/structures';
 import { MemberResponsibility } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
@@ -170,7 +171,7 @@ async function editInheritedResponsibility(responsibility: MemberResponsibility,
     let isNew = false;
 
     if (!role) {
-        role = responsibility.createDefaultPermissions(group);
+        role = Group.createDefaultResponsibilityPermissions(group, responsibility);
         isNew = true;
     }
 

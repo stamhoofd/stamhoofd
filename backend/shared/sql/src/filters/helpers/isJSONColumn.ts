@@ -1,5 +1,5 @@
-import type { SQLCurrentColumn} from '../SQLFilter.js';
-import { SQLValueType } from '../SQLFilter.js';
+import type { SQLCurrentColumn } from '../SQLFilterTypes.js';
+import { SQLValueType } from '../SQLFilterTypes.js';
 
 export function isJSONColumn({ type }: SQLCurrentColumn): boolean {
     return isJSONType(type);

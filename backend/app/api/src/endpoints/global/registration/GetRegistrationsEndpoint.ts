@@ -6,7 +6,8 @@ import { Group, Member, Registration } from '@stamhoofd/models';
 import type { SQLExpression, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLSelect, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest, RegistrationWithMemberBlob, RegistrationsBlob, StamhoofdFilter, StamhoofdKeyFilter } from '@stamhoofd/structures';
-import { GroupStatus, GroupType, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, assertSort } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { GroupStatus, GroupType, LimitedFilteredRequest, PaginatedResponse, assertSort } from '@stamhoofd/structures';
 
 import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';

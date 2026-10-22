@@ -1,6 +1,7 @@
 import type { Organization, Webshop } from '@stamhoofd/models';
 import { WebshopFactory } from '@stamhoofd/models';
-import { PaymentConfiguration, PaymentMethod, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopDeliveryMethod, WebshopMetaData, WebshopPrivateMetaData, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
+import type { DarkMode } from '@stamhoofd/structures';
+import { PaymentConfiguration, PaymentMethod, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopDeliveryMethod, WebshopMetaData, WebshopOrderMode, WebshopPrivateMetaData, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 import { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 import type { Country } from '@stamhoofd/types/Country';
@@ -40,6 +41,7 @@ export interface CreateWebshopOptions {
     deliveryCountries?: Country[];
     /** Raw HTML injected into the document head on custom domains (script/style tags) */
     customCode?: string | null;
+    darkMode?: DarkMode;
 }
 
 function toRequirement(enabled: boolean): CustomerFieldRequirement {
@@ -70,6 +72,7 @@ export class TestWebshops {
             genderEnabled = false,
             deliveryCountries,
             customCode,
+            darkMode,
         } = options;
 
         let meta = WebshopMetaData.patch({});
@@ -105,7 +108,7 @@ export class TestWebshops {
             paymentConfiguration: paymentConfigurationPatch,
             ticketType,
             type: withSeatingPlan ? WebshopType.Performance : (ticketType === WebshopTicketType.None ? WebshopType.Webshop : WebshopType.Event),
-            cartEnabled,
+            orderMode: cartEnabled ? WebshopOrderMode.Cart : WebshopOrderMode.Single,
             customerSettings: CustomerSettings.create({
                 email: CustomerFieldRequirement.Required,
                 // Keep the customer step minimal so the order flow doesn't require a phone number
@@ -115,6 +118,7 @@ export class TestWebshops {
                 gender: toRequirement(genderEnabled),
             }),
             customCode,
+            darkMode,
         });
 
         if (deliveryCountries) {

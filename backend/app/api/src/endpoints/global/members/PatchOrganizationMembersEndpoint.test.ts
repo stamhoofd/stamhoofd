@@ -6,7 +6,9 @@ import { Request } from '@simonbackx/simple-endpoints';
 import { GroupFactory, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberResponsibilityRecordFactory, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, RegistrationPeriodFactory, User, UserFactory } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import type { PatchAnswers } from '@stamhoofd/structures';
-import { Address, EmergencyContact, MemberDetails, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberResponsibility, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, ParentType, PermissionLevel, PermissionRoleForResponsibility, Permissions, PermissionsResourceKey, PermissionsResourceType, PlatformMembershipType, PlatformMembershipTypeConfig, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, Version } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { Address, EmergencyContact, MemberDetails, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberResponsibility, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, ParentType, PermissionRoleForResponsibility, Permissions, PermissionsResourceKey, PlatformMembershipType, PlatformMembershipTypeConfig, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
@@ -546,6 +548,47 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const response = await testServer.test(endpoint, request);
             expect(response.body.members[0].details.memberNumber).toEqual('LID-100');
+        });
+    });
+
+    describe('Member number', () => {
+        const patchMemberNumberAsLinkedAdmin = async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const admin = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization,
+            }).create();
+
+            // The admin is also a user manager of this member
+            const member = await new MemberFactory({ organization, firstName, lastName, birthDay, generateData: false, user: admin }).create();
+            await new RegistrationFactory({ member, organization }).create();
+
+            const token = await SessionService.createSession(admin);
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ memberNumber: 'LID-200' }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await testServer.test(endpoint, request);
+
+            return (await Member.getByID(member.id))!;
+        };
+
+        test('An admin who is also a user manager of the member can set the member number in organization mode', async () => {
+            TestUtils.setEnvironment('userMode', 'organization');
+            await UniqueMemberNumberService.check();
+
+            const member = await patchMemberNumberAsLinkedAdmin();
+            expect(member.details.memberNumber).toBe('LID-200');
+        });
+
+        test('The member number cannot be set in platform mode', async () => {
+            const member = await patchMemberNumberAsLinkedAdmin();
+            expect(member.details.memberNumber).toBeNull();
         });
     });
 
@@ -1808,6 +1851,54 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 await memberWithFunction.refresh();
                 expect(memberWithFunction.details.getParentEmails()).toEqual(['linda@example.com']);
                 expect(memberWithFunction.details.parents[0].phone).toBe(null);
+            });
+
+            test('A parent phone change by a non-full admin does not reach a family member with a function', async () => {
+                const organization = await new OrganizationFactory({}).create();
+                const group = await new GroupFactory({ organization }).create();
+
+                const admin = await new UserFactory({
+                    permissions: Permissions.create({ level: PermissionLevel.Write }),
+                    organization,
+                }).create();
+
+                const familyUser = await new UserFactory({}).create();
+                const parent = Parent.create({ firstName: 'Linda', lastName: 'Doe', email: 'linda@example.com', phone: '+32470000000' });
+
+                const member = await new MemberFactory({
+                    user: familyUser,
+                    details: MemberDetails.create({ firstName: 'John', lastName: 'Doe', parents: [parent] }),
+                }).create();
+                await new RegistrationFactory({ member, group }).create();
+
+                const memberWithFunction = await new MemberFactory({
+                    user: familyUser,
+                    details: MemberDetails.create({ firstName: 'Jane', lastName: 'Doe', parents: [parent.clone()] }),
+                }).create();
+                await new RegistrationFactory({ member: memberWithFunction, group }).create();
+                await addResponsibility(memberWithFunction, PermissionLevel.Full, organization.id);
+
+                const token = await SessionService.createSession(admin);
+                const parents = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+                parents.addPatch(Parent.patch({ id: parent.id, phone: '+32412345678' }));
+
+                const arr: Body = new PatchableArray();
+                arr.addPatch(MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ parents }),
+                }));
+
+                const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                request.headers.authorization = 'Bearer ' + token.accessToken;
+                const response = await testServer.test(endpoint, request);
+                expect(response.status).toBe(200);
+
+                await member.refresh();
+                expect(member.details.parents[0].phone).toBe('+32412345678');
+
+                await memberWithFunction.refresh();
+                expect(memberWithFunction.details.parents[0].phone).toBe('+32470000000');
+                expect(memberWithFunction.details.getPhoneNumbersForVerification()).toEqual(['+32470000000']);
             });
         });
     });

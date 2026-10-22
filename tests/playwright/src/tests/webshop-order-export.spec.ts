@@ -9,9 +9,9 @@ import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { User } from '@stamhoofd/models';
 import { Organization, OrganizationFactory, Ticket, Token, UserFactory } from '@stamhoofd/models';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import {
     PaymentMethod,
-    PermissionLevel,
     Permissions,
     STPackageBundle,
     Token as TokenStruct,

@@ -111,8 +111,8 @@ import InfiniteObjectFetcherEnd from '@stamhoofd/components/tables/InfiniteObjec
 import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet.ts';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import type { Event, Group, StamhoofdFilter } from '@stamhoofd/structures';
 import { DocumentTemplateGroup, GroupType, isEmptyFilter, NamedObject, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

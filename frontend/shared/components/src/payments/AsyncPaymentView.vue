@@ -6,7 +6,7 @@
 
 <script lang="ts" setup>
 import type { Decoder } from '@simonbackx/simple-encoding';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Payment} from '@stamhoofd/structures';
 import { PaymentGeneral } from '@stamhoofd/structures';
 import type { Ref} from 'vue';

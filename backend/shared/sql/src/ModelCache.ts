@@ -1,11 +1,11 @@
 import { AutoEncoder } from '@simonbackx/simple-encoding';
-import type { QueryableModel } from './QueryableModel.js';
+import type { Model } from '@simonbackx/simple-database';
 import { LRUCache } from 'lru-cache';
 
 /**
  * There simply is no reason not to cache data in memory for the most used models.
  */
-export class ModelCache<M extends QueryableModel> {
+export class ModelCache<M extends Model> {
     cache = new LRUCache<string | number, M>({
         max: 1000,
     });

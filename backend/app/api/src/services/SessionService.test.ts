@@ -4,7 +4,8 @@ import type { Organization, User } from '@stamhoofd/models';
 import { OrganizationFactory, Token, UserFactory, UserSession } from '@stamhoofd/models';
 import type { SessionType } from '@stamhoofd/models/constants/sessions.js';
 import { ACCESS_TOKEN_DURATION, SESSION_DURATIONS, SSO_HANDOFF_TOKEN_DURATION } from '@stamhoofd/models/constants/sessions.js';
-import { PermissionLevel, Permissions, SessionClientType, SessionDeviceType, SessionLoginMethod, SessionOS } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Permissions, SessionClientType, SessionDeviceType, SessionLoginMethod, SessionOS } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 
 import { ContextInstance } from '../helpers/Context.js';

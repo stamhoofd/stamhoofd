@@ -5,8 +5,9 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
-import { GetWebshopFromDomainResult, Webshop as WebshopStruct, WebshopPreview } from '@stamhoofd/structures';
+import { GetWebshopFromDomainResult, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { GoogleTranslateHelper, Sorter } from '@stamhoofd/utility';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 type Params = Record<string, never>;
 
 class Query extends AutoEncoder {
@@ -160,7 +161,7 @@ export class GetWebshopFromDomainEndpoint extends Endpoint<Params, Query, Body, 
                 return new Response(GetWebshopFromDomainResult.create({
                     organization: organization.getBaseStructure(),
                     webshop: null,
-                    webshops: webshops.map(w => WebshopPreview.create(w)).filter(w => w.isClosed(0) === false).sort((a, b) => Sorter.byStringValue(a.meta.name, b.meta.name)),
+                    webshops: (await Promise.all(webshops.map(w => AuthenticatedStructures.webshopPreview(w)))).filter(w => w.isClosed(0) === false).sort((a, b) => Sorter.byStringValue(a.meta.name, b.meta.name)),
                 }));
             }
 

@@ -6,7 +6,7 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import type { SelectableWorkbook } from '@stamhoofd/frontend-excel-export/SelectableWorkbook';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import type { ExcelExportType, StamhoofdFilter } from '@stamhoofd/structures';
 import { LimitedFilteredRequest, SortItemDirection } from '@stamhoofd/structures';
 import { BreakdownRequest } from '@stamhoofd/structures/breakdown/BreakdownRequest.js';
@@ -211,7 +211,7 @@ export function useBreakdownView<T extends PaymentBreakdown | BalanceItemBreakdo
         try {
             await show({
                 components: [
-                    AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
+                    AsyncComponent(() => import('@stamhoofd/components/export/ExcelExportView.vue'), {
                         type: target.type,
                         filter: new LimitedFilteredRequest({
                             filter: target.filter,

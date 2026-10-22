@@ -6,6 +6,7 @@ import { RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/struc
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Group, Organization, Platform, Registration, RegistrationPeriod } from '@stamhoofd/models';
+import { RegistrationPeriodService } from '@stamhoofd/models/services/RegistrationPeriodService.js';
 import { SQL } from '@stamhoofd/sql';
 import { Context } from '../../../helpers/Context.js';
 import { PeriodHelper } from '../../../helpers/PeriodHelper.js';
@@ -145,7 +146,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
             }
 
             await period.save();
-            await period.updatePreviousNextPeriods();
+            await RegistrationPeriodService.updatePreviousNextPeriods(period.organizationId, period);
             periods.push(period);
         }
 
@@ -202,7 +203,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
                 model.customName = patch.customName;
             }
 
-            await model.updatePreviousNextPeriods();
+            await RegistrationPeriodService.updatePreviousNextPeriods(model.organizationId, model);
             await model.save();
 
             // Schedule patch of all groups in this period
@@ -221,7 +222,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
 
             // Now delete the model
             await model.delete();
-            await RegistrationPeriod.updatePreviousNextPeriods(model.organizationId);
+            await RegistrationPeriodService.updatePreviousNextPeriods(model.organizationId);
         }
 
         // Clear platform cache

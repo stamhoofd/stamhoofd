@@ -2,7 +2,8 @@ import type { XlsxTransformerColumn } from '@stamhoofd/excel-writer';
 import { isXlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import type { BalanceItem, Organization, Webshop } from '@stamhoofd/models';
 import { BalanceItemFactory, BalanceItemPayment, OrderFactory, OrganizationFactory, Payment, UserFactory, WebshopFactory } from '@stamhoofd/models';
-import { BalanceItemType, ExcelExportType, LimitedFilteredRequest, OrderStatus, PaymentMethod, PaymentStatus, PaymentType, PermissionLevel, Permissions, Platform, SortItemDirection } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { BalanceItemType, ExcelExportType, LimitedFilteredRequest, OrderStatus, PaymentMethod, PaymentStatus, PaymentType, Permissions, Platform, SortItemDirection } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';

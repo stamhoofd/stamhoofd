@@ -1,9 +1,7 @@
 // i18n-setup.js
-import { HistoryManager } from '@simonbackx/vue-app-navigation';
+import { HistoryManager, UrlHelper } from '@simonbackx/vue-app-navigation';
 import { countries, languages } from '@stamhoofd/locales';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { Storage } from '@stamhoofd/networking/Storage';
-import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
+import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import { countryToCode } from '@stamhoofd/structures';
 import type { CountryCode } from '@stamhoofd/types/Country';
 import { Country } from '@stamhoofd/types/Country';
@@ -54,14 +52,11 @@ export class I18nController {
     // Allows you to set and remove meta data
     // vueMetaApp?: VueMetaApp
 
-    $context: SessionContext | null | undefined;
-
     get locale() {
         return this.language + '-' + this.countryCode;
     }
 
-    constructor($context: SessionContext | undefined | null, language: Language, country: Country, namespace: string) {
-        this.$context = $context;
+    constructor(language: Language, country: Country, namespace: string) {
         this.namespace = namespace;
         this.language = language;
         this.setCountryCode(country);
@@ -291,8 +286,11 @@ export class I18nController {
         return STAMHOOFD.fixedCountry ? ((country as any) === STAMHOOFD.fixedCountry) : countries.includes(country as Country);
     }
 
-    static async loadDefault({ $context, defaultCountry, defaultLanguage, country, locales }: {
-        $context: SessionContext | null | undefined;
+    /** Preferred language precedes storage and URL settings; fallbacks follow them. */
+    static async loadDefault({ preferredLanguage, fallbackLanguage, fallbackCountry, defaultCountry, defaultLanguage, country, locales }: {
+        preferredLanguage?: Language | null;
+        fallbackLanguage?: Language | null;
+        fallbackCountry?: Country;
         defaultCountry?: Country;
         defaultLanguage?: Language;
         country?: Country;
@@ -318,13 +316,10 @@ export class I18nController {
             country = undefined;
         }
 
-        // 0. A signed-in user's preferred language wins over storage, url and browser
-        if (!$context?.user?.impersonatedBy) {
-            const userLanguage = $context?.user?.language;
-            if (userLanguage && this.isValidLanguage(userLanguage)) {
-                console.info('[I18n] Using language of user', userLanguage);
-                language = userLanguage;
-            }
+        // 0. The preferred language wins over storage, url and browser
+        if (preferredLanguage && this.isValidLanguage(preferredLanguage)) {
+            console.info('[I18n] Using preferred language', preferredLanguage);
+            language = preferredLanguage;
         }
 
         // 1. Get by storage (always preferred)
@@ -381,22 +376,9 @@ export class I18nController {
             }
         }
 
-        // 3. By organization
-        if ($context?.organization) {
-            if (!language && $context.organization.language) {
-                language = $context.organization.language;
-            }
-            if (!country) {
-                country = $context.organization.address.country;
-            }
-        }
-
-        // 4. By tenant/platform
-        if ($context?.platform) {
-            if (!language && $context.platform.language) {
-                language = $context.platform.language;
-            }
-        }
+        // 3. Caller-provided fallbacks
+        language = language || fallbackLanguage || undefined;
+        country = country || fallbackCountry;
 
         // 5. Get country by referrer TLD
         if (!country && document.referrer && typeof document.referrer === 'string' && document.referrer.length > 0) {
@@ -502,17 +484,12 @@ export class I18nController {
             country = defaultCountry ?? Country.Belgium;
         }
 
-        if (I18nController.shared) {
-            // Remove listeners
-            I18nController.shared.$context?.removeListener(I18nController.shared);
-        }
-
         if (STAMHOOFD.fixedCountry) {
             // Not allowed to change country locale
             country = STAMHOOFD.fixedCountry;
         }
 
-        const def = new I18nController($context, language ?? defaultLanguage ?? Language.Dutch, country, namespace);
+        const def = new I18nController(language ?? defaultLanguage ?? Language.Dutch, country, namespace);
         def.usingStoredLanguage = usingStoredLanguage;
         def.defaultCountryCode = defaultCountry ? countryToCode({ country: defaultCountry, defaultCountryCode: def.defaultCountryCode }) : def.defaultCountryCode;
         def.defaultLanguage = defaultLanguage ?? def.defaultLanguage;
@@ -520,16 +497,6 @@ export class I18nController {
         if (import.meta.hot) {
             import.meta.hot.data.shared = def;
         }
-
-        // Automatically set country when the organization is loaded
-        $context?.addListener(def, (changed) => {
-            if (!$context?.organization) {
-                return;
-            }
-            if (changed === 'organization') {
-                def.switchToLocale({ country: $context?.organization.address.country }).catch(console.error);
-            }
-        });
 
         // Update already pushed urls
         // this can't work: should remove locale first and then add it

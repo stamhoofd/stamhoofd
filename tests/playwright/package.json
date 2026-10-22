@@ -5,10 +5,11 @@
     "type": "module",
     "scripts": {
         "build": "tsc --build",
-        "lint": "eslint",
+        "lint": "eslint --quiet",
         "test": "pnpm run build && NODE_OPTIONS=--use-system-ca NODE_ENV=test STAMHOOFD_ENV=playwright DEBUG=pw:browser* playwright test -c dist",
         "test:extra": "PLAYWRIGHT_INCLUDE_EXTRA=1 pnpm run test --grep @extra",
-        "test:trace": "pnpm run test --trace on"
+        "test:trace": "pnpm run test --trace on",
+        "merge-reports": "playwright merge-reports --config merge.config.ts blob-report"
     },
     "dependencies": {
         "@simonbackx/simple-database": "1.40.1",
@@ -21,11 +22,11 @@
         "@stamhoofd/types": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
         "@simonbackx/simple-encoding": "*",
-        "pino": "10.1.1",
-        "mysql2": "3.24.4"
+        "pino": "10.4.0",
+        "mysql2": "3.24.5"
     },
     "devDependencies": {
-        "@playwright/test": "1.60.0",
+        "@playwright/test": "1.63.0",
         "@stamhoofd/test-utils": "workspace:*",
         "eslint-plugin-stamhoofd": "workspace:*",
         "nock": "14.0.17",

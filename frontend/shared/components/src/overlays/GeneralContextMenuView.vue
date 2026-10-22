@@ -29,13 +29,13 @@
 import { onActivated, onBeforeUnmount, onDeactivated, onMounted, ref } from 'vue';
 
 import Checkbox from '../inputs/Checkbox.vue';
-import type { ContextMenu, ContextMenuItem } from './ContextMenu';
+import type { ContextMenuItem, ContextMenuViewState } from './ContextMenuTypes';
 import ContextMenuItemView from './ContextMenuItemView.vue';
 import ContextMenuLine from './ContextMenuLine.vue';
 import ContextMenuView from './ContextMenuView.vue';
 
 const props = defineProps<{
-    menu: ContextMenu;
+    menu: ContextMenuViewState;
 }>();
 
 const contextMenuView = ref<InstanceType<typeof ContextMenuView> | null>(null);

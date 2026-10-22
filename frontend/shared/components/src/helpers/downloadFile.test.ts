@@ -1,4 +1,4 @@
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
 import { downloadFile } from './downloadFile.ts';

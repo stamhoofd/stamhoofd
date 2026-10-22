@@ -4,10 +4,12 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "lint": "eslint",
-        "typecheck": "vue-tsc --noEmit"
+        "lint": "eslint --quiet",
+        "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "dependencies": {
+        "@stamhoofd/frontend-session": "workspace:*",
+        "@stamhoofd/frontend-platform": "workspace:*",
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-networking": "1.23.0",
         "@stamhoofd/assets": "workspace:*",

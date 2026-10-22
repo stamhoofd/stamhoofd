@@ -23,8 +23,9 @@ export class MembersPdfDocument {
     }
 
     private async createDoc(): Promise<PDFKit.PDFDocument> {
-        const PDFDocument = (await import('pdfkit/js/pdfkit.standalone')).default;
-        return new PDFDocument({ size: 'A4', margin: pageMargin, bufferPages: true });
+        const { default: PDFDocument } = await import('pdfkit');
+        // font: null skips PDFKit's eager Helvetica load; PdfRenderer sets Metropolis
+        return new PDFDocument({ size: 'A4', margin: pageMargin, bufferPages: true, font: null as unknown as string });
     }
 
     private async render() {

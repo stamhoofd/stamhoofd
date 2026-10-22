@@ -60,7 +60,7 @@
 
 <script setup lang="ts">
 import type { PlatformMember, RecordCategory } from '@stamhoofd/structures';
-import { PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 
 import { useDataPermissionSettings } from '#groups/hooks/useDataPermissionSettings.ts';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';

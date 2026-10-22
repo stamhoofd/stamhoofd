@@ -98,11 +98,11 @@ import STGradientBackground from '@stamhoofd/components/icons/STGradientBackgrou
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { SessionManager } from '@stamhoofd/networking/SessionManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
+import { SessionManager } from '@stamhoofd/frontend-application/SessionManager';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import { Organization } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';
 import type { Ref } from 'vue';

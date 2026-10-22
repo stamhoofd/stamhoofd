@@ -3,7 +3,9 @@ import { isXlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import type { Organization, Webshop } from '@stamhoofd/models';
 import { OrganizationFactory, UserFactory, WebshopDiscountCode, WebshopFactory } from '@stamhoofd/models';
 import type { IPaginatedResponse, PrivateDiscountCode } from '@stamhoofd/structures';
-import { ExcelExportType, LimitedFilteredRequest, PermissionLevel, Permissions, PermissionsResourceType, Platform, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { ExcelExportType, LimitedFilteredRequest, Permissions, Platform, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';

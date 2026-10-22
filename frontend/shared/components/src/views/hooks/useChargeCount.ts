@@ -1,7 +1,7 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { useContext } from '#hooks/useContext.ts';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { CountResponse } from '@stamhoofd/structures';
 

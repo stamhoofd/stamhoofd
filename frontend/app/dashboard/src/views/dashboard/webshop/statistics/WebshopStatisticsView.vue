@@ -82,7 +82,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { DateOption } from '@stamhoofd/components/views/DateRange.ts';
 import GraphView from '@stamhoofd/components/views/GraphView.vue';
 import { GraphViewConfiguration } from '@stamhoofd/components/views/GraphViewConfiguration.ts';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { markReviewMoment } from '@stamhoofd/frontend-application/markReviewMoment';
 import type { Category, Order, TicketPrivate } from '@stamhoofd/structures';
 import { Graph, GraphData, OrderStatus, ProductType, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -586,7 +586,7 @@ async function reload() {
 
     reviewTimer = setTimeout(() => {
         if (!loading.value && (totalOrders.value > 10 || totalRevenue.value > 50000)) {
-            AppManager.shared.markReviewMoment(context.value);
+            markReviewMoment(context.value.organization);
         }
     }, 5 * 1000);
 }

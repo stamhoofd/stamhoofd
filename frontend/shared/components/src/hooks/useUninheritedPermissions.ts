@@ -1,4 +1,4 @@
-import { ContextPermissions } from '@stamhoofd/networking/ContextPermissions'
+import { ContextPermissions } from '@stamhoofd/frontend-session/ContextPermissions'
 import type { Organization, Platform, UserWithMembers } from '@stamhoofd/structures'
 import type { Ref } from 'vue'
 import { useOrganization } from './useOrganization'

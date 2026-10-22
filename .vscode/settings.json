@@ -76,7 +76,8 @@
         "LICENSE": true,
         ".worktrees": true,
         "tests/playwright/playwright.log": true,
-        ".development/cli": true
+        ".development/cli": true,
+        ".claude": true
     },
     "search.useIgnoreFiles": false,
     "js/ts.tsdk.promptToUseWorkspaceVersion": true,

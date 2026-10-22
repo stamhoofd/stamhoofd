@@ -45,13 +45,15 @@ import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useIsMobile } from '@stamhoofd/components/hooks/useIsMobile.ts';
 import type { PrivateOrder, PrivateWebshop, Product, ReservedSeat } from '@stamhoofd/structures';
-import { PermissionLevel, PrivateOrderWithTickets } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PrivateOrderWithTickets } from '@stamhoofd/structures';
 
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { Ref} from 'vue';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
+import type { Ref } from 'vue';
 import { computed, onBeforeUnmount, ref } from 'vue';
 
 import type { WebshopManager } from '../WebshopManager';
+import { createTicketPresenter } from '../tickets/createTicketPresenter';
 
 
 const props = defineProps<{
@@ -358,6 +360,7 @@ function openOrder(order: PrivateOrderWithTickets) {
         root: AsyncComponent(() => import('./OrderView.vue'), {
             initialOrder: order,
             webshopManager: props.webshopManager,
+            openTicketHandler: createTicketPresenter(props.webshopManager),
         }),
     });
 

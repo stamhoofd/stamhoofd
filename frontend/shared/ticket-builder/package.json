@@ -4,10 +4,11 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "lint": "eslint",
-        "typecheck": "vue-tsc --noEmit"
+        "lint": "eslint --quiet",
+        "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "dependencies": {
+        "@stamhoofd/frontend-platform": "workspace:*",
         "@stamhoofd/assets": "workspace:*",
         "@stamhoofd/frontend-i18n": "workspace:*",
         "@stamhoofd/networking": "workspace:*",
@@ -15,7 +16,7 @@
         "@stamhoofd/types": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
         "buffer": "6.0.3",
-        "pdfkit": "0.19.1",
+        "pdfkit": "0.20.2",
         "qrcode": "1.5.4"
     },
     "devDependencies": {

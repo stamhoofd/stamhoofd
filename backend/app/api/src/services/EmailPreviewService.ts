@@ -3,7 +3,8 @@ import type { Email } from '@stamhoofd/models';
 import { EmailRecipient, Organization, User } from '@stamhoofd/models';
 import { fillRecipientReplacements, mergeReplacementsIfEqual, removeUnusedReplacements, runWithRecipientLocale, stripRecipientReplacementsForWebDisplay, stripSensitiveRecipientReplacements } from '../helpers/EmailBuilder.js';
 import type { BaseOrganization, EmailRecipient as EmailRecipientStruct, Replacement, User as UserStruct } from '@stamhoofd/structures';
-import { EmailPreview, EmailRecipientFilter, EmailWithRecipients, getExampleRecipient } from '@stamhoofd/structures';
+import { EmailPreview, EmailRecipientFilter, EmailWithRecipients } from '@stamhoofd/structures';
+import { EmailHelper } from '@stamhoofd/structures/helpers/EmailHelper.js';
 import { ExampleReplacements } from '@stamhoofd/structures/email/exampleReplacements.js';
 import type { Language } from '@stamhoofd/types/Language';
 import { ContextInstance } from '../helpers/Context.js';
@@ -31,7 +32,7 @@ export class EmailPreviewService {
         }
 
         if (!baseRow) {
-            baseRow = getExampleRecipient();
+            baseRow = EmailHelper.getExampleRecipient();
         }
 
         const organization = email.organizationId ? (await Organization.getByID(email.organizationId))! : null;

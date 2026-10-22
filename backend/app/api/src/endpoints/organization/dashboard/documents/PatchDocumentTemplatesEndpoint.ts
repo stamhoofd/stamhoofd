@@ -4,7 +4,8 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Document, DocumentTemplate } from '@stamhoofd/models';
-import { DocumentTemplatePrivate, PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { DocumentTemplatePrivate } from '@stamhoofd/structures';
 
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { Context } from '../../../../helpers/Context.js';

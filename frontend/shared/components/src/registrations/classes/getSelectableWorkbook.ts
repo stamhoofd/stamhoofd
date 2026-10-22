@@ -1,9 +1,10 @@
 import { SelectableColumn } from '@stamhoofd/frontend-excel-export/SelectableColumn';
 import { SelectableSheet } from '@stamhoofd/frontend-excel-export/SelectableSheet';
 import { SelectableWorkbook } from '@stamhoofd/frontend-excel-export/SelectableWorkbook';
-import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
+import type { ContextPermissions } from '@stamhoofd/frontend-session/ContextPermissions';
 import type { Group, Organization, Platform } from '@stamhoofd/structures';
-import { AccessRight, getFinancialSupportSettingsOrDefault, GroupType, RecordCategory } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { getFinancialSupportSettingsOrDefault, GroupType, RecordCategory } from '@stamhoofd/structures';
 
 export function getSelectableWorkbook(platform: Platform, organization: Organization | null, groups: Group[] = [], auth: ContextPermissions) {
     const groupColumns: SelectableColumn[] = [];
@@ -186,12 +187,24 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                     }),
                     new SelectableColumn({
                         id: 'member.organization',
-                        name: $t('%1KQ'),
-                        description: $t('%1KF'),
+                        name: $t('%Zxl'),
+                        description: $t('%Zxk'),
                         enabled: false,
                     }),
                     new SelectableColumn({
                         id: 'member.uri',
+                        name: $t('%Zxn'),
+                        description: $t('%Zxi'),
+                        enabled: false,
+                    }),
+                    new SelectableColumn({
+                        id: 'member.organizations',
+                        name: $t('%1KQ'),
+                        description: $t('%1Jj'),
+                        enabled: false,
+                    }),
+                    new SelectableColumn({
+                        id: 'member.uris',
                         name: $t('%1KR'),
                         description: $t('%1Jk'),
                         enabled: false,

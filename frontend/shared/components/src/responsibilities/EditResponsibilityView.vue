@@ -174,7 +174,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { MemberResponsibility } from '@stamhoofd/structures';
-import { PermissionLevel, PermissionRoleForResponsibility } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionRoleForResponsibility } from '@stamhoofd/structures';
 import { computed, ref, watchEffect } from 'vue';
 import NumberInputBox from '../inputs/NumberInputBox.vue';
 

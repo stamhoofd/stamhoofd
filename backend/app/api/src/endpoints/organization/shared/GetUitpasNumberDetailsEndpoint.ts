@@ -5,6 +5,7 @@ import { UitpasNumberDetails, UitpasNumbersGetDetailsRequest } from '@stamhoofd/
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { uitpasApiResponseToSocialTariff } from '../../../helpers/updateMemberDetailsUitpasNumber.js';
+import { throwIfInvalidUitpasNumber } from '../../../services/uitpas/checkUitpasNumbers.js';
 import { UitpasService } from '../../../services/uitpas/UitpasService.js';
 
 type Params = Record<string, never>;
@@ -47,6 +48,7 @@ export class GetUitpasNumberDetailsEndpoint extends Endpoint<Params, Query, Body
             const uitpasNumber = uitpasNumbers[i];
 
             try {
+                throwIfInvalidUitpasNumber(uitpasNumber);
                 const result = await UitpasService.getPassByUitpasNumber(uitpasNumber);
                 const socialTariff = uitpasApiResponseToSocialTariff(result);
                 results.push(UitpasNumberDetails.create({

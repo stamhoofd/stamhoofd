@@ -3,15 +3,24 @@ import { Request } from '@simonbackx/simple-networking';
 import type { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import type { CountFilteredRequest, PrivateOrderWithTickets, SortItem, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { assertSort, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, SortItemDirection } from '@stamhoofd/structures';
-import { parsePhoneNumber } from 'libphonenumber-js';
+import { parsePhoneNumber } from 'libphonenumber-js/max';
 import { toRaw } from 'vue';
-import type { OrderIndexedDBIndex} from '../ordersIndexedDBSorters';
-import { ordersIndexedDBSorters } from '../ordersIndexedDBSorters';
+import type { OrderIndexedDBIndex } from '../ordersIndexedDBSorters';
+import { getOrderIndexKey, ordersIndexedDBSorters, splitIndexFilter } from '../ordersIndexedDBSorters';
 import type { WebshopManager } from '../WebshopManager';
 import { OrderRequiredFilterHelper } from './OrderRequiredFilterHelper';
 
-let lastNextRequest: LimitedFilteredRequest | null = null;
-let itemsToAdvanceNext: number = 0;
+/**
+ * Where to continue for a next request that fetch returned: by its identity, so tables and exports that fetch at the same
+ * time each continue their own pages.
+ */
+const resumeStates = new WeakMap<LimitedFilteredRequest, {
+    /**
+     * The sort index key of the last order of the previous page: the next page continues after it, also when other tabs
+     * changed the stored orders in between.
+     */
+    indexKeyToResumeAfter: IDBValidKey | null;
+}>();
 
 type ObjectType = PrivateOrderWithTickets;
 
@@ -24,16 +33,53 @@ function extendSort(list: SortList): SortList {
     return assertSort(list, [{ key: 'id', order }]);
 }
 
+/**
+ * The keys this builds (number, email, phone, name) can all be filtered on the stored index values.
+ */
 function searchToFilter(search: string | null): StamhoofdFilter | null {
     return getOrderSearchFilter(search, parsePhoneNumber);
 }
 
-export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> & { reset: () => void; lastInternetLoad: number } {
+/**
+ * The key of the order in the sort index, as OrdersStore.sortIds expects it.
+ */
+function getSortIndexKey(order: PrivateOrderWithTickets, sortItem: SortItem & { key: OrderIndexedDBIndex | 'id' }): IDBValidKey | null {
+    const value = getOrderIndexKey(order, sortItem.key);
+    if (value === null || sortItem.key === 'id') {
+        return value;
+    }
+    return [value, order.id];
+}
+
+export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> & { reset: () => void; isWaitingForInternet: boolean } {
     const objectFetcher = {
         isOffline: false,
         internetPromise: null as Promise<void> | null,
         lastInternetLoad: 0,
+        lastInternetAttempt: 0,
+        /**
+         * True while a fetch waits for the sync before reading, so it will read whatever the sync stores.
+         */
+        isWaitingForInternet: false,
         extendSort,
+        /**
+         * Only the first read waits for the network: until then the stored orders can be missing or outdated.
+         * Later reads use the stored orders right away, and the sync updates the table when it brings in changes.
+         */
+        async syncBeforeReading() {
+            if (this.lastInternetLoad === 0 && !this.isOffline) {
+                this.isWaitingForInternet = true;
+                try {
+                    await this.loadFromInternet();
+                }
+                finally {
+                    this.isWaitingForInternet = false;
+                }
+                return;
+            }
+
+            this.loadFromInternet().catch(console.error);
+        },
         async loadFromInternet() {
             if (this.internetPromise) {
                 return this.internetPromise;
@@ -46,16 +92,17 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             return this.internetPromise;
         },
         async doLoadFromInternet() {
-            // Prevent doing multiple calls within 5 seconds (other rate limiting should happen outside of the object fetcher)
-            if (!this.isOffline && this.lastInternetLoad > Date.now() - 5_000) {
+            // Prevent doing multiple calls within 5 seconds (other rate limiting should happen outside of the object fetcher).
+            // Until a sync succeeded, the stored orders can be missing, so a retry always fetches.
+            if (this.lastInternetLoad !== 0 && this.lastInternetAttempt > Date.now() - 5_000) {
                 return;
             }
+            this.lastInternetAttempt = Date.now();
 
             try {
                 this.isOffline = false;
 
-                await manager.orders.fetchAllUpdated();
-                await manager.tickets.fetchAllUpdated();
+                await manager.syncAll();
                 this.lastInternetLoad = Date.now();
             }
             catch (e) {
@@ -69,7 +116,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             }
         },
 
-        async fetch(data: LimitedFilteredRequest) {
+        async fetch(data: LimitedFilteredRequest, options?: { signal?: AbortSignal }) {
             data = toRaw(data);
             console.log('Orders(IndexedDb).fetch', data);
             const results: PrivateOrderWithTickets[] = [];
@@ -80,11 +127,9 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 filters.push(searchFilter);
             }
 
-            if (data.pageFilter) {
-                filters.unshift(data.pageFilter);
-            }
-            else {
-                await this.loadFromInternet();
+            // A next page continues after the order in resumeStates: its pageFilter is not needed to read it
+            if (!data.pageFilter) {
+                await this.syncBeforeReading();
             }
 
             // validate sort
@@ -112,29 +157,37 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 
             console.log('Orders(IndexedDb).fetch', 'streamOrders, filter', filter, 'sortItem', sortItem, 'limit', data.limit);
 
-            // set advance count
-            let advanceCount = 0;
+            const indexKeyToResumeAfter = resumeStates.get(data)?.indexKeyToResumeAfter ?? null;
 
-            if (lastNextRequest !== null) {
-                if (lastNextRequest === data) {
-                    advanceCount = itemsToAdvanceNext;
-                }
-                else {
-                    lastNextRequest = null;
-                    itemsToAdvanceNext = 0;
-                }
+            const { indexFilter } = splitIndexFilter(filter, OrderRequiredFilterHelper.getDefault(manager.preview.id));
+
+            if (indexFilter) {
+                // Find and sort the matching orders on their stored index values, so only the orders of this page get decoded
+                const { ids } = await manager.orders.getCandidateIds(indexFilter);
+                const sortedIds = await manager.orders.sortIds(ids, sortItem, indexKeyToResumeAfter);
+
+                await manager.streamOrdersWithPatchedTickets({
+                    callback: (order) => {
+                        results.push(order);
+                    },
+                    filter,
+                    limit: data.limit,
+                    ids: sortedIds,
+                    signal: options?.signal,
+                });
             }
-
-            // stream
-            itemsToAdvanceNext = await manager.streamOrdersWithPatchedTickets({
-                callback: (order) => {
-                    results.push(order);
-                },
-                filter,
-                limit: data.limit,
-                sortItem,
-                advanceCount,
-            });
+            else {
+                await manager.streamOrdersWithPatchedTickets({
+                    callback: (order) => {
+                        results.push(order);
+                    },
+                    filter,
+                    limit: data.limit,
+                    sortItem,
+                    after: indexKeyToResumeAfter,
+                    signal: options?.signal,
+                });
+            }
 
             // create next request
             const lastItem = results[results.length - 1];
@@ -168,20 +221,18 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             }
 
             if (next) {
-                lastNextRequest = next;
-            }
-            else {
-                lastNextRequest = null;
-                itemsToAdvanceNext = 0;
+                resumeStates.set(next, {
+                    indexKeyToResumeAfter: getSortIndexKey(lastItem, sortItem),
+                });
             }
 
             return { results, next };
         },
-        async fetchCount(data: CountFilteredRequest): Promise<number> {
+        async fetchCount(data: CountFilteredRequest, options?: { signal?: AbortSignal }): Promise<number> {
             data = toRaw(data);
             console.log('Orders(IndexedDb).fetchCount', data);
 
-            await this.loadFromInternet();
+            await this.syncBeforeReading();
 
             if (!data.search && OrderRequiredFilterHelper.isDefault(manager.preview.id, data.filter)) {
                 return await manager.orders.countAll();
@@ -197,12 +248,22 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             }
 
             const filter = mergeFilters(filters, '$and');
+            const { indexFilter, coversFilter } = splitIndexFilter(filter, OrderRequiredFilterHelper.getDefault(manager.preview.id));
+            const candidates = indexFilter ? await manager.orders.getCandidateIds(indexFilter) : null;
+
+            if (candidates && candidates.exact && coversFilter) {
+                return candidates.ids.size;
+            }
 
             await manager.streamOrdersWithPatchedTickets({
                 callback: () => {
                     count++;
                 },
                 filter,
+                ids: candidates ? [...candidates.ids] : undefined,
+                // Counting never looks at an order, let alone at its tickets
+                withTickets: false,
+                signal: options?.signal,
             });
             console.log('[Done] Orders(IndexedDb).fetchCount', data, count);
 
@@ -211,9 +272,8 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
         reset() {
             this.isOffline = false;
             this.lastInternetLoad = 0;
+            this.lastInternetAttempt = 0;
             this.internetPromise = null;
-            lastNextRequest = null;
-            itemsToAdvanceNext = 0;
         },
         ...overrides,
     };

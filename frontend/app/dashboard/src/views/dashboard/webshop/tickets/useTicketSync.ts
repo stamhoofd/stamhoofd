@@ -15,13 +15,13 @@ export function useTicketSync(getWebshopManager: () => WebshopManager) {
         return !webshopManager.tickets.hasCompletedSync || !webshopManager.orders.hasCompletedSync;
     });
 
-    const scannerSyncParts = computed(() => {
-        const sync = getWebshopManager().scannerSync;
+    const syncParts = computed(() => {
+        const sync = getWebshopManager().syncState;
         return sync ? [sync.tickets, sync.orders] : [];
     });
 
     const progressPercentage = computed(() => {
-        const parts = scannerSyncParts.value;
+        const parts = syncParts.value;
 
         // Until every running part knows its total, a percentage would jump back once it does
         if (parts.some(part => part.isRunning && part.progress === null)) {
@@ -45,7 +45,7 @@ export function useTicketSync(getWebshopManager: () => WebshopManager) {
     /**
      * A sync of more than one page of new orders or tickets is running.
      */
-    const isCatchingUp = computed(() => scannerSyncParts.value.some(part => part.progress !== null));
+    const isCatchingUp = computed(() => syncParts.value.some(part => part.progress !== null));
 
     const mightMissTickets = computed(() => isCatchingUp.value || hasNeverSynced.value);
 

@@ -1,5 +1,5 @@
 import type { MemberProperty, PlatformMember } from '@stamhoofd/structures';
-import { PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import type { Ref } from 'vue';
 import { computed } from 'vue';
 import { useAppContext } from '../../context/appContext';

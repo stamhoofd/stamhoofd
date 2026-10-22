@@ -1,6 +1,7 @@
 import type { Group, Registration } from '@stamhoofd/models';
 import { Member, Organization, Platform, User } from '@stamhoofd/models';
-import { NamedObject, PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { NamedObject } from '@stamhoofd/structures';
 import { NotificationSubjectType } from '@stamhoofd/structures/notifications/NotificationSubjectType.js';
 import { NotificationType } from '@stamhoofd/structures/notifications/NotificationType.js';
 import { RegistrationCreatedNotificationPayload } from '@stamhoofd/structures/notifications/RegistrationCreatedNotificationPayload.js';

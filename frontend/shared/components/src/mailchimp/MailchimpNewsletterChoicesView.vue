@@ -24,7 +24,7 @@
 <script lang="ts" setup>
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { RecordSettings } from '@stamhoofd/structures';
 import { MailchimpSettings } from '@stamhoofd/structures/mailchimp/MailchimpSettings.js';
 import { ref } from 'vue';

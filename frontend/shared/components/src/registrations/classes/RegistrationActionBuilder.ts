@@ -11,11 +11,13 @@ import { canDeleteMembersInBulk, deleteInvitationsForMembers, getActionsForCateg
 import type { TableAction, TableActionSelection } from '#tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
+import { useFetchOrganizationRegistrationPeriods } from '#hooks/networking/useFetchOrganizationRegistrationPeriods';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember, PlatformRegistration } from '@stamhoofd/structures';
-import { EmailRecipientSubfilter, ExcelExportType, GroupType, mergeFilters, PermissionLevel, PermissionsResourceType, RegistrationWithPlatformMember } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { EmailRecipientSubfilter, ExcelExportType, GroupType, mergeFilters, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { Formatter } from '@stamhoofd/utility';
 import { RegistrationsActionBuilder } from '../../members/classes/RegistrationsActionBuilder';
@@ -878,7 +880,7 @@ export class RegistrationActionBuilder {
         await this.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
-                    root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
+                    root: AsyncComponent(() => import('#export/ExcelExportView.vue'), {
                         type: ExcelExportType.Registrations,
                         filter: selection.filter,
                         workbook: getSelectableWorkbook(this.platform, this.organizations.length === 1 ? this.organizations[0] : null, this.groups, this.context.auth),

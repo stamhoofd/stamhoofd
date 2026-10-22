@@ -100,7 +100,7 @@ import MemberIcon from '@stamhoofd/components/members/components/MemberIcon.vue'
 import { useEditMember } from '@stamhoofd/components/members/hooks/useEditMember';
 import { usePlatformFamilyManager } from '@stamhoofd/components/members/PlatformFamilyManager';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions';
-import { useMemberManager } from '@stamhoofd/networking/MemberManager';
+import { useMemberManager } from '@stamhoofd/frontend-application/MemberManager';
 import type { Parent, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

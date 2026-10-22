@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { decodeBase62, isBase62 } from './compress-uuids.js';
+import { decodeBase62, isBase62 } from './base62.js';
 
 export function writeMultipleTranslations(translationsWithPath: Map<string, Record<string, string>>) {
     for (const [filePath, translations] of translationsWithPath) {

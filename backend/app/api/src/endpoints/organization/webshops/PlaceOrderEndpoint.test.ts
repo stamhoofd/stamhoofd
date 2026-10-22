@@ -5,7 +5,8 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, StripeAccount, User, Token } from '@stamhoofd/models';
 import { MolliePayment, Order, OrganizationFactory, Payment, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
 import type { OrderResponse } from '@stamhoofd/structures';
-import { Address, Cart, CartItem, CartItemOption, Customer, MollieOnboarding, MollieStatus, Option, OptionMenu, OrderData, PaymentConfiguration, PaymentMethod, PaymentProvider, PaymentStatus, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopAuthType, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Address, Cart, CartItem, CartItemOption, Customer, MollieOnboarding, MollieStatus, Option, OptionMenu, OrderData, PaymentConfiguration, PaymentMethod, PaymentProvider, PaymentStatus, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopAuthType, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopOrderMode, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
@@ -724,6 +725,68 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
 
             const orderModel = (await Order.getByID(orderStruct.id))!;
             expect(orderModel.validAt).toBeNull();
+        });
+    });
+
+    describe('Order modes', () => {
+        async function setOrderMode(orderMode: WebshopOrderMode) {
+            webshop.meta.orderMode = orderMode;
+            await webshop.save();
+        }
+
+        function buildItem(amount = 1, option: Option = radioOption1) {
+            return CartItem.create({
+                product,
+                productPrice: productPrice1,
+                amount,
+                options: [
+                    CartItemOption.create({ optionMenu: chooseOneOptionMenu, option }),
+                ],
+            });
+        }
+
+        function buildOrderData(items: CartItem[]) {
+            return OrderData.create({
+                paymentMethod: PaymentMethod.PointOfSale,
+                checkoutMethod: onSiteMethod,
+                timeSlot: slot4,
+                cart: Cart.create({ items }),
+                customer,
+            });
+        }
+
+        test('Bulk mode stores every item separately, also of the same product', async () => {
+            await setOrderMode(WebshopOrderMode.Bulk);
+
+            const orderData = buildOrderData([
+                buildItem(1, radioOption1),
+                buildItem(1, radioOption1),
+                buildItem(2, radioOption2),
+                CartItem.create({ product: personProduct, productPrice: personProductPrice, amount: 1 }),
+            ]);
+
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const response: Response<OrderResponse> = await testServer.test(endpoint, r);
+
+            const order = response.body.order;
+            expect(order.data.cart.items).toHaveLength(4);
+            expect(order.data.cart.items.map(i => i.amount)).toEqual([1, 1, 2, 1]);
+            expect(order.data.cart.items.map(i => i.options[0]?.option.id)).toEqual([radioOption1.id, radioOption1.id, radioOption2.id, undefined]);
+        });
+
+        test('Single mode only keeps the first item', async () => {
+            await setOrderMode(WebshopOrderMode.Single);
+
+            const orderData = buildOrderData([
+                buildItem(1, radioOption1),
+                CartItem.create({ product: personProduct, productPrice: personProductPrice, amount: 1 }),
+            ]);
+
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const response: Response<OrderResponse> = await testServer.test(endpoint, r);
+
+            expect(response.body.order.data.cart.items).toHaveLength(1);
+            expect(response.body.order.data.cart.items[0].product.id).toEqual(product.id);
         });
     });
 });

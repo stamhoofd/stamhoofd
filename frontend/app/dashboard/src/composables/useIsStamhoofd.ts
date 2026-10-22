@@ -1,4 +1,4 @@
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import { computed } from 'vue';
 
 export default function useIsStamhoofd() {

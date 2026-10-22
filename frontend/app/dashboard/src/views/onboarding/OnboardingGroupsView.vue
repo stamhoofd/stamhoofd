@@ -46,13 +46,13 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions';
-import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
+import { usePatchOrganizationPeriod } from '@stamhoofd/components/hooks/networking/usePatchOrganizationPeriod';
 import { GroupCategory, GroupSettings, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
 import { Group } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { onActivated, ref, watch } from 'vue';
 import { getSuggestedGroupNames } from './onboardingGroupSuggestions';
-import type { OnboardingStepProps } from './useMemberAdministrationOnboarding';
+import type { OnboardingStepProps } from './OnboardingStepProps';
 
 type GroupRow = {
     key: string;

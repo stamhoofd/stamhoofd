@@ -25,13 +25,13 @@
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 
-import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import SetupStepRows from '@stamhoofd/components/setupSteps/SetupStepRows.vue';
 import TransitionFade from '@stamhoofd/components/transitions/TransitionFade.vue';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityChange.ts';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import { SetupStepType } from '@stamhoofd/structures';
 import { computed, onActivated, ref } from 'vue';
 

@@ -3,7 +3,8 @@ import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Webshop } from '@stamhoofd/models';
-import { PermissionLevel, WebshopUriAvailabilityResponse } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { WebshopUriAvailabilityResponse } from '@stamhoofd/structures';
 import { isReservedWebshopPathSegment } from '@stamhoofd/utility';
 
 import { Context } from '../../../../helpers/Context.js';

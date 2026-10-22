@@ -5,9 +5,11 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { MemberWithUsersRegistrationsAndGroups, Registration } from '@stamhoofd/models';
-import { AuditLog, BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, Organization, Platform, RateLimiter, RegistrationPeriod, User } from '@stamhoofd/models';
+import { AuditLog, BalanceItem, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, Organization, Platform, RateLimiter, RegistrationPeriod, User } from '@stamhoofd/models';
+import { DocumentService } from '../../../services/DocumentService.js';
 import type { MemberResponsibility, MembersBlob } from '@stamhoofd/structures';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, EmergencyContact, GroupType, MemberDetails, MemberWithRegistrationsBlob, Parent, PermissionLevel, PlatformMembershipTypeBehaviour, SetupStepType } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, EmergencyContact, GroupType, MemberDetails, MemberWithRegistrationsBlob, Parent, PlatformMembershipTypeBehaviour, SetupStepType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Email } from '@stamhoofd/email';
@@ -20,6 +22,7 @@ import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer.js';
 import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater.js';
 import { didUitpasReviewChange, updateMemberDetailsUitpasNumber, updateMemberDetailsUitpasNumberForPatch } from '../../../helpers/updateMemberDetailsUitpasNumber.js';
 import { MemberNumberService } from '../../../services/MemberNumberService.js';
+import { GroupService } from '../../../services/GroupService.js';
 import { PlatformMembershipService } from '../../../services/PlatformMembershipService.js';
 import { RegistrationService } from '../../../services/RegistrationService.js';
 import { shouldCheckIfMemberIsDuplicateForPatch } from './shouldCheckIfMemberIsDuplicate.js';
@@ -282,7 +285,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     members.push(duplicate);
 
                     await MemberUserSyncer.onChangeMember(duplicate);
-                    await Document.updateForMember(duplicate);
+                    await DocumentService.updateForMember(duplicate);
                     continue;
                 }
             }
@@ -299,7 +302,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
 
             // Update documents
-            await Document.updateForMember(member);
+            await DocumentService.updateForMember(member);
 
             // Update responsibilities
             for (const patchResponsibility of patch.responsibilities.getPatches()) {
@@ -931,7 +934,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
         // Loop all groups and update occupancy if needed
         for (const group of groups) {
-            await group.updateOccupancy();
+            await GroupService.refreshOccupancy(group);
             await group.save();
         }
 
@@ -969,8 +972,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         const _familyMembers = await Member.loadRegistrationsAndUsers(__familyMembers);
         const familyMembers: Member[] = [];
 
-        // Parent emails link users to a member, so they can only change for members whose emails the user can edit
-        const protectedParents = new Map<string, Parent[]>();
+        // Parent emails link users to a member and parent phones receive its security code,
+        // so they can only change for members whose emails the user can edit
+        const protectedDetails = new Map<string, MemberDetails>();
 
         // Only modify members if we have write access to them (this avoids issues with overriding data)
         for (const familyMember of _familyMembers) {
@@ -978,7 +982,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 familyMembers.push(familyMember);
 
                 if (familyMember.id !== member.id && !await Context.auth.canEditMemberEmailAddresses(familyMember)) {
-                    protectedParents.set(familyMember.id, familyMember.details.parents.map(p => p.clone()));
+                    protectedDetails.set(familyMember.id, familyMember.details.clone());
                 }
             }
         }
@@ -1088,9 +1092,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
 
             for (const m of familyMembers) {
-                const originalParents = protectedParents.get(m.id);
-                if (originalParents && originalParents.flatMap(p => p.getEmails()).join('\n') !== m.details.getParentEmails().join('\n')) {
-                    m.details.parents = originalParents;
+                const originalDetails = protectedDetails.get(m.id);
+                if (originalDetails && (
+                    originalDetails.getParentEmails().join('\n') !== m.details.getParentEmails().join('\n')
+                    || Context.auth.addsSecurityCodePhoneNumbers(originalDetails, m.details)
+                )) {
+                    m.details.parents = originalDetails.parents;
                 }
 
                 m.details.cleanData();
@@ -1100,7 +1107,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     await MemberUserSyncer.onChangeMember(m);
 
                     // Update documents
-                    await Document.updateForMember(m);
+                    await DocumentService.updateForMember(m);
                 }
             }
         }

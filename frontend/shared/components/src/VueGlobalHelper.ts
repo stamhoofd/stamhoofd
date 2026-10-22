@@ -1,6 +1,6 @@
 import { Request } from '@simonbackx/simple-networking';
 import { injectHooks, useCurrentComponent, useUrl } from '@simonbackx/vue-app-navigation';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { CountryHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { App, ComponentPublicInstance } from 'vue';
@@ -11,7 +11,7 @@ import { useAppContext } from '#context/appContext.ts';
 import CopyableDirective from '#directives/Copyable.ts';
 import LongPressDirective from '#directives/LongPress.ts';
 import TooltipDirective from '#directives/Tooltip.ts';
-import { GlobalEventBus } from '#EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useFeatureFlag } from '#hooks/useFeatureFlag.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
@@ -37,6 +37,7 @@ import TTextarea from './inputs/TTextarea.vue';
 import STListItem from './layout/STListItem.vue';
 import LoadingButton from './navigation/LoadingButton.vue';
 import STNavigationBar from './navigation/STNavigationBar.vue';
+import { configureFrontendServices } from './context/configureFrontendServices';
 
 export type ComponentExposed<T>
     = T extends new (...args: any[]) => infer E ? E
@@ -103,6 +104,7 @@ function focusNextElement() {
 
 export class VueGlobalHelper {
     static setup(app: App<Element>) {
+        configureFrontendServices();
         (window as any).PromiseComponent = PromiseView;
         (window as any)._importWithRetry = importWithRetry;
 
