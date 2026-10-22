@@ -13,7 +13,8 @@ import { EventFactory, GroupFactory, OrganizationFactory, OrganizationRegistrati
 import { Notification } from '@stamhoofd/models/models/Notification.js';
 import { NotificationPreference } from '@stamhoofd/models/models/NotificationPreference.js';
 import { NotificationRecipient } from '@stamhoofd/models/models/NotificationRecipient.js';
-import { appToUri, GroupType, NamedObject, PermissionLevel, Permissions, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { appToUri, GroupType, NamedObject, Permissions, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
 import { NotificationChannel } from '@stamhoofd/structures/notifications/NotificationChannel.js';
 import { NotificationType } from '@stamhoofd/structures/notifications/NotificationType.js';
 import { RegistrationCreatedNotificationPayload } from '@stamhoofd/structures/notifications/RegistrationCreatedNotificationPayload.js';

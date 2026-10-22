@@ -37,7 +37,7 @@
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
-import type { UpdateOptions } from '@stamhoofd/networking/AppManager';
+import type { UpdateOptions } from '@stamhoofd/frontend-platform/AppManager';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
 const props = defineProps<{

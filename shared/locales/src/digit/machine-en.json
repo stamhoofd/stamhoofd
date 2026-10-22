@@ -211,10 +211,6 @@
     "original": "Alle nummers van de groepen waarvoor het lid is ingeschreven",
     "translation": "All numbers of the groups the member is registered for"
   },
-  "%1KF": {
-    "original": "Alle groepen waarvoor het lid is ingeschreven",
-    "translation": "All groups this member is registered with"
-  },
   "%1KQ": {
     "original": "Alle groepen",
     "translation": "All groups"
@@ -1426,6 +1422,78 @@
   "%Ztn": {
     "original": "Je hebt geen toegang om te filteren op gegevens van groepen",
     "translation": "You do not have access to filter group data."
+  },
+  "%Zts": {
+    "original": "Vraag de code aan jouw Ravot-verantwoordelijke",
+    "translation": "Request the code from your Ravot contact person"
+  },
+  "%ZuD": {
+    "original": "Vraag de code aan KSA Nationaal",
+    "translation": "Request the code from KSA Nationaal"
+  },
+  "%ZuW": {
+    "original": "Contacteer KSA Nationaal en verduidelijk waarom je toegang nodig hebt tot {member}.",
+    "translation": "Contact KSA Nationaal and clarify why you need access to {member}."
+  },
+  "%Zv0": {
+    "original": "Ravot vergeet dan je API-sleutel en instellingen. Contacten die al in Mailchimp staan, blijven daar staan.",
+    "translation": "Ravot will then forget your API key and settings. Contacts already in Mailchimp will remain there."
+  },
+  "%Zv7": {
+    "original": "Importeer best ook minstens één e-mailadres en één telefoonnummer van leden. Zo kunnen leden of ouders automatisch toegang krijgen als ze zich aanmelden in ‘Mijn account’.",
+    "translation": "It's best to import at least one email address and one phone number for members. This way, members or parents can automatically get access when logging in to ‘My account’."
+  },
+  "%Zvc": {
+    "original": "Synchroniseer leden van alle groepen naar een audience van de koepel",
+    "translation": "Synchronize members from all groups to an audience of the umbrella organization."
+  },
+  "%Zvn": {
+    "original": "Bestellingen kunnen enkel per groep gesynchroniseerd worden.",
+    "translation": "Orders can only be synchronized per group."
+  },
+  "%Zw8": {
+    "original": "Stuur de leden van alle groepen vanuit {platform} naar een audience in Mailchimp. De synchronisatie loopt enkel van {platform} naar Mailchimp: wijzigingen in Mailchimp komen niet terug.",
+    "translation": "Send the members from all groups in {platform} to an audience in Mailchimp. Synchronization only happens from {platform} to Mailchimp: changes made in Mailchimp will not be reflected back."
+  },
+  "%ZwX": {
+    "original": "Vraag het lid om zichzelf in te schrijven via ‘Mijn account’",
+    "translation": "Ask the member to register via ‘My account’"
+  },
+  "%Zwn": {
+    "original": "{contactCan} in Ravot jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf {role}, vraag het dan aan {alternative}.",
+    "translation": "{contactCan} in Ravot can look up your security code and pass it on to you. If you are the {role}, ask {alternative}."
+  },
+  "%Zwp": {
+    "original": "Bekijk alle aansluitingen van jouw leden bij KSA Nationaal.",
+    "translation": "View all affiliations of your members in KSA Nationaal."
+  },
+  "%ZxD": {
+    "original": "jouw medeleiding of KSA Nationaal",
+    "translation": "your fellow leaders or KSA Nationaal"
+  },
+  "%Zxf": {
+    "original": "{firstName} kan niet worden aangemeld via ‘Mijn account’. Voeg een telefoonnummer of e-mailadres toe zodat men zelf de beveiliginscode kan aanvragen.",
+    "translation": "{firstName} cannot be registered through ‘My account’. Please add a phone number or email address so that a security code can be requested."
+  },
+  "%Zxi": {
+    "original": "Het nummer van de groep waartoe het lid hoort",
+    "translation": "The group number to which the member belongs"
+  },
+  "%Zxk": {
+    "original": "De groep waartoe het lid hoort",
+    "translation": "The group the member belongs to"
+  },
+  "%Zxl": {
+    "original": "Groep van het lid",
+    "translation": "Group of the member"
+  },
+  "%Zxo": {
+    "original": "Alle leden die in het huidige werkjaar ingeschreven zijn, en hun ouders, komen in Mailchimp met een tag per standaard leeftijdsgroep en per groep. Leden met een functie van {platform} krijgen ook een tag per functie.",
+    "translation": "All members who are registered in the current work year, along with their parents, will appear in Mailchimp with a tag for each default age group and per group. Members with a role from {platform} will also get a tag for each role they have."
+  },
+  "%Zxq": {
+    "original": "Een voorbeeld is enkel beschikbaar bij het synchroniseren van één groep.",
+    "translation": "An example is only available when synchronizing a single group."
   },
   "%a6": {
     "original": "Portaal voor beroepsmedewerkers",

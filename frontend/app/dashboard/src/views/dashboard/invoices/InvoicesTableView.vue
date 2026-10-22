@@ -33,7 +33,7 @@ import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import type { TableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import type { Invoice, StamhoofdFilter } from '@stamhoofd/structures';
 import { InvoiceStruct } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';

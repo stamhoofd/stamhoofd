@@ -2,7 +2,7 @@ import type { ImportRetryMethod } from '@simonbackx/vue-app-navigation';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 
 import { isModuleImportError } from '#errors/isModuleImportError.ts';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { sleep } from '@stamhoofd/utility';
 import { Toast } from '../overlays/Toast';
 import ImportErrorView from './ImportErrorView.vue';

@@ -118,19 +118,17 @@ export class WebshopDatabase {
         return new Promise<any | undefined>((resolve, reject) => {
             const transaction = openTransaction ?? db.transaction([storeName], 'readonly');
 
-            transaction.onerror = (event) => {
-                // Don't forget to handle errors!
-                if (openTransaction && openTransaction.onerror) {
-                    openTransaction.onerror(event);
-                }
+            // The error of a request also reaches the onerror of its transaction, which an openTransaction's owner handles
+            if (!openTransaction) {
+                transaction.onerror = (event) => {
+                    reject(event);
+                };
+            }
 
-                reject(event);
-            };
-
-            // Do the actual saving
             const objectStore = transaction.objectStore(storeName);
 
             const request = objectStore.get(id);
+            request.onerror = () => reject(request.error);
 
             request.onsuccess = () => {
                 const rawResult = request.result;

@@ -22,12 +22,12 @@
 import { useContext } from '#hooks/useContext.ts';
 import STToolbar from '#navigation/STToolbar.vue';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
-import { useMemberManager } from '@stamhoofd/networking/MemberManager';
+import { useMemberManager } from '@stamhoofd/frontend-application/MemberManager';
 import type { PaymentGeneral } from '@stamhoofd/structures';
 import { BalanceItemRelationType, BalanceItemType, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { onMounted } from 'vue';
-import { GlobalEventBus } from '../EventBus';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';
 
 // We only pass in the payment for compatibility with URL handling
 const props = withDefaults(

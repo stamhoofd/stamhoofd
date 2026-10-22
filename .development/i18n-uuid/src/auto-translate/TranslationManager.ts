@@ -12,9 +12,10 @@ import { globals } from '../shared/globals.js';
 import type { ConsistentWords } from '../types/ConsistentWords.js';
 import type { TranslationDictionary } from '../types/TranslationDictionary.js';
 import type { Translations } from '../types/Translations.js';
-import type { MachineTranslationComparison } from './MachineTranslationComparer.js';
+import type { MachineTranslationComparison } from './MachineTranslationComparison.js';
+import type { TranslationProvider } from './TranslationProvider.js';
 
-export class TranslationManager {
+export class TranslationManager implements TranslationProvider {
     readonly namespaces: string[];
     readonly locales: string[];
 

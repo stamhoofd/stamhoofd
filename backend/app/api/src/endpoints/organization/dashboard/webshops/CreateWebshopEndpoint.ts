@@ -3,7 +3,9 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Webshop } from '@stamhoofd/models';
-import { PermissionLevel, PermissionsResourceType, PrivateWebshop, ResourcePermissions, Version, WebshopPrivateMetaData } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { PrivateWebshop, ResourcePermissions, Version, WebshopPrivateMetaData } from '@stamhoofd/structures';
 import { Formatter, isReservedWebshopPathSegment } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 

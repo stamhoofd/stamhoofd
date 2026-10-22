@@ -1,8 +1,9 @@
 import { ObjectData, PatchMap } from '@simonbackx/simple-encoding';
-import { PermissionLevel } from './PermissionLevel.js';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionRoleDetailed } from './PermissionRole.js';
 import { Permissions } from './Permissions.js';
-import { PermissionsResourceKey, PermissionsResourceType } from './PermissionsResourceType.js';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { PermissionsResourceKey } from './PermissionsResourceType.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 import { Version } from './Version.js';
 

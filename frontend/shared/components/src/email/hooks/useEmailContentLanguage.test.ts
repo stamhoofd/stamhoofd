@@ -5,8 +5,7 @@ import { TestUtils } from '@stamhoofd/test-utils';
 import { Language } from '@stamhoofd/types/Language';
 import { describe, expect, test, vi } from 'vitest';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
-import type { Ref } from 'vue';
-import { ref } from 'vue';
+import { shallowRef } from 'vue';
 import type { EmailContentHolder, EmailContentPatch } from './useEmailContentLanguage';
 import { createAddLanguagePatch, createRemoveLanguagePatch, createSetDefaultLanguagePatch, getChangedEmailContentLanguages, getEmailContentFor, getStaleEmailContentLanguages, useEmailContentLanguage } from './useEmailContentLanguage';
 
@@ -107,7 +106,7 @@ describe('createSetDefaultLanguagePatch', () => {
 
 describe('useEmailContentLanguage', () => {
     function createHook(initial: Email) {
-        const email: Ref<Email> = ref(initial);
+        const email = shallowRef(initial);
         const hook = useEmailContentLanguage({
             editor: () => null,
             patched: () => email.value,
@@ -309,7 +308,7 @@ describe('getStaleEmailContentLanguages', () => {
 
 describe('useEmailContentLanguage setDefaultLanguage', () => {
     function createHook(initial: Email) {
-        const email: Ref<Email> = ref(initial);
+        const email = shallowRef(initial);
         const hook = useEmailContentLanguage({
             editor: () => null,
             patched: () => email.value,
@@ -372,7 +371,7 @@ describe('EmailContentPatch on the Email structure', () => {
 
 describe('useEmailContentLanguage translateToOtherLanguages', () => {
     function createHook(initial: Email, translate: (request: TranslateRequest) => Promise<TranslateResponse>) {
-        const email: Ref<Email> = ref(initial);
+        const email = shallowRef(initial);
         const hook = useEmailContentLanguage({
             editor: () => null,
             patched: () => email.value,

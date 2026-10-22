@@ -1,9 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CliContext } from '../context/create-context.js';
 import { run, RunVerbosity } from './command-runner.js';
-import { buildAll, buildShared, coverageTestPackages, lint, migrate, runUnitTests, sharedBuildReadyCommand, sharedBuildWatchCommand, typecheck } from './monorepo-runner.js';
+import { buildAll, buildShared, coverageTestPackages, lint, migrate, runUnitTests, sharedBuildReadyCommand, sharedBuildWatchCommand, testE2e, typecheck, unitTestPackages } from './monorepo-runner.js';
+import { isPortListening } from './port-probe.js';
+import { CaddyService } from '../services/definitions/caddy-service.js';
 
 vi.mock('./command-runner.js', async importOriginal => ({ ...await importOriginal<typeof import('./command-runner.js')>(), run: vi.fn() }));
+vi.mock('./port-probe.js', () => ({ isPortListening: vi.fn() }));
+vi.mock('../services/shared-services.js', () => ({ startSharedServices: vi.fn() }));
+vi.mock('../services/definitions/caddy-service.js', () => ({ CaddyService: { reload: vi.fn() } }));
 
 const context: CliContext = {
     rootDir: '/repo',
@@ -23,6 +28,38 @@ describe('shared build orchestration', () => {
         await buildShared(context);
 
         expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', ['run', 'build:shared'], { cwd: '/repo', verbosity: RunVerbosity.Output });
+    });
+
+    it.each([undefined, '3/4'])('passes shard %s to Playwright without changing its reserved worker count', async (shard) => {
+        vi.mocked(isPortListening).mockResolvedValue(true);
+
+        await testE2e(context, { ci: true, clear: false, ui: false, skipBuild: true, localDb: true, workers: 2, shard });
+
+        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', [
+            '--dir', 'tests/playwright', 'run', 'test', '--workers', '2', ...(shard === undefined ? [] : ['--shard', shard]),
+        ], expect.objectContaining({ env: expect.objectContaining({ PLAYWRIGHT_WORKER_COUNT: '2', CI: 'true' }) }));
+        expect(CaddyService.reload).toHaveBeenCalledWith(context);
+    });
+
+    it.each([false, true])('only enables migration diagnostics when verbose is %s', async (verbose) => {
+        vi.mocked(isPortListening).mockResolvedValue(true);
+
+        await testE2e({ ...context, verbose }, { ci: false, clear: false, ui: false, skipBuild: true, localDb: true });
+
+        expect(run).toHaveBeenCalledWith('pnpm', expect.any(Array), expect.objectContaining({
+            env: expect.objectContaining({ PLAYWRIGHT_VERBOSE: verbose ? '1' : undefined }),
+            verbosity: RunVerbosity.Output,
+        }));
+    });
+
+    it.each([RunVerbosity.Command, RunVerbosity.Quiet])('preserves migration failure output in reduced-output mode %s', async (verbosity) => {
+        vi.mocked(isPortListening).mockResolvedValue(true);
+        vi.mocked(run).mockResolvedValueOnce({ stdout: '[Migration] Running broken.sql\n', stderr: 'Invalid SQL', status: 1 } as any);
+
+        await expect(testE2e({ ...context, verbose: false, verbosity }, { ci: false, clear: false, ui: false, skipBuild: true, localDb: true }))
+            .rejects.toThrow('[Migration] Running broken.sql\nInvalid SQL');
+
+        expect(CaddyService.reload).toHaveBeenCalledWith(expect.objectContaining({ verbosity }));
     });
 
     it('propagates a failed shared build', async () => {
@@ -90,6 +127,48 @@ describe('shared build orchestration', () => {
         });
     });
 
+    it('forwards unit sharding', async () => {
+        await runUnitTests(context, {
+            packages: [{ name: 'utility', path: 'shared/utility', needsDatabase: false }],
+            skipBuild: true,
+            shard: '2/2',
+        });
+
+        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', [
+            'exec', 'vitest', 'run', '--shard', '2/2',
+        ], expect.objectContaining({ cwd: '/repo/shared/utility' }));
+    });
+
+    it('forwards JSON reporting while retaining console output', async () => {
+        await runUnitTests(context, {
+            packages: [{ name: 'utility', path: 'shared/utility', needsDatabase: false }],
+            skipBuild: true,
+            jsonReport: '/reports/api.json',
+        });
+
+        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', [
+            'exec', 'vitest', 'run', '--reporter=default', '--reporter=json', '--outputFile=/reports/api.json',
+        ], expect.objectContaining({ cwd: '/repo/shared/utility' }));
+    });
+
+    it('rejects a shared JSON report path for multiple packages before building or starting services', async () => {
+        await expect(runUnitTests(context, {
+            packages: [
+                { name: 'utility', path: 'shared/utility', needsDatabase: false },
+                { name: 'queues', path: 'backend/shared/queues', needsDatabase: false },
+            ],
+            jsonReport: '/reports/api.json',
+        })).rejects.toThrow('--json-report requires a single package');
+
+        expect(run).not.toHaveBeenCalled();
+    });
+
+    it('runs unit tests without typechecking', async () => {
+        const pkg = unitTestPackages.find(pkg => pkg.name === 'structures')!;
+        await runUnitTests(context, { packages: [pkg], skipBuild: true });
+        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', ['exec', 'vitest', 'run'], expect.anything());
+    });
+
     it.each([
         ['lint', lint],
         ['typecheck', typecheck],
@@ -100,6 +179,17 @@ describe('shared build orchestration', () => {
         expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', ['run', script], { cwd: '/repo', verbosity: RunVerbosity.Output });
     });
 
+    it.each([
+        ['lint', lint],
+        ['typecheck', typecheck],
+    ] as const)('forwards %s selectors to Turbo without changing check prerequisites', async (script, check) => {
+        await check(context, ['@stamhoofd/mobile', './backend/shared/*']);
+
+        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', [
+            'run', script, '--filter=@stamhoofd/mobile', '--filter=./backend/shared/*',
+        ], { cwd: '/repo', verbosity: RunVerbosity.Output });
+    });
+
     it('only publishes readiness after a successful build and keeps watching after errors', () => {
         const readyFile = sharedBuildReadyCommand().split(' ')[1];
         const watch = sharedBuildWatchCommand();
@@ -108,7 +198,7 @@ describe('shared build orchestration', () => {
         expect(watch).toContain(`--exec 'pnpm run build:shared && touch ${readyFile} || exit 0'`);
         expect(watch).toContain('--signal SIGTERM');
         expect(watch).toContain('--watch shared --watch backend/shared');
-        expect(watch).toContain('--watch turbo.json');
+        expect(watch).toContain('--watch turbo.jsonc');
         expect(watch).toContain("--ignore './shared/*/dist/' --ignore './backend/shared/*/dist/'");
     });
 });

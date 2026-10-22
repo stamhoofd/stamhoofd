@@ -448,6 +448,7 @@ describe('PaymentReallocationService', () => {
                 (await getOrganization()).id,
                 memberId,
                 ReceivableBalanceType.member,
+                items => BalanceItemService.updatePaidAndPending(items),
             );
 
             // Check if the balance items are now equal
@@ -495,6 +496,7 @@ describe('PaymentReallocationService', () => {
                 (await getOrganization()).id,
                 memberId,
                 ReceivableBalanceType.member,
+                items => BalanceItemService.updatePaidAndPending(items),
             );
 
             // Check if the balance items are now equal
@@ -550,6 +552,7 @@ describe('PaymentReallocationService', () => {
                 (await getOrganization()).id,
                 memberId,
                 ReceivableBalanceType.member,
+                items => BalanceItemService.updatePaidAndPending(items),
             );
 
             // Check if the balance items are now equal
@@ -610,6 +613,7 @@ describe('PaymentReallocationService', () => {
                 (await getOrganization()).id,
                 memberId,
                 ReceivableBalanceType.member,
+                items => BalanceItemService.updatePaidAndPending(items),
             );
 
             // Check if the balance items are now equal
@@ -669,6 +673,7 @@ describe('PaymentReallocationService', () => {
                 (await getOrganization()).id,
                 memberId,
                 ReceivableBalanceType.member,
+                items => BalanceItemService.updatePaidAndPending(items),
             );
 
             // Check if the balance items are now equal
@@ -728,6 +733,7 @@ describe('PaymentReallocationService', () => {
                 (await getOrganization()).id,
                 memberId,
                 ReceivableBalanceType.member,
+                items => BalanceItemService.updatePaidAndPending(items),
             );
 
             // Check if the balance items are now equal
@@ -783,6 +789,7 @@ describe('PaymentReallocationService', () => {
                 (await getOrganization()).id,
                 memberId,
                 ReceivableBalanceType.member,
+                items => BalanceItemService.updatePaidAndPending(items),
             );
 
             // Check if the balance items are now equal
@@ -838,6 +845,7 @@ describe('PaymentReallocationService', () => {
                 (await getOrganization()).id,
                 memberId,
                 ReceivableBalanceType.member,
+                items => BalanceItemService.updatePaidAndPending(items),
             );
 
             // Check if the balance items are now equal
@@ -905,6 +913,7 @@ describe('PaymentReallocationService', () => {
                 (await getOrganization()).id,
                 memberId,
                 ReceivableBalanceType.member,
+                items => BalanceItemService.updatePaidAndPending(items),
             );
 
             // Check if the balance items are now equal

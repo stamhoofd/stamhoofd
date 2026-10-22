@@ -65,9 +65,9 @@ import STNavigationBar from '#navigation/STNavigationBar.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import { Validator } from '#errors/Validator.ts';
-import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { SessionManager } from '@stamhoofd/networking/SessionManager';
+import { LoginHelper } from '@stamhoofd/frontend-application/LoginHelper';
+import { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
+import { SessionManager } from '@stamhoofd/frontend-application/SessionManager';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 import type { MFASetupResponse } from '@stamhoofd/structures';
 import { AppRoute, NewUser } from '@stamhoofd/structures';
@@ -76,12 +76,14 @@ import { useContext } from '../hooks/useContext';
 import { useOrganization } from '../hooks/useOrganization';
 import { usePlatform } from '../hooks/usePlatform';
 import SignupPoliciesBox from './components/SignupPoliciesBox.vue';
+import { useFreshAction } from './useFreshAction';
 
 const props = defineProps<{
     token: string;
 }>();
 
 const context = useContext();
+const runFresh = useFreshAction();
 const organization = useOrganization();
 const platform = usePlatform();
 const dismiss = useDismiss();
@@ -220,6 +222,7 @@ async function presentMFASetup(setup: MFASetupResponse) {
         components: [
             AsyncComponent(() => import('./SetupMFAView.vue'), {
                 setupToken: setup.setupToken,
+                runFresh,
                 canUsePasskeys: setup.canUsePasskeys,
                 // We opened this flow in a sheet, so we close it again before moving on.
                 onCompleted: async (_: NavigationActions) => {

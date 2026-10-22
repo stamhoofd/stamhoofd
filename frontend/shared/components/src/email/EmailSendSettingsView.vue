@@ -58,14 +58,14 @@ import { EmailPreview, EmailStatus } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { usePatchEmail } from '../communication/hooks/usePatchEmail';
 import { useErrors } from '../errors/useErrors';
-import { GlobalEventBus } from '../EventBus';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';
 import { useContext } from '#hooks/useContext.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
 import { Formatter } from '@stamhoofd/utility';
 import { ErrorBox } from '../errors/ErrorBox';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { markReviewMoment } from '@stamhoofd/frontend-application/markReviewMoment';
 
 const props = withDefaults(defineProps<{
     editEmail: EmailPreview;
@@ -149,7 +149,7 @@ async function save() {
             await GlobalEventBus.sendEvent('selectTabById', 'communication');
 
             // Mark review moment
-            AppManager.shared.markReviewMoment(context.value);
+            markReviewMoment(context.value.organization);
         }
         await dismiss({ force: true });
     }

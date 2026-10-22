@@ -466,10 +466,8 @@ describe('Endpoint.PatchPaymentsEndpoint', () => {
         balanceItem.orderId = order.id;
         await balanceItem.save();
 
-        const updatedAtBefore = (await Order.getByID(order.id))!.updatedAt;
-
-        // updatedAt has second precision: make sure the bump is measurable
-        await new Promise(resolve => setTimeout(resolve, 1100));
+        const updatedAtBefore = new Date('2024-01-01T00:00:00Z');
+        await Order.update().set('updatedAt', updatedAtBefore).where('id', order.id).update();
 
         const body = buildRefund({ sourcePayment: payment, items: new Map([[balanceItem, -50_0000]]) });
         await post(body, organization, adminToken);
@@ -479,8 +477,8 @@ describe('Endpoint.PatchPaymentsEndpoint', () => {
         expect(updatedOrder!.updatedAt.getTime()).toBeGreaterThan(updatedAtBefore.getTime());
 
         // The refund fails at Mollie: the order is bumped again (and stays valid)
-        const updatedAtPending = updatedOrder!.updatedAt;
-        await new Promise(resolve => setTimeout(resolve, 1100));
+        const updatedAtPending = new Date('2024-01-02T00:00:00Z');
+        await Order.update().set('updatedAt', updatedAtPending).where('id', order.id).update();
         await mollieMocker.failRefund();
 
         updatedOrder = await Order.getByID(order.id);

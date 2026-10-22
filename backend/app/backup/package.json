@@ -1,26 +1,36 @@
 {
     "name": "@stamhoofd/backend-backup",
-    "version": "2.154.0",
+    "version": "2.155.0",
     "type": "module",
     "main": "./dist/index.js",
     "exports": {
         ".": {
+            "types": "./dist-types/index.d.ts",
             "require": "./dist/index.js"
         }
     },
+    "types": "./dist-types/index.d.ts",
+    "files": [
+        "dist",
+        "dist-types",
+        "src",
+        "*.ts",
+        "tsconfig*.json"
+    ],
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
+        "build:types": "tsc --project tsconfig.types.json",
         "build:full": "pnpm run clear && pnpm run build",
         "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
-        "lint": "eslint",
+        "lint": "eslint --quiet",
         "start": "pnpm run build && node --enable-source-maps ./dist/index.js"
     },
     "dependencies": {
-        "@aws-sdk/client-s3": "3.1140.0",
-        "@aws-sdk/lib-storage": "3.1140.0",
+        "@aws-sdk/client-s3": "3.1146.0",
+        "@aws-sdk/lib-storage": "3.1146.0",
         "@simonbackx/simple-database": "1.40.1",
         "@simonbackx/simple-encoding": "2.26.11",
-        "@simonbackx/simple-endpoints": "1.22.0",
+        "@simonbackx/simple-endpoints": "1.23.0",
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-logging": "1.0.1",
         "@stamhoofd/backend-env": "workspace:*",
@@ -34,11 +44,11 @@
         "formidable": "3.5.4",
         "luxon": "3.7.2",
         "mockdate": "3.0.5",
-        "mysql2": "3.24.4"
+        "mysql2": "3.24.5"
     },
     "devDependencies": {
         "@types/formidable": "3.5.1",
-        "@types/luxon": "3.7.5",
+        "@types/luxon": "3.7.6",
         "@types/node": "22.20.4"
     },
     "license": "UNLICENCED",

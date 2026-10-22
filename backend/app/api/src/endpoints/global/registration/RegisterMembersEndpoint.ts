@@ -8,13 +8,15 @@ import type { MemberWithUsersRegistrationsAndGroups, Organization, Payment, User
 import { BalanceItem, CachedBalance, Group, Member, Platform, RateLimiter, Registration, RegistrationPeriod } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import type { BalanceItem as BalanceItemStruct, PlatformMember, RegisterItem } from '@stamhoofd/structures';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, IDRegisterCheckout, Payment as PaymentStruct, PermissionLevel, PlatformFamily, ReceivableBalanceType, RegisterResponse, TranslatedString } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, IDRegisterCheckout, Payment as PaymentStruct, PlatformFamily, ReceivableBalanceType, RegisterResponse, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 import { updateMemberDetailsUitpasNumber } from '../../../helpers/updateMemberDetailsUitpasNumber.js';
 import { BalanceItemService } from '../../../services/BalanceItemService.js';
+import { GroupService } from '../../../services/GroupService.js';
 import { PaymentService } from '../../../services/PaymentService.js';
 import { RegistrationService } from '../../../services/RegistrationService.js';
 type Params = Record<string, never>;
@@ -144,7 +146,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         // Update balances before we start
         await BalanceItemService.flushCaches(organization.id);
 
-        const deleteRegistrationIds = request.body.cart.deleteRegistrationIds;
+        const deleteRegistrationIds = request.body.cart.deleteRegistrations.map(i => i.registrationId);
         const deleteRegistrationModels = (deleteRegistrationIds.length ? (await Registration.getByIDs(...deleteRegistrationIds)) : []).filter(r => r.organizationId === organization.id);
 
         // Validate balance items (can only happen serverside)
@@ -202,7 +204,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // update uitpas social tariff
             if (!isBulkUpdate && member.details.uitpasNumberDetails
-                && member.details.uitpasNumberDetails.socialTariff.shouldUpdateForRegsitration(member.details.requiresFinancialSupport)
+                && member.details.uitpasNumberDetails.socialTariff.shouldUpdateForRegistration(member.details.requiresFinancialSupport?.value)
             ) {
                 let isUpdated: boolean = false;
 
@@ -365,7 +367,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     continue;
                 }
 
-                if (checkout.cart.deleteRegistrations.some(r => r.registration.id === existingRegistration.id)) {
+                if (checkout.cart.deleteRegistrations.some(r => r.id === existingRegistration.id)) {
                     // Safe
                     continue;
                 }
@@ -475,7 +477,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Create negative balance items
         for (const { registration: registrationStruct, deleted } of [
-            ...checkout.cart.deleteRegistrations.map(r => ({ registration: r, deleted: true })),
+            ...checkout.cart.deleteRegistrations.map(r => ({ registration: r.registration, deleted: true })),
             ...checkout.cart.items.flatMap(i => i.replaceRegistrations).map(r => ({ registration: r, deleted: false })),
         ]) {
             if (whoWillPayNow !== 'nobody') {
@@ -926,7 +928,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         // Update occupancy
         for (const group of groups) {
             if ([...registrations, ...deactivatedRegistrations].some(r => r.groupId === group.id)) {
-                await group.updateOccupancy();
+                await GroupService.refreshOccupancy(group);
                 await group.save();
             }
         }

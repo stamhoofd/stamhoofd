@@ -370,7 +370,7 @@
 import { useCanPop, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
@@ -383,17 +383,21 @@ import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/componen
 
 import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
 import type { Payment, PrivateOrder, ProductDateRange, TicketPublicPrivate } from '@stamhoofd/structures';
-import { AccessRight, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, PermissionLevel, PrivateOrderWithTickets, RecordCategory, RecordWarning, TicketPrivate } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, PrivateOrderWithTickets, RecordCategory, RecordWarning, TicketPrivate } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { OrderActionBuilder } from '../../orders/OrderActionBuilder';
 
 import type { WebshopManager } from '../../WebshopManager';
+import type { OpenTicketHandler } from '../TicketNavigation';
 
 const props = defineProps<{
     webshopManager: WebshopManager;
+    openTicketHandler: OpenTicketHandler;
     ticket: TicketPrivate | TicketPublicPrivate;
     order: PrivateOrder;
 }>();
@@ -555,6 +559,7 @@ function openOrder() {
             AsyncComponent(() => import('../../orders/OrderView.vue'), {
                 initialOrder: PrivateOrderWithTickets.create(props.order),
                 webshopManager: props.webshopManager,
+                openTicketHandler: props.openTicketHandler,
             }),
         ],
         modalDisplayStyle: 'popup',

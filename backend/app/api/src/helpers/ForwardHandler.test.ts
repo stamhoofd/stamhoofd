@@ -1,6 +1,7 @@
 import { EmailAddress } from '@stamhoofd/email';
 import { OrganizationFactory, UserFactory } from '@stamhoofd/models';
-import { OrganizationEmail, PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { OrganizationEmail, Permissions } from '@stamhoofd/structures';
 
 import { ForwardHandler } from './ForwardHandler.js';
 

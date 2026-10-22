@@ -1,9 +1,10 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { AccessRight } from '../AccessRight.js';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
 import type { NamedObject } from '../Event.js';
 import type { LoadedPermissions } from '../LoadedPermissions.js';
-import { PermissionLevel } from '../PermissionLevel.js';
-import { PermissionsResourceKey, PermissionsResourceType } from '../PermissionsResourceType.js';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { PermissionsResourceKey } from '../PermissionsResourceType.js';
 import type { Platform } from '../Platform.js';
 import type { OrganizationForPermissionCalculation, UserPermissions } from '../UserPermissions.js';
 

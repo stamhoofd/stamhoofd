@@ -2,7 +2,7 @@
 // import 'regenerator-runtime/runtime'; // only needed for entry or 'false' useBuiltIns
 
 import { VueGlobalHelper } from '@stamhoofd/components/VueGlobalHelper.ts';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { defineCustomElement } from 'vue';
 
 const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;

@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import type { CaddyRoute } from '../config/caddy-config.js';
+import type { CaddyRoute } from '../config/caddy-types.js';
 import type { CliContext } from '../context/create-context.js';
 import type { OutputWriter } from './output-target.js';
 import { defaultOutputWriter } from './output-target.js';

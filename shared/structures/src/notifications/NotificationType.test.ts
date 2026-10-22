@@ -1,4 +1,4 @@
-import { PermissionLevel } from '../PermissionLevel.js';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { Permissions } from '../Permissions.js';
 import { Platform } from '../Platform.js';
 import { UserPermissions } from '../UserPermissions.js';

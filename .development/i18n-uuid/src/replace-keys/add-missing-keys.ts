@@ -4,7 +4,7 @@ import { getFilesToSearch, translatableFileTypes } from '../shared/get-files-to-
 import { getDefaultTranslations } from './get-translations-with-path.js';
 import { findTranslationKeyUsages, replaceOccurrences } from './replace-keys-with-uuid.js';
 import { writeTranslation } from './write-translations.js';
-import { isBase62 } from './compress-uuids.js';
+import { isBase62 } from './base62.js';
 import { reportProgress } from '../shared/progress.js';
 import type { ProgressCallback } from '../shared/progress.js';
 

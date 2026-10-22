@@ -39,7 +39,8 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useEmitPatch } from '#hooks/useEmitPatch.ts';
 import type { ApiUser, PermissionRole, User } from '@stamhoofd/structures';
-import { PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Permissions } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 import { useAdmins } from '../hooks/useAdmins';

@@ -1,5 +1,5 @@
 import type { PatchableArray } from '@simonbackx/simple-encoding';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { Organization, Platform, RecordCategory, RecordSettings } from '@stamhoofd/structures';
 import { RecordType } from '@stamhoofd/structures';
 import type { MailchimpSettings } from '@stamhoofd/structures/mailchimp/MailchimpSettings.js';

@@ -1,11 +1,11 @@
-import { AccessRight } from './AccessRight.js';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { LoadedPermissions } from './LoadedPermissions.js';
 import { MemberResponsibility } from './MemberResponsibility.js';
 import { MemberResponsibilityRecordBase } from './members/MemberResponsibilityRecord.js';
-import { PermissionLevel } from './PermissionLevel.js';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionRoleForResponsibility } from './PermissionRole.js';
 import { Permissions } from './Permissions.js';
-import { PermissionsResourceType } from './PermissionsResourceType.js';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import { ResourcePermissions } from './ResourcePermissions.js';
 
 describe('Unit.LoadedPermissions', () => {

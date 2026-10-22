@@ -6,6 +6,9 @@ name: CI
 permissions:
     contents: read
 
+env:
+    PUPPETEER_SKIP_DOWNLOAD: 'true'
+
 on:
     merge_group:
         types: [checks_requested]
@@ -13,13 +16,12 @@ on:
         branches: [main, ci-test, "renovate/**"]
     pull_request:
         branches: [main]
-        types: [opened, synchronize, reopened, labeled]
+        types: [opened, synchronize, reopened, labeled, stacked]
 
-# Cancel superseded runs on the same ref. We only cancel on pull_request events so
-# that pushes to main always run to completion (and keep their full check history).
-# concurrency:
-#   group: ci-${{ github.workflow }}-${{ github.ref }}
-#   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+# Group PR runs by ref; unique groups preserve every non-PR run, including pending runs.
+concurrency:
+    group: ci-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+    cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
     job_setup:
@@ -115,16 +117,26 @@ jobs:
                         - 'pnpm-workspace.yaml'
                         - '.npmrc'
                         - 'shared/**'
+                        - '.development/stam.mjs'
                       playwright:
                         - 'package.json'
                         - 'pnpm-lock.yaml'
                         - 'pnpm-workspace.yaml'
                         - '.npmrc'
                         - 'tests/playwright/**'
+                        - 'shared/**'
+                        - 'frontend/**'
+                        - 'backend/**'
+                        - '.development/Corefile'
+                        - '.development/loadenv.sh'
                       # Changing the workflow itself (or the shared setup action) can affect
                       # any job, so all of them run.
                       ci:
-                        - 'turbo.json'
+                        - '.nvmrc'
+                        - 'tsconfig*.json'
+                        - 'jest-extended.d.ts'
+                        - '.development/i18n-uuid/**'
+                        - 'turbo.json*'
                         - '.github/workflows/ci.yml'
                         - '.github/actions/**'
 
@@ -150,12 +162,13 @@ jobs:
                       package.json|pnpm-lock.yaml|pnpm-workspace.yaml|.npmrc)
                         backend_apps=true; backend_shared=true; frontend=true; shared=true; playwright=true ;;
                       shared/*)
-                        backend_apps=true; backend_shared=true; frontend=true; shared=true ;;
-                      backend/shared/*) backend_apps=true; backend_shared=true ;;
-                      backend/*) backend_apps=true ;;
-                      frontend/*) frontend=true ;;
-                      tests/playwright/*) playwright=true ;;
-                      turbo.json|.github/workflows/ci.yml|.github/actions/*) ci=true ;;
+                        backend_apps=true; backend_shared=true; frontend=true; shared=true; playwright=true ;;
+                      backend/shared/*) backend_apps=true; backend_shared=true; playwright=true ;;
+                      backend/*) backend_apps=true; playwright=true ;;
+                      frontend/*) frontend=true; playwright=true ;;
+                      tests/playwright/*|.development/Corefile|.development/loadenv.sh) playwright=true ;;
+                      .development/stam.mjs) shared=true ;;
+                      .nvmrc|tsconfig*.json|jest-extended.d.ts|.development/i18n-uuid/*|turbo.json*|.github/workflows/ci.yml|.github/actions/*) ci=true ;;
                     esac
                   done < "$RUNNER_TEMP/stack-files"
 
@@ -187,6 +200,7 @@ jobs:
                   echo "Failed jobs in that run: ${failed:-none}"
 
                   has() { printf '%s\n' "$failed" | grep -qxF "$1"; }
+                  has_playwright() { printf '%s\n' "$failed" | grep -qE '^Playwright Tests( \(shard [1-4]/4\))?$'; }
 
                   # If setup or the shared build failed, the conditional jobs were all
                   # skipped and their state is unknown: re-run everything.
@@ -199,7 +213,7 @@ jobs:
                     echo "backend_shared=$(has 'Backend Shared Tests' && echo true || echo false)"
                     echo "shared=$(has 'Shared Package Tests' && echo true || echo false)"
                     echo "frontend=$(has 'Components Browser Tests' && echo true || echo false)"
-                    echo "playwright=$(has 'Playwright Tests' && echo true || echo false)"
+                    echo "playwright=$(has_playwright && echo true || echo false)"
                   } >> "$GITHUB_OUTPUT"
 
         outputs:
@@ -211,8 +225,8 @@ jobs:
             in_stack_range: ${{ steps.stack.outputs.run }}
 
     # Build all shared TypeScript packages exactly once and share the compiled output
-    # (dist + tsbuildinfo) with every downstream job via an artifact. This removes the
-    # duplicated `pnpm run build:shared` step from each consumer job.
+    # (dist, dist-types, and .cache build metadata) with every downstream job via an
+    # artifact. This removes the duplicated `pnpm run build:shared` step from each consumer job.
     job_build_shared:
         name: "Build shared packages"
         runs-on: ubuntu-latest
@@ -221,8 +235,23 @@ jobs:
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
             - uses: ./.github/actions/setup
+            - name: Cache shared Turbo tasks
+              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: .turbo/cache
+                  key: turbo-shared-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-${{ github.sha }}-${{ github.run_attempt }}
+                  restore-keys: |
+                      turbo-shared-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-
             - name: Build shared packages
-              run: pnpm run build:shared
+              run: pnpm run build:shared --summarize
+            - name: Upload Turbo build summary
+              if: always()
+              uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+              with:
+                  name: turbo-shared-summary
+                  path: .turbo/runs/*.json
+                  include-hidden-files: true
+                  retention-days: 7
             - name: Upload shared build output
               uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
               with:
@@ -232,30 +261,28 @@ jobs:
                   include-hidden-files: true
                   path: |
                       shared/*/dist
-                      shared/*/*.tsbuildinfo
+                      shared/*/dist-types
+                      shared/*/.cache/*.tsbuildinfo
                       backend/shared/*/dist
-                      backend/shared/*/*.tsbuildinfo
+                      backend/shared/*/dist-types
+                      backend/shared/*/.cache/*.tsbuildinfo
                       .development/i18n-uuid/dist
-                      .development/i18n-uuid/*.tsbuildinfo
+                      .development/i18n-uuid/dist-types
+                      .development/i18n-uuid/.cache/*.tsbuildinfo
 
-    job_test_backend_apps:
-        name: "Backend App Tests"
+    job_test_backend_app_shards:
+        name: "Backend App Tests (shard ${{ matrix.shard }}/2)"
         runs-on: ubuntu-latest
         needs: [job_setup, job_build_shared]
         if: needs.job_setup.outputs.in_stack_range == 'true' && needs.job_setup.outputs.changed_backend_apps == 'true'
-        services:
-            mysql:
-                image: mysql:8.4@sha256:0744ee5ef89ce6ccfa13de3e579fe6b9e27f93dd70da9c06d2c908b1b193fb8d
-                env:
-                    MYSQL_ROOT_PASSWORD: root
-                    MYSQL_DATABASE: stamhoofd-tests
-                ports:
-                    - 3306:3306
-                options: >-
-                    --health-cmd="mysqladmin ping --silent"
-                    --health-interval=10s
-                    --health-timeout=5s
-                    --health-retries=3
+        strategy:
+            fail-fast: false
+            matrix:
+                shard: [1, 2]
+        env:
+            PUPPETEER_SKIP_DOWNLOAD: ${{ matrix.shard == 1 && 'false' || 'true' }}
+            STAMHOOFD_CONTAINER_RUNTIME: docker
+            CI_MYSQL_IMAGE: mysql:8.4@sha256:0744ee5ef89ce6ccfa13de3e579fe6b9e27f93dd70da9c06d2c908b1b193fb8d
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
             - uses: ./.github/actions/setup
@@ -264,15 +291,50 @@ jobs:
               with:
                   name: shared-dist
             - name: Allow Chrome to use unprivileged user namespaces
+              if: matrix.shard == 1
               # ubuntu-latest restricts unprivileged user namespaces via AppArmor, which makes the
               # Chrome that puppeteer launches in the renderer tests abort with "No usable sandbox!".
               # Production grants the same exception via /etc/apparmor.d/chrome-dev-builds.
               run: sudo sysctl -e -w kernel.apparmor_restrict_unprivileged_userns=0
-            - name: Run tests
+            # Typecheck has its own required job. Each shard keeps one Vitest worker and
+            # lets stam own its isolated MySQL, migrations, and teardown.
+            - name: Run API tests
+              run: >-
+                  pnpm stam test api --ci --skip-build
+                  --shard ${{ matrix.shard }}/2
+                  --json-report "${{ runner.temp }}/api-test-reports/api-${{ matrix.shard }}.json"
+            - name: Upload API test timings
+              if: ${{ !cancelled() }}
+              uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+              with:
+                  name: api-test-report-${{ matrix.shard }}
+                  path: ${{ runner.temp }}/api-test-reports/*.json
+                  if-no-files-found: error
+                  retention-days: 7
+            - name: Run other backend app tests once
+              if: ${{ !cancelled() && matrix.shard == 1 }}
               run: |
-                  for package in backend/app/renderer backend/app/redirecter backend/app/api; do
-                    pnpm --dir "$package" run test --bail=1
-                  done
+                  pnpm stam test renderer --ci --skip-build
+                  pnpm stam test redirecter --ci --skip-build
+                  pnpm stam test statistics-syncer --ci --skip-build
+
+    job_test_backend_apps:
+        name: "Backend App Tests"
+        runs-on: ubuntu-latest
+        needs: [job_setup, job_test_backend_app_shards]
+        if: >-
+            !cancelled() &&
+            needs.job_setup.outputs.in_stack_range == 'true' &&
+            needs.job_setup.outputs.changed_backend_apps == 'true'
+        steps:
+            - name: Check all backend app shards succeeded
+              env:
+                  SHARD_RESULT: ${{ needs.job_test_backend_app_shards.result }}
+              run: |
+                  if [ "$SHARD_RESULT" != "success" ]; then
+                      echo "Backend app shards finished with: $SHARD_RESULT"
+                      exit 1
+                  fi
 
     job_test_backend_shared:
         name: "Backend Shared Tests"
@@ -300,10 +362,7 @@ jobs:
               with:
                   name: shared-dist
             - name: Run tests
-              run: |
-                  for package in backend/shared/queues backend/shared/logging backend/shared/models backend/shared/vies backend/shared/sql; do
-                    pnpm --dir "$package" run test --bail=1
-                  done
+              run: pnpm exec turbo run test --filter='./backend/shared/*' --concurrency=1 --env-mode=loose -- --run --bail=1
 
     job_test_shared:
         name: "Shared Package Tests"
@@ -318,10 +377,7 @@ jobs:
               with:
                   name: shared-dist
             - name: Run tests
-              run: |
-                  for package in shared/structures shared/utility shared/cli shared/object-differ shared/sgv shared/eslint; do
-                    pnpm --dir "$package" run test --bail=1
-                  done
+              run: pnpm exec turbo run test --filter='./shared/*' --filter=i18n-uuid --concurrency=2 --env-mode=loose -- --run --bail=1
 
     job_boot:
         name: "API boot and shutdown"
@@ -344,12 +400,27 @@ jobs:
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
             - uses: ./.github/actions/setup
+            - name: Restore API Turbo tasks
+              id: api-cache
+              uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: .turbo/cache
+                  key: turbo-api-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-${{ github.job }}-${{ github.sha }}-${{ github.run_attempt }}
+                  restore-keys: |
+                      turbo-api-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-
+                      turbo-shared-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-
             - name: Download shared build output
               uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
               with:
                   name: shared-dist
             - name: Build API
-              run: pnpm --dir backend/app/api run build
+              run: pnpm exec turbo run build --filter=@stamhoofd/backend
+            - name: Save API Turbo tasks
+              if: steps.api-cache.outputs.cache-hit != 'true'
+              uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: .turbo/cache
+                  key: ${{ steps.api-cache.outputs.cache-primary-key }}
             - name: Remove all installed dependencies
               run: pnpm run clear-dependencies
             - name: Install production dependencies only
@@ -359,22 +430,79 @@ jobs:
             - name: Run boot test
               run: NODE_ENV=test bash tests/boot/boot-test.sh
 
-    job_test_lint_typecheck_checking:
-        name: "Lint and Typecheck"
+    job_test_typecheck:
+        name: "Typecheck"
         runs-on: ubuntu-latest
         needs: [job_setup, job_build_shared]
         if: needs.job_setup.outputs.in_stack_range == 'true'
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
             - uses: ./.github/actions/setup
+            - name: Cache typecheck Turbo tasks
+              id: turbo-cache
+              uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: .turbo/cache
+                  key: turbo-typecheck-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-${{ github.sha }}-${{ github.run_attempt }}
+                  restore-keys: |
+                      turbo-typecheck-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-
             - name: Download shared build output
               uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
               with:
                   name: shared-dist
             - name: Run type checking
-              run: pnpm run typecheck
+              run: pnpm run typecheck --summarize
+            - name: Upload typecheck Turbo summary
+              if: always()
+              uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+              with:
+                  name: turbo-typecheck-summary
+                  path: .turbo/runs/*.json
+                  include-hidden-files: true
+                  retention-days: 7
+            - name: Save typecheck Turbo tasks
+              if: ${{ !cancelled() && steps.turbo-cache.outputs.cache-primary-key != '' && steps.turbo-cache.outputs.cache-hit != 'true' }}
+              uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: .turbo/cache
+                  key: ${{ steps.turbo-cache.outputs.cache-primary-key }}
+
+    job_test_lint:
+        name: "Lint"
+        runs-on: ubuntu-latest
+        needs: [job_setup, job_build_shared]
+        if: needs.job_setup.outputs.in_stack_range == 'true'
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/setup
+            - name: Cache lint Turbo tasks
+              id: turbo-cache
+              uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: .turbo/cache
+                  key: turbo-lint-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-${{ github.sha }}-${{ github.run_attempt }}
+                  restore-keys: |
+                      turbo-lint-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-
+            - name: Download shared build output
+              uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+              with:
+                  name: shared-dist
             - name: Run type linting
-              run: pnpm run lint
+              run: pnpm run lint --summarize
+            - name: Upload lint Turbo summary
+              if: always()
+              uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+              with:
+                  name: turbo-lint-summary
+                  path: .turbo/runs/*.json
+                  include-hidden-files: true
+                  retention-days: 7
+            - name: Save lint Turbo tasks
+              if: ${{ !cancelled() && steps.turbo-cache.outputs.cache-primary-key != '' && steps.turbo-cache.outputs.cache-hit != 'true' }}
+              uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: .turbo/cache
+                  key: ${{ steps.turbo-cache.outputs.cache-primary-key }}
             # Temporarily disabled until everything is formatted.
             # - name: Check formatting
             #   run: pnpm stam check format
@@ -387,53 +515,56 @@ jobs:
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
             - uses: ./.github/actions/setup
+            - name: Determine Playwright version
+              id: playwright-version
+              run: |
+                  version=$(pnpm --dir tests/playwright exec node -p "require('@playwright/test/package.json').version")
+                  echo "version=$version" >> "$GITHUB_OUTPUT"
             - name: Cache Playwright browsers
               uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: ~/.cache/ms-playwright
-                  key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+                  key: playwright-v2-${{ runner.os }}-${{ runner.arch }}-chromium-with-shell-${{ steps.playwright-version.outputs.version }}
             - name: Install Playwright Browsers
               run: pnpm --dir tests/playwright exec playwright install --with-deps chromium
             - name: Download shared build output
               uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
               with:
                   name: shared-dist
-            - name: Run components browser tests
-              run: pnpm --dir frontend/shared/components exec vitest run
-            - name: Run networking browser tests
-              run: pnpm --dir frontend/shared/networking exec vitest run
+            - name: Run frontend shared tests
+              run: pnpm exec turbo run test --filter='./frontend/shared/*' --concurrency=1 --env-mode=loose -- --run --bail=1
 
-    job_test_playwright:
-        name: "Playwright Tests"
+    job_test_playwright_shards:
+        name: "Playwright Tests (shard ${{ matrix.shard }}/4)"
         timeout-minutes: 60
         runs-on: ubuntu-latest
         needs: [job_setup, job_build_shared]
-        if: needs.job_setup.outputs.in_stack_range == 'true' && (needs.job_setup.outputs.changed_backend_apps == 'true' || needs.job_setup.outputs.changed_frontend == 'true' || needs.job_setup.outputs.rerun_playwright == 'true')
-        permissions:
-            contents: read
-            pull-requests: write
+        if: needs.job_setup.outputs.in_stack_range == 'true' && needs.job_setup.outputs.rerun_playwright == 'true'
+        strategy:
+            fail-fast: false
+            matrix:
+                shard: [1, 2, 3, 4]
         env:
-            SPACES_CI_BUCKET: stamhoofd-ci-traces
-            SPACES_CI_REGION: ams3
+            CI_MYSQL_IMAGE: mysql:8.4@sha256:0744ee5ef89ce6ccfa13de3e579fe6b9e27f93dd70da9c06d2c908b1b193fb8d
+            PLAYWRIGHT_WORKER_COUNT: '2'
             # The SSO tests start a Keycloak container from the CLI. Runners ship both docker and
             # podman, and the auto-detection prefers podman, so pin the runtime we actually verified.
             STAMHOOFD_CONTAINER_RUNTIME: docker
-        services:
-            mysql:
-                image: mysql:8.4@sha256:0744ee5ef89ce6ccfa13de3e579fe6b9e27f93dd70da9c06d2c908b1b193fb8d
-                env:
-                    MYSQL_ROOT_PASSWORD: root
-                    MYSQL_DATABASE: stamhoofd-tests
-                ports:
-                    - 3306:3306
-                options: >-
-                    --health-cmd="mysqladmin ping --silent"
-                    --health-interval=10s
-                    --health-timeout=5s
-                    --health-retries=3
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - name: Start MySQL in background
+              id: mysql
+              run: node shared/cli/bin/ci-mysql.mjs start
             - uses: ./.github/actions/setup
+            - name: Restore API Turbo tasks
+              id: api-cache
+              uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: .turbo/cache
+                  key: turbo-api-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-${{ github.job }}-${{ github.sha }}-${{ github.run_attempt }}
+                  restore-keys: |
+                      turbo-api-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-
+                      turbo-shared-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-
             - name: Restore CoreDNS cache
               id: cache-coredns
               uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -454,8 +585,8 @@ jobs:
               run: coredns -version
             - name: Disable default DNS
               run: |
+                  sudo cp -L /etc/resolv.conf "$RUNNER_TEMP/original-resolv.conf"
                   sudo systemctl stop systemd-resolved
-                  sudo systemctl disable systemd-resolved
                   sudo rm /etc/resolv.conf
                   echo "nameserver 127.0.0.1" | sudo tee /etc/resolv.conf
             - name: Run coredns
@@ -493,11 +624,16 @@ jobs:
             # Now Caddy certificates are trusted by the system. Now we need to add it to Chromium as well.
             - name: Install libnss3-tools
               run: sudo apt-get update && sudo apt-get install -y libnss3-tools
+            - name: Determine Playwright version
+              id: playwright-version
+              run: |
+                  version=$(pnpm --dir tests/playwright exec node -p "require('@playwright/test/package.json').version")
+                  echo "version=$version" >> "$GITHUB_OUTPUT"
             - name: Cache Playwright browsers
               uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: ~/.cache/ms-playwright
-                  key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+                  key: playwright-v2-${{ runner.os }}-${{ runner.arch }}-chromium-no-shell-${{ steps.playwright-version.outputs.version }}
             - name: Install Playwright Browsers
               run: pnpm --dir tests/playwright exec playwright install --with-deps --no-shell chromium
             - name: Cache Caddy
@@ -545,18 +681,110 @@ jobs:
               with:
                   name: shared-dist
             - name: Build API
-              run: pnpm --dir backend/app/api run build:playwright:pre
+              run: pnpm exec turbo run build --filter=@stamhoofd/backend
+            - name: Save API Turbo tasks
+              if: matrix.shard == 1 && steps.api-cache.outputs.cache-hit != 'true'
+              uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: .turbo/cache
+                  key: ${{ steps.api-cache.outputs.cache-primary-key }}
+            - name: Compile API test helpers
+              run: pnpm --dir backend/app/api exec tsc --build tsconfig.test.build.json
+            - name: Wait for MySQL
+              run: node shared/cli/bin/ci-mysql.mjs wait
             - name: Run Playwright tests
-              run: pnpm --dir tests/playwright run test
+              run: pnpm --dir tests/playwright run test --shard ${{ matrix.shard }}/4
+            - name: Restore runner DNS
+              if: always()
+              run: |
+                  if [ -f "$RUNNER_TEMP/original-resolv.conf" ]; then
+                      sudo systemctl start systemd-resolved
+                      sudo cp "$RUNNER_TEMP/original-resolv.conf" /etc/resolv.conf
+                  fi
+            - name: Upload MySQL startup diagnostics
+              if: ${{ !cancelled() && steps.mysql.outcome && steps.mysql.outcome != 'skipped' }}
+              uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+              with:
+                  name: playwright-mysql-startup-${{ matrix.shard }}
+                  path: ${{ runner.temp }}/stamhoofd-ci-mysql
+                  retention-days: 7
+            - name: Upload Playwright blob report
+              if: ${{ !cancelled() }}
+              uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+              with:
+                  name: playwright-blob-${{ matrix.shard }}
+                  path: tests/playwright/blob-report
+                  if-no-files-found: error
+                  overwrite: true
+                  compression-level: 0
+                  retention-days: 1
             - name: Upload Playwright artifacts
               if: failure()
               uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
               with:
-                  name: playwright-traces
+                  name: playwright-traces-${{ github.run_attempt }}-${{ matrix.shard }}
                   path: |
                       tests/playwright/playwright-report
                       tests/playwright/test-results
                   retention-days: 1
+
+    job_test_playwright:
+        name: "Playwright Tests"
+        runs-on: ubuntu-latest
+        needs: [job_setup, job_test_playwright_shards]
+        if: >-
+            !cancelled() &&
+            needs.job_setup.outputs.in_stack_range == 'true' &&
+            needs.job_setup.outputs.rerun_playwright == 'true' &&
+            needs.job_test_playwright_shards.result != 'skipped'
+        permissions:
+            contents: read
+            pull-requests: write
+        env:
+            SPACES_CI_BUCKET: stamhoofd-ci-traces
+            SPACES_CI_REGION: ams3
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/setup
+            - name: Download Playwright blob reports
+              uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+              with:
+                  pattern: playwright-blob-*
+                  path: tests/playwright/blob-report
+                  merge-multiple: true
+            - name: Download Playwright failure artifacts
+              if: ${{ !cancelled() && needs.job_test_playwright_shards.result != 'success' }}
+              uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+              with:
+                  pattern: playwright-traces-${{ github.run_attempt }}-*
+                  path: tests/playwright/test-results
+            - name: Merge Playwright reports
+              if: ${{ !cancelled() }}
+              run: pnpm --dir tests/playwright run merge-reports
+            - name: Upload combined Playwright report
+              if: ${{ !cancelled() }}
+              uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+              with:
+                  name: playwright-traces
+                  overwrite: true
+                  path: |
+                      tests/playwright/playwright-report
+                      tests/playwright/test-results
+                  retention-days: 1
+            - name: Check all Playwright shards succeeded
+              if: ${{ !cancelled() }}
+              env:
+                  SHARD_RESULT: ${{ needs.job_test_playwright_shards.result }}
+              run: |
+                  if [ "$SHARD_RESULT" != "success" ]; then
+                      echo "Playwright shards finished with: $SHARD_RESULT"
+                      exit 1
+                  fi
+                  count=$(find tests/playwright/blob-report -maxdepth 1 -name '*.zip' | wc -l)
+                  if [ "$count" -ne 4 ]; then
+                      echo "Expected 4 shard reports, found $count"
+                      exit 1
+                  fi
             - name: Publish traces to Spaces & build notifications
               id: publish_traces
               if: failure()
@@ -654,10 +882,10 @@ jobs:
                   state-key: incidents/${{ github.ref_name }}.json
 
     notify_lint:
-        name: "Notify · Lint and Typecheck"
+        name: "Notify · Lint"
         runs-on: ubuntu-latest
-        needs: [job_test_lint_typecheck_checking, notify_shared]
-        if: ${{ !cancelled() && needs.job_test_lint_typecheck_checking.result == 'failure' && github.event_name == 'push' }}
+        needs: [job_test_lint, notify_shared]
+        if: ${{ !cancelled() && needs.job_test_lint.result == 'failure' && github.event_name == 'push' }}
         permissions:
             contents: read
         steps:
@@ -665,7 +893,28 @@ jobs:
             - uses: ./.github/actions/slack-notify
               with:
                   mode: report-failure
-                  job-label: "Lint and Typecheck"
+                  job-label: "Lint"
+                  slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+                  slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+                  spaces-key: ${{ secrets.SPACES_CI_KEY }}
+                  spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+                  spaces-bucket: stamhoofd-ci-traces
+                  spaces-region: ams3
+                  state-key: incidents/${{ github.ref_name }}.json
+
+    notify_typecheck:
+        name: "Notify · Typecheck"
+        runs-on: ubuntu-latest
+        needs: [job_test_typecheck, notify_lint]
+        if: ${{ !cancelled() && needs.job_test_typecheck.result == 'failure' && github.event_name == 'push' }}
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: ./.github/actions/slack-notify
+              with:
+                  mode: report-failure
+                  job-label: "Typecheck"
                   slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
                   slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
                   spaces-key: ${{ secrets.SPACES_CI_KEY }}
@@ -677,7 +926,7 @@ jobs:
     notify_backend_shared:
         name: "Notify · Backend Shared Tests"
         runs-on: ubuntu-latest
-        needs: [job_test_backend_shared, notify_lint]
+        needs: [job_test_backend_shared, notify_typecheck]
         if: ${{ !cancelled() && needs.job_test_backend_shared.result == 'failure' && github.event_name == 'push' }}
         permissions:
             contents: read
@@ -790,7 +1039,8 @@ jobs:
             - job_setup
             - job_build_shared
             - job_test_shared
-            - job_test_lint_typecheck_checking
+            - job_test_lint
+            - job_test_typecheck
             - job_test_backend_shared
             - job_test_backend_apps
             - job_test_components_vitest
@@ -831,7 +1081,8 @@ jobs:
             - job_setup
             - job_build_shared
             - job_test_shared
-            - job_test_lint_typecheck_checking
+            - job_test_lint
+            - job_test_typecheck
             - job_test_backend_shared
             - job_test_backend_apps
             - job_test_components_vitest

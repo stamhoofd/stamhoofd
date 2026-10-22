@@ -1,7 +1,9 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, Token } from '@stamhoofd/models';
 import { DocumentTemplateFactory, OrganizationFactory, STPackageFactory, UserFactory } from '@stamhoofd/models';
-import { DocumentStatus, LimitedFilteredRequest, OrganizationMetaData, OrganizationRecordsConfiguration, OrganizationType, PermissionLevel, Permissions, RecordCategory, RecordSettings, RecordType, STPackageBundle, type StamhoofdFilter, TranslatedString, UmbrellaOrganization } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { DocumentStatus, LimitedFilteredRequest, OrganizationMetaData, OrganizationRecordsConfiguration, OrganizationType, Permissions, RecordCategory, RecordSettings, RecordType, STPackageBundle, TranslatedString, UmbrellaOrganization } from '@stamhoofd/structures';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';

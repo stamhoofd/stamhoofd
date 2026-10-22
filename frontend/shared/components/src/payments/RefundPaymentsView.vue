@@ -84,7 +84,7 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { BalanceItemPaymentDetailed, PaymentGeneral, PaymentProvider, PaymentStatus, PaymentType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
-import { GlobalEventBus } from '#EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
 import { useErrors } from '#errors/useErrors.ts';

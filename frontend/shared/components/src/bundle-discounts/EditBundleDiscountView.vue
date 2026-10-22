@@ -144,7 +144,8 @@ import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useGroupViewLoaders } from '#groups/groupViewLoaders.ts';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { BundleDiscount, Group, LimitedFilteredRequest, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PaginatedResponseDecoder } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
@@ -170,6 +171,7 @@ const groups = ref(null) as Ref<null | Group[]>;
 const context = useContext();
 const owner = useRequestOwner();
 const present = usePresent();
+const groupViewLoaders = useGroupViewLoaders();
 
 loadGroups().catch(console.error);
 
@@ -289,7 +291,7 @@ async function editGroup(group: Group) {
 
     await present({
         components: [
-            AsyncComponent(() => import('#groups/EditGroupView.vue'), {
+            AsyncComponent(groupViewLoaders.editGroup, {
                 period: patchedPeriod.value,
                 groupId: group.id,
                 isNew: false,

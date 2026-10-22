@@ -1,0 +1,1266 @@
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import type { SimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import type { RequestMiddleware } from '@simonbackx/simple-networking';
+import { Request } from '@simonbackx/simple-networking';
+import { Toast } from '@stamhoofd/frontend-notifications/Toast';
+import { getSessionPresentation } from './SessionPresentation';
+import type { LoginProviderType } from '@stamhoofd/structures';
+import { ImpersonationTicketGrant, OpenIDAuthTokenResponse, Organization, Platform, Token, UserWithMembers, Version } from '@stamhoofd/structures';
+import { isReactive, reactive } from 'vue';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
+import { ContextPermissions } from './ContextPermissions';
+import { loadPlatform, savePlatformToStorage } from './loadPlatform';
+import { ManagedToken } from './ManagedToken';
+import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
+import { QueueHandler } from './QueueHandler';
+import { Storage } from '@stamhoofd/frontend-storage/Storage';
+import { UrlHelper } from '@simonbackx/vue-app-navigation';
+
+type AuthenticationStateListener = (changed: 'user' | 'organization' | 'platform' | 'token' | 'preventComplete') => void;
+
+// dec2hex :: Integer -> String
+// i.e. 0-255 -> '00'-'ff'
+function dec2hex(dec: number) {
+    return dec.toString(16).padStart(2, '0');
+}
+
+// generateId :: Integer -> String
+function generateId(len: number) {
+    const arr = new Uint8Array((len || 40) / 2);
+    window.crypto.getRandomValues(arr);
+    return Array.from(arr, dec2hex).join('');
+}
+
+export class SessionContext implements RequestMiddleware {
+    /**
+     * This will become optional in the future
+     */
+    organization: Organization | null = null;
+
+    /**
+     * Never replace this reference: use updatePlatform to keep it stable
+     * (usePlatform() and the audit log uuid resolver keep a reference to this object)
+     */
+    platform: Platform;
+    user: UserWithMembers | null = null;
+    loadingError: Error | null = null;
+
+    /**
+     * Manually mark the session as incomplete by setting this to true
+     * Not using #private syntax because that messes with Vue proxies
+    */
+    _preventComplete = false;
+
+    protected token: ManagedToken | null = null;
+    protected usedPlatformStorage = false;
+
+    // Stored: encryption key to obtain the private keys (valid token needed in order to have any meaning => revokable in case of leakage, lost device, theft)
+    // Storage is required since otherwise you would have to enter your password again every time you reload the page
+    // protected authEncryptionKey: string | null = null
+
+    // We can store the private key in the browser, because on password change it will get changed
+    // protected userPrivateKey: string | null = null // Used to decrypt messages for this user
+
+    protected listeners: Map<any, AuthenticationStateListener> = new Map();
+
+    isStorageDisabled = false;
+
+    /**
+     * Set by checkSSO() when the identity provider signed the user in, but the login still
+     * needs a second factor (`mfaToken`) or the enrollment of one (`setupToken`). There is
+     * no session token yet. The login view reads this to continue the flow, and clears it.
+     */
+    pendingSSOTwoFactor: { mfaToken: string } | { setupToken: string; canUsePasskeys: boolean } | null = null;
+
+    /**
+     * A session always needs a platform: it is required to calculate permissions. Pass the app level
+     * platform (see loadPlatform), which is either read from cache or fetched over the network.
+     */
+    constructor(organization: Organization | null, platform: Platform) {
+        this.organization = organization;
+        this.platform = platform;
+        this.usedPlatformStorage = this.organization === null;
+
+        // Reactive hack: always force creating reactive SessionContext
+        return reactive(this) as unknown as SessionContext;
+    }
+
+    disableStorage() {
+        this.isStorageDisabled = true;
+    }
+
+    enableStorage() {
+        this.isStorageDisabled = false;
+        this.saveToStorage().catch(console.error);
+    }
+
+    /**
+     * @deprecated
+     */
+    get organizationId() {
+        return this.organization?.id ?? null;
+    }
+
+    /**
+     * @deprecated
+     * Use auth.permissions
+     */
+    get organizationPermissions() {
+        if (!this.organization) {
+            return null;
+        }
+        return this.user?.permissions?.forOrganization(this.organization, this.platform) ?? null;
+    }
+
+    /**
+     * @deprecated
+     * Use auth
+     */
+    get organizationAuth() {
+        return this.auth;
+    }
+
+    _auth: ContextPermissions | null = null;
+    get auth() {
+        if (!this._auth) {
+            this._auth = new ContextPermissions(this.user, this.organization, this.platform);
+        }
+        return this._auth;
+    }
+
+    clearAuthCache() {
+        this._auth = null;
+    }
+
+    /**
+     * @param platform The app level platform. Only omit it when this session is the app level one:
+     * sub-contexts (see useWrapOrganization and SessionManager.getContextForOrganization) have to
+     * pass the platform they already have, or they'd end up with a second platform object that
+     * silently diverges from the one usePlatform() returns.
+     */
+    static async createFrom(data: ({ organization: Organization } | { organizationId: string }), platform?: Platform) {
+        let organization: Organization;
+        if ('organizationId' in data) {
+            // If we have the token, we better do an authenticated request
+            const response = await SessionContext.serverForOrganization(data.organizationId).request({
+                method: 'GET',
+                path: '/organization',
+                decoder: Organization as Decoder<Organization>,
+                shouldRetry: false,
+            });
+            organization = response.data;
+        } else {
+            organization = data.organization;
+        }
+
+        return new SessionContext(organization, platform ?? (await loadPlatform()).platform);
+    }
+
+    get preventComplete() {
+        return this._preventComplete;
+    }
+
+    set preventComplete(preventComplete: boolean) {
+        this._preventComplete = preventComplete;
+        this.callListeners('preventComplete');
+    }
+
+    /**
+     * A stored session whose refresh token expired can never be used again: it is dropped
+     * instead of restored, so we never end up sending that refresh token to the server (it
+     * would sign the user out of their other sessions as well).
+     */
+    private async dropExpiredStoredToken(token: Token, key: string): Promise<boolean> {
+        if (!token.isRefreshTokenExpired()) {
+            return false;
+        }
+
+        console.log('[SessionContext] Dropping stored session: the refresh token expired');
+        try {
+            await Storage.secure.removeItem(key);
+        } catch (e) {
+            console.error(e);
+        }
+        return true;
+    }
+
+    async loadTokenFromStorage() {
+        if (this.isStorageDisabled) {
+            return;
+        }
+
+        if (this.token && this.token.isRefreshing()) {
+            console.error('[SessionContext] Loading token from storage while current token is refreshing - something is wrong with timing and locking');
+        }
+
+        console.log('[SessionContext] Loading Token from Storage');
+
+        // Check localstorage
+        try {
+            let usePlatformStorage = !this.organization || STAMHOOFD.userMode === 'platform';
+            const key = 'token-' + (!usePlatformStorage ? this.organization!.id : 'platform');
+            const json = await Storage.secure.getItem(key);
+            if (json) {
+                try {
+                    const parsed = JSON.parse(json);
+                    const token = Token.decode(new ObjectData(parsed, { version: Version }));
+                    if (!await this.dropExpiredStoredToken(token, key)) {
+                        this.setTokenWithoutSaving(token, usePlatformStorage);
+                        return;
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            if (!usePlatformStorage) {
+                usePlatformStorage = true;
+                // Also try platform token
+                const json2 = await Storage.secure.getItem('token-platform');
+                if (json2) {
+                    try {
+                        const parsed = JSON.parse(json2);
+                        const token = Token.decode(new ObjectData(parsed, { version: Version }));
+                        if (!await this.dropExpiredStoredToken(token, 'token-platform')) {
+                            this.setTokenWithoutSaving(token, usePlatformStorage);
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Localstorage error');
+            console.error(e);
+        }
+    }
+
+    async loadFromStorage() {
+        await QueueHandler.schedule('session-context-token', async () => {
+            if (this.isStorageDisabled) {
+                return;
+            }
+
+            // Check localstorage
+            try {
+                await this.loadTokenFromStorage();
+
+                if (this.token) {
+                    // Also check if we have the user (optional)
+                    const json = await Storage.secure.getItem('user-' + (!this.usedPlatformStorage ? this.organization!.id : 'platform'));
+                    if (json) {
+                        try {
+                            const parsed = JSON.parse(json);
+                            this.user = new ObjectData(parsed, { version: 0 }).decode(new VersionBoxDecoder(UserWithMembers as Decoder<UserWithMembers>) as Decoder<VersionBox<UserWithMembers>>).data;
+                            this.clearAuthCache();
+                            this.callListeners('user');
+                            return;
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Localstorage error');
+                console.error(e);
+            }
+        });
+    }
+
+    private async doSaveToStorage() {
+        if (this.isStorageDisabled) {
+            return;
+        }
+
+        try {
+            // Save token to localStorage
+            if (this.token) {
+                const suffix = (this.user
+                    ? (this.user.organizationId ? this.user.organizationId : 'platform')
+                    : (
+                            this.usedPlatformStorage ? 'platform' : (this.organization!.id)
+                        ));
+
+                if (suffix === 'platform' && this.organization) {
+                    await Storage.secure.removeItem('token-' + this.organization.id);
+                    await Storage.secure.removeItem('user-' + this.organization.id);
+                }
+
+                if (suffix !== 'platform' && (this.usedPlatformStorage || STAMHOOFD.userMode === 'platform')) {
+                    await Storage.secure.removeItem('token-platform');
+                    await Storage.secure.removeItem('user-platform');
+                }
+
+                await Storage.secure.setItem('token-' + suffix, JSON.stringify(this.token.token.encode({ version: Version })));
+
+                if (this.user) {
+                    await Storage.secure.setItem('user-' + suffix, JSON.stringify(new VersionBox(this.user).encode({ version: Version })));
+                } else {
+                    await Storage.secure.removeItem('user-' + suffix);
+                }
+
+                if (suffix === 'platform') {
+                    this.usedPlatformStorage = true;
+                }
+                console.log('[SessionContext] Saved token to storage, suffix: ' + suffix);
+            }
+        } catch (e) {
+            console.error('Storage error when saving session');
+            console.error(e);
+        }
+    }
+
+    async saveToStorage() {
+        await QueueHandler.schedule('session-context-token', async () => {
+            await this.doSaveToStorage();
+        });
+    }
+
+    private async deleteFromStorage() {
+        if (this.isStorageDisabled) {
+            return;
+        }
+
+        try {
+            if (this.organization) {
+                await Storage.secure.removeItem('token-' + this.organization.id);
+                await Storage.secure.removeItem('user-' + this.organization.id);
+            }
+            if (this.usedPlatformStorage || STAMHOOFD.userMode === 'platform') {
+                await Storage.secure.removeItem('token-platform');
+                await Storage.secure.removeItem('user-platform');
+            }
+        } catch (e) {
+            console.error('Storage error when saving session');
+            console.error(e);
+        }
+
+        console.log('Deleted token to storage');
+    }
+
+    removeFromStorage() {
+        if (this.isStorageDisabled) {
+            return;
+        }
+        try {
+            void Storage.secure.removeItem('token-' + this.organizationId);
+            void Storage.secure.removeItem('user-' + this.organizationId);
+
+            // Deprecated: but best to delete it for now
+            void Storage.secure.removeItem('key-' + this.organizationId);
+        } catch (e) {
+            console.error('Storage error when deleting session');
+            console.error(e);
+        }
+
+        console.log('Deleted token to storage');
+    }
+
+    async checkSSO() {
+        const search = UrlHelper.initial.getSearchParams();
+        const oid_rt = search.get('oid_rt');
+        const oid_mfa = search.get('oid_mfa');
+        const oid_mfa_setup = search.get('oid_mfa_setup');
+        const oid_mfa_passkeys = search.get('oid_mfa_passkeys');
+        const state = search.get('s');
+        const error = search.get('error');
+        const msg = search.get('msg');
+
+        console.log('Checking SSO', oid_rt, state, error);
+
+        /**
+         * The state is a one-time value we stored before starting the flow: it proves the
+         * result in the url belongs to a login this browser started.
+         */
+        const consumeState = async (): Promise<boolean> => {
+            try {
+                const savedState = await Storage.secure.getItem('oid-state');
+                if (savedState !== state) {
+                    console.warn('SSO state didn\'t match');
+
+                    if (!this.canGetCompleted()) {
+                        Toast.error('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.').setHide(20000).show();
+                    }
+                    return false;
+                }
+                Storage.secure.removeItem('oid-state').catch(console.error);
+                return true;
+            } catch (e) {
+                console.error(e);
+
+                if (!this.canGetCompleted()) {
+                    Toast.error('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.').setHide(20000).show();
+                }
+                return false;
+            }
+        };
+
+        if (oid_rt && state) {
+            // Delete initial url
+            search.delete('oid_rt');
+            search.delete('s');
+
+            if (!await consumeState()) {
+                return;
+            }
+
+            await this.setToken(new Token({
+                accessToken: '',
+                refreshToken: oid_rt,
+                accessTokenValidUntil: new Date(0),
+            }));
+
+            try {
+                // We successfull logged in, so clear the tried login - will make sure we'll log in automatically next time
+                sessionStorage.removeItem('triedLogin');
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // The identity provider authenticated the user, but the login is not finished: a
+        // second factor still has to be passed or set up. No session token was handed out,
+        // so we only remember what is pending; the login views pick this up and run the
+        // same 2FA flow as a password login.
+        if ((oid_mfa || oid_mfa_setup) && state) {
+            search.delete('oid_mfa');
+            search.delete('oid_mfa_setup');
+            search.delete('oid_mfa_passkeys');
+            search.delete('s');
+
+            if (!await consumeState()) {
+                return;
+            }
+
+            this.pendingSSOTwoFactor = oid_mfa
+                ? { mfaToken: oid_mfa }
+                : { setupToken: oid_mfa_setup!, canUsePasskeys: oid_mfa_passkeys === '1' };
+        }
+
+        if (state && error) {
+            search.delete('error');
+            search.delete('s');
+
+            // Check valid state
+            try {
+                const savedState = await Storage.secure.getItem('oid-state');
+                if (savedState !== state) {
+                    console.warn('SSO state didn\'t match');
+
+                    if (!this.canGetCompleted()) {
+                        Toast.error('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.').setHide(20000).show();
+                    }
+                    return;
+                }
+                Storage.secure.removeItem('oid-state').catch(console.error);
+            } catch (e) {
+                console.error(e);
+                if (!this.canGetCompleted()) {
+                    Toast.error('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.').setHide(20000).show();
+                }
+                return;
+            }
+
+            Toast.error(error).setHide(20000).show();
+        } else {
+            if (error) {
+                search.delete('error');
+
+                // Message not authorized
+                Toast.error($t(`%kv`)).setHide(20000).show();
+            }
+        }
+
+        if (state && msg) {
+            search.delete('msg');
+            search.delete('s');
+
+            // Check valid state
+            try {
+                const savedState = await Storage.secure.getItem('oid-state');
+                if (savedState !== state) {
+                    console.warn('SSO state didn\'t match');
+                    // Don't show msg
+                    return;
+                }
+                Toast.success(msg).show();
+                Storage.secure.removeItem('oid-state').catch(console.error);
+            } catch (e) {
+                console.error(e);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Sign in through an impersonation link: an administrator asked to see the application
+     * as one of their users, and opened the resulting link here.
+     *
+     * The ticket travels in the fragment of the url, so it never reaches a server log or a
+     * referrer. It is single use, expires within minutes and only works from the address
+     * that asked for it - but a link is still something that can be sent to somebody else,
+     * so this refuses to run in a browser that already has a session and asks before it
+     * signs anybody in.
+     */
+    async checkImpersonation() {
+        // The address bar is rewritten while the application boots (it gains a locale prefix and
+        // the url of the view that is shown), and that drops the fragment, so the ticket has to
+        // come from the url as it was when the page loaded.
+        const hash = UrlHelper.initial.getHashParams();
+        const ticket = hash.get('impersonate');
+
+        if (!ticket) {
+            return;
+        }
+
+        // Drop the ticket before anything else, so a reload, a shared url or a second run of
+        // this check cannot use it again.
+        hash.delete('impersonate');
+        UrlHelper.initial.url.hash = hash.toString();
+
+        if (this.hasToken()) {
+            Toast.error($t(`%Zm9`)).setHide(30000).show();
+            return;
+        }
+
+        if (!await getSessionPresentation().confirm({
+            title: $t(`%ZnG`),
+            confirmText: $t(`%ZmZ`),
+            description: $t(`%ZmW`),
+        })) {
+            return;
+        }
+
+        try {
+            const response = await this.identityServer.request({
+                method: 'POST',
+                path: '/impersonation/token',
+                body: ImpersonationTicketGrant.create({ ticket }),
+                decoder: Token as Decoder<Token>,
+                shouldRetry: false,
+            });
+
+            await this.setToken(response.data);
+        } catch (e) {
+            console.error(e);
+            Toast.fromError(e).setHide(30000).show();
+        }
+    }
+
+    /**
+     * `reauthenticate` confirms the identity of the user that is already signed in instead
+     * of linking the provider to their account: the current session counts as freshly
+     * authenticated again when the provider returns the same user.
+     */
+    async startSSO(data: { webshopId?: string; prompt?: string; providerType: LoginProviderType; reauthenticate?: boolean }) {
+        const spaState = generateId(40);
+        try {
+            await Storage.secure.setItem('oid-state', spaState);
+        } catch (e) {
+            console.error('Could not save state in local storage');
+            Toast.error($t(`%kw`)).setHide(20000).show();
+            return;
+        }
+
+        // Generate code verifier
+        // const codeVerifier = await this.generateCodeVerifier();
+        // Generate code challenge from code verifier
+        // const codeChallenge = await this.generateCodeChallenge(codeVerifier);
+        // code_challenge_method = S256
+
+        const url = new URL(this.identityServer.host + '/openid/start');
+        url.searchParams.set('spaState', spaState);
+        url.searchParams.set('provider', data.providerType);
+        url.searchParams.set('clientPlatform', AppManager.shared.platform);
+        url.searchParams.set('sessionMetaData', JSON.stringify(await AppManager.shared.getSessionMetaData()));
+        if (data.webshopId) {
+            url.searchParams.set('webshopId', data.webshopId);
+        }
+        if (data.prompt) {
+            url.searchParams.set('prompt', data.prompt);
+        }
+
+        let redirectUri = new URL(window.location.href);
+        if (redirectUri.protocol !== 'https:') {
+            // Settings protocol does not work in all situations sadly
+            redirectUri = new URL(redirectUri.toString().replace(redirectUri.protocol, 'https:'));
+        }
+
+        if (STAMHOOFD.REDIRECT_LOGIN_DOMAIN) {
+            redirectUri.searchParams.set('skipRedirect', 'true');
+        }
+        url.searchParams.set('redirectUri', redirectUri.href);
+
+        if (this.hasToken()) {
+            // Request a one-time auth token to connect an external account
+            const respponse = await this.authenticatedServer.request({
+                method: 'POST',
+                path: '/openid/auth-token',
+                decoder: OpenIDAuthTokenResponse as Decoder<OpenIDAuthTokenResponse>,
+            });
+            url.searchParams.set('authToken', respponse.data.ssoAuthToken);
+
+            if (data.reauthenticate) {
+                url.searchParams.set('reauthenticate', 'true');
+            }
+        }
+
+        // Redirect / open url
+        window.location.href = url.toString();
+    }
+
+    addListener(owner: any, listener: AuthenticationStateListener) {
+        this.listeners.set(owner, listener);
+    }
+
+    removeListener(owner: any) {
+        this.listeners.delete(owner);
+    }
+
+    callListeners(changed: 'user' | 'organization' | 'platform' | 'token' | 'preventComplete') {
+        for (const listener of this.listeners.values()) {
+            listener(changed);
+        }
+    }
+
+    hasToken(): boolean {
+        return !!this.token;
+    }
+
+    /**
+     * The access token as it is right now, without refreshing it first. Only use this to
+     * authenticate a request that must also work when the session is invalid or expired -
+     * a normal authenticated request should go through authenticatedServer, which refreshes
+     * the token when needed.
+     */
+    get currentAccessToken(): string | null {
+        return this.token?.token.accessToken ?? null;
+    }
+
+    canGetCompleted(): boolean {
+        // console.log("canGetCompleted", this.token, this.user, this.organization, this.preventComplete, this.user?.permissions, this.organization?.privateMeta)
+        return !!this.token;
+    }
+
+    hasPermissions(): boolean {
+        // console.log("canGetCompleted", this.token, this.user, this.organization, this.preventComplete, this.user?.permissions, this.organization?.privateMeta)
+        return !!this.auth?.permissions;
+    }
+
+    isComplete(): boolean {
+        if (!this.token) {
+            return false;
+        }
+
+        if (!this.user) {
+            return false;
+        }
+
+        if (this.preventComplete) {
+            return false;
+        }
+
+        if (this.organization) {
+            if (this.auth.requiresPrivateMeta && !this.organization.privateMeta) {
+                // Private meta is missing while we have permissions for this organization: requires a refetch
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    static serverForOrganization(organizationId: string | null | undefined) {
+        const server = NetworkManager.server;
+        if (!organizationId) {
+            return server;
+        }
+
+        server.host = 'https://' + organizationId + '.' + STAMHOOFD.domains.api;
+        return server;
+    }
+
+    /** Unauthenticated API server scoped to this context's organization, when present. */
+    get server() {
+        return SessionContext.serverForOrganization(this.organization?.id);
+    }
+
+    get identityServer() {
+        if (STAMHOOFD.userMode === 'platform' || (this.user && this.user.organizationId === null)) {
+            return SessionContext.serverForOrganization(null);
+        }
+        return SessionContext.serverForOrganization(this.organization?.id);
+    }
+
+    /**
+     * Organization-scoped API server with this context's authentication middleware.
+     * Requires a token; refreshes it before attempts and may retry expired-token API
+     * errors even with shouldRetry:false while allowErrorRetry remains enabled.
+     * Invalid access/refresh tokens clear the session rather than retry indefinitely.
+     */
+    get authenticatedServer() {
+        if (!this.hasToken()) {
+            throw new Error('Could not get authenticated server without token');
+        }
+        const server = this.server;
+        server.middlewares.push(this);
+        return server;
+    }
+
+    get authenticatedIdentityServer() {
+        if (!this.hasToken()) {
+            throw new Error('Could not get authenticated server without token');
+        }
+        const server = this.identityServer;
+        server.middlewares.push(this);
+        return server;
+    }
+
+    getAuthenticatedServerForOrganization(organizationId: string | null) {
+        if (!this.hasToken()) {
+            throw new Error('Could not get authenticated server without token');
+        }
+        if (!this.user || (this.user.organizationId !== organizationId && this.user.organizationId !== null)) {
+            console.error('Avoid usage of getAuthenticatedServerForOrganization in organization mode');
+
+            if (STAMHOOFD.environment === 'development') {
+                throw new Error('Not supported in organization mode');
+            }
+        }
+        const server = SessionContext.serverForOrganization(organizationId);
+        server.middlewares.push(this);
+        return server;
+    }
+
+    getOptionalAuthenticatedServerForOrganization(organizationId: string | null) {
+        if (!this.hasToken()) {
+            const server = SessionContext.serverForOrganization(organizationId);
+            return server;
+        }
+
+        if (!this.user || (this.user.organizationId !== organizationId && this.user.organizationId !== null)) {
+            // Out of scope
+            // Server will throw authentication error if we send tokens for a different organization
+            const server = SessionContext.serverForOrganization(organizationId);
+            return server;
+        }
+
+        const server = SessionContext.serverForOrganization(organizationId);
+        server.middlewares.push(this);
+        return server;
+    }
+
+    get optionalAuthenticatedServer() {
+        if (this.hasToken()) {
+            return this.authenticatedServer;
+        }
+        return this.server;
+    }
+
+    protected async onTokenChanged() {
+        await this.doSaveToStorage();
+        this.callListeners('token');
+    }
+
+    setTokenWithoutSaving(token: Token, usedPlatformStorage?: boolean) {
+        console.log('[SessionContext] Setting Token. Platform: ' + usedPlatformStorage);
+
+        if (this.token) {
+            // Disable listener before clearing the token
+            this.token.onChange = () => {
+                console.error('Oops, old token was updated while we are using a different token');
+                // emtpy
+            };
+        }
+        this.token = new ManagedToken(token, async () => {
+            await this.onTokenChanged();
+        });
+
+        if (usedPlatformStorage !== undefined) {
+            this.usedPlatformStorage = usedPlatformStorage;
+        }
+        this.callListeners('token');
+    }
+
+    async setToken(token: Token, usedPlatformStorage?: boolean) {
+        await QueueHandler.schedule('session-context-token', async () => {
+            this.setTokenWithoutSaving(token, usedPlatformStorage);
+            await this.onTokenChanged();
+        });
+    }
+
+    _lastFetchedUser: Date | null = null;
+    _lastFetchedOrganization: Date | null = null;
+
+    async fetchUser(shouldRetry = true): Promise<UserWithMembers> {
+        console.log('Fetching session user...');
+
+        if (!isReactive(this)) {
+            console.error('SessionContext is not reactive while fetching user!');
+        }
+
+        const response = await this.authenticatedServer.request({
+            method: 'GET',
+            path: '/user',
+            decoder: UserWithMembers as Decoder<UserWithMembers>,
+            shouldRetry,
+        });
+        this._lastFetchedUser = new Date();
+
+        if (this.user) {
+            this.user.deepSet(response.data);
+        } else {
+            this.user = response.data;
+            this.clearAuthCache();
+
+            if (this.user.impersonatedBy) {
+                Toast.success($t('%Zma', { name: this.user.name || this.user.email })).show();
+            }
+        }
+        console.log('Fetched session user');
+
+        if (!isReactive(this.user)) {
+            console.error('SessionContext.user is not reactive after fetching user!');
+        }
+
+        // Auto copy organization data from the response
+        if (this.organization) {
+            const returnedOrganization = this.user.members.organizations.find(o => o.id === this.organization?.id);
+            if (returnedOrganization) {
+                this._lastFetchedOrganization = new Date();
+                this.updateOrganization(returnedOrganization);
+            } else {
+                console.warn('Did not find organization in user response');
+            }
+        }
+
+        await this.saveToStorage();
+        this.callListeners('user');
+        return this.user;
+    }
+
+    /**
+     * Set the organization, including the reference
+     */
+    private setOrganization(organization: Organization) {
+        this.organization = organization;
+        this.callListeners('organization');
+    }
+
+    /**
+     * Set the organization, but keep the same reference and update
+     * other references (like groups) correctly to keep the app reactive
+     */
+    updateOrganization(organization: Organization) {
+        if (!this.organization) {
+            this.setOrganization(organization);
+            this.clearAuthCache();
+            this.callListeners('organization');
+        } else {
+            this.organization.deepSet(organization);
+            this.clearAuthCache();
+            this.callListeners('organization');
+        }
+    }
+
+    async fetchOrganization(shouldRetry = true): Promise<Organization> {
+        if (!this.organization) {
+            throw new Error('Cannot fetch organization in a context with no organization');
+        }
+        console.log('Fetching session organization...');
+
+        const response = await (this.hasToken() ? this.authenticatedServer : this.server).request({
+            method: 'GET',
+            path: '/organization',
+            decoder: Organization as Decoder<Organization>,
+            shouldRetry,
+        });
+
+        if (this.hasToken() && this.auth.requiresPrivateMeta && !response.data.privateMeta) {
+            console.error('Missing privateMeta in authenticated organization response');
+
+            // Critical issue: log out
+            this.setLoadingError(new SimpleError({
+                code: 'failed',
+                message: 'Something went wrong',
+                human: $t(`%kx`),
+            }));
+            throw new SimpleError({
+                code: 'failed',
+                message: 'Something went wrong',
+                human: $t(`%kx`),
+            });
+        }
+
+        this.updateOrganization(response.data);
+        this._lastFetchedOrganization = new Date();
+        this.callListeners('organization');
+        return this.organization!;
+    }
+
+    /**
+     * Set the platform, but keep the same reference and update
+     * other references correctly to keep the app reactive
+     */
+    updatePlatform(platform: Platform) {
+        this.platform.deepSet(platform);
+        this.clearAuthCache();
+        this.callListeners('platform');
+    }
+
+    /**
+     * Whether we need the private config of the platform to reliably calculate the permissions of this session.
+     * This is the platform equivalent of auth.requiresPrivateMeta.
+     *
+     * Users with global permissions need the private data to reliably calculate permissions, even for specific
+     * organizations when not using the admin panel.
+     */
+    requiresPlatformPrivateConfig() {
+        if (this.user?.organizationId) {
+            return false;
+        }
+        return this.auth.unloadedPlatformPermissions?.isEmpty === false;
+    }
+
+    /**
+     * Fetch the platform for this session. Unlike the unauthenticated bootstrap fetch in
+     * loadPlatform, this uses the session's token when it has one, so it also loads the
+     * privateConfig for users with global permissions.
+     */
+    async fetchPlatform(): Promise<Platform> {
+        // Run in a queue to prevent race conditions, so concurrent callers of this context share one request
+        await QueueHandler.schedule('fetch-platform-' + (this.organization?.id ?? 'platform'), async () => {
+            const pResponse = await this.optionalAuthenticatedServer.request({
+                method: 'GET',
+                path: '/platform',
+                decoder: Platform as Decoder<Platform>,
+            });
+            this.updatePlatform(pResponse.data);
+            await savePlatformToStorage(this.platform);
+        });
+
+        return this.platform;
+    }
+
+    isOutdated(date: Date | null) {
+        return date === null || date < new Date(new Date().getTime() - 10 * 1000);
+    }
+
+    /**
+     *
+     * @param force Always fetch new information, even when it is available
+     * @param shouldRetry Keep retrying on network or server issues
+     * @param background If we don't need to update the data right away, initiate a forced background update
+     */
+    async updateData(force = false, shouldRetry = true, background = false, skipIfNotOutdated = false) {
+        if (force) {
+            console.log('SessionContext force update data, background: ', background, skipIfNotOutdated);
+        } else {
+            console.log('SessionContext update data, background: ', background, skipIfNotOutdated);
+        }
+
+        if (skipIfNotOutdated) {
+            if ((!this.canGetCompleted() || !this.isOutdated(this._lastFetchedUser)) && (!this.organization || !this.isOutdated(this._lastFetchedOrganization))) {
+                console.log('Data is not outdated, skipping update');
+                return;
+            }
+
+            console.log('Data is outdated, updating...', this._lastFetchedUser, this._lastFetchedOrganization);
+        }
+
+        try {
+            let fetchedUser = false;
+            let fetchedOrganization = false;
+
+            if (this.canGetCompleted()) {
+                if (force || !this.user) {
+                    fetchedUser = true;
+                    await this.fetchUser(shouldRetry);
+
+                    // The user also includes the organization, so we don't need to fetch it again
+                    fetchedOrganization = true;
+                }
+            }
+
+            if (this.organization && ((force && !fetchedOrganization) || (this.auth.requiresPrivateMeta && !this.organization.privateMeta))) {
+                fetchedOrganization = true;
+                await this.fetchOrganization(shouldRetry);
+            }
+
+            // The platform is not touched here. It is passed into the constructor, and loading it
+            // again would be actively wrong: sessions that are not the app level one are handed the
+            // app level platform object, so writing a cached platform into it would overwrite the
+            // live one (and could drop a privateConfig that was already loaded).
+
+            if (((!fetchedOrganization && this.organization) || (!fetchedUser && this.canGetCompleted())) && background) {
+                // Initiate a slow background update without retry
+                // = we don't need to block the UI for this ;)
+                this.updateData(true, false, false).catch((e) => {
+                    // Ignore network errors
+                    console.error('Background session update error', e);
+                });
+            }
+        } catch (e) {
+            console.error('Error while updating session data', e);
+            throw e;
+        }
+    }
+
+    // Logout without clearing this token
+    temporaryLogout() {
+        console.log('temporary logout');
+
+        // We do not call ontoken changed -> prevent saving!!!!
+        // Might still be able to login after a reload (because the error was caused by data errors)
+        if (this.token) {
+            this.token.onChange = () => {
+                // emtpy
+            };
+            this.token = null;
+            this.callListeners('token');
+        }
+        this.user = null;
+        this.callListeners('user');
+    }
+
+    // Logout without clearing this token
+    setLoadingError(error: unknown) {
+        this.loadingError = error as Error;
+        this.callListeners('token');
+        this.callListeners('user');
+    }
+
+    isLoggingOut = false;
+
+    async renewToken(): Promise<void> {
+        await QueueHandler.schedule('session-context-token', async () => {
+            await this.loadTokenFromStorage();
+            if (!this.token) {
+                throw new Error('Could not refresh a session without a token');
+            }
+            await this.token.refresh(this.identityServer);
+        });
+    }
+
+    async endSession(accessToken: string): Promise<void> {
+        await this.identityServer.request({
+            method: 'DELETE',
+            path: '/oauth/token',
+            headers: { Authorization: 'Bearer ' + accessToken },
+            shouldRetry: false,
+        });
+    }
+
+    async logout(updateUIForLogout = true) {
+        if (this.isLoggingOut) {
+            // Prevents loops when refreshing inside the logout endpoint
+            return;
+        }
+
+        if (this.token) {
+            this.isLoggingOut = true;
+            console.log('Logout');
+
+            // Delete first to prevent loops (could be already invalid so the deletion might fail)
+            try {
+                await this.authenticatedIdentityServer.request({
+                    method: 'DELETE',
+                    path: '/oauth/token',
+                    shouldRetry: false,
+                    allowErrorRetry: true, // sometimes we need to refresh a token before we can delete it
+                });
+            } catch (e) {
+                if (Request.isNetworkError(e) || Request.isAbortError(e)) {
+                    // Network access is required for a reliable logout
+                    this.isLoggingOut = false;
+                    throw e;
+                }
+                console.error('Failed to end session. Probably already ended?', e);
+            }
+
+            this.isLoggingOut = false;
+            await this.unsetToken(updateUIForLogout);
+        }
+    }
+
+    private async doUnsetToken(updateUIForLogout = true) {
+        console.log('Unset token');
+        if (!this.token) {
+            return;
+        }
+        this.token.onChange = () => {
+            // emtpy
+        };
+        this.token = null;
+        this.user = null; // force refetch in the future
+        await this.deleteFromStorage();
+
+        if (updateUIForLogout) {
+            await this.onTokenChanged();
+        }
+    }
+
+    /**
+     * Clears the token from memory and storage
+     */
+    private async unsetToken(updateUIForLogout = true) {
+        await QueueHandler.schedule('session-context-token', async () => {
+            await this.doUnsetToken(updateUIForLogout);
+        });
+    }
+
+    async deleteAccount() {
+        if (this.isLoggingOut) {
+            // Prevents loops when refreshing inside the logout endpoint
+            return;
+        }
+
+        if (this.token) {
+            this.isLoggingOut = true;
+            console.log('Logout');
+
+            // Delete first to prevent loops (could be already invalid so the deletion might fail)
+            try {
+                await this.authenticatedServer.request({
+                    method: 'DELETE',
+                    path: '/user',
+                    shouldRetry: false,
+                    allowErrorRetry: true, // sometimes we need to refresh a token before we can delete it
+                });
+            } catch (e) {
+                if (Request.isNetworkError(e) || Request.isAbortError(e)) {
+                    // Network access is required for a reliable logout
+                    this.isLoggingOut = false;
+                    throw e;
+                }
+                console.error('Failed to delete token. Probably already deleted?', e);
+            }
+
+            this.isLoggingOut = false;
+            await this.unsetToken(true);
+        }
+    }
+
+    // -- Implementation for requestMiddleware ----
+
+    async onBeforeRequest(request: Request<any>): Promise<void> {
+        // We need to use a queue here, to avoid doing multiple token refreshes at the same time.
+        await QueueHandler.schedule('session-context-token', async () => {
+            // Check if we have an updated token in storage (other browser tab refreshed the token)
+            await this.loadTokenFromStorage();
+
+            if (!this.token) {
+                // Euhm? The user is not signed in!
+                throw new Error('Could not authenticate request without token');
+            }
+
+            if (this.token.isRefreshing() || this.token.needsRefresh()) {
+                // Already expired.
+                console.log(this.requestPrefix(request) + 'Request started with expired access token, refreshing before starting request...');
+                try {
+                    await this.token.refresh(this.identityServer, () => request.shouldRetry);
+                } catch (e) {
+                    if (isSimpleError(e) || isSimpleErrors(e)) {
+                        if (e.hasCode('invalid_refresh_token')) {
+                            this.setLoadingError(e);
+                            await this.doUnsetToken(true);
+                            throw new SimpleError({
+                                code: 'invalid_refresh_token',
+                                message: 'Invalid refresh token',
+                                human: $t(`%ky`),
+                            });
+                        }
+                    }
+                    this.setLoadingError(e);
+                    throw e;
+                }
+            }
+
+            request.headers['Authorization'] = 'Bearer ' + this.token.token.accessToken;
+        });
+    }
+
+    private requestPrefix(request: Request<any>) {
+        return '[' + request.method + ' ' + request.path + '] ';
+    }
+
+    async shouldRetryError(request: Request<any>, response: XMLHttpRequest, error: SimpleErrors): Promise<boolean> {
+        if ((error.hasCode('invalid_organization') || error.hasCode('archived')) && this.organization) {
+            // Clear from session storage
+            this.setLoadingError(error);
+            this.callListeners('organization');
+            window.location.reload();
+            return false;
+        }
+
+        if (error.hasCode('not_activated') && !this.isStorageDisabled) {
+            // The user is not activated, logout
+            // (logout instead of unsetToken because here we probably still have a valid access token which we need to delete)
+            await this.logout();
+            return false;
+        }
+
+        // Only start queue here, because we should never call logout or any other authenticated request
+        // inside the queue (queue in queue deadlock)
+        return await QueueHandler.schedule('session-context-token', async () => {
+            // Load token from storage, because it could have been refreshed in another tab
+            await this.loadTokenFromStorage();
+
+            if (!this.token) {
+                // Euhm? The user is not signed in!
+                return false;
+            }
+
+            if (response.status !== 401) {
+                return false;
+            }
+
+            if (error.hasCode('expired_access_token')) {
+                if (request.headers.Authorization !== 'Bearer ' + this.token.token.accessToken) {
+                    console.log(this.requestPrefix(request) + 'This request started with an old token that might not be valid anymore. Retry with new token before doing a refresh');
+                    return true;
+                }
+
+                // Try to refresh
+                try {
+                    console.log(this.requestPrefix(request) + 'Request failed due to expired access token, refreshing...');
+                    await this.token.refresh(this.identityServer, () => request.shouldRetry);
+                    console.log(this.requestPrefix(request) + 'Retrying request...');
+                } catch (e) {
+                    if (isSimpleError(e) || isSimpleErrors(e)) {
+                        if (e.hasCode('invalid_refresh_token')) {
+                            console.log(this.requestPrefix(request) + 'Refresh token is invalid');
+                            this.setLoadingError(e);
+                            await this.doUnsetToken(true);
+                            return false;
+                        }
+                    }
+
+                    if (Request.isNetworkError(e) || Request.isAbortError(e)) {
+                        return false;
+                    }
+
+                    // Something went wrong
+                    this.setLoadingError(e);
+                    return false;
+                }
+                return true;
+            } else {
+                if (request.headers.Authorization !== 'Bearer ' + this.token.token.accessToken) {
+                    console.log(this.requestPrefix(request) + 'This request started with an old token that might not be valid anymore. Retry with new token');
+                    return true;
+                } else {
+                    if (error.hasCode('invalid_access_token')) {
+                        await this.doUnsetToken(true);
+                    } else {
+                        this.setLoadingError(error);
+                    }
+                }
+            }
+
+            return false;
+        });
+    }
+}

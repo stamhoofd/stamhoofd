@@ -1,28 +1,35 @@
 {
     "name": "@stamhoofd/email",
-    "version": "2.154.0",
+    "version": "2.155.0",
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "types": "./dist-types/index.d.ts",
     "sideEffects": false,
     "files": [
         "dist",
+        "dist-types",
         "migrations"
     ],
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
-        "lint": "eslint"
+        "build:types": "tsc --project tsconfig.types.json",
+        "lint": "eslint --quiet"
     },
     "dependencies": {
         "@simonbackx/simple-database": "1.40.1",
         "@stamhoofd/test-utils": "workspace:*",
         "html-to-text": "10.0.1",
-        "mysql2": "3.24.4",
-        "nodemailer": "10.0.10",
+        "mysql2": "3.24.5",
+        "nodemailer": "10.0.15",
         "uuid": "14.0.2"
     },
     "devDependencies": {
+        "@stamhoofd/backend-i18n": "workspace:*",
+        "@stamhoofd/queues": "workspace:*",
+        "@stamhoofd/sql": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "@types/html-to-text": "9.0.4",
         "@types/nodemailer": "8.0.2",
         "@types/uuid": "8.3.4",

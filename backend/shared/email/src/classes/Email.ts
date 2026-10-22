@@ -7,11 +7,9 @@ import { convert } from 'html-to-text';
 import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
 import { EmailAddress } from '../models/EmailAddress.js';
+import type { EmailInterfaceRecipient } from '../models/EmailInterfaceRecipient.js';
 
-export type EmailInterfaceRecipient = {
-    name?: string | null;
-    email: string;
-};
+export type { EmailInterfaceRecipient } from '../models/EmailInterfaceRecipient.js';
 
 export type EmailInterfaceBase = {
     to: EmailInterfaceRecipient[];

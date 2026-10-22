@@ -121,10 +121,12 @@ import type { AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArr
 import { encodeObject, PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { AppManager } from '@stamhoofd/networking/AppManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { markReviewMoment } from '@stamhoofd/frontend-application/markReviewMoment';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { EmailContent, EmailRecipientSubfilter, File } from '@stamhoofd/structures';
-import { AccessRight, Email, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailStatus, EmailTemplate, PermissionsResourceType } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { Email, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailStatus, EmailTemplate } from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';
 import { Formatter, sleep, throttle } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
@@ -135,7 +137,7 @@ import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import EditorView from '../editor/EditorView.vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
-import { GlobalEventBus } from '../EventBus';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useHoldValueForMinimumDuration } from '#hooks/useHoldValueForMinimumDuration.ts';
@@ -743,7 +745,7 @@ async function doSend(): Promise<boolean> {
         await pop({ force: true });
 
         // Mark review moment
-        AppManager.shared.markReviewMoment(context.value);
+        markReviewMoment(context.value.organization);
         sending.value = false;
         return true;
     } catch (e) {

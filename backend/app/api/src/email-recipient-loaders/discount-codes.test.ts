@@ -2,7 +2,9 @@ import { Database } from '@simonbackx/simple-database';
 import type { Organization, Webshop } from '@stamhoofd/models';
 import { Email, OrganizationFactory, UserFactory, WebshopDiscountCode, WebshopFactory } from '@stamhoofd/models';
 import type { EmailRecipient, PaginatedResponse } from '@stamhoofd/structures';
-import { LimitedFilteredRequest, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { LimitedFilteredRequest, Permissions, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { TestUtils } from '@stamhoofd/test-utils';
 

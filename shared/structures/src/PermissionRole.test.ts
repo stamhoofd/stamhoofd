@@ -1,7 +1,8 @@
-import { AccessRight } from './AccessRight.js';
-import { PermissionLevel } from './PermissionLevel.js';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionRoleDetailed } from './PermissionRole.js';
-import { PermissionsResourceKey, PermissionsResourceType } from './PermissionsResourceType.js';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { PermissionsResourceKey } from './PermissionsResourceType.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 
 describe('Unit.PermissionRoleDetailed', () => {

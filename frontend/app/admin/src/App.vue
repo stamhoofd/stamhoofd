@@ -13,11 +13,24 @@ import { buildTranslatedUrl } from '@stamhoofd/components/containers/TranslatedU
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { useProvideMemberViews } from '@stamhoofd/components/members/provideMemberViews';
+import { useProvideEventViews } from '@stamhoofd/components/events/provideEventViews';
+import { useProvideGroupViews } from '@stamhoofd/components/groups/provideGroupViews';
+import { useProvidePaymentViews } from '@stamhoofd/components/payments/providePaymentViews';
+import { useProvideSGVSync } from '@stamhoofd/sgv-frontend/provideSGVSync';
 import { computed } from 'vue';
+import { useProvideEventWebshopViews } from '@stamhoofd/dashboard/providers/provideEventWebshopViews.ts';
 import { useAdminAuditLogRenderers } from './views/organizations/useAdminAuditLogRenderers';
 
 const getLoginRoot = useLoginRoot();
+useProvideEventWebshopViews();
+useProvideMemberViews();
+useProvideEventViews();
+useProvideGroupViews();
+useProvidePaymentViews();
+useProvideSGVSync();
 const context = useContext();
 const platform = usePlatform();
 const auditLogRenderers = useAdminAuditLogRenderers();

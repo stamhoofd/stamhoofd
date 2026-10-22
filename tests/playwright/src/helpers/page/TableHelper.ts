@@ -153,6 +153,28 @@ export class TableHelper {
         });
     }
 
+    /**
+     * Type a search query in the table's search field. Passing an empty string clears it again.
+     */
+    async search(query: string) {
+        await this.locator.locator('input[name="search"]').fill(query);
+    }
+
+    /**
+     * The number next to the table title: the amount of rows that match the current search and filter.
+     */
+    getResultCount() {
+        return this.locator.locator('.title-suffix');
+    }
+
+    /**
+     * The visible rows. The table keeps a pool of row elements around and hides the ones it does not
+     * need, so the hidden ones have to be filtered out to count what is on screen.
+     */
+    getRows() {
+        return this.locator.getByTestId('table-row').filter({ visible: true });
+    }
+
     getOfflineIcon() {
         return this.page.getByTestId('offline-icon');
     }

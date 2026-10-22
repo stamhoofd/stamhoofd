@@ -10,7 +10,7 @@
         "preview": "nuxt preview"
     },
     "dependencies": {
-        "@nuxt/content": "3.16.0",
+        "@nuxt/content": "3.16.1",
         "@stamhoofd/assets": "workspace:*",
         "@stamhoofd/scss": "workspace:*",
         "docus": "5.13.0",
@@ -19,7 +19,7 @@
     },
     "devDependencies": {
         "eslint-plugin-stamhoofd": "workspace:*",
-        "sass": "1.105.0",
-        "vite-svg-2-webfont": "8.3.0"
+        "sass": "1.105.1",
+        "vite-svg-2-webfont": "8.3.1"
     }
 }

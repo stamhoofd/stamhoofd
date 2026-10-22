@@ -5,6 +5,8 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { checkoutDefaultItem, chooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import EditMemberAllBox from '#members/components/edit/EditMemberAllBox.vue';
+import type { MemberViewLoaders } from '#members/memberViewLoaders.ts';
+import { useMemberViewLoaders } from '#members/memberViewLoaders.ts';
 import { RegistrationInvitationEventBus } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
 import type { TableAction, TableActionSelection } from '#tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
@@ -12,17 +14,19 @@ import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-enco
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AppManager } from '@stamhoofd/networking/AppManager';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { markReviewMoment } from '@stamhoofd/frontend-application/markReviewMoment';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
+import { useFetchOrganizationRegistrationPeriods } from '#hooks/networking/useFetchOrganizationRegistrationPeriods';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember } from '@stamhoofd/structures';
-import { EmailRecipientSubfilter, ExcelExportType, GroupType, MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, RegistrationInvitation, RegistrationInvitationRequest, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { EmailRecipientSubfilter, ExcelExportType, GroupType, MemberDetails, MemberWithRegistrationsBlob, RegistrationInvitation, RegistrationInvitationRequest, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { MailchimpSyncRequest, MailchimpSyncType } from '@stamhoofd/structures/mailchimp/MailchimpSyncRequest.js';
 import { Formatter } from '@stamhoofd/utility';
 import { markRaw } from 'vue';
-import { GlobalEventBus } from '../../EventBus';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';
 import type { RecipientChooseOneOption } from '../../email/EmailView.vue';
 import { isMailchimpReady } from '../../mailchimp/useMailchimp';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
@@ -46,6 +50,7 @@ export function useMemberActions() {
     const organization = useOrganization();
     const platform = usePlatform();
     const fetchOrganizationPeriods = useFetchOrganizationRegistrationPeriods();
+    const memberViewLoaders = useMemberViewLoaders();
 
     return (options?: { groups?: Group[]; organizations?: Organization[]; categories?: GroupCategoryTree[]; forceWriteAccess?: boolean | null; organizationPeriod?: OrganizationRegistrationPeriod | null }) => {
         return new MemberActionBuilder({
@@ -60,6 +65,7 @@ export function useMemberActions() {
             forceWriteAccess: options?.forceWriteAccess,
             organizationPeriod: options?.organizationPeriod,
             fetchOrganizationPeriods,
+            memberViewLoaders,
         });
     };
 }
@@ -78,6 +84,7 @@ export class MemberActionBuilder {
     categories: GroupCategoryTree[];
 
     present: ReturnType<typeof usePresent>;
+    memberViewLoaders: Pick<MemberViewLoaders, 'member' | 'messages'>;
     context: SessionContext;
     platformFamilyManager: PlatformFamilyManager;
     owner: any;
@@ -100,6 +107,7 @@ export class MemberActionBuilder {
 
     constructor(settings: {
         present: ReturnType<typeof usePresent>;
+        memberViewLoaders: Pick<MemberViewLoaders, 'member' | 'messages'>;
         context: SessionContext;
         groups: Group[];
         platform: Platform;
@@ -112,6 +120,7 @@ export class MemberActionBuilder {
         organizationPeriod?: OrganizationRegistrationPeriod | null;
     }) {
         this.present = settings.present;
+        this.memberViewLoaders = settings.memberViewLoaders;
         this.context = settings.context;
         this.organizationPeriod = settings.organizationPeriod ?? null;
         this.platform = settings.platform;
@@ -452,7 +461,7 @@ export class MemberActionBuilder {
                     await this.present({
                         components: [
                             new ComponentWithProperties(NavigationController, {
-                                root: AsyncComponent(() => import('../../communication/CommunicationView.vue'), {
+                                root: AsyncComponent(this.memberViewLoaders.messages, {
                                     members,
                                 }),
                             }),
@@ -963,7 +972,7 @@ export class MemberActionBuilder {
 
     async showMember(member: PlatformMember) {
         const component = new ComponentWithProperties(NavigationController, {
-            root: AsyncComponent(() => import('#members/MemberSegmentedView.vue'), {
+            root: AsyncComponent(this.memberViewLoaders.member, {
                 member,
             }),
         });
@@ -1033,7 +1042,7 @@ export class MemberActionBuilder {
         await this.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
-                    root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
+                    root: AsyncComponent(() => import('#export/ExcelExportView.vue'), {
                         type: ExcelExportType.Members,
                         filter: selection.filter,
                         workbook: getSelectableWorkbook(this.platform, this.organizations.length === 1 ? this.organizations[0] : null, this.groups, this.context.auth),
@@ -1230,7 +1239,7 @@ export async function presentEditMember({ member, present, context }: { member: 
                     await dismiss({ force: true });
 
                     // Mark review moment
-                    AppManager.shared.markReviewMoment(context);
+                    markReviewMoment(context.organization);
                 },
             }),
         ],

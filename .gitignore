@@ -180,6 +180,7 @@ web_modules/
 # Nuxt.js build / generate output
 .nuxt
 dist
+dist-types/
 
 # Gatsby files
 .cache/
@@ -236,6 +237,7 @@ __screenshots__
 /playwright/.auth/
 /tests/playwright/playwright-report
 /tests/playwright/test-results
+/tests/playwright/blob-report
 /frontend/app/dashboard/dist-playwright
 /frontend/app/registration/dist-playwright
 /frontend/app/web-app/dist-playwright

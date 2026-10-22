@@ -1,4 +1,4 @@
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { Formatter } from '@stamhoofd/utility';
 import { Buffer } from 'buffer';
 import { metropolisMedium } from './fonts';

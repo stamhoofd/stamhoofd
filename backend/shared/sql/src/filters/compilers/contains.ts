@@ -4,8 +4,9 @@ import { assertFilterCompareValue } from '@stamhoofd/structures';
 import { scalarToSQLExpression, SQLLower, SQLNull } from '../../SQLExpressions.js';
 import { SQLJsonSearch } from '../../SQLJsonExpressions.js';
 import { SQLWhereEqual, SQLWhereLike, SQLWhereSign } from '../../SQLWhere.js';
-import type { SQLCurrentColumn, SQLSyncFilterRunner} from '../SQLFilter.js';
-import { normalizeColumn, SQLValueType } from '../SQLFilter.js';
+import type { SQLCurrentColumn, SQLSyncFilterRunner } from '../SQLFilterTypes.js';
+import { SQLValueType } from '../SQLFilterTypes.js';
+import { normalizeColumn } from '../helpers/normalizeColumn.js';
 import { normalizeCompareValue } from '../helpers/normalizeCompareValue.js';
 
 export function $containsSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilterRunner {

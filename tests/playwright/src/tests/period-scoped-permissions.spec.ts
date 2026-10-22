@@ -9,7 +9,9 @@ import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import type { Group, Organization, User } from '@stamhoofd/models';
 import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import { appToUri, EventMeta, GroupCategory, GroupCategorySettings, GroupType, NamedObject, PermissionLevel, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { appToUri, EventMeta, GroupCategory, GroupCategorySettings, GroupType, NamedObject, Permissions, PermissionsResourceKey, ResourcePermissions, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WorkerData } from '../helpers/index.js';
 
@@ -297,6 +299,8 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
         // The edit view opens, which confirms the action really ran
         const editView = page.getByTestId('member-step');
         await expect(editView).toBeVisible();
+        await expect(action).toHaveCount(0);
+        await expect(page.locator('.popup.focused').filter({ has: editView })).toBeVisible();
 
         // Close it again: the popup would otherwise swallow clicks of the next step
         await page.keyboard.press('Escape');

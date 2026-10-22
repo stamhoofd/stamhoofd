@@ -282,16 +282,18 @@
 import { AsyncComponent, LoadComponent } from '#containers/AsyncComponent.ts';
 import PromiseView from '#containers/PromiseView.vue';
 import EventNotificationRow from '#event-notifications/components/EventNotificationRow.vue';
-import { GlobalEventBus } from '#EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, defineRoute, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { useFetchOrganizationPeriodForGroup } from '@stamhoofd/networking/hooks/useFetchOrganizationPeriodForGroup';
-import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useFetchOrganizationPeriodForGroup } from '#hooks/networking/useFetchOrganizationPeriodForGroup';
+import { usePatchOrganizationPeriod } from '#hooks/networking/usePatchOrganizationPeriod';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import { AccessRight, EmailTemplate, EmailTemplateType, Event, getAppHost, Group, GroupSettings, GroupStatus, LimitedFilteredRequest, mergeFilters, PermissionsResourceType, PrivateWebshop, TranslatedString, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { EmailTemplate, EmailTemplateType, Event, getAppHost, Group, GroupSettings, GroupStatus, LimitedFilteredRequest, mergeFilters, PrivateWebshop, TranslatedString, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
@@ -326,11 +328,14 @@ import { useCreateEventGroup } from './composables/createEventGroup';
 import type { EventPeriodProblem } from './composables/useEventPeriodProblem';
 import { useGetEventPeriodProblem } from './composables/useEventPeriodProblem';
 import { buildTranslatedUrl } from '#containers/TranslatedUrl.ts';
+import { useEventWebshopViewLoaders } from './eventWebshopViewLoaders.ts';
 
 const props = defineProps<{
     event: Event;
     onSaveDuplicate?: (event: Event) => void;
 }>();
+
+const webshopViewLoaders = useEventWebshopViewLoaders();
 
 const title = computed(() => props.event.name);
 const $navigate = useNavigate();
@@ -658,9 +663,8 @@ defineRoute({
 
 defineRoute({
     url: Routes.Webshop,
-    component: async () => {
-        return (await import('@stamhoofd/dashboard/src/views/dashboard/webshop/WebshopOverview.vue')).default;
-    },
+    // eslint-disable-next-line stamhoofd/async-route-components -- Keep the injected import loader intact for chunk retries.
+    component: webshopViewLoaders.overview,
     defaultProperties: () => {
         if (!webshop.value) {
             throw new Error('Webshop not found');
@@ -685,7 +689,7 @@ async function createWebshop() {
     await present({
         components: [
             await LoadComponent(
-                () => import('@stamhoofd/dashboard/src/views/dashboard/webshop/edit/EditWebshopGeneralView.vue'),
+                webshopViewLoaders.edit,
                 {
                     initialWebshop: PrivateWebshop.create({
                         meta: WebshopMetaData.create({

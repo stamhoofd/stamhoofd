@@ -333,7 +333,7 @@ const actions = [
             await present({
                 components: [
                     new ComponentWithProperties(NavigationController, {
-                        root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
+                        root: AsyncComponent(() => import('@stamhoofd/components/export/ExcelExportView.vue'), {
                             type: ExcelExportType.BalanceItems,
                             filter: selection.filter,
                             workbook: getSelectableWorkbook(),

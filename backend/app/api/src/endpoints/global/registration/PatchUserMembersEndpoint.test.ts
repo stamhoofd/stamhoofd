@@ -5,7 +5,8 @@ import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import { GroupFactory, Member, MemberFactory, MemberResponsibilityRecordFactory, OrganizationFactory, Platform, RegistrationFactory, UserFactory } from '@stamhoofd/models';
 import type { PatchAnswers } from '@stamhoofd/structures';
-import { Address, BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, ParentType, PermissionLevel, RecordCategory, RecordSettings, RecordTextAnswer, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Address, BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, ParentType, RecordCategory, RecordSettings, RecordTextAnswer, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initUitpasApi } from '../../../../tests/init/index.js';
@@ -396,6 +397,38 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             // Check access
             expect(member.users.map(u => u.id)).toEqual([user.id]);
+        });
+    });
+
+    describe('Member number', () => {
+        test('A user manager without admin access cannot set the member number in organization mode', async () => {
+            TestUtils.setEnvironment('userMode', 'organization');
+
+            const organization = await new OrganizationFactory({ }).create();
+            const user = await new UserFactory({ organization }).create();
+            const existingMember = await new MemberFactory({
+                organization,
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+                user,
+            }).create();
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: existingMember.id,
+                details: MemberDetails.patch({ memberNumber: 'LID-300' }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await testServer.test(endpoint, request);
+
+            const member = await Member.getByID(existingMember.id);
+            expect(member!.details.memberNumber).toBeNull();
         });
     });
 

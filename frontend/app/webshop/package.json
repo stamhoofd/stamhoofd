@@ -11,10 +11,13 @@
         "build:playwright": "NODE_OPTIONS=\"--max-old-space-size=4096 --max-semi-space-size=128\" NODE_ENV=test STAMHOOFD_ENV=playwright vite build",
         "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=production vite build",
         "dev": "NODE_ENV=development ENV_FILE=../../.env.json vite",
-        "lint": "eslint",
-        "typecheck": "vue-tsc --noEmit"
+        "lint": "eslint --quiet",
+        "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "dependencies": {
+        "@stamhoofd/frontend-application": "workspace:*",
+        "@stamhoofd/frontend-session": "workspace:*",
+        "@stamhoofd/frontend-platform": "workspace:*",
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/vue-app-navigation": "2.25.1",
@@ -33,6 +36,6 @@
     "devDependencies": {
         "@stamhoofd/vite-config": "workspace:*",
         "eslint-plugin-stamhoofd": "workspace:*",
-        "vite": "8.3.1"
+        "vite": "8.3.2"
     }
 }

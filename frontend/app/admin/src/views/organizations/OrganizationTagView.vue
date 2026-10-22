@@ -105,7 +105,7 @@ defineRoute({
 defineRoute({
     url: 'tag/@slug',
     name: Routes.Tag,
-    component: async () => (await import('./OrganizationTagView.vue')).default,
+    component: 'self',
     params: {
         slug: String,
     },

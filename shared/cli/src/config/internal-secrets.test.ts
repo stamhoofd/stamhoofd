@@ -6,6 +6,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CliContext } from '../context/create-context.js';
 import { read1PasswordCli } from '../runtime/one-password.js';
 import { applyInternalSecrets } from './internal-secrets.js';
+import { BackendApp } from '@stamhoofd/types/BackendApp';
+import { FrontendApp } from '@stamhoofd/types/FrontendApp';
 
 vi.mock('../runtime/one-password.js', () => ({
     read1PasswordCli: vi.fn(),
@@ -53,7 +55,7 @@ describe('applyInternalSecrets', () => {
     it('returns the environment unchanged when there is no .internal-contributor marker', async () => {
         const env = { MOLLIE_API_KEY: '' } as SharedEnvironment;
 
-        const result = await applyInternalSecrets(context(), { backend: 'api' }, env);
+        const result = await applyInternalSecrets(context(), { backend: BackendApp.Api }, env);
 
         expect(result).toBe(env);
         expect(read1PasswordCliMock).not.toHaveBeenCalled();
@@ -75,7 +77,7 @@ describe('applyInternalSecrets', () => {
         // MOLLIE_SECRET is intentionally not mocked, so it resolves to '' and must be preserved.
         const env = { MOLLIE_SECRET: 'keep-me', STRIPE_SECRET_KEY: 'sk_live_existing' } as BackendEnvironment;
 
-        const result = await applyInternalSecrets(context(), { backend: 'api' }, env) as BackendEnvironment;
+        const result = await applyInternalSecrets(context(), { backend: BackendApp.Api }, env) as BackendEnvironment;
 
         expect(result.MOLLIE_CLIENT_ID).toBe('mollie-client');
         expect(result.MOLLIE_API_KEY).toBe('mollie-api');
@@ -100,7 +102,7 @@ describe('applyInternalSecrets', () => {
         mockSecrets({ 'op://Localhost/Mollie/MOLLIE_CLIENT_ID': 'mollie-client' });
         const env = { MOLLIE_CLIENT_ID: '' } as FrontendEnvironment;
 
-        const result = await applyInternalSecrets(context(), { frontend: 'web-app' }, env) as FrontendEnvironment;
+        const result = await applyInternalSecrets(context(), { frontend: FrontendApp.WebApp }, env) as FrontendEnvironment;
 
         expect(result.MOLLIE_CLIENT_ID).toBe('mollie-client');
         expect(read1PasswordCliMock).toHaveBeenCalledTimes(1);
@@ -111,7 +113,7 @@ describe('applyInternalSecrets', () => {
         await markInternalContributor();
         const env = { MOLLIE_API_KEY: '' } as BackendEnvironment;
 
-        const result = await applyInternalSecrets(context(), { backend: 'renderer' }, env);
+        const result = await applyInternalSecrets(context(), { backend: BackendApp.Renderer }, env);
 
         expect(result).toBe(env);
         expect(read1PasswordCliMock).not.toHaveBeenCalled();

@@ -71,9 +71,7 @@ import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import type { SGVLid } from '@stamhoofd/sgv';
 import { Formatter } from '@stamhoofd/utility';
 import { onBeforeUnmount, ref } from 'vue';
-import {
-    SGVOldMemberAction,
-} from '../SGVGroupAdministration';
+import { SGVOldMemberAction } from '../SGVOldMemberAction';
 
 const props = defineProps<{
     members: SGVLid[];

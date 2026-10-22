@@ -10,11 +10,12 @@ import OnboardingGroupPricesView from './OnboardingGroupPricesView.vue';
 import OnboardingGroupsView from './OnboardingGroupsView.vue';
 import OnboardingMemberAdministrationView from './OnboardingMemberAdministrationView.vue';
 import OnboardingRegistrationPeriodView from './OnboardingRegistrationPeriodView.vue';
+import type { OnboardingStepProps } from './OnboardingStepProps';
 
 import type { Organization } from '@stamhoofd/structures';
 import { OrganizationCheckout, OrganizationType, OrganizationTypeHelper, PackagePurchases, PaymentCustomer, PaymentMethod, STPackageBundle } from '@stamhoofd/structures';
 import { useActivatePackages } from '../dashboard/settings/packages/hooks/useActivatePackages';
-import { GlobalEventBus } from '@stamhoofd/components/EventBus';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';
 import { useUser } from '@stamhoofd/components/hooks/useUser';
 
 /**
@@ -27,16 +28,6 @@ const steps: Component[] = [
     OnboardingGroupsView, // Step 3: subdivisions / age groups
     OnboardingGroupPricesView, // Step 4: prices and advanced settings
 ];
-
-/**
- * The props every onboarding step view receives.
- */
-export type OnboardingStepProps = {
-    viewModel: MemberAdministrationOnboardingViewModel;
-    saveHandler: (navigate: NavigationActions) => Promise<void>;
-    stepNumber: number;
-    stepCount: number;
-};
 
 /**
  * The first step (organization type details) only collects extra information for sport

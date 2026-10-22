@@ -46,11 +46,11 @@ import type { Ref } from 'vue';
 import { computed, ref, watch, watchEffect } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
-import type { RelationFetcherSubFilterOption, RelationFilterOption, RelationUIFilterViewProperties } from './RelationUIFilter';
+import type { RelationFetcherSubFilterOption, RelationFilterOption, RelationUIFilterViewProperties } from './RelationFilterTypes';
 import { getRelationFilterDisplayOptions } from './relationFilterOptions';
 import { useAnimateHeightChange } from '@simonbackx/vue-app-navigation';
 
-const props = withDefaults(defineProps<RelationUIFilterViewProperties<T>>(), {
+const props = withDefaults(defineProps<RelationUIFilterViewProperties<T, ObjectType>>(), {
     searchEnabled: true,
 });
 

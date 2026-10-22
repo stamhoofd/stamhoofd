@@ -1,6 +1,7 @@
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
-import { AccessRight, AccessRightHelper } from '../AccessRight.js';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { AccessRightHelper } from '../AccessRight.js';
 import { CountryHelper } from '../addresses/CountryDecoder.js';
 import { AuditLogReplacementDependencies, registerAuditLogEnum } from '../AuditLogReplacement.js';
 import { LanguageHelper } from '../Language.js';

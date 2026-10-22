@@ -75,7 +75,7 @@ import type { useDismiss, usePopup } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ComponentWithProperties, NavigationController, ReactiveUrl, usePresent } from '@simonbackx/vue-app-navigation';
 import OrganizationLogo from '@stamhoofd/components/context/OrganizationLogo.vue';
-import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import { injectCustomCode } from '@stamhoofd/components/helpers/injectCustomCode.ts';
 import { MetaKey, useMetaInfo } from '@stamhoofd/components/helpers/useMetaInfo.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';

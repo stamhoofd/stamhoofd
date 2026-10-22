@@ -111,7 +111,7 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
 import { Toast, ToastButton } from '@stamhoofd/components/overlays/Toast.ts';
 import MollieWarningBox from '@stamhoofd/components/mollie/MollieWarningBox.vue';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import { AdministrationFeeSettings, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter, Sorter } from '@stamhoofd/utility';

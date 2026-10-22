@@ -40,15 +40,22 @@
 </template>
 
 <script lang="ts">
+import type { PushOptions } from '@simonbackx/vue-app-navigation';
 import { inject, shallowRef } from 'vue';
 
-import { GlobalEventBus } from '../EventBus';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';
 import { useDeviceWidth } from '#hooks/useDeviceWidth.ts';
-import type TabBarController from './TabBarController.vue';
 import { getUrls } from './TranslatedUrl.ts';
 
-export function useTabBarController(): Ref<InstanceType<typeof TabBarController>> {
-    const c = inject('reactive_tabBarController') as InstanceType<typeof TabBarController> | Ref<InstanceType<typeof TabBarController>>;
+type TabBarControllerInstance = {
+    returnToHistoryIndex(): boolean | undefined;
+    show(options: PushOptions): Promise<void>;
+    shouldNavigateAway(): Promise<boolean>;
+    selectTabById(id: string): Promise<void>;
+};
+
+export function useTabBarController(): Ref<TabBarControllerInstance> {
+    const c = inject('reactive_tabBarController') as TabBarControllerInstance | Ref<TabBarControllerInstance>;
     return shallowRef(c);
 }
 
@@ -79,7 +86,6 @@ export function useHideTabBar() {
 </script>
 
 <script setup lang="ts">
-import type { PushOptions } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { ComponentWithProperties, defineRoutes, FramedComponent, HistoryManager, NavigationController, ReactiveUrl, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
@@ -90,6 +96,7 @@ import InheritComponent from './InheritComponent.vue';
 import { TabBarItem, TabBarItemGroup } from './TabBarItem';
 
 const props = defineProps<{
+    /** Reusable tab items; switching preserves mounted state and internal scroll positions. Reselecting can scroll to top or reset the tab. */
     tabs: ((TabBarItem | TabBarItemGroup)[]) | Ref<(TabBarItem | TabBarItemGroup)[]>;
 }>();
 
@@ -439,7 +446,7 @@ defineExpose({
     show,
     shouldNavigateAway,
     selectTabById,
-});
+} satisfies TabBarControllerInstance);
 
 </script>
 

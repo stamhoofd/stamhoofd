@@ -18,7 +18,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { Image, ResolutionRequest, Version } from '@stamhoofd/structures';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { computed, ref } from 'vue';
 
 import { useContext } from '#hooks/useContext.ts';
@@ -108,7 +108,7 @@ function changedFile(event: Event) {
     if (file.size > 5 * 1024 * 1024) {
         errorBox.value = new ErrorBox(new SimpleError({
             code: 'file_too_large',
-            message: $t(`%z3`),
+            message: $t('%z3'),
         }));
         return;
     }
@@ -211,6 +211,7 @@ function changedFile(event: Event) {
 
     .image-component {
         width: 100%;
+        height: 100%;
         border-radius: $border-radius;
     }
 

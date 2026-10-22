@@ -106,6 +106,7 @@ import { computed } from 'vue';
 import { getBalanceItemPaymentSelectableWorkbook } from '../payments/getSelectableWorkbook';
 import BreakdownGraphView from './BreakdownGraphView.vue';
 import BreakdownList from './BreakdownList.vue';
+import { useBreakdownViewLoaders } from './breakdownViewLoaders';
 import type { BreakdownViewProps } from './useBreakdownView';
 import { useBreakdownView } from './useBreakdownView';
 
@@ -123,12 +124,13 @@ const props = withDefaults(
     },
 );
 
+const loaders = useBreakdownViewLoaders();
 const { breakdown, loading, exporting, errors, canExport, canExportWithoutBreakdown, amountMessage, startExport, openTable, tabs, tab, visibleGroups, hasClosedGroups, openGroup } = useBreakdownView<BalanceItemBreakdown>(props, {
     endpoint: '/balance-items/breakdown',
     decoder: BalanceItemBreakdown as Decoder<BalanceItemBreakdown>,
     exportType: ExcelExportType.BalanceItems,
     exportSortKey: 'createdAt',
-    tableView: () => import('../balance-items/BalanceItemsTableView.vue'),
+    tableView: loaders.balanceItemsTable,
     isEmpty: breakdown => breakdown.balanceItemCount === 0,
     sliceExport: {
         type: ExcelExportType.BalanceItemPayments,
@@ -162,7 +164,7 @@ const { breakdown, loading, exporting, errors, canExport, canExportWithoutBreakd
             case BreakdownTab.Account: return [];
         }
     },
-    view: () => import('./BalanceItemBreakdownView.vue'),
+    view: loaders.balanceItems,
 });
 
 /**

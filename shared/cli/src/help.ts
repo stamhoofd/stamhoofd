@@ -1,4 +1,4 @@
-import { Help } from '@oclif/core';
+import { CommandHelp, Help } from '@oclif/core';
 import type { Command, Interfaces } from '@oclif/core';
 import { colorize } from '@oclif/core/ux';
 
@@ -19,7 +19,15 @@ const rootGroups = [
     },
 ] as const;
 
+class StamhoofdCommandHelp extends CommandHelp {
+    protected override description(): string | undefined {
+        return this.command.description ? this.wrap(this.command.description) : undefined;
+    }
+}
+
 export default class StamhoofdHelp extends Help {
+    protected override CommandHelpClass = StamhoofdCommandHelp;
+
     constructor(config: Interfaces.Config, opts?: Partial<Interfaces.HelpOptions>) {
         super(config, { ...opts, hideCommandSummaryInDescription: true });
     }

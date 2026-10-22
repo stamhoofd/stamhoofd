@@ -26,28 +26,29 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import type { Order, TicketPublicPrivate} from '@stamhoofd/structures';
-import { PermissionLevel, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
+import type { Order, TicketPublicPrivate } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { computed } from 'vue';
-import TicketAlreadyScannedView from '../tickets/status/TicketAlreadyScannedView.vue';
-import ValidTicketView from '../tickets/status/ValidTicketView.vue';
+import type { OpenTicketHandler } from '../tickets/TicketNavigation';
 import type { WebshopManager } from '../WebshopManager';
 
 const props = defineProps<{
     ticket: TicketPublicPrivate;
     order: Order;
     webshopManager: WebshopManager;
+    openTicketHandler: OpenTicketHandler;
 }>();
 
-const present = usePresent();
+const navigation = useNavigationActions();
 const context = useContext();
 const organization = useOrganization();
 const webshop = computed(() => props.webshopManager.preview);
@@ -76,18 +77,7 @@ async function openTicket() {
         await download();
         return;
     }
-    await present({
-        components: [
-            new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(props.ticket.scannedAt !== null ? TicketAlreadyScannedView : ValidTicketView, {
-                    order: props.order,
-                    ticket: props.ticket,
-                    webshopManager: props.webshopManager,
-                }),
-            }),
-        ],
-        modalDisplayStyle: 'popup',
-    });
+    await props.openTicketHandler(props.ticket, props.order, navigation);
 }
 
 function openMenu(clickEvent: MouseEvent) {

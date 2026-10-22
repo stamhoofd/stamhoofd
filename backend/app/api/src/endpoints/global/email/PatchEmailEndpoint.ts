@@ -2,7 +2,8 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Email, Platform } from '@stamhoofd/models';
 import type { EmailPreview } from '@stamhoofd/structures';
-import { EmailRecipientsStatus, EmailStatus, Email as EmailStruct, PermissionLevel, validateEmailTranslations } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { EmailRecipientsStatus, EmailStatus, Email as EmailStruct, validateEmailTranslations } from '@stamhoofd/structures';
 
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { patchObject } from '@simonbackx/simple-encoding';

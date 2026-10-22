@@ -9,6 +9,7 @@
     "include": [
         "./src",
         "./stamhoofd.d.ts",
-        "./playwright.config.ts"
+        "./playwright.config.ts",
+        "./merge.config.ts"
     ]
 }

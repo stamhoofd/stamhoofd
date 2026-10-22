@@ -87,7 +87,8 @@
 
 <script setup lang="ts">
 import type { PlatformMember } from '@stamhoofd/structures';
-import { BooleanStatus, Parent, PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { BooleanStatus, Parent } from '@stamhoofd/structures';
 
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useAppContext } from '#context/appContext.ts';

@@ -2,7 +2,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { CliContext } from '../context/create-context.js';
 import { read1PasswordCli } from '../runtime/one-password.js';
-import type { AppEnvironment, AppService } from './development-config.js';
+import type { AppEnvironment, AppService } from './development-config-types.js';
+import { BackendApp } from '@stamhoofd/types/BackendApp';
 
 /**
  * Internal contributors mark their checkout with a `.internal-contributor` file at the
@@ -28,7 +29,7 @@ export async function applyInternalSecrets(context: CliContext, service: AppServ
     }
 
     // Only the API backend talks to these external integrations.
-    if (service.backend !== 'api') {
+    if (service.backend !== BackendApp.Api) {
         return env;
     }
 

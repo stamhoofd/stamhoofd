@@ -1,9 +1,10 @@
 import { SelectableColumn } from '@stamhoofd/frontend-excel-export/SelectableColumn';
 import { SelectableSheet } from '@stamhoofd/frontend-excel-export/SelectableSheet';
 import { SelectableWorkbook } from '@stamhoofd/frontend-excel-export/SelectableWorkbook';
-import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
+import type { ContextPermissions } from '@stamhoofd/frontend-session/ContextPermissions';
 import type { Group, Organization, Platform } from '@stamhoofd/structures';
-import { AccessRight, getFinancialSupportSettingsOrDefault, RecordCategory } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { getFinancialSupportSettingsOrDefault, RecordCategory } from '@stamhoofd/structures';
 
 export function getSelectableColumns({ platform, organization, auth, groupColumns }: { platform: Platform; organization: Organization | null; auth: ContextPermissions; groupColumns?: SelectableColumn[] }) {
     const recordCategories = [
@@ -115,6 +116,18 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
                     new SelectableColumn({
                         id: 'uri',
                         name: $t(`%1O1`),
+                        enabled: false,
+                    }),
+                    new SelectableColumn({
+                        id: 'organizations',
+                        name: $t('%1KQ'),
+                        description: $t('%1Jj'),
+                        enabled: false,
+                    }),
+                    new SelectableColumn({
+                        id: 'uris',
+                        name: $t('%1KR'),
+                        description: $t('%1Jk'),
                         enabled: false,
                     }),
                 ]

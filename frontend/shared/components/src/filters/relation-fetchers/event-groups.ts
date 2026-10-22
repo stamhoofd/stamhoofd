@@ -2,7 +2,7 @@ import type { Event, Group } from '@stamhoofd/structures';
 import { SortItemDirection } from '@stamhoofd/structures';
 import { useEventsObjectFetcher } from '../../fetchers/useEventsObjectFetcher';
 import { useOrganization } from '#hooks/useOrganization.ts';
-import { RelationFetcher } from '../RelationUIFilter';
+import { RelationFetcher } from '../RelationFetcher';
 
 export function useEventGroupsRelationFetcher() {
     // event fetcher

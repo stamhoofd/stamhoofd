@@ -45,7 +45,7 @@ import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { MemberWithRegistrationsBlob, PlatformMember } from '@stamhoofd/structures';
 
-import { GlobalEventBus } from '../../../EventBus';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';
 import { Toast } from '../../../overlays/Toast';
 import { useChooseGroupForMember } from '#members/checkout/useCheckoutRegisterItem.ts';
 import { useEditMember } from '#members/hooks/useEditMember.ts';

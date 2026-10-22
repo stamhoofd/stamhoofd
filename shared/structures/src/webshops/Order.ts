@@ -535,16 +535,16 @@ export class PrivateOrderWithTickets extends PrivateOrder {
     }
 
     /**
-     * Date first ticket was scanned at.
+     * Date first ticket was scanned at, null if no ticket was scanned.
      */
-    get ticketScannedAt() {
-        return this.tickets.reduce((acc, ticket) => {
-            if (ticket.scannedAt && ticket.scannedAt < acc) {
+    get ticketScannedAt(): Date | null {
+        return this.tickets.reduce<Date | null>((acc, ticket) => {
+            if (ticket.scannedAt && (acc === null || ticket.scannedAt < acc)) {
                 return ticket.scannedAt;
             }
 
             return acc;
-        }, new Date(2222, 0, 1));
+        }, null);
     }
 
     /**

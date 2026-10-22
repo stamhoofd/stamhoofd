@@ -13,7 +13,10 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <p v-if="!preview && !errors.errorBox" class="style-description">
+        <p v-if="isPlatform" class="style-description">
+            {{ $t('%Zxp') }}
+        </p>
+        <p v-else-if="!preview && !errors.errorBox" class="style-description">
             <Spinner />
         </p>
 
@@ -115,7 +118,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { MailchimpSync } from '@stamhoofd/structures/mailchimp/MailchimpSync.js';
 import { MailchimpSyncPreview } from '@stamhoofd/structures/mailchimp/MailchimpSyncPreview.js';
 import type { MailchimpSyncRequest } from '@stamhoofd/structures/mailchimp/MailchimpSyncRequest.js';
@@ -146,7 +149,7 @@ const context = useContext();
 const owner = useRequestOwner();
 const errors = useErrors();
 const platform = usePlatform();
-const { settings } = useMailchimpSettings();
+const { settings, isPlatform } = useMailchimpSettings();
 
 const preview = ref<MailchimpSyncPreview | null>(null);
 const saving = ref(false);
@@ -168,6 +171,10 @@ function buildRequest() {
 }
 
 onMounted(async () => {
+    // The preview loads every member in one request, which takes too long for a whole platform
+    if (isPlatform.value) {
+        return;
+    }
     try {
         const response = await context.value.authenticatedServer.request({
             method: 'POST',

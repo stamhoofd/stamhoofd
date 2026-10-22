@@ -1,20 +1,11 @@
 import { TranslatorType } from '../enums/TranslatorType.js';
 import { globals } from '../shared/globals.js';
 import type { Translations } from '../types/Translations.js';
-import type { TranslationManager } from './TranslationManager.js';
-
-type MachineTranslationComparisonItem = {
-    original: string;
-    translations: Record<TranslatorType, string>;
-};
-
-export type MachineTranslationComparison = Record<
-    string,
-    MachineTranslationComparisonItem
->;
+import type { MachineTranslationComparison } from './MachineTranslationComparison.js';
+import type { TranslationProvider } from './TranslationProvider.js';
 
 export class MachineTranslationComparer {
-    constructor(private readonly translationManager: TranslationManager) {}
+    constructor(private readonly translationManager: TranslationProvider) {}
 
     createComparisons() {
         const defaultLocale = globals.DEFAULT_LOCALE;

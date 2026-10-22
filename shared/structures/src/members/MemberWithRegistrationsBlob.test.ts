@@ -119,6 +119,17 @@ describe('MemberWithRegistrationsBlob SGV sync helpers', () => {
         expect(member.getSGVSyncStatus({ now, organization: createOrganization('period-id') })).toBe(SGVSyncStatus.Ok);
     });
 
+    test('returns ok for members that are only on a waiting list or registered for an event', () => {
+        for (const type of [GroupType.WaitingList, GroupType.EventRegistration]) {
+            const member = createMember({
+                lastExternalSync: null,
+                group: createGroup(type),
+            });
+
+            expect(member.getSGVSyncStatus({ now, organization: createOrganization() })).toBe(SGVSyncStatus.Ok);
+        }
+    });
+
     test('ignores deactivated registrations when determining outdated status', () => {
         const lastExternalSync = new Date(now.getTime() - 1000 * 60 * 2);
         const member = createMember({

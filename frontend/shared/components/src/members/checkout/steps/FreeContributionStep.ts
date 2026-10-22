@@ -3,8 +3,7 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { RegisterCheckout } from '@stamhoofd/structures';
 import type { NavigationActions } from '../../../types/NavigationActions';
 
-import type {ViewStepsManager} from '#steps/ViewStepsManager.ts';
-import type {ViewStep} from '#steps/ViewStep.ts';
+import type {ViewStep, ViewStepNavigation} from '#steps/ViewStep.ts';
 
 export class FreeContributionStep implements ViewStep {
     checkout: RegisterCheckout;
@@ -13,7 +12,7 @@ export class FreeContributionStep implements ViewStep {
         this.checkout = checkout;
     }
 
-    isEnabled(_manager: ViewStepsManager) {
+    isEnabled() {
         if (!this.checkout.singleOrganization?.meta.recordsConfiguration.freeContribution) {
             return false;
         }
@@ -38,11 +37,11 @@ export class FreeContributionStep implements ViewStep {
         return true;
     }
 
-    getComponent(manager: ViewStepsManager): ComponentWithProperties {
+    getComponent(navigation: ViewStepNavigation): ComponentWithProperties {
         return AsyncComponent(() => import('../FreeContributionView.vue'), {
             checkout: this.checkout,
             saveHandler: async (navigate: NavigationActions) => {
-                await manager.saveHandler(this, navigate);
+                await navigation.saveHandler(this, navigate);
             },
         });
     }

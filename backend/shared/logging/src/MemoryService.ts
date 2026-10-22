@@ -49,15 +49,22 @@ class StaticMemoryService {
     /**
      * Sustained (one minute average) share of system memory in use above which Linux starts
      * swapping, which stalls the event loop, and the OOM killer becomes a risk for every process on
-     * the host (MySQL included).
+     * the host (MySQL included). Only reported together with systemAvailableThresholdBytes.
      */
     systemUsedWarningRatio = 0.9;
 
     /**
      * A single sample at or above this share of system memory in use is reported right away, so a
      * sudden grab by another process (a backup, MySQL) is caught before the average catches up.
+     * Only reported together with systemAvailableThresholdBytes.
      */
     systemUsedCriticalRatio = 0.95;
+
+    /**
+     * System memory is only reported when less than this is available, on top of the ratios above.
+     * On a large host a high ratio still leaves plenty of room.
+     */
+    systemAvailableThresholdBytes = 500 * MiB;
 
     /** Seconds between two samples */
     private readonly sampleIntervalSeconds = 5;
@@ -120,6 +127,7 @@ class StaticMemoryService {
         const errors: string[] = [];
         const averageHeapRatio = this.getHeapRatio();
         const averageSystemUsedRatio = this.getSystemUsedRatio();
+        const averageSystemAvailable = this.average(sample => sample.systemAvailable);
 
         if (heapRatio(last) >= this.heapCriticalRatio) {
             errors.push(`Heap memory usage is critical: ${formatBytes(last.heapUsed)} of ${formatBytes(last.heapLimit)} (${formatPercentage(heapRatio(last))})`);
@@ -127,10 +135,10 @@ class StaticMemoryService {
             errors.push(`Heap memory usage is too high: ${formatBytes(last.heapUsed)} of ${formatBytes(last.heapLimit)} (${formatPercentage(averageHeapRatio)} average)`);
         }
 
-        if (systemUsedRatio(last) >= this.systemUsedCriticalRatio) {
+        if (systemUsedRatio(last) >= this.systemUsedCriticalRatio && last.systemAvailable < this.systemAvailableThresholdBytes) {
             errors.push(`System memory is exhausted: ${formatBytes(last.systemAvailable)} available of ${formatBytes(last.systemTotal)} (${formatPercentage(systemUsedRatio(last))} used)`);
-        } else if (averageSystemUsedRatio > this.systemUsedWarningRatio) {
-            errors.push(`System memory is almost exhausted: ${formatBytes(last.systemAvailable)} available of ${formatBytes(last.systemTotal)} (${formatPercentage(averageSystemUsedRatio)} used on average)`);
+        } else if (averageSystemUsedRatio > this.systemUsedWarningRatio && averageSystemAvailable < this.systemAvailableThresholdBytes) {
+            errors.push(`System memory is almost exhausted: ${formatBytes(averageSystemAvailable)} available of ${formatBytes(last.systemTotal)} on average (${formatPercentage(averageSystemUsedRatio)} used)`);
         }
 
         return errors;

@@ -50,11 +50,11 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions';
-import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
+import { usePatchOrganizationPeriod } from '@stamhoofd/components/hooks/networking/usePatchOrganizationPeriod';
 import { Group, GroupPrice, GroupSettings, OrganizationRegistrationPeriod, ReduceablePrice } from '@stamhoofd/structures';
 import { computed, reactive, ref } from 'vue';
 import { useGroupActions } from '../members/useGroupActions';
-import type { OnboardingStepProps } from './useMemberAdministrationOnboarding';
+import type { OnboardingStepProps } from './OnboardingStepProps';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 
 const props = defineProps<OnboardingStepProps>();

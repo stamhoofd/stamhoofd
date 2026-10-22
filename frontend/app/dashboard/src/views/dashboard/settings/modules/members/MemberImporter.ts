@@ -3,7 +3,7 @@ import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import type { PlatformFamilyManager } from '@stamhoofd/components/members/PlatformFamilyManager.ts';
 import { startSilentRegister } from '@stamhoofd/components/members/checkout/startCheckout.ts';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { BalanceItem, Group, Organization, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, Registration} from '@stamhoofd/structures';
 import { BalanceItemPaymentDetailed, DetailedReceivableBalance, GroupPrice, GroupType, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, ReceivableBalanceType, RegisterCheckout, RegisterItem, RegistrationWithPlatformMember, TranslatedString } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';

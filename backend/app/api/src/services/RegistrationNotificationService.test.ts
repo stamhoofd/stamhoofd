@@ -4,7 +4,9 @@ import type { Group, Organization, RegistrationPeriod, User } from '@stamhoofd/m
 import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { Notification } from '@stamhoofd/models/models/Notification.js';
 import { NotificationRecipient } from '@stamhoofd/models/models/NotificationRecipient.js';
-import { GroupType, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, TranslatedString, Version } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { GroupType, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, Permissions, ResourcePermissions, TranslatedString, Version } from '@stamhoofd/structures';
 import { NotificationSubjectType } from '@stamhoofd/structures/notifications/NotificationSubjectType.js';
 import { NotificationType } from '@stamhoofd/structures/notifications/NotificationType.js';
 import { RegistrationCreatedNotificationPayload } from '@stamhoofd/structures/notifications/RegistrationCreatedNotificationPayload.js';
@@ -71,7 +73,7 @@ describe('RegistrationNotificationService', () => {
                     }),
                 ],
                 balanceItems: [],
-                deleteRegistrationIds: [],
+                deleteRegistrations: [],
             }),
             administrationFee: 0,
             freeContribution: 0,

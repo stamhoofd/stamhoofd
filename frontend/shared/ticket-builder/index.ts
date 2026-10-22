@@ -1,13 +1,13 @@
 import metropolisMediumUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-Medium.woff2';
 import metropolisBoldUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import type { Order, Organization, Sponsor, TicketPublic, Webshop, WebshopPreview } from '@stamhoofd/structures';
 import { WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTicketType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { Buffer } from 'buffer';
-import PDFDocument from 'pdfkit/js/pdfkit.standalone';
+import PDFDocument from 'pdfkit';
 import QRCode from 'qrcode';
 
 // polyfill
@@ -50,7 +50,7 @@ export class TicketBuilder {
         this.webshop = webshop;
         this.organization = organization;
         this.order = order;
-        this.document = new PDFDocument({ size: [PAGE_WIDTH, PAGE_HEIGHT], margin: PAGE_MARGIN });
+        this.document = new PDFDocument({ size: [PAGE_WIDTH, PAGE_HEIGHT], margin: PAGE_MARGIN, font: null as unknown as string });
     }
 
     get primaryColor() {

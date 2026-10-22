@@ -10,7 +10,7 @@ import { fetchAll } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts'
 import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { PrivateWebshop } from '@stamhoofd/structures';
 import { CountFilteredRequest, DiscountCode, EmailRecipientSubfilter, ExcelExportType, LimitedFilteredRequest, mergeFilters, PrivateDiscountCode, SortItemDirection } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
@@ -342,7 +342,7 @@ export class DiscountCodeActionBuilder {
         await this.navigationActions.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
-                    root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
+                    root: AsyncComponent(() => import('@stamhoofd/components/export/ExcelExportView.vue'), {
                         type: ExcelExportType.WebshopDiscountCodes,
                         filter: new LimitedFilteredRequest({
                             filter: mergeFilters([selection.filter.filter, {

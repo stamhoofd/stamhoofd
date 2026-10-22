@@ -55,6 +55,11 @@ export class TableObjectFetcher<O extends { id: string }> {
     // todo: add rate limits if scrolling too fast
     _clearIndex = 0;
 
+    /**
+     * Aborted on every reset, so fetches whose results would be discarded stop early.
+     */
+    _abortController = new AbortController();
+
     nextRequest: LimitedFilteredRequest | null = null;
 
     constructor({ objectFetcher, maxLimit }: { objectFetcher: ObjectFetcher<O>; maxLimit?: number }) {
@@ -67,7 +72,7 @@ export class TableObjectFetcher<O extends { id: string }> {
     }
 
     destroy() {
-        this._clearIndex += 1;
+        this.abortRunningFetches();
         Request.cancelAll(this.objectFetcher);
         if (this.objectFetcher.destroy) {
             this.objectFetcher.destroy();
@@ -118,10 +123,16 @@ export class TableObjectFetcher<O extends { id: string }> {
         }
     }
 
+    abortRunningFetches() {
+        this._clearIndex += 1;
+        this._abortController.abort();
+        this._abortController = new AbortController();
+    }
+
     reset(total = false, filteredCount = false) {
         console.info('Reset');
 
-        this._clearIndex += 1;
+        this.abortRunningFetches();
 
         // Save current objects in cache
         for (const o of this.objects) {
@@ -163,6 +174,8 @@ export class TableObjectFetcher<O extends { id: string }> {
     }
 
     setSearchQuery(query: string) {
+        // The backend searches on the exact text, so spaces typed around it would find fewer results
+        query = query.trim();
         if (query === this.searchQuery) {
             return;
         }
@@ -255,6 +268,12 @@ export class TableObjectFetcher<O extends { id: string }> {
 
         this.fetchingData = true;
         const currentClearIndex = this._clearIndex;
+        const signal = this._abortController.signal;
+        const logUnlessAborted = (e: unknown) => {
+            if (!signal.aborted) {
+                console.error(e);
+            }
+        };
 
         try {
             const hasFilter = !!this.baseFilter || !!this.searchQuery;
@@ -268,7 +287,7 @@ export class TableObjectFetcher<O extends { id: string }> {
                 // Fetch count in parallel
                 this.objectFetcher.fetchCount(new CountFilteredRequest({
                     filter: this.objectFetcher.requiredFilter,
-                })).then((c) => {
+                }), { signal }).then((c) => {
                     if (currentClearIndex !== this._clearIndex) {
                         // Discard old requests
                         return;
@@ -282,21 +301,21 @@ export class TableObjectFetcher<O extends { id: string }> {
                     }
 
                     this.fetchIfNeeded().catch(console.error);
-                }).catch(console.error);
+                }).catch(logUnlessAborted);
             }
 
             if (!this.fetchingFilteredCount && this.totalFilteredCount === null && hasFilter) {
                 this.fetchingFilteredCount = true;
 
                 // Fetch count in parallel
-                this.objectFetcher.fetchCount(new CountFilteredRequest({ filter: this.filter, search: this.searchQuery })).then((c) => {
+                this.objectFetcher.fetchCount(new CountFilteredRequest({ filter: this.filter, search: this.searchQuery }), { signal }).then((c) => {
                     if (currentClearIndex !== this._clearIndex) {
                         // Discard old requests
                         return;
                     }
                     this.totalFilteredCount = c;
                     this.fetchingFilteredCount = false;
-                }).catch(console.error);
+                }).catch(logUnlessAborted);
             }
 
             const fetchUntil = this.totalFilteredCount !== null ? Math.min(this.totalFilteredCount, this.currentEndIndex + 1 + this.fetchMargin) : (this.currentEndIndex + 1 + this.fetchMargin); // +1 is required to convert index to total items
@@ -317,7 +336,7 @@ export class TableObjectFetcher<O extends { id: string }> {
                 // Same for sorting
                 this.nextRequest.sort = this.objectFetcher.extendSort ? this.objectFetcher.extendSort([...this.sort]) : this.sort;
 
-                const data = await this.objectFetcher.fetch(this.nextRequest);
+                const data = await this.objectFetcher.fetch(this.nextRequest, { signal });
                 if (currentClearIndex !== this._clearIndex) {
                     // Discard old requests
                     console.warn('Discarded fetch result');
@@ -372,6 +391,9 @@ export class TableObjectFetcher<O extends { id: string }> {
                 console.log('No fetch required.', this.objects.length, '/', this.totalFilteredCount);
             }
         } catch (e) {
+            if (signal.aborted) {
+                return;
+            }
             if (currentClearIndex === this._clearIndex) {
                 console.error('Stopped fetching due to error');
                 console.error(e);

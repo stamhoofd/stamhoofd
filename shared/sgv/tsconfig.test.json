@@ -10,5 +10,5 @@
         "./src/**/*.spec.ts",
         "./src/**/*.test.ts"
     ],
-    "references": [{ "path": "./tsconfig.build.json" }]
+    "references": [{ "path": "./tsconfig.types.json" }]
 }

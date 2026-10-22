@@ -1,7 +1,8 @@
 import { colorDark, colorGray } from '../colors';
 import type { PdfDocWrapper } from '../PdfDocWrapper';
 import type { PdfFont } from '../PdfFont';
-import type { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../PdfItem';
+import type { PdfItem } from '../PdfItem';
+import type { PdfItemDrawOptions, PdfItemGetHeightOptions } from '../PdfItemOptions';
 import { DefaultText } from './DefaultText';
 import type { PdfTextOptions } from './PdfText';
 

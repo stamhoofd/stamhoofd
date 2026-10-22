@@ -9,14 +9,34 @@ import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.
 import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
 import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
 import { TabBarItem, TabBarItemGroup } from '@stamhoofd/components/containers/TabBarItem.ts';
+import { openNolt, useOpenPendingNoltLogin } from '@stamhoofd/components/helpers/nolt.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { AccessRight, getEventTypes, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { getEventTypes } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { WhatsNewCount } from './classes/WhatsNewCount';
 import { buildTranslatedUrl } from '@stamhoofd/components/containers/TranslatedUrl.ts';
+import { useProvideEventWebshopViews } from './providers/provideEventWebshopViews';
+import { useProvideMemberViews } from '@stamhoofd/components/members/provideMemberViews';
+import { useProvideEventViews } from '@stamhoofd/components/events/provideEventViews';
+import { useProvideGroupViews } from '@stamhoofd/components/groups/provideGroupViews';
+import { useProvidePaymentViews } from '@stamhoofd/components/payments/providePaymentViews';
+import { useProvideBreakdownViews } from './views/dashboard/breakdown/provideBreakdownViews';
+import { useProvideSGVSync } from '@stamhoofd/sgv-frontend/provideSGVSync';
+
+useProvideEventWebshopViews();
+useProvideMemberViews();
+useProvideEventViews();
+useProvideGroupViews();
+useProvidePaymentViews();
+useProvideBreakdownViews();
+useProvideSGVSync();
+useOpenPendingNoltLogin();
 
 const context = useContext();
 const platform = usePlatform();
@@ -210,8 +230,7 @@ function getRoot() {
                 icon: 'feedback',
                 name: $t(`%18`),
                 action: async function () {
-                    const NoltHelper = (await import('./classes/NoltHelper'));
-                    await NoltHelper.openNolt(context.value, false);
+                    await openNolt(context.value, false);
                 },
             }),
         );

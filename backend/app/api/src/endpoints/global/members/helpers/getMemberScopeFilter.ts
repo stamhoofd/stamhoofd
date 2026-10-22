@@ -1,6 +1,7 @@
 import { Group } from '@stamhoofd/models';
 import type { StamhoofdFilter, StamhoofdKeyFilter } from '@stamhoofd/structures';
-import { GroupStatus, GroupType, PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { GroupStatus, GroupType } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context.js';
 
 /**

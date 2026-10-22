@@ -1,29 +1,39 @@
 {
     "name": "@stamhoofd/backend-renderer",
-    "version": "2.154.0",
+    "version": "2.155.0",
     "type": "module",
     "main": "./dist/index.js",
     "exports": {
         ".": {
+            "types": "./dist-types/index.d.ts",
             "require": "./dist/index.js"
         }
     },
+    "types": "./dist-types/index.d.ts",
+    "files": [
+        "dist",
+        "dist-types",
+        "src",
+        "*.ts",
+        "tsconfig*.json"
+    ],
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
+        "build:types": "tsc --project tsconfig.types.json",
         "build:full": "pnpm run clear && pnpm run build",
         "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
         "dev": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'pnpm run build --watch --preserveWatchOutput' \"wait-on ./dist/index.js && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
-        "lint": "eslint",
+        "lint": "eslint --quiet",
         "start": "pnpm run build && node --enable-source-maps ./dist/index.js",
-        "typecheck": "tsc --build tsconfig.test.json",
+        "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
         "test": "vitest",
         "test:coverage": "vitest --coverage",
-        "postinstall": "puppeteer browsers install chrome"
+        "postinstall": "node -e \"if (process.env.PUPPETEER_SKIP_DOWNLOAD !== 'true') require('node:child_process').execSync('puppeteer browsers install chrome', { stdio: 'inherit' })\""
     },
     "dependencies": {
         "@simonbackx/simple-database": "1.40.1",
         "@simonbackx/simple-encoding": "2.26.11",
-        "@simonbackx/simple-endpoints": "1.22.0",
+        "@simonbackx/simple-endpoints": "1.23.0",
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-logging": "1.0.1",
         "@stamhoofd/backend-env": "workspace:*",
@@ -37,13 +47,13 @@
         "formidable": "3.5.4",
         "luxon": "3.7.2",
         "mockdate": "3.0.5",
-        "mysql2": "3.24.4",
+        "mysql2": "3.24.5",
         "puppeteer": "25.12.0"
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "workspace:*",
         "@types/formidable": "3.5.1",
-        "@types/luxon": "3.7.5",
+        "@types/luxon": "3.7.6",
         "@types/node": "22.20.4",
         "nock": "14.0.17",
         "vitest": "4.1.11"

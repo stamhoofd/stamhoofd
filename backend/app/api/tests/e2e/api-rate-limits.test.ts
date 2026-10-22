@@ -3,7 +3,8 @@ import type { Organization } from '@stamhoofd/models';
 import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { SessionService } from '../../src/services/SessionService.js';
 
-import { ApiUser, ApiUserRateLimits, PermissionLevel, Permissions, UserMeta, UserPermissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { ApiUser, ApiUserRateLimits, Permissions, UserMeta, UserPermissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { GetUserEndpoint } from '../../src/endpoints/auth/GetUserEndpoint.js';
 import { CreateApiUserEndpoint } from '../../src/endpoints/organization/dashboard/users/CreateApiUserEndpoint.js';

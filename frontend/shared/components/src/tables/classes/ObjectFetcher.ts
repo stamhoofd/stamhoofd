@@ -5,9 +5,13 @@ import { CountFilteredRequest } from '@stamhoofd/structures';
 export interface ObjectFetcher<O> {
     extendSort?(list: SortList): SortList;
     requiredFilter?: StamhoofdFilter | null | undefined;
-    fetch(data: LimitedFilteredRequest, options?: { shouldRetry?: boolean }): Promise<{ results: O[]; next?: LimitedFilteredRequest }>;
+    /**
+     * signal is aborted when the result is no longer needed (e.g. the search query changed).
+     * Implementations may ignore it, but long running local work should stop on it.
+     */
+    fetch(data: LimitedFilteredRequest, options?: { shouldRetry?: boolean; signal?: AbortSignal }): Promise<{ results: O[]; next?: LimitedFilteredRequest }>;
 
-    fetchCount(data: CountFilteredRequest): Promise<number>;
+    fetchCount(data: CountFilteredRequest, options?: { signal?: AbortSignal }): Promise<number>;
 
     destroy?(): void;
 

@@ -1,9 +1,9 @@
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import type { DisplayOptions, NavigationActions} from '../types/NavigationActions';
 import { glueNavigationActions, runDisplayOptions } from '../types/NavigationActions';
-import type {ViewStep} from './ViewStep';
+import type {ViewStep, ViewStepNavigation} from './ViewStep';
 
-export class ViewStepsManager {
+export class ViewStepsManager implements ViewStepNavigation {
     steps: ViewStep[] = [];
     finishHandler: (navigate: NavigationActions) => void | Promise<void>;
     displayOptions: DisplayOptions;

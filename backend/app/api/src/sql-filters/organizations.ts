@@ -1,6 +1,7 @@
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, compileToSQLFilter, createColumnFilter, createExistsFilter, SQL, SQLConcat, SQLNow, SQLNull, SQLScalar, SQLValueType, SQLWhereAnd, SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '@stamhoofd/sql';
-import { PermissionLevel, SetupStepType } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { SetupStepType } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context.js';
 
 type SQLFilterCompiler = ReturnType<typeof createExistsFilter>;

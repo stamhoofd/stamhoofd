@@ -489,10 +489,13 @@ import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vu
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import type { WebshopPreview } from '@stamhoofd/structures';
-import { AccessRight, EmailTemplate, EmailTemplateType, PaymentMethod, PermissionLevel, PermissionsResourceType, PrivateWebshop, WebshopMetaData, WebshopStatus, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { EmailTemplate, EmailTemplateType, PaymentMethod, PrivateWebshop, WebshopMetaData, WebshopStatus, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';

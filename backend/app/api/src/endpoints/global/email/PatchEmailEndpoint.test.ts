@@ -3,7 +3,10 @@ import { PatchMap } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, RegistrationPeriod, User, Token } from '@stamhoofd/models';
 import { Email, EmailRecipient, GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import { AccessRight, EmailContent, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, Email as EmailStruct, OrganizationEmail, Parent, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, UserPermissions, Version } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { EmailContent, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, Email as EmailStruct, OrganizationEmail, Parent, Permissions, ResourcePermissions, UserPermissions, Version } from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -19,6 +22,7 @@ import '../../../email-recipient-loaders/receivable-balances.js';
 import '../../../email-recipient-loaders/registrations.js';
 import { EmailMocker } from '@stamhoofd/email';
 import { vi } from 'vitest';
+import { QueueHandler } from '@stamhoofd/queues';
 
 const baseUrl = `/v${Version}/email`;
 
@@ -669,8 +673,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         const response = await patchEmail(body, token, organization);
         expect(response.status).toBe(200);
 
-        // Wait for the background process to complete (or fail)
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await QueueHandler.awaitAll();
 
         // Refresh the email to check the status
         await email.refresh();
@@ -847,7 +850,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         expect(response.status).toBe(200);
 
         // Wait for the background process to complete (or fail)
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await QueueHandler.awaitAll();
 
         // Refresh the email to check the status
         await email.refresh();
@@ -1008,7 +1011,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         expect(response.status).toBe(200);
 
         // Wait for the background process to complete (or fail)
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await QueueHandler.awaitAll();
 
         // Refresh the email to check the status
         await email.refresh();
@@ -1156,7 +1159,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         expect(response.status).toBe(200);
 
         // Wait for the background process to complete (or fail)
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await QueueHandler.awaitAll();
 
         // Refresh the email to check the status
         await email.refresh();

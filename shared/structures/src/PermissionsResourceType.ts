@@ -1,23 +1,7 @@
 import { isPatchMap, PatchMap } from '@simonbackx/simple-encoding';
-import { AccessRight } from './AccessRight.js';
-import { PermissionLevel } from './PermissionLevel.js';
-
-/**
- * More granular access rights to specific things in the system
- */
-export enum PermissionsResourceType {
-    Webshops = 'Webshops',
-    Groups = 'Groups',
-    GroupCategories = 'GroupCategories',
-    OrganizationTags = 'OrganizationTags',
-    RecordCategories = 'RecordCategory',
-    Events = 'Events',
-
-    /**
-     * Sending emails and other communication via a sender and viewing the history of sent messages
-     */
-    Senders = 'Senders',
-}
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 
 export const PermissionsResourceKey = {
     All: '$all',

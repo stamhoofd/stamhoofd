@@ -1,7 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, Token } from '@stamhoofd/models';
 import { OrganizationFactory, Platform, RegistrationPeriod, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import { PermissionLevel, Permissions, PlatformConfig, PlatformPrivateConfig, Platform as PlatformStruct, Version } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Permissions, PlatformConfig, PlatformPrivateConfig, Platform as PlatformStruct, Version } from '@stamhoofd/structures';
 import { SessionService } from '../../../services/SessionService.js';
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';

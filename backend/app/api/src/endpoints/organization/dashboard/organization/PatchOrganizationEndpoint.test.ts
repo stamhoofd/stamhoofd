@@ -1,7 +1,10 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, User, Webshop, Token } from '@stamhoofd/models';
 import { EventFactory, GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, RegistrationPeriodFactory, UserFactory, WebshopFactory } from '@stamhoofd/models';
-import { AccessRight, Address, Company, MemberResponsibility, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PeppolEndointId, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { Address, BuckarooSettings, Company, MemberResponsibility, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PeppolEndointId, PermissionRoleDetailed, PermissionRoleForResponsibility, Permissions, PermissionsResourceKey, ResourcePermissions, Version } from '@stamhoofd/structures';
 import { SessionService } from '../../../../services/SessionService.js';
 
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
@@ -1619,6 +1622,45 @@ describe('Endpoint.PatchOrganization', () => {
             await expect(patchOrganization({ patch, organization, token })).rejects.toThrow(
                 STExpect.simpleError({ code: 'invalid_field', field: 'period' }),
             );
+        });
+    });
+
+    describe('Buckaroo settings', () => {
+        afterEach(() => {
+            nock.cleanAll();
+        });
+
+        test('Patching with the placeholder secret keeps the stored secret', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            organization.privateMeta.buckarooSettings = BuckarooSettings.create({ key: 'website-key', secret: 'buckaroo-secret' });
+            await organization.save();
+
+            const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const token = await SessionService.createSession(user);
+
+            nock('https://testcheckout.buckaroo.nl')
+                .post('/json/Transaction')
+                .reply(200, { Key: 'test-key', Status: { Code: { Code: 791 } } });
+
+            const response = await patchOrganization({
+                patch: OrganizationStruct.patch({
+                    id: organization.id,
+                    privateMeta: OrganizationPrivateMetaData.patch({
+                        buckarooSettings: BuckarooSettings.patch({
+                            key: 'new-website-key',
+                            secret: BuckarooSettings.placeholderSecret,
+                        }),
+                    }),
+                }),
+                organization,
+                token,
+            });
+
+            expect(response.body.privateMeta?.buckarooSettings?.secret).toEqual(BuckarooSettings.placeholderSecret);
+
+            await organization.refresh();
+            expect(organization.privateMeta.buckarooSettings?.secret).toEqual('buckaroo-secret');
+            expect(organization.privateMeta.buckarooSettings?.key).toEqual('new-website-key');
         });
     });
 });

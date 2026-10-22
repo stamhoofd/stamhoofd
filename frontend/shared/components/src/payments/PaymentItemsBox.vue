@@ -31,11 +31,11 @@ import STGrid from '#layout/STGrid.vue';
 import STGridItem from '#layout/STGridItem.vue';
 import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
 import type { BalanceItem, PaymentGeneral } from '@stamhoofd/structures';
-import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 
 import BalanceItemIcon from './BalanceItemIcon.vue';
 import BalanceItemTitleBox from './BalanceItemTitleBox.vue';
+import { sortBalanceItemPayments } from './sortBalanceItemPayments.ts';
 
 const props = withDefaults(
     defineProps<{
@@ -47,14 +47,7 @@ const props = withDefaults(
 );
 
 const present = usePresent();
-const sortedItems = computed(() => {
-    return props.payment.balanceItemPayments.slice().sort((a, b) => {
-        return Sorter.stack(
-            Sorter.byNumberValue(a.price, b.price),
-            Sorter.byStringValue(a.itemDescription ?? a.balanceItem.name, b.itemDescription ?? b.balanceItem.name),
-        );
-    });
-});
+const sortedItems = computed(() => sortBalanceItemPayments(props.payment.balanceItemPayments));
 
 async function editBalanceItem(balanceItem: BalanceItem) {
     if (!props.canWrite) {

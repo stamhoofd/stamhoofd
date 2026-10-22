@@ -1,7 +1,8 @@
 import backendEnv from '@stamhoofd/backend-env';
+import { BackendApp } from '@stamhoofd/types/BackendApp';
 
 process.title = 'stamhoofd-renderer';
-backendEnv.load({ service: 'renderer' }).catch((error) => {
+backendEnv.load({ service: BackendApp.Renderer }).catch((error) => {
     console.error('Failed to load environment:', error);
     process.exit(1);
 }).then(async () => {

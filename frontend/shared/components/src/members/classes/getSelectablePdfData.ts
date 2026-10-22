@@ -1,7 +1,8 @@
 import type { SelectableColumn } from '@stamhoofd/frontend-excel-export/SelectableColumn';
-import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
+import type { ContextPermissions } from '@stamhoofd/frontend-session/ContextPermissions';
 import type { EmergencyContact, Group, Organization, Parent, Platform, PlatformMember, RecordSettings } from '@stamhoofd/structures';
-import { AccessRight, getFinancialSupportSettingsOrDefault, getGenderName, GroupType, ParentTypeHelper, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordType } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { getFinancialSupportSettingsOrDefault, getGenderName, GroupType, ParentTypeHelper, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { SelectablePdfData } from '../../export/SelectablePdfData';
 
@@ -138,6 +139,18 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
                         id: 'organization',
                         name: $t(`%ey`),
                         enabled: false,
+                        getValue: (member: PlatformMember) => member.getPrimaryOrganization({ periodId: platform.period.id })?.name ?? $t('%5D'),
+                    }),
+                    new SelectablePdfData<PlatformMember>({
+                        id: 'uri',
+                        name: $t(`%1O1`),
+                        enabled: false,
+                        getValue: (member: PlatformMember) => member.getPrimaryOrganization({ periodId: platform.period.id })?.uri ?? $t('%5D'),
+                    }),
+                    new SelectablePdfData<PlatformMember>({
+                        id: 'organizations',
+                        name: $t('%1KQ'),
+                        enabled: false,
                         getValue: (member: PlatformMember) => {
                             const organizations = member.filterOrganizations({
                                 currentPeriod: true,
@@ -155,8 +168,8 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
                         },
                     }),
                     new SelectablePdfData<PlatformMember>({
-                        id: 'uri',
-                        name: $t(`%1O1`),
+                        id: 'uris',
+                        name: $t('%1KR'),
                         enabled: false,
                         getValue: (member: PlatformMember) => {
                             const organizations = member.filterOrganizations({

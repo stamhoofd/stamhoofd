@@ -1,6 +1,7 @@
 import { ManyToOneRelation } from '@simonbackx/simple-database';
 import { encodeObject } from '@simonbackx/simple-encoding';
 import { BalanceItem, Document, Group, Member, Organization, Platform, Registration, RegistrationInvitation } from '@stamhoofd/models';
+import { DocumentService } from './DocumentService.js';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import { isCanceledError, QueueHandler } from '@stamhoofd/queues';
 import { AppliedRegistrationDiscount, AuditLogSource, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, EmailTemplateType, getAppHost, GroupType, Recipient, Replacement, StockReservation, Version } from '@stamhoofd/structures';
@@ -71,7 +72,7 @@ export const RegistrationService = {
         if (member) {
             const registrationMemberRelation = new ManyToOneRelation(Member, 'member');
             registrationMemberRelation.foreignKey = Member.registrations.foreignKey;
-            await Document.updateForRegistration(registration.setRelation(registrationMemberRelation, member));
+            await DocumentService.updateForRegistration(registration.setRelation(registrationMemberRelation, member));
 
             // update lastRegisteredAt (should not be awaited)
             member.tryUpdateLastRegisteredAt(registration)

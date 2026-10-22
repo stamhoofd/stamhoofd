@@ -125,7 +125,7 @@ const baseRules = [
     },
 
     {
-        ignores: ['**/dist/*', '**/dist-*/*', '**/ios/*', '**/android/*'],
+        ignores: ['**/dist/', '**/dist-*/', '**/ios/*', '**/android/*'],
     },
 
     {

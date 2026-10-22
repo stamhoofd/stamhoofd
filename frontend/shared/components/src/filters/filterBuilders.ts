@@ -24,26 +24,26 @@ import type { UIFilter, UIFilterBuilder, UIFilterBuilders } from './UIFilter';
 export const getCustomerUIFilterBuilders: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [
         new StringFilterBuilder({
-            name: $t(`%1JZ`),
+            name: $t('%1JZ'),
             key: 'name',
         }),
         new StringFilterBuilder({
-            name: $t(`%1FK`),
+            name: $t('%1FK'),
             key: 'email',
         }),
         new GroupUIFilterBuilder({
-            name: $t(`%1Ja`),
+            name: $t('%1Ja'),
             builders: [
                 new StringFilterBuilder({
-                    name: $t(`%1JI`),
+                    name: $t('%1JI'),
                     key: 'name',
                 }),
                 new StringFilterBuilder({
-                    name: $t(`%1CK`),
+                    name: $t('%1CK'),
                     key: 'VATNumber',
                 }),
                 new StringFilterBuilder({
-                    name: $t(`%wa`),
+                    name: $t('%wa'),
                     key: 'companyNumber',
                 }),
             ],
@@ -74,6 +74,8 @@ export function useBalanceItemRelationFilterBuilders() {
     const groupsRelationFetcher = useGroupsRelationFetcher();
     const eventGroupsRelationFetcher = useEventGroupsRelationFetcher();
     const webshopsRelationFetcher = useWebshopsRelationFetcher();
+    const organization = useOrganization();
+    const platform = usePlatform();
 
     return ({ registrationWrapper, orderWrapper }: { registrationWrapper: WrapperFilter; orderWrapper: WrapperFilter }): UIFilterBuilders => {
         return [
@@ -82,7 +84,10 @@ export function useBalanceItemRelationFilterBuilders() {
                 type: GroupType.Membership,
                 key: 'groupId',
                 wrapper: registrationWrapper,
-                relationFetcher: groupsRelationFetcher({ type: GroupType.Membership }),
+                relationFetcher: groupsRelationFetcher({
+                    type: GroupType.Membership,
+                    defaultPeriodId: organization.value?.period.period.id ?? platform.value.period.id,
+                }),
             }),
             new RelationFilterBuilder({
                 name: $t('%1IR'),
@@ -118,7 +123,7 @@ export const useBalanceItemsUIFilterBuilders: () => UIFilterBuilders = () => {
 
     const builders: UIFilterBuilders = [
         new MultipleChoiceFilterBuilder({
-            name: $t(`%1A`),
+            name: $t('%1A'),
             options: Object.values(BalanceItemStatus).filter(f => f !== BalanceItemStatus.Hidden).map((method) => {
                 return new MultipleChoiceUIFilterOption(getBalanceItemStatusName(method), method);
             }),
@@ -130,7 +135,7 @@ export const useBalanceItemsUIFilterBuilders: () => UIFilterBuilders = () => {
         }),
 
         new MultipleChoiceFilterBuilder({
-            name: $t(`%1LP`),
+            name: $t('%1LP'),
             options: getApplicableBalanceItemTypes(organization.value, platform.value).map((method) => {
                 return new MultipleChoiceUIFilterOption(Formatter.capitalizeFirstLetter(getBalanceItemTypeName(method)), method);
             }),
@@ -144,19 +149,19 @@ export const useBalanceItemsUIFilterBuilders: () => UIFilterBuilders = () => {
         ...getRelationFilterBuilders({ registrationWrapper, orderWrapper }),
 
         new NumberFilterBuilder({
-            name: $t(`%1IP`),
+            name: $t('%1IP'),
             type: NumberFilterFormat.Currency,
             key: 'priceWithVAT',
         }),
 
         new NumberFilterBuilder({
-            name: $t(`%76`),
+            name: $t('%76'),
             type: NumberFilterFormat.Currency,
             key: 'priceOpen',
         }),
 
         new DateFilterBuilder({
-            name: $t(`%1Jc`),
+            name: $t('%1Jc'),
             key: 'createdAt',
         }),
     ];
@@ -216,25 +221,25 @@ export function useRegisterItemFilterBuilders() {
     return (group: Group) => {
         const all: UIFilterBuilders = [
             new NumberFilterBuilder({
-                name: $t(`%9S`),
+                name: $t('%9S'),
                 key: 'age',
                 wrapper: {
                     member: FilterWrapperMarker,
                 },
             }),
             new DateFilterBuilder({
-                name: $t(`%17w`),
+                name: $t('%17w'),
                 key: 'birthDay',
                 wrapper: {
                     member: FilterWrapperMarker,
                 },
             }),
             new MultipleChoiceFilterBuilder({
-                name: $t(`%1d`),
+                name: $t('%1d'),
                 options: [
-                    new MultipleChoiceUIFilterOption($t(`%XM`), Gender.Female),
-                    new MultipleChoiceUIFilterOption($t(`%XK`), Gender.Male),
-                    new MultipleChoiceUIFilterOption($t(`%1JG`), Gender.Other),
+                    new MultipleChoiceUIFilterOption($t('%XM'), Gender.Female),
+                    new MultipleChoiceUIFilterOption($t('%XK'), Gender.Male),
+                    new MultipleChoiceUIFilterOption($t('%1JG'), Gender.Other),
                 ],
                 wrapper: {
                     member: {
@@ -249,7 +254,7 @@ export function useRegisterItemFilterBuilders() {
         // Add price filter
         all.push(
             new MultipleChoiceFilterBuilder({
-                name: $t(`%62`),
+                name: $t('%62'),
                 options: [
                     ...group.settings.prices.map((price) => {
                         return new MultipleChoiceUIFilterOption(price.name.toString(), price.id);
@@ -313,23 +318,23 @@ export function useRegisterItemFilterBuilders() {
 export const getCachedOutstandingBalanceUIFilterBuilders: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [
         new NumberFilterBuilder({
-            name: $t(`%76`),
+            name: $t('%76'),
             type: NumberFilterFormat.Currency,
             key: 'amountOpen',
         }),
         new NumberFilterBuilder({
-            name: $t(`%c4`),
+            name: $t('%c4'),
             type: NumberFilterFormat.Currency,
             key: 'amountPending',
         }),
         new NumberFilterBuilder({
-            name: $t(`%c4`),
+            name: $t('%c4'),
             type: NumberFilterFormat.Currency,
             key: 'pricePending',
         }),
 
         new DateFilterBuilder({
-            name: $t(`%1cf`),
+            name: $t('%1cf'),
             key: 'nextDueAt',
             nullable: true,
         }),
@@ -364,15 +369,15 @@ export const getCachedOutstandingBalanceUIFilterBuilders: () => UIFilterBuilders
 export function getOrganizationCompanyFilterBuilders() {
     const all: UIFilterBuilder[] = [
         new StringFilterBuilder({
-            name: $t(`%1Os`),
+            name: $t('%1Os'),
             key: 'name',
         }),
         new StringFilterBuilder({
-            name: $t(`%wa`),
+            name: $t('%wa'),
             key: 'companyNumber',
         }),
         new StringFilterBuilder({
-            name: $t(`%1CK`),
+            name: $t('%1CK'),
             key: 'VATNumber',
         }),
         new MultipleChoiceFilterBuilder({
@@ -402,7 +407,7 @@ export function useEmailFilterBuilders() {
     return () => {
         const all: UIFilterBuilder[] = [
             new DateFilterBuilder({
-                name: $t(`%1D9`),
+                name: $t('%1D9'),
                 key: 'sentAt',
             }),
 
@@ -426,11 +431,11 @@ export function useAdminEmailFilterBuilders() {
     return () => {
         const all: UIFilterBuilder[] = [
             new DateFilterBuilder({
-                name: $t(`%1JJ`),
+                name: $t('%1JJ'),
                 key: 'createdAt',
             }),
             new DateFilterBuilder({
-                name: $t(`%1D9`),
+                name: $t('%1D9'),
                 key: 'sentAt',
             }),
             new NumberFilterBuilder({
@@ -458,7 +463,7 @@ export function useAdminEmailFilterBuilders() {
                 key: 'spamComplaintsCount',
             }),
             new MultipleChoiceFilterBuilder({
-                name: $t(`%1GA`),
+                name: $t('%1GA'),
                 options: [
                     ...(organization.value ? (organization.value.privateMeta?.emails ?? []) : (platform.value.privateConfig?.emails ?? [])).map(e => new MultipleChoiceUIFilterOption(e.name || e.email, e.id)),
                 ],
@@ -469,11 +474,11 @@ export function useAdminEmailFilterBuilders() {
                 },
             }),
             new StringFilterBuilder({
-                name: $t(`%aO`),
+                name: $t('%aO'),
                 key: 'subject',
             }),
             new StringFilterBuilder({
-                name: $t(`%1GB`),
+                name: $t('%1GB'),
                 key: 'text',
             }),
 
@@ -533,7 +538,7 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions, g
 
     if (isPlatform) {
         organizationOptions.push({
-            name: $t(`%c8`),
+            name: $t('%c8'),
             value: null,
         });
     }
@@ -544,7 +549,7 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions, g
     })));
 
     const organizationFilter = new MultipleChoiceFilterBuilder({
-        name: $t(`%c7`),
+        name: $t('%c7'),
         allowCreation: organizationOptions.length > 1,
         options: organizationOptions.map(x => new MultipleChoiceUIFilterOption(x.name, x.value)),
         wrapper: {
@@ -557,10 +562,10 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions, g
     all.push(organizationFilter);
 
     const tagsFilter = new MultipleChoiceFilterBuilder({
-        name: $t(`%ae`),
+        name: $t('%ae'),
         allowCreation: (isPlatform || app === 'admin' || app === 'dashboard') && platform.config.tags.length > 1,
         options: [
-            new MultipleChoiceUIFilterOption($t(`%c9`), null),
+            new MultipleChoiceUIFilterOption($t('%c9'), null),
             ...platform.config.tags.map(tag => new MultipleChoiceUIFilterOption(tag.name, tag.id)),
         ],
         wrapper: {
@@ -576,10 +581,10 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions, g
 
     if (isPlatform) {
         const defaultAgeGroupFilter = new MultipleChoiceFilterBuilder({
-            name: $t(`%wI`),
+            name: $t('%wI'),
             allowCreation: platform.config.defaultAgeGroups.length > 0,
             options: [
-                new MultipleChoiceUIFilterOption($t(`%cA`), null),
+                new MultipleChoiceUIFilterOption($t('%cA'), null),
                 ...platform.config.defaultAgeGroups.filter(defaultAgeGroup => defaultAgeGroup.isEnabledForTags(allTags)).map(g => new MultipleChoiceUIFilterOption(g.name, g.id)),
             ],
             wrapper: {
@@ -616,7 +621,7 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions, g
         const eventTypes = getEventTypes({ platform, organization });
 
         const typeFilter = new MultipleChoiceFilterBuilder({
-            name: $t(`%1B`),
+            name: $t('%1B'),
             allowCreation: eventTypes.length > 1,
             options: [
                 ...eventTypes.map(type => new MultipleChoiceUIFilterOption(type.name, type.id)),
@@ -632,7 +637,7 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions, g
     }
 
     const ageFilter = new SimpleNumberFilterBuilder({
-        name: $t(`%9S`),
+        name: $t('%9S'),
         wrapper: {
             $and: [
                 {
@@ -669,7 +674,7 @@ export function useAuditLogUIFilterBuilders() {
     const options: MultipleChoiceUIFilterOption[] = Object.values(AuditLogType).map(type => new MultipleChoiceUIFilterOption(getAuditLogTypeName(type), type));
 
     const typeFilter = new MultipleChoiceFilterBuilder({
-        name: $t(`%1B`),
+        name: $t('%1B'),
         options,
         wrapper: {
             type: {
@@ -692,19 +697,19 @@ export function useAuditLogUIFilterBuilders() {
 export function getDocumentsUIFilterBuilders() {
     const builders: UIFilterBuilders = [
         new StringFilterBuilder({
-            name: $t(`%Kq`),
+            name: $t('%Kq'),
             key: 'id',
         }),
         new NumberFilterBuilder({
-            name: $t(`%cH`),
+            name: $t('%cH'),
             key: 'number',
         }),
         new StringFilterBuilder({
-            name: $t(`%6o`),
+            name: $t('%6o'),
             key: 'description',
         }),
         new MultipleChoiceFilterBuilder({
-            name: $t(`%17`),
+            name: $t('%17'),
             options: Object.values(DocumentStatus).map((status) => {
                 return new MultipleChoiceUIFilterOption(
                     Formatter.capitalizeFirstLetter(DocumentStatusHelper.getName(status)),

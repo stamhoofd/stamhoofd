@@ -171,10 +171,6 @@
     "original": "In sommige situaties (bv. in combinatie met artikelvoorwaarden), is het mogelijk dat er meerdere productkortingen in een winkelmandje actief zijn. Keeo kan dan de korting op hetzelfde item geven, als dat voordeliger zou zijn.",
     "translation": "Dans certains cas (par exemple avec des conditions d'article), il est possible que plusieurs réductions produit soient actives dans un panier. Keeo peut alors appliquer la réduction la plus avantageuse sur le même article."
   },
-  "%1GC": {
-    "original": "Andere start eind/datum dan scoutsjaar",
-    "translation": "Autre date de début/fin que l'année scoute"
-  },
   "%1GR": {
     "original": "Je moet een platformbeheerder zijn om inactieve eenheden te bekijken",
     "translation": "Vous devez être gestionnaire de la plateforme pour voir les unités inactives."
@@ -242,10 +238,6 @@
   "%1Jk": {
     "original": "Alle nummers van de eenheden waarvoor het lid is ingeschreven",
     "translation": "Tous les numéros des unités dans lesquelles le membre est inscrit"
-  },
-  "%1KF": {
-    "original": "Alle eenheden waarvoor het lid is ingeschreven",
-    "translation": "Toutes les unités pour lesquelles le membre est inscrit"
   },
   "%1KQ": {
     "original": "Alle eenheden",
@@ -1031,10 +1023,6 @@
     "original": "Filter op leden die een inschrijving (zowel huidig scoutsjaar of in een afgelopen scoutsjaar) heeft die aan deze voorwaarden voldoet.",
     "translation": "Filtrez les membres qui ont une inscription (année scoute actuelle ou année scoute passée) qui répond aux conditions."
   },
-  "%8V": {
-    "original": "Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorig scoutsjaar van gelijk welke inschrijvingsgroep.",
-    "translation": "Les membres sont considérés comme existants s'ils sont inscrits pour une année scoute précédente de n'importe quel groupe d'inscription."
-  },
   "%8X": {
     "original": "Onbekend scoutsjaar",
     "translation": "Année scoute inconnue"
@@ -1758,6 +1746,90 @@
   "%Ztn": {
     "original": "Je hebt geen toegang om te filteren op gegevens van eenheden",
     "translation": "Vous n'avez pas l'autorisation de filtrer sur les données des unités."
+  },
+  "%Zts": {
+    "original": "Vraag de code aan jouw Keeo-verantwoordelijke",
+    "translation": "Demandez le code à votre responsable Keeo"
+  },
+  "%ZuD": {
+    "original": "Vraag de code aan FOS Open Scouting",
+    "translation": "Demandez le code à FOS Open Scouting"
+  },
+  "%ZuW": {
+    "original": "Contacteer FOS Open Scouting en verduidelijk waarom je toegang nodig hebt tot {member}.",
+    "translation": "Contactez FOS Open Scouting et expliquez pourquoi vous avez besoin d'accéder à {member}."
+  },
+  "%Zv0": {
+    "original": "Keeo vergeet dan je API-sleutel en instellingen. Contacten die al in Mailchimp staan, blijven daar staan.",
+    "translation": "Keeo oubliera alors votre clé API et vos paramètres. Les contacts déjà présents dans Mailchimp y resteront."
+  },
+  "%Zvc": {
+    "original": "Synchroniseer leden van alle eenheden naar een audience van de koepel",
+    "translation": "Synchroniser les membres de toutes les unités vers un audience du groupe principal"
+  },
+  "%Zvn": {
+    "original": "Bestellingen kunnen enkel per eenheid gesynchroniseerd worden.",
+    "translation": "Les commandes ne peuvent être synchronisées que par unité."
+  },
+  "%Zvu": {
+    "original": "Alle leden die in het huidige scoutsjaar ingeschreven zijn, en hun ouders, komen in Mailchimp met een tag per groep.",
+    "translation": "Tous les membres inscrits pour l'année scoute en cours, ainsi que leurs parents, apparaissent dans Mailchimp avec un tag par groupe."
+  },
+  "%Zw8": {
+    "original": "Stuur de leden van alle eenheden vanuit {platform} naar een audience in Mailchimp. De synchronisatie loopt enkel van {platform} naar Mailchimp: wijzigingen in Mailchimp komen niet terug.",
+    "translation": "Envoyez les membres de toutes les unités depuis {platform} vers une audience dans Mailchimp. La synchronisation ne fonctionne que de {platform} vers Mailchimp : les modifications dans Mailchimp ne sont pas répercutées."
+  },
+  "%Zwn": {
+    "original": "{contactCan} in Keeo jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf {role}, vraag het dan aan {alternative}.",
+    "translation": "{contactCan} dans Keeo peut consulter votre code de sécurité et vous le communiquer. Si vous êtes vous-même {role}, demandez-le à {alternative}."
+  },
+  "%Zwp": {
+    "original": "Bekijk alle aansluitingen van jouw leden bij FOS Open Scouting.",
+    "translation": "Consultez toutes les affiliations de vos membres chez FOS Open Scouting."
+  },
+  "%ZxD": {
+    "original": "jouw medeleiding of FOS Open Scouting",
+    "translation": "votre équipe dirigeante ou FOS Open Scouting"
+  },
+  "%ZxM": {
+    "original": "Je hebt geen toegang tot inschrijvingsgroepen in dit scoutsjaar, vraag een hoofdbeheerder om toegang of wissel van scoutsjaar onderaan",
+    "translation": "Vous n'avez pas accès aux groupes d'inscription pour cette année scoute. Demandez l'accès à un administrateur principal ou changez d'année scoute en bas de page."
+  },
+  "%Zxd": {
+    "original": "Dit stuurt de huidige toestand van alle leden die in het huidige scoutsjaar ingeschreven zijn naar Mailchimp.",
+    "translation": "Cela envoie le statut actuel de tous les membres inscrits pour l'année scoute en cours à Mailchimp."
+  },
+  "%Zxi": {
+    "original": "Het nummer van de eenheid waartoe het lid hoort",
+    "translation": "Le numéro de l'unité à laquelle appartient le membre"
+  },
+  "%Zxj": {
+    "original": "Andere start- of einddatum dan scoutsjaar",
+    "translation": "Date de début ou de fin différente de l'année scoute"
+  },
+  "%Zxk": {
+    "original": "De eenheid waartoe het lid hoort",
+    "translation": "L'unité à laquelle appartient le membre"
+  },
+  "%Zxl": {
+    "original": "Eenheid van het lid",
+    "translation": "Unité du membre"
+  },
+  "%Zxm": {
+    "original": "Leden worden als bestaand beschouwd als ze ingeschreven zijn voor gelijk welke inschrijvingsgroep van het vorige, huidige of volgende scoutsjaar.",
+    "translation": "Les membres sont considérés comme existants s'ils sont inscrits dans n'importe quel groupe d'inscription de l'année scoute précédente, actuelle ou suivante."
+  },
+  "%Zxn": {
+    "original": "Eenheidsnummer van het lid",
+    "translation": "Numéro d'unité du membre"
+  },
+  "%Zxo": {
+    "original": "Alle leden die in het huidige scoutsjaar ingeschreven zijn, en hun ouders, komen in Mailchimp met een tag per standaard leeftijdsgroep en per eenheid. Leden met een functie van {platform} krijgen ook een tag per functie.",
+    "translation": "Tous les membres inscrits pour l'année scoute en cours, ainsi que leurs parents, sont ajoutés à Mailchimp avec un tag pour chaque groupe d'âge standard et chaque unité. Les membres exerçant une fonction sur {platform} reçoivent également un tag pour chaque fonction."
+  },
+  "%Zxq": {
+    "original": "Een voorbeeld is enkel beschikbaar bij het synchroniseren van één eenheid.",
+    "translation": "Un exemple n'est disponible que lors de la synchronisation d'une seule unité."
   },
   "%ad": {
     "original": "Een hoofdbeheerder van jouw eenheid moet eerst een afzender toevoegen die je kan gebruiken voor je een bericht kan versturen.",

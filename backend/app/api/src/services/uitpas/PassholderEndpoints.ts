@@ -30,7 +30,7 @@ export class PassholderEndpoints {
         let response: Response;
 
         try {
-            response = await fetch(`${this.baseUrl}/passes/${uitpasNumber}`, {
+            response = await fetch(`${this.baseUrl}/passes/${encodeURIComponent(uitpasNumber)}`, {
                 method: 'GET',
                 headers: this.getHeaders(),
                 signal: AbortSignal.timeout(10000),
