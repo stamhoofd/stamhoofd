@@ -38,7 +38,12 @@ test.describe('Period scoped permissions in platform mode @period-permissions-pl
         originalPlatformPeriodId = (await Platform.getForEditing()).periodId;
     });
 
-    test.afterEach(async () => {
+    test.afterEach(async ({ page }, testInfo) => {
+        // Close the app before resetting the data it still uses (closing the context afterwards sometimes hung).
+        // Keep the page of a failed test open for its error context.
+        if (testInfo.status === testInfo.expectedStatus) {
+            await page.close();
+        }
         const platform = await Platform.getForEditing();
         platform.periodId = originalPlatformPeriodId;
         await platform.save();

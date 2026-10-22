@@ -37,8 +37,8 @@ export default defineConfig({
         // Capture screenshot after each test failure.
         screenshot: 'only-on-failure',
 
-        /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-        trace: process.env.CI ? 'on-first-retry' : 'retain-on-failure',
+        /* Keep the trace of the first failing attempt: the retry of a flaky test usually passes. See https://playwright.dev/docs/trace-viewer */
+        trace: process.env.CI ? 'retain-on-first-failure' : 'retain-on-failure',
 
         // todo
         headless: process.env.HEADED ? false : true,

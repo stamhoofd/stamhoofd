@@ -528,6 +528,8 @@ test.describe('Settings email templates', () => {
         await popup.getByTestId('email-language-button').click();
         const menu = page.locator('.context-menu-container:visible').last();
         await expect(menu.locator('.context-menu-item').first()).toBeVisible();
+        // Menus scale in: hovering during that animation can leave the cursor on a neighbouring item once it settles
+        await expect(menu).not.toHaveClass(/show-enter/);
         return menu;
     }
 
@@ -539,9 +541,12 @@ test.describe('Settings email templates', () => {
         const containers = page.locator('.context-menu-container:visible');
         const menu = await openLanguageMenu(page);
         const count = await containers.count();
-        await menu.locator('.context-menu-item', { hasText: parentName }).first().hover();
+        const parent = menu.locator('.context-menu-item', { hasText: parentName }).first();
+        await parent.hover();
         await expect(containers).toHaveCount(count + 1);
+        await expect(parent).toHaveClass(/\bisOpen\b/);
         const child = containers.last();
+        await expect(child).not.toHaveClass(/show-enter/);
         await expect(child.locator('.context-menu-item').first()).toBeVisible();
         return child;
     }

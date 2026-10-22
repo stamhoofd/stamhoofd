@@ -47,7 +47,12 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         TestUtils.setPermanentEnvironment('userMode', 'organization');
     });
 
-    test.afterEach(async () => {
+    test.afterEach(async ({ page }, testInfo) => {
+        // Close the app before resetting the data it still uses (closing the context afterwards sometimes hung).
+        // Keep the page of a failed test open for its error context.
+        if (testInfo.status === testInfo.expectedStatus) {
+            await page.close();
+        }
         await WorkerData.resetDatabase();
     });
 
