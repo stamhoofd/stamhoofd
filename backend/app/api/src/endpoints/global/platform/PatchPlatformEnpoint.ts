@@ -114,7 +114,23 @@ export class PatchPlatformEndpoint extends Endpoint<
                     }
                 }
 
-                platform.privateConfig.responsibilityEmailDomains = Formatter.uniqueArray(domains);
+                const uniqueDomains = Formatter.uniqueArray(domains);
+
+                // Prevent admins from locking themselves out: their own platform access could depend on a responsibility
+                const previewPlatform = Context.auth.platform.clone();
+                previewPlatform.privateConfig = platform.privateConfig.clone();
+                previewPlatform.privateConfig.responsibilityEmailDomains = uniqueDomains;
+
+                if (!Context.auth.user.permissions?.forPlatform(previewPlatform, Context.auth.user.email)?.hasFullAccess()) {
+                    throw new SimpleError({
+                        code: 'locked_out',
+                        message: 'The email domain of the current user is not in the list, which would remove their platform access',
+                        human: $t('Je kan je eigen e-maildomein niet uitsluiten, anders verlies je zelf de toegang tot het platform.'),
+                        field: 'privateConfig.responsibilityEmailDomains',
+                    });
+                }
+
+                platform.privateConfig.responsibilityEmailDomains = uniqueDomains;
             }
         }
 

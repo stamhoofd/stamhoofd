@@ -2,7 +2,8 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, Token } from '@stamhoofd/models';
 import { OrganizationFactory, Platform, RegistrationPeriod, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { Permissions, PlatformConfig, PlatformPrivateConfig, Platform as PlatformStruct, Version } from '@stamhoofd/structures';
+import { MemberResponsibility, MemberResponsibilityRecordBase, PermissionRoleForResponsibility, Permissions, PlatformConfig, PlatformPrivateConfig, Platform as PlatformStruct, Version } from '@stamhoofd/structures';
+import { v4 as uuidv4 } from 'uuid';
 import { SessionService } from '../../../services/SessionService.js';
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
@@ -84,6 +85,63 @@ describe('Endpoint.PatchPlatform', () => {
             });
 
             expect(response.body.privateConfig?.responsibilityEmailDomains).toEqual(['ksa.be', 'gent.ksa.be']);
+        });
+
+        test('Admins cannot exclude their own email domain', async () => {
+            const organization = await new OrganizationFactory({ }).create();
+
+            const responsibility = MemberResponsibility.create({
+                name: 'Koepelbeheerder',
+                organizationBased: false,
+                permissions: PermissionRoleForResponsibility.create({ level: PermissionLevel.Full }),
+            });
+            const platform = await Platform.getForEditing();
+            platform.config.responsibilities.push(responsibility);
+            await platform.save();
+
+            try {
+                // This admin only has full access through the responsibility
+                const admin = await new UserFactory({
+                    email: `admin.${uuidv4()}@ksa.be`,
+                    globalPermissions: Permissions.create({
+                        responsibilities: [
+                            MemberResponsibilityRecordBase.create({
+                                responsibilityId: responsibility.id,
+                                memberId: uuidv4(),
+                                startDate: new Date(0),
+                                endDate: null,
+                            }),
+                        ],
+                    }),
+                }).create();
+                const token = await SessionService.createSession(admin);
+
+                await expect(patchPlatform({
+                    patch: PlatformStruct.patch({
+                        privateConfig: PlatformPrivateConfig.patch({
+                            responsibilityEmailDomains: ['fos.be'] as any,
+                        }),
+                    }),
+                    organization,
+                    token,
+                })).rejects.toThrow(STExpect.errorWithCode('locked_out'));
+                expect((await Platform.getForEditing()).privateConfig.responsibilityEmailDomains).toEqual([]);
+
+                const response = await patchPlatform({
+                    patch: PlatformStruct.patch({
+                        privateConfig: PlatformPrivateConfig.patch({
+                            responsibilityEmailDomains: ['fos.be', 'ksa.be'] as any,
+                        }),
+                    }),
+                    organization,
+                    token,
+                });
+                expect(response.body.privateConfig?.responsibilityEmailDomains).toEqual(['fos.be', 'ksa.be']);
+            } finally {
+                const platform = await Platform.getForEditing();
+                platform.config.responsibilities = platform.config.responsibilities.filter(r => r.id !== responsibility.id);
+                await platform.save();
+            }
         });
 
         test('Invalid domains are rejected', async () => {
