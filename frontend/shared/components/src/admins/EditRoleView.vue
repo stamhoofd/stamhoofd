@@ -468,7 +468,7 @@ async function addEvents() {
                             period,
                             search,
                             // Without an organization these are platform roles, which only govern national and regional events
-                            filter: organization.value ? null : { organizationId: null },
+                            filter: organization.value ? { organizationId: organization.value.id } : { organizationId: null },
                         });
                         return events.map(event => ({
                             id: event.id,

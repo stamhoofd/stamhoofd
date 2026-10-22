@@ -181,6 +181,15 @@ export class ContextPermissions {
             organization = this.organization;
         }
 
+        // National events are managed via platform roles, regardless of the organization that owns the group
+        const event = group.type === GroupType.EventRegistration
+            ? group.event
+            : (group.type === GroupType.WaitingList && group.parentGroup?.type === GroupType.EventRegistration ? group.parentGroup.event : null);
+
+        if (event && event.organizationId === null && this.canAccessNationalEvent(event, permissionLevel)) {
+            return true;
+        }
+
         if (!organization || group.organizationId !== organization.id) {
             return this.hasFullPlatformAccess();
         }
@@ -250,11 +259,7 @@ export class ContextPermissions {
     canAccessRegistration(registration: Registration, organization: Organization, permissionLevel: PermissionLevel = PermissionLevel.Read, groupPeriod?: OrganizationRegistrationPeriod | null) {
         const organizationPermissions = this.getPermissionsForOrganization(organization);
 
-        if (!organizationPermissions) {
-            return false;
-        }
-
-        if (organizationPermissions.hasAccess(PermissionLevel.Full)) {
+        if (organizationPermissions?.hasAccess(PermissionLevel.Full)) {
             // Only full permissions; because non-full doesn't have access to other periods
             return true;
         }
@@ -533,5 +538,19 @@ export class ContextPermissions {
         }
 
         return isPeriodInUse && this.canWriteEventForOrganization(event, organization);
+    }
+
+    private canAccessNationalEvent(event: Event, permissionLevel: PermissionLevel) {
+        const platformPermissions = this.platformPermissions;
+        if (!platformPermissions) {
+            return false;
+        }
+
+        const isPeriodInUse = this.isEventPeriodInUse(event, null);
+        if (platformPermissions.forPeriod(isPeriodInUse).hasResourceAccess(PermissionsResourceType.Events, event.id, permissionLevel)) {
+            return true;
+        }
+
+        return isPeriodInUse && this.canWriteEventForOrganization(event, null);
     }
 }
