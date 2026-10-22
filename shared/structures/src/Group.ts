@@ -11,11 +11,14 @@ import { GroupGenderType } from './GroupGenderType.js';
 import { GroupPrivateSettings } from './GroupPrivateSettings.js';
 import { GroupSettings, WaitingListType } from './GroupSettings.js';
 import { GroupType } from './GroupType.js';
+import type { MemberResponsibility } from './MemberResponsibility.js';
 import { Gender } from './members/Gender.js';
-import type { Organization } from './Organization.js';
-import { PermissionLevel } from './PermissionLevel.js';
-import { PermissionsResourceType } from './PermissionsResourceType.js';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionRoleForResponsibility } from './PermissionRole.js';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import { StockReservation } from './StockReservation.js';
+
+type GroupOrganization = NonNullable<Parameters<typeof getActivePeriods>[1]> & { id: string };
 
 export type GroupTagItem = {
     icon?: string;
@@ -51,6 +54,14 @@ export function getGroupStatusName(status: GroupStatus | 'RegistrationStartDate'
 }
 
 export class Group extends AutoEncoder {
+    static createDefaultResponsibilityPermissions(group: Group | null, responsibility: MemberResponsibility): PermissionRoleForResponsibility {
+        return PermissionRoleForResponsibility.create({
+            name: responsibility.name + (group ? ` van ${group.settings.name.toString()}` : ''),
+            responsibilityId: responsibility.id,
+            responsibilityGroupId: group?.id ?? null,
+        });
+    }
+
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
@@ -337,7 +348,7 @@ export class Group extends AutoEncoder {
      * Return the period ids that we consider as active for a given
      * group and organization combination.
      */
-    getActivePeriodIds(organization: Organization | null) {
+    getActivePeriodIds(organization: GroupOrganization | null) {
         return getActivePeriodIds(this.periodId, organization);
     }
 
@@ -345,11 +356,11 @@ export class Group extends AutoEncoder {
      * Return the period ids that we consider as active for a given
      * group and organization combination.
      */
-    getActivePeriods(organization: Organization | null) {
+    getActivePeriods(organization: GroupOrganization | null) {
         return getActivePeriods(this.settings.period ?? { id: this.periodId, name: $t('%8X') }, organization);
     }
 
-    getRecommendedFilter(organization?: Organization | null): StamhoofdFilter {
+    getRecommendedFilter(organization?: GroupOrganization | null): StamhoofdFilter {
         const filter: StamhoofdFilter = [];
 
         const periods = this.getActivePeriods(organization ?? null).map((p) => {
@@ -540,7 +551,7 @@ export class Group extends AutoEncoder {
         return filter;
     }
 
-    getTags(options: { app: AppType; now?: Date; organization: Organization | null; blockCreatingNewMembers?: boolean }): GroupTagItem[] {
+    getTags(options: { app: AppType; now?: Date; organization: GroupOrganization | null; blockCreatingNewMembers?: boolean }): GroupTagItem[] {
         const tags: GroupTagItem[] = [];
         const now = options.now ?? new Date();
         const remainingStock = this.settings.getRemainingStockIncludingPricesAndOptions(this);

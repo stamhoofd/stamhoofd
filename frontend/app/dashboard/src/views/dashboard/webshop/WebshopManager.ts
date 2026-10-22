@@ -1,10 +1,11 @@
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { EncodeMedium, ObjectData } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { OrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { SortItem, StamhoofdFilter, WebshopPreview } from '@stamhoofd/structures';
-import { PermissionLevel, PrivateOrderWithTickets, PrivateWebshop, Version } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PrivateOrderWithTickets, PrivateWebshop, Version } from '@stamhoofd/structures';
 import { IndexBoxDecoder } from './IndexBox';
 import { filterNeedsTickets } from './orderTicketFilters';
 import type { OrderIndexedDBIndex } from './ordersIndexedDBSorters';
@@ -14,7 +15,7 @@ import { WebshopSettingsStore } from './repositories/WebshopSettingsStore';
 import { WebshopTicketPatchesStore, WebshopTicketsRepo, WebshopTicketsStore } from './repositories/WebshopTicketsRepo';
 import type { SyncProgress } from './repositories/syncProgress';
 
-export type ScannerSyncPart = { isRunning: boolean; progress: SyncProgress | null };
+export type SyncPart = { isRunning: boolean; progress: SyncProgress | null };
 
 /**
  * Responsible for managing a single webshop orders and tickets
@@ -40,11 +41,11 @@ export class WebshopManager {
     readonly orders: WebshopOrdersRepo;
 
     /**
-     * State of the running syncForScanner, null if none is running.
+     * State of the running syncAll, null if none is running.
      * Finished parts keep their progress so the combined progress never goes back.
      */
-    scannerSync: { tickets: ScannerSyncPart; orders: ScannerSyncPart } | null = null;
-    private scannerSyncPromise: Promise<void> | null = null;
+    syncState: { tickets: SyncPart; orders: SyncPart } | null = null;
+    private syncPromise: Promise<void> | null = null;
 
     get hasWrite() {
         return this.context.auth.canAccessWebshop(this.preview, PermissionLevel.Write);
@@ -70,20 +71,20 @@ export class WebshopManager {
     }
 
     /**
-     * Download all updated tickets and orders for the ticket scanner, or join the running download.
+     * Download all updated tickets and orders, or join the running download.
      */
-    syncForScanner(): Promise<void> {
-        if (this.scannerSyncPromise) {
-            return this.scannerSyncPromise;
+    syncAll(): Promise<void> {
+        if (this.syncPromise) {
+            return this.syncPromise;
         }
 
-        this.scannerSync = {
+        this.syncState = {
             tickets: { isRunning: true, progress: null },
             orders: { isRunning: true, progress: null },
         };
-        const sync = this.scannerSync;
+        const sync = this.syncState;
 
-        const run = async (part: ScannerSyncPart, fetch: (onProgress: (progress: SyncProgress | null) => void) => Promise<void>) => {
+        const run = async (part: SyncPart, fetch: (onProgress: (progress: SyncProgress | null) => void) => Promise<void>) => {
             try {
                 await fetch((progress) => {
                     part.progress = progress;
@@ -94,7 +95,7 @@ export class WebshopManager {
             }
         };
 
-        this.scannerSyncPromise = (async () => {
+        this.syncPromise = (async () => {
             const results = await Promise.allSettled([
                 run(sync.tickets, onProgress => this.tickets.fetchAllUpdated({ onProgress })),
                 run(sync.orders, onProgress => this.orders.fetchAllUpdated({ onProgress })),
@@ -104,11 +105,11 @@ export class WebshopManager {
                 throw failed.reason;
             }
         })().finally(() => {
-            this.scannerSyncPromise = null;
-            this.scannerSync = null;
+            this.syncPromise = null;
+            this.syncState = null;
         });
 
-        return this.scannerSyncPromise;
+        return this.syncPromise;
     }
 
     async reload(): Promise<boolean> {
@@ -305,7 +306,7 @@ export class WebshopManager {
         withTickets?: boolean;
         limit?: number;
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
-        advanceCount?: number;
+        after?: IDBValidKey | null;
         ids?: string[];
         signal?: AbortSignal;
     }): Promise<number> {

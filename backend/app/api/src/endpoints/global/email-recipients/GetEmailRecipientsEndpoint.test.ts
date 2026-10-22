@@ -1,6 +1,11 @@
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
+import { GetEmailRecipientsCountEndpoint } from './GetEmailRecipientsCountEndpoint.js';
 import { GetEmailRecipientsEndpoint } from './GetEmailRecipientsEndpoint.js';
-import { AccessRight, EmailStatus, LimitedFilteredRequest, OrganizationEmail, PermissionLevel, Permissions, PermissionsResourceKey, PermissionsResourceType, Replacement, ResourcePermissions } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
+import { CountFilteredRequest, EmailStatus, LimitedFilteredRequest, OrganizationEmail, Permissions, PermissionsResourceKey, Replacement, ResourcePermissions } from '@stamhoofd/structures';
 import type { Organization, RegistrationPeriod, User, Token } from '@stamhoofd/models';
 import { Email, EmailRecipient, OrganizationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { Request } from '@simonbackx/simple-endpoints';
@@ -445,5 +450,119 @@ describe('Endpoint.GetEmailRecipients', () => {
         const serialized = JSON.stringify(result.body.results[0].replacements);
         expect(serialized).not.toContain('AAAA-BBBB-CCCC-DDDD');
         expect(serialized).not.toContain('secret-token-12345');
+    });
+
+    describe('Handcrafted filters', () => {
+        // user2 can only read emails of sender2. The validator may skip the permission check only when
+        // the request filter is guaranteed to narrow the results to emails it can access.
+        let allowedEmail: Email;
+        let forbiddenEmail: Email;
+        let allowedRecipient: EmailRecipient;
+
+        const createEmail = async (senderId: string) => {
+            const email = new Email();
+            email.subject = 'test subject';
+            email.status = EmailStatus.Draft;
+            email.text = 'test email';
+            email.html = `<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>`;
+            email.json = {};
+            email.organizationId = organization.id;
+            email.senderId = senderId;
+            await email.save();
+            return email;
+        };
+
+        const createRecipient = async (email: Email, firstName: string) => {
+            const emailRecipient = new EmailRecipient();
+            emailRecipient.email = `${firstName.toLowerCase()}.janssens@geenemail.com`;
+            emailRecipient.firstName = firstName;
+            emailRecipient.lastName = 'Janssens';
+            emailRecipient.emailId = email.id;
+            emailRecipient.organizationId = organization.id;
+            await emailRecipient.save();
+            return emailRecipient;
+        };
+
+        beforeAll(async () => {
+            allowedEmail = await createEmail(sender2.id);
+            forbiddenEmail = await createEmail(sender.id);
+            allowedRecipient = await createRecipient(allowedEmail, 'Allowed');
+            await createRecipient(forbiddenEmail, 'Hidden');
+        });
+
+        const fetchIds = async (filter: StamhoofdFilter) => {
+            const response = await testServer.test(endpoint, Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({ filter, limit: 10 }),
+                headers: { authorization: 'Bearer ' + token2.accessToken },
+            }));
+            expect(response.status).toBe(200);
+            return response.body.results.map(r => r.id);
+        };
+
+        const count = async (filter: StamhoofdFilter) => {
+            const response = await testServer.test(new GetEmailRecipientsCountEndpoint(), Request.get({
+                path: `${baseUrl}/count`,
+                host: organization.getApiHost(),
+                query: new CountFilteredRequest({ filter }),
+                headers: { authorization: 'Bearer ' + token2.accessToken },
+            }));
+            return response.body.count;
+        };
+
+        const expectDenied = async (filter: StamhoofdFilter) => {
+            await expect(fetchIds(filter)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(count(filter)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+        };
+
+        const expectVisible = async (filter: StamhoofdFilter, recipientIds: string[]) => {
+            expect(await fetchIds(filter)).toIncludeSameMembers(recipientIds);
+            expect(await count(filter)).toBe(recipientIds.length);
+        };
+
+        test('An email filter wrapped in a top-level array or $and returns the same recipients as the plain object', async () => {
+            const expected = [allowedRecipient.id];
+            await expectVisible({ emailId: allowedEmail.id }, expected);
+            await expectVisible([{ emailId: allowedEmail.id }], expected);
+            await expectVisible({ $and: [{ emailId: allowedEmail.id }] }, expected);
+            await expectVisible({ $and: [[{ emailId: allowedEmail.id }]] }, expected);
+            await expectVisible([{ $and: [{ emailId: allowedEmail.id }] }, { lastName: 'Janssens' }], expected);
+            await expectVisible([{ emailId: { $in: [allowedEmail.id] } }], expected);
+        });
+
+        test('Extra conditions next to the email filter can only narrow the result', async () => {
+            await expectVisible({
+                $and: [{ emailId: allowedEmail.id }],
+                $or: [{ firstName: 'Hidden' }, { firstName: 'Allowed' }],
+            }, [allowedRecipient.id]);
+            await expectVisible([{ emailId: allowedEmail.id }, { firstName: 'Hidden' }], []);
+            await expectVisible([{ emailId: allowedEmail.id }, { emailId: forbiddenEmail.id }], []);
+            await expectVisible({ $and: [{ emailId: allowedEmail.id }], $or: [{ emailId: forbiddenEmail.id }, { firstName: 'Hidden' }] }, []);
+            await expectVisible([{ emailId: { $in: [allowedEmail.id], $neq: allowedEmail.id } }], []);
+            await expectVisible([{ emailId: { $in: [allowedEmail.id], $or: [{ $eq: forbiddenEmail.id }] } }], []);
+            await expectVisible({ emailId: allowedEmail.id, $or: [{ emailId: forbiddenEmail.id }, { firstName: 'Hidden' }] }, []);
+            await expectVisible({ $and: [{ emailId: allowedEmail.id }], $or: [{ emailId: forbiddenEmail.id }, { emailId: allowedEmail.id }] }, [allowedRecipient.id]);
+        });
+
+        test('An email filter that does not narrow the result is rejected', async () => {
+            await expectDenied([{ $or: [{ emailId: allowedEmail.id }, { firstName: 'Hidden' }] }]);
+            await expectDenied({ $and: [{ $or: [{ emailId: allowedEmail.id }, { firstName: 'Hidden' }] }] });
+            await expectDenied({ $and: [[{ $or: [{ emailId: allowedEmail.id }] }]] });
+            await expectDenied({ $or: [{ $and: [{ emailId: allowedEmail.id }] }, { firstName: 'Hidden' }] });
+            await expectDenied({ $not: { emailId: allowedEmail.id } });
+            await expectDenied([{ $not: { emailId: allowedEmail.id } }]);
+            await expectDenied({ $and: { emailId: allowedEmail.id } });
+            await expectDenied([]);
+            await expectDenied({ $and: [] });
+            await expectDenied([{ firstName: 'Hidden' }]);
+        });
+
+        test('A forbidden email anywhere in the required position is rejected', async () => {
+            await expectDenied([{ emailId: forbiddenEmail.id }]);
+            await expectDenied({ $and: [{ emailId: forbiddenEmail.id }, { emailId: allowedEmail.id }] });
+            await expectDenied([{ emailId: { $in: [allowedEmail.id, forbiddenEmail.id] } }]);
+            await expectDenied({ $or: [{ emailId: allowedEmail.id }, { emailId: forbiddenEmail.id }] });
+        });
     });
 });

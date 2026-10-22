@@ -1,5 +1,8 @@
 import type { Event, NamedObject, Organization, OrganizationTag, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, EventPeriodHelper, PermissionLevel, PermissionsResourceKey, PermissionsResourceType } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { EventPeriodHelper, PermissionsResourceKey } from '@stamhoofd/structures';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';

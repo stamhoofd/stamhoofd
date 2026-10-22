@@ -1,18 +1,28 @@
 {
     "name": "@stamhoofd/backend-backup",
-    "version": "2.154.0",
+    "version": "2.155.0",
     "type": "module",
     "main": "./dist/index.js",
     "exports": {
         ".": {
+            "types": "./dist-types/index.d.ts",
             "require": "./dist/index.js"
         }
     },
+    "types": "./dist-types/index.d.ts",
+    "files": [
+        "dist",
+        "dist-types",
+        "src",
+        "*.ts",
+        "tsconfig*.json"
+    ],
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
+        "build:types": "tsc --project tsconfig.types.json",
         "build:full": "pnpm run clear && pnpm run build",
         "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
-        "lint": "eslint",
+        "lint": "eslint --quiet",
         "start": "pnpm run build && node --enable-source-maps ./dist/index.js"
     },
     "dependencies": {

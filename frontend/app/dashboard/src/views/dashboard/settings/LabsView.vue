@@ -349,7 +349,7 @@ import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { useTwoFactorEnabled } from '@stamhoofd/components/hooks/useTwoFactorEnabled.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import { Organization, OrganizationMetaData, OrganizationPrivateMetaData, PrivatePaymentConfiguration, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, ref, shallowRef } from 'vue';

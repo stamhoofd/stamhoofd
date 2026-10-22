@@ -1,56 +1,66 @@
 {
     "name": "@stamhoofd/backend",
-    "version": "2.154.0",
+    "version": "2.155.0",
     "type": "module",
     "main": "./dist/index.js",
+    "types": "./dist-types/index.d.ts",
     "exports": {
         ".": {
-            "types": "./dist/index.d.ts",
+            "types": "./dist-types/index.d.ts",
             "import": "./dist/index.js",
             "require": "./dist/index.js"
         },
         "./migrate": {
-            "types": "./dist/src/migrate.d.ts",
+            "types": "./dist-types/src/migrate.d.ts",
             "import": "./dist/src/migrate.js",
             "require": "./dist/src/migrate.js"
         },
         "./boot": {
-            "types": "./dist/src/boot.d.ts",
+            "types": "./dist-types/src/boot.d.ts",
             "import": "./dist/src/boot.js",
             "require": "./dist/src/boot.js"
         },
         "./services/*": {
-            "types": "./dist/src/services/*.d.ts",
+            "types": "./dist-types/src/services/*.d.ts",
             "import": "./dist/src/services/*.js",
             "require": "./dist/src/services/*.js",
             "@stamhoofd/source": "./src/services/*.ts"
         },
         "./tests/helpers": {
-            "types": "./dist/tests/helpers/index.d.ts",
+            "types": "./dist-types/tests/helpers/index.d.ts",
             "import": "./dist/tests/helpers/index.js",
             "require": "./dist/tests/helpers/index.js",
             "@stamhoofd/source": "./tests/helpers/index.ts"
         },
         "./tests/helpers/*": {
-            "types": "./dist/tests/helpers/*.d.ts",
+            "types": "./dist-types/tests/helpers/*.d.ts",
             "import": "./dist/tests/helpers/*.js",
             "require": "./dist/tests/helpers/*.js",
             "@stamhoofd/source": "./tests/helpers/*.ts"
         }
     },
+    "files": [
+        "dist",
+        "dist-types",
+        "src",
+        "tests/helpers",
+        "*.ts",
+        "tsconfig*.json"
+    ],
     "scripts": {
+        "build:types": "tsc --project tsconfig.types.json && tsc --project tsconfig.types.helpers.json",
         "build": "tsc --build tsconfig.build.json --clean && pnpm run copy-assets && tsc --build tsconfig.build.json",
         "build:full": "pnpm run clear && pnpm run build",
-        "build:playwright:pre": "pnpm run build && tsc --build tsconfig.test.json",
+        "build:playwright:pre": "pnpm run build:types && pnpm run build && tsc --build tsconfig.test.build.json",
         "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
         "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/ ./dist/src/",
         "dev": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'pnpm run build --watch --preserveWatchOutput' \"pnpm run dev:watch\"",
         "dev:backend": "pnpm run dev",
         "dev:watch": "wait-on ./dist/index.js && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../../shared/*/package.json' --watch '../../shared/*/dist/' --watch '../../shared/*/package.json' --ext .ts,.json,.sql,.js,.html --delay 2000ms --exec 'echo \"Restarting API...\" && exec node --enable-source-maps --use-system-ca ./dist/index.js' --signal SIGTERM",
-        "lint": "eslint",
+        "lint": "eslint --quiet",
         "migrations": "pnpm run build:full && node ./dist/migrations.js",
         "start": "pnpm run build && node --enable-source-maps ./dist/index.js",
-        "typecheck": "tsc --build tsconfig.test.json",
+        "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
         "test": "vitest",
         "test:coverage": "vitest --coverage",
         "test:reset": "pnpm run build:full && pnpm run test"
@@ -90,7 +100,7 @@
         "chalk": "5.6.2",
         "cookie": "2.0.1",
         "formidable": "3.5.4",
-        "handlebars": "4.7.9",
+        "handlebars": "4.7.10",
         "jose": "5.10.0",
         "jsonwebtoken": "9.0.3",
         "libphonenumber-js": "1.13.14",

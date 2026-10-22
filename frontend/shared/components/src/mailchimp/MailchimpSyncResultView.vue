@@ -59,7 +59,7 @@
 <script lang="ts" setup>
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { MailchimpSyncIssue } from '@stamhoofd/structures/mailchimp/MailchimpSync.js';
 import { MailchimpSync, MailchimpSyncIssueReason, MailchimpSyncStatus } from '@stamhoofd/structures/mailchimp/MailchimpSync.js';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';

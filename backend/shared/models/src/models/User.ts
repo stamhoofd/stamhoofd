@@ -9,7 +9,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
-import type { Organization } from './Organization.js';
 
 export class User extends QueryableModel {
     static table = 'users';
@@ -236,74 +235,6 @@ export class User extends QueryableModel {
         return organizationIds.length > 0 ? (await User.where({ permissions: { sign: '!=', value: null }, organizationId: { sign: 'IN', value: organizationIds } })).filter(a => a.isApiUser) : [];
     }
 
-    async merge(other: User) {
-        if (other.hasAccount()) {
-            // We are going to merge accounts!
-            if (this.permissions && other.permissions) {
-                this.permissions = UserPermissions.add(this.permissions, other.permissions);
-            } else {
-                if (!this.permissions && other.permissions) {
-                    this.permissions = other.permissions;
-                }
-            }
-            await this.save();
-
-            if (other.firstName && !this.firstName) {
-                this.firstName = other.firstName;
-            }
-
-            if (other.lastName && !this.lastName) {
-                this.lastName = other.lastName;
-            }
-        }
-
-        const Member = (await import('./Member.js')).Member;
-
-        // Delete placeholder account, but migrate members first
-        const members = await Member.getMembersWithRegistrationForUser(other);
-
-        if (members.length > 0) {
-            const existingMembers = await Member.getMembersWithRegistrationForUser(this);
-            const addMembers = members.filter(m => !existingMembers.find(ee => ee.id === m.id));
-
-            if (addMembers.length) {
-                console.log('Moving members from user ' + other.id + ' to ' + this.id);
-                await Member.users.reverse('members').link(this, addMembers);
-            }
-        }
-
-        // Update balance items
-        const query = 'UPDATE balance_items SET userId = ? WHERE userId = ?';
-        await Database.update(query, [this.id, other.id]);
-
-        // Update payments
-        const query2 = 'UPDATE payments SET payingUserId = ? WHERE payingUserId = ?';
-        await Database.update(query2, [this.id, other.id]);
-
-        // Update orders
-        const query3 = 'UPDATE webshop_orders SET userId = ? WHERE userId = ?';
-        await Database.update(query3, [this.id, other.id]);
-
-        // Update emails
-        await Database.update('UPDATE emails SET userId = ? WHERE userId = ?', [this.id, other.id]);
-
-        // Update email recipients
-        await Database.update('UPDATE email_recipients SET userId = ? WHERE userId = ?', [this.id, other.id]);
-
-        // Update orders
-        const queries = [
-            'UPDATE event_notifications SET createdBy = ? WHERE createdBy = ?',
-            'UPDATE event_notifications SET submittedBy = ? WHERE submittedBy = ?',
-            'UPDATE audit_logs SET userId = ? WHERE userId = ?',
-
-        ];
-        for (const q of queries) {
-            await Database.update(q, [this.id, other.id]);
-        }
-
-        await other.delete();
-    }
-
     static async login(organizationId: string | null, email: string, password: string): Promise<User | undefined> {
         const user = await User.getForAuthentication(organizationId, email);
         if (!user || !user.hasKeys() || user.isApiUser) {
@@ -445,7 +376,7 @@ export class User extends QueryableModel {
     }
 
     static async createInvited(
-        organization: Organization | null,
+        organization: { id: string } | null,
         data: { firstName: string | null; lastName: string | null; email: string; language?: Language | null; allowPlatform?: boolean },
     ): Promise<User | undefined> {
         const {
@@ -481,7 +412,7 @@ export class User extends QueryableModel {
     }
 
     static async register(
-        organization: Organization | null,
+        organization: { id: string } | null,
         data: NewUser,
         options?: { allowPlatform?: boolean },
     ): Promise<User | undefined> {
@@ -559,7 +490,7 @@ export class User extends QueryableModel {
     }
 
     static async registerSSO(
-        organization: Organization | null,
+        organization: { id: string } | null,
         data: { email; id; firstName; lastName; type: LoginProviderType; sub: string },
     ): Promise<User | undefined> {
         const {

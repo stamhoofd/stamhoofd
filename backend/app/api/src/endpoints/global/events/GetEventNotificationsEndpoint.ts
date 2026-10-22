@@ -6,7 +6,8 @@ import { EventNotification } from '@stamhoofd/models';
 import type { SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest, EventNotification as EventNotificationStruct, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, LimitedFilteredRequest, PaginatedResponse, assertSort, getSortFilter } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { LimitedFilteredRequest, PaginatedResponse, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';

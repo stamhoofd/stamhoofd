@@ -1,6 +1,9 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import type { Permissions } from '@stamhoofd/structures';
-import { AccessRight, AccessRightHelper, getPermissionLevelName, PermissionLevel, PermissionRoleDetailed, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { AccessRightHelper, getPermissionLevelName, PermissionRoleDetailed, PermissionsResourceKey, ResourcePermissions } from '@stamhoofd/structures';
 import { expect, test } from 'vitest';
 import { render } from 'vitest-browser-vue';
 import Checkbox from '#inputs/Checkbox.vue';

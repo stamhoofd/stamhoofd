@@ -174,6 +174,8 @@ export class TableObjectFetcher<O extends { id: string }> {
     }
 
     setSearchQuery(query: string) {
+        // The backend searches on the exact text, so spaces typed around it would find fewer results
+        query = query.trim();
         if (query === this.searchQuery) {
             return;
         }

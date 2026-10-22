@@ -1,9 +1,10 @@
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import type { CountFilteredRequest, PrivateOrder, StamhoofdFilter } from '@stamhoofd/structures';
-import { assertSort, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, PaginatedResponse } from '@stamhoofd/structures';
+import { assertSort, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PermissionsResourceKey } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 
-import { Order } from '@stamhoofd/models';
+import { Order, Webshop } from '@stamhoofd/models';
 import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { applySQLSorter, compileToSQLFilter, SQL } from '@stamhoofd/sql';
 
@@ -39,6 +40,30 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
         return [false];
     }
 
+    /**
+     * Returns null when the user can access the orders of all webshops
+     */
+    static async getAccessibleWebshopIds(organizationId: string): Promise<string[] | null> {
+        if (await Context.auth.canAccessOrder({ id: PermissionsResourceKey.All, organizationId }, PermissionLevel.Read)) {
+            return null;
+        }
+
+        const rows = await SQL
+            .select(SQL.column('id'))
+            .from(SQL.table(Webshop.table))
+            .where('organizationId', organizationId)
+            .fetch();
+
+        const webshopIds: string[] = [];
+        for (const row of rows) {
+            const id = row[Webshop.table]['id'] as string;
+            if (await Context.auth.canAccessOrder({ id, organizationId }, PermissionLevel.Read)) {
+                webshopIds.push(id);
+            }
+        }
+        return webshopIds;
+    }
+
     static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
         // todo: filter userId???
         const organization = Context.organization!;
@@ -54,6 +79,12 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
                     $neq: null,
                 },
             }, filterCompilers));
+
+        // Restricted in the query itself so orders of other webshops cannot influence counts or errors
+        const accessibleWebshopIds = await GetWebshopOrdersEndpoint.getAccessibleWebshopIds(organization.id);
+        if (accessibleWebshopIds !== null) {
+            query.where('webshopId', accessibleWebshopIds);
+        }
 
         if (q.filter) {
             query.where(await compileToSQLFilter(q.filter, filterCompilers));

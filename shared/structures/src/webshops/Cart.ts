@@ -5,7 +5,7 @@ import { ProductType } from './Product.js';
 import type { Webshop } from './Webshop.js';
 import { CartItem } from './CartItem.js';
 import { Formatter } from '@stamhoofd/utility';
-import { error } from 'console';
+import { WebshopOrderMode } from './WebshopMetaData.js';
 
 export class Cart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(CartItem) })
@@ -139,18 +139,27 @@ export class Cart extends AutoEncoder {
         }
     }
 
-    validate(webshop: Webshop, asAdmin = false) {
+    /**
+     * In bulk order mode the seats and the item details are entered in separate checkout steps after the items
+     * are chosen. Pass validateSeats or validateDetails = false while that step hasn't been reached yet, so items
+     * aren't rejected for data the customer still has to enter. See CartItem.validate for what validateDetails covers.
+     */
+    validate(webshop: Webshop, asAdmin = false, { validateSeats = true, validateDetails = true }: { validateSeats?: boolean; validateDetails?: boolean } = {}) {
         const newItems: CartItem[] = [];
         const errors = new SimpleErrors();
+        const singleItem = webshop.orderMode === WebshopOrderMode.Single;
+
         for (const item of this.items) {
             try {
                 item.validate(webshop, this, {
                     refresh: true,
                     admin: asAdmin,
+                    validateSeats,
+                    validateDetails,
                 });
                 newItems.push(item);
 
-                if (!webshop.meta.cartEnabled) {
+                if (singleItem) {
                     break;
                 }
             } catch (e) {
@@ -165,7 +174,7 @@ export class Cart extends AutoEncoder {
                     item.cartError = e;
                     newItems.push(item);
 
-                    if (!webshop.meta.cartEnabled) {
+                    if (singleItem) {
                         break;
                     }
                 }
@@ -174,7 +183,7 @@ export class Cart extends AutoEncoder {
 
         this.items = newItems;
 
-        if (errors.errors.length === 0) {
+        if (errors.errors.length === 0 && validateDetails) {
             // Only validate uitpas usage across items when all items are valid
             try {
                 this.validateUitpasNumbers();

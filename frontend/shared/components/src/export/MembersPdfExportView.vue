@@ -29,7 +29,7 @@ import { ErrorBox } from '#errors/ErrorBox.ts';
 import ScrollableSegmentedControl from '#inputs/ScrollableSegmentedControl.vue';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useErrors } from '#errors/useErrors.ts';
-import { Storage } from '@stamhoofd/networking/Storage';
+import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import type { Group, Organization, Platform, PlatformMember} from '@stamhoofd/structures';
 import { SelectablePdfDocumentFilter, Version } from '@stamhoofd/structures';
 import { onMounted, ref } from 'vue';

@@ -2,7 +2,7 @@ import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-a
 import type { PlatformMember } from '@stamhoofd/structures';
 import type { DisplayOptions, NavigationActions} from '../../types/NavigationActions';
 import { defaultDisplayOptions, glueNavigationActions, runDisplayOptions } from '../../types/NavigationActions';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 
 export class MemberStepManager {
     member: PlatformMember;

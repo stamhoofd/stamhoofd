@@ -1,5 +1,5 @@
 import { Formatter } from '@stamhoofd/utility';
-import type { SelectableData } from './SelectableData';
+import type { SelectableData } from '@stamhoofd/frontend-excel-export/SelectableData';
 
 export type SelectablePdfDataValue = string | null | undefined | number | boolean | Date;
 

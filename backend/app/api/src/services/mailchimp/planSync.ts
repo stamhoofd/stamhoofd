@@ -84,6 +84,11 @@ export type MailchimpPlan = {
     upserts: MailchimpUpsert[];
     removals: MailchimpRemoval[];
     skips: MailchimpSkip[];
+
+    /**
+     * Existing contacts that already match, so they need no request
+     */
+    unchanged: number;
 };
 
 const unsubscribableStatuses = new Set(['subscribed', 'pending']);
@@ -182,7 +187,7 @@ export function planSync(
     emailStatus: Map<string, MailchimpEmailStatus>,
     options: MailchimpPlanOptions,
 ): MailchimpPlan {
-    const plan: MailchimpPlan = { upserts: [], removals: [], skips: [] };
+    const plan: MailchimpPlan = { upserts: [], removals: [], skips: [], unchanged: 0 };
     const statusIfNew = options.doubleOptIn ? 'pending' : 'subscribed';
 
     for (const contact of contacts) {
@@ -219,14 +224,20 @@ export function planSync(
             unsubscribe = true;
         }
 
-        plan.upserts.push({
+        const upsert: MailchimpUpsert = {
             email: contact.email,
             isNew: !existing,
             statusIfNew,
             unsubscribe: unsubscribe && !!existing && unsubscribableStatuses.has(existing.status),
             mergeFields: buildMergeFields(contact, existing, options),
             tags: buildTagChanges(contact, existing, options),
-        });
+        };
+
+        if (existing && !upsert.unsubscribe && upsert.tags.length === 0 && Object.entries(upsert.mergeFields).every(([tag, value]) => existing.mergeFields[tag] === value)) {
+            plan.unchanged++;
+            continue;
+        }
+        plan.upserts.push(upsert);
     }
 
     if (options.kind === 'members' && options.full) {

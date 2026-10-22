@@ -2,10 +2,10 @@ import { ViewStepsManager } from '#steps/ViewStepsManager.ts';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { PlatformMember, RegisterCheckout, RegistrationWithTinyMember } from '@stamhoofd/structures';
 import { GroupType, PaymentStatus, PlatformFamily, RegisterResponse } from '@stamhoofd/structures';
-import { GlobalEventBus } from '../../EventBus';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';
 import { Toast } from '../../overlays/Toast';
 
 import type { DisplayOptions, NavigationActions } from '../../types/NavigationActions';

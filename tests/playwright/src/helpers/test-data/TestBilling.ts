@@ -1,12 +1,12 @@
 import type { MollieMocker } from '@stamhoofd/backend/tests/helpers';
 import type { User } from '@stamhoofd/models';
 import { Organization, Platform, STPackage } from '@stamhoofd/models';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import {
     Company,
     MollieOnboarding,
     MollieStatus,
     PaymentMethod,
-    PermissionLevel,
     Permissions,
     STPackageMeta,
     STPackageType,

@@ -70,9 +70,6 @@ export const test = base.extend<
             // Make sure we also delete the current user
             WorkerData.clearLoginState();
 
-            // Resetting database
-            await WorkerData.resetDatabase();
-
             // Override environment with specific environment for this worker
             WorkerHelper.loadEnvironment({ force: true });
 

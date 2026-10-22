@@ -105,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync.ts';
+import { useSGVSync } from '#members/sgvSync.ts';
 import type { PlatformMember } from '@stamhoofd/structures';
 import { LanguageHelper, NationalRegisterNumberOptOut } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

@@ -164,7 +164,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, NumberDe
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, defineRoute, NavigationController, useCanPop, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { Storage } from '@stamhoofd/networking/Storage';
+import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { isEmptyFilter, LimitedFilteredRequest, mergeFilters, SortItemDirection, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -1868,7 +1868,8 @@ function updateVisibleRows() {
         totalItems = props.tableObjectFetcher.totalFilteredCount;
         cachedProvisionalTotalItems = null;
     } else if (lastFilteredCount.value !== null) {
-        totalItems = lastFilteredCount.value;
+        // The count of the previous search or filter, but at least the rows that already loaded for this one
+        totalItems = Math.max(lastFilteredCount.value, values.value.length);
         cachedProvisionalTotalItems = totalItems;
     } else {
         totalItems = totalFilteredCount.value;

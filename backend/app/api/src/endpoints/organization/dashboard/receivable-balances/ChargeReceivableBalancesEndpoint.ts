@@ -1,7 +1,8 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { CountFilteredRequest, CountResponse, PaymentCustomer, PaymentMethod, PermissionLevel, ReceivableBalanceType } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { CountFilteredRequest, CountResponse, PaymentCustomer, PaymentMethod, ReceivableBalanceType } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
 import { GetReceivableBalancesEndpoint } from './GetReceivableBalancesEndpoint.js';

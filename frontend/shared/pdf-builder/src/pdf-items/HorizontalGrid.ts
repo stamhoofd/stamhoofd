@@ -1,6 +1,7 @@
 import type { PdfDocWrapper } from '../PdfDocWrapper';
 import type { PdfFont } from '../PdfFont';
-import type { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../PdfItem';
+import type { PdfItem } from '../PdfItem';
+import type { PdfItemDrawOptions, PdfItemGetHeightOptions } from '../PdfItemOptions';
 import { VerticalStack } from './VerticalStack';
 
 export interface PdfHorizontalGridOptions {

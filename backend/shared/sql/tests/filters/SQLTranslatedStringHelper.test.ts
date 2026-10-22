@@ -2,8 +2,8 @@ import { Language } from '@stamhoofd/types/Language';
 import {
     baseSQLFilterCompilers,
     createColumnFilter,
-    SQLValueType,
 } from '../../src/filters/SQLFilter.js';
+import { SQLValueType } from '../../src/filters/SQLFilterTypes.js';
 import { SQL } from '../../src/SQL.js';
 import { SQLTranslatedStringHelper } from '../../src/SQLTranslatedStringHelper.js';
 import type { TableDefinition} from '../utils/index.js';

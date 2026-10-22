@@ -1,0 +1,202 @@
+<template>
+    <SaveView :loading="exporting" save-icon="download" @save="startExport">
+        <h1>
+            {{ $t('%Gc') }}
+        </h1>
+
+        <ScrollableSegmentedControl v-if="workbook.sheets.length > 1" v-model="visibleSheet" :items="workbook.sheets">
+            <template #item="{item}">
+                <span>{{ item.name }}</span>
+
+                <span v-if="item.enabledCount === 0" class="icon disabled small" v-tooltip="$t('%kp')" />
+            </template>
+        </ScrollableSegmentedControl>
+
+        <p v-if="visibleSheet.description" class="style-description-block">
+            {{ visibleSheet.description }}
+        </p>
+
+        <p v-if="visibleSheet.warning" class="warning-box">
+            {{ visibleSheet.warning }}
+        </p>
+
+        <STErrorsDefault :error-box="errors.errorBox" />
+
+        <STList v-if="visibleSheet.withCategoryRow || visibleSheet.columns.find(c => c.category)">
+            <STListItem element-name="label" :selectable="true">
+                <template #left>
+                    <Checkbox v-model="visibleSheet.withCategoryRow" />
+                </template>
+
+                <h3 class="style-title-list">
+                    {{ $t('%kq') }}
+                </h3>
+                <p class="style-description-small">
+                    {{ $t('%kr') }}
+                </p>
+            </STListItem>
+        </STList>
+
+        <DataSelector :name="visibleSheet.name" :selectable-data="visibleSheet.columns" />
+    </SaveView>
+</template>
+
+<script lang="ts" setup>
+import type { Decoder} from '@simonbackx/simple-encoding';
+import { ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { usePop } from '@simonbackx/vue-app-navigation';
+import { ErrorBox } from '#errors/ErrorBox';
+import { useErrors } from '#errors/useErrors';
+import DataSelector from './DataSelector.vue';
+import { useContext } from '#hooks/useContext';
+import ScrollableSegmentedControl from '#inputs/ScrollableSegmentedControl.vue';
+import { Toast, ToastButton } from '#overlays/Toast';
+import Checkbox from '#inputs/Checkbox.vue';
+import SaveView from '#navigation/SaveView.vue';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import STList from '#layout/STList.vue';
+import STListItem from '#layout/STListItem.vue';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
+import { Storage } from '@stamhoofd/frontend-storage/Storage';
+import type { ExcelExportType, LimitedFilteredRequest} from '@stamhoofd/structures';
+import { ExcelExportRequest, ExcelExportResponse, ExcelWorkbookFilter, Version } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { onMounted, ref } from 'vue';
+import type { SelectableWorkbook } from '@stamhoofd/frontend-excel-export/SelectableWorkbook';
+
+const props = withDefaults(
+    defineProps<{
+        type?: ExcelExportType | null;
+        title?: string | null; // file name to use for the excel file, without extension
+        filter?: LimitedFilteredRequest | null;
+        workbook: SelectableWorkbook;
+        configurationId: string; // How to store the filters for easy reuse
+
+        /**
+         * Generate the Excel file locally (in the browser) instead of sending a request
+         * to the backend. When set, `type` and `filter` are not used.
+         */
+        localExporter?: ((workbookFilter: ExcelWorkbookFilter) => Promise<void>) | null;
+    }>(),
+    {
+        type: null,
+        title: null,
+        filter: null,
+        localExporter: null,
+    },
+);
+
+const visibleSheet = ref(props.workbook.sheets[0]);
+const exporting = ref(false);
+const errors = useErrors();
+const context = useContext();
+const pop = usePop();
+
+onMounted(async () => {
+    // Load from storage
+    try {
+        const savedFilter = await Storage.keyValue.getItem('excel-filter-' + props.configurationId);
+
+        if (savedFilter) {
+            const decodedJson = JSON.parse(savedFilter);
+            const decoder = new VersionBoxDecoder(ExcelWorkbookFilter as Decoder<ExcelWorkbookFilter>);
+            const filter = decoder.decode(new ObjectData(decodedJson, { version: 0 }));
+
+            if (filter) {
+                console.log('Loaded filter', filter);
+                props.workbook.from(filter.data);
+            }
+        }
+    }
+    catch (e) {
+        console.error('Failed to load filter', e);
+    }
+});
+
+async function saveFilter() {
+    const filter = props.workbook.getFilter();
+    const encoded = new VersionBox(filter).encode({ version: Version });
+
+    try {
+        await Storage.keyValue.setItem('excel-filter-' + props.configurationId, JSON.stringify(encoded));
+    }
+    catch (e) {
+        console.error('Failed to save filter', e);
+    }
+}
+
+async function startExport() {
+    if (exporting.value) {
+        return;
+    }
+    exporting.value = true;
+    errors.errorBox = null;
+
+    try {
+        await saveFilter();
+        await doExport();
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+
+    exporting.value = false;
+}
+
+async function doExport() {
+    if (props.localExporter) {
+        await props.localExporter(props.workbook.getFilter());
+        await pop();
+        return;
+    }
+
+    const type = props.type;
+    const filter = props.filter;
+
+    if (!type || !filter) {
+        throw new Error('Missing type or filter to export to Excel via the backend');
+    }
+
+    try {
+        let title = Formatter.fileSlug(props.title ?? type);
+        const response = await context.value.authenticatedServer.request({
+            method: 'POST',
+            path: `/export/excel/${type}`,
+            body: ExcelExportRequest.create({
+                filter,
+                workbookFilter: props.workbook.getFilter(),
+                title: title,
+            }),
+            decoder: ExcelExportResponse as Decoder<ExcelExportResponse>,
+            shouldRetry: false,
+        });
+
+        if (response.data.url) {
+            const url = new URL(response.data.url);
+            if (url.searchParams.has('name')) {
+                title = Formatter.fileSlug(url.searchParams.get('name')!)
+            }
+            new Toast($t('%1B6'), 'download')
+                .setButton(
+                    new ToastButton($t('%1B7'), () => {
+                        AppManager.shared.downloadFile(url, title + '.xlsx').catch((e) => {
+                            Toast.fromError(e).setHide(15_000).show();
+                        });
+                    }),
+                )
+                .setHide(null)
+                .setForceButtonClick()
+                .show();
+        }
+        else {
+            Toast.success('Je ontvang een e-mail met het bestand als jouw Excel export klaar is').setHide(15000).show();
+        }
+
+        await pop();
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+}
+
+</script>

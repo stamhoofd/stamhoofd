@@ -6,7 +6,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import type { Organization } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemPayment, Payment, User } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, Payment as PaymentStruct, PaymentType, PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, Payment as PaymentStruct, PaymentType } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';

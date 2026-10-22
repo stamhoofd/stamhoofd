@@ -487,6 +487,7 @@ export class Formatter {
         return v + '%';
     }
 
+    /** Format 1/10,000-euro units as nl-BE EUR; defaults to two decimals, stripping a trailing ,00. */
     static price(value: number, { removeZeroDecimals = true, maximumFractionDigits = 2 }: { removeZeroDecimals?: boolean; maximumFractionDigits?: number } = {}): string {
         // We store prices with up to 4 digits after the decimal point for correct VAT calculations,
         // but we never display more than 2 digits: users confuse 5,012 euro with 5.012 euro.

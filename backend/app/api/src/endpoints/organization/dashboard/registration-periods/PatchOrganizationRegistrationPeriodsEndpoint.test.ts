@@ -1,7 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, Token } from '@stamhoofd/models';
 import { Group, GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import { GroupCategory, GroupSettings, Group as GroupStruct, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, PermissionLevel, Permissions, TranslatedString, Version } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { GroupCategory, GroupSettings, Group as GroupStruct, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Permissions, TranslatedString, Version } from '@stamhoofd/structures';
 import { SessionService } from '../../../../services/SessionService.js';
 
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';

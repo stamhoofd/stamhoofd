@@ -4,8 +4,8 @@ import { GroupCategory, OrganizationRegistrationPeriod, OrganizationRegistration
 
 import { PromiseComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import { useLoadRecentPeriods } from '@stamhoofd/networking/hooks/useLoadRecentPeriods';
-import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';
+import { useLoadRecentPeriods } from '@stamhoofd/components/hooks/networking/useLoadRecentPeriods';
+import { usePatchOrganizationPeriods } from '@stamhoofd/components/hooks/networking/usePatchOrganizationPeriods';
 
 // You can declare mixins as the same style as components.
 export function useEditGroupsView() {

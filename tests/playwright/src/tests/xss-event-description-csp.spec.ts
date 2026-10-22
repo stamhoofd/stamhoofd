@@ -12,9 +12,9 @@ import {
     Token,
     UserFactory,
 } from '@stamhoofd/models';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import {
     EventMeta,
-    PermissionLevel,
     Permissions,
     RichText,
 } from '@stamhoofd/structures';

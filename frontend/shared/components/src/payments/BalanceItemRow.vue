@@ -62,7 +62,7 @@ import type { GroupedBalanceItems } from '@stamhoofd/structures';
 import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { computed } from 'vue';
-import { GlobalEventBus } from '../EventBus';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';
 import BalanceItemIcon from './BalanceItemIcon.vue';
 import BalanceItemTitleBox from './BalanceItemTitleBox.vue';
 

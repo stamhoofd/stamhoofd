@@ -1,4 +1,4 @@
-import { decodeBase62, isBase62 } from './compress-uuids.js';
+import { decodeBase62, isBase62 } from './base62.js';
 import { getTranslationsWithPath } from './get-translations-with-path.js';
 import { replaceOccurrences } from './replace-keys-with-uuid.js';
 import { reportProgress } from '../shared/progress.js';

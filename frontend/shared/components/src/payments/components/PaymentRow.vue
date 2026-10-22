@@ -51,6 +51,7 @@ import type { Payment } from '@stamhoofd/structures';
 import { PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper } from '@stamhoofd/structures';
 
 import PaymentMethodIcon from './PaymentMethodIcon.vue';
+import { usePaymentViewLoaders } from '../paymentViewLoaders';
 
 const props = withDefaults(
     defineProps<{
@@ -66,11 +67,13 @@ const props = withDefaults(
 );
 
 const navigate = useNavigate();
+const paymentViewLoaders = usePaymentViewLoaders();
 
 const Route = defineRoute({
     url: props.payment.id,
     show: true,
-    component: async () => (await import('../AsyncPaymentView.vue')).default,
+    // eslint-disable-next-line stamhoofd/async-route-components -- Keep the injected import loader intact for chunk retries.
+    component: paymentViewLoaders.asyncPayment,
     defaultProperties() {
         return {
             payment: props.payment,

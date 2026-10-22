@@ -5,7 +5,8 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, Invoice, Organization, OrganizationRegistrationPeriod, Payment, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
-import { AccessRight, Organization as OrganizationStruct } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { Organization as OrganizationStruct } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';

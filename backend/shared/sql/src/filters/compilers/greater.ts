@@ -2,8 +2,8 @@ import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { assertFilterCompareValue } from '@stamhoofd/structures';
 import { scalarToSQLExpression } from '../../SQLExpressions.js';
 import { SQLWhereEqual, SQLWhereSign } from '../../SQLWhere.js';
-import type { SQLCurrentColumn, SQLSyncFilterRunner } from '../SQLFilter.js';
-import { normalizeColumn } from '../SQLFilter.js';
+import type { SQLCurrentColumn, SQLSyncFilterRunner } from '../SQLFilterTypes.js';
+import { normalizeColumn } from '../helpers/normalizeColumn.js';
 import { normalizeCompareValue } from '../helpers/normalizeCompareValue.js';
 
 export function $greaterThanSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilterRunner {

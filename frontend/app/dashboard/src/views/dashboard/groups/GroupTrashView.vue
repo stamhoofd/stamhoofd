@@ -49,9 +49,9 @@ import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vu
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
+import { usePatchOrganizationPeriod } from '@stamhoofd/components/hooks/networking/usePatchOrganizationPeriod';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import type { GroupCategoryTree } from '@stamhoofd/structures';
 import { Group, GroupCategory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

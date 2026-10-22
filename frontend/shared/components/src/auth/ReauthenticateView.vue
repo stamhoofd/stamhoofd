@@ -40,7 +40,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, useShow } from '@simonbackx/vue-app-navigation';
-import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
+import { LoginHelper } from '@stamhoofd/frontend-application/LoginHelper';
 import { LoginMethod, LoginProviderType } from '@stamhoofd/structures';
 import { computed, onUnmounted, ref } from 'vue';
 
@@ -61,8 +61,10 @@ import { useNavigationActions } from '#types/NavigationActions.ts';
 import { AppRoute } from '@stamhoofd/structures/AppRoute.js';
 import LoginMethodButton from './LoginMethodButton.vue';
 import { useForgotPassword } from './useForgotPassword.ts';
+import type { FreshAction } from './FreshAction';
 
 const props = defineProps<{
+    runFresh: FreshAction;
     // Called once the session holds a fresh token again, with the actions of the view that
     // finished the flow: two-factor authentication adds views on top of this one, and only
     // those can close what is on screen by then.
@@ -192,6 +194,7 @@ async function submit() {
                     new ComponentWithProperties(NavigationController, {
                         root: AsyncComponent(() => import('./SetupMFAView.vue'), {
                             setupToken: mfaSetup.setupToken,
+                            runFresh: props.runFresh,
                             canUsePasskeys: mfaSetup.canUsePasskeys,
                             onCompleted: complete,
                         }),

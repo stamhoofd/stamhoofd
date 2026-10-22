@@ -114,6 +114,10 @@ export class BuckarooSettings extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)) })
     paymentMethods: PaymentMethod[] = [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq];
+
+    static get placeholderSecret() {
+        return '••••';
+    }
 }
 
 /** Stores organization-level bookkeeping for the latest external SGV synchronization. */
@@ -388,6 +392,10 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
 
         for (const account of c.payconiqAccounts) {
             account.apiKey = PayconiqAccount.placeholderApiKey;
+        }
+
+        if (c.buckarooSettings?.secret) {
+            c.buckarooSettings.secret = BuckarooSettings.placeholderSecret;
         }
 
         return c;

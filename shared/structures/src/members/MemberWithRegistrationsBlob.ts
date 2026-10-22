@@ -15,7 +15,7 @@ import { MemberPlatformMembership } from './MemberPlatformMembership.js';
 import { MemberResponsibilityRecord } from './MemberResponsibilityRecord.js';
 import { Registration } from './Registration.js';
 import { MemberRegistrationInvitation } from './RegistrationInvitation.js';
-import type { Filterable } from './records/RecordCategory.js';
+import type { Filterable } from '../filters/Filterable.js';
 
 const SGV_OUTDATED_AFTER_MS = 1000 * 60 * 60 * 24 * 30 * 9; // 9 months
 const SGV_SYNC_UPDATE_TOLERANCE_MS = 1000 * 5; // 5 seconds

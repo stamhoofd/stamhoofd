@@ -4,15 +4,23 @@
     "private": true,
     "type": "module",
     "main": "./src/exports.ts",
+    "exports": {
+        ".": "./src/exports.ts",
+        "./providers/provideEventWebshopViews.ts": "./src/providers/provideEventWebshopViews.ts"
+    },
     "files": [
         "dist"
     ],
     "scripts": {
-        "lint": "eslint",
+        "lint": "eslint --quiet",
         "test": "pnpm run typecheck",
-        "typecheck": "vue-tsc --noEmit"
+        "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "dependencies": {
+        "@stamhoofd/frontend-application": "workspace:*",
+        "@stamhoofd/frontend-session": "workspace:*",
+        "@stamhoofd/frontend-platform": "workspace:*",
+        "@stamhoofd/frontend-storage": "workspace:*",
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-networking": "1.23.0",

@@ -6,23 +6,17 @@ import { Formatter } from '@stamhoofd/utility';
 
 import type { StyledDescription, UIFilterBuilder, UiFilterOptions, UIFilterUnwrapper, UIFilterWrapper } from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
+import { MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilterTypes';
+import type { MultipleChoiceUIFilterEditor } from './MultipleChoiceUIFilterTypes';
 
-export class MultipleChoiceUIFilterOption {
-    name: string;
-    value: StamhoofdFilter;
-
-    constructor(name: string, value: StamhoofdFilter) {
-        this.name = name;
-        this.value = value;
-    }
-}
+export { MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilterTypes';
 
 export enum MultipleChoiceUIFilterMode {
     And = 'And',
     Or = 'Or',
 }
 
-export class MultipleChoiceUIFilter extends UIFilter<MultipleChoiceFilterBuilder> {
+export class MultipleChoiceUIFilter extends UIFilter<MultipleChoiceFilterBuilder> implements MultipleChoiceUIFilterEditor {
     selectedOptions: MultipleChoiceUIFilterOption[] = [];
     configuration: MultipleChoiceUiFilterConfiguration;
 

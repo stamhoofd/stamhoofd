@@ -1,6 +1,5 @@
 import { AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DataValidator } from '@stamhoofd/utility';
-import type { BooleanStatus } from './MemberDetails.js';
 
 /**
  * Possibles status returned from uitpas api
@@ -49,9 +48,9 @@ export class UitpasSocialTariff extends AutoEncoder {
      * @param requiresFinancialSupport
      * @returns
      */
-    shouldUpdateForRegsitration(requiresFinancialSupport: BooleanStatus | null): boolean {
+    shouldUpdateForRegistration(requiresFinancialSupport?: boolean): boolean {
         // does not matter if financial support is required
-        if (requiresFinancialSupport?.value === true) {
+        if (requiresFinancialSupport === true) {
             return false;
         }
 

@@ -1,7 +1,8 @@
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import type { CountFilteredRequest, EmailPreview, StamhoofdFilter } from '@stamhoofd/structures';
-import { assertSort, EmailStatus, getSortFilter, LimitedFilteredRequest, mergeFilters, PaginatedResponse, PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { assertSort, EmailStatus, getSortFilter, LimitedFilteredRequest, mergeFilters, PaginatedResponse } from '@stamhoofd/structures';
 
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';

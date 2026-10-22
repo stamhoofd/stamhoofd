@@ -3,7 +3,8 @@ import { PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/s
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { EmailTemplate, Group, Platform, Webshop } from '@stamhoofd/models';
-import { EmailTemplate as EmailTemplateStruct, PermissionLevel, validateEmailTranslations } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { EmailTemplate as EmailTemplateStruct, validateEmailTranslations } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
 

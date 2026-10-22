@@ -3,7 +3,7 @@ import { v4 as uuidv4, validate as uuidValidate } from 'uuid';
 import { getFilesToSearch, translatableFileTypes } from '../shared/get-files-to-search.js';
 import { getTranslationsWithPath } from './get-translations-with-path.js';
 import { writeTranslation } from './write-translations.js';
-import { isBase62 } from './compress-uuids.js';
+import { isBase62 } from './base62.js';
 import { reportProgress } from '../shared/progress.js';
 import type { ProgressCallback } from '../shared/progress.js';
 

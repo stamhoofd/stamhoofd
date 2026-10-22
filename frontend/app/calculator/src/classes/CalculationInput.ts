@@ -11,6 +11,9 @@
 import { Country } from './Country';
 import { ModuleType } from './ModuleType';
 import type { PaymentMethod } from './PaymentMethod';
+import type { CalculationOptions } from './CalculationOptions';
+
+export type { CalculationOptions } from './CalculationOptions';
 
 export class CalculationProduct {
     unitPrice = 10_00; // Price per ticket or registration
@@ -126,7 +129,3 @@ export class CalculationInput {
         return this.products.reduce((total, product) => total + product.volume, 0);
     }
 }
-
-export type CalculationOptions = {
-    country: Country;
-};

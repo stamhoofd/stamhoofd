@@ -8,7 +8,7 @@ import { ComponentWithProperties, defineRoute, UrlHelper, useNavigate } from '@s
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import LoadingView from '@stamhoofd/components/containers/LoadingView.vue';
 import { provideAppNavigate } from '@stamhoofd/components/hooks/useAppNavigate';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import type { Organization } from '@stamhoofd/structures';
 import { AppRoute } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

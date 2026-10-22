@@ -10,7 +10,7 @@
             </h1>
 
             <STList>
-                <TicketRow v-for="ticket in tickets" :key="ticket.id" :ticket="ticket" :webshop-manager="webshopManager" :order="order" data-testid="ticket-row" />
+                <TicketRow v-for="ticket in tickets" :key="ticket.id" :ticket="ticket" :webshop-manager="webshopManager" :order="order" :open-ticket-handler="openTicketHandler" data-testid="ticket-row" />
             </STList>
         </main>
 
@@ -35,11 +35,13 @@ import { TicketPublic } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
+import type { OpenTicketHandler } from '../tickets/TicketNavigation';
 import TicketRow from './TicketRow.vue';
 
 const props = defineProps<{
     initialOrder: PrivateOrderWithTickets;
     webshopManager: WebshopManager;
+    openTicketHandler: OpenTicketHandler;
 }>();
 
 const organization = useOrganization();

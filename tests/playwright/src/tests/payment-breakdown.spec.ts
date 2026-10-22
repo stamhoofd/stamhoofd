@@ -9,6 +9,7 @@ import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { BalanceItem, Group, Member, Organization, User, Webshop } from '@stamhoofd/models';
 import { BalanceItemFactory, BalanceItemPayment, GroupFactory, MemberFactory, OrderFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Payment, RegistrationFactory, RegistrationPeriod, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import {
     appToUri,
     BalanceItemRelation,
@@ -20,7 +21,6 @@ import {
     PaymentProvider,
     PaymentStatus,
     PaymentType,
-    PermissionLevel,
     Permissions,
     SettlementReference,
     STPackageBundle,

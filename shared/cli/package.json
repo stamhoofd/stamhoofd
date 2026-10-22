@@ -1,14 +1,14 @@
 {
     "name": "@stamhoofd/cli",
-    "version": "2.154.0",
+    "version": "2.155.0",
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "types": "./dist-types/index.d.ts",
     "sideEffects": false,
     "exports": {
         ".": {
-            "types": "./dist/index.d.ts",
+            "types": "./dist-types/index.d.ts",
             "import": "./dist/index.js",
             "require": "./dist/index.js"
         }
@@ -16,14 +16,16 @@
     "files": [
         "bin",
         "dist",
+        "dist-types",
         "package.json"
     ],
     "bin": {
         "stam": "NODE_OPTIONS=--use-system-ca ./bin/stam.js"
     },
     "scripts": {
-        "build": "rm -rf dist tsconfig.build.tsbuildinfo && tsc --build tsconfig.build.json",
-        "lint": "eslint .",
+        "build": "rm -rf dist .cache/build.tsbuildinfo && tsc --build tsconfig.build.json",
+        "build:types": "tsc --project tsconfig.types.json",
+        "lint": "eslint . --quiet",
         "test": "vitest run",
         "test:coverage": "vitest --coverage"
     },

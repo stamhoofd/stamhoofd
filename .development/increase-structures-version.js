@@ -184,11 +184,26 @@ async function loopFolder(folderPath) {
     for (const file of files) {
         const filePath = path.join(folderPath, file);
         const stat = await fs.stat(filePath);
-        if (stat.isDirectory() && !excludedFolder.includes(file)) {
+        if (stat.isDirectory()) {
+            if (excludedFolder.includes(file) || await isNestedCheckout(filePath)) {
+                continue;
+            }
             await loopFolder(filePath);
         } else {
             await processFile(filePath);
         }
+    }
+}
+
+/**
+ * Git worktrees (e.g. .claude/worktrees/*) and submodules contain a .git entry and have their own pending fields
+ */
+async function isNestedCheckout(folderPath) {
+    try {
+        await fs.access(path.join(folderPath, '.git'));
+        return true;
+    } catch {
+        return false;
     }
 }
 

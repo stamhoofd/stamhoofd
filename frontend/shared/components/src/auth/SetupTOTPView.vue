@@ -62,7 +62,7 @@
 
 <script lang="ts" setup>
 import { useShow } from '@simonbackx/vue-app-navigation';
-import { MFAManager } from '@stamhoofd/networking/MFAManager';
+import { MFAManager } from '@stamhoofd/frontend-application/MFAManager';
 import type { TOTPSetupResponse } from '@stamhoofd/structures';
 import { onMounted, ref } from 'vue';
 
@@ -82,11 +82,12 @@ import { useNavigationActions } from '#types/NavigationActions.ts';
 import STToolbar from '#navigation/STToolbar.vue';
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import { useFreshAction } from './useFreshAction';
+import type { FreshAction } from './FreshAction';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 
 const props = defineProps<{
     totpSetup: TOTPSetupResponse;
+    runFresh: FreshAction;
     // Present during forced enrollment; null for a logged-in (fresh Bearer) enrollment.
     setupToken?: string | null;
     onCompleted: (navigation: NavigationActions) => void | Promise<void>;
@@ -96,7 +97,6 @@ const $context = useContext();
 const errors = useErrors();
 const navigationActions = useNavigationActions();
 const show = useShow();
-const runFresh = useFreshAction();
 
 const code = ref('');
 const name = ref('');
@@ -139,7 +139,10 @@ async function submit() {
                 message: $t('%Zhn'),
             });
         }
-        const result = await runFresh(() => MFAManager.confirmTotp($context.value, props.totpSetup.totpId, code.value, name.value, props.setupToken ?? undefined));
+        const result = await props.runFresh(() => MFAManager.confirmTotp($context.value, props.totpSetup.totpId, code.value, name.value, props.setupToken ?? undefined), {
+            context: $context.value,
+            navigation: navigationActions,
+        });
 
         // Show the recovery codes BEFORE applying the session token: applying it completes
         // the session, which swaps the root of the app and destroys this flow.

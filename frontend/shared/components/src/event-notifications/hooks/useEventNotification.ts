@@ -1,4 +1,4 @@
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Event, EventNotification} from '@stamhoofd/structures';
 import { LimitedFilteredRequest } from '@stamhoofd/structures';
 import type { Ref } from 'vue';

@@ -1,6 +1,7 @@
 import { Model } from '@simonbackx/simple-database';
 import type { Organization } from '@stamhoofd/models';
-import { BalanceItem, CachedBalance, Document, MemberUser, Order, Payment, Platform, Webshop } from '@stamhoofd/models';
+import { BalanceItem, CachedBalance, MemberUser, Order, Payment, Platform, Webshop } from '@stamhoofd/models';
+import { DocumentService } from './DocumentService.js';
 import { SQL } from '@stamhoofd/sql';
 import { AuditLogSource, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentStatus, PaymentType, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -17,7 +18,7 @@ const memberUpdateQueue = new GroupedThrottledQueue(async (organizationId: strin
     await CachedBalance.updateForMembers(organizationId, memberIds);
 
     for (const memberId of memberIds) {
-        await PaymentReallocationService.reallocate(organizationId, memberId, ReceivableBalanceType.member);
+        await PaymentReallocationService.reallocate(organizationId, memberId, ReceivableBalanceType.member, items => BalanceItemService.updatePaidAndPending(items));
     }
 
     if (memberIds.length) {
@@ -31,7 +32,7 @@ const userUpdateQueue = new GroupedThrottledQueue(async (organizationId: string,
     await CachedBalance.updateForUsers(organizationId, userIds);
 
     for (const userId of userIds) {
-        await PaymentReallocationService.reallocate(organizationId, userId, ReceivableBalanceType.user);
+        await PaymentReallocationService.reallocate(organizationId, userId, ReceivableBalanceType.user, items => BalanceItemService.updatePaidAndPending(items));
     }
 }, { maxDelay: 10_000 });
 
@@ -39,7 +40,7 @@ const organizationUpdateQueue = new GroupedThrottledQueue(async (organizationId:
     const results = await CachedBalance.updateForOrganizations(organizationId, organizationIds);
 
     for (const payingOrganizationId of organizationIds) {
-        await PaymentReallocationService.reallocate(organizationId, payingOrganizationId, ReceivableBalanceType.organization);
+        await PaymentReallocationService.reallocate(organizationId, payingOrganizationId, ReceivableBalanceType.organization, items => BalanceItemService.updatePaidAndPending(items));
     }
 
     const platform = await Platform.getShared();
@@ -55,7 +56,7 @@ const organizationUpdateQueue = new GroupedThrottledQueue(async (organizationId:
 
 export const registrationUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, registrationIds: string[]) => {
     await CachedBalance.updateForRegistrations(organizationId, registrationIds);
-    await Document.updateForRegistrations(registrationIds, organizationId);
+    await DocumentService.updateForRegistrations(registrationIds, organizationId);
 }, { maxDelay: 10_000 });
 
 const bundleDiscountsUpdateQueue = new ThrottledQueue(async (registrationIds: string[]) => {

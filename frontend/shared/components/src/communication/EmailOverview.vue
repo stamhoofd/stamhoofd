@@ -289,7 +289,8 @@ import { useAuth } from '#hooks/useAuth.ts';
 import { useInterval } from '#hooks/useInterval.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { useUser } from '#hooks/useUser.ts';
-import { EmailPreview, EmailRecipientsStatus, EmailStatus, PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { EmailPreview, EmailRecipientsStatus, EmailStatus } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { computed, ref } from 'vue';
 

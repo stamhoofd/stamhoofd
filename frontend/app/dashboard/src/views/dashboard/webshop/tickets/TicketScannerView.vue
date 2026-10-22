@@ -21,7 +21,7 @@
 
                 <div class="status-bar">
                     <p v-if="isFetchingFromServer" data-testid="ticket-scanner-checking-ticket">
-                        <Spinner class="inline" /> {{ $t('Ticket controleren...') }}
+                        <Spinner class="inline" /> {{ $t('%Zxv') }}
                     </p>
                     <p v-else-if="isCatchingUp" data-testid="ticket-scanner-catching-up">
                         <TicketSyncProgressRing class="inline" :progress-percentage="progressPercentage" /> {{ $t('%Zti') }}<br><span class="style-description-small">{{ $t('%Ztj') }}</span>
@@ -59,8 +59,8 @@ import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import Spinner from '@stamhoofd/components/Spinner.vue';
-import type { PluginListenerHandle } from '@stamhoofd/networking/AppManager';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import type { PluginListenerHandle } from '@stamhoofd/frontend-platform/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import type { Order, PrivateOrder, Product, TicketPrivate } from '@stamhoofd/structures';
 import { OrderStatus } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
@@ -69,6 +69,7 @@ import QrScanner from 'qr-scanner';
 
 import { computed, onActivated, onBeforeUnmount, onDeactivated, ref } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
+import { createTicketPresenter } from './createTicketPresenter';
 import TicketSyncProgressRing from './TicketSyncProgressRing.vue';
 import { useTicketSync } from './useTicketSync';
 
@@ -232,7 +233,7 @@ function toggleFlash() {
 
 async function updateTickets() {
     try {
-        await props.webshopManager.syncForScanner();
+        await props.webshopManager.syncAll();
 
         hadNetworkError.value = false;
 
@@ -565,6 +566,7 @@ function alreadyScannedTicket(ticket: TicketPrivate, order: Order) {
         webshopManager: props.webshopManager,
         ticket,
         order,
+        openTicketHandler: createTicketPresenter(props.webshopManager),
     })).catch(console.error);
 }
 
@@ -578,6 +580,7 @@ function validTicket(ticket: TicketPrivate, order: PrivateOrder) {
         webshopManager: props.webshopManager,
         ticket,
         order,
+        openTicketHandler: createTicketPresenter(props.webshopManager),
     })).catch(console.error);
 }
 
@@ -593,7 +596,7 @@ function disabledTicket(product: Product, scannedAt: Date | null) {
 }
 
 function notCheckedTicket() {
-    new Toast($t('Dit ticket staat nog niet op dit toestel en kon niet online gecontroleerd worden door een trage internetverbinding. Probeer opnieuw.'), 'warning yellow').show();
+    new Toast($t('%Zxr'), 'warning yellow').show();
     AppManager.shared.hapticWarning();
 }
 

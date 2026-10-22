@@ -4,13 +4,12 @@ import { Formatter } from '@stamhoofd/utility';
 import type { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery } from './SQLExpression.js';
 import { joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
 import { SQLAlias, SQLColumnExpression, SQLCount, SQLSelectAs, SQLSum, SQLTableExpression } from './SQLExpressions.js';
-import type { SQLJoin } from './SQLJoin.js';
+import type { SQLJoinExpression } from './SQLQueryContracts.js';
+import { SQLSelectBase } from './SQLQueryContracts.js';
 import { SQLLogger } from './SQLLogger.js';
 import { Orderable } from './SQLOrderBy.js';
 import type { SQLWhere } from './SQLWhere.js';
 import { Whereable } from './SQLWhere.js';
-
-class EmptyClass {}
 
 export function parseTable(tableOrExpression: SQLNamedExpression | string, asNamespace?: string): SQLNamedExpression {
     if (typeof tableOrExpression === 'string') {
@@ -35,7 +34,7 @@ export type IterableSQLSelectOptions = {
 
 export type SQLNamedSelect<T extends object = SQLResultNamespacedRow> = SQLSelect<T> & { getName(): string };
 
-export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Whereable(Orderable(EmptyClass)) implements SQLExpression {
+export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Whereable(Orderable(SQLSelectBase)) implements SQLExpression {
     _columns: SQLExpression[];
     _from: SQLNamedExpression;
 
@@ -43,7 +42,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     _offset: number | null = null;
     _groupBy: SQLExpression[] = [];
     _having: SQLWhere | null = null;
-    _joins: (InstanceType<typeof SQLJoin>)[] = [];
+    _joins: SQLJoinExpression[] = [];
     _max_execution_time: number | null = null;
     _log = false;
 
@@ -99,7 +98,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         return this;
     }
 
-    join(join: InstanceType<typeof SQLJoin>): this {
+    join(join: SQLJoinExpression): this {
         // prevent duplicate joins (reference of join should be the same)
         if (!this._joins.includes(join)) {
             this._joins.push(join);
@@ -277,6 +276,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         return rows as T[];
     }
 
+    /** Sets limit to 1; throws when absent by default, or returns null when required is false. */
     first(required: false): Promise<T | null>;
     first(required: true): Promise<T>;
     first(required: boolean): Promise<T | null>;
@@ -292,6 +292,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         return rows[0];
     }
 
+    /** Replaces selected columns with COUNT and clears limit, offset and ordering on this query. */
     async count(expression?: SQLExpression): Promise<number> {
         if (this._where && this._where.isAlways === false) {
             return 0;
@@ -326,6 +327,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         return 0;
     }
 
+    /** Replaces selected columns with SUM and clears pagination/order; returns 0 for non-integer results. */
     async sum(expression: SQLExpression): Promise<number> {
         if (this._where && this._where.isAlways === false) {
             return 0;
@@ -361,6 +363,11 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         return 0;
     }
 
+    /**
+     * Iterates rows in primary-key order, using limit as batch size (default 100).
+     * Rejects custom order/offset; pagination requires a selected string primary key.
+     * maxQueries caps database queries, not the number of rows.
+     */
     all(options?: IterableSQLSelectOptions): IterableSQLSelect<T>;
     all<PrimaryKey extends keyof T & string>(options: IterableSQLSelectOptions, primaryKey: PrimaryKey): T extends Record<PrimaryKey, string> ? IterableSQLSelect<T> : never;
     all<PrimaryKey extends keyof T & string>(options: IterableSQLSelectOptions = {}, preferredPrimaryKey?: PrimaryKey) {
@@ -467,6 +474,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         } as IterableSQLSelect<T> as any;
     }
 
+    /** Same pagination constraints as all(), but yields arrays of up to limit rows (default 100). */
     allBatched(options: IterableSQLSelectOptions = {}): IterableSQLSelect<T[]> {
         if (this._orderBy) {
             throw new Error('Cannot use async iterator with custom order by. Results should be ordered by ID');

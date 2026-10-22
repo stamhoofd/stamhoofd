@@ -65,7 +65,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Andere start- of einddatum dan werkjaar') }}
+                            {{ $t('%Zxj') }}
                         </h3>
 
                         <template v-if="hasCustomDates">
@@ -299,7 +299,7 @@
                 <div v-for="optionMenu of patchedGroup.settings.optionMenus" :key="optionMenu.id" class="container">
                     <hr>
 
-                    <GroupOptionMenuBox :option-menu="optionMenu" :group="patchedGroup" :errors="errors" :level="2" @patch:group="addGroupPatch" @patch:option-menu="addOptionMenuPatch" @delete="addOptionMenuDelete(optionMenu.id)" />
+                    <GroupOptionMenuBox :option-menu="optionMenu" :group="patchedGroup" :errors="errors" :level="2" @patch:group="addGroupPatch" @patch:option-menu="addOptionMenuPatch" @delete="addOptionMenuDelete(optionMenu.id)" @edit="editGroupOptionMenu" />
                 </div>
             </CategorizedBox>
 
@@ -588,7 +588,7 @@
                 <p>{{ $t('%cm') }}</p>
 
                 <p v-if="waitingListType === WaitingListType.PreRegistrations || waitingListType === WaitingListType.ExistingMembersFirst" class="info-box">
-                    {{ $t('%8V') }}
+                    {{ $t('%Zxm') }}
                 </p>
 
                 <STList>
@@ -757,6 +757,7 @@
 <script setup lang="ts">
 
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import { useGroupViewLoaders } from './groupViewLoaders';
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import OrganizationAvatar from '#context/OrganizationAvatar.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';
@@ -1002,6 +1003,7 @@ const { priceName: reducedPriceName } = useFinancialSupportSettings({
     group: patchedGroup,
 });
 const present = usePresent();
+const groupViewLoaders = useGroupViewLoaders();
 const didSetAutomaticGroup = ref(false);
 
 const availableWaitingLists = computed(() => {
@@ -1622,6 +1624,25 @@ async function addGroupOptionMenu() {
     });
 }
 
+async function editGroupOptionMenu(optionMenu: GroupOptionMenu) {
+    await present({
+        components: [
+            AsyncComponent(() => import('./components/GroupOptionMenuView.vue'), {
+                optionMenu,
+                group: patchedGroup.value,
+                isNew: false,
+                saveHandler: async (patch: AutoEncoderPatchType<GroupOptionMenu>) => {
+                    addOptionMenuPatch(patch);
+                },
+                deleteHandler: async () => {
+                    addOptionMenuDelete(optionMenu.id);
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
+
 async function addWaitingList() {
     if (!externalOrganization.value) {
         return;
@@ -1647,7 +1668,7 @@ async function addWaitingList() {
     // Edit the group
     await present({
         components: [
-            AsyncComponent(() => import('./EditGroupView.vue'), {
+            AsyncComponent(groupViewLoaders.editGroup, {
                 initialPatch: basePatch,
                 period: patchedPeriod.value,
                 groupId: waitingList.id,
@@ -1688,7 +1709,7 @@ async function editWaitingList(waitingList: Group) {
 
     await present({
         components: [
-            AsyncComponent(() => import('./EditGroupView.vue'), {
+            AsyncComponent(groupViewLoaders.editGroup, {
                 period: patchedPeriod.value,
                 groupId: waitingList.id,
                 isNew: false,

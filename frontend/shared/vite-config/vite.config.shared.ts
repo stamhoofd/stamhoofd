@@ -1,4 +1,5 @@
 import iconConfig from '@stamhoofd/assets/images/icons/icons.font.js';
+import { FrontendApp } from '@stamhoofd/types/FrontendApp';
 import type { FrontendEnvironment } from '@stamhoofd/types/Environment';
 import vue from '@vitejs/plugin-vue';
 import { playwright } from '@vitest/browser-playwright';
@@ -12,7 +13,7 @@ import svgNamespacePlugin from './svgNamespacePlugin.ts';
 import { getVendorChunkName } from './vendorChunkName.ts';
 
 // https://vitejs.dev/config/
-export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calculator'; port: number; clientFiles?: string[]; frontendDir: string }): Promise<ViteUserConfig> {
+export async function buildConfig(options: { name: FrontendApp.WebApp | FrontendApp.Webshop | FrontendApp.Calculator; port: number; clientFiles?: string[]; frontendDir: string }): Promise<ViteUserConfig> {
     if (process.env.NODE_ENV === 'production') {
         console.log('Building for production...');
     }
@@ -89,13 +90,13 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
                 ...iconConfig,
                 context: resolve(frontendDir, './shared/assets/images/icons/'),
                 cssTemplate: resolve(frontendDir, './shared/assets/images/icons/iconCss.hbs'),
-                moduleId: options.name === 'calculator' ? 'vite-svg-2-webfont.css?inline' : 'vite-svg-2-webfont.css',
+                moduleId: options.name === FrontendApp.Calculator ? 'vite-svg-2-webfont.css?inline' : 'vite-svg-2-webfont.css',
             }),
             svgNamespacePlugin({
                 namespace: loadedEnv?.ILLUSTRATIONS_NAMESPACE ?? '',
                 colors: loadedEnv?.ILLUSTRATIONS_COLORS,
             }),
-            options.name === 'calculator' ? emptyLocalesPlugin() : null,
+            options.name === FrontendApp.Calculator ? emptyLocalesPlugin() : null,
             vue({
                 template: {
                     compilerOptions: {
@@ -103,7 +104,7 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
                     },
                 },
                 features: {
-                    customElement: options.name === 'calculator', // Only enable custom elements for the calculator
+                    customElement: options.name === FrontendApp.Calculator, // Only enable custom elements for the calculator
                 },
             }),
         ] as any,
@@ -141,7 +142,7 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
                     },
                     cssCodeSplit: false,
                 }
-            : (options.name === 'calculator'
+            : (options.name === FrontendApp.Calculator
                     ? {
                             lib: {
                                 name: 'StamhoofdCalculator',

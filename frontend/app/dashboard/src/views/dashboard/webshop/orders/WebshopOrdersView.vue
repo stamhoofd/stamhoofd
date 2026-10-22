@@ -20,7 +20,7 @@
 
 <script lang="ts" setup>
 import { Request } from '@simonbackx/simple-networking';
-import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import { getWebshopOrderUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/orders.ts';
 import type { UIFilterBuilders } from '@stamhoofd/components/filters/UIFilter.ts';
 import { useIsMobile } from '@stamhoofd/components/hooks/useIsMobile.ts';
@@ -31,25 +31,29 @@ import { InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableA
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import type { CheckoutMethod, PaymentGeneral, PrivateOrder, TicketPrivate } from '@stamhoofd/structures';
-import { CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PrivateOrderWithTickets, SortItemDirection, WebshopNumberingType, WebshopTimeSlot } from '@stamhoofd/structures';
+import { CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PrivateOrderWithTickets, SortItemDirection, WebshopNumberingType, WebshopOrderMode, WebshopTimeSlot } from '@stamhoofd/structures';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
+import { createTicketPresenter } from '../tickets/createTicketPresenter';
 import { OrderActionBuilder } from './OrderActionBuilder';
 import { OrderRequiredFilterHelper } from './OrderRequiredFilterHelper';
 
 import { useOrdersObjectFetcher } from './useOrdersObjectFetcher';
+import { useOrdersSyncToast } from './useOrdersSyncToast';
 
 const props = defineProps<{ webshopManager: WebshopManager }>();
 
 const title = $t('%1JX');
+
+useOrdersSyncToast(() => props.webshopManager);
 
 const objectFetcher = useOrdersObjectFetcher(props.webshopManager, {
     requiredFilter: OrderRequiredFilterHelper.getDefault(props.webshopManager.preview.id),
@@ -74,6 +78,7 @@ const route = {
     objectKey: 'initialOrder',
     getProperties: () => ({
         webshopManager: props.webshopManager,
+        openTicketHandler: createTicketPresenter(props.webshopManager),
     }),
 };
 
@@ -414,7 +419,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
         );
     }
 
-    if (!preview.value.meta.cartEnabled) {
+    if (preview.value.meta.orderMode === WebshopOrderMode.Single) {
         cols.push(
             new Column<PrivateOrderWithTickets, string>({
                 name: $t('%Sc'),
@@ -553,6 +558,7 @@ function openOrder(order: PrivateOrder) {
         root: AsyncComponent(() => import('./OrderView.vue'), {
             initialOrder: order,
             webshopManager: props.webshopManager,
+            openTicketHandler: createTicketPresenter(props.webshopManager),
             getNext: (order: PrivateOrder) => {
                 const currentIndex = getCurrentIndex(order);
                 return tableObjectFetcher.objects[currentIndex + 1];

@@ -1,8 +1,9 @@
 import { Column } from '#tables/classes/Column.ts';
-import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
+import type { ContextPermissions } from '@stamhoofd/frontend-session/ContextPermissions';
 import type { AppType, Group, GroupCategoryTree, GroupPrice, Organization, Platform, PlatformMember, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';
-import { ContinuousMembershipStatus, GroupType, LanguageHelper, MembershipStatus, PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { ContinuousMembershipStatus, GroupType, LanguageHelper, MembershipStatus } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 type ObjectType = PlatformMember;
@@ -321,13 +322,13 @@ export function getMemberColumns({ platform, organization, dateRange, group, gro
 
     if (app === 'admin' || (group && group.settings.requireOrganizationIds.length !== 1 && group.type === GroupType.EventRegistration && auth.hasSomePlatformAccess())) {
         allColumns.push(
-            new Column<ObjectType, Organization[]>({
+            new Column<ObjectType, Organization | null>({
                 id: 'organization',
                 allowSorting: false,
                 name: $t('%1PI'),
-                getValue: member => member.filterOrganizations({ periodId: filterPeriodId, types: [GroupType.Membership] }),
-                format: organizations => Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' ' + $t(`%M1`) + ' ') || $t('%5D'),
-                getStyle: organizations => organizations.length === 0 ? 'gray' : '',
+                getValue: member => member.getPrimaryOrganization({ periodId: filterPeriodId }),
+                format: organization => organization?.name ?? $t('%5D'),
+                getStyle: organization => !organization ? 'gray' : '',
                 minimumWidth: 100,
                 recommendedWidth: 300,
                 enabled: app === 'admin',
@@ -335,10 +336,40 @@ export function getMemberColumns({ platform, organization, dateRange, group, gro
         );
 
         allColumns.push(
-            new Column<ObjectType, Organization[]>({
+            new Column<ObjectType, Organization | null>({
                 id: 'uri',
                 allowSorting: false,
                 name: $t('%1O1'),
+                getValue: member => member.getPrimaryOrganization({ periodId: filterPeriodId }),
+                format: organization => organization?.uri ?? $t('%1FW'),
+                getStyle: organization => !organization ? 'gray' : '',
+                minimumWidth: 50,
+                recommendedWidth: 100,
+                enabled: false,
+            }),
+        );
+
+        allColumns.push(
+            new Column<ObjectType, Organization[]>({
+                id: 'organizations',
+                allowSorting: false,
+                name: $t('%1KQ'),
+                description: $t('%1Jj'),
+                getValue: member => member.filterOrganizations({ periodId: filterPeriodId, types: [GroupType.Membership] }),
+                format: organizations => Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' ' + $t(`%M1`) + ' ') || $t('%5D'),
+                getStyle: organizations => organizations.length === 0 ? 'gray' : '',
+                minimumWidth: 100,
+                recommendedWidth: 300,
+                enabled: false,
+            }),
+        );
+
+        allColumns.push(
+            new Column<ObjectType, Organization[]>({
+                id: 'uris',
+                allowSorting: false,
+                name: $t('%1KR'),
+                description: $t('%1Jk'),
                 getValue: member => member.filterOrganizations({ periodId: filterPeriodId, types: [GroupType.Membership] }),
                 format: organizations => Formatter.joinLast(organizations.map(o => o.uri).sort(), ', ', ' ' + $t(`%M1`) + ' ') || $t('%1FW'),
                 getStyle: organizations => organizations.length === 0 ? 'gray' : '',

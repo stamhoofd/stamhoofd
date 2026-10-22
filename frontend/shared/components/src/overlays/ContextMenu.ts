@@ -4,39 +4,12 @@ import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import GeneralContextMenuView from './GeneralContextMenuView.vue';
 import { ModalStackEventBus } from './ModalStackEventBus';
 import { markRaw } from 'vue';
+import { ContextMenuItem } from './ContextMenuTypes';
+import type { ContextMenuLike } from './ContextMenuTypes';
 
-export class ContextMenuItem {
-    name: string;
-    description?: string;
+export { ContextMenuItem } from './ContextMenuTypes';
 
-    rightText: string | null = null;
-    icon: string | null = null;
-
-    /**
-     * Shows a checkbox on the left if true/false.
-     * You can  alter the selected value in action() to adjust it.
-     */
-    selected: boolean | null = null;
-    disabled: boolean | string = false;
-    destructive = false;
-
-    /**
-     * Return true when the context menu should get closed.
-     */
-    action: ((this: ContextMenuItem) => unknown | Promise<void>) | null = null;
-
-    /**
-     * Context menu to show when hovered
-     */
-    childMenu: ContextMenu | null = null;
-
-    constructor(settings: Partial<ContextMenuItem>) {
-        markRaw(this);
-        Object.assign(this, settings);
-    }
-}
-
-export class ContextMenu {
+export class ContextMenu implements ContextMenuLike {
     /**
      * Prevent the default behaviour of click on the item, e.g. to keep the focus on an input element
      */
@@ -55,6 +28,11 @@ export class ContextMenu {
         return new ComponentWithProperties(GeneralContextMenuView, { menu: this });
     }
 
+    /**
+     * Present at an event position or button bounds; defaults to right/bottom placement.
+     * Mutates the position options. Resolves with this menu after dispatching presentation,
+     * not after selecting an item or closing it.
+     */
     async show(position: { component?: typeof NavigationMixin; clickEvent?: TouchEvent | MouseEvent; button?: HTMLElement; x?: number; y?: number; xPlacement?: 'right' | 'left'; yPlacement?: 'bottom' | 'top'; wrapWidth?: number; wrapHeight?: number; yOffset?: number; xOffset?: number }) {
         if (position.button) {
             const bounds = position.button.getBoundingClientRect();

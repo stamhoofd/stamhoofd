@@ -1,6 +1,6 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { CountFilteredRequest, CountResponse } from '@stamhoofd/structures';
 import { NotificationChannel } from '@stamhoofd/structures/notifications/NotificationChannel.js';
 import { NotificationPreference } from '@stamhoofd/structures/notifications/NotificationPreference.js';

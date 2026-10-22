@@ -179,7 +179,7 @@ import { CartStockHelper, ProductPrice, ProductType, UitpasNumberAndPrice } from
 import { Formatter } from '@stamhoofd/utility';
 
 import { useContext } from '#hooks/useContext.ts';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';

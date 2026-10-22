@@ -25,6 +25,7 @@ export default class Test extends BaseCommand {
         'stam test structures bundle-discounts -t "Only these tests"',
         'stam test structures -t "Only these tests"',
         'stam test api --skip-build',
+        'stam test api --shard 1/2 --json-report /reports/api-1.json',
         'stam test components ImageComponent',
     ];
 
@@ -44,6 +45,8 @@ export default class Test extends BaseCommand {
         'coverage': Flags.boolean({ default: false, description: 'Collect coverage for the selected package' }),
         'test-name': Flags.string({ char: 't', description: 'Only run tests whose name matches this text (vitest -t)' }),
         'skip-build': Flags.boolean({ default: false, description: 'Skip the automatic build:shared step' }),
+        'shard': Flags.string({ description: 'Run one shard of the suite on a separate machine (1-based index/total, e.g. 1/2)' }),
+        'json-report': Flags.string({ description: 'Write a Vitest JSON report with per-file timings (single package only)' }),
     };
 
     async run(): Promise<void> {
@@ -57,6 +60,12 @@ export default class Test extends BaseCommand {
         }
 
         const [target, ...fileFilters] = positionals;
+        if (flags.shard !== undefined) {
+            const [index, total] = flags.shard.split('/').map(Number);
+            if (!/^[1-9]\d*\/[1-9]\d*$/.test(flags.shard) || !Number.isSafeInteger(index) || !Number.isSafeInteger(total) || index > total) {
+                throw new Error('--shard must be index/total with 1 <= index <= total (e.g. 1/2)');
+            }
+        }
 
         let packages = target === 'coverage' ? coverageTestPackages : unitTestPackages;
         if (target !== 'unit' && target !== 'coverage') {
@@ -76,6 +85,8 @@ export default class Test extends BaseCommand {
             skipBuild: flags['skip-build'],
             clear: flags.clear,
             coverage: target === 'coverage' || flags.coverage,
+            shard: flags.shard,
+            jsonReport: flags['json-report'],
         });
     }
 }

@@ -52,7 +52,6 @@ import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEnc
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useDraggableArrayIds } from '@stamhoofd/components/hooks/useDraggableArray.ts';
@@ -61,12 +60,15 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { getOrganizationTagTypeName, OrganizationTag } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
-import { computed, ref } from 'vue';
+import { computed, ref, resolveComponent } from 'vue';
 import TagRow from './components/TagRow.vue';
 
 
+defineOptions({ name: 'EditOrganizationTagView' });
+
 const errors = useErrors();
 const present = usePresent();
+const currentComponent = resolveComponent('EditOrganizationTagView');
 const saving = ref(false);
 const deleting = ref(false);
 
@@ -190,7 +192,7 @@ async function editTag(tag: OrganizationTag) {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            AsyncComponent(() => import('./EditOrganizationTagView.vue'), {
+            new ComponentWithProperties(currentComponent, {
                 allTags: allPatchedTags.value,
                 tag,
                 isNew: false,
@@ -208,7 +210,7 @@ async function addTag() {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            AsyncComponent(() => import('./EditOrganizationTagView.vue'), {
+            new ComponentWithProperties(currentComponent, {
                 allTags: allPatchedTags.value,
                 tag,
                 isNew: true,

@@ -1,6 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { OrganizationFactory, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
-import { PermissionLevel, Permissions, PrivateWebshop, WebshopMetaData } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Permissions, PrivateWebshop, WebshopMetaData } from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { SessionService } from '../../../../services/SessionService.js';

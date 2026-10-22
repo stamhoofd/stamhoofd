@@ -2,7 +2,8 @@ import type { Organization } from '@stamhoofd/models';
 import { Platform, Token, User } from '@stamhoofd/models';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import type { OrganizationEmail } from '@stamhoofd/structures';
-import { AccessRight, Recipient } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { Recipient } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
 /**

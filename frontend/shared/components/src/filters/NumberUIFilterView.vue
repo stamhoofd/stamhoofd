@@ -74,11 +74,11 @@ import NumberInput from '../inputs/NumberInput.vue';
 import PriceInput from '../inputs/PriceInput.vue';
 import TimeMinutesInput from '../inputs/TimeMinutesInput.vue';
 import { NumberFilterFormat } from './NumberFilterFormat.ts';
-import type { NumberUIFilter } from './NumberUIFilter';
+import type { NumberUIFilterEditor } from './NumberUIFilterTypes.ts';
 import { UINumberFilterMode } from './UINumberFilterMode.ts';
 
 const props = defineProps<{
-    filter: NumberUIFilter;
+    filter: NumberUIFilterEditor;
 }>();
 
 const type = computed(() => props.filter.builder.type);

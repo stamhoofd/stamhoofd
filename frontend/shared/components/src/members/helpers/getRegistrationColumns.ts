@@ -1,8 +1,9 @@
 import { Column } from '#tables/classes/Column.ts';
-import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
+import type { ContextPermissions } from '@stamhoofd/frontend-session/ContextPermissions';
 import type { AppType, Group, GroupCategoryTree, Organization, Platform, PlatformRegistration, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';
-import { ContinuousMembershipStatus, getGroupTypeName, GroupType, LanguageHelper, MembershipStatus, PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { ContinuousMembershipStatus, getGroupTypeName, GroupType, LanguageHelper, MembershipStatus } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 type ObjectType = PlatformRegistration;
@@ -306,8 +307,38 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
         );
 
         allColumns.push(
-            new Column<ObjectType, Organization[]>({
+            new Column<ObjectType, Organization | null>({
                 id: 'member.organization',
+                allowSorting: false,
+                name: $t('%Zxl'),
+                description: $t('%Zxk'),
+                getValue: registration => registration.member.getPrimaryOrganization({ periodId: filterPeriodId }),
+                format: organization => organization?.name ?? $t('%5D'),
+                getStyle: organization => !organization ? 'gray' : '',
+                minimumWidth: 100,
+                recommendedWidth: 300,
+                enabled: app === 'admin',
+            }),
+        );
+
+        allColumns.push(
+            new Column<ObjectType, Organization | null>({
+                id: 'member.uri',
+                allowSorting: false,
+                name: $t('%Zxn'),
+                description: $t('%Zxi'),
+                getValue: registration => registration.member.getPrimaryOrganization({ periodId: filterPeriodId }),
+                format: organization => organization?.uri ?? $t('%1FW'),
+                getStyle: organization => !organization ? 'gray' : '',
+                minimumWidth: 50,
+                recommendedWidth: 100,
+                enabled: false,
+            }),
+        );
+
+        allColumns.push(
+            new Column<ObjectType, Organization[]>({
+                id: 'member.organizations',
                 allowSorting: false,
                 name: $t('%1KQ'),
                 description: $t('%1Jj'),
@@ -316,13 +347,13 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
                 getStyle: organizations => organizations.length === 0 ? 'gray' : '',
                 minimumWidth: 100,
                 recommendedWidth: 300,
-                enabled: app === 'admin',
+                enabled: false,
             }),
         );
 
         allColumns.push(
             new Column<ObjectType, Organization[]>({
-                id: 'member.uri',
+                id: 'member.uris',
                 allowSorting: false,
                 name: $t('%1KR'),
                 description: $t('%1Jk'),

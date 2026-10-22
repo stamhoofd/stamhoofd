@@ -121,7 +121,7 @@ import ProgressIcon from '@stamhoofd/components/icons/ProgressIcon.vue';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 
 const show = useShow();

@@ -1,9 +1,11 @@
 import { ArrayDecoder, AutoEncoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { MemberResponsibilityRecordBase } from './members/MemberResponsibilityRecord.js';
-import { getPermissionLevelNumber, PermissionLevel } from './PermissionLevel.js';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { getPermissionLevelNumber } from './PermissionLevel.js';
 import { PermissionRole } from './PermissionRole.js';
-import { downgradeResourceKeys, PermissionsResourceKey, PermissionsResourceType, upgradeResourceKeys } from './PermissionsResourceType.js';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { downgradeResourceKeys, PermissionsResourceKey, upgradeResourceKeys } from './PermissionsResourceType.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 
 export function getUnlistedResources(resourceType: PermissionsResourceType, permissions: { resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> }, listedResources: { id: string }[]): { id: string; name: string; type: PermissionsResourceType }[] {

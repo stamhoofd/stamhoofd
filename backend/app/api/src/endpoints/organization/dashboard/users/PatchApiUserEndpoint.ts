@@ -4,7 +4,8 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Platform, Token, User } from '@stamhoofd/models';
-import { ApiUser, PermissionLevel, UserMeta, UserPermissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { ApiUser, UserMeta, UserPermissions } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context.js';
 
 type Params = { id: string };

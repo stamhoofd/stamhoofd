@@ -47,6 +47,10 @@ export class TranslatedStringPatch implements Encodeable, Patchable<TranslatedSt
     }
 }
 
+/**
+ * Accepts legacy untranslated strings as well as language maps, so existing stored
+ * text can be decoded without first migrating it to a translated representation.
+ */
 export class TranslatedString implements Encodeable, Patchable<TranslatedStringPatch>, StringLikeObject {
     translations: LanguageMap | string; // set to a string if not known in which language it is
 

@@ -1,12 +1,14 @@
 import { Formatter } from '@stamhoofd/utility';
-import type { AccessRight } from './AccessRight.js';
+import type { AccessRight } from '@stamhoofd/types/AccessRight';
 import { AccessRightHelper } from './AccessRight.js';
 import type { MemberResponsibility } from './MemberResponsibility.js';
 import type { MemberResponsibilityRecordBase } from './members/MemberResponsibilityRecord.js';
-import { getPermissionLevelNumber, PermissionLevel } from './PermissionLevel.js';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { getPermissionLevelNumber } from './PermissionLevel.js';
 import type { PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole.js';
 import type { Permissions } from './Permissions.js';
-import { isPeriodScopedResourceType, PermissionsResourceKey, PermissionsResourceType } from './PermissionsResourceType.js';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { isPeriodScopedResourceType, PermissionsResourceKey } from './PermissionsResourceType.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 
 /**

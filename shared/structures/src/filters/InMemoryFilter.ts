@@ -103,7 +103,7 @@ function $equalsInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterR
         }
 
         const a = normalizeValue(assertFilterCompareValue(val));
-        return a === b;
+        return normalizeTextForEquality(a) === normalizeTextForEquality(b);
     };
 }
 
@@ -126,10 +126,11 @@ function $containsInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilte
         if (Array.isArray(val)) {
             // To match backend logic where these things are required for optimizations
             // + also match MongoDB behavior
+            // MySQL searches a lowercased JSON array, so only casing is ignored
 
             for (const v of val) {
                 const a = normalizeValue(assertFilterCompareValue(v));
-                if (typeof a === 'string' && StringCompare.contains(a, needle)) {
+                if (typeof a === 'string' && a.includes(needle)) {
                     return true;
                 }
             }
@@ -142,7 +143,8 @@ function $containsInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilte
             return false;
         }
 
-        return StringCompare.contains(a, needle);
+        // Like LIKE in MySQL: accents are ignored, spaces count as they are
+        return StringCompare.normalize(a).includes(StringCompare.normalize(needle));
     };
 }
 
@@ -174,10 +176,10 @@ function $inInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunne
             return false;
         }
 
-        const a = normalizeValue(assertFilterCompareValue(val));
+        const a = normalizeTextForEquality(normalizeValue(assertFilterCompareValue(val)));
 
         for (const element of filter) {
-            const b = normalizeValue(assertFilterCompareValue(element));
+            const b = normalizeTextForEquality(normalizeValue(assertFilterCompareValue(element)));
             if (a === b) {
                 return true;
             }
@@ -296,6 +298,14 @@ function normalizeValue(val: StamhoofdCompareValue): string | number | null {
     }
 
     return val;
+}
+
+/**
+ * Text compares like MySQL's utf8mb4_0900_ai_ci collation for equality. Not used for the values of arrays: MySQL compares
+ * JSON arrays exactly (after lowercasing them).
+ */
+function normalizeTextForEquality(val: string | number | null): string | number | null {
+    return typeof val === 'string' ? StringCompare.normalizeForEquality(val) : val;
 }
 
 export function createInMemoryFilterCompiler(path: string | string[], overrideFilterDefinitions?: InMemoryFilterDefinitions | InMemoryFilterCompilerSelector): InMemoryFilterCompiler {

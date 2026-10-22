@@ -2,9 +2,9 @@ import { ComponentWithProperties, ModalStackComponent, NavigationController } fr
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
 import ContextProvider from '@stamhoofd/components/containers/ContextProvider.vue';
-import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { ThemeManager } from '@stamhoofd/networking/ThemeManager';
+import { OrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
+import { ThemeManager } from '@stamhoofd/frontend-application/ThemeManager';
 import type { Webshop } from '@stamhoofd/structures';
 import { WebshopAuthType } from '@stamhoofd/structures';
 import { markRaw, reactive } from 'vue';

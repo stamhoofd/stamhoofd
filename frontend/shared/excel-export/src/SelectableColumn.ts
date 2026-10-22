@@ -1,4 +1,4 @@
-import type { SelectableData } from '@stamhoofd/components/export/SelectableData';
+import type { SelectableData } from './SelectableData';
 
 export class SelectableColumn implements SelectableData {
     enabled: boolean = true;

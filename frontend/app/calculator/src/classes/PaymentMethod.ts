@@ -1,4 +1,4 @@
-import type { CalculationOptions } from './CalculationInput';
+import type { CalculationOptions } from './CalculationOptions';
 import { Country } from './Country';
 
 export enum PaymentMethod {

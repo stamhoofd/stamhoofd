@@ -2,6 +2,7 @@ import { setup, test } from '../../test-fixtures/base.js';
 
 setup();
 
+import { Database } from '@simonbackx/simple-database';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { Order, Ticket } from '@stamhoofd/models';
@@ -12,7 +13,7 @@ import type { TestOrder } from '../../helpers/index.js';
 import { TestOrders } from '../../helpers/index.js';
 import type { OrdersTable } from '../../helpers/page/webshop/OrdersTable.js';
 import { mixedOrderSeeds } from './data.js';
-import { expectOrders, names, ticketScanStatus } from './expected.js';
+import { expectOrders, names, sortOrders, ticketScanStatus } from './expected.js';
 import type { OrdersListWebshop } from './setup.js';
 import { createOrdersListWebshop, openOrdersList, openOrdersTab, statusNames } from './setup.js';
 
@@ -122,6 +123,26 @@ test.describe('Orders list changes @webshop-orders-list', () => {
         await context.close();
     });
 
+    test('Scrolling continues after the last loaded order when another tab removed an order before it', async ({ browser }) => {
+        // Without a filter, the next page continues where the previous one ended in the shared local database
+        const big = await createOrdersListWebshop('OrdersScrollSync');
+        const bigOrders = await TestOrders.create(big.webshop, mixedOrderSeeds(150));
+        const { context, table } = await openOrdersList(browser, big);
+        await table.expectCount(150);
+
+        // The first row (highest number) is deleted on the server, and tab B stores that deletion locally
+        const first = bigOrders[bigOrders.length - 1];
+        first.order.status = OrderStatus.Deleted;
+        await first.order.save();
+        const tabB = await openOrdersTab(context, big);
+        await tabB.table.expectCount(149);
+
+        // Tab A still shows the order it loaded before, and every order after it
+        expect(await table.readNames(names(bigOrders))).toEqual(names(sortOrders(bigOrders, o => o.seed.number, 'DESC')));
+
+        await context.close();
+    });
+
     test('Retrying right after the first sync failed fetches the orders', async ({ browser }) => {
         let failNext = true;
         const { context, table } = await openOrdersList(browser, shop, 'desktop', {
@@ -139,6 +160,41 @@ test.describe('Orders list changes @webshop-orders-list', () => {
         await table.getErrorBox().getByRole('button').click();
         await table.expectCount(30);
         await expect(table.getErrorBox()).toHaveCount(0);
+
+        await context.close();
+    });
+
+    test('Retrying after storing a page of the sync failed keeps the orders of the pages before it', async ({ browser }) => {
+        // Like a lost IndexedDB connection after the screen of a phone locked
+        const big = await createOrdersListWebshop('OrdersFailedWrite');
+        const bigOrders = await TestOrders.create(big.webshop, mixedOrderSeeds(250));
+
+        // One second apart, so a sync that resumes after the first page does not fetch that page again
+        const updatedAt = new Date(Date.now() - 2 * 24 * 60 * 60 * 1_000);
+        updatedAt.setMilliseconds(0);
+        for (const [index, { order }] of bigOrders.entries()) {
+            await Database.update('UPDATE `webshop_orders` SET `updatedAt` = ? WHERE `id` = ?', [new Date(updatedAt.getTime() + index * 1_000), order.id]);
+        }
+
+        const { context, table } = await openOrdersList(browser, big, 'desktop', {
+            waitForFirstRow: false,
+            beforeOpen: page => page.addInitScript(() => {
+                // Aborts the transaction that stores the second page of 100 orders, once
+                const put = IDBObjectStore.prototype.put;
+                let orderPuts = 0;
+                IDBObjectStore.prototype.put = function (this: IDBObjectStore, ...args: Parameters<IDBObjectStore['put']>) {
+                    const request = put.apply(this, args);
+                    if (this.name === 'orders' && ++orderPuts === 101) {
+                        this.transaction.abort();
+                    }
+                    return request;
+                };
+            }),
+        });
+
+        await expect(table.getErrorBox()).toBeVisible();
+        await table.getErrorBox().getByRole('button').click();
+        await table.expectCount(250);
 
         await context.close();
     });

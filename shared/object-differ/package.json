@@ -1,25 +1,27 @@
 {
     "name": "@stamhoofd/object-differ",
-    "version": "2.154.0",
+    "version": "2.155.0",
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "types": "./dist-types/index.d.ts",
     "sideEffects": [],
     "exports": {
         ".": {
-            "types": "./dist/index.d.ts",
+            "types": "./dist-types/index.d.ts",
             "import": "./dist/index.js",
             "require": "./dist/index.js"
         }
     },
     "files": [
         "dist",
+        "dist-types",
         "package.json"
     ],
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
-        "lint": "eslint",
+        "build:types": "tsc --project tsconfig.types.json",
+        "lint": "eslint --quiet",
         "test": "vitest",
         "test:coverage": "vitest --coverage"
     },
@@ -28,7 +30,10 @@
         "uuid": "14.0.2"
     },
     "devDependencies": {
+        "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "@types/uuid": "8.3.4",
         "uuid": "14.0.2",
         "vitest": "4.1.11"

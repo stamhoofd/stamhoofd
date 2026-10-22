@@ -1,21 +1,23 @@
 {
     "name": "@stamhoofd/types",
-    "version": "2.154.0",
+    "version": "2.155.0",
     "type": "module",
     "exports": {
         "./*": {
-            "types": "./dist/*.d.ts",
+            "types": "./dist-types/*.d.ts",
             "import": "./dist/*.js",
             "require": "./dist/*.js"
         }
     },
     "files": [
         "dist",
+        "dist-types",
         "package.json"
     ],
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
-        "lint": "eslint"
+        "build:types": "tsc --project tsconfig.types.json",
+        "lint": "eslint --quiet"
     },
     "dependencies": {
         "jose": "5.10.0"

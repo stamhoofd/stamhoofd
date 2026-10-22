@@ -1,7 +1,10 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { BalanceItem, Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
 import { BalanceItemFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import { AccessRight, AppliedRegistrationDiscount, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, GroupPriceDiscount, GroupPriceDiscountType, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, PermissionLevel, Permissions, PermissionsResourceType, ReduceablePrice, ResourcePermissions } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { AppliedRegistrationDiscount, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, GroupPriceDiscount, GroupPriceDiscountType, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, Permissions, ReduceablePrice, ResourcePermissions } from '@stamhoofd/structures';
 import { IDDeleteRegisterItem } from '@stamhoofd/structures/members/checkout/DeleteRegisterItem.js';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { RegisterMembersEndpoint } from '../../src/endpoints/global/registration/RegisterMembersEndpoint.js';

@@ -1,5 +1,6 @@
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { Organization, OrganizationPrivateMetaData, PermissionLevel, Permissions, Platform, PlatformConfig, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
+import { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Organization, OrganizationPrivateMetaData, Permissions, Platform, PlatformConfig, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { describe, expect, test } from 'vitest';
 import { isTwoFactorEnabled } from './useTwoFactorEnabled';
 

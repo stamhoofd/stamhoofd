@@ -38,9 +38,12 @@ import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '@stamhoo
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import type { OrganizationTag, OrganizationType, StamhoofdFilter, UmbrellaOrganization } from '@stamhoofd/structures';
-import { AccessRight, Address, CountryHelper, EmailRecipientSubfilter, ExcelExportType, isEmptyFilter, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationTypeHelper, PermissionLevel, PermissionsResourceType, STPackageType, STPackageTypeHelper, TagHelper, UmbrellaOrganizationHelper } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { Address, CountryHelper, EmailRecipientSubfilter, ExcelExportType, isEmptyFilter, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationTypeHelper, STPackageType, STPackageTypeHelper, TagHelper, UmbrellaOrganizationHelper } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import type { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
@@ -577,7 +580,7 @@ async function exportToExcel(selection: TableActionSelection<ObjectType>) {
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
+                root: AsyncComponent(() => import('@stamhoofd/components/export/ExcelExportView.vue'), {
                     type: ExcelExportType.Organizations,
                     filter: selection.filter,
                     workbook: getSelectableWorkbook(platform.value),

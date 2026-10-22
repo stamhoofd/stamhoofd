@@ -4,7 +4,7 @@ import type { CountFilteredRequest, SortList } from '@stamhoofd/structures';
 import { assertSort, CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, PaymentGeneral, SortItemDirection } from '@stamhoofd/structures';
 import { useContext } from '#hooks/useContext.ts';
 import type { ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { Ref } from 'vue';
 
 type ObjectType = PaymentGeneral;

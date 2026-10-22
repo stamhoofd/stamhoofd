@@ -4,8 +4,9 @@ import { scalarToSQLExpression, SQLLower, SQLNull } from '../../SQLExpressions.j
 import { SQLJsonContains, SQLJsonSearch, SQLJsonValue } from '../../SQLJsonExpressions.js';
 import type { SQLWhere} from '../../SQLWhere.js';
 import { SQLWhereEqual, SQLWhereLike, SQLWhereOr, SQLWhereSign } from '../../SQLWhere.js';
-import type { SQLCurrentColumn, SQLSyncFilterRunner} from '../SQLFilter.js';
-import { normalizeColumn, SQLValueType } from '../SQLFilter.js';
+import type { SQLCurrentColumn, SQLSyncFilterRunner } from '../SQLFilterTypes.js';
+import { SQLValueType } from '../SQLFilterTypes.js';
+import { normalizeColumn } from '../helpers/normalizeColumn.js';
 import { isJSONColumn } from '../helpers/isJSONColumn.js';
 import { normalizeCompareValue } from '../helpers/normalizeCompareValue.js';
 

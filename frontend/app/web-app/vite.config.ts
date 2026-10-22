@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import { buildConfig } from '@stamhoofd/vite-config';
+import { FrontendApp } from '@stamhoofd/types/FrontendApp';
 
 // Set timezone!
 process.env.TZ = 'UTC';
@@ -9,7 +10,7 @@ process.env.TZ = 'UTC';
 // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 export default defineConfig({
     ...await buildConfig({
-        name: 'web-app',
+        name: FrontendApp.WebApp,
         port: 8080,
         frontendDir: resolve(import.meta.dirname, '../..'),
         clientFiles: [
@@ -25,7 +26,7 @@ export default defineConfig({
         // per-request nonce and sets the matching CSP header (see devops buildCaddyConfig.ts).
         // Keep this string in sync with `CSP_NONCE_PLACEHOLDER` in @stamhoofd/cli and the
         // manual nonce="..." attributes in index.html and shared/public/out-of-date.html.
-        // NOTE: the mobile app also builds with buildConfig({ name: 'web-app' }) but has its own
+        // NOTE: the mobile app also builds with buildConfig({ name: FrontendApp.WebApp }) but has its own
         // vite.config.ts without this option — it is served from the device (no Caddy to set the
         // header / rewrite the nonce), so it keeps its meta-tag CSP instead.
         cspNonce: 'STAMHOOFD_CSP_NONCE',

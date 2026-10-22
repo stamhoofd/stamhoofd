@@ -2,7 +2,8 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ChargeRequest, LimitedFilteredRequest, PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { ChargeRequest, LimitedFilteredRequest } from '@stamhoofd/structures';
 
 import { QueueHandler } from '@stamhoofd/queues';
 import { Context } from '../../../helpers/Context.js';

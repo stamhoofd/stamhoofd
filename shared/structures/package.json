@@ -1,10 +1,10 @@
 {
     "name": "@stamhoofd/structures",
-    "version": "2.154.0",
+    "version": "2.155.0",
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "types": "./dist-types/index.d.ts",
     "sideEffects": [
         "./src/circular-dependencies/*.ts",
         "./src/index.ts",
@@ -14,8 +14,14 @@
         "./dist/Version.js"
     ],
     "exports": {
-        ".": "./dist/index.js",
-        "./*.js": "./dist/*.js"
+        ".": {
+            "types": "./dist-types/index.d.ts",
+            "default": "./dist/index.js"
+        },
+        "./*.js": {
+            "types": "./dist-types/*.d.ts",
+            "default": "./dist/*.js"
+        }
     },
     "imports": {
         "#*.ts": "./src/*.ts",
@@ -23,12 +29,14 @@
     },
     "files": [
         "dist",
+        "dist-types",
         "package.json"
     ],
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
-        "lint": "eslint",
-        "typecheck": "tsc --build tsconfig.test.json",
+        "build:types": "tsc --project tsconfig.types.json",
+        "lint": "eslint --quiet",
+        "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
         "test": "vitest",
         "test:coverage": "vitest --coverage"
     },
@@ -38,7 +46,10 @@
     },
     "devDependencies": {
         "@simonbackx/simple-errors": "1.5.0",
+        "@stamhoofd/excel-writer": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "@types/uuid": "8.3.4",
         "vitest": "4.1.11"
     },

@@ -56,10 +56,11 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
-import { MFAManager } from '@stamhoofd/networking/MFAManager';
+import { MFAManager } from '@stamhoofd/frontend-application/MFAManager';
 import { computed, ref } from 'vue';
 
 import { canUsePasskeysOnThisDomain } from './passkeyAvailability.ts';
+import type { FreshAction } from './FreshAction';
 
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
@@ -78,6 +79,7 @@ import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 
 const props = withDefaults(defineProps<{
     setupToken: string;
+    runFresh: FreshAction;
     // Whether this account may enroll a passkey at all (see User.canUsePasskeys).
     canUsePasskeys?: boolean;
     // Called after the first factor is enrolled and the session holds a fresh token.
@@ -113,6 +115,7 @@ async function startTotpSetup() {
                 new ComponentWithProperties(BoxedController, {
                     root: AsyncComponent(() => import('./SetupTOTPView.vue'), {
                         totpSetup,
+                        runFresh: props.runFresh,
                         setupToken: props.setupToken,
                         onCompleted: props.onCompleted,
                     }),

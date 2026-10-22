@@ -12,11 +12,15 @@
         "build:playwright": "NODE_ENV=test STAMHOOFD_ENV=playwright vite build",
         "build:production": "pnpm run typecheck && NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=production vite build",
         "dev": "NODE_ENV=development ENV_FILE=../../.env.json vite",
-        "lint": "eslint",
+        "lint": "eslint --quiet",
         "test": "pnpm run typecheck",
-        "typecheck": "vue-tsc --noEmit"
+        "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "dependencies": {
+        "@stamhoofd/frontend-application": "workspace:*",
+        "@stamhoofd/frontend-session": "workspace:*",
+        "@stamhoofd/frontend-platform": "workspace:*",
+        "@stamhoofd/frontend-storage": "workspace:*",
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/vue-app-navigation": "2.25.1",
@@ -32,6 +36,7 @@
         "@stamhoofd/networking": "workspace:*",
         "@stamhoofd/registration": "workspace:*",
         "@stamhoofd/scss": "workspace:*",
+        "@stamhoofd/sgv-frontend": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/ticket-builder": "workspace:*",
         "@stamhoofd/types": "workspace:*",

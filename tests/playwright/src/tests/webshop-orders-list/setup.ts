@@ -4,7 +4,7 @@ import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import type { User, Webshop } from '@stamhoofd/models';
 import { Organization, OrganizationFactory, UserFactory } from '@stamhoofd/models';
-import { PermissionLevel } from '@stamhoofd/structures/PermissionLevel.js';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { Permissions } from '@stamhoofd/structures/Permissions.js';
 import { Token as TokenStruct } from '@stamhoofd/structures/Token.js';
 import { Version } from '@stamhoofd/structures/Version.js';
@@ -44,6 +44,8 @@ export interface OrdersListWebshop {
 export async function createOrdersListWebshop(prefix: string, options: { ticketType?: WebshopTicketType } = {}): Promise<OrdersListWebshop> {
     const created = await new OrganizationFactory({
         name: `${prefix}${WorkerData.id}`,
+        // A worker can run several tests of a file before its database is reset
+        uri: `${prefix.toLowerCase()}-${WorkerData.id}-${crypto.randomUUID()}`,
         packages: [STPackageBundle.Webshops],
     }).create();
     await STPackageService.updateOrganizationPackages(created.id);
@@ -70,7 +72,8 @@ export async function createOrdersListWebshop(prefix: string, options: { ticketT
  * Opens the orders table of the webshop in a new browser context (its own local order database).
  */
 export async function openOrdersList(browser: Browser, shop: OrdersListWebshop, device: TestDevice = 'desktop', options: { beforeOpen?: (page: Page) => Promise<unknown>; waitForFirstRow?: boolean } = {}): Promise<{ context: BrowserContext; page: Page; table: OrdersTable; backend: BackendOrders }> {
-    const context = await browser.newContext({ ...testDevices[device] });
+    // The dashboard picks dates in Belgian time, like its users
+    const context = await browser.newContext({ ...testDevices[device], timezoneId: 'Europe/Brussels' });
     await login(context, shop);
     const page = await context.newPage();
     await options.beforeOpen?.(page);

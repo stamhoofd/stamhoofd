@@ -1,8 +1,7 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
-import type { ViewStep } from '@stamhoofd/components/steps/ViewStep';
-import type { ViewStepsManager } from '@stamhoofd/components/steps/ViewStepsManager';
+import type { ViewStep, ViewStepNavigation } from '@stamhoofd/components/steps/ViewStep';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions';
 import type { OrganizationCheckoutViewModel } from '../OrganizationCheckoutViewModel';
 
@@ -13,11 +12,11 @@ export class PaymentCustomerStep implements ViewStep {
         this.model = model;
     }
 
-    isEnabled(_manager: ViewStepsManager) {
+    isEnabled() {
         return true;
     }
 
-    getComponent(manager: ViewStepsManager): ComponentWithProperties {
+    getComponent(navigation: ViewStepNavigation): ComponentWithProperties {
         return AsyncComponent(() => import('@stamhoofd/components/members/checkout/PaymentCustomerView.vue'), {
             checkout: this.model.checkout,
             invoicesEnabled: this.model.sellingOrganization.meta.invoicesEnabled,
@@ -27,7 +26,7 @@ export class PaymentCustomerStep implements ViewStep {
             // of existing balance items
             allowNonDefault: !this.model.requiresMandate && this.model.checkout.balances.size === 0,
             saveHandler: async (navigate: NavigationActions) => {
-                await manager.saveHandler(this, navigate);
+                await navigation.saveHandler(this, navigate);
             },
         });
     }

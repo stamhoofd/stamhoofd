@@ -27,6 +27,12 @@ export class DataValidator {
             return false;
         }
 
+        // Valid domains that are one typo away from a domain in the typo list
+        const typoExceptions = ['mail.com', 'mailo.com', 'ymail.com'];
+        if (typoExceptions.includes(domain)) {
+            return true;
+        }
+
         const typo = ['gmail.com', 'hotmail.com', 'hotmail.fr', 'hotmail.be', 'yahoo.com', 'live.com', 'outlook.com', 'icloud.com', 'skynet.be', 'telenet.be', 'proximus.be', 'scarlet.be', 'vodafone.be', 'orange.be'];
         let foundInvalid = false;
         for (const t of typo) {
@@ -36,16 +42,6 @@ export class DataValidator {
             if (StringCompare.typoCount(domain, t) === 1) {
                 foundInvalid = true;
             }
-        }
-
-        if (domain === 'mail.com') {
-            // Exception for typo on gmail.com
-            return true;
-        }
-
-        if (domain === 'mailo.com') {
-            // Exception for typo on gmail.com
-            return true;
         }
 
         if (foundInvalid) {

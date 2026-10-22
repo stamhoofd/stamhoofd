@@ -409,11 +409,20 @@ export class MailchimpService {
     }
 
     static async preview(organization: Organization | null, request: MailchimpSyncRequest): Promise<MailchimpSyncPreview> {
+        // Loads every member within the request, which takes too long for all organizations of a platform
+        if (!organization) {
+            throw new SimpleError({
+                code: 'not_available',
+                message: 'A preview is only available for an organization',
+                human: $t('%Zxq'),
+                statusCode: 400,
+            });
+        }
         const settings = this.validateRequest(organization, request, await this.loadSettings(organization));
         await this.validateNewsletterRecord(organization, request, settings);
         const tags = await MailchimpTags.forScope(organization);
         const contacts = await this.buildContacts(organization, request, settings, tags);
-        const status = await this.getEmailStatus(contacts.map(c => c.email), organization?.id ?? null);
+        const status = await this.getEmailStatus(contacts.map(c => c.email), organization.id);
 
         // Without Mailchimp data every contact counts as new
         const plan = planSync(contacts, new Map(), status, {
@@ -528,7 +537,9 @@ export class MailchimpService {
 
         if (kind === 'members') {
             tags.members = await ensure({ tag: MAILCHIMP_MERGE_FIELDS.members, name: platformName + ' - ' + i18n.$t('%1EH'), type: 'text' });
-            tags.groups = await ensure({ tag: MAILCHIMP_MERGE_FIELDS.groups, name: platformName + ' - ' + i18n.$t('%wP'), type: 'text' });
+            // Platforms often call organizations 'groups', so the age groups of a platform sync need another name
+            const groupsName = organization ? i18n.$t('%wP') : i18n.$t('%P4');
+            tags.groups = await ensure({ tag: MAILCHIMP_MERGE_FIELDS.groups, name: platformName + ' - ' + groupsName, type: 'text' });
             if (!organization) {
                 tags.organizations = await ensure({ tag: MAILCHIMP_MERGE_FIELDS.organizations, name: platformName + ' - ' + i18n.$t('%1HI'), type: 'text' });
             }
@@ -586,7 +597,10 @@ export class MailchimpService {
                 tags,
             });
 
-            result.total = plan.upserts.length + plan.removals.length + plan.skips.length;
+            result.total = plan.upserts.length + plan.removals.length + plan.skips.length + plan.unchanged;
+            // Contacts that already match are up to date, so they count as updated without a request
+            result.processed += plan.unchanged;
+            result.updated += plan.unchanged;
             for (const skip of plan.skips) {
                 result.skipped++;
                 result.processed++;

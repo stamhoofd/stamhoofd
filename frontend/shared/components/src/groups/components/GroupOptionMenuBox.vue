@@ -116,7 +116,7 @@ const props = withDefaults(
     },
 );
 
-const emit = defineEmits(['patch:optionMenu', 'delete', 'patch:group']);
+const emit = defineEmits(['patch:optionMenu', 'delete', 'patch:group', 'edit']);
 const { patched, addPatch } = useEmitPatch<GroupOptionMenu>(props, emit, 'optionMenu');
 const present = usePresent();
 const { priceName: reducedPriceName } = useFinancialSupportSettings({
@@ -183,23 +183,8 @@ async function editOption(option: GroupOption) {
     });
 }
 
-async function editOptionMenu() {
-    await present({
-        components: [
-            AsyncComponent(() => import('./GroupOptionMenuView.vue'), {
-                optionMenu: patched.value,
-                group: props.group,
-                isNew: false,
-                saveHandler: async (patch: AutoEncoderPatchType<GroupOptionMenu>) => {
-                    addPatch(patch);
-                },
-                deleteHandler: () => {
-                    emit('delete');
-                },
-            }),
-        ],
-        modalDisplayStyle: 'popup',
-    });
+function editOptionMenu() {
+    emit('edit', patched.value);
 }
 
 async function showContextMenu(event: MouseEvent) {
@@ -208,8 +193,8 @@ async function showContextMenu(event: MouseEvent) {
             new ContextMenuItem({
                 name: $t(`%xU`),
                 icon: 'settings',
-                action: async () => {
-                    await editOptionMenu();
+                action: () => {
+                    editOptionMenu();
                     return true;
                 },
             }),

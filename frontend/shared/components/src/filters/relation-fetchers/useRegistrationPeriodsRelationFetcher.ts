@@ -1,6 +1,6 @@
 import { SortItemDirection } from '@stamhoofd/structures';
 import { useRegistrationPeriodsObjectFetcher } from '../../fetchers/useRegistrationPeriodsObjectFetcher';
-import { RelationFetcher } from '../RelationUIFilter';
+import { RelationFetcher } from '../RelationFetcher';
 
 export function useRegistrationPeriodsRelationFetcher() {
     const fetcher = useRegistrationPeriodsObjectFetcher();

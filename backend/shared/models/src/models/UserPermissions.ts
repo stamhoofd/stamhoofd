@@ -4,7 +4,8 @@ import { QueryableModel } from '@stamhoofd/sql';
 import { Permissions } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
-import type {Organization, User} from './index.js';
+import type { Organization } from './Organization.js';
+import type { User } from './User.js';
 
 export class UserPermissions extends QueryableModel {
     static table = 'user_permissions';

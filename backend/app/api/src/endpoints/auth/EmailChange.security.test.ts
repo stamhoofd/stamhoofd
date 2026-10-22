@@ -3,7 +3,8 @@ import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import type { Organization, Token, User } from '@stamhoofd/models';
 import { EmailTemplateFactory, EmailVerificationCode, OrganizationFactory, UserFactory } from '@stamhoofd/models';
-import { EmailTemplateType, NewUser, PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { EmailTemplateType, NewUser, Permissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 
 import { testServer } from '../../../tests/helpers/TestServer.js';

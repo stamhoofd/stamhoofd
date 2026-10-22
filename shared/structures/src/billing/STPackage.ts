@@ -1,10 +1,8 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Formatter } from '@stamhoofd/utility';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
-import { STPackageBundle, STPackageBundleHelper } from './STPackageBundle.js';
 
 export enum STPackageType {
     // Members without activities (not available in frontend anymore)
@@ -38,27 +36,6 @@ export class STPackageTypeHelper {
             }
             case STPackageType.TrialMembers: return $t(`%1Hl`);
             case STPackageType.TrialWebshops: return $t(`%1Hm`);
-        }
-    }
-
-    /**
-     * Used for renewal. Should this package renew as what bundle?
-     */
-    static getBundle(type: STPackageType): STPackageBundle {
-        switch (type) {
-            case STPackageType.LegacyMembers:
-            case STPackageType.Members:
-                return STPackageBundle.Members;
-
-            case STPackageType.Webshops:
-            case STPackageType.SingleWebshop:
-                return STPackageBundle.Webshops;
-
-            case STPackageType.TrialMembers:
-                return STPackageBundle.TrialMembers;
-
-            case STPackageType.TrialWebshops:
-                return STPackageBundle.TrialWebshops;
         }
     }
 
@@ -335,55 +312,6 @@ export class STPackage extends AutoEncoder {
 
     get isActive() {
         return !!this.validAt && (!this.endDate || this.endDate > new Date());
-    }
-
-    /**
-     * Package as if it has been renewed
-     */
-    createRenewed(): STPackage {
-        if (!this.meta.allowRenew) {
-            throw new SimpleError({
-                code: 'not_allowed',
-                message: 'Not allowed',
-                human: $t(`%x7`),
-            });
-        }
-
-        if (!this.meta.keepPricesOnRenewal) {
-            return STPackageBundleHelper.getCurrentPackage(
-                STPackageTypeHelper.getBundle(this.meta.type),
-                new Date(Math.max(new Date().getTime(), this.validUntil?.getTime() ?? 0)),
-            );
-        }
-
-        const pack = this.clone();
-        pack.id = uuidv4();
-
-        // Not yet valid / active (ignored until valid)
-        pack.validAt = null;
-
-        const start = Formatter.luxon(new Date(Math.max(new Date().getTime(), this.endDate?.getTime() ?? 0) + 1_000)).startOf('day');
-        const validUntil = start.plus({ years: 1 }).endOf('day');
-        const removeAt = validUntil.plus({ months: 1 }).endOf('day');
-
-        pack.meta.paidAmount = 0;
-        pack.meta.paidPrice = 0;
-        pack.meta.firstFailedPayment = null;
-        pack.meta.didRenewId = this.id;
-
-        // Duration for renewals is always a year ATM
-        pack.meta.startDate = start.toJSDate();
-        pack.validUntil = validUntil.toJSDate();
-
-        // Remove (= not renewable) if not renewed after 3 months
-        pack.removeAt = removeAt.toJSDate();
-
-        if (this.meta.type === STPackageType.SingleWebshop) {
-            // Deprecated package
-            pack.meta.type = STPackageType.Webshops;
-        }
-
-        return pack;
     }
 
     get status() {

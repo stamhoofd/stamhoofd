@@ -1,6 +1,8 @@
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { GroupPrivateSettings, Group as GroupStruct, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, PermissionLevel, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { GroupPrivateSettings, Group as GroupStruct, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, ResourcePermissions, Version } from '@stamhoofd/structures';
 
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
@@ -11,6 +13,7 @@ import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStruct
 import { Context } from '../../../../helpers/Context.js';
 import { RecordAnswerHelper } from '../../../../helpers/RecordAnswerHelper.js';
 import { SetupStepUpdater } from '../../../../helpers/SetupStepUpdater.js';
+import { GroupService } from '../../../../services/GroupService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -657,7 +660,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         }
 
         model.settings.throwIfInvalidPrices();
-        await model.updateOccupancy();
+        await GroupService.refreshOccupancy(model);
         await model.save();
 
         if (model.eventId && syncGroupWithEvent) {

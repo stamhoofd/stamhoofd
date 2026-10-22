@@ -6,154 +6,179 @@ importers:
   .:
     configDependencies: {}
     packageManagerDependencies:
+      '@pnpm/exe':
+        specifier: 12.13.0
+        version: 12.13.0
       pnpm:
-        specifier: 12.4.2
-        version: 12.4.2
+        specifier: 12.13.0
+        version: 12.13.0
 
 packages:
 
-  '@pnpm/exe.android-arm64@12.4.2':
-    resolution: {integrity: sha512-E255MbcQ0V1577M2BV0ajWuP7KmTPYA0jqZnk3rK6Lq3kTvZWulMMb7iqRmnLsQbyWTkMEB2CfyM70loVDA8xg==}
+  '@pnpm/exe.android-arm64@12.13.0':
+    resolution: {integrity: sha512-BI++xXYAk3lTLQ1695b3pAAaLwzUTQqKyT5UukVd1NU5qv7h/rUfVCiV5hrLksdbgPMWcic8gf9uXMiqTlerzg==}
     cpu: [arm64]
     os: [android]
 
-  '@pnpm/exe.android-x64@12.4.2':
-    resolution: {integrity: sha512-J1pSeCUwuKxMG70ZzpWn8JzElxiEa8NN/3N0SlZRtU2xbztChaJCKF3HaBNIj9yPfeofWzJo/lwNvDDjraQuZw==}
+  '@pnpm/exe.android-x64@12.13.0':
+    resolution: {integrity: sha512-bFq6cnbSB3fezJ0siOtuoRqLiR3VXFCZvUUFa0wlZ4a3EaJYsnnDli4ZTe8/bDfX1UhNMFxAAiSAKg7xITu+Zw==}
     cpu: [x64]
     os: [android]
 
-  '@pnpm/exe.darwin-arm64@12.4.2':
-    resolution: {integrity: sha512-A0WDo8iErfZBXgrLseQxw8i8Y9ctUpOEl/Uu+cubnTzpD8tT9ykIB548L8YTM2WD4OS+ZOHSxy8aGZcvKq8PaQ==}
+  '@pnpm/exe.darwin-arm64@12.13.0':
+    resolution: {integrity: sha512-9rRpaMGxxrv5YbptsRTIeG+q2IzQyrkRKXkD30pb7weCC6Xz6vQzfkItzrUZsb2bXyYd7fSsq+luTsreXBQYyQ==}
     cpu: [arm64]
     os: [darwin]
 
-  '@pnpm/exe.darwin-x64@12.4.2':
-    resolution: {integrity: sha512-MSgJdovBWHcb5DEOvfPH9yNi/T5O1Xa4ess+E1ESGo/5yuty7S4JoiIjami+fsNXfnoQMlwsMUqYU4zAvBcNCw==}
+  '@pnpm/exe.darwin-x64@12.13.0':
+    resolution: {integrity: sha512-A+VFQakozmXIo8kxtcP9sZCKIi94f9uB5jLXRvwnNSA5G6/G6Iq/8E17+fIPf4bm7xvR+qeM794Nz98Q52lutQ==}
     cpu: [x64]
     os: [darwin]
 
-  '@pnpm/exe.freebsd-x64@12.4.2':
-    resolution: {integrity: sha512-h2YumlQSNvgbRPv+RXwABohX65f9bOBZn+jMIt7bFDISZPCzQ+Nvpt6Awbp4ip5PwQgYxbu5iREJ1fHE39Fm8A==}
+  '@pnpm/exe.freebsd-x64@12.13.0':
+    resolution: {integrity: sha512-HqT2ppLDxmpO8jTgl44BLdrBQoQXE73HHBElYRKvxL47d4maQ0sfk+fI+bfeDpRTqKzc5JZfj85yjRo7anqioA==}
     cpu: [x64]
     os: [freebsd]
 
-  '@pnpm/exe.linux-arm64-musl@12.4.2':
-    resolution: {integrity: sha512-LwSEtSEDTv6S51YLs3YvSkPyun/QmfMic1UGICUkPWFu6ByP43RdMlkKvmVkfGhAYCpnxO057vrmyJqtfZrPCA==}
+  '@pnpm/exe.linux-arm64-musl@12.13.0':
+    resolution: {integrity: sha512-yZfm/7h1Kdd1XTNf9+F2Gt5R4WuQKMRbkMIpbzCtxpzniPEKGo/2kymNxdHq3jIcfnzHnP+KBR/YONZ+4Icq+g==}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@pnpm/exe.linux-arm64@12.4.2':
-    resolution: {integrity: sha512-2dSiDXyhx+RTHsewxex8f/jVjqQXWJ2oow4kCVHEWdZKeBpgMxvZ6fHkTAUBJXgqhbKIDHvuNlZBP7gJfUWL5A==}
+  '@pnpm/exe.linux-arm64@12.13.0':
+    resolution: {integrity: sha512-jp29ia+fTNhheXzt4FRUw5CwFW9caPNEdLRuy7/Dlbv3sj+iHldfJXfCojkPE4g71NPVwMpY5Eoc7nkfWexqrA==}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@pnpm/exe.linux-ppc64@12.4.2':
-    resolution: {integrity: sha512-8Itc+jQk+MTz04LS9D1RcH+VctAWmzM4l1cJQ+Sx7pAJNo7EKHdRMbC0Tok1jyQ7eEHNJZD5EleYneZqWfZM+g==}
+  '@pnpm/exe.linux-ppc64@12.13.0':
+    resolution: {integrity: sha512-BO8Nz70baL6KV0G9p+Lx8l6BQYFE11KDEOTTjSNZdiUMMyN1byeDlls10ZgCIaIq5ELlLJ0F/LKieNjubOC7BA==}
     cpu: [ppc64]
     os: [linux]
     libc: [glibc]
 
-  '@pnpm/exe.linux-riscv64@12.4.2':
-    resolution: {integrity: sha512-hleOeqhTVpH+z9RVMGnxvU4ZnrkBUClWjCbHD9u6kwyqhGSpevoU1wTGish+CBRhmIgMAy9pAfFpqhbAKOKNfw==}
+  '@pnpm/exe.linux-riscv64@12.13.0':
+    resolution: {integrity: sha512-LrGM+VzpNghXuHK1XSMNEsochaLscAYkllSPLF3Y4CQpaOFYmiZoX+G3TN+T3pYRxdgvwWJCqbbdwRJZFykrig==}
     cpu: [riscv64]
     os: [linux]
     libc: [glibc]
 
-  '@pnpm/exe.linux-s390x@12.4.2':
-    resolution: {integrity: sha512-LAsQRRdP9aToENR6dtcIJ9l+e1zMYOX0tQcLGpRyLPVBQcYRLlvAPcmDshsiIHQjp05SDa9FI0czX1ZQ1a7a/A==}
+  '@pnpm/exe.linux-s390x@12.13.0':
+    resolution: {integrity: sha512-0Xetcb9OJpXYmJ7rMDh3oFszIvbQl0F8UNh7oJnbLJY1K5PtDgYVkjqwb1JpjU0mkr0b4HKkFdZhlYh7XEGTvw==}
     cpu: [s390x]
     os: [linux]
     libc: [glibc]
 
-  '@pnpm/exe.linux-x64-musl@12.4.2':
-    resolution: {integrity: sha512-kzfzH2/0BWdTABK14Yj5a1xsdkTEQUp2eXEPNakaD9jKL025lq3hyaKHIz/gIZaPDMe/1bFFK/En4ztFlbBJxw==}
+  '@pnpm/exe.linux-x64-musl@12.13.0':
+    resolution: {integrity: sha512-LSD/snRsouEGA52HrTfEbGrCGdkkr5gXfQym26Ogu3I7sc5dJHUHyp8GnA7ewXrFOSRCJXH25mnmQ6Jpit572Q==}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@pnpm/exe.linux-x64@12.4.2':
-    resolution: {integrity: sha512-/pbt0UVTa8NMDhzOWLQRfZ6G9ROKXlJPZtx845BqyWfc7hCrWXhTLBd70yO2y8+E+IWN3oHM1s/JsIQNGk1yvg==}
+  '@pnpm/exe.linux-x64@12.13.0':
+    resolution: {integrity: sha512-t4EYUFG4SPYaJJVQToWIPq/lLBquCPCxMtt9vV//HirSDl332dnxDnwgvdW29sqLg3Ob2x7zFQ69HZLyoCyfpQ==}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@pnpm/exe.win32-arm64@12.4.2':
-    resolution: {integrity: sha512-PsW19e4dAUNpZ0cS9flaxFuAmpt2dKlH/Vvi8TZ4qyJjjQzue/CEsWm+6wKVP4CJ7IT8RdL4qh+soOPWIgF2Zw==}
+  '@pnpm/exe.win32-arm64@12.13.0':
+    resolution: {integrity: sha512-aDzzll9stgP+p6KKYHNzuShZhBCaxabv481xK5BjfvSnyFbjzu7ksKUIVlsiAw4xAXnrIqvEj0lQarsbBRcIQA==}
     cpu: [arm64]
     os: [win32]
 
-  '@pnpm/exe.win32-x64@12.4.2':
-    resolution: {integrity: sha512-+xGoeE0g55ztWvl8i5QqdmNfW3nIrTVcoQrNshEOwxthm9Ag48oXton3uxOA3/SANyz5AXexEjj2KO20NnOrEw==}
+  '@pnpm/exe.win32-x64@12.13.0':
+    resolution: {integrity: sha512-Nkw4hDJTcmuO6zDjkTo4Dz7pG2ojEifSBGC4QbFJFIfBoRbN88GIMu/Lm1woxd7ONhJFlfJ+dJeiDyuP0NKtSA==}
     cpu: [x64]
     os: [win32]
 
-  pnpm@12.4.2:
-    resolution: {integrity: sha512-CK3GYTGAJ1x8ntraOdzwjJxhrU5+rzMKTzRh8QKw+QdCNFTRF/mOctR/7wYWBwZE17/8lzpqV/UJCm18NosHyQ==}
+  '@pnpm/exe@12.13.0':
+    resolution: {integrity: sha512-8LTPPc49G82W7lUvjD4+gDOtSAqIbC0UK+n6nk3j5h/JokkYFcDF2ag9NwYj6xh//7GDnyNgNj2Z7Yh63g9vCw==}
+    engines: {node: '>=18.*'}
+    hasBin: true
+
+  pnpm@12.13.0:
+    resolution: {integrity: sha512-HlVxm/JugJ3OXFCE/euqZO+z2pA4rl1oqfimgxHxpFhByMO3ajcpjDtm9rzIBAmpt/M8eKcWij6Q+2Wl2CNa5A==}
     engines: {node: '>=18.*'}
     hasBin: true
 
 snapshots:
 
-  '@pnpm/exe.android-arm64@12.4.2':
+  '@pnpm/exe.android-arm64@12.13.0':
     optional: true
 
-  '@pnpm/exe.android-x64@12.4.2':
+  '@pnpm/exe.android-x64@12.13.0':
     optional: true
 
-  '@pnpm/exe.darwin-arm64@12.4.2':
+  '@pnpm/exe.darwin-arm64@12.13.0':
     optional: true
 
-  '@pnpm/exe.darwin-x64@12.4.2':
+  '@pnpm/exe.darwin-x64@12.13.0':
     optional: true
 
-  '@pnpm/exe.freebsd-x64@12.4.2':
+  '@pnpm/exe.freebsd-x64@12.13.0':
     optional: true
 
-  '@pnpm/exe.linux-arm64-musl@12.4.2':
+  '@pnpm/exe.linux-arm64-musl@12.13.0':
     optional: true
 
-  '@pnpm/exe.linux-arm64@12.4.2':
+  '@pnpm/exe.linux-arm64@12.13.0':
     optional: true
 
-  '@pnpm/exe.linux-ppc64@12.4.2':
+  '@pnpm/exe.linux-ppc64@12.13.0':
     optional: true
 
-  '@pnpm/exe.linux-riscv64@12.4.2':
+  '@pnpm/exe.linux-riscv64@12.13.0':
     optional: true
 
-  '@pnpm/exe.linux-s390x@12.4.2':
+  '@pnpm/exe.linux-s390x@12.13.0':
     optional: true
 
-  '@pnpm/exe.linux-x64-musl@12.4.2':
+  '@pnpm/exe.linux-x64-musl@12.13.0':
     optional: true
 
-  '@pnpm/exe.linux-x64@12.4.2':
+  '@pnpm/exe.linux-x64@12.13.0':
     optional: true
 
-  '@pnpm/exe.win32-arm64@12.4.2':
+  '@pnpm/exe.win32-arm64@12.13.0':
     optional: true
 
-  '@pnpm/exe.win32-x64@12.4.2':
+  '@pnpm/exe.win32-x64@12.13.0':
     optional: true
 
-  pnpm@12.4.2:
+  '@pnpm/exe@12.13.0':
     optionalDependencies:
-      '@pnpm/exe.android-arm64': 12.4.2
-      '@pnpm/exe.android-x64': 12.4.2
-      '@pnpm/exe.darwin-arm64': 12.4.2
-      '@pnpm/exe.darwin-x64': 12.4.2
-      '@pnpm/exe.freebsd-x64': 12.4.2
-      '@pnpm/exe.linux-arm64': 12.4.2
-      '@pnpm/exe.linux-arm64-musl': 12.4.2
-      '@pnpm/exe.linux-ppc64': 12.4.2
-      '@pnpm/exe.linux-riscv64': 12.4.2
-      '@pnpm/exe.linux-s390x': 12.4.2
-      '@pnpm/exe.linux-x64': 12.4.2
-      '@pnpm/exe.linux-x64-musl': 12.4.2
-      '@pnpm/exe.win32-arm64': 12.4.2
-      '@pnpm/exe.win32-x64': 12.4.2
+      '@pnpm/exe.android-arm64': 12.13.0
+      '@pnpm/exe.android-x64': 12.13.0
+      '@pnpm/exe.darwin-arm64': 12.13.0
+      '@pnpm/exe.darwin-x64': 12.13.0
+      '@pnpm/exe.freebsd-x64': 12.13.0
+      '@pnpm/exe.linux-arm64': 12.13.0
+      '@pnpm/exe.linux-arm64-musl': 12.13.0
+      '@pnpm/exe.linux-ppc64': 12.13.0
+      '@pnpm/exe.linux-riscv64': 12.13.0
+      '@pnpm/exe.linux-s390x': 12.13.0
+      '@pnpm/exe.linux-x64': 12.13.0
+      '@pnpm/exe.linux-x64-musl': 12.13.0
+      '@pnpm/exe.win32-arm64': 12.13.0
+      '@pnpm/exe.win32-x64': 12.13.0
+
+  pnpm@12.13.0:
+    optionalDependencies:
+      '@pnpm/exe.android-arm64': 12.13.0
+      '@pnpm/exe.android-x64': 12.13.0
+      '@pnpm/exe.darwin-arm64': 12.13.0
+      '@pnpm/exe.darwin-x64': 12.13.0
+      '@pnpm/exe.freebsd-x64': 12.13.0
+      '@pnpm/exe.linux-arm64': 12.13.0
+      '@pnpm/exe.linux-arm64-musl': 12.13.0
+      '@pnpm/exe.linux-ppc64': 12.13.0
+      '@pnpm/exe.linux-riscv64': 12.13.0
+      '@pnpm/exe.linux-s390x': 12.13.0
+      '@pnpm/exe.linux-x64': 12.13.0
+      '@pnpm/exe.linux-x64-musl': 12.13.0
+      '@pnpm/exe.win32-arm64': 12.13.0
+      '@pnpm/exe.win32-x64': 12.13.0
 
 ---
 lockfileVersion: '9.0'
@@ -203,9 +228,6 @@ importers:
       '@simplewebauthn/server':
         specifier: 13.3.3
         version: 13.3.3
-      '@stamhoofd/cli':
-        specifier: workspace:*
-        version: link:shared/cli
       '@xmldom/xmldom':
         specifier: ^0.9.10
         version: 0.9.12
@@ -279,9 +301,6 @@ importers:
       '@oxc-project/runtime':
         specifier: 0.153.0
         version: 0.153.0
-      '@stamhoofd/test-utils':
-        specifier: workspace:*
-        version: link:shared/test-utils
       '@stamhoofd/types':
         specifier: workspace:*
         version: link:shared/types
@@ -538,8 +557,8 @@ importers:
         specifier: 3.5.4
         version: 3.5.4
       handlebars:
-        specifier: 4.7.9
-        version: 4.7.9
+        specifier: 4.7.10
+        version: 4.7.10
       jose:
         specifier: 5.10.0
         version: 5.10.0
@@ -869,12 +888,16 @@ importers:
       '@simonbackx/simple-logging':
         specifier: 1.0.1
         version: 1.0.1
-      '@stamhoofd/utility':
-        specifier: workspace:*
-        version: link:../../../shared/utility
       mysql2:
         specifier: 3.24.5
         version: 3.24.5(@types/node@22.20.4)
+    devDependencies:
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../../../shared/types
+      '@stamhoofd/utility':
+        specifier: workspace:*
+        version: link:../../../shared/utility
 
   backend/shared/email:
     dependencies:
@@ -884,24 +907,9 @@ importers:
       '@simonbackx/simple-errors':
         specifier: 1.5.0
         version: 1.5.0(@simonbackx/simple-encoding@2.26.11)(uuid@14.0.2)
-      '@stamhoofd/backend-i18n':
-        specifier: workspace:*
-        version: link:../i18n
-      '@stamhoofd/queues':
-        specifier: workspace:*
-        version: link:../queues
-      '@stamhoofd/sql':
-        specifier: workspace:*
-        version: link:../sql
       '@stamhoofd/test-utils':
         specifier: workspace:*
         version: link:../../../shared/test-utils
-      '@stamhoofd/types':
-        specifier: workspace:*
-        version: link:../../../shared/types
-      '@stamhoofd/utility':
-        specifier: workspace:*
-        version: link:../../../shared/utility
       html-to-text:
         specifier: 10.0.1
         version: 10.0.1
@@ -915,6 +923,21 @@ importers:
         specifier: 14.0.2
         version: 14.0.2
     devDependencies:
+      '@stamhoofd/backend-i18n':
+        specifier: workspace:*
+        version: link:../i18n
+      '@stamhoofd/queues':
+        specifier: workspace:*
+        version: link:../queues
+      '@stamhoofd/sql':
+        specifier: workspace:*
+        version: link:../sql
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../../../shared/types
+      '@stamhoofd/utility':
+        specifier: workspace:*
+        version: link:../../../shared/utility
       '@types/html-to-text':
         specifier: 9.0.4
         version: 9.0.4
@@ -930,19 +953,19 @@ importers:
 
   backend/shared/env:
     dependencies:
-      '@stamhoofd/cli':
-        specifier: workspace:*
-        version: link:../../../shared/cli
       '@stamhoofd/test-utils':
         specifier: workspace:*
         version: link:../../../shared/test-utils
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../../../shared/types
       chalk:
         specifier: 5.6.2
         version: 5.6.2
     devDependencies:
-      '@stamhoofd/types':
+      '@stamhoofd/cli':
         specifier: workspace:*
-        version: link:../../../shared/types
+        version: link:../../../shared/cli
 
   backend/shared/i18n:
     dependencies:
@@ -952,6 +975,7 @@ importers:
       '@simonbackx/simple-logging':
         specifier: 1.0.1
         version: 1.0.1
+    devDependencies:
       '@stamhoofd/locales':
         specifier: workspace:*
         version: link:../../../shared/locales
@@ -968,6 +992,9 @@ importers:
         specifier: 1.0.1
         version: 1.0.1
     devDependencies:
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../../../shared/types
       vitest:
         specifier: 4.1.11
         version: 4.1.11(@types/node@22.20.4)(@vitest/browser-playwright@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@24.1.3(supports-color@5.5.0))(vite@8.3.2(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.1)(terser@5.51.2)(yaml@2.9.0))
@@ -983,9 +1010,13 @@ importers:
       '@simonbackx/simple-logging':
         specifier: 1.0.1
         version: 1.0.1
+    devDependencies:
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../../../shared/types
 
   backend/shared/models:
     dependencies:
@@ -1010,6 +1041,25 @@ importers:
       '@simonbackx/simple-errors':
         specifier: 1.5.0
         version: 1.5.0(@simonbackx/simple-encoding@2.26.11)(uuid@14.0.2)
+      argon2:
+        specifier: 0.45.1
+        version: 0.45.1
+      base-x:
+        specifier: 3.0.11
+        version: 3.0.11
+      handlebars:
+        specifier: 4.7.10
+        version: 4.7.10
+      luxon:
+        specifier: 3.7.2
+        version: 3.7.2
+      sharp:
+        specifier: 0.35.5
+        version: 0.35.5(@types/node@22.20.4)
+      uuid:
+        specifier: 14.0.2
+        version: 14.0.2
+    devDependencies:
       '@stamhoofd/backend-i18n':
         specifier: workspace:*
         version: link:../i18n
@@ -1025,34 +1075,15 @@ importers:
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
+      '@stamhoofd/test-utils':
+        specifier: workspace:*
+        version: link:../../../shared/test-utils
       '@stamhoofd/types':
         specifier: workspace:*
         version: link:../../../shared/types
       '@stamhoofd/utility':
         specifier: workspace:*
         version: link:../../../shared/utility
-      argon2:
-        specifier: 0.45.1
-        version: 0.45.1
-      base-x:
-        specifier: 3.0.11
-        version: 3.0.11
-      handlebars:
-        specifier: 4.7.9
-        version: 4.7.9
-      luxon:
-        specifier: 3.7.2
-        version: 3.7.2
-      sharp:
-        specifier: 0.35.5
-        version: 0.35.5(@types/node@22.20.4)
-      uuid:
-        specifier: 14.0.2
-        version: 14.0.2
-    devDependencies:
-      '@stamhoofd/test-utils':
-        specifier: workspace:*
-        version: link:../../../shared/test-utils
       '@types/luxon':
         specifier: 3.7.6
         version: 3.7.6
@@ -1072,6 +1103,9 @@ importers:
         specifier: 1.5.0
         version: 1.5.0(@simonbackx/simple-encoding@2.26.11)(uuid@9.0.1)
     devDependencies:
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../../../shared/types
       vitest:
         specifier: 4.1.11
         version: 4.1.11(@types/node@22.20.4)(@vitest/browser-playwright@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@24.1.3(supports-color@5.5.0))(vite@8.3.2(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.1)(terser@5.51.2)(yaml@2.9.0))
@@ -1090,22 +1124,22 @@ importers:
       '@simonbackx/simple-logging':
         specifier: 1.0.1
         version: 1.0.1
+      lru-cache:
+        specifier: 11.5.3
+        version: 11.5.3
+    devDependencies:
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
+      '@stamhoofd/test-utils':
+        specifier: workspace:*
+        version: link:../../../shared/test-utils
       '@stamhoofd/types':
         specifier: workspace:*
         version: link:../../../shared/types
       '@stamhoofd/utility':
         specifier: workspace:*
         version: link:../../../shared/utility
-      lru-cache:
-        specifier: 11.5.3
-        version: 11.5.3
-    devDependencies:
-      '@stamhoofd/test-utils':
-        specifier: workspace:*
-        version: link:../../../shared/test-utils
       mysql2:
         specifier: 3.24.5
         version: 3.24.5(@types/node@22.20.4)
@@ -1207,9 +1241,15 @@ importers:
       '@stamhoofd/components':
         specifier: workspace:*
         version: link:../../shared/components
+      '@stamhoofd/dashboard':
+        specifier: workspace:*
+        version: link:../dashboard
       '@stamhoofd/document-helper':
         specifier: workspace:*
         version: link:../../shared/document-helper
+      '@stamhoofd/frontend-application':
+        specifier: workspace:*
+        version: link:../../shared/application
       '@stamhoofd/frontend-excel-export':
         specifier: workspace:*
         version: link:../../shared/excel-export
@@ -1219,12 +1259,18 @@ importers:
       '@stamhoofd/frontend-pdf-builder':
         specifier: workspace:*
         version: link:../../shared/pdf-builder
+      '@stamhoofd/frontend-session':
+        specifier: workspace:*
+        version: link:../../shared/session
       '@stamhoofd/networking':
         specifier: workspace:*
         version: link:../../shared/networking
       '@stamhoofd/scss':
         specifier: workspace:*
         version: link:../../shared/scss
+      '@stamhoofd/sgv-frontend':
+        specifier: workspace:*
+        version: link:../../shared/sgv
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
@@ -1268,6 +1314,9 @@ importers:
       '@stamhoofd/document-helper':
         specifier: workspace:*
         version: link:../../shared/document-helper
+      '@stamhoofd/frontend-application':
+        specifier: workspace:*
+        version: link:../../shared/application
       '@stamhoofd/frontend-excel-export':
         specifier: workspace:*
         version: link:../../shared/excel-export
@@ -1277,6 +1326,15 @@ importers:
       '@stamhoofd/frontend-pdf-builder':
         specifier: workspace:*
         version: link:../../shared/pdf-builder
+      '@stamhoofd/frontend-platform':
+        specifier: workspace:*
+        version: link:../../shared/platform
+      '@stamhoofd/frontend-session':
+        specifier: workspace:*
+        version: link:../../shared/session
+      '@stamhoofd/frontend-storage':
+        specifier: workspace:*
+        version: link:../../shared/storage
       '@stamhoofd/networking':
         specifier: workspace:*
         version: link:../../shared/networking
@@ -1329,6 +1387,9 @@ importers:
       '@stamhoofd/frontend-pdf-builder':
         specifier: workspace:*
         version: link:../../shared/pdf-builder
+      '@stamhoofd/frontend-platform':
+        specifier: workspace:*
+        version: link:../../shared/platform
       '@stamhoofd/networking':
         specifier: workspace:*
         version: link:../../shared/networking
@@ -1387,6 +1448,9 @@ importers:
       '@stamhoofd/excel-writer':
         specifier: workspace:*
         version: link:../../../shared/excel-writer
+      '@stamhoofd/frontend-application':
+        specifier: workspace:*
+        version: link:../../shared/application
       '@stamhoofd/frontend-excel-export':
         specifier: workspace:*
         version: link:../../shared/excel-export
@@ -1396,6 +1460,15 @@ importers:
       '@stamhoofd/frontend-pdf-builder':
         specifier: workspace:*
         version: link:../../shared/pdf-builder
+      '@stamhoofd/frontend-platform':
+        specifier: workspace:*
+        version: link:../../shared/platform
+      '@stamhoofd/frontend-session':
+        specifier: workspace:*
+        version: link:../../shared/session
+      '@stamhoofd/frontend-storage':
+        specifier: workspace:*
+        version: link:../../shared/storage
       '@stamhoofd/networking':
         specifier: workspace:*
         version: link:../../shared/networking
@@ -1544,6 +1617,12 @@ importers:
       '@stamhoofd/frontend-pdf-builder':
         specifier: workspace:*
         version: link:../../shared/pdf-builder
+      '@stamhoofd/frontend-platform':
+        specifier: workspace:*
+        version: link:../../shared/platform
+      '@stamhoofd/frontend-storage':
+        specifier: workspace:*
+        version: link:../../shared/storage
       '@stamhoofd/networking':
         specifier: workspace:*
         version: link:../../shared/networking
@@ -1572,6 +1651,9 @@ importers:
       '@capacitor/cli':
         specifier: 8.5.2
         version: 8.5.2(supports-color@10.2.2)
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../../../shared/types
       '@stamhoofd/vite-config':
         specifier: workspace:*
         version: link:../../shared/vite-config
@@ -1608,15 +1690,24 @@ importers:
       '@stamhoofd/document-helper':
         specifier: workspace:*
         version: link:../../shared/document-helper
+      '@stamhoofd/frontend-application':
+        specifier: workspace:*
+        version: link:../../shared/application
       '@stamhoofd/frontend-i18n':
         specifier: workspace:*
         version: link:../../shared/i18n
+      '@stamhoofd/frontend-storage':
+        specifier: workspace:*
+        version: link:../../shared/storage
       '@stamhoofd/networking':
         specifier: workspace:*
         version: link:../../shared/networking
       '@stamhoofd/scss':
         specifier: workspace:*
         version: link:../../shared/scss
+      '@stamhoofd/sgv-frontend':
+        specifier: workspace:*
+        version: link:../../shared/sgv
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
@@ -1645,6 +1736,9 @@ importers:
       '@stamhoofd/components':
         specifier: workspace:*
         version: link:../../shared/components
+      '@stamhoofd/frontend-application':
+        specifier: workspace:*
+        version: link:../../shared/application
       '@stamhoofd/networking':
         specifier: workspace:*
         version: link:../../shared/networking
@@ -1694,6 +1788,9 @@ importers:
       '@stamhoofd/document-helper':
         specifier: workspace:*
         version: link:../../shared/document-helper
+      '@stamhoofd/frontend-application':
+        specifier: workspace:*
+        version: link:../../shared/application
       '@stamhoofd/frontend-excel-export':
         specifier: workspace:*
         version: link:../../shared/excel-export
@@ -1703,6 +1800,15 @@ importers:
       '@stamhoofd/frontend-pdf-builder':
         specifier: workspace:*
         version: link:../../shared/pdf-builder
+      '@stamhoofd/frontend-platform':
+        specifier: workspace:*
+        version: link:../../shared/platform
+      '@stamhoofd/frontend-session':
+        specifier: workspace:*
+        version: link:../../shared/session
+      '@stamhoofd/frontend-storage':
+        specifier: workspace:*
+        version: link:../../shared/storage
       '@stamhoofd/networking':
         specifier: workspace:*
         version: link:../../shared/networking
@@ -1712,6 +1818,9 @@ importers:
       '@stamhoofd/scss':
         specifier: workspace:*
         version: link:../../shared/scss
+      '@stamhoofd/sgv-frontend':
+        specifier: workspace:*
+        version: link:../../shared/sgv
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
@@ -1761,9 +1870,18 @@ importers:
       '@stamhoofd/components':
         specifier: workspace:*
         version: link:../../shared/components
+      '@stamhoofd/frontend-application':
+        specifier: workspace:*
+        version: link:../../shared/application
       '@stamhoofd/frontend-i18n':
         specifier: workspace:*
         version: link:../../shared/i18n
+      '@stamhoofd/frontend-platform':
+        specifier: workspace:*
+        version: link:../../shared/platform
+      '@stamhoofd/frontend-session':
+        specifier: workspace:*
+        version: link:../../shared/session
       '@stamhoofd/networking':
         specifier: workspace:*
         version: link:../../shared/networking
@@ -1799,6 +1917,67 @@ importers:
         specifier: 8.3.2
         version: 8.3.2(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.1)(terser@5.51.2)(yaml@2.9.0)
 
+  frontend/shared/application:
+    dependencies:
+      '@simonbackx/simple-encoding':
+        specifier: 2.26.11
+        version: 2.26.11(@simonbackx/simple-errors@1.5.0)(tslib@2.8.1)
+      '@simonbackx/simple-errors':
+        specifier: 1.5.0
+        version: 1.5.0(@simonbackx/simple-encoding@2.26.11)(uuid@9.0.1)
+      '@simonbackx/simple-networking':
+        specifier: 1.23.0
+        version: 1.23.0(@simonbackx/simple-encoding@2.26.11)(@simonbackx/simple-errors@1.5.0)
+      '@simplewebauthn/browser':
+        specifier: 13.3.0
+        version: 13.3.0
+      '@stamhoofd/frontend-i18n':
+        specifier: workspace:*
+        version: link:../i18n
+      '@stamhoofd/frontend-notifications':
+        specifier: workspace:*
+        version: link:../notifications
+      '@stamhoofd/frontend-platform':
+        specifier: workspace:*
+        version: link:../platform
+      '@stamhoofd/frontend-session':
+        specifier: workspace:*
+        version: link:../session
+      '@stamhoofd/frontend-storage':
+        specifier: workspace:*
+        version: link:../storage
+      '@stamhoofd/networking':
+        specifier: workspace:*
+        version: link:../networking
+      '@stamhoofd/structures':
+        specifier: workspace:*
+        version: link:../../../shared/structures
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../../../shared/types
+      '@stamhoofd/utility':
+        specifier: workspace:*
+        version: link:../../../shared/utility
+      vue:
+        specifier: 3.5.43
+        version: 3.5.43(typescript@6.0.3)
+    devDependencies:
+      '@simonbackx/vue-app-navigation':
+        specifier: 2.25.1
+        version: 2.25.1(tslib@2.8.1)(vue@3.5.43(typescript@6.0.3))
+      '@stamhoofd/vite-config':
+        specifier: workspace:*
+        version: link:../vite-config
+      eslint-plugin-stamhoofd:
+        specifier: workspace:*
+        version: link:../../../shared/eslint
+      vite:
+        specifier: 8.3.2
+        version: 8.3.2(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.1)(terser@5.51.2)(yaml@2.9.0)
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@22.20.4)(@vitest/browser-playwright@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@24.1.3(supports-color@10.2.2))(vite@8.3.2(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.1)(terser@5.51.2)(yaml@2.9.0))
+
   frontend/shared/assets: {}
 
   frontend/shared/components:
@@ -1821,18 +2000,30 @@ importers:
       '@stamhoofd/assets':
         specifier: workspace:*
         version: link:../assets
-      '@stamhoofd/dashboard':
+      '@stamhoofd/frontend-application':
         specifier: workspace:*
-        version: link:../../app/dashboard
+        version: link:../application
       '@stamhoofd/frontend-excel-export':
         specifier: workspace:*
         version: link:../excel-export
       '@stamhoofd/frontend-i18n':
         specifier: workspace:*
         version: link:../i18n
+      '@stamhoofd/frontend-notifications':
+        specifier: workspace:*
+        version: link:../notifications
       '@stamhoofd/frontend-pdf-builder':
         specifier: workspace:*
         version: link:../pdf-builder
+      '@stamhoofd/frontend-platform':
+        specifier: workspace:*
+        version: link:../platform
+      '@stamhoofd/frontend-session':
+        specifier: workspace:*
+        version: link:../session
+      '@stamhoofd/frontend-storage':
+        specifier: workspace:*
+        version: link:../storage
       '@stamhoofd/locales':
         specifier: workspace:*
         version: link:../../../shared/locales
@@ -1845,9 +2036,6 @@ importers:
       '@stamhoofd/scss':
         specifier: workspace:*
         version: link:../scss
-      '@stamhoofd/sgv-frontend':
-        specifier: workspace:*
-        version: link:../sgv
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
@@ -1978,6 +2166,12 @@ importers:
       '@stamhoofd/components':
         specifier: workspace:*
         version: link:../components
+      '@stamhoofd/frontend-platform':
+        specifier: workspace:*
+        version: link:../platform
+      '@stamhoofd/frontend-session':
+        specifier: workspace:*
+        version: link:../session
       '@stamhoofd/networking':
         specifier: workspace:*
         version: link:../networking
@@ -2003,15 +2197,9 @@ importers:
       '@simonbackx/vue-app-navigation':
         specifier: 2.25.1
         version: 2.25.1(tslib@2.8.1)(vue@3.5.43(typescript@6.0.3))
-      '@stamhoofd/components':
-        specifier: workspace:*
-        version: link:../components
       '@stamhoofd/excel-writer':
         specifier: workspace:*
         version: link:../../../shared/excel-writer
-      '@stamhoofd/networking':
-        specifier: workspace:*
-        version: link:../networking
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
@@ -2031,12 +2219,12 @@ importers:
       '@simonbackx/vue-app-navigation':
         specifier: 2.25.1
         version: 2.25.1(tslib@2.8.1)(vue@3.5.43(typescript@6.0.3))
+      '@stamhoofd/frontend-storage':
+        specifier: workspace:*
+        version: link:../storage
       '@stamhoofd/locales':
         specifier: workspace:*
         version: link:../../../shared/locales
-      '@stamhoofd/networking':
-        specifier: workspace:*
-        version: link:../networking
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
@@ -2068,15 +2256,9 @@ importers:
       '@simonbackx/vue-app-navigation':
         specifier: 2.25.1
         version: 2.25.1(tslib@2.8.1)(vue@3.5.43(typescript@6.0.3))
-      '@simplewebauthn/browser':
-        specifier: 13.3.0
-        version: 13.3.0
-      '@stamhoofd/components':
+      '@stamhoofd/frontend-notifications':
         specifier: workspace:*
-        version: link:../components
-      '@stamhoofd/frontend-i18n':
-        specifier: workspace:*
-        version: link:../i18n
+        version: link:../notifications
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
@@ -2086,9 +2268,6 @@ importers:
       '@stamhoofd/utility':
         specifier: workspace:*
         version: link:../../../shared/utility
-      file-saver:
-        specifier: 2.0.5
-        version: 2.0.5
       vue:
         specifier: 3.5.43
         version: 3.5.43(typescript@6.0.3)
@@ -2099,9 +2278,6 @@ importers:
       '@stamhoofd/vite-config':
         specifier: workspace:*
         version: link:../vite-config
-      '@types/file-saver':
-        specifier: 2.0.7
-        version: 2.0.7
       '@vitest/browser':
         specifier: 4.1.11
         version: 4.1.11(vite@8.3.2(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.1)(terser@5.51.2)(yaml@2.9.0))(vitest@4.1.11)
@@ -2118,14 +2294,42 @@ importers:
         specifier: 2.1.0
         version: 2.1.0(@vue/compiler-dom@3.5.43)(@vue/server-renderer@3.5.40)(vitest@4.1.11)(vue@3.5.43(typescript@6.0.3))
 
+  frontend/shared/notifications:
+    dependencies:
+      '@simonbackx/simple-errors':
+        specifier: 1.5.0
+        version: 1.5.0(@simonbackx/simple-encoding@2.26.11)(uuid@9.0.1)
+      '@simonbackx/simple-networking':
+        specifier: 1.23.0
+        version: 1.23.0(@simonbackx/simple-encoding@2.26.11)(@simonbackx/simple-errors@1.5.0)
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../../../shared/types
+      vue:
+        specifier: 3.5.43
+        version: 3.5.43(typescript@6.0.3)
+    devDependencies:
+      '@stamhoofd/vite-config':
+        specifier: workspace:*
+        version: link:../vite-config
+      eslint-plugin-stamhoofd:
+        specifier: workspace:*
+        version: link:../../../shared/eslint
+      vite:
+        specifier: 8.3.2
+        version: 8.3.2(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.1)(terser@5.51.2)(yaml@2.9.0)
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@22.20.4)(@vitest/browser-playwright@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@24.1.3(supports-color@10.2.2))(vite@8.3.2(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.1)(terser@5.51.2)(yaml@2.9.0))
+
   frontend/shared/pdf-builder:
     dependencies:
       '@stamhoofd/assets':
         specifier: workspace:*
         version: link:../assets
-      '@stamhoofd/components':
+      '@stamhoofd/frontend-platform':
         specifier: workspace:*
-        version: link:../components
+        version: link:../platform
       '@stamhoofd/networking':
         specifier: workspace:*
         version: link:../networking
@@ -2143,11 +2347,91 @@ importers:
         specifier: workspace:*
         version: link:../../../shared/eslint
 
+  frontend/shared/platform:
+    dependencies:
+      '@simonbackx/vue-app-navigation':
+        specifier: 2.25.1
+        version: 2.25.1(tslib@2.8.1)(vue@3.5.43(typescript@6.0.3))
+      '@stamhoofd/structures':
+        specifier: workspace:*
+        version: link:../../../shared/structures
+      file-saver:
+        specifier: 2.0.5
+        version: 2.0.5
+    devDependencies:
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../../../shared/types
+      '@stamhoofd/vite-config':
+        specifier: workspace:*
+        version: link:../vite-config
+      '@types/file-saver':
+        specifier: 2.0.7
+        version: 2.0.7
+      eslint-plugin-stamhoofd:
+        specifier: workspace:*
+        version: link:../../../shared/eslint
+      vite:
+        specifier: 8.3.2
+        version: 8.3.2(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.1)(terser@5.51.2)(yaml@2.9.0)
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@22.20.4)(@vitest/browser-playwright@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@24.1.3(supports-color@10.2.2))(vite@8.3.2(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.1)(terser@5.51.2)(yaml@2.9.0))
+
   frontend/shared/scss:
     dependencies:
       '@stamhoofd/assets':
         specifier: workspace:*
         version: link:../assets
+
+  frontend/shared/session:
+    dependencies:
+      '@simonbackx/simple-encoding':
+        specifier: 2.26.11
+        version: 2.26.11(@simonbackx/simple-errors@1.5.0)(tslib@2.8.1)
+      '@simonbackx/simple-errors':
+        specifier: 1.5.0
+        version: 1.5.0(@simonbackx/simple-encoding@2.26.11)(uuid@9.0.1)
+      '@simonbackx/simple-networking':
+        specifier: 1.23.0
+        version: 1.23.0(@simonbackx/simple-encoding@2.26.11)(@simonbackx/simple-errors@1.5.0)
+      '@simonbackx/vue-app-navigation':
+        specifier: 2.25.1
+        version: 2.25.1(tslib@2.8.1)(vue@3.5.43(typescript@6.0.3))
+      '@stamhoofd/frontend-notifications':
+        specifier: workspace:*
+        version: link:../notifications
+      '@stamhoofd/frontend-platform':
+        specifier: workspace:*
+        version: link:../platform
+      '@stamhoofd/frontend-storage':
+        specifier: workspace:*
+        version: link:../storage
+      '@stamhoofd/networking':
+        specifier: workspace:*
+        version: link:../networking
+      '@stamhoofd/structures':
+        specifier: workspace:*
+        version: link:../../../shared/structures
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../../../shared/types
+      vue:
+        specifier: 3.5.43
+        version: 3.5.43(typescript@6.0.3)
+    devDependencies:
+      '@stamhoofd/vite-config':
+        specifier: workspace:*
+        version: link:../vite-config
+      eslint-plugin-stamhoofd:
+        specifier: workspace:*
+        version: link:../../../shared/eslint
+      vite:
+        specifier: 8.3.2
+        version: 8.3.2(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.1)(terser@5.51.2)(yaml@2.9.0)
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@22.20.4)(@vitest/browser-playwright@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@24.1.3(supports-color@10.2.2))(vite@8.3.2(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.1)(terser@5.51.2)(yaml@2.9.0))
 
   frontend/shared/sgv:
     dependencies:
@@ -2169,6 +2453,15 @@ importers:
       '@stamhoofd/components':
         specifier: workspace:*
         version: link:../components
+      '@stamhoofd/frontend-application':
+        specifier: workspace:*
+        version: link:../application
+      '@stamhoofd/frontend-session':
+        specifier: workspace:*
+        version: link:../session
+      '@stamhoofd/frontend-storage':
+        specifier: workspace:*
+        version: link:../storage
       '@stamhoofd/networking':
         specifier: workspace:*
         version: link:../networking
@@ -2188,15 +2481,33 @@ importers:
         specifier: 3.5.43
         version: 3.5.43(typescript@6.0.3)
     devDependencies:
+      '@stamhoofd/test-utils':
+        specifier: workspace:*
+        version: link:../../../shared/test-utils
+      '@stamhoofd/vite-config':
+        specifier: workspace:*
+        version: link:../vite-config
       '@vue/test-utils':
         specifier: 2.5.1
         version: 2.5.1(@vue/compiler-dom@3.5.43)(@vue/server-renderer@3.5.40)(vue@3.5.43(typescript@6.0.3))
       eslint-plugin-stamhoofd:
         specifier: workspace:*
         version: link:../../../shared/eslint
+      vite:
+        specifier: 8.3.2
+        version: 8.3.2(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.1)(terser@5.51.2)(yaml@2.9.0)
       vitest:
         specifier: 4.1.11
         version: 4.1.11(@types/node@22.20.4)(@vitest/browser-playwright@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@24.1.3(supports-color@5.5.0))(vite@8.3.2(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.1)(terser@5.51.2)(yaml@2.9.0))
+      vitest-browser-vue:
+        specifier: 2.1.0
+        version: 2.1.0(@vue/compiler-dom@3.5.43)(@vue/server-renderer@3.5.40)(vitest@4.1.11)(vue@3.5.43(typescript@6.0.3))
+
+  frontend/shared/storage:
+    devDependencies:
+      eslint-plugin-stamhoofd:
+        specifier: workspace:*
+        version: link:../../../shared/eslint
 
   frontend/shared/ticket-builder:
     dependencies:
@@ -2206,6 +2517,9 @@ importers:
       '@stamhoofd/frontend-i18n':
         specifier: workspace:*
         version: link:../i18n
+      '@stamhoofd/frontend-platform':
+        specifier: workspace:*
+        version: link:../platform
       '@stamhoofd/networking':
         specifier: workspace:*
         version: link:../networking
@@ -2270,9 +2584,12 @@ importers:
 
   frontend/tests:
     devDependencies:
-      '@stamhoofd/frontend-i18n':
+      '@stamhoofd/components':
         specifier: workspace:*
-        version: link:../shared/i18n
+        version: link:../shared/components
+      '@stamhoofd/frontend-application':
+        specifier: workspace:*
+        version: link:../shared/application
       '@stamhoofd/test-utils':
         specifier: workspace:*
         version: link:../../shared/test-utils
@@ -2374,9 +2691,6 @@ importers:
       '@simonbackx/simple-errors':
         specifier: 1.5.0
         version: 1.5.0(@simonbackx/simple-encoding@2.26.11)(uuid@14.0.2)
-      '@stamhoofd/utility':
-        specifier: workspace:*
-        version: link:../utility
       archiver:
         specifier: 7.0.1
         version: 7.0.1
@@ -2387,6 +2701,12 @@ importers:
         specifier: 14.0.2
         version: 14.0.2
     devDependencies:
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../types
+      '@stamhoofd/utility':
+        specifier: workspace:*
+        version: link:../utility
       '@types/archiver':
         specifier: 6.0.4
         version: 6.0.4
@@ -2408,6 +2728,9 @@ importers:
       '@stamhoofd/test-utils':
         specifier: workspace:*
         version: link:../test-utils
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../types
       vitest:
         specifier: 4.1.11
         version: 4.1.11(@types/node@22.20.4)(@vitest/browser-playwright@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@24.1.3(supports-color@5.5.0))(vite@8.3.2(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.1)(terser@5.51.2)(yaml@2.9.0))
@@ -2417,19 +2740,22 @@ importers:
       '@simonbackx/simple-encoding':
         specifier: 2.26.11
         version: 2.26.11(@simonbackx/simple-errors@1.5.0)(tslib@2.8.1)
-      '@stamhoofd/structures':
-        specifier: workspace:*
-        version: link:../structures
-      '@stamhoofd/utility':
-        specifier: workspace:*
-        version: link:../utility
       uuid:
         specifier: 14.0.2
         version: 14.0.2
     devDependencies:
+      '@stamhoofd/structures':
+        specifier: workspace:*
+        version: link:../structures
       '@stamhoofd/test-utils':
         specifier: workspace:*
         version: link:../test-utils
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../types
+      '@stamhoofd/utility':
+        specifier: workspace:*
+        version: link:../utility
       '@types/uuid':
         specifier: 8.3.4
         version: 8.3.4
@@ -2476,15 +2802,6 @@ importers:
       '@simonbackx/simple-encoding':
         specifier: 2.26.11
         version: 2.26.11(@simonbackx/simple-errors@1.5.0)(tslib@2.8.1)
-      '@stamhoofd/excel-writer':
-        specifier: workspace:*
-        version: link:../excel-writer
-      '@stamhoofd/types':
-        specifier: workspace:*
-        version: link:../types
-      '@stamhoofd/utility':
-        specifier: workspace:*
-        version: link:../utility
       uuid:
         specifier: 14.0.2
         version: 14.0.2
@@ -2492,9 +2809,18 @@ importers:
       '@simonbackx/simple-errors':
         specifier: 1.5.0
         version: 1.5.0(@simonbackx/simple-encoding@2.26.11)(uuid@14.0.2)
+      '@stamhoofd/excel-writer':
+        specifier: workspace:*
+        version: link:../excel-writer
       '@stamhoofd/test-utils':
         specifier: workspace:*
         version: link:../test-utils
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../types
+      '@stamhoofd/utility':
+        specifier: workspace:*
+        version: link:../utility
       '@types/uuid':
         specifier: 8.3.4
         version: 8.3.4
@@ -2502,7 +2828,11 @@ importers:
         specifier: 4.1.11
         version: 4.1.11(@types/node@22.20.4)(@vitest/browser-playwright@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@24.1.3(supports-color@5.5.0))(vite@8.3.2(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.1)(terser@5.51.2)(yaml@2.9.0))
 
-  shared/test-utils: {}
+  shared/test-utils:
+    devDependencies:
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../types
 
   shared/types:
     dependencies:
@@ -9647,6 +9977,11 @@ packages:
 
   h3@1.15.11:
     resolution: {integrity: sha512-L3THSe2MPeBwgIZVSH5zLdBBU90TOxarvhK9d04IDY2AmVS8j2Jz2LIWtwsGOU3lu2I5jCN7FNvVfY2+XyF+mg==}
+
+  handlebars@4.7.10:
+    resolution: {integrity: sha512-P5VJMVM7qgBn6vjXMw8WG9uVI+ncf2pi72j4de4yz5ZULLj2RGqLYaKOYGsgyrViQ0tePOVlN1tDCCXXtFqXKg==}
+    engines: {node: '>=0.4.7'}
+    hasBin: true
 
   handlebars@4.7.9:
     resolution: {integrity: sha512-4E71E0rpOaQuJR2A3xDZ+GM1HyWYv1clR58tC8emQNeQe3RH7MAzSbat+V0wG78LQBo6m6bzSG/L4pBuCsgnUQ==}
@@ -22586,6 +22921,15 @@ snapshots:
       radix3: 1.1.2
       ufo: 1.6.4
       uncrypto: 0.1.3
+
+  handlebars@4.7.10:
+    dependencies:
+      minimist: 1.2.8
+      neo-async: 2.6.2
+      source-map: 0.6.1
+      wordwrap: 1.0.0
+    optionalDependencies:
+      uglify-js: 3.19.3
 
   handlebars@4.7.9:
     dependencies:

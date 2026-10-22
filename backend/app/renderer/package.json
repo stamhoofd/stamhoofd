@@ -1,24 +1,34 @@
 {
     "name": "@stamhoofd/backend-renderer",
-    "version": "2.154.0",
+    "version": "2.155.0",
     "type": "module",
     "main": "./dist/index.js",
     "exports": {
         ".": {
+            "types": "./dist-types/index.d.ts",
             "require": "./dist/index.js"
         }
     },
+    "types": "./dist-types/index.d.ts",
+    "files": [
+        "dist",
+        "dist-types",
+        "src",
+        "*.ts",
+        "tsconfig*.json"
+    ],
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
+        "build:types": "tsc --project tsconfig.types.json",
         "build:full": "pnpm run clear && pnpm run build",
         "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
         "dev": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'pnpm run build --watch --preserveWatchOutput' \"wait-on ./dist/index.js && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
-        "lint": "eslint",
+        "lint": "eslint --quiet",
         "start": "pnpm run build && node --enable-source-maps ./dist/index.js",
-        "typecheck": "tsc --build tsconfig.test.json",
+        "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
         "test": "vitest",
         "test:coverage": "vitest --coverage",
-        "postinstall": "puppeteer browsers install chrome"
+        "postinstall": "node -e \"if (process.env.PUPPETEER_SKIP_DOWNLOAD !== 'true') require('node:child_process').execSync('puppeteer browsers install chrome', { stdio: 'inherit' })\""
     },
     "dependencies": {
         "@simonbackx/simple-database": "1.40.1",

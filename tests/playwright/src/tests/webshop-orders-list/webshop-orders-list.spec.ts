@@ -26,6 +26,7 @@ test.describe('Orders list @webshop-orders-list', () => {
     test.describe.configure({ timeout: 5 * 60_000 });
 
     test.beforeAll(async () => {
+        test.setTimeout(5 * 60_000);
         TestUtils.setPermanentEnvironment('userMode', 'organization');
         shop = await createOrdersListWebshop('OrdersList', { ticketType: WebshopTicketType.Tickets });
         orders = await TestOrders.create(shop.webshop, mixedOrderSeeds(150, { withTickets: true }));
@@ -98,6 +99,39 @@ test.describe('Orders list @webshop-orders-list', () => {
         await table.expectCount(1, orders.length);
         await expect(table.getOrderRow(order.name)).toContainText(`${scanned} / ${order.tickets.length}`);
         await expect(table.getErrorBox()).toHaveCount(0);
+
+        await context.close();
+    });
+
+    test('A phone search with more matches than one page keeps every order in a sort on name', async ({ browser }) => {
+        // A complete phone number is looked up in the index: its matches are sorted in memory and paged after the last order
+        const phoneShop = await createOrdersListWebshop('OrdersPhone');
+        const seeds = mixedOrderSeeds(135).map((seed, i) => (i < 130 ? { ...seed, phone: '+32 478 12 34 56' } : seed));
+        const phoneOrders = await TestOrders.create(phoneShop.webshop, seeds);
+        const matches = phoneOrders.filter(o => o.seed.phone);
+
+        const { context, table } = await openOrdersList(browser, phoneShop);
+        await table.search('0478 12 34 56');
+        await table.expectCount(matches.length, phoneOrders.length);
+        await table.sortOn('Naam', 'ASC');
+        expect(await table.readNames(names(phoneOrders))).toEqual(names(sortOrders(matches, o => o.name, 'ASC')));
+
+        await context.close();
+    });
+
+    test('A search after a search with one result shows every row on a phone', async ({ browser }) => {
+        // While the count of a new search loads, the table must draw every row that already loaded
+        const { context, table } = await openOrdersList(browser, shop, 'phone');
+
+        await table.search('5');
+        await table.expectCount(1, orders.length);
+        await expect(table.getRows()).toHaveCount(1);
+
+        const annas = sortOrders(orders.filter(o => o.name.toLowerCase().includes('anna')), o => o.seed.number, 'DESC');
+        await table.search('anna');
+        await expect(table.getOrderRow(annas[0].name)).toBeVisible();
+        await expect(table.getOrderRow(annas[1].name)).toBeVisible();
+        await table.expectCount(annas.length, orders.length);
 
         await context.close();
     });

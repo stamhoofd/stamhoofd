@@ -1,5 +1,5 @@
 import type { PlatformMember, RegisterItem } from '@stamhoofd/structures';
-import { PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import type { EditMemberStep } from '../MemberStepManager';
 import { MemberDataPermissionStep } from './MemberDataPermissionStep';
 import { MemberEmergencyContactsStep } from './MemberEmergencyContactsStep';

@@ -15,11 +15,15 @@ import { useAppNavigate } from '@stamhoofd/components/hooks/useAppNavigate.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { useEventsEnabled } from '@stamhoofd/components/hooks/useEventsEnabled.ts';
 import { useMembersPackage } from '@stamhoofd/components/hooks/useMembersPackage.ts';
-import { useMemberManager } from '@stamhoofd/networking/MemberManager';
+import { useProvidePaymentViews } from '@stamhoofd/components/payments/providePaymentViews';
+import { useMemberManager } from '@stamhoofd/frontend-application/MemberManager';
+import { useProvideSGVSync } from '@stamhoofd/sgv-frontend/provideSGVSync';
 import { AppRoute } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const context = useContext();
+useProvidePaymentViews();
+useProvideSGVSync();
 const memberManager = useMemberManager();
 const getLoginRoot = useLoginRoot();
 const eventsEnabled = useEventsEnabled();

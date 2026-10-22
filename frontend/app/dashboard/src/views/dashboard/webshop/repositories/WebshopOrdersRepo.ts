@@ -1,10 +1,10 @@
 import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, EncodeMedium, ObjectData } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EventBus } from '@stamhoofd/components/EventBus.ts';
+import { EventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import type { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import { fetchAll } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { CountFilteredRequest, InMemoryFilterRunner, SortItem, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { compileToInMemoryFilter, CountResponse, LimitedFilteredRequest, OrderStatus, PaginatedResponseDecoder, PrivateOrder, privateOrderWithTicketsFilterCompilers, SortItemDirection, Version } from '@stamhoofd/structures';
 import { IndexBoxDecoder } from '../IndexBox';
@@ -203,7 +203,7 @@ export class WebshopOrdersRepo {
         filter?: StamhoofdFilter;
         limit?: number;
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
-        advanceCount?: number;
+        after?: IDBValidKey | null;
     }): Promise<number> {
         const decoder = new IndexBoxDecoder(PrivateOrder as Decoder<PrivateOrder>);
 
@@ -230,7 +230,7 @@ export class WebshopOrdersRepo {
         filter?: StamhoofdFilter;
         limit?: number;
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
-        advanceCount?: number;
+        after?: IDBValidKey | null;
         ids?: string[];
         openTransaction?: IDBTransaction;
         signal?: AbortSignal;
@@ -311,17 +311,6 @@ type SortEntry = { value: IDBValidKey; id: string };
 export class OrdersStore {
     static readonly storeName: WebshopStoreName = 'orders';
     private readonly database: WebshopDatabase;
-
-    /**
-     * Times the store has changed (write operations).
-     */
-    private changeCount = 0;
-
-    /**
-     * The changeCount on the last stream.
-     * All orders should be streamed again (no order can be advanced) if the count is different than the current changeCount.
-     */
-    private changeCountOnLastStream = 0;
 
     /**
      * Per index ('id' for the order ids): the stored index value of every order in that index, by order id. Read without loading
@@ -626,7 +615,6 @@ export class OrdersStore {
     }
 
     async delete(id: string): Promise<void> {
-        this.changeCount++;
         const db = await this.database.get();
 
         return new Promise<void>((resolve, reject) => {
@@ -662,7 +650,6 @@ export class OrdersStore {
     }
 
     async putAll(orders: PrivateOrder[]) {
-        this.changeCount++;
         const db = await this.database.get();
 
         return new Promise<void>((resolve, reject) => {
@@ -679,8 +666,8 @@ export class OrdersStore {
             };
 
             transaction.onerror = (event) => {
-                // Don't forget to handle errors!
-                this.database.delete().catch(console.error);
+                // Reconnect on the next use. Deleting the database would lose orders that the sync cursor counts as stored.
+                this.database.close();
                 reject(event);
             };
 
@@ -698,7 +685,7 @@ export class OrdersStore {
         });
     }
 
-    async streamRaw<T>({ callback, filter, limit, sortItem, advanceCount, ids, transform, openTransaction, signal }: {
+    async streamRaw<T>({ callback, filter, limit, sortItem, after, ids, transform, openTransaction, signal }: {
         transform: (rawOrder: any) => Promise<T>;
         /**
          * Called for every order that matches, before the cursor moves on. Anything it awaits has to
@@ -708,9 +695,13 @@ export class OrdersStore {
         filter?: StamhoofdFilter;
         limit?: number;
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
-        advanceCount?: number;
         /**
-         * Only visit these orders, in this order. Cannot be combined with a sortItem or advanceCount.
+         * Only visit the orders the cursor of the sortItem visits after the order with this key ([index value, id], or the id
+         * when sorting on id).
+         */
+        after?: IDBValidKey | null;
+        /**
+         * Only visit these orders, in this order. Cannot be combined with a sortItem or after.
          */
         ids?: string[];
         openTransaction?: IDBTransaction;
@@ -722,34 +713,21 @@ export class OrdersStore {
     ): Promise<number> {
         signal?.throwIfAborted();
 
-        // all items should be streamed again if the content of the store changed
-        if (this.changeCount !== this.changeCountOnLastStream) {
-            if (advanceCount) {
-                advanceCount = 0;
-            }
-
-            this.changeCountOnLastStream = this.changeCount;
-        }
-
         const db = await this.database.get();
 
         return await new Promise<number>((resolve, reject) => {
             const transaction = openTransaction ?? db.transaction([OrdersStore.storeName], 'readonly');
 
             transaction.onerror = (event) => {
-                // Don't forget to handle errors!
-                if (openTransaction && openTransaction.onerror) {
-                    openTransaction.onerror(event);
-                }
-
-                this.database.delete().catch(console.error);
+                // Reconnect on the next use. Deleting the database would lose orders that the sync cursor counts as stored.
+                this.database.close();
                 reject(event);
             };
 
             const objectStore = transaction.objectStore(OrdersStore.storeName);
 
             let matchedItemsCount = 0;
-            let totalIterationCount = advanceCount ?? 0;
+            let totalIterationCount = 0;
 
             let compiledFilter: InMemoryFilterRunner | undefined;
 
@@ -806,8 +784,8 @@ export class OrdersStore {
             };
 
             if (ids) {
-                if (sortItem || advanceCount) {
-                    reject(new Error('ids cannot be combined with a sortItem or advanceCount'));
+                if (sortItem || after) {
+                    reject(new Error('ids cannot be combined with a sortItem or after'));
                     return;
                 }
                 let position = 0;
@@ -836,12 +814,26 @@ export class OrdersStore {
             }
 
             let request: IDBRequest<IDBCursorWithValue | null>;
+            const isAscending = sortItem?.order !== SortItemDirection.DESC;
+
+            // Index value and id of the order to continue after, when sorting on an index
+            let afterInIndex: { value: IDBValidKey; id: IDBValidKey } | null = null;
 
             try {
+                if (sortItem && after !== null && after !== undefined && sortItem.key !== 'id') {
+                    afterInIndex = { value: (after as IDBValidKey[])[0], id: (after as IDBValidKey[])[1] };
+                }
+
                 if (sortItem) {
-                    const direction: IDBCursorDirection = sortItem.order === SortItemDirection.DESC ? 'prev' : 'next';
-                    const source = sortItem.key === 'id' ? objectStore : objectStore.index(sortItem.key);
-                    request = source.openCursor(null, direction);
+                    const direction: IDBCursorDirection = isAscending ? 'next' : 'prev';
+                    if (sortItem.key === 'id') {
+                        const range = (after === null || after === undefined) ? null : (isAscending ? IDBKeyRange.lowerBound(after, true) : IDBKeyRange.upperBound(after, true));
+                        request = objectStore.openCursor(range, direction);
+                    } else {
+                        // Starts at the first order with the same index value: the ones up to the id are skipped below
+                        const range = afterInIndex ? (isAscending ? IDBKeyRange.lowerBound(afterInIndex.value) : IDBKeyRange.upperBound(afterInIndex.value)) : null;
+                        request = objectStore.index(sortItem.key).openCursor(range, direction);
+                    }
                 } else {
                     request = objectStore.openCursor();
                 }
@@ -849,6 +841,29 @@ export class OrdersStore {
                 reject(e);
                 return;
             }
+
+            /**
+             * Moves the cursor past the orders with the index value of afterInIndex, up to and including its id.
+             * Returns false once the cursor is after it.
+             */
+            const skipUpToAfter = (cursor: IDBCursorWithValue): boolean => {
+                if (!afterInIndex || indexedDB.cmp(cursor.key, afterInIndex.value) !== 0) {
+                    afterInIndex = null;
+                    return false;
+                }
+                const position = indexedDB.cmp(cursor.primaryKey, afterInIndex.id) * (isAscending ? 1 : -1);
+                if (position > 0) {
+                    afterInIndex = null;
+                    return false;
+                }
+                if (position === 0) {
+                    cursor.continue();
+                }
+                else {
+                    cursor.continuePrimaryKey(afterInIndex.value, afterInIndex.id);
+                }
+                return true;
+            };
 
             const onsuccess = () => {
                 if (shouldStop()) {
@@ -862,23 +877,12 @@ export class OrdersStore {
                     return;
                 }
 
+                if (skipUpToAfter(cursor)) {
+                    return;
+                }
+
                 handleValue(cursor.value, () => cursor.continue());
             };
-
-            if (advanceCount) {
-                request.onsuccess = () => {
-                    const cursor = request.result;
-                    if (!cursor) {
-                        // no more results
-                        resolve(totalIterationCount);
-                        return;
-                    }
-
-                    cursor.advance(advanceCount);
-                    request.onsuccess = onsuccess;
-                };
-                return;
-            }
 
             request.onsuccess = onsuccess;
         });
@@ -891,8 +895,8 @@ export class OrdersStore {
             const transaction = db.transaction([OrdersStore.storeName], 'readonly');
 
             transaction.onerror = (event) => {
-                // Don't forget to handle errors!
-                this.database.delete().catch(console.error);
+                // Reconnect on the next use. Deleting the database would lose orders that the sync cursor counts as stored.
+                this.database.close();
                 reject(event);
             };
 
@@ -907,7 +911,6 @@ export class OrdersStore {
     }
 
     async clear(): Promise<void> {
-        this.changeCount++;
         const db = await this.database.get();
 
         return new Promise<void>((resolve, reject) => {

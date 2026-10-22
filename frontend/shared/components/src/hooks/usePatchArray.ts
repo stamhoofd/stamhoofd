@@ -3,6 +3,7 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import type { Ref} from 'vue';
 import { computed, ref, unref } from 'vue';
 
+/** Accumulate array operations over a value or ref; `hasChanges` means operations exist, not that the result differs. */
 export function usePatchArray<T extends AutoEncoder & NonScalarIdentifiable<any>>(obj: T[] | Ref<T[]>): {
     patched: Ref<T[]>;
     patch: Ref<PatchableArrayAutoEncoder<T>>;

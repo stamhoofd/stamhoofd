@@ -1,9 +1,9 @@
 import { useAuth } from '#hooks/useAuth.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { Column } from '#tables/classes/Column.ts';
-import { useFetchRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
+import { useFetchRegistrationPeriods } from '#hooks/networking/useFetchRegistrationPeriods';
 import type { Organization, PlatformMembership, RegistrationPeriod } from '@stamhoofd/structures';
-import { AccessRight } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { Formatter } from '@stamhoofd/utility';
 import { onMounted, shallowRef } from 'vue';
 

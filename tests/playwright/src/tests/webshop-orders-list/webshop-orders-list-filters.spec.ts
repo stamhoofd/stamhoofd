@@ -9,7 +9,7 @@ import { WebshopTicketType } from '@stamhoofd/structures/webshops/WebshopMetaDat
 import { TestUtils } from '@stamhoofd/test-utils';
 import type { TestOrder } from '../../helpers/index.js';
 import { TestOrders } from '../../helpers/index.js';
-import type { NumberFilterMode, OrdersTable, StringFilterMode } from '../../helpers/page/webshop/OrdersTable.js';
+import type { DateFilterMode, NumberFilterMode, OrdersTable, StringFilterMode } from '../../helpers/page/webshop/OrdersTable.js';
 import { edgeCaseOrderSeeds } from './data.js';
 import { expectOrders, names, sortOrders, ticketScanStatus } from './expected.js';
 import type { OrdersListWebshop } from './setup.js';
@@ -99,12 +99,15 @@ test.describe('Orders list filters @webshop-orders-list @extra', () => {
             // Casing and accents
             { filter: 'Naam', key: 'name', mode: 'Bevat...', value: 'MÜLLER', expected: [1, 2] },
             { filter: 'Naam', key: 'name', mode: 'Bevat...', value: 'muller', expected: [1, 2] },
+            { filter: 'Naam', key: 'name', mode: 'Is gelijk aan...', value: 'jose muller', expected: [1, 2] },
+            { filter: 'Naam', key: 'name', mode: 'Bevat...', value: 'orsted', expected: [9] },
             // Characters with a meaning in SQL LIKE
             { filter: 'Naam', key: 'name', mode: 'Bevat...', value: '%', expected: [7] },
             { filter: 'Naam', key: 'name', mode: 'Bevat...', value: '_', expected: [7] },
             { filter: 'Naam', key: 'name', mode: 'Bevat...', value: 'o\'brien', expected: [8] },
             // Negations
             { filter: 'Naam', key: 'name', mode: 'Bevat niet...', value: 'klant', expected: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] },
+            { filter: 'Naam', key: 'name', mode: 'Is niet gelijk aan...', value: 'josé müller', expected: [3, 4, 5, 6, 7, 8, 9, 10, 11, 20, 100, 1000] },
             // E-mail addresses are stored with any casing
             { filter: 'E-mailadres', key: 'email', mode: 'Is gelijk aan...', value: 'jose.muller@example.com', expected: [1, 2] },
             { filter: 'E-mailadres', key: 'email', mode: 'Bevat...', value: 'PEETERS@EXAMPLE', expected: [10] },
@@ -128,7 +131,12 @@ test.describe('Orders list filters @webshop-orders-list @extra', () => {
             // A name, in another casing and without accents
             { search: 'MÜLLER', expected: [1, 2] },
             { search: 'jose muller', expected: [1, 2] },
+            // Spaces around the search are ignored, spaces inside it count
+            { search: ' jose ', expected: [1, 2] },
+            { search: 'van  damme', expected: [6] },
+            { search: 'van damme', expected: [] },
             // Characters with a meaning in SQL LIKE
+            { search: '100%', expected: [7] },
             { search: 'o\'brien', expected: [8] },
             // A complete e-mail address is looked up exactly, part of one with a contains
             { search: 'JOSE.MULLER@example.com', expected: [1, 2] },
@@ -136,6 +144,8 @@ test.describe('Orders list filters @webshop-orders-list @extra', () => {
             // Phone numbers, in another notation than they are stored
             { search: '0478 12 34 56', expected: [10] },
             { search: '0478123456', expected: [10] },
+            // Not an assigned number: searched as a name
+            { search: '0412345678', expected: [] },
             // An order number
             { search: '20', expected: [20] },
             { search: '1000', expected: [1000] },
@@ -153,12 +163,46 @@ test.describe('Orders list filters @webshop-orders-list @extra', () => {
         }
     });
 
-    test.describe('Ticket filters (only in the dashboard)', () => {
+    test.describe('Ticket filters', () => {
         for (const [option, status] of [['Geen enkel ticket gescand', 'none'], ['Gedeeltelijk gescand', 'partial'], ['Alle tickets gescand', 'all']] as const) {
             test(`Ticket scan status: ${option}`, async ({ browser }) => {
                 await check(browser, {
                     apply: table => table.addChoiceFilter('Ticket scanstatus', [option]),
                     expected: () => orders.filter(o => ticketScanStatus(o) === status),
+                    backendFilter: { ticketScanStatus: { $in: [status] } },
+                });
+            });
+        }
+
+        test('E-mailing the orders of a ticket filter reaches the orders of the table', async ({ browser }) => {
+            const { context, page, table } = await openOrdersList(browser, shop);
+            await table.addChoiceFilter('Ticket scanstatus', ['Alle tickets gescand']);
+            const expected = orders.filter(o => ticketScanStatus(o) === 'all');
+            await table.expectCount(expected.length, orders.length);
+
+            await table.clickAction('E-mailen');
+            const recipients = page.locator('.right-stack').filter({ has: page.locator('.list-input-box') }).first();
+            await expect(recipients.locator('.icon.error')).toHaveCount(0);
+            await expect(recipients.locator('.style-description-small')).toHaveText(expected.length.toString());
+
+            await context.close();
+        });
+
+        // Without a scanned ticket, the first scan is empty, which compares as earlier than any date (like in MySQL)
+        const firstScan = (o: TestOrder) => Math.min(...(o.seed.tickets ?? []).filter(t => t.scannedAt).map(t => t.scannedAt!.getTime()), Infinity);
+        // Days in Belgian time (UTC+1 in March)
+        const scanDateCases: { mode: DateFilterMode; date: Date; backendFilter: StamhoofdFilter; matches: (o: TestOrder) => boolean }[] = [
+            { mode: 'Gelijk aan...', date: new Date(2026, 2, 1), backendFilter: { $and: [{ ticketScannedAt: { $gte: new Date('2026-02-28T23:00:00.000Z') } }, { ticketScannedAt: { $lte: new Date('2026-03-01T22:59:59.999Z') } }] }, matches: o => firstScan(o) !== Infinity },
+            { mode: 'Groter dan...', date: new Date(2026, 1, 28), backendFilter: { ticketScannedAt: { $gt: new Date('2026-02-28T22:59:59.999Z') } }, matches: o => firstScan(o) !== Infinity },
+            { mode: 'Kleiner dan...', date: new Date(2026, 2, 1), backendFilter: { ticketScannedAt: { $lt: new Date('2026-02-28T23:00:00.000Z') } }, matches: o => firstScan(o) === Infinity },
+        ];
+
+        for (const c of scanDateCases) {
+            test(`Ticket scan time ${c.mode} ${c.date.toDateString()}`, async ({ browser }) => {
+                await check(browser, {
+                    apply: table => table.addDateFilter('Ticket scan tijdstip', c.mode, c.date),
+                    expected: () => orders.filter(c.matches),
+                    backendFilter: c.backendFilter,
                 });
             });
         }
@@ -167,6 +211,7 @@ test.describe('Orders list filters @webshop-orders-list @extra', () => {
             await check(browser, {
                 apply: table => table.addNumberFilter('Aantal aangemaakte tickets', 'Groter dan...', 1),
                 expected: () => orders.filter(o => (o.seed.tickets ?? []).length > 1),
+                backendFilter: { ticketCount: { $gt: 1 } },
             });
         });
     });

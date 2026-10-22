@@ -1,7 +1,8 @@
 import { EmailMocker } from '@stamhoofd/email';
 import type { Organization } from '@stamhoofd/models';
 import { EmailTemplateFactory, OrganizationFactory, UserFactory } from '@stamhoofd/models';
-import { EmailTemplateType, PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { EmailTemplateType, Permissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { OrganizationDNSService } from './OrganizationDNSService.js';
 

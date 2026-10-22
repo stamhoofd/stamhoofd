@@ -7,7 +7,8 @@ import { BalanceItemFactory, Document, DocumentTemplateFactory, GroupFactory, Me
 import { render } from '@stamhoofd/models/helpers/Handlebars.js';
 import { splitPrice } from '@stamhoofd/models/models/DocumentTemplate.js';
 import type { RecordAnswer } from '@stamhoofd/structures';
-import { BooleanStatus, DocumentData, DocumentStatus, Document as DocumentStruct, MemberDetails, MemberWithRegistrationsBlob, Parent, PermissionLevel, Permissions, RecordCategory, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { BooleanStatus, DocumentData, DocumentStatus, Document as DocumentStruct, MemberDetails, MemberWithRegistrationsBlob, Parent, Permissions, RecordCategory, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Formatter } from '@stamhoofd/utility';
 import { testServer } from '../../../../tests/helpers/TestServer.js';

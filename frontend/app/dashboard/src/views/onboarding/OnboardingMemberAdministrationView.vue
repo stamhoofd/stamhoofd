@@ -47,10 +47,10 @@ import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import { Organization, OrganizationMetaData, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization, UmbrellaOrganizationHelper } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
-import type { OnboardingStepProps } from './useMemberAdministrationOnboarding';
+import type { OnboardingStepProps } from './OnboardingStepProps';
 
 const props = defineProps<OnboardingStepProps>();
 const navigationActions = useNavigationActions();

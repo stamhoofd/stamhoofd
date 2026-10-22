@@ -277,7 +277,7 @@
 
 import OrganizationAvatar from '#context/OrganizationAvatar.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';
-import { GlobalEventBus } from '#EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
 import { useEventTypes } from '#hooks/useEventTypes.ts';
 import AddressInput from '#inputs/AddressInput.vue';
@@ -297,7 +297,9 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { Organization } from '@stamhoofd/structures';
-import { AccessRight, Event, EventLocation, EventMeta, PermissionsResourceType, ResolutionRequest } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { Event, EventLocation, EventMeta, ResolutionRequest } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch, watchEffect } from 'vue';

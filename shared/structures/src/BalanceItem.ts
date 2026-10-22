@@ -5,8 +5,6 @@ import { Formatter, Sorter, STMath } from '@stamhoofd/utility';
 import { getPricingTypeSuffix, STPricingType } from './billing/STPackage.js';
 import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
 import { Payment, PrivatePayment } from './members/Payment.js';
-import type { Organization } from './Organization.js';
-import type { Platform } from './Platform.js';
 import type { PriceBreakdown } from './PriceBreakdown.js';
 import { TranslatedString } from './TranslatedString.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
@@ -205,7 +203,7 @@ export function getBalanceItemRelationTypeDescription(type: BalanceItemRelationT
 /**
  * Determines which categories of balance items are relevant to list or filter for the given organization and platform.
  */
-function getBalanceItemVisibility(organization: Organization | null, platform: Platform): { showStamhoofdBilling: boolean; showMembership: boolean } {
+function getBalanceItemVisibility(organization: { id: string } | null, platform: { membershipOrganizationId: string | null }): { showStamhoofdBilling: boolean; showMembership: boolean } {
     // A null organization means we are looking at the platform/membership organization itself (e.g. platform-wide views)
     const isMembershipOrganization = organization === null || organization.id === platform.membershipOrganizationId;
 
@@ -221,7 +219,7 @@ function getBalanceItemVisibility(organization: Organization | null, platform: P
  * Returns the balance item types that are relevant to list or filter for the given organization and platform.
  * Non-applicable types (packages, referral discounts, transaction/service fees and platform memberships) are hidden.
  */
-export function getApplicableBalanceItemTypes(organization: Organization | null, platform: Platform): BalanceItemType[] {
+export function getApplicableBalanceItemTypes(organization: { id: string } | null, platform: { membershipOrganizationId: string | null }): BalanceItemType[] {
     const { showStamhoofdBilling, showMembership } = getBalanceItemVisibility(organization, platform);
 
     return Object.values(BalanceItemType).filter((type) => {
@@ -243,7 +241,7 @@ export function getApplicableBalanceItemTypes(organization: Organization | null,
  * Returns the balance item relation types that are relevant to list or filter for the given organization and platform.
  * Non-applicable relations (packages, pricing types, payment providers and membership types) are hidden.
  */
-export function getApplicableBalanceItemRelationTypes(organization: Organization | null, platform: Platform): BalanceItemRelationType[] {
+export function getApplicableBalanceItemRelationTypes(organization: { id: string } | null, platform: { membershipOrganizationId: string | null }): BalanceItemRelationType[] {
     const { showStamhoofdBilling, showMembership } = getBalanceItemVisibility(organization, platform);
 
     return Object.values(BalanceItemRelationType).filter((type) => {

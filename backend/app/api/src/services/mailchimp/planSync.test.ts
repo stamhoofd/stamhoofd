@@ -7,7 +7,7 @@ import { MailchimpTags } from './MailchimpTags.js';
 import type { MailchimpEmailStatus, MailchimpExistingContact, MailchimpPlanOptions } from './planSync.js';
 import { planSync } from './planSync.js';
 
-const tags = new MailchimpTags(new I18n(Language.Dutch, Country.Belgium));
+const tags = new MailchimpTags(new I18n(Language.Dutch, Country.Belgium), 'Stamhoofd');
 
 function contact(data: Partial<MailchimpContact> & { email: string }): MailchimpContact {
     return {
@@ -196,5 +196,38 @@ describe('planSync', () => {
             { LNAME: 'Naam' },
             { FNAME: 'Bestel', LNAME: 'Naam' },
         ]);
+    });
+
+    test('a full sync sends no request for contacts that already match', () => {
+        const fields = { FNAME: 'Jan', LNAME: 'Peeters', SH_LEDEN: 'Emma', SH_GROEPEN: 'Welpen' };
+        const plan = planSync(
+            [
+                contact({ email: 'same@example.com', memberFirstNames: ['Emma'], groups: ['Welpen'], tags: [tags.parent] }),
+                contact({ email: 'renamed@example.com', memberFirstNames: ['Emma'], groups: ['Welpen'], tags: [tags.parent] }),
+                contact({ email: 'new-tag@example.com', memberFirstNames: ['Emma'], groups: ['Welpen'], tags: [tags.parent, tags.group('Welpen')] }),
+            ],
+            new Map([
+                existing({ email: 'same@example.com', tags: [tags.parent, 'Eigen tag'], mergeFields: { ...fields, PHONE: '0412' } }),
+                existing({ email: 'renamed@example.com', tags: [tags.parent], mergeFields: { ...fields, FNAME: 'Janneke' } }),
+                existing({ email: 'new-tag@example.com', tags: [tags.parent], mergeFields: fields }),
+            ]),
+            new Map(),
+            options({ full: true }),
+        );
+
+        expect(plan.unchanged).toBe(1);
+        expect(plan.upserts.map(u => u.email)).toEqual(['renamed@example.com', 'new-tag@example.com']);
+    });
+
+    test('a matching contact without consent is still unsubscribed', () => {
+        const plan = planSync(
+            [contact({ email: 'same@example.com', memberFirstNames: ['Emma'], groups: ['Welpen'], tags: [tags.parent], consent: false })],
+            new Map([existing({ email: 'same@example.com', tags: [tags.parent], mergeFields: { FNAME: 'Jan', LNAME: 'Peeters', SH_LEDEN: 'Emma', SH_GROEPEN: 'Welpen' } })]),
+            new Map(),
+            options({ full: true }),
+        );
+
+        expect(plan.unchanged).toBe(0);
+        expect(plan.upserts).toEqual([expect.objectContaining({ email: 'same@example.com', unsubscribe: true })]);
     });
 });

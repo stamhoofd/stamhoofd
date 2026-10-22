@@ -1,5 +1,5 @@
 import { Formatter } from '@stamhoofd/utility';
-import type { FrontendProjectName } from './FrontendService.js';
+import type { FrontendProjectName } from './frontend-project-name.js';
 import type { CaddyRoute, CaddyRouteOptions } from '@stamhoofd/cli';
 import { cspFrontendSubroutes, ssoRealm } from '@stamhoofd/cli';
 

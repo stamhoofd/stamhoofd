@@ -1,0 +1,18 @@
+{
+    "name": "@stamhoofd/frontend-storage",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "sideEffects": false,
+    "exports": {
+        "./*": "./src/*.ts",
+        "./*.ts": "./src/*.ts"
+    },
+    "scripts": {
+        "lint": "eslint --quiet",
+        "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
+    },
+    "devDependencies": {
+        "eslint-plugin-stamhoofd": "workspace:*"
+    }
+}

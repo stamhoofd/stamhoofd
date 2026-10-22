@@ -39,10 +39,10 @@
 </template>
 
 <script setup lang="ts">
-import { GlobalEventBus } from '#EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import { useVisibilityChange } from '#hooks/useVisibilityChange';
 import { Toast } from '#overlays/Toast';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { DetailedPayableBalance, DetailedPayableBalanceCollection } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';

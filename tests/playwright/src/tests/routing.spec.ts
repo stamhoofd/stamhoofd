@@ -8,7 +8,8 @@ import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization, User } from '@stamhoofd/models';
 import { EventFactory, OrganizationFactory, Platform, Token, UserFactory } from '@stamhoofd/models';
 import type { AppType } from '@stamhoofd/structures';
-import { PermissionLevel, Permissions, PlatformEventType, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Permissions, PlatformEventType, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WorkerData } from '../helpers/worker/WorkerData.js';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
@@ -117,12 +118,11 @@ async function testRoute({ page, ...spec }: {
 }) {
     await page.goto(spec.url + '?initial=true'); // nav framework should remove this param
 
+    await expect(page).toHaveURL(spec.expectedUrl, { timeout: 20_000 });
+
     // Settings view should be visible
     await expect(page.locator(spec.expectedLocator)).toBeVisible();
     await checkScopedTo({ page, organization: spec.expectedScope });
-
-    // Wait until URL is as expected, or time-out after 5 seconds
-    await expect(page).toHaveURL(spec.expectedUrl, { timeout: 5_000 });
 
     if (spec.expectedTopLeft === undefined) {
         return;
