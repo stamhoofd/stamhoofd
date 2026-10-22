@@ -52,7 +52,7 @@
         "build": "tsc --build tsconfig.build.json --clean && pnpm run copy-assets && tsc --build tsconfig.build.json",
         "build:full": "pnpm run clear && pnpm run build",
         "build:playwright:pre": "pnpm run build:types && pnpm run build && tsc --build tsconfig.test.build.json",
-        "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
+        "clear": "rm -rf ./dist && rm -f *.tsbuildinfo .cache/*.tsbuildinfo",
         "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/ ./dist/src/",
         "dev": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'pnpm run build --watch --preserveWatchOutput' \"pnpm run dev:watch\"",
         "dev:backend": "pnpm run dev",

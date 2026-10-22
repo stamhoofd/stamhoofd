@@ -21,7 +21,7 @@
         "build": "tsc --build tsconfig.build.json",
         "build:types": "tsc --project tsconfig.types.json",
         "build:full": "pnpm run clear && pnpm run build",
-        "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
+        "clear": "rm -rf ./dist && rm -f *.tsbuildinfo .cache/*.tsbuildinfo",
         "lint": "eslint --quiet",
         "start": "pnpm run build && node --enable-source-maps ./dist/index.js"
     },
