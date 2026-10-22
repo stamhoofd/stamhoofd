@@ -3,6 +3,7 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import type { BalanceItem } from '../../BalanceItem.js';
 import type { BundleDiscountCalculation } from '../../BundleDiscount.js';
 import { BalanceItemCartItem } from './BalanceItemCartItem.js';
+import { IDDeleteRegisterItem } from './DeleteRegisterItem.js';
 import type { RegisterCheckout, RegisterContext } from './RegisterCheckout.js';
 import { IDRegisterItem } from './RegisterItem.js';
 import type { RegisterItem } from './RegisterItem.js';
@@ -18,8 +19,15 @@ export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(BalanceItemCartItem), optional: true })
     balanceItems: BalanceItemCartItem[] = [];
 
-    @field({ decoder: new ArrayDecoder(StringDecoder), optional: true })
-    deleteRegistrationIds: string[] = [];
+    @field({ decoder: new ArrayDecoder(StringDecoder), optional: true, field: 'deleteRegistrationIds' })
+    @field({
+        decoder: new ArrayDecoder(IDDeleteRegisterItem),
+        optional: true,
+        ...NextVersion,
+        upgrade: (registrationIds: string[] | undefined) => (registrationIds ?? []).map(registrationId => IDDeleteRegisterItem.create({ registrationId })),
+        downgrade: (items: IDDeleteRegisterItem[]) => items.map(i => i.registrationId),
+    })
+    deleteRegistrations: IDDeleteRegisterItem[] = [];
 
     get organizationId() {
         if (this.items.length > 0) {
@@ -39,7 +47,7 @@ export class IDRegisterCart extends AutoEncoder {
         cart.balanceItems = this.balanceItems;
 
         const registrations: RegistrationWithPlatformMember[] = [];
-        for (const registrationId of this.deleteRegistrationIds) {
+        for (const { registrationId } of this.deleteRegistrations) {
             let found = false;
             for (const member of context.members) {
                 const registration = member.patchedMember.registrations.find(r => r.id === registrationId);
@@ -60,7 +68,7 @@ export class IDRegisterCart extends AutoEncoder {
                     code: 'not_found',
                     message: 'Registration not found',
                     human: $t(`%qn`),
-                    field: 'deleteRegistrationIds',
+                    field: 'deleteRegistrations',
                 });
             }
         }
@@ -111,7 +119,7 @@ export class RegisterCart {
         return IDRegisterCart.create({
             items: this.items.map(i => i.convert()),
             balanceItems: this.balanceItems,
-            deleteRegistrationIds: this.deleteRegistrations.map(r => r.registration.id),
+            deleteRegistrations: this.deleteRegistrations.map(r => IDDeleteRegisterItem.create({ registrationId: r.registration.id })),
         });
     }
 

@@ -73,7 +73,7 @@ describe('RegistrationNotificationService', () => {
                     }),
                 ],
                 balanceItems: [],
-                deleteRegistrationIds: [],
+                deleteRegistrations: [],
             }),
             administrationFee: 0,
             freeContribution: 0,

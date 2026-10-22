@@ -5,6 +5,7 @@ import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import { AppliedRegistrationDiscount, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, GroupPriceDiscount, GroupPriceDiscountType, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, Permissions, ReduceablePrice, ResourcePermissions } from '@stamhoofd/structures';
+import { IDDeleteRegisterItem } from '@stamhoofd/structures/members/checkout/DeleteRegisterItem.js';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { RegisterMembersEndpoint } from '../../src/endpoints/global/registration/RegisterMembersEndpoint.js';
 import { BalanceItemService } from '../../src/services/BalanceItemService.js';
@@ -3080,7 +3081,7 @@ describe('E2E.Bundle Discounts', () => {
             // Now delete registration 1, which has discount
             const checkout = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
-                    deleteRegistrationIds: [registration1.id],
+                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration1.id })],
                 }),
                 asOrganizationId: organization.id,
                 totalPrice: -25_0000 + 5_0000,
@@ -3135,7 +3136,7 @@ describe('E2E.Bundle Discounts', () => {
             // Now delete registration 1, which has discount
             const checkout = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
-                    deleteRegistrationIds: [registration1.id],
+                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration1.id })],
                 }),
                 asOrganizationId: organization.id,
                 totalPrice: 0, // no change in outstanding balance, because we charge a cancellation fee
@@ -3195,7 +3196,7 @@ describe('E2E.Bundle Discounts', () => {
             // Now delete registration 2, which does not have a discount
             const checkout = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
-                    deleteRegistrationIds: [registration2.id],
+                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration2.id })],
                 }),
                 asOrganizationId: organization.id,
                 totalPrice: -15_0000 + 5_0000, // -15 back, but also lose discount on registration 1, so add 5
@@ -3270,7 +3271,7 @@ describe('E2E.Bundle Discounts', () => {
             // Now delete registration 2, which does not have a discount
             const checkout = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
-                    deleteRegistrationIds: [registration2.id],
+                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration2.id })],
                 }),
                 asOrganizationId: organization.id,
                 totalPrice: 5_0000, // Positive 5 because we lose the discount on registration 1
