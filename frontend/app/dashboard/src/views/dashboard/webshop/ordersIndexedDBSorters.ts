@@ -1,7 +1,7 @@
 import { AutoEncoder, field, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import type { InMemoryFilterDefinitions } from '@stamhoofd/structures/filters/InMemoryFilter.js';
-import type { SortDefinitions } from '@stamhoofd/structures/filters/Sorters.js';
-import type { StamhoofdFilter } from '@stamhoofd/structures/filters/StamhoofdFilter.js';
+import type { SortDefinitions } from '@stamhoofd/filters/Sorters';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilterTypes';
 import type { PrivateOrder } from '@stamhoofd/structures/webshops/Order.js';
 import { baseInMemoryFilterCompilers, createInMemoryFilterCompiler } from '@stamhoofd/structures/filters/InMemoryFilter.js';
 import type { IndexedDbIndexValue } from './IndexBox';

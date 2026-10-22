@@ -3,7 +3,7 @@ import { setup, test } from '../../test-fixtures/base.js';
 setup();
 
 import { expect } from '@playwright/test';
-import { SortItemDirection } from '@stamhoofd/structures/filters/SortList.js';
+import { SortItemDirection } from '@stamhoofd/filters/SortList';
 import { OrderStatus } from '@stamhoofd/structures/webshops/Order.js';
 import { WebshopTicketType } from '@stamhoofd/structures/webshops/WebshopMetaData.js';
 import { TestUtils } from '@stamhoofd/test-utils';

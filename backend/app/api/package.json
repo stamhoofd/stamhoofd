@@ -84,6 +84,7 @@
         "@stamhoofd/crons": "workspace:*",
         "@stamhoofd/email": "workspace:*",
         "@stamhoofd/excel-writer": "workspace:*",
+        "@stamhoofd/filters": "workspace:*",
         "@stamhoofd/logging": "workspace:*",
         "@stamhoofd/models": "workspace:*",
         "@stamhoofd/object-differ": "workspace:*",

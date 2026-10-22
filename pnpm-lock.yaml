@@ -508,6 +508,9 @@ importers:
       '@stamhoofd/excel-writer':
         specifier: workspace:*
         version: link:../../../shared/excel-writer
+      '@stamhoofd/filters':
+        specifier: workspace:*
+        version: link:../../../shared/filters
       '@stamhoofd/logging':
         specifier: workspace:*
         version: link:../../shared/logging
@@ -1448,6 +1451,9 @@ importers:
       '@stamhoofd/excel-writer':
         specifier: workspace:*
         version: link:../../../shared/excel-writer
+      '@stamhoofd/filters':
+        specifier: workspace:*
+        version: link:../../../shared/filters
       '@stamhoofd/frontend-application':
         specifier: workspace:*
         version: link:../../shared/application
@@ -2875,6 +2881,9 @@ importers:
         specifier: 3.7.2
         version: 3.7.2
     devDependencies:
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../types
       '@types/luxon':
         specifier: 3.7.6
         version: 3.7.6
@@ -2902,6 +2911,9 @@ importers:
       '@stamhoofd/email':
         specifier: workspace:*
         version: link:../../backend/shared/email
+      '@stamhoofd/filters':
+        specifier: workspace:*
+        version: link:../../shared/filters
       '@stamhoofd/models':
         specifier: workspace:*
         version: link:../../backend/shared/models

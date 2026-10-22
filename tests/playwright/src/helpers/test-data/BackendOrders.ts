@@ -1,12 +1,12 @@
 import type { Page } from '@playwright/test';
 import type { Organization, User } from '@stamhoofd/models';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
-import type { SortList } from '@stamhoofd/structures/filters/SortList.js';
-import type { StamhoofdFilter } from '@stamhoofd/structures/filters/StamhoofdFilter.js';
+import type { SortList } from '@stamhoofd/filters/SortList';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilterTypes';
 import { Version } from '@stamhoofd/structures/Version.js';
 import { CountFilteredRequest, LimitedFilteredRequest } from '@stamhoofd/structures/filters/FilteredRequest.js';
-import { SortItemDirection } from '@stamhoofd/structures/filters/SortList.js';
-import { mergeFilters } from '@stamhoofd/structures/filters/StamhoofdFilter.js';
+import { SortItemDirection } from '@stamhoofd/filters/SortList';
+import { mergeFilters } from '@stamhoofd/filters/StamhoofdFilter';
 import { OrderStatus } from '@stamhoofd/structures/webshops/Order.js';
 import { WorkerData } from '../worker/WorkerData.js';
 

@@ -17,6 +17,7 @@
         "@stamhoofd/backend-i18n": "workspace:*",
         "@stamhoofd/cli": "workspace:*",
         "@stamhoofd/email": "workspace:*",
+        "@stamhoofd/filters": "workspace:*",
         "@stamhoofd/models": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/types": "workspace:*",

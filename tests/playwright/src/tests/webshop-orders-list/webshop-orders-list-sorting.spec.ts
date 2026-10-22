@@ -4,7 +4,7 @@ setup();
 
 import type { Browser } from '@playwright/test';
 import { expect } from '@playwright/test';
-import { SortItemDirection } from '@stamhoofd/structures/filters/SortList.js';
+import { SortItemDirection } from '@stamhoofd/filters/SortList';
 import { OrderStatus } from '@stamhoofd/structures/webshops/Order.js';
 import { TestUtils } from '@stamhoofd/test-utils';
 import type { TestOrder } from '../../helpers/index.js';
