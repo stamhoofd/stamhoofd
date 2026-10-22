@@ -281,7 +281,7 @@ describe('Unit.UserPermissions', () => {
             };
             const userPermissions = UserPermissions.decode(new ObjectData(encoded, { version: 417 }));
 
-            const result = userPermissions.forOrganization(createOrganization({ tags: [] }), createPlatform());
+            const result = userPermissions.forOrganization(createOrganization({ tags: [] }), createPlatform(), null);
             expect(result).not.toBeNull();
             expect(result!.hasReadAccess()).toBe(true);
             expect(result!.hasWriteAccess()).toBe(false);
