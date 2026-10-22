@@ -44,7 +44,7 @@ Email.recipientLoaders.set(EmailRecipientFilterType.Organizations, {
 async function fetchRecipients(query: LimitedFilteredRequest, subfilter: StamhoofdFilter | null) {
     const result = await GetOrganizationsEndpoint.buildModels(query);
     const compiledFilter = compileToInMemoryFilter(subfilter, filterableAdminFilterCompilers);
-    const platform = await Platform.getSharedStruct();
+    const platform = await Platform.getSharedPrivateStruct();
 
     // Map recipients to admins
     const recipients: EmailRecipient[] = [];

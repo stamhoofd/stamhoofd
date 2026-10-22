@@ -32,8 +32,11 @@ export class UserPermissions extends AutoEncoder {
     // Current list of groups
 
     /**
+     * @param platform Backend code must pass the private struct (Platform.getSharedPrivateStruct()): the check on
+     * responsibilityEmailDomains below needs privateConfig and is skipped without it. The frontend only has the
+     * privateConfig for users with platform access, the backend enforces the permissions anyway.
      * @param email Email address of the user these permissions belong to. Platform responsibilities are ignored
-     * when it doesn't match PlatformPrivateConfig.responsibilityEmailDomains (only checked when privateConfig is available).
+     * when it doesn't match PlatformPrivateConfig.responsibilityEmailDomains.
      */
     forPlatform(platform: Platform, email: string | null): LoadedPermissions | null {
         let globalPermissions = this.globalPermissions;

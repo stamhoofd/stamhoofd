@@ -1236,7 +1236,7 @@ export class AuthenticatedStructures {
         const users = await User.getByIDs(...userIds);
         const organizationsIds = Formatter.uniqueArray(logs.map(l => l.organizationId).filter(id => id !== null));
         const organizations = await Organization.getByIDs(...organizationsIds);
-        const platform = await PlatformModel.getSharedStruct();
+        const platform = await PlatformModel.getSharedPrivateStruct();
 
         for (const log of logs) {
             const user = log.userId ? (users.find(u => u.id === log.userId) ?? null) : null;
@@ -1244,7 +1244,7 @@ export class AuthenticatedStructures {
 
             if (user) {
                 if (!await Context.auth.canAccessUser(user)) {
-                    if (user.permissions?.forPlatform(platform, user.email) !== null) {
+                    if (user.permissions?.forPlatform(platform, user.email)) {
                         userStruct = NamedObject.create({
                             id: '',
                             name: $t(`%wi`) + ' ' + platform.config.name,

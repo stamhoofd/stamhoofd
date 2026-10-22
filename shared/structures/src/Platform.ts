@@ -59,7 +59,7 @@ export class PlatformPrivateConfig extends AutoEncoder {
     responsibilityEmailDomains: string[] = [];
 
     static normalizeEmailDomain(domain: string) {
-        return domain.trim().toLocaleLowerCase().replace(/^@/, '');
+        return domain.trim().toLowerCase().replace(/^@/, '');
     }
 
     canInheritPlatformResponsibilityPermissions(email: string | null) {
@@ -73,7 +73,7 @@ export class PlatformPrivateConfig extends AutoEncoder {
         if (at === -1) {
             return false;
         }
-        const emailDomain = email.slice(at + 1).trim().toLocaleLowerCase();
+        const emailDomain = email.slice(at + 1).trim().toLowerCase();
         return this.responsibilityEmailDomains.some((d) => {
             const domain = PlatformPrivateConfig.normalizeEmailDomain(d);
             return domain.length > 0 && emailDomain === domain;

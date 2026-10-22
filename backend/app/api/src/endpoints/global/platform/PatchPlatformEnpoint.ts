@@ -104,7 +104,7 @@ export class PatchPlatformEndpoint extends Endpoint<
                 const domains = patchedDomains.map(d => PlatformPrivateConfig.normalizeEmailDomain(d)).filter(d => d.length > 0);
 
                 for (const domain of domains) {
-                    if (!/^[a-z0-9-]+(?:\.[a-z0-9-]+)+$/.test(domain)) {
+                    if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/.test(domain)) {
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid domain name: ' + domain,

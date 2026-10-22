@@ -55,11 +55,11 @@
         <template v-if="!organization && auth.hasPlatformFullAccess()">
             <hr>
             <h2>{{ $t('Toegestane e-maildomeinen voor nationale functies') }}</h2>
-            <p>{{ $t('Leden met een nationale functie krijgen enkel de rechten van die functie via e-mailadressen op exact deze domeinen. Subdomeinen (bv. gent.ksa.be) moet je apart toevoegen. Andere e-mailadressen van hetzelfde lid krijgen geen rechten. Laat leeg om geen beperkingen in te stellen.') }}</p>
+            <p>{{ $t('Leden met een nationale functie krijgen enkel de rechten van die functie via e-mailadressen op exact deze domeinen. Subdomeinen (bv. afdeling.voorbeeld.be) moet je apart toevoegen. Andere e-mailadressen van hetzelfde lid krijgen geen rechten. Laat leeg om geen beperkingen in te stellen.') }}</p>
 
             <ArrayInput v-model="responsibilityEmailDomains" :default-value="() => ''" :title="$t('Domeinnamen')" error-fields="privateConfig.responsibilityEmailDomains" :error-box="errors.errorBox">
                 <template #item="{index, modelValue, updateModelValue}">
-                    <input :value="modelValue" class="input" type="text" :placeholder="$t('%NE') + ' ' + (index + 1)" autocomplete="off" @input="updateModelValue(($event.target as HTMLInputElement).value || '')">
+                    <input :value="modelValue" class="input" type="text" inputmode="url" :placeholder="$t('%NE') + ' ' + (index + 1)" autocomplete="off" autocapitalize="off" spellcheck="false" @input="updateModelValue(($event.target as HTMLInputElement).value || '')">
                 </template>
 
                 <template #empty>
@@ -75,8 +75,8 @@
 <script lang="ts" setup>
 import { useAuth } from '#hooks/useAuth.ts';
 import { useDraggableArray } from '#hooks/useDraggableArray.ts';
-import ArrayInput from '#inputs/ArrayInput.vue';
 import { useOrganization } from '#hooks/useOrganization.ts';
+import ArrayInput from '#inputs/ArrayInput.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';

@@ -62,7 +62,7 @@ export class PasswordForgotService {
             throw new Error('Unexpected mismatch in organization id for PasswordToken');
         }
 
-        const hasOrganizationPermissions = organization ? tokenUser.permissions?.forOrganization(organization, await Platform.getSharedStruct(), tokenUser.email)?.isEmpty === false : false;
+        const hasOrganizationPermissions = organization ? tokenUser.permissions?.forOrganization(organization, await Platform.getSharedPrivateStruct(), tokenUser.email)?.isEmpty === false : false;
         const host = 'https://' + getAppHost(hasOrganizationPermissions ? 'dashboard' : 'registration', organization, hasOrganizationPermissions, i18n);
         return host + '/reset-password?token=' + encodeURIComponent(token.token);
     }

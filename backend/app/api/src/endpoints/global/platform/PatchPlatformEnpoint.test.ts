@@ -6,7 +6,7 @@ import { Permissions, PlatformConfig, PlatformPrivateConfig, Platform as Platfor
 import { SessionService } from '../../../services/SessionService.js';
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { TestUtils } from '@stamhoofd/test-utils';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Language } from '@stamhoofd/types/Language';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { PatchPlatformEndpoint } from './PatchPlatformEnpoint.js';
@@ -131,7 +131,7 @@ describe('Endpoint.PatchPlatform', () => {
                 }),
                 organization,
                 token,
-            })).rejects.toThrow(/permission/i);
+            })).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
             expect((await Platform.getForEditing()).privateConfig.responsibilityEmailDomains).toEqual([]);
         });
     });
