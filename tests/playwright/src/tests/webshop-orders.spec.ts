@@ -8,7 +8,7 @@ import { devices, expect } from '@playwright/test';
 import { MollieMocker, PayconiqMocker, STPackageService, StripeMocker } from '@stamhoofd/backend/tests/helpers';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { User } from '@stamhoofd/models';
-import { Order, OrderFactory, Organization, OrganizationFactory, Payment, TicketFactory, Token, UserFactory, Webshop } from '@stamhoofd/models';
+import { Order, OrderFactory, Organization, OrganizationFactory, Payment, STPackage, TicketFactory, Token, UserFactory, Webshop } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import {
     MollieOnboarding,
@@ -166,6 +166,8 @@ function registerWebshopOrderTests() {
     });
 
     test('Transfer per-item tickets: instructions first, tickets after admin marks paid (custom domain)', async ({ page, browser }) => {
+        // Full customer checkout and an admin dashboard flow in one test
+        test.slow();
         const organization = await createWebshopOrganization('TransferShop');
         const { webshop } = await TestWebshops.create({
             organization,
@@ -246,6 +248,8 @@ function registerWebshopOrderTests() {
     });
 
     test('Opening a ticket of a paid transfer order shows no unpaid warning', async ({ page, browser }) => {
+        // Full customer checkout and an admin dashboard flow in one test
+        test.slow();
         const organization = await createWebshopOrganization('TransferScanShop');
         const { webshop } = await TestWebshops.create({
             organization,
@@ -519,6 +523,14 @@ function registerWebshopOrderTests() {
         // every access token look expired, so the dashboard would renew it before every request.
         const X = new Date(Date.now() - 2 * 60 * 60 * 1_000);
         X.setMilliseconds(0);
+
+        // The package starts at midnight Europe/Brussels: between 00:00 and 02:00 X lies before it, and the
+        // browser would treat the package as inactive and show the onboarding instead of the dashboard
+        for (const pack of await STPackage.select().where('organizationId', organization.id).fetch()) {
+            pack.meta.startDate = new Date(X.getTime() - 24 * 60 * 60 * 1_000);
+            await pack.save();
+        }
+        await STPackageService.updateOrganizationPackages(organization.id);
 
         // The first order already exists when the admin opens the table.
         await new OrderFactory({ webshop, firstName: 'Alice', lastName: 'First', updatedAt: X }).create();

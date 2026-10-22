@@ -172,7 +172,7 @@ test.describe('Webshops offline', () => {
 
         await test.step('scan ticket manually', async () => {
             const scanButton = page.getByTestId('scan-button');
-            await scanButton.click();
+            await clickEvenIfCoveredByToast(page, scanButton);
 
             // click ticket again
             const ticketRow = page.getByTestId('ticket-row');

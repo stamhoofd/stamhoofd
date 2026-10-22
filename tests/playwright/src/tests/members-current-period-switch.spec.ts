@@ -201,12 +201,16 @@ test.describe('Switching the current period from the members menu @members-perio
             const menu = page.getByTestId('members-menu').filter({ visible: true }).last();
             await expect(menu.getByRole('heading', { name: scenario.otherPeriodName, exact: true }).last()).toBeVisible();
             await expect(menu.getByRole('button', { name: 'Andere tak' })).toBeVisible();
-            await expect(page).not.toHaveURL(originalUrl);
+            // The URL is replaced after mount, and on desktop the split view then appends the lazily loaded group detail
+            await expect(page).toHaveURL(viewport.name === 'desktop' ? /\/leden\/p\/volgend-testwerkjaar\/andere-tak$/ : /\/leden\/p\/volgend-testwerkjaar$/);
             const periodUrl = page.url();
 
             await page.reload();
             await expect(menu.getByRole('button', { name: 'Andere tak' })).toBeVisible();
             await expect(menu.getByRole('heading', { name: scenario.otherPeriodName, exact: true }).last()).toBeVisible();
+            // After a reload the URL is only restored a moment after the view is shown: going back before that
+            // leaves the root URL in this history entry
+            await expect(page).toHaveURL(periodUrl);
 
             await page.goBack();
             await expect(page).toHaveURL(originalUrl);

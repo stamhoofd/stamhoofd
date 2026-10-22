@@ -101,7 +101,8 @@ test.describe('Webshop discount codes @webshop-discount-codes', () => {
         await newView.getByPlaceholder('Bv. BLACK-FRIDAY').fill('welcome-10');
         await newView.getByTestId('email-input').fill('welcome@test.be');
         await newView.getByRole('button', { name: 'Korting toevoegen' }).click();
-        const discountView = page.getByTestId('save-view').filter({ hasText: 'Korting toevoegen' }).last();
+        // Filter on the heading: the code view itself also contains a "Korting toevoegen" button until the discount popup has loaded
+        const discountView = page.getByTestId('save-view').filter({ has: page.getByRole('heading', { name: 'Korting toevoegen', exact: true }) });
         await discountView.getByTestId('save-button').click();
         await newView.getByTestId('save-button').click();
         await expect(newView).not.toBeVisible();

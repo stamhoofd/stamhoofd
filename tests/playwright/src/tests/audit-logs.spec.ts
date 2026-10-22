@@ -11,6 +11,7 @@ import type { Organization, User } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { Permissions, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
+import { Formatter } from '@stamhoofd/utility';
 import { randomUUID } from 'node:crypto';
 import { WorkerData } from '../helpers/worker/WorkerData.js';
 
@@ -50,10 +51,10 @@ test.describe('Audit log navigation @audit', () => {
         }).create();
 
         const objectId = randomUUID();
-        const today = new Date();
-        today.setHours(12, 0, 0, 0);
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
+        // The "vandaag" filter uses the Europe/Brussels day, while this process runs in UTC on CI
+        const todayNoon = Formatter.luxon().set({ hour: 12, minute: 0, second: 0, millisecond: 0 });
+        const today = todayNoon.toJSDate();
+        const yesterday = todayNoon.minus({ days: 1 }).toJSDate();
         for (const entry of [
             { objectId, description: 'Audit target today', createdAt: today },
             { objectId, description: 'Audit target yesterday', createdAt: yesterday },
