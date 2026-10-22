@@ -1,10 +1,8 @@
-// Elements where whitespace is significant, so inserting a newline would change the output.
-const whitespaceSensitiveElements = new Set(['pre', 'textarea']);
-
-function isInsideWhitespaceSensitiveElement(element) {
+// Whitespace is significant inside <pre>, so inserting a newline would change the output.
+function isInsidePre(element) {
     let parent = element.parent;
     while (parent && parent.type === 'VElement') {
-        if (whitespaceSensitiveElements.has(parent.rawName.toLowerCase())) {
+        if (parent.name === 'pre') {
             return true;
         }
         parent = parent.parent;
@@ -33,10 +31,12 @@ export default {
         }
 
         const text = sourceCode.text;
+        const newline = text.includes('\r\n') ? '\r\n' : '\n';
 
         return parserServices.defineTemplateBodyVisitor({
             'VElement[name="hr"]'(element) {
-                if (isInsideWhitespaceSensitiveElement(element)) {
+                // The parser lowercases name, so also check rawName to skip components such as <Hr />.
+                if (element.rawName !== 'hr' || isInsidePre(element)) {
                     return;
                 }
 
@@ -63,11 +63,11 @@ export default {
                         const fixes = [];
                         if (contentBefore) {
                             const whitespaceBefore = /[ \t]*$/.exec(before)[0].length;
-                            fixes.push(fixer.replaceTextRange([start - whitespaceBefore, start], '\n' + indent));
+                            fixes.push(fixer.replaceTextRange([start - whitespaceBefore, start], newline + indent));
                         }
                         if (contentAfter) {
                             const whitespaceAfter = /^[ \t]*/.exec(after)[0].length;
-                            fixes.push(fixer.replaceTextRange([end, end + whitespaceAfter], '\n' + indent));
+                            fixes.push(fixer.replaceTextRange([end, end + whitespaceAfter], newline + indent));
                         }
                         return fixes;
                     },

@@ -184,7 +184,7 @@ export default {
                         ],
                     }],
                     'stamhoofd/async-route-components': 'error',
-                    // TODO: restore to 'error' once the existing violations are fixed.
+                    // TODO: change to 'error' once the existing violations are fixed.
                     'stamhoofd/hr-on-own-line': 'warn',
                     'stamhoofd/no-t-route-url': 'error',
                     'stamhoofd/prefer-define-route': 'warn',
