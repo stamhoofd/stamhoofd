@@ -4,7 +4,8 @@
     "private": true,
     "type": "module",
     "devDependencies": {
-        "@stamhoofd/frontend-i18n": "workspace:*",
+        "@stamhoofd/frontend-application": "workspace:*",
+        "@stamhoofd/components": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "vitest": "4.1.11"

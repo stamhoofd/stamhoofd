@@ -14,7 +14,7 @@
 <script lang="ts" setup>
 import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { onBeforeUnmount, ref } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';

@@ -9,7 +9,7 @@ import type { TableAction, TableActionSelection } from '@stamhoofd/components/ta
 import { AsyncTableAction, InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { downloadDocuments } from '@stamhoofd/document-helper';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { DocumentTemplatePrivate } from '@stamhoofd/structures';
 import { DocumentData, DocumentStatus, Document as DocumentStruct, EmailRecipientSubfilter } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';

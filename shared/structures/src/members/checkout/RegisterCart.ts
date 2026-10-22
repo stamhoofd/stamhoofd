@@ -3,10 +3,11 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import type { BalanceItem } from '../../BalanceItem.js';
 import type { BundleDiscountCalculation } from '../../BundleDiscount.js';
 import { BalanceItemCartItem } from './BalanceItemCartItem.js';
+import { DeleteRegisterItem, IDDeleteRegisterItem } from './DeleteRegisterItem.js';
 import type { RegisterCheckout, RegisterContext } from './RegisterCheckout.js';
 import { IDRegisterItem } from './RegisterItem.js';
 import type { RegisterItem } from './RegisterItem.js';
-import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
+import type { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
 
 export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(IDRegisterItem) })
@@ -18,8 +19,15 @@ export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(BalanceItemCartItem), optional: true })
     balanceItems: BalanceItemCartItem[] = [];
 
-    @field({ decoder: new ArrayDecoder(StringDecoder), optional: true })
-    deleteRegistrationIds: string[] = [];
+    @field({ decoder: new ArrayDecoder(StringDecoder), optional: true, field: 'deleteRegistrationIds' })
+    @field({
+        decoder: new ArrayDecoder(IDDeleteRegisterItem),
+        optional: true,
+        ...NextVersion,
+        upgrade: (registrationIds: string[] | undefined) => (registrationIds ?? []).map(registrationId => IDDeleteRegisterItem.create({ registrationId })),
+        downgrade: (items: IDDeleteRegisterItem[]) => items.map(i => i.registrationId),
+    })
+    deleteRegistrations: IDDeleteRegisterItem[] = [];
 
     get organizationId() {
         if (this.items.length > 0) {
@@ -37,35 +45,7 @@ export class IDRegisterCart extends AutoEncoder {
         const cart = new RegisterCart();
         cart.items = this.items.map(i => i.hydrate(context));
         cart.balanceItems = this.balanceItems;
-
-        const registrations: RegistrationWithPlatformMember[] = [];
-        for (const registrationId of this.deleteRegistrationIds) {
-            let found = false;
-            for (const member of context.members) {
-                const registration = member.patchedMember.registrations.find(r => r.id === registrationId);
-                if (!registration) {
-                    continue;
-                }
-
-                registrations.push(new RegistrationWithPlatformMember({
-                    registration,
-                    member,
-                }));
-                found = true;
-                break;
-            }
-
-            if (!found) {
-                throw new SimpleError({
-                    code: 'not_found',
-                    message: 'Registration not found',
-                    human: $t(`%qn`),
-                    field: 'deleteRegistrationIds',
-                });
-            }
-        }
-        cart.deleteRegistrations = registrations;
-
+        cart.deleteRegistrations = this.deleteRegistrations.map(i => i.hydrate(context));
         return cart;
     }
 }
@@ -77,7 +57,7 @@ export class RegisterCart {
     /**
      * You can define which registrations you want remove as part of this register operation.
      */
-    deleteRegistrations: RegistrationWithPlatformMember[] = [];
+    deleteRegistrations: DeleteRegisterItem[] = [];
     bundleDiscounts: BundleDiscountCalculation[] = [];
 
     calculatePrices() {
@@ -111,7 +91,7 @@ export class RegisterCart {
         return IDRegisterCart.create({
             items: this.items.map(i => i.convert()),
             balanceItems: this.balanceItems,
-            deleteRegistrationIds: this.deleteRegistrations.map(r => r.registration.id),
+            deleteRegistrations: this.deleteRegistrations.map(r => r.convert()),
         });
     }
 
@@ -181,14 +161,14 @@ export class RegisterCart {
     }
 
     removeRegistration(registration: RegistrationWithPlatformMember) {
-        const index = this.deleteRegistrations.findIndex(r => r.registration.id === registration.registration.id);
+        const index = this.deleteRegistrations.findIndex(r => r.id === registration.registration.id);
         if (index === -1) {
-            this.deleteRegistrations.push(registration);
+            this.deleteRegistrations.push(new DeleteRegisterItem({ registration }));
         }
     }
 
     unremoveRegistration(registration: RegistrationWithPlatformMember) {
-        const index = this.deleteRegistrations.findIndex(r => r.registration.id === registration.registration.id);
+        const index = this.deleteRegistrations.findIndex(r => r.id === registration.registration.id);
         if (index !== -1) {
             this.deleteRegistrations.splice(index, 1);
         }
@@ -275,14 +255,14 @@ export class RegisterCart {
     get refund() {
         return this.items.reduce((total, item) => item.calculatedRefund + total, 0)
             + this.deleteRegistrations.reduce((total, item) => {
-                return total + item.registration.calculatedPrice;
+                return total + item.registration.registration.calculatedPrice;
             }, 0);
     }
 
     getCancellationFees(cancellationFeePercentage: number) {
         return this.items.reduce((total, item) => this.calculateCancellationFee(item.calculatedRefund, cancellationFeePercentage) + total, 0)
             + this.deleteRegistrations.reduce((total, item) => {
-                return total + this.calculateCancellationFee(item.registration.calculatedPrice, cancellationFeePercentage);
+                return total + this.calculateCancellationFee(item.registration.registration.calculatedPrice, cancellationFeePercentage);
             }, 0);
     }
 
@@ -295,7 +275,7 @@ export class RegisterCart {
         if (this.items.length === 0) {
             if (this.deleteRegistrations.length > 0) {
                 const organizationId = this.deleteRegistrations[0].registration.group.organizationId;
-                return this.deleteRegistrations[0].member.organizations.find(o => o.id === organizationId) ?? null;
+                return this.deleteRegistrations[0].registration.member.organizations.find(o => o.id === organizationId) ?? null;
             }
             return null;
         }
@@ -362,10 +342,12 @@ export class RegisterCart {
             }
         }
 
-        const cleanedRegistrations: RegistrationWithPlatformMember[] = [];
+        const cleanedRegistrations: DeleteRegisterItem[] = [];
         const singleOrganization = checkout.singleOrganization;
 
-        for (const registration of this.deleteRegistrations) {
+        for (const deleteItem of this.deleteRegistrations) {
+            const registration = deleteItem.registration;
+
             if (checkout.singleOrganizationId && registration.registration.group.organizationId !== checkout.singleOrganizationId) {
                 errors.addError(new SimpleError({
                     code: 'invalid_organization',
@@ -403,7 +385,7 @@ export class RegisterCart {
                 continue;
             }
 
-            cleanedRegistrations.push(registration);
+            cleanedRegistrations.push(deleteItem);
         }
 
         this.balanceItems = cleanedBalanceItems;

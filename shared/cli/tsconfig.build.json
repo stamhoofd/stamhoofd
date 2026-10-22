@@ -1,26 +1,13 @@
 {
-    "extends": "../../tsconfig.base.json",
+    "extends": ["../../tsconfig.base.json", "../../tsconfig.runtime.json"],
     "compilerOptions": {
+        "tsBuildInfoFile": ".cache/build.tsbuildinfo",
         "rootDir": "src",
         "outDir": "dist"
     },
     "include": [
         "./src",
         "../stamhoofd.d.ts"
-    ],
-    "references": [
-        {
-            "path": "../types/tsconfig.build.json"
-        },
-        {
-            "path": "../metabase/tsconfig.build.json"
-        },
-        {
-            "path": "../stdsync/tsconfig.build.json"
-        },
-        {
-            "path": "../../.development/i18n-uuid/tsconfig.build.json"
-        }
     ],
     "exclude": [
         "./src/**/*.spec.ts",

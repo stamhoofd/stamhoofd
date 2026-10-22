@@ -2,8 +2,8 @@ import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import { useLoadRecentPeriods } from '@stamhoofd/networking/hooks/useLoadRecentPeriods';
-import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';
+import { useLoadRecentPeriods } from '@stamhoofd/components/hooks/networking/useLoadRecentPeriods';
+import { usePatchOrganizationPeriods } from '@stamhoofd/components/hooks/networking/usePatchOrganizationPeriods';
 import { GroupCategory, GroupCategorySettings, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { PromiseComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 

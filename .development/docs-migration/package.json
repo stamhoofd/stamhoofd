@@ -7,8 +7,8 @@
     "license": "MIT",
     "scripts": {
         "start": "jiti src/migrate-ghost.ts",
-        "lint": "eslint",
-        "typecheck": "tsc --noEmit"
+        "lint": "eslint --quiet",
+        "typecheck": "tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "devDependencies": {
         "@types/node": "22.20.4",

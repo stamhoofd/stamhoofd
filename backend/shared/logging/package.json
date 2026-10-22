@@ -3,27 +3,29 @@
     "version": "2.155.0",
     "type": "module",
     "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "types": "./dist-types/index.d.ts",
     "sideEffects": false,
     "exports": {
         ".": {
-            "types": "./dist/index.d.ts",
+            "types": "./dist-types/index.d.ts",
             "import": "./dist/index.js",
             "require": "./dist/index.js"
         },
         "./*": {
-            "types": "./dist/*.d.ts",
+            "types": "./dist-types/*.d.ts",
             "import": "./dist/*.js",
             "require": "./dist/*.js"
         }
     },
     "files": [
         "src",
-        "dist"
+        "dist",
+        "dist-types"
     ],
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
-        "lint": "eslint",
+        "build:types": "tsc --project tsconfig.types.json",
+        "lint": "eslint --quiet",
         "test": "vitest"
     },
     "dependencies": {
@@ -34,6 +36,7 @@
         "access": "public"
     },
     "devDependencies": {
+        "@stamhoofd/types": "workspace:*",
         "vitest": "4.1.11"
     }
 }

@@ -15,8 +15,8 @@
         "#*": "./src/*.ts"
     },
     "scripts": {
-        "lint": "eslint",
-        "typecheck": "vue-tsc --noEmit"
+        "lint": "eslint --quiet",
+        "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "dependencies": {
         "@simonbackx/simple-encoding": "2.26.11",

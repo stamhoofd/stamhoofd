@@ -1,4 +1,4 @@
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import type { ObjectWithRecords, RecordAnswer } from '@stamhoofd/structures';
 import { File as FileStruct, Image, RecordCategory, RecordFileAnswer, RecordImageAnswer, RecordSettings, RecordType, Resolution, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

@@ -1,0 +1,39 @@
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import { useContext } from '../useContext';
+import { Group, LimitedFilteredRequest, PaginatedResponseDecoder } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { useRequestOwner } from './useRequestOwner';
+
+export function useGetGroupsById() {
+    const context = useContext();
+    const owner = useRequestOwner();
+
+    const getGroupsById = async (groupIds: string[], shouldRetry?: boolean) => {
+        if (groupIds.length === 0) {
+            return [];
+        }
+
+        const uniqueIds = Formatter.uniqueArray(groupIds);
+
+        const response = await context.value.authenticatedServer.request({
+            method: 'GET',
+            path: '/groups',
+            query: new LimitedFilteredRequest({
+                limit: uniqueIds.length,
+                filter: {
+                    id: {
+                        $in: uniqueIds,
+                    },
+                },
+            }),
+            decoder: new PaginatedResponseDecoder(new ArrayDecoder(Group as Decoder<Group>), LimitedFilteredRequest),
+            owner,
+            shouldRetry,
+        });
+
+        return response.data.results;
+    };
+
+    return getGroupsById;
+}

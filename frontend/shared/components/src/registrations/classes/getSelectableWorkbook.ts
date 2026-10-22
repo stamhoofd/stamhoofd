@@ -1,7 +1,7 @@
 import { SelectableColumn } from '@stamhoofd/frontend-excel-export/SelectableColumn';
 import { SelectableSheet } from '@stamhoofd/frontend-excel-export/SelectableSheet';
 import { SelectableWorkbook } from '@stamhoofd/frontend-excel-export/SelectableWorkbook';
-import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
+import type { ContextPermissions } from '@stamhoofd/frontend-session/ContextPermissions';
 import type { Group, Organization, Platform } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { getFinancialSupportSettingsOrDefault, GroupType, RecordCategory } from '@stamhoofd/structures';

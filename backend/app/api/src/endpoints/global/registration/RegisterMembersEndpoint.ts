@@ -146,7 +146,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         // Update balances before we start
         await BalanceItemService.flushCaches(organization.id);
 
-        const deleteRegistrationIds = request.body.cart.deleteRegistrationIds;
+        const deleteRegistrationIds = request.body.cart.deleteRegistrations.map(i => i.registrationId);
         const deleteRegistrationModels = (deleteRegistrationIds.length ? (await Registration.getByIDs(...deleteRegistrationIds)) : []).filter(r => r.organizationId === organization.id);
 
         // Validate balance items (can only happen serverside)
@@ -367,7 +367,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     continue;
                 }
 
-                if (checkout.cart.deleteRegistrations.some(r => r.registration.id === existingRegistration.id)) {
+                if (checkout.cart.deleteRegistrations.some(r => r.id === existingRegistration.id)) {
                     // Safe
                     continue;
                 }
@@ -477,7 +477,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Create negative balance items
         for (const { registration: registrationStruct, deleted } of [
-            ...checkout.cart.deleteRegistrations.map(r => ({ registration: r, deleted: true })),
+            ...checkout.cart.deleteRegistrations.map(r => ({ registration: r.registration, deleted: true })),
             ...checkout.cart.items.flatMap(i => i.replaceRegistrations).map(r => ({ registration: r, deleted: false })),
         ]) {
             if (whoWillPayNow !== 'nobody') {

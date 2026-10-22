@@ -20,7 +20,7 @@ import { ComponentWithProperties, ComponentWithPropertiesInstance } from '@simon
 import type { Ref } from 'vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
-import { Toast } from './Toast';
+import { Toast } from '@stamhoofd/frontend-notifications/Toast';
 import ToastView from './ToastView.vue';
 
 /**

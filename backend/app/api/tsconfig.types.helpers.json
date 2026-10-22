@@ -1,0 +1,9 @@
+{
+    "extends": "./tsconfig.types.json",
+    "compilerOptions": {
+        "types": ["node", "vitest/globals"],
+        "tsBuildInfoFile": ".cache/types-helpers.tsbuildinfo"
+    },
+    "include": ["./tests/helpers", "../../stamhoofd.d.ts", "../../../jest-extended.d.ts"],
+    "references": [{ "path": "./tsconfig.types.json" }]
+}

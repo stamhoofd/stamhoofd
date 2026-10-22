@@ -18,9 +18,10 @@ import { ModalStackEventBus, ReplaceRootEventBus } from '@stamhoofd/components/o
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import ToastBox from '@stamhoofd/components/overlays/ToastBox.vue';
 import { useProvidePaymentViews } from '@stamhoofd/components/payments/providePaymentViews';
-import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { Storage } from '@stamhoofd/networking/Storage';
+import { loadSessionLocale } from '@stamhoofd/frontend-application/SessionLocalization';
+import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
+import { useProvideSGVSync } from '@stamhoofd/sgv-frontend/provideSGVSync';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import { onMounted, useTemplateRef } from 'vue';
@@ -33,6 +34,7 @@ useProvideMemberViews();
 useProvideEventViews();
 useProvideGroupViews();
 useProvidePaymentViews();
+useProvideSGVSync();
 HistoryManager.activate();
 HistoryManager.debug = STAMHOOFD.environment === 'test';
 
@@ -44,8 +46,7 @@ const root = new ComponentWithProperties(PromiseView, {
     promise: async () => {
         // Load locales first
         try {
-            await I18nController.loadDefault({
-                $context: null,
+            await loadSessionLocale(null, {
                 defaultCountry: Country.Belgium,
                 defaultLanguage: Language.Dutch,
             });

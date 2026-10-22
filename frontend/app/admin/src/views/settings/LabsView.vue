@@ -143,7 +143,7 @@ import CheckboxListItem from '@stamhoofd/components/inputs/CheckboxListItem.vue'
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import { LoginMethod, LoginMethodConfig, LoginProviderType, PlatformConfig, PlatformPrivateConfig } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 

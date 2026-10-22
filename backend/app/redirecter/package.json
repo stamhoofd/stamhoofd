@@ -3,13 +3,22 @@
     "version": "2.155.0",
     "type": "module",
     "main": "index.ts",
+    "types": "./dist-types/index.d.ts",
+    "files": [
+        "dist",
+        "dist-types",
+        "src",
+        "*.ts",
+        "tsconfig*.json"
+    ],
     "scripts": {
+        "build:types": "tsc --project tsconfig.types.json",
         "build": "tsc --build tsconfig.build.json && pnpm run copy-assets",
         "build:full": "rm -rf ./dist && rm -f *.tsbuildinfo && pnpm run build",
         "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/ ./dist/",
-        "lint": "eslint",
+        "lint": "eslint --quiet",
         "start": "pnpm run build && node ./dist/index.js",
-        "typecheck": "tsc --build tsconfig.test.json",
+        "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
         "test": "vitest",
         "test:coverage": "vitest --coverage"
     },

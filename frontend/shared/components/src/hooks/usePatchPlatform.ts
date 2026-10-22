@@ -1,6 +1,6 @@
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { savePlatformToStorage } from '@stamhoofd/networking/loadPlatform';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
+import { savePlatformToStorage } from '@stamhoofd/frontend-session/loadPlatform';
 import { Platform } from '@stamhoofd/structures';
 import { useContext } from './useContext';
 

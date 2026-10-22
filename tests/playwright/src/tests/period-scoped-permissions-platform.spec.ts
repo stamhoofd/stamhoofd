@@ -205,6 +205,8 @@ test.describe('Period scoped permissions in platform mode @period-permissions-pl
 
         const editView = page.getByTestId('member-step');
         await expect(editView).toBeVisible();
+        await expect(action).toHaveCount(0);
+        await expect(page.locator('.popup.focused').filter({ has: editView })).toBeVisible();
 
         await page.keyboard.press('Escape');
         await expect(editView).toBeHidden();

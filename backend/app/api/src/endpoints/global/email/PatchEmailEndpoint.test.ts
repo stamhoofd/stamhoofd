@@ -22,6 +22,7 @@ import '../../../email-recipient-loaders/receivable-balances.js';
 import '../../../email-recipient-loaders/registrations.js';
 import { EmailMocker } from '@stamhoofd/email';
 import { vi } from 'vitest';
+import { QueueHandler } from '@stamhoofd/queues';
 
 const baseUrl = `/v${Version}/email`;
 
@@ -672,8 +673,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         const response = await patchEmail(body, token, organization);
         expect(response.status).toBe(200);
 
-        // Wait for the background process to complete (or fail)
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await QueueHandler.awaitAll();
 
         // Refresh the email to check the status
         await email.refresh();
@@ -850,7 +850,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         expect(response.status).toBe(200);
 
         // Wait for the background process to complete (or fail)
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await QueueHandler.awaitAll();
 
         // Refresh the email to check the status
         await email.refresh();
@@ -1011,7 +1011,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         expect(response.status).toBe(200);
 
         // Wait for the background process to complete (or fail)
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await QueueHandler.awaitAll();
 
         // Refresh the email to check the status
         await email.refresh();
@@ -1159,7 +1159,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         expect(response.status).toBe(200);
 
         // Wait for the background process to complete (or fail)
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await QueueHandler.awaitAll();
 
         // Refresh the email to check the status
         await email.refresh();

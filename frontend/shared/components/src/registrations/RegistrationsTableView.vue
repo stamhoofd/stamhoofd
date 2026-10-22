@@ -50,7 +50,7 @@ import type { Column } from '#tables/classes/Column.ts';
 import type { TableAction } from '#tables/classes/TableAction.ts';
 import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
-import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync';
+import { useSGVSync } from '#members/sgvSync.ts';
 import type { Group, GroupCategoryTree, MemberResponsibility, Organization, OrganizationRegistrationPeriod, PlatformRegistration, StamhoofdFilter } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

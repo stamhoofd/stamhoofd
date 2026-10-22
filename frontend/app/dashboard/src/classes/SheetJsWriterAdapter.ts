@@ -1,5 +1,5 @@
 import type { CellValue, XlsxWriterAdapter } from '@stamhoofd/excel-writer/core';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import XLSX from 'xlsx';
 import { ExcelHelper } from './ExcelHelper';
 

@@ -120,7 +120,7 @@ import type { PrivateWebshop} from '@stamhoofd/structures';
 import { SeatingPlan, SeatingPlanCategory, SeatingPlanRow, SeatingPlanSection, Version, WebshopMetaData } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { computed, ref } from 'vue';
 
 import EditSeatingPlanSectionBox from './EditSeatingPlanSectionBox.vue';

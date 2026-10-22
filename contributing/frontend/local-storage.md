@@ -10,7 +10,7 @@ For example if you want to cache the currently signed in user:
 
 ```typescript
 import { VersionBox, Version, EncodeMedium } from '@stamhoofd/structures';
-import { Storage } from '@stamhoofd/networking';
+import { Storage } from '@stamhoofd/frontend-storage/Storage';
 
 await Storage.secure.setItem(
 	'user', 

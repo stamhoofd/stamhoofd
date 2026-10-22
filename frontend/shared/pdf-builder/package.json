@@ -8,10 +8,11 @@
         "./*": "./src/*.ts"
     },
     "scripts": {
-        "lint": "eslint",
-        "typecheck": "vue-tsc --noEmit"
+        "lint": "eslint --quiet",
+        "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "dependencies": {
+        "@stamhoofd/frontend-platform": "workspace:*",
         "@stamhoofd/assets": "workspace:*",
         "@stamhoofd/networking": "workspace:*",
         "@stamhoofd/structures": "workspace:*",

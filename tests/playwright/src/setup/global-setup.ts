@@ -53,16 +53,21 @@ export default async function globalSetup() {
     const migrateDatabases = async () => {
         const { run: runMigrations } = await import('@stamhoofd/backend/migrate');
         const clear = shouldClearPlaywrightDatabases();
+        const verbose = process.env.PLAYWRIGHT_VERBOSE === '1';
 
         for (let workerId = 0; workerId < workerCount; workerId += 1) {
             const database = DatabaseHelper.getDatabaseName(workerId.toString());
             if (clear) {
-                console.log(`Dropping ${database}...`);
+                if (verbose) {
+                    console.log(`Dropping ${database}...`);
+                }
                 await DatabaseHelper.dropDatabase(database);
             }
-            console.log(`Migrating ${database}...`);
+            if (verbose) {
+                console.log(`Migrating ${database}...`);
+            }
             TestUtils.setEnvironment('DB_DATABASE', database);
-            await runMigrations();
+            await runMigrations({ verbose });
         }
     };
 

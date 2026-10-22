@@ -37,7 +37,7 @@ import { Toast } from '#overlays/Toast.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { UitpasOrganizerResponse} from '@stamhoofd/structures';
 import { UitpasOrganizersResponse } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';

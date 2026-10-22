@@ -59,8 +59,8 @@ import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import Spinner from '@stamhoofd/components/Spinner.vue';
-import type { PluginListenerHandle } from '@stamhoofd/networking/AppManager';
-import { AppManager } from '@stamhoofd/networking/AppManager';
+import type { PluginListenerHandle } from '@stamhoofd/frontend-platform/AppManager';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import type { Order, PrivateOrder, Product, TicketPrivate } from '@stamhoofd/structures';
 import { OrderStatus } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';

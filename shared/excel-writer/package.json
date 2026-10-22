@@ -2,29 +2,31 @@
     "name": "@stamhoofd/excel-writer",
     "version": "2.155.0",
     "type": "module",
-    "main": "./dist/index.d.ts",
+    "main": "./dist/index.js",
     "module": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "types": "./dist-types/index.d.ts",
     "sideEffects": false,
     "exports": {
         ".": {
-            "types": "./dist/index.d.ts",
+            "types": "./dist-types/index.d.ts",
             "import": "./dist/index.js",
             "require": "./dist/index.js"
         },
         "./core": {
-            "types": "./dist/core.d.ts",
+            "types": "./dist-types/core.d.ts",
             "import": "./dist/core.js",
             "require": "./dist/core.js"
         }
     },
     "files": [
         "dist",
+        "dist-types",
         "package.json"
     ],
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
-        "lint": "eslint"
+        "build:types": "tsc --project tsconfig.types.json",
+        "lint": "eslint --quiet"
     },
     "dependencies": {
         "@simonbackx/simple-errors": "1.5.0",
@@ -32,6 +34,8 @@
         "uuid": "14.0.2"
     },
     "devDependencies": {
+        "@stamhoofd/types": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "@types/archiver": "6.0.4",
         "@types/luxon": "3.7.6",
         "@types/uuid": "8.3.4"

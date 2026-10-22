@@ -84,7 +84,7 @@ import { ArrayDecoder, PatchableArray, PatchMap } from '@simonbackx/simple-encod
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import ActionButtonsBox from '@stamhoofd/components/payments/components/ActionButtonsBox.vue';
@@ -103,8 +103,8 @@ import { computed, ref } from 'vue';
 
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
-import { AppManager } from '@stamhoofd/networking/AppManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 
 import { fiscal } from './definitions/fiscal';
 import { participation } from './definitions/participation.ts';

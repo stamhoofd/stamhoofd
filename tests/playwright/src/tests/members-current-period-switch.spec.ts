@@ -201,8 +201,8 @@ test.describe('Switching the current period from the members menu @members-perio
             const menu = page.getByTestId('members-menu').filter({ visible: true }).last();
             await expect(menu.getByRole('heading', { name: scenario.otherPeriodName, exact: true }).last()).toBeVisible();
             await expect(menu.getByRole('button', { name: 'Andere tak' })).toBeVisible();
+            await expect(page).not.toHaveURL(originalUrl);
             const periodUrl = page.url();
-            expect(periodUrl).not.toBe(originalUrl);
 
             await page.reload();
             await expect(menu.getByRole('button', { name: 'Andere tak' })).toBeVisible();

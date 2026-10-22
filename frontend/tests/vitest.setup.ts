@@ -1,4 +1,5 @@
-import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
+import { loadSessionLocale } from '@stamhoofd/frontend-application/SessionLocalization';
+import { configureFrontendServices } from '@stamhoofd/components/context/configureFrontendServices';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
@@ -11,12 +12,12 @@ import { afterEach, beforeAll, beforeEach } from 'vitest';
 
 TestUtils.setup();
 TestUtils.loadEnvironment();
+configureFrontendServices();
 
 Error.stackTraceLimit = Infinity;
 
 beforeAll(async () => {
-    await I18nController.loadDefault({
-        $context: null,
+    await loadSessionLocale(null, {
         defaultCountry: Country.Belgium,
         defaultLanguage: Language.Dutch,
         country: Country.Belgium,

@@ -1,14 +1,14 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { Group, PlatformFamily, PlatformMember, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { GroupType, Organization, RegisterCheckout, RegisterItem } from '@stamhoofd/structures';
 
 import { loadFamilyIfNeeded } from '#members/hooks/useLoadFamily.ts';
 import { useAppContext } from '../../context/appContext';
-import { GlobalEventBus } from '../../EventBus';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';
 import { useContext } from '#hooks/useContext.ts';
 import { Toast } from '../../overlays/Toast';
 import type { DisplayOptions, NavigationActions } from '../../types/NavigationActions';

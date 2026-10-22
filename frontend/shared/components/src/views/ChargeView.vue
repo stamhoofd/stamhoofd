@@ -75,7 +75,7 @@ import VATPercentageInput from '#payments/components/VATPercentageInput.vue';
 import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Organization, StamhoofdFilter, VATExcemptReason } from '@stamhoofd/structures';
 import { BalanceItem, ChargeRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

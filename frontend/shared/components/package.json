@@ -15,11 +15,16 @@
         "#*": "./src/*.ts"
     },
     "scripts": {
-        "lint": "eslint",
+        "lint": "eslint --quiet",
         "test": "vitest run",
-        "typecheck": "vue-tsc --noEmit"
+        "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "dependencies": {
+        "@stamhoofd/frontend-notifications": "workspace:*",
+        "@stamhoofd/frontend-application": "workspace:*",
+        "@stamhoofd/frontend-session": "workspace:*",
+        "@stamhoofd/frontend-platform": "workspace:*",
+        "@stamhoofd/frontend-storage": "workspace:*",
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-networking": "1.23.0",
@@ -33,7 +38,6 @@
         "@stamhoofd/networking": "workspace:*",
         "@stamhoofd/object-differ": "workspace:*",
         "@stamhoofd/scss": "workspace:*",
-        "@stamhoofd/sgv-frontend": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/ticket-builder": "workspace:*",
         "@stamhoofd/types": "workspace:*",

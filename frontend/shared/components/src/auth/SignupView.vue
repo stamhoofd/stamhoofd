@@ -50,7 +50,7 @@
 
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
+import { LoginHelper } from '@stamhoofd/frontend-application/LoginHelper';
 import { ref } from 'vue';
 
 import { AppRoute } from '@stamhoofd/structures/AppRoute.js';

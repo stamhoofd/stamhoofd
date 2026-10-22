@@ -5,7 +5,7 @@ import { useErrors } from '#errors/useErrors.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatchPlatform } from '#hooks/usePatchPlatform.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import type { Group, MemberResponsibility, PermissionRoleDetailed, PermissionRoleForResponsibility} from '@stamhoofd/structures';
 import { Organization, OrganizationPrivateMetaData, Platform, PlatformConfig, PlatformPrivateConfig, Version } from '@stamhoofd/structures';
 import type { Ref} from 'vue';

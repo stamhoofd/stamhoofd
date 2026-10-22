@@ -264,7 +264,7 @@ import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import { getGroupTypeName, getPermissionLevelName, getPermissionLevelNumber, getUnlistedResources, GroupType, maximumPermissionlevel, PermissionRoleForResponsibility, PermissionsResourceKey, ResourcePermissions } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
-import { useSearchEventsInPeriod } from '@stamhoofd/networking/hooks/useGetEvents';
+import { useSearchEventsInPeriod } from '#hooks/networking/useGetEvents';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import AccessRightPermissionRow from './components/AccessRightPermissionRow.vue';

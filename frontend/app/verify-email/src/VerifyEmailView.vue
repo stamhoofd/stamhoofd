@@ -56,7 +56,7 @@ import type { NavigationActions } from '@stamhoofd/components/types/NavigationAc
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
+import { LoginHelper } from '@stamhoofd/frontend-application/LoginHelper';
 import type { MFAChallengeResponse, MFASetupResponse } from '@stamhoofd/structures';
 import { AppRoute } from '@stamhoofd/structures';
 import { onDeactivated, onMounted, onUnmounted, ref } from 'vue';

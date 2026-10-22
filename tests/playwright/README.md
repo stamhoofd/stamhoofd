@@ -8,9 +8,23 @@ Run tests through `pnpm stam test e2e` from the repository root (or `stam test e
 
 The CLI and Playwright global setup own shared builds, the API build, migrations, Caddy, SSO, worker databases, and the runner lifecycle. Frontend bundles use an uncached Turbo task filtered to `@stamhoofd/web-app` and `@stamhoofd/webshop` for `build:playwright`. Do not build or invoke Playwright manually.
 
+API startup clears each worker database once, including the initial organization-index rebuild. Every test group still resets its database and login state; fully parallel groups do not share fixture data.
+
 Use `--grep @tag` to select tests, and add `--skip-build` only when the application build is still current (for example, only test files changed since the last run). Use `--local-db` to connect to an already running MySQL; see [databases](#databases).
 
+Database names and successful migration logs are hidden by default, including on CI. Use `stam test e2e --verbose` to show them (`PLAYWRIGHT_VERBOSE=1` when CI invokes the package directly). Failures show their errors and captured migration output. This does not change manual or production migration logging.
+
 On environment problems such as DNS failures, SSL errors, or blank pages, stop and ask for help rather than provisioning alternative test infrastructure.
+
+In CI, `shared/cli/bin/ci-mysql.mjs` starts pulling and provisioning the pinned MySQL image immediately after checkout, alongside dependency installation and app setup. The workflow waits for an authenticated TCP query before running Playwright. The GitHub-hosted runner is discarded at job completion, so MySQL needs no explicit cleanup. The job summary reports total provisioning time and the remaining wait; the `playwright-mysql-startup-<shard>` artifact contains startup logs and status. This bootstrap uses only Node built-ins because dependencies and the compiled CLI are not available yet. Local test database ownership is unchanged.
+
+## CI reports
+
+GitHub Actions runs four shards with two workers per shard. Each runner owns its MySQL, Caddy, DNS, and SSO services. The aggregate `Playwright Tests` check fails if any shard fails or a shard report is missing; other shards continue so their results are still available.
+
+CI produces a mergeable Playwright blob report alongside the console output. Each shard must upload its blob report and failure attachments under unique artifact names. Download the blobs into `tests/playwright/blob-report`, then run `pnpm --dir tests/playwright run merge-reports` to produce a combined HTML report and `playwright-report/results.json`. This command only merges reports; it does not start tests or application services.
+
+Keep downloaded failure artifacts in separate subdirectories under `tests/playwright/test-results`. The trace publisher searches recursively, so one aggregation job can publish all trace links and post a single PR comment without shards overwriting each other's output.
 
 ## Todo
 Set a fixed time. The tests should be predictable. Now the current time in tests will change depending on the date the test is run.

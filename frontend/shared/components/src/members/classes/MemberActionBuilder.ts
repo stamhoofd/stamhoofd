@@ -14,10 +14,10 @@ import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-enco
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AppManager } from '@stamhoofd/networking/AppManager';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { markReviewMoment } from '@stamhoofd/frontend-application/markReviewMoment';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
+import { useFetchOrganizationRegistrationPeriods } from '#hooks/networking/useFetchOrganizationRegistrationPeriods';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
@@ -26,7 +26,7 @@ import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecip
 import { MailchimpSyncRequest, MailchimpSyncType } from '@stamhoofd/structures/mailchimp/MailchimpSyncRequest.js';
 import { Formatter } from '@stamhoofd/utility';
 import { markRaw } from 'vue';
-import { GlobalEventBus } from '../../EventBus';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';
 import type { RecipientChooseOneOption } from '../../email/EmailView.vue';
 import { isMailchimpReady } from '../../mailchimp/useMailchimp';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
@@ -1239,7 +1239,7 @@ export async function presentEditMember({ member, present, context }: { member: 
                     await dismiss({ force: true });
 
                     // Mark review moment
-                    AppManager.shared.markReviewMoment(context);
+                    markReviewMoment(context.organization);
                 },
             }),
         ],

@@ -9,6 +9,7 @@ import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.
 import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
 import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
 import { TabBarItem, TabBarItemGroup } from '@stamhoofd/components/containers/TabBarItem.ts';
+import { openNolt, useOpenPendingNoltLogin } from '@stamhoofd/components/helpers/nolt.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
@@ -26,6 +27,7 @@ import { useProvideEventViews } from '@stamhoofd/components/events/provideEventV
 import { useProvideGroupViews } from '@stamhoofd/components/groups/provideGroupViews';
 import { useProvidePaymentViews } from '@stamhoofd/components/payments/providePaymentViews';
 import { useProvideBreakdownViews } from './views/dashboard/breakdown/provideBreakdownViews';
+import { useProvideSGVSync } from '@stamhoofd/sgv-frontend/provideSGVSync';
 
 useProvideEventWebshopViews();
 useProvideMemberViews();
@@ -33,6 +35,8 @@ useProvideEventViews();
 useProvideGroupViews();
 useProvidePaymentViews();
 useProvideBreakdownViews();
+useProvideSGVSync();
+useOpenPendingNoltLogin();
 
 const context = useContext();
 const platform = usePlatform();
@@ -226,8 +230,7 @@ function getRoot() {
                 icon: 'feedback',
                 name: $t(`%18`),
                 action: async function () {
-                    const NoltHelper = (await import('./classes/NoltHelper'));
-                    await NoltHelper.openNolt(context.value, false);
+                    await openNolt(context.value, false);
                 },
             }),
         );

@@ -8,10 +8,11 @@
         "dist"
     ],
     "scripts": {
-        "lint": "eslint",
-        "typecheck": "vue-tsc --noEmit"
+        "lint": "eslint --quiet",
+        "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "dependencies": {
+        "@stamhoofd/frontend-application": "workspace:*",
         "@simonbackx/vue-app-navigation": "2.25.1",
         "@stamhoofd/assets": "workspace:*",
         "@stamhoofd/components": "workspace:*",

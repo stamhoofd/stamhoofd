@@ -17,12 +17,13 @@ export default class TestE2e extends BaseCommand {
         'stam test e2e --ci',
         'stam test e2e --extra',
         'stam test e2e --workers 2',
+        'stam test e2e --shard 1/4 --workers 2',
         'stam test e2e --local-db',
         'stam test e2e --ui',
     ];
 
     static flags = {
-        ...this.verbosityFlags(),
+        ...this.verbosityFlags(RunVerbosity.Command),
         'ci': ciFlag,
         'clear': Flags.boolean({ default: false, description: 'Clear the persistent e2e database before running tests' }),
         'extra': Flags.boolean({ default: false, description: 'Include Playwright tests tagged @extra' }),
@@ -31,6 +32,7 @@ export default class TestE2e extends BaseCommand {
         'skip-build': Flags.boolean({ default: false, description: 'Skip build:shared, the API test pre-build, and the frontend build (only test files changed)' }),
         'ui': Flags.boolean({ default: false, description: 'Run Playwright in UI mode' }),
         'workers': Flags.integer({ description: 'Number of Playwright workers' }),
+        'shard': Flags.string({ description: 'Run one shard of the suite (1-based index/total, e.g. 1/4)' }),
     };
 
     async run(): Promise<void> {
@@ -39,7 +41,13 @@ export default class TestE2e extends BaseCommand {
         if (flags.workers !== undefined && flags.workers < 1) {
             throw new Error('--workers must be at least 1');
         }
+        if (flags.shard !== undefined) {
+            const [index, total] = flags.shard.split('/').map(Number);
+            if (!/^[1-9]\d*\/[1-9]\d*$/.test(flags.shard) || !Number.isSafeInteger(index) || !Number.isSafeInteger(total) || index > total) {
+                throw new Error('--shard must be index/total with 1 <= index <= total (e.g. 1/4)');
+            }
+        }
         const { context } = await this.parseWithContext(TestE2e, parsed);
-        await testE2e(context, { ci: flags.ci, clear: flags.clear, extra: flags.extra, grep: flags.grep, localDb: flags['local-db'], skipBuild: flags['skip-build'], ui: flags.ui, workers: flags.workers });
+        await testE2e(context, { ci: flags.ci, clear: flags.clear, extra: flags.extra, grep: flags.grep, localDb: flags['local-db'], skipBuild: flags['skip-build'], ui: flags.ui, workers: flags.workers, shard: flags.shard });
     }
 }

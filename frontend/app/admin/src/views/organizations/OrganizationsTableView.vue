@@ -38,7 +38,7 @@ import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '@stamhoo
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import type { OrganizationTag, OrganizationType, StamhoofdFilter, UmbrellaOrganization } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

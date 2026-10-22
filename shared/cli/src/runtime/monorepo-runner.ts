@@ -44,7 +44,6 @@ export type UnitTestPackage = {
     path: string;
     /** Whether the package's tests connect to MySQL (checked via its vitest setup files). */
     needsDatabase: boolean;
-    typecheck?: boolean;
 };
 
 // The unit-test packages that `stam test unit` runs. To add a package: give it a `test` script that
@@ -53,8 +52,8 @@ export type UnitTestPackage = {
 export const unitTestPackages: UnitTestPackage[] = [
     { name: 'cli', path: 'shared/cli', needsDatabase: false },
     { name: 'i18n-uuid', path: '.development/i18n-uuid', needsDatabase: false },
-    { name: 'metabase', path: 'shared/metabase', needsDatabase: false, typecheck: true },
-    { name: 'structures', path: 'shared/structures', needsDatabase: false, typecheck: true },
+    { name: 'metabase', path: 'shared/metabase', needsDatabase: false },
+    { name: 'structures', path: 'shared/structures', needsDatabase: false },
     { name: 'object-differ', path: 'shared/object-differ', needsDatabase: false },
     { name: 'sgv', path: 'shared/sgv', needsDatabase: false },
     { name: 'stdsync', path: 'shared/stdsync', needsDatabase: false },
@@ -63,16 +62,21 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'vite-config', path: 'frontend/shared/vite-config', needsDatabase: false },
     { name: 'queues', path: 'backend/shared/queues', needsDatabase: false },
     { name: 'logging', path: 'backend/shared/logging', needsDatabase: false },
-    { name: 'models', path: 'backend/shared/models', needsDatabase: true, typecheck: true },
-    { name: 'vies', path: 'backend/shared/vies', needsDatabase: true, typecheck: true },
-    { name: 'sql', path: 'backend/shared/sql', needsDatabase: true, typecheck: true },
-    { name: 'renderer', path: 'backend/app/renderer', needsDatabase: false, typecheck: true },
+    { name: 'models', path: 'backend/shared/models', needsDatabase: true },
+    { name: 'vies', path: 'backend/shared/vies', needsDatabase: true },
+    { name: 'sql', path: 'backend/shared/sql', needsDatabase: true },
+    { name: 'renderer', path: 'backend/app/renderer', needsDatabase: false },
     { name: 'redirecter', path: 'backend/app/redirecter', needsDatabase: false },
-    { name: 'statistics-syncer', path: 'backend/app/statistics-syncer', needsDatabase: true, typecheck: true },
-    { name: 'api', path: 'backend/app/api', needsDatabase: true, typecheck: true },
+    { name: 'statistics-syncer', path: 'backend/app/statistics-syncer', needsDatabase: true },
+    { name: 'api', path: 'backend/app/api', needsDatabase: true },
     // Browser tests (vitest browser mode); need a Playwright Chromium: `pnpm --dir tests/playwright exec playwright install chromium`.
     { name: 'components', path: 'frontend/shared/components', needsDatabase: false },
     { name: 'networking', path: 'frontend/shared/networking', needsDatabase: false },
+    { name: 'sgv-frontend', path: 'frontend/shared/sgv', needsDatabase: false },
+    { name: 'notifications', path: 'frontend/shared/notifications', needsDatabase: false },
+    { name: 'platform', path: 'frontend/shared/platform', needsDatabase: false },
+    { name: 'session', path: 'frontend/shared/session', needsDatabase: false },
+    { name: 'application', path: 'frontend/shared/application', needsDatabase: false },
 ];
 export const coverageTestPackages: UnitTestPackage[] = [
     { name: 'i18n-uuid', path: '.development/i18n-uuid', needsDatabase: false },
@@ -89,12 +93,12 @@ export async function buildAll(context: CliContext): Promise<void> {
     await run('pnpm', ['exec', 'turbo', 'run', 'build', '--env-mode=loose', '--filter=@stamhoofd/backend', '--filter=@stamhoofd/backend-renderer', '--filter=@stamhoofd/backend-statistics-syncer', '--filter=@stamhoofd/web-app', '--filter=@stamhoofd/webshop'], { cwd: context.rootDir, env: { STAMHOOFD_ENV: context.env }, verbosity: context.verbosity ?? RunVerbosity.Output });
 }
 
-export async function lint(context: CliContext): Promise<void> {
-    await run('pnpm', ['run', 'lint'], { cwd: context.rootDir, verbosity: context.verbosity ?? RunVerbosity.Output });
+export async function lint(context: CliContext, filters: string[] = []): Promise<void> {
+    await run('pnpm', ['run', 'lint', ...filters.map(filter => `--filter=${filter}`)], { cwd: context.rootDir, verbosity: context.verbosity ?? RunVerbosity.Output });
 }
 
-export async function typecheck(context: CliContext): Promise<void> {
-    await run('pnpm', ['run', 'typecheck'], { cwd: context.rootDir, verbosity: context.verbosity ?? RunVerbosity.Output });
+export async function typecheck(context: CliContext, filters: string[] = []): Promise<void> {
+    await run('pnpm', ['run', 'typecheck', ...filters.map(filter => `--filter=${filter}`)], { cwd: context.rootDir, verbosity: context.verbosity ?? RunVerbosity.Output });
 }
 
 export async function migrate(context: CliContext): Promise<void> {
@@ -167,12 +171,19 @@ export type UnitTestOptions = {
     /** Drop the persistent test database volume before running (fresh start). */
     clear?: boolean;
     coverage?: boolean;
+    /** Vitest shard selection; each shard must run on a separate machine/worktree. */
+    shard?: string;
+    /** JSON report path for a single package, in addition to the console reporter. */
+    jsonReport?: string;
 };
 
 export async function runUnitTests(context: CliContext, options: UnitTestOptions = {}): Promise<void> {
     const packages = options.packages ?? unitTestPackages;
     if (packages.length === 0) {
         throw new Error('No test packages selected.');
+    }
+    if (options.jsonReport !== undefined && packages.length !== 1) {
+        throw new Error('--json-report requires a single package');
     }
 
     if (!options.skipBuild) {
@@ -188,11 +199,13 @@ export async function runUnitTests(context: CliContext, options: UnitTestOptions
 
     try {
         for (const pkg of packages) {
-            if (pkg.typecheck) {
-                await run('pnpm', ['run', 'typecheck'], { cwd: path.join(context.rootDir, pkg.path), env: { CI: options.ci ? 'true' : undefined, DB_PORT: dbPort }, verbosity: context.verbosity ?? RunVerbosity.Output });
-            }
-
             const args = ['exec', 'vitest', 'run'];
+            if (options.shard !== undefined) {
+                args.push('--shard', options.shard);
+            }
+            if (options.jsonReport !== undefined) {
+                args.push('--reporter=default', '--reporter=json', `--outputFile=${options.jsonReport}`);
+            }
             if (options.coverage) {
                 args.push('--coverage');
             }
@@ -217,7 +230,7 @@ export async function testUnit(context: CliContext, ci: boolean): Promise<void> 
     await runUnitTests(context, { ci });
 }
 
-export async function testE2e(context: CliContext, options: { ci: boolean; clear: boolean; extra?: boolean; ui: boolean; workers?: number; grep?: string; skipBuild?: boolean; localDb?: boolean }): Promise<void> {
+export async function testE2e(context: CliContext, options: { ci: boolean; clear: boolean; extra?: boolean; ui: boolean; workers?: number; shard?: string; grep?: string; skipBuild?: boolean; localDb?: boolean }): Promise<void> {
     const mysql = resolveE2eMysqlTarget({ localDb: options.localDb });
     const databaseEnv = await prepareE2eDatabase(context, mysql, options.clear);
     let shouldRestoreCaddy = false;
@@ -230,7 +243,30 @@ export async function testE2e(context: CliContext, options: { ci: boolean; clear
         if (!options.skipBuild) {
             await run('pnpm', ['--dir', 'backend/app/api', 'run', 'build:playwright:pre'], { cwd: context.rootDir, env: databaseEnv, verbosity: context.verbosity ?? RunVerbosity.Output });
         }
-        await run('pnpm', ['--dir', 'tests/playwright', 'run', 'test', ...(options.ui ? ['--ui'] : []), ...(options.grep === undefined ? [] : ['--grep', options.grep]), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)])], { cwd: context.rootDir, env: { ...databaseEnv, CI: options.ci ? 'true' : undefined, NODE_EXTRA_CA_CERTS: caddyRootCaPath(), PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined, PLAYWRIGHT_WORKER_COUNT: options.workers === undefined ? undefined : String(options.workers), STAMHOOFD_SKIP_FRONTEND_BUILD: options.skipBuild ? 'true' : undefined }, verbosity: context.verbosity ?? RunVerbosity.Output });
+        const verbosity = context.verbosity ?? RunVerbosity.Output;
+        const args = ['--dir', 'tests/playwright', 'run', 'test', ...(options.ui ? ['--ui'] : []), ...(options.grep === undefined ? [] : ['--grep', options.grep]), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)]), ...(options.shard === undefined ? [] : ['--shard', options.shard])];
+        const runOptions = {
+            cwd: context.rootDir,
+            env: {
+                ...databaseEnv,
+                CI: options.ci ? 'true' : undefined,
+                NODE_EXTRA_CA_CERTS: caddyRootCaPath(),
+                PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined,
+                PLAYWRIGHT_WORKER_COUNT: options.workers === undefined ? undefined : String(options.workers),
+                PLAYWRIGHT_VERBOSE: context.verbose ? '1' : undefined,
+                STAMHOOFD_SKIP_FRONTEND_BUILD: options.skipBuild ? 'true' : undefined,
+            },
+            verbosity,
+        };
+        if (verbosity === RunVerbosity.Output) {
+            await run('pnpm', args, runOptions);
+        }
+        else {
+            const result = await run('pnpm', args, { ...runOptions, capture: true, allowFailure: true });
+            if (result.status !== 0) {
+                throw new Error(`Playwright exited with status ${result.status}\n${result.stdout}${result.stderr}`);
+            }
+        }
     } finally {
         // Shut down the e2e MySQL container after the run; the data volume is kept for the next run.
         // A MySQL that was already running is left alone: it is not ours to stop.
@@ -252,12 +288,14 @@ export async function cleanBuild(context: CliContext, options: { dryRun?: boolea
         'tests',
         'shared',
         'frontend/app',
+        'frontend/shared',
         'backend/shared',
         'backend/app',
+        '.development',
     ];
 
     if (options.dryRun) {
-        console.log('Would remove dist, dist-playwright, and *.tsbuildinfo from:');
+        console.log('Would remove dist, dist-types, dist-playwright, and TypeScript build metadata from:');
         roots.forEach(root => console.log(`  ${root}/*`));
         return;
     }
@@ -268,11 +306,11 @@ export async function cleanBuild(context: CliContext, options: { dryRun?: boolea
 }
 
 export function sharedBuildWatchCommand(): string {
-    return `mkdir -p .development/cli/generated && rm -f ${sharedBuildReadyFile} && pnpm exec nodemon --quiet --signal SIGTERM --watch shared --watch backend/shared --watch backend/stamhoofd.d.ts --watch turbo.jsonc --watch tsconfig.base.json --watch tsconfig.test.json --watch jest-extended.d.ts --ignore './shared/*/dist/' --ignore './backend/shared/*/dist/' --ext .ts,.json,.jsonc,.sql,.mjs,.js --exec 'pnpm run build:shared && touch ${sharedBuildReadyFile} || exit 0'`;
+    return `mkdir -p .development/cli/generated && rm -f ${sharedBuildReadyFile} && pnpm exec nodemon --quiet --signal SIGTERM --watch shared --watch backend/shared --watch backend/stamhoofd.d.ts --watch turbo.jsonc --watch tsconfig.base.json --watch tsconfig.test.json --watch tsconfig.runtime.json --watch tsconfig.types.json --watch jest-extended.d.ts --ignore './shared/*/dist/' --ignore './backend/shared/*/dist/' --ignore './shared/*/dist-types/' --ignore './backend/shared/*/dist-types/' --ext .ts,.json,.jsonc,.sql,.mjs,.js --exec 'pnpm run build:shared && touch ${sharedBuildReadyFile} || exit 0'`;
 }
 
 export function sharedBuildReadyCommand(): string {
-    return `wait-on ${sharedBuildReadyFile} shared/cli/dist/index.js shared/locales/dist/index.d.ts`;
+    return `wait-on ${sharedBuildReadyFile} shared/cli/dist/index.js shared/locales/dist-types/index.d.ts`;
 }
 
 async function cleanPackageChildren(root: string): Promise<void> {
@@ -290,8 +328,10 @@ async function cleanPackageChildren(root: string): Promise<void> {
             return;
         }
         await fs.rm(path.join(packagePath, 'dist'), { recursive: true, force: true });
+        await fs.rm(path.join(packagePath, 'dist-types'), { recursive: true, force: true });
         await fs.rm(path.join(packagePath, 'dist-playwright'), { recursive: true, force: true });
         await removeTsBuildInfo(packagePath);
+        await removeTsBuildInfo(path.join(packagePath, '.cache'));
     }));
 }
 
@@ -315,7 +355,9 @@ async function ensureTestMysql(context: CliContext, names: { container: string; 
     if (!await docker.containerIsRunning(container)) {
         await docker.removeContainer(container, context.verbose);
         await docker.createVolume(volume, context.verbose);
-        await docker.run(['run', '-d', '--name', container, '-e', `MYSQL_ROOT_PASSWORD=${mysqlRootPassword}`, '-p', localhostPortMappingDynamic(mysqlInternalPort), '-v', `${volume}:/var/lib/mysql`, mysqlImage, ...mysqlServerArgs()], { verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
+        // Test data is rebuildable: keep transactions and redo, without per-commit fsync or replication logs.
+        const serverArgs = [...mysqlServerArgs(), '--innodb-flush-log-at-trx-commit=2', '--skip-log-bin'];
+        await docker.run(['run', '-d', '--name', container, '-e', `MYSQL_ROOT_PASSWORD=${mysqlRootPassword}`, '-p', localhostPortMappingDynamic(mysqlInternalPort), '-v', `${volume}:/var/lib/mysql`, process.env.CI_MYSQL_IMAGE ?? mysqlImage, ...serverArgs], { verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
     }
 
     await docker.waitForMysql(container);

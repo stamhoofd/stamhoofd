@@ -3,15 +3,24 @@
     "version": "2.155.0",
     "type": "module",
     "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "types": "./dist-types/index.d.ts",
     "sideEffects": [
         "./src/models/_relations.ts",
         "./dist/models/_relations.js"
     ],
     "exports": {
-        ".": "./dist/index.js",
-        "./*.ts": "./dist/*.js",
-        "./*.js": "./dist/*.js"
+        ".": {
+            "types": "./dist-types/index.d.ts",
+            "default": "./dist/index.js"
+        },
+        "./*.ts": {
+            "types": "./dist-types/*.d.ts",
+            "default": "./dist/*.js"
+        },
+        "./*.js": {
+            "types": "./dist-types/*.d.ts",
+            "default": "./dist/*.js"
+        }
     },
     "imports": {
         "#*": "./src/*.ts",
@@ -19,12 +28,14 @@
     },
     "files": [
         "dist",
+        "dist-types",
         "src"
     ],
     "scripts": {
+        "build:types": "tsc --project tsconfig.types.json",
         "build": "tsc --build tsconfig.build.json && mkdir -p ./dist/migrations && rsync --delete --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/migrations/ ./dist/migrations/ && rsync -r --checksum ./src/assets/ ./dist/assets/",
-        "lint": "eslint",
-        "typecheck": "tsc --build tsconfig.test.json",
+        "lint": "eslint --quiet",
+        "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
         "test": "vitest",
         "test:coverage": "vitest --coverage"
     },
@@ -44,7 +55,14 @@
         "uuid": "14.0.2"
     },
     "devDependencies": {
+        "@stamhoofd/backend-i18n": "workspace:*",
+        "@stamhoofd/email": "workspace:*",
+        "@stamhoofd/queues": "workspace:*",
+        "@stamhoofd/sql": "workspace:*",
+        "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "@types/luxon": "3.7.6",
         "@types/uuid": "8.3.4",
         "mysql2": "3.24.5",

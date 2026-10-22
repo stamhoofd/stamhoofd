@@ -58,7 +58,7 @@ import { useNavigationActions } from '#types/NavigationActions.ts';
 import DateBox from '#icons/DateBox.vue';
 import type { UitpasEventResponse } from '@stamhoofd/structures';
 import { UitpasEventsResponse } from '@stamhoofd/structures';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { throttle } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { onMounted, ref, watch } from 'vue';

@@ -1,5 +1,5 @@
 import { useContext } from '#hooks/useContext.ts';
-import { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
+import { ContextPermissions } from '@stamhoofd/frontend-session/ContextPermissions';
 import type { Organization } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { usePlatform } from './usePlatform';

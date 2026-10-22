@@ -299,6 +299,8 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
         // The edit view opens, which confirms the action really ran
         const editView = page.getByTestId('member-step');
         await expect(editView).toBeVisible();
+        await expect(action).toHaveCount(0);
+        await expect(page.locator('.popup.focused').filter({ has: editView })).toBeVisible();
 
         // Close it again: the popup would otherwise swallow clicks of the next step
         await page.keyboard.press('Escape');

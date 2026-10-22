@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import ExternalOrganizationContainer from '#containers/ExternalOrganizationContainer.vue';
-import { GlobalEventBus } from '#EventBus.ts';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import type { Group, Organization, PlatformFamily } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import RegisterItemCheckboxRow from './components/group/RegisterItemCheckboxRow.vue';

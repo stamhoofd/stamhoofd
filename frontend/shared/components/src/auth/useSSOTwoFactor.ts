@@ -1,5 +1,5 @@
 import { useShow } from '@simonbackx/vue-app-navigation';
-import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
+import { LoginHelper } from '@stamhoofd/frontend-application/LoginHelper';
 import type { MFAChallengeResponse } from '@stamhoofd/structures';
 
 import { AsyncComponent } from '#containers/AsyncComponent.ts';

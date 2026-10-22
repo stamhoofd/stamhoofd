@@ -50,13 +50,13 @@ import { startCheckout } from '@stamhoofd/components/members/checkout/startCheck
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { useErrors } from '@stamhoofd/components/errors/useErrors';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import { useMemberManager } from '@stamhoofd/networking/MemberManager';
+import { useMemberManager } from '@stamhoofd/frontend-application/MemberManager';
 import { computed, onActivated, onMounted, ref } from 'vue';
 import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 
 const memberManager = useMemberManager();
 const checkout = computed(() => memberManager.family.checkout);

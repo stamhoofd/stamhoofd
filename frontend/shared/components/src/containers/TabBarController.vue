@@ -43,7 +43,7 @@
 import type { PushOptions } from '@simonbackx/vue-app-navigation';
 import { inject, shallowRef } from 'vue';
 
-import { GlobalEventBus } from '../EventBus';
+import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';
 import { useDeviceWidth } from '#hooks/useDeviceWidth.ts';
 import { getUrls } from './TranslatedUrl.ts';
 

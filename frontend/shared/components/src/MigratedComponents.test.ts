@@ -1,6 +1,7 @@
 /* eslint-disable vue/one-component-per-file */
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { Organization, Webshop } from '@stamhoofd/structures';
+import { Toast as SharedToast, ToastButton as SharedToastButton } from '@stamhoofd/frontend-notifications/Toast';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { expect, test, vi } from 'vitest';
 import { render } from 'vitest-browser-vue';
@@ -130,6 +131,29 @@ test('ToastView runs a button action without also running the toast action', asy
 
     expect(buttonAction).toHaveBeenCalledTimes(1);
     expect(action).not.toHaveBeenCalled();
+});
+
+test('legacy toast exports share the notifications implementation', () => {
+    expect(Toast).toBe(SharedToast);
+    expect(ToastButton).toBe(SharedToastButton);
+    expect(SharedToast.success('Klaar')).toBeInstanceOf(Toast);
+});
+
+test('notifications survive caller unmount', async () => {
+    const box = renderComponent(ToastBox);
+    const toast = SharedToast.success('Opgeslagen').setHide(null);
+    const Caller = defineComponent({
+        setup() {
+            toast.show();
+            return () => null;
+        },
+    });
+    const caller = renderComponent(Caller);
+    await caller.unmount();
+    await vi.waitFor(() => expect(document.querySelector('.toast-view')?.textContent).toContain('Opgeslagen'));
+    toast.hide();
+    await vi.waitFor(() => expect(document.querySelector('.toast-view')).toBeNull());
+    await box.unmount();
 });
 
 test('ToastBox shows and removes real toasts through the listener lifecycle', async () => {
