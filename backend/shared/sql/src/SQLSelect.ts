@@ -1,5 +1,6 @@
 import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { Database } from '@simonbackx/simple-database';
+import { Formatter } from '@stamhoofd/utility';
 import type { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery } from './SQLExpression.js';
 import { joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
 import { SQLAlias, SQLColumnExpression, SQLCount, SQLSelectAs, SQLSum, SQLTableExpression } from './SQLExpressions.js';
@@ -162,7 +163,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         // Joins
         query.push(...this._joins.map(j => j.getSQL(options)));
         if (this._where) {
-            const whereJoins = [...new Set(this._where.getJoins())].filter(j => !this._joins.includes(j));
+            const whereJoins = Formatter.uniqueArray(this._where.getJoins()).filter(j => !this._joins.includes(j));
             query.push(...whereJoins.map(j => j.getSQL(options)));
         }
 
