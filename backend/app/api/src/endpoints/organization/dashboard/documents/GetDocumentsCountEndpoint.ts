@@ -31,8 +31,7 @@ export class GetDocumentsCountEndpoint extends Endpoint<Params, Query, Body, Res
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
+        if (!await Context.auth.canManageDocuments(organization.id)) {
             throw Context.auth.error();
         }
 
