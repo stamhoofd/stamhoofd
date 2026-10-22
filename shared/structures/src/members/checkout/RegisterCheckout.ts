@@ -170,7 +170,7 @@ export class RegisterCheckout {
     }
 
     get singleOrganizationId() {
-        return this.singleOrganization?.id ?? this.cart.deleteRegistrations[0]?.registration.organizationId ?? this.cart.balanceItems[0]?.item.organizationId;
+        return this.singleOrganization?.id ?? this.cart.deleteRegistrations[0]?.registration.registration.organizationId ?? this.cart.balanceItems[0]?.item.organizationId;
     }
 
     setDefaultOrganization(organization: Organization | null) {
