@@ -8,7 +8,9 @@ import { expect } from '@playwright/test';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { User } from '@stamhoofd/models';
 import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, Platform, RegistrationFactory, UserFactory } from '@stamhoofd/models';
-import { EventMeta, GroupType, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, Token as TokenStruct, Version } from '@stamhoofd/structures';
+import { EventMeta, GroupType, PermissionRoleDetailed, Permissions, ResourcePermissions, Token as TokenStruct, Version } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WorkerData } from '../helpers/index.js';
 
