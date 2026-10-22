@@ -407,7 +407,7 @@ export class PlatformConfig extends AutoEncoder {
      * The responsibilities are still linked to the user, they are only ignored when calculating permissions.
      * When empty, there are no restrictions. Public, so the frontend can calculate permissions without the private config.
      */
-    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 423 })
     responsibilityEmailDomains: string[] = [];
 
     static normalizeEmailDomain(domain: string) {

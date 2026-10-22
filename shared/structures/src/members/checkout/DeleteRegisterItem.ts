@@ -10,7 +10,7 @@ export class IDDeleteRegisterItem extends AutoEncoder {
     /**
      * Per ten thousand of the registration price
      */
-    @field({ decoder: IntegerDecoder, ...NextVersion })
+    @field({ decoder: IntegerDecoder, version: 423 })
     cancellationFeePercentage = 0;
 
     hydrate(context: RegisterContext): DeleteRegisterItem {

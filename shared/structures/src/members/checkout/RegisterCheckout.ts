@@ -25,7 +25,7 @@ export class IDRegisterCheckout extends AutoEncoder {
     @field({ decoder: IDRegisterCart })
     @field({
         decoder: IDRegisterCart,
-        ...NextVersion,
+        version: 423,
         upgrade: function (this: IDRegisterCheckout, cart: IDRegisterCart) {
             for (const item of cart.deleteRegistrations) {
                 item.cancellationFeePercentage = this._cancellationFeePercentage ?? 0;

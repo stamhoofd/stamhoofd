@@ -23,7 +23,7 @@ export class IDRegisterCart extends AutoEncoder {
     @field({
         decoder: new ArrayDecoder(IDDeleteRegisterItem),
         optional: true,
-        ...NextVersion,
+        version: 423,
         upgrade: (registrationIds: string[] | undefined) => (registrationIds ?? []).map(registrationId => IDDeleteRegisterItem.create({ registrationId })),
         downgrade: (items: IDDeleteRegisterItem[]) => items.map(i => i.registrationId),
     })
