@@ -23,6 +23,16 @@ export type RegisterContext = {
 
 export class IDRegisterCheckout extends AutoEncoder {
     @field({ decoder: IDRegisterCart })
+    @field({
+        decoder: IDRegisterCart,
+        ...NextVersion,
+        upgrade: function (this: IDRegisterCheckout, cart: IDRegisterCart) {
+            for (const item of cart.deleteRegistrations) {
+                item.cancellationFeePercentage = this._cancellationFeePercentage ?? 0;
+            }
+            return cart;
+        },
+    })
     cart: IDRegisterCart = IDRegisterCart.create({});
 
     @field({ decoder: IntegerDecoder })
@@ -33,8 +43,11 @@ export class IDRegisterCheckout extends AutoEncoder {
     @field({ ...upgradePriceFrom2To4DecimalPlaces })
     freeContribution = 0;
 
-    @field({ decoder: IntegerDecoder, version: 362 })
-    cancellationFeePercentage = 0;
+    /**
+     * @deprecated removed, moved to cart.deleteRegistrations
+     */
+    @field({ decoder: IntegerDecoder, version: 362, optional: true, field: 'cancellationFeePercentage' })
+    _cancellationFeePercentage?: number;
 
     @field({ decoder: new EnumDecoder(PaymentMethod), nullable: true })
     paymentMethod: PaymentMethod | null = null;
@@ -84,7 +97,6 @@ export class IDRegisterCheckout extends AutoEncoder {
         checkout.paymentMethod = this.paymentMethod;
         checkout.asOrganizationId = this.asOrganizationId;
         checkout.customer = this.customer;
-        checkout.cancellationFeePercentage = this.cancellationFeePercentage;
         checkout.sendConfirmationEmail = this.sendConfirmationEmail;
 
         if (context.organizations[0] && !checkout.cart.isEmpty && checkout.defaultOrganization === null) {
@@ -130,8 +142,6 @@ export class RegisterCheckout {
     // Default hint for empty carts to know the organization to use
     defaultOrganization: Organization | null = null;
 
-    cancellationFeePercentage = 0; // per ten thousand
-
     /**
      * Note: only use this for temporary clones,
      * because the register items will still have a reference to the old checkout.
@@ -144,7 +154,6 @@ export class RegisterCheckout {
         checkout.paymentMethod = this.paymentMethod;
         checkout.asOrganizationId = this.asOrganizationId;
         checkout.customer = this.customer ? this.customer.clone() : null;
-        checkout.cancellationFeePercentage = this.cancellationFeePercentage;
         checkout.defaultOrganization = this.defaultOrganization;
         checkout.balanceItems = this.balanceItems?.slice() ?? null;
 
@@ -158,7 +167,6 @@ export class RegisterCheckout {
             freeContribution: this.freeContribution,
             paymentMethod: this.paymentMethod,
             totalPrice: this.totalPrice,
-            cancellationFeePercentage: this.cancellationFeePercentage,
             asOrganizationId: this.asOrganizationId,
             customer: this.customer,
             sendConfirmationEmail: this.sendConfirmationEmail,
@@ -221,17 +229,6 @@ export class RegisterCheckout {
 
     removeRegistration(registration: RegistrationWithPlatformMember, options?: { calculate?: boolean }) {
         this.cart.removeRegistration(registration);
-
-        if (this.cart.deleteRegistrations.length === 1) {
-            // Set the default cancellation fee
-            if (registration.registration.balances.reduce((total, balance) => total + balance.amountPaid + balance.amountPending, 0) > 0) {
-                // Already paid. By default we try to be undestructive. This means not refunding the already paid amount
-                this.cancellationFeePercentage = 100_00;
-            } else {
-                // Not yet paid, by default we are undescructive. This means we try to 'refund' the already paid amount. Since it is not paid, this is no-op
-                this.cancellationFeePercentage = 0;
-            }
-        }
 
         if (this.cart.isEmpty) {
             this.defaultOrganization = null;
@@ -390,14 +387,6 @@ export class RegisterCheckout {
             this.freeContribution = 0;
         }
 
-        if (this.cancellationFeePercentage > 100_00 || this.cancellationFeePercentage < 0) {
-            throw new SimpleError({
-                code: 'invalid_field',
-                field: 'cancellationFeePercentage',
-                message: 'Invalid cancellation fee percentage',
-            });
-        }
-
         if (!this.isAdminFromSameOrganization) {
             if (this.totalPrice < 0) {
                 // If the total price is negative, we cannot charge the user
@@ -424,7 +413,7 @@ export class RegisterCheckout {
      * Only includes 'due now' items - so excludes trials (doesn't work 100% yet with deleted registrations but this is not a problem at the moment)
      */
     get totalPrice() {
-        return this.cart.price - this.bundleDiscount - this.cart.refund + this.administrationFee + this.freeContribution + this.cart.getCancellationFees(this.cancellationFeePercentage);
+        return this.cart.price - this.bundleDiscount - this.cart.refund + this.administrationFee + this.freeContribution + this.cart.cancellationFees;
     }
 
     /**
@@ -494,7 +483,7 @@ export class RegisterCheckout {
             },
             {
                 name: $t(`%17G`),
-                price: this.cart.getCancellationFees(this.cancellationFeePercentage),
+                price: this.cart.cancellationFees,
             },
         ].filter(a => a.price !== 0));
 

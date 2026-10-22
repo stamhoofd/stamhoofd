@@ -476,9 +476,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const deletedBalanceItems: BalanceItem[] = [];
 
         // Create negative balance items
-        for (const { registration: registrationStruct, deleted } of [
-            ...checkout.cart.deleteRegistrations.map(r => ({ registration: r.registration, deleted: true })),
-            ...checkout.cart.items.flatMap(i => i.replaceRegistrations).map(r => ({ registration: r, deleted: false })),
+        for (const { registration: registrationStruct, cancellationFeePercentage } of [
+            ...checkout.cart.deleteRegistrations,
+            ...checkout.cart.items.flatMap(i => i.replaceRegistrations).map(r => ({ registration: r, cancellationFeePercentage: 0 })),
         ]) {
             if (whoWillPayNow !== 'nobody') {
                 // this also fixes the issue that we cannot delete the registration right away if we would need to wait for a payment
@@ -517,11 +517,11 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // We can alter right away since whoWillPayNow is nobody, and shouldMarkValid will always be true
             // Find all balance items of this registration and set them to Canceled
-            if ((deleted ? checkout.cancellationFeePercentage : 0) !== 100_00) {
+            if (cancellationFeePercentage !== 100_00) {
                 // Only cancel balances if we don't charge 100% cancellation fee
                 // Also - this avoid creating a new cancellation fee balance item together with canceling the registration balance item, which is more complicated
                 deletedBalanceItems.push(...(await BalanceItem.deleteForDeletedRegistration(existingRegistration.id, {
-                    cancellationFeePercentage: deleted ? checkout.cancellationFeePercentage : 0,
+                    cancellationFeePercentage,
                 })));
             }
 

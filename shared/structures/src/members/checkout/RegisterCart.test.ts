@@ -570,7 +570,6 @@ describe('Unit.RegisterCart', () => {
 
             // If we delete registration B, the discount won't be visible in the cart because it is included in the registration
             const checkout = family.checkout;
-            checkout.cancellationFeePercentage = 50_00;
             const cart = checkout.cart;
             cart.removeRegistration(
                 new RegistrationWithPlatformMember({
@@ -578,6 +577,7 @@ describe('Unit.RegisterCart', () => {
                     member: memberB,
                 }),
             );
+            cart.deleteRegistrations[0].cancellationFeePercentage = 50_00;
 
             cart.calculatePrices();
 
@@ -612,6 +612,7 @@ describe('Unit.RegisterCart', () => {
                     member: memberA,
                 }),
             );
+            cart.deleteRegistrations[0].cancellationFeePercentage = 50_00;
             cart.calculatePrices();
 
             expect(cart.bundleDiscounts).toHaveLength(1);
@@ -1698,5 +1699,28 @@ describe('Unit.RegisterCart', () => {
         test.todo('Can handle bundle discounts for a future period');
         test.todo('Families should be calculated correctly for admins');
         test.todo('The price per item can never be negative');
+    });
+
+    describe('Cancellation fees', () => {
+        test('Deleted registrations share the default cancellation fee percentage of the first deleted registration', () => {
+            const { organization, groups, family } = setupDiscountTest({ memberCount: 2 });
+            const [groupA, groupB] = groups;
+            const [memberA, memberB] = family.members;
+
+            const paid = new RegistrationWithPlatformMember({ registration: addHistoricRegistration(memberA, groupA, organization), member: memberA });
+            paid.registration.balances[0].amountPaid = 10_0000;
+            const unpaid = new RegistrationWithPlatformMember({ registration: addHistoricRegistration(memberB, groupB, organization), member: memberB });
+
+            const cart = family.checkout.cart;
+            cart.removeRegistration(paid);
+            cart.removeRegistration(unpaid);
+            expect(cart.deleteRegistrations.map(r => r.cancellationFeePercentage)).toEqual([100_00, 100_00]);
+
+            cart.unremoveRegistration(paid);
+            cart.unremoveRegistration(unpaid);
+            cart.removeRegistration(unpaid);
+            cart.removeRegistration(paid);
+            expect(cart.deleteRegistrations.map(r => r.cancellationFeePercentage)).toEqual([0, 0]);
+        });
     });
 });
