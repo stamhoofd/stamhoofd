@@ -221,6 +221,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
+        // Family members are added below for discount calculations, but only these members can be returned to the caller
+        const accessibleMemberIds = new Set(members.map(m => m.id));
+
         const platformMembers: PlatformMember[] = [];
 
         let payingOrganization: Organization | null = null;
@@ -945,7 +948,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         return new Response(RegisterResponse.create({
             payment: payment ? await AuthenticatedStructures.paymentGeneral(payment, true) : null,
-            members: await AuthenticatedStructures.membersBlob(members),
+            members: await AuthenticatedStructures.membersBlob(members.filter(m => accessibleMemberIds.has(m.id))),
             registrations: registrations.map(r => Member.getRegistrationWithTinyMemberStructure(r)),
             paymentUrl,
             paymentQRCode,

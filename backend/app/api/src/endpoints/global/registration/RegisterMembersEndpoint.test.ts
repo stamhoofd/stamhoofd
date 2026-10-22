@@ -1844,6 +1844,46 @@ describe('Endpoint.RegisterMembers', () => {
             defaultLinkMembersToUser = false;
         });
 
+        test('Does not return family members the admin cannot access', async () => {
+            const { member, groupPrice, group, organization, token } = await initData({
+                permissionLevel: PermissionLevel.None,
+                memberPermissionLevel: PermissionLevel.Write,
+                groupPermissionLevel: PermissionLevel.Write,
+            });
+
+            const familyUser = await new UserFactory({}).create();
+            await Member.users.link(member, [familyUser]);
+            const sibling = await new MemberFactory({ organization, user: familyUser }).create();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25_0000,
+                asOrganizationId: organization.id,
+            });
+
+            const response = await post(body, organization, token);
+            const returnedIds = response.body.members.members.map(m => m.id);
+            expect(returnedIds).toContain(member.id);
+            expect(returnedIds).not.toContain(sibling.id);
+        });
+
         test('[Regression] Pay balance between organizations requires only finance access rights', async () => {
             const { member, organization, token, user } = await initData();
             const role = await initPermissionRole({
