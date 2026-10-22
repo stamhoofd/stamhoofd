@@ -380,6 +380,28 @@ export class AdminPermissionChecker {
             return await this.canAccessArchivedGroups(group.organizationId);
         }
 
+        const event = group.type === GroupType.EventRegistration
+            ? await Event.select().where('groupId', group.id).first(false)
+            : null;
+
+        // National events are managed via platform roles, regardless of the organization that owns the group
+        if (event && event.organizationId === null && await this.canAccessNationalEvent(event, permissionLevel)) {
+            return true;
+        }
+
+        if (group.type === GroupType.WaitingList) {
+            // Check if this is a waiting list for an event
+            const parentGroup = await Group.select()
+                .where('type', GroupType.EventRegistration)
+                .where('organizationId', group.organizationId)
+                .where('waitingListId', group.id)
+                .first(false);
+
+            if (parentGroup && await this.canAccessGroup(parentGroup, permissionLevel)) {
+                return true;
+            }
+        }
+
         let organizationPermissions = await this.getOrganizationPermissions(group.organizationId);
 
         if (!organizationPermissions) {
@@ -394,19 +416,14 @@ export class AdminPermissionChecker {
             return true;
         }
 
-        if (group.type === GroupType.EventRegistration) {
-            // Check if we can access the event
-            const event = await Event.select().where('groupId', group.id).first(false);
+        if (event && event.organizationId === group.organizationId) {
+            if (organizationPermissions.hasResourceAccess(PermissionsResourceType.Events, event.id, permissionLevel)) {
+                return true;
+            }
 
-            if (event && event.organizationId === group.organizationId) {
-                if (organizationPermissions.hasResourceAccess(PermissionsResourceType.Events, event.id, permissionLevel)) {
-                    return true;
-                }
-
-                // Skip canAccessEvent outside the current period: it evaluates $currentPeriod-scoped grants and would not succeed cross-period.
-                if (isPeriodInUse && await this.canAccessEvent(event)) {
-                    return true;
-                }
+            // Skip canAccessEvent outside the current period: it evaluates $currentPeriod-scoped grants and would not succeed cross-period.
+            if (isPeriodInUse && await this.canAccessEvent(event)) {
+                return true;
             }
         }
 
@@ -421,20 +438,21 @@ export class AdminPermissionChecker {
             }
         }
 
-        if (group.type === GroupType.WaitingList) {
-            // Check if this is a waiting list for an event
-            const parentGroup = await Group.select()
-                .where('type', GroupType.EventRegistration)
-                .where('organizationId', group.organizationId)
-                .where('waitingListId', group.id)
-                .first(false);
+        return false;
+    }
 
-            if (parentGroup) {
-                return await this.canAccessGroup(parentGroup, permissionLevel);
-            }
+    private async canAccessNationalEvent(event: Event, permissionLevel: PermissionLevel): Promise<boolean> {
+        const platformPermissions = this.platformPermissions;
+        if (!platformPermissions) {
+            return false;
         }
 
-        return false;
+        const isPeriodInUse = await this.isEventPeriodInUse(event);
+        if (platformPermissions.forPeriod(isPeriodInUse).hasResourceAccess(PermissionsResourceType.Events, event.id, permissionLevel)) {
+            return true;
+        }
+
+        return isPeriodInUse && await this.canAccessEvent(event);
     }
 
     async canRegisterMembersInGroup(group: Group, asOrganizationId: string | null) {
@@ -587,11 +605,7 @@ export class AdminPermissionChecker {
 
         const organizationPermissions = await this.getOrganizationPermissions(registration.organizationId);
 
-        if (!organizationPermissions) {
-            return false;
-        }
-
-        if (organizationPermissions.hasAccess(PermissionLevel.Full)) {
+        if (organizationPermissions?.hasAccess(PermissionLevel.Full)) {
             return true;
         }
 
@@ -614,8 +628,13 @@ export class AdminPermissionChecker {
             return false;
         }
 
+        // Without organization permissions, access can still be granted to national events through platform permissions
         if (await this.canAccessGroup(group, permissionLevel)) {
             return true;
+        }
+
+        if (!organizationPermissions) {
+            return false;
         }
 
         if (permissionLevel === PermissionLevel.Read && checkMember && group.settings.implicitlyAllowViewRegistrations) {
@@ -644,13 +663,30 @@ export class AdminPermissionChecker {
 
         for (const [resourceType, mapForType] of resources.entries()) {
             for (const resourceId of mapForType.keys()) {
-                if (!organizationPermissions.hasResourceAccess(resourceType, resourceId, PermissionLevel.Full)) {
-                    return false;
+                if (organizationPermissions.hasResourceAccess(resourceType, resourceId, PermissionLevel.Full)) {
+                    continue;
                 }
+
+                if (resourceType === PermissionsResourceType.Events && await this.canWriteOrganizationEvent(organizationId, resourceId)) {
+                    continue;
+                }
+
+                return false;
             }
         }
 
         return true;
+    }
+
+    /**
+     * Write access to an event also grants full access to its registrations (see canAccessGroup).
+     */
+    private async canWriteOrganizationEvent(organizationId: string, eventId: string): Promise<boolean> {
+        const event = await Event.getByID(eventId);
+        if (!event || event.organizationId !== organizationId) {
+            return false;
+        }
+        return await this.canAccessEvent(event);
     }
 
     async canAccessWebshop(webshop: { id: string; organizationId: string }, permissionLevel: PermissionLevel = PermissionLevel.Read) {

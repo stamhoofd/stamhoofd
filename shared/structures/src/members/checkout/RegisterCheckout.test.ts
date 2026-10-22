@@ -1,7 +1,8 @@
+import { ObjectData } from '@simonbackx/simple-encoding';
 import { BalanceItem } from '../../BalanceItem.js';
 import { Organization } from '../../Organization.js';
 import { OrganizationRegistrationPeriod, RegistrationPeriod } from '../../RegistrationPeriod.js';
-import { RegisterCheckout } from './RegisterCheckout.js';
+import { IDRegisterCheckout, RegisterCheckout } from './RegisterCheckout.js';
 
 function createOrganization() {
     return Organization.create({
@@ -181,5 +182,37 @@ describe('RegisterCheckout', () => {
 
             expect(discounts.size).toBe(0);
         });
+    });
+});
+
+describe('IDRegisterCheckout', () => {
+    // Older clients sent one cancellationFeePercentage for the whole checkout.
+    // 421 stays below the version of the per-registration fee, now (NextVersion) and after the release bump.
+    const legacyVersion = 421;
+
+    test('applies the checkout cancellation fee percentage of an old client to every deleted registration', () => {
+        const checkout = IDRegisterCheckout.decode(new ObjectData({
+            cart: {
+                deleteRegistrationIds: ['registration-a', 'registration-b'],
+            },
+            cancellationFeePercentage: 20_00,
+        }, { version: legacyVersion }));
+
+        expect(checkout.cart.deleteRegistrations.map(i => [i.registrationId, i.cancellationFeePercentage])).toEqual([
+            ['registration-a', 20_00],
+            ['registration-b', 20_00],
+        ]);
+    });
+
+    test('charges no cancellation fee when an old client omits the percentage', () => {
+        const checkout = IDRegisterCheckout.decode(new ObjectData({
+            cart: {
+                deleteRegistrationIds: ['registration-a'],
+            },
+        }, { version: legacyVersion }));
+
+        expect(checkout.cart.deleteRegistrations.map(i => [i.registrationId, i.cancellationFeePercentage])).toEqual([
+            ['registration-a', 0],
+        ]);
     });
 });

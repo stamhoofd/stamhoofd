@@ -8,6 +8,7 @@ import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import type { PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole.js';
 import { Permissions } from './Permissions.js';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
+import { PermissionsResourceKey } from './PermissionsResourceType.js';
 import type { Platform } from './Platform.js';
 
 export type OrganizationForPermissionCalculation = {
@@ -94,7 +95,7 @@ export class UserPermissions extends AutoEncoder {
             const platformPermissions = this.forPlatform(platform, email);
 
             if (platformPermissions) {
-                const tags = organization.meta.tags.length === 0 ? [''] : organization.meta.tags;
+                const tags = organization.meta.tags.length === 0 ? [PermissionsResourceKey.All] : organization.meta.tags;
 
                 for (const tag of tags) {
                     const rp = platformPermissions.getMergedResourcePermissions(PermissionsResourceType.OrganizationTags, tag);

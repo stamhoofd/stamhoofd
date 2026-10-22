@@ -163,7 +163,11 @@ export class RegisterCart {
     removeRegistration(registration: RegistrationWithPlatformMember) {
         const index = this.deleteRegistrations.findIndex(r => r.id === registration.registration.id);
         if (index === -1) {
-            this.deleteRegistrations.push(new DeleteRegisterItem({ registration }));
+            const first = this.deleteRegistrations[0];
+            this.deleteRegistrations.push(first
+                ? new DeleteRegisterItem({ registration, cancellationFeePercentage: first.cancellationFeePercentage })
+                : DeleteRegisterItem.defaultFor(registration),
+            );
         }
     }
 
@@ -259,16 +263,8 @@ export class RegisterCart {
             }, 0);
     }
 
-    getCancellationFees(cancellationFeePercentage: number) {
-        return this.items.reduce((total, item) => this.calculateCancellationFee(item.calculatedRefund, cancellationFeePercentage) + total, 0)
-            + this.deleteRegistrations.reduce((total, item) => {
-                return total + this.calculateCancellationFee(item.registration.registration.calculatedPrice, cancellationFeePercentage);
-            }, 0);
-    }
-
-    calculateCancellationFee(price: number, cancellationFeePercentage: number) {
-        const cancellationFee = Math.round(price * cancellationFeePercentage / 10000);
-        return cancellationFee;
+    get cancellationFees() {
+        return this.deleteRegistrations.reduce((total, item) => total + item.cancellationFee, 0);
     }
 
     get singleOrganization() {
@@ -383,6 +379,17 @@ export class RegisterCart {
                     human: $t('%qm', { group: registration.registration.group.settings.name }),
                 }));
                 continue;
+            }
+
+            try {
+                deleteItem.validate();
+            } catch (e) {
+                if (isSimpleError(e) || isSimpleErrors(e)) {
+                    e.addNamespace('deleteRegistrations');
+                    errors.addError(e);
+                    continue;
+                }
+                throw e;
             }
 
             cleanedRegistrations.push(deleteItem);

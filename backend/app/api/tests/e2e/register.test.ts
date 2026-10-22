@@ -983,11 +983,10 @@ describe('E2E.Register', () => {
                             memberId: member.id,
                         }),
                     ],
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registrationToDelete.id })],
+                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registrationToDelete.id, cancellationFeePercentage: 20_00 })],
                 }),
                 totalPrice: 3000 - 2500 + 500, // 20% of 2500 is 500
                 asOrganizationId: organization.id,
-                cancellationFeePercentage: 20_00,
             });
 
             await register(body2, organization, token);
@@ -1019,6 +1018,129 @@ describe('E2E.Register', () => {
                     amount: 1,
                     status: BalanceItemStatus.Due,
                     type: BalanceItemType.Registration,
+                },
+            ]);
+        });
+
+        test('Should apply a different cancelation fee per deleted registration', async () => {
+            const { member, group: group1, groupPrice: groupPrice1, organization, token } = await initData();
+            const group2 = await new GroupFactory({ organization, price: 3000 }).create();
+
+            const body1 = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            groupPrice: groupPrice1,
+                            organizationId: organization.id,
+                            groupId: group1.id,
+                            memberId: member.id,
+                        }),
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            groupPrice: group2.settings.prices[0],
+                            organizationId: organization.id,
+                            groupId: group2.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                }),
+                totalPrice: 2500 + 3000,
+                asOrganizationId: organization.id,
+            });
+
+            const response1 = await register(body1, organization, token);
+            const registration1 = response1.body.registrations.find(r => r.groupId === group1.id)!;
+            const registration2 = response1.body.registrations.find(r => r.groupId === group2.id)!;
+
+            const body2 = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    deleteRegistrations: [
+                        IDDeleteRegisterItem.create({ registrationId: registration1.id, cancellationFeePercentage: 20_00 }),
+                        IDDeleteRegisterItem.create({ registrationId: registration2.id, cancellationFeePercentage: 100_00 }),
+                    ],
+                }),
+                totalPrice: -2500 + 500 - 3000 + 3000,
+                asOrganizationId: organization.id,
+            });
+
+            await register(body2, organization, token);
+            await assertBalances({ member }, [
+                {
+                    unitPrice: 2500,
+                    status: BalanceItemStatus.Canceled,
+                    type: BalanceItemType.Registration,
+                    registrationId: registration1.id,
+                },
+                {
+                    unitPrice: 500,
+                    priceOpen: 500,
+                    status: BalanceItemStatus.Due,
+                    type: BalanceItemType.CancellationFee,
+                    registrationId: registration1.id,
+                },
+                {
+                    // 100% fee keeps the original item instead of creating a cancellation fee
+                    unitPrice: 3000,
+                    priceOpen: 3000,
+                    status: BalanceItemStatus.Due,
+                    type: BalanceItemType.Registration,
+                    registrationId: registration2.id,
+                },
+            ]);
+        });
+
+        test('Should apply the checkout cancellation fee percentage of an old client to the deleted registration', async () => {
+            const { member, group, groupPrice, organization, token } = await initData();
+
+            const body1 = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                }),
+                totalPrice: 2500,
+                asOrganizationId: organization.id,
+            });
+
+            const response1 = await register(body1, organization, token);
+            const registrationToDelete = response1.body.registrations[0];
+
+            // Older clients sent one cancellationFeePercentage for the whole checkout, see RegisterCheckout.test.ts for the version choice
+            const legacyVersion = 421;
+            const body2 = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registrationToDelete.id })],
+                }),
+                totalPrice: -2500 + 500, // 20% of 2500 is 500
+                asOrganizationId: organization.id,
+            }).encode({ version: legacyVersion }) as Record<string, unknown>;
+            body2.cancellationFeePercentage = 20_00;
+            expect(body2.cart).toMatchObject({ deleteRegistrationIds: [registrationToDelete.id] });
+
+            const request = Request.buildJson('POST', `/v${legacyVersion}/members/register`, organization.getApiHost(), body2);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await testServer.test(registerEndpoint, request);
+
+            await assertBalances({ member }, [
+                {
+                    unitPrice: 2500,
+                    status: BalanceItemStatus.Canceled,
+                    type: BalanceItemType.Registration,
+                    registrationId: registrationToDelete.id,
+                },
+                {
+                    unitPrice: 500,
+                    priceOpen: 500,
+                    status: BalanceItemStatus.Due,
+                    type: BalanceItemType.CancellationFee,
+                    registrationId: registrationToDelete.id,
                 },
             ]);
         });
