@@ -661,13 +661,30 @@ export class AdminPermissionChecker {
 
         for (const [resourceType, mapForType] of resources.entries()) {
             for (const resourceId of mapForType.keys()) {
-                if (!organizationPermissions.hasResourceAccess(resourceType, resourceId, PermissionLevel.Full)) {
-                    return false;
+                if (organizationPermissions.hasResourceAccess(resourceType, resourceId, PermissionLevel.Full)) {
+                    continue;
                 }
+
+                if (resourceType === PermissionsResourceType.Events && await this.canWriteOrganizationEvent(organizationId, resourceId)) {
+                    continue;
+                }
+
+                return false;
             }
         }
 
         return true;
+    }
+
+    /**
+     * Write access to an event also grants full access to its registrations (see canAccessGroup).
+     */
+    private async canWriteOrganizationEvent(organizationId: string, eventId: string): Promise<boolean> {
+        const event = await Event.getByID(eventId);
+        if (!event || event.organizationId !== organizationId) {
+            return false;
+        }
+        return await this.canAccessEvent(event);
     }
 
     async canAccessWebshop(webshop: { id: string; organizationId: string }, permissionLevel: PermissionLevel = PermissionLevel.Read) {

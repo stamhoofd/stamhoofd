@@ -1,10 +1,10 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, User, Webshop, Token } from '@stamhoofd/models';
-import { GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, RegistrationPeriodFactory, UserFactory, WebshopFactory } from '@stamhoofd/models';
+import { EventFactory, GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, RegistrationPeriodFactory, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { Address, BuckarooSettings, Company, MemberResponsibility, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PeppolEndointId, PermissionRoleDetailed, PermissionRoleForResponsibility, Permissions, ResourcePermissions, Version } from '@stamhoofd/structures';
+import { Address, BuckarooSettings, Company, MemberResponsibility, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PeppolEndointId, PermissionRoleDetailed, PermissionRoleForResponsibility, Permissions, PermissionsResourceKey, ResourcePermissions, Version } from '@stamhoofd/structures';
 import { SessionService } from '../../../../services/SessionService.js';
 
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
@@ -1313,6 +1313,69 @@ describe('Endpoint.PatchOrganization', () => {
                     token,
                 })).rejects.toThrow('You do not have permissions to edit inherited responsibility roles');
             });
+        });
+    });
+
+    describe('Edit access to event', () => {
+        let organization: Organization;
+
+        beforeEach(async () => {
+            const period = await new RegistrationPeriodFactory({
+                startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+                endDate: new Date(Date.now() + 300 * 24 * 60 * 60 * 1000),
+            }).create();
+            organization = await new OrganizationFactory({ period }).create();
+        });
+
+        const createUserWithGroupAccess = async (groupPermissions: ResourcePermissions) => {
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    resources: new Map([[PermissionsResourceType.Groups, new Map([[PermissionsResourceKey.CurrentPeriod, groupPermissions]])]]),
+                }),
+            }).create();
+            return await SessionService.createSession(user);
+        };
+
+        const grantRoleAccessToEvent = async ({ token, eventId }: { token: Token; eventId: string }) => {
+            const role = PermissionRoleDetailed.create({ name: 'Penningmeester' });
+            organization.privateMeta.roles = [role];
+            await organization.save();
+
+            const rolesPatch: PatchableArrayAutoEncoder<PermissionRoleDetailed> = new PatchableArray();
+            rolesPatch.addPatch(PermissionRoleDetailed.patch({
+                id: role.id,
+                resources: new PatchMap([[PermissionsResourceType.Events, new PatchMap([[eventId, ResourcePermissions.create({ level: PermissionLevel.Full })]])]]),
+            }));
+
+            const response = await patchOrganization({
+                patch: OrganizationStruct.patch({
+                    id: organization.id,
+                    privateMeta: OrganizationPrivateMetaData.patch({ roles: rolesPatch }),
+                }),
+                organization,
+                token,
+            });
+            return response.body.privateMeta!.roles.find(r => r.id === role.id)!;
+        };
+
+        test('an admin who can manage an event can give a role access to that event only', async () => {
+            const event = await new EventFactory({ organization }).create();
+            const otherOrganizationEvent = await new EventFactory({ organization: await new OrganizationFactory({}).create() }).create();
+            const token = await createUserWithGroupAccess(ResourcePermissions.create({ level: PermissionLevel.Read, accessRights: [AccessRight.EventWrite] }));
+
+            const role = await grantRoleAccessToEvent({ token, eventId: event.id });
+            expect(role.resources.get(PermissionsResourceType.Events)?.get(event.id)?.level).toBe(PermissionLevel.Full);
+
+            await expect(grantRoleAccessToEvent({ token, eventId: PermissionsResourceKey.All })).rejects.toThrow('You do not have permissions to edit roles');
+            await expect(grantRoleAccessToEvent({ token, eventId: otherOrganizationEvent.id })).rejects.toThrow('You do not have permissions to edit roles');
+        });
+
+        test('an admin who cannot manage an event cannot give a role access to it', async () => {
+            const event = await new EventFactory({ organization }).create();
+            const token = await createUserWithGroupAccess(ResourcePermissions.create({ level: PermissionLevel.Read }));
+
+            await expect(grantRoleAccessToEvent({ token, eventId: event.id })).rejects.toThrow('You do not have permissions to edit roles');
         });
     });
 
