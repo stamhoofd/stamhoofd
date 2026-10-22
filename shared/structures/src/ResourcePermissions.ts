@@ -152,8 +152,11 @@ export class ResourcePermissions extends AutoEncoder {
 
                 const name = getPermissionResourceTypeName(type, true) + (key === PermissionsResourceKey.CurrentPeriod ? ' ' + $t('%Zrx') : '');
                 const accessRights = all.accessRights.map(a => AccessRightHelper.getDescription(a));
+                allDescriptions.push(resourceDescription(all));
+
                 if (all.level === PermissionLevel.None) {
                     stack.push($t(`%nF`) + ' ' + name + ': ' + Formatter.joinLast(accessRights, ', ', ' ' + $t(`%M1`) + ' '));
+                    continue;
                 }
 
                 let prefix = $t(`%nF`) + ' ';
@@ -167,7 +170,6 @@ export class ResourcePermissions extends AutoEncoder {
                 }
 
                 stack.push(prefix + name + suffix + (accessRights.length > 0 ? ' ' + $t(`%nE`) + ' ' + Formatter.joinLast(accessRights, ', ', ' ' + $t(`%M1`) + ' ') : ''));
-                allDescriptions.push(resourceDescription(all));
             }
 
             const countsPer = new Map<string, { count: number; firstName: string | null }>();
