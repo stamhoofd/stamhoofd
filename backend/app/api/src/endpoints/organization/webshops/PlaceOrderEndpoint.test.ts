@@ -7,6 +7,8 @@ import { MolliePayment, Order, OrganizationFactory, Payment, UserFactory, Websho
 import type { OrderResponse } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { Address, Cart, CartItem, CartItemOption, Customer, MollieOnboarding, MollieStatus, Option, OptionMenu, OrderData, PaymentConfiguration, PaymentMethod, PaymentProvider, PaymentStatus, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopAuthType, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopOrderMode, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
+import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
+import { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
@@ -787,6 +789,61 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
 
             expect(response.body.order.data.cart.items).toHaveLength(1);
             expect(response.body.order.data.cart.items[0].product.id).toEqual(product.id);
+        });
+    });
+
+    describe('Per-item customer', () => {
+        let customerProduct: Product;
+
+        beforeEach(async () => {
+            customerProduct = Product.create({
+                name: 'customerProduct',
+                enableCustomer: true,
+                customerSettings: CustomerSettings.create({
+                    email: CustomerFieldRequirement.Required,
+                }),
+            });
+            webshop.products.push(customerProduct);
+            webshop.meta.orderMode = WebshopOrderMode.Bulk;
+            await webshop.save();
+        });
+
+        function buildOrderData(items: CartItem[]) {
+            return OrderData.create({
+                paymentMethod: PaymentMethod.PointOfSale,
+                checkoutMethod: onSiteMethod,
+                timeSlot: slot4,
+                cart: Cart.create({ items }),
+                customer,
+            });
+        }
+
+        test('The customer of every item is stored', async () => {
+            const orderData = buildOrderData([
+                CartItem.create({ product: customerProduct, productPrice: customerProduct.prices[0], customer: Customer.create({ firstName: 'Jane', lastName: 'Doe', email: 'jane@example.com', phone: '+32412345678' }) }),
+                CartItem.create({ product: customerProduct, productPrice: customerProduct.prices[0], customer: Customer.create({ firstName: 'Jack', lastName: 'Doe', email: 'jack@example.com' }) }),
+            ]);
+
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const response: Response<OrderResponse> = await testServer.test(endpoint, r);
+
+            const items = response.body.order.data.cart.items;
+            expect(items.map(i => i.customer?.name)).toEqual(['Jane Doe', 'Jack Doe']);
+            // Phone is disabled in the product settings, so it is not stored
+            expect(items[0].customer?.phone).toEqual('');
+            expect(items[0].customer?.email).toEqual('jane@example.com');
+        });
+
+        test('A missing customer or a missing required field is rejected', async () => {
+            const missingCustomer = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildOrderData([
+                CartItem.create({ product: customerProduct, productPrice: customerProduct.prices[0] }),
+            ]));
+            await expect(testServer.test(endpoint, missingCustomer)).rejects.toThrow(STExpect.errorWithCode('missing_customer'));
+
+            const missingEmail = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildOrderData([
+                CartItem.create({ product: customerProduct, productPrice: customerProduct.prices[0], customer: Customer.create({ firstName: 'Jane', lastName: 'Doe' }) }),
+            ]));
+            await expect(testServer.test(endpoint, missingEmail)).rejects.toThrow(STExpect.errorWithCode('invalid_email'));
         });
     });
 });
