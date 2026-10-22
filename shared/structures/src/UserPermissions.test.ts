@@ -123,6 +123,15 @@ describe('Unit.UserPermissions', () => {
             expect(result!.hasFullAccess()).toBe(false);
         });
 
+        test('platform responsibilities do not grant permissions without the private config', () => {
+            const platform = createPlatformWithDomains([]);
+            platform.privateConfig = null;
+
+            expect(createUser().forPlatform(platform, 'john@ksa.be')).toBeNull();
+            expect(createUser({ level: PermissionLevel.Read }).forPlatform(platform, 'john@ksa.be')?.hasReadAccess()).toBe(true);
+            expect(createUser({ level: PermissionLevel.Read }).forPlatform(platform, 'john@ksa.be')?.hasFullAccess()).toBe(false);
+        });
+
         test('no restrictions without domains', () => {
             const user = createUser();
             expect(user.forPlatform(createPlatformWithDomains([]), 'john@gmail.com')?.hasFullAccess()).toBe(true);

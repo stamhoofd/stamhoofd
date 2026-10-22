@@ -32,9 +32,9 @@ export class UserPermissions extends AutoEncoder {
     // Current list of groups
 
     /**
-     * @param platform Backend code must pass the private struct (Platform.getSharedPrivateStruct()): the check on
-     * responsibilityEmailDomains below needs privateConfig and is skipped without it. The frontend only has the
-     * privateConfig for users with platform access, the backend enforces the permissions anyway.
+     * @param platform Backend code must pass the private struct (Platform.getSharedPrivateStruct()). Like platform
+     * roles, platform responsibilities only grant permissions when privateConfig is available: the check on
+     * responsibilityEmailDomains needs it. The frontend only receives the privateConfig for users with platform access.
      * @param email Email address of the user these permissions belong to. Platform responsibilities are ignored
      * when it doesn't match PlatformPrivateConfig.responsibilityEmailDomains.
      */
@@ -44,7 +44,7 @@ export class UserPermissions extends AutoEncoder {
             return null;
         }
 
-        if (globalPermissions.responsibilities.length > 0 && platform.privateConfig && !platform.privateConfig.canInheritPlatformResponsibilityPermissions(email)) {
+        if (globalPermissions.responsibilities.length > 0 && !platform.privateConfig?.canInheritPlatformResponsibilityPermissions(email)) {
             globalPermissions = globalPermissions.clone();
             globalPermissions.responsibilities = [];
             if (globalPermissions.isEmpty) {
