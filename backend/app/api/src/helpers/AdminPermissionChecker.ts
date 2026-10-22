@@ -210,7 +210,7 @@ export class AdminPermissionChecker {
     }
 
     get platformPermissions() {
-        return this.user.permissions?.forPlatform(this.platform);
+        return this.user.permissions?.forPlatform(this.platform, this.user.email);
     }
 
     async getOrganizationPermissions(organizationOrId: string | Organization) {
@@ -222,6 +222,7 @@ export class AdminPermissionChecker {
         const p = this.user.permissions.forOrganization(
             organization,
             this.platform,
+            this.user.email,
         );
         return p;
     }
@@ -479,6 +480,7 @@ export class AdminPermissionChecker {
     async checkEventAccess(event: Event): Promise<Organization | null> {
         return await EventPermissionChecker.checkEventAccessAsync(event, {
             userPermissions: this.user.permissions,
+            userEmail: this.user.email,
             platform: this.platform,
             getOrganization: async (id: string) => await this.getOrganization(id),
             isPeriodInUse: await this.isEventPeriodInUse(event),
@@ -942,7 +944,7 @@ export class AdminPermissionChecker {
 
             // Check if this user has permissions for the current scoped organization
             if (this.organization && await this.hasFullAccess(this.organization.id)) {
-                if (user.permissions?.forOrganization(this.organization, this.platform, { inheritFromPlatform: false })) {
+                if (user.permissions?.forOrganization(this.organization, this.platform, user.email, { inheritFromPlatform: false })) {
                     return true;
                 }
             }

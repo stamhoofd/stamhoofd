@@ -117,7 +117,7 @@ export function useEventPermissions() {
     }
 
     function canAdminEventForExternalOrganization(organization: Organization) {
-        const organizationPermissions = auth.user?.permissions?.forOrganization(organization, platform.value);
+        const organizationPermissions = auth.user?.permissions?.forOrganization(organization, platform.value, auth.user?.email ?? null);
         return organizationPermissions?.hasAccessRight(AccessRight.EventWrite) ?? false;
     }
 

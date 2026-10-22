@@ -985,7 +985,7 @@ export class PlatformMember implements ObjectWithRecords {
                 // Need permission to view financial support
                 let foundPermissions = false;
                 for (const organization of this.filterOrganizations({ currentPeriod: options?.scopeGroups ? undefined : true, groups: options?.scopeGroups })) {
-                    if (options.checkPermissions.user.permissions?.forOrganization(organization, this.platform)?.hasAccessRight(options.checkPermissions.level === PermissionLevel.Read ? AccessRight.MemberReadFinancialData : AccessRight.MemberWriteFinancialData)) {
+                    if (options.checkPermissions.user.permissions?.forOrganization(organization, this.platform, options.checkPermissions.user.email)?.hasAccessRight(options.checkPermissions.level === PermissionLevel.Read ? AccessRight.MemberReadFinancialData : AccessRight.MemberWriteFinancialData)) {
                         foundPermissions = true;
                         break;
                     }
@@ -1002,7 +1002,7 @@ export class PlatformMember implements ObjectWithRecords {
                 // Need permission to view financial support
                 let foundPermissions = false;
                 for (const organization of this.filterOrganizations({ currentPeriod: options?.scopeGroups ? undefined : true, groups: options?.scopeGroups })) {
-                    if (options.checkPermissions.user.permissions?.forOrganization(organization, this.platform)?.hasAccessRight(AccessRight.MemberManageNRN)) {
+                    if (options.checkPermissions.user.permissions?.forOrganization(organization, this.platform, options.checkPermissions.user.email)?.hasAccessRight(AccessRight.MemberManageNRN)) {
                         foundPermissions = true;
                         break;
                     }
@@ -1019,7 +1019,7 @@ export class PlatformMember implements ObjectWithRecords {
                 if (options?.checkPermissions && this.needsTaxCertificateIfSevereDisability) {
                     let foundPermissions = false;
                     for (const organization of this.filterOrganizations({ currentPeriod: options?.scopeGroups ? undefined : true, groups: options?.scopeGroups })) {
-                        if (options.checkPermissions.user.permissions?.forOrganization(organization, this.platform)?.hasFullAccess()) {
+                        if (options.checkPermissions.user.permissions?.forOrganization(organization, this.platform, options.checkPermissions.user.email)?.hasFullAccess()) {
                             foundPermissions = true;
                             break;
                         }
@@ -1675,7 +1675,7 @@ export class PlatformMember implements ObjectWithRecords {
                             // Check permissions
                             // we need at least permission in one organization where this member is registered
                             for (const organization of scopedOrganizations) {
-                                const organizationPermissions = checkPermissions.user.permissions.forOrganization(organization, this.platform);
+                                const organizationPermissions = checkPermissions.user.permissions.forOrganization(organization, this.platform, checkPermissions.user.email);
 
                                 if (!organizationPermissions) {
                                     continue;

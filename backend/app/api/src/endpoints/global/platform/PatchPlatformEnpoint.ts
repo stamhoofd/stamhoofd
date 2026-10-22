@@ -3,8 +3,9 @@ import { isPatchableArray, patchObject } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
-import type { EventNotificationType, MemberResponsibility, PlatformConfig, PlatformPremiseType } from '@stamhoofd/structures';
-import { Platform as PlatformStruct } from '@stamhoofd/structures';
+import type { EventNotificationType, MemberResponsibility, PlatformPremiseType } from '@stamhoofd/structures';
+import { Platform as PlatformStruct, PlatformConfig } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { isAbortedError, isCanceledError, QueueHandler } from '@stamhoofd/queues';
@@ -146,6 +147,39 @@ export class PatchPlatformEndpoint extends Endpoint<
                 } else {
                     platform.config = patchObject(platform.config, newConfig);
                 }
+            }
+
+            if (newConfig.responsibilityEmailDomains !== undefined) {
+                const domains = platform.config.responsibilityEmailDomains.map(d => PlatformConfig.normalizeEmailDomain(d)).filter(d => d.length > 0);
+
+                for (const domain of domains) {
+                    if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/.test(domain)) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'Invalid domain name: ' + domain,
+                            human: $t('Ongeldige domeinnaam: {domain}', { domain }),
+                            field: 'config.responsibilityEmailDomains',
+                        });
+                    }
+                }
+
+                const uniqueDomains = Formatter.uniqueArray(domains);
+
+                // Prevent admins from locking themselves out: their own platform access could depend on a responsibility
+                const previewPlatform = Context.auth.platform.clone();
+                previewPlatform.config = platform.config.clone();
+                previewPlatform.config.responsibilityEmailDomains = uniqueDomains;
+
+                if (!Context.auth.user.permissions?.forPlatform(previewPlatform, Context.auth.user.email)?.hasFullAccess()) {
+                    throw new SimpleError({
+                        code: 'locked_out',
+                        message: 'The email domain of the current user is not in the list, which would remove their platform access',
+                        human: $t('Je kan je eigen e-maildomein niet uitsluiten, anders verlies je zelf de toegang tot het platform.'),
+                        field: 'config.responsibilityEmailDomains',
+                    });
+                }
+
+                platform.config.responsibilityEmailDomains = uniqueDomains;
             }
 
             if (newConfig.tags && isPatchableArray(newConfig.tags) && newConfig.tags.changes.length > 0) {

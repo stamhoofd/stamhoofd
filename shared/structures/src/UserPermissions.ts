@@ -32,14 +32,39 @@ export class UserPermissions extends AutoEncoder {
 
     // Current list of groups
 
-    forPlatform(platform: Platform): LoadedPermissions | null {
-        if (!this.globalPermissions) {
+    /**
+     * The global permissions of the user without the platform responsibilities that don't apply to the email
+     * address of the user (PlatformConfig.responsibilityEmailDomains). Null when nothing is left.
+     *
+     * @param email Email address of the user these permissions belong to
+     */
+    applicableGlobalPermissions(platform: Platform, email: string | null): Permissions | null {
+        const globalPermissions = this.globalPermissions;
+        if (!globalPermissions) {
+            return null;
+        }
+
+        if (globalPermissions.responsibilities.length === 0 || platform.config.canInheritPlatformResponsibilityPermissions(email)) {
+            return globalPermissions;
+        }
+
+        const applicable = globalPermissions.clone();
+        applicable.responsibilities = [];
+        return applicable.isEmpty ? null : applicable;
+    }
+
+    /**
+     * @param email Email address of the user these permissions belong to, see applicableGlobalPermissions
+     */
+    forPlatform(platform: Platform, email: string | null): LoadedPermissions | null {
+        const globalPermissions = this.applicableGlobalPermissions(platform, email);
+        if (!globalPermissions) {
             return null;
         }
 
         const platformRoles = platform.getRoles();
         const base = LoadedPermissions.from(
-            this.globalPermissions,
+            globalPermissions,
             platformRoles,
             [],
             platform.config.responsibilities,
@@ -60,13 +85,14 @@ export class UserPermissions extends AutoEncoder {
     }
 
     /**
+     * @param email See forPlatform
      * @param options.inheritFromPlatform Whether the permissions this user was granted at the platform level, and that apply to this organization, are included in the result. Defaults to true. Set to false to only take the permissions that were granted for this organization itself into account.
      */
-    forOrganization(organization: OrganizationForPermissionCalculation, platform: Platform, options?: { inheritFromPlatform?: boolean }): LoadedPermissions | null {
+    forOrganization(organization: OrganizationForPermissionCalculation, platform: Platform, email: string | null, options?: { inheritFromPlatform?: boolean }): LoadedPermissions | null {
         const base: LoadedPermissions = LoadedPermissions.create({});
 
         if (options?.inheritFromPlatform ?? true) {
-            const platformPermissions = this.forPlatform(platform);
+            const platformPermissions = this.forPlatform(platform, email);
 
             if (platformPermissions) {
                 const tags = organization.meta.tags.length === 0 ? [PermissionsResourceKey.All] : organization.meta.tags;

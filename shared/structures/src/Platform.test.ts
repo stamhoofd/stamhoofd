@@ -1,6 +1,6 @@
 import { ObjectData } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
-import { Platform, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig } from './Platform.js';
+import { Platform, PlatformConfig, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig } from './Platform.js';
 import { Version } from './Version.js';
 
 describe('PlatformMembershipTypeConfig', () => {
@@ -104,5 +104,30 @@ describe('Platform tenant identity', () => {
 
         expect(decoded.parentTenant).toBeNull();
         expect(decoded.feesTenantId).toBe('1');
+    });
+});
+
+describe('PlatformConfig.canInheritPlatformResponsibilityPermissions', () => {
+    test('allows every email address without domains', () => {
+        const config = PlatformConfig.create({});
+        expect(config.canInheritPlatformResponsibilityPermissions('john@gmail.com')).toBe(true);
+    });
+
+    test('only allows exact domain matches', () => {
+        const config = PlatformConfig.create({ responsibilityEmailDomains: ['KSA.be'] });
+        expect(config.canInheritPlatformResponsibilityPermissions('john@ksa.be')).toBe(true);
+        expect(config.canInheritPlatformResponsibilityPermissions('John@KSA.BE')).toBe(true);
+        expect(config.canInheritPlatformResponsibilityPermissions('john@gent.ksa.be')).toBe(false);
+        expect(config.canInheritPlatformResponsibilityPermissions('john@notksa.be')).toBe(false);
+        expect(config.canInheritPlatformResponsibilityPermissions('john@ksa.be.evil.com')).toBe(false);
+        expect(config.canInheritPlatformResponsibilityPermissions('john@gmail.com')).toBe(false);
+        expect(config.canInheritPlatformResponsibilityPermissions('ksa.be')).toBe(false);
+    });
+
+    test('subdomains need to be added separately', () => {
+        const config = PlatformConfig.create({ responsibilityEmailDomains: ['@ksa.be', 'gent.ksa.be'] });
+        expect(config.canInheritPlatformResponsibilityPermissions('john@ksa.be')).toBe(true);
+        expect(config.canInheritPlatformResponsibilityPermissions('john@gent.ksa.be')).toBe(true);
+        expect(config.canInheritPlatformResponsibilityPermissions('john@brugge.ksa.be')).toBe(false);
     });
 });

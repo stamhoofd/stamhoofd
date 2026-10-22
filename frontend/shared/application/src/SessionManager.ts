@@ -201,6 +201,18 @@ export class SessionManagerStatic {
             });
         }
 
+        if (session.requiresPlatformPrivateConfig() && !session.platform.privateConfig) {
+            // The platform was loaded without a session (or for a different user), but this user needs the private
+            // config to calculate its permissions (platform roles and responsibilities). One authenticated request:
+            // the backend only returns the private config to users with platform access, so a missing private
+            // config after this request is final and must not be retried.
+            try {
+                await session.fetchPlatform();
+            } catch (e) {
+                console.error('Failed to load the private platform config', e);
+            }
+        }
+
         const storage = await this.getSessionStorage(false);
         storage.lastOrganizationId = session.organization?.id ?? null;
         this.saveSessionStorage(storage);

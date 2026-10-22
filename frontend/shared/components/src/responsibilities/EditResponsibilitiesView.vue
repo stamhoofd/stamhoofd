@@ -51,12 +51,32 @@
                 <span>{{ $t('%A1') }}</span>
             </button>
         </p>
+
+        <template v-if="!organization && auth.hasPlatformFullAccess()">
+            <hr>
+            <h2>{{ $t('Toegestane e-maildomeinen voor nationale functies') }}</h2>
+            <p>{{ $t('Leden met een nationale functie krijgen enkel de rechten van die functie via e-mailadressen op exact deze domeinen. Subdomeinen (bv. afdeling.voorbeeld.be) moet je apart toevoegen. Andere e-mailadressen van hetzelfde lid krijgen geen rechten. Laat leeg om geen beperkingen in te stellen.') }}</p>
+
+            <ArrayInput v-model="responsibilityEmailDomains" :default-value="() => ''" :title="$t('Domeinnamen')" error-fields="config.responsibilityEmailDomains" :error-box="errors.errorBox">
+                <template #item="{index, modelValue, updateModelValue}">
+                    <input :value="modelValue" class="input" type="text" inputmode="url" :placeholder="$t('%NE') + ' ' + (index + 1)" autocomplete="off" autocapitalize="off" spellcheck="false" @input="updateModelValue(($event.target as HTMLInputElement).value || '')">
+                </template>
+
+                <template #empty>
+                    <p class="style-description-small">
+                        {{ $t('Alle e-mailadressen krijgen de rechten van nationale functies') }}
+                    </p>
+                </template>
+            </ArrayInput>
+        </template>
     </SaveView>
 </template>
 
 <script lang="ts" setup>
+import { useAuth } from '#hooks/useAuth.ts';
 import { useDraggableArray } from '#hooks/useDraggableArray.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
+import ArrayInput from '#inputs/ArrayInput.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
@@ -65,7 +85,7 @@ import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { Group } from '@stamhoofd/structures/Group.js';
 import type { PermissionRoleForResponsibility } from '@stamhoofd/structures';
-import { MemberResponsibility } from '@stamhoofd/structures';
+import { MemberResponsibility, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 import { useLoadAdmins } from '../admins/hooks/useLoadAdmins';
@@ -79,7 +99,20 @@ const present = usePresent();
 const organization = useOrganization();
 const { load } = useLoadAdmins();
 
-const { saving, errors, save: rawSave, hasChanges, createInheritedResponsibilityRolePatchArray, responsibilities, inheritedResponsibilitiesWithGroup, patchResponsibilities, patchInheritedResponsibilityRoles } = usePatchRoles();
+const auth = useAuth();
+
+const { saving, errors, save: rawSave, hasChanges, createInheritedResponsibilityRolePatchArray, responsibilities, inheritedResponsibilitiesWithGroup, patchResponsibilities, patchInheritedResponsibilityRoles, platformPatch, patchedPlatform } = usePatchRoles();
+
+const responsibilityEmailDomains = computed({
+    get: () => patchedPlatform.value.config.responsibilityEmailDomains,
+    set: (responsibilityEmailDomains: string[]) => {
+        platformPatch.value = platformPatch.value.patch(Platform.patch({
+            config: PlatformConfig.patch({
+                responsibilityEmailDomains: responsibilityEmailDomains as any,
+            }),
+        }));
+    },
+});
 
 const draggableResponsibilities = useDraggableArray(() => responsibilities.value, patchResponsibilities);
 const groupedDraggableResponsibilites = computed(() => {

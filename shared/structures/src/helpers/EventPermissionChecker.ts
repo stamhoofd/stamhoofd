@@ -30,11 +30,13 @@ export class EventPermissionChecker {
         {
             getOrganization,
             userPermissions,
+            userEmail,
             platform,
             isPeriodInUse,
         }: {
             getOrganization: (id: string) => Promise<O>;
             userPermissions: UserPermissions | null;
+            userEmail: string | null;
             platform: Platform;
             isPeriodInUse: boolean;
         },
@@ -66,12 +68,13 @@ export class EventPermissionChecker {
                 organization,
                 platform,
                 userPermissions,
+                userEmail,
                 isPeriodInUse,
             );
             return organization;
         }
 
-        this.throwIfNoPermissionToWriteNationalOrRegionalEvent(event, userPermissions, platform, isPeriodInUse);
+        this.throwIfNoPermissionToWriteNationalOrRegionalEvent(event, userPermissions, userEmail, platform, isPeriodInUse);
         return null;
     }
 
@@ -85,11 +88,13 @@ export class EventPermissionChecker {
         {
             organization,
             userPermissions,
+            userEmail,
             platform,
             isPeriodInUse,
         }: {
             organization: O | null;
             userPermissions: UserPermissions | null;
+            userEmail: string | null;
             platform: Platform;
             isPeriodInUse: boolean;
         },
@@ -112,10 +117,11 @@ export class EventPermissionChecker {
                 organization,
                 platform,
                 userPermissions,
+                userEmail,
                 isPeriodInUse,
             );
         } else {
-            this.throwIfNoPermissionToWriteNationalOrRegionalEvent(event, userPermissions, platform, isPeriodInUse);
+            this.throwIfNoPermissionToWriteNationalOrRegionalEvent(event, userPermissions, userEmail, platform, isPeriodInUse);
         }
     }
 
@@ -124,6 +130,7 @@ export class EventPermissionChecker {
         options: {
             organization: O | null;
             userPermissions: UserPermissions | null;
+            userEmail: string | null;
             platform: Platform;
             isPeriodInUse: boolean;
         },
@@ -145,6 +152,7 @@ export class EventPermissionChecker {
         organization: O,
         platform: Platform,
         userPermissions: UserPermissions,
+        userEmail: string | null,
         isPeriodInUse: boolean,
     ): void {
         const accessRight: AccessRight = AccessRight.EventWrite;
@@ -161,6 +169,7 @@ export class EventPermissionChecker {
         const organizationPermissions = userPermissions.forOrganization(
             organization,
             platform,
+            userEmail,
         );
 
         if (!organizationPermissions) {
@@ -219,11 +228,12 @@ export class EventPermissionChecker {
     private static throwIfNoPermissionToWriteNationalOrRegionalEvent(
         event: EventDataForPermission,
         userPermissions: UserPermissions,
+        userEmail: string | null,
         platform: Platform,
         isPeriodInUse: boolean,
     ): void {
         const accessRight: AccessRight = AccessRight.EventWrite;
-        const platformPermissions = userPermissions.forPlatform(platform);
+        const platformPermissions = userPermissions.forPlatform(platform, userEmail);
         if (!platformPermissions) {
             throw new SimpleError({
                 code: 'permission_denied',

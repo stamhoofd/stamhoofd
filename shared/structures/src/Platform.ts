@@ -402,6 +402,37 @@ export class PlatformConfig extends AutoEncoder {
     featureFlags: string[] = [];
 
     /**
+     * Platform responsibilities (not organization based) only resolve to platform permissions for users
+     * whose email domain exactly matches one of these domains (subdomains need to be added separately).
+     * The responsibilities are still linked to the user, they are only ignored when calculating permissions.
+     * When empty, there are no restrictions. Public, so the frontend can calculate permissions without the private config.
+     */
+    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    responsibilityEmailDomains: string[] = [];
+
+    static normalizeEmailDomain(domain: string) {
+        return domain.trim().toLowerCase().replace(/^@/, '');
+    }
+
+    canInheritPlatformResponsibilityPermissions(email: string | null) {
+        if (this.responsibilityEmailDomains.length === 0) {
+            return true;
+        }
+        if (!email) {
+            return false;
+        }
+        const at = email.lastIndexOf('@');
+        if (at === -1) {
+            return false;
+        }
+        const emailDomain = email.slice(at + 1).trim().toLowerCase();
+        return this.responsibilityEmailDomains.some((d) => {
+            const domain = PlatformConfig.normalizeEmailDomain(d);
+            return domain.length > 0 && emailDomain === domain;
+        });
+    }
+
+    /**
      * Contains the text and settings for when financial support is enabled - not whether it is enabled
      */
     @field({ decoder: FinancialSupportSettings, nullable: true, version: 320 })

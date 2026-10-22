@@ -38,7 +38,7 @@ export function useContextOptions() {
 
     const isPlatformAdmin = (user: User | null) => {
         if (user && user.organizationId === null && user.permissions && user.permissions.globalPermissions !== null) {
-            if (user.permissions?.forPlatform(platform.value)?.isEmpty === false) {
+            if (user.permissions?.forPlatform(platform.value, user.email)?.isEmpty === false) {
                 return true;
             }
         }
@@ -95,7 +95,7 @@ export function useContextOptions() {
                     // Only add in the list if focused
                     opts.push(getRegistrationOption(organization, user));
 
-                    if (!(user?.permissions?.forOrganization(organization, platform.value)?.isEmpty !== false)) {
+                    if (!(user?.permissions?.forOrganization(organization, platform.value, user?.email ?? null)?.isEmpty !== false)) {
                         // Directly add dashboard only if we have permissions
                         app = 'dashboard';
                     } else {
@@ -104,14 +104,14 @@ export function useContextOptions() {
                     }
                 }
 
-                if (!organization.meta.packages.useMembers && user?.permissions?.forOrganization(organization, platform.value)?.isEmpty !== false) {
+                if (!organization.meta.packages.useMembers && user?.permissions?.forOrganization(organization, platform.value, user?.email ?? null)?.isEmpty !== false) {
                     // Hide organizations you don't have permissions for that don't have members package
                     continue;
                 }
             } else {
                 // In platform mode, only list organizations you have permission to.
                 // in organization mode, we also list organizations you don't have permission to, because we'll redirect to the login view
-                if (user?.permissions?.forOrganization(organization, platform.value)?.isEmpty !== false) {
+                if (user?.permissions?.forOrganization(organization, platform.value, user?.email ?? null)?.isEmpty !== false) {
                     continue;
                 }
 
@@ -170,7 +170,7 @@ export function useContextOptions() {
                     options.push(getRegistrationOption($organization.value, $user.value));
                 }
 
-                if ($user.value && $user.value?.permissions && $user.value.permissions.forOrganization($organization.value, platform.value)?.isEmpty === false) {
+                if ($user.value && $user.value?.permissions && $user.value.permissions.forOrganization($organization.value, platform.value, $user.value.email)?.isEmpty === false) {
                 // Hide organizations you don't have permissions for that don't have members package
                     const context = new SessionContext($organization.value, platform.value);
                     context.user = $user.value;
