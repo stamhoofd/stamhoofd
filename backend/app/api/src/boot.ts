@@ -20,6 +20,7 @@ import { GlobalHelper } from './helpers/GlobalHelper.js';
 import { waitUntilDeadline } from './helpers/waitUntilDeadline.js';
 import { SetupStepUpdater } from './helpers/SetupStepUpdater.js';
 import { ContextMiddleware } from './middleware/ContextMiddleware.js';
+import { HumanErrorMessageMiddleware } from './middleware/HumanErrorMessageMiddleware.js';
 import { TenantScopeMiddleware } from './middleware/TenantScopeMiddleware.js';
 import { AuditLogService } from './services/AuditLogService.js';
 import { BalanceItemService } from './services/BalanceItemService.js';
@@ -145,6 +146,9 @@ export const boot = async (options: { killProcess: boolean }) => {
 
     routerServer.addResponseMiddleware(FileSignService);
     routerServer.addRequestMiddleware(FileSignService);
+
+    // Before ContextMiddleware on purpose: it has to run inside the request context so $t uses the request language.
+    routerServer.addRequestMiddleware(HumanErrorMessageMiddleware);
 
     // Contexts
     routerServer.addRequestMiddleware(ContextMiddleware);
