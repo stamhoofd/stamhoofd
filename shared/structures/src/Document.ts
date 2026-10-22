@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { NamedObject } from './Event.js';
 import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler } from './filters/InMemoryFilter.js';
 import { documentInMemoryFilterCompilers } from './filters/inMemoryFilterDefinitions.js';
-import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import type { ObjectWithRecords, PatchAnswers } from './members/ObjectWithRecords.js';
 import type { RecordAnswer } from './members/records/RecordAnswer.js';
 import { RecordAnswerDecoder, RecordAnswerMapDecoder } from './members/records/RecordAnswer.js';

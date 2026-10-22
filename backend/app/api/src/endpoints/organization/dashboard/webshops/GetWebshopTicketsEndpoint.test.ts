@@ -256,7 +256,7 @@ describe('Endpoint.GetWebshopTicketsEndpoint', () => {
         await new TicketFactory({ order: await new OrderFactory({ webshop }).create() }).create();
 
         await expect(filterTickets({ organization, user, filter: { webshopId: webshop.id, secret: secretFilter } }))
-            .rejects.toThrow(STExpect.errorWithCode('unknown_filter'));
+            .rejects.toThrow(expect.objectContaining({ code: 'unknown_filter', human: 'Deze filter wordt niet ondersteund of er ging iets fout met deze filter' }));
         await expect(countTickets({ organization, user, filter: { webshopId: webshop.id, secret: secretFilter } }))
             .rejects.toThrow(STExpect.errorWithCode('unknown_filter'));
     });

@@ -99,6 +99,11 @@
             "outputs": ["dist/**", ".cache/build.tsbuildinfo"],
             "cache": true
         },
+        "@stamhoofd/filters#build": {
+            "dependsOn": ["^build", "build:types"],
+            "outputs": ["dist/**", ".cache/build.tsbuildinfo"],
+            "cache": true
+        },
         "@stamhoofd/sql#build": {
             "dependsOn": ["^build", "build:types"],
             "outputs": ["dist/**", ".cache/build.tsbuildinfo"],

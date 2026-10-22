@@ -356,7 +356,7 @@ CLI-managed test MySQL disables binary logging and uses `innodb_flush_log_at_trx
 ```bash
 pnpm stam test unit                                 # every unit package (excludes Playwright)
 pnpm stam test coverage                             # package coverage with the same isolated MySQL lifecycle
-pnpm stam test api                                  # one package (api, models, vies, sql, statistics-syncer, structures, renderer, redirecter, queues, utility, sgv, object-differ, eslint, vite-config, metabase, i18n-uuid, cli, components, networking, sgv-frontend)
+pnpm stam test api                                  # one package (api, models, vies, sql, statistics-syncer, filters, structures, renderer, redirecter, queues, utility, sgv, object-differ, eslint, vite-config, metabase, i18n-uuid, cli, components, networking, sgv-frontend)
 pnpm stam test api --coverage                       # collect coverage for one package
 pnpm stam test unit SomeFile                         # filter by filename across all packages
 pnpm stam test structures bundle-discounts           # package + filename filter

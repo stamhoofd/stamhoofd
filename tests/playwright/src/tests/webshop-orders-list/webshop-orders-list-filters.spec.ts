@@ -3,7 +3,7 @@ import { setup, test } from '../../test-fixtures/base.js';
 setup();
 
 import { expect } from '@playwright/test';
-import type { StamhoofdFilter } from '@stamhoofd/structures/filters/StamhoofdFilter.js';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilterTypes';
 import { OrderStatus } from '@stamhoofd/structures/webshops/Order.js';
 import { WebshopTicketType } from '@stamhoofd/structures/webshops/WebshopMetaData.js';
 import { TestUtils } from '@stamhoofd/test-utils';

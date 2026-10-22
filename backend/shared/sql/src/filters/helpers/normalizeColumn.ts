@@ -1,4 +1,4 @@
-import type { StamhoofdCompareValue } from '@stamhoofd/structures';
+import type { StamhoofdCompareValue } from '@stamhoofd/filters/StamhoofdFilterTypes';
 import { SQLJsonValue } from '../../SQLJsonExpressions.js';
 import type { SQLCurrentColumn } from '../SQLFilterTypes.js';
 import { SQLValueType } from '../SQLFilterTypes.js';

@@ -508,6 +508,9 @@ importers:
       '@stamhoofd/excel-writer':
         specifier: workspace:*
         version: link:../../../shared/excel-writer
+      '@stamhoofd/filters':
+        specifier: workspace:*
+        version: link:../../../shared/filters
       '@stamhoofd/logging':
         specifier: workspace:*
         version: link:../../shared/logging
@@ -1124,13 +1127,13 @@ importers:
       '@simonbackx/simple-logging':
         specifier: 1.0.1
         version: 1.0.1
+      '@stamhoofd/filters':
+        specifier: workspace:*
+        version: link:../../../shared/filters
       lru-cache:
         specifier: 11.5.3
         version: 11.5.3
     devDependencies:
-      '@stamhoofd/structures':
-        specifier: workspace:*
-        version: link:../../../shared/structures
       '@stamhoofd/test-utils':
         specifier: workspace:*
         version: link:../../../shared/test-utils
@@ -1448,6 +1451,9 @@ importers:
       '@stamhoofd/excel-writer':
         specifier: workspace:*
         version: link:../../../shared/excel-writer
+      '@stamhoofd/filters':
+        specifier: workspace:*
+        version: link:../../../shared/filters
       '@stamhoofd/frontend-application':
         specifier: workspace:*
         version: link:../../shared/application
@@ -2717,6 +2723,22 @@ importers:
         specifier: 8.3.4
         version: 8.3.4
 
+  shared/filters:
+    dependencies:
+      '@simonbackx/simple-encoding':
+        specifier: 2.26.11
+        version: 2.26.11(@simonbackx/simple-errors@1.5.0)(tslib@2.8.1)
+      '@simonbackx/simple-errors':
+        specifier: 1.5.0
+        version: 1.5.0(@simonbackx/simple-encoding@2.26.11)(uuid@9.0.1)
+    devDependencies:
+      eslint-plugin-stamhoofd:
+        specifier: workspace:*
+        version: link:../eslint
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@22.20.4)(@vitest/browser-playwright@4.1.11)(@vitest/coverage-v8@4.1.11)(jsdom@24.1.3(supports-color@5.5.0))(vite@8.3.2(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.1)(terser@5.51.2)(yaml@2.9.0))
+
   shared/locales:
     dependencies:
       '@stamhoofd/types':
@@ -2802,6 +2824,9 @@ importers:
       '@simonbackx/simple-encoding':
         specifier: 2.26.11
         version: 2.26.11(@simonbackx/simple-errors@1.5.0)(tslib@2.8.1)
+      '@stamhoofd/filters':
+        specifier: workspace:*
+        version: link:../filters
       uuid:
         specifier: 14.0.2
         version: 14.0.2
@@ -2846,9 +2871,6 @@ importers:
 
   shared/utility:
     dependencies:
-      '@stamhoofd/types':
-        specifier: workspace:*
-        version: link:../types
       ibantools:
         specifier: 4.5.4
         version: 4.5.4
@@ -2859,6 +2881,9 @@ importers:
         specifier: 3.7.2
         version: 3.7.2
     devDependencies:
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../types
       '@types/luxon':
         specifier: 3.7.6
         version: 3.7.6
@@ -2886,6 +2911,9 @@ importers:
       '@stamhoofd/email':
         specifier: workspace:*
         version: link:../../backend/shared/email
+      '@stamhoofd/filters':
+        specifier: workspace:*
+        version: link:../../shared/filters
       '@stamhoofd/models':
         specifier: workspace:*
         version: link:../../backend/shared/models

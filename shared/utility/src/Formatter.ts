@@ -1,4 +1,4 @@
-import type { StringLike } from '@stamhoofd/types/StringLike';
+import type { StringLike } from './StringLike.js';
 import { friendlyFormatIBAN } from 'ibantools';
 import { DateTime } from 'luxon';
 import { Sorter } from './Sorter.js';

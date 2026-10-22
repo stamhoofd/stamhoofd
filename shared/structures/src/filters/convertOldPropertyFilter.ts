@@ -1,4 +1,4 @@
-import type { StamhoofdFilter } from './StamhoofdFilterTypes.js';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilterTypes';
 
 // todo: remove after migration
 

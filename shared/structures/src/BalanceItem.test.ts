@@ -5,7 +5,7 @@ import { TestUtils } from '@stamhoofd/test-utils';
 import { BalanceItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, NAME_TITLED_BALANCE_ITEM_TYPES, getApplicableBalanceItemRelationTypes, getApplicableBalanceItemTypes, GroupedBalanceItems, VATExcemptReason } from './BalanceItem.js';
 import type { InMemoryFilterDefinitions } from './filters/InMemoryFilter.js';
 import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler } from './filters/InMemoryFilter.js';
-import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import { TranslatedString } from './TranslatedString.js';
 import { DetailedPayableBalance } from './endpoints/PayableBalanceCollection.js';
 import { BaseOrganization, Organization } from './Organization.js';

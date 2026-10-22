@@ -53,6 +53,7 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'cli', path: 'shared/cli', needsDatabase: false },
     { name: 'i18n-uuid', path: '.development/i18n-uuid', needsDatabase: false },
     { name: 'metabase', path: 'shared/metabase', needsDatabase: false },
+    { name: 'filters', path: 'shared/filters', needsDatabase: false },
     { name: 'structures', path: 'shared/structures', needsDatabase: false },
     { name: 'object-differ', path: 'shared/object-differ', needsDatabase: false },
     { name: 'sgv', path: 'shared/sgv', needsDatabase: false },
@@ -80,7 +81,7 @@ export const unitTestPackages: UnitTestPackage[] = [
 ];
 export const coverageTestPackages: UnitTestPackage[] = [
     { name: 'i18n-uuid', path: '.development/i18n-uuid', needsDatabase: false },
-    ...unitTestPackages.filter(pkg => ['metabase', 'structures', 'object-differ', 'utility', 'queues', 'models', 'vies', 'sql', 'renderer', 'redirecter', 'statistics-syncer', 'api'].includes(pkg.name)),
+    ...unitTestPackages.filter(pkg => ['metabase', 'filters', 'structures', 'object-differ', 'utility', 'queues', 'models', 'vies', 'sql', 'renderer', 'redirecter', 'statistics-syncer', 'api'].includes(pkg.name)),
 ];
 const sharedBuildReadyFile = `.development/cli/generated/shared-build-${process.pid}.ready`;
 

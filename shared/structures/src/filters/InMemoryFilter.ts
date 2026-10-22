@@ -1,8 +1,8 @@
 import { StringCompare } from '@stamhoofd/utility';
 
-import type { FilterCompiler, FilterCompilerSelector, FilterDefinitions, RequiredFilterCompiler } from './FilterCompilers.js';
-import { assertFilterCompareValue, compileFilter, filterDefinitionsToSelector } from './FilterCompilers.js';
-import type { StamhoofdCompareValue, StamhoofdFilter } from './StamhoofdFilter.js';
+import type { FilterCompiler, FilterCompilerSelector, FilterDefinitions, RequiredFilterCompiler } from '@stamhoofd/filters/FilterCompilers';
+import { assertFilterCompareValue, compileFilter, filterDefinitionsToSelector } from '@stamhoofd/filters/FilterCompilers';
+import type { StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 
 export type InMemoryFilterRunner = (object: any) => boolean;
 

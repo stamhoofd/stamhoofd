@@ -2,7 +2,7 @@ import type { Data, EncodeContext, PlainObject } from '@simonbackx/simple-encodi
 import { DateDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 
-import type { StamhoofdCompareValue, StamhoofdFilter } from './StamhoofdFilterTypes.js';
+import type { StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilterTypes';
 
 export class StamhoofdFilterJSONDecoder {
     static encode(filter: StamhoofdFilter, context: EncodeContext): string {

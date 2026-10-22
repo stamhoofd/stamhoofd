@@ -5,8 +5,8 @@
  * breakdown holds grows with the number of rows it is building, not with the number of payments it
  * reads - the same way an Excel export writes its rows while it reads them.
  */
-import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
-import { mergeFilters } from '../filters/StamhoofdFilter.js';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import { mergeFilters } from '@stamhoofd/filters/StamhoofdFilter';
 import type { PaymentGeneral } from '../members/PaymentGeneral.js';
 import type { PaymentAccount } from '../PaymentAccount.js';
 import { getPaymentAccount } from '../PaymentAccount.js';

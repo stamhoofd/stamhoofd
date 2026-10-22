@@ -29,6 +29,7 @@
         "@stamhoofd/components": "workspace:*",
         "@stamhoofd/document-helper": "workspace:*",
         "@stamhoofd/excel-writer": "workspace:*",
+        "@stamhoofd/filters": "workspace:*",
         "@stamhoofd/frontend-excel-export": "workspace:*",
         "@stamhoofd/frontend-i18n": "workspace:*",
         "@stamhoofd/frontend-pdf-builder": "workspace:*",

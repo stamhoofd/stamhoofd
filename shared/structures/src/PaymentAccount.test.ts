@@ -1,7 +1,7 @@
 import { TestUtils } from '@stamhoofd/test-utils';
 import type { InMemoryFilterDefinitions } from './filters/InMemoryFilter.js';
 import { baseInMemoryFilterCompilers, compileToInMemoryFilter } from './filters/InMemoryFilter.js';
-import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import { PaymentGeneral } from './members/PaymentGeneral.js';
 import { getPaymentAccount } from './PaymentAccount.js';
 import { PaymentMethod } from './PaymentMethod.js';

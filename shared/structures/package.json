@@ -42,6 +42,7 @@
     },
     "dependencies": {
         "@simonbackx/simple-encoding": "2.26.11",
+        "@stamhoofd/filters": "workspace:*",
         "uuid": "14.0.2"
     },
     "devDependencies": {

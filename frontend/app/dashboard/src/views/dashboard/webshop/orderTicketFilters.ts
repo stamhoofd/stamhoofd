@@ -1,4 +1,4 @@
-import type { StamhoofdFilter } from '@stamhoofd/structures/filters/StamhoofdFilter.js';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilterTypes';
 import { privateOrderFilterCompilers, privateOrderWithTicketsFilterCompilers } from '@stamhoofd/structures/filters/inMemoryFilterDefinitions.js';
 
 /**

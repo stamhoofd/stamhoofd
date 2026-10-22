@@ -2,7 +2,7 @@ import { Database } from '@simonbackx/simple-database';
 import type { Organization, Webshop } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemPayment, Order, OrganizationFactory, Payment, Ticket, TicketFactory, WebshopFactory } from '@stamhoofd/models';
 import { compileToSQLFilter, SQL } from '@stamhoofd/sql';
-import type { StamhoofdFilter } from '@stamhoofd/structures/filters/StamhoofdFilter.js';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilterTypes';
 import { parsePhoneNumber } from 'libphonenumber-js/max';
 import { BalanceItemType } from '@stamhoofd/structures/BalanceItem.js';
 import { PaymentMethod } from '@stamhoofd/structures/PaymentMethod.js';

@@ -1,5 +1,5 @@
 import { Formatter } from '@stamhoofd/utility';
-import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
+import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import type { SettlementReference } from './members/Payment.js';
 import { OFFLINE_PAYMENT_METHODS, PaymentMethod, PaymentMethodHelper } from './PaymentMethod.js';
 import { getPaymentProviderName, PaymentProvider } from './PaymentProvider.js';

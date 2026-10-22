@@ -22,10 +22,10 @@
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-logging": "1.0.1",
+        "@stamhoofd/filters": "workspace:*",
         "lru-cache": "11.5.3"
     },
     "devDependencies": {
-        "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
@@ -33,8 +33,6 @@
         "vitest": "4.1.11"
     },
     "peerDependencies": {
-        "@stamhoofd/structures": "workspace:*",
-        "@stamhoofd/types": "workspace:*",
         "@stamhoofd/utility": "workspace:*"
     },
     "license": "UNLICENCED",

@@ -29,12 +29,12 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
-        "@stamhoofd/types": "workspace:*",
         "ibantools": "4.5.4",
         "jsvat-next": "3.0.4",
         "luxon": "3.7.2"
     },
     "devDependencies": {
+        "@stamhoofd/types": "workspace:*",
         "@types/luxon": "3.7.6",
         "vitest": "4.1.11"
     },
