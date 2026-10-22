@@ -32,24 +32,33 @@ export class UserPermissions extends AutoEncoder {
     // Current list of groups
 
     /**
-     * @param platform Backend code must pass the private struct (Platform.getSharedPrivateStruct()). Like platform
-     * roles, platform responsibilities only grant permissions when privateConfig is available: the check on
-     * responsibilityEmailDomains needs it. The frontend only receives the privateConfig for users with platform access.
-     * @param email Email address of the user these permissions belong to. Platform responsibilities are ignored
-     * when it doesn't match PlatformPrivateConfig.responsibilityEmailDomains.
+     * The global permissions of the user without the platform responsibilities that don't apply to the email
+     * address of the user (PlatformConfig.responsibilityEmailDomains). Null when nothing is left.
+     *
+     * @param email Email address of the user these permissions belong to
      */
-    forPlatform(platform: Platform, email: string | null): LoadedPermissions | null {
-        let globalPermissions = this.globalPermissions;
+    applicableGlobalPermissions(platform: Platform, email: string | null): Permissions | null {
+        const globalPermissions = this.globalPermissions;
         if (!globalPermissions) {
             return null;
         }
 
-        if (globalPermissions.responsibilities.length > 0 && !platform.privateConfig?.canInheritPlatformResponsibilityPermissions(email)) {
-            globalPermissions = globalPermissions.clone();
-            globalPermissions.responsibilities = [];
-            if (globalPermissions.isEmpty) {
-                return null;
-            }
+        if (globalPermissions.responsibilities.length === 0 || platform.config.canInheritPlatformResponsibilityPermissions(email)) {
+            return globalPermissions;
+        }
+
+        const applicable = globalPermissions.clone();
+        applicable.responsibilities = [];
+        return applicable.isEmpty ? null : applicable;
+    }
+
+    /**
+     * @param email Email address of the user these permissions belong to, see applicableGlobalPermissions
+     */
+    forPlatform(platform: Platform, email: string | null): LoadedPermissions | null {
+        const globalPermissions = this.applicableGlobalPermissions(platform, email);
+        if (!globalPermissions) {
+            return null;
         }
 
         const platformRoles = platform.getRoles();

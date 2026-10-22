@@ -918,10 +918,12 @@ export class SessionContext implements RequestMiddleware {
      * organizations when not using the admin panel.
      */
     requiresPlatformPrivateConfig() {
-        if (this.user?.organizationId) {
+        if (!this.user || this.user.organizationId) {
             return false;
         }
-        return this.auth.unloadedPlatformPermissions?.isEmpty === false;
+        // Platform responsibilities that don't apply to the email address of the user never grant permissions,
+        // so a user with only those doesn't need (and wouldn't receive) the private config
+        return this.user.permissions?.applicableGlobalPermissions(this.platform, this.user.email)?.isEmpty === false;
     }
 
     /**

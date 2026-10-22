@@ -1,6 +1,6 @@
 import { ObjectData } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
-import { Platform, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig, PlatformPrivateConfig } from './Platform.js';
+import { Platform, PlatformConfig, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig } from './Platform.js';
 import { Version } from './Version.js';
 
 describe('PlatformMembershipTypeConfig', () => {
@@ -107,14 +107,14 @@ describe('Platform tenant identity', () => {
     });
 });
 
-describe('PlatformPrivateConfig.canInheritPlatformResponsibilityPermissions', () => {
+describe('PlatformConfig.canInheritPlatformResponsibilityPermissions', () => {
     test('allows every email address without domains', () => {
-        const config = PlatformPrivateConfig.create({});
+        const config = PlatformConfig.create({});
         expect(config.canInheritPlatformResponsibilityPermissions('john@gmail.com')).toBe(true);
     });
 
     test('only allows exact domain matches', () => {
-        const config = PlatformPrivateConfig.create({ responsibilityEmailDomains: ['KSA.be'] });
+        const config = PlatformConfig.create({ responsibilityEmailDomains: ['KSA.be'] });
         expect(config.canInheritPlatformResponsibilityPermissions('john@ksa.be')).toBe(true);
         expect(config.canInheritPlatformResponsibilityPermissions('John@KSA.BE')).toBe(true);
         expect(config.canInheritPlatformResponsibilityPermissions('john@gent.ksa.be')).toBe(false);
@@ -125,7 +125,7 @@ describe('PlatformPrivateConfig.canInheritPlatformResponsibilityPermissions', ()
     });
 
     test('subdomains need to be added separately', () => {
-        const config = PlatformPrivateConfig.create({ responsibilityEmailDomains: ['@ksa.be', 'gent.ksa.be'] });
+        const config = PlatformConfig.create({ responsibilityEmailDomains: ['@ksa.be', 'gent.ksa.be'] });
         expect(config.canInheritPlatformResponsibilityPermissions('john@ksa.be')).toBe(true);
         expect(config.canInheritPlatformResponsibilityPermissions('john@gent.ksa.be')).toBe(true);
         expect(config.canInheritPlatformResponsibilityPermissions('john@brugge.ksa.be')).toBe(false);

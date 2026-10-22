@@ -63,7 +63,7 @@ describe('Endpoint.PatchPlatform', () => {
         afterEach(async () => {
             // The platform row is shared by every test file
             const platform = await Platform.getForEditing();
-            platform.privateConfig.responsibilityEmailDomains = [];
+            platform.config.responsibilityEmailDomains = [];
             await platform.save();
         });
 
@@ -76,7 +76,7 @@ describe('Endpoint.PatchPlatform', () => {
 
             const response = await patchPlatform({
                 patch: PlatformStruct.patch({
-                    privateConfig: PlatformPrivateConfig.patch({
+                    config: PlatformConfig.patch({
                         responsibilityEmailDomains: [' @KSA.be', 'gent.ksa.be', 'ksa.be', ''] as any,
                     }),
                 }),
@@ -84,7 +84,7 @@ describe('Endpoint.PatchPlatform', () => {
                 token,
             });
 
-            expect(response.body.privateConfig?.responsibilityEmailDomains).toEqual(['ksa.be', 'gent.ksa.be']);
+            expect(response.body.config.responsibilityEmailDomains).toEqual(['ksa.be', 'gent.ksa.be']);
         });
 
         test('Admins cannot exclude their own email domain', async () => {
@@ -118,25 +118,25 @@ describe('Endpoint.PatchPlatform', () => {
 
                 await expect(patchPlatform({
                     patch: PlatformStruct.patch({
-                        privateConfig: PlatformPrivateConfig.patch({
+                        config: PlatformConfig.patch({
                             responsibilityEmailDomains: ['fos.be'] as any,
                         }),
                     }),
                     organization,
                     token,
                 })).rejects.toThrow(STExpect.errorWithCode('locked_out'));
-                expect((await Platform.getForEditing()).privateConfig.responsibilityEmailDomains).toEqual([]);
+                expect((await Platform.getForEditing()).config.responsibilityEmailDomains).toEqual([]);
 
                 const response = await patchPlatform({
                     patch: PlatformStruct.patch({
-                        privateConfig: PlatformPrivateConfig.patch({
+                        config: PlatformConfig.patch({
                             responsibilityEmailDomains: ['fos.be', 'ksa.be'] as any,
                         }),
                     }),
                     organization,
                     token,
                 });
-                expect(response.body.privateConfig?.responsibilityEmailDomains).toEqual(['fos.be', 'ksa.be']);
+                expect(response.body.config.responsibilityEmailDomains).toEqual(['fos.be', 'ksa.be']);
             } finally {
                 const platform = await Platform.getForEditing();
                 platform.config.responsibilities = platform.config.responsibilities.filter(r => r.id !== responsibility.id);
@@ -153,7 +153,7 @@ describe('Endpoint.PatchPlatform', () => {
 
             await expect(patchPlatform({
                 patch: PlatformStruct.patch({
-                    privateConfig: PlatformPrivateConfig.patch({
+                    config: PlatformConfig.patch({
                         responsibilityEmailDomains: ['john@ksa.be'] as any,
                     }),
                 }),
@@ -164,14 +164,14 @@ describe('Endpoint.PatchPlatform', () => {
             // No wildcard support: subdomains need to be added one by one
             await expect(patchPlatform({
                 patch: PlatformStruct.patch({
-                    privateConfig: PlatformPrivateConfig.patch({
+                    config: PlatformConfig.patch({
                         responsibilityEmailDomains: ['*.ksa.be'] as any,
                     }),
                 }),
                 organization,
                 token,
             })).rejects.toThrow(/Invalid domain name/);
-            expect((await Platform.getForEditing()).privateConfig.responsibilityEmailDomains).toEqual([]);
+            expect((await Platform.getForEditing()).config.responsibilityEmailDomains).toEqual([]);
         });
 
         test('Platform admins without full access cannot change the domains', async () => {
@@ -183,14 +183,14 @@ describe('Endpoint.PatchPlatform', () => {
 
             await expect(patchPlatform({
                 patch: PlatformStruct.patch({
-                    privateConfig: PlatformPrivateConfig.patch({
+                    config: PlatformConfig.patch({
                         responsibilityEmailDomains: ['ksa.be'] as any,
                     }),
                 }),
                 organization,
                 token,
             })).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
-            expect((await Platform.getForEditing()).privateConfig.responsibilityEmailDomains).toEqual([]);
+            expect((await Platform.getForEditing()).config.responsibilityEmailDomains).toEqual([]);
         });
     });
 

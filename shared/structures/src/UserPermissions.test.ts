@@ -73,7 +73,7 @@ describe('Unit.UserPermissions', () => {
 
         const createPlatformWithDomains = (domains: string[]) => {
             const platform = createPlatform({ responsibilities: [responsibility] });
-            platform.privateConfig!.responsibilityEmailDomains = domains;
+            platform.config.responsibilityEmailDomains = domains;
             return platform;
         };
 
@@ -123,13 +123,25 @@ describe('Unit.UserPermissions', () => {
             expect(result!.hasFullAccess()).toBe(false);
         });
 
-        test('platform responsibilities do not grant permissions without the private config', () => {
-            const platform = createPlatformWithDomains([]);
+        test('the private config is not needed to ignore platform responsibilities', () => {
+            const platform = createPlatformWithDomains(['ksa.be']);
             platform.privateConfig = null;
 
-            expect(createUser().forPlatform(platform, 'john@ksa.be')).toBeNull();
-            expect(createUser({ level: PermissionLevel.Read }).forPlatform(platform, 'john@ksa.be')?.hasReadAccess()).toBe(true);
-            expect(createUser({ level: PermissionLevel.Read }).forPlatform(platform, 'john@ksa.be')?.hasFullAccess()).toBe(false);
+            expect(createUser().forPlatform(platform, 'john@gmail.com')).toBeNull();
+            expect(createUser().applicableGlobalPermissions(platform, 'john@gmail.com')).toBeNull();
+            expect(createUser().applicableGlobalPermissions(platform, 'john@ksa.be')?.responsibilities).toHaveLength(1);
+        });
+
+        test('applicableGlobalPermissions keeps the other permissions', () => {
+            const platform = createPlatformWithDomains(['ksa.be']);
+            const user = createUser({ level: PermissionLevel.Read });
+
+            const applicable = user.applicableGlobalPermissions(platform, 'john@gmail.com');
+            expect(applicable?.level).toBe(PermissionLevel.Read);
+            expect(applicable?.responsibilities).toHaveLength(0);
+
+            // Nothing was removed from the stored permissions
+            expect(user.globalPermissions?.responsibilities).toHaveLength(1);
         });
 
         test('no restrictions without domains', () => {

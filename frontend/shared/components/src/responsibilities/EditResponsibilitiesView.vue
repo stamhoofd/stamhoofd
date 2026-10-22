@@ -57,7 +57,7 @@
             <h2>{{ $t('Toegestane e-maildomeinen voor nationale functies') }}</h2>
             <p>{{ $t('Leden met een nationale functie krijgen enkel de rechten van die functie via e-mailadressen op exact deze domeinen. Subdomeinen (bv. afdeling.voorbeeld.be) moet je apart toevoegen. Andere e-mailadressen van hetzelfde lid krijgen geen rechten. Laat leeg om geen beperkingen in te stellen.') }}</p>
 
-            <ArrayInput v-model="responsibilityEmailDomains" :default-value="() => ''" :title="$t('Domeinnamen')" error-fields="privateConfig.responsibilityEmailDomains" :error-box="errors.errorBox">
+            <ArrayInput v-model="responsibilityEmailDomains" :default-value="() => ''" :title="$t('Domeinnamen')" error-fields="config.responsibilityEmailDomains" :error-box="errors.errorBox">
                 <template #item="{index, modelValue, updateModelValue}">
                     <input :value="modelValue" class="input" type="text" inputmode="url" :placeholder="$t('%NE') + ' ' + (index + 1)" autocomplete="off" autocapitalize="off" spellcheck="false" @input="updateModelValue(($event.target as HTMLInputElement).value || '')">
                 </template>
@@ -85,7 +85,7 @@ import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { Group } from '@stamhoofd/structures/Group.js';
 import type { PermissionRoleForResponsibility } from '@stamhoofd/structures';
-import { MemberResponsibility, Platform, PlatformPrivateConfig } from '@stamhoofd/structures';
+import { MemberResponsibility, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 import { useLoadAdmins } from '../admins/hooks/useLoadAdmins';
@@ -104,10 +104,10 @@ const auth = useAuth();
 const { saving, errors, save: rawSave, hasChanges, createInheritedResponsibilityRolePatchArray, responsibilities, inheritedResponsibilitiesWithGroup, patchResponsibilities, patchInheritedResponsibilityRoles, platformPatch, patchedPlatform } = usePatchRoles();
 
 const responsibilityEmailDomains = computed({
-    get: () => patchedPlatform.value.privateConfig?.responsibilityEmailDomains ?? [],
+    get: () => patchedPlatform.value.config.responsibilityEmailDomains,
     set: (responsibilityEmailDomains: string[]) => {
         platformPatch.value = platformPatch.value.patch(Platform.patch({
-            privateConfig: PlatformPrivateConfig.patch({
+            config: PlatformConfig.patch({
                 responsibilityEmailDomains: responsibilityEmailDomains as any,
             }),
         }));

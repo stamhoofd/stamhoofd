@@ -1236,7 +1236,7 @@ export class AuthenticatedStructures {
         const users = await User.getByIDs(...userIds);
         const organizationsIds = Formatter.uniqueArray(logs.map(l => l.organizationId).filter(id => id !== null));
         const organizations = await Organization.getByIDs(...organizationsIds);
-        const platform = await PlatformModel.getSharedPrivateStruct();
+        const platform = await PlatformModel.getSharedStruct();
 
         for (const log of logs) {
             const user = log.userId ? (users.find(u => u.id === log.userId) ?? null) : null;

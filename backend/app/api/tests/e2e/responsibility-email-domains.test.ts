@@ -2,7 +2,7 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization } from '@stamhoofd/models';
 import { MemberFactory, MemberResponsibilityRecordFactory, OrganizationFactory, Platform, User, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { MemberDetails, MemberResponsibility, OrganizationAdmins, PermissionRoleForResponsibility, PlatformPrivateConfig, Platform as PlatformStruct, Version } from '@stamhoofd/structures';
+import { MemberDetails, MemberResponsibility, OrganizationAdmins, PermissionRoleForResponsibility, PlatformConfig, Platform as PlatformStruct, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -40,7 +40,7 @@ describe('E2E.ResponsibilityEmailDomains', () => {
 
         const platform = await Platform.getForEditing();
         platform.config.responsibilities.push(responsibility);
-        platform.privateConfig.responsibilityEmailDomains = ['ksa.be'];
+        platform.config.responsibilityEmailDomains = ['ksa.be'];
         await platform.save();
 
         organization = await new OrganizationFactory({}).create();
@@ -70,13 +70,13 @@ describe('E2E.ResponsibilityEmailDomains', () => {
         // The platform row is shared by every test file
         const platform = await Platform.getForEditing();
         platform.config.responsibilities = platform.config.responsibilities.filter(r => r.id !== responsibility.id);
-        platform.privateConfig.responsibilityEmailDomains = [];
+        platform.config.responsibilityEmailDomains = [];
         await platform.save();
     });
 
     async function setDomains(domains: string[]) {
         const platform = await Platform.getForEditing();
-        platform.privateConfig.responsibilityEmailDomains = domains;
+        platform.config.responsibilityEmailDomains = domains;
         await platform.save();
     }
 
@@ -97,7 +97,7 @@ describe('E2E.ResponsibilityEmailDomains', () => {
 
     async function patchPlatformDomains(user: User, domains: string[]) {
         const patch = PlatformStruct.patch({
-            privateConfig: PlatformPrivateConfig.patch({
+            config: PlatformConfig.patch({
                 responsibilityEmailDomains: domains as any,
             }),
         });
@@ -116,10 +116,12 @@ describe('E2E.ResponsibilityEmailDomains', () => {
 
     test('only the whitelisted user receives the private platform configuration', async () => {
         const allowedResponse = await getPlatform(allowed);
-        expect(allowedResponse.body.privateConfig?.responsibilityEmailDomains).toEqual(['ksa.be']);
+        expect(allowedResponse.body.privateConfig).not.toBeNull();
 
+        // The domain list itself is public, so the frontend of both users can calculate the permissions
         const otherResponse = await getPlatform(other);
         expect(otherResponse.body.privateConfig).toBeNull();
+        expect(otherResponse.body.config.responsibilityEmailDomains).toEqual(['ksa.be']);
     });
 
     test('only the whitelisted user can list the platform admins', async () => {
@@ -132,10 +134,10 @@ describe('E2E.ResponsibilityEmailDomains', () => {
 
     test('only the whitelisted user can change the platform settings', async () => {
         await expect(patchPlatformDomains(other, ['ksa.be', 'fos.be'])).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
-        expect((await Platform.getForEditing()).privateConfig.responsibilityEmailDomains).toEqual(['ksa.be']);
+        expect((await Platform.getForEditing()).config.responsibilityEmailDomains).toEqual(['ksa.be']);
 
         const response = await patchPlatformDomains(allowed, ['ksa.be', 'fos.be']);
-        expect(response.body.privateConfig?.responsibilityEmailDomains).toEqual(['ksa.be', 'fos.be']);
+        expect(response.body.config.responsibilityEmailDomains).toEqual(['ksa.be', 'fos.be']);
     });
 
     test('only the whitelisted user inherits full access to organizations', async () => {
