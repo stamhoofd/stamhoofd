@@ -9,7 +9,10 @@ import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import type { User } from '@stamhoofd/models';
 import { EventFactory, Organization, OrganizationFactory, RegistrationPeriod, UserFactory } from '@stamhoofd/models';
-import { AccessRight, appToUri, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, PermissionsResourceKey, PermissionsResourceType, ResourcePermissions, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
+import { appToUri, PermissionRole, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ResourcePermissions, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WorkerData } from '../helpers/index.js';
 
