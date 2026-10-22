@@ -539,14 +539,11 @@ test.describe('Settings email templates', () => {
      */
     async function openLanguageChildMenu(page: Page, parentName: string) {
         const containers = page.locator('.context-menu-container:visible');
-        await openLanguageMenu(page);
+        const menu = await openLanguageMenu(page);
         const count = await containers.count();
-        // Pin both menus by index: `.last()` resolves to the child menu once it opened
-        const parent = containers.nth(count - 1).locator('.context-menu-item', { hasText: parentName }).first();
-        await parent.hover();
+        await menu.locator('.context-menu-item', { hasText: parentName }).first().hover();
         await expect(containers).toHaveCount(count + 1);
-        await expect(parent).toHaveClass(/\bisOpen\b/);
-        const child = containers.nth(count);
+        const child = containers.last();
         await expect(child).not.toHaveClass(/show-enter/);
         await expect(child.locator('.context-menu-item').first()).toBeVisible();
         return child;

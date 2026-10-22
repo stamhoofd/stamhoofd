@@ -208,6 +208,9 @@ test.describe('Switching the current period from the members menu @members-perio
             await page.reload();
             await expect(menu.getByRole('button', { name: 'Andere tak' })).toBeVisible();
             await expect(menu.getByRole('heading', { name: scenario.otherPeriodName, exact: true }).last()).toBeVisible();
+            // After a reload the URL is only restored a moment after the view is shown: going back before that
+            // leaves the root URL in this history entry
+            await expect(page).toHaveURL(periodUrl);
 
             await page.goBack();
             await expect(page).toHaveURL(originalUrl);
