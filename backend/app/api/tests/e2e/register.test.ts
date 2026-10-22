@@ -1089,6 +1089,61 @@ describe('E2E.Register', () => {
                 },
             ]);
         });
+
+        test('Should apply the checkout cancellation fee percentage of an old client to the deleted registration', async () => {
+            const { member, group, groupPrice, organization, token } = await initData();
+
+            const body1 = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                }),
+                totalPrice: 2500,
+                asOrganizationId: organization.id,
+            });
+
+            const response1 = await register(body1, organization, token);
+            const registrationToDelete = response1.body.registrations[0];
+
+            // Older clients sent one cancellationFeePercentage for the whole checkout, see RegisterCheckout.test.ts for the version choice
+            const legacyVersion = 421;
+            const body2 = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registrationToDelete.id })],
+                }),
+                totalPrice: -2500 + 500, // 20% of 2500 is 500
+                asOrganizationId: organization.id,
+            }).encode({ version: legacyVersion }) as Record<string, unknown>;
+            body2.cancellationFeePercentage = 20_00;
+            expect(body2.cart).toMatchObject({ deleteRegistrationIds: [registrationToDelete.id] });
+
+            const request = Request.buildJson('POST', `/v${legacyVersion}/members/register`, organization.getApiHost(), body2);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await testServer.test(registerEndpoint, request);
+
+            await assertBalances({ member }, [
+                {
+                    unitPrice: 2500,
+                    status: BalanceItemStatus.Canceled,
+                    type: BalanceItemType.Registration,
+                    registrationId: registrationToDelete.id,
+                },
+                {
+                    unitPrice: 500,
+                    priceOpen: 500,
+                    status: BalanceItemStatus.Due,
+                    type: BalanceItemType.CancellationFee,
+                    registrationId: registrationToDelete.id,
+                },
+            ]);
+        });
     });
 
     describe('Register for group with default age group', () => {
