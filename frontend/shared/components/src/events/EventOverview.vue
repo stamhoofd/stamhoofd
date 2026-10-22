@@ -96,7 +96,7 @@
                                     </template>
                                 </STListItem>
 
-                                <STListItem v-if="canEditPermissions" :selectable="true" class="left-center" @click="$navigate(Routes.EditPermissions)">
+                                <STListItem :selectable="true" class="left-center" @click="editPermissions">
                                     <template #left>
                                         <img src="@stamhoofd/assets/images/illustrations/lock.svg">
                                     </template>
@@ -432,7 +432,22 @@ function setGroupOrganization(o: Organization) {
 const canWriteEvent = computed(() => auth.canWriteEventForOrganization(props.event, eventOrganization.value));
 
 // Roles are edited in the scope the event belongs to: organization roles for an organization event, platform roles for a national event.
-const canEditPermissions = computed(() => canWriteEvent.value && props.event.organizationId === (organization.value?.id ?? null));
+async function editPermissions() {
+    if (!canWriteEvent.value) {
+        Toast.error($t('Je hebt geen toegang om deze activiteit te bewerken, vraag het aan een beheerder.')).show();
+        return;
+    }
+    if (props.event.organizationId === (organization.value?.id ?? null)) {
+        await $navigate(Routes.EditPermissions);
+        return;
+    }
+    if (props.event.organizationId === null) {
+        Toast.info($t('Ga naar het administratieportaal om het toegangsbeheer van deze nationale activiteit aan te passen.')).show();
+        return;
+    }
+    Toast.info($t('Ga naar het beheerdersportaal van {organization} om het toegangsbeheer van deze activiteit aan te passen.', { organization: eventOrganization.value?.name ?? $t('de organiserende #groep') })).show();
+}
+
 const patchOrganizationPeriod = usePatchOrganizationPeriod();
 
 const levelPrefix = computed(() => {
