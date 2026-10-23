@@ -172,6 +172,13 @@ const selectedControlTab = computed<string>({
     },
 });
 
+// Organizations without any groups (e.g. only camps) open on the activities tab
+const hasGroups = computed(() => treeFactory({}).categories.length > 0);
+
+function selectDefaultTab() {
+    isEventsTab.value = !hasGroups.value;
+}
+
 const tree = computed(() => treeFactory({
     filterGroups: (g) => {
         return props.member.family.checkout.isAdminFromSameOrganization || props.member.canRegister(g, selectedOrganization.value!) || props.member.canRegisterForWaitingList(g, selectedOrganization.value!);
@@ -258,12 +265,13 @@ const noGroupsMessage = computed(() => {
 function addOrganization(organization: Organization) {
     props.member.insertOrganization(organization);
     selectedOrganization.value = organization;
-    // Selecting an organization always shows its groups, not the events tab
-    isEventsTab.value = false;
+    selectDefaultTab();
 }
 
 if (props.defaultOrganization) {
     addOrganization(props.defaultOrganization);
+} else {
+    selectDefaultTab();
 }
 
 async function openGroup(group: Group) {

@@ -27,6 +27,7 @@ import { WorkerData } from '../helpers/index.js';
  * ChooseGroupForMemberView improvements (STA-1311 + STA-1266):
  * - the group list becomes searchable once there are more than five groups
  * - an 'Activiteiten' tab lets you register the member for an event directly
+ * - organizations without groups open on the 'Activiteiten' tab (STA-1589)
  */
 test.describe('Register member - choose group', () => {
     let organization: Organization;
@@ -207,5 +208,38 @@ test.describe('Register member - choose group', () => {
                 page.getByTestId('event-button').filter({ hasText: eventName }),
             ).toBeVisible();
         });
+    });
+
+    test('opens on the activities tab when the organization has no groups', async ({
+        page,
+        pages,
+    }) => {
+        const eventGroup = await new GroupFactory({ organization, price: 0 }).create();
+        const startDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
+        const eventName = `Kamp ${WorkerData.id}-${Math.floor(Math.random() * 1_000_000)}`;
+
+        await new EventFactory({
+            organization,
+            group: eventGroup,
+            name: eventName,
+            startDate,
+            endDate,
+            meta: EventMeta.create({ visible: true, minAge: 0, maxAge: 99 }),
+        }).create();
+
+        await new MemberFactory({
+            firstName: 'Jan',
+            lastName: 'Peeters',
+            user,
+        }).create();
+
+        await openChooseGroup(page, pages, 'Jan Peeters');
+
+        await expect(page.getByTestId('register-tabs')).toBeVisible();
+        await expect(
+            page.getByTestId('event-button').filter({ hasText: eventName }),
+        ).toBeVisible();
+        await expect(page.getByTestId('group-button')).toHaveCount(0);
     });
 });
