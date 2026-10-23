@@ -83,6 +83,19 @@ The CLI build clears its own compiled output before compiling so commands remove
 | Cleanup     | `pnpm stam clean services`             | Stop shared services.                                                      |
 | Cleanup     | `pnpm stam clean all`                  | Clean build artifacts and stop shared services.                            |
 
+### Local SQS
+
+`pnpm stam services up` starts ElasticMQ and its web UI alongside the other shared services:
+
+- SQS API: `https://queues.stamhoofd`
+- Queue management UI: `https://ui.queues.stamhoofd`
+
+Both use `STAMHOOFD_DOMAIN` when configured and are shared across workspaces. Configure an SQS client with the API endpoint, region `elasticmq`, and dummy credentials `x` / `x`. The UI trusts the local Caddy CA installed by `pnpm stam setup`.
+
+After updating an existing checkout, run `pnpm stam services up`. Existing wildcard DNS covers both hostnames, and Caddy automatically reloads the generated routes and issues certificates using the already trusted local CA. If local DNS or certificate trust is broken, run `pnpm stam setup` to check and repair it.
+
+Queues and messages are in-memory and are lost when ElasticMQ stops or restarts. Host ports default to `9324` (API) and `9325` (UI); override them with `ELASTICMQ_PORT` and `ELASTICMQ_UI_PORT`. Status, logs, restart, and shutdown are included in the normal `services` commands.
+
 ### Translations
 
 During development, write Dutch `$t('Opslaan')` strings and commit them unchanged. Do not manually edit `shared/locales/src/nl.json`. Before releasing, a maintainer runs `pnpm stam translate auto`, reviews the generated changes, and commits them separately.

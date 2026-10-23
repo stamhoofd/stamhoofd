@@ -11,6 +11,8 @@ export const dockerHostGateway = 'host.docker.internal';
 export const mysqlContainer = 'stamhoofd-mysql';
 export const maildevContainer = 'stamhoofd-maildev';
 export const rustfsContainer = 'stamhoofd-rustfs';
+export const elasticmqContainer = 'stamhoofd-elasticmq';
+export const elasticmqUiContainer = 'stamhoofd-elasticmq-ui';
 export const corednsContainer = 'stamhoofd-coredns';
 export const caddyContainer = 'stamhoofd-caddy';
 export const metabaseContainer = 'stamhoofd-metabase';
@@ -18,6 +20,8 @@ export const metabaseContainer = 'stamhoofd-metabase';
 export const mysqlImage = 'docker.io/library/mysql:8.4';
 export const maildevImage = 'docker.io/maildev/maildev:2.2.1';
 export const rustfsImage = 'docker.io/rustfs/rustfs:latest';
+export const elasticmqImage = 'docker.io/softwaremill/elasticmq-native:1.7.1';
+export const elasticmqUiImage = 'docker.io/softwaremill/elasticmq-ui:1.7.1';
 export const corednsImage = 'docker.io/coredns/coredns:1.11.3';
 export const metabaseImage = 'docker.io/metabase/metabase:v0.63.3';
 
@@ -85,6 +89,8 @@ export const maildevInternalSmtpPort = 1025;
 export const maildevInternalHttpPort = 1080;
 export const rustfsInternalApiPort = 9000;
 export const rustfsInternalConsolePort = 9001;
+export const elasticmqInternalPort = 9324;
+export const elasticmqUiInternalPort = 3000;
 export const ssoInternalPort = 8080;
 export const metabaseInternalPort = 3000;
 
