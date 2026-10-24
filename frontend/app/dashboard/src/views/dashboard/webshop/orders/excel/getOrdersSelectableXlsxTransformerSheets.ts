@@ -296,13 +296,16 @@ function getAnswerGroups<R>(webshop: Webshop, orders: PrivateOrder[], getOrder: 
     }
 
     // Records configured on the webshop, grouped per record category (nested categories are flattened)
-    for (const recordCategory of RecordCategory.flattenCategoriesWith(webshop.meta.recordCategories, isExportable)) {
+    const customerRecordCategoryId = webshop.meta.customerSettings.recordCategory?.id;
+    for (const recordCategory of RecordCategory.flattenCategoriesWith(webshop.meta.allRecordCategories, isExportable)) {
+        // Questions about the customer belong to the customer details: the name of their category is never shown
+        const categoryName = recordCategory.id === customerRecordCategoryId ? columnCategories.customer : recordCategory.name.toString();
         for (const record of recordCategory.records) {
             if (recordIds.has(record.id)) {
                 continue;
             }
             recordIds.add(record.id);
-            addRecordGroup(record.id, record.name.toString(), recordCategory.name.toString(), record.excelColumns);
+            addRecordGroup(record.id, record.name.toString(), categoryName, record.excelColumns);
         }
     }
 

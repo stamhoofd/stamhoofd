@@ -83,7 +83,7 @@
         </p>
 
         <TTextarea v-if="shouldAskInputPlaceholder" v-model="inputPlaceholder" :placeholder="$t(`%is`)" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`%ir`)" />
-        <p class="style-description-small">
+        <p v-if="shouldAskInputPlaceholder" class="style-description-small">
             {{ $t('%ih') }}
         </p>
 
@@ -237,15 +237,16 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import type { ObjectWithRecords, RecordCategory } from '@stamhoofd/structures';
+import type { ObjectWithRecords, RecordCategory, TranslatedString } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { FileType, PropertyFilter, RecordAnswerDecoder, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, TranslatedString } from '@stamhoofd/structures';
+import { FileType, PropertyFilter, RecordAnswerDecoder, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 
 import type { RecordEditorSettings } from './RecordEditorSettings';
+import { createDefaultRecordChoices, getRecordTypeGroups, isRecordTypeRequiredByDefault } from './recordTypes';
 import { RecordEditorType } from './RecordEditorSettings';
 
 import RecordChoiceRow from './components/RecordChoiceRow.vue';
@@ -281,91 +282,16 @@ const showExternalPermissionLevel = computed(() => editorType.value === RecordEd
 
 const enableAllTypes = props.isNew || !props.savedRecordIds.has(props.record.id);
 
-const availableTypes: {name: string, values: {value: RecordType, name: string, disabled: boolean}[]}[] = [
-    {
-        name: $t(`%110`),
-        values: [
-            {
-                value: RecordType.Text,
-                name: $t(`%111`),
-            },
-            {
-                value: RecordType.Textarea,
-                name: $t(`%112`),
-            },
-            {
-                value: RecordType.Email,
-                name: $t(`%1FK`),
-            },
-            {
-                value: RecordType.Phone,
-                name: $t(`%wD`),
-            },
-        ],
-    },
-    {
-        name: $t(`%1JG`),
-        values: [
-            {
-                value: RecordType.Address,
-                name: $t(`%Cn`),
-            },
-            {
-                value: RecordType.Date,
-                name: $t(`%7R`),
-            },
-            {
-                value: RecordType.Integer,
-                name: $t(`%113`),
-            },
-            {
-                value: RecordType.Price,
-                name: $t(`%1IP`),
-            },
-        ],
-    },
-    {
-        name: $t(`%114`),
-        values: [
-            {
-                value: RecordType.Checkbox,
-                name: $t(`%115`),
-            },
-            {
-                value: RecordType.ChooseOne,
-                name: $t(`%116`),
-            },
-            {
-                value: RecordType.MultipleChoice,
-                name: $t(`%117`),
-            },
-        ],
-    },
-    {
-        name: $t(`%HQ`),
-        values: [
-            {
-                value: RecordType.Image,
-                name: $t(`%118`),
-            },
-            {
-                value: RecordType.File,
-                name: $t(`%yU`),
-            },
-        ],
-    },
-].map(category => {
-    return {
-        ...category,
-        values: category.values.map(v => ({ ...v, disabled: isTypeDisabled(v.value) })),
-    }
-});
+const availableTypes = getRecordTypeGroups().map(group => ({
+    name: group.name,
+    values: group.types.map(t => ({ value: t.type, name: t.name, disabled: isTypeDisabled(t.type) })),
+}));
 
 const areMultipleTypesAvailable = enableAllTypes ? true : availableTypes.some(c => c.values.some(v => !v.disabled && v.value !== props.record.type));
 
 function isTypeDisabled(type: RecordType) {
     if (enableAllTypes) {
-       return false; 
+        return false;
     }
 
     return RecordAnswerDecoder.getClassForType(props.record.type) !== RecordAnswerDecoder.getClassForType(type);
@@ -373,7 +299,7 @@ function isTypeDisabled(type: RecordType) {
 
 const availableFileTypes = [
     {
-        name: $t(`%c9`),
+        name: $t('%c9'),
         value: null,
     },
     {
@@ -400,49 +326,49 @@ const canAddWarning = computed(() => {
 
 const warningNonInvertedText = computed(() => {
     if (patchedRecord.value.type === RecordType.Checkbox) {
-        return $t(`%iR`);
+        return $t('%iR');
     }
-    return $t(`%119`);
+    return $t('%119');
 });
 
 const warningInvertedText = computed(() => {
     if (patchedRecord.value.type === RecordType.Checkbox) {
-        return $t(`%iS`);
+        return $t('%iS');
     }
-    return $t(`%11A`);
+    return $t('%11A');
 });
 
 const title = computed(() => {
     if (props.isNew) {
-        return $t(`%11B`);
+        return $t('%11B');
     }
-    return $t(`%Sf`);
+    return $t('%Sf');
 });
 
 const labelTitle = computed(() => {
     if (type.value === RecordType.Checkbox) {
-        return $t(`%iB`);
+        return $t('%iB');
     }
     if (type.value === RecordType.MultipleChoice) {
-        return $t(`%11C`);
+        return $t('%11C');
     }
     if (type.value === RecordType.ChooseOne) {
-        return $t(`%11C`);
+        return $t('%11C');
     }
-    return $t(`%11D`);
+    return $t('%11D');
 });
 
 const descriptionTitle = computed(() => {
     if (type.value === RecordType.Checkbox) {
-        return $t(`%11E`);
+        return $t('%11E');
     }
     if (type.value === RecordType.MultipleChoice) {
-        return $t(`%11F`);
+        return $t('%11F');
     }
     if (type.value === RecordType.ChooseOne) {
-        return $t(`%11F`);
+        return $t('%11F');
     }
-    return $t(`%11G`);
+    return $t('%11G');
 });
 
 const name = computed({
@@ -533,15 +459,15 @@ const shouldAskCommentsDescription = computed(() => {
 
 const requiredText = computed(() => {
     if (type.value === RecordType.Checkbox) {
-        return $t(`%11H`);
+        return $t('%11H');
     }
     if (type.value === RecordType.MultipleChoice) {
-        return $t(`%11I`);
+        return $t('%11I');
     }
     if (type.value === RecordType.ChooseOne) {
-        return $t(`%11J`);
+        return $t('%11J');
     }
-    return $t(`%yw`);
+    return $t('%yw');
 });
 
 const type = computed({
@@ -550,9 +476,7 @@ const type = computed({
         patchRecord.value = patchRecord.value.patch({
             type,
             // Set required if not checkbox or multiple choice, and if the type changed
-            required: (type !== RecordType.MultipleChoice && type !== RecordType.Checkbox) && props.record.type !== type
-                ? true
-                : ((type === RecordType.Checkbox || type === RecordType.MultipleChoice) && props.record.type !== type ? false : undefined),
+            required: props.record.type !== type ? isRecordTypeRequiredByDefault(type) : undefined,
         });
 
         if (type === RecordType.MultipleChoice || type === RecordType.ChooseOne) {
@@ -560,18 +484,11 @@ const type = computed({
                 if (props.record.choices.length > 0) {
                     // Revert to original choices
                     patchRecord.value = patchRecord.value.patch({ choices: props.record.choices as any });
-                }
-                else {
-                    patchRecord.value = patchRecord.value.patch({
-                        choices: [
-                            RecordChoice.create({ name: TranslatedString.create($t(`%11K`)) }),
-                            RecordChoice.create({ name: TranslatedString.create($t(`%11L`)) }),
-                        ] as any,
-                    });
+                } else {
+                    patchRecord.value = patchRecord.value.patch({ choices: createDefaultRecordChoices() as any });
                 }
             }
-        }
-        else {
+        } else {
             // Delete choices
             patchRecord.value = patchRecord.value.patch({ choices: [] as any });
         }
@@ -614,8 +531,7 @@ const warningInverted = computed({
                     inverted,
                 }),
             });
-        }
-        else {
+        } else {
             addPatch({
                 warning: RecordWarning.patch({
                     inverted,
@@ -640,8 +556,7 @@ const warningText = computed({
                     text,
                 }),
             });
-        }
-        else {
+        } else {
             patchRecord.value = patchRecord.value.patch({
                 warning: RecordWarning.patch({
                     text,
@@ -666,8 +581,7 @@ const warningType = computed({
                     type,
                 }),
             });
-        }
-        else {
+        } else {
             patchRecord.value = patchRecord.value.patch({
                 warning: RecordWarning.patch({
                     type,
@@ -714,7 +628,7 @@ async function save() {
     if (name.value.length < 2) {
         errors.errorBox = new ErrorBox(new SimpleError({
             code: 'invalid_field',
-            message: $t(`%11M`),
+            message: $t('%11M'),
             field: 'name',
         }));
         return;
@@ -732,8 +646,7 @@ async function save() {
 
     if (props.isNew) {
         arrayPatch.addPut(patchedRecord.value);
-    }
-    else {
+    } else {
         arrayPatch.addPatch(patchRecord.value);
     }
 
@@ -744,8 +657,8 @@ async function save() {
 async function deleteMe() {
     if (!await CenteredMessage.confirm({
         title: name.value.toString() ? $t('%Zn2', { name: name.value.toString() }) : $t('Dit kenmerk verwijderen?'),
-        confirmText: $t(`%CJ`),
-        description: $t(`%11O`) + ' ' + $t('%ZnK'),
+        confirmText: $t('%CJ'),
+        description: $t('%11O') + ' ' + $t('%ZnK'),
         availabilityDelay: 2_000,
     })) {
         return;
@@ -768,7 +681,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 function openPreview() {

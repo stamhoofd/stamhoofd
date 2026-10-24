@@ -1,10 +1,11 @@
 import { AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { Formatter } from '@stamhoofd/utility';
 import { Address } from '../addresses/Address.js';
 import { Gender } from '../members/Gender.js';
 import { PaymentCustomer } from '../PaymentCustomer.js';
 import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';
-import type { CustomerSettings } from './CustomerSettings.js';
+import type { CustomerFieldKey, CustomerSettings } from './CustomerSettings.js';
 
 export class Customer extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -119,6 +120,62 @@ export class Customer extends AutoEncoder {
                 });
             }
         }
+    }
+
+    /**
+     * Whether something was filled in for this field. A gender always counts: 'other' is a valid choice.
+     */
+    hasValue(key: CustomerFieldKey): boolean {
+        switch (key) {
+            case 'name': return this.firstName !== '' || this.lastName !== '';
+            case 'email': return this.email !== '';
+            case 'phone': return this.phone !== '';
+            case 'birthDay': return this.birthDay !== null;
+            case 'address': return this.address !== null;
+            case 'gender': return true;
+        }
+    }
+
+    copyFields(source: Customer, keys: CustomerFieldKey[]) {
+        for (const key of keys) {
+            switch (key) {
+                case 'name':
+                    this.firstName = source.firstName;
+                    this.lastName = source.lastName;
+                    break;
+                case 'email':
+                    this.email = source.email;
+                    break;
+                case 'phone':
+                    this.phone = source.phone;
+                    break;
+                case 'birthDay':
+                    this.birthDay = source.birthDay;
+                    break;
+                case 'address':
+                    this.address = source.address;
+                    break;
+                case 'gender':
+                    this.gender = source.gender;
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Age in years today, calculated in the Brussels timezone like MemberDetails.ageOnDate
+     */
+    get age(): number | null {
+        if (!this.birthDay) {
+            return null;
+        }
+        const birthDay = Formatter.luxon(this.birthDay);
+        const today = Formatter.luxon(new Date());
+        let age = today.year - birthDay.year;
+        if (today.month < birthDay.month || (today.month === birthDay.month && today.day < birthDay.day)) {
+            age--;
+        }
+        return age;
     }
 
     get name() {

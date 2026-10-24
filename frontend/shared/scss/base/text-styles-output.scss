@@ -107,29 +107,34 @@ ul.style-list { @extend %style-list; }
 .theme-warning {
     --color-primary: #{$color-warning};
     --color-primary-background: #{$color-warning-background};
+    --color-primary-light: #{$color-warning-background};
     --color-primary-dark: #{$color-warning-dark};
 }
 
 .theme-secundary {
     --color-primary: #{$color-secundary};
     --color-primary-background: #{$color-secundary-background};
+    --color-primary-light: #{$color-secundary-background};
     --color-primary-dark: #{$color-secundary-dark};
 }
 
 .theme-tertiary {
     --color-primary: #{$color-tertiary};
     --color-primary-background: #{$color-tertiary-background};
+    --color-primary-light: #{$color-tertiary-background};
     --color-primary-dark: #{$color-tertiary-dark};
 }
 
 .theme-success {
     --color-primary: #{$color-success};
     --color-primary-background: #{$color-success-background};
+    --color-primary-light: #{$color-success-background};
     --color-primary-dark: #{$color-success-dark};
 }
 
 .theme-error {
     --color-primary: #{$color-error};
     --color-primary-background: #{$color-error-background};
+    --color-primary-light: #{$color-error-background};
     --color-primary-dark: #{$color-error-dark};
 }

@@ -46,7 +46,7 @@ export class WebshopOrderFlow {
     /**
      * Add a product to the cart. For seated tickets, pass the number of seats to pick.
      */
-    async addProduct(name: string, options: { seats?: number; count?: number; customer?: { firstName: string; lastName: string } } = {}) {
+    async addProduct(name: string, options: { seats?: number; count?: number; customer?: { firstName: string; lastName: string; email?: string; birthDay?: TestBirthDay } } = {}) {
         const seats = options.seats ?? 0;
         const count = options.seats ?? options.count ?? 1;
 
@@ -67,6 +67,12 @@ export class WebshopOrderFlow {
         if (options.customer) {
             await cartItemView.locator('input[name="fname"]').fill(options.customer.firstName);
             await cartItemView.locator('input[name="lname"]').fill(options.customer.lastName);
+            if (options.customer.email) {
+                await cartItemView.locator('input[name="email"]').fill(options.customer.email);
+            }
+            if (options.customer.birthDay) {
+                await this.fillBirthDay(cartItemView, options.customer.birthDay);
+            }
         }
         await cartItemView.getByTestId('save-button').click();
 

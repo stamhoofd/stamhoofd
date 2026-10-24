@@ -71,7 +71,7 @@ export function createOrderDataHTMLTable(order: Order, webshop: Webshop): string
             title: a.field.name,
             value: a.answer,
         })),
-        ...RecordCategory.sortAnswers(order.data.recordAnswers, webshop.meta.recordCategories).filter(a => !a.isEmpty || a instanceof RecordCheckboxAnswer).map(a => ({
+        ...RecordCategory.sortAnswers(order.data.recordAnswers, webshop.meta.allRecordCategories).filter(a => !a.isEmpty || a instanceof RecordCheckboxAnswer).map(a => ({
             title: a.settings.name.toString(),
             value: a.stringValue,
         })),

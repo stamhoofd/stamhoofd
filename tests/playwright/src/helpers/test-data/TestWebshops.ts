@@ -1,6 +1,6 @@
 import type { Organization, Webshop } from '@stamhoofd/models';
 import { WebshopFactory } from '@stamhoofd/models';
-import type { DarkMode } from '@stamhoofd/structures';
+import type { DarkMode, RecordCategory } from '@stamhoofd/structures';
 import { PaymentConfiguration, PaymentMethod, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopDeliveryMethod, WebshopMetaData, WebshopOrderMode, WebshopPrivateMetaData, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 import { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
@@ -39,6 +39,8 @@ export interface CreateWebshopOptions {
     addressEnabled?: boolean;
     /** Ask for the customer's gender during checkout */
     genderEnabled?: boolean;
+    /** Questions asked next to the customer details during checkout */
+    customerRecordCategory?: RecordCategory | null;
     /** Add a delivery checkout method covering the given countries (enables the delivery address step) */
     deliveryCountries?: Country[];
     /** Raw HTML injected into the document head on custom domains (script/style tags) */
@@ -73,6 +75,7 @@ export class TestWebshops {
             birthDayEnabled = false,
             addressEnabled = false,
             genderEnabled = false,
+            customerRecordCategory = null,
             deliveryCountries,
             customCode,
             darkMode,
@@ -121,6 +124,7 @@ export class TestWebshops {
                 birthDay: toRequirement(birthDayEnabled),
                 address: toRequirement(addressEnabled),
                 gender: toRequirement(genderEnabled),
+                recordCategory: customerRecordCategory,
             }),
             customCode,
             darkMode,

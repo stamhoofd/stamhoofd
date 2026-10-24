@@ -182,7 +182,7 @@
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useCanDismiss, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import type { CartItem, Checkout, PatchAnswers, ProductDateRange, Webshop } from '@stamhoofd/structures';
-import { CartStockHelper, Customer, ProductPrice, ProductType, UitpasNumberAndPrice } from '@stamhoofd/structures';
+import { CartStockHelper, Customer, ProductPrice, ProductType, UitpasNumberAndPrice, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { useContext } from '#hooks/useContext.ts';
@@ -219,10 +219,14 @@ const props = withDefaults(defineProps<{
     saveHandler: (newItem: CartItem, oldItem: CartItem | null,
         component: { dismiss: ReturnType<typeof useDismiss>; canDismiss: boolean }) => void;
     oldItem?: CartItem | null;
-
+    /**
+     * Shown as an example in the dashboard: nothing is saved, so closing never asks for confirmation
+     */
+    isPreview?: boolean;
 }>(), {
     admin: false,
     oldItem: null,
+    isPreview: false,
 });
 
 const present = usePresent();
@@ -254,7 +258,15 @@ onMounted(() => {
     onChangeItem();
     handleNewAmount(props.cartItem.amount);
     originalSelectedPriceId.value = props.cartItem.productPrice.id;
+    // Snapshot after the setup above: handleNewAmount pads uitpasNumbers and the customer watcher creates an empty customer
+    originalEncodedItem = encodeItem(props.cartItem);
 });
+
+let originalEncodedItem = '';
+
+function encodeItem(item: CartItem) {
+    return JSON.stringify(item.encode({ version: Version }));
+}
 
 // External changes should trigger a price update
 watch(() => props.checkout, () => {
@@ -331,7 +343,14 @@ async function addToCart() {
 
     loading.value = true;
 
-    if (!(await errors.validator.validate())) {
+    // Inputs may throw their validation error instead of returning false
+    try {
+        if (!(await errors.validator.validate())) {
+            loading.value = false;
+            return;
+        }
+    } catch (e) {
+        errors.errorBox = new ErrorBox(e);
         loading.value = false;
         return;
     }
@@ -503,7 +522,6 @@ function patchRecordAnswers(patch: PatchAnswers) {
 }
 
 const uitpasNumbers = ref(props.cartItem.uitpasNumbers);
-const originalUitpasNumbers = props.cartItem.uitpasNumbers.map(u => u.uitpasNumber);
 
 watch(() => props.cartItem.amount, handleNewAmount);
 
@@ -535,8 +553,7 @@ function handleNewAmount(newAmount: number) {
 }
 
 const shouldNavigateAway = async () => {
-    console.log('Checking if should navigate away from UitpasNumberInput');
-    if (originalUitpasNumbers.length === uitpasNumbers.value.length && originalUitpasNumbers.every((val, index) => val === uitpasNumbers.value[index].uitpasNumber)) {
+    if (props.isPreview || encodeItem(props.cartItem) === originalEncodedItem) {
         return true;
     }
     return await CenteredMessage.confirm($t('%A0'), $t('%4X'));

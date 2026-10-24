@@ -46,6 +46,10 @@ withDefaults(defineProps<{
         }
     }
 
+    .st-list + & {
+        padding-top: 15px;
+    }
+
     > h4:has(.button) {
         max-width: 315px;
 
@@ -66,7 +70,7 @@ withDefaults(defineProps<{
         max-width: none;
     }
 
-    &:has(.st-list) {
+    &:has(.st-list):not(:has(.st-card)) {
         padding-bottom: 5px;
     }
 

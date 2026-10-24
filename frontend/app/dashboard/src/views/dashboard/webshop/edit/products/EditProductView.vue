@@ -1,5 +1,8 @@
 <template>
-    <SaveView :title="isNew ? typeName+' ' + $t(`%14c`) : name+' ' + $t(`%Rw`)" :disabled="!hasChanges" class="product-edit-view" @save="save">
+    <SaveView :title="isNew ? typeName+' ' + $t(`%14c`) : name+' ' + $t(`%Rw`)" :disabled="!hasChanges" class="product-edit-view" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
+        <template #buttons>
+            <button v-tooltip="$t('%jH')" class="button icon eye" type="button" data-testid="product-preview-button" @click="showExample" />
+        </template>
         <h1 v-if="isNew">
             {{ typeName }} {{ $t('%14c') }}
         </h1>
@@ -429,78 +432,34 @@
                     <Checkbox v-model="enableCustomer" />
                 </template>
 
-                <h3 class="style-title-list">
-                    {{ $t('Vraag de gegevens van de deelnemer op voor elk exemplaar') }}
+                <h3 v-if="isTicket" class="style-title-list">
+                    {{ $t('Ticket op naam') }}
                 </h3>
-                <p class="style-description-small">
-                    {{ $t('Elke persoon wordt een apart artikel in de bestelling. Standaard vragen we enkel de naam; e-mailadres en GSM-nummer worden enkel voor de hoofdbesteller gevraagd.') }}
+                <h3 v-else class="style-title-list">
+                    {{ $t('Vraag de gegevens van de deelnemer per artikel') }}
+                </h3>
+                <p v-if="isTicket" class="style-description-small">
+                    {{ $t('Vraag de naam en eventueel andere contactgegevens per ticket in plaats van enkel op bestelniveau.') }}
+                </p>
+                <p v-else class="style-description-small">
+                    {{ $t('Vraag de naam en eventueel andere contactgegevens per artikel in plaats van enkel op bestelniveau.') }}
                 </p>
             </STListItem>
         </STList>
 
         <div v-if="modernWebshopEnabled && enableCustomer" class="container">
-            <hr><h2>{{ $t('Gegevens per deelnemer') }}</h2>
+            <hr>
+            <h2 class="style-with-button">
+                <div>{{ $t('Gegevens per deelnemer') }}</div>
+                <div>
+                    <button v-if="customerSettingsBox?.canAdd" v-tooltip="$t('%SN')" class="button icon add" type="button" data-testid="customer-settings-add-button" @click="customerSettingsBox?.showAddMenu($event)" />
+                </div>
+            </h2>
             <p class="style-description-block">
                 {{ $t('Kies welke gegevens je van elke deelnemer wil verzamelen.') }}
             </p>
 
-            <STList>
-                <STListItem>
-                    <h3 class="style-title-list">
-                        {{ $t('Naam') }}
-                    </h3>
-                    <template #right>
-                        <span class="style-description">{{ getCustomerFieldRequirementName(CustomerFieldRequirement.Required) }}</span>
-                    </template>
-                </STListItem>
-                <STListItem v-for="customerField of customerFields" :key="customerField.key" element-name="label" :selectable="true">
-                    <h3 class="style-title-list">
-                        {{ customerField.name }}
-                    </h3>
-                    <template #right>
-                        <Dropdown :model-value="customerSettings[customerField.key]" :data-testid="'customer-field-' + customerField.key" @update:model-value="setCustomerField(customerField.key, $event)">
-                            <option v-for="requirement of CustomerFieldRequirement" :key="requirement" :value="requirement">
-                                {{ getCustomerFieldRequirementName(requirement) }}
-                            </option>
-                        </Dropdown>
-                    </template>
-                </STListItem>
-            </STList>
-
-            <hr><h2 class="style-with-button">
-                <div>{{ $t('Extra vragen per deelnemer') }}</div>
-                <div>
-                    <button v-if="customerSettings.recordCategory" class="button icon trash" type="button" @click="deleteCustomerRecordCategory" />
-                    <button class="button text" type="button" data-testid="edit-customer-record-category" @click="editCustomerRecordCategory">
-                        <span class="icon edit" />
-                        <span>{{ customerSettings.recordCategory ? $t('Bewerken') : $t('Toevoegen') }}</span>
-                    </button>
-                </div>
-            </h2>
-            <p v-if="!customerSettings.recordCategory" class="style-description-block">
-                {{ $t('Stel extra vragen die elke deelnemer moet beantwoorden.') }}
-            </p>
-            <STList v-else>
-                <STListItem v-for="record of customerSettings.recordCategory.getAllRecords()" :key="record.id" :selectable="true" @click="editCustomerRecordCategory">
-                    <h3 class="style-title-list">
-                        {{ record.name }}
-                    </h3>
-                    <p v-if="!record.required" class="style-description-small">
-                        {{ $t('Optioneel') }}
-                    </p>
-                </STListItem>
-            </STList>
-        </div>
-
-        <div v-if="!isNew" class="container">
-            <hr><h2>
-                {{ $t('%Tw') }}
-            </h2>
-
-            <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>{{ $t('%CJ') }}</span>
-            </button>
+            <CustomerSettingsBox ref="customerSettingsBox" :customer-settings="customerSettings" :fixed-fields="['name']" :record-editor-settings="customerRecordEditorSettings" :saved-record-ids="savedCustomerRecordIds" @patch="patchCustomerSettings" />
         </div>
     </SaveView>
 </template>
@@ -512,7 +471,6 @@ import { ComponentWithProperties, NavigationController, usePop, usePresent } fro
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
-import { GroupUIFilterBuilder } from '@stamhoofd/components/filters/GroupUIFilter.ts';
 import { useFeatureFlagComputed } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
@@ -527,15 +485,16 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { RecordEditorSettings, RecordEditorType } from '@stamhoofd/components/records/RecordEditorSettings.ts';
+
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { useSetUitpasEvent } from '@stamhoofd/components/uitpas/useSetUitpasEvent.ts';
 import ImageComponent from '@stamhoofd/components/views/ImageComponent.vue';
 import type { Image, ProductDateRange, ProductLocation } from '@stamhoofd/structures';
-import { CartItem, OptionMenu, PrivateWebshop, Product, ProductPrice, ProductType, RecordCategory, ResolutionRequest, TranslatedString, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, Version, WebshopField, WebshopTicketType } from '@stamhoofd/structures';
-import { CustomerFieldRequirement, getCustomerFieldRequirementName } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
-import { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
-import { computed, onBeforeUnmount, onMounted } from 'vue';
+import { CartItem, Checkout, OptionMenu, PrivateWebshop, Product, ProductPrice, ProductType, ResolutionRequest, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, Version, WebshopField, WebshopTicketType } from '@stamhoofd/structures';
+import type { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
+import { computed, onBeforeUnmount, onMounted, useTemplateRef } from 'vue';
+import CustomerSettingsBox from '../CustomerSettingsBox.vue';
+import { createParticipantRecordEditorSettings, getParticipantSettingsPatch } from './participantSettings';
 import WebshopFieldsBox from '../fields/WebshopFieldsBox.vue';
 import OptionMenuSection from './OptionMenuSection.vue';
 import ProductPriceBox from './ProductPriceBox.vue';
@@ -692,7 +651,7 @@ const seatingWarning = computed(() => {
 
     for (const p of patchedWebshop.value.products) {
         if (p.id !== props.product.id && p.seatingPlanId === patchedProduct.value.seatingPlanId && p.dateRange && p.dateRange.toString() === patchedProduct.value.dateRange.toString()) {
-            return $t(`%Zs5`);
+            return $t('%Zs5');
         }
     }
 
@@ -850,63 +809,15 @@ const enableCustomer = computed({
 });
 
 const customerSettings = computed(() => patchedProduct.value.resolvedCustomerSettings);
-
-const customerFields: { key: 'email' | 'phone' | 'birthDay' | 'gender' | 'address'; name: string }[] = [
-    { key: 'email', name: $t('E-mailadres') },
-    { key: 'phone', name: $t('GSM-nummer') },
-    { key: 'birthDay', name: $t('Geboortedatum') },
-    { key: 'gender', name: $t('Geslacht') },
-    { key: 'address', name: $t('Adres') },
-];
+const customerSettingsBox = useTemplateRef('customerSettingsBox');
 
 function patchCustomerSettings(patch: AutoEncoderPatchType<CustomerSettings>) {
-    if (patchedProduct.value.customerSettings === null) {
-        // Settings did not exist yet: store a full object instead of a patch
-        addProductPatch({ customerSettings: CustomerSettings.create({}).patch(patch) });
-        return;
-    }
-    addProductPatch({ customerSettings: patch });
+    addProductPatch(getParticipantSettingsPatch(patchedProduct.value, patch));
 }
 
-function setCustomerField(key: 'email' | 'phone' | 'birthDay' | 'gender' | 'address', requirement: CustomerFieldRequirement) {
-    patchCustomerSettings(CustomerSettings.patch({ [key]: requirement }));
-}
+const savedCustomerRecordIds = new Set(props.isNew ? [] : props.product.customerSettings?.recordCategory?.getAllRecords().map(r => r.id) ?? []);
 
-const customerRecordEditorSettings = new RecordEditorSettings({
-    type: RecordEditorType.Webshop,
-    dataPermission: false,
-    filterBuilder: () => new GroupUIFilterBuilder({ builders: [] }),
-    exampleValue: CartItem.create({ product: props.product, productPrice: props.product.prices[0] }),
-});
-
-function editCustomerRecordCategory() {
-    const existing = customerSettings.value.recordCategory;
-    const category = existing ?? RecordCategory.create({ name: TranslatedString.create($t('Extra vragen')) });
-
-    present({
-        components: [
-            new ComponentWithProperties(NavigationController, {
-                root: AsyncComponent(() => import('@stamhoofd/components/records/EditRecordCategoryView.vue'), {
-                    categoryId: category.id,
-                    rootCategories: [category],
-                    settings: customerRecordEditorSettings,
-                    isNew: !existing,
-                    allowChildCategories: true,
-                    unboxed: true,
-                    saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
-                        const [patched] = patch.applyTo([category]);
-                        patchCustomerSettings(CustomerSettings.patch({ recordCategory: patched ?? null }));
-                    },
-                }),
-            }),
-        ],
-        modalDisplayStyle: 'popup',
-    }).catch(console.error);
-}
-
-function deleteCustomerRecordCategory() {
-    patchCustomerSettings(CustomerSettings.patch({ recordCategory: null }));
-}
+const customerRecordEditorSettings = createParticipantRecordEditorSettings(props.product);
 
 const remainingStock = computed(() => patchedProduct.value.remainingStock);
 
@@ -1196,6 +1107,31 @@ async function save() {
     p.products.addPatch(patchProduct.value);
     props.saveHandler(p);
     pop({ force: true })?.catch(console.error);
+}
+
+// Opens the product as a buyer would see it, with the unsaved changes applied
+function showExample() {
+    const checkout = Checkout.create({});
+    const webshop = patchedWebshop.value;
+    const cartItem = CartItem.createDefault(patchedProduct.value, checkout.cart, webshop, { admin: false });
+
+    present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: AsyncComponent(() => import('@stamhoofd/components/views/CartItemView.vue'), {
+                    admin: false,
+                    isPreview: true,
+                    cartItem,
+                    webshop,
+                    checkout,
+                    saveHandler: (_cartItem: CartItem, _oldItem: CartItem | null, component: { dismiss: (options?: { force?: boolean }) => Promise<unknown> | undefined }) => {
+                        component.dismiss({ force: true })?.catch(console.error);
+                    },
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'sheet',
+    }).catch(console.error);
 }
 
 async function deleteMe() {

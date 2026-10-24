@@ -22,7 +22,7 @@
                 <span class="style-discount-price">{{ cartItem.getFormattedPriceWithDiscount() }}</span>
             </p>
             <div class="actions" @click.stop>
-                <span v-if="cartItem.formattedAmount" class="amount">{{ cartItem.formattedAmount }}</span>
+                <span v-if="cartItem.formattedAmount && (cartItem.amount !== 1 || (cartItem.product.maxPerOrder !== 1 && !cartItem.product.enableCustomer))" class="amount">{{ cartItem.formattedAmount }}</span>
                 <StepperInput v-if="editable && !cartItem.cartError && cartItem.customer === null && cartItem.seats.length === 0 && (maximumRemaining === null || maximumRemaining > 1) && cartItem.productPrice.uitpasBaseProductPriceId === null" v-model="amount" :min="1" :max="maximumRemaining" @click.stop />
                 <button v-if="editable" class="button icon trash" type="button" @click="deleteItem()" />
             </div>
@@ -47,7 +47,7 @@
 
 <script lang="ts" setup>
 import type { Cart, CartItem, Webshop } from '@stamhoofd/structures';
-import { Gender, getGenderName } from '@stamhoofd/structures';
+import { Gender, getGenderName, RecordCategory } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 
@@ -104,7 +104,10 @@ const participantDetails = computed(() => {
         return [];
     }
     const lines = [customer.email, customer.phone, customer.birthDay ? Formatter.date(customer.birthDay, true) : '', customer.gender !== Gender.Other ? getGenderName(customer.gender) : '', customer.address?.toString() ?? ''].filter(line => !!line);
-    for (const answer of props.cartItem.recordAnswers.values()) {
+    // Stored answers can come back in any order: follow the order of the questions
+    const category = props.cartItem.product.resolvedCustomerSettings.recordCategory;
+    const answers = category ? RecordCategory.sortAnswers(props.cartItem.recordAnswers, [category]) : [...props.cartItem.recordAnswers.values()];
+    for (const answer of answers) {
         if (!answer.isEmpty) {
             lines.push(answer.descriptionValue);
         }

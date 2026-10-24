@@ -4,9 +4,10 @@ import { ComponentWithProperties, ReactiveUrl } from '@simonbackx/vue-app-naviga
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import type { Checkout, CheckoutMethod, OrganizationMetaData, PatchAnswers, Webshop } from '@stamhoofd/structures';
-import { CheckoutMethodType } from '@stamhoofd/structures';
+import type { CheckoutMethod, OrganizationMetaData, PatchAnswers, Webshop } from '@stamhoofd/structures';
+import { Checkout, CheckoutMethodType } from '@stamhoofd/structures';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
+import { customerFieldKeys } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 import { Formatter } from '@stamhoofd/utility';
 
 import { patchObject } from '@simonbackx/simple-encoding';
@@ -137,11 +138,29 @@ export class CheckoutStepsManager {
         const hasDeliveryAddress = checkoutMethod !== null && checkoutMethod.type === CheckoutMethodType.Delivery;
         const customerSettings = webshop.meta.customerSettings;
         const asks = (requirement: CustomerFieldRequirement) => requirement !== CustomerFieldRequirement.Disabled;
+        const asksCustomerQuestions = (customerSettings.recordCategory?.isEnabled(checkout) ?? false) || webshop.meta.customFields.length > 0;
+
+        // A single participant becomes the contact person without asking, unless the order needs more than what was
+        // collected for them.
+        const participants = checkout.cart.items.filter(i => i.customer !== null);
+        const singleParticipant = !loggedIn && participants.length === 1 ? participants[0] : null;
+        const singleParticipantSuffices = singleParticipant !== null
+            && !asksCustomerQuestions
+            && Checkout.canBeAutomaticContactPerson(singleParticipant)
+            && customerFieldKeys.every(key => !asks(customerSettings[key]) || singleParticipant.collectedCustomerFields.includes(key) || (key === 'address' && hasDeliveryAddress));
 
         steps.push(new CheckoutStep({
             id: CheckoutStepType.Customer,
             url: '/checkout/' + CheckoutStepType.Customer.toLowerCase(),
-            active: !loggedIn || asks(customerSettings.phone) || asks(customerSettings.birthDay) || asks(customerSettings.gender) || (asks(customerSettings.address) && !hasDeliveryAddress) || !user?.firstName || !user?.lastName,
+            active: loggedIn
+                ? (asks(customerSettings.phone) || asks(customerSettings.birthDay) || asks(customerSettings.gender) || (asks(customerSettings.address) && !hasDeliveryAddress) || !user?.firstName || !user?.lastName || asksCustomerQuestions)
+                : !singleParticipantSuffices,
+            skipHandler: () => {
+                if (singleParticipant) {
+                    this.$checkoutManager.checkout.setContactPerson(singleParticipant.id);
+                    this.$checkoutManager.saveCheckout();
+                }
+            },
             getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CustomerView.vue').then(m => new ComponentWithProperties(m.default, {
                 continueCheckout: (navigate: NavigationActions) => this.goNext(CheckoutStepType.Customer, navigate),
             })),
