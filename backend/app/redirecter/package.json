@@ -31,7 +31,7 @@
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
-        "mysql2": "3.24.5"
+        "mysql2": "3.24.6"
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "workspace:*",

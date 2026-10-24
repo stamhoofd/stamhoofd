@@ -20,9 +20,9 @@
         "@simonbackx/simple-database": "1.40.1",
         "@stamhoofd/test-utils": "workspace:*",
         "html-to-text": "10.0.1",
-        "mysql2": "3.24.5",
+        "mysql2": "3.24.6",
         "nodemailer": "10.1.4",
-        "uuid": "14.0.2"
+        "uuid": "14.0.3"
     },
     "devDependencies": {
         "@stamhoofd/backend-i18n": "workspace:*",
