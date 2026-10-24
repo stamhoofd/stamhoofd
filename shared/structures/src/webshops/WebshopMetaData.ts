@@ -601,6 +601,15 @@ export class WebshopMetaData extends AutoEncoder {
     recordCategories: RecordCategory[] = [];
 
     /**
+     * Every category that stores answers in `Checkout.recordAnswers`: the questions asked next to the
+     * customer details, followed by the extra checkout steps.
+     */
+    get allRecordCategories(): RecordCategory[] {
+        const customerCategory = this.customerSettings.recordCategory;
+        return customerCategory ? [customerCategory, ...this.recordCategories] : this.recordCategories;
+    }
+
+    /**
      * @deprecated
      */
     @field({ decoder: new ArrayDecoder(WebshopField), version: 94 })

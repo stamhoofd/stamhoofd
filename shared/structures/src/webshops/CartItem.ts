@@ -13,6 +13,9 @@ import type { RecordSettings } from '../members/records/RecordSettings.js';
 import { CartReservedSeat, ReservedSeat } from '../SeatingPlan.js';
 import type { Cart } from './Cart.js';
 import { Customer } from './Customer.js';
+import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';
+import type { CustomerFieldKey } from './CustomerSettings.js';
+import { customerFieldKeys } from './CustomerSettings.js';
 import type { StockDefinition } from './CartStockHelper.js';
 import { CartStockHelper } from './CartStockHelper.js';
 import { ProductDiscountSettings } from './Discount.js';
@@ -787,10 +790,19 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
     }
 
     /**
-     * Update self to the newest available data and throw if it was not able to recover
+     * Customer fields that were collected for this item's participant. An optional field that was left empty doesn't count.
      */
+    get collectedCustomerFields(): CustomerFieldKey[] {
+        const customer = this.customer;
+        if (!customer || !this.product.enableCustomer) {
+            return [];
+        }
+        const settings = this.product.resolvedCustomerSettings;
+        return customerFieldKeys.filter(key => settings[key] === CustomerFieldRequirement.Required || (settings[key] === CustomerFieldRequirement.Optional && customer.hasValue(key)));
+    }
+
     /**
-     * One person per cart item: forces amount 1 and validates the customer and the product's record category
+     * One person per cart item: forces amount 1 and validates the customer and the product's record category (admins can keep older items as they are)
      */
     validateCustomer(admin: boolean) {
         if (!this.product.enableCustomer) {
@@ -799,9 +811,15 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
             return;
         }
 
-        this.amount = 1;
+        // Orders from before details were collected per item can hold several pieces without a participant: an admin keeps those as they are
+        if (!admin) {
+            this.amount = 1;
+        }
 
         if (!this.customer) {
+            if (admin) {
+                return;
+            }
             throw new SimpleError({
                 code: 'missing_customer',
                 message: 'Missing customer for cart item',
@@ -814,7 +832,10 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
         this.customer.validate(settings, { asAdmin: admin });
 
         if (settings.recordCategory) {
-            RecordCategory.validate([settings.recordCategory], this);
+            // Admins may edit orders placed before the questions changed
+            if (!admin) {
+                RecordCategory.validate([settings.recordCategory], this);
+            }
             this.recordAnswers = new Map(RecordCategory.sortAnswers(this.recordAnswers, [settings.recordCategory]).map(a => [a.settings.id, a]));
         } else {
             this.recordAnswers = new Map();
@@ -822,6 +843,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
     }
 
     /**
+     * Update self to the newest available data and throw if it was not able to recover
      * validateDetails = false: skip everything the bulk details step collects (option menus, custom fields, customer, UiTPAS numbers)
      */
     validate(webshop: Webshop, cart: Cart, { refresh, admin, validateSeats, validateDetails }: { refresh?: boolean; admin?: boolean; validateSeats?: boolean; validateDetails?: boolean } = { refresh: true, admin: false, validateSeats: true, validateDetails: true }) {

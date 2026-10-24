@@ -1,5 +1,8 @@
 <template>
-    <SaveView :title="isNew ? typeName+' ' + $t(`%14c`) : name+' ' + $t(`%Rw`)" :disabled="!hasChanges" class="product-edit-view" @save="save">
+    <SaveView :title="isNew ? typeName+' ' + $t(`%14c`) : name+' ' + $t(`%Rw`)" :disabled="!hasChanges" class="product-edit-view" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
+        <template #buttons>
+            <button v-tooltip="$t('%jH')" class="button icon eye" type="button" data-testid="product-preview-button" @click="showExample" />
+        </template>
         <h1 v-if="isNew">
             {{ typeName }} {{ $t('%14c') }}
         </h1>
@@ -423,17 +426,40 @@
                     {{ $t('%Tv') }}
                 </p>
             </STListItem>
+
+            <STListItem v-if="modernWebshopEnabled" :selectable="true" element-name="label" data-testid="enable-customer-checkbox">
+                <template #left>
+                    <Checkbox v-model="enableCustomer" />
+                </template>
+
+                <h3 v-if="isTicket" class="style-title-list">
+                    {{ $t('Ticket op naam') }}
+                </h3>
+                <h3 v-else class="style-title-list">
+                    {{ $t('Vraag de gegevens van de deelnemer per artikel') }}
+                </h3>
+                <p v-if="isTicket" class="style-description-small">
+                    {{ $t('Vraag de naam en eventueel andere contactgegevens per ticket in plaats van enkel op bestelniveau.') }}
+                </p>
+                <p v-else class="style-description-small">
+                    {{ $t('Vraag de naam en eventueel andere contactgegevens per artikel in plaats van enkel op bestelniveau.') }}
+                </p>
+            </STListItem>
         </STList>
 
-        <div v-if="!isNew" class="container">
-            <hr><h2>
-                {{ $t('%Tw') }}
+        <div v-if="modernWebshopEnabled && enableCustomer" class="container">
+            <hr>
+            <h2 class="style-with-button">
+                <div>{{ $t('Gegevens per deelnemer') }}</div>
+                <div>
+                    <button v-if="customerSettingsBox?.canAdd" v-tooltip="$t('%SN')" class="button icon add" type="button" data-testid="customer-settings-add-button" @click="customerSettingsBox?.showAddMenu($event)" />
+                </div>
             </h2>
+            <p class="style-description-block">
+                {{ $t('Kies welke gegevens je van elke deelnemer wil verzamelen.') }}
+            </p>
 
-            <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>{{ $t('%CJ') }}</span>
-            </button>
+            <CustomerSettingsBox ref="customerSettingsBox" :customer-settings="customerSettings" :fixed-fields="['name']" :record-editor-settings="customerRecordEditorSettings" :saved-record-ids="savedCustomerRecordIds" @patch="patchCustomerSettings" />
         </div>
     </SaveView>
 </template>
@@ -454,27 +480,28 @@ import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';
 import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';
-import ImageComponent from '@stamhoofd/components/views/ImageComponent.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import type { Image, ProductDateRange, ProductLocation } from '@stamhoofd/structures';
-import { OptionMenu, PrivateWebshop, Product, ProductPrice, ProductType, ResolutionRequest, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, Version, WebshopField, WebshopTicketType } from '@stamhoofd/structures';
-
-import { useGoToUitpasConfiguration } from './useGoToUitpasConfiguration.ts';
 import { useSetUitpasEvent } from '@stamhoofd/components/uitpas/useSetUitpasEvent.ts';
-import { computed, onBeforeUnmount, onMounted } from 'vue';
-
+import ImageComponent from '@stamhoofd/components/views/ImageComponent.vue';
+import type { Image, ProductDateRange, ProductLocation } from '@stamhoofd/structures';
+import { CartItem, Checkout, OptionMenu, PrivateWebshop, Product, ProductPrice, ProductType, ResolutionRequest, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, Version, WebshopField, WebshopTicketType } from '@stamhoofd/structures';
+import type { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
+import { computed, onBeforeUnmount, onMounted, useTemplateRef } from 'vue';
+import CustomerSettingsBox from '../CustomerSettingsBox.vue';
+import { createParticipantRecordEditorSettings, getParticipantSettingsPatch } from './participantSettings';
 import WebshopFieldsBox from '../fields/WebshopFieldsBox.vue';
-
 import OptionMenuSection from './OptionMenuSection.vue';
 import ProductPriceBox from './ProductPriceBox.vue';
 import ProductPriceRow from './ProductPriceRow.vue';
 import ProductSelectDateRangeInput from './ProductSelectDateRangeInput.vue';
 import ProductSelectLocationInput from './ProductSelectLocationInput.vue';
+import { useGoToUitpasConfiguration } from './useGoToUitpasConfiguration.ts';
 
 const organization = useRequiredOrganization();
 
@@ -624,7 +651,7 @@ const seatingWarning = computed(() => {
 
     for (const p of patchedWebshop.value.products) {
         if (p.id !== props.product.id && p.seatingPlanId === patchedProduct.value.seatingPlanId && p.dateRange && p.dateRange.toString() === patchedProduct.value.dateRange.toString()) {
-            return $t(`%Zs5`);
+            return $t('%Zs5');
         }
     }
 
@@ -771,6 +798,26 @@ const notAllowMultiple = computed({
         addProductPatch({ allowMultiple: !notAllowMultiple });
     },
 });
+
+const modernWebshopEnabled = useFeatureFlagComputed('modern-webshop');
+
+const enableCustomer = computed({
+    get: () => patchedProduct.value.enableCustomer,
+    set: (enableCustomer: boolean) => {
+        addProductPatch({ enableCustomer });
+    },
+});
+
+const customerSettings = computed(() => patchedProduct.value.resolvedCustomerSettings);
+const customerSettingsBox = useTemplateRef('customerSettingsBox');
+
+function patchCustomerSettings(patch: AutoEncoderPatchType<CustomerSettings>) {
+    addProductPatch(getParticipantSettingsPatch(patchedProduct.value, patch));
+}
+
+const savedCustomerRecordIds = new Set(props.isNew ? [] : props.product.customerSettings?.recordCategory?.getAllRecords().map(r => r.id) ?? []);
+
+const customerRecordEditorSettings = createParticipantRecordEditorSettings(props.product);
 
 const remainingStock = computed(() => patchedProduct.value.remainingStock);
 
@@ -1060,6 +1107,31 @@ async function save() {
     p.products.addPatch(patchProduct.value);
     props.saveHandler(p);
     pop({ force: true })?.catch(console.error);
+}
+
+// Opens the product as a buyer would see it, with the unsaved changes applied
+function showExample() {
+    const checkout = Checkout.create({});
+    const webshop = patchedWebshop.value;
+    const cartItem = CartItem.createDefault(patchedProduct.value, checkout.cart, webshop, { admin: false });
+
+    present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: AsyncComponent(() => import('@stamhoofd/components/views/CartItemView.vue'), {
+                    admin: false,
+                    isPreview: true,
+                    cartItem,
+                    webshop,
+                    checkout,
+                    saveHandler: (_cartItem: CartItem, _oldItem: CartItem | null, component: { dismiss: (options?: { force?: boolean }) => Promise<unknown> | undefined }) => {
+                        component.dismiss({ force: true })?.catch(console.error);
+                    },
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'sheet',
+    }).catch(console.error);
 }
 
 async function deleteMe() {

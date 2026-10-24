@@ -238,6 +238,28 @@ describe('Structure.CartItem', () => {
             expect(() => item.validate(webshop, cart)).not.toThrow();
         });
 
+        it('lets an admin save a participant without answers to the current questions', () => {
+            const record = RecordSettings.create({ name: TranslatedString.create('Allergieën'), type: RecordType.Text, required: true });
+            const { webshop, product } = buildWebshop({ recordCategory: RecordCategory.create({ name: TranslatedString.create('Extra'), records: [record] }) });
+            const item = buildCartItem(product, Customer.create({ firstName: 'John', lastName: 'Doe' }));
+
+            expect(() => item.validate(webshop, Cart.create({}), { admin: true })).not.toThrow();
+        });
+
+        it('lets an admin keep items that were ordered before details were collected per item', () => {
+            const { webshop, product } = buildWebshop();
+
+            // An older order: 4 tickets in one item, without a participant
+            const item = buildCartItem(product, null, 4);
+            expect(() => item.validate(webshop, Cart.create({}), { admin: true })).not.toThrow();
+            expect(item.amount).toBe(4);
+
+            // Filling in a participant does not drop the other tickets
+            const withCustomer = buildCartItem(product, Customer.create({ firstName: 'John', lastName: 'Doe' }), 4);
+            withCustomer.validate(webshop, Cart.create({}), { admin: true });
+            expect(withCustomer.amount).toBe(4);
+        });
+
         it('clears the customer when the product does not collect one', () => {
             const product = Product.create({ name: 'Ticket' });
             const webshop = Webshop.create({ products: [product] });

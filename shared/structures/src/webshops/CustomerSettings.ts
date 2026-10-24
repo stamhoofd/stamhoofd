@@ -3,6 +3,9 @@ import { AutoEncoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
 import { RecordCategory } from '../members/records/RecordCategory.js';
 import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';
 
+export const customerFieldKeys = ['name', 'email', 'phone', 'birthDay', 'gender', 'address'] as const;
+export type CustomerFieldKey = typeof customerFieldKeys[number];
+
 /**
  * Which details are collected from a person.
  */

@@ -1,5 +1,5 @@
 import { Country } from '@stamhoofd/types/Country';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Address } from '../addresses/Address.js';
 import { Gender } from '../members/Gender.js';
@@ -71,5 +71,28 @@ describe('Customer.validate', () => {
         c.validate(settings({ email: Optional, gender: Optional }));
         expect(c.email).toBe('john@example.com');
         expect(c.gender).toBe(Gender.Female);
+    });
+});
+
+describe('Customer.age', () => {
+    it('is null without a birth day', () => {
+        expect(customer().age).toBeNull();
+    });
+
+    describe('on a fixed day', () => {
+        beforeEach(() => {
+            // 23:30 in Brussels on June 15th: still the 15th there, already the 16th in UTC+2 and later
+            vi.useFakeTimers({ now: new Date('2026-06-15T21:30:00Z') });
+        });
+
+        afterEach(() => {
+            vi.useRealTimers();
+        });
+
+        it('counts full years since the birth day in Brussels', () => {
+            // Birth days are stored as midnight Brussels time
+            expect(customer({ birthDay: new Date('2016-06-14T22:00:00Z') }).age).toBe(10);
+            expect(customer({ birthDay: new Date('2016-06-15T22:00:00Z') }).age).toBe(9);
+        });
     });
 });
