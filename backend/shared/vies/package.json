@@ -44,7 +44,7 @@
         "@stamhoofd/test-utils": "workspace:*",
         "mysql2": "3.24.5",
         "nock": "14.0.17",
-        "vitest": "4.1.11"
+        "vitest": "4.1.12"
     },
     "license": "UNLICENCED",
     "publishConfig": {

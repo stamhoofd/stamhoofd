@@ -50,7 +50,7 @@
     "devDependencies": {
         "@stamhoofd/test-utils": "workspace:*",
         "@types/node": "22.20.4",
-        "vitest": "4.1.11"
+        "vitest": "4.1.12"
     },
     "license": "UNLICENCED",
     "publishConfig": {

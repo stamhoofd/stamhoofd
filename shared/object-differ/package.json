@@ -36,7 +36,7 @@
         "@stamhoofd/utility": "workspace:*",
         "@types/uuid": "8.3.4",
         "uuid": "14.0.2",
-        "vitest": "4.1.11"
+        "vitest": "4.1.12"
     },
     "peerDependencies": {
         "@stamhoofd/structures": "workspace:*",
