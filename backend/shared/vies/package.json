@@ -42,7 +42,7 @@
         "@simonbackx/simple-database": "1.40.1",
         "@stamhoofd/backend-i18n": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
-        "mysql2": "3.24.5",
+        "mysql2": "3.24.6",
         "nock": "14.0.17",
         "vitest": "4.1.12"
     },

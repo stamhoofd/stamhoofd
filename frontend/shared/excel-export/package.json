@@ -24,7 +24,7 @@
         "@stamhoofd/excel-writer": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
-        "vue": "3.5.43"
+        "vue": "3.5.44"
     },
     "devDependencies": {
         "eslint-plugin-stamhoofd": "workspace:*"

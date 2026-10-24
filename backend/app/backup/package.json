@@ -26,8 +26,8 @@
         "start": "pnpm run build && node --enable-source-maps ./dist/index.js"
     },
     "dependencies": {
-        "@aws-sdk/client-s3": "3.1146.0",
-        "@aws-sdk/lib-storage": "3.1146.0",
+        "@aws-sdk/client-s3": "3.1152.0",
+        "@aws-sdk/lib-storage": "3.1152.0",
         "@simonbackx/simple-database": "1.40.1",
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/simple-endpoints": "1.23.0",
@@ -44,7 +44,7 @@
         "formidable": "3.5.4",
         "luxon": "3.7.2",
         "mockdate": "3.0.5",
-        "mysql2": "3.24.5"
+        "mysql2": "3.24.6"
     },
     "devDependencies": {
         "@types/formidable": "3.5.1",

@@ -17,7 +17,7 @@
     "dependencies": {
         "@simonbackx/simple-database": "1.40.1",
         "@simonbackx/simple-logging": "1.0.1",
-        "mysql2": "3.24.5"
+        "mysql2": "3.24.6"
     },
     "devDependencies": {
         "@stamhoofd/types": "workspace:*",
