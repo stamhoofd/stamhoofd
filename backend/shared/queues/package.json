@@ -21,7 +21,7 @@
     },
     "devDependencies": {
         "@stamhoofd/types": "workspace:*",
-        "vitest": "4.1.11"
+        "vitest": "4.1.12"
     },
     "license": "UNLICENCED",
     "publishConfig": {
