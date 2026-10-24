@@ -468,6 +468,12 @@
         letter-spacing: normal;
     }
 
+    &.small {
+        font-size: 10.5px;
+        letter-spacing: normal;
+        gap: 2px;
+    }
+
     &.warn {
         color: $color-warning-dark;
         background: $color-warning-background;
