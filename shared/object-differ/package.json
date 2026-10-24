@@ -27,7 +27,7 @@
     },
     "dependencies": {
         "@simonbackx/simple-encoding": "2.26.11",
-        "uuid": "14.0.2"
+        "uuid": "14.0.3"
     },
     "devDependencies": {
         "@stamhoofd/structures": "workspace:*",
@@ -35,13 +35,13 @@
         "@stamhoofd/types": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
         "@types/uuid": "8.3.4",
-        "uuid": "14.0.2",
+        "uuid": "14.0.3",
         "vitest": "4.1.12"
     },
     "peerDependencies": {
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
-        "uuid": "14.0.2"
+        "uuid": "14.0.3"
     },
     "license": "UNLICENCED",
     "publishConfig": {
