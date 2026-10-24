@@ -10,12 +10,12 @@
         "preview": "nuxt preview"
     },
     "dependencies": {
-        "@nuxt/content": "3.16.1",
+        "@nuxt/content": "3.16.2",
         "@stamhoofd/assets": "workspace:*",
         "@stamhoofd/scss": "workspace:*",
-        "docus": "5.13.0",
+        "docus": "5.15.0",
         "better-sqlite3": "12.11.1",
-        "nuxt": "4.5.2"
+        "nuxt": "4.6.2"
     },
     "devDependencies": {
         "eslint-plugin-stamhoofd": "workspace:*",

@@ -30,7 +30,7 @@
         "@stamhoofd/types": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
         "mysql2": "3.24.5",
-        "vitest": "4.1.11"
+        "vitest": "4.1.12"
     },
     "peerDependencies": {
         "@stamhoofd/utility": "workspace:*"

@@ -128,7 +128,7 @@
         "nock": "14.0.17",
         "qs": "6.16.0",
         "sinon": "18.0.1",
-        "vitest": "4.1.11"
+        "vitest": "4.1.12"
     },
     "license": "UNLICENCED",
     "publishConfig": {

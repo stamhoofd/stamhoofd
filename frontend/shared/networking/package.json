@@ -33,10 +33,10 @@
     "devDependencies": {
         "@stamhoofd/test-utils": "workspace:*",
         "@stamhoofd/vite-config": "workspace:*",
-        "@vitest/browser": "4.1.11",
+        "@vitest/browser": "4.1.12",
         "eslint-plugin-stamhoofd": "workspace:*",
-        "vite": "8.3.2",
-        "vitest": "4.1.11",
+        "vite": "8.3.4",
+        "vitest": "4.1.12",
         "vitest-browser-vue": "2.1.0"
     }
 }

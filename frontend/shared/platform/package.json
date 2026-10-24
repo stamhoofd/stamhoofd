@@ -23,7 +23,7 @@
         "@stamhoofd/types": "workspace:*",
         "@types/file-saver": "2.0.7",
         "eslint-plugin-stamhoofd": "workspace:*",
-        "vite": "8.3.2",
-        "vitest": "4.1.11"
+        "vite": "8.3.4",
+        "vitest": "4.1.12"
     }
 }
