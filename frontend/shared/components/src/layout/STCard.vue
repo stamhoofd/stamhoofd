@@ -14,10 +14,14 @@
             <div v-if="title || $slots.title || $slots.right || selectable" class="st-card-header">
                 <div class="st-card-heading">
                     <h3 v-if="title || $slots.title" class="st-card-title">
-                        <slot name="title">{{ title }}</slot>
+                        <slot name="title">
+                            {{ title }}
+                        </slot>
                     </h3>
                     <p v-if="description || $slots.description" class="st-card-description">
-                        <slot name="description">{{ description }}</slot>
+                        <slot name="description">
+                            {{ description }}
+                        </slot>
                     </p>
                 </div>
                 <div v-if="$slots.right || selectable" class="st-card-right">
@@ -75,6 +79,12 @@ const elementName = computed(() => props.selectable ? 'button' : 'div');
     background: var(--color-current-background, #{$color-background});
     color: $color-dark;
     transition: background-color 0.2s, border-color 0.2s;
+    @extend %style-input-shadow;
+
+    // Keep hover layers of list rows inside the rounded border
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
 
     &.selectable {
         cursor: pointer;
@@ -133,7 +143,7 @@ const elementName = computed(() => props.selectable ? 'button' : 'div');
     }
 
     .st-card-body {
-        // Separator lines of lists inside the card run from border to border
+        // A list inside the card runs from border to border: STList compensates this padding with its negative margin
         --st-horizontal-padding: 20px;
 
         > p {
@@ -141,7 +151,9 @@ const elementName = computed(() => props.selectable ? 'button' : 'div');
         }
 
         > .st-list {
-            margin: -5px 0;
+            --st-list-padding: 15px;
+            margin-top: -10px;
+            margin-bottom: -10px;
         }
 
         > .button {

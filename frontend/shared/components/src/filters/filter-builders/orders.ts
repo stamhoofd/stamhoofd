@@ -211,7 +211,7 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
     }
 
     // Also include complex filters
-    builders.push(...getFilterBuildersForRecordCategories(preview.meta.recordCategories));
+    builders.push(...getFilterBuildersForRecordCategories(preview.meta.allRecordCategories));
 
     const groupFilter = new GroupUIFilterBuilder({ builders });
 

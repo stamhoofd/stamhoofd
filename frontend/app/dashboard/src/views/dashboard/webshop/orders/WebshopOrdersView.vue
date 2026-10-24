@@ -523,7 +523,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
     );
 
     // Custom questions
-    for (const category of preview.value.meta.recordCategories) {
+    for (const category of preview.value.meta.allRecordCategories) {
         for (const record of category.getAllRecords()) {
             cols.push(new Column<PrivateOrder, string | undefined>({
                 name: record.name.toString(),

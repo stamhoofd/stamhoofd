@@ -313,7 +313,7 @@ export class Order extends AutoEncoder {
                 title: a.field.name,
                 value: a.answer,
             })),
-            ...RecordCategory.sortAnswers(this.data.recordAnswers, webshop.meta.recordCategories).filter(a => !a.isEmpty || a instanceof RecordCheckboxAnswer).map((a) => {
+            ...RecordCategory.sortAnswers(this.data.recordAnswers, webshop.meta.allRecordCategories).filter(a => !a.isEmpty || a instanceof RecordCheckboxAnswer).map((a) => {
                 const title = a.settings.name.toString();
 
                 // Files and images are attached to the email instead of showing their (potentially inaccessible) url
@@ -366,7 +366,7 @@ export class Order extends AutoEncoder {
      * Images use the same file as the inline image in the table, so the email builder can render them inline.
      */
     getRecordAnswerFiles(webshop: WebshopPreview): File[] {
-        return RecordCategory.sortAnswers(this.data.recordAnswers, webshop.meta.recordCategories)
+        return RecordCategory.sortAnswers(this.data.recordAnswers, webshop.meta.allRecordCategories)
             .flatMap((a) => {
                 if (a instanceof RecordFileAnswer && a.file) {
                     return [a.file];

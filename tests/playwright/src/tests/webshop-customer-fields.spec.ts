@@ -7,15 +7,21 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
+import { EmailMocker } from '@stamhoofd/email';
 import type { User } from '@stamhoofd/models';
-import { Order, Organization, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
+import { EmailTemplateFactory, Order, Organization, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import {
+    EmailTemplateType,
     Gender,
     PaymentMethod,
     Permissions,
+    RecordCategory,
+    RecordSettings,
+    RecordType,
     STPackageBundle,
     Token as TokenStruct,
+    TranslatedString,
     Version,
 } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
@@ -25,6 +31,9 @@ import { WebshopOrderFlow } from '../flows/WebshopOrderFlow.js';
 import { DashboardPage, DashboardTab, WorkerData } from '../helpers/index.js';
 import { WebshopOrdersView } from '../helpers/page/webshop/WebshopOrdersView.js';
 import { TestWebshops } from '../helpers/test-data/TestWebshops.js';
+
+// Route emails through the in-process mailer mock so the confirmation email can be read back
+EmailMocker.infect();
 
 const PointOfSaleLabel = 'plaatse';
 
@@ -243,5 +252,53 @@ test.describe('Webshop customer fields (organization mode) @webshop-customer-fie
         expect(data.customer.address).not.toBeNull();
         expect(data.customer.address?.city).toBe('Paris');
         expect(data.customer.address?.toString()).toBe(data.address?.toString());
+    });
+
+    test('asks the customer questions in the customer step and stores the answers', async ({ page }) => {
+        const organization = await createWebshopOrganization('CustQuestions');
+        // The confirmation email is only sent when a template exists; the factory fills in every replacement, including the order table
+        await new EmailTemplateFactory({ type: EmailTemplateType.OrderConfirmationPOS }).create();
+        const question = RecordSettings.create({
+            name: TranslatedString.create('T-shirtmaat'),
+            inputPlaceholder: TranslatedString.create('bv. M'),
+            type: RecordType.Text,
+            required: true,
+        });
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Customer questions ${WorkerData.id}`,
+            productCount: 1,
+            cartEnabled: false,
+            paymentMethods: [PaymentMethod.PointOfSale],
+            customerRecordCategory: RecordCategory.create({
+                name: TranslatedString.create('Extra vragen'),
+                records: [question],
+            }),
+        });
+
+        const flow = new WebshopOrderFlow(page, { cartEnabled: false });
+        await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
+        await flow.addProduct('Product 1');
+        await flow.goToCheckout();
+
+        // The question is listed with the customer details, without a separate step
+        const step = page.getByTestId('customer-step');
+        await expect(step).toContainText('T-shirtmaat');
+        await step.getByPlaceholder('bv. M').fill('L');
+        await flow.fillCustomer();
+        await flow.selectPaymentMethod(PointOfSaleLabel);
+        await flow.confirmPayment();
+        await flow.expectOrderConfirmed();
+
+        await expect(page.getByTestId('order-view')).toContainText('T-shirtmaat');
+
+        const orders = await Order.select().where('webshopId', webshop.id).fetch();
+        expect(orders).toHaveLength(1);
+        expect(orders[0].data.recordAnswers.get(question.id)?.stringValue).toBe('L');
+
+        // The answer is listed in the confirmation email like the other order details
+        await expect.poll(async () => (await EmailMocker.getSucceededEmails()).filter(e => e.to.includes('john.doe@test.be')).length, { timeout: 20_000 }).toBe(1);
+        const confirmation = (await EmailMocker.getSucceededEmails()).find(e => e.to.includes('john.doe@test.be'))!;
+        expect(confirmation.html).toContain('<h4>T-shirtmaat</h4></td><td>L</td>');
     });
 });

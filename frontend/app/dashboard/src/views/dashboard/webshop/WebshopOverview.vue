@@ -220,10 +220,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('%u1') }}
+                            {{ preview.meta.isRegistrations ? $t('Inschrijvingsformulier') : $t('Bestelformulier') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('%Pp') }}
+                            {{ preview.meta.isRegistrations ? $t('Welke gegevens en vragen iemand invult bij het inschrijven.') : $t('Welke gegevens en vragen bestellers invullen bij het bestellen.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />

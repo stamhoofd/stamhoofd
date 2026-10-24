@@ -1,21 +1,13 @@
 <template>
-    <STListItem v-long-press="(e: any) => showContextMenu(e)" :selectable="true" class="right-stack left-center" @click="editRecord()" @contextmenu.prevent="showContextMenu">
+    <STListItem v-long-press="(e: any) => showContextMenu(e)" :selectable="true" class="record-row right-stack left-center hover-box" @click="editRecord()" @contextmenu.prevent="showContextMenu">
         <template #left>
-            <img v-if="record.type === 'Text'" src="@stamhoofd/assets/images/illustrations/text-input.svg" class="style-illustration-img">
-            <img v-else-if="record.type === 'Textarea'" src="@stamhoofd/assets/images/illustrations/textarea.svg" class="style-illustration-img">
-            <img v-else-if="record.type === 'Checkbox'" src="@stamhoofd/assets/images/illustrations/checkbox.svg" class="style-illustration-img">
-            <img v-else-if="record.type === 'ChooseOne'" src="@stamhoofd/assets/images/illustrations/radio-input.svg" class="style-illustration-img">
-            <img v-else-if="record.type === 'MultipleChoice'" src="@stamhoofd/assets/images/illustrations/multiple-choice-input.svg" class="style-illustration-img">
-            <img v-else-if="record.type === 'Email'" src="@stamhoofd/assets/images/illustrations/email-input.svg" class="style-illustration-img">
-            <img v-else-if="record.type === 'Address'" src="@stamhoofd/assets/images/illustrations/address-input.svg" class="style-illustration-img">
-            <img v-else-if="record.type === 'Date'" src="@stamhoofd/assets/images/illustrations/date-input.svg" class="style-illustration-img">
-            <img v-else src="@stamhoofd/assets/images/illustrations/text-input.svg" class="style-illustration-img">
+            <IconContainer :icon="typeIcon" :aside-icon="record.required ? null : 'help'" class="gray" />
         </template>
 
         <h3 class="style-title-list">
             {{ record.name }}
         </h3>
-        <p v-if="description && description !== record.name.toString()" class="style-description">
+        <p v-if="description && description !== record.name.toString()" class="style-description-small">
             {{ description }}
         </p>
 
@@ -26,7 +18,9 @@
         <template #right>
             <span v-if="record.externalPermissionLevel === PermissionLevel.None" v-tooltip="$t('%172')" class="button icon tiny eye-off gray" />
             <span v-if="record.externalPermissionLevel === PermissionLevel.Read" v-tooltip="$t('%171')" class="button icon tiny no-edit gray" />
-            <span class="button icon drag gray" @click.stop @contextmenu.stop />
+            <span class="button icon drag hover-show" @click.stop @contextmenu.stop />
+            <button type="button" class="hover-show button icon more small" @click.stop="showContextMenu" />
+
             <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>
@@ -35,14 +29,16 @@
 <script setup lang="ts">
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
-import type { RecordSettings } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { RecordCategory, RecordType } from '@stamhoofd/structures';
+import { RecordCategory, RecordSettings, RecordType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { propertyFilterToString } from '../../filters/UIFilter';
+import IconContainer from '../../icons/IconContainer.vue';
 import { usePatchMoveUpDownSingle } from '#hooks/usePatchMoveUpDown.ts';
+import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
 import type { RecordEditorSettings } from '../RecordEditorSettings';
+import { getRecordTypeIcon } from '../recordTypes';
 
 const props = withDefaults(
     defineProps<{
@@ -65,184 +61,238 @@ const emit = defineEmits<{
 const { up, down } = usePatchMoveUpDownSingle(props.record.id, props.category.records, addPatch);
 const filterBuilder = computed(() => props.settings.filterBuilder(props.rootCategories));
 
+const typeIcon = computed(() => getRecordTypeIcon(props.record.type));
+
 const description = computed(() => {
     if (props.record.type === RecordType.Checkbox) {
         if (props.record.askComments) {
-            return $t(`%11k`);
+            return $t('%11k');
         }
         if (props.record.required) {
-            return $t(`%11l`);
+            return $t('%11l');
         }
-        return $t(`%115`);
+        return $t('%115');
     }
-    if (props.record.type === RecordType.ChooseOne) {
-        if (!props.record.required) {
-            return $t(`%11m`, { count: props.record.choices.length.toString() });
+    if (props.record.type === RecordType.ChooseOne || props.record.type === RecordType.MultipleChoice) {
+        const choices = props.record.choices;
+        // Few short choices read better than a count
+        if (choices.length > 0 && choices.length < 4 && choices.every(c => c.name.toString().length <= 20)) {
+            const names = choices.map(c => c.name.toString()).join(' · ');
+            return props.record.required ? names : $t('{choices} (optioneel)', { choices: names });
         }
-        return $t(`%11n`, { count: props.record.choices.length.toString() });
-    }
-    if (props.record.type === RecordType.MultipleChoice) {
+        if (props.record.type === RecordType.ChooseOne) {
+            if (!props.record.required) {
+                return $t('%11m', { count: choices.length.toString() });
+            }
+            return $t('%11n', { count: choices.length.toString() });
+        }
         if (props.record.required) {
-            return $t(`%11o`, { count: props.record.choices.length.toString() });
+            return $t('%11o', { count: choices.length.toString() });
         }
-        return $t(`%11p`, { count: props.record.choices.length.toString() });
+        return $t('%11p', { count: choices.length.toString() });
     }
     if (props.record.type === RecordType.Email) {
         if (!props.record.required) {
-            return $t(`%11q`);
+            return $t('%11q');
         }
-        return $t(`%1FK`);
+        return $t('%1FK');
     }
     if (props.record.type === RecordType.Address) {
         if (!props.record.required) {
-            return $t(`%11r`);
+            return $t('%11r');
         }
-        return $t(`%Cn`);
+        return $t('%Cn');
     }
     if (props.record.type === RecordType.Phone) {
         if (!props.record.required) {
-            return $t(`%11s`);
+            return $t('%11s');
         }
-        return $t(`%wD`);
+        return $t('%wD');
     }
     if (props.record.type === RecordType.Date) {
         if (!props.record.required) {
-            return $t(`%11t`);
+            return $t('%11t');
         }
-        return $t(`%7R`);
+        return $t('%7R');
     }
 
     if (props.record.type === RecordType.Textarea) {
         if (!props.record.required) {
-            return $t(`%11u`);
+            return $t('%11u');
         }
-        return $t(`%11v`);
+        return $t('%11v');
     }
 
     if (props.record.type === RecordType.Integer) {
         if (!props.record.required) {
-            return $t(`%11w`);
+            return $t('%11w');
         }
-        return $t(`%113`);
+        return $t('%113');
     }
 
     if (props.record.type === RecordType.Price) {
         if (!props.record.required) {
-            return $t(`%11x`);
+            return $t('%11x');
         }
-        return $t(`%1IP`);
+        return $t('%1IP');
     }
 
     if (props.record.type === RecordType.Image) {
         if (!props.record.required) {
-            return $t(`%11y`);
+            return $t('%11y');
         }
-        return $t(`%la`);
+        return $t('%la');
     }
 
     if (props.record.type === RecordType.File) {
         if (!props.record.required) {
-            return $t(`%11z`);
+            return $t('%11z');
         }
-        return $t(`%yU`);
+        return $t('%yU');
     }
 
     if (!props.record.required) {
-        return $t(`%120`);
+        return $t('%120');
     }
-    return $t(`%121`);
+    return $t('%121');
 });
 
 function editRecord() {
     emit('edit', props.record);
 }
 
-// Patch a root category
-function addRootPatch(patch: AutoEncoderPatchType<RecordCategory>) {
+function toRootPatch(patch: AutoEncoderPatchType<RecordCategory>): PatchableArrayAutoEncoder<RecordCategory> {
     const array: PatchableArrayAutoEncoder<RecordCategory> = new PatchableArray();
     array.addPatch(patch);
-    emit('patch', array);
+    return array;
 }
 
-// Sends patch meant the root categories
-function addPatch(patch: PatchableArrayAutoEncoder<RecordSettings>) {
-    // Is category a root category or not?
-    const rootCategory = props.rootCategories.find(c => c.id === props.category.id);
-    if (rootCategory) {
-        const categoryPatch = RecordCategory.patch({
-            id: rootCategory.id,
+/**
+ * Converts a patch of the records of the given category to a patch of the root categories
+ */
+function toRecordsRootPatch(category: RecordCategory, patch: PatchableArrayAutoEncoder<RecordSettings>): PatchableArrayAutoEncoder<RecordCategory> | null {
+    if (props.rootCategories.find(c => c.id === category.id)) {
+        return toRootPatch(RecordCategory.patch({
+            id: category.id,
             records: patch,
-        });
-        addRootPatch(categoryPatch);
-    } else {
-        // Find the root category that contains this category
-        const rootCategory = props.rootCategories.find(c => c.childCategories.find(r => r.id === props.category.id));
-        if (rootCategory) {
-            const childCategoryPatch = RecordCategory.patch({
-                id: props.category.id,
-                records: patch,
-            });
-
-            const arr: PatchableArrayAutoEncoder<RecordCategory> = new PatchableArray();
-            arr.addPatch(childCategoryPatch);
-
-            const categoryPatch = RecordCategory.patch({
-                id: rootCategory.id,
-                childCategories: arr,
-            });
-            addRootPatch(categoryPatch);
-        } else {
-            console.warn('Could not find root category to patch for this record');
-        }
+        }));
     }
+
+    const rootCategory = props.rootCategories.find(c => c.childCategories.find(r => r.id === category.id));
+    if (!rootCategory) {
+        return null;
+    }
+
+    const arr: PatchableArrayAutoEncoder<RecordCategory> = new PatchableArray();
+    arr.addPatch(RecordCategory.patch({
+        id: category.id,
+        records: patch,
+    }));
+
+    return toRootPatch(RecordCategory.patch({
+        id: rootCategory.id,
+        childCategories: arr,
+    }));
+}
+
+// Patches the records of the category of this record
+function addPatch(patch: PatchableArrayAutoEncoder<RecordSettings>) {
+    const rootPatch = toRecordsRootPatch(props.category, patch);
+    if (!rootPatch) {
+        console.warn('Could not find root category to patch for this record');
+        return;
+    }
+    emit('patch', rootPatch);
+}
+
+async function deleteRecord() {
+    if (!await CenteredMessage.confirm({
+        title: $t('%Zn2', { name: props.record.name.toString() }),
+        confirmText: $t('%CJ'),
+        description: $t('%11O') + ' ' + $t('%ZnK'),
+        availabilityDelay: 2_000,
+    })) {
+        return;
+    }
+
+    const deleteArray: PatchableArrayAutoEncoder<RecordSettings> = new PatchableArray();
+    deleteArray.addDelete(props.record.id);
+    addPatch(deleteArray);
 }
 
 function moveTo(category: RecordCategory) {
     const me = props.record;
 
-    // Delete record from current category
     const deleteArray: PatchableArrayAutoEncoder<RecordSettings> = new PatchableArray();
     deleteArray.addDelete(me.id);
-    addPatch(deleteArray);
 
-    // Add it to the right category
     const putArray: PatchableArrayAutoEncoder<RecordSettings> = new PatchableArray();
     putArray.addPut(me);
 
-    const rootCategory = props.rootCategories.find(r => r.id === category.id);
-    if (rootCategory) {
-        const categoryPatch = RecordCategory.patch({
-            id: rootCategory.id,
-            records: putArray,
-        });
-        addRootPatch(categoryPatch);
-        return;
-    }
-
-    const parentRootCategory = props.rootCategories.find(r => !!r.childCategories.find(rr => rr.id === category.id));
-    if (!parentRootCategory) {
+    const deletePatch = toRecordsRootPatch(props.category, deleteArray);
+    const putPatch = toRecordsRootPatch(category, putArray);
+    if (!deletePatch || !putPatch) {
         console.error('Invalid move');
         return;
     }
 
-    const childCategoryPatch: PatchableArrayAutoEncoder<RecordCategory> = new PatchableArray();
-    childCategoryPatch.addPatch(RecordCategory.patch({
-        id: category.id,
-        records: putArray,
-    }));
+    // Emitted as one patch: a parent that applies each patch to its props would otherwise lose the delete
+    deletePatch.merge(putPatch);
+    emit('patch', deletePatch);
+}
 
-    const categoryPatch = RecordCategory.patch({
-        id: parentRootCategory.id,
-        childCategories: childCategoryPatch,
-    });
-    addRootPatch(categoryPatch);
+function setRequired(required: boolean) {
+    const patch: PatchableArrayAutoEncoder<RecordSettings> = new PatchableArray();
+    patch.addPatch(RecordSettings.patch({ id: props.record.id, required }));
+    addPatch(patch);
+}
+
+/**
+ * The category itself (as general question) and its child categories
+ */
+function getMoveToCategoryItems(category: RecordCategory): ContextMenuItem[][] {
+    return [
+        [
+            new ContextMenuItem({
+                name: $t('%123'),
+                disabled: category.id === props.category.id,
+                action: () => moveTo(category),
+            }),
+        ],
+        category.childCategories.map(childCategory => new ContextMenuItem({
+            name: childCategory.name.toString(),
+            disabled: childCategory.id === props.category.id,
+            action: () => moveTo(childCategory),
+        })),
+    ];
 }
 
 function showContextMenu(event: MouseEvent) {
+    // With a single root category, its name adds nothing (and can be hidden from the user): list its child categories directly
+    const moveItems = props.rootCategories.length === 1
+        ? getMoveToCategoryItems(props.rootCategories[0])
+        : [
+                props.rootCategories.map(category => new ContextMenuItem({
+                    name: category.name.toString(),
+                    disabled: category.childCategories.length === 0 && category.id === props.category.id,
+                    action: () => moveTo(category),
+                    childMenu: category.childCategories.length > 0 ? new ContextMenu(getMoveToCategoryItems(category)) : undefined,
+                })),
+            ];
+    const canMove = moveItems.some(group => group.some(item => !item.disabled));
+
     const menu = new ContextMenu([
+        // A required checkbox means it has to be checked, which is a different setting: only available in the editor
+        props.record.type !== RecordType.Checkbox
+            ? [true, false].map(required => new ContextMenuItem({
+                    name: required ? $t('%Qk') : $t('%14p'),
+                    selected: props.record.required === required,
+                    action: () => setRequired(required),
+                }))
+            : [],
         [
             new ContextMenuItem({
-                name: $t(`%11f`),
+                name: $t('%11f'),
                 icon: 'arrow-up',
                 action: () => {
                     up();
@@ -250,45 +300,33 @@ function showContextMenu(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`%11g`),
+                name: $t('%11g'),
                 icon: 'arrow-down',
                 action: () => {
                     down();
                     return true;
                 },
             }),
+            ...(canMove
+                ? [
+                        new ContextMenuItem({
+                            icon: 'folder',
+                            name: $t('%122'),
+                            childMenu: new ContextMenu(moveItems),
+                        }),
+                    ]
+                : []),
+        ],
+        [
+
             new ContextMenuItem({
-                name: $t(`%122`),
-                childMenu: new ContextMenu([
-                    props.rootCategories.map((category) => {
-                        return new ContextMenuItem({
-                            name: category.name.toString(),
-                            action: () => {
-                                moveTo(category);
-                            },
-                            childMenu: category.childCategories.length > 0
-                                ? new ContextMenu([
-                                        [
-                                            new ContextMenuItem({
-                                                name: $t(`%123`),
-                                                action: () => {
-                                                    moveTo(category);
-                                                },
-                                            }),
-                                        ],
-                                        category.childCategories.map((childCategory) => {
-                                            return new ContextMenuItem({
-                                                name: childCategory.name.toString(),
-                                                action: () => {
-                                                    moveTo(childCategory);
-                                                },
-                                            });
-                                        }),
-                                    ])
-                                : undefined,
-                        });
-                    }),
-                ]),
+                name: $t('%CJ'),
+                icon: 'trash',
+                destructive: true,
+                action: async () => {
+                    await deleteRecord();
+                    return true;
+                },
             }),
         ],
     ]);
@@ -296,3 +334,9 @@ function showContextMenu(event: MouseEvent) {
 }
 
 </script>
+
+<style lang="scss" scoped>
+.record-row :deep(> .left) {
+    gap: 12px;
+}
+</style>

@@ -1,11 +1,12 @@
-import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { PrivateWebshop, WebshopPrivateMetaData } from '@stamhoofd/structures';
+import { PrivateWebshop, RecordCategory, WebshopPrivateMetaData } from '@stamhoofd/structures';
 import { Formatter, isReservedWebshopPathSegment } from '@stamhoofd/utility';
 
 import { Context } from '../../../../helpers/Context.js';
@@ -68,6 +69,8 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                     RecordAnswerHelper.throwIfPatchOrPutIsInvalid(webshop.meta.recordCategories, request.body.meta.recordCategories);
                 }
 
+                throwIfCustomerCategoryChangeIsInvalid(webshop.meta.customerSettings.recordCategory, request.body.meta.customerSettings?.recordCategory);
+
                 webshop.meta.patchOrPut(request.body.meta);
             }
 
@@ -78,6 +81,13 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
             }
 
             if (request.body.products) {
+                // Saved questions per participant can't change to an incompatible type
+                const changedProducts = [...request.body.products.getPatches(), ...request.body.products.getPuts().map(p => p.put)];
+                for (const changed of changedProducts) {
+                    const original = webshop.products.find(p => p.id === changed.id);
+                    throwIfCustomerCategoryChangeIsInvalid(original?.customerSettings?.recordCategory ?? null, changed.customerSettings?.recordCategory);
+                }
+
                 webshop.products = request.body.products.applyTo(webshop.products);
             }
 
@@ -240,4 +250,20 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
             return new Response(PrivateWebshop.create(webshop));
         });
     }
+}
+
+/**
+ * The questions per person are stored in a single category: compare it like a list of one category.
+ */
+function throwIfCustomerCategoryChangeIsInvalid(original: RecordCategory | null, change: RecordCategory | AutoEncoderPatchType<RecordCategory> | null | undefined) {
+    if (!original || !change) {
+        return;
+    }
+    const categoryPatch: PatchableArrayAutoEncoder<RecordCategory> = new PatchableArray();
+    if (change instanceof RecordCategory) {
+        categoryPatch.addPut(change);
+    } else {
+        categoryPatch.addPatch(change);
+    }
+    RecordAnswerHelper.throwIfPatchOrPutIsInvalid([original], categoryPatch);
 }

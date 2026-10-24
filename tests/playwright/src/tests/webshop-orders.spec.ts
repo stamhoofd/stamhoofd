@@ -1216,6 +1216,38 @@ function registerWebshopOrderTests() {
         await expect(priceInput).toHaveValue('15');
     });
 
+    test('Closing an untouched new cart item does not ask for confirmation', async ({ page }) => {
+        const organization = await createWebshopOrganization('CloseItem');
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Close item ${WorkerData.id}`,
+            productCount: 1,
+            cartEnabled: true,
+            paymentMethods: [PaymentMethod.PointOfSale],
+        });
+
+        const flow = new WebshopOrderFlow(page, { cartEnabled: true });
+        await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
+
+        await page.getByTestId('product-box').first().click();
+        const cartItemView = page.getByTestId('cart-item-view');
+        await expect(cartItemView).toBeVisible();
+
+        await cartItemView.getByTestId('close-button').click();
+        await expect(cartItemView).toHaveCount(0);
+        await expect(page.getByTestId('centered-message')).toHaveCount(0);
+
+        // A changed item does ask for confirmation
+        await page.getByTestId('product-box').first().click();
+        await expect(cartItemView).toBeVisible();
+        await cartItemView.getByTestId('amount-number-input').locator('input').fill('2');
+        await cartItemView.getByTestId('close-button').click();
+        const confirmation = page.getByTestId('centered-message');
+        await expect(confirmation).toContainText('Ben je zeker dat je wilt sluiten zonder op te slaan?');
+        await confirmation.getByTestId('centered-message-button').filter({ hasText: 'Niet opslaan' }).click();
+        await expect(cartItemView).toHaveCount(0);
+    });
+
     test('Zero-price order skips payment and tickets are downloadable', async ({ page }) => {
         const organization = await createWebshopOrganization('FreeShop');
         const { webshop } = await TestWebshops.create({

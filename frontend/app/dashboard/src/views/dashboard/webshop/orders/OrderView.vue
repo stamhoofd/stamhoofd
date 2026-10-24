@@ -287,6 +287,9 @@
                 </STListItem>
             </STList>
 
+            <!-- Questions about the customer belong to the customer details: no separate title -->
+            <RecordCategoryAnswersBox v-if="customerRecordCategory" :category="customerRecordCategory" :value="order.data" />
+
             <div v-if="!order.data.comments && hasWrite" class="container">
                 <button class="button text" type="button" @click="editComments()">
                     <span class="icon edit" />
@@ -335,6 +338,7 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 
+import RecordCategoryAnswersBox from '@stamhoofd/components/records/components/RecordCategoryAnswersBox.vue';
 import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/components/ViewRecordCategoryAnswersBox.vue';
 import type { TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
 
@@ -664,6 +668,11 @@ const recordCategories = computed(() => {
         webshop.value.meta.recordCategories,
         order.value.data,
     );
+});
+
+const customerRecordCategory = computed(() => {
+    const category = webshop.value?.meta.customerSettings.recordCategory;
+    return category?.isEnabled(order.value.data) ? category : null;
 });
 
 const recordAnswers = computed(() => order.value.data.recordAnswers);

@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, NumberDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -18,8 +18,10 @@ import type { PriceBreakdown } from '../PriceBreakdown.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 import type { User } from '../User.js';
 import { Cart } from './Cart.js';
+import type { CartItem } from './CartItem.js';
 import { Customer } from './Customer.js';
 import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';
+import type { CustomerFieldKey } from './CustomerSettings.js';
 import type { ProductDiscountTracker } from './Discount.js';
 import { Discount } from './Discount.js';
 import { DiscountCode } from './DiscountCode.js';
@@ -43,6 +45,13 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
 
     @field({ decoder: Customer, version: 40 })
     customer: Customer = Customer.create({});
+
+    /**
+     * Cart item whose participant is also the contact person of the order. The details collected for that
+     * participant are copied to `customer` instead of asking them again (see `customerFieldsFromCartItem`).
+     */
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    customerCartItemId: string | null = null;
 
     @field({ decoder: new ArrayDecoder(WebshopFieldAnswer), version: 94 })
     fieldAnswers: WebshopFieldAnswer[] = [];
@@ -149,26 +158,26 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
     get priceBreakown(): PriceBreakdown {
         const all = [
             {
-                name: Formatter.percentage(this.percentageDiscount) + ' ' + $t(`%sT`),
+                name: Formatter.percentage(this.percentageDiscount) + ' ' + $t('%sT'),
                 price: -this.appliedPercentageDiscount,
             },
             {
-                name: $t(`%176`),
+                name: $t('%176'),
                 price: -this.fixedDiscount,
             },
             {
-                name: $t(`%Sn`),
+                name: $t('%Sn'),
                 price: this.deliveryPrice,
             },
             {
-                name: $t(`%qs`),
+                name: $t('%qs'),
                 price: this.administrationFee,
             },
         ].filter(a => a.price !== 0);
 
         if (all.length > 0) {
             all.unshift({
-                name: $t(`%xJ`),
+                name: $t('%xJ'),
                 price: this.cart.priceWithDiscounts,
             });
         }
@@ -176,7 +185,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         return [
             ...all,
             {
-                name: $t(`%xL`),
+                name: $t('%xL'),
                 price: this.totalPrice,
             },
         ];
@@ -240,7 +249,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'cart_empty',
                 message: 'Cart is empty',
-                human: $t(`%sU`),
+                human: $t('%sU'),
                 field: 'cart',
             });
         }
@@ -279,7 +288,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'closed',
                 message: 'Orders are closed',
-                human: $t(`%sV`),
+                human: $t('%sV'),
             });
         }
 
@@ -287,7 +296,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'closed',
                 message: 'Orders are closed',
-                human: $t(`%sW`, { date: Formatter.dateTime(webshop.meta.openAt) }),
+                human: $t('%sW', { date: Formatter.dateTime(webshop.meta.openAt) }),
             });
         }
 
@@ -295,7 +304,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'closed',
                 message: 'Orders are closed',
-                human: $t(`%sX`),
+                human: $t('%sX'),
             });
         }
     }
@@ -306,7 +315,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'missing_checkout_method',
                     message: 'Checkout method is required',
-                    human: $t(`%sY`),
+                    human: $t('%sY'),
                     field: 'checkoutMethod',
                 });
             }
@@ -324,7 +333,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'invalid_checkout_method',
                 message: 'Checkout method is invalid',
-                human: $t(`%sY`),
+                human: $t('%sY'),
                 field: 'checkoutMethod',
             });
         }
@@ -341,7 +350,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'invalid_data_type',
                 message: 'Invalid data type',
-                human: $t(`%sZ`),
+                human: $t('%sZ'),
                 field: 'address',
             });
         }
@@ -350,7 +359,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'missing_address',
                 message: 'Checkout address is invalid',
-                human: $t(`%sa`),
+                human: $t('%sa'),
                 field: 'address',
             });
         }
@@ -379,7 +388,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         throw new SimpleError({
             code: 'region_not_supported',
             message: 'Region not supported',
-            human: $t(`%sb`),
+            human: $t('%sb'),
             field: 'address',
         });
     }
@@ -394,7 +403,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'missing_timeslot',
                 message: 'Checkout timeslot is missings',
-                human: $t(`%sc`),
+                human: $t('%sc'),
                 field: 'timeSlot',
             });
         }
@@ -407,7 +416,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'invalid_timeslot',
                 message: 'Checkout timeslot is invalid',
-                human: $t(`%sd`),
+                human: $t('%sd'),
                 field: 'timeSlot',
             });
         }
@@ -417,7 +426,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'timeslot_full',
                 message: 'Timeslot has reached maximum orders',
-                human: (availableTimeslots !== 1 ? $t(`%se`) : $t(`%sf`)),
+                human: (availableTimeslots !== 1 ? $t('%se') : $t('%sf')),
                 field: 'timeSlot',
             });
         }
@@ -429,7 +438,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'timeslot_full',
                     message: 'Timeslot has reached maximum orders',
-                    human: (availableTimeslots !== 1 ? $t(`%se`) : $t(`%sf`)),
+                    human: (availableTimeslots !== 1 ? $t('%se') : $t('%sf')),
                     field: 'timeSlot',
                 });
             }
@@ -437,7 +446,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
                 code: 'timeslot_full',
                 message: 'Timeslot has reached maximum persons',
                 // todo translation
-                human: $t(`%sg`) + ' ' + (remainingPersons !== 1 ? $t(`%bR`) : $t(`%1q`)) + ' ' + $t(`%sh`) + ' ' + remainingPersons + ' ' + (remainingPersons !== 1 ? $t(`%UL`) : $t(`%12Y`)) + ' ' + $t(`%si`) + ' ' + (availableTimeslots !== 1 ? $t(`%sj`) : $t(`%sk`)) + $t(`%sl`) + ' ' + this.cart.persons + ' ' + (this.cart.persons !== 1 ? $t(`%12R`) : $t(`%12P`)) + (availableTimeslots !== 1 ? $t(`%sm`) : ''),
+                human: $t('%sg') + ' ' + (remainingPersons !== 1 ? $t('%bR') : $t('%1q')) + ' ' + $t('%sh') + ' ' + remainingPersons + ' ' + (remainingPersons !== 1 ? $t('%UL') : $t('%12Y')) + ' ' + $t('%si') + ' ' + (availableTimeslots !== 1 ? $t('%sj') : $t('%sk')) + $t('%sl') + ' ' + this.cart.persons + ' ' + (this.cart.persons !== 1 ? $t('%12R') : $t('%12P')) + (availableTimeslots !== 1 ? $t('%sm') : ''),
                 field: 'timeSlot',
             });
         }
@@ -445,7 +454,122 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         this.timeSlot = timeSlot;
     }
 
+    /**
+     * Participants that can be the contact person of the order: children under 16 are left out.
+     * Without a birth day we assume an adult.
+     */
+    get contactPersonCandidates(): CartItem[] {
+        return this.cart.items.filter((i) => {
+            const age = i.customer?.age ?? null;
+            return i.customer !== null && (age === null || age >= Checkout.contactPersonMinimumAge);
+        });
+    }
+
+    static readonly contactPersonMinimumAge = 16;
+
+    /**
+     * A single participant is only made the contact person without asking from this age on.
+     * Younger candidates can still be picked in the customer step.
+     */
+    static readonly automaticContactPersonMinimumAge = 18;
+
+    get customerCartItem(): CartItem | null {
+        if (this.customerCartItemId === null) {
+            return null;
+        }
+        return this.contactPersonCandidates.find(i => i.id === this.customerCartItemId) ?? null;
+    }
+
+    /**
+     * Customer fields that are already collected on the contact person's cart item, so they are not asked again for the order.
+     * A delivery address always wins over the participant's address.
+     */
+    get customerFieldsFromCartItem(): CustomerFieldKey[] {
+        const fields = this.customerCartItem?.collectedCustomerFields ?? [];
+        if (this.checkoutMethod?.type === CheckoutMethodType.Delivery) {
+            return fields.filter(key => key !== 'address');
+        }
+        return fields;
+    }
+
+    /**
+     * Preselects the first adult participant as contact person, as long as nobody was chosen and nothing was filled in yet.
+     * Younger candidates stay available, but are never chosen without asking.
+     */
+    selectDefaultContactPerson() {
+        // A contact person whose cart item was removed is forgotten first, so a new default can take over
+        this.syncCustomerFromCartItem();
+        if (this.customerCartItem || this.customer.hasValue('name') || this.customer.hasValue('email')) {
+            return;
+        }
+        const item = this.defaultContactPerson;
+        if (item) {
+            this.customerCartItemId = item.id;
+            this.syncCustomerFromCartItem();
+        }
+    }
+
+    /**
+     * The participant that becomes the contact person when nobody was chosen: the first adult.
+     * Younger candidates stay available, but are never chosen without asking.
+     */
+    get defaultContactPerson(): CartItem | null {
+        return this.contactPersonCandidates.find(i => Checkout.canBeAutomaticContactPerson(i)) ?? null;
+    }
+
+    /**
+     * Whether a participant may become the contact person without asking: adults only, and without a birth day we assume an adult.
+     */
+    static canBeAutomaticContactPerson(item: CartItem): boolean {
+        const age = item.customer?.age ?? null;
+        return item.customer !== null && (age === null || age >= Checkout.automaticContactPersonMinimumAge);
+    }
+
+    /**
+     * Makes a participant the contact person, or nobody (null). The details copied from the previous
+     * contact person are cleared first, so they can't end up on the order of someone else. What was
+     * filled in for the order itself stays.
+     */
+    setContactPerson(cartItemId: string | null) {
+        this.customer.copyFields(Customer.create({}), this.customerFieldsFromCartItem);
+        this.customerCartItemId = cartItemId;
+        this.syncCustomerFromCartItem();
+    }
+
+    /**
+     * A logged in user is the contact person: forgets a participant chosen before logging in, with the details copied from them
+     */
+    forgetContactPerson() {
+        if (this.customerCartItemId !== null) {
+            this.customerCartItemId = null;
+            this.customer = Customer.create({});
+        }
+    }
+
+    /**
+     * Copies the contact person's details to the order customer, so edits to the cart item carry over.
+     * When that cart item is no longer in the cart or no longer qualifies, the contact person is forgotten,
+     * together with everything filled in for them, so a new participant can take over.
+     */
+    syncCustomerFromCartItem() {
+        const item = this.customerCartItem;
+        if (!item) {
+            if (this.customerCartItemId !== null) {
+                this.customerCartItemId = null;
+                this.customer = Customer.create({});
+            }
+            return;
+        }
+        this.customer.copyFields(item.customer!, this.customerFieldsFromCartItem);
+    }
+
     validateCustomer(webshop: Webshop, organizationMeta: OrganizationMetaData, i18n: I18n, asAdmin = false, user: User | null = null) {
+        if (user) {
+            // The account is the contact person, even when a participant was chosen before logging in
+            this.forgetContactPerson();
+        }
+        this.syncCustomerFromCartItem();
+
         if (user) {
             if (user.firstName) {
                 this.customer.firstName = user.firstName;
@@ -467,6 +591,12 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         );
 
         this.validateAnswers(webshop);
+
+        // Needed when only the customer step is validated: a full validate() checks this category again in validateRecordAnswers.
+        // Admins may edit orders placed before the questions changed.
+        if (settings.recordCategory && !asAdmin) {
+            RecordCategory.validate([settings.recordCategory], this);
+        }
     }
 
     validatePayment(webshop: Webshop, organizationMeta: OrganizationMetaData) {
@@ -492,11 +622,14 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         RecordCategory.validate([category], this);
     }
 
-    validateRecordAnswers(webshop: Webshop) {
-        const filtered = RecordCategory.removeOldAnswers(webshop.meta.recordCategories, this);
+    validateRecordAnswers(webshop: Webshop, asAdmin = false) {
+        const filtered = RecordCategory.removeOldAnswers(webshop.meta.allRecordCategories, this);
         this.recordAnswers = filtered.getRecordAnswers();
 
-        RecordCategory.validate(webshop.meta.recordCategories, this);
+        // Admins may edit orders placed before the questions changed
+        if (!asAdmin) {
+            RecordCategory.validate(webshop.meta.allRecordCategories, this);
+        }
     }
 
     private updateAdministrationFee(webshop: Webshop) {
@@ -563,7 +696,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             this.validateDeliveryAddress(webshop, organizationMeta);
             this.validateTimeSlot(webshop, organizationMeta);
             this.validateCustomer(webshop, organizationMeta, i18n, asAdmin, user);
-            this.validateRecordAnswers(webshop);
+            this.validateRecordAnswers(webshop, asAdmin);
 
             if (this.totalPrice !== 0 && !asAdmin) {
                 this.validatePayment(webshop, organizationMeta);

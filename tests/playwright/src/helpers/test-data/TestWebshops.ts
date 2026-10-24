@@ -1,6 +1,6 @@
 import type { Organization, Webshop } from '@stamhoofd/models';
 import { WebshopFactory } from '@stamhoofd/models';
-import type { DarkMode } from '@stamhoofd/structures';
+import type { DarkMode, RecordCategory } from '@stamhoofd/structures';
 import { PaymentConfiguration, PaymentMethod, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopDeliveryMethod, WebshopMetaData, WebshopOrderMode, WebshopPrivateMetaData, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 import { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
@@ -16,6 +16,8 @@ export interface CreateWebshopOptions {
     productCount?: number;
     /** Whether a cart is used (multiple items) or each product goes straight to checkout */
     cartEnabled?: boolean;
+    /** Replace the generated products (index-based) with custom ones; `productCount` and `buildPrices` are ignored */
+    buildProducts?: (context: { seatingPlanId: string | null }) => Product[];
     /** Add a seating plan to the products (only meaningful for Tickets per item) */
     withSeatingPlan?: boolean;
     /** Price per product in cents (default € 15,00). Use 0 for a free shop. */
@@ -37,6 +39,8 @@ export interface CreateWebshopOptions {
     addressEnabled?: boolean;
     /** Ask for the customer's gender during checkout */
     genderEnabled?: boolean;
+    /** Questions asked next to the customer details during checkout */
+    customerRecordCategory?: RecordCategory | null;
     /** Add a delivery checkout method covering the given countries (enables the delivery address step) */
     deliveryCountries?: Country[];
     /** Raw HTML injected into the document head on custom domains (script/style tags) */
@@ -59,6 +63,7 @@ export class TestWebshops {
             ticketType = WebshopTicketType.None,
             productCount = 1,
             cartEnabled = true,
+            buildProducts,
             withSeatingPlan = false,
             price = 15_0000,
             buildPrices,
@@ -70,6 +75,7 @@ export class TestWebshops {
             birthDayEnabled = false,
             addressEnabled = false,
             genderEnabled = false,
+            customerRecordCategory = null,
             deliveryCountries,
             customCode,
             darkMode,
@@ -84,15 +90,17 @@ export class TestWebshops {
             seatingPlanId = seatingPlan.id;
         }
 
-        const products: Product[] = [];
+        const products: Product[] = buildProducts?.({ seatingPlanId }) ?? [];
         const productType = ticketType === WebshopTicketType.Tickets ? ProductType.Ticket : ProductType.Product;
-        for (let i = 0; i < productCount; i++) {
-            products.push(Product.create({
-                name: `Product ${i + 1}`,
-                prices: buildPrices?.() ?? [ProductPrice.create({ name: `Price ${i + 1}`, price })],
-                type: productType,
-                seatingPlanId: withSeatingPlan ? seatingPlanId : null,
-            }));
+        if (!buildProducts) {
+            for (let i = 0; i < productCount; i++) {
+                products.push(Product.create({
+                    name: `Product ${i + 1}`,
+                    prices: buildPrices?.() ?? [ProductPrice.create({ name: `Price ${i + 1}`, price })],
+                    type: productType,
+                    seatingPlanId: withSeatingPlan ? seatingPlanId : null,
+                }));
+            }
         }
 
         const paymentConfigurationPatch = PaymentConfiguration.patch({
@@ -116,6 +124,7 @@ export class TestWebshops {
                 birthDay: toRequirement(birthDayEnabled),
                 address: toRequirement(addressEnabled),
                 gender: toRequirement(genderEnabled),
+                recordCategory: customerRecordCategory,
             }),
             customCode,
             darkMode,

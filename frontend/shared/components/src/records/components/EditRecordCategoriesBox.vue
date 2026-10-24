@@ -9,7 +9,7 @@
         <p>
             <button class="button text" type="button" @click="addCategory()">
                 <span class="icon add" />
-                <span>{{ $t('%10l') }}</span>
+                <span>{{ addText ?? $t('%10l') }}</span>
             </button>
         </p>
     </div>
@@ -32,9 +32,11 @@ const props = withDefaults(
         categories: RecordCategory[];
         settings: RecordEditorSettings<any>;
         allowChildCategories?: boolean;
+        addText?: string | null;
     }>(),
     {
         allowChildCategories: true,
+        addText: null,
     },
 );
 const emit = defineEmits(['patch:categories']);

@@ -12,7 +12,7 @@
         </STInputBox>
 
         <template v-if="settings.email !== CustomerFieldRequirement.Disabled">
-            <EmailInput v-model="email" name="email" :validator="validator" :required="settings.email === CustomerFieldRequirement.Required" :placeholder="emailPlaceholder ?? undefined" :autocomplete="autocomplete('email')" :title="withOptional($t(`%1FK`), settings.email)" />
+            <EmailInput v-model="email" name="email" :validator="validator" :required="settings.email === CustomerFieldRequirement.Required" :placeholder="emailPlaceholder" :autocomplete="autocomplete('email')" :title="withOptional($t(`%1FK`), settings.email)" />
             <p v-if="emailDescription" class="style-description-small" v-text="emailDescription" />
         </template>
 
@@ -66,12 +66,12 @@ const props = withDefaults(defineProps<{
     enableAutocomplete?: boolean;
     errorBox: ErrorBox | null;
     validator: Validator;
-    emailPlaceholder?: string | null;
+    emailPlaceholder?: string;
     emailDescription?: string | null;
 }>(), {
     nameTitle: () => $t(`%Uy`),
     enableAutocomplete: true,
-    emailPlaceholder: null,
+    emailPlaceholder: () => $t(`%1FK`),
     emailDescription: null,
 });
 
@@ -85,9 +85,12 @@ function autocomplete(value: string) {
     return props.enableAutocomplete ? value : 'off';
 }
 
-// The name inputs are plain html: validate them with the shared rules instead of the browser
+// The name inputs are plain html: validate them with the shared rules instead of the browser.
+// A hidden name is left alone: it comes from elsewhere (the account or a cart item).
 useValidation(props.validator, () => {
-    props.customer.validateName(props.settings.name);
+    if (props.settings.name !== CustomerFieldRequirement.Disabled) {
+        props.customer.validateName(props.settings.name);
+    }
 });
 
 function withOptional(title: string, requirement: CustomerFieldRequirement) {

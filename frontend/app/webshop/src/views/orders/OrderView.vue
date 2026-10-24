@@ -202,6 +202,13 @@
                                     <span v-if="order.payments.length > 1">{{ formatPrice(payment.price) }}</span>
                                 </template>
                             </STListItem>
+                            <!-- Questions about the customer belong to the customer details: no separate title -->
+                            <STListItem v-for="{ record, answer } in customerAnswers" :key="record.id" class="right-description">
+                                <h3 class="style-definition-label">
+                                    {{ record.name }}
+                                </h3>
+                                <p class="style-definition-text pre-wrap" v-text="answer?.stringValue || '/'" />
+                            </STListItem>
                             <STListItem v-for="a in order.data.fieldAnswers" :key="a.field.id" class="right-description">
                                 <h3 class="style-definition-label">
                                     {{ a.field.name }}
@@ -515,6 +522,15 @@ const recordCategories = computed(() => {
         webshop.value.meta.recordCategories,
         order.value.data,
     );
+});
+
+const customerAnswers = computed(() => {
+    const category = webshop.value.meta.customerSettings.recordCategory;
+    if (!order.value || !category?.isEnabled(order.value.data)) {
+        return [];
+    }
+    const data = order.value.data;
+    return category.getAllFilteredRecords(data).map(record => ({ record, answer: data.recordAnswers.get(record.id) }));
 });
 
 function share() {

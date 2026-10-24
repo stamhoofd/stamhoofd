@@ -24,9 +24,14 @@ const props = withDefaults(
         saveHandler: (patch: PatchAnswers, navigate: NavigationActions) => Promise<void> | void;
         saveText?: string;
         forceMarkReviewed?: boolean | null;
+        /**
+         * Answers in a preview are thrown away, so closing never asks for confirmation
+         */
+        isPreview?: boolean;
     }>(), {
         saveText: () => $t(`%1Op`),
         forceMarkReviewed: null,
+        isPreview: false,
     },
 );
 
@@ -71,7 +76,7 @@ const hasChanges = computed(() => {
 });
 
 async function shouldNavigateAway() {
-    if (!hasChanges.value && !loading.value) {
+    if (props.isPreview || (!hasChanges.value && !loading.value)) {
         return true;
     }
     return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));

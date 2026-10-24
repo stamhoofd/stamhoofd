@@ -1368,7 +1368,7 @@
     color: $color-primary-dark;
     
     figure {
-        background: $color-primary-background;
+        background: $color-primary-light;
         color: $color-primary-dark;
         overflow: hidden;
 
@@ -1474,7 +1474,7 @@
         color: $color-dark;
         
         figure {
-            background: $color-background-shade;
+            background: $color-background-shade-darker;
             color: $color-dark;
         }
 

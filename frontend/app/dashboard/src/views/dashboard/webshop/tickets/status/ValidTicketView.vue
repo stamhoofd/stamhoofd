@@ -230,6 +230,9 @@
                 </STListItem>
             </STList>
 
+            <!-- Questions about the customer belong to the customer details: no separate title -->
+            <RecordCategoryAnswersBox v-if="customerRecordCategory" :category="customerRecordCategory" :value="order.data" />
+
             <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="order.data" />
 
             <div v-if="order.data.comments" class="container">
@@ -379,6 +382,7 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 
+import RecordCategoryAnswersBox from '@stamhoofd/components/records/components/RecordCategoryAnswersBox.vue';
 import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/components/ViewRecordCategoryAnswersBox.vue';
 
 import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
@@ -551,6 +555,11 @@ const recordCategories = computed(() => {
         webshop.value.meta.recordCategories,
         props.order.data,
     );
+});
+
+const customerRecordCategory = computed(() => {
+    const category = webshop.value?.meta.customerSettings.recordCategory;
+    return category?.isEnabled(props.order.data) ? category : null;
 });
 
 function openOrder() {

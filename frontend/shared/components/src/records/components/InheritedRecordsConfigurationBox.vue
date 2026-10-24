@@ -424,6 +424,7 @@ async function previewCategory(category: RecordCategory) {
                 }),
                 value: settings.exampleValue,
                 forceMarkReviewed: true,
+                isPreview: true,
                 saveHandler: async (_patch: PatchAnswers, navigate: NavigationActions) => {
                     await navigate.pop({ force: true });
                 },

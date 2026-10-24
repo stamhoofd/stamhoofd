@@ -12,15 +12,34 @@
             </STInputBox>
         </template>
         <template v-else>
-            <hr><h2>{{ $t('%Ul') }}</h2>
+            <hr><h2>{{ cartTitle }}</h2>
 
-            <CustomerInputs :customer="customerClone" :settings="customerFieldSettings" :error-box="errors.errorBox" :validator="errors.validator" :email-placeholder="emailPlaceholder" :email-description="emailDescription" />
+            <p v-for="code of patchedOrder.data.discountCodes" :key="code.id" class="discount-box icon label">
+                <span>{{ $t('%1MX') }} <span class="style-discount-code">{{ code.code }}</span></span>
 
-            <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="answersClone" :error-box="errors.errorBox" />
+                <button class="button icon trash" type="button" @click="deleteCode(code)" />
+            </p>
 
-            <div v-for="category in recordCategories.filter(c => c.isEnabled(patchedOrder.data))" :key="category.id" class="container">
-                <hr><FillRecordCategoryBox :category="category" :value="patchedOrder.data" :validator="errors.validator" :level="2" :all-optional="true" :force-mark-reviewed="true" @patch="addRecordAnswersPatch" />
-            </div>
+            <STCard>
+                <STList v-if="webshopFull && patchedOrder.data.cart.items.length > 0">
+                    <CartItemRow v-for="cartItem of patchedOrder.data.cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="patchedOrder.data.cart" :webshop="webshopFull" :editable="true" :admin="true" @edit="editCartItem(cartItem)" @delete="deleteItem(cartItem)" @amount="setCartItemAmount(cartItem, $event)" />
+                </STList>
+
+                <EmptyStateCard v-else :icon="emptyCartIcon" :title="$t('Nog niets toegevoegd')" :description="$t('Voeg toe wat er besteld wordt.')">
+                    <button class="button text" type="button" data-testid="add-product-button" @click="addProduct">
+                        <span class="icon add" />
+                        <span>{{ $t('%1IY') }}</span>
+                    </button>
+                </EmptyStateCard>
+            </STCard>
+
+            <p v-if="webshopFull && webshopFull.orderMode !== WebshopOrderMode.Single && patchedOrder.data.cart.items.length > 0" class="style-button-bar">
+                <button class="button text" type="button" data-testid="add-product-button" @click="addProduct">
+                    <span class="icon add" />
+                    <span>{{ $t('%1IY') }}</span>
+                </button>
+            </p>
+            <AddDiscountCodeBox v-if="webshop.meta.allowDiscountCodeEntry" :apply-code="applyCode" />
 
             <template v-if="checkoutMethods.length > 1">
                 <hr><h2>{{ $t('%xE') }}</h2>
@@ -112,25 +131,45 @@
                 <AddressInput v-model="address" :required="true" :validator="errors.validator" :validate-server="server" :title="$t(`%V0`)" />
             </template>
 
-            <hr><h2>{{ $t('%1DQ') }}</h2>
+            <hr><h2>{{ $t('%Ul') }}</h2>
 
-            <p v-for="code of patchedOrder.data.discountCodes" :key="code.id" class="discount-box icon label">
-                <span>{{ $t('%1MX') }} <span class="style-discount-code">{{ code.code }}</span></span>
+            <template v-if="contactPersonCandidates.length > 0">
+                <p class="style-description-block">
+                    {{ $t('Wie is de contactpersoon voor deze bestelling?') }}
+                </p>
+                <STList class="customer-selection-list" data-testid="main-customer-list">
+                    <template v-for="option of contactPersonOptions" :key="option.id">
+                        <STListItem :selectable="true" element-name="label" class="left-center" :class="{ 'no-border': option.selected && asksCustomerDetails }">
+                            <template #left>
+                                <Radio :model-value="selectedContactItemId" :value="option.id" name="main-customer" @update:model-value="option.select" />
+                            </template>
+                            <h3 class="style-title-list">
+                                {{ option.title }}
+                            </h3>
+                            <p v-if="option.description" class="style-description-small">
+                                {{ option.description }}
+                            </p>
+                        </STListItem>
+                        <div v-if="option.selected && asksCustomerDetails" class="contact-person-details">
+                            <STCard>
+                                <CustomerInputs :customer="customerClone" :settings="customerFieldSettings" :error-box="errors.errorBox" :validator="errors.validator" :email-placeholder="emailPlaceholder" :email-description="emailDescription" />
+                                <FillRecordCategoryBox v-if="customerRecordCategory" :category="customerRecordCategory" :value="patchedOrder.data" :validator="errors.validator" :all-optional="true" :force-mark-reviewed="true" :hide-title="true" :parent-error-box="errors.errorBox" @patch="addRecordAnswersPatch" />
+                                <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="answersClone" :error-box="errors.errorBox" />
+                            </STCard>
+                        </div>
+                    </template>
+                </STList>
+            </template>
 
-                <button class="button icon trash" type="button" @click="deleteCode(code)" />
-            </p>
+            <template v-else>
+                <CustomerInputs :customer="customerClone" :settings="customerFieldSettings" :error-box="errors.errorBox" :validator="errors.validator" :email-placeholder="emailPlaceholder" :email-description="emailDescription" />
+                <FillRecordCategoryBox v-if="customerRecordCategory" :category="customerRecordCategory" :value="patchedOrder.data" :validator="errors.validator" :all-optional="true" :force-mark-reviewed="true" :hide-title="true" :parent-error-box="errors.errorBox" @patch="addRecordAnswersPatch" />
+                <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="answersClone" :error-box="errors.errorBox" />
+            </template>
 
-            <STList v-if="webshopFull">
-                <CartItemRow v-for="cartItem of patchedOrder.data.cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="patchedOrder.data.cart" :webshop="webshopFull" :editable="true" :admin="true" @edit="editCartItem(cartItem)" @delete="deleteItem(cartItem)" @amount="setCartItemAmount(cartItem, $event)" />
-            </STList>
-
-            <p v-if="(webshopFull && webshopFull.orderMode !== WebshopOrderMode.Single) || patchedOrder.data.cart.items.length === 0">
-                <button class="button text" type="button" data-testid="add-product-button" @click="addProduct">
-                    <span class="icon add" />
-                    <span>{{ $t('%1IY') }}</span>
-                </button>
-            </p>
-            <AddDiscountCodeBox v-if="webshop.meta.allowDiscountCodeEntry" :apply-code="applyCode" />
+            <div v-for="category in recordCategories.filter(c => c.isEnabled(patchedOrder.data))" :key="category.id" class="container">
+                <hr><FillRecordCategoryBox :category="category" :value="patchedOrder.data" :validator="errors.validator" :level="2" :all-optional="true" :force-mark-reviewed="true" @patch="addRecordAnswersPatch" />
+            </div>
 
             <hr><PriceBreakdownBox :price-breakdown="patchedOrder.data.priceBreakown" />
 
@@ -156,6 +195,8 @@ import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
 import CustomerInputs from '@stamhoofd/components/views/CustomerInputs.vue';
 import Radio from '@stamhoofd/components/inputs/Radio.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import EmptyStateCard from '@stamhoofd/components/layout/EmptyStateCard.vue';
+import STCard from '@stamhoofd/components/layout/STCard.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
@@ -172,8 +213,9 @@ import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { DiscountCode } from '@stamhoofd/structures';
 import type { CartItem, CheckoutMethod, PatchAnswers, ValidatedAddress, WebshopOnSiteMethod, WebshopTakeoutMethod } from '@stamhoofd/structures';
-import { CheckoutMethodType, Gender, OrderData, PaymentConfiguration, PaymentMethod, PrivateOrder, RecordCategory, Version, WebshopOrderMode, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
+import { CheckoutMethodType, Customer, Gender, OrderData, PaymentConfiguration, PaymentMethod, PrivateOrder, RecordCategory, Version, WebshopOrderMode, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
+import { customerFieldKeys } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
@@ -198,11 +240,30 @@ const answersClone = ref(order.data.fieldAnswers.map(a => a.clone()));
 // CustomerInputs edits a Customer instance, so keep a clone and merge it into the patch
 const customerClone = ref(order.data.customer.clone());
 
+// The order without the customer edits: the contact person's cart item and the fields it collected come from here
+const orderWithoutCustomer = computed(() => order.patch(patchOrder.value));
+
+// The details collected on the contact person's cart item are not edited here: they always follow that cart item
+const customer = computed(() => {
+    const data = orderWithoutCustomer.value.data;
+    const item = data.customerCartItem;
+    const merged = customerClone.value.clone();
+    if (item) {
+        merged.copyFields(item.customer!, data.customerFieldsFromCartItem);
+    }
+    return merged;
+});
+
 const finalPatch = computed(() => {
+    // The contact person's cart item was removed: keep their details as they are, so the admin can edit them
+    const data = orderWithoutCustomer.value.data;
+    const lostContactPerson = data.customerCartItemId !== null && data.customerCartItem === null;
+
     return patchOrder.value.patch(PrivateOrder.patch({
         data: OrderData.patch({
             fieldAnswers: answersClone.value,
-            customer: customerClone.value,
+            customer: customer.value,
+            ...(lostContactPerson ? { customerCartItemId: null } : {}),
         }),
     }));
 });
@@ -245,7 +306,7 @@ async function applyCode(code: string) {
 
         addPatch({ data: patchedData });
 
-        new Toast($t(`%Xd`), 'success primary').setHide(10 * 1000).show();
+        new Toast($t('%Xd'), 'success primary').setHide(10 * 1000).show();
 
         return true;
     }
@@ -263,19 +324,25 @@ async function applyCode(code: string) {
 
         addPatch({ data: patchedData });
 
-        new Toast($t(`%Xd`), 'success primary').setHide(10 * 1000).show();
+        new Toast($t('%Xd'), 'success primary').setHide(10 * 1000).show();
         return true;
     } else {
-        new Toast($t(`%Xe`) + ' ' + code, 'red error').setHide(10 * 1000).show();
+        new Toast($t('%Xe') + ' ' + code, 'red error').setHide(10 * 1000).show();
         return false;
     }
 }
 
+// The questions of the contact person are shown with the customer details, as if they were built-in fields
 const recordCategories = computed(() => {
     return RecordCategory.flattenCategories(
         webshop.meta.recordCategories,
         patchedOrder.value.data,
     );
+});
+
+const customerRecordCategory = computed(() => {
+    const category = webshop.meta.customerSettings.recordCategory;
+    return category?.isEnabled(patchedOrder.value.data) ? category : null;
 });
 
 // Fields that already have a value stay visible even when the webshop no longer asks for them
@@ -288,6 +355,7 @@ const hasValue = {
 
 /**
  * Admins are never forced to fill in a field, but they do see everything the webshop asks or already stored.
+ * Details copied from the contact person's cart item are not shown: they are edited on that item.
  */
 const customerFieldSettings = computed(() => {
     const settings = webshop.meta.customerSettings;
@@ -298,14 +366,83 @@ const customerFieldSettings = computed(() => {
         return CustomerFieldRequirement.Optional;
     };
 
-    return settings.patch({
+    const patched = settings.patch({
         phone: forAdmin('phone'),
         birthDay: forAdmin('birthDay'),
         gender: forAdmin('gender'),
         // A delivery address is edited in its own input below
         address: selectedMethod.value?.type === CheckoutMethodType.Delivery ? CustomerFieldRequirement.Disabled : forAdmin('address'),
     });
+    for (const key of patchedOrder.value.data.customerFieldsFromCartItem) {
+        patched[key] = CustomerFieldRequirement.Disabled;
+    }
+    return patched;
 });
+
+// Without a cart, name what is ordered: a ticket, a registration or an article
+const orderMode = computed(() => webshopFull?.orderMode ?? webshop.meta.orderMode);
+const cartTitle = computed(() => {
+    if (orderMode.value === WebshopOrderMode.Cart) {
+        return $t('%1DQ');
+    }
+    const plural = orderMode.value === WebshopOrderMode.Bulk;
+    if (webshop.meta.isTicketBased) {
+        return plural ? $t('%1AU') : $t('%2K');
+    }
+    if (webshop.meta.isRegistrations) {
+        return plural ? $t('%1EI') : $t('%lc');
+    }
+    return plural ? $t('%Rv') : $t('%Sc');
+});
+const emptyCartIcon = computed(() => {
+    if (webshop.meta.isTicketBased) {
+        return 'ticket';
+    }
+    if (webshop.meta.isRegistrations) {
+        return 'user';
+    }
+    return 'basket';
+});
+
+const contactPersonCandidates = computed(() => patchedOrder.value.data.contactPersonCandidates);
+const selectedContactItemId = computed(() => patchedOrder.value.data.customerCartItem?.id ?? '');
+
+// The participants and 'someone else', so the details can be shown right below the chosen one
+const contactPersonOptions = computed(() => [
+    ...contactPersonCandidates.value.map(item => ({
+        id: item.id,
+        title: item.customer!.name,
+        description: item.product.name,
+        selected: selectedContactItemId.value === item.id,
+        select: () => selectContactPerson(item),
+    })),
+    {
+        id: '',
+        title: $t('Iemand anders'),
+        description: '',
+        selected: selectedContactItemId.value === '',
+        select: () => selectContactPerson(null),
+    },
+]);
+
+// Nothing left to fill in when the chosen participant already provided everything
+const asksCustomerDetails = computed(() => customerFieldKeys.some(key => customerFieldSettings.value[key] !== CustomerFieldRequirement.Disabled) || !!customerRecordCategory.value || fields.length > 0);
+
+// Like in the webshop: the first adult participant is the contact person until someone was chosen or filled in
+function selectDefaultContactPerson(data: OrderData) {
+    if (data.customerCartItemId !== null || customerClone.value.hasValue('name') || customerClone.value.hasValue('email')) {
+        return;
+    }
+    data.customerCartItemId = data.defaultContactPerson?.id ?? null;
+}
+
+// Like Checkout.setContactPerson: only clear what came from the previous contact person, details entered for the order itself stay
+function selectContactPerson(item: CartItem | null) {
+    const cleared = customerClone.value.clone();
+    cleared.copyFields(Customer.create({}), orderWithoutCustomer.value.data.customerFieldsFromCartItem);
+    customerClone.value = cleared;
+    addPatch({ data: OrderData.patch({ customerCartItemId: item?.id ?? null }) });
+}
 
 const emailPlaceholder = computed(() => {
     if (webshop.meta.ticketType !== WebshopTicketType.None) {
@@ -523,6 +660,7 @@ async function addProduct() {
                 } else {
                     clone.cart.addItem(cartItem);
                 }
+                selectDefaultContactPerson(clone);
 
                 if (!isNew && clone.totalPrice !== patchedOrder.value.data.totalPrice) {
                     new Toast($t('%ZpH'), 'warning yellow').setHide(10 * 1000).show();
@@ -628,3 +766,10 @@ defineExpose({
     shouldNavigateAway,
 });
 </script>
+
+<style lang="scss" scoped>
+// Lines up with the text of the list items, after the radio button
+.contact-person-details {
+    padding: 0 var(--st-horizontal-padding, 15px) 15px calc(var(--st-horizontal-padding, 15px) + 33px);
+}
+</style>
