@@ -635,11 +635,13 @@ test.describe('Webshop per-item customers @webshop-item-customer', () => {
         await flow.fillDetails(1, { customer: { firstName: 'Jack', lastName: 'Doe' } });
         await flow.submitDetails();
 
-        // The main customer can be picked from the ticket holders
-        await expect(page.getByTestId('customer-step')).toBeVisible({ timeout: 15000 });
+        // The main customer can be picked from the ticket holders: their name is copied, so only the email is still asked
+        const customerStep = page.getByTestId('customer-step');
+        await expect(customerStep).toBeVisible({ timeout: 15000 });
         await flow.selectMainCustomer('Jack Doe');
-        await expect(page.getByTestId('customer-step').locator('input[name="fname"]')).toHaveValue('Jack');
-        await flow.fillCustomer({ firstName: 'Jack', lastName: 'Doe', email: 'jack@test.be' });
+        await expect(customerStep.locator('input[name="fname"]')).toHaveCount(0);
+        await customerStep.locator('input[name="email"]').fill('jack@test.be');
+        await customerStep.getByTestId('save-button').click();
         await flow.confirmPayment();
         await flow.expectTicketsDownloadable();
         await flow.expectTicketCount(2);
@@ -702,12 +704,15 @@ test.describe('Webshop per-item customers @webshop-item-customer', () => {
         await recordInputs.nth(1).fill('John Doe');
         await flow.submitDetails();
 
-        await flow.fillCustomer();
+        // The only participant provided everything the order asks, so they become the contact person without a customer step
+        await expect(page.getByTestId('payment-step')).toBeVisible({ timeout: 15000 });
         await flow.confirmPayment();
         await flow.expectTicketsDownloadable();
 
         const orders = await fetchOrders(webshop.id);
         expect(orders).toHaveLength(1);
+        expect(orders[0].data.customer.name).toBe('Jane Doe');
+        expect(orders[0].data.customer.email).toBe('jane@test.be');
         const participant = orders[0].data.cart.items[0];
         expect(participant.customer?.email).toBe('jane@test.be');
         expect([...participant.recordAnswers.values()].map(a => a.stringValue).sort()).toEqual(['John Doe', 'Noten']);
