@@ -53,6 +53,7 @@ describe('HTML PDF multipart cleanup', () => {
         };
         if (mode === 'missing signature') delete fields.signature;
         if (mode === 'invalid signature') fields.signature = 'invalid';
+        if (mode === 'expired authorization') fields.expires = String(Date.now() - 1000);
         let body = `--${boundary}\r\nContent-Disposition: form-data; name="html"; filename="document.html"\r\nContent-Type: text/html\r\n\r\n${html}\r\n`;
         for (const [name, value] of Object.entries(fields)) {
             body += `--${boundary}\r\nContent-Disposition: form-data; name="${name}"\r\n\r\n${value}\r\n`;
@@ -72,8 +73,9 @@ describe('HTML PDF multipart cleanup', () => {
      * Both successful responses and rejected requests must remove every observed
      * upload before handle settles. Requiring an observed path prevents an empty
      * upload list from satisfying the ENOENT checks without exercising cleanup.
+     * An expired grant must also reject the request without retaining its upload.
      */
-    test.each(['success', 'missing signature', 'invalid signature', 'malformed multipart', 'render failure'])('removes uploaded files after %s', async (mode) => {
+    test.each(['success', 'missing signature', 'invalid signature', 'malformed multipart', 'render failure', 'expired authorization'])('removes uploaded files after %s', async (mode) => {
         if (mode === 'render failure') vi.mocked(endpoint.htmlToPdf).mockResolvedValue(null);
         const decoded = await endpoint.decode(request(mode));
         expect(decoded).not.toBeNull();
