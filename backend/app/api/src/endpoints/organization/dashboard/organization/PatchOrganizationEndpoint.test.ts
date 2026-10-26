@@ -86,11 +86,17 @@ describe('Endpoint.PatchOrganization', () => {
     });
 
     describe('Change the name', () => {
-        test('Change the name of the organization', async () => {
+        const setOnlyAdminCanChangeOrganizationName = async (value: boolean) => {
             const platform = await Platform.getForEditing();
-            platform.config.featureFlags = [];
+            platform.config.onlyAdminCanChangeOrganizationName = value;
             await platform.save();
+        };
 
+        afterEach(async () => {
+            await setOnlyAdminCanChangeOrganizationName(false);
+        });
+
+        test('Change the name of the organization', async () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
             // const groups = await new GroupFactory({ organization }).createMultiple(2)
@@ -114,9 +120,7 @@ describe('Endpoint.PatchOrganization', () => {
         });
 
         test('Changing the name fails if only platform admins can change it (non-admin)', async () => {
-            const platform = await Platform.getForEditing();
-            platform.config.onlyAdminCanChangeOrganizationName = true;
-            await platform.save();
+            await setOnlyAdminCanChangeOrganizationName(true);
 
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
@@ -131,10 +135,55 @@ describe('Endpoint.PatchOrganization', () => {
             await expect(testServer.test(endpoint, r)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
         });
 
+        test('Changing the name fails if only platform admins can change it (full access through organization tags)', async () => {
+            await setOnlyAdminCanChangeOrganizationName(true);
+
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                globalPermissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources: new Map([[PermissionsResourceType.OrganizationTags, new Map([[
+                        PermissionsResourceKey.All,
+                        ResourcePermissions.create({ level: PermissionLevel.Full }),
+                    ]])]]),
+                }),
+            }).create();
+            const token = await SessionService.createSession(user);
+
+            await expect(patchOrganization({
+                patch: OrganizationStruct.patch({ id: organization.id, name: 'My crazy name' }),
+                organization,
+                token,
+            })).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+
+            // Proves the rejection comes from the name check and not from missing access to the organization
+            const response = await patchOrganization({
+                patch: OrganizationStruct.patch({ id: organization.id, website: 'https://example.com' }),
+                organization,
+                token,
+            });
+            expect(response.body.website).toEqual('https://example.com');
+        });
+
+        test('Patching the unchanged name succeeds if only platform admins can change it (non-admin)', async () => {
+            await setOnlyAdminCanChangeOrganizationName(true);
+
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const token = await SessionService.createSession(user);
+
+            const response = await patchOrganization({
+                patch: OrganizationStruct.patch({ id: organization.id, name: organization.name, website: 'https://example.com' }),
+                organization,
+                token,
+            });
+
+            expect(response.body.name).toEqual(organization.name);
+            expect(response.body.website).toEqual('https://example.com');
+        });
+
         test('Change the name of the organization if only platform admins can change it (admin)', async () => {
-            const platform = await Platform.getForEditing();
-            platform.config.onlyAdminCanChangeOrganizationName = false;
-            await platform.save();
+            await setOnlyAdminCanChangeOrganizationName(true);
 
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization, globalPermissions: Permissions.create({
