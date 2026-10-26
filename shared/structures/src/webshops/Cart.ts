@@ -17,6 +17,19 @@ export class Cart extends AutoEncoder {
     }
 
     /**
+     * Validates one item of this cart like validate does: only the items before it count against the stock
+     */
+    validateItem(webshop: Webshop, item: CartItem, options: { validateSeats?: boolean } = {}) {
+        const index = this.items.indexOf(item);
+        item.validate(webshop, this, {
+            refresh: true,
+            validateSeats: options.validateSeats ?? true,
+            validateDetails: true,
+            stockCart: Cart.create({ items: this.items.slice(0, index + 1) }),
+        });
+    }
+
+    /**
      * The bulk order mode has one item per unit. Splits items with a larger amount, e.g. from a cart that was saved
      * before the webshop switched to bulk mode. Every unit keeps its own seat.
      */
@@ -174,15 +187,17 @@ export class Cart extends AutoEncoder {
         const errors = new SimpleErrors();
         const singleItem = webshop.orderMode === WebshopOrderMode.Single;
 
-        for (const item of this.items) {
+        for (const [index, item] of this.items.entries()) {
             try {
-                // Only the items kept so far count against the stock, so the first units within stock stay. Otherwise
-                // every unit of a product with one item per unit (bulk, per-item customers) sees all the others.
-                item.validate(webshop, Cart.create({ items: [...newItems, item] }), {
+                item.validate(webshop, Cart.create({ items: [...newItems, ...this.items.slice(index)] }), {
                     refresh: true,
                     admin: asAdmin,
                     validateSeats,
                     validateDetails,
+                    // Only the items kept so far count against the stock, so the first units within stock stay. Otherwise
+                    // every unit of a product with one item per unit (bulk, per-item customers) sees all the others.
+                    // Seats are still checked against every other item.
+                    stockCart: Cart.create({ items: [...newItems, item] }),
                 });
                 newItems.push(item);
 

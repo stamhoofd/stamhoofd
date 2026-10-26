@@ -107,11 +107,14 @@ export class CheckoutStepsManager {
 
         for (const product of seatedProducts) {
             const id = CheckoutStepsManager.seatsStepId(product);
+            // E.g. the same show on two dates: told apart by the date, and the url needs to stay unique
+            const sameName = seatedProducts.filter(p => p.name === product.name).length > 1;
+            const date = sameName && product.dateRange ? ' ' + Formatter.date(product.dateRange.startDate) : '';
             steps.push(new CheckoutStep({
                 id,
                 // With more than one seated product, the steps are told apart by product
-                title: seatedProducts.length > 1 ? product.name : $t('%sB'),
-                url: '/checkout/seats/' + Formatter.slug(product.name),
+                title: seatedProducts.length > 1 ? product.name + date : $t('%sB'),
+                url: '/checkout/seats/' + Formatter.slug(product.name) + (sameName ? '-' + product.id.slice(0, 8) : ''),
                 getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './BulkSeatsView.vue').then(m => new ComponentWithProperties(m.default, {
                     product,
                     continueCheckout: (navigate: NavigationActions) => this.goNext(id, navigate),
@@ -375,17 +378,18 @@ export class CheckoutStepsManager {
             this.$checkoutManager.saveCart();
 
             const steps = this.getSteps();
-            const detailsStep = steps.find(s => s.id === (CheckoutStepType.Details as string));
-            if (detailsStep?.active && await CheckoutStepsManager.popToUrl(navigate.navigationController, detailsStep.url, { force: true })) {
-                this.$checkoutManager.pendingCartError = error;
-                return;
-            }
 
-            // Without a details step, a seat that is no longer available is chosen again in the seats step of its product
+            // A seat that is no longer available can only be chosen again in the seats step of its product
             const seatItem = this.$checkoutManager.cart.items.find(i => isSimpleError(i.cartError) && ['seats_unavailable', 'invalid_seats'].includes(i.cartError.code));
             const seatsStep = seatItem ? steps.find(s => s.id === CheckoutStepsManager.seatsStepId(seatItem.product)) : undefined;
             if (seatsStep && await CheckoutStepsManager.popToUrl(navigate.navigationController, seatsStep.url, { force: true })) {
                 Toast.fromError(error).show();
+                return;
+            }
+
+            const detailsStep = steps.find(s => s.id === (CheckoutStepType.Details as string));
+            if (detailsStep?.active && await CheckoutStepsManager.popToUrl(navigate.navigationController, detailsStep.url, { force: true })) {
+                this.$checkoutManager.pendingCartError = error;
                 return;
             }
         }

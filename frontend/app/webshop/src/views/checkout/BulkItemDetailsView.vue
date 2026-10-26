@@ -198,7 +198,7 @@ function showCartError(error: unknown) {
             continue;
         }
         try {
-            item.validate(webshop.value, cart.value, { refresh: true, validateSeats: true });
+            cart.value.validateItem(webshop.value, item);
             setItemError(entry, null);
         } catch (e) {
             setItemError(entry, e);
@@ -241,7 +241,7 @@ async function goNext() {
     for (const entry of entries.value) {
         const item = entry.item;
         try {
-            item.validate(webshop.value, cart.value, { refresh: true, validateSeats: true });
+            cart.value.validateItem(webshop.value, item);
             await validateUitpasNumbers(item, webshopManager.optionalAuthenticatedServer, owner);
             setItemError(entry, null);
         } catch (e) {

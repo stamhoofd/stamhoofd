@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { Cart } from './Cart.js';
 import { CartItem } from './CartItem.js';
-import { SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection } from '../SeatingPlan.js';
+import { CartReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection } from '../SeatingPlan.js';
 import { Option, OptionMenu, Product } from './Product.js';
 import { WebshopField } from './WebshopField.js';
 import { Webshop } from './Webshop.js';
@@ -60,6 +60,19 @@ describe('Cart.validate', () => {
         expect(() => cart.validate(webshop)).toThrow();
         expect(cart.items.map(i => i.id)).toEqual([units[0].id, units[1].id]);
     });
+
+    it('validates one unit against the units before it', () => {
+        const product = Product.create({ name: 'Workshop', stock: 2 });
+        const webshop = Webshop.create({
+            meta: WebshopMetaData.create({ orderMode: WebshopOrderMode.Bulk }),
+            products: [product],
+        });
+        const units = [item(product), item(product), item(product)];
+        const cart = Cart.create({ items: units });
+
+        expect(() => cart.validateItem(webshop, units[1])).not.toThrow();
+        expect(() => cart.validateItem(webshop, units[2])).toThrow();
+    });
 });
 
 describe('Cart.splitIntoUnits', () => {
@@ -93,6 +106,27 @@ describe('Cart.validate without seat validation', () => {
 
         expect(() => cart.validate(webshop, false, { validateSeats: false })).not.toThrow();
         expect(() => cart.validate(webshop)).toThrow(/seats/i);
+    });
+});
+
+describe('Cart.validate with seats', () => {
+    it('keeps the seats of units of the same product that were chosen right to left', () => {
+        const seatingPlan = SeatingPlan.create({
+            name: 'Zaal',
+            requireOptimalReservation: true,
+            sections: [SeatingPlanSection.create({ rows: [SeatingPlanRow.create({ label: 'A', seats: ['1', '2', '3', '4', '5', '6'].map(label => SeatingPlanSeat.create({ label })) })] })],
+        });
+        const section = seatingPlan.sections[0].id;
+        const product = Product.create({ name: 'Voorstelling', seatingPlanId: seatingPlan.id });
+        const webshop = Webshop.create({
+            meta: WebshopMetaData.create({ orderMode: WebshopOrderMode.Bulk, seatingPlans: [seatingPlan] }),
+            products: [product],
+        });
+        const unit = (seat: string) => CartItem.create({ product, productPrice: product.prices[0], seats: [CartReservedSeat.create({ section, row: 'A', seat })] });
+        const cart = Cart.create({ items: [unit('2'), unit('1')] });
+
+        cart.validate(webshop);
+        expect(cart.items.map(i => i.seats.map(s => s.seat))).toEqual([['2'], ['1']]);
     });
 });
 

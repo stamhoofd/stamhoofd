@@ -200,7 +200,7 @@ test.describe('Webshop bulk ordering @webshop-bulk', () => {
         expect(orders[0].data.totalPrice).toBe(3_00_00 + 100_00_00);
     });
 
-    test('Shows a seat that got taken in the meantime on the affected ticket in the details step', async ({ page }) => {
+    test('Returns to the seats step when a seat got taken in the meantime', async ({ page }) => {
         const organization = await createOrganization({ modernWebshop: true });
         const { webshop } = await TestWebshops.create({
             organization,
@@ -243,15 +243,14 @@ test.describe('Webshop bulk ordering @webshop-bulk', () => {
 
         await flow.confirmPayment();
 
-        // Back on the details step, with the error on the affected ticket
-        await expect(flow.detailsStep()).toBeVisible({ timeout: 15000 });
-        await expect(flow.detailsItem(0).locator('.error-box')).toContainText('A1');
+        // Back on the seats step: the taken seat is no longer selected there, so another one is chosen
+        const seatsView = page.getByTestId('bulk-seats-view');
+        await expect(seatsView).toBeVisible({ timeout: 15000 });
         await expect(page.getByTestId('order-view')).toHaveCount(0);
-
-        // The seats step stayed mounted below: the taken seat is no longer selected there, so another one is chosen
-        await page.getByTestId('checkout-progress').getByRole('button', { name: 'Plaatsen' }).click();
-        await expect(page.getByTestId('bulk-seats-view').getByTestId('confirm-seats-button')).toBeDisabled();
+        await expect(seatsView.getByTestId('confirm-seats-button')).toBeDisabled();
         await flow.chooseBulkSeats('Voorstelling', 1);
+
+        // The details are kept: the order below still has the meal choice
         await flow.submitDetails();
         await page.getByTestId('customer-step').getByTestId('save-button').click();
         await flow.confirmPayment();
@@ -260,6 +259,7 @@ test.describe('Webshop bulk ordering @webshop-bulk', () => {
         const orders = await fetchOrders(webshop.id);
         expect(orders).toHaveLength(1);
         expect(orders[0].data.cart.items[0].seats.map(s => s.row + s.seat)).toEqual(['A2']);
+        expect(orders[0].data.cart.items[0].options[0].option.name).toBe('Vegetarisch');
     });
 
     test('Has a seats step per seated product in the checkout progress and resumes the details step after a reload', async ({ page }) => {

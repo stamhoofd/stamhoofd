@@ -847,7 +847,10 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
      * Update self to the newest available data and throw if it was not able to recover
      * validateDetails = false: skip everything the bulk details step collects (option menus, custom fields, customer, UiTPAS numbers)
      */
-    validate(webshop: Webshop, cart: Cart, { refresh, admin, validateSeats, validateDetails }: { refresh?: boolean; admin?: boolean; validateSeats?: boolean; validateDetails?: boolean } = { refresh: true, admin: false, validateSeats: true, validateDetails: true }) {
+    /**
+     * @param stockCart The items that count against the stock, when that is not the whole cart (see Cart.validate)
+     */
+    validate(webshop: Webshop, cart: Cart, { refresh, admin, validateSeats, validateDetails, stockCart }: { refresh?: boolean; admin?: boolean; validateSeats?: boolean; validateDetails?: boolean; stockCart?: Cart } = { refresh: true, admin: false, validateSeats: true, validateDetails: true }) {
         this.cartError = null;
 
         if (admin === undefined) {
@@ -904,7 +907,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                 });
             }
 
-            const remaining = this.getAvailableStock(this, cart, webshop, admin);
+            const remaining = this.getAvailableStock(this, stockCart ?? cart, webshop, admin);
             const minimumRemaining = CartStockHelper.getRemaining(remaining);
             if (minimumRemaining !== null && minimumRemaining < this.amount) {
                 // Search for appropriate message in stock definitions

@@ -117,6 +117,13 @@ function setSeats(newSeats: ReservedSeat[]) {
     seats.value = newSeats.map(s => CartReservedSeat.create(s));
 }
 
+// Units can be dropped while this step stays mounted (e.g. when the stock dropped): keep one seat per unit
+watch(amount, (amount) => {
+    if (seats.value.length > amount) {
+        seats.value = seats.value.slice(0, amount);
+    }
+});
+
 // A reload (e.g. after a seat got taken during the checkout) can make selected seats unavailable while this step
 // stays mounted below the later steps: drop them, so they can't be confirmed again
 watch(reservedSeats, (reserved) => {
