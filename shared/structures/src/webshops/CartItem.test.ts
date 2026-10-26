@@ -1,4 +1,5 @@
 import { TranslatedString } from '../TranslatedString.js';
+import { CartReservedSeat } from '../SeatingPlan.js';
 import { RecordTextAnswer } from '../members/records/RecordAnswer.js';
 import { RecordCategory } from '../members/records/RecordCategory.js';
 import { RecordSettings, RecordType } from '../members/records/RecordSettings.js';
@@ -11,6 +12,31 @@ import { Option, OptionMenu, Product, ProductPrice } from './Product.js';
 import { Webshop } from './Webshop.js';
 
 describe('Structure.CartItem', () => {
+    /**
+     * An ordinary product has no seating plan, even when its cart item contains
+     * client-supplied seat data. Both negative and positive seat prices must leave
+     * the product's undiscounted total unchanged after validation and calculation:
+     * neither a discount nor a surcharge may come from these unrelated seats.
+     */
+    it.each([-10_00_00, 10_00_00])('ignores injected seat prices for products without a seating plan (%i)', (price) => {
+        const product = Product.create({
+            name: 'Ordinary product',
+            prices: [ProductPrice.create({ price: 10_00_00 })],
+        });
+        const item = CartItem.create({
+            product,
+            productPrice: product.prices[0],
+            seats: [CartReservedSeat.create({ price })],
+        });
+        const cart = Cart.create({ items: [item] });
+        const webshop = Webshop.create({ products: [product] });
+
+        item.validate(webshop, cart);
+        item.calculatePrices(cart);
+
+        expect(item.getPriceWithoutDiscounts()).toBe(10_00_00);
+    });
+
     it('can contain multiple options for the same multiple choice menu', () => {
         const optionA = Option.create({ name: 'A' });
         const optionB = Option.create({ name: 'B' });
