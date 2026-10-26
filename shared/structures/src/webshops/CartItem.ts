@@ -339,7 +339,8 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
             } else {
                 p = unitPrice;
             }
-            if (i < this.seats.length) {
+            // Seat data on a cart item only affects pricing when the product has a seating plan.
+            if (this.product.seatingPlanId && i < this.seats.length) {
                 // Seats
                 const seatPrice = p + this.seats[i].price;
 
