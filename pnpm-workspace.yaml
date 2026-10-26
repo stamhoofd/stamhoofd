@@ -91,7 +91,7 @@ overrides:
   axios: '1.20.0'
   cookie: '2.0.1'
   fast-xml-parser: '5.11.2'
-  nodemailer: '10.1.4'
+  nodemailer: '10.1.7'
   pacote: '21.5.1'
   postcss: '8.5.28'
   semver: '7.8.5'
