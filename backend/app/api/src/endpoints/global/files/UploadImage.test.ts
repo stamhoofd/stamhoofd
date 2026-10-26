@@ -9,6 +9,10 @@ import { Readable } from 'node:stream';
 // The root pins the same sharp used by models; intercept rendering without allocating large images.
 // eslint-disable-next-line import/no-extraneous-dependencies
 import sharp from 'sharp';
+import { promises as fs } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { defaultOptions } from 'formidable';
 import { SessionService } from '../../../services/SessionService.js';
 
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -28,8 +32,19 @@ describe('Endpoint.UploadImage', () => {
      * All the objects that were sent to the (mocked) file server
      */
     let uploads: PutObjectCommand['input'][] = [];
+    let uploadDirectory: string;
+    const originalUploadDirectory = defaultOptions.uploadDir;
 
-    beforeEach(() => {
+    /**
+     * Keep real multipart parsing and filesystem writes inside a per-test root.
+     * TMPDIR captures endpoint-owned subdirectories; Formidable's default upload
+     * directory also points here. Only S3 is mocked, so directory assertions check
+     * actual removal rather than just observing a cleanup call.
+     */
+    beforeEach(async () => {
+        uploadDirectory = await fs.mkdtemp(join(tmpdir(), 'upload-image-test-'));
+        vi.stubEnv('TMPDIR', uploadDirectory);
+        defaultOptions.uploadDir = uploadDirectory;
         TestUtils.setEnvironment('SPACES_BUCKET', 'test-bucket');
         TestUtils.setEnvironment('SPACES_ENDPOINT', 'test.digitaloceanspaces.com');
         TestUtils.setEnvironment('SPACES_KEY', 'test-key');
@@ -44,15 +59,23 @@ describe('Endpoint.UploadImage', () => {
         } as any;
     });
 
-    afterEach(() => {
+    // Restore process-wide parser/environment state and remove the test root itself.
+    afterEach(async () => {
         Image.s3Client = null;
         vi.restoreAllMocks();
+        vi.unstubAllEnvs();
+        defaultOptions.uploadDir = originalUploadDirectory;
+        await fs.rm(uploadDirectory, { recursive: true, force: true });
     });
 
     /**
-     * Builds a multipart/form-data request with a single uploaded image, like a browser would send it
+     * Returns an authenticated organization-admin request backed by a real
+     * multipart stream. Resolutions default to a 50 x 50 inside fit; metadata
+     * overrides the JSON verbatim to exercise syntax and decoding failures.
+     * field renames the required file part, and extraFile appends a second image
+     * to exercise parser rejection after temporary files may have been written.
      */
-    const buildUploadRequest = async (data: { filename: string; contentType: string; content: Buffer; resolutions?: object[] }) => {
+    const buildUploadRequest = async (data: { filename: string; contentType: string; content: Buffer; resolutions?: object[]; metadata?: string; field?: string; extraFile?: boolean }) => {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({
             organization,
@@ -62,9 +85,10 @@ describe('Endpoint.UploadImage', () => {
 
         const boundary = '--------------------------StamhoofdTest';
         const body = Buffer.concat([
-            Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="resolutions"\r\n\r\n${JSON.stringify(data.resolutions ?? [{ width: 50, height: 50, fit: 'inside' }])}\r\n`),
-            Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${data.filename}"\r\nContent-Type: ${data.contentType}\r\n\r\n`),
+            Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="resolutions"\r\n\r\n${data.metadata ?? JSON.stringify(data.resolutions ?? [{ width: 50, height: 50, fit: 'inside' }])}\r\n`),
+            Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="${data.field ?? 'file'}"; filename="${data.filename}"\r\nContent-Type: ${data.contentType}\r\n\r\n`),
             data.content,
+            ...(data.extraFile ? [Buffer.from(`\r\n--${boundary}\r\nContent-Disposition: form-data; name="extra"; filename="extra.png"\r\nContent-Type: image/png\r\n\r\n`), pngContent] : []),
             Buffer.from(`\r\n--${boundary}--\r\n`),
         ]);
 
@@ -81,6 +105,24 @@ describe('Endpoint.UploadImage', () => {
 
         return r;
     };
+
+    /**
+     * Invalid JSON, undecodable resolutions, a wrong file field and an extra file
+     * must all reject without storage. An empty real upload root also excludes
+     * leaked partial files and empty endpoint-owned directories, regardless of
+     * which parsing or validation stage rejected the request.
+     */
+    test.each([
+        { metadata: '{' },
+        { metadata: '[{"width":"invalid"}]' },
+        { field: 'wrong' },
+        { extraFile: true },
+    ])('It removes temporary resources after rejecting %j', async (options) => {
+        const r = await buildUploadRequest({ filename: 'logo.png', contentType: 'image/png', content: pngContent, ...options });
+        await expect(testServer.test(endpoint, r)).rejects.toThrow();
+        expect(await fs.readdir(uploadDirectory)).toEqual([]);
+        expect(uploads).toHaveLength(0);
+    });
 
     /**
      * Rejects excessive variant counts, invalid dimensions and per-variant or total
