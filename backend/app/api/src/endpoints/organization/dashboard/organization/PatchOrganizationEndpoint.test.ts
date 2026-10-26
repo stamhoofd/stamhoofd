@@ -1,6 +1,6 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, User, Webshop, Token } from '@stamhoofd/models';
-import { EventFactory, GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, RegistrationPeriodFactory, UserFactory, WebshopFactory } from '@stamhoofd/models';
+import { EventFactory, GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, Platform, RegistrationPeriodFactory, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
@@ -57,29 +57,6 @@ describe('Endpoint.PatchOrganization', () => {
         expect(organization.language).toBeNull();
     });
 
-    test('Change the name of the organization', async () => {
-        const organization = await new OrganizationFactory({}).create();
-        const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
-        // const groups = await new GroupFactory({ organization }).createMultiple(2)
-        const token = await SessionService.createSession(user);
-
-        const r = Request.buildJson('PATCH', '/v2/organization', organization.getApiHost(), {
-            id: organization.id,
-            name: 'My crazy name',
-        });
-        r.headers.authorization = 'Bearer ' + token.accessToken;
-
-        const response = await testServer.test(endpoint, r);
-        expect(response.body).toBeDefined();
-
-        if (!(response.body instanceof OrganizationStruct)) {
-            throw new Error('Expected Organization');
-        }
-
-        expect(response.body.id).toEqual(organization.id);
-        expect(response.body.name).toEqual('My crazy name');
-    });
-
     test("Can't change organization as a normal user", async () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({ organization }).create();
@@ -106,6 +83,130 @@ describe('Endpoint.PatchOrganization', () => {
         r.headers.authorization = 'Bearer ' + token.accessToken;
 
         await expect(testServer.test(endpoint, r)).rejects.toThrow(/permissions/i);
+    });
+
+    describe('Change the name', () => {
+        const setOnlyAdminCanChangeOrganizationName = async (value: boolean) => {
+            const platform = await Platform.getForEditing();
+            platform.config.onlyAdminCanChangeOrganizationName = value;
+            await platform.save();
+        };
+
+        afterEach(async () => {
+            await setOnlyAdminCanChangeOrganizationName(false);
+        });
+
+        test('Change the name of the organization', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            // const groups = await new GroupFactory({ organization }).createMultiple(2)
+            const token = await SessionService.createSession(user);
+
+            const r = Request.buildJson('PATCH', '/v2/organization', organization.getApiHost(), {
+                id: organization.id,
+                name: 'My crazy name',
+            });
+            r.headers.authorization = 'Bearer ' + token.accessToken;
+
+            const response = await testServer.test(endpoint, r);
+            expect(response.body).toBeDefined();
+
+            if (!(response.body instanceof OrganizationStruct)) {
+                throw new Error('Expected Organization');
+            }
+
+            expect(response.body.id).toEqual(organization.id);
+            expect(response.body.name).toEqual('My crazy name');
+        });
+
+        test('Changing the name fails if only platform admins can change it (non-admin)', async () => {
+            await setOnlyAdminCanChangeOrganizationName(true);
+
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const token = await SessionService.createSession(user);
+
+            const r = Request.buildJson('PATCH', '/v2/organization', organization.getApiHost(), {
+                id: organization.id,
+                name: 'My crazy name',
+            });
+            r.headers.authorization = 'Bearer ' + token.accessToken;
+
+            await expect(testServer.test(endpoint, r)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+        });
+
+        test('Changing the name fails if only platform admins can change it (full access through organization tags)', async () => {
+            await setOnlyAdminCanChangeOrganizationName(true);
+
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                globalPermissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources: new Map([[PermissionsResourceType.OrganizationTags, new Map([[
+                        PermissionsResourceKey.All,
+                        ResourcePermissions.create({ level: PermissionLevel.Full }),
+                    ]])]]),
+                }),
+            }).create();
+            const token = await SessionService.createSession(user);
+
+            await expect(patchOrganization({
+                patch: OrganizationStruct.patch({ id: organization.id, name: 'My crazy name' }),
+                organization,
+                token,
+            })).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+
+            // Proves the rejection comes from the name check and not from missing access to the organization
+            const response = await patchOrganization({
+                patch: OrganizationStruct.patch({ id: organization.id, website: 'https://example.com' }),
+                organization,
+                token,
+            });
+            expect(response.body.website).toEqual('https://example.com');
+        });
+
+        test('Patching the unchanged name succeeds if only platform admins can change it (non-admin)', async () => {
+            await setOnlyAdminCanChangeOrganizationName(true);
+
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const token = await SessionService.createSession(user);
+
+            const response = await patchOrganization({
+                patch: OrganizationStruct.patch({ id: organization.id, name: organization.name, website: 'https://example.com' }),
+                organization,
+                token,
+            });
+
+            expect(response.body.name).toEqual(organization.name);
+            expect(response.body.website).toEqual('https://example.com');
+        });
+
+        test('Change the name of the organization if only platform admins can change it (admin)', async () => {
+            await setOnlyAdminCanChangeOrganizationName(true);
+
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ organization, globalPermissions: Permissions.create({
+                level: PermissionLevel.Full,
+            }) }).create();
+            const token = await SessionService.createSession(user);
+
+            const r = Request.buildJson('PATCH', '/v2/organization', organization.getApiHost(), {
+                id: organization.id,
+                name: 'My crazy name',
+            });
+            r.headers.authorization = 'Bearer ' + token.accessToken;
+
+            const response = await testServer.test(endpoint, r);
+            expect(response.body).toBeDefined();
+
+            if (!(response.body instanceof OrganizationStruct)) {
+                throw new Error('Expected Organization');
+            }
+
+            expect(response.body.id).toEqual(organization.id);
+            expect(response.body.name).toEqual('My crazy name');
+        });
     });
 
     describe('Edit access to webshop', () => {

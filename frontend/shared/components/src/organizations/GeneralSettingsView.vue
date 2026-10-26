@@ -13,8 +13,11 @@
         <div class="split-inputs">
             <div>
                 <STInputBox :title="$t('%8D')" error-fields="name" :error-box="errors.errorBox">
-                    <input id="organization-name" ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('%8C')" autocomplete="organization">
+                    <input id="organization-name" ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('%8C')" autocomplete="organization" :disabled="!canEditOrganizationName">
                 </STInputBox>
+                <p v-if="!canEditOrganizationName" class="style-description-small">
+                    {{ $t('Enkel een platformbeheerder kan de naam van een vereniging aanpassen') }}
+                </p>
 
                 <AddressInput v-model="address" :title="$t('%8a')" :validator="errors.validator" :link-country-to-locale="true" :optional-except-city="STAMHOOFD.userMode !== 'platform'" />
             </div>
@@ -48,7 +51,8 @@
             </p>
         </template>
 
-        <hr><h2>{{ $t('%1Ke') }}</h2>
+        <hr>
+        <h2>{{ $t('%1Ke') }}</h2>
         <p>{{ $t('%gC') }}</p>
 
         <p v-if="draggableCompanies.length === 0" class="info-box">
@@ -74,7 +78,8 @@
         </p>
 
         <div v-for="category of recordCategories" :key="category.id" class="container">
-            <hr><FillRecordCategoryBox :category="category" :value="patched" :validator="errors.validator" :level="2" :all-optional="false" :force-mark-reviewed="true" @patch="patchAnswers" />
+            <hr>
+            <FillRecordCategoryBox :category="category" :value="patched" :validator="errors.validator" :level="2" :all-optional="false" :force-mark-reviewed="true" @patch="patchAnswers" />
         </div>
     </SaveView>
 </template>
@@ -110,7 +115,7 @@ import CompanyRow from '../companies/CompanyRow.vue';
 
 const props = defineProps<{ isReview?: boolean }>();
 
-const title = computed(() => props.isReview ? $t('%4d') : $t(`%10T`));
+const title = computed(() => props.isReview ? $t('%4d') : $t('%10T'));
 const organizationManager = useOrganizationManager();
 const platform = usePlatform();
 const auth = useAuth();
@@ -125,6 +130,12 @@ const present = usePresent();
 const { patched, hasChanges, addPatch, patch } = usePatch(computed(() => organizationManager.value.organization));
 
 const { overrideIsDone, hasChanges: hasReviewChanges, save: saveReview, reviewCheckboxData } = useReview(SetupStepType.Companies);
+
+const canEditOrganizationName = computed(() => {
+    if (!platform.value.config.onlyAdminCanChangeOrganizationName) return true;
+
+    return auth.hasPlatformFullAccess();
+});
 
 const hasSomeChanges = computed(() => {
     if (props.isReview) {

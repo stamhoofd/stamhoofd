@@ -15,6 +15,10 @@ import { OrganizationEmail } from './OrganizationEmail.js';
 import { OrganizationLevelRecordsConfiguration } from './OrganizationLevelRecordsConfiguration.js';
 import { PermissionRoleDetailed } from './PermissionRole.js';
 import { PlatformMembershipTypeBehaviour } from './PlatformMembershipTypeBehaviour.js';
+import { ReduceablePrice } from './ReduceablePrice.js';
+import { RegistrationPeriod } from './RegistrationPeriod.js';
+import { RichText } from './RichText.js';
+import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 /**
  * Re-exported so `export * from './Platform.js'` in index.ts keeps exposing it to consumers of
@@ -24,10 +28,6 @@ import { PlatformMembershipTypeBehaviour } from './PlatformMembershipTypeBehavio
  * of those modules reintroduces the cycle.
  */
 export { PlatformMembershipTypeBehaviour } from './PlatformMembershipTypeBehaviour.js';
-import { ReduceablePrice } from './ReduceablePrice.js';
-import { RegistrationPeriod } from './RegistrationPeriod.js';
-import { RichText } from './RichText.js';
-import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 export class PlatformPrivateConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRoleDetailed) })
@@ -60,26 +60,26 @@ export enum OrganizationTagType {
 export function getOrganizationTagTypeName(type: OrganizationTagType): string {
     switch (type) {
         case OrganizationTagType.Tag:
-            return $t(`%2T`);
+            return $t('%2T');
         case OrganizationTagType.Verbond:
-            return $t(`%n5`);
+            return $t('%n5');
         case OrganizationTagType.Gewest:
-            return $t(`%n6`);
+            return $t('%n6');
         case OrganizationTagType.Gouw:
-            return $t(`%n7`);
+            return $t('%n7');
     }
 }
 
 export function getOrganizationTagTypePluralName(type: OrganizationTagType): string {
     switch (type) {
         case OrganizationTagType.Tag:
-            return $t(`%2C`);
+            return $t('%2C');
         case OrganizationTagType.Verbond:
-            return $t(`%n8`);
+            return $t('%n8');
         case OrganizationTagType.Gewest:
-            return $t(`%n9`);
+            return $t('%n9');
         case OrganizationTagType.Gouw:
-            return $t(`%nA`);
+            return $t('%nA');
     }
 }
 
@@ -196,9 +196,9 @@ export class PlatformMembershipTypeConfigPrice extends AutoEncoder {
 
     get name() {
         if (this.startDate) {
-            return $t(`%nB`) + ' ' + Formatter.date(this.startDate);
+            return $t('%nB') + ' ' + Formatter.date(this.startDate);
         }
-        return $t(`%nC`);
+        return $t('%nC');
     }
 }
 
@@ -525,6 +525,9 @@ export class PlatformConfig extends AutoEncoder {
         LoginMethod.Password,
         LoginMethodConfig.create({}),
     ]]);
+
+    @field({ decoder: BooleanDecoder, optional: true, ...NextVersion })
+    onlyAdminCanChangeOrganizationName = false;
 
     getEmailReplacements(platform: { privateConfig: PlatformPrivateConfig | null }, isPreviewing = false) {
         const base = [

@@ -66,7 +66,8 @@
             </STListItem>
         </STList>
 
-        <hr><h2>{{ $t('%HJ') }}</h2>
+        <hr>
+        <h2>{{ $t('%HJ') }}</h2>
 
         <STList>
             <CheckboxListItem :model-value="getLoginMethod(LoginMethod.Password)" :label="$t(`%HK`)" @update:model-value="setLoginMethod(LoginMethod.Password, !!$event)">
@@ -86,7 +87,8 @@
             </CheckboxListItem>
         </STList>
 
-        <hr><h2>
+        <hr>
+        <h2>
             {{ $t('%HF') }}
         </h2>
 
@@ -124,6 +126,10 @@
         <Checkbox :model-value="getFeatureFlag('mailchimp')" @update:model-value="setFeatureFlag('mailchimp', !!$event)">
             {{ $t('%Zui') }}
         </Checkbox>
+
+        <Checkbox v-model="onlyAdminCanChangeOrganizationName">
+            {{ $t('Naam vereniging enkel aanpasbaar door platformbeheerders') }}
+        </Checkbox>
     </SaveView>
 </template>
 
@@ -139,6 +145,7 @@ import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePatchPlatform } from '@stamhoofd/components/hooks/usePatchPlatform.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import CheckboxListItem from '@stamhoofd/components/inputs/CheckboxListItem.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
@@ -182,6 +189,17 @@ const requireTwoFactor = computed({
         addPatch({
             privateConfig: PlatformPrivateConfig.patch({
                 requireTwoFactor,
+            }),
+        });
+    },
+});
+
+const onlyAdminCanChangeOrganizationName = computed({
+    get: () => patched.value.config.onlyAdminCanChangeOrganizationName,
+    set: (onlyAdminCanChangeOrganizationName: boolean) => {
+        addPatch({
+            config: PlatformConfig.patch({
+                onlyAdminCanChangeOrganizationName,
             }),
         });
     },
@@ -297,14 +315,14 @@ function getLoginMethodProvider(loginMethod: LoginMethod) {
 
 function getLoginMethodTitle(loginMethod: LoginMethod) {
     if (loginMethod === LoginMethod.Password) {
-        return $t(`%HK`);
+        return $t('%HK');
     }
 
     if (loginMethod === LoginMethod.Google) {
-        return $t(`%1p`);
+        return $t('%1p');
     }
 
-    return $t(`%2b`);
+    return $t('%2b');
 }
 
 async function save() {
@@ -324,7 +342,7 @@ async function save() {
         const startedRequiringTwoFactor = !platform.value.privateConfig?.requireTwoFactor && requireTwoFactor.value;
 
         await patchPlatform(patch.value);
-        new Toast($t(`%HA`), 'success green').show();
+        new Toast($t('%HA'), 'success green').show();
 
         if (startedRequiringTwoFactor) {
             // After the patch, so the admins that sign in again already meet the new requirement
