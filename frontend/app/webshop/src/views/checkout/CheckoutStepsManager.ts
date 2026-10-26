@@ -9,6 +9,7 @@ import { Checkout, CheckoutMethodType, WebshopOrderMode } from '@stamhoofd/struc
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 import { customerFieldKeys } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 import { Formatter } from '@stamhoofd/utility';
+import { getUnitName } from '@stamhoofd/components/helpers/webshopWording.ts';
 
 import { patchObject } from '@common/encoding';
 import type { CheckoutManager } from '../../classes/CheckoutManager';
@@ -106,8 +107,13 @@ export class CheckoutStepsManager {
             const id = CheckoutStepsManager.seatsStepId(product);
             steps.push(new CheckoutStep({
                 id,
+                // With more than one seated product, the steps are told apart by product
+                title: seatedProducts.length > 1 ? product.name : $t('%sB'),
                 url: '/checkout/seats/' + Formatter.slug(product.name),
-                getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './BulkSeatsView.vue').then(m => new ComponentWithProperties(m.default, { product })),
+                getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './BulkSeatsView.vue').then(m => new ComponentWithProperties(m.default, {
+                    product,
+                    continueCheckout: (navigate: NavigationActions) => this.goNext(id, navigate),
+                })),
                 validate: (checkout) => {
                     const missing = checkout.cart.items.filter(i => i.product.id === product.id && i.seats.length !== i.amount);
                     if (missing.length > 0) {
@@ -122,11 +128,17 @@ export class CheckoutStepsManager {
             }));
         }
 
+        // Named after what the items are when they are all the same kind, e.g. "Deelnemers"
+        const detailsUnitNames = new Set(checkout.cart.items.filter(i => cartItemNeedsDetails(i)).map(i => getUnitName(webshop, i.product).plural));
+
         steps.push(new CheckoutStep({
             id: CheckoutStepType.Details,
+            title: detailsUnitNames.size === 1 ? Formatter.capitalizeFirstLetter([...detailsUnitNames][0]) : $t('Details'),
             url: '/checkout/' + CheckoutStepType.Details.toLowerCase(),
-            active: bulk && checkout.cart.items.some(i => cartItemNeedsDetails(i)),
-            getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './BulkItemDetailsView.vue').then(m => new ComponentWithProperties(m.default, {})),
+            active: bulk && detailsUnitNames.size > 0,
+            getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './BulkItemDetailsView.vue').then(m => new ComponentWithProperties(m.default, {
+                continueCheckout: (navigate: NavigationActions) => this.goNext(CheckoutStepType.Details, navigate),
+            })),
             validate: () => {
                 // Items are validated by validateCart at the start of getNextStep
             },

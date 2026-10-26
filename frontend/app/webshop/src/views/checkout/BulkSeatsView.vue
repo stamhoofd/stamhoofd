@@ -19,7 +19,8 @@
             <STErrorsDefault :error-box="errorBox" />
 
             <div v-for="(seatingPlanSection, index) of seatingPlan.sections" :key="seatingPlanSection.id" class="container">
-                <hr v-if="index > 0"><h2 v-if="seatingPlan.sections.length > 1 && seatingPlanSection.name">
+                <hr v-if="index > 0">
+                <h2 v-if="seatingPlan.sections.length > 1 && seatingPlanSection.name">
                     {{ seatingPlanSection.name }}
                 </h2>
 
@@ -47,6 +48,7 @@ import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
+import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import SeatSelectionBox from '@stamhoofd/components/views/SeatSelectionBox.vue';
 import type { Product, ReservedSeat } from '@stamhoofd/structures';
@@ -54,12 +56,13 @@ import { CartReservedSeat } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 
+import { useCheckoutContinue } from '../../composables/useCheckoutContinue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
 import { useWebshopManager } from '../../composables/useWebshopManager';
-import { CheckoutStepsManager } from './CheckoutStepsManager';
 
 const props = defineProps<{
     product: Product;
+    continueCheckout: (navigate: NavigationActions) => Promise<void>;
 }>();
 
 const checkoutManager = useCheckoutManager();
@@ -81,16 +84,16 @@ const seatingPlan = computed(() => webshop.value.meta.seatingPlans.find(p => p.i
 
 const title = computed(() => {
     if (remainingAmount.value === 0) {
-        return $t(`%12X`) + '.';
+        return $t('%12X') + '.';
     }
 
     if (remainingAmount.value === amount.value) {
-        return $t('Kies {seats}.', { seats: Formatter.pluralText(remainingAmount.value, $t(`%12Y`), $t(`%UL`)) });
+        return $t('Kies {seats}.', { seats: Formatter.pluralText(remainingAmount.value, $t('%12Y'), $t('%UL')) });
     }
-    return $t('Kies nog {seats}.', { seats: Formatter.pluralText(remainingAmount.value, $t(`%12Y`), $t(`%UL`)) });
+    return $t('Kies nog {seats}.', { seats: Formatter.pluralText(remainingAmount.value, $t('%12Y'), $t('%UL')) });
 });
 
-const description = computed(() => $t(`%12Z`) + ' ' + Formatter.pluralText(amount.value, $t(`%12Y`), $t(`%UL`)) + ' ' + $t(`%12a`));
+const description = computed(() => $t('%12Z') + ' ' + Formatter.pluralText(amount.value, $t('%12Y'), $t('%UL')) + ' ' + $t('%12a'));
 
 // Date and location so the visitor knows which performance these seats are for
 const productInfo = computed(() => {
@@ -114,6 +117,8 @@ function setSeats(newSeats: ReservedSeat[]) {
     seats.value = newSeats.map(s => CartReservedSeat.create(s));
 }
 
+useCheckoutContinue(save);
+
 async function save() {
     if (loading.value || !seatingPlan.value) {
         return;
@@ -126,7 +131,7 @@ async function save() {
             setSeats(adjusted);
             errorBox.value = new ErrorBox(new SimpleError({
                 code: 'adjusted',
-                message: $t(`%12b`),
+                message: $t('%12b'),
             }));
             return;
         }
@@ -136,7 +141,7 @@ async function save() {
         errorBox.value = new ErrorBox(new SimpleError({
             code: 'invalid_seats',
             message: 'Invalid seats',
-            human: $t(`%sM`, { seats: Formatter.pluralText(amount.value - seats.value.length, $t(`%12Y`), $t(`%UL`)) }),
+            human: $t('%sM', { seats: Formatter.pluralText(amount.value - seats.value.length, $t('%12Y'), $t('%UL')) }),
         }));
         return;
     }
@@ -153,7 +158,7 @@ async function save() {
     checkoutManager.saveCart();
 
     try {
-        await CheckoutStepsManager.for(checkoutManager).goNext(CheckoutStepsManager.seatsStepId(props.product), navigationActions);
+        await props.continueCheckout(navigationActions);
     } catch (e) {
         console.error(e);
         errorBox.value = new ErrorBox(e);

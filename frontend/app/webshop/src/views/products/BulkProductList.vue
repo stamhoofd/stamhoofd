@@ -84,7 +84,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, ref } from 'vue';
 
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
-import { getProductListTitle } from '../../classes/webshopWording';
+import { getProductListTitle } from '@stamhoofd/components/helpers/webshopWording.ts';
 import { useWebshopManager } from '../../composables/useWebshopManager';
 
 const webshopManager = useWebshopManager();
@@ -233,7 +233,7 @@ function onAmountInput(product: Product, price: ProductPrice, event: Event) {
     const max = getMaximum(product, price);
     if (max !== null && amount > max) {
         amount = max;
-        Toast.warning($t(`%zD`)).show();
+        Toast.warning($t('%zD')).show();
     }
     setAmount(product, price, amount);
     input.value = amount ? amount.toString() : '';

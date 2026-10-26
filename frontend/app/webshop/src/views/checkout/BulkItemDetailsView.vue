@@ -29,7 +29,8 @@
                 <FieldBox v-for="field in entry.item.product.customFields" :key="field.id" :field="field" :answers="entry.item.fieldAnswers" :error-box="entry.errors.errorBox" />
 
                 <template v-if="entry.item.productPrice.uitpasBaseProductPriceId !== null && entry.item.uitpasNumbers[0]">
-                    <hr><h3>{{ $t('%wF') }}</h3>
+                    <hr>
+                    <h3>{{ $t('%wF') }}</h3>
                     <UitpasNumberInput v-model="entry.item.uitpasNumbers[0].uitpasNumber" :placeholder="$t('Geef het UiTPAS-nummer in')" class="max" :validator="entry.errors.validator" :required="true" error-fields="uitpasNumbers.0" :error-box="entry.errors.errorBox" />
                 </template>
             </div>
@@ -50,6 +51,7 @@ import UitpasNumberInput from '@stamhoofd/components/inputs/UitpasNumberInput.vu
 import CategorizedBox from '@stamhoofd/components/layout/categorized-view/CategorizedBox.vue';
 import CategorizedView from '@stamhoofd/components/layout/categorized-view/CategorizedView.vue';
 import FillRecordCategoryBox from '@stamhoofd/components/records/components/FillRecordCategoryBox.vue';
+import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import CustomerInputs from '@stamhoofd/components/views/CustomerInputs.vue';
 import FieldBox from '@stamhoofd/components/views/FieldBox.vue';
@@ -59,13 +61,14 @@ import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useReque
 import type { CartItem, PatchAnswers } from '@stamhoofd/structures';
 import { Customer, ProductType, UitpasNumberAndPrice, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, onActivated, reactive, ref, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 
 import { validateUitpasNumbers } from '@stamhoofd/components/views/validateUitpasNumbers.ts';
-import { getUnitName } from '../../classes/webshopWording';
+import { getUnitName } from '@stamhoofd/components/helpers/webshopWording.ts';
+import { useCheckoutContinue } from '../../composables/useCheckoutContinue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
 import { useWebshopManager } from '../../composables/useWebshopManager';
-import { cartItemNeedsDetails, CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
+import { cartItemNeedsDetails } from './CheckoutStepsManager';
 
 interface ItemErrors {
     errorBox: ErrorBox | null;
@@ -73,6 +76,10 @@ interface ItemErrors {
     /** Encoded item at the time the error was set: the error disappears once the visitor edits the item */
     snapshot: string | null;
 }
+
+const props = defineProps<{
+    continueCheckout: (navigate: NavigationActions) => Promise<void>;
+}>();
 
 const loading = ref(false);
 const errors = useErrors();
@@ -203,13 +210,15 @@ function showCartError(error: unknown) {
     errors.errorBox = matched ? null : new ErrorBox(error);
 }
 
-onActivated(() => {
-    const pending = checkoutManager.pendingCartError;
+// Set by handleCartError after it popped back to this step, which can stay mounted below the later steps
+watch(() => checkoutManager.pendingCartError, (pending) => {
     if (pending) {
         checkoutManager.pendingCartError = null;
         showCartError(pending);
     }
-});
+}, { immediate: true });
+
+useCheckoutContinue(goNext);
 
 async function goNext() {
     if (loading.value) {
@@ -249,7 +258,7 @@ async function goNext() {
     checkoutManager.saveCart();
 
     try {
-        await CheckoutStepsManager.for(checkoutManager).goNext(CheckoutStepType.Details, navigationActions);
+        await props.continueCheckout(navigationActions);
     } catch (e) {
         console.error(e);
         // handleCartError already ran (no navigation needed: this is the details step)
