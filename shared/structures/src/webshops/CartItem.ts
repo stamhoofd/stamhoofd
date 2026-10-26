@@ -917,6 +917,16 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
             }
         }
 
+        // A seating plan is required even for admins or when seat availability
+        // validation is skipped; client-supplied seats cannot belong to an ordinary item.
+        if (!this.product.seatingPlanId && this.seats.length > 0) {
+            throw new SimpleError({
+                code: 'invalid_seats',
+                message: 'Seats require a seating plan',
+                human: $t('Dit product heeft geen zitplaatsen. Verwijder de zitplaatsen en probeer opnieuw.'),
+            });
+        }
+
         if (this.product.seatingPlanId && validateSeats) {
             const seatingPlan = webshop.meta.seatingPlans.find(s => s.id === this.product.seatingPlanId);
             if (!seatingPlan) {
