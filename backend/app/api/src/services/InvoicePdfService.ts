@@ -269,7 +269,11 @@ export class InvoicePdfService {
         console.log('html length:', html.length);
         form.append('html', new Blob([html], { type: 'text/html' }));
         form.append('cacheId', cacheId);
-        form.append('signature', signInternal(cacheId, invoice.updatedAt.getTime().toString(), html));
+        // Bind the renderer grant to this invoice version and the exact uploaded HTML;
+        // the operation prefix prevents using it as a PDF cache-read grant.
+        const expires = String(Date.now() + 60000);
+        form.append('expires', expires);
+        form.append('signature', signInternal('html-to-pdf', cacheId, invoice.updatedAt.getTime().toString(), expires, html));
         form.append('timestamp', invoice.updatedAt.getTime().toString());
 
         const controller = new AbortController();

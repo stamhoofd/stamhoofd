@@ -46,14 +46,15 @@ describe('HTML PDF multipart cleanup', () => {
      */
     function request(mode: string) {
         const boundary = 'StamhoofdRendererTest';
+        const expires = String(Date.now() + (mode === 'expired authorization' ? -1000 : 60000));
         const fields: Record<string, string> = {
             cacheId,
             timestamp,
-            signature: signInternal(cacheId, timestamp, html),
+            expires,
+            signature: signInternal('html-to-pdf', cacheId, timestamp, expires, html),
         };
         if (mode === 'missing signature') delete fields.signature;
         if (mode === 'invalid signature') fields.signature = 'invalid';
-        if (mode === 'expired authorization') fields.expires = String(Date.now() - 1000);
         let body = `--${boundary}\r\nContent-Disposition: form-data; name="html"; filename="document.html"\r\nContent-Type: text/html\r\n\r\n${html}\r\n`;
         for (const [name, value] of Object.entries(fields)) {
             body += `--${boundary}\r\nContent-Disposition: form-data; name="${name}"\r\n\r\n${value}\r\n`;

@@ -7,9 +7,28 @@ import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext'
 import type { Document } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
+/**
+ * Fetches currently authorized HTML and renderer grants through the session's API,
+ * then returns the exact API-selected version as a cached or newly rendered PDF.
+ * The supplied document identifies the resource; its local updatedAt is not used
+ * to select a version. The optional owner is forwarded to every network request.
+ * Aborts propagate; other cache-read failures fall back to signed HTML rendering.
+ */
 export async function getDocumentPdfBlob($context: SessionContext, document: Document, owner?: any): Promise<Blob> {
-    const cacheId = 'document-' + document.id;
-    const timestamp = document.updatedAt.getTime();
+    // Recheck current document permissions before every renderer cache lookup.
+    const response = await $context.authenticatedServer.request({
+        method: 'GET',
+        path: '/documents/' + encodeURIComponent(document.id) + '/html',
+        shouldRetry: true,
+        timeout: 60 * 1000,
+        owner,
+        responseType: 'blob',
+    });
+
+    if (!response.headers['x-cache-id'] || !response.headers['x-cache-timestamp'] || !response.headers['x-cache-signature']
+        || !response.headers['x-cache-expires'] || !response.headers['x-cache-read-signature']) {
+        throw new Error('Missing cache headers');
+    }
 
     // Check if we have a cached version available
     try {
@@ -17,8 +36,10 @@ export async function getDocumentPdfBlob($context: SessionContext, document: Doc
             method: 'GET',
             path: '/pdf-cache',
             query: {
-                cacheId,
-                timestamp,
+                cacheId: response.headers['x-cache-id'],
+                timestamp: response.headers['x-cache-timestamp'],
+                expires: response.headers['x-cache-expires'],
+                signature: response.headers['x-cache-read-signature'],
             },
             shouldRetry: true,
             timeout: 60 * 1000,
@@ -42,19 +63,6 @@ export async function getDocumentPdfBlob($context: SessionContext, document: Doc
         }
     }
 
-    const response = await $context.authenticatedServer.request({
-        method: 'GET',
-        path: '/documents/' + encodeURIComponent(document.id) + '/html',
-        shouldRetry: true,
-        timeout: 60 * 1000,
-        owner,
-        responseType: 'blob',
-    });
-
-    if (!response.headers['x-cache-id'] || !response.headers['x-cache-timestamp'] || !response.headers['x-cache-signature']) {
-        throw new Error('Missing cache headers');
-    }
-
     /* if (STAMHOOFD.environment === 'development') {
         // Return html
         return response.data as Buffer;
@@ -66,6 +74,7 @@ export async function getDocumentPdfBlob($context: SessionContext, document: Doc
     form.append('cacheId', response.headers['x-cache-id'] as string);
     form.append('timestamp', response.headers['x-cache-timestamp'] as string);
     form.append('signature', response.headers['x-cache-signature'] as string);
+    form.append('expires', response.headers['x-cache-expires'] as string);
 
     // Convert to PDF
     const pdfResponse = await NetworkManager.rendererServer.request({
