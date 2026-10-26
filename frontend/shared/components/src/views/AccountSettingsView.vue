@@ -2,7 +2,7 @@
     <div id="account-view" class="st-view">
         <STNavigationBar :title="$t('%E')" />
 
-        <main class="center">
+        <main>
             <h1>
                 {{ $t("%E") }}
             </h1>

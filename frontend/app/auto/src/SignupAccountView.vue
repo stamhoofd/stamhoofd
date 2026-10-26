@@ -2,7 +2,7 @@
     <form id="signup-account-view" class="st-view" @submit.prevent="goNext">
         <STNavigationBar :title="$t(`%WQ`)" />
 
-        <main class="center small">
+        <main class="small">
             <aside class="style-title-prefix">
                 {{ $t('%1PQ', {current: 2, total: 2}) }}
             </aside>

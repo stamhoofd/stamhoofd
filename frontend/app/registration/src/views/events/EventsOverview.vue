@@ -2,7 +2,7 @@
     <div class="st-view" data-testid="events-overview">
         <STNavigationBar :title="$t(`%uB`)" />
 
-        <main class="center">
+        <main>
             <h1>
                 {{ $t('%uB') }}
             </h1>

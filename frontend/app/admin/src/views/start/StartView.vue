@@ -1,7 +1,7 @@
 <template>
     <section class="st-view" data-testid="platform-start-view">
         <STNavigationBar :title="$t(`%IW`)" />
-        <main class="center">
+        <main>
             <h1>
                 {{ $t('%IW') }}
             </h1>

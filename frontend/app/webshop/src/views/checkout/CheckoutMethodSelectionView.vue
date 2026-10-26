@@ -38,6 +38,7 @@ import { CheckoutMethodType } from '@stamhoofd/structures';
 
 import { computed, ref } from 'vue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
+import { useCheckoutContinue } from '../../composables/useCheckoutContinue';
 import { useWebshopManager } from '../../composables/useWebshopManager';
 
 const props = defineProps<{
@@ -77,6 +78,8 @@ function getTypeName(type: CheckoutMethodType) {
         case CheckoutMethodType.OnSite: return 'Ter plaatse consumeren';
     }
 }
+
+useCheckoutContinue(goNext);
 
 async function goNext() {
     if (loading.value || !selectedMethod.value) {

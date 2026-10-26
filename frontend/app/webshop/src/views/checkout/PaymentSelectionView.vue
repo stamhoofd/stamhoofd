@@ -1,43 +1,67 @@
 <template>
-    <SaveView :title="title" :loading="loading" :save-text="confirmText" :prefer-large-button="true" data-testid="payment-step" @save="goNext">
-        <template v-if="checkout.totalPrice > 0" #left>
-            <span>{{ $t('%xL') }}: {{ formatPrice(checkout.totalPrice) }}</span>
+    <PreviewPanel>
+        <template #default="{ wide }">
+            <SaveView :title="title" :loading="loading" :save-text="confirmText" :save-icon="confirmIcon" :prefer-large-button="true" :hide-toolbar="wide" data-testid="payment-step" @save="goNext">
+                <h1 class="larger">
+                    {{ title }}
+                </h1>
+
+                <p v-if="isTrial" class="warning-box">
+                    {{ $t('%Xw') }}
+                </p>
+
+                <template v-if="checkout.totalPrice > 0">
+                    <STErrorsDefault :error-box="errors.errorBox" />
+                    <PaymentSelectionList v-model="selectedPaymentMethod" :payment-configuration="paymentConfiguration" :amount="checkout.totalPrice" :country="organization.address.country" :context="paymentContext" />
+                </template>
+                <template v-else>
+                    <p>{{ freeDescription }}</p>
+                    <STErrorsDefault :error-box="errors.errorBox" />
+                </template>
+
+                <PreviewOutlet />
+            </SaveView>
         </template>
 
-        <h1>{{ title }}</h1>
-
-        <p v-if="isTrial" class="warning-box">
-            {{ $t('%Xw') }}
-        </p>
-
-        <template v-if="checkout.totalPrice > 0">
-            <STErrorsDefault :error-box="errors.errorBox" />
-            <PaymentSelectionList v-model="selectedPaymentMethod" :payment-configuration="paymentConfiguration" :amount="checkout.totalPrice" :country="organization.address.country" :context="paymentContext" />
+        <template #preview>
+            <CartPreview :with-customer="true" />
         </template>
-        <template v-else>
-            <p>{{ $t('%Xx') }}</p>
-            <STErrorsDefault :error-box="errors.errorBox" />
+
+        <!-- On desktop the confirm button moves below the cart -->
+        <template #actions>
+            <LoadingButton :loading="loading" class="max">
+                <button class="button primary full" type="button" data-testid="preview-confirm-button" @click="goNext">
+                    <span class="icon" :class="confirmIcon" />
+                    <span>{{ confirmText }}</span>
+                </button>
+            </LoadingButton>
         </template>
-    </SaveView>
+    </PreviewPanel>
 </template>
 
 <script lang="ts" setup>
 import type { Decoder } from '@simonbackx/simple-encoding';
-import { ReactiveUrl, usePopup } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+import { ReactiveUrl } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import PreviewOutlet from '@stamhoofd/components/layout/PreviewOutlet.vue';
+import PreviewPanel from '@stamhoofd/components/layout/PreviewPanel.vue';
+import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { PaymentHandler } from '@stamhoofd/components/views/PaymentHandler.ts';
 import PaymentSelectionList from '@stamhoofd/components/views/PaymentSelectionList.vue';
 import type { Payment } from '@stamhoofd/structures';
-import { OrderData, OrderResponse, PaymentMethod, WebshopType } from '@stamhoofd/structures';
+import { OrderData, OrderResponse, PaymentMethod, PaymentMethodHelper, WebshopType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
 import { useWebshopManager } from '../../composables/useWebshopManager';
+import { getOrderComponent } from '../orders/getOrderComponent';
+import CartPreview from './CartPreview.vue';
+import type { CartKind } from './useCartKind';
+import { useCartKind } from './useCartKind';
 
 const props = defineProps<{
     handleCheckoutError: (error: unknown, navigate: NavigationActions) => Promise<void>;
@@ -45,16 +69,37 @@ const props = defineProps<{
 
 const loading = ref(false);
 const errors = useErrors();
-const popup = usePopup();
 const navigationActions = useNavigationActions();
 const checkoutManager = useCheckoutManager();
 const webshopManager = useWebshopManager();
+
+const cartKind = useCartKind();
 
 const title = computed(() => {
     if (checkout.value.totalPrice > 0) {
         return $t('%1Dn');
     }
-    return $t('%1Do');
+    const texts: Record<CartKind, string> = {
+        donation: $t('Bevestig jouw bijdrage'),
+        ticket: $t('Bevestig jouw ticket'),
+        tickets: $t('Bevestig jouw tickets'),
+        registration: $t('Bevestig jouw inschrijving'),
+        registrations: $t('Bevestig jouw inschrijvingen'),
+        order: $t('%1Do'),
+    };
+    return texts[cartKind.value];
+});
+
+const freeDescription = computed(() => {
+    const texts: Record<CartKind, string> = {
+        donation: $t('Jouw bijdrage is definitief zodra je bevestigt.'),
+        ticket: $t('Je ontvangt jouw ticket zodra je bevestigt.'),
+        tickets: $t('Je ontvangt jouw tickets zodra je bevestigt.'),
+        registration: $t('Jouw inschrijving is definitief zodra je bevestigt.'),
+        registrations: $t('Jouw inschrijvingen zijn definitief zodra je bevestigt.'),
+        order: $t('%Xx'),
+    };
+    return texts[cartKind.value];
 });
 
 const selectedPaymentMethod = computed<PaymentMethod | null>({
@@ -72,7 +117,17 @@ const organization = computed(() => webshopManager.organization);
 const isTrial = computed(() => organization.value.meta.packages.isWebshopsTrial);
 const paymentConfiguration = computed(() => webshop.value.meta.paymentConfiguration);
 
+// An online payment continues to the payment provider, other methods (transfer, point of sale) only confirm the order
+const isOnlinePayment = computed(() => {
+    const method = selectedPaymentMethod.value;
+    return checkout.value.totalPrice > 0 && !!method && PaymentMethodHelper.isOnline(method);
+});
+
 const confirmText = computed(() => {
+    if (isOnlinePayment.value) {
+        return $t('%eX');
+    }
+
     if (webshop.value.meta.type === WebshopType.Donations) {
         return $t('%Zkm');
     }
@@ -91,6 +146,8 @@ const confirmText = computed(() => {
     return $t('%X9');
 });
 
+const confirmIcon = computed(() => isOnlinePayment.value ? 'card' : 'success');
+
 async function goToOrder(id: string, args: NavigationActions) {
     // Force reload webshop (stock will have changed: prevent invalidating the cart)
     // Update stock in background
@@ -98,38 +155,12 @@ async function goToOrder(id: string, args: NavigationActions) {
         console.error(e);
     });
 
-    if (!popup) {
-        // We are not in a popup: on mobile
-        // So replace with a force instead of dimissing
-        await args.present({
-            components: [
-                AsyncComponent(() => import('../orders/OrderView.vue'), { orderId: id, success: true }, {
-                    provide: {
-                        reactive_navigation_url: new ReactiveUrl({
-                            url: 'order/' + id,
-                        }),
-                    },
-                }),
-            ],
-            replace: 1,
-            force: true,
-
-        });
-    } else {
-        // Desktop: push
-        await args.dismiss({ force: true });
-        await args.present({
-            components: [
-                AsyncComponent(() => import('../orders/OrderView.vue'), { orderId: id, success: true }, {
-                    provide: {
-                        reactive_navigation_url: new ReactiveUrl({
-                            url: 'order/' + id,
-                        }),
-                    },
-                }),
-            ],
-        });
-    }
+    // The steps are on the navigation controller of the webshop: go back to the shop and show the order on top.
+    // Not with replace: going back would restore the steps of the placed order.
+    await args.navigationController?.popToRoot({ force: true });
+    const component = getOrderComponent({ orderId: id, success: true });
+    component.provide.reactive_navigation_url = new ReactiveUrl({ url: 'order/' + id });
+    await args.show({ components: [component] });
 }
 
 async function goNext() {

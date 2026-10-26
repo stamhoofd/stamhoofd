@@ -1,0 +1,13 @@
+// Applies the grid layout of products (inside .enable-grid) when the product grid is wide enough.
+// Browsers without container query support fall back to the device width.
+@mixin product-grid-wide {
+    @container product-grid (min-width: 650px) {
+        @content;
+    }
+
+    @supports not (container-type: inline-size) {
+        @media (min-width: 801px) {
+            @content;
+        }
+    }
+}

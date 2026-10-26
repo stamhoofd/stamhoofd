@@ -3,7 +3,7 @@
         <div v-if="status" class="st-view mfa-settings-view" data-testid="mfa-settings-view">
             <STNavigationBar :title="$t('%ZiA')" />
 
-            <main class="center">
+            <main>
                 <h1>{{ $t('%Zgk') }}</h1>
                 <p>
                     <I18nComponent :t="$t('%Zih')">

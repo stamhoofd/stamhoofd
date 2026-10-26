@@ -37,6 +37,7 @@ import { ValidatedAddress } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
+import { useCheckoutContinue } from '../../composables/useCheckoutContinue';
 import { useWebshopManager } from '../../composables/useWebshopManager';
 
 const props = defineProps<{
@@ -61,6 +62,8 @@ const address = computed({
 });
 
 const unscopedServer = computed(() => webshopManager.unscopedServer);
+
+useCheckoutContinue(goNext);
 
 async function goNext() {
     if (loading.value) {

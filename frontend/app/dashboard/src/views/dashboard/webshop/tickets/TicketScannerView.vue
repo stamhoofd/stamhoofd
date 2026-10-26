@@ -1,5 +1,5 @@
 <template>
-    <div ref="rootRef" class="st-view scanner-view" data-testid="ticket-scanner-view">
+    <div ref="rootRef" class="st-view full-width scanner-view" data-testid="ticket-scanner-view">
         <STNavigationBar :show-title="false" :title="$t(`%Vu`)" />
 
         <div class="video-container" :class="{ native: disableWebVideo }">

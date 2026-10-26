@@ -67,12 +67,30 @@ export class AppManager {
         this.nativeDeviceInfo = info;
     }
 
+    get isIPad(): boolean {
+        const userAgent = navigator.userAgent || '';
+        return /iPad/.test(userAgent) || (/Macintosh/.test(userAgent) && navigator.maxTouchPoints > 1);
+    }
+
+    get isTablet(): boolean {
+        return this.isIPad || this.isAndroidTablet;
+    }
+
+    get isPhone(): boolean {
+        return !this.isTablet && (this.platform === 'ios' || this.platform === 'android' || /iPhone|iPod|Android.+Mobile/.test(navigator.userAgent || ''));
+    }
+
+    private get isAndroidTablet(): boolean {
+        const userAgent = navigator.userAgent || '';
+        return /Android/.test(userAgent) && !/Mobile/.test(userAgent);
+    }
+
     async getSessionMetaData(): Promise<SessionMetaData> {
         const userAgent = navigator.userAgent || '';
         const native = this.nativeDeviceInfo ? await this.nativeDeviceInfo.catch(() => null) : null;
-        const isIPad = native?.model.toLowerCase().includes('ipad') || /iPad/.test(userAgent) || (/Macintosh/.test(userAgent) && navigator.maxTouchPoints > 1);
-        const isTablet = isIPad || (/Android/.test(userAgent) && !/Mobile/.test(userAgent));
-        const isPhone = !isTablet && (this.platform === 'ios' || this.platform === 'android' || /iPhone|iPod|Android.+Mobile/.test(userAgent));
+        const isIPad = native?.model.toLowerCase().includes('ipad') || this.isIPad;
+        const isTablet = isIPad || this.isAndroidTablet;
+        const isPhone = !isTablet && this.isPhone;
 
         return {
             deviceType: isTablet ? SessionDeviceType.Tablet : (isPhone ? SessionDeviceType.Phone : SessionDeviceType.Desktop),

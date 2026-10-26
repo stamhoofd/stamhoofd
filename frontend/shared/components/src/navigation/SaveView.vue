@@ -2,7 +2,7 @@
     <LoadingViewTransition :loading="loadingView" :error-box="errorBox">
         <form class="st-view" data-testid="save-view" v-bind="$attrs" novalidate @submit.prevent="$emit('save')">
             <STNavigationBar :title="title instanceof TranslatedString ? title.toString() : title" :disable-pop="true" :disable-dismiss="true">
-                <template v-if="canPop || (!preferLargeButton && ($isMobile || $isIOS || $isAndroid))" #left>
+                <template v-if="canPop || (!preferLargeButton && ($isMobile || $isPhone))" #left>
                     <BackButton v-if="canPop" @click="pop()" />
                     <button v-else-if="$isAndroid || $isIOS" class="button icon close" type="button" @click="pop()" />
                     <button v-else class="button text selected unbold" type="button" @click="pop()">
@@ -11,29 +11,29 @@
                 </template>
 
                 <template #right>
-                    <template v-if="!$isMobile && !$isIOS">
+                    <template v-if="!$isMobile && !$isPhone">
                         <slot name="buttons" />
                     </template>
                     <LoadingButton v-if="canDelete" :loading="deleting">
                         <button v-tooltip="$t('%CJ')" class="button icon trash" type="button" :disabled="deleting" @click="$emit('delete')" />
                     </LoadingButton>
-                    <LoadingButton v-if="!preferLargeButton && ($isMobile || $isIOS || $isAndroid)" :loading="loading">
+                    <LoadingButton v-if="!preferLargeButton && ($isMobile || $isPhone)" :loading="loading">
                         <button v-if="saveIconMobile" v-tooltip="saveText" :class="'button icon navigation highlight ' + saveIconMobile" :disabled="isSaveDisabled" type="submit" data-testid="save-button" />
                         <button v-else-if="$isIOS || $isAndroid" v-tooltip="saveText" :class="'button icon navigation highlight ' + (saveIcon ?? 'success')" :disabled="isSaveDisabled" type="submit" data-testid="save-button" />
                         <button v-else class="button navigation highlight" :disabled="isSaveDisabled" type="submit" data-testid="save-button">
                             {{ saveText }}
                         </button>
                     </LoadingButton>
-                    <template v-else-if="canDismiss && !(!preferLargeButton && ($isMobile || $isIOS || $isAndroid))">
+                    <template v-else-if="canDismiss && !(!preferLargeButton && ($isMobile || $isPhone))">
                         <button class="button icon close" type="button" data-testid="close-button" @click="dismiss()" />
                     </template>
                 </template>
                 <slot name="fixed" />
             </STNavigationBar>
-            <main class="center" :class="mainClass">
+            <main :class="mainClass">
                 <slot />
             </main>
-            <STToolbar v-if="preferLargeButton || (!$isMobile && !$isIOS && !$isAndroid)">
+            <STToolbar v-if="!hideToolbar && (preferLargeButton || (!$isMobile && !$isPhone))">
                 <template #left>
                     <slot name="left" />
                 </template>
@@ -56,7 +56,7 @@
                     </LoadingButton>
                 </template>
             </STToolbar>
-            <STButtonToolbar v-else-if="!!$slots.buttons || !!$slots.toolbar" class="sticky">
+            <STButtonToolbar v-else-if="!hideToolbar && (!!$slots.buttons || !!$slots.toolbar)" class="sticky">
                 <slot name="buttons" />
                 <slot name="toolbar" />
             </STButtonToolbar>

@@ -2,7 +2,7 @@
     <form class="st-view verify-recovery-code-view" data-testid="verify-recovery-code-view" novalidate @submit.prevent="submit">
         <STNavigationBar :title="$t('%ZhI')" />
 
-        <main class="center">
+        <main>
             <h1>{{ $t('%ZhI') }}</h1>
             <p>{{ $t('%ZgN') }}</p>
 

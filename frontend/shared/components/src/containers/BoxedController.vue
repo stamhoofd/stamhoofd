@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view">
+    <div class="st-view full-width">
         <div class=" boxed-controller">
             <div ref="mainElement" class="boxed-main">
                 <FramedComponent v-if="root" :key="root.key" :root="root" />

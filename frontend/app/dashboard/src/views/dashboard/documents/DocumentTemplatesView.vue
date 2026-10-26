@@ -10,7 +10,7 @@
             </template>
         </STNavigationBar>
 
-        <main class="center">
+        <main>
             <h1>
                 {{ $t(`%tw`) }}
             </h1>

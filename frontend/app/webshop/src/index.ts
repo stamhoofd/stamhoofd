@@ -14,10 +14,12 @@ const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -
 
 import App from './App.vue';
 
-document.body.classList.add((AppManager.shared.isNative ? 'native-' : 'web-') + AppManager.shared.getOS());
+// iPads get the desktop layout: the iOS styles are designed for phones and waste too much space on a tablet
+const os = AppManager.shared.isIPad ? 'macOS' : AppManager.shared.getOS();
+document.body.classList.add((AppManager.shared.isNative ? 'native-' : 'web-') + os);
 
 const app = createApp(App);
-VueGlobalHelper.setup(app);
+VueGlobalHelper.setup(app, { os });
 
 const i18n = I18nController.getI18n();
 I18nController.fixedCountry = true;

@@ -1,6 +1,8 @@
 <template>
-    <div class="product-grid" :class="{single: products.length === 1}">
-        <ProductBox v-for="product in products" :key="product.id" :product="product" :webshop="webshop" :checkout="checkout" :save-handler="saveHandler" :admin="admin" />
+    <div class="product-grid-container">
+        <div class="product-grid" :class="{single: products.length === 1}">
+            <ProductBox v-for="product in products" :key="product.id" :product="product" :webshop="webshop" :checkout="checkout" :save-handler="saveHandler" :admin="admin" />
+        </div>
     </div>
 </template>
 
@@ -26,6 +28,12 @@ withDefaults(defineProps<{
 </script>
 
 <style lang="scss">
+@use "./product-grid.mixin.scss" as *;
+
+.product-grid-container {
+    container: product-grid / inline-size;
+}
+
 .product-grid {
     display: grid;
     gap: 0;
@@ -33,7 +41,7 @@ withDefaults(defineProps<{
 }
 
 .enable-grid .product-grid {
-    @media (min-width: 801px) {
+    @include product-grid-wide {
         grid-template-columns: repeat(2, 1fr);
         gap: 15px;
 

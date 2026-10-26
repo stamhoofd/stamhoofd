@@ -1122,7 +1122,8 @@ function registerWebshopOrderTests() {
         const { webshop } = await TestWebshops.create({
             organization,
             name: `Custom price shop ${WorkerData.id}`,
-            productCount: 1,
+            // Two products, so the products are listed: a single product without cart shows its form on the page
+            productCount: 2,
             cartEnabled: false,
             paymentMethods: [PaymentMethod.PointOfSale],
             buildPrices: () => [ProductPrice.create({ name: 'Steun ons', price: 15_00_00, allowCustomPrice: true })],
@@ -1196,7 +1197,7 @@ function registerWebshopOrderTests() {
         // Choose € 20,50 and add it to the cart
         await priceInput.fill('20,5');
         await cartItemView.getByTestId('save-button').click();
-        await expect(page.getByTestId('cart-add-more-button')).toBeVisible();
+        await flow.openCart();
         await expect(page.locator('.cart-item-row')).toContainText('20,50');
 
         // Reopen the item from the cart: the custom price is still selected with the chosen amount
@@ -1221,7 +1222,8 @@ function registerWebshopOrderTests() {
         const { webshop } = await TestWebshops.create({
             organization,
             name: `Close item ${WorkerData.id}`,
-            productCount: 1,
+            // Two products: a cart with one unique product behaves as a webshop without cart, which shows its form on the page
+            productCount: 2,
             cartEnabled: true,
             paymentMethods: [PaymentMethod.PointOfSale],
         });

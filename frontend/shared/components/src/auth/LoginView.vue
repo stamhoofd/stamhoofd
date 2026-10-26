@@ -2,7 +2,7 @@
     <form class="st-view login-view" data-testid="login-view" data-submit-last-field novalidate @submit.prevent="submit">
         <STNavigationBar :large="true" class="transparent" :title="$t(`%Qg`)" />
 
-        <main class="center small flex">
+        <main class="small flex">
             <div class="st-view-vertical-center">
                 <div class="container">
                     <h1 v-if="STAMHOOFD.userMode === 'organization' && $context.organization">

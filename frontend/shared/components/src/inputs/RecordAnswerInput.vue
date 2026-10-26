@@ -7,7 +7,7 @@
             </h3>
             <p v-if="answer.settings.description.length" class="style-description-small pre-wrap style-wysiwyg" v-html="linkText(answer.settings.description.toString())" />
         </Checkbox>
-        <STInputBox v-else-if="answer.settings.type === RecordType.MultipleChoice" class="max" :title="label.toString()" error-fields="input" :error-box="errors.errorBox">
+        <STInputBox v-else-if="answer.settings.type === RecordType.MultipleChoice" :class="{ max: hasLargeChoices }" :title="label.toString()" error-fields="input" :error-box="errors.errorBox">
             <STList>
                 <STListItem v-for="choice in record.choices" :key="choice.id" :selectable="true" element-name="label">
                     <template #left>
@@ -20,7 +20,7 @@
                 </STListItem>
             </STList>
         </STInputBox>
-        <STInputBox v-else-if="answer.settings.type === RecordType.ChooseOne" class="max" :title="label.toString()" error-fields="input" :error-box="errors.errorBox">
+        <STInputBox v-else-if="answer.settings.type === RecordType.ChooseOne" :class="{ max: hasLargeChoices }" :title="label.toString()" error-fields="input" :error-box="errors.errorBox">
             <STList>
                 <STListItem v-for="choice in record.choices" :key="choice.id" :selectable="true" element-name="label">
                     <template #left>
@@ -159,15 +159,18 @@ const casted = {
 
 const label = computed(() => props.record.label.length ? props.record.label : props.record.name);
 const required = computed(() => !props.allOptional && props.record.required);
+
+// Only drop the default max-width of the input box when the choices need the extra space
+const hasLargeChoices = computed(() => props.record.choices.some(choice => choice.name.toString().length > 30 || choice.description.length > 0));
 const inputPlaceholder = computed(() => {
     if (!required.value) {
         if (answer.value.settings.inputPlaceholder.length > 0) {
             if (props.record.type === RecordType.Integer) {
                 return answer.value.settings.inputPlaceholder;
             }
-            return $t(`%zB`) + ' ' + answer.value.settings.inputPlaceholder;
+            return $t('%zB') + ' ' + answer.value.settings.inputPlaceholder;
         }
-        return $t(`%14p`);
+        return $t('%14p');
     }
     return answer.value.settings.inputPlaceholder.length ? answer.value.settings.inputPlaceholder : answer.value.settings.name;
 });

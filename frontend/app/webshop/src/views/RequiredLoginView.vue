@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition>
-        <section v-if="!loading" class="st-view box-shade">
+        <section v-if="!loading" class="st-view full-width box-shade">
             <STNavigationBar :large="true">
                 <template #left>
                     <OrganizationLogo :organization="organization" />

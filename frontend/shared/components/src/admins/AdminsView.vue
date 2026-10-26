@@ -3,7 +3,7 @@
         <div v-if="!loading" class="st-view background">
             <STNavigationBar :title="$t(`%K5`)" />
 
-            <main class="center">
+            <main>
                 <h1>{{ $t('%K5') }}</h1>
                 <p v-if="$isStamhoofd">
                     <I18nComponent :t="$t('%ZsQ')">

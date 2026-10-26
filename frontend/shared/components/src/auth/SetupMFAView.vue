@@ -2,7 +2,7 @@
     <div class="st-view setup-mfa-view" data-testid="setup-mfa-view">
         <STNavigationBar :title="$t('%Zgx')" />
 
-        <main class="center">
+        <main>
             <h1>{{ $t('%Zgx') }}</h1>
 
             <p>

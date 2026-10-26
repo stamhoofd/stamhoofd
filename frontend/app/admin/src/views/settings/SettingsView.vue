@@ -2,7 +2,7 @@
     <div id="settings-view" class="st-view background">
         <STNavigationBar :title="$t(`%xU`)" />
 
-        <main class="center">
+        <main>
             <h1>
                 {{ $t("%xU") }}
             </h1>

@@ -1,6 +1,50 @@
 @use '../base/variables' as *;
 @use '../base/text-styles' as *;
 
+// A centered view keeps its toolbar aligned with the content column.
+// The toolbar follows the content instead of floating at the bottom, and only sticks to the bottom when the content scrolls.
+// The navigation bar keeps the full width, unless the view or one of its containers has .center-navigation-bar.
+@mixin st-view-centered($center-padding) {
+    --st-view-center-padding: #{$center-padding};
+    --st-view-toolbar-margin-top: 0px;
+    --st-view-toolbar-main-grow: 0;
+
+    @supports (animation-timeline: scroll()) {
+        --st-view-toolbar-border-color: transparent;
+        --st-view-toolbar-border-animation: st-view-toolbar-sticky-border;
+    }
+
+    // Only the view's own navigation bar, so nested views don't inherit it
+    &:where(.center-navigation-bar, .center-navigation-bar *) > .st-navigation-bar-container {
+        --navigation-bar-horizontal-padding: max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px));
+    }
+
+    > main {
+        --st-horizontal-padding: 0px;
+    }
+}
+
+// A view that is not centered: it opted out with .full-width, or its context sizes it (e.g. a popup or sheet).
+// Set explicitly, so it does not inherit the values of a centered outer view.
+@mixin st-view-not-centered {
+    --st-view-center-padding: 0px;
+    --st-view-toolbar-margin-top: auto;
+    --st-view-toolbar-main-grow: 1;
+    --st-view-toolbar-border-color: #{$color-border-lighter};
+    --st-view-toolbar-border-animation: none;
+
+    > main {
+        --st-horizontal-padding: var(--st-view-horizontal-padding);
+    }
+}
+
+// Only runs while the main element can scroll: the toolbar then overlaps content and shows its border
+@keyframes st-view-toolbar-sticky-border {
+    from, to {
+        border-top-color: $color-border-lighter;
+    }
+}
+
 .view > main ,
 .st-view > main > .box > main {
     @extend %main-text-container;
@@ -67,8 +111,32 @@ body.modern.web-iOS {
     // Save padding if we make changes
     --st-view-horizontal-padding: var(--st-horizontal-padding, 40px);
 
+    // Set on every view, so a nested view does not inherit them from a centered outer view
+    --st-view-toolbar-margin-top: auto;
+    --st-view-toolbar-main-grow: 1;
+    --st-view-toolbar-border-color: #{$color-border-lighter};
+    --st-view-toolbar-border-animation: none;
+
+    // Lets the toolbar (a sibling of main) follow the scroll position of main
+    timeline-scope: --st-view-main;
+
     .st-toolbar:not(.dont-float) {
-        margin-top: auto;
+        margin-top: var(--st-view-toolbar-margin-top, auto);
+    }
+
+    // Align the toolbar contents with the content column
+    > .st-toolbar > div {
+        padding-left: max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px), var(--st-safe-area-left, 0px));
+        padding-right: max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px), var(--st-safe-area-right, 0px));
+        border-top-color: var(--st-view-toolbar-border-color);
+
+        @supports (animation-timeline: scroll()) {
+            animation-name: var(--st-view-toolbar-border-animation, none);
+            animation-duration: auto;
+            animation-timing-function: linear;
+            animation-fill-mode: both;
+            animation-timeline: --st-view-main;
+        }
     }
 
     &.auto {
@@ -79,51 +147,44 @@ body.modern.web-iOS {
 
     background: var(--color-current-background, #{$color-background});
 
-    &.center, & > main.center {
-        &:not(.small) {
-            @media (min-width: 900px) {
-                // Auto center all views on desktop
-                --st-horizontal-padding: 0px;
-                --st-view-center-padding: calc((var(--vw, 1vw)*100 - var(--st-view-max-width, 800px)) / 2);
-                --st-view-center-padding: max(var(--st-view-horizontal-padding), calc((var(--vw, 1vw)*100 - var(--st-view-max-width, 800px)) / 2));     
-                --navigation-bar-horizontal-padding: var(--st-view-center-padding);
-            }
+    // Views center their content on desktop by default. The variables are set on the view, so the toolbar (and, opt-in,
+    // the navigation bar) align with the content column. A view that needs the full width adds .full-width to itself
+    // or to its main. All selectors use :where(), so the rules below override each other in source order.
+    &:where(:not(.small, :has(> main.small))) {
+        @media (min-width: 900px) {
+            @include st-view-centered(max(var(--st-view-horizontal-padding), calc((var(--vw, 1vw)*100 - var(--st-view-max-width, 800px)) / 2)));
         }
+    }
 
-        &.small {
-            --st-view-max-width: 400px; 
+    &:where(.small, :has(> main.small)) {
+        --st-view-max-width: 400px;
 
-            @media (min-width: 500px) {
-                // Auto center all views on desktop
-                --st-horizontal-padding: 0px;
-                --st-view-center-padding: calc((var(--vw, 1vw)*100 - var(--st-view-max-width, 800px)) / 2);
-                --st-view-center-padding: max(var(--st-view-horizontal-padding), calc((var(--vw, 1vw)*100 - var(--st-view-max-width, 800px)) / 2));     
-            }
+        @media (min-width: 500px) {
+            @include st-view-centered(max(var(--st-view-horizontal-padding), calc((var(--vw, 1vw)*100 - var(--st-view-max-width, 800px)) / 2)));
         }
+    }
 
-        .split-view-controller > .detail & {
-            --st-view-center-padding: 0px;
-            --st-horizontal-padding: var(--st-view-horizontal-padding);
+    :where(.split-view-controller > .detail) & {
+        @include st-view-not-centered;
 
-            @media (min-width: 1300px) {
-                --st-view-max-width: 900px;
-                // Auto center all views on desktop
-                --st-horizontal-padding: 0px;
-                --st-view-center-padding: calc((var(--vw, 1vw)*100 - var(--split-view-width, 300px) - var(--st-view-max-width, 800px)) / 2);
-                --st-view-center-padding: max(var(--st-view-horizontal-padding), calc((var(--vw, 1vw)*100 - var(--split-view-width, 300px) - var(--st-view-max-width, 800px)) / 2));     
-            }
+        @media (min-width: 1300px) {
+            --st-view-max-width: 900px;
+            @include st-view-centered(max(var(--st-view-horizontal-padding), calc((var(--vw, 1vw)*100 - var(--split-view-width, 300px) - var(--st-view-max-width, 800px)) / 2)));
         }
+    }
 
-        .popup &, .sheet &, .boxed-controller &, .split-view-controller[data-has-detail="true"] > .master & {
-            --st-view-center-padding: 0px;
-            --st-horizontal-padding: var(--st-view-horizontal-padding);
-        }
+    // Modals (popup, sheet, positionable sheet) and other contexts that size the view themselves, views inside the main
+    // of another (already centered) view, and opted-out views
+    :where(.modal, .modal-full-height, .modal-dynamic-size, .popup, .sheet, .positionable-sheet, .boxed-controller, .split-view-controller[data-has-detail="true"] > .master, .st-view > main) &,
+    &:where(.full-width, :has(> main.full-width)) {
+        @include st-view-not-centered;
     }
 
 
     > main {
         // We fixed the safe area, no need to recorrect it again
         --st-safe-area-top: 0px;
+        scroll-timeline: --st-view-main block;
 
 
         padding: var(--st-navigation-bar-correction, 0px) max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px), var(--st-safe-area-right, 0px)) 0 max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px), var(--st-safe-area-left, 0px));
@@ -162,6 +223,11 @@ body.modern.web-iOS {
     
         &:last-child {
             padding-bottom: calc(var(--st-vertical-padding, 20px) + max(var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px), var(--bottom-padding, 0px)));
+        }
+
+        // A centered view only lets main grow to the available height, so its toolbar directly follows the content
+        &:has(~ .st-toolbar:not(.dont-float)) {
+            flex-grow: var(--st-view-toolbar-main-grow, 1);
         }
 
         &.flex {

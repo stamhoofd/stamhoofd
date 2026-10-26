@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition>
-        <div v-if="!loading && seatingPlan" class="st-view webshop-seating-view">
+        <div v-if="!loading && seatingPlan" class="st-view full-width webshop-seating-view">
             <STNavigationBar :title="$t(`%uA`)">
                 <template v-if="hasFullPermissions" #right>
                     <button class="icon edit button" type="button" @click="editSeatingPlan" />

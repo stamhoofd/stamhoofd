@@ -1,6 +1,6 @@
 <template>
-    <form class="st-view cart-item-view" data-testid="cart-item-view" @submit.prevent="addToCart">
-        <STNavigationBar :title="cartItem.product.name">
+    <form :class="embedded ? 'cart-item-view embedded' : 'st-view cart-item-view'" data-testid="cart-item-view" @submit.prevent="addToCart">
+        <STNavigationBar v-if="!embedded" :title="cartItem.product.name">
             <template #left>
                 <p v-if="(!webshop.isAllFree || pricedItem.getPriceWithDiscounts()) && !cartItem.productPrice.allowCustomPrice">
                     <span v-if="formattedPriceWithDiscount" class="style-tag discount">{{ formattedPriceWithDiscount }}</span>
@@ -8,8 +8,13 @@
                 </p>
             </template>
         </STNavigationBar>
-        <main>
-            <h1>{{ cartItem.product.name }}</h1>
+        <component :is="embedded ? 'div' : 'main'" :class="{ container: embedded, small: true }">
+            <h2 v-if="embedded" class="larger">
+                {{ cartItem.product.name }}
+            </h2>
+            <h1 v-else>
+                {{ cartItem.product.name }}
+            </h1>
 
             <ImageGallery :images="images" />
             <p v-if="cartItem.product.description" class="description" v-text="cartItem.product.description" />
@@ -153,24 +158,25 @@
             <div v-if="!cartEnabled && (pricedCheckout.priceBreakown.length > 1 || pricedCheckout.totalPrice > 0)" class="pricing-box max">
                 <PriceBreakdownBox :price-breakdown="pricedCheckout.priceBreakown" />
             </div>
-        </main>
 
-        <STToolbar v-if="canOrder">
+            <div v-if="canOrder && embedded" class="style-button-bar">
+                <LoadingButton :loading="loading">
+                    <button class="button primary" type="submit" data-testid="save-button">
+                        <span v-if="saveButton.iconLeft" :class="'icon ' + saveButton.iconLeft" />
+                        <span>{{ saveButton.text }}</span>
+                        <span v-if="saveButton.iconRight" :class="'icon ' + saveButton.iconRight" />
+                    </button>
+                </LoadingButton>
+            </div>
+        </component>
+
+        <STToolbar v-if="canOrder && !embedded">
             <template #right>
                 <LoadingButton :loading="loading">
-                    <button v-if="willNeedSeats" class="button primary" type="submit" data-testid="save-button">
-                        <span>{{ $t('%k5') }}</span>
-                        <span class="icon arrow-right" />
-                    </button>
-                    <button v-else-if="oldItem && cartEnabled" class="button primary" type="submit" data-testid="save-button">
-                        <span class="icon basket" />
-                        <span>{{ $t('%1Op') }}</span>
-                    </button>
-                    <button v-else class="button primary" type="submit" data-testid="save-button">
-                        <span v-if="cartEnabled" class="icon basket" />
-                        <span v-if="cartEnabled">{{ $t('%SN') }}</span>
-                        <span v-else>{{ $t('%16p') }}</span>
-                        <span v-if="!cartEnabled" class="icon arrow-right" />
+                    <button class="button primary" type="submit" data-testid="save-button">
+                        <span v-if="saveButton.iconLeft" :class="'icon ' + saveButton.iconLeft" />
+                        <span>{{ saveButton.text }}</span>
+                        <span v-if="saveButton.iconRight" :class="'icon ' + saveButton.iconRight" />
                     </button>
                 </LoadingButton>
             </template>
@@ -191,6 +197,7 @@ import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
+import { getOrderButtonText } from '../helpers/webshopWording';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
 import { useErrors } from '../errors/useErrors';
 import NumberInput from '../inputs/NumberInput.vue';
@@ -223,10 +230,23 @@ const props = withDefaults(defineProps<{
      * Shown as an example in the dashboard: nothing is saved, so closing never asks for confirmation
      */
     isPreview?: boolean;
+    /**
+     * Rendered inside another view (e.g. the webshop page): no navigation bar, the product name as a smaller title
+     * and the save button at the end of the form instead of in a toolbar
+     */
+    embedded?: boolean;
+    /**
+     * Live editing: every change is passed to this handler right away (e.g. to store the cart), so nothing is lost
+     * when the page reloads and closing never asks to discard changes.
+     * Pass the item that is in the cart as both `cartItem` and `oldItem`, so it is edited in place.
+     */
+    liveSaveHandler?: ((item: CartItem) => void) | null;
 }>(), {
     admin: false,
     oldItem: null,
     isPreview: false,
+    embedded: false,
+    liveSaveHandler: null,
 });
 
 const present = usePresent();
@@ -275,7 +295,22 @@ watch(() => props.checkout, () => {
 
 watch(() => props.cartItem, () => {
     onChangeItem();
+    liveSave();
 }, { deep: true });
+
+let lastLiveSavedItem = '';
+
+function liveSave() {
+    if (!props.liveSaveHandler) {
+        return;
+    }
+    // Saving recalculates the prices of the item in the cart, which triggers the watcher again: only save real changes
+    if (encodeItem(props.cartItem) === lastLiveSavedItem) {
+        return;
+    }
+    props.liveSaveHandler(props.cartItem);
+    lastLiveSavedItem = encodeItem(props.cartItem);
+}
 
 function onChangeItem() {
     // Update the cart price on changes
@@ -299,11 +334,6 @@ const formattedPriceWithDiscount = computed(() => pricedItem.value.getFormattedP
 const formattedPriceWithoutDiscount = computed(() => pricedItem.value.getFormattedPriceWithoutDiscount());
 
 async function validate() {
-    // clear only on save, so fast switchting between items doesn't clear the UiTPAS numbers
-    if (!props.cartItem.productPrice.uitpasBaseProductPriceId) {
-        props.cartItem.uitpasNumbers = [];
-    }
-
     try {
         const clonedCart = cart.value.clone();
 
@@ -408,19 +438,36 @@ function chooseSeats() {
 }
 
 const cartEnabled = computed(() => props.webshop.shouldEnableCart);
+
+const saveButton = computed(() => {
+    if (willNeedSeats.value) {
+        return { iconLeft: null, text: $t('%k5'), iconRight: 'arrow-right' };
+    }
+    if (props.oldItem && cartEnabled.value) {
+        return { iconLeft: 'basket', text: $t('%1Op'), iconRight: null };
+    }
+    if (cartEnabled.value) {
+        return { iconLeft: 'basket', text: $t('%SN'), iconRight: null };
+    }
+    if (props.admin) {
+        return { iconLeft: null, text: $t('%16p'), iconRight: 'arrow-right' };
+    }
+    // Without a cart, saving the item starts the order
+    return { iconLeft: null, text: getOrderButtonText(props.webshop), iconRight: 'arrow-right' };
+});
 const withSeats = computed(() => props.cartItem.product.seatingPlanId !== null);
 const suffixSingular = computed(() => {
     if (props.cartItem.product.type === ProductType.Ticket) {
-        return $t(`%o`);
+        return $t('%o');
     }
-    return props.cartItem.product.type === ProductType.Person ? $t(`%12P`) : $t(`%12Q`);
+    return props.cartItem.product.type === ProductType.Person ? $t('%12P') : $t('%12Q');
 });
 
 const suffix = computed(() => {
     if (props.cartItem.product.type === ProductType.Ticket) {
-        return $t(`%m`);
+        return $t('%m');
     }
-    return props.cartItem.product.type === ProductType.Person ? $t(`%12R`) : $t(`%12S`);
+    return props.cartItem.product.type === ProductType.Person ? $t('%12R') : $t('%12S');
 });
 
 const images = computed(() => props.cartItem.product.images);
@@ -507,7 +554,6 @@ const canOrder = computed(() => {
 
 const canSelectAmount = computed(() => product.value.maxPerOrder !== 1 && product.value.allowMultiple && !product.value.enableCustomer);
 
-
 // The structure only stores a customer when the product asks for one
 watch(() => product.value.enableCustomer, (enabled) => {
     if (enabled && !props.cartItem.customer) {
@@ -521,7 +567,13 @@ function patchRecordAnswers(patch: PatchAnswers) {
     props.cartItem.recordAnswers = patchObject(props.cartItem.recordAnswers, patch);
 }
 
+// Kept here, so switching between prices doesn't clear typed numbers. The item only holds them for a UiTPAS price:
+// live editing stores the item in the cart right away, and validating the cart rejects UiTPAS numbers on other prices.
 const uitpasNumbers = ref(props.cartItem.uitpasNumbers);
+
+watch([() => props.cartItem.productPrice.uitpasBaseProductPriceId, uitpasNumbers], ([uitpasBaseProductPriceId, numbers]) => {
+    props.cartItem.uitpasNumbers = uitpasBaseProductPriceId ? numbers : [];
+}, { immediate: true });
 
 watch(() => props.cartItem.amount, handleNewAmount);
 
@@ -553,7 +605,7 @@ function handleNewAmount(newAmount: number) {
 }
 
 const shouldNavigateAway = async () => {
-    if (props.isPreview || encodeItem(props.cartItem) === originalEncodedItem) {
+    if (props.isPreview || props.liveSaveHandler || encodeItem(props.cartItem) === originalEncodedItem) {
         return true;
     }
     return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
@@ -584,12 +636,12 @@ defineExpose({
         padding-top: 15px;
     }
 
-    h1 + .description {
+    h1 + .description, h2 + .description {
         // Remove duplicate padding
         padding-top: 0;
     }
 
-    h1 + .info {
+    h1 + .info, h2 + .info {
         padding-top: 0;
     }
 

@@ -1,12 +1,12 @@
 <template>
-    <header class="st-navigation-bar-container" :class="{collapsed: collaped, negative: !!($slots.default && isValidVnodes($slots.default())), scrolled}">
-        <div v-if="!hasLeft && !hasRight && !popup" class="st-navigation-bar-background" :class="{ scrolled, large }" :style="{height: heightPx}">
+    <header class="st-navigation-bar-container" :class="{collapsed: collaped, negative: !!($slots.default && isValidVnodes($slots.default())), scrolled, 'safe-area-only': safeAreaOnly}">
+        <div v-if="!hasLeft && !hasRight && !popup && !safeAreaOnly" class="st-navigation-bar-background" :class="{ scrolled, large }" :style="{height: heightPx}">
             <div ref="inherited-header" class="inherited-header">
                 <InheritComponent name="tabbar-replacement" />
             </div>
         </div>
-        <div class="st-navigation-bar" :class="{ scrolled, large, 'show-title': showTitle, negative: !!($slots.default && isValidVnodes($slots.default()))}">
-            <div ref="bar" class="header" :class="{ large, 'show-title': showTitle}" :style="{'grid-template-columns': templateColumns}">
+        <div class="st-navigation-bar" :class="{ scrolled, large, 'show-title': showTitle, negative: !!($slots.default && isValidVnodes($slots.default())), 'safe-area-only': safeAreaOnly}">
+            <div v-if="!safeAreaOnly" ref="bar" class="header" :class="{ large, 'show-title': showTitle}" :style="{'grid-template-columns': templateColumns}">
                 <div v-if="hasLeft || hasRight" class="left">
                     <BackButton v-if="canPop && !disablePop" data-testid="close-button" @click="pop()" />
                     <button v-else-if="canDismiss && !disableDismiss && ($isAndroid)" class="button icon close" type="button" data-testid="close-button" @click="dismiss()" />
@@ -67,6 +67,11 @@ const props = withDefaults(defineProps<{
     disableDismiss?: boolean;
     disablePop?: boolean;
     leftLogo?: boolean;
+    /**
+     * No bar of its own: only covers the safe area at the top with a background once the view scrolls, e.g. for a bar
+     * of a surrounding container that is shown in the safe area of the view
+     */
+    safeAreaOnly?: boolean;
 }>(), {
     addShadow: true,
     showTitle: false,
@@ -74,6 +79,7 @@ const props = withDefaults(defineProps<{
     disableDismiss: false,
     disablePop: false,
     leftLogo: false,
+    safeAreaOnly: false,
     title: '',
 });
 
@@ -128,6 +134,9 @@ const collaped = computed(() => {
  * Does not include safe area
  */
 const heightPx = computed(() => {
+    if (props.safeAreaOnly) {
+        return '0px';
+    }
     if (collaped.value) {
         return Math.max(50, inheritedHeaderHeight.value, footerHeight.value).toFixed(2) + 'px';
     }
@@ -258,7 +267,8 @@ onDeactivated(() => {
         }
     }
 
-    &.scrolled {
+    // The title moves into the bar while scrolling (except when there is no bar to show it)
+    &.scrolled:not(.safe-area-only) {
         &+ main {
             > h1:first-child, > *:first-child > h1:first-child {
                 opacity: 0;
@@ -301,6 +311,10 @@ onDeactivated(() => {
 
     @media (min-width: 550px) {
         padding-top: max(var(--st-safe-area-top, 0px), 5px);
+    }
+
+    &.safe-area-only {
+        padding-top: var(--st-safe-area-top, 0px);
     }
 
     &.large {

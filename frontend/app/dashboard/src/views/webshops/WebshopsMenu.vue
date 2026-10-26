@@ -1,7 +1,7 @@
 <template>
     <div class="st-menu st-view">
         <STNavigationBar :title="$t(`%2V`)" />
-        <main class="center">
+        <main>
             <h1>{{ $t('%1Pd') }}</h1>
 
             <p v-if="visibleWebshops.length === 0" class="info-box">

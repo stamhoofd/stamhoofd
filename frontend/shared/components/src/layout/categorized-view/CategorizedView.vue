@@ -1,7 +1,7 @@
 <template>
-    <div class="st-view" :class="{'categorized-view': columnsEnabled, 'collapsed': !isEnabled, 'animated': animated, 'shade': columnsEnabled && isEnabled, 'categorized-boxes': isEnabled}">
+    <div class="st-view full-width" :class="{'categorized-view': columnsEnabled, 'collapsed': !isEnabled, 'animated': animated, 'shade': columnsEnabled && isEnabled, 'categorized-boxes': isEnabled}">
         <div v-if="columnsEnabled">
-            <div class="st-view summary-column background">
+            <div class="st-view full-width summary-column background">
                 <main>
                     <h1 class="style-navigation-title">
                         {{ title }}

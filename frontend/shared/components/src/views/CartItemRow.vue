@@ -14,13 +14,15 @@
         </p>
 
         <footer>
-            <p v-if="!cartItem.getFormattedPriceWithDiscount()" class="price">
-                {{ cartItem.getFormattedPriceWithoutDiscount() }}
-            </p>
-            <p v-else class="price">
-                <span class="style-discount-old-price">{{ cartItem.getFormattedPriceWithoutDiscount() }}</span>
-                <span class="style-discount-price">{{ cartItem.getFormattedPriceWithDiscount() }}</span>
-            </p>
+            <template v-if="showPrice">
+                <p v-if="!cartItem.getFormattedPriceWithDiscount()" class="price">
+                    {{ cartItem.getFormattedPriceWithoutDiscount() }}
+                </p>
+                <p v-else class="price">
+                    <span class="style-discount-old-price">{{ cartItem.getFormattedPriceWithoutDiscount() }}</span>
+                    <span class="style-discount-price">{{ cartItem.getFormattedPriceWithDiscount() }}</span>
+                </p>
+            </template>
             <div class="actions" @click.stop>
                 <span v-if="cartItem.formattedAmount && (cartItem.amount !== 1 || (cartItem.product.maxPerOrder !== 1 && !cartItem.product.enableCustomer))" class="amount">{{ cartItem.formattedAmount }}</span>
                 <StepperInput v-if="editable && !cartItem.cartError && cartItem.customer === null && cartItem.seats.length === 0 && (maximumRemaining === null || maximumRemaining > 1) && cartItem.productPrice.uitpasBaseProductPriceId === null" v-model="amount" :min="1" :max="maximumRemaining" @click.stop />
@@ -96,6 +98,9 @@ function deleteItem() {
 }
 
 const labels = computed(() => props.cartItem.discounts.filter(d => !!d.cartLabel));
+
+// A webshop where everything is free is about the registration, not about payments: don't show a price of 0
+const showPrice = computed(() => !props.webshop.isAllFree || props.cartItem.getPriceWithoutDiscounts() !== 0);
 
 // Everything collected about the participant besides the name (which is part of the description)
 const participantDetails = computed(() => {

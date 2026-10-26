@@ -28,8 +28,9 @@
 
 %style-input-box {
     border: $border-width solid $color-border-shade;
-    background: $color-current-background;
-    background: var(--color-input-background, #{$color-current-background});
+    // Inputs keep the background of the page, also on a shaded background (dark mode sets its own input background)
+    background: $color-background;
+    background: var(--color-input-background, #{$color-background});
     border-radius: $border-radius;
     transition: border-color 0.2s;
     @extend %style-input-shadow;
@@ -1272,8 +1273,16 @@
                 @extend %style-description-block;
             }
         }
-        
-        > h2 {
+
+        > h1.larger:first-child, > %style-title-prefix:first-child + h1.larger {
+            @extend %style-navigation-title;
+
+            + p:not([class]), + p.style-description {
+                @extend %style-description-block;
+            }
+        }
+
+        > h2, > h3.larger {
             @extend %style-title-2;
             padding-bottom: 11px;
 
@@ -1282,7 +1291,7 @@
             }
         }
 
-        > h2.smaller {
+        > h2.smaller, > h3:not([class]) {
             @extend %style-title-3;
             padding-bottom: 11px;
 
@@ -1329,8 +1338,8 @@
                 margin: var(--st-hr-margin, 20px) calc(-1 * var(--st-horizontal-padding, 40px));
             }
 
-            + h2, + .container > h2:first-child {
-                margin-top: 25px;
+            + h2, + .container > h2:first-child, + h3, + .container > h3:first-child {
+                margin-top: 40px;
             }
         }
     }

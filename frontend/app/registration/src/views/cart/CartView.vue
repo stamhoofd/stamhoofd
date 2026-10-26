@@ -1,7 +1,7 @@
 <template>
     <section class="st-view" data-testid="cart-view">
         <STNavigationBar :title="$t(`%1DQ`)" />
-        <main class="center">
+        <main>
             <h1>
                 {{ $t('%1DQ') }}
             </h1>

@@ -1,6 +1,6 @@
 <template>
     <div class="st-view" data-testid="no-permissions-view">
-        <main class="center">
+        <main>
             <h1 v-if="organization">
                 {{ $t('%WC') }}
             </h1>

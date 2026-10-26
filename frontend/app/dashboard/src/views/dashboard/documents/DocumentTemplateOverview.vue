@@ -2,7 +2,7 @@
     <div class="st-view background">
         <STNavigationBar :title="template.settings.name" />
 
-        <main class="center">
+        <main>
             <h1 class="style-navigation-title">
                 {{ template.settings.name }}
             </h1>

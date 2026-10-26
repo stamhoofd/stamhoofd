@@ -2,7 +2,7 @@
     <LoadingViewTransition :error-box="errors.errorBox">
         <div v-if="mandates !== null" class="st-view shade">
             <STNavigationBar :title=" $t(`%X8`)" />
-            <main class="center">
+            <main>
                 <h1>{{ $t('%X8') }}</h1>
 
                 <STErrorsDefault :error-box="errors.errorBox" />

@@ -5,7 +5,7 @@
                 <div v-if="invitationsCount !== null" class="st-view event-overview">
                     <STNavigationBar :title="title" />
 
-                    <main class="center">
+                    <main>
                         <ImageComponent v-if="event.meta.coverPhoto" :image="event.meta.coverPhoto" :auto-height="true" class="style-cover-photo" />
 
                         <p class="style-title-prefix">

@@ -21,6 +21,8 @@ export type SaveViewProps = {
     preferLargeButton?: boolean;
     addExtraCancel?: boolean;
     mainClass?: string;
+    /** Hides the toolbar at the bottom, for a view that shows its save button somewhere else (e.g. in the actions of a PreviewPanel) */
+    hideToolbar?: boolean;
 };
 
 export const SaveViewDefaults = {
@@ -40,4 +42,5 @@ export const SaveViewDefaults = {
     preferLargeButton: false,
     addExtraCancel: false,
     mainClass: '',
+    hideToolbar: false,
 };

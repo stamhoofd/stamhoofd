@@ -1,7 +1,7 @@
 <template>
     <section class="st-view" data-testid="members-start-view">
         <STNavigationBar :title="$t('%2g')" />
-        <main class="center">
+        <main>
             <h1>
                 {{ $t('%2g') }}
             </h1>

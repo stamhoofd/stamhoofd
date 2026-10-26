@@ -46,7 +46,8 @@ const step = (add: number) => {
 .stepper-input {
     display: inline-flex;
     flex-direction: row;
-    background: $color-background-shade;
+    // Relative to the background it is shown on (e.g. a shaded column)
+    background: $color-current-background-shade;
     border-radius: $border-radius;
     align-items: stretch;
     height: $input-height;
@@ -88,8 +89,14 @@ const step = (add: number) => {
         outline: 0;
         display: block;
 
+        @media (hover: hover) {
+            &:hover {
+                background: var(--color-current-background-shade-darker, #{$color-background-shade-darker});
+            }
+        }
+
         &:active {
-            background: $color-gray-3;
+            background: var(--color-current-background-shade-darker, #{$color-background-shade-darker});
             transition: none;
         }
 

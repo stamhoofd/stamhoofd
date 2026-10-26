@@ -1,5 +1,5 @@
 <template>
-    <div class="modern st-view table-view background" data-testid="table">
+    <div class="modern st-view full-width table-view background" data-testid="table">
         <STNavigationBar :add-shadow="wrapColumns" :title="title" :disable-pop="true" :class="{'has-sticky-sibling': !wrapColumns}">
             <template #left>
                 <button v-if="canLeaveSelectionMode && isMobile && showSelection && !isIOS" type="button" class="button icon close" @click="setShowSelection(false)" />

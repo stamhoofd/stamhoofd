@@ -9,7 +9,7 @@
             </template>
         </STNavigationBar>
 
-        <main class="center">
+        <main>
             <h1>
                 {{ props.period ? props.period.period.name : $t('%1Zz') }}
             </h1>
