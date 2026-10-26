@@ -3,7 +3,7 @@
         <STNavigationBar :title="title" :disable-dismiss="true" :disable-pop="true">
             <template #left>
                 <BackButton v-if="canPop" @click="pop" />
-                <template v-else-if="$isMobile || $isIOS || $isAndroid">
+                <template v-else-if="$isMobile || $isPhone">
                     <button v-if="$isAndroid || $isIOS" class="button icon close" type="button" @click="pop()" />
                     <button v-else class="button text selected unbold" type="button" @click="pop()">
                         {{ cancelText }}
@@ -13,7 +13,7 @@
 
             <template #right>
                 <slot name="navigation-buttons" />
-                <LoadingButton v-if="$isMobile || $isIOS || $isAndroid" :loading="loading">
+                <LoadingButton v-if="$isMobile || $isPhone" :loading="loading">
                     <button v-if="saveIconMobile" v-tooltip="saveText" :class="'button icon navigation highlight ' + saveIconMobile" :disabled="disabled" type="submit" />
                     <button v-else-if="$isIOS" v-tooltip="saveText" :class="'button icon navigation highlight ' + (saveIcon ?? 'success')" :disabled="disabled" type="submit" data-testid="save-button" />
                     <button v-else class="button navigation highlight" :disabled="disabled" type="submit">
@@ -68,7 +68,7 @@
                 </STList>
             </form>
         </main>
-        <STToolbar v-if="!$isMobile && !$isIOS && !$isAndroid">
+        <STToolbar v-if="!$isMobile && !$isPhone">
             <template #right>
                 <div class="editor-button-bar">
                     <button v-tooltip="$t('%a9')" class="button icon text-style" :class="{ 'enabled': showTextStyles }" type="button" @mousedown.stop @click.prevent="showTextStyles = !showTextStyles" />

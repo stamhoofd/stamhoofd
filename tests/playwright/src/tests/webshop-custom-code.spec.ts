@@ -13,7 +13,7 @@ import { TestWebshops } from '../helpers/test-data/TestWebshops.js';
 
 /**
  * Webshops can carry admin-defined `customCode`: raw HTML (typically <script> and
- * <style> tags) that WebshopView injects into the document head via
+ * <style> tags) that the webshop view injects into the document head via
  * injectCustomCode(). Because that code runs with full access to the page, it is
  * only allowed to execute when the shop is served from its own custom domain -
  * never on the shared default webshop domain, where it could affect other shops.
@@ -40,7 +40,7 @@ test.describe('Webshop custom code injection @custom-code', () => {
         '  marker.id = "custom-code-marker";',
         '  document.body.appendChild(marker);',
         '</script>',
-        `<style>.webshop-header h1 { color: ${CUSTOM_CODE_COLOR} !important; }</style>`,
+        `<style>.modern-webshop-view h1 { color: ${CUSTOM_CODE_COLOR} !important; }</style>`,
     ].join('\n');
 
     test.afterEach(async () => {
@@ -71,7 +71,7 @@ test.describe('Webshop custom code injection @custom-code', () => {
     async function readInjectionState(scope: Page) {
         const scriptExecuted = await scope.evaluate(() => (window as unknown as { __customCodeExecuted?: boolean }).__customCodeExecuted === true);
         const markerCount = await scope.locator('#custom-code-marker').count();
-        const titleColor = await scope.locator('.webshop-header h1').first().evaluate(el => getComputedStyle(el).color);
+        const titleColor = await scope.locator('.modern-webshop-view h1').first().evaluate(el => getComputedStyle(el).color);
         return { scriptExecuted, markerCount, titleColor };
     }
 
@@ -90,7 +90,7 @@ test.describe('Webshop custom code injection @custom-code', () => {
         expect(webshop.meta.customCode).toBe(customCode);
 
         await page.goto(WorkerData.urls.webshopUri(webshop.uri));
-        await expect(page.getByTestId('product-box').first()).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('.modern-webshop-view')).toBeVisible({ timeout: 15000 });
 
         const state = await readInjectionState(page);
 
@@ -114,7 +114,7 @@ test.describe('Webshop custom code injection @custom-code', () => {
         });
 
         await page.goto(WorkerData.urls.webshopCustomDomain('customcode'));
-        await expect(page.getByTestId('product-box').first()).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('.modern-webshop-view')).toBeVisible({ timeout: 15000 });
 
         // The injected DOM marker proves the <script> executed (auto-waits for injection).
         await expect(page.locator('#custom-code-marker')).toHaveCount(1);

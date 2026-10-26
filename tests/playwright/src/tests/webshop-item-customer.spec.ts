@@ -136,6 +136,7 @@ test.describe('Webshop per-item customers @webshop-item-customer', () => {
         await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
         await flow.addProduct('Deelname', { customer: { firstName: 'Jane', lastName: 'Doe', email: 'jane@test.be', birthDay: { day: 1, month: 1, year: 1990 } } });
 
+        await flow.openCart();
         await page.getByTestId('cart-checkout-button').click();
         await expect(page.getByTestId('payment-step')).toBeVisible({ timeout: 15000 });
         await expect(page.getByTestId('customer-step')).toHaveCount(0);

@@ -3,7 +3,7 @@
         <div v-if="!loadingOrganization" class="st-view charge-memberships-view">
             <STNavigationBar :title="$t(`%tv`)" />
 
-            <main class="center">
+            <main>
                 <h1>
                     {{ $t('%GX') }}
                 </h1>

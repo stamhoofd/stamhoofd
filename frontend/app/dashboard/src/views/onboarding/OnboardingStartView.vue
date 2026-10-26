@@ -2,7 +2,7 @@
     <div class="st-view onboarding-start-view shade" data-testid="onboarding-start-view">
         <STNavigationBar :title="$t('%1Wp')" />
 
-        <main class="center">
+        <main>
             <h1 class="style-navigation-title">
                 {{ $t('%1Wp') }}
             </h1>

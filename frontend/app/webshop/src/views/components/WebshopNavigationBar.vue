@@ -9,7 +9,7 @@
                 <span class="icon user" />
                 <span>{{ userName }}</span>
             </button>
-            <a v-else-if="organization.website" class="button text limit-space" :href="organization.website" target="_blank" rel="nofollow noreferrer noopener">
+            <a v-else-if="showWebsite && organization.website" class="button text limit-space" :href="organization.website" target="_blank" data-testid="website-link" rel="nofollow noreferrer noopener">
                 <span class="icon external" />
                 <span>{{ $t('%Xf') }}</span>
             </a>
@@ -29,8 +29,10 @@ import { useWebshopManager } from '../../composables/useWebshopManager';
 
 withDefaults(defineProps<{
     disablePop?: boolean;
+    showWebsite?: boolean;
 }>(), {
     disablePop: false,
+    showWebsite: true,
 });
 
 const context = useContext();

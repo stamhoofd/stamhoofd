@@ -25,6 +25,8 @@ declare module 'vue' {
         $isIOS: boolean;
         $isMac: boolean;
         $isMobile: boolean;
+        /** Phone (not a tablet), based on the device, regardless of the window size */
+        $isPhone: boolean;
         $isStamhoofd: boolean;
         $isPlatform: boolean;
         $t: typeof import('@stamhoofd/frontend-i18n/I18n').I18n.prototype.$t;

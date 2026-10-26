@@ -3,7 +3,7 @@
         <div v-if="invitationsCount !== null" id="webshop-overview" class="st-view background">
             <STNavigationBar :title="title" />
 
-            <main class="center">
+            <main>
                 <h1 class="style-navigation-title with-block-icon-and-description">
                     <span class="block-icon">
                         <GroupAvatar :group="group" class="inline" :with-aside="false" />

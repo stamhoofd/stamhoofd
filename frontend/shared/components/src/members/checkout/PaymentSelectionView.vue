@@ -1,7 +1,7 @@
 <template>
     <div class="st-view" data-testid="payment-selection-view">
         <STNavigationBar :title="needsPay ? $t(`%M7`) : $t(`%X9`)" />
-        <main v-if="needsPay" class="center">
+        <main v-if="needsPay">
             <h1>{{ $t('%eU') }}</h1>
 
             <STErrorsDefault :error-box="errors.errorBox" />
@@ -10,7 +10,7 @@
 
             <PriceBreakdownBox :price-breakdown="checkout.priceBreakown" />
         </main>
-        <main v-else class="center">
+        <main v-else>
             <h1>{{ $t('%eV') }}</h1>
             <p>{{ $t('%eW') }}</p>
 

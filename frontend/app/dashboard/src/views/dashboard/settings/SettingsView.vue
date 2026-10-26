@@ -2,7 +2,7 @@
     <div id="settings-view" class="st-view background">
         <STNavigationBar :title="$t(`%xU`)" />
 
-        <main class="center">
+        <main>
             <h1>
                 {{ $t('%xU') }}
             </h1>
@@ -507,11 +507,11 @@ defineRoutes([
                                         financialSupport: isNew ? FinancialSupportSettings.create({}).patch(patch) : patch,
                                     }),
                                 }));
-                                Toast.success($t(`%HU`)).show();
+                                Toast.success($t('%HU')).show();
                             },
                         };
                     },
-                    present: 'popup' as const,
+                    // present: 'popup' as const,
                 },
                 {
                     name: Routes.DataPermissions,
@@ -527,7 +527,7 @@ defineRoutes([
                                         dataPermission: isNew ? DataPermissionsSettings.create({}).patch(patch) : patch,
                                     }),
                                 }));
-                                Toast.success($t(`%HU`)).show();
+                                Toast.success($t('%HU')).show();
                             },
                         };
                     },

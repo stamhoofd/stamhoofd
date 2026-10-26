@@ -2,7 +2,7 @@
     <div class="st-view cart-view">
         <STNavigationBar :title="title" />
         <main class="flex">
-            <h1 class="style-navigation-title">
+            <h1 class="larger">
                 {{ title }}
             </h1>
 
@@ -22,21 +22,24 @@
                 <CartItemRow v-for="cartItem of cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="cart" :webshop="webshop" :editable="true" :admin="false" @edit="editCartItem(cartItem)" @delete="deleteItem(cartItem)" @amount="setCartItemAmount(cartItem, $event)" />
             </STList>
 
-            <AddDiscountCodeBox v-if="webshop.meta.allowDiscountCodeEntry" :apply-code="applyCode" />
-            <PriceBreakdownBox :price-breakdown="checkout.priceBreakown" />
-        </main>
-
-        <STToolbar>
-            <template #right>
-                <button type="button" class="button secundary" data-testid="cart-add-more-button" @click="() => pop()">
+            <div class="style-button-bar">
+                <button type="button" class="button text" data-testid="cart-add-more-button" @click="() => pop()">
                     <span class="icon add" />
                     <span v-if="cart.items.length > 0">{{ $t('%Xq') }}</span>
                     <span v-else>{{ $t('%Xr') }}</span>
                 </button>
-                <LoadingButton v-if="cart.items.length > 0" :loading="loading">
+            </div>
+
+            <AddDiscountCodeBox v-if="webshop.meta.allowDiscountCodeEntry" :apply-code="applyCode" />
+            <PriceBreakdownBox :price-breakdown="checkout.priceBreakown" />
+        </main>
+
+        <STToolbar v-if="cart.items.length > 0">
+            <template #right>
+                <LoadingButton :loading="loading">
                     <button class="button primary" type="button" data-testid="cart-checkout-button" @click="goToCheckout">
-                        <span class="icon flag" />
                         <span>{{ $t('%Xs') }}</span>
+                        <span class="icon arrow-right" />
                     </button>
                 </LoadingButton>
             </template>
@@ -62,6 +65,7 @@ import { useNavigationActions } from '@stamhoofd/components/types/NavigationActi
 import type { CartItem, DiscountCode } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
+import { useCheckoutContinue } from '../../composables/useCheckoutContinue';
 import { useWebshopManager } from '../../composables/useWebshopManager';
 
 import { CheckoutStepsManager } from './CheckoutStepsManager';
@@ -80,6 +84,8 @@ const cart = computed(() => checkoutManager.cart);
 const checkout = computed(() => checkoutManager.checkout);
 const webshop = computed(() => webshopManager.webshop);
 
+useCheckoutContinue(goToCheckout);
+
 async function goToCheckout() {
     if (loading.value) {
         return;
@@ -90,8 +96,7 @@ async function goToCheckout() {
 
     try {
         await CheckoutStepsManager.for(checkoutManager).goNext(undefined, navigationActions);
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         errors.errorBox = new ErrorBox(e);
     }
@@ -132,8 +137,7 @@ function editCartItem(cartItem: CartItem) {
                         component?.dismiss({ force: true });
                         if (oldItem) {
                             checkoutManager.cart.replaceItem(oldItem, cartItem);
-                        }
-                        else {
+                        } else {
                             checkoutManager.cart.addItem(cartItem);
                         }
                         errors.errorBox = null;
@@ -153,8 +157,7 @@ onMounted(() => {
 async function check() {
     try {
         await webshopManager.reload();
-    }
-    catch (e) {
+    } catch (e) {
         // Possible: but don't skip validation
         console.error(e);
     }
@@ -162,8 +165,7 @@ async function check() {
     try {
         cart.value.validate(webshopManager.webshop);
         errors.errorBox = null;
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         errors.errorBox = new ErrorBox(e);
     }
@@ -171,8 +173,7 @@ async function check() {
 
     try {
         await checkoutManager.validateCodes();
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
     }
 }

@@ -1,11 +1,14 @@
 <template>
-    <section class="st-view shade modern-webshop-view">
-        <main class="center flex" :class="webshopLayout + ' ' + (webshopLayout === 'Default' ? 'enable-grid' : '')">
-            <figure v-if="webshop.meta.coverPhoto" class="webshop-banner">
-                <ImageComponent :image="webshop.meta.coverPhoto" :auto-height="true" class="style-cover-photo" />
-            </figure>
+    <!-- Scrolling the page or the column closes the toast after adding an item (scroll events only reach the panel while capturing) -->
+    <PreviewPanel v-model:wide="previewWide" class="modern-webshop" @scroll.capture.passive="hideCartToast">
+        <section class="st-view background modern-webshop-view">
+            <!-- Gives the bar of the WebshopController (in the safe area) a background while scrolling -->
+            <STNavigationBar :safe-area-only="true" />
+            <main class="flex enable-grid">
+                <figure v-if="webshop.meta.coverPhoto" class="webshop-banner">
+                    <ImageComponent :image="webshop.meta.coverPhoto" :auto-height="true" class="style-cover-photo" />
+                </figure>
 
-            <div class="columns">
                 <div class="content">
                     <h1>{{ webshop.meta.title || webshop.meta.name }}</h1>
 
@@ -31,83 +34,83 @@
                         {{ $t('%Xm') }}
                     </p>
                 </div>
-                <div class="right container">
-                    <template v-if="(!closed || showOpenAt) && products.length > 0">
-                        <template v-if="orderMode === WebshopOrderMode.Single && products.length === 1">
-                            <div class="style-button-bar">
-                                <button type="button" class="button primary full" data-testid="single-order-button" @click="openSingleProduct(products[0])">
-                                    <span>{{ orderButtonText }}</span>
-                                    <span class="icon arrow-right" />
-                                </button>
-                            </div>
-                        </template>
-                        <div v-else class="products">
-                            <CategoryBox v-for="(category, index) in categories" :key="category.id" :category="category" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem" :is-last="index === categories.length - 1" />
-                            <ProductGrid v-if="categories.length === 0" :products="products" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem" />
-                        </div>
-                    </template>
 
-                    <!-- eslint-disable-next-line vue/no-v-html -> cleaned in backend -->
-                    <div v-if="STAMHOOFD.platformName !== 'stamhoofd'" class="style-wysiwyg gray no-underline-links" v-html="platform.config.shopFooterText.html" />
-                    <div v-else class="stamhoofd-badge">
-                        <a :href="'https://'+ LocalizedDomains.marketing +'?utm_medium=webshop'">{{ $t('%Zkw') }} <Logo /></a>
-                    </div>
-                </div>
-            </div>
+                <template v-if="!showPreview">
+                    <CartItemView v-if="embeddedCartItem" :key="embeddedCartItem.id" :cart-item="embeddedCartItem" :old-item="embeddedCartItem" :checkout="checkout" :webshop="webshop" :save-handler="onAddEmbeddedItem" :live-save-handler="saveLiveCartItem" :embedded="true" />
+                    <WebshopProducts v-else-if="canOrder" :webshop="webshop" @click="hideCartToast" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @open-single-product="openSingleProduct" />
+                    <WebshopCartButton v-if="showCartButton" :count="cartCount" @open="showCart().catch(console.error)" />
+                    <WebshopPlatformFooter />
+                </template>
+                <PreviewOutlet />
 
-            <LegalFooter :organization="organization" :webshop="webshop" />
-        </main>
-    </section>
+                <!-- The platform footer is shown right below the ordering part instead -->
+                <LegalFooter :organization="organization" :webshop="webshop" :hide-platform-footer="true" />
+            </main>
+        </section>
+
+        <!-- Ordering happens next to the content (below it on small screens) -->
+        <template v-if="showPreview" #preview>
+            <CartItemView v-if="embeddedCartItem" :key="embeddedCartItem.id" :cart-item="embeddedCartItem" :old-item="embeddedCartItem" :checkout="checkout" :webshop="webshop" :save-handler="onAddEmbeddedItem" :live-save-handler="saveLiveCartItem" :embedded="true" />
+            <WebshopProducts v-else :webshop="webshop" @click="hideCartToast" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @open-single-product="openSingleProduct" />
+            <WebshopCartButton v-if="showCartButton" :count="cartCount" @open="showCart().catch(console.error)" />
+            <WebshopPlatformFooter />
+        </template>
+    </PreviewPanel>
 </template>
 
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { useDismiss, usePopup } from '@simonbackx/vue-app-navigation';
-import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, ReactiveUrl, useNavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { injectCustomCode } from '@stamhoofd/components/helpers/injectCustomCode.ts';
 import { MetaKey, useMetaInfo } from '@stamhoofd/components/helpers/useMetaInfo.ts';
-import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import Logo from '@stamhoofd/components/icons/Logo.vue';
+import PreviewOutlet from '@stamhoofd/components/layout/PreviewOutlet.vue';
+import PreviewPanel from '@stamhoofd/components/layout/PreviewPanel.vue';
 import LegalFooter from '@stamhoofd/components/navigation/LegalFooter.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { Toast, ToastButton } from '@stamhoofd/components/overlays/Toast.ts';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import CategoryBox from '@stamhoofd/components/views/CategoryBox.vue';
 import ImageComponent from '@stamhoofd/components/views/ImageComponent.vue';
-import ProductGrid from '@stamhoofd/components/views/ProductGrid.vue';
-import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
+import CartItemView from '@stamhoofd/components/views/CartItemView.vue';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import type { Payment, Product } from '@stamhoofd/structures';
-import { CartItem, PaymentStatus, WebshopOrderMode } from '@stamhoofd/structures';
-import { computed, onMounted } from 'vue';
-import { getOrderButtonText } from '../classes/webshopWording';
+import { Cart, CartItem, PaymentStatus, WebshopLayout, WebshopOrderMode } from '@stamhoofd/structures';
+import type { Ref } from 'vue';
+import { computed, onDeactivated, onMounted, ref, watch } from 'vue';
 import { useCheckoutManager } from '../composables/useCheckoutManager';
 import { useWebshopManager } from '../composables/useWebshopManager';
 import type { CheckoutStep } from './checkout/CheckoutStepsManager';
 import { CheckoutStepsManager } from './checkout/CheckoutStepsManager';
 import CrowdfundingBar from './components/CrowdfundingBar.vue';
+import WebshopCartButton from './components/WebshopCartButton.vue';
+import WebshopPlatformFooter from './components/WebshopPlatformFooter.vue';
+import WebshopProducts from './components/WebshopProducts.vue';
 import { getCartComponent } from './checkout/getCartComponent';
+import { getOrderComponent } from './orders/getOrderComponent';
 
 const present = usePresent();
 const show = useShow();
+const navigationController = useNavigationController();
 
 const webshopManager = useWebshopManager();
 const checkoutManager = useCheckoutManager();
-checkoutManager.useRootNavigation = true;
 const organization = computed(() => webshopManager.organization);
 const webshop = computed(() => webshopManager.webshop);
 const orderMode = computed(() => webshop.value.orderMode);
 const cartEnabled = computed(() => webshop.value.shouldEnableCart);
+const cartCount = computed(() => checkoutManager.cart.count);
+const showCartButton = computed(() => cartEnabled.value && cartCount.value > 0);
 const webshopLayout = computed(() => webshop.value.meta.layout);
+// Whether the ordering part fits next to the content
+const previewWide = ref(false);
 const checkout = computed(() => checkoutManager.checkout);
 const cart = computed(() => checkoutManager.cart);
-const orderButtonText = computed(() => getOrderButtonText(webshop.value));
 const bannerImage = computed(() => webshop.value.meta.coverPhoto?.getResolutionForSize(Math.min(document.documentElement.clientWidth - 30, 900), undefined));
 const bannerImageSrc = computed(() => bannerImage.value?.file.getPublicPath());
 const bannerImageWidth = computed(() => bannerImage.value?.width);
 const bannerImageHeight = computed(() => bannerImage.value?.height);
-const platform = usePlatform();
 injectCustomCode(webshopManager.webshop);
 
 useMetaInfo({
@@ -179,54 +182,94 @@ async function openCheckout(animated = true) {
 /**
  * Cart and checkout steps live on the navigation controller of the webshop itself
  */
-function openCart(animated = true, components: ComponentWithProperties[] = []) {
+async function openCart(animated = true, components: ComponentWithProperties[] = []) {
     if (!cartEnabled.value && components.length === 0) {
-        openCheckout(animated).catch(console.error);
+        await openCheckout(animated);
         return;
     }
 
-    show({
+    let first: ComponentWithProperties[] = [];
+    if (cartEnabled.value) {
+        first = [await getCartComponent()];
+    } else if (orderButtonProduct.value) {
+        first = [getSingleProductComponent(orderButtonProduct.value)];
+    }
+
+    await show({
         animated,
         adjustHistory: animated,
-        components: [
-            ...(cartEnabled.value ? [getCartComponent()] : []),
-            ...components,
-        ],
-    }).catch(console.error);
+        components: [...first, ...components],
+    });
+}
+
+/**
+ * Back to the cart when it is already open (e.g. from the cart button), otherwise open it
+ */
+async function showCart() {
+    if (await CheckoutStepsManager.popToUrl(navigationController.value, 'cart')) {
+        return;
+    }
+    await openCart(true);
+}
+
+/**
+ * Single mode: the cart only holds the item of the one product. Returns that item, added to the cart when missing,
+ * so the form edits it in place and every change is stored right away (live editing).
+ */
+function getLiveCartItem(product: Product): CartItem {
+    const existing = checkoutManager.cart.items.find(i => i.product.id === product.id);
+    if (existing) {
+        try {
+            // Only refresh it against the webshop: a half filled in item is kept as is
+            existing.validate(webshop.value, Cart.create({}), { refresh: true, admin: false, validateSeats: false, validateDetails: false });
+            return existing;
+        } catch (e) {
+            console.error(e);
+        }
+    }
+    const item = CartItem.createDefault(product, checkoutManager.cart, webshop.value, { admin: false });
+    saveLiveCartItem(item);
+    return item;
+}
+
+function saveLiveCartItem(item: CartItem) {
+    if (!checkoutManager.cart.items.includes(item)) {
+        checkoutManager.cart.clear();
+        checkoutManager.cart.addItem(item, false);
+    }
+    checkoutManager.saveCart();
 }
 
 /**
  * Single mode with one product: open the cart item view directly (no product box)
  */
-function openSingleProduct(product: Product) {
-    const oldItem = cart.value.items.find(i => i.product.id === product.id);
-    let cartItem = oldItem?.clone() ?? CartItem.createDefault(product, cart.value, webshop.value, { admin: false });
-
-    if (oldItem) {
-        try {
-            cartItem.refresh(webshop.value);
-        } catch (e) {
-            console.error(e);
-            cartItem = CartItem.createDefault(product, cart.value, webshop.value, { admin: false });
-        }
-    }
-
-    present({
-        components: [
-            new ComponentWithProperties(NavigationController, {
-                root: AsyncComponent(() => import('@stamhoofd/components/views/CartItemView.vue'), {
-                    admin: false,
-                    cartItem,
-                    oldItem,
-                    cart: cart.value,
-                    webshop: webshop.value,
-                    checkout: checkout.value,
-                    saveHandler: onAddItem,
-                }),
-            }),
-        ],
-        modalDisplayStyle: 'sheet',
+function openSingleProduct(product: Product, animated = true) {
+    show({
+        animated,
+        adjustHistory: animated,
+        components: [getSingleProductComponent(product)],
     }).catch(console.error);
+}
+
+/**
+ * The first step of the checkout: the checkout is pushed on top of it, so the progress can return to it
+ */
+function getSingleProductComponent(product: Product) {
+    const cartItem = getLiveCartItem(product);
+    const component = new ComponentWithProperties(NavigationController, {
+        root: AsyncComponent(() => import('@stamhoofd/components/views/CartItemView.vue'), {
+            admin: false,
+            cartItem,
+            oldItem: cartItem,
+            cart: cart.value,
+            webshop: webshop.value,
+            checkout: checkout.value,
+            saveHandler: (item: CartItem, oldItem: CartItem | null) => onAddItem(item, oldItem, null),
+            liveSaveHandler: saveLiveCartItem,
+        }),
+    });
+    component.provide.reactive_navigation_url = new ReactiveUrl({ url: CheckoutStepsManager.productUrl });
+    return component;
 }
 
 // 2 minutes in advance already
@@ -234,6 +277,54 @@ const closed = computed(() => webshop.value.isClosed(2 * 60 * 1000) || !organiza
 const almostClosed = computed(() => webshop.value.isClosed(6 * 60 * 60 * 1000) && !closed.value);
 const showOpenAt = computed(() => closed.value && webshop.value.opensInTheFuture());
 const products = computed(() => webshop.value.products.filter(p => !p.hidden));
+
+/**
+ * Single mode with one product: the order form is shown on the page itself instead of an order button.
+ * When the content is stacked above the ordering part, only without a description: a title with only an order button looks empty, but a description followed by a long form is too much.
+ */
+const embeddedProduct = computed(() => {
+    if (closed.value || orderMode.value !== WebshopOrderMode.Single || products.value.length !== 1) {
+        return null;
+    }
+    // Check the text: a description that was cleared in the editor still has html like <p></p>
+    const hasDescription = webshop.value.meta.description.text.trim().length > 0;
+    // The split layout only shows the form next to the description while it fits, otherwise it behaves like the stacked layout
+    if (hasDescription && (webshopLayout.value !== WebshopLayout.Split || !previewWide.value)) {
+        return null;
+    }
+    return products.value[0];
+});
+
+// Single mode with one product, without the form on the page: an order button opens the product as the first checkout step
+const orderButtonProduct = computed(() => {
+    if (embeddedProduct.value || orderMode.value !== WebshopOrderMode.Single || products.value.length !== 1) {
+        return null;
+    }
+    return products.value[0];
+});
+
+const canOrder = computed(() => (!closed.value || showOpenAt.value) && products.value.length > 0);
+
+// Only in the split layout: the stacked layout shows the products or the form below the content
+const showPreview = computed(() => {
+    if (webshopLayout.value !== WebshopLayout.Split) {
+        return false;
+    }
+    if (embeddedProduct.value) {
+        return true;
+    }
+    // Without room for the form next to the description, the order button is shown below it, like in the stacked layout
+    if (orderButtonProduct.value) {
+        return false;
+    }
+    return canOrder.value;
+});
+
+const embeddedCartItem = ref(null) as Ref<CartItem | null>;
+// Also when the checkout is replaced (e.g. cleared after an order), so the form keeps editing the item in the cart
+watch([embeddedProduct, checkout], ([product]) => {
+    embeddedCartItem.value = product ? getLiveCartItem(product) : null;
+}, { immediate: true });
 const categories = computed(() => {
     return webshop.value.categories.filter((c) => {
         const products = c.productIds.flatMap((id) => {
@@ -247,7 +338,20 @@ const categories = computed(() => {
     });
 });
 
-function onAddItem(cartItem: CartItem, oldItem: CartItem | null, args: { dismiss: ReturnType<typeof useDismiss> }) {
+/**
+ * The toast after adding an item covers the buttons at the bottom of the cart and of a product: it closes as soon as
+ * either opens (pushing the cart deactivates this view, a product opens with a click in the products), or when the page scrolls
+ */
+let cartToast: Toast | null = null;
+
+function hideCartToast() {
+    cartToast?.hide();
+    cartToast = null;
+}
+
+onDeactivated(hideCartToast);
+
+function onAddItem(cartItem: CartItem, oldItem: CartItem | null, args: { dismiss: ReturnType<typeof useDismiss> } | null) {
     if (cartEnabled.value) {
         if (args) {
             args.dismiss({ force: true }).catch(console.error);
@@ -260,7 +364,14 @@ function onAddItem(cartItem: CartItem, oldItem: CartItem | null, args: { dismiss
         }
         checkoutManager.saveCart();
 
-        openCart(true);
+        // Stay in the webshop to add more, the cart opens from the toast or the cart button
+        hideCartToast();
+        cartToast = Toast.success($t('{name} is toegevoegd aan jouw winkelmandje', { name: cartItem.product.name }))
+            .setButton(new ToastButton($t('Bekijk winkelmandje'), () => {
+                showCart().catch(console.error);
+            }))
+            .setTestId('cart-added-toast')
+            .show();
     } else {
         checkoutManager.cart.clear();
         if (args) {
@@ -270,6 +381,11 @@ function onAddItem(cartItem: CartItem, oldItem: CartItem | null, args: { dismiss
         checkoutManager.saveCart();
         openCheckout(true).catch(console.error);
     }
+}
+
+function onAddEmbeddedItem(cartItem: CartItem, oldItem: CartItem | null, component: { dismiss: ReturnType<typeof useDismiss>; canDismiss: boolean }) {
+    // The form itself is part of the page and can't be dismissed, but the seat selection it presents on top can
+    onAddItem(cartItem, oldItem, component.canDismiss ? component : null);
 }
 
 /**
@@ -299,18 +415,18 @@ onMounted(() => {
 
     if (path.length === 2 && path[0] === 'code') {
         if (cartEnabled.value) {
-            openCart(false);
+            openCart(false).catch(console.error);
         }
 
         const code = path[1];
         checkoutManager.applyCode(code).catch(console.error);
     } else if (path.length === 2 && path[0] === 'order') {
         const orderId = path[1];
-        present({
+        show({
             animated: false,
             adjustHistory: false,
             components: [
-                AsyncComponent(() => import('./orders/OrderView.vue'), { orderId }),
+                getOrderComponent({ orderId }),
             ],
             url: path.join('/'),
         }).catch(console.error);
@@ -328,7 +444,7 @@ onMounted(() => {
         const paymentId = params.get('id');
         const cancel = params.get('cancel') === 'true';
 
-        present({
+        show({
             adjustHistory: false,
             animated: false,
             force: true,
@@ -339,27 +455,15 @@ onMounted(() => {
                     cancel,
                     finishedHandler: function (navigationActions: NavigationActions & { popup: ReturnType<typeof usePopup> }, payment: Payment | null) {
                         if (payment && payment.status === PaymentStatus.Succeeded) {
-                            if (!navigationActions.popup) {
-                                // We are not in a popup/sheet on mobile
-                                // So replace with a force instead of dimissing
-                                present({
-                                    components: [
-                                        AsyncComponent(() => import('./orders/OrderView.vue'), { paymentId: payment.id, success: true }),
-                                    ],
-                                    replace: 1,
-                                    force: true,
-                                }).catch(console.error);
-                            } else {
-                                // In popup/sheet on desktop
-                                navigationActions.dismiss({ force: true, animated: true }).catch(console.error);
-                                present({
-                                    components: [
-                                        AsyncComponent(() => import('./orders/OrderView.vue'), { paymentId: payment.id, success: true }),
-                                    ],
-                                }).catch(console.error);
-                            }
+                            navigationActions.show({
+                                components: [
+                                    getOrderComponent({ paymentId: payment.id, success: true }),
+                                ],
+                                replace: 1, // replace pending view
+                                force: true,
+                            }).catch(console.error);
                         } else {
-                            navigationActions.dismiss({ force: true }).catch(console.error);
+                            navigationActions.pop({ force: true })?.catch(console.error);
 
                             // Force reload webshop (stock will have changed: prevent invalidating the cart)
                             // Update stock in background
@@ -374,7 +478,7 @@ onMounted(() => {
                     },
                 }),
             ],
-            modalDisplayStyle: 'sheet', // warning: if changing to popup: present won't work on mobile devices in the finishedhandler (because this is deactivated -> no parents)!
+            // modalDisplayStyle: 'sheet', // warning: if changing to popup: present won't work on mobile devices in the finishedhandler (because this is deactivated -> no parents)!
             url: path.join('/'),
         }).catch(console.error);
     } else if (path.length >= 2 && path[0] === 'checkout') {
@@ -382,7 +486,9 @@ onMounted(() => {
             console.error(e);
         });
     } else if (path.length === 1 && path[0] === 'cart' && cartEnabled.value) {
-        openCart(false);
+        openCart(false).catch(console.error);
+    } else if (path.length === 1 && path[0] === CheckoutStepsManager.productUrl && orderButtonProduct.value) {
+        openSingleProduct(orderButtonProduct.value, false);
     }
 });
 
@@ -407,7 +513,7 @@ async function resumeStep(destination: string, animated = true) {
     }
 
     const components = await Promise.all(waitingComponents);
-    openCart(animated, components);
+    await openCart(animated, components);
 }
 </script>
 
@@ -416,79 +522,47 @@ async function resumeStep(destination: string, animated = true) {
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .modern-webshop-view {
-    .columns {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-    --st-vertical-padding: 0;
+    // Needs a unit: it is added to the safe area in calc()
+    --st-vertical-padding: 0px;
 
-    > main.Split {
-        // Increase width
-        --st-view-max-width: 1100px;
-
-        .columns {
-            display: grid;
-            grid-template-columns: 1fr 450px;
-            gap: 20px;
-        }
-
-        @media (max-width: 900px) {
-            .columns {
-                grid-template-columns: 1fr;
-            }
-        }
-    }
-
-    .columns > .right {
-        position: sticky;
-        top: 0;
-        align-self: flex-start;
-        padding: 15px 0;
+    // Only below the content: in the preview (next to or below the content) the preview has its own padding
+    > main > .webshop-products, > main > .cart-item-view {
+        padding: 30px 0 15px 0;
     }
 
     .content > h1 {
         @extend %style-title-semihuge;
         padding-bottom: 10px;
     }
-
-    // The webshop bar above already provides the spacing
-    > main {
-        padding-top: 20px;
-    }
-
 }
 
-.stamhoofd-badge {
-    padding-top: 15px;
-    --color-primary: #{$color-primary-original};
-    text-align: center;
+// Below the content, the ordering part continues the page without its own background color
+.modern-webshop-view .preview-outlet > .preview-panel-preview {
+    background: $color-background;
+    --color-current-background: #{$color-background};
+    --color-current-background-shade: #{$color-background-shade};
+    --color-current-background-shade-darker: #{$color-background-shade-darker};
+    --rgb-current-background: var(--rgb-background, 255);
+}
 
-    > a {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: flex-end;
-        min-width: 0;
+// The cart button sticks to the bottom of the column: the bottom padding of the column moves into the preview, so nothing scrolls below the button
+.modern-webshop .preview-panel-column {
+    padding-bottom: 0;
+
+    .preview-panel-preview {
+        padding-bottom: var(--preview-panel-padding-bottom);
+    }
+}
+
+// The column next to the content is narrow: the order button of the form takes its full width
+.modern-webshop .preview-panel-column .cart-item-view.embedded .style-button-bar {
+    > .loading-button {
+        width: 100%;
         max-width: none;
-        flex-wrap: wrap;
-        gap: 10px;
-        font-size: 12px;
+    }
 
-        svg {
-            height: 20px;
-            width: auto;
-        }
-
-        &,
-        &:hover,
-        &:link,
-        &:active,
-        &:visited {
-            color: $color-gray-text;
-            font-weight: 600;
-            text-decoration: none;
-        }
+    .button {
+        width: 100%;
     }
 }
 </style>

@@ -3,7 +3,7 @@
         <div v-if="outstandingBalance" class="st-view">
             <STNavigationBar :title="$t(`%tx`)" />
 
-            <main class="center">
+            <main>
                 <h1>
                     {{ $t('%tx') }}
                 </h1>

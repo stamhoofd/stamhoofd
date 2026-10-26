@@ -49,6 +49,7 @@ import { CheckoutMethodType, WebshopTimeSlot } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
+import { useCheckoutContinue } from '../../composables/useCheckoutContinue';
 
 const props = defineProps<{
     continueCheckout: (navigate: NavigationActions) => Promise<void>;
@@ -86,6 +87,8 @@ const selectedSlot = computed({
         checkoutManager.saveCheckout();
     },
 });
+
+useCheckoutContinue(goNext);
 
 async function goNext() {
     if (loading.value || !selectedSlot.value) {

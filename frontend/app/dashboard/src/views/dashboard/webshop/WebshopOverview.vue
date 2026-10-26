@@ -9,7 +9,7 @@
             </template>
         </STNavigationBar>
 
-        <main class="center">
+        <main>
             <h1 class="style-navigation-title with-icons">
                 <span>{{ title }}</span>
 

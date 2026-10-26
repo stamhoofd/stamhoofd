@@ -2,7 +2,7 @@
     <form class="signup-view st-view" novalidate @submit.prevent="submit">
         <STNavigationBar :title="$t(`%ur`)" />
 
-        <main class="center">
+        <main>
             <h1 v-if="STAMHOOFD.userMode === 'organization' && $context.organization">
                 {{ $t('%1Ac', {organization: $context.organization.name}) }}
             </h1>

@@ -44,7 +44,7 @@ test.describe('Webshop dark mode setting', () => {
 
         await page.emulateMedia({ colorScheme: 'dark' });
         await page.goto(WorkerData.urls.webshopUri(webshop.uri));
-        await expect(page.getByTestId('product-box').first()).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('.modern-webshop-view')).toBeVisible({ timeout: 15000 });
     }
 
     function readDarkModeState(page: Page) {

@@ -2,7 +2,7 @@
     <div class="st-view">
         <STNavigationBar :title="$t('%Zuo')" />
 
-        <main class="center">
+        <main>
             <h1>{{ $t('%Zuo') }}</h1>
             <p>
                 {{ isPlatform ? $t('%Zw8', { platform: platform.config.name }) : $t('Stuur je leden en bestellers vanuit {platform} naar Mailchimp. De synchronisatie loopt enkel van {platform} naar Mailchimp: wijzigingen in Mailchimp komen niet terug.', { platform: platform.config.name }) }}

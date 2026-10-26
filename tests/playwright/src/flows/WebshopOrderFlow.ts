@@ -40,7 +40,30 @@ export class WebshopOrderFlow {
 
     async goto(url: string) {
         await this.page.goto(url);
-        await expect(this.page.getByTestId('product-box').first()).toBeVisible({ timeout: 15000 });
+        await expect(this.page.locator('.modern-webshop-view')).toBeVisible({ timeout: 15000 });
+    }
+
+    /**
+     * Open the form of a product. A webshop with one product and no cart shows the form on the page itself, or a
+     * single order button when it has a description. Both render together with the webshop view.
+     */
+    private async openProduct(name: string): Promise<Locator> {
+        const embedded = this.page.locator('.modern-webshop').getByTestId('cart-item-view');
+        if (await embedded.count() > 0) {
+            await expect(embedded).toBeVisible();
+            return embedded;
+        }
+
+        const orderButton = this.page.getByTestId('single-order-button');
+        if (await orderButton.count() > 0) {
+            await orderButton.click();
+        } else {
+            await this.page.getByTestId('product-box').filter({ hasText: name }).first().click();
+        }
+
+        const cartItemView = this.page.getByTestId('cart-item-view');
+        await expect(cartItemView).toBeVisible();
+        return cartItemView;
     }
 
     /**
@@ -50,16 +73,7 @@ export class WebshopOrderFlow {
         const seats = options.seats ?? 0;
         const count = options.seats ?? options.count ?? 1;
 
-        // If the cart popup is still open from a previous add, go back to the shop first
-        const addMore = this.page.getByTestId('cart-add-more-button');
-        if (await addMore.isVisible().catch(() => false)) {
-            await addMore.click();
-        }
-
-        await this.page.getByTestId('product-box').filter({ hasText: name }).first().click();
-
-        const cartItemView = this.page.getByTestId('cart-item-view');
-        await expect(cartItemView).toBeVisible();
+        const cartItemView = await this.openProduct(name);
 
         if (count > 1) {
             await cartItemView.getByTestId('amount-number-input').locator('input').fill(count.toString());
@@ -86,19 +100,28 @@ export class WebshopOrderFlow {
             await seatsView.getByTestId('confirm-seats-button').click();
         }
 
-        // Wait for cart view
+        // Adding to the cart stays in the webshop and confirms it with a toast
         if (this.cartEnabled) {
-            // Wait for cart view to be visible to avoid fkalyness
-            await expect(this.page.getByTestId('cart-add-more-button')).toBeVisible();
+            await expect(this.page.getByTestId('cart-added-toast').first()).toBeVisible();
+            await expect(this.page.getByTestId('cart-item-view')).toHaveCount(0);
         }
     }
 
     /**
-     * Go to the checkout. For cart shops the cart popup is open after the last add; for no-cart
-     * shops the customer step already opened automatically after adding.
+     * Open the cart with the cart button in the bar of the webshop
+     */
+    async openCart() {
+        await this.page.getByTestId('cart-button').click();
+        await expect(this.page.getByTestId('cart-checkout-button')).toBeVisible();
+    }
+
+    /**
+     * Go to the checkout. For cart shops the cart is opened from the bar; for no-cart shops the customer step
+     * already opened automatically after adding.
      */
     async goToCheckout() {
         if (this.cartEnabled) {
+            await this.openCart();
             await this.page.getByTestId('cart-checkout-button').click();
         }
         await expect(this.page.getByTestId('customer-step')).toBeVisible({ timeout: 15000 });
@@ -148,6 +171,7 @@ export class WebshopOrderFlow {
      */
     async fillDeliveryAddressStep(address: TestAddress) {
         if (this.cartEnabled) {
+            await this.openCart();
             await this.page.getByTestId('cart-checkout-button').click();
         }
         const step = this.page.getByTestId('address-step');
@@ -185,7 +209,12 @@ export class WebshopOrderFlow {
     }
 
     async confirmPayment() {
-        await this.page.getByTestId('payment-step').getByTestId('save-button').click();
+        // Below the cart preview when the screen is wide enough for its own column (900px, see PreviewPanel), in the toolbar of the step otherwise
+        const wide = (this.page.viewportSize()?.width ?? 0) >= 900;
+        const button = wide
+            ? this.page.getByTestId('preview-confirm-button')
+            : this.page.getByTestId('payment-step').getByTestId('save-button');
+        await button.click();
     }
 
     // --- Assertions / post-order helpers ----------------------------------

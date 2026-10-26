@@ -2,7 +2,7 @@
     <div v-color="email.organization?.meta.color" class="st-view">
         <STNavigationBar :title="title" />
 
-        <main class="center">
+        <main>
             <p class="style-title-prefix flex">
                 {{ !organization && email.organization && email.fromName && (email.organization.name !== email.fromName) ? `${email.organization.name} (${email.fromName || email.organization?.name || email.fromAddress })` : email.fromName || email.organization?.name || email.fromAddress }}
             </p>

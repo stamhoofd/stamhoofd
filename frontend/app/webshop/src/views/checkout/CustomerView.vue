@@ -1,6 +1,8 @@
 <template>
     <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('%16p')" data-submit-last-field :title="title" data-testid="customer-step" @save="goNext">
-        <h1>{{ title }}</h1>
+        <h1 class="larger">
+            {{ title }}
+        </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -64,6 +66,7 @@ import type { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSe
 import { customerFieldKeys } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 import { computed, ref } from 'vue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
+import { useCheckoutContinue } from '../../composables/useCheckoutContinue';
 import { useWebshopManager } from '../../composables/useWebshopManager';
 import CustomerDetailsInputs from './CustomerDetailsInputs.vue';
 
@@ -167,6 +170,8 @@ function selectOtherCustomer() {
     checkoutManager.checkout.setContactPerson(null);
     checkoutManager.saveCheckout();
 }
+
+useCheckoutContinue(goNext);
 
 async function goNext() {
     if (loading.value) {

@@ -12,16 +12,18 @@ Also check out [View API’s](view-apis.md)
 
 **Centering content**
 
-The .center class can be added to the \<main\> element of a view when the view can be displayed very widely (most often this means not in a popup). This class will center the view.
+On desktop, a full-screen view centers its content in a column (`--st-view-max-width`, 700px by default). Add `.small` to the \<main\> element for a narrow 400px column, e.g. for login forms. Centering is switched off in popups, sheets (including positionable sheets), a `BoxedController`, a split-view sidebar, and for views nested inside the \<main\> of another view.
 
-If you don’t add this class, the content will take up all the available space. This class also makes sure the horizontal lines in the view are centered and don’t take the full width.
+The toolbar at the bottom aligns with the content column and follows the content instead of floating at the bottom of the screen. It only sticks to the bottom (with a top border) when the content scrolls. On mobile it floats as before.
+
+Add `.full-width` to the view or its \<main\> when the content needs all available space, such as tables, menus or views that set their own width.
 
 ```html
 <template>
     <div class="st-view">
         <STNavigationBar :title="$t('My View')" />
 
-        <main class="center">
+        <main>
             <h1>
                 {{ $t('My View') }}
             </h1>
@@ -31,7 +33,48 @@ If you don’t add this class, the content will take up all the available space.
 </template>
 ```
 
+The navigation bar keeps the full width by default. Add `.center-navigation-bar` to the view, or to a container around the views (like the webshop's `WebshopController`), to align it with the content column as well.
+
 ![](../assets/building-blocks/centered-content.png)
+
+---
+
+## PreviewPanel
+
+Wraps a view (or a `NavigationController`) to show a preview next to it, e.g. the cart during checkout or a preview of the webshop in the dashboard. The view keeps its own navigation bar, scrolling and toolbar.
+
+When the panel is at least 900px wide, the preview is shown in its own scrollable column with a `background-shade` background. The column is at least `--preview-panel-width` wide (450px by default). On large displays the content of the view moves next to the preview (`--preview-panel-gap`, 80px by default) and both are centered together on the screen; the preview keeps the width it has in the narrowest column. Below that width, the preview moves to the end of the view's \<main\>, so it scrolls together with the content instead of splitting a small screen in two.
+
+A view chooses where the preview goes on small screens by adding a `<PreviewOutlet />`, usually at the end of its \<main\>. A view without an outlet hides the preview on small screens, e.g. to offer a button that opens it instead. When views are pushed inside the panel, the most recent outlet takes over the preview. The preview stays mounted while it moves, so it keeps its state.
+
+The `#actions` slot is shown below the preview, only while the preview has its own column. The default slot receives `wide`, so the view can move a button there on wide screens and keep it in its own toolbar otherwise (`hideToolbar` on `SaveView`):
+
+```html
+<template>
+    <PreviewPanel>
+        <template #default="{ wide }">
+            <SaveView :title="$t('My View')" :hide-toolbar="wide" @save="save">
+                <h1>{{ $t('My View') }}</h1>
+                <!-- ... -->
+
+                <PreviewOutlet />
+            </SaveView>
+        </template>
+
+        <template #preview>
+            <!-- ... -->
+        </template>
+
+        <template #actions>
+            <LoadingButton :loading="saving" class="max">
+                <button class="button primary full" type="button" @click="save">
+                    {{ $t('Confirm') }}
+                </button>
+            </LoadingButton>
+        </template>
+    </PreviewPanel>
+</template>
+```
 
 ---
 
@@ -42,6 +85,10 @@ This is the bar at the top of all views. Normally every view has this bar. The n
 **Disable pop or dismiss buttons**
 
 By default the back and dismiss buttons are added automatically. This can be disabled by setting disable-pop or disable-dismiss to true.
+
+**Only the safe area**
+
+Set `safe-area-only` when a surrounding container shows its own bar in the safe area of the view (like the webshop's `WebshopController`). The navigation bar then takes no height and only gives that area a background once the view scrolls.
 
 ```html
 <STNavigationBar :title="title" :disable-pop="true" :disable-dismiss="true" />

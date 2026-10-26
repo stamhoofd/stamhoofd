@@ -23,6 +23,8 @@ export enum CheckoutStepType {
 
 export class CheckoutStep {
     id: string;
+    /** Short name of the step, shown in the checkout progress */
+    title: string;
     active: boolean;
     url: string;
     skipHandler?: () => void;
@@ -31,6 +33,7 @@ export class CheckoutStep {
 
     constructor(data: {
         id: string;
+        title: string;
         active?: boolean;
         url: string;
         skipHandler?: () => void;
@@ -38,6 +41,7 @@ export class CheckoutStep {
         validate: (checkout: Checkout, webshop: Webshop, organizationMeta: OrganizationMetaData) => void;
     }) {
         this.id = data.id;
+        this.title = data.title;
         this.active = data.active ?? true;
         this.skipHandler = data.skipHandler;
         this.getComponent = data.getComponent;
@@ -47,6 +51,11 @@ export class CheckoutStep {
 }
 
 export class CheckoutStepsManager {
+    /**
+     * Url of the product form that comes before the checkout steps in a webshop with one product and no cart
+     */
+    static readonly productUrl = 'product';
+
     $checkoutManager: CheckoutManager;
 
     private constructor($checkoutManager: CheckoutManager) {
@@ -75,6 +84,7 @@ export class CheckoutStepsManager {
         steps.push(
             new CheckoutStep({
                 id: CheckoutStepType.Method,
+                title: $t('%xE'),
                 url: '/checkout/' + CheckoutStepType.Method.toLowerCase(),
                 active: webshop.meta.checkoutMethods.length > 1,
                 skipHandler: () => {
@@ -93,6 +103,7 @@ export class CheckoutStepsManager {
         steps.push(
             new CheckoutStep({
                 id: CheckoutStepType.Time,
+                title: $t('%1GD'),
                 url: '/checkout/' + CheckoutStepType.Time.toLowerCase(),
                 active: checkoutMethod !== null && checkoutMethod.timeSlots.timeSlots.length > 1,
                 skipHandler: () => {
@@ -115,6 +126,7 @@ export class CheckoutStepsManager {
         steps.push(
             new CheckoutStep({
                 id: CheckoutStepType.Address,
+                title: $t('%Us'),
                 url: '/checkout/' + CheckoutStepType.Address.toLowerCase(),
                 active: checkoutMethod !== null && checkoutMethod.type == CheckoutMethodType.Delivery,
                 skipHandler: () => {
@@ -151,6 +163,7 @@ export class CheckoutStepsManager {
 
         steps.push(new CheckoutStep({
             id: CheckoutStepType.Customer,
+            title: $t('%zM'),
             url: '/checkout/' + CheckoutStepType.Customer.toLowerCase(),
             active: loggedIn
                 ? (asks(customerSettings.phone) || asks(customerSettings.birthDay) || asks(customerSettings.gender) || (asks(customerSettings.address) && !hasDeliveryAddress) || !user?.firstName || !user?.lastName || asksCustomerQuestions)
@@ -173,6 +186,7 @@ export class CheckoutStepsManager {
 
             steps.push(new CheckoutStep({
                 id,
+                title: category.name.toString(),
                 url,
                 active: category.isEnabled(checkout),
                 getComponent: async () => {
@@ -207,6 +221,8 @@ export class CheckoutStepsManager {
         // Payment
         steps.push(new CheckoutStep({
             id: CheckoutStepType.Payment,
+            // Nothing to pay: the step only confirms the order
+            title: checkout.totalPrice > 0 ? $t('%eX') : $t('%1V8'),
             url: '/checkout/' + CheckoutStepType.Payment.toLowerCase(),
             getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './PaymentSelectionView.vue').then(m => new ComponentWithProperties(m.default, {
                 handleCheckoutError: async (error: unknown, navigate: NavigationActions) => {
@@ -277,24 +293,17 @@ export class CheckoutStepsManager {
         await this.$webshopManager.reload();
         const webshop = this.$webshopManager.webshop;
 
-        if (this.$checkoutManager.useRootNavigation) {
-            // Back to the cart, or to the webshop itself when there is no cart
-            if (!webshop.shouldEnableCart || !(await this.popToUrl(navigate, 'cart'))) {
-                await navigate.navigationController!.popToRoot({ force: true });
-            }
-        } else if (!webshop.shouldEnableCart) {
-            await navigate.dismiss({ force: true });
-        } else {
+        // Back to the cart, or to the webshop itself when there is no cart
+        if (!webshop.shouldEnableCart || !(await CheckoutStepsManager.popToUrl(navigate.navigationController, 'cart', { force: true }))) {
             await navigate.navigationController!.popToRoot({ force: true });
         }
         Toast.fromError(error).show();
     }
 
     /**
-     * Pop back to the component with the given url on the current navigation controller. Returns false when it isn't on the stack.
+     * Pop back to the component with the given url on a navigation controller. Returns false when it isn't on the stack.
      */
-    private async popToUrl(navigate: NavigationActions, url: string): Promise<boolean> {
-        const navigationController = navigate.navigationController;
+    static async popToUrl(navigationController: NavigationActions['navigationController'] | null, url: string, options: { force?: boolean } = {}): Promise<boolean> {
         if (!navigationController) {
             return false;
         }
@@ -305,7 +314,7 @@ export class CheckoutStepsManager {
         }
         const count = components.length - 1 - index;
         if (count > 0) {
-            await navigationController.pop({ count, force: true });
+            await navigationController.pop({ count, force: options.force });
         }
         return true;
     }

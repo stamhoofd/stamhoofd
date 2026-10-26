@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view invalid-page-view">
+    <div class="st-view full-width invalid-page-view">
         <main class="limit-width">
             <h1 v-if="!errorBox">
                 {{ $t('%Y0') }}

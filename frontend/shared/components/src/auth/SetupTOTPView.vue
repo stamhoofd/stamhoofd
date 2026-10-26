@@ -2,7 +2,7 @@
     <form class="st-view setup-totp-view" data-testid="setup-totp-view" data-submit-last-field novalidate @submit.prevent="submit">
         <STNavigationBar :title="$t('%ZhV')" />
 
-        <main class="center">
+        <main>
             <h1>{{ $t('%ZhV') }}</h1>
 
             <p v-if="showQRCode">

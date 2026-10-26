@@ -3,7 +3,7 @@
     <div v-else class="st-view">
         <STNavigationBar :title="member.patchedMember.name" />
 
-        <main class="center">
+        <main>
             <h1>{{ $t('%di', {member: member.patchedMember.firstName}) }}</h1>
 
             <ScrollableSegmentedControl v-if="showControl" v-model="selectedControlTab" :items="controlItems" :labels="controlLabels" data-testid="register-tabs">
