@@ -48,7 +48,8 @@
             </p>
         </template>
 
-        <hr><h2>{{ $t('%1Ke') }}</h2>
+        <hr>
+        <h2>{{ $t('%1Ke') }}</h2>
         <p>{{ $t('%gC') }}</p>
 
         <p v-if="draggableCompanies.length === 0" class="info-box">
@@ -74,7 +75,8 @@
         </p>
 
         <div v-for="category of recordCategories" :key="category.id" class="container">
-            <hr><FillRecordCategoryBox :category="category" :value="patched" :validator="errors.validator" :level="2" :all-optional="false" :force-mark-reviewed="true" @patch="patchAnswers" />
+            <hr>
+            <FillRecordCategoryBox :category="category" :value="patched" :validator="errors.validator" :level="2" :all-optional="false" :force-mark-reviewed="true" @patch="patchAnswers" />
         </div>
     </SaveView>
 </template>
@@ -107,7 +109,6 @@ import { computed, ref, watch } from 'vue';
 import ReviewCheckbox from '../ReviewCheckbox.vue';
 
 import CompanyRow from '../companies/CompanyRow.vue';
-import { useFeatureFlag } from '#hooks/useFeatureFlag.ts';
 
 const props = defineProps<{ isReview?: boolean }>();
 
@@ -115,7 +116,6 @@ const title = computed(() => props.isReview ? $t('%4d') : $t('%10T'));
 const organizationManager = useOrganizationManager();
 const platform = usePlatform();
 const auth = useAuth();
-const $feature = useFeatureFlag();
 
 // Not released yet: only platform admins can set the language of an organization
 const availableLanguages = I18nController.shared.availableLanguages;
@@ -129,7 +129,7 @@ const { patched, hasChanges, addPatch, patch } = usePatch(computed(() => organiz
 const { overrideIsDone, hasChanges: hasReviewChanges, save: saveReview, reviewCheckboxData } = useReview(SetupStepType.Companies);
 
 const canEditOrganizationName = computed(() => {
-    if (!$feature('edit-organization-name-admin')) return true;
+    if (!platform.value.config.onlyAdminCanChangeOrganizationName) return true;
 
     return auth.hasPlatformFullAccess();
 });

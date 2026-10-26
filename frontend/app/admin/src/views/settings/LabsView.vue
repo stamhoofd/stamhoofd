@@ -66,7 +66,8 @@
             </STListItem>
         </STList>
 
-        <hr><h2>{{ $t('%HJ') }}</h2>
+        <hr>
+        <h2>{{ $t('%HJ') }}</h2>
 
         <STList>
             <CheckboxListItem :model-value="getLoginMethod(LoginMethod.Password)" :label="$t(`%HK`)" @update:model-value="setLoginMethod(LoginMethod.Password, !!$event)">
@@ -86,7 +87,8 @@
             </CheckboxListItem>
         </STList>
 
-        <hr><h2>
+        <hr>
+        <h2>
             {{ $t('%HF') }}
         </h2>
 
@@ -125,7 +127,7 @@
             {{ $t('%Zui') }}
         </Checkbox>
 
-        <Checkbox :model-value="getFeatureFlag('edit-organization-name-admin')" @update:model-value="setFeatureFlag('edit-organization-name-admin', !!$event)">
+        <Checkbox v-model="onlyAdminCanChangeOrganizationName">
             {{ $t('Naam vereniging enkel aanpasbaar door platformbeheerders') }}
         </Checkbox>
     </SaveView>
@@ -187,6 +189,17 @@ const requireTwoFactor = computed({
         addPatch({
             privateConfig: PlatformPrivateConfig.patch({
                 requireTwoFactor,
+            }),
+        });
+    },
+});
+
+const onlyAdminCanChangeOrganizationName = computed({
+    get: () => patched.value.config.onlyAdminCanChangeOrganizationName,
+    set: (onlyAdminCanChangeOrganizationName: boolean) => {
+        addPatch({
+            config: PlatformConfig.patch({
+                onlyAdminCanChangeOrganizationName,
             }),
         });
     },

@@ -115,7 +115,7 @@ describe('Endpoint.PatchOrganization', () => {
 
         test('Changing the name fails if only platform admins can change it (non-admin)', async () => {
             const platform = await Platform.getForEditing();
-            platform.config.featureFlags = ['edit-organization-name-admin'];
+            platform.config.onlyAdminCanChangeOrganizationName = true;
             await platform.save();
 
             const organization = await new OrganizationFactory({}).create();
@@ -133,7 +133,7 @@ describe('Endpoint.PatchOrganization', () => {
 
         test('Change the name of the organization if only platform admins can change it (admin)', async () => {
             const platform = await Platform.getForEditing();
-            platform.config.featureFlags = [];
+            platform.config.onlyAdminCanChangeOrganizationName = false;
             await platform.save();
 
             const organization = await new OrganizationFactory({}).create();

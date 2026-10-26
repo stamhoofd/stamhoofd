@@ -82,9 +82,8 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         if (await Context.auth.hasFullAccess(organization.id)) {
             if (request.body.name) {
                 const platform = await Platform.getSharedStruct();
-                const onlyPlatformAdmin = platform.config.featureFlags.includes('edit-organization-name-admin');
 
-                if (onlyPlatformAdmin && !Context.auth.hasPlatformFullAccess() && organization.name !== request.body.name)
+                if (platform.config.onlyAdminCanChangeOrganizationName && !Context.auth.hasPlatformFullAccess() && organization.name !== request.body.name)
                     throw Context.auth.error({
                         message: 'Only platform admin can change organization name',
                         human: $t('Enkel een platformbeheerder kan de naam van een vereniging aanpassen'),
