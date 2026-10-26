@@ -33,8 +33,10 @@ import { Toast } from '#overlays/Toast.ts';
 import { LoginHelper } from '@stamhoofd/frontend-application/LoginHelper';
 import { computed, ref } from 'vue';
 import { useContext } from '../hooks/useContext';
+import { useFreshAction } from '#auth/useFreshAction.ts';
 
 const context = useContext();
+const runFresh = useFreshAction();
 const dismiss = useDismiss();
 const loading = ref(false);
 const password = ref('');
@@ -67,7 +69,9 @@ async function submit() {
     loading.value = true;
 
     try {
-        await LoginHelper.changePassword(context.value, password.value);
+        // A stale session prompts for reauthentication and retries the change once;
+        // only a successful password change dismisses this view and shows success.
+        await runFresh(() => LoginHelper.changePassword(context.value, password.value));
         await dismiss({ force: true });
         new Toast($t(`%12U`), 'success').show();
     } catch (e) {

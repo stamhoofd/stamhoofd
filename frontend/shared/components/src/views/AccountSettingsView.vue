@@ -223,6 +223,7 @@ import STErrorsDefault from '#errors/STErrorsDefault.vue';
 import { useErrors } from '#errors/useErrors.ts';
 import { useValidation } from '#errors/useValidation.ts';
 import { useContext } from '#hooks/useContext.ts';
+import { useFreshAction } from '#auth/useFreshAction.ts';
 import { useLoginMethod, useLoginMethodEnabled } from '#hooks/useLoginMethods.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
@@ -247,6 +248,7 @@ import { useSwitchLanguage } from './hooks/useSwitchLanguage';
 import IconContainer from '#icons/IconContainer.vue';
 
 const $context = useContext();
+const runFresh = useFreshAction();
 const $platform = usePlatform();
 const $user = useUser();
 const errors = useErrors();
@@ -416,7 +418,9 @@ async function disconnectProvider(provider: LoginProviderType) {
         errors.errorBox = null;
 
         try {
-            await LoginHelper.patchUser($context.value, patch);
+            // If the API requires recent authentication, complete it and retry the
+            // provider removal once. Cancellation or failure reaches the error box.
+            await runFresh(() => LoginHelper.patchUser($context.value, patch));
             Toast.success($t(`%12H`)).show();
         } catch (e) {
             errors.errorBox = new ErrorBox(e);
@@ -440,7 +444,9 @@ async function deletePassword() {
         errors.errorBox = null;
 
         try {
-            await LoginHelper.patchUser($context.value, patch);
+            // Keep the password until the API accepts the removal, reauthenticating
+            // and retrying once if the session is not fresh enough.
+            await runFresh(() => LoginHelper.patchUser($context.value, patch));
             Toast.success($t(`%12J`)).show();
         } catch (e) {
             errors.errorBox = new ErrorBox(e);
