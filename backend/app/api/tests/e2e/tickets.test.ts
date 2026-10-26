@@ -634,10 +634,16 @@ describe('E2E.Tickets', () => {
         expect(ticketsAfter.map(mapTicketChangedAmount)).toIncludeSameMembers(tickets.map(mapTicketChangedAmount));
     });
 
+    /**
+     * Use the ticket product linked to this seating plan so the order and its
+     * authenticated edits exercise valid seat selection. Each selected seat gets
+     * a ticket; moving, removing and adding seats must reuse ticket identities
+     * where possible while retaining each ticket's original seat.
+     */
     test('Seats are assigned to each ticket as expected', async () => {
         const item1 = CartItem.create({
-            product: ticket1,
-            productPrice: ticket1.prices[0],
+            product: seatProduct,
+            productPrice: seatProduct.prices[0],
             amount: 3,
             seats: [
                 CartReservedSeat.create({
