@@ -9,6 +9,7 @@ import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { Address, Cart, CartItem, CartItemOption, Customer, MollieOnboarding, MollieStatus, Option, OptionMenu, OrderData, PaymentConfiguration, PaymentMethod, PaymentProvider, PaymentStatus, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopAuthType, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopOrderMode, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 import { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
+import { CartReservedSeat, Version } from '@stamhoofd/structures';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
@@ -343,6 +344,37 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
             privateMeta,
             products: [product, seatProduct, personProduct],
         }).create();
+    });
+
+    /**
+     * A product without a seating plan cannot accept a client-supplied seat, even
+     * when its coordinates exist in another product's plan. The negative seat price
+     * is untrusted input and must not turn an ordinary item into a discounted seat.
+     *
+     * Sending JSON exercises request decoding and order validation together. The
+     * persisted product and metadata snapshots cover stock, seat reservations and
+     * checkout-slot counters: rejecting the request must leave all of them intact.
+     */
+    it('rejects unexpected seats in a serialized ordinary-product order without changing stock', async () => {
+        const item = CartItem.create({
+            product: personProduct,
+            productPrice: personProductPrice,
+            seats: [CartReservedSeat.create({ section: seatingPlan.sections[0].id, row: 'A', seat: '1', price: -100_00 })],
+        });
+        const orderData = OrderData.create({
+            paymentMethod: PaymentMethod.Unknown,
+            checkoutMethod: onSiteMethod,
+            timeSlot: slot4,
+            cart: Cart.create({ items: [item] }),
+            customer,
+        });
+        const before = { products: webshop.products.map(p => p.encode({ version: Version })), meta: webshop.meta.encode({ version: Version }) };
+        const request = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+
+        await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.errorWithCode('invalid_seats'));
+
+        await refreshAll();
+        expect({ products: webshop.products.map(p => p.encode({ version: Version })), meta: webshop.meta.encode({ version: Version }) }).toEqual(before);
     });
 
     describe('User authentication', () => {
