@@ -7,7 +7,7 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { Order, Organization, OrganizationFactory } from '@stamhoofd/models';
-import { PaymentMethod, Product, ProductPrice, RichText, STPackageBundle, WebshopLayout } from '@stamhoofd/structures';
+import { PaymentMethod, Product, ProductPrice, RichText, STPackageBundle, WebshopLayout, WebshopTicketType } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { WebshopOrderFlow } from '../flows/WebshopOrderFlow.js';
@@ -449,6 +449,41 @@ test.describe('Modern webshop view @webshop-modern', () => {
         const orders = await fetchOrders(webshop.id);
         expect(orders).toHaveLength(1);
         expect(orders[0].data.cart.items.map(i => i.amount)).toEqual([3]);
+    });
+
+    test('Closes the seat selection when continuing from a single seated product', async ({ page }) => {
+        const organization = await createOrganization();
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Modern single seats ${WorkerData.id}`,
+            ticketType: WebshopTicketType.Tickets,
+            productCount: 1,
+            cartEnabled: false,
+            withSeatingPlan: true,
+            paymentMethods: [PaymentMethod.PointOfSale],
+        });
+        webshop.meta.description = RichText.create({ text: 'Alle info over deze voorstelling', html: '<p>Alle info over deze voorstelling</p>' });
+        await webshop.save();
+
+        const flow = new WebshopOrderFlow(page, { cartEnabled: false });
+        await page.goto(WorkerData.urls.webshopUri(webshop.uri));
+
+        await page.getByTestId('single-order-button').click();
+        await page.getByTestId('cart-item-view').getByTestId('save-button').click();
+
+        const seatsView = page.getByTestId('choose-seats-view');
+        await expect(seatsView).toBeVisible();
+        await seatsView.getByTestId('seat-button').first().click();
+        await seatsView.getByTestId('confirm-seats-button').click();
+        await expect(seatsView).toBeHidden();
+
+        await flow.fillCustomer();
+        await flow.confirmPayment();
+        await flow.expectOrderConfirmed();
+
+        const orders = await fetchOrders(webshop.id);
+        expect(orders).toHaveLength(1);
+        expect(orders[0].data.cart.items[0].seats).toHaveLength(1);
     });
 
     test('Shows the products next to the content in the split layout', async ({ page }) => {

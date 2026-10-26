@@ -59,7 +59,7 @@ test.describe('Webshop per-item customers @webshop-item-customer', () => {
         TestUtils.setPermanentEnvironment('userMode', 'organization');
     });
 
-    test('Collects a customer per item in the classic cart flow', async ({ page }) => {
+    test('Collects a customer per item in the cart flow', async ({ page }) => {
         const organization = await createOrganization({ modernWebshop: false });
         const { webshop } = await TestWebshops.create({
             organization,
@@ -85,6 +85,7 @@ test.describe('Webshop per-item customers @webshop-item-customer', () => {
         // No amount input: every person is a separate item
         await flow.addProduct('Deelname', { customer: { firstName: 'Jane', lastName: 'Doe' } });
         await flow.addProduct('Deelname', { customer: { firstName: 'Jack', lastName: 'Doe' } });
+        await flow.openCart();
         await expect(page.locator('.cart-item-row')).toHaveCount(2);
 
         await flow.goToCheckout();
@@ -181,6 +182,7 @@ test.describe('Webshop per-item customers @webshop-item-customer', () => {
         await page.getByTestId('cart-button').click();
         await page.locator('.cart-item-row button.trash').first().click();
         await expect(page.locator('.cart-item-row')).toHaveCount(0);
+        await page.goBack();
         await flow.addProduct('Deelname', { customer: { firstName: 'Jan', lastName: 'Doe' } });
 
         await flow.goToCheckout();

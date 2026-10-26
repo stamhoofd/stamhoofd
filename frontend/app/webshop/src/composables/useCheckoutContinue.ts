@@ -8,7 +8,7 @@ const key = Symbol('checkoutContinue') as InjectionKey<ShallowRef<ContinueHandle
 /**
  * Holds the continue action of the visible checkout view, so the checkout progress can go to the next step.
  */
-export function provideCheckoutContinue() {
+export function useProvideCheckoutContinue() {
     const handler = shallowRef<ContinueHandler | null>(null);
     provide(key, handler);
     return handler;

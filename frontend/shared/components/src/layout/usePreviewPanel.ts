@@ -16,7 +16,7 @@ const columnWidthsKey = Symbol('PreviewColumnWidths') as InjectionKey<Map<Compon
  * Lets the views inside a PreviewPanel offer a place for the preview, used when the preview does not fit next to them.
  * The most recently mounted or activated outlet wins, so a pushed view takes over the preview from the view below it.
  */
-export function providePreviewPanel() {
+export function useProvidePreviewPanel() {
     const outlets = shallowRef<HTMLElement[]>([]);
     const active = ref(true);
     onActivated(() => {
@@ -88,14 +88,14 @@ export function usePreviewOutlet(element: Readonly<Ref<HTMLElement | null>>): bo
  * Lets a container around a navigation controller follow the width of the preview column of each of its views,
  * e.g. to keep its own content above the views clear of that column. The width is 0 while the preview has no column.
  */
-export function providePreviewColumnWidths() {
+export function useProvidePreviewColumnWidths() {
     const widths = shallowReactive(new Map<ComponentWithProperties, number>());
     provide(columnWidthsKey, widths);
     return widths;
 }
 
 /**
- * Reports the width of the preview column for the view this PreviewPanel is part of (see providePreviewColumnWidths)
+ * Reports the width of the preview column for the view this PreviewPanel is part of (see useProvidePreviewColumnWidths)
  */
 export function useReportPreviewColumnWidth(width: Readonly<Ref<number>>) {
     const widths = inject(columnWidthsKey, null);

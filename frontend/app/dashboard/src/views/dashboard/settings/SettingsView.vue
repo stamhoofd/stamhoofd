@@ -511,7 +511,7 @@ defineRoutes([
                             },
                         };
                     },
-                    // present: 'popup' as const,
+                    present: 'popup' as const,
                 },
                 {
                     name: Routes.DataPermissions,

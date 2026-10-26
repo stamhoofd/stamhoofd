@@ -7,7 +7,7 @@
                 <template #right>
                     <button v-if="showingOrder" class="button text limit-space" type="button" data-testid="back-to-webshop-button" @click="backToWebshop">
                         <span class="icon close" />
-                        <span>{{ $t('Sluiten') }}</span>
+                        <span>{{ $t('%9b') }}</span>
                     </button>
                     <button v-if="cartEnabled && !showingOrder" class="primary button" type="button" data-testid="cart-button" @click="openCart().catch(console.error)">
                         <span class="icon basket" />
@@ -26,10 +26,10 @@
 import type { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import { FramedComponent } from '@simonbackx/vue-app-navigation';
 import { getWebshopSquareLogo } from '@stamhoofd/components/helpers/webshopIdentity.ts';
-import { providePreviewColumnWidths } from '@stamhoofd/components/layout/usePreviewPanel.ts';
+import { useProvidePreviewColumnWidths } from '@stamhoofd/components/layout/usePreviewPanel.ts';
 import { computed, onMounted, shallowRef } from 'vue';
 
-import { provideCheckoutContinue } from '../composables/useCheckoutContinue';
+import { useProvideCheckoutContinue } from '../composables/useCheckoutContinue';
 import { useCheckoutManager } from '../composables/useCheckoutManager';
 import { useWebshopManager } from '../composables/useWebshopManager';
 import CheckoutProgress from './checkout/CheckoutProgress.vue';
@@ -90,10 +90,10 @@ const progress = computed(() => {
     return { steps, current };
 });
 
-const continueCheckout = provideCheckoutContinue();
+const continueCheckout = useProvideCheckoutContinue();
 
 // The steps would run into the preview column of the visible view (e.g. the order summary next to the payment step)
-const previewColumnWidths = providePreviewColumnWidths();
+const previewColumnWidths = useProvidePreviewColumnWidths();
 const showingPreviewColumn = computed(() => {
     const top = navigationController.value?.components.at(-1);
     return !!top && (previewColumnWidths.get(top) ?? 0) > 0;
@@ -149,10 +149,6 @@ defineExpose({
     height: calc(var(--vh, 1vh) * 100);
     max-height: 100dvh;
     overflow: clip;
-
-    body.native-android &, body.web-android & {
-        --webshop-bar-height: 70px;
-    }
 
     > .webshop-controller-bar {
         position: absolute;

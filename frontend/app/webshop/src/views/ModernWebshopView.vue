@@ -37,7 +37,7 @@
 
                 <template v-if="!showPreview">
                     <CartItemView v-if="embeddedCartItem" :key="embeddedCartItem.id" :cart-item="embeddedCartItem" :old-item="embeddedCartItem" :checkout="checkout" :webshop="webshop" :save-handler="onAddEmbeddedItem" :live-save-handler="saveLiveCartItem" :embedded="true" />
-                    <WebshopProducts v-else-if="canOrder" :webshop="webshop" @click="hideCartToast" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @open-single-product="openSingleProduct" />
+                    <WebshopProducts v-else-if="canOrder" :webshop="webshop" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @click="hideCartToast" @open-single-product="openSingleProduct" />
                     <WebshopCartButton v-if="showCartButton" :count="cartCount" @open="showCart().catch(console.error)" />
                     <WebshopPlatformFooter />
                 </template>
@@ -51,7 +51,7 @@
         <!-- Ordering happens next to the content (below it on small screens) -->
         <template v-if="showPreview" #preview>
             <CartItemView v-if="embeddedCartItem" :key="embeddedCartItem.id" :cart-item="embeddedCartItem" :old-item="embeddedCartItem" :checkout="checkout" :webshop="webshop" :save-handler="onAddEmbeddedItem" :live-save-handler="saveLiveCartItem" :embedded="true" />
-            <WebshopProducts v-else :webshop="webshop" @click="hideCartToast" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @open-single-product="openSingleProduct" />
+            <WebshopProducts v-else :webshop="webshop" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @click="hideCartToast" @open-single-product="openSingleProduct" />
             <WebshopCartButton v-if="showCartButton" :count="cartCount" @open="showCart().catch(console.error)" />
             <WebshopPlatformFooter />
         </template>
@@ -264,7 +264,7 @@ function getSingleProductComponent(product: Product) {
             cart: cart.value,
             webshop: webshop.value,
             checkout: checkout.value,
-            saveHandler: (item: CartItem, oldItem: CartItem | null) => onAddItem(item, oldItem, null),
+            saveHandler: onAddEmbeddedItem,
             liveSaveHandler: saveLiveCartItem,
         }),
     });
@@ -384,7 +384,7 @@ function onAddItem(cartItem: CartItem, oldItem: CartItem | null, args: { dismiss
 }
 
 function onAddEmbeddedItem(cartItem: CartItem, oldItem: CartItem | null, component: { dismiss: ReturnType<typeof useDismiss>; canDismiss: boolean }) {
-    // The form itself is part of the page and can't be dismissed, but the seat selection it presents on top can
+    // The form itself is part of the page or a checkout step and can't be dismissed, but the seat selection it presents on top can
     onAddItem(cartItem, oldItem, component.canDismiss ? component : null);
 }
 
@@ -478,7 +478,6 @@ onMounted(() => {
                     },
                 }),
             ],
-            // modalDisplayStyle: 'sheet', // warning: if changing to popup: present won't work on mobile devices in the finishedhandler (because this is deactivated -> no parents)!
             url: path.join('/'),
         }).catch(console.error);
     } else if (path.length >= 2 && path[0] === 'checkout') {
@@ -487,7 +486,7 @@ onMounted(() => {
         });
     } else if (path.length === 1 && path[0] === 'cart' && cartEnabled.value) {
         openCart(false).catch(console.error);
-    } else if (path.length === 1 && path[0] === CheckoutStepsManager.productUrl && orderButtonProduct.value) {
+    } else if (path.length === 1 && path[0] === CheckoutStepsManager.productUrl && orderButtonProduct.value && !closed.value) {
         openSingleProduct(orderButtonProduct.value, false);
     }
 });

@@ -33,7 +33,7 @@ Add `.full-width` to the view or its \<main\> when the content needs all availab
 </template>
 ```
 
-The navigation bar keeps the full width by default. Add `.center-navigation-bar` to the view, or to a container around the views (like the webshop's `WebshopController`), to align it with the content column as well.
+The navigation bar keeps the full width by default. Add `.center-navigation-bar` to the view, or to a container around the views, to align it with the content column as well.
 
 ![](../assets/building-blocks/centered-content.png)
 

@@ -27,7 +27,7 @@
 import { useElementSize } from '#hooks/useElementSize.ts';
 import { computed, useTemplateRef } from 'vue';
 import { useResizeObserver } from '../inputs/hooks/useResizeObserver';
-import { providePreviewPanel, useReportPreviewColumnWidth } from './usePreviewPanel';
+import { useProvidePreviewPanel, useReportPreviewColumnWidth } from './usePreviewPanel';
 
 const slots = defineSlots<{
     /**
@@ -61,7 +61,7 @@ function isWide() {
     return wide.value && !!slots.preview;
 }
 
-const { outlet } = providePreviewPanel();
+const { outlet } = useProvidePreviewPanel();
 
 // Hidden (so 0) while the preview has no column
 const { width: columnWidth } = useElementSize(useTemplateRef<HTMLElement>('aside'));

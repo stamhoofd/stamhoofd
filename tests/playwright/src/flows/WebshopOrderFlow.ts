@@ -108,9 +108,13 @@ export class WebshopOrderFlow {
     }
 
     /**
-     * Open the cart with the cart button in the bar of the webshop
+     * Open the cart with the cart button in the bar of the webshop. Does nothing when the cart is already open: the
+     * checkout progress replaces the bar there.
      */
     async openCart() {
+        if (await this.page.getByTestId('cart-checkout-button').isVisible()) {
+            return;
+        }
         await this.page.getByTestId('cart-button').click();
         await expect(this.page.getByTestId('cart-checkout-button')).toBeVisible();
     }
