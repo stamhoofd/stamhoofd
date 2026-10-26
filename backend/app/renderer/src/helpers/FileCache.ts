@@ -2,9 +2,9 @@ import { SimpleError } from '@common/errors';
 import { promises as fs } from 'fs';
 
 /**
- * This cache does not use a TTL. 
+ * This cache does not use a TTL.
  * Instead it uses the updatedAt timestamp of a resource when caching. So we keep the cache forever unless the resource itself has changed.
- * The cache requester passes the updatedAt timestamp, so this works flawlessly.
+ * Reads only return the exact requested updatedAt timestamp, never a later version.
  */
 export class FileCache {
     static async write(cacheId: string, timestamp: Date, data: Uint8Array | Buffer) {
@@ -32,6 +32,7 @@ export class FileCache {
         await fs.writeFile(path, data);
     }
 
+    /** Returns bytes for this exact resource version, or null when its file cannot be read. */
     static async read(cacheId: string, timestamp: Date): Promise<Buffer | null> {
         if (cacheId.includes('/')) {
             throw new SimpleError({
@@ -46,25 +47,6 @@ export class FileCache {
         try {
             const data = await fs.readFile(path);
             return data;
-        }
-        catch {
-            // ignore
-        }
-
-        try {
-            const files = await fs.readdir(folder);
-            for (const file of files) {
-                const fileTimestamp = parseInt(file.substring(0, file.length - 4));
-                if (fileTimestamp >= timestamp.getTime()) {
-                    try {
-                        const data = await fs.readFile(folder + '/' + file);
-                        return data;
-                    }
-                    catch {
-                        // ignore
-                    }
-                }
-            }
         }
         catch {
             // ignore
