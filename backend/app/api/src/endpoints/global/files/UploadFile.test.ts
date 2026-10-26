@@ -7,6 +7,9 @@ import { TestUtils } from '@stamhoofd/test-utils';
 import { promises as fs } from 'fs';
 import type { IncomingMessage } from 'node:http';
 import { Readable } from 'node:stream';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { defaultOptions } from 'formidable';
 import { SessionService } from '../../../services/SessionService.js';
 
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -24,8 +27,18 @@ describe('Endpoint.UploadFile', () => {
      * All the paths the endpoint tried to clean up
      */
     let temporaryFiles: string[] = [];
+    let uploadDirectory: string;
+    const originalUploadDirectory = defaultOptions.uploadDir;
 
-    beforeEach(() => {
+    /**
+     * Isolate real multipart writes in a per-test root, covering both TMPDIR-based
+     * endpoint directories and Formidable's default upload location. S3 is mocked;
+     * the rm spy records cleanup paths while still performing real deletions.
+     */
+    beforeEach(async () => {
+        uploadDirectory = await fs.mkdtemp(join(tmpdir(), 'upload-file-test-'));
+        vi.stubEnv('TMPDIR', uploadDirectory);
+        defaultOptions.uploadDir = uploadDirectory;
         TestUtils.setEnvironment('SPACES_BUCKET', 'test-bucket');
         TestUtils.setEnvironment('SPACES_ENDPOINT', 'test.digitaloceanspaces.com');
         TestUtils.setEnvironment('SPACES_KEY', 'test-key');
@@ -47,15 +60,22 @@ describe('Endpoint.UploadFile', () => {
         });
     });
 
-    afterEach(() => {
+    // Restore process-wide parser/environment state and remove the test root itself.
+    afterEach(async () => {
         Image.s3Client = null;
         vi.restoreAllMocks();
+        vi.unstubAllEnvs();
+        defaultOptions.uploadDir = originalUploadDirectory;
+        await fs.rm(uploadDirectory, { recursive: true, force: true });
     });
 
     /**
-     * Builds a multipart/form-data request with a single uploaded file, like a browser would send it
+     * Returns an authenticated organization-admin request with a real multipart
+     * file stream and an optional private query. field renames the required part;
+     * extraFile adds a second PDF to trigger the file-count limit. These malformed
+     * bodies still pass through Formidable and can create temporary files.
      */
-    const buildUploadRequest = async (data: { filename: string; contentType: string; content?: string; isPrivate?: boolean }) => {
+    const buildUploadRequest = async (data: { filename: string; contentType: string; content?: string; isPrivate?: boolean; field?: string; extraFile?: boolean }) => {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({
             organization,
@@ -65,8 +85,9 @@ describe('Endpoint.UploadFile', () => {
 
         const boundary = '--------------------------StamhoofdTest';
         const body = Buffer.concat([
-            Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${data.filename}"\r\nContent-Type: ${data.contentType}\r\n\r\n`),
+            Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="${data.field ?? 'file'}"; filename="${data.filename}"\r\nContent-Type: ${data.contentType}\r\n\r\n`),
             Buffer.from(data.content ?? 'Hello world'),
+            ...(data.extraFile ? [Buffer.from(`\r\n--${boundary}\r\nContent-Disposition: form-data; name="extra"; filename="extra.pdf"\r\nContent-Type: application/pdf\r\n\r\nextra`)] : []),
             Buffer.from(`\r\n--${boundary}--\r\n`),
         ]);
 
@@ -83,6 +104,18 @@ describe('Endpoint.UploadFile', () => {
 
         return r;
     };
+
+    /**
+     * Reject a missing required file field or excess file count without uploading.
+     * Checking the real test root after rejection verifies removal of partial
+     * uploads and endpoint-owned subdirectories, not merely a call to fs.rm.
+     */
+    test.each([{ field: 'wrong' }, { extraFile: true }])('It removes temporary resources after rejecting %j', async (options) => {
+        const r = await buildUploadRequest({ filename: 'document.pdf', contentType: 'application/pdf', ...options });
+        await expect(testServer.test(endpoint, r)).rejects.toThrow();
+        expect(await fs.readdir(uploadDirectory)).toEqual([]);
+        expect(uploads).toHaveLength(0);
+    });
 
     test('It stores a pdf with the reported content type, and lets the browser render it', async () => {
         const r = await buildUploadRequest({ filename: 'Mijn document.pdf', contentType: 'application/pdf' });
