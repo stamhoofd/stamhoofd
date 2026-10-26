@@ -47,6 +47,35 @@ describe('Cart.validate', () => {
         cart.validate(webshop);
         expect(cart.items).toHaveLength(3);
     });
+
+    it('keeps the units that are still in stock in Bulk mode', () => {
+        const product = Product.create({ name: 'Workshop', stock: 2 });
+        const webshop = Webshop.create({
+            meta: WebshopMetaData.create({ orderMode: WebshopOrderMode.Bulk }),
+            products: [product],
+        });
+        const units = [item(product), item(product), item(product)];
+        const cart = Cart.create({ items: units });
+
+        expect(() => cart.validate(webshop)).toThrow();
+        expect(cart.items.map(i => i.id)).toEqual([units[0].id, units[1].id]);
+    });
+});
+
+describe('Cart.splitIntoUnits', () => {
+    it('splits items with an amount into one item per unit', () => {
+        const { productA, productB } = createWebshop(WebshopOrderMode.Bulk);
+        const multiple = item(productA, 3);
+        const single = item(productB);
+        const cart = Cart.create({ items: [multiple, single] });
+
+        cart.splitIntoUnits();
+        expect(cart.items.map(i => i.amount)).toEqual([1, 1, 1, 1]);
+        expect(cart.items.map(i => i.product.id)).toEqual([productA.id, productA.id, productA.id, productB.id]);
+        expect(new Set(cart.items.map(i => i.id)).size).toBe(4);
+        expect(cart.items[0].id).toBe(multiple.id);
+        expect(cart.items[3]).toBe(single);
+    });
 });
 
 describe('Cart.validate without seat validation', () => {

@@ -39,7 +39,8 @@
         </p>
 
         <template v-if="modernWebshopEnabled">
-            <hr><h2>{{ $t('Bestelwijze') }}</h2>
+            <hr>
+            <h2>{{ $t('Bestelwijze') }}</h2>
             <p>
                 {{ $t('Kies hoe bezoekers artikelen selecteren en afrekenen.') }}
             </p>
@@ -81,7 +82,8 @@
             </STList>
         </template>
         <template v-else-if="webshop.canEnableCart">
-            <hr><h2>{{ $t('%1DQ') }}</h2>
+            <hr>
+            <h2>{{ $t('%1DQ') }}</h2>
             <p>
                 {{ $t('%Ri') }}
             </p>

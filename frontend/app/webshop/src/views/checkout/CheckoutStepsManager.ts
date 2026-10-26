@@ -86,8 +86,10 @@ export class CheckoutStepsManager {
         return new CheckoutStepsManager($checkoutManager);
     }
 
+    private static readonly seatsStepPrefix = 'seats-';
+
     static seatsStepId(product: Product) {
-        return `seats-${product.id}`;
+        return CheckoutStepsManager.seatsStepPrefix + product.id;
     }
 
     /// Return all the steps that are confirmed with the current checkout configuration
@@ -120,7 +122,7 @@ export class CheckoutStepsManager {
                         throw new SimpleError({
                             code: 'invalid_seats',
                             message: 'Missing seats',
-                            human: $t('Kies een plaats voor elk ticket van {product}', { product: product.name }),
+                            human: $t('Kies eerst alle plaatsen voor {product}', { product: product.name }),
                             field: 'cart',
                         });
                     }
@@ -306,7 +308,7 @@ export class CheckoutStepsManager {
         }
 
         // Bulk: seats, options, fields and customers are collected in the first checkout steps, so don't require them before those are done
-        const detailsPending = this.$webshopManager.webshop.orderMode === WebshopOrderMode.Bulk && (stepId === undefined || stepId.startsWith('seats-'));
+        const detailsPending = this.$webshopManager.webshop.orderMode === WebshopOrderMode.Bulk && (stepId === undefined || stepId.startsWith(CheckoutStepsManager.seatsStepPrefix));
 
         try {
             this.$checkoutManager.checkout.validateCart(this.$webshopManager.webshop, this.$webshopManager.organization.meta, false, { validateSeats: !detailsPending, validateDetails: !detailsPending });
@@ -361,18 +363,29 @@ export class CheckoutStepsManager {
         const webshop = this.$webshopManager.webshop;
 
         if (webshop.orderMode === WebshopOrderMode.Bulk) {
+            // Seats are only checked once every unit has one: before that, the seats steps still have to collect them
+            const seatsChosen = this.$checkoutManager.cart.items.every(i => !i.product.seatingPlanId || i.seats.length === i.amount);
             try {
                 // Stores recoverable errors on the items for the details step and drops invalid ones. Missing details are
                 // not an error yet: the details step collects and shows them.
-                this.$checkoutManager.cart.validate(webshop, false, { validateDetails: false });
+                this.$checkoutManager.cart.validate(webshop, false, { validateDetails: false, validateSeats: seatsChosen });
             } catch (e) {
                 console.error(e);
             }
             this.$checkoutManager.saveCart();
 
-            const detailsStep = this.getSteps().find(s => s.id === (CheckoutStepType.Details as string));
+            const steps = this.getSteps();
+            const detailsStep = steps.find(s => s.id === (CheckoutStepType.Details as string));
             if (detailsStep?.active && await CheckoutStepsManager.popToUrl(navigate.navigationController, detailsStep.url, { force: true })) {
                 this.$checkoutManager.pendingCartError = error;
+                return;
+            }
+
+            // Without a details step, a seat that is no longer available is chosen again in the seats step of its product
+            const seatItem = this.$checkoutManager.cart.items.find(i => isSimpleError(i.cartError) && ['seats_unavailable', 'invalid_seats'].includes(i.cartError.code));
+            const seatsStep = seatItem ? steps.find(s => s.id === CheckoutStepsManager.seatsStepId(seatItem.product)) : undefined;
+            if (seatsStep && await CheckoutStepsManager.popToUrl(navigate.navigationController, seatsStep.url, { force: true })) {
+                Toast.fromError(error).show();
                 return;
             }
         }

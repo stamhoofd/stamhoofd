@@ -157,10 +157,13 @@ useMetaInfo({
     ],
 });
 
-async function openCheckout(animated = true) {
+/**
+ * @param reload Reload the webshop first, e.g. so the seats step starts from the latest taken seats
+ */
+async function openCheckout(animated = true, reload = false) {
     try {
         // Force a save if nothing changed (to fix timeSlot + updated data)
-        const nextStep = await CheckoutStepsManager.for(checkoutManager).getNextStep(undefined, false);
+        const nextStep = await CheckoutStepsManager.for(checkoutManager).getNextStep(undefined, reload);
         if (!nextStep) {
             throw new SimpleError({
                 code: 'missing_config',
@@ -245,7 +248,7 @@ function startBulkOrder() {
         Toast.warning($t('Maak eerst een keuze')).show();
         return;
     }
-    openCheckout(true).catch(console.error);
+    openCheckout(true, true).catch(console.error);
 }
 
 /**
@@ -403,6 +406,9 @@ async function check() {
     try {
         // Bulk: seats and details are only collected during the checkout
         const bulk = webshop.value.orderMode === WebshopOrderMode.Bulk;
+        if (bulk) {
+            cart.value.splitIntoUnits();
+        }
         cart.value.validate(webshopManager.webshop, false, { validateSeats: !bulk, validateDetails: !bulk });
     } catch (e) {
         console.error(e);
@@ -517,6 +523,7 @@ async function resumeStep(destination: string, animated = true) {
             step = nextStep;
         } catch (e) {
             // Possible invalid checkout -> stop here
+            console.error(e);
             break;
         }
     }

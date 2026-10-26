@@ -1,5 +1,6 @@
 import { ArrayDecoder, AutoEncoder, field } from '@common/encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
+import { v4 as uuidv4 } from 'uuid';
 
 import { ProductType } from './Product.js';
 import type { Webshop } from './Webshop.js';
@@ -13,6 +14,28 @@ export class Cart extends AutoEncoder {
 
     clear() {
         this.items = [];
+    }
+
+    /**
+     * The bulk order mode has one item per unit. Splits items with a larger amount, e.g. from a cart that was saved
+     * before the webshop switched to bulk mode. Every unit keeps its own seat.
+     */
+    splitIntoUnits() {
+        this.items = this.items.flatMap((item) => {
+            if (item.amount <= 1) {
+                return [item];
+            }
+            return Array.from({ length: item.amount }, (_, index) => {
+                const unit = item.clone();
+                if (index > 0) {
+                    unit.id = uuidv4();
+                }
+                unit.amount = 1;
+                unit.seats = item.seats.slice(index, index + 1);
+                unit.uitpasNumbers = item.uitpasNumbers.slice(index, index + 1);
+                return unit;
+            });
+        });
     }
 
     addItem(item: CartItem, allowMerge = true) {
@@ -153,7 +176,9 @@ export class Cart extends AutoEncoder {
 
         for (const item of this.items) {
             try {
-                item.validate(webshop, this, {
+                // Only the items kept so far count against the stock, so the first units within stock stay. Otherwise
+                // every unit of a product with one item per unit (bulk, per-item customers) sees all the others.
+                item.validate(webshop, Cart.create({ items: [...newItems, item] }), {
                     refresh: true,
                     admin: asAdmin,
                     validateSeats,

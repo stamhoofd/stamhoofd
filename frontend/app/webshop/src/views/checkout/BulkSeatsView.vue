@@ -54,7 +54,7 @@ import SeatSelectionBox from '@stamhoofd/components/views/SeatSelectionBox.vue';
 import type { Product, ReservedSeat } from '@stamhoofd/structures';
 import { CartReservedSeat } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import { useCheckoutContinue } from '../../composables/useCheckoutContinue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
@@ -116,6 +116,15 @@ const reservedSeats = computed(() => {
 function setSeats(newSeats: ReservedSeat[]) {
     seats.value = newSeats.map(s => CartReservedSeat.create(s));
 }
+
+// A reload (e.g. after a seat got taken during the checkout) can make selected seats unavailable while this step
+// stays mounted below the later steps: drop them, so they can't be confirmed again
+watch(reservedSeats, (reserved) => {
+    const plan = seatingPlan.value;
+    if (plan && seats.value.some(s => !plan.isValidSeat(s, reserved))) {
+        seats.value = seats.value.filter(s => plan.isValidSeat(s, reserved));
+    }
+});
 
 useCheckoutContinue(save);
 

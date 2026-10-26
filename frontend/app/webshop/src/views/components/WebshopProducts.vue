@@ -2,6 +2,8 @@
     <div class="webshop-products container">
         <template v-if="bulk">
             <BulkProductList />
+            <!-- Bulk mode has no cart, so codes are entered below the list -->
+            <AddDiscountCodeBox v-if="webshop.meta.allowDiscountCodeEntry" :apply-code="code => checkoutManager.applyCode(code)" />
 
             <div class="style-button-bar">
                 <button type="button" class="button primary full" data-testid="bulk-order-button" @click="emit('startBulkOrder')">
@@ -32,6 +34,8 @@ import type { CartItem, Category, Checkout, Product, Webshop } from '@stamhoofd/
 import { WebshopOrderMode } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { getOrderButtonText } from '@stamhoofd/components/helpers/webshopWording.ts';
+import AddDiscountCodeBox from '@stamhoofd/components/views/AddDiscountCodeBox.vue';
+import { useCheckoutManager } from '../../composables/useCheckoutManager';
 import BulkProductList from '../products/BulkProductList.vue';
 
 /**
@@ -55,6 +59,7 @@ const emit = defineEmits<{
     startBulkOrder: [];
 }>();
 
+const checkoutManager = useCheckoutManager();
 const bulk = computed(() => props.webshop.orderMode === WebshopOrderMode.Bulk);
 const totalPrice = computed(() => props.checkout.totalPrice);
 

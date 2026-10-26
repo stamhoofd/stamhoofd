@@ -31,17 +31,17 @@ export function getProductListTitle(webshop: Webshop): string {
  */
 export function getUnitName(webshop: Webshop, product: Product): { singular: string; plural: string } {
     // A product that collects a participant per unit is counted in people, whatever its type
-    if (product?.enableCustomer) {
+    if (product.enableCustomer) {
         return { singular: $t('deelnemer'), plural: $t('deelnemers') };
     }
-    if (product?.type === ProductType.Ticket) {
-        return { singular: $t(`%o`), plural: $t(`%m`) };
+    if (product.type === ProductType.Ticket) {
+        return { singular: $t('%o'), plural: $t('%m') };
     }
-    if (product?.type === ProductType.Voucher) {
-        return { singular: $t(`voucher`), plural: $t(`vouchers`) };
+    if (product.type === ProductType.Voucher) {
+        return { singular: $t('voucher'), plural: $t('vouchers') };
     }
-    if (product?.type === ProductType.Person) {
-        return { singular: $t(`%12P`), plural: $t(`%12R`) };
+    if (product.type === ProductType.Person) {
+        return { singular: $t('%12P'), plural: $t('%12R') };
     }
     if (webshop.meta.type === WebshopType.Registrations) {
         return { singular: $t('inschrijving'), plural: $t('inschrijvingen') };

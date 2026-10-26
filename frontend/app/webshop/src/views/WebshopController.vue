@@ -27,6 +27,7 @@ import type { ComponentWithProperties, NavigationController } from '@browser/nav
 import { FramedComponent } from '@browser/navigation';
 import { getWebshopSquareLogo } from '@stamhoofd/components/helpers/webshopIdentity.ts';
 import { useProvidePreviewColumnWidths } from '@stamhoofd/components/layout/usePreviewPanel.ts';
+import { WebshopOrderMode } from '@stamhoofd/structures';
 import { computed, onMounted, shallowRef } from 'vue';
 
 import { useProvideCheckoutContinue } from '../composables/useCheckoutContinue';
@@ -67,6 +68,9 @@ const showingOrder = computed(() => {
     return !!top && isOrderComponent(top);
 });
 
+// The webshop itself has no url: marks it as a step in the progress
+const rootStepUrl = '';
+
 const progress = computed(() => {
     const url = navigationController.value?.components.at(-1)?.provide.reactive_navigation_url?.url;
     if (!url) {
@@ -82,6 +86,9 @@ const progress = computed(() => {
         // Opened with the order button of a webshop with one product: the product form is the first step
         const product = webshopManager.webshop.products.find(p => !p.hidden);
         steps.unshift({ title: product?.name ?? $t('%1DQ'), url: CheckoutStepsManager.productUrl });
+    } else if (webshopManager.webshop.orderMode === WebshopOrderMode.Bulk) {
+        // The product list on the webshop itself is the first step
+        steps.unshift({ title: $t('%TE'), url: rootStepUrl });
     }
     const current = steps.findIndex(s => s.url === url);
     if (current === -1) {
@@ -110,7 +117,12 @@ function selectStep(index: number) {
         continueCheckout.value?.();
         return;
     }
-    CheckoutStepsManager.popToUrl(navigationController.value, progress.value.steps[index].url).catch(console.error);
+    const url = progress.value.steps[index].url;
+    if (url === rootStepUrl) {
+        navigationController.value?.popToRoot().catch(console.error);
+        return;
+    }
+    CheckoutStepsManager.popToUrl(navigationController.value, url).catch(console.error);
 }
 
 function backToWebshop() {

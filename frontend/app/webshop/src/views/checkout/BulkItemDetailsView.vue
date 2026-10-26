@@ -94,15 +94,6 @@ const cart = computed(() => checkoutManager.cart);
 // One error box + validator per item, keyed on the item id so they survive cart changes
 const itemErrors = reactive(new Map<string, ItemErrors>());
 
-function errorsFor(item: CartItem): ItemErrors {
-    let e = itemErrors.get(item.id);
-    if (!e) {
-        e = { errorBox: null, validator: new Validator(), snapshot: null };
-        itemErrors.set(item.id, e);
-    }
-    return e;
-}
-
 const entries = computed(() => {
     const counters = new Map<string, number>();
     return cart.value.items.filter(i => cartItemNeedsDetails(i)).map((item) => {
@@ -122,7 +113,8 @@ const entries = computed(() => {
             title: Formatter.capitalizeFirstLetter(getUnitName(webshop.value, item.product).singular) + ' ' + count,
             icon: item.product.type === ProductType.Ticket || item.product.type === ProductType.Voucher ? 'ticket' : (item.product.type === ProductType.Person || item.product.enableCustomer ? 'user' : 'box'),
             subtitle: subtitle.join(' • '),
-            errors: errorsFor(item),
+            // Created by prepareItems, which runs on every cart change before rendering
+            errors: itemErrors.get(item.id)!,
         };
     });
 });
@@ -145,7 +137,15 @@ function summaryOf(item: CartItem): string[] {
  * Give every item the objects its inputs bind to, so the template never has to create them while rendering
  */
 function prepareItems() {
+    for (const id of itemErrors.keys()) {
+        if (!cart.value.items.some(i => i.id === id)) {
+            itemErrors.delete(id);
+        }
+    }
     for (const item of cart.value.items) {
+        if (!itemErrors.has(item.id)) {
+            itemErrors.set(item.id, { errorBox: null, validator: new Validator(), snapshot: null });
+        }
         if (item.product.enableCustomer && !item.customer) {
             item.customer = Customer.create({});
         }
