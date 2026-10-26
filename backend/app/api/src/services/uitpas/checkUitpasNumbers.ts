@@ -31,7 +31,7 @@ export async function checkUitpasNumbers(access_token: string, uitpasNumbers: st
             throwIfInvalidUitpasNumber(uitpasNumber);
             const result = await passholderEndpoints.getPassByUitpasNumber(uitpasNumber);
             if (result.socialTariff.status !== 'ACTIVE') {
-                new SimpleError({
+                throw new SimpleError({
                     code: 'non_active_social_tariff',
                     message: `UiTPAS social tariff is not ACTIVE but ${result.socialTariff.status}`,
                     human: $t(
