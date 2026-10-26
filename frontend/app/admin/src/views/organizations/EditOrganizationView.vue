@@ -8,8 +8,11 @@
         <div class="split-inputs">
             <div>
                 <STInputBox :title="$t('%3C')" error-fields="name" :error-box="errors.errorBox">
-                    <input id="organization-name" ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('%3D')" autocomplete="organization">
+                    <input id="organization-name" ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('%3D')" autocomplete="organization" :disabled="!canEditName">
                 </STInputBox>
+                <p v-if="!canEditName" class="style-description-small">
+                    {{ $t('Enkel een platformbeheerder kan de naam van een vereniging aanpassen') }}
+                </p>
 
                 <AddressInput v-model="address" :optional-except-city="STAMHOOFD.userMode !== 'platform'" :title="$t('%33')" :validator="errors.validator" />
             </div>
@@ -150,6 +153,8 @@ const selectedTagIds = computed(() => patched.value.meta.tags);
 const selectedTags = computed(() => tagIdsToTags(selectedTagIds.value));
 const allTagsWithChildren = computed(() => platformTags.value.filter(tag => tag.childTags.length > 0));
 const selectedTagsWithChildren = computed(() => selectedTags.value.filter(tag => tag.childTags.length > 0));
+
+const canEditName = computed(() => props.isNew || !platform.value.config.onlyAdminCanChangeOrganizationName || auth.hasPlatformFullAccess());
 
 // Only full platform admins can change the tags of existing organizations
 const canEditTags = props.isNew || auth.hasPlatformFullAccess();
