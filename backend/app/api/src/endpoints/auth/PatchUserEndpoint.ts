@@ -39,6 +39,15 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         const organization = await Context.setOptionalOrganizationScope();
         const { user, token } = await Context.authenticate({ allowWithoutAccount: true });
 
+        // Login-method changes require recent authentication; ordinary profile edits do not.
+        // A password can only be set for the authenticated user, even with a fresh session.
+        if (request.body.password || request.body.hasPassword === false || request.body.meta?.loginProviderIds) {
+            if (request.body.password && request.body.id !== user.id) {
+                throw Context.auth.error();
+            }
+            await Context.authenticateFresh({ allowWithoutAccount: true });
+        }
+
         if (request.body.id !== request.params.id) {
             throw new SimpleError({
                 code: 'invalid_request',
