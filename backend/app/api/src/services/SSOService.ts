@@ -647,6 +647,16 @@ export class SSOServiceWithSession {
 
             // Get user from database
             let user = await User.getForRegister(this.service.organization?.id ?? null, claims.email);
+            // Password authentication may fall back to a global account. An organization's
+            // identity provider only has authority over accounts owned by that organization.
+            if (user && user.organizationId !== (this.service.organization?.id ?? null)) {
+                throw new SimpleError({
+                    code: 'invalid_user',
+                    message: 'User does not belong to this identity provider scope',
+                    human: $t('Log in via de aanmeldpagina van je eigen account.'),
+                    statusCode: 403,
+                });
+            }
             if (!user) {
                 if (this.session.userId) {
                     throw new SimpleError({
