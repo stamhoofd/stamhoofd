@@ -6,6 +6,8 @@ import { File } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import formidable from 'formidable';
 import { promises as fs } from 'fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { Decoder } from '@simonbackx/simple-encoding';
@@ -96,49 +98,53 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
             }
         }
 
-        const form = formidable({ maxFileSize: 20 * 1024 * 1024, maxFields: 1, keepExtensions: true });
-        const file = await new Promise<FormidableFile>((resolve, reject) => {
-            if (!request.request.request) {
-                reject(new SimpleError({
-                    code: 'invalid_request',
-                    message: 'Invalid request',
-                    statusCode: 500,
-                }));
-                return;
-            }
-            try {
-                if (request.request.request?.destroyed) {
-                    throw new Error('Request destroyed before parsing');
-                }
-                form.parse(request.request.request, (err, fields, files) => {
-                    console.log('form.parse', err, fields, files);
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-
-                    if (!files.file || !Array.isArray(files.file) || files.file.length !== 1) {
-                        reject(new SimpleError({
-                            code: 'missing_field',
-                            message: 'Missing file',
-                            field: 'file',
-                        }));
-                        return;
-                    }
-
-                    resolve(files.file[0]);
-                });
-            } catch (e) {
-                console.error(e);
-                reject(e);
-            }
-        });
-
+        // Allocate before parsing so every temporary artifact belongs to this request,
+        // even if a parser error prevents selecting the required file field.
+        const uploadDirectory = await fs.mkdtemp(join(tmpdir(), 'stamhoofd-file-'));
         try {
+            const form = formidable({ uploadDir: uploadDirectory, maxFileSize: 20 * 1024 * 1024, maxFiles: 1, maxFields: 1, keepExtensions: true });
+            const file = await new Promise<FormidableFile>((resolve, reject) => {
+                if (!request.request.request) {
+                    reject(new SimpleError({
+                        code: 'invalid_request',
+                        message: 'Invalid request',
+                        statusCode: 500,
+                    }));
+                    return;
+                }
+                try {
+                    if (request.request.request?.destroyed) {
+                        throw new Error('Request destroyed before parsing');
+                    }
+                    form.parse(request.request.request, (err, fields, files) => {
+                        console.log('form.parse', err, fields, files);
+                        if (err) {
+                            reject(err);
+                            return;
+                        }
+
+                        if (!files.file || !Array.isArray(files.file) || files.file.length !== 1) {
+                            reject(new SimpleError({
+                                code: 'missing_field',
+                                message: 'Missing file',
+                                field: 'file',
+                            }));
+                            return;
+                        }
+
+                        resolve(files.file[0]);
+                    });
+                } catch (e) {
+                    console.error(e);
+                    reject(e);
+                }
+            });
+
             return await this.upload(request, file, organization, user);
         } finally {
-            // Formidable wrote the upload to a temporary file
-            await fs.rm(file.filepath, { force: true }).catch(() => { /* we can't do anything about this */ });
+            // Enclose parsing and uploading: success and failure both remove the
+            // entire directory, including partial uploads and unexpected fields.
+            await fs.rm(uploadDirectory, { recursive: true, force: true });
         }
     }
 
