@@ -79,7 +79,7 @@ allowBuilds:
   argon2@0.45.1: true
   better-sqlite3@12.11.1: true
   core-js@3.50.0: false
-  esbuild@0.25.12 || 0.27.7 || 0.28.2: true
+  esbuild@0.25.12 || 0.28.2: true
   nx@22.7.12: false
   puppeteer: true
   puppeteer@25.10.0: true
@@ -108,3 +108,8 @@ overrides:
   'nx>follow-redirects': '1.16.1'
   'nx>smol-toml': '1.9.0'
   '@simonbackx/simple-errors>uuid': '11.1.1'
+  'xcode>uuid': '11.1.1'
+  'fontless>esbuild': '0.28.2'
+  '@nuxt/content>zod': '4.6.7'
+  'openai>zod': '4.6.7'
+  '@anthropic-ai/sdk>zod': '4.6.7'
