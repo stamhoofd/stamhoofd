@@ -6,6 +6,7 @@ import { Permissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import type { IncomingMessage } from 'node:http';
 import { Readable } from 'node:stream';
+import sharp from 'sharp';
 import { SessionService } from '../../../services/SessionService.js';
 
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -43,6 +44,7 @@ describe('Endpoint.UploadImage', () => {
 
     afterEach(() => {
         Image.s3Client = null;
+        vi.restoreAllMocks();
     });
 
     /**
@@ -77,6 +79,45 @@ describe('Endpoint.UploadImage', () => {
 
         return r;
     };
+
+    /**
+     * Rejects excessive variant counts, invalid dimensions and per-variant or total
+     * pixel budgets through the anonymous upload path. A fixed IP lets that path
+     * reach validation. The rendering spy must remain untouched, and the storage
+     * capture must stay empty: rejection alone would not prove work was bounded.
+     */
+    test.each([
+        ['too many variants', Array.from({ length: 9 }, () => ({ width: 10 }))],
+        ['an oversized dimension', [{ width: 8193 }]],
+        ['missing dimensions', [{}]],
+        ['too many output pixels', [{ width: 8192, height: 8192, fit: 'fill' }]],
+        ['too much total work', Array.from({ length: 8 }, () => ({ width: 3000, height: 3000, fit: 'fill' }))],
+    ])('It rejects %s before rendering or storage', async (_name, resolutions) => {
+        const render = vi.spyOn(sharp.prototype, 'toBuffer').mockRejectedValue(new Error('Rendering was reached'));
+        const r = await buildUploadRequest({ filename: 'logo.svg', contentType: 'image/svg+xml', content: svgContent, resolutions });
+        delete r.headers.authorization;
+        vi.spyOn(r, 'getIP').mockReturnValue('127.0.0.1');
+
+        await expect(testServer.test(endpoint, r)).rejects.toMatchObject({ code: 'invalid_resolutions' });
+        expect(render).not.toHaveBeenCalled();
+        expect(uploads).toHaveLength(0);
+    });
+
+    /**
+     * A tiny SVG document can describe a 100-million-pixel raster. Sharp must
+     * reject those input dimensions while reading metadata, without materializing
+     * a rendered buffer or uploading either a variant or the source.
+     */
+    test('It rejects excessive SVG input pixels before rendering or storage', async () => {
+        const render = vi.spyOn(sharp.prototype, 'toBuffer').mockRejectedValue(new Error('Rendering was reached'));
+        const r = await buildUploadRequest({
+            filename: 'large.svg', contentType: 'image/svg+xml',
+            content: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="10000" height="10000"/>'),
+        });
+        await expect(testServer.test(endpoint, r)).rejects.toThrow(/pixel limit/i);
+        expect(render).not.toHaveBeenCalled();
+        expect(uploads).toHaveLength(0);
+    });
 
     test('It stores a png, and never stores the original with a content type of the uploader', async () => {
         const r = await buildUploadRequest({ filename: 'logo.png', contentType: 'image/png', content: pngContent });
