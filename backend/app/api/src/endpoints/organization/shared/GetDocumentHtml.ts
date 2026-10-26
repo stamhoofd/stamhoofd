@@ -25,6 +25,11 @@ export class GetDocumentHtml extends Endpoint<Params, Query, Body, ResponseBody>
         return [false];
     }
 
+    /**
+     * Checks current document access and returns UTF-8 HTML with separate, one-minute
+     * renderer grants for reading its exact cached version and rendering these bytes.
+     * The response must not be stored: each new grant requires another access check.
+     */
     async handle(request: DecodedRequest<Params, Query, Body>) {
         await Context.setOptionalOrganizationScope();
         await Context.authenticate();
@@ -59,7 +64,12 @@ export class GetDocumentHtml extends Endpoint<Params, Query, Body, ResponseBody>
         response.headers['content-length'] = Buffer.byteLength(html, 'utf8').toString();
         response.headers['x-cache-id'] = 'document-' + document.id;
         response.headers['x-cache-timestamp'] = document.updatedAt.getTime().toString();
-        response.headers['x-cache-signature'] = signInternal('document-' + document.id, document.updatedAt.getTime().toString(), html);
+        // Renderer grants are scoped to one version and expire after one minute.
+        const expires = String(Date.now() + 60000);
+        response.headers['cache-control'] = 'no-store';
+        response.headers['x-cache-expires'] = expires;
+        response.headers['x-cache-read-signature'] = signInternal('pdf-cache', 'document-' + document.id, document.updatedAt.getTime().toString(), expires);
+        response.headers['x-cache-signature'] = signInternal('html-to-pdf', 'document-' + document.id, document.updatedAt.getTime().toString(), expires, html);
         return response;
     }
 }

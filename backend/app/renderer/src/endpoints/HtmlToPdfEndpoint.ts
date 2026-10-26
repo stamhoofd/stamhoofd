@@ -40,6 +40,8 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
      * Reads multipart HTML into memory and removes the request's upload directory
      * whether parsing succeeds or fails, before signature verification or rendering.
      * Returns PDF bytes after rendering and caching the signed resource version.
+     * The html-to-pdf grant binds the HTML bytes, cache ID, version and expiry;
+     * expired grants or expiries beyond the next minute are rejected before rendering.
      */
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const uploadDir = await fs.mkdtemp(join(tmpdir(), 'stamhoofd-renderer-'));
@@ -50,7 +52,7 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             maxFiles: 1,
         });
 
-        const { html, cacheId, timestamp, signature } = await new Promise<{ html: string; cacheId: string; timestamp: Date; signature: string }>((resolve, reject) => {
+        const { html, cacheId, timestamp, signature, expires } = await new Promise<{ html: string; cacheId: string; timestamp: Date; signature: string; expires: string }>((resolve, reject) => {
             if (!request.request.request) {
                 reject(new SimpleError({
                     code: 'invalid_request',
@@ -75,6 +77,12 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     return;
                 }
                 const fields = firstValues(form, fieldsMultiple);
+                const expires: unknown = fields.expires;
+
+                if (typeof expires !== 'string' || !/^\d+$/.test(expires)) {
+                    reject(new SimpleError({ code: 'invalid_signature', message: 'Missing expiration', statusCode: 403 }));
+                    return;
+                }
 
                 if (!fields.signature || typeof fields.signature !== 'string') {
                     reject(new SimpleError({
@@ -116,6 +124,7 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
                 resolve({
                     html,
+                    expires,
                     signature: fields.signature,
                     cacheId: fields.cacheId,
                     timestamp: new Date(parseInt(fields.timestamp as string)),
@@ -128,7 +137,8 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         });
 
         // Verify signature first
-        if (!verifyInternalSignature(signature, cacheId, timestamp.getTime().toString(), html)) {
+        if (Number(expires) <= Date.now() || Number(expires) > Date.now() + 60000
+            || !verifyInternalSignature(signature, 'html-to-pdf', cacheId, timestamp.getTime().toString(), expires, html)) {
             throw new SimpleError({
                 code: 'invalid_signature',
                 message: 'Invalid signature',
@@ -150,6 +160,7 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         }
         await FileCache.write(cacheId, timestamp, pdf);
         const response = new Response(pdf);
+        response.headers['Cache-Control'] = 'no-store';
         response.headers['Content-Type'] = 'application/pdf';
         response.headers['Content-Length'] = pdf.byteLength.toString();
         return response;
