@@ -2,7 +2,7 @@
     <LoadingViewTransition :error-box="errorBox">
         <form v-if="!loadingSession" key="form" class="forgot-password-reset-view st-view" @submit.prevent="submit">
             <STNavigationBar :title="title" />
-            <main class="center small">
+            <main class="small">
                 <h1>{{ title }}</h1>
 
                 <p>{{ description }}</p>

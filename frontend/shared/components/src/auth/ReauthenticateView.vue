@@ -2,7 +2,7 @@
     <form class="st-view reauthenticate-view" data-testid="reauthenticate-view" data-submit-last-field novalidate @submit.prevent="submit">
         <STNavigationBar :title="$t('%Zh7')" />
 
-        <main class="center">
+        <main>
             <h1>{{ $t('%Zh7') }}</h1>
             <p v-if="showPassword">
                 {{ $t('%Zi6') }}

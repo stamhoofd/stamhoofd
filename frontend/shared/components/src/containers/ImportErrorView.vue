@@ -2,7 +2,7 @@
     <ComponentWithPropertiesInstance v-if="loadedComponent" :key="loadedComponent.key" :component="loadedComponent" v-bind="$attrs" />
     <div v-else class="st-view import-error-view">
         <STNavigationBar :title="$t(`%gT`)" />
-        <main class="center">
+        <main>
             <h1>{{ $t('%gT') }}</h1>
             <p>{{ $t('%1VA') }}</p>
 

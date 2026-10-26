@@ -1,5 +1,5 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import { useDismiss } from '@simonbackx/vue-app-navigation';
+import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
@@ -30,7 +30,7 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
 
     const context = useContext();
     const organizationManager = useOrganizationManager();
-    const dismiss = useDismiss();
+    const pop = usePop();
 
     const webshopManager = ref(getProps().webshopManager);
     const isNew = computed(() => webshopManager.value === undefined);
@@ -148,7 +148,8 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
 
             const dis = shouldDismiss ? await shouldDismiss() : true;
             if (dis) {
-                await dismiss({ force: true });
+                // Pop instead of dismiss: this view is not always presented as a popup
+                await pop({ force: true });
             }
         }
         catch (e) {

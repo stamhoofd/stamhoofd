@@ -1,7 +1,7 @@
 <template>
     <LoadingViewTransition>
-        <div v-if="order" class="st-view order-view box-shade" data-testid="order-view">
-            <STNavigationBar :large="true" :sticky="false" :left-logo="true">
+        <div v-if="order" class="st-view full-width order-view box-shade" data-testid="order-view">
+            <STNavigationBar v-if="showNavigationBar" :large="true" :sticky="false" :left-logo="true">
                 <template #left>
                     <OrganizationLogo :organization="organization" :webshop="webshop" />
                 </template>
@@ -402,11 +402,14 @@ const props = withDefaults(defineProps<{
     paymentId?: string | null;
     initialOrder?: Order | null;
     success?: boolean;
+    /** False when the WebshopController's bar is shown above the view */
+    showNavigationBar?: boolean;
 }>(), {
     orderId: null,
     paymentId: null,
     initialOrder: null,
     success: false,
+    showNavigationBar: true,
 });
 
 const webshopManager = useWebshopManager();

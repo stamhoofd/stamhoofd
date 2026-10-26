@@ -13,7 +13,7 @@
             </template>
         </STNavigationBar>
 
-        <main class="center">
+        <main>
             <p v-if="status" :class="'style-title-prefix flex ' + (status.theme ?? '')">
                 <span>{{ status.text }}</span>
                 <ProgressRing v-if="status.progress !== undefined" :radius="7" :opacity="status.progress >= 1 ? 0 : 1" :stroke="2" :progress="status.progress" :loading="status.progress === 0" />

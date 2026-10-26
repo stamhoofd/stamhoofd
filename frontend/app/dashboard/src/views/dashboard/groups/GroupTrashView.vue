@@ -2,7 +2,7 @@
     <div class="st-view">
         <STNavigationBar :title="title" />
 
-        <main class="center">
+        <main>
             <h1>
                 {{ title }}
             </h1>

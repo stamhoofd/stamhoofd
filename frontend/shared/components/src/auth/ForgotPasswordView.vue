@@ -1,7 +1,7 @@
 <template>
     <form class="st-view forgot-password-view" novalidate @submit.prevent="submit">
         <STNavigationBar :title="$t(`%uz`)" />
-        <main class="center small">
+        <main class="small">
             <h1>{{ $t('%uz') }}</h1>
             <p>{{ $t('%ZW') }}</p>
 

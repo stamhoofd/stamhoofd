@@ -13,7 +13,7 @@
                 </template>
             </STNavigationBar>
 
-            <main class="center small">
+            <main class="small">
                 <aside class="style-title-prefix">
                     {{ $t('%1PQ', {current: 1, total: 2}) }}
                 </aside>

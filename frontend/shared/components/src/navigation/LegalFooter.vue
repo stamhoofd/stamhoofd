@@ -29,11 +29,13 @@
                     </button>
                 </div>
             </aside>
-            <div v-if="STAMHOOFD.platformName !== 'stamhoofd'" class="style-wysiwyg gray no-underline-links" v-html="platform.config.shopFooterText.html" />
-            <div v-else>
-                <a v-if="isWebshop" :href="'https://'+ LocalizedDomains.marketing +'?utm_medium=webshop'">{{ $t('%Zkw') }} <Logo /></a>
-                <a v-else :href="'https://'+ LocalizedDomains.marketing +'/ledenadministratie?utm_medium=ledenportaal'">{{ $t('%XC') }} <Logo /></a>
-            </div>
+            <template v-if="!hidePlatformFooter">
+                <div v-if="STAMHOOFD.platformName !== 'stamhoofd'" class="style-wysiwyg gray no-underline-links" v-html="platform.config.shopFooterText.html" />
+                <div v-else>
+                    <a v-if="isWebshop" :href="'https://'+ LocalizedDomains.marketing +'?utm_medium=webshop'">{{ $t('%Zkw') }} <Logo /></a>
+                    <a v-else :href="'https://'+ LocalizedDomains.marketing +'/ledenadministratie?utm_medium=ledenportaal'">{{ $t('%XC') }} <Logo /></a>
+                </div>
+            </template>
         </div>
     </div>
 </template>
@@ -56,9 +58,14 @@ const props = withDefaults(
     defineProps<{
         organization: Organization;
         webshop?: Webshop | WebshopPreview | null;
+        /**
+         * Hide the footer text of the platform (or the Stamhoofd logo), for a view that shows it somewhere else
+         */
+        hidePlatformFooter?: boolean;
     }>(),
     {
         webshop: null,
+        hidePlatformFooter: false,
     },
 );
 

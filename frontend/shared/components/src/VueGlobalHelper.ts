@@ -103,7 +103,10 @@ function focusNextElement() {
 }
 
 export class VueGlobalHelper {
-    static setup(app: App<Element>) {
+    /**
+     * @param options.os Overrides the detected OS for the OS specific layout and components (e.g. to give iPads the desktop layout)
+     */
+    static setup(app: App<Element>, options?: { os?: ReturnType<AppManager['getOS']> }) {
         configureFrontendServices();
         (window as any).PromiseComponent = PromiseView;
         (window as any)._importWithRetry = importWithRetry;
@@ -114,8 +117,9 @@ export class VueGlobalHelper {
             focusNextElement();
         };
 
-        app.config.globalProperties.$OS = AppManager.shared.getOS();
+        app.config.globalProperties.$OS = options?.os ?? AppManager.shared.getOS();
         app.config.globalProperties.$isNative = AppManager.shared.isNative;
+        app.config.globalProperties.$isPhone = AppManager.shared.isPhone;
         app.config.globalProperties.$isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || ((navigator as any).msMaxTouchPoints > 0);
 
         app.config.globalProperties.$isAndroid = app.config.globalProperties.$OS === 'android';

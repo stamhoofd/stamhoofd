@@ -1,5 +1,5 @@
 <template>
-    <section class="st-view box-shade choose-webshop-view">
+    <section class="st-view full-width box-shade choose-webshop-view">
         <STNavigationBar :large="true">
             <template #left>
                 <OrganizationLogo :organization="organization" />

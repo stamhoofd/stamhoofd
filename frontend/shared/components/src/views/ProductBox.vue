@@ -166,6 +166,7 @@ function formatDateRange(dateRange: ProductDateRange) {
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
+@use "./product-grid.mixin.scss" as *;
 
 .product-box {
     display: flex;
@@ -341,7 +342,7 @@ function formatDateRange(dateRange: ProductDateRange) {
 }
 
 .enable-grid .product-box {
-    @media (min-width: 801px) {
+    @include product-grid-wide {
         background: $color-background;
         border-radius: $border-radius;
         margin: 0;

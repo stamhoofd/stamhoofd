@@ -2,7 +2,7 @@
     <div id="settings-view" class="st-view background">
         <STNavigationBar :title="$t(`%xU`)" />
 
-        <main class="center">
+        <main>
             <h1>
                 {{ $t('%xU') }}
             </h1>
@@ -507,7 +507,7 @@ defineRoutes([
                                         financialSupport: isNew ? FinancialSupportSettings.create({}).patch(patch) : patch,
                                     }),
                                 }));
-                                Toast.success($t(`%HU`)).show();
+                                Toast.success($t('%HU')).show();
                             },
                         };
                     },
@@ -527,7 +527,7 @@ defineRoutes([
                                         dataPermission: isNew ? DataPermissionsSettings.create({}).patch(patch) : patch,
                                     }),
                                 }));
-                                Toast.success($t(`%HU`)).show();
+                                Toast.success($t('%HU')).show();
                             },
                         };
                     },

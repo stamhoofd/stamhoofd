@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view members-home-view" data-testid="members-home-view">
+    <div class="st-view full-width members-home-view" data-testid="members-home-view">
         <STNavigationBar :title="$t('%1W0', { organization: organization.name })" />
 
         <main class="limit-width">

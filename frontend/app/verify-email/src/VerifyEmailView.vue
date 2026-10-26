@@ -11,7 +11,7 @@
             </template>
         </STNavigationBar>
 
-        <main class="center">
+        <main>
             <img src="@stamhoofd/assets/images/illustrations/email.svg" class="email-illustration">
 
             <h1 class="style-navigation-title">

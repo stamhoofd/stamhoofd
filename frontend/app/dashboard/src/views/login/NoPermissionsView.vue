@@ -2,7 +2,7 @@
     <div class="st-view">
         <STNavigationBar :large="true" />
 
-        <main class="center">
+        <main>
             <h1>{{ $t('%WC') }}</h1>
             <p>{{ $t('%WD') }} {{ organization.name }}{{ membersPackage ? $t('%WE') : '.' }}</p>
         </main>

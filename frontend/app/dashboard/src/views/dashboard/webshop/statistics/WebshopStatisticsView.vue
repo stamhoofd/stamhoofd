@@ -2,7 +2,7 @@
     <div class="st-view webshop-statistics-view background" data-testid="webshop-statistics-view">
         <STNavigationBar />
 
-        <main class="center">
+        <main>
             <h1>
                 {{ $t('%Pa') }}
             </h1>

@@ -2,7 +2,7 @@
     <div class="st-view show-recovery-codes-view" data-testid="show-recovery-codes-view">
         <STNavigationBar :title="$t('%ZhY')" />
 
-        <main class="center">
+        <main>
             <h1>{{ $t('%ZhY') }}</h1>
             <p>{{ $t('%Zgw') }}</p>
 

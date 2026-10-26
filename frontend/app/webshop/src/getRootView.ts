@@ -41,11 +41,13 @@ export function wrapWithModalStack(...components: ComponentWithProperties[]) {
 }
 
 export async function getWebshopRootView(session: SessionContext, webshop: Webshop) {
-    // Do we need to require login?
-    let root = wrapWithModalStack(new ComponentWithProperties(NavigationController, {
-        root: AsyncComponent(() => import('./views/WebshopView.vue'), {}),
+    let root = wrapWithModalStack(AsyncComponent(() => import('./views/WebshopController.vue'), {
+        root: new ComponentWithProperties(NavigationController, {
+            root: AsyncComponent(() => import('./views/ModernWebshopView.vue'), {}),
+        }),
     }));
 
+    // Do we need to require login?
     if (webshop.meta.authType === WebshopAuthType.Required) {
         root = wrapWithModalStack(
             new ComponentWithProperties(AuthenticatedView, {

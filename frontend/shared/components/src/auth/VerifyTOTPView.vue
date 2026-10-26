@@ -2,7 +2,7 @@
     <form class="st-view verify-totp-view" data-testid="verify-totp-view" @submit.prevent="submit">
         <STNavigationBar :title="$t('%ZgY')" />
 
-        <main class="center">
+        <main>
             <h1>{{ $t('%ZgY') }}</h1>
             <p>{{ $t('%ZhL') }}</p>
 
