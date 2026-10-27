@@ -1,4 +1,3 @@
-import type { TranslationDictionary } from '../types/TranslationDictionary.js';
 import type { Translations } from '../types/Translations.js';
 
 export function validateTranslations(
@@ -133,15 +132,15 @@ export function validateConsistentWords(consistentWordsRecord: any): {
     };
 }
 
-export function validateTranslationDictionary(dictionary: TranslationDictionary): { valid: boolean; message?: string } {
-    if (typeof dictionary !== 'object' || Array.isArray(dictionary)) {
+export function validateTranslationDictionary(dictionary: unknown): { valid: boolean; message?: string } {
+    if (dictionary === null || typeof dictionary !== 'object' || Array.isArray(dictionary)) {
         return {
             valid: false,
             message: 'translation dictionary must be an object',
         };
     }
 
-    for (const [key, value] of Object.entries(dictionary)) {
+    for (const [key, value] of dictionary instanceof Map ? dictionary : Object.entries(dictionary)) {
         if (typeof value !== 'object' || Array.isArray(value)) {
             return {
                 valid: false,

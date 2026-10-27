@@ -277,7 +277,7 @@ export class AutoTranslator {
                 targetLocal: args.locale,
                 namespace: args.namespace,
                 afterBatchTranslated: (batch) => {
-                    const dict = Object.fromEntries(
+                    const dict = new Map(
                         batch.map(({ uuid, value }) => {
                             return [
                                 uuid,
@@ -306,7 +306,7 @@ export class AutoTranslator {
                     targetLocal: args.locale,
                     namespace: args.namespace,
                     afterBatchTranslated: (batch) => {
-                        const dict = Object.fromEntries(
+                        const dict = new Map(
                             batch.map(({ uuid, value }) => {
                                 return [
                                     uuid,

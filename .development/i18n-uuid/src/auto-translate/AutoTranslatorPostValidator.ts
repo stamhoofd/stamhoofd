@@ -41,7 +41,7 @@ export class AutoTranslatorPostValidator {
         await this.manager.iterateNonDefaultLocalesWithNamespaceAsync(async (locale, namespace) => {
             const dict = this.manager.readMachineTranslationDictionary(locale, namespace);
 
-            const total = Object.entries(dict).filter(([, value]) => {
+            const total = [...dict].filter(([, value]) => {
                 const errorMessage = this.validateDictionaryValue(value);
                 return errorMessage !== null;
             }).length;
@@ -50,7 +50,7 @@ export class AutoTranslatorPostValidator {
                 console.log(chalk.blue('Found ' + total + ' errors in auto translations (locale: ' + locale + ', namespace: ' + namespace + ')'));
 
                 let current = 0;
-                for (const [key, value] of Object.entries(dict)) {
+                for (const [key, value] of dict) {
                     const errorMessage = this.validateDictionaryValue(value);
 
                     if (errorMessage !== null) {
@@ -93,14 +93,14 @@ ${current}/${total}`));
     }
 
     private filterDictionary(dict: TranslationDictionary): { filteredDictionary: TranslationDictionary; errors: number } {
-        const filteredDictionary = {};
+        const filteredDictionary: TranslationDictionary = new Map();
         let errors = 0;
 
-        for (const [key, value] of Object.entries(dict)) {
+        for (const [key, value] of dict) {
             const errorMessage = this.validateDictionaryValue(value);
 
             if (errorMessage === null) {
-                filteredDictionary[key] = value;
+                filteredDictionary.set(key, value);
             }
             else {
                 errors = errors + 1;
@@ -110,7 +110,7 @@ ${current}/${total}`));
         return { filteredDictionary, errors };
     }
 
-    private validateDictionaryValue<K extends keyof TranslationDictionary>({ original, translation }: TranslationDictionary[K]): string | null {
+    private validateDictionaryValue({ original, translation }: { original: string; translation: string }): string | null {
         if (original.length > 0) {
             if (original === translation) {
                 return 'Not translated';

@@ -144,14 +144,14 @@ export class TranslationManager implements TranslationProvider {
         namespace: string,
     ): TranslationDictionary {
         const filePath = TranslationManager.getMachinePath(locale, namespace);
-        return TranslationManager.readTranslationDictionaryAllowNull(filePath) ?? {};
+        return TranslationManager.readTranslationDictionaryAllowNull(filePath) ?? new Map();
     }
 
     static convertMachineTranslationDictionaryToTranslations(
         dictionary: TranslationDictionary,
     ): Translations {
         return Object.fromEntries(
-            Object.entries(dictionary).map(([key, value]) => {
+            Array.from(dictionary, ([key, value]) => {
                 return [key, value.translation];
             }),
         );
@@ -180,7 +180,7 @@ export class TranslationManager implements TranslationProvider {
             args.namespace,
         );
 
-        delete existingDictionary[args.key];
+        existingDictionary.delete(args.key);
         this.setMachineTranslationDictionary(existingDictionary, args);
     }
 
@@ -193,7 +193,7 @@ export class TranslationManager implements TranslationProvider {
             args.namespace,
         );
 
-        const mergedDictionary = { ...existingDictionary, ...dictionary };
+        const mergedDictionary = new Map([...existingDictionary, ...dictionary]);
 
         this.setMachineTranslationDictionary(mergedDictionary, args);
     }
@@ -214,7 +214,7 @@ export class TranslationManager implements TranslationProvider {
             args.namespace,
         );
 
-        const sortedDictionary = Object.fromEntries(Object.keys(dictionary).sort().map(key => [key, dictionary[key]]));
+        const sortedDictionary = Object.fromEntries([...dictionary.keys()].sort().map(key => [key, dictionary.get(key)]));
 
         fs.writeFileSync(filePath, JSON.stringify(sortedDictionary, null, 2));
     }
@@ -389,7 +389,7 @@ export class TranslationManager implements TranslationProvider {
             );
         }
 
-        return parsedDictionary;
+        return new Map(Object.entries(parsedDictionary));
     }
 
     static readCompleteSource(filePath: string): (Translations & any) | null {

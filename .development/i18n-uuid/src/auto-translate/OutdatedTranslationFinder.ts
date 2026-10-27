@@ -51,15 +51,15 @@ export class OutdatedTranslationFinder {
                     );
 
                 // only keep translations that are not changed
-                const filteredDictionary = Object.fromEntries(
-                    Object.entries(machineTranslationDictionary).filter(
+                const filteredDictionary = new Map(
+                    [...machineTranslationDictionary].filter(
                         ([key, { original }]) => defaultTranslations[key] === original,
                     ),
                 );
 
                 const difference
-                    = Object.keys(machineTranslationDictionary).length
-                        - Object.keys(filteredDictionary).length;
+                    = machineTranslationDictionary.size
+                        - filteredDictionary.size;
 
                 if (difference > 0) {
                     console.log(

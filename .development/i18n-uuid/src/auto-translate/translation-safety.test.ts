@@ -16,7 +16,7 @@ it.each([0, 1, 2])('reports exactly %i invalid translations once per locale', as
     const dictionary = Object.fromEntries(Array.from({ length: count }, (_, i) => [`%${i}`, { original: 'Account', translation: 'Account' }]));
     const manager = {
         iterateNonDefaultLocalesWithNamespaceAsync: async (callback: (locale: string, namespace: string) => Promise<void>) => await callback('en', 'stamhoofd'),
-        readMachineTranslationDictionary: () => ({ ...dictionary, '%valid': { original: 'Opslaan', translation: 'Save' } }),
+        readMachineTranslationDictionary: () => new Map(Object.entries({ ...dictionary, '%valid': { original: 'Opslaan', translation: 'Save' } })),
     };
     await new AutoTranslatorPostValidator(manager as unknown as TranslationManager).loopAndPromptValidateInvalidTranslations({ dryRun: true });
     const messages = log.mock.calls.map(([message]) => String(message));
@@ -35,7 +35,7 @@ it('rejects a failed locale build instead of continuing with stale output', asyn
 it('previews invalid translations without prompting or changing translation files', async () => {
     const manager = {
         iterateNonDefaultLocalesWithNamespaceAsync: async (callback: (locale: string, namespace: string) => Promise<void>) => await callback('en', 'stamhoofd'),
-        readMachineTranslationDictionary: () => ({ '%test': { original: 'Account', translation: 'Account' } }),
+        readMachineTranslationDictionary: () => new Map([['%test', { original: 'Account', translation: 'Account' }]]),
         setSourceTranslation: vi.fn(),
         removeFromMachineTranslationDictionary: vi.fn(),
     };

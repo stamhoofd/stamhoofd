@@ -1,4 +1,5 @@
 import { TranslationManager } from '../auto-translate/TranslationManager.js';
+import type { TranslationDictionary } from '../types/TranslationDictionary.js';
 import { getTranslationsWithPath } from './get-translations-with-path.js';
 import { replaceOccurrences } from './replace-keys-with-uuid.js';
 import { writeTranslation } from './write-translations.js';
@@ -75,15 +76,15 @@ export async function compressUuids(onProgress?: ProgressCallback) {
     const manager = new TranslationManager();
     manager.iterateNonDefaultLocalesWithNamespace((locale, namespace) => {
         const dict = manager.readMachineTranslationDictionary(locale, namespace);
-        const filteredDictionary = {};
+        const filteredDictionary: TranslationDictionary = new Map();
 
-        for (const [key, value] of Object.entries(dict)) {
+        for (const [key, value] of dict) {
             const k = merge.get(key);
             if (k) {
-                filteredDictionary[k] = value;
+                filteredDictionary.set(k, value);
             }
             else {
-                filteredDictionary[key] = value;
+                filteredDictionary.set(key, value);
             }
         }
 
