@@ -14,7 +14,7 @@ class TestInstance {
     beforeAllCallbacks: AfterCallback[] = [];
     afterAllCallbacks: AfterCallback[] = [];
 
-    permanentEnvironmentOverrides: Record<string, any> = {};
+    permanentEnvironmentOverrides = new Map<keyof typeof STAMHOOFD, (typeof STAMHOOFD)[keyof typeof STAMHOOFD]>();
 
     private hooks: TestHooks = new JestHooks();
 
@@ -26,7 +26,7 @@ class TestInstance {
     }
 
     setPermanentEnvironment<Key extends keyof typeof STAMHOOFD>(value: Key, newValue: typeof STAMHOOFD[Key]) {
-        this.permanentEnvironmentOverrides[value] = newValue;
+        this.permanentEnvironmentOverrides.set(value, newValue);
 
         if (getGlobalObject().STAMHOOFD && typeof getGlobalObject().STAMHOOFD === 'object') {
             // If already loaded the environment, set it immediately
@@ -87,7 +87,7 @@ class TestInstance {
     }
 
     clearPermanentOverrides() {
-        this.permanentEnvironmentOverrides = {};
+        this.permanentEnvironmentOverrides.clear();
     }
 
     loadEnvironment() {
@@ -95,8 +95,8 @@ class TestInstance {
         loadEnvironment();
 
         // Reset permanent environment overrides
-        for (const key in this.permanentEnvironmentOverrides) {
-            this.setEnvironment(key as any, this.permanentEnvironmentOverrides[key]);
+        for (const [key, value] of this.permanentEnvironmentOverrides) {
+            this.setEnvironment(key, value);
         }
     }
 
