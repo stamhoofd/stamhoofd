@@ -53,9 +53,9 @@ async function saveLog({ email, organization, type, subType, subject, response, 
     await log.save();
 }
 
-async function storeEmailStatus({ headers, type, message }: { headers: Record<string, string>; type: 'hard-bounce' | 'soft-bounce' | 'complaint'; message: string }) {
-    const emailId = headers['x-email-id'];
-    const recipientId = headers['x-email-recipient-id'];
+async function storeEmailStatus({ headers, type, message }: { headers: ReadonlyMap<string, string>; type: 'hard-bounce' | 'soft-bounce' | 'complaint'; message: string }) {
+    const emailId = headers.get('x-email-id');
+    const recipientId = headers.get('x-email-recipient-id');
 
     if (emailId && recipientId) {
         // check
@@ -104,14 +104,15 @@ async function storeEmailStatus({ headers, type, message }: { headers: Record<st
     }
 }
 
-function readHeaders(message: any) {
+/** Keeps nonempty string SES headers as literal, case-insensitive keys; the last duplicate wins. */
+export function readHeaders(message: any): Map<string, string> {
     try {
         const mail = message.mail;
-        const headers: Record<string, string> = {};
+        const headers = new Map<string, string>();
         if (mail && typeof mail === 'object' && mail !== null && Array.isArray(mail.headers)) {
             for (const header of mail.headers) {
-                if (header.name && header.value) {
-                    headers[(header.name as string).toLowerCase()] = header.value;
+                if (typeof header?.name === 'string' && header.name && typeof header.value === 'string' && header.value) {
+                    headers.set(header.name.toLowerCase(), header.value);
                 }
             }
         } else {
@@ -120,7 +121,7 @@ function readHeaders(message: any) {
         return headers;
     } catch (e) {
         console.log('[AWS] Failed to read headers', e, message);
-        return {};
+        return new Map();
     }
 }
 
