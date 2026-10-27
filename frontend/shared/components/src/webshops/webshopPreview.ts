@@ -1,5 +1,5 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { ObjectData } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { ObjectData } from '@common/encoding';
 import { Version, Webshop } from '@stamhoofd/structures';
 
 /**

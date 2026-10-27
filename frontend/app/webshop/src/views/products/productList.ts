@@ -1,4 +1,4 @@
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { getProductListTitle } from '@stamhoofd/components/helpers/webshopWording.ts';
 import type { Product, Webshop } from '@stamhoofd/structures';

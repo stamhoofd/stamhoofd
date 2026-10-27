@@ -1,4 +1,4 @@
-import { Migration } from '@simonbackx/simple-database';
+import { Migration } from '@node/database';
 import { Webshop } from '@stamhoofd/models';
 import { Webshop as WebshopStruct, WebshopOrderMode } from '@stamhoofd/structures';
 import { SeedTools } from '../helpers/SeedTools.js';

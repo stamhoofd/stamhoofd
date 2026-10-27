@@ -36,8 +36,8 @@
 </template>
 
 <script lang="ts" setup>
-import { patchObject } from '@simonbackx/simple-encoding';
-import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
+import { patchObject } from '@common/encoding';
+import { isSimpleError, isSimpleErrors, SimpleErrors } from '@common/errors';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
