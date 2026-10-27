@@ -2,7 +2,8 @@ export type RenderContext = {
     type: 'text' | 'html';
     /** Template variable names are literal Map keys; falsy values remain absent in output. */
     context: ReadonlyMap<string, any>;
-    helpers: Record<string, Helper>;
+    /** Only explicitly registered helper names are callable. */
+    helpers: ReadonlyMap<string, Helper>;
 };
 
 type Helper = (context: RenderContext, ...args: unknown[]) => unknown[];
@@ -33,8 +34,9 @@ class RendersState {
             return;
         }
 
-        if (!this.quoteChar && this.currentHelper === null && this.context.helpers[helperName]) {
-            this.currentHelper = this.context.helpers[helperName];
+        const helper = this.context.helpers.get(helperName);
+        if (!this.quoteChar && this.currentHelper === null && helper) {
+            this.currentHelper = helper;
         } else {
             if (!this.currentHelper) {
                 // Default output helper
