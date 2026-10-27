@@ -66,7 +66,7 @@ test.describe('Webshop checkout steps @webshop-record-categories', () => {
         await dashboard.openOrganizationDashboard({ organizationUri: organization.uri });
         await dashboard.openTab(DashboardTab.Webshops);
         await page.getByTestId('webshop-menu-item').filter({ hasText: webshop.meta.name }).click();
-        await page.getByRole('heading', { name: 'Bestelformulier' }).click();
+        await page.getByRole('heading', { name: 'Contactgegevens' }).click();
 
         // Built-in contact person fields are added from the navigation bar
         await topView(page).getByTestId('customer-settings-add-button').click();
@@ -77,7 +77,7 @@ test.describe('Webshop checkout steps @webshop-record-categories', () => {
         await topView(page).getByTestId('customer-settings-preview-button').click();
         await expect(topView(page).getByRole('heading', { name: 'Jouw gegevens', level: 1 }).first()).toBeVisible();
         await topView(page).getByTestId('close-button').click();
-        await expect(topView(page).getByRole('heading', { name: 'Bestelformulier', level: 1 }).first()).toBeVisible();
+        await expect(topView(page).getByRole('heading', { name: 'Contactgegevens', level: 1 }).first()).toBeVisible();
 
         // New checkout step with one root question
         await topView(page).getByText('Nieuwe stap').click();

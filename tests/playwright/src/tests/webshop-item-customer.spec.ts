@@ -553,7 +553,7 @@ test.describe('Webshop per-item customers @webshop-item-customer', () => {
         await dashboard.openOrganizationDashboard({ organizationUri: organization.uri });
         await dashboard.openTab(DashboardTab.Webshops);
         await page.getByTestId('webshop-menu-item').filter({ hasText: webshop.meta.name }).click();
-        await page.getByRole('heading', { name: 'Bestelformulier' }).click();
+        await page.getByRole('heading', { name: 'Contactgegevens' }).click();
 
         const productRow = (name: string) => page.getByTestId('participant-product').filter({ hasText: name });
         const confirmRemoval = async () => {
@@ -581,7 +581,7 @@ test.describe('Webshop per-item customers @webshop-item-customer', () => {
 
         // Once per order removes the details per ticket after confirming; switching back before saving restores them
         await expect(page.getByTestId('participant-mode-order')).toHaveCount(0);
-        await page.getByRole('heading', { name: 'Bestelformulier' }).click();
+        await page.getByRole('heading', { name: 'Contactgegevens' }).click();
         await expect(productRow('Kind')).toContainText('Geboortedatum');
 
         // Cancelling keeps 'per ticket' selected
@@ -638,7 +638,7 @@ test.describe('Webshop per-item customers @webshop-item-customer', () => {
         await flow.startBulkOrder();
 
         await expect(flow.detailsStep().getByTestId('details-item')).toHaveCount(2);
-        await expect(flow.detailsStep().getByRole('heading', { name: 'Deelnemer 1', exact: true }).last()).toBeVisible();
+        await expect(flow.detailsStep().getByRole('heading', { name: 'Deelname 1', exact: true }).last()).toBeVisible();
         await flow.fillDetails(0, { customer: { firstName: 'Jane', lastName: 'Doe' } });
         await flow.fillDetails(1, { customer: { firstName: 'Jack', lastName: 'Doe' } });
         await flow.submitDetails();

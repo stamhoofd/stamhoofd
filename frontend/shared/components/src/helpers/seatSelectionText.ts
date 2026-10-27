@@ -13,9 +13,9 @@ export function getSeatSelectionTitle(amount: number, selectedAmount: number): s
         return $t('%12X');
     }
     if (remaining === amount) {
-        return $t('Kies {seats}', { seats: formatSeats(remaining) });
+        return $t('%sL', { seats: formatSeats(remaining) });
     }
-    return $t('Kies nog {seats}', { seats: formatSeats(remaining) });
+    return $t('%sM', { seats: formatSeats(remaining) });
 }
 
 export function getSeatSelectionDescription(amount: number): string {

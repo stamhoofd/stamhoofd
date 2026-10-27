@@ -147,7 +147,7 @@ async function save() {
         errorBox.value = new ErrorBox(new SimpleError({
             code: 'invalid_seats',
             message: 'Invalid seats',
-            human: $t('%sM', { seats: Formatter.pluralText(amount.value - seats.value.length, $t('%12Y'), $t('%UL')) }),
+            human: getSeatSelectionTitle(amount.value, seats.value.length),
         }));
         return;
     }

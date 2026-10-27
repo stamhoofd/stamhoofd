@@ -88,8 +88,8 @@ test.describe('Webshops admin', () => {
         await table.getRow(webshopName).waitFor({ timeout: 10000 });
         await table.getRow(webshopName).click();
 
-        // the detail pane should show the webshop name as h1 (style-navigation-title is the class used in the popup)
-        await expect(page.locator('h1.style-navigation-title').filter({ hasText: webshopName })).toBeVisible({ timeout: 5000 });
+        // the detail pane should show the webshop name as h1
+        await expect(page.locator('h1.larger').filter({ hasText: webshopName })).toBeVisible({ timeout: 5000 });
     });
 
     test('@extra webshop url link heeft https:// protocol', async ({ page }) => {
@@ -104,7 +104,7 @@ test.describe('Webshops admin', () => {
         await table.getRow(webshopName).waitFor({ timeout: 10000 });
         await table.getRow(webshopName).click();
 
-        await page.locator('h1.style-navigation-title').filter({ hasText: webshopName }).waitFor({ timeout: 5000 });
+        await page.locator('h1.larger').filter({ hasText: webshopName }).waitFor({ timeout: 5000 });
 
         // The 'Webshop openen' link must start with https://
         const webshopLink = page.getByRole('link', { name: 'Webshop openen' });
@@ -127,7 +127,7 @@ test.describe('Webshops admin', () => {
         // use the route system (/{id}) to open it directly.
         await page.goto(WorkerData.urls.dashboard + '/platform/webshops/' + archivedWebshop.id);
 
-        await page.locator('h1.style-navigation-title').filter({ hasText: archivedWebshopName }).waitFor({ timeout: 10000 });
+        await page.locator('h1.larger').filter({ hasText: archivedWebshopName }).waitFor({ timeout: 10000 });
 
         // For an archived webshop, 'Bestellingen beheren' must point to /verkoop/archief
         // (not to the specific webshop id, which would throw "Webshop not found").

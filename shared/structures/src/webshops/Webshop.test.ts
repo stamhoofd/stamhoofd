@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { Product, ProductPrice } from './Product.js';
-import { Webshop } from './Webshop.js';
+import { PrivateWebshop, Webshop } from './Webshop.js';
 import { WebshopMetaData, WebshopOrderMode } from './WebshopMetaData.js';
 
 function createWebshop({ orderMode, products }: { orderMode: WebshopOrderMode; products?: Product[] }) {
@@ -77,5 +77,11 @@ describe('Webshop.products 423 <-> 424', () => {
 
         encodeAllowMultiple(webshop, 423);
         expect(webshop.products[0].allowMultiple).toBeNull();
+    });
+
+    it('sends a patch of the products to an older client unchanged', () => {
+        const patch = PrivateWebshop.patch({});
+        patch.products.addPut(Product.create({ name: 'Nieuw', allowMultiple: null }));
+        expect(() => patch.encode({ version: 423 })).not.toThrow();
     });
 });

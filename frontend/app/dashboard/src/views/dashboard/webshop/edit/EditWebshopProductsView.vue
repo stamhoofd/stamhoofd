@@ -56,7 +56,7 @@
             </template>
 
             <p v-if="!formProduct && webshop.categories.length === 0">
-                <button class="button text" type="button" @click="addProduct">
+                <button class="button text" type="button" data-testid="add-product-button" @click="addProduct">
                     <span class="icon add" />
                     <span v-if="isTickets">{{ $t('%Rf') }}</span>
                     <span v-else>{{ $t('%Rg') }}</span>

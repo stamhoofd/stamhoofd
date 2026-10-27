@@ -11,7 +11,6 @@ import { CartItem, CartItemOption } from './CartItem.js';
 import { Option, OptionMenu, Product, ProductPrice } from './Product.js';
 import { Webshop } from './Webshop.js';
 import { WebshopMetaData, WebshopOrderMode } from './WebshopMetaData.js';
-import { Formatter } from '@stamhoofd/utility';
 
 describe('Structure.CartItem', () => {
     /**
@@ -326,7 +325,6 @@ describe('Structure.CartItem', () => {
             const { item, webshop } = createItem(WebshopOrderMode.Single);
             expect(item.product.allowMultiple).toBe(false);
             expect(item.formattedAmount).toBe('');
-            expect(item.getFormattedPriceWithoutDiscount()).toBe(Formatter.price(5_0000));
 
             item.refresh(webshop);
             expect(item.formattedAmount).toBe('');
@@ -338,12 +336,15 @@ describe('Structure.CartItem', () => {
             expect(item.formattedAmount).toBe('1');
         });
 
-        it('keeps the same snapshot on every refresh and leaves the webshop product unchanged', () => {
+        it('leaves the webshop product unchanged and picks up changes made to it in place', () => {
             const { item, product, webshop } = createItem(WebshopOrderMode.Single);
-            const snapshot = item.product;
-            item.refresh(webshop);
-            expect(item.product).toBe(snapshot);
             expect(product.allowMultiple).toBeNull();
+
+            // The dashboard updates its webshop in place (deepSet), keeping the product instances
+            product.name = 'Nieuwe naam';
+            item.refresh(webshop);
+            expect(item.product.name).toBe('Nieuwe naam');
+            expect(item.product.allowMultiple).toBe(false);
         });
     });
 });

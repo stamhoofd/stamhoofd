@@ -59,8 +59,6 @@ export class CartItemOption extends AutoEncoder {
     optionMenu: OptionMenu;
 }
 
-const productSnapshots = new WeakMap<Product, Map<boolean, Product>>();
-
 export class CartItem extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4(), version: 106, upgrade: function (this: CartItem) {
         // Warning: this id will always be too long for storage in a normal database record.
@@ -281,20 +279,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
         if (product.allowMultiple !== null) {
             return product;
         }
-        const allowMultiple = webshop.allowsMultiple(product);
-
-        // Always the same snapshot for the same product: a new object on every refresh would trigger watchers of the cart
-        let snapshots = productSnapshots.get(product);
-        if (!snapshots) {
-            snapshots = new Map();
-            productSnapshots.set(product, snapshots);
-        }
-        let snapshot = snapshots.get(allowMultiple);
-        if (!snapshot) {
-            snapshot = product.patch({ allowMultiple });
-            snapshots.set(allowMultiple, snapshot);
-        }
-        return snapshot;
+        return product.patch({ allowMultiple: webshop.allowsMultiple(product) });
     }
 
     static create<T extends typeof AutoEncoder>(this: T, object: PartialWithoutMethods<CartItem>): InstanceType<T> {

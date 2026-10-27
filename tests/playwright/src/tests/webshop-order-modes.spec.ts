@@ -58,7 +58,7 @@ async function openWebshopsAsAdmin(page: Page, organization: Organization) {
 async function openRecordSettings(page: Page, organization: Organization, webshop: Webshop) {
     await openWebshopsAsAdmin(page, organization);
     await page.getByTestId('webshop-menu-item').filter({ hasText: webshop.meta.name }).click();
-    await page.getByRole('heading', { name: 'Bestelformulier' }).click();
+    await page.getByRole('heading', { name: 'Contactgegevens' }).click();
 }
 
 async function openProductOffer(page: Page, organization: Organization, webshop: Webshop) {

@@ -124,6 +124,19 @@ describe('Cart.grouped', () => {
         expect(cart.items.every(i => i.amount === 1)).toBe(true);
     });
 
+    it('combines the units of a split item again with their seats, e.g. after switching from bulk mode to a cart', () => {
+        const { productA } = createWebshop(WebshopOrderMode.Bulk);
+        const seated = item(productA, 2);
+        seated.seats = [CartReservedSeat.create({ row: 'A', seat: '1' }), CartReservedSeat.create({ row: 'A', seat: '2' })];
+        const cart = Cart.create({ items: [seated] });
+
+        cart.splitIntoUnits();
+        const grouped = cart.grouped();
+        expect(grouped.items).toHaveLength(1);
+        expect(grouped.items[0].amount).toBe(2);
+        expect(grouped.items[0].seats.map(s => s.row + s.seat)).toEqual(['A1', 'A2']);
+    });
+
     it('keeps the units with a participant of their own apart', () => {
         const product = Product.create({ name: 'Kamp', enableCustomer: true });
         const cart = Cart.create({ items: [item(product), item(product)] });
