@@ -277,12 +277,14 @@ const NavigationController = defineComponent({
             el.style.height = h + 'px';
             this.setFrozenHeightVariable(h);
 
+            const token = this.contentAnimationToken;
             setTimeout(() => {
-                if (this.isSizeFrozen()) {
+                // Loading views and newer animations still own their freeze.
+                if (token === this.contentAnimationToken && this.hasContent() && !this.animatingContent && this.isSizeFrozen()) {
                     console.error('Navigation controller size still frozen!', this);
                     this.unfreezeSize();
                 }
-            }, 1_000);
+            }, Math.max(1_000, this.getNavigationTransitionDuration() + 100));
         },
         growSize(width: number, height: number) {
             const el = this.$el as HTMLElement;
