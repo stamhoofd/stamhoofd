@@ -17,9 +17,11 @@
                         <hr class="style-hr">
                     </template>
 
-                    <!-- eslint-disable-next-line vue/no-v-html -> cleaned in backend -->
-                    <div v-if="webshop.meta.description.html" class="style-wysiwyg gray" v-html="webshop.meta.description.html" />
-                    <p v-else-if="webshop.meta.description.text" class="description" v-text="webshop.meta.description.text" />
+                    <template v-if="hasDescription">
+                        <!-- eslint-disable-next-line vue/no-v-html -> cleaned in backend -->
+                        <div v-if="webshop.meta.description.html" class="style-wysiwyg gray" v-html="webshop.meta.description.html" />
+                        <p v-else class="description" v-text="webshop.meta.description.text" />
+                    </template>
 
                     <p v-if="showOpenAt" class="info-box">
                         {{ $t('%Xj') }} {{ webshop.meta.openAt ? formatDateTime(webshop.meta.openAt) : '?' }}
@@ -37,7 +39,8 @@
 
                 <template v-if="!showPreview">
                     <CartItemView v-if="embeddedCartItem" :key="embeddedCartItem.id" :cart-item="embeddedCartItem" :old-item="embeddedCartItem" :checkout="checkout" :webshop="webshop" :save-handler="onAddEmbeddedItem" :live-save-handler="saveLiveCartItem" :embedded="true" />
-                    <WebshopProducts v-else-if="canOrder" :webshop="webshop" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @click="hideCartToast" @open-single-product="openSingleProduct" @start-bulk-order="startBulkOrder" />
+                    <!-- Without a title, the webshop name above already says what to order (e.g. 'Koop hier je tickets'), a second title 'Tickets' right below it is double -->
+                    <WebshopProducts v-else-if="canOrder" :webshop="webshop" :hide-list-title="!webshop.meta.title" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @click="hideCartToast" @open-single-product="openSingleProduct" @start-bulk-order="startBulkOrder" />
                     <WebshopCartButton v-if="showCartButton" :count="cartCount" @open="showCart().catch(console.error)" />
                     <WebshopPlatformFooter />
                 </template>
@@ -89,6 +92,8 @@ import WebshopPlatformFooter from './components/WebshopPlatformFooter.vue';
 import WebshopProducts from './components/WebshopProducts.vue';
 import { getCartComponent } from './checkout/getCartComponent';
 import { getOrderComponent } from './orders/getOrderComponent';
+import { productHasChoices } from './products/productList';
+import { getVisibleCategories, getVisibleProducts } from './products/visibleProducts';
 
 const present = usePresent();
 const show = useShow();
@@ -111,7 +116,10 @@ const bannerImage = computed(() => webshop.value.meta.coverPhoto?.getResolutionF
 const bannerImageSrc = computed(() => bannerImage.value?.file.getPublicPath());
 const bannerImageWidth = computed(() => bannerImage.value?.width);
 const bannerImageHeight = computed(() => bannerImage.value?.height);
-injectCustomCode(webshopManager.webshop);
+// Not in the preview in the dashboard: e.g. analytics would count the visits of administrators
+if (!webshopManager.preview) {
+    injectCustomCode(webshopManager.webshop);
+}
 
 useMetaInfo({
     title: `${webshopManager.webshop.meta.name} | ${webshopManager.organization.name}`,
@@ -194,8 +202,8 @@ async function openCart(animated = true, components: ComponentWithProperties[] =
     let first: ComponentWithProperties[] = [];
     if (cartEnabled.value) {
         first = [await getCartComponent()];
-    } else if (orderButtonProduct.value) {
-        first = [getSingleProductComponent(orderButtonProduct.value)];
+    } else if (stepProduct.value) {
+        first = [getSingleProductComponent(stepProduct.value)];
     }
 
     await show({
@@ -252,9 +260,15 @@ function startBulkOrder() {
 }
 
 /**
- * Single mode with one product: open the cart item view directly (no product box)
+ * Single mode: open the cart item view of the product as the first checkout step, or start the checkout right away
+ * when that step has nothing to show
  */
 function openSingleProduct(product: Product, animated = true) {
+    if (!hasProductStep(product)) {
+        getLiveCartItem(product);
+        openCheckout(animated).catch(console.error);
+        return;
+    }
     show({
         animated,
         adjustHistory: animated,
@@ -287,23 +301,32 @@ function getSingleProductComponent(product: Product) {
 const closed = computed(() => webshop.value.isClosed(2 * 60 * 1000) || !organization.value.meta.packages.useWebshops);
 const almostClosed = computed(() => webshop.value.isClosed(6 * 60 * 60 * 1000) && !closed.value);
 const showOpenAt = computed(() => closed.value && webshop.value.opensInTheFuture());
-const products = computed(() => webshop.value.products.filter(p => !p.hidden));
+const products = computed(() => getVisibleProducts(webshop.value));
+
+// Check the text: a description that was cleared in the editor still has html like <p></p>
+const hasDescription = computed(() => webshop.value.meta.description.text.trim().length > 0);
 
 /**
  * Single mode with one product: the order form is shown on the page itself instead of an order button.
- * When the content is stacked above the ordering part, only without a description: a title with only an order button looks empty, but a description followed by a long form is too much.
+ * When the content is stacked above the ordering part, only when the product does not clash with the webshop content:
+ * a product photo, or a product description below the webshop description, belongs in a separate step.
  */
 const embeddedProduct = computed(() => {
     if (closed.value || orderMode.value !== WebshopOrderMode.Single || products.value.length !== 1) {
         return null;
     }
-    // Check the text: a description that was cleared in the editor still has html like <p></p>
-    const hasDescription = webshop.value.meta.description.text.trim().length > 0;
-    // The split layout only shows the form next to the description while it fits, otherwise it behaves like the stacked layout
-    if (hasDescription && (webshopLayout.value !== WebshopLayout.Split || !previewWide.value)) {
+    const product = products.value[0];
+
+    // The split layout shows the form next to the content while it fits, otherwise it behaves like the stacked layout
+    if (webshopLayout.value === WebshopLayout.Split && previewWide.value) {
+        return product;
+    }
+
+    const productHasDescription = product.description.trim().length > 0;
+    if (product.images.length > 0 || (hasDescription.value && productHasDescription)) {
         return null;
     }
-    return products.value[0];
+    return product;
 });
 
 // Single mode with one product, without the form on the page: an order button opens the product as the first checkout step
@@ -313,6 +336,30 @@ const orderButtonProduct = computed(() => {
     }
     return products.value[0];
 });
+
+/**
+ * Single mode without the form on the page: the product that opens as the first checkout step. With several products
+ * it is the one the visitor picked, which is the product of the item in the cart.
+ */
+const stepProduct = computed(() => {
+    if (orderButtonProduct.value) {
+        return orderButtonProduct.value;
+    }
+    if (orderMode.value !== WebshopOrderMode.Single || products.value.length <= 1) {
+        return null;
+    }
+    const productId = cart.value.items[0]?.product.id;
+    const product = products.value.find(p => p.id === productId);
+    return product && hasProductStep(product) ? product : null;
+});
+
+/**
+ * With several products, the list on the webshop already shows the description and photos of a product: its step is
+ * only useful when there is something to choose
+ */
+function hasProductStep(product: Product) {
+    return products.value.length === 1 || productHasChoices(product, webshop.value);
+}
 
 const canOrder = computed(() => (!closed.value || showOpenAt.value) && products.value.length > 0);
 
@@ -336,18 +383,7 @@ const embeddedCartItem = ref(null) as Ref<CartItem | null>;
 watch([embeddedProduct, checkout], ([product]) => {
     embeddedCartItem.value = product ? getLiveCartItem(product) : null;
 }, { immediate: true });
-const categories = computed(() => {
-    return webshop.value.categories.filter((c) => {
-        const products = c.productIds.flatMap((id) => {
-            const product = webshop.value.products.find(p => p.id === id);
-            if (product && !product.hidden) {
-                return [product];
-            }
-            return [];
-        });
-        return products.length > 0;
-    });
-});
+const categories = computed(() => getVisibleCategories(webshop.value));
 
 /**
  * The toast after adding an item covers the buttons at the bottom of the cart and of a product: it closes as soon as
@@ -502,8 +538,8 @@ onMounted(() => {
         });
     } else if (path.length === 1 && path[0] === 'cart' && cartEnabled.value) {
         openCart(false).catch(console.error);
-    } else if (path.length === 1 && path[0] === CheckoutStepsManager.productUrl && orderButtonProduct.value && !closed.value) {
-        openSingleProduct(orderButtonProduct.value, false);
+    } else if (path.length === 1 && path[0] === CheckoutStepsManager.productUrl && stepProduct.value && !closed.value) {
+        openSingleProduct(stepProduct.value, false);
     }
 });
 
@@ -552,8 +588,14 @@ async function resumeStep(destination: string, animated = true) {
     }
 }
 
-// Below the content, the ordering part continues the page without its own background color
+// Below the content, the ordering part continues the page without its own background color, so it takes the same
+// spacing as in the stacked layout instead of the extra padding of a shaded preview
+.modern-webshop-view .preview-outlet:has(> .preview-panel-preview) {
+    padding-top: 0;
+}
+
 .modern-webshop-view .preview-outlet > .preview-panel-preview {
+    padding-top: 30px;
     background: $color-background;
     --color-current-background: #{$color-background};
     --color-current-background-shade: #{$color-background-shade};

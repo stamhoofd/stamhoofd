@@ -3,7 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { Cart } from './Cart.js';
 import { CartItem } from './CartItem.js';
 import { CartReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection } from '../SeatingPlan.js';
-import { Option, OptionMenu, Product } from './Product.js';
+import { Option, OptionMenu, Product, ProductPrice } from './Product.js';
+import { UitpasNumberAndPrice } from './UitpasNumberAndPrice.js';
 import { WebshopField } from './WebshopField.js';
 import { Webshop } from './Webshop.js';
 import { WebshopMetaData, WebshopOrderMode } from './WebshopMetaData.js';
@@ -73,6 +74,27 @@ describe('Cart.validate', () => {
         expect(() => cart.validateItem(webshop, units[1])).not.toThrow();
         expect(() => cart.validateItem(webshop, units[2])).toThrow();
     });
+
+    it('rejects the same UiTPAS number on units that are combined in the order', () => {
+        const basePrice = ProductPrice.create({ name: 'Normaal', price: 10_0000 });
+        const uitpasPrice = ProductPrice.create({ name: 'UiTPAS kansentarief', price: 2_0000, uitpasBaseProductPriceId: basePrice.id });
+        const product = Product.create({ name: 'Voorstelling', prices: [basePrice, uitpasPrice] });
+        const webshop = Webshop.create({
+            meta: WebshopMetaData.create({ orderMode: WebshopOrderMode.Bulk }),
+            products: [product],
+        });
+        const unit = (uitpasNumber: string) => CartItem.create({
+            product,
+            productPrice: uitpasPrice,
+            uitpasNumbers: [UitpasNumberAndPrice.create({ uitpasNumber, price: uitpasPrice.price })],
+        });
+
+        expect(() => Cart.create({ items: [unit('0900000095902'), unit('0900000095903')] }).validate(webshop)).not.toThrow();
+
+        const cart = Cart.create({ items: [unit('0900000095902'), unit('0900000095902')] });
+        expect(() => cart.validateItem(webshop, cart.items[1])).not.toThrow();
+        expect(() => cart.validate(webshop)).toThrow(expect.objectContaining({ code: 'duplicate_uitpas_numbers' }));
+    });
 });
 
 describe('Cart.splitIntoUnits', () => {
@@ -88,6 +110,25 @@ describe('Cart.splitIntoUnits', () => {
         expect(new Set(cart.items.map(i => i.id)).size).toBe(4);
         expect(cart.items[0].id).toBe(multiple.id);
         expect(cart.items[3]).toBe(single);
+    });
+});
+
+describe('Cart.grouped', () => {
+    it('combines the units with the same code into one item, without changing the cart', () => {
+        const { productA, productB } = createWebshop(WebshopOrderMode.Bulk);
+        const cart = Cart.create({ items: [item(productA), item(productB), item(productA), item(productA)] });
+
+        const grouped = cart.grouped();
+        expect(grouped.items.map(i => [i.product.id, i.amount])).toEqual([[productA.id, 3], [productB.id, 1]]);
+        expect(cart.items).toHaveLength(4);
+        expect(cart.items.every(i => i.amount === 1)).toBe(true);
+    });
+
+    it('keeps the units with a participant of their own apart', () => {
+        const product = Product.create({ name: 'Kamp', enableCustomer: true });
+        const cart = Cart.create({ items: [item(product), item(product)] });
+
+        expect(cart.grouped().items.map(i => i.amount)).toEqual([1, 1]);
     });
 });
 

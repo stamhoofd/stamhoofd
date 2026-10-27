@@ -96,6 +96,7 @@ export class TestWebshops {
             seatingPlanId = seatingPlan.id;
         }
 
+        const resolvedOrderMode = orderMode ?? (cartEnabled ? WebshopOrderMode.Cart : WebshopOrderMode.Single);
         const products: Product[] = buildProducts?.({ seatingPlanId }) ?? [];
         const productType = ticketType === WebshopTicketType.Tickets ? ProductType.Ticket : ProductType.Product;
         if (!buildProducts) {
@@ -105,6 +106,8 @@ export class TestWebshops {
                     prices: buildPrices?.() ?? [ProductPrice.create({ name: `Price ${i + 1}`, price })],
                     type: productType,
                     seatingPlanId: withSeatingPlan ? seatingPlanId : null,
+                    // Like the existing webshops that order one at a time: the amount can still be chosen
+                    allowMultiple: resolvedOrderMode === WebshopOrderMode.Single ? true : null,
                 }));
             }
         }
@@ -122,7 +125,7 @@ export class TestWebshops {
             paymentConfiguration: paymentConfigurationPatch,
             ticketType,
             type: type ?? (withSeatingPlan ? WebshopType.Performance : (ticketType === WebshopTicketType.None ? WebshopType.Webshop : WebshopType.Event)),
-            orderMode: orderMode ?? (cartEnabled ? WebshopOrderMode.Cart : WebshopOrderMode.Single),
+            orderMode: resolvedOrderMode,
             customerSettings: CustomerSettings.create({
                 email: CustomerFieldRequirement.Required,
                 // Keep the customer step minimal so the order flow doesn't require a phone number

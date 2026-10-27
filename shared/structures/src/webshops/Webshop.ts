@@ -241,15 +241,16 @@ export class Webshop extends AutoEncoder {
         return true;
     }
 
-    /**
-     * A Cart webshop with a single unique product behaves as Single
-     */
     get orderMode(): WebshopOrderMode {
-        const mode = this.meta.orderMode;
-        if (mode === WebshopOrderMode.Cart && !this.canEnableCart) {
-            return WebshopOrderMode.Single;
-        }
-        return mode;
+        return this.meta.orderMode;
+    }
+
+    /**
+     * Whether visitors can order several pieces of the same product combination: unless the product has its own (older)
+     * setting, not when ordering one at a time
+     */
+    allowsMultiple(product: Product) {
+        return product.allowMultiple ?? this.orderMode !== WebshopOrderMode.Single;
     }
 
     get shouldEnableCart() {

@@ -3,7 +3,7 @@
         <div v-if="columnsEnabled">
             <div class="st-view full-width summary-column background">
                 <main>
-                    <h1 class="style-navigation-title">
+                    <h1 class="larger">
                         {{ title }}
                     </h1>
                     <div class="seeker-box">

@@ -4,7 +4,7 @@
             <button v-tooltip="$t('%A1')" class="button icon add" type="button" @click="addResponsibility" />
         </template>
 
-        <h1 class="style-navigation-title">
+        <h1 class="larger">
             {{ title }}
         </h1>
         <p>{{ $t('%1dj') }}</p>

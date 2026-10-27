@@ -8,7 +8,7 @@
             </STNavigationBar>
 
             <main>
-                <h1 class="style-navigation-title">
+                <h1 class="larger">
                     {{ $t('%uA') }}
                 </h1>
 

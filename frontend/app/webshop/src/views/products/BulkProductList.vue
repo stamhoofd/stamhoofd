@@ -9,13 +9,13 @@
 
             <div class="boxed">
                 <STList>
-                    <STListItem v-for="product of group.products" :key="product.id" data-testid="bulk-product-row" :class="{ 'amount-focused': getPrices(product).length === 1 && focusedAmountKey === amountKey(product, getPrices(product)[0]) }" :selectable="isCheckboxRow(product) && canOrder(product)" :element-name="isCheckboxRow(product) ? 'label' : 'article'">
+                    <STListItem v-for="product of group.products" :key="product.id" data-testid="bulk-product-row" :class="{ 'amount-focused': getPrices(product).length === 1 && focusedAmountKey === amountKey(product, getPrices(product)[0]) }" :selectable="isCheckboxRow(product) && canOrderProduct(product)" :element-name="isCheckboxRow(product) ? 'label' : 'article'">
                         <h3 class="style-title-list bolder">
                             {{ product.name }}
                             <button v-if="product.description || product.images.length > 0" class="button icon info-circle gray inline" type="button" data-testid="bulk-product-info" @click.stop.prevent="showProductInfo(product)" />
                         </h3>
-                        <p v-if="getProductDescription(product)" class="style-description-small">
-                            {{ getProductDescription(product) }}
+                        <p v-if="getProductListDescription(product, getPriceText(product))" class="style-description-small">
+                            {{ getProductListDescription(product, getPriceText(product)) }}
                         </p>
 
                         <div v-if="getStockTag(product)" class="tags-without-background">
@@ -31,9 +31,9 @@
 
                         <div v-if="getPrices(product).length > 1" class="stacked-box">
                             <STList>
-                                <STListItem v-for="price of getPrices(product)" :key="price.id" class="no-border" :class="{ 'amount-focused': focusedAmountKey === amountKey(product, price) }" :selectable="!product.allowMultiple && canOrder(product)" :element-name="!product.allowMultiple ? 'label' : 'article'">
-                                    <template v-if="!product.allowMultiple" #left>
-                                        <Radio :model-value="getSelectedPriceId(product)" :value="price.id" :name="product.id + '-price'" :disabled="!canOrder(product)" @update:model-value="selectPrice(product, price)" />
+                                <STListItem v-for="price of getPrices(product)" :key="price.id" class="no-border" :class="{ 'amount-focused': focusedAmountKey === amountKey(product, price) }" :selectable="!webshop.allowsMultiple(product) && canOrderProduct(product)" :element-name="!webshop.allowsMultiple(product) ? 'label' : 'article'">
+                                    <template v-if="!webshop.allowsMultiple(product)" #left>
+                                        <Radio :model-value="getSelectedPriceId(product)" :value="price.id" :name="product.id + '-price'" :disabled="!canOrderProduct(product)" @update:model-value="selectPrice(product, price)" />
                                     </template>
                                     <h4 class="style-title-list">
                                         {{ price.name || $t('%CL') }}
@@ -42,7 +42,7 @@
                                         {{ formatPriceName(price) }}
                                     </p>
                                     <PriceInputBox v-if="price.allowCustomPrice && getAmount(product, price) > 0" :model-value="getCustomPrice(product, price)" class="max custom-price-box" :min="ProductPrice.customPriceMinimum" :max="ProductPrice.customPriceMaximum" :validator="null" data-testid="custom-price-input" @update:model-value="setCustomPrice(product, price, $event)" />
-                                    <template v-if="product.allowMultiple" #right>
+                                    <template v-if="webshop.allowsMultiple(product)" #right>
                                         <input class="amount-input" type="text" inputmode="numeric" :value="getAmount(product, price) || ''" placeholder="0" data-testid="bulk-amount" @focus="focusedAmountKey = amountKey(product, price)" @blur="focusedAmountKey = null" @change="onAmountInput(product, price, $event)" @keydown.enter.prevent="($event.target as HTMLInputElement).blur()">
                                         <StepperInput :model-value="getAmount(product, price)" :min="0" :max="getMaximum(product, price)" data-testid="bulk-stepper" @update:model-value="setAmount(product, price, $event)" />
                                     </template>
@@ -53,11 +53,11 @@
                         <PriceInputBox v-else-if="getPrices(product)[0]?.allowCustomPrice && getAmount(product, getPrices(product)[0]) > 0" :model-value="getCustomPrice(product, getPrices(product)[0])" class="max custom-price-box" :min="ProductPrice.customPriceMinimum" :max="ProductPrice.customPriceMaximum" :validator="null" data-testid="custom-price-input" @update:model-value="setCustomPrice(product, getPrices(product)[0], $event)" />
 
                         <template v-if="getPrices(product).length === 1" #right>
-                            <input v-if="product.allowMultiple" class="amount-input" type="text" inputmode="numeric" :value="getAmount(product, getPrices(product)[0]) || ''" placeholder="0" data-testid="bulk-amount" @focus="focusedAmountKey = amountKey(product, getPrices(product)[0])" @blur="focusedAmountKey = null" @change="onAmountInput(product, getPrices(product)[0], $event)" @keydown.enter.prevent="($event.target as HTMLInputElement).blur()">
-                            <StepperInput v-if="product.allowMultiple" :model-value="getAmount(product, getPrices(product)[0])" :min="0" :max="getMaximum(product, getPrices(product)[0])" data-testid="bulk-stepper" @update:model-value="setAmount(product, getPrices(product)[0], $event)" />
-                            <Checkbox v-else :model-value="getAmount(product, getPrices(product)[0]) > 0" :disabled="!canOrder(product)" data-testid="bulk-checkbox" @update:model-value="setAmount(product, getPrices(product)[0], $event ? 1 : 0)" />
+                            <input v-if="webshop.allowsMultiple(product)" class="amount-input" type="text" inputmode="numeric" :value="getAmount(product, getPrices(product)[0]) || ''" placeholder="0" data-testid="bulk-amount" @focus="focusedAmountKey = amountKey(product, getPrices(product)[0])" @blur="focusedAmountKey = null" @change="onAmountInput(product, getPrices(product)[0], $event)" @keydown.enter.prevent="($event.target as HTMLInputElement).blur()">
+                            <StepperInput v-if="webshop.allowsMultiple(product)" :model-value="getAmount(product, getPrices(product)[0])" :min="0" :max="getMaximum(product, getPrices(product)[0])" data-testid="bulk-stepper" @update:model-value="setAmount(product, getPrices(product)[0], $event)" />
+                            <Checkbox v-else :model-value="getAmount(product, getPrices(product)[0]) > 0" :disabled="!canOrderProduct(product)" data-testid="bulk-checkbox" @update:model-value="setAmount(product, getPrices(product)[0], $event ? 1 : 0)" />
                         </template>
-                        <template v-else-if="!product.allowMultiple && getSelectedPriceId(product)" #right>
+                        <template v-else-if="!webshop.allowsMultiple(product) && getSelectedPriceId(product)" #right>
                             <button class="button icon trash gray" type="button" data-testid="bulk-clear-product" @click="clearProduct(product)" />
                         </template>
                     </STListItem>
@@ -68,8 +68,6 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import PriceInputBox from '@stamhoofd/components/inputs/PriceInputBox.vue';
 import Radio from '@stamhoofd/components/inputs/Radio.vue';
@@ -84,49 +82,39 @@ import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, ref } from 'vue';
 
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
-import { getProductListTitle } from '@stamhoofd/components/helpers/webshopWording.ts';
 import { useWebshopManager } from '../../composables/useWebshopManager';
+import { canOrderProduct, getProductListDescription, getProductListGroups, useShowProductInfo } from './productList';
+import { getVisibleProducts } from './visibleProducts';
+
+const props = defineProps<{
+    hideTitle?: boolean;
+}>();
 
 const webshopManager = useWebshopManager();
 const checkoutManager = useCheckoutManager();
 const webshop = computed(() => webshopManager.webshop);
 const cart = computed(() => checkoutManager.cart);
 
-const visibleProducts = computed(() => webshop.value.products.filter(p => !p.hidden));
-
-const groups = computed(() => {
-    const categorised = new Set<string>();
-    const groups = webshop.value.categories.flatMap((category) => {
-        const products = category.productIds.flatMap((id) => {
-            const product = visibleProducts.value.find(p => p.id === id);
-            if (!product) {
-                return [];
-            }
-            categorised.add(product.id);
-            return [product];
-        });
-        if (products.length === 0) {
-            return [];
-        }
-        return [{ id: category.id, name: category.name, description: category.description, products }];
-    });
-
-    const rest = visibleProducts.value.filter(p => !categorised.has(p.id));
-    if (rest.length > 0) {
-        groups.push({ id: 'uncategorised', name: groups.length > 0 ? $t('Andere') : getProductListTitle(webshop.value), description: '', products: rest });
-    }
-    return groups;
-});
+const visibleProducts = computed(() => getVisibleProducts(webshop.value));
+const groups = computed(() => getProductListGroups(webshop.value, { hideTitle: props.hideTitle }));
 
 function getPrices(product: Product) {
     return product.filteredPrices({ admin: false });
 }
 
 /**
+ * Only a single fixed price: several prices are listed below the product, and a custom price is entered below it
+ */
+function getPriceText(product: Product) {
+    const prices = getPrices(product);
+    return prices.length === 1 && !prices[0].allowCustomPrice && prices[0].price > 0 ? Formatter.price(prices[0].price) : '';
+}
+
+/**
  * Non-multiple product with one price: the whole row toggles the checkbox
  */
 function isCheckboxProduct(product: Product) {
-    return !product.allowMultiple && getPrices(product).length === 1;
+    return !webshop.value.allowsMultiple(product) && getPrices(product).length === 1;
 }
 
 /**
@@ -134,24 +122,6 @@ function isCheckboxProduct(product: Product) {
  */
 function isCheckboxRow(product: Product) {
     return isCheckboxProduct(product) && !getPrices(product)[0].allowCustomPrice;
-}
-
-function getProductDescription(product: Product) {
-    const parts: string[] = [];
-    if (product.dateRange) {
-        parts.push(Formatter.capitalizeFirstLetter(product.dateRange.toString()));
-    }
-    if (product.location) {
-        parts.push(product.location.name);
-    }
-    const prices = getPrices(product);
-    if (prices.length === 1 && !prices[0].allowCustomPrice && prices[0].price > 0) {
-        parts.push(Formatter.price(prices[0].price));
-    }
-    if (parts.length === 0 && product.description) {
-        return product.description;
-    }
-    return parts.join(' • ');
 }
 
 function formatPriceName(price: ProductPrice) {
@@ -177,10 +147,6 @@ function getStockTag(product: Product) {
     return getProductStockTag({ product, webshop: webshop.value, cart: cart.value, admin: false, editExisting: false });
 }
 
-function canOrder(product: Product) {
-    return product.isEnabled && !product.isSoldOut;
-}
-
 function getErrors(product: Product) {
     return Formatter.uniqueArray(cart.value.items.filter(i => i.product.id === product.id && i.cartError).map(i => i.cartError!.getHuman()));
 }
@@ -189,7 +155,7 @@ function getErrors(product: Product) {
  * How many units of this price can be in the cart, given the other items
  */
 function getMaximum(product: Product, price: ProductPrice): number | null {
-    if (!canOrder(product)) {
+    if (!canOrderProduct(product)) {
         return 0;
     }
     const otherItems = cart.value.items.filter(i => !(i.product.id === product.id && i.productPrice.id === price.id));
@@ -203,18 +169,7 @@ function getMaximum(product: Product, price: ProductPrice): number | null {
     return remaining;
 }
 
-const present = usePresent();
-
-function showProductInfo(product: Product) {
-    present({
-        components: [
-            new ComponentWithProperties(NavigationController, {
-                root: AsyncComponent(() => import('./ProductInfoView.vue'), { product }),
-            }),
-        ],
-        modalDisplayStyle: 'sheet',
-    }).catch(console.error);
-}
+const showProductInfo = useShowProductInfo();
 
 const focusedAmountKey = ref<string | null>(null);
 
@@ -291,7 +246,7 @@ onMounted(() => {
     }
     const product = visibleProducts.value[0];
     const prices = getPrices(product);
-    if (prices.length !== 1 || prices[0].allowCustomPrice || !canOrder(product)) {
+    if (prices.length !== 1 || prices[0].allowCustomPrice || !canOrderProduct(product)) {
         return;
     }
     const max = getMaximum(product, prices[0]);
@@ -305,23 +260,10 @@ onMounted(() => {
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
+@use "./product-list.mixin.scss" as *;
 
 .bulk-product-list {
-    .boxed {
-        background: $color-background;
-        // Nested inputs (radio, checkbox) and hover layers derive their colors from the current background
-        --color-current-background: #{$color-background};
-        --color-current-background-shade: #{$color-background-shade};
-        --color-current-background-shade-darker: #{$color-background-shade-darker-darker};
-        margin: 0 auto;
-        border-radius: $border-radius;
-        overflow: hidden;
-        border: $border-width solid $color-border;
-        @extend %style-input-shadow;
-        --st-horizontal-padding: 20px;
-        --st-vertical-padding: 7px;
-        padding: 7px 20px;
-    }
+    @include product-list;
 
     .stacked-box {
         padding-left: 10px;
@@ -336,11 +278,6 @@ onMounted(() => {
 
     .error-box.small {
         margin-top: 10px;
-    }
-
-    h3 > .button.inline {
-        vertical-align: middle;
-        margin-left: 4px;
     }
 
     .amount-input {

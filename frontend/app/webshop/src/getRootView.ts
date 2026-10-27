@@ -8,6 +8,7 @@ import { ThemeManager } from '@stamhoofd/frontend-application/ThemeManager';
 import type { Webshop } from '@stamhoofd/structures';
 import { WebshopAuthType } from '@stamhoofd/structures';
 import { markRaw, reactive } from 'vue';
+import { createWebshopPreviewReadyMessage, decodeWebshopPreviewUpdateMessage, getWebshopPreviewDashboardOrigin } from '@stamhoofd/components/webshops/webshopPreview.ts';
 import { CheckoutManager } from './classes/CheckoutManager';
 import { WebshopManager } from './classes/WebshopManager';
 
@@ -15,11 +16,14 @@ export async function wrapContext(
     context: SessionContext,
     app: 'webshop',
     root: ComponentWithProperties,
-    options: { ownDomain?: boolean; webshop: Webshop },
+    options: { ownDomain?: boolean; webshop: Webshop; preview?: boolean },
 ) {
     const themeManager = new ThemeManager(context, app);
 
-    const $webshopManager = reactive(new WebshopManager(context, context.platform, options.webshop) as any) as WebshopManager;
+    const $webshopManager = reactive(new WebshopManager(context, context.platform, options.webshop, { preview: options.preview }) as any) as WebshopManager;
+    if (options.preview) {
+        listenForPreviewWebshops($webshopManager);
+    }
     const $checkoutManager = reactive(new CheckoutManager($webshopManager));
 
     return new ComponentWithProperties(ContextProvider, {
@@ -40,15 +44,39 @@ export function wrapWithModalStack(...components: ComponentWithProperties[]) {
     return new ComponentWithProperties(ModalStackComponent, { initialComponents: components });
 }
 
-export async function getWebshopRootView(session: SessionContext, webshop: Webshop) {
+/**
+ * Preview in the dashboard: show the webshop the dashboard sends, with the settings that are not saved yet
+ */
+function listenForPreviewWebshops(webshopManager: WebshopManager) {
+    const dashboardOrigin = getWebshopPreviewDashboardOrigin();
+    window.addEventListener('message', (event) => {
+        if (event.origin !== dashboardOrigin || event.source !== window.parent) {
+            return;
+        }
+        try {
+            const webshop = decodeWebshopPreviewUpdateMessage(event.data);
+            if (webshop) {
+                webshopManager.setPreviewWebshop(webshop);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    });
+    window.parent.postMessage(createWebshopPreviewReadyMessage(), dashboardOrigin);
+}
+
+/**
+ * @param preview Shown as a preview in the dashboard (see webshopPreview.ts in the components)
+ */
+export async function getWebshopRootView(session: SessionContext, webshop: Webshop, { preview = false }: { preview?: boolean } = {}) {
     let root = wrapWithModalStack(AsyncComponent(() => import('./views/WebshopController.vue'), {
         root: new ComponentWithProperties(NavigationController, {
             root: AsyncComponent(() => import('./views/ModernWebshopView.vue'), {}),
         }),
     }));
 
-    // Do we need to require login?
-    if (webshop.meta.authType === WebshopAuthType.Required) {
+    // Do we need to require login? Not for a preview: the administrator sees the webshop itself
+    if (webshop.meta.authType === WebshopAuthType.Required && !preview) {
         root = wrapWithModalStack(
             new ComponentWithProperties(AuthenticatedView, {
                 root,
@@ -62,5 +90,6 @@ export async function getWebshopRootView(session: SessionContext, webshop: Websh
     return wrapContext(session, 'webshop', root, {
         ownDomain: true,
         webshop,
+        preview,
     });
 }

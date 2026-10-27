@@ -23,13 +23,28 @@ describe('Webshop.orderMode', () => {
         expect(createWebshop({ orderMode: WebshopOrderMode.Bulk }).shouldEnableCart).toBe(false);
     });
 
-    it('behaves as Single for a Cart webshop with a single unique product', () => {
+    it('keeps a cart for a single unique product', () => {
         const webshop = createWebshop({ orderMode: WebshopOrderMode.Cart, products: [Product.create({ name: 'Only' })] });
         expect(webshop.canEnableCart).toBe(false);
-        expect(webshop.orderMode).toBe(WebshopOrderMode.Single);
-        expect(webshop.shouldEnableCart).toBe(false);
+        expect(webshop.orderMode).toBe(WebshopOrderMode.Cart);
+        expect(webshop.shouldEnableCart).toBe(true);
+    });
+});
 
-        const bulk = createWebshop({ orderMode: WebshopOrderMode.Bulk, products: [Product.create({ name: 'Only' })] });
-        expect(bulk.orderMode).toBe(WebshopOrderMode.Bulk);
+describe('Webshop.allowsMultiple', () => {
+    const product = Product.create({ name: 'Only' });
+
+    it('follows the chosen order mode for a product without its own setting', () => {
+        expect(createWebshop({ orderMode: WebshopOrderMode.Cart, products: [product] }).allowsMultiple(product)).toBe(true);
+        expect(createWebshop({ orderMode: WebshopOrderMode.Bulk, products: [product] }).allowsMultiple(product)).toBe(true);
+        expect(createWebshop({ orderMode: WebshopOrderMode.Single, products: [product] }).allowsMultiple(product)).toBe(false);
+    });
+
+    it('uses the setting of the product when it has one', () => {
+        const legacy = Product.create({ name: 'Legacy', allowMultiple: true });
+        expect(createWebshop({ orderMode: WebshopOrderMode.Single, products: [legacy] }).allowsMultiple(legacy)).toBe(true);
+
+        const unique = Product.create({ name: 'Unique', allowMultiple: false });
+        expect(createWebshop({ orderMode: WebshopOrderMode.Cart, products: [unique] }).allowsMultiple(unique)).toBe(false);
     });
 });

@@ -494,8 +494,13 @@ test.describe('Webshop per-item customers @webshop-item-customer', () => {
 
         // Extra questions open the question editor with the chosen type: the category that stores them is never shown
         await page.getByTestId('customer-settings-add-button').click();
+        // Wait until the child menu opened: clicking while it still appears closes it again
+        const menus = page.locator('.context-menu-container:visible');
+        await expect(menus).toHaveCount(1);
         await page.getByTestId('context-menu-item-title').filter({ hasText: 'Eigen vraag' }).hover();
-        await page.getByTestId('context-menu-item-title').filter({ hasText: 'Keuzemenu (kies één)' }).click();
+        await expect(menus).toHaveCount(2);
+        await expect(menus.last().getByTestId('context-menu-item-title').filter({ hasText: 'Keuzemenu (kies één)' })).toBeVisible();
+        await menus.last().getByTestId('context-menu-item-title').filter({ hasText: 'Keuzemenu (kies één)' }).click();
         const recordView = page.locator('.st-view').last();
         await expect(recordView.getByRole('heading', { name: 'Nieuwe vraag', level: 1 }).first()).toBeVisible();
         await expect(recordView.getByText('Keuze 1')).toBeVisible();

@@ -1,22 +1,17 @@
 <template>
-    <CategorizedView :columns="false" :loading="loading" save-icon-right="arrow-right" :save-text="$t('%16p')" :title="$t('Vul de gegevens aan')" data-testid="details-step" class="bulk-item-details-view" @save="goNext">
+    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('%16p')" :title="title" data-testid="details-step" class="bulk-item-details-view" @save="goNext">
+        <h1>{{ title }}</h1>
+
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <CategorizedBox v-for="entry of entries" :key="entry.item.id" :title="entry.title" :icon="entry.icon">
-            <template #summary>
-                <p class="style-description-small">
-                    {{ entry.subtitle }}
-                </p>
-                <p v-for="line of summaryOf(entry.item)" :key="line" class="style-description-small">
-                    {{ line }}
-                </p>
-            </template>
+        <template v-for="entry of entries" :key="entry.item.id">
+            <hr>
+            <h2>{{ entry.title }}</h2>
+            <p v-if="entry.subtitle" class="style-description-block">
+                {{ entry.subtitle }}
+            </p>
 
-            <div data-testid="details-item">
-                <p class="style-description-block">
-                    {{ entry.subtitle }}
-                </p>
-
+            <STCard data-testid="details-item">
                 <STErrorsDefault :error-box="entry.errors.errorBox" />
 
                 <template v-if="entry.item.product.enableCustomer && entry.item.customer">
@@ -29,15 +24,15 @@
                 <FieldBox v-for="field in entry.item.product.customFields" :key="field.id" :field="field" :answers="entry.item.fieldAnswers" :error-box="entry.errors.errorBox" />
 
                 <template v-if="entry.item.productPrice.uitpasBaseProductPriceId !== null && entry.item.uitpasNumbers[0]">
-                    <hr>
+                    <hr v-if="hasQuestionsAboveUitpas(entry.item)" class="style-hr">
                     <h3>{{ $t('%wF') }}</h3>
                     <UitpasNumberInput v-model="entry.item.uitpasNumbers[0].uitpasNumber" :placeholder="$t('Geef het UiTPAS-nummer in')" class="max" :validator="entry.errors.validator" :required="true" error-fields="uitpasNumbers.0" :error-box="entry.errors.errorBox" />
                 </template>
-            </div>
-        </CategorizedBox>
+            </STCard>
+        </template>
 
         <PriceBreakdownBox v-if="pricedCheckout.priceBreakown.length > 1 || pricedCheckout.totalPrice > 0" :price-breakdown="pricedCheckout.priceBreakown" />
-    </CategorizedView>
+    </SaveView>
 </template>
 
 <script lang="ts" setup>
@@ -48,8 +43,8 @@ import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import UitpasNumberInput from '@stamhoofd/components/inputs/UitpasNumberInput.vue';
-import CategorizedBox from '@stamhoofd/components/layout/categorized-view/CategorizedBox.vue';
-import CategorizedView from '@stamhoofd/components/layout/categorized-view/CategorizedView.vue';
+import STCard from '@stamhoofd/components/layout/STCard.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import FillRecordCategoryBox from '@stamhoofd/components/records/components/FillRecordCategoryBox.vue';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
@@ -59,12 +54,10 @@ import OptionMenuBox from '@stamhoofd/components/views/OptionMenuBox.vue';
 import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
 import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import type { CartItem, PatchAnswers } from '@stamhoofd/structures';
-import { Customer, ProductType, UitpasNumberAndPrice, Version } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { Customer, UitpasNumberAndPrice, Version } from '@stamhoofd/structures';
 import { computed, reactive, ref, watch } from 'vue';
 
 import { validateUitpasNumbers } from '@stamhoofd/components/views/validateUitpasNumbers.ts';
-import { getUnitName } from '@stamhoofd/components/helpers/webshopWording.ts';
 import { useCheckoutContinue } from '../../composables/useCheckoutContinue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
 import { useWebshopManager } from '../../composables/useWebshopManager';
@@ -90,6 +83,7 @@ const navigationActions = useNavigationActions();
 
 const webshop = computed(() => webshopManager.webshop);
 const cart = computed(() => checkoutManager.cart);
+const title = $t('Vul de gegevens aan');
 
 // One error box + validator per item, keyed on the item id so they survive cart changes
 const itemErrors = reactive(new Map<string, ItemErrors>());
@@ -100,7 +94,7 @@ const entries = computed(() => {
         const count = (counters.get(item.product.id) ?? 0) + 1;
         counters.set(item.product.id, count);
 
-        const subtitle: string[] = [item.product.name];
+        const subtitle: string[] = [];
         if (item.product.prices.length > 1) {
             subtitle.push(item.productPrice.name);
         }
@@ -110,28 +104,13 @@ const entries = computed(() => {
 
         return {
             item,
-            title: Formatter.capitalizeFirstLetter(getUnitName(webshop.value, item.product).singular) + ' ' + count,
-            icon: item.product.type === ProductType.Ticket || item.product.type === ProductType.Voucher ? 'ticket' : (item.product.type === ProductType.Person || item.product.enableCustomer ? 'user' : 'box'),
+            title: item.product.name + ' ' + count,
             subtitle: subtitle.join(' • '),
             // Created by prepareItems, which runs on every cart change before rendering
             errors: itemErrors.get(item.id)!,
         };
     });
 });
-
-/**
- * What the visitor filled in so far. Read from the reactive item at render time so the summary column follows the inputs.
- */
-function summaryOf(item: CartItem): string[] {
-    const summary: string[] = [];
-    if (item.customer?.name) {
-        summary.push(item.customer.name);
-    }
-    summary.push(...item.options.map(o => o.option.name));
-    summary.push(...item.fieldAnswers.filter(a => a.answer).map(a => a.field.name + ': ' + a.answer));
-    summary.push(...item.uitpasNumbers.filter(u => u.uitpasNumber).map(u => $t('%wF') + ': ' + u.uitpasNumber));
-    return summary;
-}
 
 /**
  * Give every item the objects its inputs bind to, so the template never has to create them while rendering
@@ -153,6 +132,10 @@ function prepareItems() {
             item.uitpasNumbers.push(UitpasNumberAndPrice.create({ uitpasNumber: '', price: item.productPrice.price }));
         }
     }
+}
+
+function hasQuestionsAboveUitpas(item: CartItem) {
+    return item.product.enableCustomer || item.product.optionMenus.length > 0 || item.product.customFields.length > 0;
 }
 
 function patchRecordAnswers(item: CartItem, patch: PatchAnswers) {
@@ -229,7 +212,13 @@ async function goNext() {
 
     let valid = true;
     for (const entry of entries.value) {
-        if (!await entry.errors.validator.validate()) {
+        // Inputs may throw their validation error instead of returning false
+        try {
+            if (!await entry.errors.validator.validate()) {
+                valid = false;
+            }
+        } catch (e) {
+            setItemError(entry, e);
             valid = false;
         }
     }

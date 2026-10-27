@@ -114,10 +114,12 @@ test.describe('Webshop bulk ordering @webshop-bulk', () => {
 
         const orders = await fetchOrders(webshop.id);
         expect(orders).toHaveLength(1);
+        // The units with the same choices are one item in the order
         const items = orders[0].data.cart.items;
-        expect(items).toHaveLength(3);
-        expect(items.every(i => i.amount === 1)).toBe(true);
-        expect(items.filter(i => i.product.name === 'Voorstelling').flatMap(i => i.seats)).toHaveLength(2);
+        expect(items).toHaveLength(2);
+        const seated = items.find(i => i.product.name === 'Voorstelling')!;
+        expect(seated.amount).toBe(2);
+        expect(seated.seats).toHaveLength(2);
         const workshop = items.find(i => i.product.name === 'Workshop')!;
         expect(workshop.options[0].option.name).toBe('Vlees');
         expect(workshop.fieldAnswers[0].answer).toBe('Alice');
@@ -369,11 +371,81 @@ test.describe('Webshop bulk ordering @webshop-bulk', () => {
 
         const orders = await fetchOrders(webshop.id);
         expect(orders).toHaveLength(1);
-        expect(orders[0].data.cart.items).toHaveLength(2);
-        expect(orders[0].data.cart.items.every(i => i.options[0].option.name === 'Vegetarisch')).toBe(true);
+        // Both units have the same choices: one item in the order
+        expect(orders[0].data.cart.items).toHaveLength(1);
+        expect(orders[0].data.cart.items[0].amount).toBe(2);
+        expect(orders[0].data.cart.items[0].options[0].option.name).toBe('Vegetarisch');
     });
 
-    test('Applies a discount code entered below the product list', async ({ page }) => {
+    test('Shows the name error when a participant is left without a name', async ({ page }) => {
+        const organization = await createOrganization({ modernWebshop: true });
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Bulk missing name ${WorkerData.id}`,
+            orderMode: WebshopOrderMode.Bulk,
+            paymentMethods: [PaymentMethod.PointOfSale],
+            buildProducts: () => [
+                Product.create({
+                    name: 'Deelname',
+                    enableCustomer: true,
+                    prices: [ProductPrice.create({ name: 'Standaard', price: 5_00_00 })],
+                }),
+            ],
+        });
+
+        const flow = new WebshopOrderFlow(page, { orderMode: WebshopOrderMode.Bulk });
+        await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
+        await flow.startBulkOrder();
+        await expect(flow.detailsItem(0)).toBeVisible({ timeout: 15000 });
+        await flow.submitDetails();
+
+        // The validation error is shown at the name input instead of blocking the step
+        await expect(flow.detailsItem(0).getByText('De voornaam die je hebt opgegeven is ongeldig', { exact: false })).toBeVisible();
+
+        await flow.fillDetails(0, { customer: { firstName: 'Jane', lastName: 'Doe' } });
+        await flow.submitDetails();
+
+        // The only participant is the contact person: only the email is left to ask
+        const step = page.getByTestId('customer-step');
+        await step.locator('input[name="email"]').fill('jane@test.be');
+        await step.getByTestId('save-button').click();
+        await flow.confirmPayment();
+        await flow.expectOrderConfirmed();
+
+        const orders = await fetchOrders(webshop.id);
+        expect(orders[0].data.cart.items[0].customer?.name).toBe('Jane Doe');
+    });
+
+    test('Keeps the option of a unit selected when an option is chosen for another unit', async ({ page }) => {
+        const organization = await createOrganization({ modernWebshop: true });
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Bulk options ${WorkerData.id}`,
+            orderMode: WebshopOrderMode.Bulk,
+            paymentMethods: [PaymentMethod.PointOfSale],
+            buildProducts: () => [
+                Product.create({
+                    name: 'Workshop',
+                    prices: [ProductPrice.create({ name: 'Standaard', price: 5_00_00 })],
+                    optionMenus: [mealMenu()],
+                }),
+            ],
+        });
+
+        const flow = new WebshopOrderFlow(page, { orderMode: WebshopOrderMode.Bulk });
+        await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
+        // One unit is preselected: 2 in total
+        await flow.setBulkAmount('Workshop', 1);
+        await flow.startBulkOrder();
+        await flow.fillDetails(0, { option: 'Vegetarisch' });
+        await flow.fillDetails(1, { option: 'Vlees' });
+
+        // Every unit has its own radio group: the choice of the first unit stays visible
+        await expect(flow.detailsItem(0).locator('label').filter({ hasText: 'Vegetarisch' }).locator('input[type="radio"]')).toBeChecked();
+        await expect(flow.detailsItem(1).locator('label').filter({ hasText: 'Vlees' }).locator('input[type="radio"]')).toBeChecked();
+    });
+
+    test('Applies a discount code entered in the payment step', async ({ page }) => {
         const organization = await createOrganization({ modernWebshop: true });
         const { webshop } = await TestWebshops.create({
             organization,
@@ -396,13 +468,20 @@ test.describe('Webshop bulk ordering @webshop-bulk', () => {
         await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
         await expect(flow.bulkAmount('Product 1')).toHaveValue('1');
 
-        await page.getByRole('button', { name: 'Kortingscode inwisselen' }).click();
-        await page.getByPlaceholder('Vul hier je kortingscode in').fill('BULK5');
-        await page.getByRole('button', { name: 'Inwisselen' }).click();
-        await expect(page.getByTestId('bulk-order-button')).toContainText('10');
+        // The bulk order mode has no cart: codes are entered next to the payment methods
+        await expect(page.getByRole('button', { name: 'Kortingscode inwisselen' })).toHaveCount(0);
 
         await flow.startBulkOrder();
         await flow.fillCustomer();
+        await expect(page.getByTestId('payment-step')).toBeVisible({ timeout: 15000 });
+
+        const preview = page.getByTestId('cart-preview');
+        await preview.getByRole('button', { name: 'Kortingscode inwisselen' }).click();
+        await preview.getByPlaceholder('Vul hier je kortingscode in').fill('BULK5');
+        await preview.getByRole('button', { name: 'Inwisselen', exact: true }).click();
+        await expect(preview.locator('.discount-box')).toContainText('BULK5');
+        await expect(preview).toContainText('€ 10');
+
         await flow.confirmPayment();
         await flow.expectOrderConfirmed();
 

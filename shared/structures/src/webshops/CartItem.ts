@@ -437,7 +437,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
     }
 
     get formattedAmount(): string | null {
-        if (!this.product.allowMultiple) {
+        if (this.product.allowMultiple === false) {
             return '';
         }
         return Formatter.integer(this.amount);
@@ -485,7 +485,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                 }
             }
 
-            if (!this.product.allowMultiple && amount === 1) {
+            if (this.product.allowMultiple === false && amount === 1) {
                 parts.push(Formatter.price(Math.abs(price)));
                 continue;
             }
@@ -871,7 +871,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
         }
         const product = this.product;
 
-        if (!product.allowMultiple) {
+        if (!webshop.allowsMultiple(product)) {
             this.amount = 1;
         }
 

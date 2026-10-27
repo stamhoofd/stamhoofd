@@ -150,18 +150,32 @@ export class WebshopOrderFlow {
 
     /**
      * Open the form of a product. A webshop with one product and no cart shows the form on the page itself, or a
-     * single order button when it has a description. Both render together with the webshop view.
+     * single order button when the product has a photo, or a description next to the one of the webshop. With several
+     * products and no cart, the product is picked in a list above the order button. Otherwise the product box opens
+     * the form. Returns null when a product picked in the list has nothing to choose: the checkout then opens right away.
      */
-    private async openProduct(name: string): Promise<Locator> {
+    private async openProduct(name: string): Promise<Locator | null> {
         const embedded = this.page.locator('.modern-webshop').getByTestId('cart-item-view');
         if (await embedded.count() > 0) {
             await expect(embedded).toBeVisible();
             return embedded;
         }
 
+        // One at a time with several products: pick the product in the list above the order button
+        const row = this.page.getByTestId('single-product-row').filter({ hasText: name }).first();
+        if (await row.count() > 0) {
+            await row.click();
+        }
+
         const orderButton = this.page.getByTestId('single-order-button');
         if (await orderButton.count() > 0) {
             await orderButton.click();
+            if (await row.count() > 0) {
+                await expect(this.page).toHaveURL(/\/(product|checkout\/.+)$/);
+                if (!this.page.url().endsWith('/product')) {
+                    return null;
+                }
+            }
         } else {
             await this.page.getByTestId('product-box').filter({ hasText: name }).first().click();
         }
@@ -179,6 +193,9 @@ export class WebshopOrderFlow {
         const count = options.seats ?? options.count ?? 1;
 
         const cartItemView = await this.openProduct(name);
+        if (!cartItemView) {
+            return;
+        }
 
         if (count > 1) {
             await cartItemView.getByTestId('amount-number-input').locator('input').fill(count.toString());

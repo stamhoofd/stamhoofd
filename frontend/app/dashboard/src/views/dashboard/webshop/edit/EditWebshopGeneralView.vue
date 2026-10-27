@@ -254,13 +254,15 @@ import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
-import { PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductType, StripeAccount, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopStatus, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
+import { PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductType, StripeAccount, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopOrderMode, WebshopPrivateMetaData, WebshopStatus, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, nextTick, onMounted, ref } from 'vue';
 import EditPaymentMethodsBox from '../../../../components/EditPaymentMethodsBox.vue';
 import type { UseEditWebshopProps } from './useEditWebshop';
 import { useEditWebshop } from './useEditWebshop';
+import { prefersBulkOrderMode } from './orderModeOptions';
+import { getSingleFormProduct } from './singleForm';
 import useIsStamhoofd from '../../../../composables/useIsStamhoofd.ts';
 
 const props = withDefaults(defineProps<UseEditWebshopProps & { forceType: WebshopType | null; isCopy?: boolean }>(), { forceType: null });
@@ -320,7 +322,16 @@ onMounted(() => {
 
 const name = computed({
     get: () => webshop.value.meta.name,
-    set: (name: string) => addPatch(PrivateWebshop.patch({ meta: WebshopMetaData.patch({ name }) })),
+    set: (name: string) => {
+        const patch = PrivateWebshop.patch({ meta: WebshopMetaData.patch({ name }) });
+
+        // A single form takes the name of the webshop, unless it was given its own name
+        const formProduct = getSingleFormProduct(webshop.value);
+        if (formProduct && formProduct.name === webshop.value.meta.name) {
+            patch.products.addPatch(Product.patch({ id: formProduct.id, name }));
+        }
+        addPatch(patch);
+    },
 });
 
 const namePlaceholder = computed(() => {
@@ -488,6 +499,10 @@ const type = computed({
             return;
         }
         const patch = WebshopMetaData.patch({ type: value });
+        // The order mode can only be changed with the modern webshop
+        if (isNew.value && !props.isCopy && getFeatureFlag('modern-webshop')) {
+            patch.orderMode = prefersBulkOrderMode(value) ? WebshopOrderMode.Bulk : WebshopOrderMode.Cart;
+        }
         addPatch(PrivateWebshop.patch({ meta: patch }));
 
         // If changed to original type again

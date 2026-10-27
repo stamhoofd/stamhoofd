@@ -3,7 +3,7 @@
         <STNavigationBar :title="title" />
 
         <main>
-            <h1 class="style-navigation-title">
+            <h1 class="larger">
                 <span>{{ title }}</span>
             </h1>
             <p v-if="description" class="style-description">

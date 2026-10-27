@@ -1,6 +1,6 @@
 <template>
     <SaveView :title="title" :loading="saving" :disabled="!hasChanges" :save-text="$t('%6m')" save-icon="calculator" @save="save">
-        <h1 class="style-navigation-title">
+        <h1 class="larger">
             {{ title }}
         </h1>
 

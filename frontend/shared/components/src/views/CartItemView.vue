@@ -9,10 +9,8 @@
             </template>
         </STNavigationBar>
         <component :is="embedded ? 'div' : 'main'" :class="{ container: embedded, small: true }">
-            <h2 v-if="embedded" class="larger">
-                {{ cartItem.product.name }}
-            </h2>
-            <h1 v-else>
+            <!-- Embedded on the page of the webshop, which already has a title (often the same as the product) -->
+            <h1 v-if="!embedded">
                 {{ cartItem.product.name }}
             </h1>
 
@@ -49,8 +47,8 @@
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <STList v-if="(cartItem.product.type === 'Ticket' || cartItem.product.type === 'Voucher') && cartItem.product.location" class="info">
-                <STListItem>
+            <STList v-if="(cartItem.product.type === 'Ticket' || cartItem.product.type === 'Voucher') && (cartItem.product.location || cartItem.product.dateRange)" class="info">
+                <STListItem v-if="cartItem.product.location">
                     <h3 class="style-definition-label">
                         {{ $t('%8a') }}
                     </h3>
@@ -231,8 +229,8 @@ const props = withDefaults(defineProps<{
      */
     isPreview?: boolean;
     /**
-     * Rendered inside another view (e.g. the webshop page): no navigation bar, the product name as a smaller title
-     * and the save button at the end of the form instead of in a toolbar
+     * Rendered inside another view (e.g. the webshop page): no navigation bar, no product name and the save button at
+     * the end of the form instead of in a toolbar
      */
     embedded?: boolean;
     /**
@@ -453,7 +451,7 @@ const saveButton = computed(() => {
         return { iconLeft: null, text: $t('%16p'), iconRight: 'arrow-right' };
     }
     // Without a cart, saving the item starts the order
-    return { iconLeft: null, text: getOrderButtonText(props.webshop), iconRight: 'arrow-right' };
+    return { iconLeft: null, text: getOrderButtonText(props.webshop, pricedCheckout.value.totalPrice), iconRight: 'arrow-right' };
 });
 const withSeats = computed(() => props.cartItem.product.seatingPlanId !== null);
 const suffixSingular = computed(() => {
@@ -552,7 +550,7 @@ const canOrder = computed(() => {
     // return (props.admin || ((maximumRemaining.value === null || maximumRemaining.value > 0 || !!props.oldItem) && product.value.isEnabled)) && !this.areSeatsSoldOut
 });
 
-const canSelectAmount = computed(() => product.value.maxPerOrder !== 1 && product.value.allowMultiple && !product.value.enableCustomer);
+const canSelectAmount = computed(() => product.value.maxPerOrder !== 1 && props.webshop.allowsMultiple(product.value) && !product.value.enableCustomer);
 
 // The structure only stores a customer when the product asks for one
 watch(() => product.value.enableCustomer, (enabled) => {
@@ -647,6 +645,12 @@ defineExpose({
 
     .pricing-box {
         padding-top: 15px;
+    }
+
+    // Embedded without a title: no line above the first part of the form (e.g. the prices) when nothing precedes it
+    &.embedded > .container > .st-errors-default:first-child + hr,
+    &.embedded > .container > .st-errors-default:first-child + .container > hr:first-child {
+        display: none;
     }
 }
 

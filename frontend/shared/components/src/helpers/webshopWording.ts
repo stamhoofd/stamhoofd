@@ -4,10 +4,11 @@ import { ProductType, WebshopType } from '@stamhoofd/structures';
 /**
  * Wording that depends on what the webshop sells: tickets, registrations, donations or products.
  */
-export function getOrderButtonText(webshop: Webshop): string {
+export function getOrderButtonText(webshop: Webshop, totalPrice?: number): string {
     switch (webshop.meta.type) {
         case WebshopType.Registrations: return $t('Inschrijven');
-        case WebshopType.Donations: return $t('Doneren');
+        // totalPrice is undefined when the amount is only chosen in a later step
+        case WebshopType.Donations: return totalPrice === 0 ? $t('Doorgaan') : $t('Bijdrage doen');
         default: return $t('Bestellen');
     }
 }

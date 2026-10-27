@@ -38,6 +38,7 @@ import { CheckoutStepsManager } from './checkout/CheckoutStepsManager';
 import { getCartComponent } from './checkout/getCartComponent';
 import WebshopNavigationBar from './components/WebshopNavigationBar.vue';
 import { isOrderComponent } from './orders/getOrderComponent';
+import { getVisibleProducts } from './products/visibleProducts';
 
 /**
  * Renders the webshop's navigation bar as an overlay on a full-screen navigation controller with the webshop as root.
@@ -83,11 +84,16 @@ const progress = computed(() => {
     if (cartEnabled.value || url === 'cart') {
         steps.unshift({ title: $t('%1DQ'), url: 'cart' });
     } else if (navigationController.value?.components.some(c => c.provide.reactive_navigation_url?.url === CheckoutStepsManager.productUrl)) {
-        // Opened with the order button of a webshop with one product: the product form is the first step
-        const product = webshopManager.webshop.products.find(p => !p.hidden);
+        // Opened with the order button in single mode: the product form is the first step. In single mode the cart only
+        // holds the item of that product. With several products the visitor picked it on the webshop itself.
+        const products = getVisibleProducts(webshopManager.webshop);
+        const product = checkoutManager.cart.items[0]?.product ?? products[0];
         steps.unshift({ title: product?.name ?? $t('%1DQ'), url: CheckoutStepsManager.productUrl });
-    } else if (webshopManager.webshop.orderMode === WebshopOrderMode.Bulk) {
-        // The product list on the webshop itself is the first step
+        if (products.length > 1) {
+            steps.unshift({ title: $t('%TE'), url: rootStepUrl });
+        }
+    } else if (webshopManager.webshop.orderMode === WebshopOrderMode.Bulk || getVisibleProducts(webshopManager.webshop).length > 1) {
+        // The product list on the webshop itself is the first step (single mode: the chosen product had nothing to choose)
         steps.unshift({ title: $t('%TE'), url: rootStepUrl });
     }
     const current = steps.findIndex(s => s.url === url);

@@ -96,6 +96,10 @@ export class CheckoutManager {
     }
 
     loadCheckout() {
+        // A preview starts empty and doesn't touch the cart of the visitor
+        if (this.$webshopManager.preview) {
+            return new Checkout()
+        }
         try {
             const json = localStorage.getItem(this.$webshopManager.webshop.id+'-checkout')
             if (json) {
@@ -113,6 +117,9 @@ export class CheckoutManager {
     saveCheckout() {
         try {
             this.checkout.update(this.$webshopManager.webshop)
+            if (this.$webshopManager.preview) {
+                return
+            }
             const data = new VersionBox(this.checkout).encode({ version: Version })
             const json = JSON.stringify(data)
             localStorage.setItem(this.$webshopManager.webshop.id+'-checkout', json)

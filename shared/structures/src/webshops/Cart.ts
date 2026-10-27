@@ -51,6 +51,18 @@ export class Cart extends AutoEncoder {
         });
     }
 
+    /**
+     * A copy in which the items with the same code are combined like addItem does, e.g. the units of the bulk order
+     * mode with the same choices, for the overview and the order
+     */
+    grouped(): Cart {
+        const cart = Cart.create({});
+        for (const item of this.items) {
+            cart.addItem(item.clone());
+        }
+        return cart;
+    }
+
     addItem(item: CartItem, allowMerge = true) {
         if (item.amount === 0) {
             return;
@@ -153,6 +165,11 @@ export class Cart extends AutoEncoder {
     }
 
     validateUitpasNumbers() {
+        // The units of the bulk order mode are combined in the order, which then checks its items again
+        for (const item of this.grouped().items) {
+            item.validateUitpasNumbers();
+        }
+
         // avoid duplicate UiTPAS-numbers on the same UiTPAS-event
         const officialUitpasSales = new Map<string, string[]>(); // Event URL -> UiTPAS numbers
         for (const item of this.items) {

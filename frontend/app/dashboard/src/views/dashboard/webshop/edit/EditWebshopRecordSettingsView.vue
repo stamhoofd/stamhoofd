@@ -25,7 +25,7 @@
             <hr>
             <h2>{{ $t('Gegevens van de besteller') }}</h2>
             <p>
-                {{ webshop.products.some(p => p.enableCustomer) ? $t('Wordt één keer per bestelling gevraagd. Is de besteller zelf een deelnemer, dan worden die gegevens overgenomen.') : $t('Wordt één keer per bestelling gevraagd.') }}
+                {{ webshop.products.some(p => p.enableCustomer) ? $t('Wordt één keer per bestelling gevraagd. Is de besteller zelf een deelnemer, dan worden die gegevens overgenomen. De besteller ontvangt de bevestigingsmail.') : $t('Wordt één keer per bestelling gevraagd.') }}
             </p>
         </template>
 
@@ -54,7 +54,7 @@ import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import EditRecordCategoriesBox from '@stamhoofd/components/records/components/EditRecordCategoriesBox.vue';
 import { RecordEditorSettings, RecordEditorType } from '@stamhoofd/components/records/RecordEditorSettings.ts';
 import type { RecordCategory } from '@stamhoofd/structures';
-import { Checkout, PrivateWebshop, WebshopMetaData } from '@stamhoofd/structures';
+import { Checkout, PrivateWebshop, WebshopMetaData, WebshopOrderMode } from '@stamhoofd/structures';
 import type { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 import { computed, useTemplateRef } from 'vue';
 import CustomerSettingsBox from './CustomerSettingsBox.vue';
@@ -72,11 +72,17 @@ const savedCustomerRecordIds = new Set(originalWebshop.meta.customerSettings.rec
 
 const categories = computed(() => webshop.value.meta.recordCategories);
 const customerSettingsBox = useTemplateRef('customerSettingsBox');
-const title = computed(() => webshop.value.meta.isRegistrations ? $t('Inschrijvingsformulier') : $t('Bestelformulier'));
+const title = $t('Contactgegevens');
 const modernWebshopEnabled = useFeatureFlagComputed('modern-webshop');
 
 // Only where a piece is usually for one person: elsewhere details per order are the norm (e.g. 5× a meal on one name)
-const showParticipantSettings = computed(() => modernWebshopEnabled.value && (webshop.value.meta.isTicketBased || webshop.value.meta.isRegistrations));
+// With one product, asking the details once per order is the same and simpler: only kept when it was already set up
+const showParticipantSettings = computed(() => (
+    modernWebshopEnabled.value
+    && (webshop.value.meta.isTicketBased || webshop.value.meta.isRegistrations)
+    && (webshop.value.products.length >= 1 && webshop.value.products[0].allowMultiple !== false)
+    && (webshop.value.meta.orderMode !== WebshopOrderMode.Single || webshop.value.products.length > 1 || webshop.value.products.some(p => p.allowMultiple === true))
+) || originalWebshop.products.some(p => p.enableCustomer));
 const present = usePresent();
 
 function patchCustomerSettings(patch: AutoEncoderPatchType<CustomerSettings>) {

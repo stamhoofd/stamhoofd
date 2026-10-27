@@ -1,6 +1,6 @@
 <template>
     <SaveView :loading="false" :title="title" :disabled="!hasChanges" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
-        <h1 class="style-navigation-title">
+        <h1 class="larger">
             {{ title }}
         </h1>
         <p>

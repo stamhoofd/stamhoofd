@@ -24,7 +24,7 @@
                 </p>
             </template>
             <div class="actions" @click.stop>
-                <span v-if="cartItem.formattedAmount && (cartItem.amount !== 1 || (cartItem.product.maxPerOrder !== 1 && !cartItem.product.enableCustomer))" class="amount">{{ cartItem.formattedAmount }}</span>
+                <span v-if="cartItem.formattedAmount && (cartItem.amount !== 1 || (webshop.allowsMultiple(cartItem.product) && cartItem.product.maxPerOrder !== 1 && !cartItem.product.enableCustomer))" class="amount">{{ cartItem.formattedAmount }}</span>
                 <StepperInput v-if="editable && !cartItem.cartError && cartItem.customer === null && cartItem.seats.length === 0 && (maximumRemaining === null || maximumRemaining > 1) && cartItem.productPrice.uitpasBaseProductPriceId === null" v-model="amount" :min="1" :max="maximumRemaining" @click.stop />
                 <button v-if="editable" class="button icon trash" type="button" @click="deleteItem()" />
             </div>
