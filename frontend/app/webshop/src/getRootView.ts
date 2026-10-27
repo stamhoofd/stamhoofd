@@ -33,7 +33,7 @@ export async function wrapContext(
             $organizationManager: new OrganizationManager(context),
             $webshopManager,
             $checkoutManager,
-            reactive_components: {},
+            reactive_components: new Map<string, ComponentWithProperties | null>(),
             stamhoofd_app: app,
         }),
         root,

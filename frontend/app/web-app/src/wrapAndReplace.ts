@@ -61,12 +61,12 @@ export async function wrap(organization: Organization | null = null, app: AppTyp
             $themeManager: themeManager,
             $memberManager,
             $organizationManager: new OrganizationManager(context),
-            reactive_components: {
-                'tabbar-left': new ComponentWithProperties(OrganizationSwitcher, {}),
-                'tabbar-notifications': new ComponentWithProperties(NotificationsButton, {}),
-                'tabbar-right': new ComponentWithProperties(AccountSwitcher, {}),
-                'tabbar-replacement': new ComponentWithProperties(ContextNavigationBar, {}),
-            },
+            reactive_components: new Map<string, ComponentWithProperties | null>([
+                ['tabbar-left', new ComponentWithProperties(OrganizationSwitcher, {})],
+                ['tabbar-notifications', new ComponentWithProperties(NotificationsButton, {})],
+                ['tabbar-right', new ComponentWithProperties(AccountSwitcher, {})],
+                ['tabbar-replacement', new ComponentWithProperties(ContextNavigationBar, {})],
+            ]),
             stamhoofd_app: app,
         }),
         root: wrapWithModalStack(new ComponentWithProperties(CustomHooksContainer, {

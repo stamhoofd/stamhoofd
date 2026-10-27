@@ -16,12 +16,12 @@ const props = defineProps<{
     overrideProps?: Record<string, any>;
 }>();
 
-const injectedComponents = inject('reactive_components') as Ref<Record<string, ComponentWithProperties> | undefined> | undefined;
+const injectedComponents = inject('reactive_components') as Ref<Map<string, ComponentWithProperties | null> | undefined> | undefined;
 const root = computed(() => {
     const injected = unref(injectedComponents);
-    if (injected && injected[props.name]) {
+    if (injected?.get(props.name)) {
         // We need to clone here, because the component might be in multiple places
-        const unreffed = unref(injected[props.name]);
+        const unreffed = unref(injected.get(props.name));
         const c = unreffed?.deepClone() ?? null;
         if (c) {
             if (props.overrideProps) {

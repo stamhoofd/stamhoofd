@@ -133,7 +133,7 @@ const tabs = computed(() => {
 });
 
 const flatTabs = computed<TabBarItemWithComponent[]>(() => unref(props.tabs).flatMap(t => t.items as TabBarItemWithComponent[]).filter(t => !!t.component));
-const injectedComponents = inject('reactive_components') as Ref<Record<string, ComponentWithProperties> | undefined> | undefined;
+const injectedComponents = inject('reactive_components') as Ref<Map<string, ComponentWithProperties | null> | undefined> | undefined;
 const deviceWidth = useDeviceWidth();
 const showTopBar = computed(() => deviceWidth.value > 1100);
 const showBottomBar = computed(() => !showTopBar.value && tabs.value.length > 1);
@@ -156,13 +156,12 @@ provide('reactive_hide_tab_bar', {
 
 provide('reactive_components', computed(() => {
     if (!showTopBar.value) {
-        return unref(injectedComponents) ?? {};
+        return unref(injectedComponents) ?? new Map<string, ComponentWithProperties | null>();
     }
     // All displayed
-    return {
-        ...(unref(injectedComponents) ?? {}),
-        'tabbar-replacement': null,
-    };
+    const components = new Map(unref(injectedComponents));
+    components.set('tabbar-replacement', null);
+    return components;
 }));
 
 const selectedItem: Ref<TabBarItem | null> = ref(null) as any as Ref<TabBarItem | null>; // TypeScript is unpacking the TabBarItem to {...} for some reason
