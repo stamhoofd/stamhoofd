@@ -111,6 +111,23 @@ describe('service manager', () => {
         });
     });
 
+    it.each([startServicesInteractive, restartServicesInteractive])('passes options from the service-key map', async (start) => {
+        const options = { reset: true };
+        const service: ServiceDefinition<{ reset: boolean } | undefined> = {
+            key: 'maildev',
+            name: 'MailDev',
+            status: async () => ({ name: 'MailDev', running: false, detail: 'stopped' }),
+            start: vi.fn(async () => ({ message: 'started' })),
+            stop: async () => 'stopped',
+        };
+
+        await start(context, [service], new Map([['maildev', options]]));
+        expect(service.start).toHaveBeenLastCalledWith(context, options);
+
+        await start(context, [service], new Map());
+        expect(service.start).toHaveBeenLastCalledWith(context, undefined);
+    });
+
     it('stops services concurrently', async () => {
         const first = deferred<void>();
         const second = deferred<void>();

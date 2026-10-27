@@ -33,7 +33,7 @@ type ServiceTaskContext = {
     updateRow(row: ServiceTableRow): void;
 };
 
-type ServiceOptionsByKey<TOptions> = Partial<Record<string, TOptions>>;
+type ServiceOptionsByKey<TOptions> = ReadonlyMap<string, TOptions>;
 
 export async function getServicesStatus<TOptions>(context: CliContext, services: ReadonlyArray<ServiceDefinition<TOptions>>): Promise<ServiceStatus[]> {
     return await Promise.all(services.map(service => service.status(context)));
@@ -44,13 +44,13 @@ export async function allRunning<TOptions>(context: CliContext, services: Readon
     return statuses.every(status => status.running);
 }
 
-export async function startServices<TOptions>(context: CliContext, services: ReadonlyArray<ServiceDefinition<TOptions>>, optionsByKey: ServiceOptionsByKey<TOptions> = {}): Promise<{ env: NodeJS.ProcessEnv; started: string[] }> {
+export async function startServices<TOptions>(context: CliContext, services: ReadonlyArray<ServiceDefinition<TOptions>>, optionsByKey: ServiceOptionsByKey<TOptions> = new Map()): Promise<{ env: NodeJS.ProcessEnv; started: string[] }> {
     const env: NodeJS.ProcessEnv = {};
     const started: string[] = [];
 
     for (const service of services) {
         const before = await service.status(context);
-        const result = await step(`Starting ${service.name}`, async () => await service.start(context, optionsByKey[service.key] as TOptions), { successMessage: value => (value as ServiceStartResult).message });
+        const result = await step(`Starting ${service.name}`, async () => await service.start(context, optionsByKey.get(service.key) as TOptions), { successMessage: value => (value as ServiceStartResult).message });
         if (!before.running) {
             started.push(service.key);
         }
@@ -60,10 +60,10 @@ export async function startServices<TOptions>(context: CliContext, services: Rea
     return { env, started };
 }
 
-export async function startServicesInteractive<TOptions>(context: CliContext, services: ReadonlyArray<ServiceDefinition<TOptions>>, optionsByKey: ServiceOptionsByKey<TOptions> = {}): Promise<{ env: NodeJS.ProcessEnv; started: string[] }> {
+export async function startServicesInteractive<TOptions>(context: CliContext, services: ReadonlyArray<ServiceDefinition<TOptions>>, optionsByKey: ServiceOptionsByKey<TOptions> = new Map()): Promise<{ env: NodeJS.ProcessEnv; started: string[] }> {
     const results = await runServicesInteractive(services, ServiceTableRowStatus.Starting, async (service) => {
         const before = await service.status(context);
-        const result = await service.start(context, optionsByKey[service.key] as TOptions);
+        const result = await service.start(context, optionsByKey.get(service.key) as TOptions);
         const after = await service.status(context);
 
         return {
@@ -78,11 +78,11 @@ export async function startServicesInteractive<TOptions>(context: CliContext, se
     };
 }
 
-export async function restartServicesInteractive<TOptions>(context: CliContext, services: ReadonlyArray<ServiceDefinition<TOptions>>, optionsByKey: ServiceOptionsByKey<TOptions> = {}): Promise<{ env: NodeJS.ProcessEnv; started: string[] }> {
+export async function restartServicesInteractive<TOptions>(context: CliContext, services: ReadonlyArray<ServiceDefinition<TOptions>>, optionsByKey: ServiceOptionsByKey<TOptions> = new Map()): Promise<{ env: NodeJS.ProcessEnv; started: string[] }> {
     const results = await runServicesInteractive(services, ServiceTableRowStatus.Stopping, async (service, row) => {
         await service.stop(context);
         row.updateRow({ name: service.name, status: ServiceTableRowStatus.Starting, detail: ServiceTableRowStatus.Starting });
-        const result = await service.start(context, optionsByKey[service.key] as TOptions);
+        const result = await service.start(context, optionsByKey.get(service.key) as TOptions);
         const after = await service.status(context);
 
         return {
