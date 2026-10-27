@@ -30,6 +30,24 @@ function sleep(ms: number): Promise<void> {
 }
 
 describe('NavigationController size animations', () => {
+    test('keeps an intentional loading freeze beyond the recovery timer', async () => {
+        let setHasContent!: (value: boolean) => void;
+        const LoadingView = defineComponent({
+            setup() {
+                setHasContent = useContentState();
+                return () => h('div', { style: viewStyle(INITIAL_HEIGHT) });
+            },
+        });
+        await mountController(new ComponentWithProperties(LoadingView));
+        setHasContent(false);
+        await nextTick();
+
+        const element = getControllerElement();
+        expect(element.style.height).not.toBe('');
+        await sleep(1_200);
+        expect(element.style.height).not.toBe('');
+    });
+
     test('does not collapse while content loads and grows smoothly when it arrives', async () => {
         let revealContent!: (() => Promise<void>);
         let abruptResizeContent!: (() => Promise<void>);
