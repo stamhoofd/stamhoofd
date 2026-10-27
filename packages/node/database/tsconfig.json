@@ -1,0 +1,16 @@
+{
+    // File used by the editor.
+    "extends": "./tsconfig.base.json",
+    "compilerOptions": {
+        "outDir": "dist"
+    },
+    "files": [], // intentionally empty
+    "references": [
+        {
+            "path": "./tsconfig.build.json"
+        },
+        {
+            "path": "./tsconfig.test.json"
+        }
+    ]
+}
