@@ -155,11 +155,12 @@ export class PrerenderEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         return parsed.href;
     }
 
+    /** Normalizes literal header keys in a Map, returning the object required by the HTTP boundary. */
     static cleanHeaders(headers: Record<string, string | undefined>): Record<string, string> {
-        const cleanedHeaders: Record<string, string> = {};
+        const cleanedHeaders = new Map<string, string>();
         for (const key of Object.keys(headers)) {
             const rawValue = headers[key];
-            if (!rawValue) {
+            if (typeof rawValue !== 'string' || !rawValue) {
                 continue;
             }
             const l = key.toLowerCase();
@@ -169,9 +170,9 @@ export class PrerenderEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             if (/[\r\n]/.test(rawValue)) {
                 continue;
             }
-            cleanedHeaders[l] = rawValue;
+            cleanedHeaders.set(l, rawValue);
         }
-        return cleanedHeaders;
+        return Object.fromEntries(cleanedHeaders);
     }
 
     static async getUrlHtml(url: string, options: { retryCount: number; startDate: Date }): Promise<Data | null> {
