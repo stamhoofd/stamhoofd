@@ -225,7 +225,7 @@ export class Request<T> {
     private async fetch(data: {
         method: HTTPMethod;
         url: string;
-        body: string | Document | Blob | ArrayBufferView | ArrayBuffer | FormData | URLSearchParams | null | undefined;
+        body: Document | XMLHttpRequestBodyInit | null | undefined;
         headers: Record<string, string>;
         timeout: number;
     }): Promise<XMLHttpRequest> {
