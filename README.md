@@ -169,8 +169,6 @@ pnpm stam test structures -t 'partial test name'  # package + test-name filter (
 pnpm stam test api --skip-build     # skip the automatic build:shared step
 ```
 
-The root `pnpm test` and `pnpm run test:coverage` scripts use these same CLI flows.
-
 For browser tests, use `pnpm stam test e2e` (Playwright) or `pnpm stam test all` for both.
 
 ### Backend

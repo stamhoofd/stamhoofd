@@ -21,7 +21,7 @@ shared package, so the dependency could only run the wrong way.
 
 ```bash
 pnpm run start        # boot the service
-pnpm run migrations   # migrate the statistics database (part of `pnpm run migrate` from the repo root)
+pnpm run migrations   # migrate the statistics database (part of `pnpm stam db migrate` from the repo root)
 ```
 
 Wherever this service runs, it syncs: there is nothing to switch off in configuration, so deploy it

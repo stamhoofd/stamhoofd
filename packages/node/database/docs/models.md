@@ -265,5 +265,5 @@ Use TablePlus to write your table scheme, and then copy over the schema into you
 To run migrations locally, use
 
 ```bash
-yarn migrate
+pnpm stam db migrate
 ```
