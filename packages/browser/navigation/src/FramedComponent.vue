@@ -23,7 +23,10 @@ export default {
     },
     props: {
         root: {
-            type: ComponentWithProperties,
+            // Defer the constructor lookup until the circular navigation graph has initialized.
+            get type() {
+                return ComponentWithProperties;
+            },
             required: true,
         },
         customProvide: {

@@ -106,7 +106,10 @@ export default defineComponent({
     name: 'ComponentWithPropertiesInstance',
     props: {
         component: {
-            type: ComponentWithProperties,
+            // The navigation module graph is circular; Vue reads this after initialization.
+            get type() {
+                return ComponentWithProperties;
+            },
             required: true,
         },
         customProvide: {
