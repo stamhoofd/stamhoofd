@@ -174,11 +174,6 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                 }
 
                 if (organization.serverMeta.privateDKIMKey && organization.serverMeta.publicDKIMKey) {
-                    // Allow creation of new keys for new domains
-                    console.log('Backup DKIM keys for ' + organization.id);
-                    console.log('Private: ' + organization.serverMeta.privateDKIMKey);
-                    console.log('Public: ' + organization.serverMeta.publicDKIMKey);
-
                     // Delete keys if mail domain is deleted -> to allow new keys
                     organization.serverMeta.privateDKIMKey = undefined;
                     organization.serverMeta.publicDKIMKey = undefined;
