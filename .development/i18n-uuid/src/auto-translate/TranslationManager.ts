@@ -249,7 +249,7 @@ export class TranslationManager implements TranslationProvider {
             = TranslationManager.getConsistentWordsHelper(
                 language,
                 globals.DEFAULT_NAMESPACE,
-            ) ?? {};
+            ) ?? new Map();
 
         if (namespace !== globals.DEFAULT_NAMESPACE) {
             const namespaceConsistentWords = TranslationManager.getConsistentWordsHelper(
@@ -257,8 +257,8 @@ export class TranslationManager implements TranslationProvider {
                 namespace,
             );
             if (namespaceConsistentWords) {
-                Object.entries(namespaceConsistentWords).forEach(
-                    ([key, value]) => (result[key] = value),
+                namespaceConsistentWords.forEach(
+                    (value, key) => result.set(key, value),
                 );
             }
         }
@@ -368,7 +368,7 @@ export class TranslationManager implements TranslationProvider {
             return null;
         }
 
-        return parsedConsistentWords;
+        return new Map(Object.entries(parsedConsistentWords));
     }
 
     static readTranslationDictionaryAllowNull(

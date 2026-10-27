@@ -64,14 +64,14 @@ export abstract class Translator implements ITranslator {
         }: {
             originalLocal: string;
             targetLocal: string;
-            consistentWords: Record<string, string> | null;
+            consistentWords: Map<string, string> | null;
             prompt: string;
         },
     ): string {
         const consistentWordsText
-            = consistentWords && Object.keys(consistentWords).length > 0
+            = consistentWords && consistentWords.size > 0
                 ? `\n- Make sure certain words are translated consistently, most often we use the following words, so try to keep the following translations in sentences if the context makes sense: \n`
-                + JSON.stringify(consistentWords, undefined, '  ')
+                + JSON.stringify(Object.fromEntries(consistentWords), undefined, '  ')
                 + '\n'
                 : '';
 
@@ -96,14 +96,14 @@ Translate the above values of the JSON array from ${originalLocal} to ${targetLo
         }: {
             originalLocal: string;
             targetLocal: string;
-            consistentWords: Record<string, string> | null;
+            consistentWords: Map<string, string> | null;
             prompt: string;
         },
     ): string {
         const consistentWordsText
-            = consistentWords && Object.keys(consistentWords).length > 0
+            = consistentWords && consistentWords.size > 0
                 ? `\n- Make sure certain words are translated consistently, most often we use the following words, so try to keep the following translations in sentences if the context makes sense: \n`
-                + JSON.stringify(consistentWords, undefined, '  ')
+                + JSON.stringify(Object.fromEntries(consistentWords), undefined, '  ')
                 + '.\n'
                 : '';
 
@@ -130,7 +130,7 @@ Above is an array with an original text in ${originalLocal}, the translation of 
         args: {
             originalLocal: string;
             targetLocal: string;
-            consistentWords: Record<string, string> | null;
+            consistentWords: Map<string, string> | null;
             namespace: string;
             batchNumber: number;
             totalBatches: number;
@@ -155,7 +155,7 @@ Above is an array with an original text in ${originalLocal}, the translation of 
         args: {
             originalLocal: string;
             targetLocal: string;
-            consistentWords: Record<string, string> | null;
+            consistentWords: Map<string, string> | null;
             namespace: string;
             batchNumber: number;
             totalBatches: number;
@@ -205,7 +205,7 @@ Above is an array with an original text in ${originalLocal}, the translation of 
         args: {
             originalLocal: string;
             targetLocal: string;
-            consistentWords: Record<string, string> | null;
+            consistentWords: Map<string, string> | null;
             namespace: string;
             batchNumber: number;
             totalBatches: number;
@@ -237,7 +237,7 @@ Above is an array with an original text in ${originalLocal}, the translation of 
         args: {
             originalLocal: string;
             targetLocal: string;
-            consistentWords: Record<string, string> | null;
+            consistentWords: Map<string, string> | null;
             namespace: string;
             batchNumber: number;
             totalBatches: number;
@@ -287,14 +287,14 @@ Above is an array with an original text in ${originalLocal}, the translation of 
             originalLocal: string;
             targetLocal: string;
             translations: Record<string, T>;
-            consistentWords: Record<string, string> | null;
+            consistentWords: Map<string, string> | null;
             namespace: string;
             translateBatch: (
                 batch: Batch<T>,
                 args: {
                     originalLocal: string;
                     targetLocal: string;
-                    consistentWords: Record<string, string> | null;
+                    consistentWords: Map<string, string> | null;
                     namespace: string;
                     batchNumber: number;
                     totalBatches: number;

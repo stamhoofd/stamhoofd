@@ -1,1 +1,1 @@
-export type ConsistentWords = Record<string, string>;
+export type ConsistentWords = Map<string, string>;
