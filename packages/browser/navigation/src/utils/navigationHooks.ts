@@ -62,8 +62,8 @@ function isPromiseLike<T = unknown>(
     );
 }
 
-type DistributiveOmit<T, K extends PropertyKey> =
-    T extends unknown ? Omit<T, K> : never;
+type DistributiveOmit<T, K extends PropertyKey>
+    = T extends unknown ? Omit<T, K> : never;
 
 export function typeRoute<
     const C extends Record<string, StringConstructor | NumberConstructor>,
@@ -218,8 +218,7 @@ export function useNavigate() {
                                 query.set(key, options!.query!.get(key) ?? '');
                             }
                             reactiveQuery.value = query;
-                        }
-                        else {
+                        } else {
                             reactiveQuery.value = null;
                         }
                     }
@@ -229,12 +228,10 @@ export function useNavigate() {
 
                 if (isPromiseLike(componentProperties)) {
                     componentProperties = componentProperties.then(onResolve);
-                }
-                else {
+                } else {
                     onResolve(undefined);
                 }
-            }
-            else {
+            } else {
                 query = null;
                 if (options?.params) {
                     console.error('Using route to a route that only has properties, no parameters. Use properties instead of params in navigate() for this route: ' + route.url, route, options);
@@ -259,10 +256,10 @@ export function useNavigate() {
                     });
                 })
             : new ReactiveUrl({
-                url: templateToUrl(route.url, params ?? {}),
-                matched: options?.url ? templateToUrl(options?.url, params ?? {}) : options?.url,
-                query,
-            });
+                    url: templateToUrl(route.url, params ?? {}),
+                    matched: options?.url ? templateToUrl(options?.url, params ?? {}) : options?.url,
+                    query,
+                });
 
         if ('handler' in route) {
             await route.handler({
@@ -302,8 +299,7 @@ export function useNavigate() {
                     return new ComponentWithProperties(realComponent === 'self' ? (instance?.type as ComponentOptions) : realComponent, properties as Record<string, unknown>);
                 },
             } as any; // some magic here
-        }
-        else {
+        } else {
             component = route.component === 'self' ? (instance?.type as ComponentOptions) : route.component;
         }
 
@@ -326,8 +322,7 @@ export function useNavigate() {
                 replace: route.replace,
                 force: route.force,
             });
-        }
-        else if (route.show === 'detail') {
+        } else if (route.show === 'detail') {
             await showDetail({
                 url,
                 adjustHistory: options?.adjustHistory ?? true,
@@ -341,8 +336,7 @@ export function useNavigate() {
                 replace: route.replace,
                 force: route.force,
             });
-        }
-        else {
+        } else {
             await show({
                 url,
                 adjustHistory: options?.adjustHistory ?? true,
@@ -407,8 +401,7 @@ function getCurrentRoutes() {
             set(newValue: Route[]) {
                 if (component) {
                     component.navigationRoutes.splice(0, component.navigationRoutes.length, ...newValue);
-                }
-                else {
+                } else {
                     console.error('Missing component when setting routes');
                 }
             },
@@ -466,14 +459,12 @@ function addCheckRoutesMountedHandler() {
                             // Stop if we got a true value
                             return;
                         }
-                    }
-                    else {
+                    } else {
                         console.error('Invalid checkRoutes handler', handler);
                     }
                 }
             }
-        }
-        else {
+        } else {
             if ('_navigationNotCheckRoutesHandlers' in instance && Array.isArray(instance._navigationNotCheckRoutesHandlers)) {
                 for (const handler of instance._navigationNotCheckRoutesHandlers as OnCheckRoutesHandler[]) {
                     if (typeof handler === 'function') {
@@ -481,8 +472,7 @@ function addCheckRoutesMountedHandler() {
                             // Stop if we got a true value
                             return;
                         }
-                    }
-                    else {
+                    } else {
                         console.error('Invalid not checkRoutes handler', handler);
                     }
                 }
@@ -544,8 +534,7 @@ export function defineRoutes(tmpRoutes: Route<any>[]) {
                         checkRoutes: true,
                     });
                     return true; // The route should clear url helpers
-                }
-                catch (e) {
+                } catch (e) {
                     // Route error:
                     // - continue to next route
                     console.error('Failed to navigate to route', route, e);
@@ -558,8 +547,7 @@ export function defineRoutes(tmpRoutes: Route<any>[]) {
             if (await defaultHandler({ allowDetail: false })) {
                 return true;
             }
-        }
-        catch (e) {
+        } catch (e) {
             // Route error:
             // - continue to next route
             console.error('Failed to navigate to default (non-detail) route', e);
@@ -586,8 +574,7 @@ export function defineRoutes(tmpRoutes: Route<any>[]) {
                     checkRoutes: false,
                 });
                 return true;
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Failed to navigate to default route', defaultRoute, e);
             }
         }
@@ -697,8 +684,7 @@ export function useCheckRoute() {
             // Clear cache
             checkRouteCache.results.clear();
             checkRouteCache.lastUrl = currentPath.value;
-        }
-        else {
+        } else {
             const result = checkRouteCache.results.get(id);
             if (result) {
                 return checkMatchResult(result.route, result.result, options);
@@ -745,8 +731,7 @@ export function normalizePushOptions(o: PushOptions | ComponentWithProperties, c
     let options: PushOptions;
     if (!(o as any).components) {
         options = ({ components: [o as ComponentWithProperties] });
-    }
-    else {
+    } else {
         options = o as PushOptions;
     }
 
@@ -759,8 +744,7 @@ export function normalizePushOptions(o: PushOptions | ComponentWithProperties, c
         for (const component of options.components) {
             component.inheritFromDisplayer(currentComponent);
         }
-    }
-    else {
+    } else {
         console.warn('Using show or present outside of a component: Inherited properties will not be set.');
     }
 
@@ -989,8 +973,7 @@ export function useUrl() {
                 const index = unref(historyIndex);
                 if (index !== null && index !== undefined) {
                     prefix = HistoryManager.getStateUrl(index.index - options.returnHistory);
-                }
-                else {
+                } else {
                     console.error('Failed to get history index');
                 }
             }

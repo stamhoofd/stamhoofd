@@ -9,7 +9,7 @@ AutoEncoder uses the `@field` TypeScript decorator to mark all properties that s
 Here is an example:
 
 ```typescript
-import { Encodeable, StringDecoder, NumberDecoder, field } from "@simonbackx/simple-encoding";
+import { Encodeable, StringDecoder, NumberDecoder, field } from '@simonbackx/simple-encoding';
 
 class MyClass extends AutoEncoder {
     @field({ decoder: NumberDecoder })
@@ -25,7 +25,6 @@ class MyClass extends AutoEncoder {
         console.log(this.name);
     }
 }
-
 ```
 
 #### @field options
@@ -39,7 +38,7 @@ class MyClass extends AutoEncoder {
     - **DateDecoder** (stores the time in ms)
     - **ArrayDecoder**: e.g. `new ArrayDecoder(StringDecoder)` for an array of strings
     - **MapDecoder**: e.g. `new MapDecoder(StringDecoder, User)` for a map with string keys and User values.
-    - ***NullableDecoder***: e.g. `new NullableDecoder(StringDecoder)` (implements Decoder\<string \| null\>) <br>*— normally you don’t wrap it in an @field: you can set nullable to true instead*
+    - _**NullableDecoder**_: e.g. `new NullableDecoder(StringDecoder)` (implements Decoder\<string \| null\>) <br>_— normally you don’t wrap it in an @field: you can set nullable to true instead_
 - **version**: The version where this field was introduced.
 - **nullable**: This makes sure we allow null values when decoding data.
 - **optional**: Optional properties won’t throw an error when a key is missing but will use the default value.
@@ -51,8 +50,8 @@ class MyClass extends AutoEncoder {
 ## Usage
 
 ```typescript
-const test = MyClass.create({ id: 123, name: "Hello world" });
-const test2 = MyClass.create({ id: 123, name: "Hello world", other: test });
+const test = MyClass.create({ id: 123, name: 'Hello world' });
+const test2 = MyClass.create({ id: 123, name: 'Hello world', other: test });
 
 // Simulate a network or file storage by converting to JSON
 // You can also convert it to a different storage type
@@ -165,27 +164,25 @@ Sometimes, TypeScript can’t properly infer the right type when you use AutoEnc
 // 🚫 Doesn't work
 // response.data is of type AutoEncoder
 const response = server.request({
-		method: "GET",
-		url: "/dogs/123",
-		decoder: Dog
+    method: 'GET',
+    url: '/dogs/123',
+    decoder: Dog,
 });
-
 
 // ✅ Does work
 // response.data is of type Dog
 const response = server.request({
-		method: "GET",
-		url: "/dogs/123",
-		decoder: Dog as Decoder<Dog>
+    method: 'GET',
+    url: '/dogs/123',
+    decoder: Dog as Decoder<Dog>,
 });
-
 
 // ✅ Does work
 // response.data is of type Dog[]
 const response = server.request({
-		method: "GET",
-		url: "/dogs",
-		decoder: new ArrayDecoder(Dog as Decoder<Dog>)
+    method: 'GET',
+    url: '/dogs',
+    decoder: new ArrayDecoder(Dog as Decoder<Dog>),
 });
 ```
 

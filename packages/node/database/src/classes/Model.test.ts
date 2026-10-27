@@ -480,8 +480,7 @@ describe('Model', () => {
             expect(meWithFriends.friends).toHaveLength(2);
             expect(meWithFriends.friends[0].id).toEqual(friend1.id);
             expect(meWithFriends.friends[1].id).toEqual(friend2.id);
-        }
-        else {
+        } else {
             expect('other friends not loaded').toEqual('other friends loaded');
         }
 
@@ -537,8 +536,7 @@ describe('Model', () => {
             expect(meWithFriends.sortedFriends[0].id).toEqual(friend1.id);
             expect(meWithFriends.sortedFriends[1].id).toEqual(friend2.id);
             expect(meWithFriends.sortedFriends[2].id).toEqual(friend3.id);
-        }
-        else {
+        } else {
             expect('other friends not loaded').toEqual('other friends loaded');
         }
 
@@ -581,8 +579,7 @@ describe('Model', () => {
         if (TestModel.friends.isLoaded(meWithFriends)) {
             expect(meWithFriends.friends).toHaveLength(1);
             expect(meWithFriends.friends[0].id).toEqual(friend2.id);
-        }
-        else {
+        } else {
             expect('other friends not loaded').toEqual('other friends loaded');
         }
 
@@ -605,8 +602,7 @@ describe('Model', () => {
         await TestModel.friends.clear(meWithFriends);
         if (TestModel.friends.isLoaded(meWithFriends)) {
             expect(meWithFriends.friends).toHaveLength(0);
-        }
-        else {
+        } else {
             expect('other friends not loaded').toEqual('other friends loaded');
         }
 

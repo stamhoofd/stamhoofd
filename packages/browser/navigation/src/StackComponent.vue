@@ -64,13 +64,11 @@ function removeAt(index: number, key: number) {
             if (!newFocused) {
                 // The normalModalStackComponent is visible again
                 emit('returnToHistoryIndex');
-            }
-            else {
+            } else {
                 newFocused.returnToHistoryIndex();
             }
         }
-    }
-    else {
+    } else {
         console.warn('Expected component with key ' + key + ' at index ' + index);
     }
 }

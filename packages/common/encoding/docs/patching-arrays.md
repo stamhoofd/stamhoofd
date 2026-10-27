@@ -3,6 +3,7 @@
 ## What is a PatchableArray?
 
 A smart patch type that tracks array modifications including:
+
 - Inserting new items
 - Moving items
 - Deleting items
@@ -13,11 +14,11 @@ A smart patch type that tracks array modifications including:
 The most basic usage involves manually creating a patchable array. You normally won't need to do this, except in rare cases.
 
 ```typescript
-const array = ["apple"];
+const array = ['apple'];
 const patchableArray = new PatchableArray<string, string, string>();
 
 // Add "cherry" to the end
-patchableArray.addPut("cherry");
+patchableArray.addPut('cherry');
 
 // Apply the patch
 const newArray = patchableArray.applyTo(array);
@@ -34,21 +35,21 @@ Given an object that has array properties, PatchableArray will automatically be 
 class Dog extends AutoEncoder {
 		@field({ decoder: StringDecoder });
 		id: string;
-		
+
 		@field({ decoder: StringDecoder });
 		name: string;
-		
+
 		@field({ decoder: new ArrayDecoder(StringDecoder) });
 		tags: string[] = [];
-		
+
 		@field({ decoder: new ArrayDecoder(Dog) });
 		friends: Dog[] = [];
 }
 ```
 
 ```typescript
-const pablo = Dog.create({ name: "Pablo" });
-const otto = Dog.create({ name: "Otto" });
+const pablo = Dog.create({ name: 'Pablo' });
+const otto = Dog.create({ name: 'Otto' });
 
 const patch = Dog.patch({});
 patch.tags.addPut('friendly');
@@ -60,6 +61,7 @@ const patchedPablo = pablo.patch(patch);
 ## Supported array types
 
 PatchableArray works with:
+
 - Simple arrays (`string[]` or `number[]`)
 - Arrays of encodeable objects with `Identifiable<Id>`
 
@@ -68,8 +70,8 @@ PatchableArray works with:
     <summary>Definition of <code>Identifiable&lt;Id&gt;</code></summary>
 
     ```typescript
-    type Identifiable<P extends string | number> = { 
-    	id: P 
+    type Identifiable<P extends string | number> = {
+        id: P;
     };
     // tl;dr; an object with an id property
     ```
@@ -93,12 +95,12 @@ The type signature is:<br>`PatchableArray<Id extends string|number, Put, Patch>`
 
 ```typescript
 // Scalar data types (string & number)
-patchableArray.addPut("cherry");
+patchableArray.addPut('cherry');
 ```
 
 ```typescript
 // Objects that implement Identifiable<Id>
-patchableArray.addPut(myObject)
+patchableArray.addPut(myObject);
 ```
 
 </details>
@@ -109,12 +111,12 @@ patchableArray.addPut(myObject)
 
 ```typescript
 // Scalar data types (string & number)
-patchableArray.addPut("cherry", null);
+patchableArray.addPut('cherry', null);
 ```
 
 ```typescript
 // Objects that implement Identifiable<Id>
-patchableArray.addPut(myObject, null)
+patchableArray.addPut(myObject, null);
 ```
 
 </details>
@@ -125,13 +127,13 @@ patchableArray.addPut(myObject, null)
 
 ```typescript
 // Scalar data types (string & number)
-patchableArray.addPut("cherry", "apple"); // insert after apple
+patchableArray.addPut('cherry', 'apple'); // insert after apple
 ```
 
 ```typescript
 // Objects that implement Identifiable<Id>
 // insert myObject after item with id 123
-patchableArray.addPut(myObject, 123); 
+patchableArray.addPut(myObject, 123);
 ```
 
 </details>
@@ -147,7 +149,7 @@ patchableArray.addPut(myObject, 123);
 
 ```typescript
 // Objects that implement Identifiable<Id> and are patchable
-const patch = MyObject.patch({ id: 2, name: "Changed name" });
+const patch = MyObject.patch({ id: 2, name: 'Changed name' });
 patchableArray.addPatch(patch); // Note that the ID should be set in the patch
 ```
 
@@ -159,7 +161,7 @@ patchableArray.addPatch(patch); // Note that the ID should be set in the patch
 
 ```typescript
 // Scalar data types (string & number)
-patchableArray.addDelete("cherry"); 
+patchableArray.addDelete('cherry');
 ```
 
 ```typescript
@@ -175,9 +177,9 @@ patchableArray.addDelete(2); // Delete item with id 2
 
 ```typescript
 // Scalar data types (string & number)
-patchableArray.addMove("cherry", "apple"); // Move cherry after apple 
-patchableArray.addMove("cherry", null); // Move cherry to the start
-patchableArray.addMove("cherry", "inexisting item"); // Move cherry to the end
+patchableArray.addMove('cherry', 'apple'); // Move cherry after apple
+patchableArray.addMove('cherry', null); // Move cherry to the start
+patchableArray.addMove('cherry', 'inexisting item'); // Move cherry to the end
 ```
 
 ```typescript
@@ -196,12 +198,12 @@ patchableArray.addMove(123, 0); // Move item with id 123 to the end if no item i
 A PatchableArray is patchable by itself. Which means you can easily merge two patchable arrays:
 
 ```typescript
-const array: string[] = ["apple"];
+const array: string[] = ['apple'];
 const patchableArray1 = new PatchableArray<string, string, string>();
 const patchableArray2 = new PatchableArray<string, string, string>();
 
-patchableArray1.addPut("cherry");
-patchableArray2.addPut("banana");
+patchableArray1.addPut('cherry');
+patchableArray2.addPut('banana');
 
 const mergedPatchableArray = patchableArray1.patch(patchableArray2);
 
@@ -227,10 +229,10 @@ For arrays with items that don’t implement `Identifiable` (= no id property), 
 class Street extends AutoEncoder {
 		@field({ decoder: StringDecoder });
 		id: string;
-		
+
 		@field({ decoder: StringDecoder });
 		name: string;
-		
+
 		@field({ decoder: new ArrayDecoder(House) });
 		houses: House[] = [];
 }
@@ -244,7 +246,7 @@ class House extends AutoEncoder {
 **Example**
 
 ```typescript
-const street = Street.create({ name: "Kerkstraat" });
+const street = Street.create({ name: 'Kerkstraat' });
 
 // 🚫 This does not work
 // Changing houses can not use PatchableArray
@@ -255,10 +257,7 @@ patch.houses.addPut(House.create({ nr: 2 }));
 // ✅ Instead, you always need to set the property,
 // because it does not have an 'id' property
 const patch = Street.patch({
-		houses: [
-				House.create({ nr: 1 }),
-				House.create({ nr: 2 })
-		]
+    houses: [House.create({ nr: 1 }), House.create({ nr: 2 })],
 });
 ```
 
@@ -266,7 +265,7 @@ const patch = Street.patch({
 
 You can manually overwrite an array that would normally use `PatchableArray` (arrays of string, number or Identifiable\<Id\>).
 
-> Manually add `as any` - because there are some TypeScript issues in the upstream library to support this, for now you’ll need to cast to any. <br>*If this ever changes, please delete this note.*
+> Manually add `as any` - because there are some TypeScript issues in the upstream library to support this, for now you’ll need to cast to any. <br>_If this ever changes, please delete this note._
 
 ```typescript
 const pablo = Dog.create({ name: "Pablo", ... });
@@ -292,9 +291,7 @@ The PatchebleArray class has 3 generic types: Id, Put, Patch. It can be a hassle
 
 ```typescript
 const array: PatchableArrayAutoEncoder<Dog> = new PatchableArray();
-array.addPut(
-		Dog.create({name: "Pablo"})
-);
+array.addPut(Dog.create({ name: 'Pablo' }));
 ```
 
 ---
@@ -325,56 +322,54 @@ patch.tags.addPut("kind");
 It is bad practice to adjust an existing patch. It will result in hard to read code. It will also result in longer code when dealing with arrays or more complex data structures.
 
 ```typescript
-let patch = MyObject.patch({ name: "Changed name" });
+let patch = MyObject.patch({ name: 'Changed name' });
 
 // 🚫 Don't
-patch.name = "Something";
+patch.name = 'Something';
 
 // ✅ Do
-patch = patch.patch({ name: "Something" });
+patch = patch.patch({ name: 'Something' });
 ```
 
 ```typescript
-let patch = MyObject.patch({ name: "Changed name" });
+let patch = MyObject.patch({ name: 'Changed name' });
 
 // 🚫 Don't
 patch.friend = MyObject.patch({
-		name: "test"
+    name: 'test',
 });
 
 // ✅ Do
-patch = patch.patch({ 
-		friend: MyObject.patch({
-				name: "test"
-		})
+patch = patch.patch({
+    friend: MyObject.patch({
+        name: 'test',
+    }),
 });
 ```
 
 ```typescript
-const pablo = Dog.create({ 
-		id: "1", 
-		name: "Pablo", 
-		tags: ["friendly"],
-		friends: [
-				Dog.create({ id: "2", name: "Otto" })
-		]
+const pablo = Dog.create({
+    id: '1',
+    name: 'Pablo',
+    tags: ['friendly'],
+    friends: [Dog.create({ id: '2', name: 'Otto' })],
 });
 
 // Create a patch to store our changes
 let patch = Dog.patch({});
-patch.friends.addPatch(Dog.patch({ id: "2", name: "Otto 2" }));
+patch.friends.addPatch(Dog.patch({ id: '2', name: 'Otto 2' }));
 
 // 🚫 Don't do something like this
 if (patch.friends instanceof PatchebleArray) {
-		const otto = patch.friends.getPuts().find(d => d.id === "2");
-		if (otto) {
-				otto.tags.addPut("happy");
-		}
+    const otto = patch.friends.getPuts().find((d) => d.id === '2');
+    if (otto) {
+        otto.tags.addPut('happy');
+    }
 }
 
 // ✅ Do: 'patch' the 'patch'
 const patchOtto = Dog.patch({});
-patchOtto.tags.addPut("happy");
+patchOtto.tags.addPut('happy');
 
 const newPatch = Dog.patch({});
 newPatch.friends.addPatch(patchOtto);

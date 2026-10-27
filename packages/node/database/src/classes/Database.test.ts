@@ -99,8 +99,7 @@ describe('Database.beginTransaction', () => {
             const outsideConnection = await Database.getConnection();
             try {
                 expect(await getCount(name, { connection: outsideConnection })).toEqual(1);
-            }
-            finally {
+            } finally {
                 outsideConnection.release();
             }
         });
@@ -127,8 +126,7 @@ describe('Database.beginTransaction', () => {
 
             // The transaction was rolled back, but the explicit-connection update was committed independently
             expect(await getCount(name)).toEqual(5);
-        }
-        finally {
+        } finally {
             explicitConnection.release();
         }
 
@@ -183,8 +181,7 @@ describe('Database.beginTransaction', () => {
                     { connection: outsideConnection, nestTables: true },
                 );
                 expect(outsideRows).toHaveLength(1);
-            }
-            finally {
+            } finally {
                 outsideConnection.release();
             }
         });
@@ -209,8 +206,7 @@ describe('Database.beginTransaction', () => {
 
             // The transaction was rolled back, but the explicit-connection delete was committed independently
             expect(await countModels(name)).toEqual(0);
-        }
-        finally {
+        } finally {
             explicitConnection.release();
         }
     });
@@ -268,8 +264,7 @@ describe('Database.beginTransaction', () => {
                     { connection: outsideConnection, nestTables: true },
                 );
                 expect(outsideRows).toHaveLength(0);
-            }
-            finally {
+            } finally {
                 outsideConnection.release();
             }
         });
@@ -292,8 +287,7 @@ describe('Database.beginTransaction', () => {
 
             // The transaction was rolled back, but the explicit-connection insert was committed independently
             expect(await countModels(name)).toEqual(1);
-        }
-        finally {
+        } finally {
             explicitConnection.release();
         }
 

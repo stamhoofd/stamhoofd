@@ -13,12 +13,10 @@ export const ModalMixin = defineComponent({
                 // Sometimes we need to call the pop event instead (because this adds custom data to the event)
                 if (nav.props.onPop) {
                     nav.emit('pop', options);
-                }
-                else {
+                } else {
                     console.error("Couldn't pop. Failed");
                 }
-            }
-            else {
+            } else {
                 console.warn('No navigation controller to pop');
             }
         },

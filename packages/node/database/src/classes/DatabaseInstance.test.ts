@@ -66,8 +66,7 @@ describe('DatabaseInstance.use', () => {
                 expect(Database.instance).toBe(other);
                 expect(await getSelectedDatabase()).toBeNull();
             });
-        }
-        finally {
+        } finally {
             await nested.end();
         }
     });

@@ -91,7 +91,7 @@ export class ObjectData implements Data {
             if (!Number.isSafeInteger(number)) {
                 throw new SimpleError({
                     code: 'invalid_index',
-                    message: `Invalid index`,
+                    message: 'Invalid index',
                     field: this.currentField,
                 });
             }

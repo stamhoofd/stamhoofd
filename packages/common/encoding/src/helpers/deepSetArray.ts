@@ -30,12 +30,10 @@ export function deepSetArray(oldArray: any[], newArray: any[], options?: { keepM
             const oldItem = copiedArray.find(i => getOptionalId(i) === getOptionalId(newItem));
             if (oldItem !== undefined) {
                 oldArray.push(deepSet(oldItem, newItem, { replaceOnIdChange: true }));
-            }
-            else {
+            } else {
                 oldArray.push(newItem);
             }
-        }
-        else {
+        } else {
             oldArray.push(newItem);
         }
     }

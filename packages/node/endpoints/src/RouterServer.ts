@@ -53,8 +53,7 @@ export class RouterServer {
                 e.statusCode ?? 400,
                 headers,
             );
-        }
-        else if (isSimpleErrors(e)) {
+        } else if (isSimpleErrors(e)) {
             return new Response(
                 e,
                 e.statusCode ?? 400,
@@ -81,8 +80,7 @@ export class RouterServer {
         for (const middleware of this.responseMiddlewares) {
             try {
                 await middleware.handleResponse(request, response, e);
-            }
-            catch (ee) {
+            } catch (ee) {
                 console.error('Error in response middleware', ee);
             }
         }
@@ -97,33 +95,28 @@ export class RouterServer {
 
                 // Somehow indicate to the client that something went wrong - since we already wrote the status code
                 res.end();
-            }
-            else {
+            } else {
                 this.setHead(res, encodedResponse);
 
                 if (isReadableStream(encodedResponse.body)) {
                     console.error('Cannot use Readable streams for error responses');
                     res.end();
-                }
-                else {
+                } else {
                     res.end(encodedResponse.body);
                 }
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Failed to end error response', e);
             try {
                 res.statusCode = 500;
                 res.end('Internal server error');
-            }
-            catch (e2) {
+            } catch (e2) {
                 console.error('Failed to end error response with body', e2);
 
                 // Try to hangup connection
                 try {
                     res.socket?.end();
-                }
-                catch (e3) {
+                } catch (e3) {
                     console.error('Failed to hangup connection', e3);
                 }
             }
@@ -156,8 +149,7 @@ export class RouterServer {
             let request: Request;
             try {
                 request = Request.fromHttp(req);
-            }
-            catch (e) {
+            } catch (e) {
                 console.error(e);
                 res.end();
                 return;
@@ -191,8 +183,7 @@ export class RouterServer {
                                 statusCode: 404,
                             }),
                         );
-                    }
-                    else {
+                    } else {
                         const { endpoint, request: decodedRequest } = decoded;
 
                         for (const middleware of this.requestMiddlewares) {
@@ -245,8 +236,7 @@ export class RouterServer {
                     );
 
                     console.log('Successfully streamed data to client');
-                }
-                else {
+                } else {
                     res.end(encodedResponse.body);
                 }
 
@@ -257,13 +247,11 @@ export class RouterServer {
                         body: encodedResponse.body,
                     });
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 await this.processError(res, e, request);
                 return;
             }
-        }
-        catch (e2) {
+        } catch (e2) {
             // Catch errors in error logic
             console.error(e2);
         }
@@ -275,8 +263,7 @@ export class RouterServer {
         }
         if (this.httpsOptions) {
             this.server = https.createServer(this.httpsOptions, this.requestListener.bind(this));
-        }
-        else {
+        } else {
             this.server = http.createServer(this.requestListener.bind(this));
         }
         this.server.timeout = 10000;

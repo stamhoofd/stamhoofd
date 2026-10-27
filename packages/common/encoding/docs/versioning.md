@@ -4,22 +4,22 @@ When encoding or decoding data, you must specify a version number. This versioni
 
 ### AutoEncoder
 
-*AutoEncoder* ([Writing AutoEncoder classes](autoencoder.md)) has an easy way to introduce new fields or make changes to fields using the `@field` decorator.
+_AutoEncoder_ ([Writing AutoEncoder classes](autoencoder.md)) has an easy way to introduce new fields or make changes to fields using the `@field` decorator.
 
 Let's say you want to change the ID field from a number to a string type, and add a new field called createdAt. Versioning makes this possible:
 
 ```typescript
 class MyClass extends AutoEncoder {
     @field({ decoder: NumberDecoder })
-    @field({ 
-		    decoder: StringDecoder, 
-		    version: 2, 
-		    upgrade: (old: number) => old.toString(), 
-		    downgrade: (n: string) => parseInt(n) 
-		 })
+    @field({
+        decoder: StringDecoder,
+        version: 2,
+        upgrade: (old: number) => old.toString(),
+        downgrade: (n: string) => parseInt(n),
+    })
     id: number;
 
-    @field({ decoder: StringDecoder }) 
+    @field({ decoder: StringDecoder })
     name: string;
 
     @field({ decoder: MyClass, nullable: true })
@@ -30,7 +30,7 @@ class MyClass extends AutoEncoder {
 }
 ```
 
-*For other classes you'll have to implement it manually in your encode/decode methods (*[Manually implementing encode and decode](manual-encoding.md)).
+_For other classes you'll have to implement it manually in your encode/decode methods (_[Manually implementing encode and decode](manual-encoding.md)).
 
 #### Real example with upgrade
 
@@ -111,14 +111,14 @@ export class User extends AutoEncoder {
 
 ### The current version: `Version` constant
 
-In Stamhoofd, we store the current version in `Version`  (`shared/structures/src/Version.ts`).
+In Stamhoofd, we store the current version in `Version` (`shared/structures/src/Version.ts`).
 
 **Encoding**
 
 ```typescript
-import { Version } from "@stamhoofd/structures";
+import { Version } from '@stamhoofd/structures';
 
-const pablo = Dog.create({ id: "123", name: "Pablo", createdAt: new Date() });
+const pablo = Dog.create({ id: '123', name: 'Pablo', createdAt: new Date() });
 const json = JSON.stringify(pablo.encode({ version: Version }));
 // Do something with json (send it over the network, store it...)
 ```
@@ -126,7 +126,7 @@ const json = JSON.stringify(pablo.encode({ version: Version }));
 **Decoding**
 
 ```typescript
-import { Version } from "@stamhoofd/structures";
+import { Version } from '@stamhoofd/structures';
 
 const plainObject = JSON.parse(json);
 const data = new ObjectData(plainObject, { version: Version });
@@ -142,10 +142,10 @@ We increase the version only during Stamhoofd releases to avoid conflicts when m
 ```typescript
 export class User extends AutoEncoder {
 		...
-		
+
     @field({ decoder: StringDecoder, ...NextVersion })
     myNewProperty = ""
-    
+
     ...
   }
 ```
@@ -155,10 +155,10 @@ After release, it will look like this:
 ```typescript
 export class User extends AutoEncoder {
 		...
-		
+
     @field({ decoder: StringDecoder, version: 508 })
     myNewProperty = ""
-    
+
     ...
   }
 ```
@@ -172,22 +172,20 @@ export class User extends AutoEncoder {
 **Encoding**
 
 ```typescript
-const pablo = Dog.create({ id: "123", name: "Pablo", createdAt: new Date() });
-const json = JSON.stringify(
-		new VersionBox(pablo).encode({ version: 508 })
-);
+const pablo = Dog.create({ id: '123', name: 'Pablo', createdAt: new Date() });
+const json = JSON.stringify(new VersionBox(pablo).encode({ version: 508 }));
 ```
 
-The `json`  can be stored in a file, in the database or it can be sent to the API. `json` looks like this:
+The `json` can be stored in a file, in the database or it can be sent to the API. `json` looks like this:
 
 ```json
 {
-		"version": 508,
-		"data": {
-				"id": "123",
-				"name": "Pablo",
-				"createdAt": 1749544680676
-		}
+    "version": 508,
+    "data": {
+        "id": "123",
+        "name": "Pablo",
+        "createdAt": 1749544680676
+    }
 }
 ```
 
@@ -199,7 +197,7 @@ A `VersionBox` can be decoded with the `VersionBoxDecoder`:
 const plainObject = JSON.parse(json);
 
 // We use version 0 because we don't know which version
-const data = new ObjectData(plainObject, { version: 0 }); 
+const data = new ObjectData(plainObject, { version: 0 });
 
 const decoder = new VersionBoxDecoder(Dog as Decoder<Dog>);
 const pablo = decoder.decode(data);
@@ -215,30 +213,30 @@ In a very far future, we can eventually delete the deprecated fields.
 
 ```typescript
 class Dog extends AutoEncoder {
-		@field({ decoder: StringDecoder })
-		id: string;
-		
-		@field({ decoder: StringDecoder })
-		name = ""
-		
-		@field({ decoder: DateDecoder })
-		createdAt = new Date();
+    @field({ decoder: StringDecoder })
+    id: string;
+
+    @field({ decoder: StringDecoder })
+    name = '';
+
+    @field({ decoder: DateDecoder })
+    createdAt = new Date();
 }
 ```
 
 ```typescript
 class Dog extends AutoEncoder {
-		@field({ decoder: StringDecoder })
-		id: string;
-		
-		@field({ decoder: StringDecoder })
-		name = ""
-		
-		/**
-		 * @deprecated
-		 * Use x instead
-		 */
-		@field({ decoder: DateDecoder, field: "createdAt" })
-		_createdAt = new Date();
+    @field({ decoder: StringDecoder })
+    id: string;
+
+    @field({ decoder: StringDecoder })
+    name = '';
+
+    /**
+     * @deprecated
+     * Use x instead
+     */
+    @field({ decoder: DateDecoder, field: 'createdAt' })
+    _createdAt = new Date();
 }
 ```

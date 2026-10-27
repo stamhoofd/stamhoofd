@@ -18,17 +18,13 @@
         "noErrorTruncation": true,
         "forceConsistentCasingInFileNames": true,
         "useDefineForClassFields": true,
-        "lib": [
-            "es2022"
-        ],
-        "types": [
-            "node"
-        ],
+        "lib": ["es2022"],
+        "types": ["node"],
         "paths": {
             // Fixed for self referencing
             "@simonbackx/simple-endpoints": ["./index.ts"],
             "@simonbackx/simple-endpoints/*.ts": ["./src/*.ts"],
-            "@simonbackx/simple-endpoints/*": ["./src/*"],
+            "@simonbackx/simple-endpoints/*": ["./src/*"]
         }
     }
 }

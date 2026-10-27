@@ -43,8 +43,7 @@ export class URLDecoder implements Decoder<URL> {
             }
 
             return parsed;
-        }
-        catch (e) {
+        } catch (e) {
             if (!isSimpleError(e) && !isSimpleErrors(e)) {
                 throw new SimpleError({
                     code: 'invalid_field',

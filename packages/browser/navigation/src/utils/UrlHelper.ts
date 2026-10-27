@@ -48,8 +48,7 @@ export class UrlHelper {
         if (this.localFixedPrefix) {
             if (prefix) {
                 prefix += '/' + UrlHelper.trim(this.localFixedPrefix);
-            }
-            else {
+            } else {
                 prefix = UrlHelper.trim(this.localFixedPrefix);
             }
         }
@@ -114,8 +113,7 @@ export class UrlHelper {
                 if (parts.length > 0 && parts[0] === part) {
                 // Remove the prefix
                     parts.shift();
-                }
-                else {
+                } else {
                     break;
                 }
             }
@@ -197,11 +195,11 @@ export class UrlHelper {
     }
 }
 
-type ConstructorToType<C> =
-    C extends NumberConstructor ? number :
-        C extends StringConstructor ? string :
-            C extends BooleanConstructor ? boolean :
-                never;
+type ConstructorToType<C>
+    = C extends NumberConstructor ? number
+        : C extends StringConstructor ? string
+            : C extends BooleanConstructor ? boolean
+                : never;
 
 // Inverse of UrlParamsConstructors
 export type ParamsFromConstructors<C> = {
@@ -307,8 +305,7 @@ export function templateToUrl<Params>(template: string, params: Params): string 
             if ((params as any)[param]) {
                 // Replace the template part
                 templateParts[index] = (params as any)[param].toString();
-            }
-            else {
+            } else {
                 throw new Error('Missing param: ' + param);
             }
         }

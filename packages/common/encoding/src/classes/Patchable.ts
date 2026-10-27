@@ -27,12 +27,12 @@ export function patchContainsChanges<B extends Encodeable & Patchable<B>, A exte
     return JSON.stringify(patched.encode(context)) != JSON.stringify(model.encode(context));
 }
 
-export type ConvertArrayToPatchableArray<T> =
-    T extends AutoEncoder ?
-        T | AutoEncoderPatchType<T> | undefined // This is needed to help Typescript Understand to keep T instead of just generalizing to AutoEncoderPatchType<AutoEncoder>
+export type ConvertArrayToPatchableArray<T>
+    = T extends AutoEncoder
+        ? T | AutoEncoderPatchType<T> | undefined // This is needed to help Typescript Understand to keep T instead of just generalizing to AutoEncoderPatchType<AutoEncoder>
         : T extends PatchableArray<any, any, any>
-            ? T :
-                (T extends Array<infer P>
+            ? T
+            : (T extends Array<infer P>
                     ? (P extends string
                             ? PatchableArray<string, string, string>
                             : P extends number
@@ -41,8 +41,8 @@ export type ConvertArrayToPatchableArray<T> =
                                     ? PatchableArrayAutoEncoder<P>
                                     : T | undefined)
                     : (
-                            T extends Map<infer T, infer P> ?
-                                    (/* Map<T, P> | */ PatchMap<T, P | ConvertArrayToPatchableArray<P> | null>)
+                            T extends Map<infer T, infer P>
+                                ? (/* Map<T, P> | */ PatchMap<T, P | ConvertArrayToPatchableArray<P> | null>)
                                 : PatchType<T> | undefined
                         ))
     ;
@@ -60,8 +60,8 @@ type GetOptionalPropertiesOf<Base> = Exclude<GetOptionalPropertiesOfHelper<Base>
 
 type MakeOptionalRealOptionalHelper<Base> = {
     [Key in GetOptionalPropertiesOf<Base>]?: Base[Key];
-} &
-{
+}
+& {
     [Key in Exclude<keyof Base, GetOptionalPropertiesOf<Base>>]: Base[Key];
 };
 type MakeOptionalRealOptional<Base> = {
@@ -72,8 +72,8 @@ type MakeOptionalRealOptional<Base> = {
  * Patch type for an AutoEncoder subclass, including nested array/map patches.
  * PatchType cannot reliably infer subclass fields from AutoEncoder's generic patch method.
  */
-export type AutoEncoderPatchType<T extends AutoEncoder> =
-    AutoEncoder & (
+export type AutoEncoderPatchType<T extends AutoEncoder>
+    = AutoEncoder & (
         {
             [P in Exclude<Exclude<keyof T, 'id'>, keyof AutoEncoder>]: T[P] extends Function ? never : ConvertArrayToPatchableArray<T[P]>;
         } & (T extends NonScalarIdentifiable<infer Id> ? NonScalarIdentifiable<Id> : {})
@@ -83,8 +83,8 @@ export type AutoEncoderPatchType<T extends AutoEncoder> =
  * Shorthand for an array patch of identifiable AutoEncoders.
  * For non-identifiable AutoEncoders this resolves to a replacement array instead.
  */
-export type PatchableArrayAutoEncoder<P extends AutoEncoder> = P extends AutoEncoder & NonScalarIdentifiable<infer Id> ?
-        (
+export type PatchableArrayAutoEncoder<P extends AutoEncoder> = P extends AutoEncoder & NonScalarIdentifiable<infer Id>
+    ? (
             PatchableArray<Id, P, AutoEncoderPatchType<P> & NonScalarIdentifiable<Id>>
         )
     : P[];

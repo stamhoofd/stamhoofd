@@ -9,11 +9,6 @@
     },
     "editor.formatOnPaste": true,
     "eslint.format.enable": true,
-    "eslint.validate": [
-        "typescript",
-        "javascript"
-    ],
-    "eslint.workingDirectories": [
-        "."
-    ],
+    "eslint.validate": ["typescript", "javascript"],
+    "eslint.workingDirectories": ["."]
 }

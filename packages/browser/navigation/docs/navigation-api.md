@@ -2,7 +2,7 @@
 
 > Make sure to read [Concept of navigation (when to show, present, pop or dismiss)](navigation-concepts.md) before continuing here. Otherwise you’ll have issues with understanding the differences.
 
-These API’s don’t support URL based routing. They are sometimes used in Stamhoofd, but often you better use the  [Routes](routes.md) API’s.
+These API’s don’t support URL based routing. They are sometimes used in Stamhoofd, but often you better use the [Routes](routes.md) API’s.
 
 ### show: Showing a view
 
@@ -12,33 +12,26 @@ These API’s don’t support URL based routing. They are sometimes used in Stam
         <STNavigationBar :title="$t(`Other view`)" />
 
         <main>
-            <h1>
-                {{ $t(`Other view`) }}
-            </h1>
+            <h1>{{ $t(`Other view`) }}</h1>
 
             <p>Hello world</p>
-            
-            <button class="button text" type="button" @click="gotoView">
-		            Go to other view
-            </button>
+
+            <button class="button text" type="button" @click="gotoView">Go to other view</button>
         </main>
     </div>
 </template>
 
 <script lang="ts" setup>
-import MyView from "./my-view.vue";
-import { useShow } from "@simonbackx/vue-app-navigation";
+    import MyView from './my-view.vue';
+    import { useShow } from '@simonbackx/vue-app-navigation';
 
-const show = useShow();
+    const show = useShow();
 
-async function gotoView() {
-		await show({
-				components: [
-						new ComponentWithProperties(MyView, {})
-				]
-		});
-}
-
+    async function gotoView() {
+        await show({
+            components: [new ComponentWithProperties(MyView, {})],
+        });
+    }
 </script>
 ```
 
@@ -50,18 +43,18 @@ When presenting view, you need to choose a modalDisplayStyle. This can either be
 const present = usePresent();
 
 async function gotoView() {
-		await present({
-				components: [
-						new ComponentWithProperties(NavigationController, {
-							root: new ComponentWithProperties(MyView, {})
-						})
-				],
-				modalDisplayStyle: "popup"
-		});
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(MyView, {}),
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
 }
 ```
 
-*In the example above, we wrap MyView with NavigationController (**[NavigationController](controllers.md#navigationcontroller)**) - this wraps MyView in a navigation stack so it can ‘show’ other views. These views will be displayed in the same popup.*
+_In the example above, we wrap MyView with NavigationController (**[NavigationController](controllers.md#navigationcontroller)**) - this wraps MyView in a navigation stack so it can ‘show’ other views. These views will be displayed in the same popup._
 
 ### **dismiss/pop: Going back**
 
@@ -72,17 +65,17 @@ For example, say you ‘present’ a view A, then show view B. If you pop in vie
 
 ```html
 <template>
-		<div>
-				<button @click="onBackButtonClicked" type="button">Back</button>
-		</div>
+    <div>
+        <button @click="onBackButtonClicked" type="button">Back</button>
+    </div>
 </template>
 
 <script lang="ts" setup>
-const pop = usePop();
+    const pop = usePop();
 
-async function onBackButtonClicked() {
-		await pop();
-}
+    async function onBackButtonClicked() {
+        await pop();
+    }
 </script>
 ```
 
@@ -90,7 +83,7 @@ async function onBackButtonClicked() {
 const dismiss = useDismiss();
 
 async function onCloseButtonClicked() {
-		await dismiss();
+    await dismiss();
 }
 ```
 
@@ -104,18 +97,16 @@ If you return true, you’ll allow the view from being unmounted/dismissed/poppe
 
 ```html
 <script lang="ts" setup>
+    const shouldNavigateAway = async () => {
+        if (!hasChanges.value) {
+            return true;
+        }
+        return await CenteredMessage.confirm($t('Ben je zeker?'), $t('Ja, zeker'));
+    };
 
-const shouldNavigateAway = async () => {
-    if (!hasChanges.value) {
-        return true;
-    }
-    return await CenteredMessage.confirm($t('Ben je zeker?'), $t('Ja, zeker'));
-};
-
-defineExpose({
-    shouldNavigateAway,
-});
-
+    defineExpose({
+        shouldNavigateAway,
+    });
 </script>
 ```
 
@@ -125,8 +116,8 @@ When using dismiss or pop, you can set the `force` property to ignore shouldNavi
 const dismiss = useDismiss();
 
 async function save() {
-		// (...) save to the server
-		await dismiss({ force: true });
+    // (...) save to the server
+    await dismiss({ force: true });
 }
 ```
 
@@ -136,18 +127,18 @@ By default, the navigationbar will show back and close buttons using these prope
 
 ```html
 <template>
-		<div>
-				<button v-if="canPop" @click="pop" type="button">Terug</button>
-				<button v-if="canDismiss" @click="dismiss" type="button">X</button>
-		</div>
+    <div>
+        <button v-if="canPop" @click="pop" type="button">Terug</button>
+        <button v-if="canDismiss" @click="dismiss" type="button">X</button>
+    </div>
 </template>
 
 <script lang="ts" setup>
-const canDismiss = useCanDismiss();
-const canPop = useCanPop();
+    const canDismiss = useCanDismiss();
+    const canPop = useCanPop();
 
-const pop = usePop();
-const dismiss = useDismiss();
+    const pop = usePop();
+    const dismiss = useDismiss();
 </script>
 ```
 
@@ -162,83 +153,70 @@ When showing it is possible to simply override your current view with a new view
 > Note that when you replace views, the `shouldNavigateAway` method will be called as if you pop or dismiss a component. You can prevent this by setting `force: true`.
 
 ```html
-<template>
-    ...
-</template>
+<template> ... </template>
 
 <script lang="ts" setup>
-import MyView from "./my-view.vue";
-import { useShow } from "@simonbackx/vue-app-navigation";
+    import MyView from './my-view.vue';
+    import { useShow } from '@simonbackx/vue-app-navigation';
 
-const show = useShow();
+    const show = useShow();
 
-async function gotoView() {
-		await show({
-				components: [
-						new ComponentWithProperties(MyView, {})
-				],
-				replace: 1 // Replace 1 view on the stack
-		});
-}
-
+    async function gotoView() {
+        await show({
+            components: [new ComponentWithProperties(MyView, {})],
+            replace: 1, // Replace 1 view on the stack
+        });
+    }
 </script>
 ```
 
-*If you want to replace all views in the navigation controller, use a very high number such as 100.*
+_If you want to replace all views in the navigation controller, use a very high number such as 100._
 
 #### Showing multiple views
 
 You can show multiple views in one go. The animation (in animated) will only show the animation to the last view in your array. But when you go back, you’ll first go to the earlier views in your array.
 
 ```html
-<template>
-    ...
-</template>
+<template> ... </template>
 
 <script lang="ts" setup>
-import MyView from "./my-view.vue";
-import { useShow } from "@simonbackx/vue-app-navigation";
+    import MyView from './my-view.vue';
+    import { useShow } from '@simonbackx/vue-app-navigation';
 
-const show = useShow();
+    const show = useShow();
 
-async function gotoView() {
-		await show({
-				components: [
-						new ComponentWithProperties(CartView, {}),
-						new ComponentWithProperties(CustomerView, {})
-				]
-		});
-}
-
+    async function gotoView() {
+        await show({
+            components: [
+                new ComponentWithProperties(CartView, {}),
+                new ComponentWithProperties(CustomerView, {}),
+            ],
+        });
+    }
 </script>
 ```
 
-*If you want to replace all views in the navigation controller, use a very high number such as 100.*
+_If you want to replace all views in the navigation controller, use a very high number such as 100._
 
 #### Disabling animations
 
 By default, Stamhoofd will always use the appropriate animations. In rare situations you can force disable animations.
 
 ```html
-<template>
-    ...
-</template>
+<template> ... </template>
 
 <script lang="ts" setup>
-import MyView from "./my-view.vue";
-import { useShow } from "@simonbackx/vue-app-navigation";
+    import MyView from './my-view.vue';
+    import { useShow } from '@simonbackx/vue-app-navigation';
 
-const show = useShow();
+    const show = useShow();
 
-async function gotoView() {
-		await show({
-				components: [
-						new ComponentWithProperties(MyView, {})
-				],
-				animated: false
-		});
-}
-
+    async function gotoView() {
+        await show({
+            components: [new ComponentWithProperties(MyView, {})],
+            animated: false,
+        });
+    }
 </script>
 ```
 

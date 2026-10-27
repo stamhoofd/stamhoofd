@@ -2,11 +2,12 @@
 
 ## What is patching?
 
-Patching allows modifying specific properties of an object without changing the original object⁠. It's like creating a list of changes that can be stored and even sent over the network to the API.  The list of changes can then be applied to one or multiple objects.
+Patching allows modifying specific properties of an object without changing the original object⁠. It's like creating a list of changes that can be stored and even sent over the network to the API. The list of changes can then be applied to one or multiple objects.
 
 All AutoEncoder objects ([Writing AutoEncoder classes](autoencoder.md)) are patchable by default. Other objects can be made patchable by implementing the [Patchable interface](#patchable-interface).
 
 This is how it works:
+
 - Create or reference an object with initial values
 - Create a patch for the properties that should be changed
 - Apply the patch to the object to create a new object with updated values
@@ -16,6 +17,7 @@ This is how it works:
 In the UI, you can maintain three variables simultaneously: the original object, the patch, and the patched object. Only the patch gets modified as changes are being made in the UI. While the patched object updates automatically (using a computed property in Vue). The patch is sent to the API over the network when the save button is clicked.
 
 This pattern enables complex nested editing views. For example, when editing a member, you track their patch. Within the same view, you can open another view to edit the member's emergency contact. Instead of saving the emergency contact's changes to the network, you can pass the emergency contact's patch back to the member editing view. If you cancel the edit, you simply discard the emergency contact's patch.
+
 - Only changed data is sent to the server, reducing network traffic
 - Easy undo functionality - discarding the patch instantly reverts all changes
 - Possible to edit data very deeply without sending any data to the network
@@ -33,14 +35,14 @@ The full pattern is described in [UI: Edit views](https://github.com/stamhoofd/s
 
 ```typescript
 class MyObject extends AutoEncoder {
-		@field({decoder: IntegerDecoder})
-		id: number
-		
-		@field({decoder: StringDecoder})
-		name: string
-		
-		@field({decoder: IntegerDecoder})
-		age: number
+    @field({ decoder: IntegerDecoder })
+    id: number;
+
+    @field({ decoder: StringDecoder })
+    name: string;
+
+    @field({ decoder: IntegerDecoder })
+    age: number;
 }
 ```
 
@@ -48,10 +50,10 @@ class MyObject extends AutoEncoder {
 
 ```typescript
 // 1. Creating an initial object
-const myObject = MyObject.create({ id: 1, name: "Hello world", age: 20 });
+const myObject = MyObject.create({ id: 1, name: 'Hello world', age: 20 });
 
 // 2. Creating a simple patch
-const patch = MyObject.patch({ name: "Changed name" });
+const patch = MyObject.patch({ name: 'Changed name' });
 
 // 3. Applying the patch
 const patchedObject = myObject.patch(patch);
@@ -71,6 +73,7 @@ console.log(patchedObject); // { id: 1, name: "Changed name", age: 20 }
 ```
 
 **Important behavior**
+
 - The original object remains unchanged when patching - it creates a new object instead
 - You can chain patches together by patching a patch object itself
 - When patching, only the specified properties are modified - other properties keep their original values
@@ -113,7 +116,7 @@ if (...) {
 
 **Other patchable types**<br>Other manually patchable classes can use `PatchType`.
 
-> You cannot use this on subclasses of `AutoEncoder` because `PatchType<Dog>` would’t properly resolve due to the sublassing of AutoEncoder and type issues in the library. The underlying reason is that PatchType auto infers the type of the patch method, but the patch method is implemented on AutoEncoder and not on your subclass such as Dog.<br>*(Something on the todo list, but tried this already a couple of times and will probably take weeks to fix)*
+> You cannot use this on subclasses of `AutoEncoder` because `PatchType<Dog>` would’t properly resolve due to the sublassing of AutoEncoder and type issues in the library. The underlying reason is that PatchType auto infers the type of the patch method, but the patch method is implemented on AutoEncoder and not on your subclass such as Dog.<br>_(Something on the todo list, but tried this already a couple of times and will probably take weeks to fix)_
 
 ```typescript
 let expectedPatch: PatchType<TranslatedString>;
@@ -204,9 +207,11 @@ expect(() => {
             name: 'Buddy',
         }),
     });
-}).toThrow(STExpect.simpleError({
-    code: 'cannot_patch_null',
-}));
+}).toThrow(
+    STExpect.simpleError({
+        code: 'cannot_patch_null',
+    }),
+);
 ```
 
 ---
@@ -218,56 +223,54 @@ expect(() => {
 It is bad practice to adjust an existing patch. It will result in hard to read code. It will also result in longer code when dealing with arrays or more complex data structures.
 
 ```typescript
-let patch = MyObject.patch({ name: "Changed name" });
+let patch = MyObject.patch({ name: 'Changed name' });
 
 // 🚫 Don't
-patch.name = "Something";
+patch.name = 'Something';
 
 // ✅ Do
-patch = patch.patch({ name: "Something" });
+patch = patch.patch({ name: 'Something' });
 ```
 
 ```typescript
-let patch = MyObject.patch({ name: "Changed name" });
+let patch = MyObject.patch({ name: 'Changed name' });
 
 // 🚫 Don't
 patch.friend = MyObject.patch({
-		name: "test"
+    name: 'test',
 });
 
 // ✅ Do
-patch = patch.patch({ 
-		friend: MyObject.patch({
-				name: "test"
-		})
+patch = patch.patch({
+    friend: MyObject.patch({
+        name: 'test',
+    }),
 });
 ```
 
 ```typescript
-const pablo = Dog.create({ 
-		id: "1", 
-		name: "Pablo", 
-		tags: ["friendly"],
-		friends: [
-				Dog.create({ id: "2", name: "Otto" })
-		]
+const pablo = Dog.create({
+    id: '1',
+    name: 'Pablo',
+    tags: ['friendly'],
+    friends: [Dog.create({ id: '2', name: 'Otto' })],
 });
 
 // Create a patch to store our changes
 let patch = Dog.patch({});
-patch.friends.addPatch(Dog.patch({ id: "2", name: "Otto 2" }));
+patch.friends.addPatch(Dog.patch({ id: '2', name: 'Otto 2' }));
 
 // 🚫 Don't do something like this
 if (patch.friends instanceof PatchebleArray) {
-		const otto = patch.friends.getPuts().find(d => d.id === "2");
-		if (otto) {
-				otto.tags.addPut("happy");
-		}
+    const otto = patch.friends.getPuts().find((d) => d.id === '2');
+    if (otto) {
+        otto.tags.addPut('happy');
+    }
 }
 
 // ✅ Do: 'patch' the 'patch'
 const patchOtto = Dog.patch({});
-patchOtto.tags.addPut("happy");
+patchOtto.tags.addPut('happy');
 
 const newPatch = Dog.patch({});
 newPatch.friends.addPatch(patchOtto);

@@ -14,8 +14,7 @@ describe('Migration.runAll', () => {
         const instance = new DatabaseInstance({ database: null });
         try {
             await handler(instance);
-        }
-        finally {
+        } finally {
             await instance.end();
         }
     }

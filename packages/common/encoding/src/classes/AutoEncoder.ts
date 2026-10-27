@@ -13,10 +13,10 @@ import { addPropertyField, ObjectData } from './ObjectData.js';
 import { AutoEncoderPatchType, PartialWithoutMethods, Patchable, patchObject } from './Patchable.js';
 
 export type PatchableDecoder<T> = Decoder<T> & (
-        T extends AutoEncoder ? {} :
-                (
-                    T extends Patchable<infer P> ?
-                            {
+        T extends AutoEncoder ? {}
+            : (
+                    T extends Patchable<infer P>
+                        ? {
                                 patchType: () => PatchableDecoder<P>;
                                 patchIdentifier: () => Decoder<string | number>; // when patchType is a custom decoder, we also need the decoder for the identifier
                             } : {}
@@ -111,8 +111,7 @@ export class AutoEncoder implements Encodeable, Cloneable {
                 return undefined;
             }
             return def;
-        }
-        catch (e) {
+        } catch (e) {
             return undefined;
         }
     }
@@ -124,8 +123,7 @@ export class AutoEncoder implements Encodeable, Cloneable {
                 return false;
             }
             return def.equals(value);
-        }
-        catch (e) {
+        } catch (e) {
             return false;
         }
     }
@@ -145,8 +143,7 @@ export class AutoEncoder implements Encodeable, Cloneable {
                 if (!tValue.equals(oValue)) {
                     return false;
                 }
-            }
-            else if (oValue !== tValue) {
+            } else if (oValue !== tValue) {
                 if (Array.isArray(oValue) && Array.isArray(tValue)) {
                     if (oValue.length === 0 && tValue.length === 0) {
                         // Equal
@@ -288,8 +285,7 @@ export class AutoEncoder implements Encodeable, Cloneable {
                 attrs.set(key, () => {
                     return false;
                 });
-            }
-            else {
+            } else {
                 // No default value, son't set a key
                 continue;
             }
@@ -429,8 +425,7 @@ export class AutoEncoder implements Encodeable, Cloneable {
             if (g !== undefined) {
                 return g;
             }
-        }
-        else {
+        } else {
             cc = new Map();
             this.__fieldsForVersion = cc;
         }
@@ -484,20 +479,17 @@ export class AutoEncoder implements Encodeable, Cloneable {
             // Use default value in every situation if set (more priority than the constructor default values)
             if (object[field.property] === undefined && field.defaultValue) { // object is required instead of model because defaultvalue has priority over constructor defaults
                 model[field.property] = field.defaultValue();
-            }
-            else if (!field.optional) {
+            } else if (!field.optional) {
                 if (model[field.property] === undefined) {
                     if (!this.isPatch) {
                         if (field.nullable) {
                             model[field.property] = null;
-                        }
-                        else if (field.decoder.getDefaultValue) {
+                        } else if (field.decoder.getDefaultValue) {
                             model[field.property] = field.decoder.getDefaultValue();
                         }
                     }
                 }
-            }
-            else {
+            } else {
                 if (model[field.property] === undefined) {
                     // Explicitly set to undefined
                     model[field.property] = undefined;
@@ -591,8 +583,7 @@ export class AutoEncoder implements Encodeable, Cloneable {
                 }
                 return false;
             }
-        }
-        else {
+        } else {
             // Default value is undefined
             return value === undefined;
         }
@@ -614,8 +605,7 @@ export class AutoEncoder implements Encodeable, Cloneable {
         if (version >= latestVersion) {
             source = this;
             fields = this.static.latestFields;
-        }
-        else {
+        } else {
             source = this.static.downgrade(version, this);
             fields = this.static.fieldsForVersion(version);
         }
@@ -643,8 +633,7 @@ export class AutoEncoder implements Encodeable, Cloneable {
 
             if (field.decoder && field.decoder.encode) {
                 object[field.field] = field.decoder.encode(source[field.property], context);
-            }
-            else {
+            } else {
                 object[field.field] = encodeObject(source[field.property], context);
             }
         }
@@ -683,24 +672,20 @@ export class AutoEncoder implements Encodeable, Cloneable {
                 if (field.defaultValue) {
                     didDecode = true;
                     model[field.property] = field.defaultValue();
-                }
-                else {
+                } else {
                     // constructor default
                     if (model[field.property] !== undefined) {
                         // keep as is
                         didDecode = true;
-                    }
-                    else if (!field.optional) {
+                    } else if (!field.optional) {
                         if (field.nullable) {
                             didDecode = true;
                             model[field.property] = null;
-                        }
-                        else if (field.decoder && field.decoder.getDefaultValue) {
+                        } else if (field.decoder && field.decoder.getDefaultValue) {
                             didDecode = true;
                             model[field.property] = field.decoder.getDefaultValue();
                         }
-                    }
-                    else {
+                    } else {
                         didDecode = true;
                         model[field.property] = undefined;
                     }
@@ -711,12 +696,10 @@ export class AutoEncoder implements Encodeable, Cloneable {
                 // Decode as normal
                 if (field.nullable && vv === null) {
                     model[field.property] = null;
-                }
-                else {
+                } else {
                     if (field.decoder.decodeField) {
                         model[field.property] = field.decoder.decodeField(vv, context, addPropertyField(currentField, field.field));
-                    }
-                    else {
+                    } else {
                         model[field.property] = new ObjectData(vv, context, addPropertyField(currentField, field.field)).decode(field.decoder);
                     }
                 }
@@ -774,26 +757,21 @@ export class AutoEncoder implements Encodeable, Cloneable {
             if (field.version > from) {
                 if (field.upgrade) {
                     object[field.property] = field.upgrade.call(object, object[field.property]);
-                }
-                else {
+                } else {
                     // Set to default
                     if (object[field.property] === undefined) {
                         if (field.defaultValue) {
                             object[field.property] = field.defaultValue();
-                        }
-                        else {
+                        } else {
                             // Set default version
                             const classDefinitionDefaultValue = defaultValues.get(field.property);
                             if (classDefinitionDefaultValue !== undefined) {
                                 object[field.property] = classDefinitionDefaultValue;
-                            }
-                            else if (field.nullable && !field.optional && !this.isPatch) {
+                            } else if (field.nullable && !field.optional && !this.isPatch) {
                                 object[field.property] = null;
-                            }
-                            else if (!field.optional && field.decoder && field.decoder.getDefaultValue) {
+                            } else if (!field.optional && field.decoder && field.decoder.getDefaultValue) {
                                 object[field.property] = field.decoder.getDefaultValue();
-                            }
-                            else {
+                            } else {
                                 // Keep undefined
                                 object[field.property] = undefined;
                             }

@@ -31,8 +31,7 @@ const throttle = (func: any, limit: any) => {
         if (!lastRan) {
             func.apply(context, args);
             lastRan = Date.now();
-        }
-        else {
+        } else {
             clearTimeout(lastFunc);
             lastFunc = setTimeout(function () {
                 if (Date.now() - lastRan >= limit) {
@@ -145,8 +144,7 @@ export default defineComponent({
                 if (this.detail) {
                     this.collapse().catch(console.error);
                 }
-            }
-            else {
+            } else {
                 if (this.canExpand()) {
                     this.expand().catch(console.error);
                 }
@@ -160,8 +158,7 @@ export default defineComponent({
             const style = window.getComputedStyle(element);
             if (style.overflowY == 'scroll' || style.overflow == 'scroll' || style.overflow == 'auto' || style.overflowY == 'auto') {
                 return element;
-            }
-            else {
+            } else {
                 if (!element.parentElement) {
                     return document.documentElement;
                 }
@@ -200,8 +197,7 @@ export default defineComponent({
                     }
 
                     await this.navigationController.push(options);
-                }
-                else {
+                } else {
                     // Replace existing detail component
                     // First check if we don't destroy anything
                     if (this.detail) {
@@ -225,8 +221,7 @@ export default defineComponent({
                     component.assignHistoryIndex();
                     this.detail = component;
                 }
-            }
-            finally {
+            } finally {
                 this.isChangingComponents = false;
             }
             return true;
@@ -261,8 +256,7 @@ export default defineComponent({
                 this.detail = null;
                 await this.navigationController.push({ components: [detail], animated: false });
                 // HistoryManager.invalidateHistory();
-            }
-            finally {
+            } finally {
                 this.isChangingComponents = false;
             }
         },
@@ -316,8 +310,7 @@ export default defineComponent({
                         console.warn('Failed to show default handler');
                     }
                     console.info('Used default handler for split view controller');
-                }
-                finally {
+                } finally {
                     this.isChangingComponents = false;
                 }
 
@@ -344,8 +337,7 @@ export default defineComponent({
                 this.detailKey = popped[0].key;
                 this.detail = popped[0];
                 this.detail.assignHistoryIndex();
-            }
-            finally {
+            } finally {
                 this.isChangingComponents = false;
             }
         },

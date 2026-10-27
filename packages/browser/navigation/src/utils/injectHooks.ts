@@ -7,8 +7,7 @@ export function injectHooks(instanceProxy: ComponentPublicInstance, definitions:
         // ref on how to extend a proxy context: core/packages/runtime-core/src/componentOptions.ts
         if (!isRef(definitions[key])) {
             ctx[key] = definitions[key];
-        }
-        else {
+        } else {
             const val = definitions[key];
             Object.defineProperty(ctx, key, {
                 enumerable: true,

@@ -10,11 +10,7 @@
         // Required in Vue projects
         "jsx": "preserve",
         "jsxImportSource": "vue",
-        "lib": [
-            "es2023",
-            "DOM",
-            "DOM.Iterable"
-        ],
+        "lib": ["es2023", "DOM", "DOM.Iterable"],
         "libReplacement": false,
         // As long as you are using a build tool, we recommend you to author and ship in ES modules.
         // Even if you are targeting Node.js, because
@@ -34,18 +30,10 @@
         // This enables stricter inference for data properties on `this`.
         "noImplicitThis": true,
         "paths": {
-            "@stamhoofd/components": [
-                "./shared/components/index.ts"
-            ],
-            "@stamhoofd/components/*": [
-                "./shared/components/src/*"
-            ],
-            "@stamhoofd/components/*.ts": [
-                "./shared/components/src/*.ts"
-            ],
-            "@stamhoofd/components/*.vue": [
-                "./shared/components/src/*.vue"
-            ]
+            "@stamhoofd/components": ["./shared/components/index.ts"],
+            "@stamhoofd/components/*": ["./shared/components/src/*"],
+            "@stamhoofd/components/*.ts": ["./shared/components/src/*.ts"],
+            "@stamhoofd/components/*.vue": ["./shared/components/src/*.vue"]
         },
         "resolveJsonModule": true,
         // See <https://github.com/vuejs/vue-cli/pull/5688>
@@ -62,5 +50,5 @@
         // Any imports or exports without a type modifier are left around. This is important for `<script setup>`.
         // Anything that uses the type modifier is dropped entirely.
         "verbatimModuleSyntax": true
-    },
+    }
 }

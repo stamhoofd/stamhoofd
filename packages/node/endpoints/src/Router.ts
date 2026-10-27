@@ -9,8 +9,7 @@ import { DecodedRequest } from './DecodedRequest.js';
 async function directoryExists(filePath): Promise<boolean> {
     try {
         return (await fs.stat(filePath)).isDirectory();
-    }
-    catch (err) {
+    } catch (err) {
         return false;
     }
 }
@@ -45,8 +44,7 @@ export class Router {
                     newQueue.push(...recursiveFolders);
                 }
                 folderQueue = newQueue;
-            }
-            else {
+            } else {
                 folderQueue = folderQueue.map(folder => folder + '/' + part);
             }
         }

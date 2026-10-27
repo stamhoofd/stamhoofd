@@ -35,8 +35,7 @@ const navigationMethods = {
         const title = navigationOptions.title;
         if (typeof title === 'function') {
             (this as any).$url.setTitle(title.call(this));
-        }
-        else {
+        } else {
             (this as any).$url.setTitle(title ?? '');
         }
     },

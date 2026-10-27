@@ -25,6 +25,7 @@ npm install @simonbackx/simple-encoding
 ### What are Structures?
 
 Structures are data objects that can be encoded (converted to plain objects) and decoded (converted back to class instances). They are essential for:
+
 - Storing JSON data in databases
 - Sending data across networks (API)
 - Storing data in the browser for caching and offline access
@@ -44,7 +45,7 @@ The encoding and decoding behavior is mostly implemented in the `@simonbackx/sim
 The easiest way to create encodable and decodable structures is by extending the AutoEncoder class. Here's a basic example:
 
 ```typescript
-import { AutoEncoder, StringDecoder, NumberDecoder, field } from "@simonbackx/simple-encoding";
+import { AutoEncoder, StringDecoder, NumberDecoder, field } from '@simonbackx/simple-encoding';
 
 class MyClass extends AutoEncoder {
     @field({ decoder: NumberDecoder })
@@ -60,7 +61,7 @@ class MyClass extends AutoEncoder {
 
 [Writing AutoEncoder classes](docs/autoencoder.md)
 
-*An alternative is manually implementing the encode and decode methods (more difficult + doesn’t provide patching behaviour out of the box):* [Manually implementing encode and decode](docs/manual-encoding.md)
+_An alternative is manually implementing the encode and decode methods (more difficult + doesn’t provide patching behaviour out of the box):_ [Manually implementing encode and decode](docs/manual-encoding.md)
 
 #### Encoding and decoding data
 
@@ -69,7 +70,7 @@ You can encode structures so you can store them as JSON in a file, in the databa
 **Encoding**
 
 ```typescript
-const pablo = Dog.create({ id: 123, name: "Pablo", createdAt: new Date() });
+const pablo = Dog.create({ id: 123, name: 'Pablo', createdAt: new Date() });
 
 // Simulate a network or file storage by converting to JSON
 // You can also convert it to a different storage type
@@ -80,9 +81,9 @@ You can store `json` this in a file, in the database or send it to the API. `jso
 
 ```json
 {
-		"id": 123,
-		"name": "Pablo",
-		"createdAt": 1749544680676,
+    "id": 123,
+    "name": "Pablo",
+    "createdAt": 1749544680676
 }
 ```
 
@@ -98,9 +99,9 @@ const pablo = Dog.decode(data);
 
 ```typescript
 const plainObject = {
-		id: "test",
-		name: "Pablo",
-		createdAt: 1749544680676
+    id: 'test',
+    name: 'Pablo',
+    createdAt: 1749544680676,
 };
 const data = new ObjectData(plainObject, { version: 1 });
 
@@ -116,10 +117,10 @@ Here's how patching works:
 
 ```typescript
 // 1. Creating an initial object
-const myObject = MyObject.create({ id: 1, name: "Hello world", age: 20 });
+const myObject = MyObject.create({ id: 1, name: 'Hello world', age: 20 });
 
 // 2. Creating a simple patch
-const patch = MyObject.patch({ name: "Changed name" });
+const patch = MyObject.patch({ name: 'Changed name' });
 // Encoded as ± { name: "Changed name" }
 
 // 3. Applying the patch
@@ -149,14 +150,14 @@ Often we support encoding/decoding out of the box. Rarely you’ll need to manua
 
 ## Features
 
--   Great errors out of the box
--   Customize as you wish:
-    -   By not using automatic generation of the encoded format, you can easily let the field names and types differ between the encoded version and your actual instances.
-    -   You can add your own decoders/validators for custom fields (e.g. phone number)
--   Minor and readable boilerplate code
+- Great errors out of the box
+- Customize as you wish:
+    - By not using automatic generation of the encoded format, you can easily let the field names and types differ between the encoded version and your actual instances.
+    - You can add your own decoders/validators for custom fields (e.g. phone number)
+- Minor and readable boilerplate code
 
 ## Todo
 
--   [x] Add context to Data: Allows for versioning (e.g. you can store a verion in the context and let the encoding/decoding differ between each version). In fact you could add this yourself by implementing Data.
--   [ ] Add some more basic types
--   [ ] Full map-patching usage guide
+- [x] Add context to Data: Allows for versioning (e.g. you can store a verion in the context and let the encoding/decoding differ between each version). In fact you could add this yourself by implementing Data.
+- [ ] Add some more basic types
+- [ ] Full map-patching usage guide

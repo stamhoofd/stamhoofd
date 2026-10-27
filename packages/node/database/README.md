@@ -29,32 +29,32 @@ detection and structures stored in JSON columns.
 type TestModelWithFriends = TestModel & { friends: TestModel[] };
 
 class TestModel extends Model {
-    static table = "testModels";
+    static table = 'testModels';
 
-    @column({ primary: true, type: "integer" })
+    @column({ primary: true, type: 'integer' })
     id: number | null = null;
 
-    @column({ type: "string" })
+    @column({ type: 'string' })
     name: string;
 
-    @column({ type: "integer" })
+    @column({ type: 'integer' })
     count: number;
 
-    @column({ type: "boolean" })
+    @column({ type: 'boolean' })
     isActive: boolean;
 
-    @column({ type: "datetime" })
+    @column({ type: 'datetime' })
     createdOn: Date;
 
-    @column({ type: "date", nullable: true })
+    @column({ type: 'date', nullable: true })
     birthDay: Date | null = null;
 
-    @column({ foreignKey: TestModel.partner, type: "integer", nullable: true })
+    @column({ foreignKey: TestModel.partner, type: 'integer', nullable: true })
     partnerId: number | null = null; // null = no address
 
     // Relations are defined as static properties, but you could define them however you like
-    static partner = new ManyToOneRelation(TestModel, "partner");
-    static friends = new ManyToManyRelation(TestModel, TestModel, "friends");
+    static partner = new ManyToOneRelation(TestModel, 'partner');
+    static friends = new ManyToManyRelation(TestModel, TestModel, 'friends');
 
     static async getWithFriends(id: number): Promise<TestModelWithFriends | undefined> {
         // ... implementation with join here
@@ -63,7 +63,7 @@ class TestModel extends Model {
 
     // You can only use this method when the relation 'friends' is loaded
     logFriendCount(this: TestModelWithFriends) {
-        console.log("I have " + this.friends.length + " friends");
+        console.log('I have ' + this.friends.length + ' friends');
     }
 }
 ```
@@ -73,12 +73,12 @@ A very basic usage example would be the following code. Please note that we coul
 ```ts
 const model = await TestModel.getByID(12);
 if (!model) {
-    throw new Error("Not found");
+    throw new Error('Not found');
 }
 await TestModel.friends.load(model);
 if (TestModel.friends.isLoaded(model)) {
     // model.friends is defined here
-    console.log("He has " + model.friends.length + " friends");
+    console.log('He has ' + model.friends.length + ' friends');
     model.logFriendCount();
 }
 
@@ -91,11 +91,11 @@ Queries that don't receive an explicit connection run on `Database.instance`: th
 the environment variables, unless the async context they run in was given another one.
 
 ```ts
-const statistics = new DatabaseInstance({ host: "...", database: "statistics" });
+const statistics = new DatabaseInstance({ host: '...', database: 'statistics' });
 
 // Everything in here - models, queries, migrations - runs on the statistics database
 await DatabaseInstance.use(statistics, async () => {
-    await Database.instance.select("SELECT * from members");
+    await Database.instance.select('SELECT * from members');
 });
 ```
 
@@ -103,7 +103,7 @@ Migrations take the database they run on directly, and keep their history in its
 table:
 
 ```ts
-await Migration.runAll(__dirname + "/migrations", { database: statistics });
+await Migration.runAll(__dirname + '/migrations', { database: statistics });
 ```
 
 ## Running tests

@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { Column } from './Column.js';
 import { Database } from './Database.js';
-import type {DatabaseStoredValue} from './DatabaseStoredValue.js';
-import type {ManyToManyRelation} from './ManyToManyRelation.js';
-import type {ManyToOneRelation} from './ManyToOneRelation.js';
-import type {OneToManyRelation} from './OneToManyRelation.js';
+import type { DatabaseStoredValue } from './DatabaseStoredValue.js';
+import type { ManyToManyRelation } from './ManyToManyRelation.js';
+import type { ManyToOneRelation } from './ManyToOneRelation.js';
+import type { OneToManyRelation } from './OneToManyRelation.js';
 
 type SQLWhere = { sign: string; value: string | Date | number | null | (string | null)[] | (number | null)[]; mode?: string };
 type SQLWhereQuery = { [key: string]: string | Date | number | null | SQLWhere | SQLWhere[] };
@@ -21,8 +21,7 @@ export class ModelEventBus<Value> {
         const existing = this.listeners.get(owner);
         if (existing) {
             existing.push({ listener });
-        }
-        else {
+        } else {
             this.listeners.set(owner, [{ listener }]);
         }
     }
@@ -238,8 +237,7 @@ export class Model /* static implements RowInitiable<Model> */ {
             if (row[column.name] !== undefined) {
                 const value = column.from(row[column.name]);
                 model[column.name] = value;
-            }
-            else {
+            } else {
                 // Override default value to prevent any saving!
                 model[column.name] = undefined;
             }
@@ -306,8 +304,7 @@ export class Model /* static implements RowInitiable<Model> */ {
                 if (relation.isSet(this)) {
                     const model = this[relation.modelKey];
                     this[relation.foreignKey] = model.getPrimaryKey();
-                }
-                else {
+                } else {
                     this[relation.foreignKey] = null;
                 }
             }
@@ -401,8 +398,7 @@ export class Model /* static implements RowInitiable<Model> */ {
             case '!=':
                 if (value.value === null) {
                     whereQuery = (`\`${this.table}\`.\`${key}\` IS NOT NULL`);
-                }
-                else {
+                } else {
                     whereQuery = (`\`${this.table}\`.\`${key}\` != ?`);
                     params.push(value.value);
                 }
@@ -431,8 +427,7 @@ export class Model /* static implements RowInitiable<Model> */ {
             case '=':
                 if (value.value === null) {
                     whereQuery = (`\`${this.table}\`.\`${key}\` IS NULL`);
-                }
-                else {
+                } else {
                     whereQuery = (`\`${this.table}\`.\`${key}\` = ?`);
                     params.push(value.value);
                 }
@@ -446,19 +441,16 @@ export class Model /* static implements RowInitiable<Model> */ {
                     const filtered = (value.value as (string | number | null)[]).filter(v => v !== null);
                     if (filtered.length === 0) {
                         whereQuery = (`\`${this.table}\`.\`${key}\` IS NULL`);
-                    }
-                    else if (filtered.length === 1) {
+                    } else if (filtered.length === 1) {
                         // Special query
                         whereQuery = (`(\`${this.table}\`.\`${key}\` = ? OR \`${this.table}\`.\`${key}\` IS NULL)`);
                         params.push(filtered[0]);
-                    }
-                    else {
+                    } else {
                         // Special query
                         whereQuery = (`(\`${this.table}\`.\`${key}\` IN (?) OR \`${this.table}\`.\`${key}\` IS NULL)`);
                         params.push(filtered);
                     }
-                }
-                else {
+                } else {
                     whereQuery = (`\`${this.table}\`.\`${key}\` IN (?)`);
                     params.push(value.value);
                 }
@@ -485,17 +477,14 @@ export class Model /* static implements RowInitiable<Model> */ {
                         whereQuery.push(w);
                         params.push(...p);
                     }
-                }
-                else if (typeof value === 'object' && value !== null && !(value instanceof Date)) {
+                } else if (typeof value === 'object' && value !== null && !(value instanceof Date)) {
                     const [w, p] = this.buildWhereOperator(key, value);
                     whereQuery.push(w);
                     params.push(...p);
-                }
-                else {
+                } else {
                     if (value === null) {
                         whereQuery.push(`\`${this.table}\`.\`${key}\` IS NULL`);
-                    }
-                    else {
+                    } else {
                         whereQuery.push(`\`${this.table}\`.\`${key}\` = ?`);
                         params.push(value);
                     }
@@ -520,7 +509,7 @@ export class Model /* static implements RowInitiable<Model> */ {
         let query = `SELECT ${extra?.select ?? this.getDefaultSelect()} FROM \`${this.table}\``;
         if (Object.keys(where).length !== 0) {
             const [whereQuery, p] = this.buildWhereQuery(where);
-            query += `WHERE ` + whereQuery;
+            query += 'WHERE ' + whereQuery;
             params.push(...p);
         }
 
@@ -530,11 +519,9 @@ export class Model /* static implements RowInitiable<Model> */ {
             for (const item of extra.sort) {
                 if (typeof item === 'string') {
                     sortQuery.push(Database.escapeId(item) + ' ASC');
-                }
-                else if (typeof item.column === 'string') {
+                } else if (typeof item.column === 'string') {
                     sortQuery.push(Database.escapeId(item.column) + ' ' + (item.direction ?? 'ASC'));
-                }
-                else {
+                } else {
                     // Repeat use of a where query in the sorting (needed when fulltext searching and need to sort on the score, because limit won't work without this for an unknown reason)
                     const [w, p] = this.buildWhereQuery(item.column);
 
@@ -543,11 +530,11 @@ export class Model /* static implements RowInitiable<Model> */ {
                 }
             }
 
-            query += ` ORDER BY ` + sortQuery.join(', ');
+            query += ' ORDER BY ' + sortQuery.join(', ');
         }
 
         if (extra && extra.limit !== undefined) {
-            query += ` LIMIT ?`;
+            query += ' LIMIT ?';
             params.push(extra.limit);
         }
 
@@ -564,7 +551,7 @@ export class Model /* static implements RowInitiable<Model> */ {
         let query = `SELECT ${this.getDefaultSelect()} FROM \`${this.table}\``;
 
         if (limit) {
-            query += ` LIMIT ?`;
+            query += ' LIMIT ?';
             params.push(limit);
         }
 
@@ -641,7 +628,7 @@ export class Model /* static implements RowInitiable<Model> */ {
      * By default records the saved values and emits a created/updated event.
      * Loaded relations must reference saved models and agree with their foreign keys.
      */
-    async save(options?: {skipMarkSaved?: boolean, skipSendEvents?: boolean}): Promise<boolean> {
+    async save(options?: { skipMarkSaved?: boolean; skipSendEvents?: boolean }): Promise<boolean> {
         if (!this.static.table) {
             throw new Error('Table name not set');
         }
@@ -668,8 +655,7 @@ export class Model /* static implements RowInitiable<Model> */ {
                             'You cannot modify the value of a foreign key when the relation is loaded. Unload the relation first or modify the relation with setRelation',
                         );
                     }
-                }
-                else {
+                } else {
                     if (this[relation.foreignKey] !== null) {
                         // Should always match because setRelation will make it match on setting it.
                         throw new Error(
@@ -685,8 +671,7 @@ export class Model /* static implements RowInitiable<Model> */ {
             if (this.existsInDatabase) {
                 throw new Error('Model ' + this.constructor.name + " was loaded from the Database, but didn't select the ID. Saving not possible.");
             }
-        }
-        else {
+        } else {
             if (!this.existsInDatabase && this.static.primary.type === 'integer' && this.static.primary.name === 'id') {
                 throw new Error(
                     `PrimaryKey was set programmatically without fetching the model ${this.constructor.name} from the database. This is not allowed for integer primary keys.`,
@@ -721,8 +706,7 @@ export class Model /* static implements RowInitiable<Model> */ {
                 fields[this.static.primary.name] = result.insertId; // Also mark saved
                 if (Model.debug) console.log(`New id = ${this[this.static.primary.name]}`);
             }
-        }
-        else {
+        } else {
             if (Model.debug) console.log(`Updating ${this.constructor.name} where ${this.static.primary.name} = ${id}`);
 
             const [result] = await Database.update('UPDATE `' + this.static.table + '` SET ? WHERE `' + this.static.primary.name + '` = ?', [fields, id]);
@@ -734,7 +718,7 @@ export class Model /* static implements RowInitiable<Model> */ {
         // Emit event
         if (this.existsInDatabase) {
             // Keep reference to old properties before marking saved
-            let originalProperties:  {
+            let originalProperties: {
                 [k: string]: DatabaseStoredValue;
             };
             if (!options?.skipSendEvents) {
@@ -770,8 +754,7 @@ export class Model /* static implements RowInitiable<Model> */ {
                     },
                 });
             }
-        }
-        else {
+        } else {
             if (!options?.skipMarkSaved) {
                 this.markSaved(fields);
             }
