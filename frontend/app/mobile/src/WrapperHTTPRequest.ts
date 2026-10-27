@@ -36,7 +36,7 @@ export class WrapperHTTPRequest implements XMLHttpRequest {
     // Private implementation
     method: 'GET' | 'POST' | 'PATCH' | 'PUT' = 'GET';
     url = '';
-    requestHeaders: Record<string, string> = {};
+    requestHeaders = new Map<string, string>();
 
     responseHeaders: Record<string, string> = {};
 
@@ -77,7 +77,7 @@ export class WrapperHTTPRequest implements XMLHttpRequest {
         console.log(this.method, this.url);
         console.log(body);
 
-        const contentType = this.requestHeaders['Content-Type'] as string | undefined;
+        const contentType = this.requestHeaders.get('Content-Type');
 
         if (contentType && contentType.startsWith('application/json') && typeof body === 'string') {
             body = JSON.parse(body);
@@ -89,7 +89,8 @@ export class WrapperHTTPRequest implements XMLHttpRequest {
             data: body,
             connectTimeout: this.timeout ? this.timeout : undefined,
             readTimeout: this.timeout ? this.timeout : undefined,
-            headers: this.requestHeaders,
+            // Capacitor expects a plain header object at the native bridge boundary.
+            headers: Object.fromEntries(this.requestHeaders),
             responseType: 'text',
         }).then((response) => {
             console.log('Received response', response);
@@ -133,7 +134,7 @@ export class WrapperHTTPRequest implements XMLHttpRequest {
     }
 
     setRequestHeader(name: string, value: string) {
-        this.requestHeaders[name] = value;
+        this.requestHeaders.set(name, value);
     }
 }
 
