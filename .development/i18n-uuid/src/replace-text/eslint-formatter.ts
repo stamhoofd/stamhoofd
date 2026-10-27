@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { getFilesToSearch } from '../shared/get-files-to-search.js';
 
 class EslintFormatter {
@@ -17,10 +17,8 @@ class EslintFormatter {
 
     private async fixFile(filePath: string, configurationDirectory: string) {
         const relativePath = filePath.substring(configurationDirectory.length + 1);
-        const command = `pnpm --dir ${configurationDirectory} exec eslint --fix ${relativePath}`;
-
         await new Promise((resolve) => {
-            exec(command, resolve);
+            execFile('pnpm', ['--dir', configurationDirectory, 'exec', 'eslint', '--fix', '--', relativePath], resolve);
         });
     }
 

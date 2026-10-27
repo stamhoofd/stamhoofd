@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import fs from 'fs';
 import { TranslatorType } from '../enums/TranslatorType.js';
 import { getChildDirectories, getChildFiles } from '../helpers/fs-helpers.js';
@@ -26,7 +26,7 @@ export class TranslationManager implements TranslationProvider {
 
     async buildDist() {
         await new Promise<void>((resolve, reject) => {
-            exec(`pnpm --dir ${globals.I18NUUID_LOCALES_ROOT} run build`, (error) => {
+            execFile('pnpm', ['--dir', globals.I18NUUID_LOCALES_ROOT, 'run', 'build'], (error) => {
                 if (error) {
                     reject(error);
                 }
@@ -231,11 +231,9 @@ export class TranslationManager implements TranslationProvider {
     async buildTranslations() {
         console.log('Building translations...');
         const root = globals.I18NUUID_LOCALES_ROOT;
-        const command = `pnpm --dir ${root} run build`;
-
         await new Promise((resolve) => {
             console.log('Finished building translations.');
-            exec(command, resolve);
+            execFile('pnpm', ['--dir', root, 'run', 'build'], resolve);
         });
     }
 
