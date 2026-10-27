@@ -104,6 +104,7 @@ describe('shared build orchestration', () => {
             'encoding',
             'common-networking',
             'database',
+            'node-logging',
             'navigation',
             'metabase',
             'filters',

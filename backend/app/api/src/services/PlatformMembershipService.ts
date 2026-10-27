@@ -1,6 +1,6 @@
 import { Model } from '@node/database';
 import { SimpleError } from '@common/errors';
-import { logger } from '@simonbackx/simple-logging';
+import { logger } from '@node/logging';
 import { BalanceItem, Group, Member, MemberPlatformMembership, Organization, Platform, Registration, RegistrationPeriod } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';

@@ -1,5 +1,5 @@
 import type { DecodedRequest, Request } from '@node/endpoints';
-import { logger, StyledText } from '@simonbackx/simple-logging';
+import { logger, StyledText } from '@node/logging';
 import { countries, languages } from '@stamhoofd/locales';
 import { appToUri } from '@stamhoofd/structures';
 import { promises as fs } from 'fs';

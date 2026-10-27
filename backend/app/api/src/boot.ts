@@ -11,7 +11,7 @@ import { sleep } from '@stamhoofd/utility';
 
 import { AutoEncoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
-import { StyledText } from '@simonbackx/simple-logging';
+import { StyledText } from '@node/logging';
 import { markAllSeedsFinished, startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';

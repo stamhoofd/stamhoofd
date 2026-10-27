@@ -54,6 +54,7 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'encoding', path: 'packages/common/encoding', needsDatabase: false },
     { name: 'common-networking', path: 'packages/common/networking', needsDatabase: false },
     { name: 'database', path: 'packages/node/database', needsDatabase: true },
+    { name: 'node-logging', path: 'packages/node/logging', needsDatabase: false },
     { name: 'navigation', path: 'packages/browser/navigation', needsDatabase: false },
     { name: 'cli', path: 'shared/cli', needsDatabase: false },
     { name: 'i18n-uuid', path: '.development/i18n-uuid', needsDatabase: false },
@@ -86,7 +87,7 @@ export const unitTestPackages: UnitTestPackage[] = [
 ];
 export const coverageTestPackages: UnitTestPackage[] = [
     { name: 'i18n-uuid', path: '.development/i18n-uuid', needsDatabase: false },
-    ...unitTestPackages.filter(pkg => ['errors', 'encoding', 'common-networking', 'database', 'navigation', 'metabase', 'filters', 'structures', 'object-differ', 'utility', 'queues', 'models', 'vies', 'sql', 'renderer', 'redirecter', 'statistics-syncer', 'api'].includes(pkg.name)),
+    ...unitTestPackages.filter(pkg => ['errors', 'encoding', 'common-networking', 'database', 'node-logging', 'navigation', 'metabase', 'filters', 'structures', 'object-differ', 'utility', 'queues', 'models', 'vies', 'sql', 'renderer', 'redirecter', 'statistics-syncer', 'api'].includes(pkg.name)),
 ];
 const sharedBuildReadyFile = `.development/cli/generated/shared-build-${process.pid}.ready`;
 
