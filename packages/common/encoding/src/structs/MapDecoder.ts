@@ -40,7 +40,7 @@ export class MapDecoder<A, B> implements Decoder<Map<A, B>> {
     decodeField(value: unknown, context: EncodeContext, currentField?: string): Map<A, B> {
         if (typeof value === 'object' && value !== null) {
             const map = new Map<A, B>();
-            for (const key in value) {
+            for (const key of Object.keys(value)) {
                 const field = addPropertyField(currentField, key);
                 map.set(
                     this.keyDecoder.decodeField ? this.keyDecoder.decodeField(key, context, field) : new ObjectData(key, context, field).decode(this.keyDecoder),
@@ -85,7 +85,7 @@ export class PatchMapDecoder<A, B> implements Decoder<PatchMap<A, B>> {
 
         if (typeof data.value === 'object' && data.value !== null) {
             const map = new PatchMap<A, B>();
-            for (const key in data.value) {
+            for (const key of Object.keys(data.value)) {
                 const keyDecoded = data.clone({
                     data: key,
                     context: data.context,

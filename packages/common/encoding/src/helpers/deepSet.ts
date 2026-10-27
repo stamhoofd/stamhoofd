@@ -14,6 +14,7 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
     return proto === Object.prototype || proto === null;
 }
 
+/** Updates own data in place, synchronizing source references without traversing inherited values. */
 export function deepSet(base: unknown, object: unknown, options?: { replaceOnIdChange?: boolean }): unknown {
     if (object === base) {
         // Nothing to do (waste of resources)
@@ -78,14 +79,35 @@ export function deepSet(base: unknown, object: unknown, options?: { replaceOnIdC
                 }
 
                 const value = object[key];
-                const baseValue = base[key];
+                const baseDescriptor = Object.getOwnPropertyDescriptor(base, key);
+                // Read own data through the target so reactive proxies can wrap nested values.
+                const baseValue = baseDescriptor && 'value' in baseDescriptor ? base[key] : undefined;
+
+                // Class setters remain part of the model API, but inherited getters are not merge targets.
+                let targetDescriptor = baseDescriptor;
+                if (!targetDescriptor && !isPlainObject(base)) {
+                    let prototype = Object.getPrototypeOf(base);
+                    while (prototype && prototype !== Object.prototype) {
+                        targetDescriptor = Object.getOwnPropertyDescriptor(prototype, key);
+                        if (targetDescriptor) {
+                            break;
+                        }
+                        prototype = Object.getPrototypeOf(prototype);
+                    }
+                }
 
                 // Precent recursive updates
                 object[key] = baseValue;
                 const setValue = deepSet(baseValue, value, { replaceOnIdChange: true });
-                if (setValue !== baseValue) {
+                if (setValue !== baseValue || !baseDescriptor) {
                     // Reference was not updated, set instead
-                    base[key] = setValue;
+                    if (targetDescriptor?.set) {
+                        targetDescriptor.set.call(base, setValue);
+                    } else if (baseDescriptor && 'value' in baseDescriptor) {
+                        base[key] = setValue;
+                    } else {
+                        Object.defineProperty(base, key, { value: setValue, enumerable: true, configurable: true, writable: true });
+                    }
                     object[key] = setValue;
                 }
             }

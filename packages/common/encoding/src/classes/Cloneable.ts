@@ -6,13 +6,14 @@ export function isCloneable(object: any): object is Cloneable {
     if (typeof object !== 'object' || object === null) {
         return false;
     }
-    return !!object.clone;
+    return typeof object.clone === 'function';
 }
 
 export type CloneableObject = Cloneable | CloneableObject[] | Map<CloneableObject, CloneableObject> | string | number | { [key: string]: CloneableObject } | boolean | undefined | null | Date;
 
 /**
- * Use this method to encode an object (might be an encodeable implementation) into a decodable structure
+ * Clones supported containers recursively and delegates to Cloneable implementations.
+ * Other objects are shallow-copied with their actual prototype and own enumerable properties.
  */
 export function cloneObject<T extends CloneableObject>(obj: T): T {
     if (isCloneable(obj)) {
@@ -41,7 +42,7 @@ export function cloneObject<T extends CloneableObject>(obj: T): T {
     }
 
     if (typeof obj === 'object' && obj !== null) {
-        return Object.assign(Object.create(obj.constructor.prototype), obj);
+        return Object.defineProperties(Object.create(Object.getPrototypeOf(obj)), Object.getOwnPropertyDescriptors({ ...obj }));
     }
 
     // Singular value

@@ -15,14 +15,14 @@ export class RecordDecoder<A extends keyof any, B> implements Decoder<Record<A, 
     decode(data: Data): Record<A, B> {
         if (typeof data.value === 'object' && data.value !== null) {
             const map: Record<A, B> = {} as any;
-            for (const key in data.value) {
+            for (const key of Object.keys(data.value)) {
                 const keyDecoded = data.clone({
                     data: key,
                     context: data.context,
                     field: data.addToCurrentField(key),
                 }).decode(this.keyDecoder);
                 const valueDecoded = data.field(key).decode(this.valueDecoder);
-                map[keyDecoded] = valueDecoded;
+                Object.defineProperty(map, keyDecoded, { value: valueDecoded, enumerable: true, configurable: true, writable: true });
             }
             return map;
         }

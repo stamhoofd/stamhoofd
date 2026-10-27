@@ -77,7 +77,7 @@ export function encodeObject(obj: unknown, context: EncodeContext): PlainObject 
 
                     for (const key of keys) {
                         const value = obj.get(key);
-                        encodedObj[key] = encodeObject(value, context);
+                        Object.defineProperty(encodedObj, key, { value: encodeObject(value, context), enumerable: true, configurable: true, writable: true });
                     }
                 }
             } else {
@@ -86,7 +86,7 @@ export function encodeObject(obj: unknown, context: EncodeContext): PlainObject 
                     if (typeof k !== 'string' && typeof k !== 'number') {
                         throw new Error(`Map keys must be strings or numbers. Got ${k}`);
                     }
-                    encodedObj[k] = encodeObject(value, context);
+                    Object.defineProperty(encodedObj, k, { value: encodeObject(value, context), enumerable: true, configurable: true, writable: true });
                 }
             }
 
@@ -104,14 +104,14 @@ export function encodeObject(obj: unknown, context: EncodeContext): PlainObject 
             const keys = Object.keys(obj).sort(sortObjectKeysForEncoding);
             const encodedObj: any = {};
             for (const key of keys) {
-                encodedObj[key] = encodeObject((obj as any)[key], context);
+                Object.defineProperty(encodedObj, key, { value: encodeObject((obj as any)[key], context), enumerable: true, configurable: true, writable: true });
             }
             return encodedObj;
         }
 
         const encodedObj: any = {};
-        for (const key in obj) {
-            encodedObj[key] = encodeObject((obj as any)[key], context);
+        for (const key of Object.keys(obj)) {
+            Object.defineProperty(encodedObj, key, { value: encodeObject((obj as any)[key], context), enumerable: true, configurable: true, writable: true });
         }
         return encodedObj;
     }

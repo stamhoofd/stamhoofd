@@ -82,6 +82,20 @@ console.log(patchedObject); // { id: 1, name: "Changed name", age: 20 }
 
 ## Special data types
 
+### Dictionary representation
+
+Dictionary decoders and encoders process own enumerable entries only. Arbitrary
+keys remain ordinary own data properties; output objects retain the normal object
+prototype. Map and patch-map wire formats, sorting, and deletion semantics are
+unchanged.
+
+`deepSet` merges own data values, never inherited values or getter results. Reads
+of verified own data properties go through the target so reactive proxies remain active. It
+preserves existing nested references, synchronizes the source references, and
+removes absent dictionary keys. Class setters remain supported. Generic cloning
+preserves the actual prototype; its fallback for objects without a `clone()`
+implementation remains shallow.
+
 [Patching arrays](patching-arrays.md)
 
 Missing docs: patching maps

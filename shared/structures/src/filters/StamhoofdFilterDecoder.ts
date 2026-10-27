@@ -44,7 +44,7 @@ export class StamhoofdFilterDecoder {
             // Loop and replace all keys
             const c = {} as Record<string, PlainObject>;
             for (const [key, value] of Object.entries(filter)) {
-                c[key] = this.encode(value, context);
+                Object.defineProperty(c, key, { value: this.encode(value, context), enumerable: true, configurable: true, writable: true });
             }
             return c;
         }
@@ -71,7 +71,7 @@ export class StamhoofdFilterDecoder {
 
         if (typeof value === 'object') {
             // Check if it's a date
-            if ('$' in value && value.$ === '$date' && 'value' in value) {
+            if ('$' in value && Object.hasOwn(value, '$') && value.$ === '$date' && 'value' in value && Object.hasOwn(value, 'value')) {
                 return DateDecoder.decode(
                     data.clone({
                         data: value.value,
@@ -84,11 +84,11 @@ export class StamhoofdFilterDecoder {
             // Loop and replace all keys
             const c = {} as Record<string, StamhoofdFilter>;
             for (const [key, v] of Object.entries(value)) {
-                c[key] = this.decode(data.clone({
+                Object.defineProperty(c, key, { value: this.decode(data.clone({
                     data: v,
                     field: data.addToCurrentField(key),
                     context: data.context,
-                }));
+                })), enumerable: true, configurable: true, writable: true });
             }
             return c;
         }
