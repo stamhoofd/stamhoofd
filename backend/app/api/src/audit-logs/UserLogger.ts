@@ -11,10 +11,10 @@ const defaultGenerator = getDefaultGenerator({
 export const UserLogger = new ModelLogger(User, {
     skipKeys: ['meta'],
     sensitiveKeys: ['password'],
-    renamedKeys: {
-        memberId: 'linkedMember',
-        verified: 'emailVerified',
-    },
+    renamedKeys: new Map([
+        ['memberId', 'linkedMember'],
+        ['verified', 'emailVerified'],
+    ]),
     async optionsGenerator(event) {
         const result = await defaultGenerator(event);
 

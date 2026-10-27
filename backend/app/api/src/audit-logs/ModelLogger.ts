@@ -27,7 +27,8 @@ export type ModelLoggerOptions<M extends Model, D = undefined> = {
     optionsGenerator: EventOptionsGenerator<M, D>;
     skipKeys?: string[];
     sensitiveKeys?: string[];
-    renamedKeys?: Record<string, string>;
+    /** Model field names mapped to audit-log keys; unmapped fields keep their original name. */
+    renamedKeys?: Map<string, string>;
     generateDescription?(event: ModelEvent<M>, options: ModelEventLogOptions<D>): string | null | undefined;
     createReplacements?(model: M, options: ModelEventLogOptions<D>): Map<string, AuditLogReplacement>;
     postProcess?(event: ModelEvent<M>, options: ModelEventLogOptions<D>, log: AuditLog): Promise<void> | void;
@@ -93,7 +94,7 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
     optionsGenerator: EventOptionsGenerator<M, D>;
     skipKeys: string[] = [];
     sensitiveKeys: string[] = [];
-    renamedKeys: Record<string, string> = {};
+    renamedKeys: Map<string, string> = new Map();
     generateDescription?: (event: ModelEvent<M>, options: ModelEventLogOptions<D>) => string | null | undefined;
     createReplacements?: (model: M, options: ModelEventLogOptions<D>) => Map<string, AuditLogReplacement>;
     postProcess?: (event: ModelEvent<M>, options: ModelEventLogOptions<D>, log: AuditLog) => Promise<void> | void;
@@ -108,7 +109,7 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
         this.createReplacements = options.createReplacements;
         this.postProcess = options.postProcess;
         this.sensitiveKeys = options.sensitiveKeys ?? [];
-        this.renamedKeys = options.renamedKeys ?? {};
+        this.renamedKeys = options.renamedKeys ?? new Map();
     }
 
     async logEvent(event: ModelEvent<M>) {
@@ -174,7 +175,7 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
                             // Ignore relations
                             continue;
                         }
-                        const renamedKey = this.renamedKeys?.[key] ?? key;
+                        const renamedKey = this.renamedKeys.get(key) ?? key;
                         if (ModelLogger.sharedSensitiveKeys.includes(key) || (this.skipKeys && this.skipKeys.includes(key))) {
                             log.patchList.push(AuditLogPatchItem.create({
                                 key: AuditLogReplacement.key(renamedKey),
