@@ -19,7 +19,7 @@
 
 <script lang="ts" setup>
 import GroupAvatar from '#GroupAvatar.vue';
-import { defineRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoute, useNavigate } from '@browser/navigation';
 import type { Group } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import GroupTag from './GroupTag.vue';

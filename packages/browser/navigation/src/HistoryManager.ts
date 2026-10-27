@@ -1,5 +1,5 @@
-import { ReactiveUrl } from './utils/navigationHooks';
-import { UrlHelper } from './utils/UrlHelper';
+import { ReactiveUrl } from './utils/navigationHooks.js';
+import { UrlHelper } from './utils/UrlHelper.js';
 
 /**
  * null makes sure the previous URL is used for this route

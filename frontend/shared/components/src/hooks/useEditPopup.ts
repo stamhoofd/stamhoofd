@@ -1,5 +1,5 @@
 import type { AutoEncoder, AutoEncoderPatchType } from '@common/encoding';
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { usePop } from '@browser/navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { Toast } from '#overlays/Toast.ts';

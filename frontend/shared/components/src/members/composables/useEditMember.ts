@@ -1,4 +1,4 @@
-import { usePresent } from '@simonbackx/vue-app-navigation';
+import { usePresent } from '@browser/navigation';
 import type { PlatformMember } from '@stamhoofd/structures';
 
 import { useContext } from '#hooks/useContext.ts';

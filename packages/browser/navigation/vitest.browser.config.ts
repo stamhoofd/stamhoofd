@@ -5,9 +5,10 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
     plugins: [vue()],
     test: {
+        name: 'navigation-browser',
         globals: true,
-        root: 'src',
-        include: ['**/*.browser.test.ts'],
+        root: import.meta.dirname,
+        include: ['src/**/*.browser.test.ts'],
         browser: {
             enabled: true,
             headless: true,

@@ -19,7 +19,7 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import FillRecordCategoryBox from '#records/components/FillRecordCategoryBox.vue';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
-import { useDismiss, usePop } from '@simonbackx/vue-app-navigation';
+import { useDismiss, usePop } from '@browser/navigation';
 import type { RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import type { EventNotificationViewModel } from './classes/EventNotificationViewModel';

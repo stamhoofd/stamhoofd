@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent';
 import { useFreshAction } from '@stamhoofd/components/auth/useFreshAction';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';

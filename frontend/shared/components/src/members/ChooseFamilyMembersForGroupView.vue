@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { useDismiss } from '@simonbackx/vue-app-navigation';
+import { useDismiss } from '@browser/navigation';
 import ExternalOrganizationContainer from '#containers/ExternalOrganizationContainer.vue';
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import type { Group, Organization, PlatformFamily } from '@stamhoofd/structures';

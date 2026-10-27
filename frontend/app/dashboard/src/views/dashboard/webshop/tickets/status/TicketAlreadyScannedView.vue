@@ -49,7 +49,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useCanPop, usePop, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, useCanPop, usePop, useShow } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';

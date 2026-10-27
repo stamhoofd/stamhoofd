@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import type { AutoEncoderPatchType } from '@common/encoding';
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { usePop } from '@browser/navigation';
 import type { AccessRight } from '@stamhoofd/types/AccessRight';
 import type { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import type { PermissionRoleDetailed, PermissionRoleForResponsibility } from '@stamhoofd/structures';

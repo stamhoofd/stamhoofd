@@ -109,7 +109,7 @@
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
-import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePresent, useShow } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { UitpasOrganizerResponse, UitpasEventResponse } from '@stamhoofd/structures';
 import { OrganizationMetaData, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper } from '@stamhoofd/structures';

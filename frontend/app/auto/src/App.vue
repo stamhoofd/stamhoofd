@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, ComponentWithPropertiesInstance, ModalStackComponent, useCurrentComponent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ComponentWithPropertiesInstance, ModalStackComponent, useCurrentComponent } from '@browser/navigation';
 import { useLoginRoot } from '@stamhoofd/components/auth/useLoginRoot.ts';
 import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';

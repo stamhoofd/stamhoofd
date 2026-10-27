@@ -4,7 +4,7 @@ import { Language } from '@stamhoofd/types/Language';
 import { expect, test } from 'vitest';
 import { render } from 'vitest-browser-vue';
 import EmailLanguageButton from './EmailLanguageButton.vue';
-import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties } from '@browser/navigation';
 import type { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { ModalStackEventBus } from '../overlays/ModalStackEventBus';
 

@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController } from '@browser/navigation';
 import IconContainer from '#icons/IconContainer.vue';
 import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
 import STGrid from '#layout/STGrid.vue';

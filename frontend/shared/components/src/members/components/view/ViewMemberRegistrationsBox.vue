@@ -46,7 +46,7 @@ import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import type { TableActionSelection } from '#tables/classes/TableAction.ts';
-import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, useDismiss, usePresent } from '@browser/navigation';
 import { useFetchOrganizationRegistrationPeriods } from '#hooks/networking/useFetchOrganizationRegistrationPeriods';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { MemberRegistrationInvitation, PlatformMember, Registration, RegistrationPeriod } from '@stamhoofd/structures';

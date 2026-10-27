@@ -77,7 +77,7 @@
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 import { PatchMap } from '@common/encoding';
-import { usePresent } from '@simonbackx/vue-app-navigation';
+import { usePresent } from '@browser/navigation';
 
 import { propertyFilterToString } from '#filters/UIFilter.ts';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';

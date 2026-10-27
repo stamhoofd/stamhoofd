@@ -155,7 +155,7 @@
 
 <script lang="ts" setup>
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
+import { useDismiss, usePresent } from '@browser/navigation';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { useAuth } from '#hooks/useAuth.ts';

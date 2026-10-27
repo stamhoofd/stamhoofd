@@ -69,7 +69,7 @@ import {
     useCanDismiss,
     useCanPop,
     usePresent,
-} from '@simonbackx/vue-app-navigation';
+} from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useMembersObjectFetcher } from '@stamhoofd/components/fetchers/useMembersObjectFetcher.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext';

@@ -1,4 +1,4 @@
-const navigationPackage = '@simonbackx/vue-app-navigation';
+const navigationPackage = '@browser/navigation';
 const asyncComponentImportNames = new Set([
     '#containers/AsyncComponent.ts',
     '@stamhoofd/components/containers/AsyncComponent.ts',

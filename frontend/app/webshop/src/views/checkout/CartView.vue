@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import AddDiscountCodeBox from '@stamhoofd/components/views/AddDiscountCodeBox.vue';
 import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';

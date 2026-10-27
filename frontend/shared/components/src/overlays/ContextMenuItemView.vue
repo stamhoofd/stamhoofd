@@ -28,8 +28,8 @@ export interface ContextMenuItemApi {
 </script>
 
 <script lang="ts" setup>
-import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { usePresent } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties } from '@browser/navigation';
+import { usePresent } from '@browser/navigation';
 import { computed, ref, useTemplateRef } from 'vue';
 
 defineOptions({

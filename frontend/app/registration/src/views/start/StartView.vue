@@ -161,7 +161,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoute, useNavigate } from '@browser/navigation';
 import { buildTranslatedUrl, getUrls } from '@stamhoofd/components/containers/TranslatedUrl.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext';

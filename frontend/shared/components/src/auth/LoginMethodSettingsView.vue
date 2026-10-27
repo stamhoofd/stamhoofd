@@ -305,7 +305,7 @@ import type {
     PartialWithoutMethods,
 } from '@common/encoding';
 import { SimpleError, SimpleErrors } from '@common/errors';
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { usePop } from '@browser/navigation';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { LoginMethod } from '@stamhoofd/structures';
 import {

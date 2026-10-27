@@ -1,4 +1,4 @@
-import { ComponentWithProperties, ModalStackComponent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ModalStackComponent } from '@browser/navigation';
 import ContextProvider from '@stamhoofd/components/containers/ContextProvider.vue';
 import { useAppContext } from '@stamhoofd/components/context/appContext';
 import { MemberManager } from '@stamhoofd/frontend-application/MemberManager';

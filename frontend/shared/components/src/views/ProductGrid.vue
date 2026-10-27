@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { useDismiss } from '@simonbackx/vue-app-navigation';
+import type { useDismiss } from '@browser/navigation';
 import type { CartItem, Checkout, Product, Webshop } from '@stamhoofd/structures';
 
 import ProductBox from './ProductBox.vue';

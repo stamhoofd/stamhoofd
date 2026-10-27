@@ -1,7 +1,7 @@
 import type { Event, Organization} from '@stamhoofd/structures';
 import { Group, GroupSettings, GroupStatus, GroupType, TranslatedString } from '@stamhoofd/structures';
 import { useOrganization } from '#hooks/useOrganization.ts';
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 
 import type { NavigationActions } from '../../types/NavigationActions';

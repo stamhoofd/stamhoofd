@@ -66,7 +66,7 @@
 
 <script lang="ts" setup>
 import { useKeyDown } from '#hooks/useKeyDown.ts';
-import { useCanDismiss, useCanPop, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
+import { useCanDismiss, useCanPop, useDismiss, usePop } from '@browser/navigation';
 import { TranslatedString } from '@stamhoofd/structures';
 import { computed, getCurrentInstance, onBeforeUnmount, ref, watch } from 'vue';
 import LoadingViewTransition from '../containers/LoadingViewTransition.vue';

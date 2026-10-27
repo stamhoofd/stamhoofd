@@ -1,4 +1,4 @@
-import { ComponentWithProperties, ReactiveUrl } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ReactiveUrl } from '@browser/navigation';
 import { importWithRetry } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 /**

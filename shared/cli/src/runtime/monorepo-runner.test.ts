@@ -104,6 +104,7 @@ describe('shared build orchestration', () => {
             'encoding',
             'common-networking',
             'database',
+            'navigation',
             'metabase',
             'filters',
             'structures',
@@ -203,9 +204,9 @@ describe('shared build orchestration', () => {
         expect(watch).toContain(`--exec 'pnpm run build:shared && touch ${readyFile} || exit 0'`);
         expect(watch).toContain('--signal SIGTERM');
         expect(watch).toContain('--watch shared --watch backend/shared');
-        expect(watch).toContain('--watch packages/common/errors');
+        expect(watch).toContain('--watch packages/common --watch packages/node --watch packages/browser');
         expect(watch).toContain('--watch turbo.jsonc');
         expect(watch).toContain("--ignore './shared/*/dist/' --ignore './backend/shared/*/dist/'");
-        expect(watch).toContain("--ignore './packages/common/*/dist/' --ignore './packages/common/*/dist-types/'");
+        expect(watch).toContain("--ignore './packages/*/*/dist/' --ignore './packages/*/*/dist-types/'");
     });
 });

@@ -5,7 +5,7 @@ import type {
     RequestResult,
 } from '@common/networking';
 import { Request, Server } from '@common/networking';
-import type { ComponentWithProperties, PushOptions } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties, PushOptions } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { MemberManager } from '@stamhoofd/frontend-application/MemberManager';

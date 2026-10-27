@@ -54,7 +54,7 @@ import { usePatch } from '#hooks/usePatch.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import type { AutoEncoderPatchType } from '@common/encoding';
-import { defineRoute, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
+import { defineRoute, useNavigate, usePop } from '@browser/navigation';
 import { BundleDiscount, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 

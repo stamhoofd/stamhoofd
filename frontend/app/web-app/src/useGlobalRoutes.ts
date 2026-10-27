@@ -1,5 +1,5 @@
 import type { Decoder } from '@common/encoding';
-import { ComponentWithProperties, defineRoute, NavigationController, onCheckRoutes, ReactiveUrl, UrlHelper, useModalStackComponent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoute, NavigationController, onCheckRoutes, ReactiveUrl, UrlHelper, useModalStackComponent } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import { rememberPendingNoltLogin } from '@stamhoofd/components/helpers/nolt.ts';

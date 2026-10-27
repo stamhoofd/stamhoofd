@@ -231,6 +231,8 @@ __screenshots__
 
 # Playwright
 /test-results/
+**/test-results/
+**/__screenshots__/
 /playwright-report/
 /blob-report/
 /playwright/.cache/

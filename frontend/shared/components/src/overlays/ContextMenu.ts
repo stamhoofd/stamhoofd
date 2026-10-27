@@ -1,5 +1,5 @@
-import type { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import type { NavigationMixin } from '@browser/navigation';
+import { ComponentWithProperties } from '@browser/navigation';
 
 import GeneralContextMenuView from './GeneralContextMenuView.vue';
 import { ModalStackEventBus } from './ModalStackEventBus';

@@ -1,4 +1,4 @@
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties } from '@browser/navigation';
 import { Formatter } from '@stamhoofd/utility';
 import { enableAutoUnmount, mount } from '@vue/test-utils';
 import { describe, expect, test } from 'vitest';

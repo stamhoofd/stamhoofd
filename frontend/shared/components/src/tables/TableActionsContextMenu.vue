@@ -27,7 +27,7 @@ import ContextMenuItemView from '#overlays/ContextMenuItemView.vue';
 import ContextMenuLine from '#overlays/ContextMenuLine.vue';
 import ContextMenuView from '#overlays/ContextMenuView.vue';
 import { Toast } from '#overlays/Toast.ts';
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties } from '@browser/navigation';
 import { computed, getCurrentInstance, onUnmounted, useTemplateRef } from 'vue';
 
 import { useIsMobile } from '../hooks/useIsMobile';

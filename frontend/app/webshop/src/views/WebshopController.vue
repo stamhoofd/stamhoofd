@@ -23,8 +23,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { FramedComponent } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties, NavigationController } from '@browser/navigation';
+import { FramedComponent } from '@browser/navigation';
 import { getWebshopSquareLogo } from '@stamhoofd/components/helpers/webshopIdentity.ts';
 import { useProvidePreviewColumnWidths } from '@stamhoofd/components/layout/usePreviewPanel.ts';
 import { computed, onMounted, shallowRef } from 'vue';

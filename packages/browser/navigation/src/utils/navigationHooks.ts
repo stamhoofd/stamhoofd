@@ -1,11 +1,11 @@
 import { computed, customRef, getCurrentInstance, inject, isRef, onActivated, onBeforeUnmount, onMounted, onScopeDispose, provide, ref, unref, type Component, type ComponentOptions, type Ref } from 'vue';
 
-import { ComponentWithProperties, HistoryIndex, useCurrentComponent, useParentComponent, type ModalDisplayStyle } from '../ComponentWithProperties';
-import { HistoryManager, type HistoryUrl } from '../HistoryManager';
+import { ComponentWithProperties, HistoryIndex, useCurrentComponent, useParentComponent, type ModalDisplayStyle } from '../ComponentWithProperties.js';
+import { HistoryManager, type HistoryUrl } from '../HistoryManager.js';
 import NavigationController from '../NavigationController.vue';
-import type { PopOptions } from '../PopOptions';
-import type { PushOptions } from '../PushOptions';
-import { UrlHelper, mergeSearchParams, templateToUrl, type ParamsFromConstructors, type UrlMatchResult, type UrlParamsConstructors } from './UrlHelper';
+import type { PopOptions } from '../PopOptions.js';
+import type { PushOptions } from '../PushOptions.js';
+import { UrlHelper, mergeSearchParams, templateToUrl, type ParamsFromConstructors, type UrlMatchResult, type UrlParamsConstructors } from './UrlHelper.js';
 import { createTrackedSearchParams } from './createTrackedSearchParams.js';
 
 /**

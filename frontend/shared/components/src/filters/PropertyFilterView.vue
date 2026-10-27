@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useDismiss } from '@simonbackx/vue-app-navigation';
+import { useDismiss } from '@browser/navigation';
 import type { PropertyFilter } from '@stamhoofd/structures';
 import { Version } from '@stamhoofd/structures';
 import { shallowRef } from 'vue';

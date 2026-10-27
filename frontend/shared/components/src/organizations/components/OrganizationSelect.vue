@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 

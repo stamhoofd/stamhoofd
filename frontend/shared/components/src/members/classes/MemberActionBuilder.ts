@@ -13,7 +13,7 @@ import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '#tables/
 import type { Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
 import { ArrayDecoder, PatchableArray } from '@common/encoding';
 import { SimpleError } from '@common/errors';
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
 import { markReviewMoment } from '@stamhoofd/frontend-application/markReviewMoment';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { useFetchOrganizationRegistrationPeriods } from '#hooks/networking/useFetchOrganizationRegistrationPeriods';

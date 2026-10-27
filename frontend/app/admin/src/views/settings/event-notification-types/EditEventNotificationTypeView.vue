@@ -58,7 +58,7 @@
 <script setup lang="ts">
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePop, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';

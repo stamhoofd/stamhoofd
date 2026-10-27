@@ -188,7 +188,7 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
 import { ArrayDecoder, PatchableArray } from '@common/encoding';
-import { ComponentWithProperties, defineRoute, defineRoutes, NavigationController, useNavigate, useNavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoute, defineRoutes, NavigationController, useNavigate, useNavigationController, usePresent, useShow } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';

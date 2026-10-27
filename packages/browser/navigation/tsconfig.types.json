@@ -1,0 +1,13 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "declaration": true,
+        "declarationMap": true,
+        "emitDeclarationOnly": true,
+        "rootDir": ".",
+        "outDir": "dist-types",
+        "tsBuildInfoFile": ".cache/types.tsbuildinfo"
+    },
+    "include": ["index.ts", "src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"],
+    "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"]
+}

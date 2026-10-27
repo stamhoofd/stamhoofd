@@ -1,4 +1,4 @@
-import { useFocused } from '@simonbackx/vue-app-navigation';
+import { useFocused } from '@browser/navigation';
 import { onActivated, onBeforeUnmount, onDeactivated, onMounted, unref } from 'vue';
 
 export type KeyMatcher = (key: string, modifiers: { shift: boolean; ctrl: boolean; alt: boolean; meta: boolean }) => boolean;

@@ -21,7 +21,7 @@ import { getAllMemberSteps } from '#members/classes/steps/getAllMemberSteps.ts';
 import { useNavigationActions } from '../../types/NavigationActions';
 import type { QuickAction, QuickActions } from '../classes/QuickActions';
 
-import { ComponentWithProperties, NavigationController, useNavigate, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, useNavigate, useShow } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import cartSvg from '@stamhoofd/assets/images/illustrations/cart.svg';
 import emailWarningSvg from '@stamhoofd/assets/images/illustrations/email-warning.svg';

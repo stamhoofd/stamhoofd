@@ -340,7 +340,7 @@ import type { AutoEncoder, AutoEncoderPatchType, Decoder } from '@common/encodin
 import { ObjectData, patchContainsChanges, VersionBox, VersionBoxDecoder } from '@common/encoding';
 import { isSimpleError, SimpleError, SimpleErrors } from '@common/errors';
 import { Request } from '@common/networking';
-import { useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { useDismiss, usePresent, useShow } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';

@@ -20,7 +20,7 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
 import { ArrayDecoder, PatchableArray } from '@common/encoding';
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
 

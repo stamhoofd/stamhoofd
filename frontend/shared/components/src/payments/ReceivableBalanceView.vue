@@ -68,7 +68,7 @@
 
 <script lang="ts" setup>
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
 
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import PromiseView from '#containers/PromiseView.vue';

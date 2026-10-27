@@ -81,7 +81,7 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePop, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { Group } from '@stamhoofd/structures/Group.js';
 import type { PermissionRoleForResponsibility } from '@stamhoofd/structures';

@@ -77,7 +77,7 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import { usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { usePresent, useShow } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';

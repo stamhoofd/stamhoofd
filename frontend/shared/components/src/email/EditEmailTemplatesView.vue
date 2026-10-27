@@ -102,7 +102,7 @@ import SegmentedControl from '#inputs/SegmentedControl.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
 import { ArrayDecoder, PatchableArray } from '@common/encoding';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePop, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';

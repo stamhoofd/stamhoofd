@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoute, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoute, useCheckRoute, useNavigate } from '@browser/navigation';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import STMenuCategory from '@stamhoofd/components/menu/STMenuCategory.vue';

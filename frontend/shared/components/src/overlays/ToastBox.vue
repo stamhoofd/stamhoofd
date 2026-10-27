@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ComponentWithPropertiesInstance } from '@browser/navigation';
 import type { Ref } from 'vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 

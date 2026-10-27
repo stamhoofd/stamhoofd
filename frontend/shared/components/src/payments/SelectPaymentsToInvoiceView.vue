@@ -59,7 +59,7 @@ import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import SaveView from '#navigation/SaveView.vue';
 import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
-import { useShow } from '@simonbackx/vue-app-navigation';
+import { useShow } from '@browser/navigation';
 import type { PaymentGeneral } from '@stamhoofd/structures';
 import { Invoice, PaymentCustomer, PaymentType, PaymentTypeHelper } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';

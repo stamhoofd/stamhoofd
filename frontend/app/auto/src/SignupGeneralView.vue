@@ -111,7 +111,7 @@
 import type { Decoder } from '@common/encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import { Request } from '@common/networking';
-import { ComponentWithProperties, useCanDismiss, useCanPop, useDismiss, usePop, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, useCanDismiss, useCanPop, useDismiss, usePop, useShow } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import bikeIllustration from '@stamhoofd/assets/images/illustrations/bike.svg';
 import charityIllustration from '@stamhoofd/assets/images/illustrations/charity.svg';

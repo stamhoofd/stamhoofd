@@ -1,4 +1,4 @@
-const navigationPackage = '@simonbackx/vue-app-navigation';
+const navigationPackage = '@browser/navigation';
 
 function unwrapExpression(node) {
     while (

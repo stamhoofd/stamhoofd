@@ -25,7 +25,7 @@
 import { useAuth } from '#hooks/useAuth.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import { usePresent } from '@simonbackx/vue-app-navigation';
+import { usePresent } from '@browser/navigation';
 import type { MemberResponsibilityRecord, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { presentEditResponsibilities } from '../../classes/MemberActionBuilder';

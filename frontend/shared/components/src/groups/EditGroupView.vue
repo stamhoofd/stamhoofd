@@ -779,7 +779,7 @@ import InheritedRecordsConfigurationBox from '#records/components/InheritedRecor
 import { RecordEditorSettings, RecordEditorType } from '#records/RecordEditorSettings.ts';
 import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import { useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { useNavigate, usePop, usePresent } from '@browser/navigation';
 import type { DefaultAgeGroup, Image, MemberProperty, RecordCategory } from '@stamhoofd/structures';
 import { BooleanStatus, getGroupStatusName, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, LimitedFilteredRequest, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, PlatformFamily, PlatformMember, RegisterItem, ResolutionFit, ResolutionRequest, TranslatedString, WaitingListType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';

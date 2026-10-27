@@ -3,8 +3,8 @@
 </template>
 
 <script setup lang="ts">
-import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties } from '@browser/navigation';
+import { ComponentWithPropertiesInstance } from '@browser/navigation';
 import type { Ref } from 'vue';
 import { computed, inject, unref } from 'vue';
 

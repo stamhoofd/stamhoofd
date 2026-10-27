@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useDismiss } from '@simonbackx/vue-app-navigation';
+import { useDismiss } from '@browser/navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors';

@@ -89,7 +89,7 @@
 import { usePatch } from '#hooks/usePatch.ts';
 import { useIsAllOptional, useIsPropertyEnabled, useIsPropertyRequired } from '#members/hooks/useIsPropertyRequired.ts';
 import { SimpleError, SimpleErrors } from '@common/errors';
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { usePop } from '@browser/navigation';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import type { Address, Parent, ParentType, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
 import { NationalRegisterNumberOptOut, ParentTypeHelper } from '@stamhoofd/structures';

@@ -121,7 +121,7 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { usePop } from '@browser/navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import PermyriadInput from '@stamhoofd/components/inputs/PermyriadInput.vue';
