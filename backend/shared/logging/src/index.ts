@@ -1,4 +1,4 @@
-import { logger } from '@simonbackx/simple-logging';
+import { logger } from '@node/logging';
 
 export function loadLogger() {
     logger.infectConsole();

@@ -27,7 +27,7 @@
         "lint": "eslint --quiet"
     },
     "dependencies": {
-        "@simonbackx/simple-logging": "1.0.1"
+        "@node/logging": "workspace:*"
     },
     "devDependencies": {
         "@node/endpoints": "workspace:*",

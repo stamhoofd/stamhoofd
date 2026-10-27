@@ -1,5 +1,5 @@
 import { Migration } from '@node/database';
-import { logger } from '@simonbackx/simple-logging';
+import { logger } from '@node/logging';
 import { Member } from '@stamhoofd/models';
 import { NationalRegisterNumberOptOut } from '@stamhoofd/structures';
 import { SeedTools } from '../helpers/SeedTools.js';

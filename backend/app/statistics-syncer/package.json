@@ -35,7 +35,7 @@
         "@node/database": "workspace:*",
         "@common/encoding": "workspace:*",
         "@common/errors": "workspace:*",
-        "@simonbackx/simple-logging": "1.0.1",
+        "@node/logging": "workspace:*",
         "@stamhoofd/backend-env": "workspace:*",
         "@stamhoofd/crons": "workspace:*",
         "@stamhoofd/logging": "workspace:*",

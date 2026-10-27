@@ -32,7 +32,7 @@
         "lint": "eslint . --quiet"
     },
     "dependencies": {
-        "@simonbackx/simple-logging": "1.0.1",
+        "@node/logging": "workspace:*",
         "@common/encoding": "workspace:*",
         "mysql2": "3.24.6",
         "tslib": "2.8.1"

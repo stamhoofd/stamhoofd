@@ -1,4 +1,4 @@
-import { logger } from '@simonbackx/simple-logging';
+import { logger } from '@node/logging';
 import { AsyncLocalStorage } from 'node:async_hooks';
 
 export async function withMigrationOutput(run: () => Promise<void>, verbose: boolean): Promise<void> {

@@ -1,6 +1,6 @@
 import { Migration } from '@node/database';
 import { isSimpleError } from '@common/errors';
-import { logger } from '@simonbackx/simple-logging';
+import { logger } from '@node/logging';
 import { Member } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';

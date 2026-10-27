@@ -35,7 +35,7 @@
         "@common/encoding": "workspace:*",
         "@node/endpoints": "workspace:*",
         "@common/errors": "workspace:*",
-        "@simonbackx/simple-logging": "1.0.1",
+        "@node/logging": "workspace:*",
         "@stamhoofd/backend-env": "workspace:*",
         "@stamhoofd/backend-i18n": "workspace:*",
         "@stamhoofd/backend-middleware": "workspace:*",

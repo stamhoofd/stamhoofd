@@ -18,7 +18,7 @@
     "dependencies": {
         "@node/endpoints": "workspace:*",
         "@common/errors": "workspace:*",
-        "@simonbackx/simple-logging": "1.0.1"
+        "@node/logging": "workspace:*"
     },
     "devDependencies": {
         "@stamhoofd/structures": "workspace:*",

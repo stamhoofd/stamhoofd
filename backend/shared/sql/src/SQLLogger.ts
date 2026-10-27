@@ -1,5 +1,5 @@
 import { Database } from '@node/database';
-import { StyledText } from '@simonbackx/simple-logging';
+import { StyledText } from '@node/logging';
 
 class StaticSQLLogger {
     slowQueryThresholdMs: number | null = null;

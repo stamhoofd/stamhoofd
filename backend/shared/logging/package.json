@@ -29,7 +29,7 @@
         "test": "vitest"
     },
     "dependencies": {
-        "@simonbackx/simple-logging": "1.0.1"
+        "@node/logging": "workspace:*"
     },
     "license": "UNLICENCED",
     "publishConfig": {

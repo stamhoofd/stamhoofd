@@ -1,6 +1,6 @@
-import { Logger } from './src/logging';
+import { Logger } from './src/logging.js';
 
-export * from './src/logging';
+export * from './src/logging.js';
 
 export const logger = new Logger({
     stdout: process.stdout,

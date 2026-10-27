@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 
-import { logger, StyledText } from '@simonbackx/simple-logging';
+import { logger, StyledText } from '@node/logging';
 import { Migration as MigrationModel } from '../models/Migration.js';
 import { Database, DatabaseInstance } from './Database.js';
 

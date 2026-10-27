@@ -1,6 +1,6 @@
 import type { Response, Request, RequestMiddleware, ResponseMiddleware } from '@node/endpoints';
 import { isSimpleError, isSimpleErrors } from '@common/errors';
-import { logger, StyledText } from '@simonbackx/simple-logging';
+import { logger, StyledText } from '@node/logging';
 let requestCounter = 0;
 
 function removePII(object: unknown) {

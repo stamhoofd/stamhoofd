@@ -53,6 +53,8 @@ Please check our [README.md](https://github.com/stamhoofd/stamhoofd)
 
 [Storing data in the database](../packages/node/database/docs/models.md)
 
+[Context-aware logging](../packages/node/logging/README.md)
+
 ## Common patterns
 
 ---

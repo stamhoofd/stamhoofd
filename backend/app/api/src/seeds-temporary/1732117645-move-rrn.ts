@@ -1,7 +1,7 @@
 import { Migration } from '@node/database';
 import { Member } from '@stamhoofd/models';
 import { MemberUserSyncer } from '../helpers/MemberUserSyncer.js';
-import { logger } from '@simonbackx/simple-logging';
+import { logger } from '@node/logging';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment == 'test') {

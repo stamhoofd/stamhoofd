@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { StyledText, Logger } from './logging';
+import { StyledText, Logger } from './logging.js';
 
 let lastLog = '';
 function createFakeStream() {
