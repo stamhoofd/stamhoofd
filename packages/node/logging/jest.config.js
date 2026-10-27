@@ -1,8 +1,8 @@
 module.exports = {
-    roots: ["<rootDir>/dist"],
-    testEnvironment: "node",
-    setupFilesAfterEnv: ["jest-extended"],
+    roots: ['<rootDir>/dist'],
+    testEnvironment: 'node',
+    setupFilesAfterEnv: ['jest-extended'],
     moduleDirectories: [
-        "node_modules",
-    ]
+        'node_modules',
+    ],
 };
