@@ -56,6 +56,13 @@ export class FiscalDocumentYearHelper {
     }
 
     /**
+     * Starting from income year 2026 (submitted in 2027), Belcotax no longer accepts XML but requires JSONL.
+     */
+    isXmlExportSupported(calendarYear: number): boolean {
+        return calendarYear < 2026;
+    }
+
+    /**
      * Check if the fiscal document XML can be downloaded. It can be downloaded if the fiscal document was created after the max publish date or if now is before the max publish date.
      */
     isAfterDeadline(calendarYear: number): boolean {
