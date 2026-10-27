@@ -21,7 +21,6 @@
         "@simonbackx/simple-logging": "1.0.1"
     },
     "devDependencies": {
-        "@common/encoding": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/types": "workspace:*"
     },

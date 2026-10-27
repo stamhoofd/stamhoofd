@@ -10,9 +10,8 @@ This is a private workspace. Declare `"@common/encoding": "workspace:*"` in
 consuming packages. Run `pnpm stam test encoding` and
 `pnpm stam check typecheck @common/encoding` from the repository root.
 
-The workspace override redirects remaining registry consumers to this same
-implementation. Consumers whose registry dependencies hide this build edge
-declare encoding as a build-time dependency until those libraries are integrated.
+All consumers use this workspace implementation through explicit workspace
+dependencies, including the integrated networking, database and endpoint libraries.
 
 ## Documentation
 
