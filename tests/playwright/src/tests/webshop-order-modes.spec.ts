@@ -151,11 +151,12 @@ test.describe('Webshop order modes @webshop-order-modes', () => {
         await openProductOffer(page, organization, webshop);
         await page.getByTestId('add-product-button').click();
 
-        const view = page.locator('.st-view').last();
-        await expect(view.getByRole('checkbox', { name: 'Meerdere dagen' })).toBeChecked();
+        const view = page.locator('.st-view').filter({ has: page.locator('.edit-product-box') }).last();
+        await expect(view.getByRole('checkbox', { name: 'Meerdere dagen' })).toBeChecked({ timeout: 15000 });
         await view.locator('.st-input-box').filter({ hasText: 'Naam' }).locator('input').first().fill('Late ingang');
         await view.locator('.st-input-box').filter({ hasText: 'Vanaf welk tijdstip' }).locator('input').fill('21:00');
         await view.getByTestId('save-button').click();
+        await expect(page.locator('.edit-product-box')).toHaveCount(0);
         await page.locator('.st-view').last().getByTestId('save-button').click();
 
         await expect.poll(async () => (await Webshop.getByID(webshop.id))!.products.length).toBe(2);
@@ -166,7 +167,14 @@ test.describe('Webshop order modes @webshop-order-modes', () => {
 
     test('Participant details per ticket are only offered with several tickets', async ({ page }) => {
         const organization = await createOrganization();
-        const { webshop: one } = await TestWebshops.create({ organization, name: `Een ticket ${WorkerData.id}`, ticketType: WebshopTicketType.Tickets, productCount: 1 });
+        // One ticket per order: the details of the order are those of the participant
+        const { webshop: one } = await TestWebshops.create({
+            organization,
+            name: `Een ticket ${WorkerData.id}`,
+            ticketType: WebshopTicketType.Tickets,
+            orderMode: WebshopOrderMode.Single,
+            buildProducts: () => [Product.create({ name: 'Ticket', type: ProductType.Ticket })],
+        });
         const { webshop: several } = await TestWebshops.create({ organization, name: `Twee tickets ${WorkerData.id}`, ticketType: WebshopTicketType.Tickets, productCount: 2 });
 
         await openRecordSettings(page, organization, one);
