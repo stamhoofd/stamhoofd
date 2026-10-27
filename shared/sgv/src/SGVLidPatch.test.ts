@@ -40,3 +40,20 @@ describe('SGVLidPatch vgagegevens', () => {
         expect(() => SGVLidPatch.decode(new ObjectData({ vgagegevens: true }, context))).toThrow();
     });
 });
+
+describe('SGVLidPatch verbondsgegevens', () => {
+    test('does not require lidnummer and retains partial and unknown data', () => {
+        const context = { version: 0 };
+        const payload = { verbondsgegevens: { lidgeldbetaald: false, extension: ['unknown'] } };
+        const decoded = SGVLidPatch.decode(new ObjectData(payload, context));
+        expect(decoded.verbondsgegevens).toEqual(payload.verbondsgegevens);
+        expect(decoded.verbondsgegevens).not.toBeInstanceOf(Map);
+        expect(decoded.encode(context)).toEqual(payload);
+        const patch = SGVLidPatch.patchType().decode(new ObjectData(payload, context));
+        expect(SGVLidPatch.create({ verbondsgegevens: { lidnummer: 'old' } }).patch(patch).verbondsgegevens).toEqual(payload.verbondsgegevens);
+        expect(SGVLidPatch.decode(new ObjectData({ verbondsgegevens: {} }, context)).verbondsgegevens).toEqual({});
+        expect(SGVLidPatch.decode(new ObjectData({}, context)).verbondsgegevens).toBeUndefined();
+        expect(() => SGVLidPatch.decode(new ObjectData({ verbondsgegevens: null }, context))).toThrow();
+        expect(() => SGVLidPatch.decode(new ObjectData({ verbondsgegevens: 42 }, context))).toThrow();
+    });
+});

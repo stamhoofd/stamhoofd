@@ -1,5 +1,5 @@
 import type { Decoder, ObjectData } from '@common/encoding';
-import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, NumberDecoder, RecordDecoder, StringDecoder } from '@common/encoding';
+import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, NumberDecoder, StringDecoder } from '@common/encoding';
 import { SimpleError, SimpleErrors } from '@common/errors';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 
@@ -581,7 +581,7 @@ export class SGVLidPatch extends AutoEncoder {
     @field({ decoder: new SGVPartialObjectDecoder<Partial<SGVVGAGegevens>>(), optional: true })
     vgagegevens?: Partial<SGVVGAGegevens>;
 
-    @field({ decoder: new RecordDecoder(StringDecoder, AnyDecoder), optional: true })
+    @field({ decoder: new SGVPartialObjectDecoder<Partial<SGVVerbondsGegevens>>(), optional: true })
     verbondsgegevens?: Partial<SGVVerbondsGegevens>;
 
     @field({ decoder: StringDecoder, nullable: true, optional: true })
