@@ -23,3 +23,20 @@ describe('SGVLidPatch persoonsgegevens', () => {
         expect(() => SGVLidPatch.decode(new ObjectData({ persoonsgegevens: null }, context))).toThrow();
     });
 });
+
+describe('SGVLidPatch vgagegevens', () => {
+    test('accepts partial identity data and retains unknown extension values', () => {
+        const context = { version: 0 };
+        const payload = { vgagegevens: { voornaam: 'Alex', extension: { active: true } } };
+        const decoded = SGVLidPatch.decode(new ObjectData(payload, context));
+        expect(decoded.vgagegevens).toEqual(payload.vgagegevens);
+        expect(decoded.vgagegevens).not.toBeInstanceOf(Map);
+        expect(decoded.encode(context)).toEqual(payload);
+        const patch = SGVLidPatch.patchType().decode(new ObjectData(payload, context));
+        expect(SGVLidPatch.create({ vgagegevens: { achternaam: 'Old' } }).patch(patch).vgagegevens).toEqual(payload.vgagegevens);
+        expect(SGVLidPatch.decode(new ObjectData({ vgagegevens: {} }, context)).vgagegevens).toEqual({});
+        expect(SGVLidPatch.decode(new ObjectData({}, context)).vgagegevens).toBeUndefined();
+        expect(() => SGVLidPatch.decode(new ObjectData({ vgagegevens: null }, context))).toThrow();
+        expect(() => SGVLidPatch.decode(new ObjectData({ vgagegevens: true }, context))).toThrow();
+    });
+});

@@ -578,7 +578,7 @@ export class SGVLidPatch extends AutoEncoder {
     @field({ decoder: new SGVPartialObjectDecoder<SGVPersoonsGegevens>(), optional: true })
     persoonsgegevens?: SGVPersoonsGegevens;
 
-    @field({ decoder: new RecordDecoder(StringDecoder, AnyDecoder), optional: true })
+    @field({ decoder: new SGVPartialObjectDecoder<Partial<SGVVGAGegevens>>(), optional: true })
     vgagegevens?: Partial<SGVVGAGegevens>;
 
     @field({ decoder: new RecordDecoder(StringDecoder, AnyDecoder), optional: true })
