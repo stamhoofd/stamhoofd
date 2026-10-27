@@ -1,0 +1,1 @@
+ALTER TABLE `_testModels_testModels` ADD COLUMN `priority` int NOT NULL COMMENT '';
