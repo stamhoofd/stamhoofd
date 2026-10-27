@@ -4,6 +4,16 @@ import { TranslationManager } from './TranslationManager.js';
 
 afterEach(() => vi.restoreAllMocks());
 
+it('edits source translations in a map without discarding locale metadata', () => {
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+    vi.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({ extends: ['nl'], greeting: 'Hallo' }));
+    const write = vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {});
+
+    TranslationManager.prototype.setSourceTranslation({ key: 'greeting', value: 'Hello', locale: 'en', namespace: 'stamhoofd' });
+
+    expect(JSON.parse(write.mock.calls[0][1] as string)).toEqual({ extends: ['nl'], greeting: 'Hello' });
+});
+
 it('reads translation text into maps without locale metadata', () => {
     vi.spyOn(fs, 'existsSync').mockReturnValue(true);
     vi.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({ greeting: 'Hallo', replacements: { lid: 'member' }, extends: ['nl'] }));

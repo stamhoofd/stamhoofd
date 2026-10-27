@@ -133,10 +133,10 @@ export class TranslationManager implements TranslationProvider {
 
     setSourceTranslation({ key, value, locale, namespace }: { key: string; value: string; locale: string; namespace: string }) {
         const path = TranslationManager.getSourcePath(locale, namespace);
-        const source = TranslationManager.readCompleteSource(path) ?? {};
-        source[key] = value;
+        const source = new Map(Object.entries(TranslationManager.readCompleteSource(path) ?? {}));
+        source.set(key, value);
 
-        fs.writeFileSync(path, JSON.stringify(source, null, 2));
+        fs.writeFileSync(path, JSON.stringify(Object.fromEntries(source), null, 2));
     }
 
     readMachineTranslationDictionary(
