@@ -14,7 +14,8 @@ export type SQLSortDefinition<T, B extends PlainObject | Date = PlainObject | Da
     checkPermission?: () => Promise<void>;
 };
 
-export type SQLSortDefinitions<T = any> = Record<string, SQLSortDefinition<T>>;
+/** Exact-key SQL sorter registry, shared with cursor pagination. */
+export type SQLSortDefinitions<T = any> = Map<string, SQLSortDefinition<T>>;
 
 export async function applySQLSorter(selectQuery: SQLSelect<any>, sortBy: SortList, definitions: SQLSortDefinitions) {
     if (sortBy.length === 0) {
@@ -25,8 +26,8 @@ export async function applySQLSorter(selectQuery: SQLSelect<any>, sortBy: SortLi
     }
 
     for (const s of sortBy) {
-        const d = definitions[s.key];
-        if (!d) {
+        const d = definitions.get(s.key);
+        if (d === undefined) {
             throw new SimpleError({
                 code: 'invalid_sort',
                 message: 'Unknown sort key ' + s.key,

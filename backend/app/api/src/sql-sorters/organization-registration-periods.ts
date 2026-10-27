@@ -1,8 +1,8 @@
 import type { OrganizationRegistrationPeriod } from '@stamhoofd/models';
-import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 
-export const organizationRegistrationPeriodSorters: SQLSortDefinitions<OrganizationRegistrationPeriod> = {
+export const organizationRegistrationPeriodSorters: SQLSortDefinitions<OrganizationRegistrationPeriod> = new Map<string, SQLSortDefinition<OrganizationRegistrationPeriod>>([
     // WARNING! TEST NEW SORTERS THOROUGHLY!
     // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
     // An example: sorting on 'name' is not a good idea, because it is a concatenation of two fields.
@@ -11,7 +11,7 @@ export const organizationRegistrationPeriodSorters: SQLSortDefinitions<Organizat
     // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
 
-    id: {
+    ['id', {
         getValue(a) {
             return a.id;
         },
@@ -21,5 +21,5 @@ export const organizationRegistrationPeriodSorters: SQLSortDefinitions<Organizat
                 direction,
             });
         },
-    },
-};
+    }],
+]);

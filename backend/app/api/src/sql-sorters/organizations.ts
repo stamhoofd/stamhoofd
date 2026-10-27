@@ -1,8 +1,8 @@
 import type { Organization } from '@stamhoofd/models';
-import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 
-export const organizationSorters: SQLSortDefinitions<Organization> = {
+export const organizationSorters: SQLSortDefinitions<Organization> = new Map<string, SQLSortDefinition<Organization>>([
     // WARNING! TEST NEW SORTERS THOROUGHLY!
     // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
     // An example: sorting on 'name' is not a good idea, because it is a concatenation of two fields.
@@ -11,7 +11,7 @@ export const organizationSorters: SQLSortDefinitions<Organization> = {
     // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
 
-    id: {
+    ['id', {
         getValue(a) {
             return a.id;
         },
@@ -21,8 +21,8 @@ export const organizationSorters: SQLSortDefinitions<Organization> = {
                 direction,
             });
         },
-    },
-    name: {
+    }],
+    ['name', {
         getValue(a) {
             return a.name;
         },
@@ -32,8 +32,8 @@ export const organizationSorters: SQLSortDefinitions<Organization> = {
                 direction,
             });
         },
-    },
-    uri: {
+    }],
+    ['uri', {
         getValue(a) {
             return a.uri;
         },
@@ -43,8 +43,8 @@ export const organizationSorters: SQLSortDefinitions<Organization> = {
                 direction,
             });
         },
-    },
-    uriPadded: {
+    }],
+    ['uriPadded', {
         getValue(a) {
             return a.uri.padStart(10, '0');
         },
@@ -54,8 +54,8 @@ export const organizationSorters: SQLSortDefinitions<Organization> = {
                 direction,
             });
         },
-    },
-    type: {
+    }],
+    ['type', {
         getValue(a) {
             return a.meta.type;
         },
@@ -65,8 +65,8 @@ export const organizationSorters: SQLSortDefinitions<Organization> = {
                 direction,
             });
         },
-    },
-    city: {
+    }],
+    ['city', {
         getValue(a) {
             return a.address.city;
         },
@@ -76,8 +76,8 @@ export const organizationSorters: SQLSortDefinitions<Organization> = {
                 direction,
             });
         },
-    },
-    country: {
+    }],
+    ['country', {
         getValue(a) {
             return a.address.country;
         },
@@ -87,8 +87,8 @@ export const organizationSorters: SQLSortDefinitions<Organization> = {
                 direction,
             });
         },
-    },
-    umbrellaOrganization: {
+    }],
+    ['umbrellaOrganization', {
         getValue(a) {
             return a.meta.umbrellaOrganization;
         },
@@ -98,8 +98,8 @@ export const organizationSorters: SQLSortDefinitions<Organization> = {
                 direction,
             });
         },
-    },
-    createdAt: {
+    }],
+    ['createdAt', {
         getValue(a) {
             return a.createdAt;
         },
@@ -109,5 +109,5 @@ export const organizationSorters: SQLSortDefinitions<Organization> = {
                 direction,
             });
         },
-    },
-};
+    }],
+]);

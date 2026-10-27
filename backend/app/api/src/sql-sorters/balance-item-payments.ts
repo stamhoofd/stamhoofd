@@ -1,13 +1,13 @@
 import type { BalanceItemPayment } from '@stamhoofd/models';
-import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 
-export const balanceItemPaymentSorters: SQLSortDefinitions<BalanceItemPayment> = {
+export const balanceItemPaymentSorters: SQLSortDefinitions<BalanceItemPayment> = new Map<string, SQLSortDefinition<BalanceItemPayment>>([
     // WARNING! TEST NEW SORTERS THOROUGHLY! See balanceItemSorters for why sorting on anything that is
     // not 1:1 with a column breaks pagination.
 
-    id: {
+    ['id', {
         getValue(a) {
             return a.id;
         },
@@ -17,8 +17,8 @@ export const balanceItemPaymentSorters: SQLSortDefinitions<BalanceItemPayment> =
                 direction,
             });
         },
-    },
-    createdAt: {
+    }],
+    ['createdAt', {
         getValue(a) {
             return Formatter.dateTimeIso(a.createdAt, 'UTC');
         },
@@ -28,5 +28,5 @@ export const balanceItemPaymentSorters: SQLSortDefinitions<BalanceItemPayment> =
                 direction,
             });
         },
-    },
-};
+    }],
+]);

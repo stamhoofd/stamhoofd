@@ -1,5 +1,5 @@
 import { Group, Member, Organization } from '@stamhoofd/models';
-import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLIfNull, SQLOrderBy } from '@stamhoofd/sql';
 import type { MemberWithRegistrationsBlob, Organization as OrganizationStruct, RegistrationWithMemberBlob } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -30,7 +30,7 @@ export class RegistrationSortData {
     }
 }
 
-export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
+export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = new Map<string, SQLSortDefinition<RegistrationSortData>>([
     // WARNING! TEST NEW SORTERS THOROUGHLY!
     // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
     // An example: sorting on 'name' is not a good idea, because it is a concatenation of two fields.
@@ -39,7 +39,7 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
     // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
 
-    'id': {
+    ['id', {
         getValue({ registration }) {
             return registration.id;
         },
@@ -49,8 +49,8 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
                 direction,
             });
         },
-    },
-    'registeredAt': {
+    }],
+    ['registeredAt', {
         getValue({ registration }) {
             return registration.registeredAt;
         },
@@ -60,8 +60,8 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
                 direction,
             });
         },
-    },
-    'groupPrice': {
+    }],
+    ['groupPrice', {
         getValue: ({ registration }) => registration.groupPrice.name.toString(),
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -69,8 +69,8 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
                 direction,
             });
         },
-    },
-    'trialUntil': {
+    }],
+    ['trialUntil', {
         getValue({ registration }) {
             return registration.trialUntil;
         },
@@ -80,8 +80,8 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
                 direction,
             });
         },
-    },
-    'startDate': {
+    }],
+    ['startDate', {
         getValue({ registration }) {
             return registration.startDate;
         },
@@ -91,8 +91,8 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
                 direction,
             });
         },
-    },
-    'endDate': {
+    }],
+    ['endDate', {
         getValue({ registration }) {
             return registration.endDate;
         },
@@ -102,8 +102,8 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
                 direction,
             });
         },
-    },
-    'memberCachedBalance.amountOpen': {
+    }],
+    ['memberCachedBalance.amountOpen', {
         getValue({ registration }) {
             return registration.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0);
         },
@@ -115,8 +115,8 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
         },
         join: memberCachedBalanceForOrganizationJoin,
         select: [SQL.column('memberCachedBalance', 'amountOpen')],
-    },
-    'registrationCachedBalance.toPay': {
+    }],
+    ['registrationCachedBalance.toPay', {
         getValue({ registration }) {
             return registration.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPending), 0);
         },
@@ -128,8 +128,8 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
         },
         join: registrationCachedBalanceJoin,
         select: [SQL.column('registrationCachedBalance', 'toPay')],
-    },
-    'registrationCachedBalance.price': {
+    }],
+    ['registrationCachedBalance.price', {
         getValue({ registration }) {
             return registration.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending), 0);
         },
@@ -141,13 +141,13 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
         },
         join: registrationCachedBalanceJoin,
         select: [SQL.column('registrationCachedBalance', 'price')],
-    },
-    'member.memberNumber': createMemberColumnSorter({
+    }],
+    ['member.memberNumber', createMemberColumnSorter({
         columnName: 'memberNumber',
         getValue: member => member.details.memberNumber ?? '',
 
-    }),
-    'member.firstName': {
+    })],
+    ['member.firstName', {
         getValue({ registration }) {
             return registration.member.firstName;
         },
@@ -159,8 +159,8 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
         },
         join: memberJoin,
         select: [SQL.column(Member.table, 'firstName')],
-    },
-    'member.lastName': {
+    }],
+    ['member.lastName', {
         getValue({ registration }) {
             return registration.member.lastName;
         },
@@ -172,8 +172,8 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
         },
         join: memberJoin,
         select: [SQL.column(Member.table, 'lastName')],
-    },
-    'member.birthDay': {
+    }],
+    ['member.birthDay', {
         getValue({ registration }) {
             return registration.member.details.birthDay === null ? null : Formatter.dateIso(registration.member.details.birthDay);
         },
@@ -185,8 +185,8 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
         },
         join: memberJoin,
         select: [SQL.column(Member.table, 'birthDay')],
-    },
-    'member.createdAt': {
+    }],
+    ['member.createdAt', {
         getValue({ registration }) {
             return registration.member.createdAt;
         },
@@ -198,8 +198,8 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
         },
         join: memberJoin,
         select: [SQL.column(Member.table, 'createdAt')],
-    },
-    'organization.name': {
+    }],
+    ['organization.name', {
         getValue: ({ organization }) => organization.name,
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -209,8 +209,8 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
         },
         join: organizationJoin,
         select: [SQL.column(Organization.table, 'name')],
-    },
-    'organization.uri': {
+    }],
+    ['organization.uri', {
         getValue: ({ organization }) => organization.uri,
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -220,8 +220,8 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
         },
         join: organizationJoin,
         select: [SQL.column(Organization.table, 'uri')],
-    },
-    'group.name': {
+    }],
+    ['group.name', {
         getValue: ({ registration }) => registration.group.settings.name.toString(),
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -230,8 +230,8 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
             });
         },
         join: groupJoin,
-    },
-};
+    }],
+]);
 
 /**
  * Helper function for simple sort on member column

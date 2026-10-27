@@ -1,9 +1,9 @@
 import type { Invoice } from '@stamhoofd/models';
-import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 
-export const invoiceSorters: SQLSortDefinitions<Invoice> = {
+export const invoiceSorters: SQLSortDefinitions<Invoice> = new Map<string, SQLSortDefinition<Invoice>>([
     // WARNING! TEST NEW SORTERS THOROUGHLY!
     // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
     // An example: sorting on 'name' is not a good idea, because it is a concatenation of two fields.
@@ -12,7 +12,7 @@ export const invoiceSorters: SQLSortDefinitions<Invoice> = {
     // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
 
-    id: {
+    ['id', {
         getValue(a) {
             return a.id;
         },
@@ -22,8 +22,8 @@ export const invoiceSorters: SQLSortDefinitions<Invoice> = {
                 direction,
             });
         },
-    },
-    invoicedAt: {
+    }],
+    ['invoicedAt', {
         getValue(a) {
             return a.invoicedAt !== null ? Formatter.dateTimeIso(a.invoicedAt, 'UTC') : null;
         },
@@ -33,8 +33,8 @@ export const invoiceSorters: SQLSortDefinitions<Invoice> = {
                 direction,
             });
         },
-    },
-    createdAt: {
+    }],
+    ['createdAt', {
         getValue(a) {
             return Formatter.dateTimeIso(a.createdAt, 'UTC');
         },
@@ -44,9 +44,9 @@ export const invoiceSorters: SQLSortDefinitions<Invoice> = {
                 direction,
             });
         },
-    },
+    }],
 
-    totalWithVAT: {
+    ['totalWithVAT', {
         getValue(a) {
             return a.totalWithVAT;
         },
@@ -56,9 +56,9 @@ export const invoiceSorters: SQLSortDefinitions<Invoice> = {
                 direction,
             });
         },
-    },
+    }],
 
-    totalWithoutVAT: {
+    ['totalWithoutVAT', {
         getValue(a) {
             return a.totalWithoutVAT;
         },
@@ -68,9 +68,9 @@ export const invoiceSorters: SQLSortDefinitions<Invoice> = {
                 direction,
             });
         },
-    },
+    }],
 
-    VATTotalAmount: {
+    ['VATTotalAmount', {
         getValue(a) {
             return a.VATTotalAmount;
         },
@@ -80,5 +80,5 @@ export const invoiceSorters: SQLSortDefinitions<Invoice> = {
                 direction,
             });
         },
-    },
-};
+    }],
+]);

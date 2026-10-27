@@ -1,9 +1,9 @@
 import type { Group } from '@stamhoofd/models';
-import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 
-export const groupSorters: SQLSortDefinitions<Group> = {
+export const groupSorters: SQLSortDefinitions<Group> = new Map<string, SQLSortDefinition<Group>>([
     // WARNING! TEST NEW SORTERS THOROUGHLY!
     // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
     // An example: sorting on 'name' is not a good idea, because it is a concatenation of two fields.
@@ -12,7 +12,7 @@ export const groupSorters: SQLSortDefinitions<Group> = {
     // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
 
-    id: {
+    ['id', {
         getValue(a) {
             return a.id;
         },
@@ -22,8 +22,8 @@ export const groupSorters: SQLSortDefinitions<Group> = {
                 direction,
             });
         },
-    },
-    periodId: {
+    }],
+    ['periodId', {
         getValue(a) {
             return a.periodId;
         },
@@ -33,8 +33,8 @@ export const groupSorters: SQLSortDefinitions<Group> = {
                 direction,
             });
         },
-    },
-    name: {
+    }],
+    ['name', {
         getValue(a) {
             return a.settings.name.toString();
         },
@@ -44,5 +44,5 @@ export const groupSorters: SQLSortDefinitions<Group> = {
                 direction,
             });
         },
-    },
-};
+    }],
+]);

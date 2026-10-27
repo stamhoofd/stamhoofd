@@ -6,7 +6,8 @@ export type SortDefinition<T, B extends PlainObject | Date = PlainObject | Date>
     getValue(a: T): B;
 };
 
-export type SortDefinitions<T> = Record<string, SortDefinition<T>>;
+/** Exact-key registry used for cursor filters; extracted values may be undefined. */
+export type SortDefinitions<T> = Map<string, SortDefinition<T>>;
 
 function sorterGetNextFilter<O>(lastObject: O, sortDefinitions: SortDefinitions<O>, list: SortList) {
     if (!lastObject) {
@@ -18,8 +19,8 @@ function sorterGetNextFilter<O>(lastObject: O, sortDefinitions: SortDefinitions<
         return null;
     }
 
-    const definition = sortDefinitions[first.key];
-    if (!definition) {
+    const definition = sortDefinitions.get(first.key);
+    if (definition === undefined) {
         throw new Error('Unknown sort key ' + first.key);
     }
 

@@ -1,10 +1,10 @@
 import type { Webshop } from '@stamhoofd/models';
-import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 
-export const webshopSorters: SQLSortDefinitions<Webshop> = {
-    id: {
+export const webshopSorters: SQLSortDefinitions<Webshop> = new Map<string, SQLSortDefinition<Webshop>>([
+    ['id', {
         getValue(a) {
             return a.id;
         },
@@ -14,8 +14,8 @@ export const webshopSorters: SQLSortDefinitions<Webshop> = {
                 direction,
             });
         },
-    },
-    name: {
+    }],
+    ['name', {
         getValue(a) {
             return a.meta.name;
         },
@@ -25,8 +25,8 @@ export const webshopSorters: SQLSortDefinitions<Webshop> = {
                 direction,
             });
         },
-    },
-    createdAt: {
+    }],
+    ['createdAt', {
         getValue(a) {
             return Formatter.dateTimeIso(a.createdAt, 'UTC');
         },
@@ -36,5 +36,5 @@ export const webshopSorters: SQLSortDefinitions<Webshop> = {
                 direction,
             });
         },
-    },
-};
+    }],
+]);

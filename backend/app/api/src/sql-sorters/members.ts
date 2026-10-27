@@ -1,12 +1,12 @@
 import type { MemberWithUsersRegistrationsAndGroups } from '@stamhoofd/models';
-import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLIfNull, SQLOrderBy } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 import { memberCachedBalanceJoinForOrganization } from '../helpers/outstandingBalanceJoin.js';
 import { throwIfNoFinancialReadAccess } from '../sql-filters/members.js';
 
 export const memberSorters = (organizationId: string | null = null): SQLSortDefinitions<MemberWithUsersRegistrationsAndGroups> => {
-    const sorters: SQLSortDefinitions<MemberWithUsersRegistrationsAndGroups> = {
+    const sorters: SQLSortDefinitions<MemberWithUsersRegistrationsAndGroups> = new Map<string, SQLSortDefinition<MemberWithUsersRegistrationsAndGroups>>([
         // WARNING! TEST NEW SORTERS THOROUGHLY!
         // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
         // An example: sorting on 'name' is not a good idea, because it is a concatenation of two fields.
@@ -14,7 +14,7 @@ export const memberSorters = (organizationId: string | null = null): SQLSortDefi
         // Why? Because ORDER BY firstName, lastName produces a different order dan ORDER BY CONCAT(firstName, ' ', lastName) if there are multiple people with spaces in the first name
         // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
         // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
-        id: {
+        ['id', {
             getValue(a) {
                 return a.id;
             },
@@ -24,8 +24,8 @@ export const memberSorters = (organizationId: string | null = null): SQLSortDefi
                     direction,
                 });
             },
-        },
-        memberNumber: {
+        }],
+        ['memberNumber', {
             getValue(a) {
                 return a.memberNumber;
             },
@@ -35,8 +35,8 @@ export const memberSorters = (organizationId: string | null = null): SQLSortDefi
                     direction,
                 });
             },
-        },
-        firstName: {
+        }],
+        ['firstName', {
             getValue(a) {
                 return a.firstName;
             },
@@ -46,8 +46,8 @@ export const memberSorters = (organizationId: string | null = null): SQLSortDefi
                     direction,
                 });
             },
-        },
-        lastName: {
+        }],
+        ['lastName', {
             getValue(a) {
                 return a.lastName;
             },
@@ -57,8 +57,8 @@ export const memberSorters = (organizationId: string | null = null): SQLSortDefi
                     direction,
                 });
             },
-        },
-        birthDay: {
+        }],
+        ['birthDay', {
             getValue(a) {
                 return a.details.birthDay ? Formatter.dateIso(a.details.birthDay) : null;
             },
@@ -68,8 +68,8 @@ export const memberSorters = (organizationId: string | null = null): SQLSortDefi
                     direction,
                 });
             },
-        },
-        createdAt: {
+        }],
+        ['createdAt', {
             getValue(a) {
                 return Formatter.dateTimeIso(a.createdAt, 'UTC');
             },
@@ -79,8 +79,8 @@ export const memberSorters = (organizationId: string | null = null): SQLSortDefi
                     direction,
                 });
             },
-        },
-        lastRegisteredAt: {
+        }],
+        ['lastRegisteredAt', {
             getValue(a) {
                 return a.lastRegisteredAt ? Formatter.dateTimeIso(a.lastRegisteredAt, 'UTC') : null;
             },
@@ -90,11 +90,11 @@ export const memberSorters = (organizationId: string | null = null): SQLSortDefi
                     direction,
                 });
             },
-        },
-    };
+        }],
+    ]);
 
     if (organizationId) {
-        sorters['memberCachedBalance.amountOpen'] = {
+        sorters.set('memberCachedBalance.amountOpen', {
             getValue(a) {
                 const row = a.rawSelectedRow?.['memberCachedBalance'];
                 if (!row) {
@@ -111,7 +111,7 @@ export const memberSorters = (organizationId: string | null = null): SQLSortDefi
             join: memberCachedBalanceJoinForOrganization(organizationId),
             select: [SQL.column('memberCachedBalance', 'amountOpen')],
             checkPermission: throwIfNoFinancialReadAccess,
-        };
+        });
     }
 
     return sorters;

@@ -1,6 +1,6 @@
 import { AutoEncoder, field, NumberDecoder, StringDecoder } from '@common/encoding';
 import type { InMemoryFilterDefinitions } from '@stamhoofd/structures/filters/InMemoryFilter.js';
-import type { SortDefinitions } from '@stamhoofd/filters/Sorters';
+import type { SortDefinition, SortDefinitions } from '@stamhoofd/filters/Sorters';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilterTypes';
 import type { PrivateOrder } from '@stamhoofd/structures/webshops/Order.js';
 import { baseInMemoryFilterCompilers, createInMemoryFilterCompiler } from '@stamhoofd/structures/filters/InMemoryFilter.js';
@@ -28,58 +28,58 @@ export enum OrderIndexedDBIndex {
 /**
  * Don't forget to add the required in memory filters.
  */
-export const ordersIndexedDBSorters: SortDefinitions<PrivateOrder> = {
-    id: {
+export const ordersIndexedDBSorters: SortDefinitions<PrivateOrder> = new Map<string, SortDefinition<PrivateOrder>>([
+    ['id', {
         getValue: value => value.id,
-    },
-    [OrderIndexedDBIndex.CreatedAt]: {
+    }],
+    [OrderIndexedDBIndex.CreatedAt, {
         getValue: value => value.createdAt.getTime(),
-    },
-    [OrderIndexedDBIndex.Number]: {
+    }],
+    [OrderIndexedDBIndex.Number, {
         getValue: value => value.number,
-    },
-    [OrderIndexedDBIndex.Status]: {
+    }],
+    [OrderIndexedDBIndex.Status, {
         getValue: value => value.status,
-    },
-    [OrderIndexedDBIndex.PaymentMethod]: {
+    }],
+    [OrderIndexedDBIndex.PaymentMethod, {
         getValue: value => value.data.paymentMethod,
-    },
-    [OrderIndexedDBIndex.CheckoutMethod]: {
+    }],
+    [OrderIndexedDBIndex.CheckoutMethod, {
         getValue: value => value.data.checkoutMethod?.type,
-    },
-    [OrderIndexedDBIndex.TimeSlotDate]: {
+    }],
+    [OrderIndexedDBIndex.TimeSlotDate, {
         getValue: value => value.data.timeSlot?.date.getTime(),
-    },
-    [OrderIndexedDBIndex.ValidAt]: {
+    }],
+    [OrderIndexedDBIndex.ValidAt, {
         getValue: value => value.validAt?.getTime(),
-    },
-    [OrderIndexedDBIndex.Name]: {
+    }],
+    [OrderIndexedDBIndex.Name, {
         getValue: value => value.data.customer.name,
-    },
-    [OrderIndexedDBIndex.Email]: {
+    }],
+    [OrderIndexedDBIndex.Email, {
         getValue: value => value.data.customer.email,
-    },
-    [OrderIndexedDBIndex.Phone]: {
+    }],
+    [OrderIndexedDBIndex.Phone, {
         getValue: value => value.data.customer.phone,
-    },
+    }],
 
     // Generated (these are stored in the indexes)
-    [OrderIndexedDBIndex.TotalPrice]: {
+    [OrderIndexedDBIndex.TotalPrice, {
         getValue: value => value.data.totalPrice,
-    },
-    [OrderIndexedDBIndex.Amount]: {
+    }],
+    [OrderIndexedDBIndex.Amount, {
         getValue: value => value.data.amount,
-    },
-    [OrderIndexedDBIndex.OpenBalance]: {
+    }],
+    [OrderIndexedDBIndex.OpenBalance, {
         getValue: value => value.openBalance,
-    },
-    [OrderIndexedDBIndex.Location]: {
+    }],
+    [OrderIndexedDBIndex.Location, {
         getValue: value => value.data.locationName,
-    },
-    [OrderIndexedDBIndex.TimeSlotTime]: {
+    }],
+    [OrderIndexedDBIndex.TimeSlotTime, {
         getValue: value => value.data.timeSlot?.timeIndex,
-    },
-};
+    }],
+]);
 
 export type OrderIndexKey = OrderIndexedDBIndex | 'id';
 
@@ -322,7 +322,7 @@ export function getPrivateOrderIndexes(order: PrivateOrder): PrivateOrderEncodea
     return PrivateOrderEncodeableIndexes.create(
         Object.fromEntries(
             Object.values(OrderIndexedDBIndex).map((generatedIndex) => {
-                const getIndex = ordersIndexedDBSorters[generatedIndex].getValue;
+                const getIndex = ordersIndexedDBSorters.get(generatedIndex)!.getValue;
                 let index = getIndex(order);
 
                 if (typeof index === 'string') {

@@ -1,9 +1,9 @@
 import type { Event } from '@stamhoofd/models';
-import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 
-export const eventSorters: SQLSortDefinitions<Event> = {
+export const eventSorters: SQLSortDefinitions<Event> = new Map<string, SQLSortDefinition<Event>>([
     // WARNING! TEST NEW SORTERS THOROUGHLY!
     // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
     // An example: sorting on 'name' is not a good idea, because it is a concatenation of two fields.
@@ -12,7 +12,7 @@ export const eventSorters: SQLSortDefinitions<Event> = {
     // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
 
-    id: {
+    ['id', {
         getValue(a) {
             return a.id;
         },
@@ -22,8 +22,8 @@ export const eventSorters: SQLSortDefinitions<Event> = {
                 direction,
             });
         },
-    },
-    name: {
+    }],
+    ['name', {
         getValue(a) {
             return a.name;
         },
@@ -33,8 +33,8 @@ export const eventSorters: SQLSortDefinitions<Event> = {
                 direction,
             });
         },
-    },
-    startDate: {
+    }],
+    ['startDate', {
         getValue(a) {
             return Formatter.dateTimeIso(a.startDate, 'UTC');
         },
@@ -44,8 +44,8 @@ export const eventSorters: SQLSortDefinitions<Event> = {
                 direction,
             });
         },
-    },
-    endDate: {
+    }],
+    ['endDate', {
         getValue(a) {
             return Formatter.dateTimeIso(a.endDate, 'UTC');
         },
@@ -55,5 +55,5 @@ export const eventSorters: SQLSortDefinitions<Event> = {
                 direction,
             });
         },
-    },
-};
+    }],
+]);

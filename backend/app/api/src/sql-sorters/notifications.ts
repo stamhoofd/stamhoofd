@@ -1,12 +1,12 @@
 import type { NotificationRecipient } from '@stamhoofd/models/models/NotificationRecipient.js';
-import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 
 /**
  * Only the recipient id is sortable: it is a uuidv7, so it follows creation order and is indexed per user.
  */
-export const notificationSorters: SQLSortDefinitions<NotificationRecipient> = {
-    id: {
+export const notificationSorters: SQLSortDefinitions<NotificationRecipient> = new Map<string, SQLSortDefinition<NotificationRecipient>>([
+    ['id', {
         getValue(a) {
             return a.id;
         },
@@ -16,5 +16,5 @@ export const notificationSorters: SQLSortDefinitions<NotificationRecipient> = {
                 direction,
             });
         },
-    },
-};
+    }],
+]);

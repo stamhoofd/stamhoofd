@@ -11,13 +11,14 @@ export type InMemorySortDefinition<T, B extends PlainObject = PlainObject> = Sor
     sort: InMemorySorter<T>;
 };
 
-export type InMemorySortDefinitions<T> = Record<string, InMemorySortDefinition<T>>;
+/** Exact-key in-memory sorter registry, shared with cursor pagination. */
+export type InMemorySortDefinitions<T> = Map<string, InMemorySortDefinition<T>>;
 
 export function compileToInMemorySorter<T>(sortBy: SortList, definitions: InMemorySortDefinitions<T>): InMemorySorter<T> {
     const sorters: InMemorySorter<T>[] = [];
     for (const s of sortBy) {
-        const d = definitions[s.key];
-        if (!d) {
+        const d = definitions.get(s.key);
+        if (d === undefined) {
             throw new Error('Unknown sort key ' + s.key);
         }
 
@@ -40,45 +41,45 @@ export function compileToInMemorySorter<T>(sortBy: SortList, definitions: InMemo
 }
 
 // EXAMPLE (should move)
-export const memberInMemorySorters: InMemorySortDefinitions<MemberSummary> = {
-    id: {
+export const memberInMemorySorters: InMemorySortDefinitions<MemberSummary> = new Map<string, InMemorySortDefinition<MemberSummary>>([
+    ['id', {
         getValue(a) {
             return a.id;
         },
         sort: (a, b) => {
             return Sorter.byStringValue(a.id, b.id);
         },
-    },
-    name: {
+    }],
+    ['name', {
         getValue(a) {
             return a.name;
         },
         sort: (a, b) => {
             return Sorter.byStringValue(a.name, b.name);
         },
-    },
-    birthDay: {
+    }],
+    ['birthDay', {
         getValue(a) {
             return a.birthDay?.getTime() ?? 0;
         },
         sort: (a, b) => {
             return Sorter.byNumberValue(b.birthDay?.getTime() ?? 0, a.birthDay?.getTime() ?? 0);
         },
-    },
-    organizationName: {
+    }],
+    ['organizationName', {
         getValue(a) {
             return a.organizationName;
         },
         sort: (a, b) => {
             return Sorter.byStringValue(b.organizationName, a.organizationName);
         },
-    },
-    email: {
+    }],
+    ['email', {
         getValue(a) {
             return a.email;
         },
         sort: (a, b) => {
             return Sorter.byStringValue(b.email ?? '', a.email ?? '');
         },
-    },
-};
+    }],
+]);

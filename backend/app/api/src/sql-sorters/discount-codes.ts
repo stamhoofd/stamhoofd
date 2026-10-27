@@ -1,10 +1,10 @@
 import type { WebshopDiscountCode } from '@stamhoofd/models';
-import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 
-export const discountCodeSorters: SQLSortDefinitions<WebshopDiscountCode> = {
-    id: {
+export const discountCodeSorters: SQLSortDefinitions<WebshopDiscountCode> = new Map<string, SQLSortDefinition<WebshopDiscountCode>>([
+    ['id', {
         getValue(code) {
             return code.id;
         },
@@ -14,8 +14,8 @@ export const discountCodeSorters: SQLSortDefinitions<WebshopDiscountCode> = {
                 direction,
             });
         },
-    },
-    code: {
+    }],
+    ['code', {
         getValue(code) {
             return code.code;
         },
@@ -25,8 +25,8 @@ export const discountCodeSorters: SQLSortDefinitions<WebshopDiscountCode> = {
                 direction,
             });
         },
-    },
-    email: {
+    }],
+    ['email', {
         getValue(code) {
             return code.email;
         },
@@ -36,8 +36,8 @@ export const discountCodeSorters: SQLSortDefinitions<WebshopDiscountCode> = {
                 direction,
             });
         },
-    },
-    usageCount: {
+    }],
+    ['usageCount', {
         getValue(code) {
             return code.usageCount;
         },
@@ -47,8 +47,8 @@ export const discountCodeSorters: SQLSortDefinitions<WebshopDiscountCode> = {
                 direction,
             });
         },
-    },
-    createdAt: {
+    }],
+    ['createdAt', {
         getValue(code) {
             return Formatter.dateTimeIso(code.createdAt, 'UTC');
         },
@@ -58,5 +58,5 @@ export const discountCodeSorters: SQLSortDefinitions<WebshopDiscountCode> = {
                 direction,
             });
         },
-    },
-};
+    }],
+]);

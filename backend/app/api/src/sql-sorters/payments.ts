@@ -1,9 +1,9 @@
 import type { Payment } from '@stamhoofd/models';
-import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 
-export const paymentSorters: SQLSortDefinitions<Payment> = {
+export const paymentSorters: SQLSortDefinitions<Payment> = new Map<string, SQLSortDefinition<Payment>>([
     // WARNING! TEST NEW SORTERS THOROUGHLY!
     // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
     // An example: sorting on 'name' is not a good idea, because it is a concatenation of two fields.
@@ -12,7 +12,7 @@ export const paymentSorters: SQLSortDefinitions<Payment> = {
     // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
 
-    id: {
+    ['id', {
         getValue(a) {
             return a.id;
         },
@@ -22,8 +22,8 @@ export const paymentSorters: SQLSortDefinitions<Payment> = {
                 direction,
             });
         },
-    },
-    createdAt: {
+    }],
+    ['createdAt', {
         getValue(a) {
             return Formatter.dateTimeIso(a.createdAt, 'UTC');
         },
@@ -33,8 +33,8 @@ export const paymentSorters: SQLSortDefinitions<Payment> = {
                 direction,
             });
         },
-    },
-    paidAt: {
+    }],
+    ['paidAt', {
         getValue(a) {
             return a.paidAt !== null ? Formatter.dateTimeIso(a.paidAt, 'UTC') : null;
         },
@@ -44,8 +44,8 @@ export const paymentSorters: SQLSortDefinitions<Payment> = {
                 direction,
             });
         },
-    },
-    price: {
+    }],
+    ['price', {
         getValue(a) {
             return a.price;
         },
@@ -55,8 +55,8 @@ export const paymentSorters: SQLSortDefinitions<Payment> = {
                 direction,
             });
         },
-    },
-    hasInvoice: {
+    }],
+    ['hasInvoice', {
         getValue(a) {
             return a.invoiceId ? 1 : 0;
         },
@@ -66,8 +66,8 @@ export const paymentSorters: SQLSortDefinitions<Payment> = {
                 direction,
             });
         },
-    },
-    method: {
+    }],
+    ['method', {
         getValue(a) {
             return a.method;
         },
@@ -77,8 +77,8 @@ export const paymentSorters: SQLSortDefinitions<Payment> = {
                 direction,
             });
         },
-    },
-    type: {
+    }],
+    ['type', {
         getValue(a) {
             return a.type;
         },
@@ -88,5 +88,5 @@ export const paymentSorters: SQLSortDefinitions<Payment> = {
                 direction,
             });
         },
-    },
-};
+    }],
+]);

@@ -1,10 +1,10 @@
 import type { SQLResultNamespacedRow } from '@node/database';
-import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 import { organizationJoin } from '../sql-filters/event-notifications.js';
 
-export const eventNotificationsSorters: SQLSortDefinitions<SQLResultNamespacedRow> = {
+export const eventNotificationsSorters: SQLSortDefinitions<SQLResultNamespacedRow> = new Map<string, SQLSortDefinition<SQLResultNamespacedRow>>([
     // WARNING! TEST NEW SORTERS THOROUGHLY!
     // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
     // An example: sorting on 'name' is not a good idea, because it is a concatenation of two fields.
@@ -13,7 +13,7 @@ export const eventNotificationsSorters: SQLSortDefinitions<SQLResultNamespacedRo
     // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
 
-    'id': {
+    ['id', {
         getValue(a) {
             return a['event_notifications'].id;
         },
@@ -23,8 +23,8 @@ export const eventNotificationsSorters: SQLSortDefinitions<SQLResultNamespacedRo
                 direction,
             });
         },
-    },
-    'status': {
+    }],
+    ['status', {
         getValue(a) {
             return a['event_notifications'].status;
         },
@@ -34,8 +34,8 @@ export const eventNotificationsSorters: SQLSortDefinitions<SQLResultNamespacedRo
                 direction,
             });
         },
-    },
-    'startDate': {
+    }],
+    ['startDate', {
         getValue(a) {
             return Formatter.dateTimeIso(a['event_notifications'].startDate as Date, 'UTC');
         },
@@ -45,8 +45,8 @@ export const eventNotificationsSorters: SQLSortDefinitions<SQLResultNamespacedRo
                 direction,
             });
         },
-    },
-    'endDate': {
+    }],
+    ['endDate', {
         getValue(a) {
             return Formatter.dateTimeIso(a['event_notifications'].endDate as Date, 'UTC');
         },
@@ -56,8 +56,8 @@ export const eventNotificationsSorters: SQLSortDefinitions<SQLResultNamespacedRo
                 direction,
             });
         },
-    },
-    'submittedAt': {
+    }],
+    ['submittedAt', {
         getValue(a) {
             return a['event_notifications'].submittedAt !== null ? Formatter.dateTimeIso(a['event_notifications'].submittedAt as Date, 'UTC') : null;
         },
@@ -67,8 +67,8 @@ export const eventNotificationsSorters: SQLSortDefinitions<SQLResultNamespacedRo
                 direction,
             });
         },
-    },
-    'organization.name': {
+    }],
+    ['organization.name', {
         getValue(a) {
             return a.organizations.name;
         },
@@ -80,8 +80,8 @@ export const eventNotificationsSorters: SQLSortDefinitions<SQLResultNamespacedRo
         },
         join: organizationJoin,
         select: [SQL.column('organizations', 'name')],
-    },
-    'organization.uriPadded': {
+    }],
+    ['organization.uriPadded', {
         getValue(a) {
             return (a.organizations.uri as string).padStart(10, '0');
         },
@@ -93,5 +93,5 @@ export const eventNotificationsSorters: SQLSortDefinitions<SQLResultNamespacedRo
         },
         join: organizationJoin,
         select: [SQL.column('organizations', 'uri')],
-    },
-};
+    }],
+]);
