@@ -11,7 +11,7 @@ Please check our [README.md](https://github.com/stamhoofd/stamhoofd)
 
 ## Stack
 
-- Node.js + TypeScript backend. We use our own routing engine as a replacement for Express.js or something similar. This library is documented in [this](https://github.com/SimonBackx/simple-endpoints/blob/master/docs/endpoints.md) guide
+- Node.js + TypeScript backend. We use our own routing engine as a replacement for Express.js or something similar. This library is documented in [this](../packages/node/endpoints/docs/endpoints.md) guide
 - [Vue.js](https://vuejs.org/) (TS) + [Vite](https://vite.dev/) frontend
 - [Capacitor](https://capacitorjs.com/) for the mobile app
 - We use a number of custom-built libraries, mostly for frontend work or for sharing code between the frontend and backend. They’re all documented here. It might take a bit to get used to them, but once you do, you’ll see how much easier and more reusable they make our code.
@@ -49,7 +49,7 @@ Please check our [README.md](https://github.com/stamhoofd/stamhoofd)
 ## Backend guides
 
 
-[Writing endpoints](https://github.com/SimonBackx/simple-endpoints/blob/master/docs/endpoints.md)
+[Writing endpoints](../packages/node/endpoints/docs/endpoints.md)
 
 [Storing data in the database](https://github.com/SimonBackx/simple-database/blob/master/docs/models.md)
 

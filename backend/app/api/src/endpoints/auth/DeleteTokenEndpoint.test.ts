@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { OrganizationFactory, Token, UserFactory, UserSession } from '@stamhoofd/models';
 
 import { testServer } from '../../../tests/helpers/TestServer.js';

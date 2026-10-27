@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import { EmailTemplateFactory, OrganizationFactory, WebshopFactory } from '@stamhoofd/models';
 import { Cart, CartItem, Customer, EmailContent, EmailTemplateType, OrderData, PaymentMethod, Product, ProductPrice } from '@stamhoofd/structures';

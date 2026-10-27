@@ -1,5 +1,5 @@
 import type { AutoEncoderPatchType } from '@common/encoding';
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { SimpleError } from '@common/errors';
 import { isSimpleError, isSimpleErrors } from '@common/errors';
 import type { Organization } from '@stamhoofd/models';

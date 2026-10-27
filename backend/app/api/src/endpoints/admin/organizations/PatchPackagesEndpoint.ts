@@ -1,6 +1,6 @@
 import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
-import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
+import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { Organization, Platform, STPackage } from '@stamhoofd/models';
 import { BalanceItemStatus, OrganizationPackagesStatus, STPackage as STPackageStruct } from '@stamhoofd/structures';

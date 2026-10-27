@@ -1,4 +1,4 @@
-import { Decoder, Encodeable } from '@simonbackx/simple-encoding';
+import { Decoder, Encodeable } from '@common/encoding';
 import http from 'http';
 import { Readable } from 'node:stream';
 

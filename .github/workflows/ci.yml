@@ -98,6 +98,7 @@ jobs:
                         - 'shared/**'
                         - 'packages/common/**'
                         - 'backend/**'
+                        - 'packages/node/**'
                       backend_shared:
                         - 'package.json'
                         - 'pnpm-lock.yaml'
@@ -106,6 +107,7 @@ jobs:
                         - 'shared/**'
                         - 'packages/common/**'
                         - 'backend/shared/**'
+                        - 'packages/node/**'
                       frontend:
                         - 'package.json'
                         - 'pnpm-lock.yaml'
@@ -132,6 +134,7 @@ jobs:
                         - 'packages/common/**'
                         - 'frontend/**'
                         - 'backend/**'
+                        - 'packages/node/**'
                         - '.development/Corefile'
                         - '.development/loadenv.sh'
                       # Changing the workflow itself (or the shared setup action) can affect
@@ -168,7 +171,7 @@ jobs:
                         backend_apps=true; backend_shared=true; frontend=true; shared=true; playwright=true ;;
                       shared/*|packages/common/*)
                         backend_apps=true; backend_shared=true; frontend=true; shared=true; playwright=true ;;
-                      backend/shared/*) backend_apps=true; backend_shared=true; playwright=true ;;
+                      backend/shared/*|packages/node/*) backend_apps=true; backend_shared=true; playwright=true ;;
                       backend/*) backend_apps=true; playwright=true ;;
                       frontend/*) frontend=true; playwright=true ;;
                       tests/playwright/*|.development/Corefile|.development/loadenv.sh) playwright=true ;;
@@ -269,8 +272,11 @@ jobs:
                       shared/*/dist-types
                       shared/*/.cache/*.tsbuildinfo
                       packages/common/*/dist
+                      packages/node/*/dist
                       packages/common/*/dist-types
+                      packages/node/*/dist-types
                       packages/common/*/.cache/*.tsbuildinfo
+                      packages/node/*/.cache/*.tsbuildinfo
                       backend/shared/*/dist
                       backend/shared/*/dist-types
                       backend/shared/*/.cache/*.tsbuildinfo

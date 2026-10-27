@@ -1,0 +1,19 @@
+{
+    "extends": [
+        "./tsconfig.json",
+        "../../../tsconfig.runtime.json"
+    ],
+    "compilerOptions": {
+        "rootDir": ".",
+        "outDir": "dist",
+        "tsBuildInfoFile": ".cache/build.tsbuildinfo"
+    },
+    "include": [
+        "index.ts",
+        "src/**/*.ts"
+    ],
+    "exclude": [
+        "src/**/*.test.ts",
+        "src/**/*.spec.ts"
+    ]
+}

@@ -1,4 +1,4 @@
-import { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
+import { DecodedRequest, Request } from '@node/endpoints';
 import { OrganizationFactory, Platform, Token, User, UserFactory } from '@stamhoofd/models';
 import { LoginMethod, LoginMethodConfig, LoginProviderType, OpenIDClientConfiguration, Permissions, SessionClientType, UserMeta } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';

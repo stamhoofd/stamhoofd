@@ -1,10 +1,10 @@
-import { DecodedRequest } from '@simonbackx/simple-endpoints';
+import { DecodedRequest } from '@node/endpoints';
 import { I18n } from './I18n.js';
 
 export * from './I18n.js';
 
 // Extend decoded request here
-declare module '@simonbackx/simple-endpoints' {
+declare module '@node/endpoints' {
     interface DecodedRequest<Params, Query, Body> {
         get i18n(): I18n;
         $t(key: string, replace?: Record<string, string>): string;

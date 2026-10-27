@@ -1,7 +1,7 @@
 import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
 import { isPatchableArray, patchObject } from '@common/encoding';
-import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
-import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
+import { Endpoint, Response } from '@node/endpoints';
 import { Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import type { EventNotificationType, MemberResponsibility, PlatformPremiseType } from '@stamhoofd/structures';
 import { Platform as PlatformStruct, PlatformConfig } from '@stamhoofd/structures';

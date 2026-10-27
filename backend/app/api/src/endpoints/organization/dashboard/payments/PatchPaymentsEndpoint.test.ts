@@ -1,6 +1,6 @@
 import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { Organization, Token } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemFactory, BalanceItemPayment, MolliePayment, Order, OrganizationFactory, Payment, WebshopFactory } from '@stamhoofd/models';
 import { BalanceItemDetailed, BalanceItemPaymentDetailed, Company, OrderData, OrderStatus, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, Version } from '@stamhoofd/structures';

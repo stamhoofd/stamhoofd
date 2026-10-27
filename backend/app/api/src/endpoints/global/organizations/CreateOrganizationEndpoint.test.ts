@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { Organization } from '@stamhoofd/models';
 import { Address, CreateOrganization, NewUser, Organization as OrganizationStruct, OrganizationMetaData, OrganizationPackages, STPackageStatus, STPackageType, UitpasClientCredentialsStatus, Version } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';

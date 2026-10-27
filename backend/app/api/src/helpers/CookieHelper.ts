@@ -1,4 +1,4 @@
-import type { Response } from '@simonbackx/simple-endpoints';
+import type { Response } from '@node/endpoints';
 import * as cookie from 'cookie';
 import type http from 'http';
 

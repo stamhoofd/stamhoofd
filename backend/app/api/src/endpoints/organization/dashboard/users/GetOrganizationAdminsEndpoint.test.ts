@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { Organization, User } from '@stamhoofd/models';
 import { MFATOTP, OrganizationFactory, Token, UserFactory, WebauthnCredential } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

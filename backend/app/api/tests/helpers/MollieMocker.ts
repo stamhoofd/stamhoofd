@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { Organization } from '@stamhoofd/models';
 import { MollieToken } from '@stamhoofd/models';
 import { Version } from '@stamhoofd/structures';

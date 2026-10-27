@@ -1,5 +1,5 @@
-import type { Endpoint } from '@simonbackx/simple-endpoints';
-import { Request } from '@simonbackx/simple-endpoints';
+import type { Endpoint } from '@node/endpoints';
+import { Request } from '@node/endpoints';
 import { Database } from '@simonbackx/simple-database';
 import type { User } from '@stamhoofd/models';
 import { MemberFactory, OrganizationFactory, OrganizationTagFactory, RegistrationFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';

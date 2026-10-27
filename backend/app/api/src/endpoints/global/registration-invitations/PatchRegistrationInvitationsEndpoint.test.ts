@@ -1,6 +1,6 @@
 import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { Organization, User } from '@stamhoofd/models';
 import { GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationInvitation, RegistrationInvitationFactory, Token, UserFactory } from '@stamhoofd/models';
 import type { RegistrationInvitation as RegistrationInvitationStruct } from '@stamhoofd/structures';

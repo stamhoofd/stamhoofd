@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { Token } from '@stamhoofd/models';
 import { BalanceItem, BlockedPaymentMandate, GroupFactory, MemberFactory, Organization, OrganizationFactory, RegistrationFactory, STPackage, STPackageFactory } from '@stamhoofd/models';
 import {

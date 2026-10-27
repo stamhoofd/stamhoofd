@@ -1,4 +1,4 @@
-import { Encodeable } from '@simonbackx/simple-encoding';
+import { Encodeable } from '@common/encoding';
 
 import { EncodedResponse } from './EncodedResponse.js';
 import { Endpoint } from './Endpoint.js';

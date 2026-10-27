@@ -1,5 +1,5 @@
 import { Database } from '@simonbackx/simple-database';
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { OrganizationFactory, Platform, ROOT_TENANT_ID } from '@stamhoofd/models';
 import { Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';

@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { Organization, Ticket, User, Webshop } from '@stamhoofd/models';
 import { GroupFactory, OrderFactory, OrganizationFactory, TicketFactory, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import type { CountResponse, PaginatedResponse, StamhoofdFilter, TicketPrivate } from '@stamhoofd/structures';

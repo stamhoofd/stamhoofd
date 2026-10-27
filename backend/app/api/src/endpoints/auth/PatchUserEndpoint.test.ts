@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { Member, MemberFactory, OrganizationFactory, UserFactory } from '@stamhoofd/models';
 
 import { LoginProviderType, NewUser, PermissionRole, Permissions, UserMeta, UserPermissions } from '@stamhoofd/structures';

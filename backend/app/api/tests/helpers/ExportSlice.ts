@@ -1,4 +1,4 @@
-import { Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import { Endpoint, Request, Response } from '@node/endpoints';
 import type { Organization, User } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import type { StamhoofdFilter } from '@stamhoofd/structures';

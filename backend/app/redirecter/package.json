@@ -24,7 +24,7 @@
     },
     "dependencies": {
         "@simonbackx/simple-database": "1.40.1",
-        "@simonbackx/simple-endpoints": "1.23.0",
+        "@node/endpoints": "workspace:*",
         "@simonbackx/simple-logging": "1.0.1",
         "@stamhoofd/backend-env": "workspace:*",
         "@stamhoofd/backend-middleware": "workspace:*",
