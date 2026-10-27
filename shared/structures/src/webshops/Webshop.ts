@@ -170,6 +170,14 @@ export class Webshop extends AutoEncoder {
     meta = WebshopMetaData.create({});
 
     @field({ decoder: new ArrayDecoder(Product) })
+    @field({
+        decoder: new ArrayDecoder(Product),
+        version: 424,
+        // Older clients don't know that a null allowMultiple follows the order mode: send them the result
+        downgrade: function (this: Webshop, products: Product[]) {
+            return products.map(product => product.allowMultiple === null ? product.patch({ allowMultiple: this.allowsMultiple(product) }) : product);
+        },
+    })
     products: Product[] = [];
 
     @field({ decoder: new ArrayDecoder(Category) })

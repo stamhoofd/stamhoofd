@@ -48,3 +48,34 @@ describe('Webshop.allowsMultiple', () => {
         expect(createWebshop({ orderMode: WebshopOrderMode.Cart, products: [unique] }).allowsMultiple(unique)).toBe(false);
     });
 });
+
+/**
+ * 424 makes Product.allowMultiple nullable: older clients get the value that follows from the order mode
+ */
+describe('Webshop.products 423 <-> 424', () => {
+    function encodeAllowMultiple(webshop: Webshop, version: number) {
+        return (webshop.encode({ version }) as { products: { allowMultiple: boolean | null }[] }).products.map(p => p.allowMultiple);
+    }
+
+    function createProducts() {
+        return [
+            Product.create({ name: 'Follows', allowMultiple: null }),
+            Product.create({ name: 'Multiple', allowMultiple: true }),
+            Product.create({ name: 'Unique', allowMultiple: false }),
+        ];
+    }
+
+    it('sends the order mode of products without their own setting to an older client', () => {
+        expect(encodeAllowMultiple(createWebshop({ orderMode: WebshopOrderMode.Single, products: createProducts() }), 423)).toEqual([false, true, false]);
+        expect(encodeAllowMultiple(createWebshop({ orderMode: WebshopOrderMode.Cart, products: createProducts() }), 423)).toEqual([true, true, false]);
+        expect(encodeAllowMultiple(createWebshop({ orderMode: WebshopOrderMode.Bulk, products: createProducts() }), 423)).toEqual([true, true, false]);
+    });
+
+    it('keeps null on 424 and leaves the products unchanged', () => {
+        const webshop = createWebshop({ orderMode: WebshopOrderMode.Single, products: createProducts() });
+        expect(encodeAllowMultiple(webshop, 424)).toEqual([null, true, false]);
+
+        encodeAllowMultiple(webshop, 423);
+        expect(webshop.products[0].allowMultiple).toBeNull();
+    });
+});

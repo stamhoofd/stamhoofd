@@ -32,7 +32,7 @@ import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
 import type { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import type { ProductDateRange } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const props = withDefaults(defineProps<{ validator?: Validator | null }>(), {
     // Assign a validator if you want to offload the validation to components
@@ -68,7 +68,14 @@ function isSingleDay(range: ProductDateRange) {
     return getSingleDayEndDate(range.startDate, range.endDate).getTime() === range.endDate.getTime();
 }
 
-const multipleDaysCache = ref(model.value ? !isSingleDay(model.value) : false);
+const multipleDaysCache = ref(false);
+
+// The range can be filled in after setup, e.g. copied from another ticket by the parent when it mounts
+watch(() => model.value === null, (isNull) => {
+    if (!isNull && model.value) {
+        multipleDaysCache.value = !isSingleDay(model.value);
+    }
+}, { immediate: true });
 
 const multipleDays = computed({
     get: () => multipleDaysCache.value,

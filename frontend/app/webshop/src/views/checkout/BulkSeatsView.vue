@@ -45,6 +45,7 @@
 import { SimpleError } from '@common/errors';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { getSeatSelectionDescription, getSeatSelectionTitle } from '@stamhoofd/components/helpers/seatSelectionText.ts';
 import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
@@ -79,21 +80,10 @@ const items = computed(() => checkoutManager.cart.items.filter(i => i.product.id
 const amount = computed(() => items.value.length);
 const seats = ref<CartReservedSeat[]>(items.value.flatMap(i => i.seats));
 const selectedAmount = computed(() => seats.value.length);
-const remainingAmount = computed(() => amount.value - selectedAmount.value);
 const seatingPlan = computed(() => webshop.value.meta.seatingPlans.find(p => p.id === product.value.seatingPlanId));
 
-const title = computed(() => {
-    if (remainingAmount.value === 0) {
-        return $t('%12X') + '.';
-    }
-
-    if (remainingAmount.value === amount.value) {
-        return $t('Kies {seats}.', { seats: Formatter.pluralText(remainingAmount.value, $t('%12Y'), $t('%UL')) });
-    }
-    return $t('Kies nog {seats}.', { seats: Formatter.pluralText(remainingAmount.value, $t('%12Y'), $t('%UL')) });
-});
-
-const description = computed(() => $t('%12Z') + ' ' + Formatter.pluralText(amount.value, $t('%12Y'), $t('%UL')) + ' ' + $t('%12a'));
+const title = computed(() => getSeatSelectionTitle(amount.value, selectedAmount.value) + '.');
+const description = computed(() => getSeatSelectionDescription(amount.value));
 
 // Date and location so the visitor knows which performance these seats are for
 const productInfo = computed(() => {

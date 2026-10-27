@@ -453,6 +453,12 @@ async function check() {
         const bulk = webshop.value.orderMode === WebshopOrderMode.Bulk;
         if (bulk) {
             cart.value.splitIntoUnits();
+        } else if (webshop.value.orderMode === WebshopOrderMode.Cart) {
+            // Combine the units of a cart that was saved in bulk mode again, like adding them to the cart one by one
+            const grouped = cart.value.grouped();
+            if (grouped.items.length !== cart.value.items.length) {
+                cart.value.items = grouped.items;
+            }
         }
         cart.value.validate(webshopManager.webshop, false, { validateSeats: !bulk, validateDetails: !bulk });
     } catch (e) {

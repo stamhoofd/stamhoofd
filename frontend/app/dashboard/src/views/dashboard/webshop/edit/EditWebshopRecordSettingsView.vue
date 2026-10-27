@@ -80,7 +80,7 @@ const modernWebshopEnabled = useFeatureFlagComputed('modern-webshop');
 const showParticipantSettings = computed(() => (
     modernWebshopEnabled.value
     && (webshop.value.meta.isTicketBased || webshop.value.meta.isRegistrations)
-    && (webshop.value.products.length >= 1 && webshop.value.products[0].allowMultiple !== false)
+    && webshop.value.products.some(p => p.allowMultiple !== false)
     && (webshop.value.meta.orderMode !== WebshopOrderMode.Single || webshop.value.products.length > 1 || webshop.value.products.some(p => p.allowMultiple === true))
 ) || originalWebshop.products.some(p => p.enableCustomer));
 const present = usePresent();

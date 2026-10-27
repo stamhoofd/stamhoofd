@@ -9,7 +9,7 @@ import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { User } from '@stamhoofd/models';
 import { Order, Organization, OrganizationFactory, UserFactory, Webshop } from '@stamhoofd/models';
-import { PaymentMethod, Permissions, Product, ProductPrice, STPackageBundle, Token as TokenStruct, Version, WebshopOrderMode, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
+import { PaymentMethod, Permissions, Product, ProductDateRange, ProductPrice, ProductType, STPackageBundle, Token as TokenStruct, Version, WebshopOrderMode, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { WebshopOrderFlow } from '../flows/WebshopOrderFlow.js';
 import { DashboardPage, DashboardTab, WorkerData } from '../helpers/index.js';
@@ -133,6 +133,37 @@ test.describe('Webshop order modes @webshop-order-modes', () => {
         expect(product.location).toBeNull();
     });
 
+    test('A new ticket keeps the date over several days that it copies from another ticket', async ({ page }) => {
+        const organization = await createOrganization();
+        // Friday 20:00 until Sunday 18:00 in Brussels
+        const startDate = new Date('2030-05-03T18:00:00Z');
+        const endDate = new Date('2030-05-05T16:00:00Z');
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Festival ${WorkerData.id}`,
+            ticketType: WebshopTicketType.Tickets,
+            orderMode: WebshopOrderMode.Cart,
+            buildProducts: () => [
+                Product.create({ name: 'Weekendticket', type: ProductType.Ticket, dateRange: ProductDateRange.create({ startDate, endDate }) }),
+            ],
+        });
+
+        await openProductOffer(page, organization, webshop);
+        await page.getByTestId('add-product-button').click();
+
+        const view = page.locator('.st-view').last();
+        await expect(view.getByRole('checkbox', { name: 'Meerdere dagen' })).toBeChecked();
+        await view.locator('.st-input-box').filter({ hasText: 'Naam' }).locator('input').first().fill('Late ingang');
+        await view.locator('.st-input-box').filter({ hasText: 'Vanaf welk tijdstip' }).locator('input').fill('21:00');
+        await view.getByTestId('save-button').click();
+        await page.locator('.st-view').last().getByTestId('save-button').click();
+
+        await expect.poll(async () => (await Webshop.getByID(webshop.id))!.products.length).toBe(2);
+        const added = (await Webshop.getByID(webshop.id))!.products.find(p => p.name === 'Late ingang')!;
+        expect(added.dateRange?.startDate.getTime()).toBe(new Date('2030-05-03T19:00:00Z').getTime());
+        expect(added.dateRange?.endDate.getTime()).toBe(endDate.getTime());
+    });
+
     test('Participant details per ticket are only offered with several tickets', async ({ page }) => {
         const organization = await createOrganization();
         const { webshop: one } = await TestWebshops.create({ organization, name: `Een ticket ${WorkerData.id}`, ticketType: WebshopTicketType.Tickets, productCount: 1 });
@@ -145,6 +176,24 @@ test.describe('Webshop order modes @webshop-order-modes', () => {
 
         // Opens the dashboard again, which closes the popup of the first webshop
         await openRecordSettings(page, organization, several);
+        await expect(page.getByTestId('participant-mode-item')).toBeVisible();
+    });
+
+    test('Participant details per ticket do not depend on which ticket is listed first', async ({ page }) => {
+        const organization = await createOrganization();
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Volgorde ${WorkerData.id}`,
+            ticketType: WebshopTicketType.Tickets,
+            orderMode: WebshopOrderMode.Cart,
+            buildProducts: () => [
+                // An older ticket that only allows one piece
+                Product.create({ name: 'Uniek', type: ProductType.Ticket, allowMultiple: false }),
+                Product.create({ name: 'Standaard', type: ProductType.Ticket }),
+            ],
+        });
+
+        await openRecordSettings(page, organization, webshop);
         await expect(page.getByTestId('participant-mode-item')).toBeVisible();
     });
 
@@ -345,6 +394,29 @@ test.describe('Webshop order modes @webshop-order-modes', () => {
         await expect(form).toBeVisible({ timeout: 15000 });
         await expect(form).not.toContainText('Je hebt het maximaal aantal stuks bereikt');
         await expect(form.getByTestId('save-button')).toBeVisible();
+    });
+
+    test('A saved cart with units of the bulk mode is combined again when the webshop switches to a cart', async ({ page }) => {
+        const organization = await createOrganization();
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Wissel cart ${WorkerData.id}`,
+            orderMode: WebshopOrderMode.Bulk,
+        });
+
+        await page.goto(WorkerData.urls.webshopUri(webshop.uri));
+        await page.getByTestId('bulk-amount').fill('3');
+        await page.getByTestId('bulk-amount').blur();
+        await expect(page.getByTestId('bulk-amount')).toHaveValue('3');
+
+        webshop.meta.orderMode = WebshopOrderMode.Cart;
+        await webshop.save();
+
+        await page.reload();
+        const flow = new WebshopOrderFlow(page, { orderMode: WebshopOrderMode.Cart });
+        await flow.openCart();
+        await expect(page.locator('.cart-item-row')).toHaveCount(1);
+        await expect(page.locator('.cart-item-row .amount')).toHaveText('3');
     });
 
     test('One at a time with several products: the visitor picks one, which opens as a step when it has choices', async ({ page }) => {

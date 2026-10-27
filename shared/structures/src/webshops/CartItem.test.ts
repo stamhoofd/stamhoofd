@@ -10,6 +10,8 @@ import { CustomerSettings } from './CustomerSettings.js';
 import { CartItem, CartItemOption } from './CartItem.js';
 import { Option, OptionMenu, Product, ProductPrice } from './Product.js';
 import { Webshop } from './Webshop.js';
+import { WebshopMetaData, WebshopOrderMode } from './WebshopMetaData.js';
+import { Formatter } from '@stamhoofd/utility';
 
 describe('Structure.CartItem', () => {
     /**
@@ -305,6 +307,43 @@ describe('Structure.CartItem', () => {
             expect(cart.items.every(i => i.amount === 1)).toBe(true);
             expect(cart.items[1].codeWithoutFields).toBe(john.codeWithoutFields);
             expect(product.isUnique).toBe(false);
+        });
+    });
+
+    /**
+     * Cart items and orders are shown without their webshop (e.g. in the order email), so the snapshot of a product
+     * that follows the order mode stores the result
+     */
+    describe('product snapshot with allowMultiple null', () => {
+        function createItem(orderMode: WebshopOrderMode) {
+            const product = Product.create({ name: 'Ticket', allowMultiple: null, prices: [ProductPrice.create({ price: 5_0000 })] });
+            const webshop = Webshop.create({ meta: WebshopMetaData.create({ orderMode }), products: [product] });
+            const item = CartItem.createDefault(product, Cart.create({}), webshop, { admin: false });
+            return { product, webshop, item };
+        }
+
+        it('shows no amount when ordering one at a time', () => {
+            const { item, webshop } = createItem(WebshopOrderMode.Single);
+            expect(item.product.allowMultiple).toBe(false);
+            expect(item.formattedAmount).toBe('');
+            expect(item.getFormattedPriceWithoutDiscount()).toBe(Formatter.price(5_0000));
+
+            item.refresh(webshop);
+            expect(item.formattedAmount).toBe('');
+        });
+
+        it('shows the amount when several pieces can be ordered', () => {
+            const { item } = createItem(WebshopOrderMode.Cart);
+            expect(item.product.allowMultiple).toBe(true);
+            expect(item.formattedAmount).toBe('1');
+        });
+
+        it('keeps the same snapshot on every refresh and leaves the webshop product unchanged', () => {
+            const { item, product, webshop } = createItem(WebshopOrderMode.Single);
+            const snapshot = item.product;
+            item.refresh(webshop);
+            expect(item.product).toBe(snapshot);
+            expect(product.allowMultiple).toBeNull();
         });
     });
 });

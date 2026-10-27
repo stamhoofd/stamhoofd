@@ -59,6 +59,8 @@ export class CartItemOption extends AutoEncoder {
     optionMenu: OptionMenu;
 }
 
+const productSnapshots = new WeakMap<Product, Map<boolean, Product>>();
+
 export class CartItem extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4(), version: 106, upgrade: function (this: CartItem) {
         // Warning: this id will always be too long for storage in a normal database record.
@@ -265,10 +267,34 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
         // Default
         // Clone the price: the cart item owns its own instance, so a custom price never mutates the webshop structure
         return CartItem.create({
-            product: product,
+            product: CartItem.getProductSnapshot(product, webshop),
             productPrice: (chosenPrice ?? product.filteredPrices(data)[0]).clone(),
             options,
         });
+    }
+
+    /**
+     * The product as the cart item stores it. A null allowMultiple follows the order mode of the webshop, but cart
+     * items and orders are shown without the webshop (e.g. in the order email), so the snapshot stores the result.
+     */
+    static getProductSnapshot(product: Product, webshop: Webshop): Product {
+        if (product.allowMultiple !== null) {
+            return product;
+        }
+        const allowMultiple = webshop.allowsMultiple(product);
+
+        // Always the same snapshot for the same product: a new object on every refresh would trigger watchers of the cart
+        let snapshots = productSnapshots.get(product);
+        if (!snapshots) {
+            snapshots = new Map();
+            productSnapshots.set(product, snapshots);
+        }
+        let snapshot = snapshots.get(allowMultiple);
+        if (!snapshot) {
+            snapshot = product.patch({ allowMultiple });
+            snapshots.set(allowMultiple, snapshot);
+        }
+        return snapshot;
     }
 
     static create<T extends typeof AutoEncoder>(this: T, object: PartialWithoutMethods<CartItem>): InstanceType<T> {
@@ -625,7 +651,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                 human: $t(`%sC`, { product: this.product.name }),
             }));
         } else {
-            this.product = product;
+            this.product = CartItem.getProductSnapshot(product, webshop);
             const productPrice = product.prices.find(p => p.id === this.productPrice.id);
             if (!productPrice) {
                 if ((this.productPrice.name.length === 0 || this.product.prices.length <= 1) && product.prices.length > 1) {

@@ -227,18 +227,30 @@ async function goNext() {
         return;
     }
 
-    for (const entry of entries.value) {
-        const item = entry.item;
+    // In order: only the items before an item count against its stock
+    const validEntries = entries.value.filter((entry) => {
         try {
-            cart.value.validateItem(webshop.value, item);
-            await validateUitpasNumbers(item, webshopManager.optionalAuthenticatedServer, owner);
+            cart.value.validateItem(webshop.value, entry.item);
+            return true;
+        } catch (e) {
+            console.error(e);
+            setItemError(entry, e);
+            valid = false;
+            return false;
+        }
+    });
+
+    // One request per item with UiTPAS numbers, at the same time
+    await Promise.all(validEntries.map(async (entry) => {
+        try {
+            await validateUitpasNumbers(entry.item, webshopManager.optionalAuthenticatedServer, owner);
             setItemError(entry, null);
         } catch (e) {
             console.error(e);
             setItemError(entry, e);
             valid = false;
         }
-    }
+    }));
     if (!valid) {
         loading.value = false;
         return;

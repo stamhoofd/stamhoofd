@@ -310,11 +310,16 @@ export class CheckoutStepsManager {
             await this.$webshopManager.reload();
         }
 
-        // Bulk: seats, options, fields and customers are collected in the first checkout steps, so don't require them before those are done
-        const detailsPending = this.$webshopManager.webshop.orderMode === WebshopOrderMode.Bulk && (stepId === undefined || stepId.startsWith(CheckoutStepsManager.seatsStepPrefix));
+        const bulk = this.$webshopManager.webshop.orderMode === WebshopOrderMode.Bulk;
+
+        // Bulk: options, fields and customers are collected in the details step, so don't require them before it
+        const detailsPending = bulk && (stepId === undefined || stepId.startsWith(CheckoutStepsManager.seatsStepPrefix));
+
+        // Bulk: seats are checked as soon as every unit has one, so a taken seat is found when leaving the last seats step
+        const validateSeats = !bulk || this.allSeatsChosen;
 
         try {
-            this.$checkoutManager.checkout.validateCart(this.$webshopManager.webshop, this.$webshopManager.organization.meta, false, { validateSeats: !detailsPending, validateDetails: !detailsPending });
+            this.$checkoutManager.checkout.validateCart(this.$webshopManager.webshop, this.$webshopManager.organization.meta, false, { validateSeats, validateDetails: !detailsPending });
         } finally {
             this.$checkoutManager.checkout.update(this.$webshopManager.webshop);
         }
@@ -348,6 +353,13 @@ export class CheckoutStepsManager {
     }
 
     /**
+     * Bulk: seats are only checked once every unit has one, before that the seats steps still have to collect them
+     */
+    private get allSeatsChosen() {
+        return this.$checkoutManager.cart.items.every(i => !i.product.seatingPlanId || i.seats.length === i.amount);
+    }
+
+    /**
      * Whether an error thrown while validating or placing the order is about the cart contents
      */
     static isCartError(error: unknown): error is SimpleError | SimpleErrors {
@@ -366,12 +378,10 @@ export class CheckoutStepsManager {
         const webshop = this.$webshopManager.webshop;
 
         if (webshop.orderMode === WebshopOrderMode.Bulk) {
-            // Seats are only checked once every unit has one: before that, the seats steps still have to collect them
-            const seatsChosen = this.$checkoutManager.cart.items.every(i => !i.product.seatingPlanId || i.seats.length === i.amount);
             try {
                 // Stores recoverable errors on the items for the details step and drops invalid ones. Missing details are
                 // not an error yet: the details step collects and shows them.
-                this.$checkoutManager.cart.validate(webshop, false, { validateDetails: false, validateSeats: seatsChosen });
+                this.$checkoutManager.cart.validate(webshop, false, { validateDetails: false, validateSeats: this.allSeatsChosen });
             } catch (e) {
                 console.error(e);
             }

@@ -264,6 +264,61 @@ test.describe('Webshop bulk ordering @webshop-bulk', () => {
         expect(orders[0].data.cart.items[0].options[0].option.name).toBe('Vegetarisch');
     });
 
+    test('Stays on the seats step when a seat got taken before confirming it, without a details step', async ({ page }) => {
+        const organization = await createOrganization({ modernWebshop: true });
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Bulk seat taken ${WorkerData.id}`,
+            ticketType: WebshopTicketType.Tickets,
+            orderMode: WebshopOrderMode.Bulk,
+            withSeatingPlan: true,
+            paymentMethods: [PaymentMethod.PointOfSale],
+            buildProducts: ({ seatingPlanId }) => [
+                Product.create({
+                    name: 'Voorstelling',
+                    type: ProductType.Ticket,
+                    prices: [ProductPrice.create({ name: 'Standaard', price: 10_00_00 })],
+                    seatingPlanId,
+                }),
+            ],
+        });
+
+        const flow = new WebshopOrderFlow(page, { orderMode: WebshopOrderMode.Bulk });
+        await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
+        await expect(flow.bulkAmount('Voorstelling')).toHaveValue('1');
+        await flow.startBulkOrder();
+
+        const seatsView = page.getByTestId('bulk-seats-view');
+        await expect(seatsView).toBeVisible({ timeout: 15000 });
+        await seatsView.getByTestId('seat-button').first().click();
+
+        // Someone else takes the selected seat (A1) before the visitor confirms it
+        const seatingPlan = TestWebshops.seatingPlanOf(webshop);
+        const model = (await Webshop.getByID(webshop.id))!;
+        model.products[0].reservedSeats.push(ReservedSeat.create({
+            section: seatingPlan.sections[0].id,
+            row: seatingPlan.sections[0].rows[0].label,
+            seat: seatingPlan.sections[0].rows[0].seats[0].label,
+        }));
+        await model.save();
+
+        // There is no details step that checks the seats later: the seats step itself does, before the contact details
+        await seatsView.getByTestId('confirm-seats-button').click();
+        await expect(seatsView.locator('.error-box').first()).toBeVisible({ timeout: 15000 });
+        await expect(page.getByTestId('customer-step')).toHaveCount(0);
+        await expect(seatsView.getByTestId('confirm-seats-button')).toBeDisabled();
+
+        await seatsView.getByTestId('seat-button').nth(1).click();
+        await seatsView.getByTestId('confirm-seats-button').click();
+        await flow.fillCustomer();
+        await flow.confirmPayment();
+        await flow.expectTicketsDownloadable();
+
+        const orders = await fetchOrders(webshop.id);
+        expect(orders).toHaveLength(1);
+        expect(orders[0].data.cart.items[0].seats.map(s => s.row + s.seat)).toEqual(['A2']);
+    });
+
     test('Has a seats step per seated product in the checkout progress and resumes the details step after a reload', async ({ page }) => {
         const organization = await createOrganization({ modernWebshop: true });
         const { webshop } = await TestWebshops.create({
