@@ -38,8 +38,8 @@ export class BuckarooHelper {
 
         const timestamp = Math.floor(Date.now() / 1000);
 
-        // Nonce: A random sequence of characters, this should differ from for each request.
-        const nonce = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        // Use independent cryptographic randomness for every signed request.
+        const nonce = crypto.randomBytes(16).toString('hex');
 
         const encodedContent = this.getEncodedContent(content);
         const rawData = this.key + method + url + timestamp + nonce + encodedContent;
