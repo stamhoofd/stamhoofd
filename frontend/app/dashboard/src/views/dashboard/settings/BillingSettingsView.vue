@@ -140,7 +140,7 @@
 
 <script setup lang="ts">
 import { Request } from '@common/networking';
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, useNavigate } from '@browser/navigation';
 import CompanyRow from '@stamhoofd/components/companies/CompanyRow.vue';
 import { useGlobalEventListener } from '@stamhoofd/components/hooks/useGlobalEventListener';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';

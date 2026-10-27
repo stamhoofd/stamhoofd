@@ -1,4 +1,4 @@
-import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController } from '@browser/navigation';
 import type { PlatformMember } from '@stamhoofd/structures';
 import type { DisplayOptions, NavigationActions} from '../../types/NavigationActions';
 import { defaultDisplayOptions, glueNavigationActions, runDisplayOptions } from '../../types/NavigationActions';

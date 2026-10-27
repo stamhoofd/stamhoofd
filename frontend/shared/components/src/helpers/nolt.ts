@@ -1,6 +1,6 @@
 import type { Decoder } from '@common/encoding';
 import { AutoEncoder, field, StringDecoder } from '@common/encoding';
-import { UrlHelper } from '@simonbackx/vue-app-navigation';
+import { UrlHelper } from '@browser/navigation';
 import { useContext } from '#hooks/useContext.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';

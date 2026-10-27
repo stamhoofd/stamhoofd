@@ -1,4 +1,4 @@
-import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { PlatformMember } from '@stamhoofd/structures';
 import { markRaw } from 'vue';

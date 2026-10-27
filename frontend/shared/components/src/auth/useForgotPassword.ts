@@ -1,4 +1,4 @@
-import { defineRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoute, useNavigate } from '@browser/navigation';
 import type { Ref } from 'vue';
 
 export function useForgotPassword({ email }: { email: Ref<string> }) {

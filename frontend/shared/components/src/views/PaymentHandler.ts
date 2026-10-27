@@ -1,5 +1,5 @@
 import type { Server } from '@common/networking';
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { BaseOrganization, Organization, Payment, TransferSettings } from '@stamhoofd/structures';
 import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';

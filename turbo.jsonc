@@ -47,6 +47,11 @@
             "outputs": ["dist/**"],
             "cache": true
         },
+        "@browser/navigation#build": {
+            "dependsOn": ["^build", "build:types"],
+            "outputs": ["dist/**"],
+            "cache": true
+        },
         "@stamhoofd/test-utils#build": {
             "dependsOn": ["^build", "build:types"],
             "outputs": ["dist/**", ".cache/build.tsbuildinfo"],

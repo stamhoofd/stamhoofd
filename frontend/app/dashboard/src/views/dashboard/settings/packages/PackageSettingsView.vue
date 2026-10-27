@@ -80,7 +80,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useDismiss, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, useDismiss, useShow } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';

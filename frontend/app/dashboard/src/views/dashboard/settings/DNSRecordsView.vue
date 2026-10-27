@@ -39,7 +39,7 @@
 
 <script lang="ts" setup>
 import type { Decoder } from '@common/encoding';
-import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, useShow } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';

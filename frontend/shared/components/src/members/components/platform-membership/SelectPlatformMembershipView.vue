@@ -129,7 +129,7 @@ import { Toast } from '#overlays/Toast.ts';
 import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
 import { SimpleError, SimpleErrors } from '@common/errors';
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { usePop } from '@browser/navigation';
 import type { PlatformMember, PlatformMembershipType, RegistrationPeriod } from '@stamhoofd/structures';
 import { MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMembershipTypeBehaviour } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

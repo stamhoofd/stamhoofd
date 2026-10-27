@@ -71,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { usePopup } from '@simonbackx/vue-app-navigation';
+import { usePopup } from '@browser/navigation';
 import type { Ref } from 'vue';
 import { computed, onMounted, shallowRef } from 'vue';
 

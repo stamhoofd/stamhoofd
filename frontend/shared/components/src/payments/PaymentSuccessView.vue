@@ -21,7 +21,7 @@
 <script lang="ts" setup>
 import { useContext } from '#hooks/useContext.ts';
 import STToolbar from '#navigation/STToolbar.vue';
-import { useDismiss } from '@simonbackx/vue-app-navigation';
+import { useDismiss } from '@browser/navigation';
 import { useMemberManager } from '@stamhoofd/frontend-application/MemberManager';
 import type { PaymentGeneral } from '@stamhoofd/structures';
 import { BalanceItemRelationType, BalanceItemType, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';

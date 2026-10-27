@@ -16,7 +16,7 @@ import { ManagedToken } from './ManagedToken';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { QueueHandler } from './QueueHandler';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
-import { UrlHelper } from '@simonbackx/vue-app-navigation';
+import { UrlHelper } from '@browser/navigation';
 
 type AuthenticationStateListener = (changed: 'user' | 'organization' | 'platform' | 'token' | 'preventComplete') => void;
 

@@ -142,7 +142,7 @@
 import type { Decoder } from '@common/encoding';
 import { ArrayDecoder } from '@common/encoding';
 import { Request } from '@common/networking';
-import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { RecordType } from '@stamhoofd/structures';

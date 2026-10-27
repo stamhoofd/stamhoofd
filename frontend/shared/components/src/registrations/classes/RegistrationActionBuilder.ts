@@ -10,7 +10,7 @@ import { checkoutDefaultItem, chooseOrganizationMembersForGroup } from '#members
 import { canDeleteMembersInBulk, deleteInvitationsForMembers, getActionsForCategory, getCategoryTreeOfGroupsLinkedToWaitingList, inviteMembersForGroup, isMemberInvited, isMemberRegistered, presentDeleteMembers, presentEditMember, presentEditResponsibilities, presentExportMembersToPdf } from '#members/classes/MemberActionBuilder.ts';
 import type { TableAction, TableActionSelection } from '#tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { useFetchOrganizationRegistrationPeriods } from '#hooks/networking/useFetchOrganizationRegistrationPeriods';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';

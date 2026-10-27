@@ -1,4 +1,4 @@
-const navigationPackage = '@simonbackx/vue-app-navigation';
+const navigationPackage = '@browser/navigation';
 const routeFunctionNames = new Set(['defineRoute', 'defineRoutes']);
 
 function unwrapExpression(node) {

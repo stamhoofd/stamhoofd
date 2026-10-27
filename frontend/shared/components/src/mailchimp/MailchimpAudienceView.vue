@@ -31,7 +31,7 @@
 import type { Decoder } from '@common/encoding';
 import { ArrayDecoder } from '@common/encoding';
 import { Request } from '@common/networking';
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { usePop } from '@browser/navigation';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { MailchimpAudience } from '@stamhoofd/structures/mailchimp/MailchimpAudience.js';
 import { MailchimpSettings } from '@stamhoofd/structures/mailchimp/MailchimpSettings.js';

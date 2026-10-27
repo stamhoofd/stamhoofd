@@ -1,5 +1,5 @@
 import type { AutoEncoderPatchType } from '@common/encoding';
-import { defineRoute } from '@simonbackx/vue-app-navigation';
+import { defineRoute } from '@browser/navigation';
 import { useRequiredOrganization } from '#hooks/useOrganization';
 import { usePlatform } from '#hooks/usePlatform';
 import { usePatchOrganization } from '#organizations/usePatchOrganization';

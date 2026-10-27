@@ -237,7 +237,7 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 
 import { SimpleErrors } from '@common/errors';
-import { ComponentWithProperties, useDismiss, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, useDismiss, usePop, usePresent, useShow } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { LoginHelper } from '@stamhoofd/frontend-application/LoginHelper';

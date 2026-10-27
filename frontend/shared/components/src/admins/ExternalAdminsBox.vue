@@ -79,7 +79,7 @@
 <script setup lang="ts">
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { useUser } from '#hooks/useUser.ts';
-import { defineRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoute, useNavigate } from '@browser/navigation';
 import type { User } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { Permissions, UserPermissions, UserWithMembers } from '@stamhoofd/structures';

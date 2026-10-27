@@ -19,8 +19,8 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties } from '@browser/navigation';
+import { ComponentWithPropertiesInstance } from '@browser/navigation';
 import { ref, shallowRef } from 'vue';
 
 import LoadingButton from '#navigation/LoadingButton.vue';

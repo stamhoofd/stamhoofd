@@ -45,7 +45,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePresent } from '@browser/navigation';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';

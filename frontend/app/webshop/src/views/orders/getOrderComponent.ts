@@ -1,4 +1,4 @@
-import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 /**

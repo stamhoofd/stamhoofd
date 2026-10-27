@@ -370,7 +370,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useCanPop, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { useCanPop, usePop, usePresent } from '@browser/navigation';
 import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';

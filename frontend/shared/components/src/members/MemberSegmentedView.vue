@@ -30,7 +30,7 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { TableActionSelection } from '#tables/classes/TableAction.ts';
-import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, useDismiss, usePresent } from '@browser/navigation';
 import type { Group, PlatformMember, PlatformRegistration } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

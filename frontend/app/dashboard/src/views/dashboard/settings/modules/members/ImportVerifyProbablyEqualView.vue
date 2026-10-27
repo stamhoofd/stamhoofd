@@ -43,8 +43,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { ComponentWithProperties, PushOptions} from '@simonbackx/vue-app-navigation';
-import { useShow } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties, PushOptions} from '@browser/navigation';
+import { useShow } from '@browser/navigation';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';

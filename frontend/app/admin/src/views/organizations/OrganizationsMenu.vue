@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoute, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoute, useCheckRoute, useNavigate } from '@browser/navigation';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useCollapsed } from '@stamhoofd/components/menu/useCollapsed';

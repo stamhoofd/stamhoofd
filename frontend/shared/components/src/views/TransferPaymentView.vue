@@ -200,7 +200,7 @@
 
 <script lang="ts" setup>
 import type { NavigationActions } from '#types/NavigationActions.ts';
-import { useCanDismiss, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
+import { useCanDismiss, useDismiss, usePop } from '@browser/navigation';
 import type { BaseOrganization, Organization, Payment, TransferSettings } from '@stamhoofd/structures';
 import { TransferDescriptionType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';

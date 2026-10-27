@@ -95,7 +95,7 @@ import { useEmitPatch } from '#hooks/useEmitPatch.ts';
 import { usePatchableArray } from '#hooks/usePatchableArray.ts';
 import { usePatchMoveUpDownSingle } from '#hooks/usePatchMoveUpDown.ts';
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
-import { usePresent } from '@simonbackx/vue-app-navigation';
+import { usePresent } from '@browser/navigation';
 import type { GroupOptionMenu } from '@stamhoofd/structures';
 import { Group, GroupOption, GroupSettings } from '@stamhoofd/structures';
 import { computed } from 'vue';

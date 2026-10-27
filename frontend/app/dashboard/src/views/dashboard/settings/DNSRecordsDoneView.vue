@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useDismiss } from '@simonbackx/vue-app-navigation';
+import { useDismiss } from '@browser/navigation';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';

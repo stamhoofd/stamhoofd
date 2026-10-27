@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, ComponentWithPropertiesInstance, ModalStackComponent, NavigationController, setTitleSuffix, SplitViewController, useCurrentComponent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ComponentWithPropertiesInstance, ModalStackComponent, NavigationController, setTitleSuffix, SplitViewController, useCurrentComponent } from '@browser/navigation';
 import { useLoginRoot } from '@stamhoofd/components/auth/useLoginRoot.ts';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';

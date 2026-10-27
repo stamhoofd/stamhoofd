@@ -95,7 +95,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { isEmptyFilter, PropertyFilter, Version } from '@stamhoofd/structures';

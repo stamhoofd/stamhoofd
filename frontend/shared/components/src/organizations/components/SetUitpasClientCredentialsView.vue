@@ -23,7 +23,7 @@
 import type { Decoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { Request } from '@common/networking';
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { usePop } from '@browser/navigation';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 import SaveView from '#navigation/SaveView.vue';

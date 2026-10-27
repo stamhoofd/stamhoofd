@@ -32,7 +32,7 @@ Please check our [README.md](https://github.com/stamhoofd/stamhoofd)
 ## Frontend guides
 
 
-[Views and navigation (Vue App Navigation)](https://github.com/SimonBackx/vue-app-navigation/blob/main/docs/getting-started.md)
+[Views and navigation (Vue App Navigation)](../packages/browser/navigation/docs/getting-started.md)
 
 [View building blocks (inline components and classes)](frontend/building-blocks.md)
 

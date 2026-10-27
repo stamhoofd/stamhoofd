@@ -1,4 +1,4 @@
-import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 import { unwrapFilterByPath } from '@stamhoofd/structures';

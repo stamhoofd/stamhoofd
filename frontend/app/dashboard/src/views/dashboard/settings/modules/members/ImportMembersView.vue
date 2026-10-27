@@ -103,9 +103,9 @@
 
 <script lang="ts" setup>
 import { isSimpleError, isSimpleErrors } from '@common/errors';
-import type { PushOptions, ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import type { PushOptions, ComponentWithProperties } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { useShow } from '@simonbackx/vue-app-navigation';
+import { useShow } from '@browser/navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';

@@ -60,7 +60,7 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useAppContext } from '#context/appContext.ts';
 import { useEventsObjectFetcher } from '#fetchers/useEventsObjectFetcher.ts';
 import { useEventTypes } from '#hooks/useEventTypes.ts';
-import { ComponentWithProperties, defineRoute, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoute, NavigationController, useNavigate, usePresent } from '@browser/navigation';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { Event, isEmptyFilter, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

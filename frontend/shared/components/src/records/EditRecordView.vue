@@ -237,7 +237,7 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
 import { SimpleError } from '@common/errors';
-import { usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { usePop, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { ObjectWithRecords, RecordCategory, TranslatedString } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

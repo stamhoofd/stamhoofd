@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import type { useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import type { useCheckRoute, useNavigate } from '@browser/navigation';
 import STMenuFolder from '@stamhoofd/components/menu/STMenuFolder.vue';
 import STMenuText from '@stamhoofd/components/menu/STMenuText.vue';
 import type { GroupCategoryTree, OrganizationRegistrationPeriod } from '@stamhoofd/structures';

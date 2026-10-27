@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { useShow } from '@simonbackx/vue-app-navigation';
+import { useShow } from '@browser/navigation';
 import { computed } from 'vue';
 import { NotificationTypeHelper } from '@stamhoofd/structures/notifications/NotificationType.js';
 import type { UserNotification } from '@stamhoofd/structures/notifications/UserNotification.js';

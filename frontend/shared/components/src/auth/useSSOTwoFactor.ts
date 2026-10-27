@@ -1,4 +1,4 @@
-import { useShow } from '@simonbackx/vue-app-navigation';
+import { useShow } from '@browser/navigation';
 import { LoginHelper } from '@stamhoofd/frontend-application/LoginHelper';
 import type { MFAChallengeResponse } from '@stamhoofd/structures';
 

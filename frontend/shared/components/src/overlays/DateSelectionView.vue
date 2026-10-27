@@ -52,7 +52,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useDismiss, usePop } from '@simonbackx/vue-app-navigation';
+import { useDismiss, usePop } from '@browser/navigation';
 import { Formatter } from '@stamhoofd/utility';
 import { DateTime } from 'luxon';
 import { computed, onBeforeUnmount, onMounted, useTemplateRef } from 'vue';

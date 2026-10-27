@@ -5,7 +5,7 @@ import { TabBarItem } from '#containers/TabBarItem.ts';
 import type { TranslatedUrl } from '#containers/TranslatedUrl.ts';
 import { useAppContext } from '#context/appContext';
 import { useContext } from '#hooks/useContext.ts';
-import { ComponentWithProperties, NavigationController, UrlHelper } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, UrlHelper } from '@browser/navigation';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 
 export function useLoginRoot() {

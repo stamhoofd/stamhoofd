@@ -88,7 +88,7 @@
 import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
 import { ArrayDecoder, PatchableArray } from '@common/encoding';
 import { SimpleError } from '@common/errors';
-import { defineRoute, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { defineRoute, useNavigate, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
 import LoadingBoxTransition from '@stamhoofd/components/containers/LoadingBoxTransition.vue';

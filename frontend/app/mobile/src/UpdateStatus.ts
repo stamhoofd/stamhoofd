@@ -3,7 +3,7 @@ import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import type { Decoder } from '@common/encoding';
 import { AutoEncoder, field, StringDecoder } from '@common/encoding';
 import { Server } from '@common/networking';
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties } from '@browser/navigation';
 import { MobileRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
 import { Toast, ToastButton } from '@stamhoofd/components/overlays/Toast.ts';
 import type { UpdateOptions } from '@stamhoofd/frontend-platform/AppManager';

@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useDismiss } from '@simonbackx/vue-app-navigation';
+import { useDismiss } from '@browser/navigation';
 import EmailInput from '#inputs/EmailInput.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import LoadingButton from '#navigation/LoadingButton.vue';

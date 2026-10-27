@@ -286,7 +286,7 @@ import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
 import { ArrayDecoder, deepSetArray, PatchableArray } from '@common/encoding';
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@common/errors';
-import { ComponentWithProperties, defineRoute, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoute, NavigationController, useNavigate, usePop, usePresent } from '@browser/navigation';
 import { useFetchOrganizationPeriodForGroup } from '#hooks/networking/useFetchOrganizationPeriodForGroup';
 import { usePatchOrganizationPeriod } from '#hooks/networking/usePatchOrganizationPeriod';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';

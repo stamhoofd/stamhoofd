@@ -326,7 +326,7 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@common/encoding';
 import { Request } from '@common/networking';
-import { usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { usePop, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import EmailAddress from '@stamhoofd/components/email/EmailAddress.vue';
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';

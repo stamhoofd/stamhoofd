@@ -116,7 +116,7 @@
 <script setup lang="ts">
 import type { Decoder } from '@common/encoding';
 import { patchContainsChanges } from '@common/encoding';
-import { ComponentWithProperties, NavigationController, useDismiss, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, useDismiss, usePop, usePresent, useShow } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { Address, PlatformMember, ReviewTimeType } from '@stamhoofd/structures';
 import { SecurityCodeSendMethod, SendMemberSecurityCodeRequest, SendMemberSecurityCodeResponse, Version } from '@stamhoofd/structures';

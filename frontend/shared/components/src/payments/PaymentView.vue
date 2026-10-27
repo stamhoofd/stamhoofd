@@ -318,7 +318,7 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import PromiseView from '#containers/PromiseView.vue';
 import { useInvoicesObjectFetcher } from '#fetchers/useInvoicesObjectFetcher.ts';
 import { SimpleError } from '@common/errors';
-import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@browser/navigation';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';

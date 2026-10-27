@@ -244,7 +244,7 @@
 <script setup lang="ts">
 import type { AutoEncoderPatchType } from '@common/encoding';
 import { SimpleError } from '@common/errors';
-import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@browser/navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';

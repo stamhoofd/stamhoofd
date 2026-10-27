@@ -6,8 +6,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { PushOptions } from '@simonbackx/vue-app-navigation';
-import { ComponentWithProperties, ModalStackComponent, NavigationController, useManualPresent } from '@simonbackx/vue-app-navigation';
+import type { PushOptions } from '@browser/navigation';
+import { ComponentWithProperties, ModalStackComponent, NavigationController, useManualPresent } from '@browser/navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import CenteredMessageView from '@stamhoofd/components/overlays/CenteredMessageView.vue';
 import { ModalStackEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
@@ -84,7 +84,7 @@ watch(modalStack, (modalStack) => {
 <style lang="scss">
 // We need to include the component styling of vue-app-navigation first
 @use "@stamhoofd/scss/main";
-@use "@simonbackx/vue-app-navigation/dist/main.css" as VueAppNavigation;
+@use "@browser/navigation/dist/main.css" as VueAppNavigation;
 @use "@stamhoofd/scss/base/dark-modus";
 @use "@stamhoofd/scss/base/variables" as *;
 

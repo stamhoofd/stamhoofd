@@ -1,7 +1,7 @@
 import { type ComponentInternalInstance, type ComponentPublicInstance, inject, markRaw, proxyRefs, type Raw, reactive, type Ref, ref, unref, type VNode } from 'vue';
 
-import { HistoryManager, type HistoryUrl } from './HistoryManager';
-import type { Route } from './utils/navigationHooks';
+import { HistoryManager, type HistoryUrl } from './HistoryManager.js';
+import type { Route } from './utils/navigationHooks.js';
 
 export type ModalDisplayStyle = 'cover' | 'popup' | 'overlay' | 'sheet' | 'side-view';
 

@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { useDismiss } from '@simonbackx/vue-app-navigation';
+import type { useDismiss } from '@browser/navigation';
 import type { CartItem, Category, Checkout, Webshop } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

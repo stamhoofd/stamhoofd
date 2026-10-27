@@ -1,6 +1,6 @@
 import type { SimpleErrors } from '@common/errors';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
-import { ComponentWithProperties, ReactiveUrl } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ReactiveUrl } from '@browser/navigation';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';

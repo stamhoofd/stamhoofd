@@ -2,11 +2,11 @@ import { type DefineComponent, inject, type Ref } from 'vue';
 
 import NavigationController from './NavigationController.vue';
 import type Popup from './Popup.vue';
-import { useNavigationController } from './useNavigationController';
-import { useSplitViewController } from './useSplitViewController';
-import { injectHooks } from './utils/injectHooks';
-import { type NavigationOptions, useCanDismiss, useCanPop, useDismiss, useFocused, useNavigate, usePop, usePresent, useShow, useShowDetail, useUrl } from './utils/navigationHooks';
-import { useModalStackComponent } from './utils/useModalStackComponent';
+import { useNavigationController } from './useNavigationController.js';
+import { useSplitViewController } from './useSplitViewController.js';
+import { injectHooks } from './utils/injectHooks.js';
+import { type NavigationOptions, useCanDismiss, useCanPop, useDismiss, useFocused, useNavigate, usePop, usePresent, useShow, useShowDetail, useUrl } from './utils/navigationHooks.js';
+import { useModalStackComponent } from './utils/useModalStackComponent.js';
 
 // WARNING: do not add this mixin as a dependency in components that the navigationMixin also depens on -> circular dependency
 // Inject the navigation hooks into the component manually in that case
@@ -75,7 +75,6 @@ export const NavigationMixin = {
     activated() {
         navigationMethods.setTitle.call(this);
     },
-    // eslint-disable-next-line @typescript-eslint/ban-types
 } as any as DefineComponent<{}, {}, {
     canPop: Unref<ReturnType<typeof useCanPop>>;
     canDismiss: Unref<ReturnType<typeof useCanDismiss>>;

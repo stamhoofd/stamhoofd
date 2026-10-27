@@ -30,7 +30,7 @@
         "vue": "3.5.44"
     },
     "devDependencies": {
-        "@simonbackx/vue-app-navigation": "2.25.1",
+        "@browser/navigation": "workspace:*",
         "@stamhoofd/vite-config": "workspace:*",
         "eslint-plugin-stamhoofd": "workspace:*",
         "vite": "8.3.4",

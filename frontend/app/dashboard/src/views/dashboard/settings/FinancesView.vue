@@ -257,7 +257,7 @@
 
 <script lang="ts" setup>
 import type { Decoder } from '@common/encoding';
-import { defineRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoute, useNavigate } from '@browser/navigation';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';

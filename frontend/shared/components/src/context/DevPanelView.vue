@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useDismiss } from '@simonbackx/vue-app-navigation';
+import { useDismiss } from '@browser/navigation';
 import Radio from '#inputs/Radio.vue';
 import SaveView from '#navigation/SaveView.vue';
 import STList from '#layout/STList.vue';

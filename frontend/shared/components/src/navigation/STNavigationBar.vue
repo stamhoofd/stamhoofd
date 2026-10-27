@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, HistoryManager, useCanDismiss, useCanPop, useCurrentComponent, useDismiss, useFocused, usePop, usePopup, useUrl } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, HistoryManager, useCanDismiss, useCanPop, useCurrentComponent, useDismiss, useFocused, usePop, usePopup, useUrl } from '@browser/navigation';
 import type { Ref } from 'vue';
 import { Comment, computed, Fragment, getCurrentInstance, inject, isVNode, onActivated, onDeactivated, onMounted, ref, useSlots, useTemplateRef, watch } from 'vue';
 

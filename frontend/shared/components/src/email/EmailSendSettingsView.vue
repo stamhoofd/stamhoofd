@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { useDismiss } from '@simonbackx/vue-app-navigation';
+import { useDismiss } from '@browser/navigation';
 import { EmailPreview, EmailStatus } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { usePatchEmail } from '../communication/hooks/usePatchEmail';

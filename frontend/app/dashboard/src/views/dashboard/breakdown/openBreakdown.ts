@@ -1,4 +1,4 @@
-import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent';
 import { useBreakdownViewLoaders } from './breakdownViewLoaders';
 import type { BreakdownViewProps } from './useBreakdownView';

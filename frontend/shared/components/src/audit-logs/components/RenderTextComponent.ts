@@ -14,7 +14,7 @@ import { useShowMember } from '#members/hooks/useShowMember.ts';
 import { Toast } from '#overlays/Toast.ts';
 import { useShowBalanceItem } from '#payments/hooks/useShowBalanceItem.ts';
 import { useShowPayment } from '#payments/hooks/useShowPayment.ts';
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
 import PromiseView from '#containers/PromiseView.vue';
 import { AuditLogReplacement, AuditLogReplacementType, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

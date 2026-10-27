@@ -11,6 +11,7 @@ packages:
   - 'packages/common/networking'
   - 'packages/node/endpoints'
   - 'packages/node/database'
+  - 'packages/browser/navigation'
   - 'tests/*'
   - '.development/*'
   - 'docs'
@@ -94,6 +95,7 @@ allowBuilds:
   vue-demi@0.14.10: true
 
 overrides:
+  '@simonbackx/vue-app-navigation': 'workspace:@browser/navigation@*'
   '@simonbackx/simple-database': 'workspace:@node/database@*'
   '@simonbackx/simple-endpoints': 'workspace:@node/endpoints@*'
   '@simonbackx/simple-networking': 'workspace:@common/networking@*'

@@ -9,8 +9,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { FramedComponent } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties } from '@browser/navigation';
+import { FramedComponent } from '@browser/navigation';
 
 const props = defineProps<{
     root: ComponentWithProperties;

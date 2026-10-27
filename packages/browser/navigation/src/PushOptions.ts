@@ -1,6 +1,6 @@
 import type { Ref } from 'vue';
-import type { ComponentWithProperties, ModalDisplayStyle } from './ComponentWithProperties';
-import type { ReactiveUrl } from './utils/navigationHooks';
+import type { ComponentWithProperties, ModalDisplayStyle } from './ComponentWithProperties.js';
+import type { ReactiveUrl } from './utils/navigationHooks.js';
 
 export interface PushOptions {
     /**

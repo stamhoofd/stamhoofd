@@ -1,4 +1,4 @@
-import { describe } from 'node:test';
+import { describe } from 'vitest';
 import { createTrackedSearchParams } from './createTrackedSearchParams.js';
 
 describe('createTrackedSearchParams', () => {

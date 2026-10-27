@@ -12,7 +12,7 @@
 
 <script lang="ts" setup>
 import STList from '#layout/STList.vue';
-import { usePopup } from '@simonbackx/vue-app-navigation';
+import { usePopup } from '@browser/navigation';
 import type { BalanceItemCartItem } from '@stamhoofd/structures';
 import BalanceItemCartItemDiscountRow from './BalanceItemCartItemDiscountRow.vue';
 

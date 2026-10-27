@@ -294,7 +294,7 @@ import ImageComponent from '#views/ImageComponent.vue';
 import type { Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
 import { ArrayDecoder, deepSetArray, PatchableArray } from '@common/encoding';
 import { SimpleError } from '@common/errors';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePop, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { Organization } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';

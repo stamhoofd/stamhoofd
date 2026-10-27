@@ -39,7 +39,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, useShow } from '@browser/navigation';
 import { LoginHelper } from '@stamhoofd/frontend-application/LoginHelper';
 import { LoginMethod, LoginProviderType } from '@stamhoofd/structures';
 import { computed, onUnmounted, ref } from 'vue';

@@ -102,7 +102,7 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import FillRecordCategoryBox from '#records/components/FillRecordCategoryBox.vue';
 import { useReview } from '#useReview.ts';
 import type { AutoEncoderPatchType } from '@common/encoding';
-import { usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { usePop, usePresent } from '@browser/navigation';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import type { PatchAnswers } from '@stamhoofd/structures';

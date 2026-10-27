@@ -116,6 +116,7 @@ jobs:
                         - 'shared/**'
                         - 'packages/common/**'
                         - 'frontend/**'
+                        - 'packages/browser/**'
                       shared:
                         - 'package.json'
                         - 'pnpm-lock.yaml'
@@ -133,6 +134,7 @@ jobs:
                         - 'shared/**'
                         - 'packages/common/**'
                         - 'frontend/**'
+                        - 'packages/browser/**'
                         - 'backend/**'
                         - 'packages/node/**'
                         - '.development/Corefile'
@@ -173,7 +175,7 @@ jobs:
                         backend_apps=true; backend_shared=true; frontend=true; shared=true; playwright=true ;;
                       backend/shared/*|packages/node/*) backend_apps=true; backend_shared=true; playwright=true ;;
                       backend/*) backend_apps=true; playwright=true ;;
-                      frontend/*) frontend=true; playwright=true ;;
+                      frontend/*|packages/browser/*) frontend=true; playwright=true ;;
                       tests/playwright/*|.development/Corefile|.development/loadenv.sh) playwright=true ;;
                       .development/stam.mjs) shared=true ;;
                       .nvmrc|tsconfig*.json|jest-extended.d.ts|.development/i18n-uuid/*|turbo.json*|.github/workflows/ci.yml|.github/actions/*) ci=true ;;
@@ -273,10 +275,13 @@ jobs:
                       shared/*/.cache/*.tsbuildinfo
                       packages/common/*/dist
                       packages/node/*/dist
+                      packages/browser/*/dist
                       packages/common/*/dist-types
                       packages/node/*/dist-types
+                      packages/browser/*/dist-types
                       packages/common/*/.cache/*.tsbuildinfo
                       packages/node/*/.cache/*.tsbuildinfo
+                      packages/browser/*/.cache/*.tsbuildinfo
                       backend/shared/*/dist
                       backend/shared/*/dist-types
                       backend/shared/*/.cache/*.tsbuildinfo
@@ -546,7 +551,7 @@ jobs:
               with:
                   name: shared-dist
             - name: Run frontend shared tests
-              run: pnpm exec turbo run test --filter='./frontend/shared/*' --concurrency=1 --env-mode=loose -- --run --bail=1
+              run: pnpm exec turbo run test --filter='./frontend/shared/*' --filter='./packages/browser/*' --concurrency=1 --env-mode=loose -- --run --bail=1
 
     job_test_playwright_shards:
         name: "Playwright Tests (shard ${{ matrix.shard }}/4)"

@@ -1,6 +1,6 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import { usePresent } from '@simonbackx/vue-app-navigation';
+import { usePresent } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';

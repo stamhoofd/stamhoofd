@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoute, useNavigate } from '@browser/navigation';
 import type { Invoice } from '@stamhoofd/structures';
 import { InvoiceType, InvoiceTypeHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

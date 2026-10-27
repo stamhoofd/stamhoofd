@@ -20,7 +20,7 @@
     },
     "dependencies": {
         "@stamhoofd/frontend-storage": "workspace:*",
-        "@simonbackx/vue-app-navigation": "2.25.1",
+        "@browser/navigation": "workspace:*",
         "@stamhoofd/locales": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/types": "workspace:*",

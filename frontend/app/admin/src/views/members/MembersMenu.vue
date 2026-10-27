@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoutes, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, useCheckRoute, useNavigate } from '@browser/navigation';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 

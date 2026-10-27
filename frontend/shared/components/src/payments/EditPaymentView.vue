@@ -266,7 +266,7 @@ import type { NavigationActions } from '#types/NavigationActions';
 import type { Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
 import { ArrayDecoder, PatchableArray } from '@common/encoding';
 import { SimpleError } from '@common/errors';
-import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import type { BalanceItem, Organization, Payment, PrivatePayment } from '@stamhoofd/structures';

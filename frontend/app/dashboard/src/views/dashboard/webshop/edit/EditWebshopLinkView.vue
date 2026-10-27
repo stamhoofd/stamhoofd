@@ -117,7 +117,7 @@
 import type { Decoder } from '@common/encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import { Request } from '@common/networking';
-import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePresent, useShow } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import PrefixInput from '@stamhoofd/components/inputs/PrefixInput.vue';

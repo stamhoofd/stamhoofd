@@ -1,4 +1,4 @@
-import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import { Toast } from '@stamhoofd/components/overlays/Toast';

@@ -89,7 +89,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import EventRow from '#events/components/EventRow.vue';
 import type { UIFilter } from '#filters/UIFilter.ts';

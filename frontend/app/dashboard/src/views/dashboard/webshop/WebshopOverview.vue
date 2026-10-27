@@ -478,7 +478,7 @@
 import type { Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
 import { ArrayDecoder, PatchableArray } from '@common/encoding';
 import { Request } from '@common/networking';
-import { ComponentWithProperties, defineRoute, NavigationController, useCanPop, useNavigate, usePop, useSplitViewController } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoute, NavigationController, useCanPop, useNavigate, usePop, useSplitViewController } from '@browser/navigation';
 
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';

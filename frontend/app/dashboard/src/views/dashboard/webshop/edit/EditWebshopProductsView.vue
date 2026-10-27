@@ -60,7 +60,7 @@
 
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@common/encoding';
-import { usePresent } from '@simonbackx/vue-app-navigation';
+import { usePresent } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { Category, PrivateWebshop, Product, ProductType, WebshopMetaData, WebshopOrderMode, WebshopTicketType } from '@stamhoofd/structures';
 import CategoryRow from './categories/CategoryRow.vue';

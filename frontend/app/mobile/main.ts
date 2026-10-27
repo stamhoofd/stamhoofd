@@ -10,7 +10,7 @@ import { Haptics, NotificationType } from '@capacitor/haptics';
 import { Keyboard } from '@capacitor/keyboard';
 import { Share } from '@capacitor/share';
 import { CapacitorUpdater } from '@capgo/capacitor-updater';
-import { HistoryManager } from '@simonbackx/vue-app-navigation';
+import { HistoryManager } from '@browser/navigation';
 import { ViewportHelper } from '@stamhoofd/components/ViewportHelper.ts';
 import { VueGlobalHelper } from '@stamhoofd/components/VueGlobalHelper.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';

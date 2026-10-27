@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
 import type { Decoder } from '@common/encoding';
-import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import ExternalOrganizationContainer from '#containers/ExternalOrganizationContainer.vue';

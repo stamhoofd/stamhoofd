@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts" name="AccountSwitcher">
-import { defineRoutes, useNavigate, useInheritCheckRoutes, defineRoute } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, useNavigate, useInheritCheckRoutes, defineRoute } from '@browser/navigation';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { Formatter } from '@stamhoofd/utility';

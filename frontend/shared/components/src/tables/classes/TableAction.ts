@@ -1,4 +1,4 @@
-import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties } from '@browser/navigation';
 
 import type { LimitedFilteredRequest } from '@stamhoofd/structures';
 import type { FetchAllOptions, FetchLimitSettings, ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';

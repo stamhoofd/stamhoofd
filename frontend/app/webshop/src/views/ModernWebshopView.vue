@@ -60,8 +60,8 @@
 
 <script lang="ts" setup>
 import { SimpleError } from '@common/errors';
-import type { useDismiss, usePopup } from '@simonbackx/vue-app-navigation';
-import { ComponentWithProperties, NavigationController, ReactiveUrl, useNavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import type { useDismiss, usePopup } from '@browser/navigation';
+import { ComponentWithProperties, NavigationController, ReactiveUrl, useNavigationController, usePresent, useShow } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { injectCustomCode } from '@stamhoofd/components/helpers/injectCustomCode.ts';
 import { MetaKey, useMetaInfo } from '@stamhoofd/components/helpers/useMetaInfo.ts';

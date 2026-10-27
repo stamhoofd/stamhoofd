@@ -49,7 +49,7 @@
 
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@common/encoding';
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { usePop } from '@browser/navigation';
 import { DataPermissionsSettings } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';

@@ -1,7 +1,7 @@
 import type { Decoder } from '@common/encoding';
 import { ArrayDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
-import { UrlHelper } from '@simonbackx/vue-app-navigation';
+import { UrlHelper } from '@browser/navigation';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { useFetchOrganizationRegistrationPeriods } from '#hooks/networking/useFetchOrganizationRegistrationPeriods.ts';
 import type { Organization } from '@stamhoofd/structures';

@@ -1,5 +1,5 @@
-import type { PushOptions} from '@simonbackx/vue-app-navigation';
-import { usePresent } from '@simonbackx/vue-app-navigation';
+import type { PushOptions} from '@browser/navigation';
+import { usePresent } from '@browser/navigation';
 
 export type PositionableSheetOptions = {
     innerPadding?: number; // Padding inside the sheet

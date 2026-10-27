@@ -76,7 +76,7 @@ import { useLoadPayableBalance } from '../../hooks/useLoadPayableBalance';
 import type { OrganizationCheckoutViewModel } from '../OrganizationCheckoutViewModel';
 import { PayBalanceMode } from '../OrganizationCheckoutViewModel';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { SimpleError } from '@common/errors';
 

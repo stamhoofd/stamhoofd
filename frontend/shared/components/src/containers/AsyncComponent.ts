@@ -1,5 +1,5 @@
-import type { ImportRetryMethod } from '@simonbackx/vue-app-navigation';
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import type { ImportRetryMethod } from '@browser/navigation';
+import { ComponentWithProperties } from '@browser/navigation';
 
 import { isModuleImportError } from '#errors/isModuleImportError.ts';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';

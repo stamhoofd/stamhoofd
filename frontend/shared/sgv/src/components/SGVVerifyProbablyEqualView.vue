@@ -77,7 +77,7 @@ import {
     useCanDismiss,
     useCanPop,
     useDismiss,
-} from '@simonbackx/vue-app-navigation';
+} from '@browser/navigation';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';

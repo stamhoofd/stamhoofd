@@ -32,7 +32,7 @@ import { useGroupsObjectFetcher } from '#fetchers/useGroupsObjectsFetcher.ts';
 import { Toast } from '#overlays/Toast.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 import { Request } from '@common/networking';
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
 import type { Group } from '@stamhoofd/structures';
 import { LimitedFilteredRequest } from '@stamhoofd/structures';
 import type { Ref } from 'vue';

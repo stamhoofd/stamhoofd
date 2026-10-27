@@ -48,7 +48,7 @@ import { ErrorBox } from '../errors/ErrorBox';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import type { RelationFetcherSubFilterOption, RelationFilterOption, RelationUIFilterViewProperties } from './RelationFilterTypes';
 import { getRelationFilterDisplayOptions } from './relationFilterOptions';
-import { useAnimateHeightChange } from '@simonbackx/vue-app-navigation';
+import { useAnimateHeightChange } from '@browser/navigation';
 
 const props = withDefaults(defineProps<RelationUIFilterViewProperties<T, ObjectType>>(), {
     searchEnabled: true,

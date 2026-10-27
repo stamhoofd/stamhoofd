@@ -48,7 +48,7 @@ import type { NavigationActions } from '#types/NavigationActions.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 import type { Decoder } from '@common/encoding';
 import type { Server } from '@common/networking';
-import { useNavigationController, usePopup } from '@simonbackx/vue-app-navigation';
+import { useNavigationController, usePopup } from '@browser/navigation';
 import { PaymentGeneral, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
 import ProgressRing from '../icons/ProgressRing.vue';

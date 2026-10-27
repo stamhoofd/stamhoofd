@@ -5,8 +5,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { PushOptions } from '@simonbackx/vue-app-navigation';
-import { ComponentWithProperties, ModalStackComponent, useManualPresent } from '@simonbackx/vue-app-navigation';
+import type { PushOptions } from '@browser/navigation';
+import { ComponentWithProperties, ModalStackComponent, useManualPresent } from '@browser/navigation';
 import { MobileRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { App as WebApp } from '@stamhoofd/web-app';

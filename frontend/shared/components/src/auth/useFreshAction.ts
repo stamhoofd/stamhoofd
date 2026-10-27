@@ -1,5 +1,5 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
 
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useContext } from '#hooks/useContext.ts';

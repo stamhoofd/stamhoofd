@@ -1,4 +1,4 @@
-import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, useShow } from '@browser/navigation';
 import type { Ref } from 'vue';
 import { computed, getCurrentInstance } from 'vue';
 import { useArrowUpDown } from './useArrowUpDown';

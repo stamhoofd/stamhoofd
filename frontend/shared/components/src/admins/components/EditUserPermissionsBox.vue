@@ -35,7 +35,7 @@
 
 <script setup lang="ts">
 import type { AutoEncoderPatchType, PartialWithoutMethods } from '@common/encoding';
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useEmitPatch } from '#hooks/useEmitPatch.ts';
 import type { ApiUser, PermissionRole, User } from '@stamhoofd/structures';

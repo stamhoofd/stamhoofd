@@ -40,7 +40,7 @@
 </template>
 
 <script lang="ts">
-import type { PushOptions } from '@simonbackx/vue-app-navigation';
+import type { PushOptions } from '@browser/navigation';
 import { inject, shallowRef } from 'vue';
 
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';
@@ -87,7 +87,7 @@ export function useHideTabBar() {
 
 <script setup lang="ts">
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { ComponentWithProperties, defineRoutes, FramedComponent, HistoryManager, NavigationController, ReactiveUrl, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, FramedComponent, HistoryManager, NavigationController, ReactiveUrl, usePresent, useUrl } from '@browser/navigation';
 import { Formatter } from '@stamhoofd/utility';
 import type { ComponentPublicInstance, Ref } from 'vue';
 import { computed, getCurrentInstance, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, provide, ref, toRaw, unref } from 'vue';

@@ -15,7 +15,7 @@ const ruleTester = new RuleTester({
 ruleTester.run('async-component-with-properties', asyncComponentWithProperties, {
     valid: [
         `
-            import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+            import { ComponentWithProperties } from '@browser/navigation';
             new ComponentWithProperties(Self, {});
         `,
         `
@@ -37,7 +37,7 @@ ruleTester.run('async-component-with-properties', asyncComponentWithProperties, 
                 ],
             }],
             code: `
-                import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+                import { ComponentWithProperties, NavigationController } from '@browser/navigation';
                 import App from './App.vue';
                 import AuthenticatedView from './AuthenticatedView.vue';
                 import CenteredMessageView from './CenteredMessageView.vue';
@@ -56,12 +56,12 @@ ruleTester.run('async-component-with-properties', asyncComponentWithProperties, 
         {
             code: `
                 import MyView from './MyView.vue';
-                import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+                import { ComponentWithProperties } from '@browser/navigation';
                 new ComponentWithProperties(MyView, {});
             `,
             output: `
 ${'                '}
-                import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+                import { ComponentWithProperties } from '@browser/navigation';
                 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
                 AsyncComponent(() => import('./MyView.vue'), {});
             `,
@@ -71,12 +71,12 @@ ${'                '}
             filename: '/repo/frontend/shared/components/src/MyFile.ts',
             code: `
                 import MyView from './MyView.vue';
-                import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+                import { ComponentWithProperties } from '@browser/navigation';
                 new ComponentWithProperties(MyView, {});
             `,
             output: `
 ${'                '}
-                import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+                import { ComponentWithProperties } from '@browser/navigation';
                 import { AsyncComponent } from '#containers/AsyncComponent.ts';
                 AsyncComponent(() => import('./MyView.vue'), {});
             `,
@@ -85,14 +85,14 @@ ${'                '}
         {
             code: `
                 import MyView from './MyView.vue';
-                import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+                import { ComponentWithProperties } from '@browser/navigation';
                 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
                 AsyncComponent(() => import('./AlreadyAsync.vue'), {});
                 new ComponentWithProperties(MyView, { id: 1 });
             `,
             output: `
 ${'                '}
-                import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+                import { ComponentWithProperties } from '@browser/navigation';
                 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
                 AsyncComponent(() => import('./AlreadyAsync.vue'), {});
                 AsyncComponent(() => import('./MyView.vue'), { id: 1 });
@@ -102,14 +102,14 @@ ${'                '}
         {
             code: `
                 import MyView from './MyView.vue';
-                import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+                import { ComponentWithProperties } from '@browser/navigation';
                 import { AsyncComponent as LazyComponent } from '#containers/AsyncComponent.ts';
                 new ComponentWithProperties(MyView);
                 new ComponentWithProperties(MyView, { id: 1 });
             `,
             output: `
 ${'                '}
-                import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+                import { ComponentWithProperties } from '@browser/navigation';
                 import { AsyncComponent as LazyComponent } from '#containers/AsyncComponent.ts';
                 LazyComponent(() => import('./MyView.vue'), {});
                 LazyComponent(() => import('./MyView.vue'), { id: 1 });
@@ -122,14 +122,14 @@ ${'                '}
         {
             code: `
                 import MyView from './MyView.vue';
-                import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+                import { ComponentWithProperties } from '@browser/navigation';
                 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
                 useView(MyView);
                 new ComponentWithProperties(MyView, {});
             `,
             output: `
                 import MyView from './MyView.vue';
-                import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+                import { ComponentWithProperties } from '@browser/navigation';
                 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
                 useView(MyView);
                 AsyncComponent(() => import('./MyView.vue'), {});
@@ -139,13 +139,13 @@ ${'                '}
         {
             code: `
                 import MyView from './MyView.vue';
-                import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+                import { ComponentWithProperties } from '@browser/navigation';
                 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
                 new ComponentWithProperties(MyView, {}, { forceCanHaveFocus: true });
             `,
             output: `
 ${'                '}
-                import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+                import { ComponentWithProperties } from '@browser/navigation';
                 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
                 AsyncComponent(() => import('./MyView.vue'), {}, { forceCanHaveFocus: true });
             `,

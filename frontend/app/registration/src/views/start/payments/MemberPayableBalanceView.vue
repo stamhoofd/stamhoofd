@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import type { Decoder } from '@common/encoding';
-import { ComponentWithProperties, useDismiss, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, useDismiss, useShow } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions';
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';

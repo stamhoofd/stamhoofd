@@ -56,7 +56,7 @@ import { EmergencyContact } from '@stamhoofd/structures';
 import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
 import { SimpleError, SimpleErrors } from '@common/errors';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { computed } from 'vue';
 import { ErrorBox } from '../../../errors/ErrorBox';

@@ -61,7 +61,7 @@ import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.
 import InfiniteObjectFetcherEnd from '#tables/InfiniteObjectFetcherEnd.vue';
 import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
-import { ComponentWithProperties, defineRoute, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoute, NavigationController, useNavigate } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { EmailPreview, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
 import { isEmptyFilter, LimitedFilteredRequest, SortItemDirection } from '@stamhoofd/structures';

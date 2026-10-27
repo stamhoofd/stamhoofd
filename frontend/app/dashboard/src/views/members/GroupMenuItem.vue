@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import type { useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import type { useCheckRoute, useNavigate } from '@browser/navigation';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 import STMenuItem from '@stamhoofd/components/menu/STMenuItem.vue';
 import type { Group, GroupCategory, OrganizationRegistrationPeriod } from '@stamhoofd/structures';

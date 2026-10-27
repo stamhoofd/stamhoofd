@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { usePop } from '@browser/navigation';
 import type { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Group, GroupPrice, GroupSettings } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';

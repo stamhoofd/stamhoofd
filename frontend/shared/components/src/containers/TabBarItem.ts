@@ -1,4 +1,4 @@
-import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties } from '@browser/navigation';
 import { Formatter } from '@stamhoofd/utility';
 import type { ComponentPublicInstance, Ref } from 'vue';
 import { markRaw, unref } from 'vue';

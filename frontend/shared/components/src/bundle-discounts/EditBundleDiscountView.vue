@@ -142,7 +142,7 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
 import { ArrayDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePop, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useGroupViewLoaders } from '#groups/groupViewLoaders.ts';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';

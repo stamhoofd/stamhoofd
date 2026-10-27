@@ -95,7 +95,7 @@ import { useAppContext } from '#context/appContext.ts';
 import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
 import { SimpleError, SimpleErrors } from '@common/errors';
-import { usePresent } from '@simonbackx/vue-app-navigation';
+import { usePresent } from '@browser/navigation';
 import { NationalRegisterNumberOptOut } from '@stamhoofd/structures';
 import { computed, nextTick } from 'vue';
 import { ErrorBox } from '../../../errors/ErrorBox';

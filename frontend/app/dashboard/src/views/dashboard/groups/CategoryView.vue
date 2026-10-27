@@ -101,7 +101,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useNavigationController, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, useNavigationController, useShow } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';

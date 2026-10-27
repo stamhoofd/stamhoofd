@@ -1,4 +1,4 @@
-import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController } from '@browser/navigation';
 import type { WebshopManager } from '../WebshopManager';
 import TicketAlreadyScannedView from './status/TicketAlreadyScannedView.vue';
 import ValidTicketView from './status/ValidTicketView.vue';

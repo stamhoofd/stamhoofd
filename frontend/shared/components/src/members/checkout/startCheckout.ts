@@ -1,6 +1,6 @@
 import { ViewStepsManager } from '#steps/ViewStepsManager.ts';
 import type { Decoder } from '@common/encoding';
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { PlatformMember, RegisterCheckout, RegistrationWithTinyMember } from '@stamhoofd/structures';

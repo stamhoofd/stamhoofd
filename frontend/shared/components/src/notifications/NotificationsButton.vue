@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController } from '@browser/navigation';
 import { computed, watch } from 'vue';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useFeatureFlag } from '#hooks/useFeatureFlag.ts';
