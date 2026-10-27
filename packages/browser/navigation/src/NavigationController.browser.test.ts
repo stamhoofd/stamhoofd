@@ -216,6 +216,7 @@ async function mountController(root: ComponentWithProperties) {
     });
 
     host = document.createElement('div');
+    // eslint-disable-next-line no-unsanitized/property -- Test-owned CSS fixture interpolating only numeric animation/layout constants.
     host.innerHTML = `
         <style>
             .mount {

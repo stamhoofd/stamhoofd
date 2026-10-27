@@ -103,6 +103,7 @@ onBeforeUnmount(() => {
     // This fixes a glitch that the editor content is wiped before the transition is finished
     if (rootEl.value) {
         const content = rootEl.value.innerHTML;
+        // eslint-disable-next-line no-unsanitized/property -- Preserves the component's existing DOM during teardown; no new input is inserted.
         rootEl.value.innerHTML = content;
     }
     editor.value?.destroy();

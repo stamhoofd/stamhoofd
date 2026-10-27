@@ -54,6 +54,7 @@ async function reimportWithCacheBust<T>(loader: () => Promise<T>): Promise<T> {
     const url = getImportUrl(loader);
     if (url) {
         url.searchParams.set('retry_t', Date.now().toString());
+        // eslint-disable-next-line no-unsanitized/method -- The URL is extracted from an application-owned Vite loader; only its cache-busting query changes.
         const c = await import(/* @vite-ignore */ url.href);
         return 'default' in c ? c.default : c;
     }

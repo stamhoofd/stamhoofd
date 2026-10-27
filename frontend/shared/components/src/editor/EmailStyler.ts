@@ -1,4 +1,5 @@
 export class EmailStyler {
+    /** Formats TipTap-generated editor HTML, not arbitrary input HTML. */
     static async format(html: string, subject: string): Promise<{ text: string; html: string }> {
         const imported = ((await import(/* webpackChunkName: "email-css" */ './email.url.scss?inline')).default);
 
@@ -22,6 +23,7 @@ export class EmailStyler {
 
         // Transform HTML into text + do replacements
         const element = document.createElement('div.email-style-apply-here');
+        // eslint-disable-next-line no-unsanitized/property -- Both callers pass editor.getHTML(); custom replacement nodes use escaped application-generated markup.
         element.innerHTML = html;
 
         const elements = element.querySelectorAll('span[data-type="smartVariable"]');
@@ -47,6 +49,7 @@ export class EmailStyler {
         const inlineButtons = element.querySelectorAll('span[data-type="smartButtonInline"]');
         for (const el of inlineButtons) {
             const button = document.createElement('a');
+            // eslint-disable-next-line no-unsanitized/property -- Copies children from the same schema-generated editor DOM.
             button.innerHTML = (el as HTMLElement).innerHTML;
             button.className = 'inline-link';
             button.setAttribute('href', el.getAttribute('href') ?? '');
@@ -83,6 +86,7 @@ export class EmailStyler {
             (el as any).setAttribute('style', buttonCSS); // style.cssText doesn't work reliably (skips some properties)
 
             // Old e-mail client fix for buttons
+            // eslint-disable-next-line no-unsanitized/method -- Wraps existing schema-generated button markup in a fixed email-layout table.
             el.insertAdjacentHTML('beforebegin', `<table width="100%" cellspacing="0" cellpadding="0" style="margin: 5px 0;">
 <tr>
     <td>

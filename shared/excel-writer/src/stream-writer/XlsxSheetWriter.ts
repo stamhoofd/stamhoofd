@@ -85,6 +85,7 @@ export class XlsxSheetWriter extends XlsxFileWriter {
         if (this.mergeCells.length > 0) {
             await this.write('<mergeCells count="' + this.mergeCells.length + '">');
             for (const merge of this.mergeCells) {
+                // eslint-disable-next-line secure-coding/no-improper-sanitization -- escapeXml escapes all five XML special characters in this attribute value.
                 await this.write('<mergeCell ref="' + escapeXml(merge) + '" />');
             }
             await this.write('</mergeCells>');

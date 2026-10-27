@@ -4,6 +4,7 @@ import { TextSelection } from '@tiptap/pm/state';
 
 export type SmartVariableNodeOptions = {
     HTMLAttributes: Record<string, any>;
+    /** Application-generated replacement markup; its producers escape user-controlled values. */
     smartVariables: EditorSmartVariable[];
 };
 
@@ -117,6 +118,7 @@ export const SmartVariableNode = Node.create<SmartVariableNodeOptions>({
         }
         const dom = document.createElement('div');
         dom.setAttribute('data-type', this.name);
+        // eslint-disable-next-line no-unsanitized/property -- Replacement markup comes from application table/login-detail builders that escape user values.
         dom.innerHTML = smartVariable.html;
         return { dom };
     },
@@ -144,6 +146,7 @@ export const SmartVariableNodeBlock = SmartVariableNode.extend<SmartVariableNode
         const dom = document.createElement('div');
         dom.setAttribute('data-type', this.name);
         dom.setAttribute('data-id', (node.attrs.id ?? '') + '');
+        // eslint-disable-next-line no-unsanitized/property -- Same trusted replacement builders as the inline smart-variable node.
         dom.innerHTML = smartVariable?.html ?? '';
         return { dom };
     },

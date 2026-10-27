@@ -213,6 +213,7 @@ export class ReferralService {
                     from: Email.getQuickFromEmail(receivingOrganization.address.country),
                     to: admins,
                     subject: 'Je hebt ' + Formatter.price(-credit.unitPrice) + ' tegoed ontvangen 💰',
+                    // eslint-disable-next-line secure-coding/no-improper-sanitization -- This is a plain-text email body, not an HTML sink.
                     text: 'Dag ' + receivingOrganization.name + ',\n\nGeweldig nieuws! ' + organization.name + ' had jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren, en nu hebben ze ook voor het eerst minstens één euro uitgegeven. Daardoor ontvangen jullie ' + Formatter.price(-credit.unitPrice) + ' tegoed voor Stamhoofd (zie daarvoor Stamhoofd > Instellingen). '
                         + (-credit.unitPrice <= 90 * 100_00 ? ('Bij de volgende vereniging ontvangen jullie nog meer: ' + Formatter.price(-credit.unitPrice + 10 * 100_00) + '. ') : '')
                         + (-credit.unitPrice <= 80 * 100_00 ? ('En dat blijft oplopen tot € 100,00 per vereniging die je aanbrengt.') : '')

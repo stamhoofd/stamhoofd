@@ -32,6 +32,7 @@ const svgContent = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="1
 
 const htmlContent = Buffer.from('<!DOCTYPE html><html><body><script>alert(document.domain)</script></body></html>');
 
+// eslint-disable-next-line secure-coding/no-xxe-injection -- Deliberate attack fixture verifying unsafe uploads are rejected or served as downloads.
 const xxeContent = Buffer.from('<?xml version="1.0"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///etc/passwd">]><foo>&xxe;</foo>');
 
 /**
@@ -244,7 +245,7 @@ describe('Upload security', () => {
             'evil .pdf',
             'evil;rm -rf /.pdf',
             'evil\'`$().pdf',
-            '‮fdp.evil.pdf',
+            '\u202Efdp.evil.pdf',
             'a'.repeat(300) + '.pdf',
             '%2e%2e%2f%2e%2e%2fevil.pdf',
             'CON.pdf',

@@ -383,6 +383,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
             const unsubscribeLocale = organization ? (await getRecipientI18n(recipient, organization)).locale : null;
             const unsubscribeUrl = 'https://' + STAMHOOFD.domains.dashboard + '/' + (unsubscribeLocale ? (unsubscribeLocale + '/') : '') + 'unsubscribe?id=' + encodeURIComponent(unsubscribe.id) + '&token=' + encodeURIComponent(unsubscribe.token) + '&type=' + encodeURIComponent(email.unsubscribeType ?? 'all');
             recipient.replacements.push(Replacement.create({
+                // eslint-disable-next-line secure-coding/no-hardcoded-credentials -- Template placeholder name; the actual URL is generated separately above.
                 token: 'unsubscribeUrl',
                 value: unsubscribeUrl,
             }));
@@ -622,6 +623,7 @@ export function stripSensitiveRecipientReplacements(recipient: Recipient | Email
     // Add dummy unsubscribeUrl
     const dummyUnsubscribeUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false) : STAMHOOFD.domains.dashboard) + '/unsubscribe?token=example';
     recipient.replacements.push(Replacement.create({
+        // eslint-disable-next-line secure-coding/no-hardcoded-credentials -- Template placeholder name, not an authentication token.
         token: 'unsubscribeUrl',
         value: dummyUnsubscribeUrl,
     }));
@@ -659,6 +661,7 @@ export function stripRecipientReplacementsForWebDisplay(recipient: Recipient | E
     // Add dummy unsubscribeUrl
     const dummyUnsubscribeUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false) : STAMHOOFD.domains.dashboard);
     recipient.replacements.push(Replacement.create({
+        // eslint-disable-next-line secure-coding/no-hardcoded-credentials -- Template placeholder name, not an authentication token.
         token: 'unsubscribeUrl',
         value: dummyUnsubscribeUrl,
     }));

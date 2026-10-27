@@ -40,8 +40,10 @@ export const caddyImage = 'localhost/stamhoofd-caddy:2';
 export const caddyPlugins = ['github.com/caddyserver/replace-response'];
 
 export const mysqlRootUser = 'root';
+// eslint-disable-next-line secure-coding/no-hardcoded-credentials -- Public default for the CLI-managed local MySQL container.
 export const mysqlRootPassword = 'root';
 export const maildevUsername = 'username';
+// eslint-disable-next-line secure-coding/no-hardcoded-credentials -- Public default for the local Maildev test inbox, not a production account.
 export const maildevPassword = 'password';
 export const localFilesAccessKey = 'stamhoofd-local';
 export const localFilesSecretKey = 'stamhoofd-local-secret';

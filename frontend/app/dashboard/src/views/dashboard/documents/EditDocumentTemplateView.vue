@@ -840,6 +840,7 @@ async function loadHtml(type: string) {
     loadingHtml.value = true;
 
     console.log('loadHtml', type);
+    // eslint-disable-next-line no-unsanitized/method -- Vite resolves only the bundled document templates in this directory.
     const imported = ((await import(`./templates/${type}.html?raw`)).default);
     if (typeof imported !== 'string') {
         throw new Error('Imported attest html is not a string');
@@ -852,6 +853,7 @@ async function loadHtml(type: string) {
 
 async function loadXML(type: string) {
     loadingXml.value = true;
+    // eslint-disable-next-line no-unsanitized/method -- Vite resolves only the bundled document templates in this directory.
     const imported = ((await import(`./templates/${type}.xml?raw`)).default);
     if (typeof imported !== 'string') {
         throw new Error('Imported attest xml is not a string');

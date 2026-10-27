@@ -57,6 +57,7 @@ export class I18n {
             for (const file of files) {
                 const locale = file.name.substr(0, file.name.length - 5);
 
+                // eslint-disable-next-line no-unsanitized/method -- Reads JSON from the installed locales package resolved above.
                 const messages = await import(directory + '/' + file.name, { with: { type: 'json' } });
                 this.loadedLocales.set(locale, this.loadRecursive(messages.default));
             }

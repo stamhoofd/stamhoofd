@@ -200,6 +200,7 @@ export class I18nController {
 
         if (!i18n.isLocaleLoaded(namespace, locale)) {
             // If the language hasn't been loaded yet
+            // eslint-disable-next-line no-unsanitized/method -- Vite restricts this import to bundled locale JSON files.
             const messages = await import(`../../../shared/locales/dist/locales/${namespace}/${locale}.json`);
             i18n.loadLocale(namespace, locale, messages.default);
             console.log('[I18n] Successfully loaded locale', namespace, locale);

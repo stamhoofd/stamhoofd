@@ -74,6 +74,7 @@ export class Router {
             if (!file.endsWith('.ts') && !file.endsWith('.js')) {
                 continue;
             }
+            // eslint-disable-next-line no-unsanitized/method -- Endpoint files come from the configured application directory, not request input.
             const imported = await import(p);
             for (const key in imported) {
                 const element = imported[key];

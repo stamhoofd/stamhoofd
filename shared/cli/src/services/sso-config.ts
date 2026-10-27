@@ -7,9 +7,11 @@ export const ssoRealm = 'stamhoofd';
 export const ssoClientId = 'stamhoofd-local';
 export const ssoClientSecret = 'stamhoofd-local-secret';
 export const ssoUserEmail = 'sso@example.com';
+// eslint-disable-next-line secure-coding/no-hardcoded-credentials -- Deliberate test user in the CLI-managed local SSO realm.
 export const ssoUserPassword = 'password';
 export const ssoUserName = 'Local SSO User';
 export const ssoAdminUser = 'admin';
+// eslint-disable-next-line secure-coding/no-hardcoded-credentials -- Deliberate admin account in the CLI-managed local SSO realm.
 export const ssoAdminPassword = 'admin';
 
 export function buildSsoConfigOutput(domains: ReturnType<typeof buildDomains>, redirectUri?: string): string {

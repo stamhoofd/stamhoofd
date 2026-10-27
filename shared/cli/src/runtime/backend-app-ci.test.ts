@@ -24,6 +24,7 @@ describe('backend app CI aggregation', () => {
 });
 
 function check(result: string) {
+    // eslint-disable-next-line node-security/no-dynamic-command-string -- Executes the repository's CI shell script; test inputs are passed through environment variables.
     execFileSync('bash', ['-e', '-o', 'pipefail', '-c', checkShards], {
         env: { ...process.env, SHARD_RESULT: result },
     });

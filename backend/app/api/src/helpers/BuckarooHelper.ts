@@ -85,6 +85,7 @@ export class BuckarooHelper {
         const data = {
             Currency: 'EUR',
             AmountDebit: '0.01',
+            // eslint-disable-next-line node-security/no-math-random-crypto -- A test invoice label, not a credential or the signed request nonce.
             Invoice: 'TESTPAYMENT-' + (new Date().getTime()) + '-' + Math.round(Math.random() * 100000),
             ClientIP: {
                 Type: 0, // 0 = ipv4, 1 = ipv6

@@ -227,6 +227,7 @@ export class AutoTranslator {
                 for (const [key, value] of replacements) {
                     originalAfterReplacements
                         = originalAfterReplacements.replaceAll(
+                            // eslint-disable-next-line secure-coding/no-redos-vulnerable-regex -- Keys are intentionally regex patterns authored in repository locale files, not request input.
                             new RegExp(`${key}+(?![^{]*})`, 'g'),
                             value,
                         );

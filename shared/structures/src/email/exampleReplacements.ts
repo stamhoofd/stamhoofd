@@ -216,6 +216,7 @@ function getReplacements() {
             value: 'https://www.example.com/sign-in',
         }),
         unsubscribeUrl: Replacement.create({
+            // eslint-disable-next-line secure-coding/no-hardcoded-credentials -- Template placeholder name paired with an example URL.
             token: 'unsubscribeUrl',
             value: 'https://www.example.com/unsubscribe',
         }),

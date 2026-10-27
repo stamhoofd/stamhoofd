@@ -213,6 +213,7 @@ export class Migration {
                 return;
             }
 
+            // eslint-disable-next-line no-unsanitized/method -- Executes repository-owned migration files, not user-selected modules.
             const imported = await import(file);
             migration = imported.default?.default ?? imported.default;
         }

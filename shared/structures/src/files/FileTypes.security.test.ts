@@ -256,7 +256,7 @@ describe('FileTypes security', () => {
             'evil.pdf ',
             'evil\r\n.pdf',
             'a'.repeat(4000) + '.pdf',
-            '‮fdp.html',
+            '\u202Efdp.html',
             '你好.pdf',
             'photo.JPEG',
             null,
@@ -354,7 +354,7 @@ describe('FileTypes security', () => {
         });
 
         test('A filename we cannot read an extension from is refused without a content type', () => {
-            for (const filename of ['', '..', '...', 'noextension', 'trailing.', 'trailing. ', 'evil.pdf\u0000', '‮fdp.html']) {
+            for (const filename of ['', '..', '...', 'noextension', 'trailing.', 'trailing. ', 'evil.pdf\u0000', '\u202Efdp.html']) {
                 expect(File.resolveUploadType({ filename }), filename).toBeNull();
                 expect(File.resolveUploadType({ contentType: 'application/octet-stream', filename }), filename).toBeNull();
             }

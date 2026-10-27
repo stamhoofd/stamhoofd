@@ -40,10 +40,12 @@ describe('Playwright CI aggregation', () => {
     });
 
     it.each(['Playwright Tests', 'Playwright Tests (shard 1/4)', 'Playwright Tests (shard 4/4)'])('recognizes previous failure %s', (failed) => {
+        // eslint-disable-next-line node-security/no-dynamic-command-string -- Tests the repository's shell function; the varying input is an environment variable.
         expect(() => execFileSync('bash', ['-c', `${hasPlaywright}\nhas_playwright`], { env: { ...process.env, failed } })).not.toThrow();
     });
 
     it('does not force Playwright after an unrelated job failed', () => {
+        // eslint-disable-next-line node-security/no-dynamic-command-string -- Tests the repository's shell function; the varying input is an environment variable.
         expect(() => execFileSync('bash', ['-c', `${hasPlaywright}\nhas_playwright`], { env: { ...process.env, failed: 'Backend App Tests' } })).toThrow();
     });
 
@@ -56,6 +58,7 @@ describe('Playwright CI aggregation', () => {
     }
 
     function check(result: string) {
+        // eslint-disable-next-line node-security/no-dynamic-command-string -- Executes the repository's CI shell script, not a command constructed from test inputs.
         execFileSync('bash', ['-e', '-o', 'pipefail', '-c', checkShards], { cwd: directory, env: { ...process.env, SHARD_RESULT: result } });
     }
 });

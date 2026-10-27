@@ -151,6 +151,7 @@ function decodeEntities(input: string): string {
 
 /** Escape characters that would otherwise be interpreted as Markdown/MDC syntax. */
 function escapeInline(text: string): string {
+    // eslint-disable-next-line secure-coding/no-improper-sanitization -- Escapes a Markdown text node, not an HTML attribute; angle brackets cannot start raw HTML.
     return text
         .replace(/\\/g, '\\\\')
         .replace(/</g, '&lt;')
@@ -294,6 +295,7 @@ async function downloadAsset(asset: Asset): Promise<void> {
         }
         body = Buffer.from(await response.arrayBuffer());
         mkdirSync(dirname(target), { recursive: true });
+        // eslint-disable-next-line node-security/no-toctou-vulnerability -- The destination is docs/public in the developer-owned checkout, not a shared temporary directory.
         writeFileSync(target, body);
     }
 
