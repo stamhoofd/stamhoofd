@@ -121,8 +121,9 @@ export type ReportCard = {
     /**
      * Numbers a parameter takes when no filter gives it one, written `-- defaults: aantal_werkjaren = 3`.
      * It is how a card switches on an optional clause of a fragment that no dashboard filter drives.
+     * Internal parameter lookup; Metabase JSON tags are constructed separately by sync-report.
      */
-    defaults: Record<string, number>;
+    defaults: Map<string, number>;
     /**
      * The environments this card is not written for. A platform that does not record what the card
      * counts has no variant of it to be given, only an empty one, so it is left out there instead.
@@ -554,8 +555,8 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
 }
 
 /** `name = 3, other = 5`: a number per parameter the query takes. */
-function parseDefaults(section: Section, file: string, parameters: string[]): Record<string, number> {
-    const defaults: Record<string, number> = {};
+function parseDefaults(section: Section, file: string, parameters: string[]): Map<string, number> {
+    const defaults = new Map<string, number>();
 
     for (const entry of splitList(section.attributes.get('defaults'))) {
         const match = /^([a-z_]+)[ \t]*=[ \t]*(\S+)$/.exec(entry);
@@ -566,7 +567,7 @@ function parseDefaults(section: Section, file: string, parameters: string[]): Re
         if (!parameters.includes(match[1])) {
             throw new Error(`${file}: card "${section.key}" gives "${match[1]}" a default, but its query takes no {{${match[1]}}}`);
         }
-        defaults[match[1]] = value;
+        defaults.set(match[1], value);
     }
 
     return defaults;

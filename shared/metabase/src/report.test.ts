@@ -934,7 +934,7 @@ describe('report', () => {
          */
         it('limits only the GTP overview to its own werkjaren', () => {
             for (const tabs of [dashboards, ravotDashboards]) {
-                const limited = tabs.flatMap(tab => tab.cards).filter(card => Object.keys(card.defaults).length > 0).map(card => `${card.key}: ${JSON.stringify(card.defaults)}`);
+                const limited = tabs.flatMap(tab => tab.cards).filter(card => card.defaults.size > 0).map(card => `${card.key}: ${JSON.stringify(Object.fromEntries(card.defaults))}`);
 
                 expect(limited).toEqual(['gtp-per-eenheid: {"aantal_werkjaren":3}']);
             }
@@ -1468,7 +1468,12 @@ describe('report', () => {
 
         it('reads the numbers a card gives its parameters', () => {
             expect(parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- defaults: aantal = 3\nSELECT {{aantal}}', 'x.sql', new Map()).cards[0].defaults)
-                .toEqual({ aantal: 3 });
+                .toEqual(new Map([['aantal', 3]]));
+        });
+
+        it('keeps zero defaults and the last value of a repeated parameter', () => {
+            expect(parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- defaults: aantal = 3, aantal = 0\nSELECT {{aantal}}', 'x.sql', new Map()).cards[0].defaults)
+                .toEqual(new Map([['aantal', 0]]));
         });
 
         it('rejects a default that is no number, or for a parameter the query does not take', () => {

@@ -18,7 +18,7 @@ function card(overrides: Partial<ReportCard> = {}): ReportCard {
         parameters: [],
         except: [],
         only: [],
-        defaults: {},
+        defaults: new Map(),
         snippets: [],
         sql: 'SELECT 1',
         snippetSql: 'SELECT 1',
@@ -470,7 +470,7 @@ describe('buildTemplateTags', () => {
      * of the fragment referring to it, so the card declares what it only reaches through another one.
      */
     it('declares a parameter with a default as a number that needs no filter', () => {
-        const tags = buildTemplateTags(card({ parameters: ['werkjaar', 'aantal_werkjaren'], defaults: { aantal_werkjaren: 3 } }), new Map(), ['werkjaar']);
+        const tags = buildTemplateTags(card({ parameters: ['werkjaar', 'aantal_werkjaren'], defaults: new Map([['aantal_werkjaren', 3]]) }), new Map(), ['werkjaar']);
 
         expect(tags['aantal_werkjaren']).toMatchObject({ type: 'number', default: 3 });
         expect(tags['aantal_werkjaren']).not.toHaveProperty('required');

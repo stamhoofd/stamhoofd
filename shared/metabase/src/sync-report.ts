@@ -251,7 +251,7 @@ export function buildTemplateTags(card: ReportCard, snippetIds: Map<string, numb
 
     for (const parameter of card.parameters) {
         const filter = reportFilters.find(entry => entry.name === parameter);
-        const fallback = card.defaults[parameter];
+        const fallback = card.defaults.get(parameter);
 
         tags[parameter] = {
             id: templateTagId(card.key, parameter),
