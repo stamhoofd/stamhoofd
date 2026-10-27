@@ -13,7 +13,7 @@ import { useErrors } from '#errors/useErrors.ts';
 import { useValidation } from '#errors/useValidation.ts';
 import type { Validator } from '#errors/Validator.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors } from '@common/errors';
 import { computed } from 'vue';
 import MultipleChoiceInput from './MultipleChoiceInput.vue';
 

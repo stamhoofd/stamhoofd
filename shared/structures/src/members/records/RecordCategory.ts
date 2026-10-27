@@ -1,5 +1,5 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, PatchMap, StringDecoder } from '@simonbackx/simple-encoding';
-import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleErrors } from '@common/errors';
 import { v4 as uuidv4 } from 'uuid';
 
 import { PropertyFilter } from '../../filters/PropertyFilter.js';

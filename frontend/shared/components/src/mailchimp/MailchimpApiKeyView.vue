@@ -20,7 +20,7 @@
 
 <script lang="ts" setup>
 import type { Decoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { MailchimpConnectRequest } from '@stamhoofd/structures/mailchimp/MailchimpConnectRequest.js';

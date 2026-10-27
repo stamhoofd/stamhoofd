@@ -1,5 +1,5 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { Server } from '@simonbackx/simple-networking';
 import { Request } from '@simonbackx/simple-networking';
 import type { CartItem } from '@stamhoofd/structures';

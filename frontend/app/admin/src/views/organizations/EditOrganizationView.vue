@@ -63,7 +63,7 @@
 
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import JumpToContainer from '@stamhoofd/components/containers/JumpToContainer.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';

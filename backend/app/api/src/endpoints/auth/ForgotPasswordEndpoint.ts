@@ -5,7 +5,7 @@ import { Platform, User } from '@stamhoofd/models';
 import { sendEmailTemplate } from '../../helpers/EmailBuilder.js';
 import { EmailTemplateType, ForgotPasswordRequest, LoginMethod, Recipient } from '@stamhoofd/structures';
 
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Context } from '../../helpers/Context.js';
 import { PasswordForgotService } from '../../services/PasswordForgotService.js';
 

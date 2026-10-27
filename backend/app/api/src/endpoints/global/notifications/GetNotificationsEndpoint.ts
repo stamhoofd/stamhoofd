@@ -2,7 +2,7 @@ import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Notification } from '@stamhoofd/models/models/Notification.js';
 import { NotificationRecipient } from '@stamhoofd/models/models/NotificationRecipient.js';
 import { SQL, SQLSelect, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';

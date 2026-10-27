@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { Address, ValidatedAddress } from '@stamhoofd/structures';
 import { computed, getCurrentInstance, ref, watch } from 'vue';
 

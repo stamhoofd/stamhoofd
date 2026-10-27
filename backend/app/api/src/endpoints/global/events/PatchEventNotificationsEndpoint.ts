@@ -6,7 +6,7 @@ import { Event, EventNotification, Platform, RegistrationPeriod } from '@stamhoo
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { EmailTemplateType, EventNotificationStatus, EventNotification as EventNotificationStruct, RecordCategory } from '@stamhoofd/structures';
 
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 import { EventNotificationService } from '../../../services/EventNotificationService.js';

@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { RateLimiter } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import type { CountFilteredRequest, IPaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';

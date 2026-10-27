@@ -2,7 +2,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Organization } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
 import { GetWebshopFromDomainResult, Webshop as WebshopStruct } from '@stamhoofd/structures';

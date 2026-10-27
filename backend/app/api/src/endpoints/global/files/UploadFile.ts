@@ -1,7 +1,7 @@
 import { PutObjectCommand } from '@aws-sdk/client-s3'; // ES Modules import
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { File } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import formidable from 'formidable';

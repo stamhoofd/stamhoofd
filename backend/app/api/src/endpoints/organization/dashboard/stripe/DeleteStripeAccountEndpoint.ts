@@ -6,7 +6,7 @@ import { AuditLogType } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
 import { StripeHelper } from '../../../../helpers/StripeHelper.js';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { AuditLogService } from '../../../../services/AuditLogService.js';
 
 type Params = { id: string };

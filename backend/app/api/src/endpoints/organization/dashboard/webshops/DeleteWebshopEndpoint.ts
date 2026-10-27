@@ -5,7 +5,7 @@ import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 
 import { Context } from '../../../../helpers/Context.js';
 import { UitpasService } from '../../../../services/uitpas/UitpasService.js';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 
 type Params = { id: string };
 type Query = undefined;

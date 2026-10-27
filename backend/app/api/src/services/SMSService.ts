@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Platform } from '@stamhoofd/models';
 import { Country } from '@stamhoofd/types/Country';
 import type { CountryCode } from 'libphonenumber-js';

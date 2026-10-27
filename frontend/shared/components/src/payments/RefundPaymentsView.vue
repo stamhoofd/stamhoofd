@@ -80,7 +80,7 @@
 <script lang="ts" setup>
 import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { BalanceItemPaymentDetailed, PaymentGeneral, PaymentProvider, PaymentStatus, PaymentType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';

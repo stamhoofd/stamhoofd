@@ -1,6 +1,6 @@
 import type { Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
 import { PatchableArray, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { RequestResult } from '@simonbackx/simple-networking';
 import { Request } from '@simonbackx/simple-networking';
 import { useAppContext } from '#context/appContext.ts';

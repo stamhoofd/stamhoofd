@@ -46,7 +46,7 @@
         "uuid": "14.0.3"
     },
     "devDependencies": {
-        "@simonbackx/simple-errors": "1.5.0",
+        "@common/errors": "workspace:*",
         "@stamhoofd/excel-writer": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
         "@stamhoofd/types": "workspace:*",
@@ -55,7 +55,7 @@
         "vitest": "4.1.12"
     },
     "peerDependencies": {
-        "@simonbackx/simple-errors": "1.5.0",
+        "@common/errors": "workspace:*",
         "@stamhoofd/excel-writer": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "@stamhoofd/utility": "workspace:*"

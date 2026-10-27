@@ -1,5 +1,5 @@
 import { isModuleImportError } from './isModuleImportError';
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
 import { Request } from '@simonbackx/simple-networking';
 import { reactive } from 'vue';
 

@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
-import { SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleErrors } from '@common/errors';
 import { Formatter } from '@stamhoofd/utility';
 import { Member } from './Member.js';
 

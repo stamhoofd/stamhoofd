@@ -1,5 +1,5 @@
 import type { Data } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 
 export enum SortItemDirection {
     ASC = 'ASC',

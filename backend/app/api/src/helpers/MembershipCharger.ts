@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { BalanceItem, Member, MemberPlatformMembership, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { SQL, SQLOrderBy, SQLWhereSign } from '@stamhoofd/sql';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, TranslatedString } from '@stamhoofd/structures';

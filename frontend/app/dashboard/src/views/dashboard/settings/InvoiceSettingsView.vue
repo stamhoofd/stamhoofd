@@ -77,7 +77,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleErrors } from '@common/errors';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';

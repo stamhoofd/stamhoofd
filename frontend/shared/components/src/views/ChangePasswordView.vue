@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import PasswordStrength from '#inputs/PasswordStrength.vue';

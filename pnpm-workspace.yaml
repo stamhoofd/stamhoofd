@@ -5,6 +5,8 @@ packages:
   - 'backend/app/*'
   - 'backend/shared/*'
   - 'shared/*'
+  # Register imported libraries individually until they are integrated.
+  - 'packages/common/errors'
   - 'tests/*'
   - '.development/*'
   - 'docs'
@@ -109,7 +111,7 @@ overrides:
   'nx>brace-expansion': '5.0.12'
   'nx>follow-redirects': '1.16.1'
   'nx>smol-toml': '1.9.0'
-  '@simonbackx/simple-errors>uuid': '11.1.1'
+  '@simonbackx/simple-errors': 'workspace:@common/errors@*'
   'xcode>uuid': '11.1.1'
   'fontless>esbuild': '0.28.2'
   '@nuxt/content>zod': '4.6.7'

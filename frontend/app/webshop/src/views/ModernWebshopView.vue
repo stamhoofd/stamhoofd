@@ -59,7 +59,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { useDismiss, usePopup } from '@simonbackx/vue-app-navigation';
 import { ComponentWithProperties, NavigationController, ReactiveUrl, useNavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';

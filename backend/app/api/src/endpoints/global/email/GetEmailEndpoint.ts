@@ -3,7 +3,7 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Email } from '@stamhoofd/models';
 import type { EmailPreview } from '@stamhoofd/structures';
 
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Context } from '../../../helpers/Context.js';
 import { EmailPreviewService } from '../../../services/EmailPreviewService.js';
 

@@ -3,7 +3,7 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import type { Invoice as InvoiceStruct } from '@stamhoofd/structures';
 import { DetailedPayableBalance, PaymentStatus } from '@stamhoofd/structures';
 
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { BalanceItem, Invoice, Organization, Payment } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';

@@ -1,5 +1,5 @@
 import { Formatter } from '@stamhoofd/utility';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { v4 as uuidv4 } from 'uuid';
 import { STPackage, STPackageMeta, STPackageType, STPricingType } from './STPackage.js';
 

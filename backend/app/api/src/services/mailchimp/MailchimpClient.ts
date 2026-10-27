@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { createHash } from 'node:crypto';
 import type { MailchimpExistingContact, MailchimpTagChange } from './planSync.js';
 

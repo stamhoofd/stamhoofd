@@ -1,7 +1,7 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
-import type { SimpleError } from '@simonbackx/simple-errors';
-import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
+import type { SimpleError } from '@common/errors';
+import { isSimpleError, isSimpleErrors } from '@common/errors';
 import type { Organization } from '@stamhoofd/models';
 import { AuditLog, ImpersonationToken, MemberFactory, MemberResponsibilityRecordFactory, OrganizationFactory, Platform, RegistrationFactory, Token, User, UserFactory, UserSession } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

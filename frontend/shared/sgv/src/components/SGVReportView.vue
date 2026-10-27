@@ -130,7 +130,7 @@
 </template>
 
 <script setup lang="ts">
-import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors } from '@common/errors';
 import {
     useCanDismiss,
     useCanPop,

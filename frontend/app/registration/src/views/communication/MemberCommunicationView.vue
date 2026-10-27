@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
 import { ComponentWithProperties, defineRoute, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useUserEmailsObjectFetcher } from '@stamhoofd/components/fetchers/useUserEmailsObjectFetcher.ts';

@@ -1,7 +1,7 @@
 import { ArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Webshop, WebshopDiscountCode } from '@stamhoofd/models';
 import type { DiscountCode } from '@stamhoofd/structures';
 

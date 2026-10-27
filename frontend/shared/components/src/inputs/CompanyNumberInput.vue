@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Country } from '@stamhoofd/types/Country';
 import { computed, ref, watch } from 'vue';
 

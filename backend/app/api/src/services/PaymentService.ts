@@ -1,4 +1,4 @@
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import type { Member, User } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemPayment, Group, MolliePayment, Organization, PayconiqPayment, Payment, Platform, UsedRegisterCode } from '@stamhoofd/models';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';

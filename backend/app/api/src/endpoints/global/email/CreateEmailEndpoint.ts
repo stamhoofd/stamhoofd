@@ -6,7 +6,7 @@ import type { EmailPreview } from '@stamhoofd/structures';
 import { EmailStatus, Email as EmailStruct, EmailTemplate as EmailTemplateStruct, validateEmailTranslations } from '@stamhoofd/structures';
 
 import { Context } from '../../../helpers/Context.js';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { EmailPreviewService } from '../../../services/EmailPreviewService.js';
 import { EmailSendService } from '../../../services/EmailSendService.js';
 import { TenantContext } from '../../../helpers/TenantContext.js';

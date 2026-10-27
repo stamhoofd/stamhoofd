@@ -1,6 +1,6 @@
 import type { AutoEncoderPatchType, Encodeable, Identifiable, Patchable, PatchableArray } from '@simonbackx/simple-encoding';
 import { isPatchableArray } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { RecordCategory, RecordSettings, RecordType } from '@stamhoofd/structures';
 import { RecordAnswerDecoder } from '@stamhoofd/structures';
 

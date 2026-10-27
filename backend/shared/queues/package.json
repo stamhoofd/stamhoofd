@@ -17,7 +17,7 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
-        "@simonbackx/simple-errors": "1.5.0"
+        "@common/errors": "workspace:*"
     },
     "devDependencies": {
         "@stamhoofd/types": "workspace:*",

@@ -10,7 +10,7 @@ import type { BalanceItem } from '@stamhoofd/models';
 import { Organization, Platform, User } from '@stamhoofd/models';
 import { CachedBalance } from '@stamhoofd/models';
 import { PaymentService } from '../../../../services/PaymentService.js';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { PaymentMandateService } from '../../../../services/PaymentMandateService.js';
 import { BalanceItemService } from '../../../../services/BalanceItemService.js';
 import { QueueHandler } from '@stamhoofd/queues';

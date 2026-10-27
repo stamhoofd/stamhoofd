@@ -3,7 +3,7 @@ import nock from 'nock';
 
 import { Column, Database } from '@simonbackx/simple-database';
 import { Request } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Email, EmailMocker } from '@stamhoofd/email';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Version } from '@stamhoofd/structures';

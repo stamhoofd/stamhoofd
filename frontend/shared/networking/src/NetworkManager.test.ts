@@ -1,4 +1,4 @@
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors } from '@common/errors';
 import { Request } from '@simonbackx/simple-networking';
 import { Toast } from '@stamhoofd/frontend-notifications/Toast';
 import { Version } from '@stamhoofd/structures';

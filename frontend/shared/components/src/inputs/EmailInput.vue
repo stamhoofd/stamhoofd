@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { DataValidator } from '@stamhoofd/utility';
 import { ref, useTemplateRef, watch } from 'vue';
 

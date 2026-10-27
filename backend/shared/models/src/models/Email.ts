@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { AnyDecoder, ArrayDecoder, EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors } from '@common/errors';
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import type { QueueHandlerOptions } from '@stamhoofd/queues';

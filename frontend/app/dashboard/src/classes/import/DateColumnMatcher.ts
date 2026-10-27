@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { StringCompare } from '@stamhoofd/utility';
 import type XLSX from 'xlsx';
 import { GeneralMemberDetailsMatcher } from '../GeneralMemberDetailsMatcher';

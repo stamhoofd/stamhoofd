@@ -5,7 +5,7 @@ import type { EmailRecipient as EmailRecipientStruct } from '@stamhoofd/structur
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { EmailStatus } from '@stamhoofd/structures';
 
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 import { EmailSendService } from '../../../services/EmailSendService.js';

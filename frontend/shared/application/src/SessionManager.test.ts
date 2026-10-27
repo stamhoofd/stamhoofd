@@ -1,5 +1,5 @@
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Toast } from '@stamhoofd/frontend-notifications/Toast';
 import { Organization, Platform } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';

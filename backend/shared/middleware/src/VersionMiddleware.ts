@@ -1,5 +1,5 @@
 import type { Response, Request, RequestMiddleware, ResponseMiddleware } from '@simonbackx/simple-endpoints';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import { Version } from '@stamhoofd/structures';
 import os from 'os';
 

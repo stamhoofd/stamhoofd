@@ -6,7 +6,7 @@ import { Event, Group, Platform, RegistrationPeriod, Webshop } from '@stamhoofd/
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { AuditLogSource, Event as EventStruct, Group as GroupStruct, GroupType, NamedObject, OrganizationEventType, PlatformEventType } from '@stamhoofd/structures';
 
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';

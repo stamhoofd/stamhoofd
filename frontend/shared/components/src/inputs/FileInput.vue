@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Request } from '@simonbackx/simple-networking';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { File } from '@stamhoofd/structures';

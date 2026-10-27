@@ -1,4 +1,4 @@
-import { SimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { SimpleErrors, SimpleError } from '@common/errors';
 import type { DNSRecord } from '@stamhoofd/structures';
 import { DNSRecordStatus, DNSRecordType } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';

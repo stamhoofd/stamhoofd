@@ -1,6 +1,6 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { isEmptyPatch, PatchMap } from '@simonbackx/simple-encoding';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, User } from '@stamhoofd/models';
 import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Webshop } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';

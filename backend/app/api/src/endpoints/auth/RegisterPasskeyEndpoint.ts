@@ -1,7 +1,7 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { WebauthnChallenge, WebauthnCredential } from '@stamhoofd/models';
 import type { MFAEnrollmentResult } from '@stamhoofd/structures';
 import { MFAMethodType, WebauthnRegistrationRequest } from '@stamhoofd/structures';

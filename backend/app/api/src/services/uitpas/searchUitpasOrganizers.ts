@@ -1,5 +1,5 @@
 import { UitpasOrganizerResponse, UitpasOrganizersResponse } from '@stamhoofd/structures';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 
 type OrganizersResponse = {
     totalItems: number;
