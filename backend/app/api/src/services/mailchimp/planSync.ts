@@ -61,7 +61,8 @@ export type MailchimpUpsert = {
      * Change the status of the existing contact to unsubscribed
      */
     unsubscribe: boolean;
-    mergeFields: Record<string, string>;
+    /** Desired values by literal audience tag; serialized to JSON only by MailchimpClient. */
+    mergeFields: Map<string, string>;
     tags: MailchimpTagChange[];
 };
 
@@ -129,7 +130,7 @@ function getSkipReason(contact: MailchimpContact, status: MailchimpEmailStatus |
 }
 
 function buildMergeFields(contact: MailchimpContact, existing: MailchimpExistingContact | undefined, options: MailchimpPlanOptions) {
-    const fields: Record<string, string> = {};
+    const fields = new Map<string, string>();
     const tags = options.mergeFields;
 
     // Order synchronisations never overwrite names that are already filled in
@@ -140,7 +141,7 @@ function buildMergeFields(contact: MailchimpContact, existing: MailchimpExisting
         if (options.kind === 'orders' && existing && existing.mergeFields.get(tag)) {
             return;
         }
-        fields[tag] = truncate(value);
+        fields.set(tag, truncate(value));
     };
     setName(tags.firstName, contact.firstName);
     setName(tags.lastName, contact.lastName);
@@ -149,13 +150,13 @@ function buildMergeFields(contact: MailchimpContact, existing: MailchimpExisting
         // A selection only contains part of the linked members, so keep the existing values
         const keepExisting = !options.full;
         if (tags.members) {
-            fields[tags.members] = joinList(contact.memberFirstNames, existing?.mergeFields.get(tags.members), keepExisting);
+            fields.set(tags.members, joinList(contact.memberFirstNames, existing?.mergeFields.get(tags.members), keepExisting));
         }
         if (tags.groups) {
-            fields[tags.groups] = joinList(contact.groups, existing?.mergeFields.get(tags.groups), keepExisting);
+            fields.set(tags.groups, joinList(contact.groups, existing?.mergeFields.get(tags.groups), keepExisting));
         }
         if (tags.organizations) {
-            fields[tags.organizations] = joinList(contact.organizations, existing?.mergeFields.get(tags.organizations), keepExisting);
+            fields.set(tags.organizations, joinList(contact.organizations, existing?.mergeFields.get(tags.organizations), keepExisting));
         }
     }
     return fields;
@@ -234,7 +235,7 @@ export function planSync(
             tags: buildTagChanges(contact, existing, options),
         };
 
-        if (existing && !upsert.unsubscribe && upsert.tags.length === 0 && Object.entries(upsert.mergeFields).every(([tag, value]) => existing.mergeFields.get(tag) === value)) {
+        if (existing && !upsert.unsubscribe && upsert.tags.length === 0 && [...upsert.mergeFields].every(([tag, value]) => existing.mergeFields.get(tag) === value)) {
             plan.unchanged++;
             continue;
         }

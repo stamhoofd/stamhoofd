@@ -1,3 +1,4 @@
+import { encodeObject } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { createHash } from 'node:crypto';
 import type { MailchimpExistingContact, MailchimpTagChange } from './planSync.js';
@@ -33,7 +34,8 @@ export type MailchimpMemberUpsert = {
     email: string;
     statusIfNew: 'subscribed' | 'pending';
     status?: 'unsubscribed';
-    mergeFields: Record<string, string>;
+    /** Internal merge-tag state; upsertMember converts it to Mailchimp's JSON object. */
+    mergeFields: ReadonlyMap<string, string>;
 };
 
 function asObject(value: unknown): Record<string, unknown> {
@@ -242,7 +244,7 @@ export class MailchimpClient {
                 email_address: member.email,
                 status_if_new: member.statusIfNew,
                 ...(member.status ? { status: member.status } : {}),
-                merge_fields: member.mergeFields,
+                merge_fields: encodeObject(member.mergeFields, { version: 0 }),
             },
         });
     }

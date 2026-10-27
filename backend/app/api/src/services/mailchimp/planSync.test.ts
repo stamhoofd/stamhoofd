@@ -51,7 +51,7 @@ describe('planSync', () => {
                 isNew: true,
                 statusIfNew: 'pending',
                 unsubscribe: false,
-                mergeFields: { FNAME: 'Jan', LNAME: 'Peeters', SH_LEDEN: 'Emma, Lucas', SH_GROEPEN: 'Welpen' },
+                mergeFields: new Map([['FNAME', 'Jan'], ['LNAME', 'Peeters'], ['SH_LEDEN', 'Emma, Lucas'], ['SH_GROEPEN', 'Welpen']]),
                 tags: [{ name: tags.parent, status: 'active' }, { name: tags.group('Welpen'), status: 'active' }],
             },
             expect.objectContaining({
@@ -139,14 +139,16 @@ describe('planSync', () => {
             { name: tags.group('Welpen'), status: 'inactive' },
             { name: tags.removed, status: 'inactive' },
         ]);
-        expect(full.upserts[0].mergeFields).toMatchObject({ SH_LEDEN: 'Emma', SH_GROEPEN: 'Jongverkenners' });
+        expect(full.upserts[0].mergeFields.get('SH_LEDEN')).toBe('Emma');
+        expect(full.upserts[0].mergeFields.get('SH_GROEPEN')).toBe('Jongverkenners');
 
         const truncated = planSync(contacts, new Map([existing({ email: 'ouder@example.com', mergeFields: { SH_LEDEN: 'Lucas, Noo…' } })]), new Map(), options());
-        expect(truncated.upserts[0].mergeFields.SH_LEDEN).toBe('Lucas, Emma');
+        expect(truncated.upserts[0].mergeFields.get('SH_LEDEN')).toBe('Lucas, Emma');
 
         const selection = planSync(contacts, audience, new Map(), options());
         expect(selection.upserts[0].tags).toEqual([{ name: tags.group('Jongverkenners'), status: 'active' }]);
-        expect(selection.upserts[0].mergeFields).toMatchObject({ SH_LEDEN: 'Lucas, Emma', SH_GROEPEN: 'Welpen, Jongverkenners' });
+        expect(selection.upserts[0].mergeFields.get('SH_LEDEN')).toBe('Lucas, Emma');
+        expect(selection.upserts[0].mergeFields.get('SH_GROEPEN')).toBe('Welpen, Jongverkenners');
     });
 
     test('a full sync marks and optionally archives contacts that no longer match', () => {
@@ -193,8 +195,8 @@ describe('planSync', () => {
         );
 
         expect(plan.upserts.map(u => u.mergeFields)).toEqual([
-            { LNAME: 'Naam' },
-            { FNAME: 'Bestel', LNAME: 'Naam' },
+            new Map([['LNAME', 'Naam']]),
+            new Map([['FNAME', 'Bestel'], ['LNAME', 'Naam']]),
         ]);
     });
 

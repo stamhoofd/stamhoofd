@@ -36,6 +36,16 @@ describe('MailchimpClient', () => {
         expect(result.get('member@example.com')?.mergeFields).toEqual(new Map([['FNAME', 'Jan'], ['LNAME', '']]));
     });
 
+    test('serializes planned merge fields as an object for Mailchimp', async () => {
+        mailchimp.addList('list1', 'Audience');
+        await client.upsertMember('list1', {
+            email: 'member@example.com', statusIfNew: 'pending',
+            mergeFields: new Map([['FNAME', 'Jan'], ['LNAME', '']]),
+        });
+        const result = await client.getMembers('list1');
+        expect(result.get('member@example.com')?.mergeFields).toEqual(new Map([['FNAME', 'Jan'], ['LNAME', '']]));
+    });
+
     test('retries after a 429 with a capped Retry-After and gives up on persistent errors', async () => {
         mailchimp.addList('list1', 'Audience');
         MailchimpClient.retryDelay = 1;
