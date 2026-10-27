@@ -133,7 +133,7 @@ async function collectTranslationsForDiff(cwd: string, diff: string): Promise<st
     const strings = await loadLocaleStrings(cwd);
     const lines: string[] = [];
     for (const key of keys) {
-        const value = strings[key];
+        const value = strings.get(key);
         if (typeof value === 'string') {
             lines.push(`${key}: ${JSON.stringify(value)}`);
         }
@@ -150,21 +150,21 @@ async function collectTranslationsForDiff(cwd: string, diff: string): Promise<st
 }
 
 /** Cached nl.json contents, keyed by absolute path so repeated tool calls don't re-read the file. */
-let localeCache: { path: string; strings: Record<string, unknown> } | undefined;
+let localeCache: { path: string; strings: Map<string, unknown> } | undefined;
 
 /** Loads and parses nl.json from the repo, returning an empty map if it cannot be read. */
-async function loadLocaleStrings(cwd: string): Promise<Record<string, unknown>> {
+async function loadLocaleStrings(cwd: string): Promise<Map<string, unknown>> {
     const path = join(cwd, LOCALE_RELATIVE_PATH);
     if (localeCache?.path === path) {
         return localeCache.strings;
     }
     try {
         const parsed = JSON.parse(await readFile(path, 'utf8')) as unknown;
-        const strings = typeof parsed === 'object' && parsed !== null ? parsed as Record<string, unknown> : {};
+        const strings = new Map<string, unknown>(typeof parsed === 'object' && parsed !== null ? Object.entries(parsed) : []);
         localeCache = { path, strings };
         return strings;
     } catch {
-        return {};
+        return new Map();
     }
 }
 

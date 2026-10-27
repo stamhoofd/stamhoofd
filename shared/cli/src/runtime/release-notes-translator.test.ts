@@ -107,6 +107,15 @@ describe('getCommitDiff translation resolution', () => {
         vi.mocked(run).mockResolvedValue({ stdout: 'diff --git a/x b/x', stderr: '', status: 0 } as never);
         expect(await getCommitDiff(repo, '4f1c7e9')).toBe('diff --git a/x b/x');
     });
+
+    it('reuses parsed locale strings across diff requests for the same repository', async () => {
+        vi.mocked(run).mockResolvedValue({ stdout: "+ label: $t('%W')", stderr: '', status: 0 } as never);
+        expect(await getCommitDiff(repo, '4f1c7e9')).toContain('%W: "Opslaan"');
+
+        await writeFile(join(repo, 'shared', 'locales', 'src', 'nl.json'), '{}', 'utf8');
+
+        expect(await getCommitDiff(repo, 'abcdef0')).toContain('%W: "Opslaan"');
+    });
 });
 
 describe('grepCodebase', () => {
