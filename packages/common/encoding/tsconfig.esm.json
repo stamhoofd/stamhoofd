@@ -1,0 +1,8 @@
+{
+    "extends": "./tsconfig.cjs.json",
+    "compilerOptions": {
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "outDir": "dist/esm",
+    }
+}

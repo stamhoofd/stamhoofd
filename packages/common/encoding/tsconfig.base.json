@@ -1,0 +1,35 @@
+{
+    "compilerOptions": {
+        "target": "es2022",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "jsx": "preserve",
+        "importHelpers": false,
+        "experimentalDecorators": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "sourceMap": true,
+        "strictNullChecks": true,
+        "alwaysStrict": true,
+        "declaration": true,
+        "declarationMap": true,
+        "composite": true,
+        "resolveJsonModule": true,
+        "noErrorTruncation": true,
+        "forceConsistentCasingInFileNames": true,
+        "useDefineForClassFields": true,
+        "lib": [
+            "es2022",
+            "dom"
+        ],
+        "types": [
+            "node"
+        ],
+        "paths": {
+            // Fixed for self referencing
+            "@simonbackx/simple-encoding": ["./index.ts"],
+            "@simonbackx/simple-encoding/*.ts": ["./src/*.ts"],
+            "@simonbackx/simple-encoding/*": ["./src/*"],
+        }
+    }
+}

@@ -1,0 +1,19 @@
+{
+    // File used by the editor.
+    "extends": "./tsconfig.base.json",
+    "compilerOptions": {
+        "outDir": "dist"
+    },
+    "files": [], // intentionally empty
+    "references": [
+        // Project dependencies are added by nx sync
+        {
+            // Normal build
+            "path": "./tsconfig.esm.json"
+        },
+        {
+            // Test files
+            "path": "./tsconfig.test.json"
+        }
+    ]
+}
