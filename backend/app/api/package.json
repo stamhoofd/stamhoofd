@@ -108,7 +108,7 @@
         "luxon": "3.7.2",
         "mailparser": "3.9.46",
         "mockdate": "3.0.5",
-        "mollie-api-typescript": "1.12.41",
+        "mollie-api-typescript": "1.12.42",
         "mysql2": "3.24.6",
         "node-rsa": "2.0.0",
         "openai": "4.104.0",
