@@ -1,7 +1,7 @@
 // first import nock
 import nock from 'nock';
 
-import { Column, Database } from '@simonbackx/simple-database';
+import { Column, Database } from '@node/database';
 import { Request } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { Email, EmailMocker } from '@stamhoofd/email';

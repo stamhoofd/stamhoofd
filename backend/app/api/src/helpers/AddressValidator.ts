@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import type { Decoder } from '@common/encoding';
 import { ArrayDecoder, AutoEncoder, field, ObjectData, StringDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';

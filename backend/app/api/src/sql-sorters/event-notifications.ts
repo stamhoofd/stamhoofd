@@ -1,4 +1,4 @@
-import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import type { SQLResultNamespacedRow } from '@node/database';
 import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';

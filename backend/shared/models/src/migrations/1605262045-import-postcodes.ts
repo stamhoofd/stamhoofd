@@ -1,4 +1,4 @@
-import { column, Database, Migration } from '@simonbackx/simple-database';
+import { column, Database, Migration } from '@node/database';
 import { QueryableModel } from '@stamhoofd/sql';
 import { Country } from '@stamhoofd/types/Country';
 import { StringCompare } from '@stamhoofd/utility';

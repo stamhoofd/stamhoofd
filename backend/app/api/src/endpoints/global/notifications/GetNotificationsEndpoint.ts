@@ -1,4 +1,4 @@
-import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import type { SQLResultNamespacedRow } from '@node/database';
 import type { Decoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';

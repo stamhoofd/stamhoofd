@@ -9,7 +9,7 @@ import type { CountFilteredRequest, EventNotification as EventNotificationStruct
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { LimitedFilteredRequest, PaginatedResponse, assertSort, getSortFilter } from '@stamhoofd/structures';
 
-import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import type { SQLResultNamespacedRow } from '@node/database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 import { eventNotificationsFilterCompilers } from '../../../sql-filters/event-notifications.js';

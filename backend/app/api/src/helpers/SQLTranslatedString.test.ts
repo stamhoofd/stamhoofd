@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import { I18n } from '@stamhoofd/backend-i18n';
 import type { NormalizedSQLQuery, SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, compileToSQLFilter, createColumnFilter, SQL, SQLValueType } from '@stamhoofd/sql';

@@ -1,4 +1,4 @@
-import { column } from '@simonbackx/simple-database';
+import { column } from '@node/database';
 import { SimpleError } from '@common/errors';
 import { STPackageMeta, STPackageStatus, STPackageStatusServiceFee, STPackageType, STPricingType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';

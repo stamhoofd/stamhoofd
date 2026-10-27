@@ -1,4 +1,4 @@
-import { Database, Migration } from '@simonbackx/simple-database';
+import { Database, Migration } from '@node/database';
 
 /**
  * If the charset of the leads table is not converted this results

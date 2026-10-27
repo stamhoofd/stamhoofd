@@ -1,4 +1,4 @@
-import { Factory } from '@simonbackx/simple-database';
+import { Factory } from '@node/database';
 import type { RecordCategory, RecordSettings} from '@stamhoofd/structures';
 import { File, Image, RecordAddressAnswer, RecordAnswer, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordDateAnswer, RecordFileAnswer, RecordImageAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordPriceAnswer, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import { AddressFactory } from './AddressFactory.js';

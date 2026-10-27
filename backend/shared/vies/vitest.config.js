@@ -13,7 +13,7 @@ export default defineConfig({
         server: {
             deps: {
                 inline: [
-                    '@simonbackx/simple-database',
+                    '@node/database',
                 ],
             },
         },

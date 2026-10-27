@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import type { SQLExpression, SQLExpressionOptions, SQLQuery } from './SQLExpression.js';
 import { isSQLExpression, joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
 import type { SQLAssignment, SQLScalarValue} from './SQLExpressions.js';

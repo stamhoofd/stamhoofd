@@ -1,4 +1,4 @@
-import { column } from '@simonbackx/simple-database';
+import { column } from '@node/database';
 import type { Decoder } from '@common/encoding';
 import { AnyDecoder, EnumDecoder, MapDecoder } from '@common/encoding';
 import { QueryableModel } from '@stamhoofd/sql';

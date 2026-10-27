@@ -1,4 +1,4 @@
-import { ManyToOneRelation } from '@simonbackx/simple-database';
+import { ManyToOneRelation } from '@node/database';
 import { encodeObject } from '@common/encoding';
 import { BalanceItem, Document, Group, Member, Organization, Platform, Registration, RegistrationInvitation } from '@stamhoofd/models';
 import { DocumentService } from './DocumentService.js';

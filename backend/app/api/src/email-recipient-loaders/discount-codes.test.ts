@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import type { Organization, Webshop } from '@stamhoofd/models';
 import { Email, OrganizationFactory, UserFactory, WebshopDiscountCode, WebshopFactory } from '@stamhoofd/models';
 import type { EmailRecipient, PaginatedResponse } from '@stamhoofd/structures';

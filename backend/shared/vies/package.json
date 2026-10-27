@@ -39,7 +39,7 @@
         "jsvat-next": "3.0.4"
     },
     "devDependencies": {
-        "@simonbackx/simple-database": "1.40.1",
+        "@node/database": "workspace:*",
         "@stamhoofd/backend-i18n": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
         "mysql2": "3.24.6",

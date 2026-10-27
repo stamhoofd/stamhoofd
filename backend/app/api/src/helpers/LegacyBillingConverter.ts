@@ -1,4 +1,4 @@
-import type { Model } from '@simonbackx/simple-database';
+import type { Model } from '@node/database';
 import { BalanceItem, BalanceItemPayment, CachedBalance, Invoice, InvoicedBalanceItem, Organization, Payment, Platform, STCredit, STInvoice, STPendingInvoice, StripeAccount, UsedRegisterCode, User } from '@stamhoofd/models';
 import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
 import { QueryableModel } from '@stamhoofd/sql';

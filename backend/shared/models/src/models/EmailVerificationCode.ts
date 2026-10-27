@@ -1,4 +1,4 @@
-import { column } from '@simonbackx/simple-database';
+import { column } from '@node/database';
 import { SimpleError } from '@common/errors';
 import { QueryableModel, readDynamicSQLExpression, SQL } from '@stamhoofd/sql';
 import basex from 'base-x';

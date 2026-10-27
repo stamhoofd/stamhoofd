@@ -1,5 +1,5 @@
-import type { ManyToOneRelation } from '@simonbackx/simple-database';
-import { column, Database } from '@simonbackx/simple-database';
+import type { ManyToOneRelation } from '@node/database';
+import { column, Database } from '@node/database';
 import { ArrayDecoder } from '@common/encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import { Category, DNSRecordStatus, Product, WebshopMetaData, WebshopPrivateMetaData, WebshopServerMetaData } from '@stamhoofd/structures';

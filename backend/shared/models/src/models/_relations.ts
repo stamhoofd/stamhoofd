@@ -5,7 +5,7 @@
  * This is a deprecated pattern and we should avoid creating new relations directly for now.
  */
 
-import { ManyToOneRelation } from '@simonbackx/simple-database';
+import { ManyToOneRelation } from '@node/database';
 import { Order } from './Order.js';
 import { Organization } from './Organization.js';
 import { STPendingInvoice } from './STPendingInvoice.js';

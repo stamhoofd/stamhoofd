@@ -1,14 +1,19 @@
 {
-    // File used by the editor.
-    "extends": "./tsconfig.base.json",
+    "extends": [
+        "./tsconfig.json",
+        "../../../tsconfig.runtime.json"
+    ],
     "compilerOptions": {
-        "outDir": "dist"
+        "rootDir": ".",
+        "outDir": "dist",
+        "tsBuildInfoFile": ".cache/build.tsbuildinfo"
     },
-    "files": [], // intentionally empty
-    "include": ["./index.ts", "./tsdown.config.ts", "./src/**/*.ts", "./src/**/*"],
+    "include": [
+        "index.ts",
+        "src/**/*.ts"
+    ],
     "exclude": [
-        // Tests are excluded (only included in tsconfig.test.json)
-        "src/**/*.spec.ts",
-        "src/**/*.test.ts"
+        "src/**/*.test.ts",
+        "src/**/*.spec.ts"
     ]
 }

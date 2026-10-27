@@ -1,4 +1,4 @@
-import { column } from '@simonbackx/simple-database';
+import { column } from '@node/database';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import type { Group as GroupStruct} from '@stamhoofd/structures';
 import { MemberResponsibilityRecordBase, MemberResponsibilityRecord as MemberResponsibilityRecordStruct } from '@stamhoofd/structures';

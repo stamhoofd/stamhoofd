@@ -1,4 +1,4 @@
-import { column } from '@simonbackx/simple-database';
+import { column } from '@node/database';
 import { ArrayDecoder } from '@common/encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { PaymentProvider } from '@stamhoofd/structures';

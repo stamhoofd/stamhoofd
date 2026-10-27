@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import { Member, MemberFactory, MemberResponsibilityRecordFactory, MemberUser, User, UserFactory } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { BooleanStatus, MemberDetails, Parent, UserPermissions } from '@stamhoofd/structures';

@@ -1,4 +1,4 @@
-import { column, Model } from '@simonbackx/simple-database';
+import { column, Model } from '@node/database';
 import { EnumDecoder } from '@common/encoding';
 import { PaymentStatus } from '@stamhoofd/structures';
 

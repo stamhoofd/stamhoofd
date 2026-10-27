@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import type { Organization, Webshop } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemPayment, Order, OrganizationFactory, Payment, Ticket, TicketFactory, WebshopFactory } from '@stamhoofd/models';
 import { compileToSQLFilter, SQL } from '@stamhoofd/sql';

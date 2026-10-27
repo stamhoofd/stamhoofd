@@ -1,4 +1,4 @@
-import { column } from '@simonbackx/simple-database';
+import { column } from '@node/database';
 import { QueryableModel } from '@stamhoofd/sql';
 import { UserNotification } from '@stamhoofd/structures/notifications/UserNotification.js';
 import { v7 as uuidv7 } from 'uuid';

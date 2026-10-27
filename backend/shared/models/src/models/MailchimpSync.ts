@@ -1,4 +1,4 @@
-import { column } from '@simonbackx/simple-database';
+import { column } from '@node/database';
 import { QueryableModel } from '@stamhoofd/sql';
 import { MailchimpSync as MailchimpSyncStruct, MailchimpSyncResult, MailchimpSyncStatus } from '@stamhoofd/structures/mailchimp/MailchimpSync.js';
 import { MailchimpSyncRequest } from '@stamhoofd/structures/mailchimp/MailchimpSyncRequest.js';

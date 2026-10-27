@@ -1,4 +1,4 @@
-import { Factory } from '@simonbackx/simple-database';
+import { Factory } from '@node/database';
 import type { MemberResponsibility } from '@stamhoofd/structures';
 
 import type { Member } from '../models/index.js';

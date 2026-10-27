@@ -1,4 +1,4 @@
-import { Migration } from '@simonbackx/simple-database';
+import { Migration } from '@node/database';
 import { AuditLog } from '@stamhoofd/models';
 import { AuditLogReplacement, AuditLogReplacementType, getLegacyAuditLogEnumReplacement } from '@stamhoofd/structures';
 

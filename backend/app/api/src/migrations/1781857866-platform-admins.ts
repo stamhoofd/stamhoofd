@@ -1,4 +1,4 @@
-import { column, Migration } from '@simonbackx/simple-database';
+import { column, Migration } from '@node/database';
 import { User } from '@stamhoofd/models';
 import { QueryableModel } from '@stamhoofd/sql';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

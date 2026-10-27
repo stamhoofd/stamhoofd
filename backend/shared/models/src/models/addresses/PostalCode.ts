@@ -1,5 +1,5 @@
-import { column, Database } from '@simonbackx/simple-database';
-import type { ManyToOneRelation } from '@simonbackx/simple-database';
+import { column, Database } from '@node/database';
+import type { ManyToOneRelation } from '@node/database';
 import { SimpleError } from '@common/errors';
 import { QueryableModel } from '@stamhoofd/sql';
 import { Country } from '@stamhoofd/types/Country';

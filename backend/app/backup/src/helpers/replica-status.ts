@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 
 export async function checkReplicaStatus() {
     const [rows] = await Database.select(`SHOW REPLICA STATUS`);

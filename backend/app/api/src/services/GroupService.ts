@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import { Group, Registration } from '@stamhoofd/models';
 
 async function getRegistrationCount(where: string, params: (string | Date)[]) {

@@ -1,4 +1,4 @@
-import { Migration } from '@simonbackx/simple-database';
+import { Migration } from '@node/database';
 import { Group, OrganizationRegistrationPeriod } from '@stamhoofd/models';
 import type { GroupCategory } from '@stamhoofd/structures';
 import { BundleDiscount, BundleDiscountGroupPriceSettings, GroupPrice, GroupPriceDiscount, GroupPriceDiscountType, GroupStatus, GroupType, OldGroupPrice, OldGroupPrices, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';

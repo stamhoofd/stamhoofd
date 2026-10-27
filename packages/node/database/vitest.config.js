@@ -6,6 +6,14 @@ export default defineConfig({
         globalSetup: './tests/vitest.global.setup.ts',
         watch: false,
         globals: true,
-        root: 'src',
+        root: import.meta.dirname,
+        include: ['src/**/*.test.ts'],
+        setupFiles: ['./tests/vitest.setup.ts'],
+        maxWorkers: 1,
+        coverage: {
+            provider: 'v8',
+            include: ['src/**'],
+            reporter: ['text', 'html', 'lcov'],
+        },
     },
 });

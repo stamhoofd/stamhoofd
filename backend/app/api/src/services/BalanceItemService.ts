@@ -1,4 +1,4 @@
-import { Model } from '@simonbackx/simple-database';
+import { Model } from '@node/database';
 import type { Organization } from '@stamhoofd/models';
 import { BalanceItem, CachedBalance, MemberUser, Order, Payment, Platform, Webshop } from '@stamhoofd/models';
 import { DocumentService } from './DocumentService.js';

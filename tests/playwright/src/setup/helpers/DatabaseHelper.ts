@@ -1,4 +1,4 @@
-import type { DatabaseInstance } from '@simonbackx/simple-database';
+import type { DatabaseInstance } from '@node/database';
 import { playwrightDatabaseCredentials, playwrightDatabaseName } from '@stamhoofd/cli';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { CaddyConfigHelper } from './CaddyConfigHelper.js';
@@ -41,7 +41,7 @@ export class DatabaseHelper {
      * global setup: dropping a database a worker is connected to breaks that worker.
      */
     static async dropDatabase(name: string) {
-        const { DatabaseInstance } = await import('@simonbackx/simple-database');
+        const { DatabaseInstance } = await import('@node/database');
 
         // A pool without a selected database: the database we are about to drop cannot be the one we
         // are connected to.
@@ -179,7 +179,7 @@ export class DatabaseHelper {
         }
 
         TestUtils.setEnvironment('DB_DATABASE', DatabaseHelper.getDatabaseName(this.workerId));
-        const { Database } = await import('@simonbackx/simple-database');
+        const { Database } = await import('@node/database');
         await Database.reload({});
         this._database = Database;
         return this._database;

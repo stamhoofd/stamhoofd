@@ -1,4 +1,4 @@
-import { Column, Database } from '@simonbackx/simple-database';
+import { Column, Database } from '@node/database';
 import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray, PatchMap } from '@common/encoding';
 import type { Endpoint } from '@node/endpoints';

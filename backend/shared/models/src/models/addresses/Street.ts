@@ -1,5 +1,5 @@
-import { column } from '@simonbackx/simple-database';
-import type { ManyToOneRelation } from '@simonbackx/simple-database';
+import { column } from '@node/database';
+import type { ManyToOneRelation } from '@node/database';
 import { QueryableModel } from '@stamhoofd/sql';
 import { v4 as uuidv4 } from 'uuid';
 

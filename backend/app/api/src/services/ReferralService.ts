@@ -1,4 +1,4 @@
-import type { Model } from '@simonbackx/simple-database';
+import type { Model } from '@node/database';
 import { SimpleError } from '@common/errors';
 import type { EmailInterfaceBase } from '@stamhoofd/email';
 import { Email } from '@stamhoofd/email';

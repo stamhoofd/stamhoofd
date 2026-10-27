@@ -2,7 +2,7 @@ import { setup, test } from '../../test-fixtures/base.js';
 
 setup();
 
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { Order, Ticket } from '@stamhoofd/models';

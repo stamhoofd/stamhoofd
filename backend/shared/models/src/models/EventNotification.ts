@@ -1,4 +1,4 @@
-import { column, ManyToManyRelation } from '@simonbackx/simple-database';
+import { column, ManyToManyRelation } from '@node/database';
 import { EnumDecoder } from '@common/encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { RecordAnswer } from '@stamhoofd/structures';

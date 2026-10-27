@@ -1,4 +1,4 @@
-import { Column, Database } from '@simonbackx/simple-database';
+import { Column, Database } from '@node/database';
 import { endStatisticsConnection } from '../src/database.js';
 import { Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';

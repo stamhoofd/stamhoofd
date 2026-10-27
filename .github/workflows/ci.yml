@@ -376,7 +376,7 @@ jobs:
               with:
                   name: shared-dist
             - name: Run tests
-              run: pnpm exec turbo run test --filter='./backend/shared/*' --concurrency=1 --env-mode=loose -- --run --bail=1
+              run: pnpm exec turbo run test --filter='./backend/shared/*' --filter='./packages/node/*' --concurrency=1 --env-mode=loose -- --run --bail=1
 
     job_test_shared:
         name: "Shared Package Tests"

@@ -10,6 +10,7 @@ packages:
   - 'packages/common/encoding'
   - 'packages/common/networking'
   - 'packages/node/endpoints'
+  - 'packages/node/database'
   - 'tests/*'
   - '.development/*'
   - 'docs'
@@ -93,6 +94,7 @@ allowBuilds:
   vue-demi@0.14.10: true
 
 overrides:
+  '@simonbackx/simple-database': 'workspace:@node/database@*'
   '@simonbackx/simple-endpoints': 'workspace:@node/endpoints@*'
   '@simonbackx/simple-networking': 'workspace:@common/networking@*'
   '@simonbackx/simple-encoding': 'workspace:@common/encoding@*'

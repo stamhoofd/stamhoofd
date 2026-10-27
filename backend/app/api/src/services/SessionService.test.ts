@@ -1,4 +1,4 @@
-import { DatabaseInstance } from '@simonbackx/simple-database';
+import { DatabaseInstance } from '@node/database';
 import { Request } from '@node/endpoints';
 import type { Organization, User } from '@stamhoofd/models';
 import { OrganizationFactory, Token, UserFactory, UserSession } from '@stamhoofd/models';

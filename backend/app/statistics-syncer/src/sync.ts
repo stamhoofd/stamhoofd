@@ -1,4 +1,4 @@
-import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import type { SQLResultNamespacedRow } from '@node/database';
 import { Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, Platform, Registration, RegistrationPeriod } from '@stamhoofd/models';
 import { SQL, SQLSelect, SQLWhereSign } from '@stamhoofd/sql';
 import { getStatisticsConnection } from './database.js';

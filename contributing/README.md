@@ -51,7 +51,7 @@ Please check our [README.md](https://github.com/stamhoofd/stamhoofd)
 
 [Writing endpoints](../packages/node/endpoints/docs/endpoints.md)
 
-[Storing data in the database](https://github.com/SimonBackx/simple-database/blob/master/docs/models.md)
+[Storing data in the database](../packages/node/database/docs/models.md)
 
 ## Common patterns
 

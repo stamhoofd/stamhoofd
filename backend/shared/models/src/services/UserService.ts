@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import { UserPermissions } from '@stamhoofd/structures';
 import { Member } from '../models/Member.js';
 import type { User } from '../models/User.js';

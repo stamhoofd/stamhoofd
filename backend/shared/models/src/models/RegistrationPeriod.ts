@@ -1,4 +1,4 @@
-import { column } from '@simonbackx/simple-database';
+import { column } from '@node/database';
 import { SimpleError } from '@common/errors';
 import { QueryableModel, SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { RegistrationPeriodBase, RegistrationPeriodSettings, RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';

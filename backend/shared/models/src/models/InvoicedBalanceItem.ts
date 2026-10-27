@@ -1,5 +1,5 @@
-import type { ManyToOneRelation } from '@simonbackx/simple-database';
-import { column } from '@simonbackx/simple-database';
+import type { ManyToOneRelation } from '@node/database';
+import { column } from '@node/database';
 import { EnumDecoder, MapDecoder } from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 

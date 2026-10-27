@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import { Request } from '@node/endpoints';
 import type { Token } from '@stamhoofd/models';
 import { Platform, ROOT_TENANT_ID, UserFactory } from '@stamhoofd/models';

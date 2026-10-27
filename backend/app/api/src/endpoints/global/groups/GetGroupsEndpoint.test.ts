@@ -7,7 +7,7 @@ import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initAdmin, initBundleDiscount, initPlatformAdmin } from '../../../../tests/init/index.js';
 import { GetGroupsEndpoint } from './GetGroupsEndpoint.js';
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import { SessionService } from '../../../services/SessionService.js';
 
 const baseUrl = `/groups`;

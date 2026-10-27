@@ -1,4 +1,4 @@
-import { Factory } from '@simonbackx/simple-database';
+import { Factory } from '@node/database';
 import type { AutoEncoderPatchType } from '@common/encoding';
 import type { Product, WebshopPrivateMetaData } from '@stamhoofd/structures';
 import { WebshopMetaData } from '@stamhoofd/structures';

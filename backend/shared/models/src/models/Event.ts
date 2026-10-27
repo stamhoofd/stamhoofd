@@ -1,4 +1,4 @@
-import { column } from '@simonbackx/simple-database';
+import { column } from '@node/database';
 import { QueryableModel } from '@stamhoofd/sql';
 import { EventMeta, Event as EventStruct, GroupType, TranslatedString } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';

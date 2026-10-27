@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import { Request } from '@node/endpoints';
 import { OrganizationFactory, Platform, ROOT_TENANT_ID } from '@stamhoofd/models';
 import { Version } from '@stamhoofd/structures';

@@ -1,5 +1,5 @@
 import { AutoEncoder } from '@common/encoding';
-import type { Model } from '@simonbackx/simple-database';
+import type { Model } from '@node/database';
 import { LRUCache } from 'lru-cache';
 
 /**

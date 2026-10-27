@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import { logger, StyledText } from '@simonbackx/simple-logging';
 import chalk from 'chalk';
 

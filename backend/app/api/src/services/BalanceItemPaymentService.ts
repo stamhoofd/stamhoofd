@@ -1,4 +1,4 @@
-import type { ManyToOneRelation } from '@simonbackx/simple-database';
+import type { ManyToOneRelation } from '@node/database';
 import type { BalanceItemPayment, Organization } from '@stamhoofd/models';
 import { BalanceItemService } from './BalanceItemService.js';
 

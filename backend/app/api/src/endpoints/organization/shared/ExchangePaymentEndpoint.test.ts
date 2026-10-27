@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import { Request } from '@node/endpoints';
 import { OrderFactory, OrganizationFactory, Payment, WebshopFactory } from '@stamhoofd/models';
 import { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';

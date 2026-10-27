@@ -1,4 +1,4 @@
-import { Migration } from '@simonbackx/simple-database';
+import { Migration } from '@node/database';
 import { Platform } from '@stamhoofd/models';
 
 export default new Migration(async () => {

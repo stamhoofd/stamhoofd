@@ -1,5 +1,5 @@
-import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { Model } from '@simonbackx/simple-database';
+import type { SQLResultNamespacedRow } from '@node/database';
+import { Model } from '@node/database';
 import { SQLSelect } from './SQLSelect.js';
 import { SQL } from './SQL.js';
 import type { SQLDelete } from './SQLDelete.js';

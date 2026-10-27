@@ -1,4 +1,4 @@
-import { Migration } from '@simonbackx/simple-database';
+import { Migration } from '@node/database';
 import { Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { Address, Company, File, Image, PaymentMethod, Resolution } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';

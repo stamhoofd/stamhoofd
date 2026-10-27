@@ -1,4 +1,4 @@
-import { Migration } from '@simonbackx/simple-database';
+import { Migration } from '@node/database';
 import { DocumentTemplate } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { DocumentStatus } from '@stamhoofd/structures';

@@ -1,4 +1,4 @@
-import { column, Database } from '@simonbackx/simple-database';
+import { column, Database } from '@node/database';
 import { QueryableModel } from '@stamhoofd/sql';
 
 export class ViesCachedResult extends QueryableModel {

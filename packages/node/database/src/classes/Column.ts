@@ -1,5 +1,5 @@
-import type { Decoder, EncodableObject } from '@simonbackx/simple-encoding';
-import { EncodeMedium, encodeObject, ObjectData } from '@simonbackx/simple-encoding';
+import type { Decoder, EncodableObject } from '@common/encoding';
+import { EncodeMedium, encodeObject, ObjectData } from '@common/encoding';
 
 import type { ColumnType } from './ColumnType.js';
 import type { DatabaseStoredValue } from './DatabaseStoredValue.js';

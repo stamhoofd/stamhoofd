@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import { registerCron } from '@stamhoofd/crons';
 import { Group, Organization, Payment, Registration, STPackage, Webshop } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';

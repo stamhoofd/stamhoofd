@@ -1,4 +1,4 @@
-import { Migration } from '@simonbackx/simple-database';
+import { Migration } from '@node/database';
 import { isSimpleError } from '@common/errors';
 import { logger } from '@simonbackx/simple-logging';
 import { Member } from '@stamhoofd/models';

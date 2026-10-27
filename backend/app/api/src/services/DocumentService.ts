@@ -1,4 +1,4 @@
-import { Model } from '@simonbackx/simple-database';
+import { Model } from '@node/database';
 import type { PlainObject } from '@common/encoding';
 import type { MemberWithRegistrations, RegistrationWithMember } from '@stamhoofd/models/models/Member.js';
 import { DocumentTemplate } from '@stamhoofd/models/models/DocumentTemplate.js';

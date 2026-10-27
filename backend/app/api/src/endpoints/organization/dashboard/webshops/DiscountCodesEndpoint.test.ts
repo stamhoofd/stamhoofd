@@ -1,6 +1,6 @@
 import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import { Request } from '@node/endpoints';
 import type { Organization, User, Webshop } from '@stamhoofd/models';
 import type { Token } from '@stamhoofd/models';

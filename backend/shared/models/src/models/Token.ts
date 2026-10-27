@@ -1,5 +1,5 @@
-import type { ManyToOneRelation } from '@simonbackx/simple-database';
-import { column, Database } from '@simonbackx/simple-database';
+import type { ManyToOneRelation } from '@node/database';
+import { column, Database } from '@node/database';
 import { QueryableModel } from '@stamhoofd/sql';
 import { ApiUser } from '@stamhoofd/structures';
 

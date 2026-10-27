@@ -8,17 +8,15 @@ Again, simplicity also means a bit more boilerplate code. But that will make the
 
 ## Installation
 
-### Yarn
+Declare `"@node/database": "workspace:*"` in consuming workspaces.
+Run `pnpm stam test database`, `pnpm stam check lint @node/database`, and
+`pnpm stam check typecheck @node/database` from the repository root.
 
-```
-yarn add @simonbackx/simple-database
-```
-
-### NPM
-
-```
-npm install @simonbackx/simple-database
-```
+The managed test runner owns MySQL. Tests use the shared test environment and
+the library's fixture migrations. Builds retain the bundled ESM/CommonJS
+implementation and shims needed by migration discovery; declarations are emitted
+separately into `dist-types`. Migration SQL and `@node/database/data/*` exports
+remain available.
 
 ## Example
 

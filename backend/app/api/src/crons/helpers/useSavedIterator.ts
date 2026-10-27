@@ -1,4 +1,4 @@
-import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import type { SQLResultNamespacedRow } from '@node/database';
 import type { IterableSQLSelect, SQLSelect } from '@stamhoofd/sql';
 
 export function useSavedIterator<T extends object = SQLResultNamespacedRow>(start: () => SQLSelect<T>, options: { limit: number; maxQueries?: number }) {

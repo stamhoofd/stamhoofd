@@ -1,4 +1,4 @@
-import { column, Database } from '@simonbackx/simple-database';
+import { column, Database } from '@node/database';
 import { QueryableModel } from '../src/QueryableModel.js';
 import { SQL } from '../src/SQL.js';
 import { SQLSelect } from '../src/SQLSelect.js';

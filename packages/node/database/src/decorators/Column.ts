@@ -1,4 +1,4 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 
 import { Column } from '../classes/Column.js';
 import type { ManyToOneRelation } from '../classes/ManyToOneRelation.js';

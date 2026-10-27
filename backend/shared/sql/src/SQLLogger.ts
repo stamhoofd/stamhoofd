@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import { StyledText } from '@simonbackx/simple-logging';
 
 class StaticSQLLogger {

@@ -1,4 +1,4 @@
-import { Factory } from '@simonbackx/simple-database';
+import { Factory } from '@node/database';
 
 import type { BalanceItemRelation, BalanceItemRelationType, BalanceItemType } from '@stamhoofd/structures';
 import { BalanceItemStatus } from '@stamhoofd/structures';

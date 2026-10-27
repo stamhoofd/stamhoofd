@@ -1,5 +1,5 @@
-import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { Database } from '@simonbackx/simple-database';
+import type { SQLResultNamespacedRow } from '@node/database';
+import { Database } from '@node/database';
 import type { PlainObject } from '@common/encoding';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import { TestUtils } from '@stamhoofd/test-utils';

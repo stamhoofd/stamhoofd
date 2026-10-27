@@ -10,7 +10,7 @@ import type { MemberDetails, MembersBlob } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { BooleanStatus, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 
-import type { OneToManyRelation } from '@simonbackx/simple-database';
+import type { OneToManyRelation } from '@node/database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer.js';

@@ -1,4 +1,4 @@
-import type { Data, Encodeable, EncodeContext } from '@simonbackx/simple-encoding';
+import type { Data, Encodeable, EncodeContext } from '@common/encoding';
 import { column } from '../decorators/Column.js';
 import { Database } from './Database.js';
 import { ManyToManyRelation } from './ManyToManyRelation.js';

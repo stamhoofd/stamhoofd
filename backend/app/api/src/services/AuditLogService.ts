@@ -1,5 +1,5 @@
-import type { ModelEvent } from '@simonbackx/simple-database';
-import { Model } from '@simonbackx/simple-database';
+import type { ModelEvent } from '@node/database';
+import { Model } from '@node/database';
 import { ArrayDecoder, EnumDecoder, MapDecoder, SymbolDecoder } from '@common/encoding';
 import { getAuditLogEnumDecoderObject, getAuditLogEnumType } from '@stamhoofd/structures';
 import type { AuditLogSource } from '@stamhoofd/structures';

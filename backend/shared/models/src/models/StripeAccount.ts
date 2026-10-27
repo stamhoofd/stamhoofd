@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { column } from '@simonbackx/simple-database';
+import { column } from '@node/database';
 import { QueryableModel } from '@stamhoofd/sql';
 import { Requirements, StripeBusinessProfile, StripeCompany, StripeMetaAccountDashboardSettings, StripeMetaAccountSettings, StripeMetaData } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';

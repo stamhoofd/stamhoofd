@@ -1,4 +1,4 @@
-import { column, Database } from '@simonbackx/simple-database';
+import { column, Database } from '@node/database';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { QueryableModel, SQL, SQLJSONNull } from '@stamhoofd/sql';
 import type { LoginProviderType, NewUser } from '@stamhoofd/structures';

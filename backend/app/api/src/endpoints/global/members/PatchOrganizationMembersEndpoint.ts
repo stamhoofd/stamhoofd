@@ -1,4 +1,4 @@
-import type { OneToManyRelation } from '@simonbackx/simple-database';
+import type { OneToManyRelation } from '@node/database';
 import type { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
 import { isEmptyPatch, isPatchableArray, PatchableArray, PatchableArrayDecoder, StringDecoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';

@@ -1,6 +1,6 @@
 // first import nock
 
-import { Column } from '@simonbackx/simple-database';
+import { Column } from '@node/database';
 import { Request } from '@node/endpoints';
 import { Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';

@@ -1,4 +1,4 @@
-import { Column, Database } from '@simonbackx/simple-database';
+import { Column, Database } from '@node/database';
 import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { loadLogger } from '@stamhoofd/logging';
 import { Version } from '@stamhoofd/structures';

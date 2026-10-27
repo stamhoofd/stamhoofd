@@ -1,4 +1,4 @@
-import { column } from '@simonbackx/simple-database';
+import { column } from '@node/database';
 import type { PlainObject } from '@common/encoding';
 import { ArrayDecoder, StringDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';

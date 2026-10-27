@@ -1,4 +1,4 @@
-import { Database, Migration } from '@simonbackx/simple-database';
+import { Database, Migration } from '@node/database';
 export default new Migration(async () => {
     if (STAMHOOFD.environment === 'test') {
         console.log('skipped in tests');

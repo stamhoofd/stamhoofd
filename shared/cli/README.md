@@ -351,6 +351,7 @@ pnpm stam clean metabase
 
 `pnpm stam test errors` and `pnpm stam test encoding` run the common library suites without MySQL.
 Networking uses `pnpm stam test common-networking`; `networking` selects the frontend service.
+`pnpm stam test database` runs the database library with managed MySQL and its fixture migrations.
 Imported libraries are registered as workspaces individually after integration; the other
 copied library folders remain inactive until their own migrations.
 

@@ -1,5 +1,5 @@
-import { Factory } from '@simonbackx/simple-database';
-import StreetNames from '@simonbackx/simple-database/data/streets';
+import { Factory } from '@node/database';
+import StreetNames from '@node/database/data/streets';
 import { Address } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 

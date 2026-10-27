@@ -1,4 +1,4 @@
-import { Factory } from '@simonbackx/simple-database';
+import { Factory } from '@node/database';
 import { EmergencyContact, Gender } from '@stamhoofd/structures';
 
 type Options = Record<string, never>;

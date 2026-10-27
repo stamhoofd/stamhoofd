@@ -1,4 +1,4 @@
-import { Migration } from '@simonbackx/simple-database';
+import { Migration } from '@node/database';
 import { EmailRecipient } from '@stamhoofd/models';
 import { QueryableModel, scalarToSQLExpression, SQL, SQLWhereLike } from '@stamhoofd/sql';
 
