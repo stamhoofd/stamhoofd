@@ -25,6 +25,8 @@ pnpm stam translate manual review
 
 Source and review previews do not write translation/source files or processing caches. Key processing supports `$t(...)` in TypeScript/Vue and `{{$t "..."}}` in Handlebars (`.hbs`, `.hbs.html`). Specialist repair tools are listed by `translate maintenance`. Legacy comparison output repeats the same saved translation under every provider label; it does not compare independent AI results.
 
+Locale builds and source formatting pass paths as subprocess arguments without a shell, including paths containing spaces or shell metacharacters. Formatting treats filenames as operands, not ESLint options.
+
 See [the CLI documentation](../../shared/cli/README.md#translations) or run `pnpm stam translate --help` for details. `pnpm stam` builds this library and the CLI first, using Turbo's local cache for unchanged builds.
 
 ## Credentials

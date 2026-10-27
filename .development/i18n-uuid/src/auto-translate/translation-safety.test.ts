@@ -3,7 +3,7 @@ import { AutoTranslatorPostValidator } from './AutoTranslatorPostValidator.js';
 import { TranslationManager } from './TranslationManager.js';
 import { promptYesNoOrDoubt, YesNoOrDoubt } from '../shared/prompt-helper.js';
 
-vi.mock('child_process', async original => ({ ...await original<typeof import('child_process')>(), exec: vi.fn((_command: string, callback: (error: Error) => void) => {
+vi.mock('child_process', async original => ({ ...await original<typeof import('child_process')>(), execFile: vi.fn((_file: string, _args: string[], callback: (error: Error) => void) => {
     callback(new Error('build failed'));
     return {};
 }) }));
