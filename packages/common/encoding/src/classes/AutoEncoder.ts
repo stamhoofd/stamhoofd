@@ -384,20 +384,21 @@ export class AutoEncoder implements Encodeable, Cloneable {
         return cc;
     }
 
+    /** Returns the newest definition per property, sorted for stable encoding. */
     static get latestFields(): Field<any>[] {
         const c = this.__latestFields;
         if (c !== undefined) {
             return c;
         }
 
-        const latestFields: Record<string, Field<any>> = {};
+        const latestFields = new Map<string, Field<any>>();
         for (let i = this.fields.length - 1; i >= 0; i--) {
             const field = this.fields[i];
-            if (!latestFields[field.property]) {
-                latestFields[field.property] = field;
+            if (!latestFields.has(field.property)) {
+                latestFields.set(field.property, field);
             }
         }
-        const fields = Object.values(latestFields);
+        const fields = [...latestFields.values()];
 
         // Sort fields for stable encodings
         fields.sort((a, b) => sortObjectKeysForEncoding(a.property, b.property));
