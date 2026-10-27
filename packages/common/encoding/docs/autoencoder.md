@@ -38,6 +38,9 @@ class MyClass extends AutoEncoder {
     - **DateDecoder** (stores the time in ms)
     - **ArrayDecoder**: e.g. `new ArrayDecoder(StringDecoder)` for an array of strings
     - **MapDecoder**: e.g. `new MapDecoder(StringDecoder, User)` for a map with string keys and User values.
+    - **RecordDecoder** is deprecated. Use `MapDecoder` for dynamic dictionaries;
+      keep fixed-shape and external JSON objects as objects with an appropriate
+      decoder.
     - _**NullableDecoder**_: e.g. `new NullableDecoder(StringDecoder)` (implements Decoder\<string \| null\>) <br>_— normally you don’t wrap it in an @field: you can set nullable to true instead_
 - **version**: The version where this field was introduced.
 - **nullable**: This makes sure we allow null values when decoding data.

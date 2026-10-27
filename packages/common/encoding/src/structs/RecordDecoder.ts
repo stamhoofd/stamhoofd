@@ -3,6 +3,10 @@ import { SimpleError } from '@common/errors';
 import { Data } from '../classes/Data.js';
 import { Decoder } from '../classes/Decoder.js';
 
+/**
+ * @deprecated Use MapDecoder for dynamic dictionaries. For fixed-shape objects,
+ * use an appropriate object decoder preserving their partial/unknown-key contract.
+ */
 export class RecordDecoder<A extends keyof any, B> implements Decoder<Record<A, B>> {
     keyDecoder: Decoder<A>;
     valueDecoder: Decoder<B>;
