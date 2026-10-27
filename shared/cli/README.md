@@ -349,8 +349,9 @@ pnpm stam clean metabase
 
 ### Tests
 
-`pnpm stam test errors` and `pnpm stam test encoding` run the common library suites without MySQL. Imported
-libraries are registered as workspaces individually after integration; the other
+`pnpm stam test errors` and `pnpm stam test encoding` run the common library suites without MySQL.
+Networking uses `pnpm stam test common-networking`; `networking` selects the frontend service.
+Imported libraries are registered as workspaces individually after integration; the other
 copied library folders remain inactive until their own migrations.
 
 `pnpm stam test` runs `build:shared` first and only starts a MySQL container when a selected package needs one. That container runs off a data volume that persists between runs (so the data dir + migrations are reused, mapped `DB_PORT`), and it is shut down after the run. Both the container and volume are namespaced per worktree so runs don't collide:

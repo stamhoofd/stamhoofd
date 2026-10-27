@@ -11,7 +11,7 @@
         "@stamhoofd/frontend-session": "workspace:*",
         "@stamhoofd/frontend-platform": "workspace:*",
         "@common/errors": "workspace:*",
-        "@simonbackx/simple-networking": "1.23.0",
+        "@common/networking": "workspace:*",
         "@stamhoofd/assets": "workspace:*",
         "@stamhoofd/components": "workspace:*",
         "@stamhoofd/networking": "workspace:*",

@@ -3,7 +3,7 @@ import type { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/brow
 import type { AutoEncoderPatchType, Decoder, EncodableObject } from '@common/encoding';
 import { ObjectData } from '@common/encoding';
 import { isSimpleError, isSimpleErrors } from '@common/errors';
-import type { RequestResult } from '@simonbackx/simple-networking';
+import type { RequestResult } from '@common/networking';
 import type { Organization } from '@stamhoofd/structures';
 import { CreateOrganization, CreateOrganizationResponse, MFAChallengeRequest, MFAChallengeResponse, MFAMethodType, MFASetupResponse, NewUser, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 

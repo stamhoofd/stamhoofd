@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';

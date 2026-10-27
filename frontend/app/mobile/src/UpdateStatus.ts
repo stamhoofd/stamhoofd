@@ -2,7 +2,7 @@ import type { BundleInfo } from '@capgo/capacitor-updater';
 import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import type { Decoder } from '@common/encoding';
 import { AutoEncoder, field, StringDecoder } from '@common/encoding';
-import { Server } from '@simonbackx/simple-networking';
+import { Server } from '@common/networking';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { MobileRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
 import { Toast, ToastButton } from '@stamhoofd/components/overlays/Toast.ts';

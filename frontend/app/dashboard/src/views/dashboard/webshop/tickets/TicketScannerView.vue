@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { useDismiss, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';

@@ -1,5 +1,5 @@
 import type { Decoder } from '@common/encoding';
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { useContext } from '#hooks/useContext.ts';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { StamhoofdFilter } from '@stamhoofd/structures';

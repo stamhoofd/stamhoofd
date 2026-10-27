@@ -1,7 +1,7 @@
 import { startRegistration } from '@simplewebauthn/browser';
 import type { PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/browser';
 import type { Decoder } from '@common/encoding';
-import type { RequestInitializer } from '@simonbackx/simple-networking';
+import type { RequestInitializer } from '@common/networking';
 import { MFAEnrollmentResult, MFAStatus, RecoveryCodes, TOTPSetupResponse, WebauthnAttestationResponseData, WebauthnRegistrationCredential, WebauthnRegistrationOptions, WebauthnRegistrationRequest } from '@stamhoofd/structures';
 
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';

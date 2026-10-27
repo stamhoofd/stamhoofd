@@ -47,7 +47,7 @@
     "dependencies": {
         "@common/encoding": "workspace:*",
         "@common/errors": "workspace:*",
-        "@simonbackx/simple-networking": "1.23.0",
+        "@common/networking": "workspace:*",
         "@simonbackx/vue-app-navigation": "2.25.1",
         "@simplewebauthn/browser": "13.3.0",
         "@simplewebauthn/server": "13.3.3",

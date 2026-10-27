@@ -1,5 +1,5 @@
 import { SimpleError, SimpleErrors } from '@common/errors';
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { Toast } from '@stamhoofd/frontend-notifications/Toast';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Version } from '@stamhoofd/structures';

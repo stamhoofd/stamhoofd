@@ -1,7 +1,7 @@
 import { AutoEncoder, encodeObject, field, IntegerDecoder, ObjectData, StringDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
-import type { RequestResult } from '@simonbackx/simple-networking';
-import { Server } from '@simonbackx/simple-networking';
+import type { RequestResult } from '@common/networking';
+import { Server } from '@common/networking';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import type { SGVTokenResponse } from '@stamhoofd/sgv';
 import {

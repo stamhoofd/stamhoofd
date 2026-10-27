@@ -1,7 +1,7 @@
 import type { Decoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
-import type { Server } from '@simonbackx/simple-networking';
-import { Request } from '@simonbackx/simple-networking';
+import type { Server } from '@common/networking';
+import { Request } from '@common/networking';
 import type { CartItem } from '@stamhoofd/structures';
 import { UitpasPriceCheckRequest, UitpasPriceCheckResponse } from '@stamhoofd/structures';
 

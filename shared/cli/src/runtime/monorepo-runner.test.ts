@@ -102,6 +102,7 @@ describe('shared build orchestration', () => {
             'i18n-uuid',
             'errors',
             'encoding',
+            'common-networking',
             'metabase',
             'filters',
             'structures',

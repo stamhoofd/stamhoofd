@@ -339,7 +339,7 @@
 import type { AutoEncoder, AutoEncoderPatchType, Decoder } from '@common/encoding';
 import { ObjectData, patchContainsChanges, VersionBox, VersionBoxDecoder } from '@common/encoding';
 import { isSimpleError, SimpleError, SimpleErrors } from '@common/errors';
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
