@@ -86,7 +86,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 throw new SimpleError({
                     code: 'locked_period',
                     message: 'This period is locked',
-                    human: $t(`%15m`, { '2000-2001': period.getStructure().nameShort }),
+                    human: $t('%15m', { '2000-2001': period.getStructure().nameShort }),
                 });
             }
 
@@ -130,7 +130,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                             }
 
                             if (!await Context.auth.canCreateGroupInCategory(organization.id, category)) {
-                                throw Context.auth.error($t(`%Ez`));
+                                throw Context.auth.error($t('%Ez'));
                             }
 
                             // Only process puts
@@ -154,7 +154,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                             code: 'invalid_field',
                             field: 'categories',
                             message: 'Cannot have groups and categories combined',
-                            human: $t(`%F0`),
+                            human: $t('%F0'),
                         });
                     }
                 }
@@ -175,7 +175,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                         const isDeleted = refCountAfter < refCountBefore;
 
                         if (isDeleted) {
-                            throw Context.auth.error($t(`%F1`));
+                            throw Context.auth.error($t('%F1'));
                         }
                     }
 
@@ -183,10 +183,10 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
                     if (!categoryAfter) {
                         if (locked) {
-                            throw Context.auth.error($t(`%F1`));
+                            throw Context.auth.error($t('%F1'));
                         }
                     } else if (locked !== categoryAfter.settings.locked) {
-                        throw Context.auth.error($t(`%F2`));
+                        throw Context.auth.error($t('%F2'));
                     }
 
                     if (!locked || !categoryAfter) {
@@ -197,7 +197,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     const settingsAfter = categoryAfter.settings;
 
                     if (settingsBefore.name !== settingsAfter.name) {
-                        throw Context.auth.error($t(`%F3`));
+                        throw Context.auth.error($t('%F3'));
                     }
                 }
             }
@@ -223,7 +223,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     throw new SimpleError({
                         code: 'invalid_group_type',
                         message: 'Cannot create groups for events via this endpoint',
-                        human: $t(`%1HF`),
+                        human: $t('%1HF'),
                     });
                 }
 
@@ -276,7 +276,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             throw new SimpleError({
                 code: 'invalid_default_age_group',
                 message: 'Invalid default age group',
-                human: $t(`%F4`),
+                human: $t('%F4'),
                 statusCode: 400,
             });
         }
@@ -284,7 +284,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         throw new SimpleError({
             code: 'invalid_default_age_group',
             message: 'Invalid default age group',
-            human: $t(`%F5`),
+            human: $t('%F5'),
             statusCode: 400,
         });
     }
@@ -313,7 +313,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             throw new SimpleError({
                 code: 'locked_period',
                 message: 'Period is locked',
-                human: $t(`%15m`, { '2000-2001': period.getStructure().nameShort }),
+                human: $t('%15m', { '2000-2001': period.getStructure().nameShort }),
             });
         }
 
@@ -357,17 +357,21 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             return 0;
         });
 
+        const createdGroups: Group[] = [];
+
         for (const s of sortedGroups) {
             s.settings.registeredMembers = 0;
             s.settings.reservedMembers = 0;
             try {
-                await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(s, organization.id, period);
+                const model = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(s, organization.id, period);
+                createdGroups.push(model);
             } catch (e) {
                 // Can happen when a group is no longer valid anymore when duplicating a period
                 console.error('Error creating group', s.id, e);
             }
         }
         const groups = await Group.getAll(organization.id, organizationPeriod.periodId);
+        await PatchOrganizationRegistrationPeriodsEndpoint.copyGroupEmailTemplates(groups, organization.id);
 
         // Delete unreachable categories first
         await organizationPeriod.cleanCategories(groups);
@@ -379,7 +383,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
     static async deleteGroup(id: string) {
         const model = await Group.getByID(id);
         if (!model || !await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
-            throw Context.auth.error($t(`%F6`));
+            throw Context.auth.error($t('%F6'));
         }
 
         model.deletedAt = new Date();
@@ -407,7 +411,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         const model = await Group.getByID(struct.id);
 
         if (!model || !await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
-            throw Context.auth.error($t(`%F7`));
+            throw Context.auth.error($t('%F7'));
         }
 
         if (struct.settings) {
@@ -431,7 +435,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 throw new SimpleError({
                     code: 'missing_permissions',
                     message: 'You cannot restrict your own permissions',
-                    human: $t(`%F8`),
+                    human: $t('%F8'),
                 });
             }
         }
@@ -620,7 +624,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                             code: 'invalid_field',
                             field: 'waitingList',
                             message: 'Waiting list group is already used in another period',
-                            human: $t(`%F9`),
+                            human: $t('%F9'),
                         });
                     }
 
@@ -710,7 +714,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
         if (struct.type !== GroupType.EventRegistration && !allowedIds.includes(struct.id)) {
             if (!await Context.auth.hasFullAccess(organizationId)) {
-                throw Context.auth.error($t(`%FA`));
+                throw Context.auth.error($t('%FA'));
             }
         } else {
             // For events, permission checking needs to happen outside this method (access to event = access to group)
@@ -787,7 +791,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 throw new SimpleError({
                     code: 'missing_permissions',
                     message: 'You cannot restrict your own permissions',
-                    human: $t(`%FB`),
+                    human: $t('%FB'),
                 });
             }
         }
@@ -808,7 +812,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                         code: 'invalid_field',
                         field: 'waitingList',
                         message: 'Waiting list group is already used in another period',
-                        human: $t(`%F9`),
+                        human: $t('%F9'),
                     });
                 }
 
@@ -826,5 +830,38 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
         await model.save();
         return model;
+    }
+
+    static async copyGroupEmailTemplates(groups: Group[], organizationId?: string) {
+        // for (const group of groups) {
+        //     if (!group.settings.previousGroupId) continue;
+
+        //     let query = EmailTemplate.select()
+        //         .where('groupId', group.settings.previousGroupId);
+
+        //     if (organizationId) {
+        //         query = query.andWhere('organizationId', organizationId);
+        //     }
+
+        //     const emailTemplates = await query
+        //         .fetch();
+
+        //     if (emailTemplates.length === 0) continue;
+
+        //     for (const emailTemplate of emailTemplates) {
+        //         const newEmailTempalte = new EmailTemplate();
+        //         newEmailTempalte.subject = emailTemplate.subject;
+        //         newEmailTempalte.groupId = group.id;
+        //         newEmailTempalte.organizationId = emailTemplate.organizationId;
+        //         newEmailTempalte.type = emailTemplate.type;
+        //         newEmailTempalte.text = emailTemplate.text;
+        //         newEmailTempalte.html = emailTemplate.html;
+        //         newEmailTempalte.json = emailTemplate.json;
+        //         newEmailTempalte.translations = emailTemplate.translations;
+        //         newEmailTempalte.language = emailTemplate.language;
+
+        //         await newEmailTempalte.save();
+        //     }
+        // }
     }
 }
