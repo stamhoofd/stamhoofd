@@ -149,8 +149,8 @@ const organization = useRequiredOrganization();
 const rowCount = ref(0);
 const columnCount = ref(0);
 const columns = ref<MatchedColumn[]>([]);
-const sheets = ref<Record<string, XLSX.WorkSheet>>({});
-const sheetSelectionList = Object.keys(sheets.value);
+const sheets = ref(new Map<string, XLSX.WorkSheet>());
+const sheetSelectionList = computed(() => Array.from(sheets.value.keys()));
 const internalSheetKey = ref<string | null>(null);
 const platform = usePlatform();
 const period: Ref<OrganizationRegistrationPeriod> = ref(organization.value.period) as unknown as Ref<OrganizationRegistrationPeriod>;
@@ -252,7 +252,7 @@ const sheetKey = computed({
             return;
         }
 
-        const sheet = sheets.value[key];
+        const sheet = sheets.value.get(key);
         if (!sheet) {
             return;
         }
@@ -274,7 +274,7 @@ const sheet = computed(() => {
     if (!sheetKey.value) {
         return null;
     }
-    return sheets.value[sheetKey.value] ?? null;
+    return sheets.value.get(sheetKey.value) ?? null;
 });
 
 const hasMembers = computed(() => {
@@ -331,7 +331,8 @@ function changedFile(event: any) {
             new CenteredMessage($t('%1A0')).addCloseButton().show();
             return;
         }
-        sheets.value = workbook.Sheets;
+        // Worksheet cell objects retain SheetJS's object-based format.
+        sheets.value = new Map(Object.entries(workbook.Sheets));
         file.value = newFile.name;
         sheetKey.value = keys[0];
     };
