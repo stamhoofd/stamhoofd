@@ -1,4 +1,4 @@
-import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, RecordDecoder, StringDecoder } from '@common/encoding';
+import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@common/encoding';
 import { Formatter } from '@stamhoofd/utility';
 
 import { PaymentMethod, PaymentMethodHelper } from './PaymentMethod.js';
@@ -71,8 +71,14 @@ export class StripeMetaData extends AutoEncoder {
     @field({ decoder: BooleanDecoder, optional: true })
     details_submitted = false;
 
-    @field({ decoder: new RecordDecoder(StringDecoder, StringDecoder), optional: true })
-    capabilities: Record<string, 'active' | 'pending' | 'inactive'> = {};
+    @field({
+        decoder: new MapDecoder(StringDecoder, StringDecoder),
+        optional: true,
+        defaultValue: () => new Map(),
+        // Historical payloads include empty capabilities rather than omitting them.
+        isDefaultValue: () => false,
+    })
+    capabilities = new Map<string, 'active' | 'pending' | 'inactive'>();
 
     @field({ decoder: Requirements, optional: true })
     requirements = Requirements.create({});
@@ -97,19 +103,19 @@ export class StripeMetaData extends AutoEncoder {
             return [];
         }
         const methods: PaymentMethod[] = [];
-        if (this.capabilities.card_payments === 'active') {
+        if (this.capabilities.get('card_payments') === 'active') {
             methods.push(PaymentMethod.CreditCard);
         }
 
-        if (this.capabilities.bancontact_payments === 'active') {
+        if (this.capabilities.get('bancontact_payments') === 'active') {
             methods.push(PaymentMethod.Bancontact);
         }
 
-        if (this.capabilities.ideal_payments === 'active') {
+        if (this.capabilities.get('ideal_payments') === 'active') {
             methods.push(PaymentMethod.iDEAL);
         }
 
-        if (this.capabilities.sepa_debit_payments === 'active') {
+        if (this.capabilities.get('sepa_debit_payments') === 'active') {
             methods.push(PaymentMethod.DirectDebit);
         }
 

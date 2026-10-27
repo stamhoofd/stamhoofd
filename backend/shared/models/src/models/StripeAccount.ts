@@ -61,7 +61,7 @@ export class StripeAccount extends QueryableModel {
             charges_enabled: account.charges_enabled,
             payouts_enabled: account.payouts_enabled,
             details_submitted: account.details_submitted,
-            capabilities: account.capabilities,
+            capabilities: new Map(Object.entries<'active' | 'pending' | 'inactive'>(account.capabilities ?? {})),
             requirements: Requirements.create(account.requirements),
             future_requirements: Requirements.create(account.future_requirements),
             settings: StripeMetaAccountSettings.create({
