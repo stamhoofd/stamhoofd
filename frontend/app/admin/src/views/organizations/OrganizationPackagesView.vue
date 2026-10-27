@@ -4,7 +4,7 @@
             <STNavigationBar :title="title" />
 
             <main>
-                <h1 class="style-navigation-title">
+                <h1 class="larger">
                     {{ title }}
                 </h1>
 

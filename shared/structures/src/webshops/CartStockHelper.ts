@@ -349,8 +349,8 @@ export class CartStockHelper {
         };
     }
 
-    static getAllowMultiple({ amount, oldItem, cart, product, admin }: StockLookupData): StockDefinition | null {
-        if (product.allowMultiple) {
+    static getAllowMultiple({ amount, oldItem, cart, product, webshop, admin }: StockLookupData): StockDefinition | null {
+        if (webshop.allowsMultiple(product)) {
             return null;
         }
 

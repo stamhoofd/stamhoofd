@@ -1,5 +1,6 @@
 import { ArrayDecoder, AutoEncoder, field } from '@common/encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
+import { v4 as uuidv4 } from 'uuid';
 
 import { ProductType } from './Product.js';
 import type { Webshop } from './Webshop.js';
@@ -13,6 +14,53 @@ export class Cart extends AutoEncoder {
 
     clear() {
         this.items = [];
+    }
+
+    /**
+     * Validates one item of this cart like validate does: only the items before it count against the stock
+     */
+    validateItem(webshop: Webshop, item: CartItem, options: { validateSeats?: boolean } = {}) {
+        const index = this.items.indexOf(item);
+        item.validate(webshop, this, {
+            refresh: true,
+            validateSeats: options.validateSeats ?? true,
+            validateDetails: true,
+            stockCart: Cart.create({ items: this.items.slice(0, index + 1) }),
+        });
+    }
+
+    /**
+     * The bulk order mode has one item per unit. Splits items with a larger amount, e.g. from a cart that was saved
+     * before the webshop switched to bulk mode. Every unit keeps its own seat.
+     */
+    splitIntoUnits() {
+        this.items = this.items.flatMap((item) => {
+            if (item.amount <= 1) {
+                return [item];
+            }
+            return Array.from({ length: item.amount }, (_, index) => {
+                const unit = item.clone();
+                if (index > 0) {
+                    unit.id = uuidv4();
+                }
+                unit.amount = 1;
+                unit.seats = item.seats.slice(index, index + 1);
+                unit.uitpasNumbers = item.uitpasNumbers.slice(index, index + 1);
+                return unit;
+            });
+        });
+    }
+
+    /**
+     * A copy in which the items with the same code are combined like addItem does, e.g. the units of the bulk order
+     * mode with the same choices, for the overview and the order
+     */
+    grouped(): Cart {
+        const cart = Cart.create({});
+        for (const item of this.items) {
+            cart.addItem(item.clone());
+        }
+        return cart;
     }
 
     addItem(item: CartItem, allowMerge = true) {
@@ -117,6 +165,11 @@ export class Cart extends AutoEncoder {
     }
 
     validateUitpasNumbers() {
+        // The units of the bulk order mode are combined in the order, which then checks its items again
+        for (const item of this.grouped().items) {
+            item.validateUitpasNumbers();
+        }
+
         // avoid duplicate UiTPAS-numbers on the same UiTPAS-event
         const officialUitpasSales = new Map<string, string[]>(); // Event URL -> UiTPAS numbers
         for (const item of this.items) {
@@ -151,13 +204,17 @@ export class Cart extends AutoEncoder {
         const errors = new SimpleErrors();
         const singleItem = webshop.orderMode === WebshopOrderMode.Single;
 
-        for (const item of this.items) {
+        for (const [index, item] of this.items.entries()) {
             try {
-                item.validate(webshop, this, {
+                item.validate(webshop, Cart.create({ items: [...newItems, ...this.items.slice(index)] }), {
                     refresh: true,
                     admin: asAdmin,
                     validateSeats,
                     validateDetails,
+                    // Only the items kept so far count against the stock, so the first units within stock stay. Otherwise
+                    // every unit of a product with one item per unit (bulk, per-item customers) sees all the others.
+                    // Seats are still checked against every other item.
+                    stockCart: Cart.create({ items: [...newItems, item] }),
                 });
                 newItems.push(item);
 

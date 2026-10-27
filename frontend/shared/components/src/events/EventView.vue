@@ -9,7 +9,7 @@
                 <p class="style-title-prefix">
                     {{ levelPrefix }}
                 </p>
-                <h1 class="style-navigation-title">
+                <h1 class="larger">
                     {{ title }}
                 </h1>
 

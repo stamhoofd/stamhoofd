@@ -265,10 +265,21 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
         // Default
         // Clone the price: the cart item owns its own instance, so a custom price never mutates the webshop structure
         return CartItem.create({
-            product: product,
+            product: CartItem.getProductSnapshot(product, webshop),
             productPrice: (chosenPrice ?? product.filteredPrices(data)[0]).clone(),
             options,
         });
+    }
+
+    /**
+     * The product as the cart item stores it. A null allowMultiple follows the order mode of the webshop, but cart
+     * items and orders are shown without the webshop (e.g. in the order email), so the snapshot stores the result.
+     */
+    static getProductSnapshot(product: Product, webshop: Webshop): Product {
+        if (product.allowMultiple !== null) {
+            return product;
+        }
+        return product.patch({ allowMultiple: webshop.allowsMultiple(product) });
     }
 
     static create<T extends typeof AutoEncoder>(this: T, object: PartialWithoutMethods<CartItem>): InstanceType<T> {
@@ -437,7 +448,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
     }
 
     get formattedAmount(): string | null {
-        if (!this.product.allowMultiple) {
+        if (this.product.allowMultiple === false) {
             return '';
         }
         return Formatter.integer(this.amount);
@@ -485,7 +496,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                 }
             }
 
-            if (!this.product.allowMultiple && amount === 1) {
+            if (this.product.allowMultiple === false && amount === 1) {
                 parts.push(Formatter.price(Math.abs(price)));
                 continue;
             }
@@ -625,7 +636,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                 human: $t(`%sC`, { product: this.product.name }),
             }));
         } else {
-            this.product = product;
+            this.product = CartItem.getProductSnapshot(product, webshop);
             const productPrice = product.prices.find(p => p.id === this.productPrice.id);
             if (!productPrice) {
                 if ((this.productPrice.name.length === 0 || this.product.prices.length <= 1) && product.prices.length > 1) {
@@ -847,7 +858,10 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
      * Update self to the newest available data and throw if it was not able to recover
      * validateDetails = false: skip everything the bulk details step collects (option menus, custom fields, customer, UiTPAS numbers)
      */
-    validate(webshop: Webshop, cart: Cart, { refresh, admin, validateSeats, validateDetails }: { refresh?: boolean; admin?: boolean; validateSeats?: boolean; validateDetails?: boolean } = { refresh: true, admin: false, validateSeats: true, validateDetails: true }) {
+    /**
+     * @param stockCart The items that count against the stock, when that is not the whole cart (see Cart.validate)
+     */
+    validate(webshop: Webshop, cart: Cart, { refresh, admin, validateSeats, validateDetails, stockCart }: { refresh?: boolean; admin?: boolean; validateSeats?: boolean; validateDetails?: boolean; stockCart?: Cart } = { refresh: true, admin: false, validateSeats: true, validateDetails: true }) {
         this.cartError = null;
 
         if (admin === undefined) {
@@ -868,7 +882,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
         }
         const product = this.product;
 
-        if (!product.allowMultiple) {
+        if (!webshop.allowsMultiple(product)) {
             this.amount = 1;
         }
 
@@ -904,7 +918,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                 });
             }
 
-            const remaining = this.getAvailableStock(this, cart, webshop, admin);
+            const remaining = this.getAvailableStock(this, stockCart ?? cart, webshop, admin);
             const minimumRemaining = CartStockHelper.getRemaining(remaining);
             if (minimumRemaining !== null && minimumRemaining < this.amount) {
                 // Search for appropriate message in stock definitions

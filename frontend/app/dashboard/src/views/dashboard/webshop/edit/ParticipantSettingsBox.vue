@@ -8,10 +8,10 @@
                     <Radio :model-value="mode" value="order" name="participant-mode" @update:model-value="selectPerOrder" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Eén keer per bestelling') }}
+                    {{ orderTitle }}
                 </h3>
                 <p class="style-description-small">
-                    {{ isRegistrations ? $t('De besteller vult zijn gegevens één keer in, hoeveel inschrijvingen er ook besteld worden.') : $t('De besteller vult zijn gegevens één keer in, hoeveel tickets er ook besteld worden. Bv. een eetfestijn: 5× vlees en 1× veggie op één naam.') }}
+                    {{ orderDescription }}
                 </p>
             </STListItem>
             <STListItem :selectable="true" element-name="label" data-testid="participant-mode-item">
@@ -19,10 +19,10 @@
                     <Radio :model-value="mode" value="item" name="participant-mode" @update:model-value="selectPerItem" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ isRegistrations ? $t('Per inschrijving') : $t('Per ticket') }}
+                    {{ itemTitle }}
                 </h3>
                 <p class="style-description-small">
-                    {{ isRegistrations ? $t('Voor elke inschrijving vul je de gegevens van een deelnemer in. Bv. een kamp.') : $t('Voor elk ticket vul je de gegevens van een deelnemer in. Bv. een kamp of tickets op naam.') }}
+                    {{ itemDescription }}
                 </p>
             </STListItem>
         </STList>
@@ -65,7 +65,7 @@ import STCard from '@stamhoofd/components/layout/STCard.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import { PrivateWebshop, Product, ProductType } from '@stamhoofd/structures';
+import { PrivateWebshop, Product, ProductType, WebshopOrderMode } from '@stamhoofd/structures';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 import type { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 import { Formatter } from '@stamhoofd/utility';
@@ -91,6 +91,37 @@ const emit = defineEmits<{
 const present = usePresent();
 const products = computed(() => props.webshop.products);
 const isRegistrations = computed(() => props.webshop.meta.isRegistrations);
+
+// One piece per order: the choice is whether every ticket asks the same details
+const isSingle = computed(() => props.webshop.meta.orderMode === WebshopOrderMode.Single);
+
+const orderTitle = computed(() => {
+    if (isSingle.value) {
+        return isRegistrations.value ? $t('Dezelfde ongeacht de inschrijving') : $t('Dezelfde ongeacht het ticket');
+    }
+    return $t('Eén keer per bestelling');
+});
+
+const orderDescription = computed(() => {
+    if (isSingle.value) {
+        return isRegistrations.value ? $t('Iedereen vult dezelfde gegevens in, ongeacht de gekozen inschrijving.') : $t('Iedereen vult dezelfde gegevens in, ongeacht het gekozen ticket.');
+    }
+    return isRegistrations.value ? $t('De besteller vult zijn gegevens één keer in, hoeveel inschrijvingen er ook gebeuren.') : $t('De besteller vult zijn gegevens één keer in, hoeveel tickets er ook besteld worden. Bv. een eetfestijn: 5× vlees en 1× veggie op één naam.');
+});
+
+const itemTitle = computed(() => {
+    if (isSingle.value) {
+        return isRegistrations.value ? $t('Verschillend per inschrijving') : $t('Verschillend per ticket');
+    }
+    return isRegistrations.value ? $t('Per inschrijving') : $t('Per ticket');
+});
+
+const itemDescription = computed(() => {
+    if (isSingle.value) {
+        return isRegistrations.value ? $t('Je kiest per inschrijving welke gegevens van de deelnemer gevraagd worden.') : $t('Je kiest per ticket welke gegevens van de deelnemer gevraagd worden.');
+    }
+    return isRegistrations.value ? $t('Voor elke inschrijving vult de besteller de gegevens van elke deelnemer in. Bv. een kamp.') : $t('Voor elk ticket vult de besteller de gegevens van elke deelnemer in. Bv. een kamp of tickets op naam.');
+});
 
 // Local, so 'per ticket' stays selected while no ticket is checked yet
 const mode = ref<'order' | 'item'>(props.webshop.products.some(p => p.enableCustomer) ? 'item' : 'order');

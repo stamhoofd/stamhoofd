@@ -8,12 +8,17 @@
         </p>
         <hr v-if="isEnteringDiscountCode"><form v-if="isEnteringDiscountCode" data-submit-last-field @submit.prevent="addEnteredCode">
             <STInputBox error-fields="code" :error-box="errorBox" class="max" :title="$t(`%1MX`)">
-                <div class="split-inputs">
-                    <input v-model="code" autofocus enterkeyhint="go" class="input" type="text" autocomplete="off" :placeholder="$t(`%k0`)" @blur="cleanCode"><LoadingButton :loading="loading">
-                        <button class="button primary" type="submit">
-                            {{ $t('%jz') }}
-                        </button>
-                    </LoadingButton>
+                <div class="input-with-buttons">
+                    <div>
+                        <input v-model="code" autofocus enterkeyhint="go" class="input" type="text" autocomplete="off" :placeholder="$t(`%k0`)" @blur="cleanCode">
+                    </div>
+                    <div>
+                        <LoadingButton :loading="loading">
+                            <button class="button primary" type="submit">
+                                {{ $t('%jz') }}
+                            </button>
+                        </LoadingButton>
+                    </div>
                 </div>
             </STInputBox>
         </form>

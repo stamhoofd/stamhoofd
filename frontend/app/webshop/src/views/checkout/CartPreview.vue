@@ -5,8 +5,18 @@
         </h2>
 
         <STList>
-            <CartItemRow v-for="cartItem of checkout.cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="checkout.cart" :webshop="webshop" :editable="false" :admin="false" />
+            <CartItemRow v-for="cartItem of groupedCheckout.cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="groupedCheckout.cart" :webshop="webshop" :editable="false" :admin="false" />
         </STList>
+
+        <template v-if="withDiscountCodes">
+            <p v-for="code of checkout.discountCodes" :key="code.id" class="discount-box icon label">
+                <span>{{ $t('%1MX') }} <span class="style-discount-code">{{ code.code }}</span></span>
+
+                <button class="button icon trash" type="button" @click="checkoutManager.removeCode(code)" />
+            </p>
+
+            <AddDiscountCodeBox v-if="webshop.meta.allowDiscountCodeEntry" :apply-code="code => checkoutManager.applyCode(code)" />
+        </template>
 
         <PriceBreakdownBox v-if="checkout.totalPrice || !webshop.isAllFree" :price-breakdown="checkout.priceBreakown" />
 
@@ -48,6 +58,7 @@
 <script lang="ts" setup>
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import AddDiscountCodeBox from '@stamhoofd/components/views/AddDiscountCodeBox.vue';
 import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
 import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
 import { computed } from 'vue';
@@ -61,8 +72,13 @@ withDefaults(defineProps<{
      * Also show the contact details of the customer, once they are filled in
      */
     withCustomer?: boolean;
+    /**
+     * Show the applied discount codes, and a box to enter one when the webshop allows it
+     */
+    withDiscountCodes?: boolean;
 }>(), {
     withCustomer: false,
+    withDiscountCodes: false,
 });
 
 const checkoutManager = useCheckoutManager();
@@ -70,6 +86,8 @@ const webshopManager = useWebshopManager();
 const checkout = computed(() => checkoutManager.checkout);
 const customer = computed(() => checkoutManager.checkout.customer);
 const webshop = computed(() => webshopManager.webshop);
+// Like the order: the units of the bulk order mode with the same choices are shown as one item
+const groupedCheckout = computed(() => checkout.value.withGroupedItems(webshop.value));
 
 const cartKind = useCartKind();
 

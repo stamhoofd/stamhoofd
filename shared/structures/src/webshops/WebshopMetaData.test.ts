@@ -32,6 +32,14 @@ function decodePatch(data: Record<string, any>, version: number) {
 }
 
 describe('WebshopMetaData.customerSettings 418 <-> 419', () => {
+    it('does not ask the phone number in a new webshop', () => {
+        const meta = WebshopMetaData.create({});
+
+        expect(meta.customerSettings.phone).toBe(Disabled);
+        expect(meta.customerSettings.name).toBe(Required);
+        expect(meta.customerSettings.email).toBe(Required);
+    });
+
     describe('upgrade: 418 -> 419', () => {
         it('builds the settings from the flags', () => {
             const meta = decode({ phoneEnabled: false, birthDayEnabled: true, addressEnabled: false, genderEnabled: true }, oldVersion);

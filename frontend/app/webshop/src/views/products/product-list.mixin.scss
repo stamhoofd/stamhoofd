@@ -1,0 +1,26 @@
+@use "@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/text-styles.scss" as *;
+
+// The boxed lists of products on the webshop page itself (BulkProductList and SingleProductList)
+@mixin product-list {
+    .boxed {
+        background: $color-background;
+        // Nested inputs (radio, checkbox) and hover layers derive their colors from the current background
+        --color-current-background: #{$color-background};
+        --color-current-background-shade: #{$color-background-shade};
+        --color-current-background-shade-darker: #{$color-background-shade-darker-darker};
+        margin: 0 auto;
+        border-radius: $border-radius;
+        overflow: hidden;
+        border: $border-width solid $color-border;
+        @extend %style-input-shadow;
+        --st-horizontal-padding: 20px;
+        --st-vertical-padding: 7px;
+        padding: 7px 20px;
+    }
+
+    h3 > .button.inline {
+        vertical-align: middle;
+        margin-left: 4px;
+    }
+}

@@ -1132,10 +1132,12 @@ function registerWebshopOrderTests() {
         const flow = new WebshopOrderFlow(page, { cartEnabled: false });
         await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
 
-        // The product box shows a free-choice label instead of a fixed price
-        await expect(page.getByTestId('product-box').first()).toContainText('Vrij bedrag');
+        // The list shows a free-choice label instead of a fixed price
+        const row = page.getByTestId('single-product-row').first();
+        await expect(row).toContainText('Vrij bedrag');
 
-        await page.getByTestId('product-box').first().click();
+        await row.click();
+        await page.getByTestId('single-order-button').click();
         const cartItemView = page.getByTestId('cart-item-view');
         await expect(cartItemView).toBeVisible();
 
@@ -1325,7 +1327,7 @@ function registerWebshopOrderTests() {
         // No cart to return to: the checkout is dismissed and the shop itself is visible again
         await expect(page.getByTestId('toast-box')).toContainText('uitverkocht');
         await expect(page.getByTestId('payment-step')).toHaveCount(0);
-        await expect(page.getByTestId('product-box').first()).toBeVisible();
+        await expect(page.getByTestId('single-product-row').first()).toBeVisible();
         expect(await Order.select().where('webshopId', webshop.id).fetch()).toHaveLength(0);
     });
 }

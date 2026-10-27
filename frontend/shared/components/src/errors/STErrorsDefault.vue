@@ -1,5 +1,5 @@
 <template>
-    <div ref="errorElement">
+    <div ref="errorElement" class="st-errors-default">
         <template v-for="(error, index) in errors" :key="index">
             <STErrorBox :error="error" />
         </template>

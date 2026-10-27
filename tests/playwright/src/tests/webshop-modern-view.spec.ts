@@ -7,7 +7,7 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { Order, Organization, OrganizationFactory } from '@stamhoofd/models';
-import { PaymentMethod, Product, ProductPrice, RichText, STPackageBundle, WebshopLayout, WebshopTicketType } from '@stamhoofd/structures';
+import { File, Image, PaymentMethod, Product, ProductPrice, RichText, STPackageBundle, WebshopLayout, WebshopTicketType } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { WebshopOrderFlow } from '../flows/WebshopOrderFlow.js';
@@ -334,6 +334,8 @@ test.describe('Modern webshop view @webshop-modern', () => {
                 name: 'Inkomticket',
                 description: 'Toegang tot het hele weekend',
                 prices: [ProductPrice.create({ price: 1500 })],
+                // Like the existing webshops that order one at a time: the amount can still be chosen
+                allowMultiple: true,
             })],
         });
         // A description that was cleared in the editor leaves empty html behind
@@ -343,7 +345,8 @@ test.describe('Modern webshop view @webshop-modern', () => {
         const flow = new WebshopOrderFlow(page, { cartEnabled: false });
         await page.goto(WorkerData.urls.webshopUri(webshop.uri));
 
-        // The form replaces the order button and shows the product name and description.
+        // The form replaces the order button and shows the description of the product, but not its name: the page
+        // already has the title of the webshop.
         // In the stacked layout, the form is shown below the content.
         const view = page.locator('.modern-webshop');
         const form = view.getByTestId('cart-item-view');
@@ -351,7 +354,7 @@ test.describe('Modern webshop view @webshop-modern', () => {
         await expect(view.getByTestId('single-order-button')).toHaveCount(0);
         await expect(view.getByRole('heading', { level: 1 })).toHaveText(`Modern inline ${WorkerData.id}`);
         await expect(form).toContainText('Toegang tot het hele weekend');
-        await expect(form.getByRole('heading', { name: 'Inkomticket' })).toBeVisible();
+        await expect(form.getByRole('heading', { name: 'Inkomticket' })).toHaveCount(0);
 
         // Changes are saved right away, so they survive a reload
         const amountInput = form.getByTestId('amount-number-input').locator('input');
@@ -419,12 +422,13 @@ test.describe('Modern webshop view @webshop-modern', () => {
             paymentMethods: [PaymentMethod.PointOfSale],
         });
         webshop.meta.description = RichText.create({ text: 'Alle info over deze actie', html: '<p>Alle info over deze actie</p>' });
+        webshop.products[0].description = 'Info over het product';
         await webshop.save();
 
         const flow = new WebshopOrderFlow(page, { cartEnabled: false });
         await page.goto(WorkerData.urls.webshopUri(webshop.uri));
 
-        // One product, no cart and a description: the page has a single order button instead of a product list
+        // One product, no cart and two descriptions: the page has a single order button instead of a product list
         const orderButton = page.getByTestId('single-order-button');
         await expect(orderButton).toBeVisible({ timeout: 15000 });
         await orderButton.click();
@@ -463,6 +467,7 @@ test.describe('Modern webshop view @webshop-modern', () => {
             paymentMethods: [PaymentMethod.PointOfSale],
         });
         webshop.meta.description = RichText.create({ text: 'Alle info over deze voorstelling', html: '<p>Alle info over deze voorstelling</p>' });
+        webshop.products[0].description = 'Info over de voorstelling';
         await webshop.save();
 
         const flow = new WebshopOrderFlow(page, { cartEnabled: false });
@@ -542,11 +547,51 @@ test.describe('Modern webshop view @webshop-modern', () => {
             paymentMethods: [PaymentMethod.PointOfSale],
         });
         webshop.meta.description = RichText.create({ text: 'Alle info over deze actie', html: '<p>Alle info over deze actie</p>' });
+        webshop.products[0].description = 'Info over het product';
         await webshop.save();
 
         await page.goto(WorkerData.urls.webshopUri(webshop.uri));
         await expect(page.locator('.modern-webshop-view').getByTestId('single-order-button')).toBeVisible({ timeout: 15000 });
         await expect(page.getByTestId('cart-item-view')).toHaveCount(0);
         await expect(page.locator('.preview-panel-column')).toBeHidden();
+    });
+
+    test('Shows the product form below the description when the product has no description or photo', async ({ page }) => {
+        const organization = await createOrganization();
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Modern stacked inline ${WorkerData.id}`,
+            productCount: 1,
+            cartEnabled: false,
+            paymentMethods: [PaymentMethod.PointOfSale],
+        });
+        webshop.meta.description = RichText.create({ text: 'Alle info over deze actie', html: '<p>Alle info over deze actie</p>' });
+        await webshop.save();
+
+        await page.goto(WorkerData.urls.webshopUri(webshop.uri));
+        const view = page.locator('.modern-webshop-view');
+        await expect(view.getByTestId('cart-item-view')).toBeVisible({ timeout: 15000 });
+        await expect(view.getByText('Alle info over deze actie')).toBeVisible();
+        await expect(page.getByTestId('single-order-button')).toHaveCount(0);
+    });
+
+    test('Shows an order button when the single product has a photo', async ({ page }) => {
+        const organization = await createOrganization();
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Modern photo ${WorkerData.id}`,
+            productCount: 1,
+            cartEnabled: false,
+            paymentMethods: [PaymentMethod.PointOfSale],
+        });
+        // Without a webshop description: the photo of the product alone is enough for a separate step
+        webshop.products[0].images = [Image.create({
+            source: new File({ id: 'product-photo', server: 'https://files.example.com', path: 'product-photo.jpg', size: 1000 }),
+        })];
+        await webshop.save();
+
+        await page.goto(WorkerData.urls.webshopUri(webshop.uri));
+        await expect(page.locator('.modern-webshop-view').getByTestId('single-order-button')).toBeVisible({ timeout: 15000 });
+        await expect(page.getByTestId('cart-item-view')).toHaveCount(0);
     });
 });

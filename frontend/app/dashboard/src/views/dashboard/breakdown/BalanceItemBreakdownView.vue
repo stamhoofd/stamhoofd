@@ -4,7 +4,7 @@
             <button v-if="breakdown" v-tooltip="$t('%Zic')" class="button icon ul" type="button" data-testid="show-list-button" @click="openTable(breakdown.selection)" />
         </template>
 
-        <h1 class="style-navigation-title">
+        <h1 class="larger">
             {{ title }} <span v-if="breakdown" class="title-suffix">{{ formatPrice(breakdown.price) }}</span>
         </h1>
 

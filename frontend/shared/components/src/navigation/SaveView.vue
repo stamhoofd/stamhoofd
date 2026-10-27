@@ -11,6 +11,8 @@
                 </template>
 
                 <template #right>
+                    <!-- Also on mobile, where the buttons slot moves to the toolbar at the bottom -->
+                    <slot name="navigation-buttons" />
                     <template v-if="!$isMobile && !$isPhone">
                         <slot name="buttons" />
                     </template>
@@ -20,7 +22,7 @@
                     <LoadingButton v-if="!preferLargeButton && ($isMobile || $isPhone)" :loading="loading">
                         <button v-if="saveIconMobile" v-tooltip="saveText" :class="'button icon navigation highlight ' + saveIconMobile" :disabled="isSaveDisabled" type="submit" data-testid="save-button" />
                         <button v-else-if="$isIOS || $isAndroid" v-tooltip="saveText" :class="'button icon navigation highlight ' + (saveIcon ?? 'success')" :disabled="isSaveDisabled" type="submit" data-testid="save-button" />
-                        <button v-else class="button navigation highlight" :disabled="isSaveDisabled" type="submit" data-testid="save-button">
+                        <button v-else class="button navigation selected" :disabled="isSaveDisabled" type="submit" data-testid="save-button">
                             {{ saveText }}
                         </button>
                     </LoadingButton>

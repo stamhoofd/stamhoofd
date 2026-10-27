@@ -18,12 +18,30 @@ export class WebshopManager {
         return this.$context.organization!;
     }
 
-    constructor($context: SessionContext, platform: Platform, webshop: Webshop) {
+    /**
+     * Shown as a preview in the dashboard: the webshop comes from the dashboard and nothing can be ordered
+     */
+    preview: boolean;
+
+    constructor($context: SessionContext, platform: Platform, webshop: Webshop, { preview = false }: { preview?: boolean } = {}) {
         this.webshop = webshop;
         this.$context = $context;
         this.platform = platform;
+        this.preview = preview;
 
-        // Set color
+        this.applyTheme();
+        setFavicon(this.organization, this.webshop);
+    }
+
+    /**
+     * Preview: the webshop with the settings in the dashboard that are not saved yet
+     */
+    setPreviewWebshop(webshop: Webshop) {
+        this.webshop = webshop;
+        this.applyTheme();
+    }
+
+    private applyTheme() {
         if (this.webshop.meta.color) {
             ColorHelper.setColor(this.webshop.meta.color);
         }
@@ -36,8 +54,6 @@ export class WebshopManager {
             }
         }
         ColorHelper.setDarkMode(this.webshop.meta.darkMode ?? DarkMode.Off);
-
-        setFavicon(this.organization, this.webshop);
     }
 
     /**
@@ -61,6 +77,10 @@ export class WebshopManager {
     }
 
     async reload() {
+        // The preview shows the webshop of the dashboard, with the settings that are not saved yet
+        if (this.preview) {
+            return;
+        }
         const response = await this.optionalAuthenticatedServer.request({
             method: 'GET',
             path: '/webshop/' + this.webshop.id,

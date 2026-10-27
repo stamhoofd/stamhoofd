@@ -34,8 +34,13 @@ import { Language } from '@stamhoofd/types/Language';
 import { GoogleTranslateHelper, isReservedWebshopPathSegment } from '@stamhoofd/utility';
 import { ref, watch } from 'vue';
 import { getWebshopRootView } from './getRootView';
+import { webshopPreviewParameter } from '@stamhoofd/components/webshops/webshopPreview.ts';
 
 const owner = {};
+
+// Shown in an iframe of the dashboard
+// The initial url: the url of the page is changed while loading
+const preview = window.parent !== window && UrlHelper.initial.getSearchParams().has(webshopPreviewParameter);
 const root = new ComponentWithProperties(PromiseView, {
     promise: async () => {
         // get organization
@@ -144,7 +149,7 @@ const root = new ComponentWithProperties(PromiseView, {
 
             document.title = webshop.meta.name + ' - ' + organization.name;
 
-            return await getWebshopRootView(session, webshop);
+            return await getWebshopRootView(session, webshop, { preview });
         } catch (e) {
             console.log(e);
             // Check if we have an organization on this domain
@@ -194,7 +199,10 @@ function created() {
     if (STAMHOOFD.environment === 'development') {
         // ComponentWithProperties.debug = true
     }
-    HistoryManager.activate();
+    // An iframe shares the browser history with the dashboard: going back in either one could navigate the other
+    if (!preview) {
+        HistoryManager.activate();
+    }
 }
 
 created();

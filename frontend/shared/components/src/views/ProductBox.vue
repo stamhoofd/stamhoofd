@@ -1,5 +1,5 @@
 <template>
-    <article class="product-box" :class="{ selected: count > 0, 'show-count': product.allowMultiple}" data-testid="product-box" @click="onClicked">
+    <article class="product-box" :class="{ selected: count > 0, 'show-count': webshop.allowsMultiple(product)}" data-testid="product-box" @click="onClicked">
         <div class="left" />
         <div class="content">
             <div>
@@ -42,6 +42,7 @@ import type { useDismiss } from '@browser/navigation';
 
 import type { Checkout, Product, ProductDateRange, Webshop } from '@stamhoofd/structures';
 import { CartItem } from '@stamhoofd/structures';
+import { getProductPriceText } from '#helpers/productPriceText.ts';
 import { getProductStockTag } from './productStockTag';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
@@ -65,33 +66,7 @@ const show = useShow();
 const canDismiss = useCanDismiss();
 const cart = computed(() => props.checkout.cart);
 
-const priceString = computed(() => {
-    const prices = props.product.filteredPrices({ admin: props.admin });
-    const fixedPrices = prices.filter(p => !p.allowCustomPrice);
-    if (fixedPrices.length === 0) {
-        // The customer chooses the price
-        return prices.length > 0 ? $t('%ZkI') : '';
-    }
-
-    if (fixedPrices.length < prices.length) {
-        // Hide ugly selection list
-        return '';
-    }
-
-    const priceRanges = Formatter.uniqueArray(fixedPrices.map(p => p.price));
-    if (priceRanges.length === 1) {
-        if (priceRanges[0] === 0) {
-            if (props.webshop.isAllFree) {
-                return '';
-            }
-            return $t(`%1Mn`);
-        }
-        return Formatter.price(priceRanges[0]);
-    }
-    const minimum = Math.min(...priceRanges);
-    const maximum = Math.max(...priceRanges);
-    return Formatter.price(minimum) + ' - ' + Formatter.price(maximum);
-});
+const priceString = computed(() => getProductPriceText(props.product, props.webshop, { admin: props.admin }));
 
 const count = computed(() => {
     return cart.value.items.reduce((prev, item) => {

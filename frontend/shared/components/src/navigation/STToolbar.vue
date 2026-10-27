@@ -93,6 +93,23 @@ function updateSize() {
     }
 }
 
+// A single button fills the toolbar
+@mixin single-full-width-button {
+    grid-template-columns: 1fr;
+
+    > div:first-child {
+        display: none;
+    }
+
+    > div:last-child {
+        @include full-width-buttons;
+
+        > .button:not(.text), > .loading-button {
+            flex-grow: 1;
+        }
+    }
+}
+
 @mixin stacked {
     > div:first-child {
         display: none;
@@ -228,19 +245,14 @@ function updateSize() {
 
             // A single button fills the toolbar when there is nothing on the left
             &:not(.has-left) {
-                grid-template-columns: 1fr;
+                @include single-full-width-button;
+            }
+        }
 
-                > div:first-child {
-                    display: none;
-                }
-
-                > div:last-child {
-                    @include full-width-buttons;
-
-                    > .button:not(.text), > .loading-button {
-                        flex-grow: 1;
-                    }
-                }
+        // Same in sheets and small views, but only for a single button
+        &:not(.has-left):not(:has(> div:last-child > :nth-child(2))) {
+            .sheet &, :where(.st-view.small, .st-view:has(> main.small)) > & {
+                @include single-full-width-button;
             }
         }
 

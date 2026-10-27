@@ -98,8 +98,8 @@ const hasDeliveryAddress = computed(() => checkoutManager.checkout.deliveryMetho
 const fieldSettings = computed((): CustomerSettings => {
     const settings = webshop.value.meta.customerSettings;
     const patched = settings.patch({
-        // A logged in user's name and email address come from their account
-        name: isLoggedIn.value ? CustomerFieldRequirement.Disabled : settings.name,
+        // A logged in user's name and email address come from their account, unless the account has no name yet
+        name: isLoggedIn.value && context.value.user?.firstName && context.value.user.lastName ? CustomerFieldRequirement.Disabled : settings.name,
         email: isLoggedIn.value ? CustomerFieldRequirement.Disabled : settings.email,
         // The delivery address is collected in its own step
         address: hasDeliveryAddress.value ? CustomerFieldRequirement.Disabled : settings.address,

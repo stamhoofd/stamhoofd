@@ -331,6 +331,12 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
 
         meta = meta.patch({
             paymentConfiguration: paymentConfigurationPatch,
+            // New webshops no longer ask a phone number by default
+            customerSettings: CustomerSettings.create({
+                name: CustomerFieldRequirement.Required,
+                email: CustomerFieldRequirement.Required,
+                phone: CustomerFieldRequirement.Required,
+            }),
         });
 
         const privateMeta = WebshopPrivateMetaData.patch({

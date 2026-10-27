@@ -3,7 +3,7 @@
         <STNavigationBar :title="template.settings.name" />
 
         <main>
-            <h1 class="style-navigation-title">
+            <h1 class="larger">
                 {{ template.settings.name }}
             </h1>
             <p v-if="template.privateSettings.templateDefinition.type === 'fiscal'">

@@ -8,7 +8,7 @@
         <STList>
             <STListItem v-for="option in optionMenu.options" :key="option.id" class="no-border right-price" :selectable="canSelectOption(option)" :disabled="!canSelectOption(option)" element-name="label">
                 <template #left>
-                    <Radio v-if="!optionMenu.multipleChoice" v-model="selectedOption" :value="option.id" :name="optionMenu.id+'-optionmenu'" :disabled="!canSelectOption(option)" />
+                    <Radio v-if="!optionMenu.multipleChoice" v-model="selectedOption" :value="option.id" :name="radioGroupName" :disabled="!canSelectOption(option)" />
                     <Checkbox v-else :model-value="isOptionSelected(option)" :disabled="!canSelectOption(option)" @update:model-value="selectOption(option, $event)" />
                 </template>
 
@@ -38,6 +38,7 @@ import STErrorsInput from '#errors/STErrorsInput.vue';
 import type { Cart, CartItem, Option, OptionMenu, Webshop } from '@stamhoofd/structures';
 import { CartItemOption, CartStockHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { v4 as uuidv4 } from 'uuid';
 import { computed } from 'vue';
 
 const props = withDefaults(defineProps<{
@@ -55,6 +56,9 @@ const props = withDefaults(defineProps<{
 });
 
 const formatPriceChange = Formatter.priceChange.bind(Formatter);
+
+// The same option menu can be shown for several cart items on one page: each needs its own native radio group
+const radioGroupName = 'optionmenu-' + uuidv4();
 const product = computed(() => props.cartItem.product);
 
 function isOptionSelected(option: Option) {

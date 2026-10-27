@@ -24,7 +24,7 @@
         </template>
 
         <template #preview>
-            <CartPreview :with-customer="true" />
+            <CartPreview :with-customer="true" :with-discount-codes="true" />
         </template>
 
         <!-- On desktop the confirm button moves below the cart -->
@@ -49,6 +49,7 @@ import PreviewOutlet from '@stamhoofd/components/layout/PreviewOutlet.vue';
 import PreviewPanel from '@stamhoofd/components/layout/PreviewPanel.vue';
 import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { PaymentHandler } from '@stamhoofd/components/views/PaymentHandler.ts';
@@ -167,15 +168,21 @@ async function goNext() {
     if (loading.value) {
         return;
     }
+
+    // The preview in the dashboard goes through all steps, but never places an order
+    if (webshopManager.preview) {
+        Toast.info($t('In een voorbeeld kan je niet bestellen')).show();
+        return;
+    }
     loading.value = true;
 
     try {
         if (!checkoutManager.checkout.paymentMethod) {
             checkoutManager.checkout.paymentMethod = PaymentMethod.Unknown;
         }
-        // Place order
+        // Place order. The units of the bulk order mode with the same choices become one item with an amount.
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        const data = OrderData.create(checkoutManager.checkout as any);
+        const data = OrderData.create(checkoutManager.checkout.withGroupedItems(webshop.value) as any);
         // The consumer language is determined server-side from the request language when placing the order.
         const response = await webshopManager.optionalAuthenticatedServer.request({
             method: 'POST',

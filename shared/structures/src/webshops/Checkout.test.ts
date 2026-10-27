@@ -16,7 +16,9 @@ import { Checkout } from './Checkout.js';
 import { Customer } from './Customer.js';
 import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';
 import { CustomerSettings } from './CustomerSettings.js';
-import { Product } from './Product.js';
+import { CartReservedSeat } from '../SeatingPlan.js';
+import { Product, ProductPrice } from './Product.js';
+import { UitpasNumberAndPrice } from './UitpasNumberAndPrice.js';
 import { Webshop } from './Webshop.js';
 import { WebshopDeliveryMethod, WebshopMetaData } from './WebshopMetaData.js';
 
@@ -433,5 +435,71 @@ describe('Checkout.validateDeliveryAddress', () => {
         checkout.validateDeliveryAddress(webshop, organizationMeta);
         expect(() => checkout.validateCustomer(webshop, organizationMeta, i18n, false)).not.toThrow();
         expect(checkout.customer.address).toStrictEqual(address);
+    });
+});
+
+describe('Checkout.validateCustomer with an account', () => {
+    it('uses the name of the account, unless the account has no full name', () => {
+        const webshop = createWebshop({});
+
+        const full = Checkout.create({ customer: createValidCustomer() });
+        full.validateCustomer(webshop, organizationMeta, i18n, false, User.create({ firstName: 'Jan', lastName: 'Peeters', email: 'jan@example.com' }));
+        expect([full.customer.firstName, full.customer.lastName, full.customer.email]).toEqual(['Jan', 'Peeters', 'jan@example.com']);
+
+        // The name filled in during the checkout stays
+        const incomplete = Checkout.create({ customer: createValidCustomer() });
+        incomplete.validateCustomer(webshop, organizationMeta, i18n, false, User.create({ firstName: 'Jan', email: 'jan@example.com' }));
+        expect([incomplete.customer.firstName, incomplete.customer.lastName, incomplete.customer.email]).toEqual(['John', 'Doe', 'jan@example.com']);
+    });
+});
+
+describe('Checkout.withGroupedItems', () => {
+    function unit(product: Product, { seat, uitpasNumber, price }: { seat?: string; uitpasNumber?: string; price?: ProductPrice } = {}) {
+        return CartItem.create({
+            product,
+            productPrice: price ?? product.prices[0],
+            amount: 1,
+            seats: seat ? [CartReservedSeat.create({ section: 'zaal', row: 'A', seat })] : [],
+            uitpasNumbers: uitpasNumber ? [UitpasNumberAndPrice.create({ uitpasNumber, price: 5_0000 })] : [],
+        });
+    }
+
+    it('combines the units of a product, keeping their seats and UiTPAS numbers in order', () => {
+        const product = Product.create({ name: 'Voorstelling', prices: [ProductPrice.create({ price: 10_0000 })] });
+        const webshop = Webshop.create({ products: [product] });
+        const checkout = Checkout.create({ cart: Cart.create({ items: [unit(product, { seat: '1', uitpasNumber: '111' }), unit(product, { seat: '2', uitpasNumber: '222' })] }) });
+
+        const grouped = checkout.withGroupedItems(webshop);
+
+        expect(grouped.cart.items).toHaveLength(1);
+        expect(grouped.cart.items[0].amount).toBe(2);
+        expect(grouped.cart.items[0].seats.map(s => s.seat)).toEqual(['1', '2']);
+        expect(grouped.cart.items[0].uitpasNumbers.map(u => u.uitpasNumber)).toEqual(['111', '222']);
+
+        // The cart of the checkout itself keeps a unit per item
+        expect(checkout.cart.items).toHaveLength(2);
+    });
+
+    it('keeps the same total price, also with a discount for buying several', () => {
+        const product = Product.create({ name: 'Spaghetti', prices: [ProductPrice.create({ price: 10_0000, discountPrice: 8_0000, discountAmount: 2 })] });
+        const webshop = Webshop.create({ products: [product] });
+        const checkout = Checkout.create({ cart: Cart.create({ items: [unit(product), unit(product), unit(product)] }) });
+        checkout.update(webshop);
+
+        const grouped = checkout.withGroupedItems(webshop);
+        expect(grouped.totalPrice).toBe(checkout.totalPrice);
+        expect(grouped.totalPrice).toBe(3 * 8_0000);
+    });
+
+    it('keeps units with a different chosen price apart', () => {
+        const price = ProductPrice.create({ price: 10_0000, allowCustomPrice: true });
+        const product = Product.create({ name: 'Steun', prices: [price] });
+        const webshop = Webshop.create({ products: [product] });
+        const checkout = Checkout.create({ cart: Cart.create({ items: [
+            unit(product, { price: price.patch({ price: 10_0000 }) }),
+            unit(product, { price: price.patch({ price: 20_0000 }) }),
+        ] }) });
+
+        expect(checkout.withGroupedItems(webshop).cart.items.map(i => i.amount)).toEqual([1, 1]);
     });
 });

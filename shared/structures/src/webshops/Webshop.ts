@@ -170,6 +170,14 @@ export class Webshop extends AutoEncoder {
     meta = WebshopMetaData.create({});
 
     @field({ decoder: new ArrayDecoder(Product) })
+    @field({
+        decoder: new ArrayDecoder(Product),
+        version: 424,
+        // Older clients don't know that a null allowMultiple follows the order mode: send them the result
+        downgrade: function (this: Webshop, products: Product[]) {
+            return products.map(product => product.allowMultiple === null ? product.patch({ allowMultiple: this.allowsMultiple(product) }) : product);
+        },
+    })
     products: Product[] = [];
 
     @field({ decoder: new ArrayDecoder(Category) })
@@ -241,15 +249,16 @@ export class Webshop extends AutoEncoder {
         return true;
     }
 
-    /**
-     * A Cart webshop with a single unique product behaves as Single
-     */
     get orderMode(): WebshopOrderMode {
-        const mode = this.meta.orderMode;
-        if (mode === WebshopOrderMode.Cart && !this.canEnableCart) {
-            return WebshopOrderMode.Single;
-        }
-        return mode;
+        return this.meta.orderMode;
+    }
+
+    /**
+     * Whether visitors can order several pieces of the same product combination: unless the product has its own (older)
+     * setting, not when ordering one at a time
+     */
+    allowsMultiple(product: Product) {
+        return product.allowMultiple ?? this.orderMode !== WebshopOrderMode.Single;
     }
 
     get shouldEnableCart() {

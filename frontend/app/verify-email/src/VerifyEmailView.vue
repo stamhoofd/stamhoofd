@@ -14,7 +14,7 @@
         <main>
             <img src="@stamhoofd/assets/images/illustrations/email.svg" class="email-illustration">
 
-            <h1 class="style-navigation-title">
+            <h1 class="larger">
                 {{ $t('%ZS') }}
             </h1>
             <div><STErrorsDefault :error-box="errorBox" /></div>

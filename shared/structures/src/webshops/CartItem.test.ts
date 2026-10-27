@@ -10,6 +10,7 @@ import { CustomerSettings } from './CustomerSettings.js';
 import { CartItem, CartItemOption } from './CartItem.js';
 import { Option, OptionMenu, Product, ProductPrice } from './Product.js';
 import { Webshop } from './Webshop.js';
+import { WebshopMetaData, WebshopOrderMode } from './WebshopMetaData.js';
 
 describe('Structure.CartItem', () => {
     /**
@@ -305,6 +306,45 @@ describe('Structure.CartItem', () => {
             expect(cart.items.every(i => i.amount === 1)).toBe(true);
             expect(cart.items[1].codeWithoutFields).toBe(john.codeWithoutFields);
             expect(product.isUnique).toBe(false);
+        });
+    });
+
+    /**
+     * Cart items and orders are shown without their webshop (e.g. in the order email), so the snapshot of a product
+     * that follows the order mode stores the result
+     */
+    describe('product snapshot with allowMultiple null', () => {
+        function createItem(orderMode: WebshopOrderMode) {
+            const product = Product.create({ name: 'Ticket', allowMultiple: null, prices: [ProductPrice.create({ price: 5_0000 })] });
+            const webshop = Webshop.create({ meta: WebshopMetaData.create({ orderMode }), products: [product] });
+            const item = CartItem.createDefault(product, Cart.create({}), webshop, { admin: false });
+            return { product, webshop, item };
+        }
+
+        it('shows no amount when ordering one at a time', () => {
+            const { item, webshop } = createItem(WebshopOrderMode.Single);
+            expect(item.product.allowMultiple).toBe(false);
+            expect(item.formattedAmount).toBe('');
+
+            item.refresh(webshop);
+            expect(item.formattedAmount).toBe('');
+        });
+
+        it('shows the amount when several pieces can be ordered', () => {
+            const { item } = createItem(WebshopOrderMode.Cart);
+            expect(item.product.allowMultiple).toBe(true);
+            expect(item.formattedAmount).toBe('1');
+        });
+
+        it('leaves the webshop product unchanged and picks up changes made to it in place', () => {
+            const { item, product, webshop } = createItem(WebshopOrderMode.Single);
+            expect(product.allowMultiple).toBeNull();
+
+            // The dashboard updates its webshop in place (deepSet), keeping the product instances
+            product.name = 'Nieuwe naam';
+            item.refresh(webshop);
+            expect(item.product.name).toBe('Nieuwe naam');
+            expect(item.product.allowMultiple).toBe(false);
         });
     });
 });

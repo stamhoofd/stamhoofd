@@ -110,4 +110,38 @@ test.describe('Webshop seating overview (organization mode) @webshop-seating', (
 
         await adminContext.close();
     });
+
+    test('Each ticket in the order overview only shows its own seat', async ({ page }) => {
+        const organization = await new OrganizationFactory({
+            name: `SeatTickets${WorkerData.id}`,
+            packages: [STPackageBundle.Webshops],
+        }).create();
+        await STPackageService.updateOrganizationPackages(organization.id);
+        const refreshed = (await Organization.getByID(organization.id))!;
+
+        const { webshop } = await TestWebshops.create({
+            organization: refreshed,
+            name: `Seat tickets ${WorkerData.id}`,
+            ticketType: WebshopTicketType.Tickets,
+            productCount: 1,
+            cartEnabled: false,
+            withSeatingPlan: true,
+            price: 0,
+            paymentMethods: [PaymentMethod.PointOfSale],
+        });
+
+        const flow = new WebshopOrderFlow(page, { cartEnabled: false });
+        await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
+        await flow.addProduct('Product 1', { seats: 2 });
+        await flow.goToCheckout();
+        await flow.fillCustomer();
+        await flow.confirmPayment();
+        await flow.expectTicketsDownloadable();
+        await flow.expectTicketCount(2);
+
+        for (const ticket of await page.getByTestId('ticket-list-item').all()) {
+            await expect(ticket).toContainText('Zetel');
+            await expect(ticket).not.toContainText('Plaatsen');
+        }
+    });
 });

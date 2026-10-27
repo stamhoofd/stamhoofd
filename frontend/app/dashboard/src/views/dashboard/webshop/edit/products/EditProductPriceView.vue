@@ -1,26 +1,15 @@
 <template>
-    <SaveView :title="isNew ? $t(`%TR`) : $t(`%TS`)" :disabled="!hasChanges && !isNew" :loading="saveLoading" @save="save">
+    <SaveView :title="isNew ? $t(`Tarief toevoegen`) : $t(`Tarief bewerken`)" :disabled="!hasChanges && !isNew" :loading="saveLoading" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
         <h1 v-if="isNew">
-            {{ $t('%TR') }}
+            {{ $t('Tarief toevoegen') }}
         </h1>
         <h1 v-else>
-            {{ $t('%TS') }}
+            {{ $t('Tarief bewerken') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <ProductPriceBox :product-price="patchedProductPrice" :is-new="isNew" :product="patched" :error-box="errors.errorBox" :validator="errors.validator" @patch="addPatch($event)" />
-
-        <div v-if="!isNew" class="container">
-            <hr><h2>
-                {{ $t('%TT') }}
-            </h2>
-
-            <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>{{ $t('%CJ') }}</span>
-            </button>
-        </div>
     </SaveView>
 </template>
 
@@ -86,19 +75,16 @@ async function save() {
                 if (productPrice.uitpasBaseProductPriceId === patchedProductPrice.value.id) {
                     // this is a UiTPAS base price, we need to update the social tariff prices
                     basePrice = patchedProductPrice.value.price;
-                }
-                else {
+                } else {
                     // also an update needed as the eventUrl might have been set
                     basePrice = patched.value.prices.find(p => p.id === productPrice.uitpasBaseProductPriceId)?.price ?? 0;
                 }
                 const newReducedPrice = await getOfficialUitpasSocialTariff(uitpasEventUrl, basePrice);
                 addPricePatch(ProductPrice.patch({ id: productPrice.id, price: newReducedPrice }), productPrice.id);
             }
-        }
-        catch (e) {
+        } catch (e) {
             Toast.fromError(e).show();
-        }
-        finally {
+        } finally {
             saveLoading.value = false;
         }
     }
