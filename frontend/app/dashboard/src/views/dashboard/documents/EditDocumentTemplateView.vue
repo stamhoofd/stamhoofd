@@ -697,7 +697,7 @@ function autoLink() {
                 continue;
             }
         }
-        const d = globalData[field.id];
+        const d = globalData.get(field.id);
         if (d && d instanceof RecordAnswerDecoder.getClassForType(field.type)) {
             // add answer
             d.settings = field;
@@ -714,7 +714,7 @@ function autoLink() {
                 continue;
             }
         }
-        const d = globalData[field.id];
+        const d = globalData.get(field.id);
         if (d && d instanceof RecordAnswerDecoder.getClassForType(field.type)) {
             // add answer
             d.settings = field;
@@ -797,39 +797,40 @@ const name = computed({
     },
 });
 
-function getDefaultGlobalData(): Record<string, RecordAnswer> {
-    const b: Record<string, RecordAnswer> = {
-        'organization.name': RecordTextAnswer.create({
+/** Default global answers keyed by linked-field ID; callers replace their placeholder settings. */
+function getDefaultGlobalData(): Map<string, RecordAnswer> {
+    const b = new Map<string, RecordAnswer>([
+        ['organization.name', RecordTextAnswer.create({
             settings: RecordSettings.create({}), // settings will be overwritten
             value: organization.value.name,
-        }),
-        'organization.companyName': RecordTextAnswer.create({
+        })],
+        ['organization.companyName', RecordTextAnswer.create({
             settings: RecordSettings.create({}),
             value: organization.value.meta.companies[0]?.name || organization.value.name,
-        }),
-        'organization.companyNumber': RecordTextAnswer.create({
+        })],
+        ['organization.companyNumber', RecordTextAnswer.create({
             settings: RecordSettings.create({}), // settings will be overwritten
             value: organization.value.meta.companies[0]?.companyNumber ?? '',
-        }),
-        'organization.address': RecordAddressAnswer.create({
+        })],
+        ['organization.address', RecordAddressAnswer.create({
             settings: RecordSettings.create({}), // settings will be overwritten
             address: organization.value.address,
-        }),
-        'organization.companyAddress': RecordAddressAnswer.create({
+        })],
+        ['organization.companyAddress', RecordAddressAnswer.create({
             settings: RecordSettings.create({}), // settings will be overwritten
             address: organization.value.meta.companies[0]?.address ?? organization.value.address,
-        }),
-    };
+        })],
+    ]);
 
     if (STAMHOOFD.translationNamespace === 'keeo') {
-        b['certification.type'] = RecordChooseOneAnswer.create({
+        b.set('certification.type', RecordChooseOneAnswer.create({
             settings: RecordSettings.create({}), // settings will be overwritten
             selectedChoice: RecordChoice.create({
                 id: 'authorities',
                 name: TranslatedString.create('Gemeenten, gemeenschappen of gewesten'),
                 description: TranslatedString.create('is vergund, erkend, gesubsidieerd of gecontroleerd door de lokale openbare besturen of openbare besturen van de gemeenschappen of gewesten'),
             }),
-        });
+        }));
     }
 
     return b;
