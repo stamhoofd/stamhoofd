@@ -545,7 +545,7 @@ export class MemberDetails extends AutoEncoder {
                 if (group.settings.maxAge && age > group.settings.maxAge) {
                     return {
                         message: $t(`%qY`),
-                        description: $t(`%15K`, {
+                        description: $t(`{firstName} is te oud. Inschrijvingen is beperkt tot leden {born-in-after-1995}`, {
                             'firstName': this.firstName,
                             'born-in-after-1995': group.settings.getAgeGenderDescription({ includeAge: true }) ?? '',
                         }),

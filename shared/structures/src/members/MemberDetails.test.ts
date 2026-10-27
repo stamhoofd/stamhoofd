@@ -1,5 +1,7 @@
 import { ObjectData } from '@simonbackx/simple-encoding';
 import { Address } from '../addresses/Address.js';
+import { Group } from '../Group.js';
+import { GroupSettings } from '../GroupSettings.js';
 import { MemberDetails } from './MemberDetails.js';
 import { Parent } from './Parent.js';
 import { UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from './UitpasNumberDetails.js';
@@ -1014,5 +1016,34 @@ describe('Correctly merge multiple details together', () => {
                 uitpasNumber: null,
             });
         });
+    });
+});
+
+describe('getMatchingError', () => {
+    const createGroup = () => Group.create({
+        organizationId: 'organization',
+        periodId: 'period',
+        settings: GroupSettings.create({
+            startDate: new Date('2026-09-01T10:00:00Z'),
+            endDate: new Date('2027-08-31T10:00:00Z'),
+            minAge: 6,
+            maxAge: 10,
+        }),
+    });
+
+    test('A member that is too old does not get the too young description', () => {
+        const group = createGroup();
+        const tooYoung = MemberDetails.create({ firstName: 'Robot', birthDay: new Date('2022-05-01T10:00:00Z') }).getMatchingError(group);
+        const tooOld = MemberDetails.create({ firstName: 'Robot', birthDay: new Date('2012-05-01T10:00:00Z') }).getMatchingError(group);
+
+        expect(tooYoung?.message).toBe($t('%qX'));
+        expect(tooOld?.message).toBe($t('%qY'));
+        expect(tooOld?.description).toContain('te oud');
+        expect(tooOld?.description).not.toBe(tooYoung?.description);
+    });
+
+    test('A member within the age range has no error', () => {
+        const details = MemberDetails.create({ firstName: 'Robot', birthDay: new Date('2018-05-01T10:00:00Z') });
+        expect(details.getMatchingError(createGroup())).toBeNull();
     });
 });
