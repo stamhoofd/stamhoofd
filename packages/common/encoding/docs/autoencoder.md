@@ -40,9 +40,8 @@ class MyClass extends AutoEncoder {
     - **MapDecoder**: e.g. `new MapDecoder(StringDecoder, User)` for a map with string keys and User values.
       Its incremental patch decoder lives in `src/structs/PatchMapDecoder.ts`;
       AutoEncoder selects it automatically when decoding a patch field.
-    - **RecordDecoder** is deprecated. Use `MapDecoder` for dynamic dictionaries;
-      keep fixed-shape and external JSON objects as objects with an appropriate
-      decoder.
+    - Use `MapDecoder` for dynamic dictionaries; keep fixed-shape and external
+      JSON objects as objects with an appropriate decoder.
     - _**NullableDecoder**_: e.g. `new NullableDecoder(StringDecoder)` (implements Decoder\<string \| null\>) <br>_— normally you don’t wrap it in an @field: you can set nullable to true instead_
 - **version**: The version where this field was introduced.
 - **nullable**: This makes sure we allow null values when decoding data.

@@ -13,7 +13,6 @@ export * from './src/structs/MapDecoder.js';
 export * from './src/structs/NullableDecoder.js';
 export * from './src/structs/EmailDecoder.js';
 export * from './src/structs/EnumDecoder.js';
-export * from './src/structs/RecordDecoder.js';
 export * from './src/structs/SymbolDecoder.js';
 export { default as IntegerDecoder } from './src/structs/IntegerDecoder.js';
 export { default as NumberDecoder } from './src/structs/NumberDecoder.js';
