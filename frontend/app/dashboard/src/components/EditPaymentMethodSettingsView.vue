@@ -312,13 +312,13 @@ const transferExample = computed(() => {
     const fakeReference = props.type === 'registration' ? $t('%59').toString() : '152';
     const settings = patched.value.transferSettings;
 
-    return settings.generateDescription(fakeReference, organization.value.address.country, {
-        nr: props.type === 'registration' ? '' : fakeReference,
-        email: props.type === 'registration' ? '' : $t('%57').toString(),
-        phone: props.type === 'registration' ? '' : $t('%R').toString(),
-        name: props.type === 'registration' ? $t('%59').toString() : $t('%58').toString(),
-        naam: props.type === 'registration' ? $t('%59').toString() : $t('%58').toString(),
-    });
+    return settings.generateDescription(fakeReference, organization.value.address.country, new Map([
+        ['nr', props.type === 'registration' ? '' : fakeReference],
+        ['email', props.type === 'registration' ? '' : $t('%57').toString()],
+        ['phone', props.type === 'registration' ? '' : $t('%R').toString()],
+        ['name', props.type === 'registration' ? $t('%59').toString() : $t('%58').toString()],
+        ['naam', props.type === 'registration' ? $t('%59').toString() : $t('%58').toString()],
+    ]));
 });
 
 async function save() {

@@ -1386,12 +1386,12 @@ export class PaymentService {
             payment.generateDescription(
                 organization,
                 groupedNames,
-                {
-                    name: groupedNames,
-                    naam: groupedNames,
-                    email: customer.email ?? user?.email ?? '',
-                    prefix,
-                },
+                new Map([
+                    ['name', groupedNames],
+                    ['naam', groupedNames],
+                    ['email', customer.email ?? user?.email ?? ''],
+                    ['prefix', prefix],
+                ]),
             );
         }
 

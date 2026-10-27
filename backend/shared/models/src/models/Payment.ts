@@ -242,7 +242,7 @@ export class Payment extends QueryableModel {
         return this.price !== 0 && (this.method === PaymentMethod.Transfer || this.method === PaymentMethod.PointOfSale || this.method === PaymentMethod.Unknown);
     }
 
-    generateDescription(organization: Organization, reference: string, replacements: { [key: string]: string } = {}) {
+    generateDescription(organization: Organization, reference: string, replacements: ReadonlyMap<string, string> = new Map()) {
         const settings = this.transferSettings ?? organization.meta.transferSettings;
         this.transferDescription = settings.generateDescription(reference, organization.address.country, replacements);
     }

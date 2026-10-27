@@ -8,9 +8,9 @@ export enum TransferDescriptionType {
     Fixed = 'Fixed', // Use a fixed description
 }
 
-function replaceReplacements(str: string, replacements: { [key: string]: string }) {
-    for (const key in replacements) {
-        str = str.replace('{{' + key + '}}', replacements[key]);
+function replaceReplacements(str: string, replacements: ReadonlyMap<string, string>) {
+    for (const [key, value] of replacements) {
+        str = str.replace('{{' + key + '}}', value);
     }
     return str;
 }
@@ -52,7 +52,8 @@ export class TransferSettings extends AutoEncoder {
         return this.iban;
     }
 
-    generateDescription(reference: string, country: Country, replacements: { [key: string]: string } = {}) {
+    /** Replaces the first occurrence of each literal key, in Map insertion order. */
+    generateDescription(reference: string, country: Country, replacements: ReadonlyMap<string, string> = new Map()) {
         if (this.type === TransferDescriptionType.Structured) {
             if (country === Country.Belgium) {
                 return TransferSettings.generateOGM(replacements);
@@ -67,7 +68,7 @@ export class TransferSettings extends AutoEncoder {
         return replaceReplacements(this.prefix ?? '', replacements);
     }
 
-    static generateOGMNL(_: { [key: string]: string } = {}) {
+    static generateOGMNL(_: ReadonlyMap<string, string> = new Map()) {
         /**
          * Reference: https://www.betaalvereniging.nl/betalingsverkeer/giraal-betalingsverkeer/betalingskenmerken/
          * Check: https://rudhar.com/cgi-bin/chkdigit.cgi
@@ -107,7 +108,7 @@ export class TransferSettings extends AutoEncoder {
         return C + '' + L + (numbers.reverse().map(n => n + '')).join('');
     }
 
-    static generateOGM(replacements: { [key: string]: string } = {}) {
+    static generateOGM(replacements: ReadonlyMap<string, string> = new Map()) {
         /**
          * De eerste tien cijfers zijn bijvoorbeeld een klantennummer of een factuurnummer.
          * De laatste twee cijfers vormen het controlegetal dat verkregen wordt door van de
@@ -120,12 +121,13 @@ export class TransferSettings extends AutoEncoder {
         let firstChars = Math.round(Math.random() * 9999999999);
         console.log(' first chars to', firstChars);
 
-        if (replacements.prefix && replacements.prefix.length > 0) {
+        const prefix = replacements.get('prefix');
+        if (prefix && prefix.length > 0) {
             // Change first characters
-            const number = parseInt(replacements.prefix);
+            const number = parseInt(prefix);
             if (!isNaN(number) && number !== 0) {
                 const paddedFirst = (firstChars + '').padStart(10, '0');
-                if (replacements.prefix.length === 4) {
+                if (prefix.length === 4) {
                     // Add in the middle, not at the start
                     firstChars = parseInt((paddedFirst.substring(0, 3) + number.toFixed(0).padStart(4, '0') + paddedFirst.substring(3)).padStart(10, '0').substring(0, 10));
                 } else {

@@ -106,17 +106,18 @@ export class Order extends QueryableModel {
     static payment: ManyToOneRelation<'payment', Payment>; ;
     static organization: ManyToOneRelation<'organization', Organization>;
 
-    getTransferReplacements(): { [key: string]: string } {
-        const base = {
-            nr: this.number?.toString() ?? '',
-            email: this.data.customer.email ?? '',
-            phone: this.data.customer.phone ?? '',
-            name: this.data.customer.name ?? '',
-            naam: this.data.customer.name ?? '',
-        };
+    /** Record-answer slugs overwrite built-in replacements with the same literal key. */
+    getTransferReplacements(): Map<string, string> {
+        const base = new Map([
+            ['nr', this.number?.toString() ?? ''],
+            ['email', this.data.customer.email ?? ''],
+            ['phone', this.data.customer.phone ?? ''],
+            ['name', this.data.customer.name ?? ''],
+            ['naam', this.data.customer.name ?? ''],
+        ]);
 
         for (const answer of this.data.recordAnswers.values()) {
-            base[Formatter.slug(answer.settings.name)] = answer.stringValue;
+            base.set(Formatter.slug(answer.settings.name), answer.stringValue);
         }
 
         return base;
