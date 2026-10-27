@@ -127,9 +127,11 @@ jj git push --bookmark main
 jj git push --remote private --bookmark private
 ```
 
+JJ automatically tracks fetched and newly created bookmarks matching `glob:private*` on the private remote. This includes `private` and names such as `private-andreasbackx/example`; JJ's `*` matches slashes. Origin's existing automatic tracking patterns are preserved but exclude `private*`. Existing feature bookmark tracking is not migrated.
+
 Setup and workspace resolution share VCS detection: when JJ is available and recognizes the repository (or `.jj` exists), JJ is preferred. Otherwise Git is used. Setup reports only which VCS is used; missing JJ is not a blocker, even if `.jj` exists. Repository checks report any problems with the selected VCS.
 
-These defaults are not an access-control boundary. Explicit remote/refspec arguments can override them; the public repository must reject the `private` branch server-side.
+These defaults are not an access-control boundary. Explicit remote/refspec arguments can override them; the public repository must reject private-prefixed branch creation and updates server-side. A GitHub ruleset can include both `private*` and `private*/**/*` to cover names with and without slashes.
 
 ### Development Configuration
 

@@ -157,8 +157,8 @@ async function checkGitBranchConfig(git: VcsCommands): Promise<VcsCheck[]> {
  * Checks JJ remote defaults and bookmark tracking.
  *
  * JJ does not use Git's per-branch pushRemote settings: origin stays the default,
- * and private pushes require --remote private. Automatic tracking excludes private
- * on origin while preserving existing patterns, and only includes private on private.
+ * and private pushes require --remote private. Automatic tracking excludes private*
+ * on origin while preserving existing patterns, and only includes private* on private.
  * Cross-remote tracking is removed before the intended remote is fetched and tracked.
  *
  * Conflicted or deleted local bookmarks require manual resolution instead of resetting
@@ -201,14 +201,15 @@ async function checkJjRemoteConfig(jj: VcsCommands): Promise<VcsCheck[]> {
 /**
  * Checks automatic bookmark tracking for both JJ remotes.
  *
- * The private remote only auto-tracks private. Origin excludes private while
+ * The private remote only auto-tracks private*. Origin excludes private* while
  * retaining its existing pattern. Both fetched and locally created bookmarks
- * are covered so future commands do not reintroduce cross-remote tracking.
+ * are covered, including names with slashes: JJ's glob wildcard matches them.
+ * Existing feature bookmark tracking is left unchanged.
  */
 async function checkJjAutomaticTracking(jj: VcsCommands): Promise<VcsCheck[]> {
     const checks: VcsCheck[] = [];
     for (const key of ['remotes.private.auto-track-bookmarks', 'remotes.private.auto-track-created-bookmarks']) {
-        const expected = 'exact:private';
+        const expected = 'glob:private*';
         const value = await jj.read(['config', 'get', key]);
         checks.push({
             label: `JJ ${key}`,
@@ -220,12 +221,12 @@ async function checkJjAutomaticTracking(jj: VcsCommands): Promise<VcsCheck[]> {
     for (const key of ['remotes.origin.auto-track-bookmarks', 'remotes.origin.auto-track-created-bookmarks']) {
         const autoTrack = await jj.read(['config', 'get', key]);
         const pattern = autoTrack.stdout.trim();
-        if (pattern && !pattern.endsWith(' & ~exact:private')) {
+        if (pattern && !pattern.endsWith(' & ~glob:private*')) {
             checks.push({
                 label: `JJ ${key}`,
                 ok: false,
-                details: 'Exclude private while preserving the existing pattern',
-                repairs: [jj.repair('config', 'set', '--repo', key, `(${pattern}) & ~exact:private`)],
+                details: 'Exclude private* while preserving the existing pattern',
+                repairs: [jj.repair('config', 'set', '--repo', key, `(${pattern}) & ~glob:private*`)],
             });
         }
     }
