@@ -25,7 +25,7 @@ describe('version control setup', () => {
         branch = true;
         bookmarkState = 'main\tok\nprivate\tok\n';
         tracked = new Set(['main@origin', 'private@private']);
-        jjConfig = new Map([['git.fetch', '["origin", "private"]'], ['git.push', 'origin'], ['remotes.private.auto-track-bookmarks', 'exact:private'], ['remotes.private.auto-track-created-bookmarks', 'exact:private']]);
+        jjConfig = new Map([['git.fetch', '["origin", "private"]'], ['git.push', 'origin'], ['remotes.private.auto-track-bookmarks', 'glob:private*'], ['remotes.private.auto-track-created-bookmarks', 'glob:private*']]);
         config = new Map([
             ['remote.origin.url', 'git@github.com:stamhoofd/stamhoofd.git'], ['remote.private.url', 'git@github.com:stamhoofd/stamhoofd-private.git'],
             ['branch.private.remote', 'private'], ['branch.private.merge', 'refs/heads/private'],
@@ -124,10 +124,41 @@ describe('version control setup', () => {
         await setupVcs('/workspace', { yes: true, dryRun: false });
         expect(jjConfig.get('git.push')).toBe('origin');
         expect(jjConfig.get('git.fetch')).toBe('["origin", "private"]');
-        expect(jjConfig.get('remotes.origin.auto-track-bookmarks')).toBe('(alice/*) & ~exact:private');
+        expect(jjConfig.get('remotes.origin.auto-track-bookmarks')).toBe('(alice/*) & ~glob:private*');
         expect(tracked).toEqual(new Set(['main@origin', 'private@private']));
         expect(vi.mocked(run).mock.calls.filter(([cmd]) => cmd === 'git').every(([, args]) => args[0] === '--git-dir=/backing/.git')).toBe(true);
         expect((await checkVcs('/workspace')).every(check => check.ok)).toBe(true);
+    });
+
+    it.each(['*', 'alice/* | private-andreasbackx/*', '(alice/*) & ~exact:private'])('preserves origin pattern %s while excluding private-prefixed bookmarks', async (pattern) => {
+        jj = true;
+        for (const key of ['auto-track-bookmarks', 'auto-track-created-bookmarks']) {
+            jjConfig.set(`remotes.private.${key}`, 'exact:private');
+            jjConfig.set(`remotes.origin.${key}`, pattern);
+        }
+        tracked.add('private-andreasbackx/example@origin');
+        tracked.add('alice/example@private');
+        const existingTracking = new Set(tracked);
+
+        await setupVcs('/workspace', { yes: true, dryRun: false });
+
+        for (const key of ['auto-track-bookmarks', 'auto-track-created-bookmarks']) {
+            expect(jjConfig.get(`remotes.private.${key}`)).toBe('glob:private*');
+            expect(jjConfig.get(`remotes.origin.${key}`)).toBe(`(${pattern}) & ~glob:private*`);
+        }
+        expect(tracked).toEqual(existingTracking);
+        expect(vi.mocked(run).mock.calls.some(([, args]) => args.includes('set') && args.includes('bookmark'))).toBe(false);
+
+        vi.mocked(run).mockClear();
+        await setupVcs('/workspace', { yes: true, dryRun: false });
+        expect(vi.mocked(run).mock.calls.every(([, , options]) => options?.capture)).toBe(true);
+    });
+
+    it('does not introduce origin automatic tracking when no pattern is configured', async () => {
+        jj = true;
+        await setupVcs('/workspace', { yes: true, dryRun: false });
+        expect(jjConfig.has('remotes.origin.auto-track-bookmarks')).toBe(false);
+        expect(jjConfig.has('remotes.origin.auto-track-created-bookmarks')).toBe(false);
     });
 
     it('stops on fetch failure instead of creating a branch', async () => {
