@@ -38,6 +38,8 @@ class MyClass extends AutoEncoder {
     - **DateDecoder** (stores the time in ms)
     - **ArrayDecoder**: e.g. `new ArrayDecoder(StringDecoder)` for an array of strings
     - **MapDecoder**: e.g. `new MapDecoder(StringDecoder, User)` for a map with string keys and User values.
+      Its incremental patch decoder lives in `src/structs/PatchMapDecoder.ts`;
+      AutoEncoder selects it automatically when decoding a patch field.
     - **RecordDecoder** is deprecated. Use `MapDecoder` for dynamic dictionaries;
       keep fixed-shape and external JSON objects as objects with an appropriate
       decoder.
