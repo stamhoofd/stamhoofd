@@ -26,8 +26,8 @@
         "start": "pnpm run build && node --enable-source-maps ./dist/index.js"
     },
     "dependencies": {
-        "@aws-sdk/client-s3": "3.1152.0",
-        "@aws-sdk/lib-storage": "3.1152.0",
+        "@aws-sdk/client-s3": "3.1153.0",
+        "@aws-sdk/lib-storage": "3.1153.0",
         "@simonbackx/simple-database": "1.40.1",
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/simple-endpoints": "1.23.0",
