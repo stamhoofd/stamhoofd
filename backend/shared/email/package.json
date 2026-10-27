@@ -25,7 +25,6 @@
         "uuid": "14.0.3"
     },
     "devDependencies": {
-        "@common/encoding": "workspace:*",
         "@stamhoofd/backend-i18n": "workspace:*",
         "@stamhoofd/queues": "workspace:*",
         "@stamhoofd/sql": "workspace:*",

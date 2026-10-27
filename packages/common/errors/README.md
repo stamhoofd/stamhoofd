@@ -11,6 +11,5 @@ for production and test typechecking. Shared builds produce JavaScript in `dist`
 and declarations in `dist-types`.
 
 Errors accepts the structural `ErrorData` decoding contract without depending on
-the encoding package. Encoding owns cross-package round-trip tests. The
-workspace override for `@simonbackx/simple-errors` redirects unmigrated registry
-dependencies to this package so all consumers use the same error implementation.
+the encoding package. Encoding owns cross-package round-trip tests. All consumers
+use the same workspace error implementation.

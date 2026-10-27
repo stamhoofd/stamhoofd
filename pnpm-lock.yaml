@@ -188,11 +188,6 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@simonbackx/vue-app-navigation': workspace:@browser/navigation@*
-  '@simonbackx/simple-database': workspace:@node/database@*
-  '@simonbackx/simple-endpoints': workspace:@node/endpoints@*
-  '@simonbackx/simple-networking': workspace:@common/networking@*
-  '@simonbackx/simple-encoding': workspace:@common/encoding@*
   '@types/node': 22.20.4
   axios: 1.20.0
   cookie: 2.0.1
@@ -214,7 +209,6 @@ overrides:
   nx>brace-expansion: 5.0.12
   nx>follow-redirects: 1.16.1
   nx>smol-toml: 1.9.0
-  '@simonbackx/simple-errors': workspace:@common/errors@*
   xcode>uuid: 11.1.1
   fontless>esbuild: 0.28.2
   '@nuxt/content>zod': 4.6.7
@@ -754,9 +748,6 @@ importers:
         specifier: 3.24.6
         version: 3.24.6(@types/node@22.20.4)
     devDependencies:
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
       '@stamhoofd/test-utils':
         specifier: workspace:*
         version: link:../../../shared/test-utils
@@ -913,9 +904,6 @@ importers:
         specifier: 3.24.6
         version: 3.24.6(@types/node@22.20.4)
     devDependencies:
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
       '@stamhoofd/types':
         specifier: workspace:*
         version: link:../../../shared/types
@@ -947,9 +935,6 @@ importers:
         specifier: 14.0.3
         version: 14.0.3
     devDependencies:
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
       '@stamhoofd/backend-i18n':
         specifier: workspace:*
         version: link:../i18n
@@ -1038,9 +1023,6 @@ importers:
         specifier: 1.0.1
         version: 1.0.1
     devDependencies:
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
@@ -2218,9 +2200,6 @@ importers:
         specifier: 3.10.2
         version: 3.10.2
     devDependencies:
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
       eslint-plugin-stamhoofd:
         specifier: workspace:*
         version: link:../../../shared/eslint
@@ -2345,9 +2324,6 @@ importers:
         specifier: 3.5.44
         version: 3.5.44(typescript@6.0.3)
     devDependencies:
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
       '@stamhoofd/vite-config':
         specifier: workspace:*
         version: link:../vite-config

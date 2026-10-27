@@ -34,7 +34,6 @@
         "mysql2": "3.24.6"
     },
     "devDependencies": {
-        "@common/encoding": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
         "@types/node": "22.20.4",
         "nock": "14.0.17",

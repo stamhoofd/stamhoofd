@@ -95,11 +95,6 @@ allowBuilds:
   vue-demi@0.14.10: true
 
 overrides:
-  '@simonbackx/vue-app-navigation': 'workspace:@browser/navigation@*'
-  '@simonbackx/simple-database': 'workspace:@node/database@*'
-  '@simonbackx/simple-endpoints': 'workspace:@node/endpoints@*'
-  '@simonbackx/simple-networking': 'workspace:@common/networking@*'
-  '@simonbackx/simple-encoding': 'workspace:@common/encoding@*'
   '@types/node': '22.20.4'
   axios: '1.20.0'
   cookie: '2.0.1'
@@ -121,7 +116,6 @@ overrides:
   'nx>brace-expansion': '5.0.12'
   'nx>follow-redirects': '1.16.1'
   'nx>smol-toml': '1.9.0'
-  '@simonbackx/simple-errors': 'workspace:@common/errors@*'
   'xcode>uuid': '11.1.1'
   'fontless>esbuild': '0.28.2'
   '@nuxt/content>zod': '4.6.7'
