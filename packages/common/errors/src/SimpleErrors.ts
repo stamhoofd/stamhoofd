@@ -1,4 +1,4 @@
-import type { Data, Encodeable, EncodeContext } from '@simonbackx/simple-encoding';
+import type { ErrorData } from './ErrorData.js';
 
 import { isSimpleError, SimpleError } from './SimpleError.js';
 
@@ -7,7 +7,7 @@ export function isSimpleErrors(e: unknown): e is SimpleErrors {
 }
 
 // Error that is caused by a client and should be reported to the client
-export class SimpleErrors extends Error implements Encodeable {
+export class SimpleErrors extends Error {
     errors: SimpleError[];
 
     constructor(...errors: SimpleError[]) {
@@ -86,13 +86,13 @@ export class SimpleErrors extends Error implements Encodeable {
         return this.encode({ version: 0 });
     }
 
-    encode(context: EncodeContext) {
+    encode(context: unknown) {
         return {
             errors: this.errors.map(e => e.encode(context)),
         };
     }
 
-    static decode(data: Data): SimpleErrors {
+    static decode(data: ErrorData): SimpleErrors {
         return new SimpleErrors(...data.field('errors').array(SimpleError));
     }
 

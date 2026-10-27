@@ -1,6 +1,3 @@
-import { NumberDecoder, ObjectData } from '@simonbackx/simple-encoding';
-import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { isSimpleError, SimpleError } from './SimpleError.js';
 
@@ -20,7 +17,6 @@ describe('SimpleError', () => {
         expect(Object.prototype.propertyIsEnumerable.call(error, 'message')).toBe(false);
         expect(error.encode({ version: 0 })).toEqual(data);
         expect(JSON.parse(JSON.stringify(error))).toEqual(data);
-        expect(SimpleError.decode(new ObjectData(data, { version: 0 })).encode({ version: 0 })).toEqual(data);
         expect(error.statusCode).toBe(422);
     });
 
@@ -35,23 +31,10 @@ describe('SimpleError', () => {
         expect(error.toString()).toContain('invalid: Invalid value at member.email');
     });
 
-    it('recognizes errors thrown by the unmigrated encoding library', () => {
-        let caught: unknown;
-        try {
-            NumberDecoder.decode(new ObjectData('invalid', { version: 0 }));
-        } catch (error) {
-            caught = error;
-        }
-
-        expect(isSimpleError(caught)).toBe(true);
+    it('recognizes structured errors without accepting ordinary errors', () => {
+        expect(isSimpleError(new SimpleError({ code: 'invalid', message: 'Invalid value' }))).toBe(true);
         expect(isSimpleError(null)).toBe(false);
         expect(isSimpleError(new Error('ordinary error'))).toBe(false);
     });
 
-    it('redirects the encoding library’s legacy error dependency to this workspace', () => {
-        const require = createRequire(import.meta.url);
-        const encodingRequire = createRequire(require.resolve('@simonbackx/simple-encoding'));
-
-        expect(encodingRequire.resolve('@simonbackx/simple-errors')).toBe(fileURLToPath(new URL('../dist/index.js', import.meta.url)));
-    });
 });
