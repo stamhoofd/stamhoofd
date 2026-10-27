@@ -196,8 +196,7 @@ export class ManyToManyRelation<Key extends keyof any, A extends Model, B extend
                     ${linkTableKeys.map(k => Database.escapeId(k)).join(', ')}
                 ) VALUES ?`;
             [result] = await Database.insert(query, [modelsB.map((modelB, i) => [modelA, modelB, ...linkTableKeys.map(k => linkTableValues[k][i])])]);
-        }
-        else {
+        } else {
             const query = `INSERT INTO ${Database.escapeId(this.linkTable)} (
                     ${Database.escapeId(this.linkKeyA)}, 
                     ${Database.escapeId(this.linkKeyB)}
@@ -230,8 +229,7 @@ export class ManyToManyRelation<Key extends keyof any, A extends Model, B extend
             if (affectedRows === modelsB.length) {
                 const arr: B[] = (modelA as any)[this.modelKey];
                 arr.push(...modelsB);
-            }
-            else {
+            } else {
                 // This could happen in race conditions and simultanious requests
 
                 console.warn('Warning: linking expected to affect ' + modelsB.length + ' rows, but only affected ' + affectedRows + ' rows');
@@ -298,8 +296,7 @@ export class ManyToManyRelation<Key extends keyof any, A extends Model, B extend
                         return !idMap.includes(model.getPrimaryKey());
                     }),
                 );
-            }
-            else {
+            } else {
                 // This could happen in race conditions and simultanious requests
                 console.warn('Warning: unlinking expected to affect ' + modelsB.length + ' rows, but only affected ' + result.affectedRows + ' rows');
 

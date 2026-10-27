@@ -18,24 +18,13 @@
         "forceConsistentCasingInFileNames": true,
         "useDefineForClassFields": true,
         "skipLibCheck": true,
-        "lib": [
-            "es2022",
-            "dom",
-        ],
-        "types": [
-            "node"
-        ],
+        "lib": ["es2022", "dom"],
+        "types": ["node"],
         "paths": {
             // Fixed for self referencing
-            "@/": [
-                "./index.ts"
-            ],
-            "@/*.ts": [
-                "./src/*.ts"
-            ],
-            "@/*": [
-                "./src/*"
-            ],
+            "@/": ["./index.ts"],
+            "@/*.ts": ["./src/*.ts"],
+            "@/*": ["./src/*"]
         }
     }
 }

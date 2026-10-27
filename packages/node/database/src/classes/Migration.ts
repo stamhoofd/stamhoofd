@@ -8,8 +8,7 @@ export async function fileExists(file: string): Promise<boolean> {
     try {
         await fs.access(file);
         return true;
-    }
-    catch (e) {
+    } catch (e) {
         return false;
     }
 }
@@ -30,8 +29,7 @@ type MigrationFunction = () => Promise<void>;
 async function directoryExists(filePath: string): Promise<boolean> {
     try {
         return (await fs.stat(filePath)).isDirectory();
-    }
-    catch (err) {
+    } catch (err) {
         return false;
     }
 }
@@ -98,8 +96,7 @@ export class Migration {
                     newQueue.push(...recursiveFolders);
                 }
                 folderQueue = newQueue;
-            }
-            else {
+            } else {
                 folderQueue = folderQueue.map(folder => folder + '/' + part);
             }
         }
@@ -168,8 +165,7 @@ export class Migration {
                     ' ',
                     new StyledText('Migration ' + name + ' ran successfully').addClass('migration', 'success', 'text'),
                 );
-            }
-            catch (e) {
+            } catch (e) {
                 // Logger.errorWithContext({textColor: ['dim', 'red'], prefix: ' FAILED ', addSpace: true, prefixColor: ['bgRed']}, "Migration " + name + " failed", e)
                 logger.error(
                     new StyledText('[Migration]').addClass('migration', 'prefix').addTag('migration'),
@@ -206,8 +202,7 @@ export class Migration {
             migration = new Migration(async () => {
                 await Database.statement(sqlStatement);
             });
-        }
-        else {
+        } else {
             if (file.includes('.test.')) {
                 return;
             }

@@ -20,18 +20,16 @@ export class EnumDecoder<E extends { [key: number]: string | number }> implement
             if (Object.values(this.enum).includes(str)) {
                 return str as E[keyof E];
             }
-        }
-        catch (e) {
+        } catch (e) {
             try {
                 str = NumberDecoder.decodeField(data, context, currentField);
                 if (Object.values(this.enum).includes(str)) {
                     return str as E[keyof E];
                 }
-            }
-            catch (e2) {
+            } catch (e2) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: `Expected a number or string for enum: ` + Object.values(this.enum).join(', '),
+                    message: 'Expected a number or string for enum: ' + Object.values(this.enum).join(', '),
                     field: currentField,
                 });
             }
@@ -51,18 +49,16 @@ export class EnumDecoder<E extends { [key: number]: string | number }> implement
             if (Object.values(this.enum).includes(str)) {
                 return str as E[keyof E];
             }
-        }
-        catch (e) {
+        } catch (e) {
             try {
                 str = data.number;
                 if (Object.values(this.enum).includes(str)) {
                     return str as E[keyof E];
                 }
-            }
-            catch (e2) {
+            } catch (e2) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: `Expected a number or string for enum: ` + Object.values(this.enum).join(', '),
+                    message: 'Expected a number or string for enum: ' + Object.values(this.enum).join(', '),
                     field: data.currentField,
                 });
             }

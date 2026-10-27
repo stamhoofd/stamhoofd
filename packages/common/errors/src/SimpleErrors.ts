@@ -19,12 +19,10 @@ export class SimpleErrors extends Error implements Encodeable {
         if (isSimpleError(error)) {
             this.errors.push(error);
             this.message += '\n' + error.toString();
-        }
-        else if (isSimpleErrors(error)) {
+        } else if (isSimpleErrors(error)) {
             this.errors.push(...error.errors);
             this.message += '\n' + error.toString();
-        }
-        else {
+        } else {
             throw new Error('Unsupported addError');
         }
     }
@@ -33,12 +31,10 @@ export class SimpleErrors extends Error implements Encodeable {
         if (isSimpleError(error)) {
             this.errors.unshift(error);
             this.message += '\n' + error.toString();
-        }
-        else if (isSimpleErrors(error)) {
+        } else if (isSimpleErrors(error)) {
             this.errors.unshift(...error.errors);
             this.message += '\n' + error.toString();
-        }
-        else {
+        } else {
             throw new Error('Unsupported addError');
         }
     }

@@ -4,7 +4,7 @@ Stamhoofd uses MySQL for data storage. The data in every table is mapped to a ty
 
 ```typescript
 const dog = new Dog();
-dog.name = "Pablo";
+dog.name = 'Pablo';
 await dog.save();
 
 console.log(dog.id); // "119df7e7-b619-4c02-b6e8-2ade3e7ca4d7"
@@ -14,7 +14,7 @@ If no fields have changed, save won’t do anything
 
 ```typescript
 const dog = new Dog();
-dog.name = "Pablo";
+dog.name = 'Pablo';
 await dog.save(); // does save
 
 await dog.save(); // won't do anything
@@ -31,7 +31,9 @@ export class Dog extends QueryableModel {
     static table = 'dogs';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -39,12 +41,13 @@ export class Dog extends QueryableModel {
 
     @column({ type: 'string' })
     name: string;
-    
+
     @column({ type: 'string', nullable: true })
     ownerName: string | null = null;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -56,7 +59,8 @@ export class Dog extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -67,7 +71,7 @@ export class Dog extends QueryableModel {
 }
 ```
 
-*After you’ve created a new model, you’ll need to add a migration:* [Migrations](#migrations)
+_After you’ve created a new model, you’ll need to add a migration:_ [Migrations](#migrations)
 
 You can use the `beforeSave` method to define default values for models. This avoids expensive operations in the constructor of the classes (e.g. generating an ID).
 
@@ -84,21 +88,21 @@ Models also support storing Encodeable data / structures. This data is stored in
 ```typescript
 export class Dog extends QueryableModel {
     // ...
-    
-		@column({ type: 'json', decoder: DogSettings })
+
+    @column({ type: 'json', decoder: DogSettings })
     settings = DogSettings.create({}); // default is optional but recommended
 
     // ...
 }
 ```
 
-> Sometimes JSON data grows steadily over the years when we introduce more properties and more nested data. In that case we sometimes need to split up the data in multiple columns to speed it up. <br>*The only data bottleneck at the moment is when storing RecordAnswers, which can become very large for members. This is something on the todo list.*
+> Sometimes JSON data grows steadily over the years when we introduce more properties and more nested data. In that case we sometimes need to split up the data in multiple columns to speed it up. <br>_The only data bottleneck at the moment is when storing RecordAnswers, which can become very large for members. This is something on the todo list._
 
 ```typescript
 const dog = new Dog();
-dog.name = "Pablo";
+dog.name = 'Pablo';
 dog.settings = DogSettings.create({
-		breed: "German shepherd"
+    breed: 'German shepherd',
 });
 await dog.save();
 ```
@@ -118,8 +122,7 @@ await dog.delete();
 **Delete where matching**
 
 ```typescript
-await Dog.delete()
-	.where('name', 'Pablo');
+await Dog.delete().where('name', 'Pablo');
 ```
 
 **Delete all**
@@ -140,17 +143,15 @@ You can easily query data.
 
 ```typescript
 const dogs = await Dog.select()
-	.where('name', 'Pablo')
-	.andWhere('createdAt', '<', new Date(2020))
-	.fetch();
+    .where('name', 'Pablo')
+    .andWhere('createdAt', '<', new Date(2020))
+    .fetch();
 ```
 
 **Where IN**
 
 ```typescript
-const pabloAndOtto = await Dog.select()
-	.where('name', ['Pablo', 'Otto'])
-	.fetch();
+const pabloAndOtto = await Dog.select().where('name', ['Pablo', 'Otto']).fetch();
 ```
 
 **Fetching a single row**
@@ -158,15 +159,15 @@ const pabloAndOtto = await Dog.select()
 ```typescript
 // Throws if no dog was found:
 const dog = await Dog.select()
-	.where('name', 'Pablo')
-	.andWhere('createdAt', '<', new Date(2020))
-	.first(); // Dog
-	
+    .where('name', 'Pablo')
+    .andWhere('createdAt', '<', new Date(2020))
+    .first(); // Dog
+
 // Optional query
 const optionalDog = await Dog.select()
-	.where('name', 'Pablo')
-	.andWhere('createdAt', '<', new Date(2020))
-	.first(false); // Dog | null
+    .where('name', 'Pablo')
+    .andWhere('createdAt', '<', new Date(2020))
+    .first(false); // Dog | null
 ```
 
 **Fetching by ID**
@@ -178,30 +179,22 @@ const optionalDog = await Dog.getByID(123);
 **Counting**
 
 ```typescript
-const count = await Dog.select()
-	.where('name', 'Pablo')
-	.count();
+const count = await Dog.select().where('name', 'Pablo').count();
 ```
 
 **Summing**
 
 ```typescript
-const totalAge = await Dog.select()
-	.where('name', 'Pablo')
-	.sum(SQL.column('age'));
+const totalAge = await Dog.select().where('name', 'Pablo').sum(SQL.column('age'));
 ```
 
 **Grouped or/and**
 
 ```typescript
 const dogs = await Dog.select()
-	.where('name', 'Pablo')
-	.andWhere(
-			SQL
-				.where('ownerName', 'Simon')
-				.or('ownerName', 'Bjarne')
-	)
-	.fetch();
+    .where('name', 'Pablo')
+    .andWhere(SQL.where('ownerName', 'Simon').or('ownerName', 'Bjarne'))
+    .fetch();
 ```
 
 **Looping data**

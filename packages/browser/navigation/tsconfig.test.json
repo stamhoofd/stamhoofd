@@ -5,14 +5,8 @@
         "module": "nodenext",
         "moduleResolution": "nodenext",
         "outDir": "./dist/test",
-        "lib": [
-            "es2022",
-            "dom"
-        ],
-        "types": [
-            "node",
-            "vitest/globals"
-        ]
+        "lib": ["es2022", "dom"],
+        "types": ["node", "vitest/globals"]
     },
     "references": [
         // Give access to build
@@ -20,9 +14,5 @@
             "path": "./tsconfig.json"
         }
     ],
-    "include": [
-        "./src/**/*.spec.ts",
-        "./src/**/*.test.ts",
-        "./tests",
-    ]
+    "include": ["./src/**/*.spec.ts", "./src/**/*.test.ts", "./tests"]
 }

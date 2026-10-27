@@ -13,19 +13,8 @@
         "declaration": true,
         "declarationMap": true,
         "outDir": "dist",
-        "lib": [
-            "esnext", "dom", "dom.iterable", "scripthost"
-        ]
+        "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
     },
-    "include": [
-        "index.ts",
-        "src/**/*.ts",
-        "tests/**/*.ts",
-    ],
-    "exclude": [
-        "node_modules",
-        "dist",
-        "commonjs/dist",
-        "dist/**/*"
-    ]
+    "include": ["index.ts", "src/**/*.ts", "tests/**/*.ts"],
+    "exclude": ["node_modules", "dist", "commonjs/dist", "dist/**/*"]
 }

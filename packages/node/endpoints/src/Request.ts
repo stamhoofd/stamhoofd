@@ -159,46 +159,37 @@ export class Request {
                         const value = query[key];
                         if (value === null || value === undefined) {
                             // skip
-                        }
-                        else if (typeof value === 'boolean') {
+                        } else if (typeof value === 'boolean') {
                             params.set(key, value ? 'true' : 'false');
-                        }
-                        else if (typeof value === 'number') {
+                        } else if (typeof value === 'number') {
                             if (Number.isFinite(value)) {
                                 params.set(key, value.toString());
-                            }
-                            else {
+                            } else {
                                 throw new SimpleError({
                                     code: 'invalid_query',
                                     message: 'Invalid query parameter with non-integer number value ' + value.toString(),
                                     human: 'Er ging iets mis bij het omvormen van dit verzoek',
                                 });
                             }
-                        }
-                        else if (typeof value === 'string') {
+                        } else if (typeof value === 'string') {
                             params.set(key, value);
-                        }
-                        else if (Array.isArray(value)) {
+                        } else if (Array.isArray(value)) {
                             for (const v of value) {
                                 if (typeof v === 'boolean') {
                                     params.append(key, v ? 'true' : 'false');
-                                }
-                                else if (typeof v === 'number') {
+                                } else if (typeof v === 'number') {
                                     if (Number.isFinite(v)) {
                                         params.set(key, v.toString());
-                                    }
-                                    else {
+                                    } else {
                                         throw new SimpleError({
                                             code: 'invalid_query',
                                             message: 'Invalid query parameter with non-integer number value in array ' + v.toString(),
                                             human: 'Er ging iets mis bij het omvormen van dit verzoek',
                                         });
                                     }
-                                }
-                                else if (typeof v === 'string') {
+                                } else if (typeof v === 'string') {
                                     params.append(key, v);
-                                }
-                                else {
+                                } else {
                                     throw new SimpleError({
                                         code: 'invalid_query',
                                         message: 'Invalid query parameter with non-string array value',
@@ -206,8 +197,7 @@ export class Request {
                                     });
                                 }
                             }
-                        }
-                        else {
+                        } else {
                             throw new SimpleError({
                                 code: 'invalid_query',
                                 message: 'Invalid query parameter with non-string value',
@@ -220,8 +210,7 @@ export class Request {
                     if (s.length) {
                         queryString = '?' + s;
                     }
-                }
-                else {
+                } else {
                     throw new SimpleError({
                         code: 'invalid_query',
                         message: 'Invalid query parameter of type ' + (typeof query),
@@ -248,8 +237,7 @@ export class Request {
                 medium: EncodeMedium.Network,
             });
             body = Promise.resolve(JSON.stringify(encoded) || '');
-        }
-        else {
+        } else {
             body = typeof data.body === 'string' ? Promise.resolve(data.body) : data.body;
         }
 
@@ -322,8 +310,7 @@ export class Request {
         if (this.version === undefined) {
             try {
                 this.version = this.getVersion();
-            }
-            catch (e) {
+            } catch (e) {
                 // Ignore
                 this.version = 0;
             }
@@ -382,8 +369,7 @@ export class Request {
                 version = parseInt(possibleVersion.substring(1));
                 if (isNaN(version)) {
                     version = undefined;
-                }
-                else {
+                } else {
                     this.url = this.url.substring(possibleVersion.length + 1);
                 }
             }

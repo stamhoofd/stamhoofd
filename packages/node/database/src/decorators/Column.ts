@@ -3,7 +3,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { Column } from '../classes/Column.js';
 import type { ManyToOneRelation } from '../classes/ManyToOneRelation.js';
 import type { Model } from '../classes/Model.js';
-import type {ColumnType} from '../classes/ColumnType.js';
+import type { ColumnType } from '../classes/ColumnType.js';
 
 /** Maps a property to a database column; does not create or migrate the SQL schema. */
 export function column<Key extends keyof any, Value extends Model>(settings: {

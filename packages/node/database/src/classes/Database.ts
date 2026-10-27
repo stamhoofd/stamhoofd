@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { AsyncLocalStorage } from 'async_hooks';
 import mysql from 'mysql2/promise';
-import type {DatabaseStoredValue} from './DatabaseStoredValue.js';
+import type { DatabaseStoredValue } from './DatabaseStoredValue.js';
 export type SQLResultRow = Record<string, DatabaseStoredValue>;
 export type SQLResultNamespacedRow = Record<string, SQLResultRow>;
 
@@ -153,8 +153,7 @@ export class DatabaseInstance {
             let result: T;
             try {
                 result = await this.transactionStorage.run(connection, transaction);
-            }
-            catch (error) {
+            } catch (error) {
                 try {
                     await connection.rollback();
                 } catch (e) {
@@ -165,8 +164,7 @@ export class DatabaseInstance {
 
             await connection.commit();
             return result;
-        }
-        finally {
+        } finally {
             connection.release();
         }
     }
@@ -208,8 +206,7 @@ export class DatabaseInstance {
                 q[0] as (SQLResultNamespacedRow | SQLResultRow)[],
                 q[1] as mysql.FieldPacket[] | undefined,
             ];
-        }
-        finally {
+        } finally {
             if (!explicitConnection) {
                 connection.release();
             }
@@ -229,8 +226,7 @@ export class DatabaseInstance {
                 q[0] as { insertId: any; affectedRows: number },
                 q[1] as mysql.FieldPacket[] | undefined,
             ];
-        }
-        finally {
+        } finally {
             if (!explicitConnection) {
                 connection.release();
             }
@@ -238,8 +234,8 @@ export class DatabaseInstance {
     }
 
     async update(query: string, values?: any, useConnection?: mysql.PoolConnection): Promise<[
-        { /** @deprecated */ changedRows: number; affectedRows: number }
-        , mysql.FieldPacket[] | undefined]> {
+        { /** @deprecated */ changedRows: number; affectedRows: number },
+         mysql.FieldPacket[] | undefined]> {
         const explicitConnection = useConnection ?? this.getTransactionConnection();
         const connection: mysql.PoolConnection = explicitConnection ?? (await this.getConnection());
         try {
@@ -248,8 +244,7 @@ export class DatabaseInstance {
                 q[0] as { changedRows: number; affectedRows: number },
                 q[1] as mysql.FieldPacket[] | undefined,
             ];
-        }
-        finally {
+        } finally {
             if (!explicitConnection) {
                 connection.release();
             }
@@ -265,8 +260,7 @@ export class DatabaseInstance {
                 q[0] as { affectedRows: number },
                 q[1] as mysql.FieldPacket[] | undefined,
             ];
-        }
-        finally {
+        } finally {
             if (!explicitConnection) {
                 connection.release();
             }
@@ -282,8 +276,7 @@ export class DatabaseInstance {
                 q[0] as any,
                 q[1] as any,
             ];
-        }
-        finally {
+        } finally {
             if (!explicitConnection) {
                 connection.release();
             }

@@ -30,37 +30,30 @@ export class EncodedResponse {
                 if (typeof response.body === 'string' || response.body instanceof Uint8Array || response.body instanceof Buffer || isReadableStream(response.body)) {
                     console.warn('We got a string/Buffer value as body for JSON');
                     encoded.body = response.body;
-                }
-                else {
+                } else {
                     if (Array.isArray(response.body)) {
                         if (process.env.NODE_ENV === 'development') {
                             encoded.body = JSON.stringify(response.body.map(e => e.encode({ version, medium: EncodeMedium.Network })), undefined, 2);
-                        }
-                        else {
+                        } else {
                             encoded.body = JSON.stringify(response.body.map(e => e.encode({ version, medium: EncodeMedium.Network })));
                         }
-                    }
-                    else {
+                    } else {
                         if (process.env.NODE_ENV === 'development') {
                             encoded.body = JSON.stringify(response.body.encode({ version, medium: EncodeMedium.Network }), undefined, 2);
-                        }
-                        else {
+                        } else {
                             encoded.body = JSON.stringify(response.body.encode({ version, medium: EncodeMedium.Network }));
                         }
                     }
                 }
-            }
-            else {
+            } else {
                 if (typeof response.body === 'string' || response.body instanceof Uint8Array || response.body instanceof Buffer || isReadableStream(response.body)) {
                     encoded.body = response.body;
-                }
-                else {
+                } else {
                     console.error('Unexpected non-string value as body');
                     encoded.body = '';
                 }
             }
-        }
-        else {
+        } else {
             encoded.body = '';
         }
         return encoded;

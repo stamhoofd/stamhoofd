@@ -106,12 +106,10 @@ class HistoryManagerStatic {
             const p = action();
             if (p) {
                 p.finally(() => this.runQueue()).catch(console.error);
-            }
-            else {
+            } else {
                 this.runQueue();
             }
-        }
-        else {
+        } else {
             if (this.debug) {
                 console.log('History queue done');
             }
@@ -227,8 +225,7 @@ class HistoryManagerStatic {
             if (title) {
                 state.title = title;
             }
-        }
-        else {
+        } else {
             const state = this.states[index];
             if (!state) {
                 console.error('Search state with index ', index, 'but no such state found');
@@ -300,8 +297,7 @@ class HistoryManagerStatic {
             const state = this.states[this.states.length - 1];
             window.document.title = this.formatTitle(title);
             state.title = title;
-        }
-        else {
+        } else {
             const state = this.states[index];
             if (!state) {
                 console.error('Search state with index ', index, 'not found');
@@ -365,8 +361,7 @@ class HistoryManagerStatic {
                 const formattedUrl = url?.transformedHref;
                 history.pushState({ counter: c }, '', formattedUrl);
             });
-        }
-        else {
+        } else {
             this.addToQueue(() => {
                 if (this.debug) {
                     console.log('history.replaceState', c);
@@ -448,8 +443,7 @@ class HistoryManagerStatic {
 
         if (!this.states[this.counter]) {
             console.error('Unexpected missing state', this.counter, this.states);
-        }
-        else if (this.states[this.counter].url) {
+        } else if (this.states[this.counter].url) {
             if (this.debug) {
                 console.log('Setting manual url without history api: ' + this.states[this.counter].url?.toString());
             }
@@ -497,8 +491,7 @@ class HistoryManagerStatic {
                     if (this.debug) {
                         console.log('Not allowed to go forward, going back ' + amount + ' steps');
                     } */
-                }
-                else {
+                } else {
                     // Only animate if we only have one undo action and if animations are enabled
                     const animate = (this.counter - newCounter) == 1 && this.animateHistoryPop;
 
@@ -531,8 +524,7 @@ class HistoryManagerStatic {
                                 console.log('Executing undoAction...');
                             }
                             await state.undoAction(animate);
-                        }
-                        else {
+                        } else {
                             if (state.adjustHistory) {
                                 // If one undoAction is missing, the state is unreliable
                                 // It would be better not to rely on the browser back behaviour

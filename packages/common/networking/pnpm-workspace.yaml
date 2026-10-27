@@ -1,2 +1,2 @@
 ignoredBuiltDependencies:
-  - '@simonbackx/simple-encoding'
+    - '@simonbackx/simple-encoding'

@@ -13,8 +13,7 @@ let EncodeMedium: typeof simpleEncoding.EncodeMedium;
 
 if ('EncodeMedium' in simpleEncoding) {
     EncodeMedium = (simpleEncoding as any).EncodeMedium;
-}
-else {
+} else {
     enum StubbedEncodeMedium {
         /**
          * The object will be sent over the network.
@@ -181,8 +180,7 @@ export class Request<T> {
         if (this.XMLHttpRequest) {
             this.XMLHttpRequest.abort();
             this.XMLHttpRequest = null;
-        }
-        else {
+        } else {
             // Probably a middleware that is running a timeout to retry it later on
             // Immediately call all middlewares to notify them faster of this abort
             // Notify middleware that we stop retrying
@@ -310,8 +308,7 @@ export class Request<T> {
 
                 this.XMLHttpRequest = request;
                 request.send(data.body);
-            }
-            catch (e) {
+            } catch (e) {
                 reject(e);
             }
         });
@@ -344,16 +341,14 @@ export class Request<T> {
             // We only support application/json or FormData for now
             if (this.body === undefined) {
                 body = undefined;
-            }
-            else {
+            } else {
                 if (this.body instanceof FormData) {
                     body = this.body;
                     let size = 0;
                     for (const [_, value] of this.body.entries()) {
                         if (typeof value === 'string') {
                             size += value.length;
-                        }
-                        else {
+                        } else {
                             size += value.size;
                         }
                     }
@@ -362,8 +357,7 @@ export class Request<T> {
                         // > 1MB upload
                         timeout = Math.max(timeout, 60 * 1000);
                     }
-                }
-                else {
+                } else {
                     if (!this.headers['Content-Type'] && this.headers['content-type']) {
                         this.headers['Content-Type'] = this.headers['content-type'];
                         delete this.headers['content-type'];
@@ -392,8 +386,7 @@ export class Request<T> {
                                 })
                                 .join('&');
                         }
-                    }
-                    else {
+                    } else {
                         this.headers['Content-Type'] = 'application/json;charset=utf-8';
                         body = JSON.stringify(encodeObject(this.body, {
                             version: this.version ?? 0,
@@ -417,46 +410,37 @@ export class Request<T> {
                             const value = query[key];
                             if (value === null || value === undefined) {
                                 // skip
-                            }
-                            else if (typeof value === 'boolean') {
+                            } else if (typeof value === 'boolean') {
                                 params.set(key, value ? 'true' : 'false');
-                            }
-                            else if (typeof value === 'number') {
+                            } else if (typeof value === 'number') {
                                 if (Number.isFinite(value)) {
                                     params.set(key, value.toString());
-                                }
-                                else {
+                                } else {
                                     throw new SimpleError({
                                         code: 'invalid_query',
                                         message: 'Invalid query parameter with non-integer number value ' + value.toString(),
                                         human: 'Er ging iets mis bij het omvormen van dit verzoek',
                                     });
                                 }
-                            }
-                            else if (typeof value === 'string') {
+                            } else if (typeof value === 'string') {
                                 params.set(key, value);
-                            }
-                            else if (Array.isArray(value)) {
+                            } else if (Array.isArray(value)) {
                                 for (const v of value) {
                                     if (typeof v === 'boolean') {
                                         params.append(key, v ? 'true' : 'false');
-                                    }
-                                    else if (typeof v === 'number') {
+                                    } else if (typeof v === 'number') {
                                         if (Number.isFinite(v)) {
                                             params.set(key, v.toString());
-                                        }
-                                        else {
+                                        } else {
                                             throw new SimpleError({
                                                 code: 'invalid_query',
                                                 message: 'Invalid query parameter with non-integer number value in array ' + v.toString(),
                                                 human: 'Er ging iets mis bij het omvormen van dit verzoek',
                                             });
                                         }
-                                    }
-                                    else if (typeof v === 'string') {
+                                    } else if (typeof v === 'string') {
                                         params.append(key, v);
-                                    }
-                                    else {
+                                    } else {
                                         throw new SimpleError({
                                             code: 'invalid_query',
                                             message: 'Invalid query parameter with non-string array value',
@@ -464,8 +448,7 @@ export class Request<T> {
                                         });
                                     }
                                 }
-                            }
-                            else {
+                            } else {
                                 throw new SimpleError({
                                     code: 'invalid_query',
                                     message: 'Invalid query parameter with non-string value',
@@ -478,8 +461,7 @@ export class Request<T> {
                         if (s.length) {
                             queryString = '?' + s;
                         }
-                    }
-                    else {
+                    } else {
                         throw new SimpleError({
                             code: 'invalid_query',
                             message: 'Invalid query parameter of type ' + (typeof query),
@@ -501,8 +483,7 @@ export class Request<T> {
                 body,
                 timeout,
             });
-        }
-        catch (error) {
+        } catch (error) {
             if ((isSimpleError(error) || isSimpleErrors(error)) && error.hasCode('network_timeout')) {
                 // Increase next timeout (note: upload will stay 1 minute)
                 this.timeout = Math.max(timeout, 45 * 1000);
@@ -601,20 +582,17 @@ export class Request<T> {
                             if (this.static.verbose) {
                                 console.error(err);
                             }
-                        }
-                        catch (e) {
+                        } catch (e) {
                             // Failed to decode
                             if (this.static.verbose) {
                                 console.error(json);
                             }
                             throw e;
                         }
-                    }
-                    else {
+                    } else {
                         err = json;
                     }
-                }
-                catch (e) {
+                } catch (e) {
                     return await this.retryOrThrowServerError(response, e as Error);
                 }
 
@@ -662,8 +640,7 @@ export class Request<T> {
                     bodyText = await response.response.text();
                 }
                 json = typeof bodyText === 'string' ? JSON.parse(bodyText) : bodyText;
-            }
-            catch (e) {
+            } catch (e) {
                 // A 200 status code with invalid JSON is considered a server error
                 return await this.retryOrThrowServerError(response, e as Error);
             }

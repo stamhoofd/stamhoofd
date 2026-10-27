@@ -24,8 +24,7 @@ export class ArrayDecoder<T> implements Decoder<T[]> {
                     arr[i] = this.decoder.decodeField(value[i], context, addIndexField(currentField, i));
                 }
                 return arr;
-            }
-            else {
+            } else {
                 const arr = new Array(value.length);
                 for (let i = 0; i < arr.length; i++) {
                     arr[i] = new ObjectData(value[i], context, addIndexField(currentField, i)).decode(this.decoder);
@@ -50,8 +49,7 @@ export class ArrayDecoder<T> implements Decoder<T[]> {
                     arr[i] = this.decoder.decodeField(value[i], data.context, data.addToCurrentField(i));
                 }
                 return arr;
-            }
-            else {
+            } else {
                 const arr = new Array(value.length);
                 for (let i = 0; i < arr.length; i++) {
                     arr[i] = data.clone({
@@ -82,13 +80,11 @@ export class ArrayDecoder<T> implements Decoder<T[]> {
             if ((elementDecoder as any).patchIdentifier) {
                 // Custom identifier (in case no automatic detection is possible)
                 idFieldType = (elementDecoder as any).patchIdentifier();
-            }
-            else {
+            } else {
                 if (patchDecoder.prototype.getIdentifier) {
                     // This autoencoder uses the getIdentifier method to define the id
                     idFieldType = StringOrNumberDecoder;
-                }
-                else {
+                } else {
                     const field = (elementDecoder as typeof AutoEncoder).fields.find(field => field.property == 'id');
                     if (field) {
                         idFieldType = field.decoder;
@@ -98,8 +94,7 @@ export class ArrayDecoder<T> implements Decoder<T[]> {
 
             if (idFieldType) {
                 return new PatchableArrayDecoder<any, any, any>(elementDecoder as any, patchDecoder, idFieldType as any);
-            }
-            else {
+            } else {
                 // A non identifiable array -> we expect an optional array instead = default behaviour
                 // upgrade / downgrade kan stay the same as default
 
@@ -130,13 +125,11 @@ export class ArrayDecoder<T> implements Decoder<T[]> {
             if ((elementDecoder as any).patchIdentifier) {
                 // Custom identifier (in case no automatic detection is possible)
                 idFieldType = (elementDecoder as any).patchIdentifier();
-            }
-            else {
+            } else {
                 if (patchDecoder.prototype.getIdentifier) {
                     // This autoencoder uses the getIdentifier method to define the id
                     idFieldType = StringOrNumberDecoder;
-                }
-                else {
+                } else {
                     const field = (elementDecoder as typeof AutoEncoder).fields.find(field => field.property == 'id');
                     if (field) {
                         idFieldType = field.decoder;
@@ -146,8 +139,7 @@ export class ArrayDecoder<T> implements Decoder<T[]> {
 
             if (idFieldType) {
                 return new PatchableArray<any, any, any>();
-            }
-            else {
+            } else {
                 // A non identifiable array -> we expect an optional array instead = default behaviour
                 // upgrade / downgrade kan stay the same as default
 

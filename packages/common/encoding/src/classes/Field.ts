@@ -75,8 +75,7 @@ export class Field<T> {
                 if (oldValue !== undefined) {
                     // Value is set, we need an upgrade
                     return upg(oldValue);
-                }
-                else {
+                } else {
                     // No value is set, we don't need an upgrade
                     return undefined;
                 }
@@ -89,8 +88,7 @@ export class Field<T> {
                 if (newValue !== undefined) {
                     // Value is set, we need an upgrade
                     return dwn(newValue);
-                }
-                else {
+                } else {
                     // No value is set, we don't need an upgrade
                     return undefined;
                 }

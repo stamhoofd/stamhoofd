@@ -51,8 +51,7 @@ export class DecodedRequest<Params, Query, Body> {
                     let parsed;
                     try {
                         parsed = parse(str);
-                    }
-                    catch (e) {
+                    } catch (e) {
                         throw new SimpleError({
                             statusCode: 400,
                             code: 'invalid_json',
@@ -63,15 +62,13 @@ export class DecodedRequest<Params, Query, Body> {
                     const body = bodyDecoder.decode(new ObjectData(parsed, { version, medium: EncodeMedium.Network }));
                     r.body = body as Body;
                 }
-            }
-            else {
+            } else {
                 if (bodyDecoder !== undefined) {
                     const str = await request.body;
                     let parsed;
                     try {
                         parsed = JSON.parse(str);
-                    }
-                    catch (e) {
+                    } catch (e) {
                         throw new SimpleError({
                             statusCode: 400,
                             code: 'invalid_json',

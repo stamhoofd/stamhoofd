@@ -30,7 +30,7 @@ export function createTrackedSearchParams(
     source: URLSearchParams | string | Record<string, string>,
 ): TrackedSearchParams {
     const target
-    = source instanceof URLSearchParams ? source : new URLSearchParams(source);
+        = source instanceof URLSearchParams ? source : new URLSearchParams(source);
 
     const readKeys = new Set<string>();
 

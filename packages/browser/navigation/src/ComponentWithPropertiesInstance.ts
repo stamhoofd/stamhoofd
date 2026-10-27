@@ -127,8 +127,7 @@ export default defineComponent({
             for (const key in props.customProvide) {
                 if (key.startsWith('reactive_')) {
                     provide(key, computed(() => unref(props.customProvide?.[key])));
-                }
-                else {
+                } else {
                     provide(key, props.customProvide[key]);
                 }
             }
@@ -168,8 +167,7 @@ export default defineComponent({
             if (!disableUrlUnwrapped) {
                 if (url && !(url instanceof ReactiveUrl)) {
                     console.error('Unexpected reactive_navigation_url', url);
-                }
-                else {
+                } else {
                     props.component.setUrl(url);
                 }
             }
@@ -293,8 +291,7 @@ export default defineComponent({
             // we need to know this inside the .destroy method, so we can properly unmount it
             if (props.component.unmount === unmount) {
                 props.component.destroy(getChildVNode());
-            }
-            else {
+            } else {
                 console.warn('ComponentWithPropertiesInstance unmount called with different unmount function');
             }
 
@@ -358,8 +355,7 @@ export default defineComponent({
 
                 if (!(cachedVNode as any)._reactiveInstance) {
                     console.warn('Missing _reactiveInstance on vnode');
-                }
-                else {
+                } else {
                     (cachedVNode as any)._reactiveInstance.value = parent;
                 }
 
