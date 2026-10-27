@@ -35,7 +35,7 @@
 import type { AutoEncoder, AutoEncoderPatchType } from '@common/encoding';
 import { patchContainsChanges } from '@common/encoding';
 import { SimpleErrors } from '@common/errors';
-import { useDismiss } from '@simonbackx/vue-app-navigation';
+import { useDismiss } from '@browser/navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';

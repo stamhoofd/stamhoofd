@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useAppContext } from '#context/appContext.ts';
 import EventRow from '#events/components/EventRow.vue';

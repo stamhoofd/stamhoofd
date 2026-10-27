@@ -165,7 +165,7 @@
 
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@common/encoding';
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';

@@ -2,19 +2,24 @@
 import vue from '@vitejs/plugin-vue';
 import path from 'path';
 import { defineConfig } from 'vite';
-import dts from 'vite-plugin-dts';
 
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [
         vue(),
-        dts(),
     ],
     test: {
+        name: 'navigation-unit',
         watch: false,
         globals: true,
-        root: 'src',
-        exclude: ['**/*.browser.test.ts'],
+        root: import.meta.dirname,
+        include: ['src/**/*.test.ts'],
+        exclude: ['src/**/*.browser.test.ts'],
+        coverage: {
+            provider: 'v8',
+            include: ['src/**'],
+            reporter: ['text', 'html', 'lcov'],
+        },
     },
     build: {
         minify: false,

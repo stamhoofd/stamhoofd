@@ -62,7 +62,7 @@
 
 <script setup lang="ts">
 import GroupTreeVue from './components/GroupTree.vue';
-import { defineRoutes, UrlHelper, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, UrlHelper, useNavigate } from '@browser/navigation';
 
 import { useRequiredOrganization } from '#hooks/useOrganization';
 import LegalFooter from '#navigation/LegalFooter.vue';

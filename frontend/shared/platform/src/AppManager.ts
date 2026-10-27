@@ -1,4 +1,4 @@
-import { UrlHelper } from '@simonbackx/vue-app-navigation';
+import { UrlHelper } from '@browser/navigation';
 import { SessionDeviceType, SessionOS } from '@stamhoofd/structures';
 import type { SessionMetaData } from '@stamhoofd/structures';
 

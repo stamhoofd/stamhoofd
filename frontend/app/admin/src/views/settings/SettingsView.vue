@@ -312,7 +312,7 @@
 
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@common/encoding';
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, useNavigate } from '@browser/navigation';
 import eventNotificationsIllustration from '@stamhoofd/assets/images/illustrations/event-notifications.svg';
 import groupIllustration from '@stamhoofd/assets/images/illustrations/group.svg';
 import houseIllustration from '@stamhoofd/assets/images/illustrations/house.svg';

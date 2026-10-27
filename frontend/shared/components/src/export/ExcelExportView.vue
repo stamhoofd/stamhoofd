@@ -44,7 +44,7 @@
 <script lang="ts" setup>
 import type { Decoder} from '@common/encoding';
 import { ObjectData, VersionBox, VersionBoxDecoder } from '@common/encoding';
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { usePop } from '@browser/navigation';
 import { ErrorBox } from '#errors/ErrorBox';
 import { useErrors } from '#errors/useErrors';
 import DataSelector from './DataSelector.vue';

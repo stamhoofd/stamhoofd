@@ -216,7 +216,7 @@
 
 <script setup lang="ts">
 import { SimpleError } from '@common/errors';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePop, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useEventViewLoaders } from '#events/eventViewLoaders.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';

@@ -41,7 +41,7 @@
 
 <script lang="ts" setup>
 import type { Decoder } from '@common/encoding';
-import { ReactiveUrl } from '@simonbackx/vue-app-navigation';
+import { ReactiveUrl } from '@browser/navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';

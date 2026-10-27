@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
-import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { DetailedReceivableBalance, PriceBreakdown } from '@stamhoofd/structures';
 import { BalanceItem, DetailedPayableBalance, getVATExcemptInvoiceNote } from '@stamhoofd/structures';

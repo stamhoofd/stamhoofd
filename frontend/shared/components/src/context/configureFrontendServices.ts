@@ -1,4 +1,4 @@
-import { UrlHelper } from '@simonbackx/vue-app-navigation';
+import { UrlHelper } from '@browser/navigation';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Toast } from '@stamhoofd/frontend-notifications/Toast';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';

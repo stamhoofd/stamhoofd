@@ -1,8 +1,8 @@
 // eslint-disable-next-line vue/prefer-import-from-vue
 import { invokeArrayFns, ShapeFlags } from '@vue/shared';
 import { callWithAsyncErrorHandling, type ComponentInternalInstance, type ComponentOptions, computed, defineComponent, type ElementNamespace, ErrorCodes, getCurrentInstance, h, inject, onActivated, onBeforeMount, onBeforeUnmount, onMounted, onUnmounted, onUpdated, provide, queuePostFlushCb, type RendererElement, type RendererNode, setTransitionHooks, shallowRef, unref, type VNode, warn } from 'vue';
-import { ComponentWithProperties, HistoryIndex } from './ComponentWithProperties';
-import { ReactiveUrl } from './utils/navigationHooks';
+import { ComponentWithProperties, HistoryIndex } from './ComponentWithProperties.js';
+import { ReactiveUrl } from './utils/navigationHooks.js';
 
 export function invokeVNodeHook(
     hook: any,

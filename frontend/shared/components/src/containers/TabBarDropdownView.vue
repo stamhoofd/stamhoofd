@@ -23,8 +23,8 @@
 </template>
 
 <script setup lang="ts">
-import type { PushOptions } from '@simonbackx/vue-app-navigation';
-import { defineRoutes, useDismiss, useNavigate, usePopup, useShow } from '@simonbackx/vue-app-navigation';
+import type { PushOptions } from '@browser/navigation';
+import { defineRoutes, useDismiss, useNavigate, usePopup, useShow } from '@browser/navigation';
 import { Formatter } from '@stamhoofd/utility';
 import type { ComponentPublicInstance } from 'vue';
 import { computed, getCurrentInstance, ref, unref } from 'vue';

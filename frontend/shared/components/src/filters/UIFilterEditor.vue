@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts" setup>
-import { FramedComponent, useCanPop, usePop, usePopup } from '@simonbackx/vue-app-navigation';
+import { FramedComponent, useCanPop, usePop, usePopup } from '@browser/navigation';
 import { Formatter } from '@stamhoofd/utility';
 import { nextTick } from 'vue';
 

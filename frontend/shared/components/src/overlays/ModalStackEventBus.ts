@@ -1,4 +1,4 @@
-import type { ComponentWithProperties, PushOptions } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties, PushOptions } from '@browser/navigation';
 
 import { EventBus } from '@stamhoofd/frontend-application/EventBus';
 

@@ -29,12 +29,6 @@
         // Added again here in case some users decide to disable `strict`.
         // This enables stricter inference for data properties on `this`.
         "noImplicitThis": true,
-        "paths": {
-            "@stamhoofd/components": ["./shared/components/index.ts"],
-            "@stamhoofd/components/*": ["./shared/components/src/*"],
-            "@stamhoofd/components/*.ts": ["./shared/components/src/*.ts"],
-            "@stamhoofd/components/*.vue": ["./shared/components/src/*.vue"]
-        },
         "resolveJsonModule": true,
         // See <https://github.com/vuejs/vue-cli/pull/5688>
         "skipLibCheck": true,

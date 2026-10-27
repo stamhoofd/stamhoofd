@@ -6,17 +6,16 @@ Navigation library for Vue for web apps that need to feel and work like native a
 
 After installing, follow the [first-view guide](docs/getting-started.md).
 
-### Yarn
+Declare `"@browser/navigation": "workspace:*"` in consuming workspaces.
+Import `@browser/navigation/dist/main.css` for the navigation styles.
+Run `pnpm stam test navigation`, `pnpm stam check lint @browser/navigation`, and
+`pnpm stam check typecheck @browser/navigation` from the repository root.
 
-```
-yarn add @simonbackx/vue-app-navigation
-```
-
-### NPM
-
-```
-npm install @simonbackx/vue-app-navigation
-```
+Vite retains the library's Vue/CSS bundle. `vue-tsc` prepares declarations in
+`dist-types` before consumer checks, using the existing strict bundler settings.
+The managed test selector runs both node tests and headless Chromium tests.
+Browser tests import the built entry and CSS, matching application consumers
+rather than the unbundled source module graph.
 
 [Example](https://simonbackx.com/files/vue-app-navigation/example.gif 'Example of navigation')
 

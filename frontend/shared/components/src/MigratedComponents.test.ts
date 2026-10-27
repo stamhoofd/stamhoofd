@@ -1,5 +1,5 @@
 /* eslint-disable vue/one-component-per-file */
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties } from '@browser/navigation';
 import { Organization, Webshop } from '@stamhoofd/structures';
 import { Toast as SharedToast, ToastButton as SharedToastButton } from '@stamhoofd/frontend-notifications/Toast';
 import { TestUtils } from '@stamhoofd/test-utils';

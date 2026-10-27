@@ -51,7 +51,7 @@
 import { useContext } from '#hooks/useContext.ts';
 import STGridItem from '#layout/STGridItem.vue';
 
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
 import { ArrayDecoder, PatchableArray } from '@common/encoding';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';

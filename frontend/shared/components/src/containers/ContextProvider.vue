@@ -6,8 +6,8 @@
 </template>
 
 <script setup lang="ts">
-import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties } from '@browser/navigation';
+import { ComponentWithPropertiesInstance } from '@browser/navigation';
 import { computed, isReactive, provide } from 'vue';
 
 const props = withDefaults(defineProps<{

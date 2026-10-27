@@ -28,7 +28,7 @@
         "@common/encoding": "workspace:*",
         "@common/errors": "workspace:*",
         "@common/networking": "workspace:*",
-        "@simonbackx/vue-app-navigation": "2.25.1",
+        "@browser/navigation": "workspace:*",
         "@simplewebauthn/browser": "13.3.0",
         "@stamhoofd/assets": "workspace:*",
         "@stamhoofd/frontend-excel-export": "workspace:*",

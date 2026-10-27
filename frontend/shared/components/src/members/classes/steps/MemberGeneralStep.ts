@@ -1,6 +1,6 @@
 import EditMemberGeneralBox from '../../components/edit/EditMemberGeneralBox.vue';
 
-import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { PlatformMember } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

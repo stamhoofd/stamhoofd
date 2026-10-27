@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts" setup>
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { usePop } from '@browser/navigation';
 import { computed, onMounted, ref } from 'vue';
 
 import Spinner from '../Spinner.vue';

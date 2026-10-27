@@ -53,7 +53,7 @@ import { useNavigationActions } from '@stamhoofd/components/types/NavigationActi
 import { useMemberManager } from '@stamhoofd/frontend-application/MemberManager';
 import { computed, onActivated, onMounted, ref } from 'vue';
 import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet';
-import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';

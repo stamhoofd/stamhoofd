@@ -25,7 +25,7 @@ ruleTester.run('async-route-components', asyncRouteComponents, {
         {
             filename: 'route.test.ts',
             code: `
-            import { defineRoute } from '@simonbackx/vue-app-navigation';
+            import { defineRoute } from '@browser/navigation';
             defineRoute({
                 component: async () => (await import('./MyView.vue')).default,
             });
@@ -34,7 +34,7 @@ ruleTester.run('async-route-components', asyncRouteComponents, {
         {
             filename: 'route.test.ts',
             code: `
-            import { defineRoutes } from '@simonbackx/vue-app-navigation';
+            import { defineRoutes } from '@browser/navigation';
             const loadView = async () => (await import('./MyView.vue')).default;
             defineRoutes([{ component: loadView }]);
         `,
@@ -45,7 +45,7 @@ ruleTester.run('async-route-components', asyncRouteComponents, {
             class ComponentWithProperties {}
             declare function buildEditGroupsView(period: unknown): ComponentWithProperties;
             declare const period: { value: unknown };
-            import { defineRoute } from '@simonbackx/vue-app-navigation';
+            import { defineRoute } from '@browser/navigation';
             defineRoute({
                 component: () => {
                     return buildEditGroupsView(period.value);
@@ -54,7 +54,7 @@ ruleTester.run('async-route-components', asyncRouteComponents, {
         `,
         },
         `
-            import { defineRoute } from '@simonbackx/vue-app-navigation';
+            import { defineRoute } from '@browser/navigation';
             defineRoute({
                 url: 'wachtlijst',
                 component: 'self',
@@ -66,11 +66,11 @@ ruleTester.run('async-route-components', asyncRouteComponents, {
             defineRoute({ component: MyView });
         `,
         `
-            import { defineRoute } from '@simonbackx/vue-app-navigation';
+            import { defineRoute } from '@browser/navigation';
             const unrelated = { component: MyView };
         `,
         `
-            import { defineRoute } from '@simonbackx/vue-app-navigation';
+            import { defineRoute } from '@browser/navigation';
             defineRoute({
                 component: async () => (await import('./MyView.vue')).default,
                 props: { component: MyNestedComponent },
@@ -78,13 +78,13 @@ ruleTester.run('async-route-components', asyncRouteComponents, {
         `,
         `
             import MyView from './MyView.vue';
-            import { defineRoute } from '@simonbackx/vue-app-navigation';
+            import { defineRoute } from '@browser/navigation';
             defineRoute({ component: MyView });
             const doSomethingWith = new ComponentWithProperties(MyView, {});
         `,
         `
             import MyView from './MyView.vue';
-            import { defineRoute } from '@simonbackx/vue-app-navigation';
+            import { defineRoute } from '@browser/navigation';
             useView(MyView);
             defineRoute({ component: MyView });
         `,
@@ -93,12 +93,12 @@ ruleTester.run('async-route-components', asyncRouteComponents, {
         {
             code: `
                 import MyView from './MyView.vue';
-                import { defineRoute } from '@simonbackx/vue-app-navigation';
+                import { defineRoute } from '@browser/navigation';
                 defineRoute({ component: MyView });
             `,
             output: `
                 
-                import { defineRoute } from '@simonbackx/vue-app-navigation';
+                import { defineRoute } from '@browser/navigation';
                 defineRoute({ component: async () => (await import('./MyView.vue')).default });
             `,
             errors: [{ messageId: 'asyncComponent' }],
@@ -106,12 +106,12 @@ ruleTester.run('async-route-components', asyncRouteComponents, {
         {
             code: `
                 import MyView, { helper } from './MyView.vue';
-                import { defineRoutes as registerRoutes } from '@simonbackx/vue-app-navigation';
+                import { defineRoutes as registerRoutes } from '@browser/navigation';
                 registerRoutes([{ component: MyView }]);
             `,
             output: `
                 import { helper } from './MyView.vue';
-                import { defineRoutes as registerRoutes } from '@simonbackx/vue-app-navigation';
+                import { defineRoutes as registerRoutes } from '@browser/navigation';
                 registerRoutes([{ component: async () => (await import('./MyView.vue')).default }]);
             `,
             errors: [{ messageId: 'asyncComponent' }],
@@ -119,13 +119,13 @@ ruleTester.run('async-route-components', asyncRouteComponents, {
         {
             code: `
                 import MyView from './MyView.vue';
-                import { defineRoute } from '@simonbackx/vue-app-navigation';
+                import { defineRoute } from '@browser/navigation';
                 defineRoute({ name: 'first', component: MyView });
                 defineRoute({ name: 'second', component: MyView });
             `,
             output: `
                 
-                import { defineRoute } from '@simonbackx/vue-app-navigation';
+                import { defineRoute } from '@browser/navigation';
                 defineRoute({ name: 'first', component: async () => (await import('./MyView.vue')).default });
                 defineRoute({ name: 'second', component: async () => (await import('./MyView.vue')).default });
             `,
@@ -136,7 +136,7 @@ ruleTester.run('async-route-components', asyncRouteComponents, {
         },
         {
             code: `
-                import { defineRoutes } from '@simonbackx/vue-app-navigation';
+                import { defineRoutes } from '@browser/navigation';
                 defineRoutes(items.map(() => ({ component: () => import('./MyView.vue') })));
             `,
             output: null,
@@ -144,7 +144,7 @@ ruleTester.run('async-route-components', asyncRouteComponents, {
         },
         {
             code: `
-                import { defineRoute } from '@simonbackx/vue-app-navigation';
+                import { defineRoute } from '@browser/navigation';
                 const loadView = () => import('./MyView.vue');
                 defineRoute({ component: loadView });
             `,
@@ -153,7 +153,7 @@ ruleTester.run('async-route-components', asyncRouteComponents, {
         },
         {
             code: `
-                import { defineRoute } from '@simonbackx/vue-app-navigation';
+                import { defineRoute } from '@browser/navigation';
                 defineRoute({ component: 'other' });
             `,
             output: null,

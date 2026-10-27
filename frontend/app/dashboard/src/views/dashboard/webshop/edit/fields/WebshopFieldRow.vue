@@ -14,7 +14,7 @@
 
 <script lang="ts" setup>
 import type { PatchableArrayAutoEncoder } from '@common/encoding';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import type { WebshopField } from '@stamhoofd/structures';

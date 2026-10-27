@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts" setup>
-import { getExposeProxy } from '@simonbackx/vue-app-navigation';
+import { getExposeProxy } from '@browser/navigation';
 import type { Ref } from 'vue';
 import { computed, getCurrentInstance, onActivated, onBeforeUnmount, onMounted, provide, ref, unref, useSlots, useTemplateRef } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';

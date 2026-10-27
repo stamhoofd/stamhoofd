@@ -27,7 +27,7 @@
 
 <script lang="ts" setup>
 import { encodeObject } from '@common/encoding';
-import { useDismiss } from '@simonbackx/vue-app-navigation';
+import { useDismiss } from '@browser/navigation';
 import RecordAnswerInput from '#inputs/RecordAnswerInput.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import STToolbar from '#navigation/STToolbar.vue';

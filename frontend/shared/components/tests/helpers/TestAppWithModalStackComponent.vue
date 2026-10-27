@@ -10,8 +10,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { PushOptions } from '@simonbackx/vue-app-navigation';
-import { ComponentWithProperties, HistoryManager, ModalStackComponent, useManualPresent } from '@simonbackx/vue-app-navigation';
+import type { PushOptions } from '@browser/navigation';
+import { ComponentWithProperties, HistoryManager, ModalStackComponent, useManualPresent } from '@browser/navigation';
 import ContextProvider from '#containers/ContextProvider.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import CenteredMessageView from '#overlays/CenteredMessageView.vue';
@@ -91,7 +91,7 @@ onMounted(async () => {
 // We need to include the component styling of vue-app-navigation first
 @use "@stamhoofd/scss/main";
 @use "@stamhoofd/scss/base/dark-modus";
-@use "@simonbackx/vue-app-navigation/dist/main.css" as VueAppNavigation;
+@use "@browser/navigation/dist/main.css" as VueAppNavigation;
 
 html {
     -webkit-touch-callout:none;

@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useCanPop, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, useCanPop, useShow } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 
 import { computed } from 'vue';

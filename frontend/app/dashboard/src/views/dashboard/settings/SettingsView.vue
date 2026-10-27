@@ -323,7 +323,7 @@ import MollieWarningBox from '@stamhoofd/components/mollie/MollieWarningBox.vue'
 import StripeWarningBox from '@stamhoofd/components/stripe/StripeWarningBox.vue';
 
 import type { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder } from '@common/encoding';
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, useNavigate } from '@browser/navigation';
 
 import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';

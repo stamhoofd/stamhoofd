@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, useNavigate } from '@browser/navigation';
 
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import SetupStepRows from '@stamhoofd/components/setupSteps/SetupStepRows.vue';

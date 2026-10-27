@@ -1,4 +1,4 @@
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties } from '@browser/navigation';
 import type { ObjectDirective } from 'vue';
 import { ModalStackEventBus } from '../overlays/ModalStackEventBus';
 import Tooltip from '../overlays/Tooltip.vue';

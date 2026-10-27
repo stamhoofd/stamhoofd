@@ -77,7 +77,7 @@
 <script lang="ts" setup>
 import type { Decoder } from '@common/encoding';
 import { SimpleError, SimpleErrors } from '@common/errors';
-import { ComponentWithProperties, usePop, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePop, useShow } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import EditUserPermissionsBox from '@stamhoofd/components/admins/components/EditUserPermissionsBox.vue';

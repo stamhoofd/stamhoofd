@@ -6,8 +6,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { PushOptions } from '@simonbackx/vue-app-navigation';
-import { ComponentWithProperties, HistoryManager, ModalStackComponent, useManualPresent } from '@simonbackx/vue-app-navigation';
+import type { PushOptions } from '@browser/navigation';
+import { ComponentWithProperties, HistoryManager, ModalStackComponent, useManualPresent } from '@browser/navigation';
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 import { useProvideEventViews } from '@stamhoofd/components/events/provideEventViews';
 import { useProvideGroupViews } from '@stamhoofd/components/groups/provideGroupViews';
@@ -138,7 +138,7 @@ if (STAMHOOFD.environment === 'development') {
 // We need to include the component styling of vue-app-navigation first
 @use "@stamhoofd/scss/main";
 @use "@stamhoofd/scss/base/dark-modus";
-@use "@simonbackx/vue-app-navigation/dist/main.css" as VueAppNavigation;
+@use "@browser/navigation/dist/main.css" as VueAppNavigation;
 
 html {
     -webkit-touch-callout:none;

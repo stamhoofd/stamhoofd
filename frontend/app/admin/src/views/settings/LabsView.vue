@@ -135,7 +135,7 @@
 
 <script lang="ts" setup>
 import type { ConvertArrayToPatchableArray } from '@common/encoding';
-import { usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { usePop, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';

@@ -46,7 +46,7 @@
 
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@common/encoding';
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { usePop } from '@browser/navigation';
 import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';

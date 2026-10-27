@@ -18,7 +18,7 @@
 
 <script setup lang="ts">
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController } from '@browser/navigation';
 
 import { useOrganization } from '#hooks/useOrganization';
 import { usePositionableSheet } from '#tables/usePositionableSheet';

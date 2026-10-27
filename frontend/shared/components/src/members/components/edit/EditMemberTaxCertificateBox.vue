@@ -92,7 +92,7 @@ import Radio from '#inputs/Radio.vue';
 import STInputBox from '#inputs/STInputBox.vue';
 import STList from '#layout/STList.vue';
 import { SimpleError } from '@common/errors';
-import { usePresent } from '@simonbackx/vue-app-navigation';
+import { usePresent } from '@browser/navigation';
 import MemberNRRInput from './MemberNRRInput.vue';
 import SevereDisabilityToggle from './SevereDisabilityToggle.vue';
 import Title from './Title.vue';

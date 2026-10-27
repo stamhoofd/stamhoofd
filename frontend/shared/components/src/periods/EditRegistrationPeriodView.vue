@@ -52,7 +52,7 @@ import SaveView from '#navigation/SaveView.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import type { AutoEncoderPatchType } from '@common/encoding';
 import { SimpleError } from '@common/errors';
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { usePop } from '@browser/navigation';
 import type { RegistrationPeriod } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { isValidRegistrationPeriodCustomName } from './isValidRegistrationPeriodCustomName';

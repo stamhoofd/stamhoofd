@@ -332,7 +332,7 @@
 import type { Decoder } from '@common/encoding';
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@common/encoding';
 import { SimpleError, SimpleErrors } from '@common/errors';
-import { useDismiss, useUrl } from '@simonbackx/vue-app-navigation';
+import { useDismiss, useUrl } from '@browser/navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors';

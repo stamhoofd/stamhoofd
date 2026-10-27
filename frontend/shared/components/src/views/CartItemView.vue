@@ -186,7 +186,7 @@
 
 <script lang="ts" setup>
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { useCanDismiss, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { useCanDismiss, useDismiss, usePresent, useShow } from '@browser/navigation';
 import type { CartItem, Checkout, PatchAnswers, ProductDateRange, Webshop } from '@stamhoofd/structures';
 import { CartStockHelper, Customer, ProductPrice, ProductType, UitpasNumberAndPrice, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

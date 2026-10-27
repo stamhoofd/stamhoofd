@@ -16,7 +16,7 @@ import { usePatch } from '#hooks/usePatch.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import type { AutoEncoderPatchType } from '@common/encoding';
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { usePop } from '@browser/navigation';
 import type { Company } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import CompanyInputBox from './CompanyInputBox.vue';

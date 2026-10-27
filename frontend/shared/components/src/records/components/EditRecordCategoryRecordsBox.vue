@@ -45,7 +45,7 @@
 <script setup lang="ts">
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import { usePresent } from '@simonbackx/vue-app-navigation';
+import { usePresent } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useDraggableArray } from '#hooks/useDraggableArray.ts';
 import { usePatchMoveUpDown } from '#hooks/usePatchMoveUpDown.ts';

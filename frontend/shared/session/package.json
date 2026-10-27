@@ -18,7 +18,7 @@
         "@common/encoding": "workspace:*",
         "@common/errors": "workspace:*",
         "@common/networking": "workspace:*",
-        "@simonbackx/vue-app-navigation": "2.25.1",
+        "@browser/navigation": "workspace:*",
         "@stamhoofd/frontend-platform": "workspace:*",
         "@stamhoofd/frontend-storage": "workspace:*",
         "@stamhoofd/networking": "workspace:*",

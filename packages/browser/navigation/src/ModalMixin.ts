@@ -1,7 +1,7 @@
 import { defineComponent } from 'vue';
 
-import { ModalStackComponentFinderMixin } from './ModalStackComponentFinderMixin';
-import { type PopOptions } from './PopOptions';
+import { ModalStackComponentFinderMixin } from './ModalStackComponentFinderMixin.js';
+import { type PopOptions } from './PopOptions.js';
 
 // You can declare mixins as the same style as components.
 export const ModalMixin = defineComponent({

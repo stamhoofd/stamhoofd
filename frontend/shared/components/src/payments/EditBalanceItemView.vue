@@ -193,7 +193,7 @@ import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
 import { ArrayDecoder, PatchableArray } from '@common/encoding';
 import { SimpleError } from '@common/errors';
-import { usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { usePop, usePresent, useShow } from '@browser/navigation';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { BalanceItemRelation, Invoice } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';

@@ -23,7 +23,7 @@ These API’s don’t support URL based routing. They are sometimes used in Stam
 
 <script lang="ts" setup>
     import MyView from './my-view.vue';
-    import { useShow } from '@simonbackx/vue-app-navigation';
+    import { useShow } from '@browser/navigation';
 
     const show = useShow();
 
@@ -157,7 +157,7 @@ When showing it is possible to simply override your current view with a new view
 
 <script lang="ts" setup>
     import MyView from './my-view.vue';
-    import { useShow } from '@simonbackx/vue-app-navigation';
+    import { useShow } from '@browser/navigation';
 
     const show = useShow();
 
@@ -181,7 +181,7 @@ You can show multiple views in one go. The animation (in animated) will only sho
 
 <script lang="ts" setup>
     import MyView from './my-view.vue';
-    import { useShow } from '@simonbackx/vue-app-navigation';
+    import { useShow } from '@browser/navigation';
 
     const show = useShow();
 
@@ -207,7 +207,7 @@ By default, Stamhoofd will always use the appropriate animations. In rare situat
 
 <script lang="ts" setup>
     import MyView from './my-view.vue';
-    import { useShow } from '@simonbackx/vue-app-navigation';
+    import { useShow } from '@browser/navigation';
 
     const show = useShow();
 

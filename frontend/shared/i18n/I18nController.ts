@@ -1,5 +1,5 @@
 // i18n-setup.js
-import { HistoryManager, UrlHelper } from '@simonbackx/vue-app-navigation';
+import { HistoryManager, UrlHelper } from '@browser/navigation';
 import { countries, languages } from '@stamhoofd/locales';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import { countryToCode } from '@stamhoofd/structures';
