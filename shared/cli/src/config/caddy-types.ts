@@ -26,7 +26,7 @@ export type CaddyHandler
     | {
         handler: 'headers';
         request?: CaddyHeaderOps;
-        response?: CaddyHeaderOps;
+        response?: CaddyHeaderOps & { require?: { headers?: Record<string, string[]> } };
     }
     | {
         handler: 'replace_response';

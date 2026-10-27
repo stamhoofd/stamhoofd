@@ -199,8 +199,7 @@ export class CaddyConfigHelper {
      * The CSP is applied by cspFrontendSubroutes based on the request path (file extension):
      * documents get the strict-dynamic nonce policy (+ per-request nonce rewrite), resources get
      * the sandboxed resource CSP and are never buffered by replace_response. The frontends are
-     * served from a static file server, so there is no Vite HMR websocket to keep unbuffered
-     * (unlike the CLI dev config, which proxies Vite and matches on the Accept header instead).
+     * served from a static file server, so there is no Vite HMR websocket to keep unbuffered.
      * `customDomain: true` omits the "no external scripts" hardening so webshop admin custom code
      * can run on its own custom domain. The route is terminal, so a matched request never also
      * falls through to a later, broader route (e.g. the webshop custom-domain catch-all).

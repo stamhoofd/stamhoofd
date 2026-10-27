@@ -253,6 +253,18 @@ const cspNonceSubRoute = {
                     },
                 },
                 {
+                    // The nonce changes on every response, so HTML must never be cached or
+                    // revalidated: on a 304 the browser would reuse the old nonce in the HTML.
+                    handler: 'headers',
+                    response: {
+                        set: {
+                            'Cache-Control': ['no-store'],
+                        },
+                        delete: ['ETag', 'Last-Modified'],
+                        deferred: true,
+                    },
+                },
+                {
                     // Replace the build-time placeholder with the same per-request nonce used
                     // in the header above. Placeholders are supported in replace_response's
                     // literal `replace` field (but not in regexes).
