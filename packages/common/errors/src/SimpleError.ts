@@ -1,8 +1,8 @@
-import type { Data, Encodeable, EncodeContext, PlainObject } from '@simonbackx/simple-encoding';
+import type { ErrorData, ErrorValue } from './ErrorData.js';
 import { v4 as uuidv4 } from 'uuid';
 
 // Error that is caused by a client and should be reported to the client
-export class SimpleError extends Error implements Encodeable {
+export class SimpleError extends Error {
     id: string;
     code: string;
     message: string;
@@ -13,14 +13,14 @@ export class SimpleError extends Error implements Encodeable {
      * Assign special meta data to an error that can be used for special handling of errors.
      * This type is 'any', but use the decode methods to decode this first
      */
-    meta: PlainObject | undefined;
+    meta: ErrorValue;
 
     /**
     * Used to determine the associated HTTP status code when thrown in an endpoint
     */
     statusCode?: number;
 
-    constructor(error: { code: string; message: string; human?: string; field?: string; statusCode?: number; id?: string; meta?: PlainObject }) {
+    constructor(error: { code: string; message: string; human?: string; field?: string; statusCode?: number; id?: string; meta?: ErrorValue }) {
         super(error.message);
         this.code = error.code;
         this.message = error.message;
@@ -46,7 +46,7 @@ export class SimpleError extends Error implements Encodeable {
         return this.encode({ version: 0 });
     }
 
-    encode(context: EncodeContext) {
+    encode(context: unknown) {
         return {
             id: this.id,
             code: this.code,
@@ -57,7 +57,7 @@ export class SimpleError extends Error implements Encodeable {
         };
     }
 
-    static decode(data: Data): SimpleError {
+    static decode(data: ErrorData): SimpleError {
         return new SimpleError({
             id: data.field('id').string,
             code: data.field('code').string,
