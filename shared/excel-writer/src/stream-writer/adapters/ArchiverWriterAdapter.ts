@@ -1,6 +1,7 @@
 import type { ZipWriterAdapter } from '../interfaces.js';
 import { Writable } from 'node:stream';
 import os from 'os';
+import path from 'node:path';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'node:fs';
 import archiver from 'archiver';
@@ -17,15 +18,14 @@ export class ArchiverWriterAdapter implements ZipWriterAdapter {
     }
 
     async addFile(name: string): Promise<WritableStream<Buffer>> {
-        const tmpDir = os.tmpdir() + '/stamhoofd-excel-writer';
+        // mkdtemp creates an owned, mode-0700 directory instead of trusting a shared path.
+        const tmpDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'stamhoofd-excel-writer-'));
 
         // generate random filename
         const tmpFilename = 'excel_writer_' + uuidv4();
         const filePath = tmpDir + '/' + tmpFilename;
 
-        await fs.promises.mkdir(tmpDir, { recursive: true });
-
-        const s = fs.createWriteStream(filePath, 'binary');
+        const s = fs.createWriteStream(filePath, { encoding: 'binary', flags: 'wx', mode: 0o600 });
 
         s.on('close', () => {
             console.log('PassThrough closed file: File written to disk', filePath);
@@ -92,6 +92,7 @@ export class ArchiverWriterAdapter implements ZipWriterAdapter {
         for (const { tmpFile } of this.fileStreams) {
             try {
                 await fs.promises.unlink(tmpFile);
+                await fs.promises.rmdir(path.dirname(tmpFile));
             }
             catch (e) {
                 console.error('Error while deleting tmp file', tmpFile, e);
@@ -113,6 +114,7 @@ export class ArchiverWriterAdapter implements ZipWriterAdapter {
         for (const { tmpFile } of this.fileStreams) {
             try {
                 await fs.promises.unlink(tmpFile);
+                await fs.promises.rmdir(path.dirname(tmpFile));
             }
             catch (e) {
                 console.error('Error while deleting tmp file', tmpFile, e);

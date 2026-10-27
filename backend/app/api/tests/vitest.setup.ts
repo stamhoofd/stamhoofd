@@ -3,6 +3,7 @@ import { expect } from 'vitest';
 
 // Only opt in files whose exercised paths do not use the database or application services.
 const lightweightTests = [
+    'src/helpers/ArchiverWriterAdapter.test.ts',
     'src/helpers/BuckarooHelper.test.ts',
     'src/crons/clearExcelCache.test.ts',
     'src/endpoints/global/members/throwIfDrasticMemberDetailsChange.test.ts',
