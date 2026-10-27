@@ -54,7 +54,7 @@ async function replaceKeysWithUuidInTranslations(
     const replacedKeys = new Map<string, string>();
 
     const flattenTranslationsAndReplaceKeys = (
-        result: Record<string, string>,
+        result: Map<string, TranslationValue>,
         translations: TranslationValue,
         parentKeys = '',
     ): number => {
@@ -69,8 +69,8 @@ async function replaceKeysWithUuidInTranslations(
             const fullKey = parentKeys ? `${parentKeys}.${key}` : key;
 
             const setOnResult = (uuidKey: string) => {
-                delete result[key];
-                result[uuidKey] = translations[key] as string;
+                result.delete(key);
+                result.set(uuidKey, translations[key]);
                 changes++;
             };
 
@@ -92,7 +92,7 @@ async function replaceKeysWithUuidInTranslations(
             }
 
             const deepChanges = flattenTranslationsAndReplaceKeys(result, value, fullKey);
-            delete result[key];
+            result.delete(key);
             changes += deepChanges;
         }
 
@@ -100,11 +100,11 @@ async function replaceKeysWithUuidInTranslations(
     };
 
     for (const [filePath, translations] of translationsWithPath) {
-        const newTranslations = { ...translations };
+        const newTranslations = new Map(Object.entries(translations));
         const changes = flattenTranslationsAndReplaceKeys(newTranslations, translations);
 
         if (changes > 0) {
-            writeTranslation(filePath, newTranslations);
+            writeTranslation(filePath, Object.fromEntries(newTranslations) as Record<string, string>);
         }
     }
 
