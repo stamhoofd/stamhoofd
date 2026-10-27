@@ -13,23 +13,9 @@
         "declaration": true,
         "declarationMap": true,
         "outDir": "dist",
-        "lib": [
-            "es2019"
-        ],
-        "types": [
-            "node",
-            "jest"
-        ]
+        "lib": ["es2019"],
+        "types": ["node", "jest"]
     },
-    "include": [
-        "index.ts",
-        "src/**/*.ts",
-        "tests/**/*.ts",
-    ],
-    "exclude": [
-        "node_modules",
-        "dist",
-        "esm/dist",
-        "dist/**/*"
-    ]
+    "include": ["index.ts", "src/**/*.ts", "tests/**/*.ts"],
+    "exclude": ["node_modules", "dist", "esm/dist", "dist/**/*"]
 }

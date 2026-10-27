@@ -76,17 +76,13 @@ export class PatchableArray<
             // Apply this change
             if (isMove(change)) {
                 cloned.addMove(change.move, change.afterId);
-            }
-            else if (isPut(change)) {
+            } else if (isPut(change)) {
                 cloned.addPut(change.put, change.afterId);
-            }
-            else if (isDelete(change)) {
+            } else if (isDelete(change)) {
                 cloned.addDelete(change.delete);
-            }
-            else if (isPatch(change)) {
+            } else if (isPatch(change)) {
                 cloned.addPatch(change.patch);
-            }
-            else {
+            } else {
                 throw new Error('Invalid change: ' + JSON.stringify(change));
             }
         }
@@ -116,23 +112,19 @@ export class PatchableArray<
         for (const change of this.changes) {
             if (isMove(change)) {
                 // ok
-            }
-            else if (isPut(change)) {
+            } else if (isPut(change)) {
                 if (getId(change.put) === item) {
                     return true;
                 }
-            }
-            else if (isDelete(change)) {
+            } else if (isDelete(change)) {
                 if (change.delete === item) {
                     return true;
                 }
-            }
-            else if (isPatch(change)) {
+            } else if (isPatch(change)) {
                 if (getId(change.patch) === item) {
                     return true;
                 }
-            }
-            else {
+            } else {
                 throw new Error('Invalid change: ' + JSON.stringify(change));
             }
         }
@@ -148,32 +140,25 @@ export class PatchableArray<
         for (const change of this.changes) {
             if (isMove(change)) {
                 newCurrentChanges.push(change);
-            }
-            else if (isPut(change)) {
+            } else if (isPut(change)) {
                 if (getId(change.put) === item) {
                     n.changes.push(change);
-                }
-                else {
+                } else {
                     newCurrentChanges.push(change);
                 }
-            }
-            else if (isDelete(change)) {
+            } else if (isDelete(change)) {
                 if (change.delete === item) {
                     n.changes.push(change);
-                }
-                else {
+                } else {
                     newCurrentChanges.push(change);
                 }
-            }
-            else if (isPatch(change)) {
+            } else if (isPatch(change)) {
                 if (getId(change.patch) === item) {
                     n.changes.push(change);
-                }
-                else {
+                } else {
                     newCurrentChanges.push(change);
                 }
-            }
-            else {
+            } else {
                 throw new Error('Invalid change: ' + JSON.stringify(change));
             }
         }
@@ -198,8 +183,7 @@ export class PatchableArray<
                     put: other.put.patch(value as any),
                     afterId: other.afterId,
                 });
-            }
-            else {
+            } else {
                 this.changes.splice(otherPut, 1, {
                     put: value as Put,
                     afterId: other.afterId,
@@ -216,8 +200,7 @@ export class PatchableArray<
                 this.changes.splice(otherPatch, 1, {
                     patch: other.patch.patch(value as any),
                 });
-            }
-            else {
+            } else {
                 this.changes.splice(otherPatch, 1, {
                     patch: value,
                 });
@@ -236,8 +219,7 @@ export class PatchableArray<
             // if it had a put, remove the put but don't add a delete
             this.changes.splice(otherPut, 1);
             return;
-        }
-        else {
+        } else {
             const otherPatch = this.changes.findIndex(e => isPatch(e) && getId(e.patch) == id);
             if (otherPatch !== -1) {
                 this.changes.splice(otherPatch, 1);
@@ -275,13 +257,11 @@ export class PatchableArray<
                         }
                     }
                     newArray.splice(afterIndex + 1, 0, value);
-                }
-                else {
+                } else {
                     // maybe throw here?
                     console.warn('Could not find element with id ' + change.move);
                 }
-            }
-            else if (isPut(change)) {
+            } else if (isPut(change)) {
                 // null = inserting at the beginning
                 // not found = inserting at the end
                 let afterIndex = -1;
@@ -306,18 +286,15 @@ export class PatchableArray<
                     }
                 }
                 newArray.splice(afterIndex + 1, 0, change.put);
-            }
-            else if (isDelete(change)) {
+            } else if (isDelete(change)) {
                 // First do a delete of this value
                 const index = newArray.findIndex(e => getId(e) === change.delete);
                 if (index !== -1) {
                     newArray.splice(index, 1);
-                }
-                else {
+                } else {
                     console.warn('Could not find element with id ' + change.delete);
                 }
-            }
-            else if (isPatch(change)) {
+            } else if (isPatch(change)) {
                 // First do a delete of this value
                 const index = newArray.findIndex(e => getId(e) === getId(change.patch));
 
@@ -326,13 +303,11 @@ export class PatchableArray<
                     const value = newArray[index];
                     if (isPatchable(value)) {
                         newArray.splice(index, 1, value.patch(change.patch as any));
-                    }
-                    else {
+                    } else {
                         newArray.splice(index, 1, change.patch as Put);
                     }
                 }
-            }
-            else {
+            } else {
                 throw new Error('Invalid change: ' + JSON.stringify(change));
             }
         }
@@ -351,20 +326,17 @@ export class PatchableArray<
                             afterId: change.afterId,
                             move: encodeObject(change.move, context),
                         };
-                    }
-                    else if (isPut(change)) {
+                    } else if (isPut(change)) {
                         // First do a delete of this value
                         return {
                             afterId: change.afterId,
                             put: encodeObject(change.put, context),
                         };
-                    }
-                    else if (isDelete(change)) {
+                    } else if (isDelete(change)) {
                         return {
                             delete: change.delete,
                         };
-                    }
-                    else if (isPatch(change)) {
+                    } else if (isPatch(change)) {
                         // First do a delete of this value
                         return {
                             patch: encodeObject(change.patch, context),

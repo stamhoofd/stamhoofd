@@ -41,17 +41,17 @@ describe('NavigationController size animations', () => {
                 const hasContent = ref(false);
                 const height = ref(CONTENT_HEIGHT);
                 const setHasContent = useContentState();
-                let text = ref('Loading...')
+                let text = ref('Loading...');
 
                 setHasContent(false);
                 revealContent = async () => {
                     hasContent.value = true;
-                    text.value = 'Loaded content'
+                    text.value = 'Loaded content';
                     await nextTick();
                     setHasContent(true);
                 };
                 abruptResizeContent = async () => {
-                    text.value = 'Resized content'
+                    text.value = 'Resized content';
                     height.value = RESIZED_HEIGHT;
                     await nextTick();
                 };
@@ -175,7 +175,7 @@ function viewStyle(height: number) {
         boxSizing: 'border-box',
         height: `${height}px`,
         width: `${VIEW_WIDTH}px`,
-        border: `5px solid black`,
+        border: '5px solid black',
         background: 'white',
     };
 }
@@ -288,5 +288,5 @@ function expectMaximumHeightChange(
 }
 
 function nextFrame() {
-    return new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    return new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
 }

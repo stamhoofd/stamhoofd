@@ -24,11 +24,11 @@ You can also initiate it with multiple initial views. Only the last view will be
 
 ```typescript
 new ComponentWithProperties(NavigationController, {
-		initialComponents: [
-				new ComponentWithProperties(CartView, {}),
-				new ComponentWithProperties(CustomerView, {}),
-				new ComponentWithProperties(PaymentView, {})
-		]
+    initialComponents: [
+        new ComponentWithProperties(CartView, {}),
+        new ComponentWithProperties(CustomerView, {}),
+        new ComponentWithProperties(PaymentView, {}),
+    ],
 });
 ```
 
@@ -60,7 +60,7 @@ defineRoutes([
         show: 'detail',
         component: GroupView,
         paramsToProps: (params: { slug: string }) => {
-            const group = groups.value.find(g => g.slug === params.slug);
+            const group = groups.value.find((g) => g.slug === params.slug);
             if (!group) {
                 throw new Error('Group not found');
             }
@@ -78,14 +78,14 @@ defineRoutes([
                 },
             };
         },
-        
+
         // The default view on the right side
-        isDefault:{
+        isDefault: {
             properties: {
                 group: tree.value.getAllGroups()[0],
                 period: period.value,
             },
-        }
+        },
     },
 ]);
 ```
@@ -112,13 +112,13 @@ const membersTab = new TabBarItem({
     name: $t(`Members`),
     component: membersTableView,
 });
-    
+
 const tabBarComponent = new ComponentWithProperties(TabBarController, {
-    tabs: [startTab, membersTab]
+    tabs: [startTab, membersTab],
 });
 
 await present({
-		components: [tabBarComponent]
+    components: [tabBarComponent],
 });
 ```
 

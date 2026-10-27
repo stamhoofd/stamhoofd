@@ -71,8 +71,7 @@ export function encodeObject(obj: unknown, context: EncodeContext): PlainObject 
                     // sort keys
                     if (firstType === 'number') {
                         keys.sort((a, b) => a - b);
-                    }
-                    else {
+                    } else {
                         keys.sort((a, b) => a.localeCompare(b));
                     }
 
@@ -81,8 +80,7 @@ export function encodeObject(obj: unknown, context: EncodeContext): PlainObject 
                         encodedObj[key] = encodeObject(value, context);
                     }
                 }
-            }
-            else {
+            } else {
                 for (const [key, value] of obj) {
                     const k = encodeObject(key, context);
                     if (typeof k !== 'string' && typeof k !== 'number') {

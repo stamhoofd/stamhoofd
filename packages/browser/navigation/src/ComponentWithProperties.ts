@@ -198,8 +198,7 @@ export class ComponentWithProperties {
                 this.isKeptAlive = false;
                 ComponentWithProperties.keepAliveCounter--;
                 if (ComponentWithProperties.debug) console.log('Total components kept alive: ' + ComponentWithProperties.keepAliveCounter);
-            }
-            else {
+            } else {
                 if (ComponentWithProperties.debug) console.warn('About to mount a component that was not destroyed properly ' + this.component.name);
 
                 // Destroy the old vnode (unless keep alive), we should not reuse this one
@@ -350,8 +349,7 @@ export class ComponentWithProperties {
                 if (!promise) {
                     return false;
                 }
-            }
-            else if (promise.then && promise.catch) {
+            } else if (promise.then && promise.catch) {
                 const r = (await promise) as boolean;
                 if (!r) {
                     return false;
@@ -393,8 +391,7 @@ export class ComponentWithProperties {
 
                 // Remove reference to unmount method
                 this.unmount = null;
-            }
-            else {
+            } else {
                 console.error('No unmount function for component ' + this.vnode);
             }
             this.deleteHistoryIndex();

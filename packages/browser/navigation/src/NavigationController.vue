@@ -66,8 +66,7 @@ const NavigationController = defineComponent({
                 reactive_navigation_can_dismiss: computed(() => this.components.length > 1),
                 reactive_navigation_can_pop: false,
             };
-        }
-        else {
+        } else {
             extra = {
                 reactive_navigation_can_pop: computed(() => this.components.length > 1 || unref(this.reactive_navigation_can_pop)),
             };
@@ -172,8 +171,7 @@ const NavigationController = defineComponent({
 
             // Update property (even if not allowed, we know, but we need to remove the references)
             // this.initialComponents.splice(0, this.initialComponents.length);
-        }
-        else {
+        } else {
             if (!this.root) {
                 throw new Error('No root component provided for navigation controller');
             }
@@ -216,8 +214,7 @@ const NavigationController = defineComponent({
                 this.cachedProvides.set(newComponent.key, {
                     reactive_navigation_can_dismiss: this.components.length > 1,
                 });
-            }
-            else {
+            } else {
                 this.cachedProvides.set(newComponent.key, {
                     reactive_navigation_can_pop: this.components.length > 1 || unref(this.reactive_navigation_can_pop),
                 });
@@ -232,8 +229,7 @@ const NavigationController = defineComponent({
                     try {
                         const r = await run();
                         resolve(r);
-                    }
-                    catch (e) {
+                    } catch (e) {
                         reject(e);
                     }
                 });
@@ -356,12 +352,10 @@ const NavigationController = defineComponent({
                 if (hasContent && this.contentlessMainKey === component.key) {
                     this.contentlessMainKey = null;
                 }
-            }
-            else if (!hasContent) {
+            } else if (!hasContent) {
                 if (!hadContent && this.isSizeFrozen()) {
                     // Already handled
-                }
-                else {
+                } else {
                     // Content disappeared again before a pending resize completed. Revoke ownership
                     // immediately so that resize cannot measure or unfreeze the loading placeholder.
                     this.contentlessMainKey = component.key;
@@ -370,8 +364,7 @@ const NavigationController = defineComponent({
                         this.freezeSize();
                     }
                 }
-            }
-            else if (!hadContent) {
+            } else if (!hadContent) {
                 this.contentlessMainKey = null;
                 // Content arrived for the current main component: animate to its real height.
                 this.animateToContentHeight();
@@ -601,8 +594,7 @@ const NavigationController = defineComponent({
                     this.cancelContentAnimation();
                     this.unfreezeSize();
                     this.transitionName = 'none';
-                }
-                else {
+                } else {
                     this.transitionName = this.animationType === 'modal' ? 'modal-push' : options.reverse ? 'pop' : 'push';
                 }
 
@@ -642,26 +634,22 @@ const NavigationController = defineComponent({
                             if (lastComponent && lastComponent.hasHistoryIndex()) {
                                 HistoryManager.returnToHistoryIndex(lastComponent.historyIndex!.index - 1);
                                 forceOneAdjust = true;
-                            }
-                            else {
+                            } else {
                                 console.log('Last removed component has no history index', popped);
                                 HistoryManager.invalidateHistory();
                             }
                         }
-                    }
-                    else {
+                    } else {
                         const lastComponent = this.components[this.components.length - components.length - 1];
                         if (lastComponent && lastComponent.hasHistoryIndex()) {
                             lastComponent.returnToHistoryIndex();
                             forceOneAdjust = true;
-                        }
-                        else {
+                        } else {
                             console.log('Last visible component has no history index', lastComponent);
                             HistoryManager.invalidateHistory();
                         }
                     }
-                }
-                else {
+                } else {
                     this.components.push(...components);
                 }
 
@@ -692,8 +680,7 @@ const NavigationController = defineComponent({
                             invalid: options.invalidHistory ?? false,
                         });
                         forceOneAdjust = false;
-                    }
-                    else {
+                    } else {
                         HistoryManager.pushState(null, async (canAnimate: boolean) => {
                             if (!this.mainComponent) {
                                 console.error('Tried to pop NavigationController, but it was already unmounted');
@@ -803,8 +790,7 @@ const NavigationController = defineComponent({
                     this.cancelContentAnimation();
                     this.unfreezeSize();
                     this.transitionName = 'none';
-                }
-                else {
+                } else {
                     this.transitionName = this.animationType === 'modal' ? 'modal-pop' : 'pop';
                     this.freezeSize();
                 }

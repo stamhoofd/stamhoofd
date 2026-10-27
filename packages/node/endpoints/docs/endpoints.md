@@ -7,6 +7,7 @@ Endpoints in Stamhoofd are stored in `backend/app/<app name>/src/endpoints`
 ## Inputs
 
 An endpoint has three input options:
+
 - Request body
 
 ```typescript
@@ -155,12 +156,9 @@ export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody>
             throw Context.auth.error();
         }
 
-        return new Response(
-            await AuthenticatedStructures.userWithMembers(user),
-        );
+        return new Response(await AuthenticatedStructures.userWithMembers(user));
     }
 }
-
 ```
 
 ---
@@ -176,15 +174,15 @@ async handle(request: DecodedRequest<Params, Query, Body>) {
 				    code: "invalid_thing",
 				    message: "Please make it valid",
 					  human: $t('Maak het leesbaar'),
-					  
+
 					  // Optionally pass a field
 					  // field: 'id',
-					  
+
 					  // Optionally pass a custom status code
 					  // statusCode: 404
 		    })
     }
-    
+
     // ...
 }
 ```
@@ -243,6 +241,6 @@ All access checking methods are implemented in `backend/app/api/src/helpers/Admi
 
 ```typescript
 if (await Context.auth.canAccessMember(member)) {
-		// Do something
+    // Do something
 }
 ```

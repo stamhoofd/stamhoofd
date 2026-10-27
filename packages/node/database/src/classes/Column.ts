@@ -1,8 +1,8 @@
-import type { Decoder, EncodableObject} from '@simonbackx/simple-encoding';
+import type { Decoder, EncodableObject } from '@simonbackx/simple-encoding';
 import { EncodeMedium, encodeObject, ObjectData } from '@simonbackx/simple-encoding';
 
-import type {ColumnType} from './ColumnType.js';
-import type {DatabaseStoredValue} from './DatabaseStoredValue.js';
+import type { ColumnType } from './ColumnType.js';
+import type { DatabaseStoredValue } from './DatabaseStoredValue.js';
 
 export class Column {
     type: ColumnType;
@@ -106,8 +106,7 @@ export class Column {
                 let parsed: unknown;
                 try {
                     parsed = JSON.parse(data);
-                }
-                catch (e) {
+                } catch (e) {
                     // Syntax error. Mark this in the future.
                     console.error(e);
                     parsed = {};
@@ -128,8 +127,7 @@ export class Column {
 
                     // Fallback decoding without version (since we don't know the saved version)
                     return this.decoder.decode(new ObjectData(parsed, { version: 0, medium: EncodeMedium.Database }, this.name));
-                }
-                else {
+                } else {
                     console.warn('It is recommended to always use a decoder for JSON columns');
                 }
 

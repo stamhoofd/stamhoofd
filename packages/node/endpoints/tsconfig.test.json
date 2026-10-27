@@ -5,10 +5,7 @@
         "module": "nodenext",
         "moduleResolution": "nodenext",
         "outDir": "./dist/test",
-        "types": [
-            "node",
-            "vitest/globals"
-        ]
+        "types": ["node", "vitest/globals"]
     },
     "references": [
         // Give access to build
@@ -16,9 +13,5 @@
             "path": "./tsconfig.esm.json"
         }
     ],
-    "include": [
-        "./src/**/*.spec.ts",
-        "./src/**/*.test.ts",
-        "./tests",
-    ]
+    "include": ["./src/**/*.spec.ts", "./src/**/*.test.ts", "./tests"]
 }

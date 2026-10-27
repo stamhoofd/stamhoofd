@@ -1,16 +1,10 @@
 {
     // File used when building the package.
     "extends": "./tsconfig.base.json",
-    "include": [
-        "./*.ts",
-        "./src/**/*.ts",
-        "./src/**/*.js",
-        "./src/**/*.tsx",
-        "./src/**/*.vue"
-    ],
+    "include": ["./*.ts", "./src/**/*.ts", "./src/**/*.js", "./src/**/*.tsx", "./src/**/*.vue"],
     "exclude": [
         // Tests are excluded (only included in tsconfig.test.json)
         "src/**/*.spec.ts",
         "src/**/*.test.ts"
-    ],
+    ]
 }
