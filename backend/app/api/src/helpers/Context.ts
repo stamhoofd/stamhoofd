@@ -11,35 +11,35 @@ import { TwoFactorHelper } from './TwoFactorHelper.js';
 export const apiUserRateLimiter = new RateLimiter({
     limits: [
         {
-            limit: {
-                '': 25, // (5req/s for 5s)
-                [ApiUserRateLimits.Medium]: 10 * 5, // (10req/s for 5s)
-                [ApiUserRateLimits.High]: 25 * 5, // (100req/s for 5s)
-            },
+            limit: new Map<string, number>([
+                ['', 25], // (5req/s for 5s)
+                [ApiUserRateLimits.Medium, 10 * 5], // (10req/s for 5s)
+                [ApiUserRateLimits.High, 25 * 5], // (100req/s for 5s)
+            ]),
             duration: 5 * 1000,
         },
         {
-            limit: {
-                '': 120, // max 1req/s during 150s
-                [ApiUserRateLimits.Medium]: 240, // (2req/s for 150s)
-                [ApiUserRateLimits.High]: 480, // (4req/s for 150s)
-            },
+            limit: new Map<string, number>([
+                ['', 120], // max 1req/s during 150s
+                [ApiUserRateLimits.Medium, 240], // (2req/s for 150s)
+                [ApiUserRateLimits.High, 480], // (4req/s for 150s)
+            ]),
             duration: 120 * 1000,
         },
         {
-            limit: {
-                '': 1000, // ± 0.27 request/s sustained for an hour = 3.6s between each request
-                [ApiUserRateLimits.Medium]: 2000, // ± 0.56 request/s sustained for an hour
-                [ApiUserRateLimits.High]: 4000, // ± 1.11 request/s sustained for an hour
-            },
+            limit: new Map<string, number>([
+                ['', 1000], // ± 0.27 request/s sustained for an hour = 3.6s between each request
+                [ApiUserRateLimits.Medium, 2000], // ± 0.56 request/s sustained for an hour
+                [ApiUserRateLimits.High, 4000], // ± 1.11 request/s sustained for an hour
+            ]),
             duration: 60 * 1000 * 60,
         },
         {
-            limit: {
-                '': 2_000, // max 2000 requests per day
-                [ApiUserRateLimits.Medium]: 14_400, // max 4000 requests per day
-                [ApiUserRateLimits.High]: 18_000, // max 10 requests per minute, sustained for a full day
-            },
+            limit: new Map<string, number>([
+                ['', 2_000], // max 2000 requests per day
+                [ApiUserRateLimits.Medium, 14_400], // max 4000 requests per day
+                [ApiUserRateLimits.High, 18_000], // max 10 requests per minute, sustained for a full day
+            ]),
             duration: 24 * 60 * 1000 * 60,
         },
     ],

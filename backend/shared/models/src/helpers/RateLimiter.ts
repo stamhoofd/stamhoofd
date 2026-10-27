@@ -4,7 +4,8 @@ export class RateLimitWindow {
     start: Date = new Date();
     windows: Map<string, number> = new Map();
 
-    limit: Record<string, number>;
+    /** Category limits; the empty-string entry is the fallback for unspecified categories. */
+    limit: Map<string, number>;
 
     /**
      * in ms
@@ -12,10 +13,10 @@ export class RateLimitWindow {
     duration: number;
 
     constructor(options: {
-        limit: Record<string, number> | number;
+        limit: Map<string, number> | number;
         duration: number;
     }) {
-        this.limit = typeof options.limit === 'number' ? { '': options.limit } : options.limit;
+        this.limit = typeof options.limit === 'number' ? new Map([['', options.limit]]) : options.limit;
         this.duration = options.duration;
     }
 
@@ -29,9 +30,9 @@ export class RateLimitWindow {
 
     getLimit(category?: string) {
         if (category) {
-            return this.limit[category] ?? this.limit[''] ?? 0;
+            return this.limit.get(category) ?? this.limit.get('') ?? 0;
         }
-        return this.limit[''] ?? 0;
+        return this.limit.get('') ?? 0;
     }
 
     track(key: string, amount = 1, category?: string) {
@@ -65,7 +66,7 @@ export class RateLimiter {
     windows: RateLimitWindow[] = [];
 
     constructor(options: {
-        limits: { duration: number; limit: Record<string, number> | number }[];
+        limits: { duration: number; limit: Map<string, number> | number }[];
     }) {
         for (const limit of options.limits) {
             this.windows.push(new RateLimitWindow({
