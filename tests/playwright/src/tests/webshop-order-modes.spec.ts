@@ -152,7 +152,7 @@ test.describe('Webshop order modes @webshop-order-modes', () => {
         await page.getByTestId('add-product-button').click();
 
         const view = page.locator('.st-view').filter({ has: page.locator('.edit-product-box') }).last();
-        await expect(view.getByRole('checkbox', { name: 'Meerdere dagen' })).toBeChecked({ timeout: 15000 });
+        await expect(view.locator('label').filter({ hasText: 'Meerdere dagen' }).locator('input[type=checkbox]')).toBeChecked({ timeout: 15000 });
         await view.locator('.st-input-box').filter({ hasText: 'Naam' }).locator('input').first().fill('Late ingang');
         await view.locator('.st-input-box').filter({ hasText: 'Vanaf welk tijdstip' }).locator('input').fill('21:00');
         await view.getByTestId('save-button').click();
