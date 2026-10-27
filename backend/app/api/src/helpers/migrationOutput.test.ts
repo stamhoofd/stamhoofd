@@ -1,4 +1,4 @@
-import { logger } from '@simonbackx/simple-logging';
+import { logger } from '@node/logging';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { withMigrationOutput } from './migrationOutput.js';
 

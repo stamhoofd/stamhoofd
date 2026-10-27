@@ -352,6 +352,7 @@ pnpm stam clean metabase
 `pnpm stam test errors` and `pnpm stam test encoding` run the common library suites without MySQL.
 Networking uses `pnpm stam test common-networking`; `networking` selects the frontend service.
 `pnpm stam test database` runs the database library with managed MySQL and its fixture migrations.
+`pnpm stam test node-logging` runs the Node logging library without MySQL; `logging` still selects the Stamhoofd wrapper.
 `pnpm stam test navigation` runs both the navigation node tests and Chromium browser tests.
 The integrated libraries are private workspaces under `packages/common`,
 `packages/node`, and `packages/browser`.

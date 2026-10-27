@@ -76,7 +76,7 @@
         "@common/encoding": "workspace:*",
         "@node/endpoints": "workspace:*",
         "@common/errors": "workspace:*",
-        "@simonbackx/simple-logging": "1.0.1",
+        "@node/logging": "workspace:*",
         "@simplewebauthn/server": "13.3.3",
         "@stamhoofd/backend-env": "workspace:*",
         "@stamhoofd/backend-i18n": "workspace:*",
