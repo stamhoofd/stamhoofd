@@ -1,5 +1,21 @@
 import { CookieHelper } from './CookieHelper.js';
 
+describe('cookie dictionary isolation', () => {
+    test('absent cookies cannot resolve inherited object properties', () => {
+        const request = { headers: {} };
+        for (const name of ['constructor', '__proto__', 'prototype', 'toString']) {
+            expect(CookieHelper.getCookie(request, name)).toBeUndefined();
+        }
+    });
+
+    test('retains special cookie names as literal data', () => {
+        const request = { headers: { cookie: '__proto__=first; constructor=second; prototype=third' } };
+        expect(CookieHelper.getCookie(request, '__proto__')).toBe('first');
+        expect(CookieHelper.getCookie(request, 'constructor')).toBe('second');
+        expect(CookieHelper.getCookie(request, 'prototype')).toBe('third');
+    });
+});
+
 describe('CookieHelper', () => {
     test('parses and caches cookies without changing decoding or duplicate-name behavior', () => {
         const request = { headers: { cookie: 'session=first; name=Jane%20Doe; session=second; empty=' } };

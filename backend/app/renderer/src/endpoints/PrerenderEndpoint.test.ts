@@ -5,6 +5,24 @@ import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import fs from 'fs/promises';
 import { TrustedIPWhitelist } from '../classes/TrustedIPWhitelist.js';
 
+describe('cleanHeaders dictionary isolation', () => {
+    test('preserves special response header names without mutating the result prototype', () => {
+        const input = JSON.parse('{"__proto__":"first","constructor":"second","prototype":"third"}');
+        const output = PrerenderEndpoint.cleanHeaders(input);
+        expect(Object.getPrototypeOf(output)).toBe(Object.prototype);
+        expect(Object.getOwnPropertyDescriptor(output, '__proto__')?.value).toBe('first');
+        expect(output).toEqual(input);
+    });
+
+    test('rejects structured values instead of treating them as header prototype state', () => {
+        const input = JSON.parse('{"__proto__":{"location":"https://untrusted.example"}}');
+        const output = PrerenderEndpoint.cleanHeaders(input);
+        expect(Object.getPrototypeOf(output)).toBe(Object.prototype);
+        expect(output).toEqual({});
+        expect(output.location).toBeUndefined();
+    });
+});
+
 async function fileExists(path: string): Promise<boolean> {
     try {
         await fs.access(path, fs.constants.F_OK);

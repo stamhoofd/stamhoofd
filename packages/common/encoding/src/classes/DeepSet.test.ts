@@ -9,7 +9,7 @@ import { MapDecoder } from '../structs/MapDecoder.js';
 import StringDecoder from '../structs/StringDecoder.js';
 import { AutoEncoder } from './AutoEncoder.js';
 import { ObjectData } from './ObjectData.js';
-import { isProxy, reactive } from 'vue';
+import { isProxy, reactive, watchEffect } from 'vue';
 
 class Dog extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -34,6 +34,28 @@ class Cat extends AutoEncoder {
 }
 
 describe('DeepSet', () => {
+    it('notifies reactive observers and synchronizes wrapped container references', () => {
+        const base = reactive({ nested: { name: 'before' }, items: ['before'], lookup: new Map([['key', 'before']]) });
+        const references = { nested: base.nested, items: base.items, lookup: base.lookup };
+        const source = { nested: { name: 'after' }, items: ['after'], lookup: new Map([['key', 'after']]) };
+        let observed: string[] = [];
+        const stop = watchEffect(() => {
+            observed = [base.nested.name, base.items.join(','), base.lookup.get('key') ?? ''];
+        }, { flush: 'sync' });
+        try {
+            deepSet(base, source);
+            expect(observed).toEqual(['after', 'after', 'after']);
+            expect(base.nested).toBe(references.nested);
+            expect(base.items).toBe(references.items);
+            expect(base.lookup).toBe(references.lookup);
+            expect(source.nested).toBe(references.nested);
+            expect(source.items).toBe(references.items);
+            expect(source.lookup).toBe(references.lookup);
+        } finally {
+            stop();
+        }
+    });
+
     it('Reuses references to objects, but updates their data', () => {
         const babyCat = new Cat();
         babyCat.id = '1';
