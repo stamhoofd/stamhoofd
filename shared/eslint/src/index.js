@@ -7,6 +7,8 @@ import tseslint from 'typescript-eslint';
 // Configs
 import vitest from '@vitest/eslint-plugin';
 import regexpPlugin from 'eslint-plugin-regexp';
+import securityPlugin from 'eslint-plugin-security';
+import unicornPlugin from 'eslint-plugin-unicorn';
 import defaultRules from './configs/default.js';
 import frontend from './configs/frontend.js';
 import node from './configs/node.js';
@@ -33,6 +35,15 @@ const stamhoofdPlugin = {
 const baseRules = [
     ...defaultRules,
     regexpPlugin.configs.recommended,
+    securityPlugin.configs.recommended,
+    {
+        plugins: {
+            unicorn: unicornPlugin,
+        },
+        rules: {
+            'unicorn/no-unsafe-json-serialization': 'error',
+        },
+    },
     {
         settings: {
             'import/parsers': {
