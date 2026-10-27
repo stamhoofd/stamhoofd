@@ -1,0 +1,19 @@
+{
+    // File used by the editor.
+    "extends": "./tsconfig.base.json",
+    "compilerOptions": {
+        "outDir": "dist"
+    },
+    "files": [], // intentionally empty
+    "include": [
+        "./index.ts",
+        "./tsdown.config.ts",
+        "./src/**/*.ts",
+        "./src/**/*",
+    ],
+    "exclude": [
+        // Tests are excluded (only included in tsconfig.test.json)
+        "src/**/*.spec.ts",
+        "src/**/*.test.ts"
+    ]
+}

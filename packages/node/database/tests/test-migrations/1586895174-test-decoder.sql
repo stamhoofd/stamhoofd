@@ -1,0 +1,1 @@
+ALTER TABLE `testModels` ADD COLUMN `testDecoder` json NOT NULL COMMENT '';
