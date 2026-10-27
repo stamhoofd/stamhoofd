@@ -176,7 +176,7 @@
                             {{ $t('%Ph') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('%Pi') }}
+                            {{ $t('Tarieven en keuzeopties bewerken') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -220,7 +220,7 @@
                             <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ preview.meta.isRegistrations ? $t('Inschrijvingsformulier') : $t('Bestelformulier') }}
+                            {{ $t('Contactgegevens') }}
                         </h2>
                         <p class="style-description">
                             {{ preview.meta.isRegistrations ? $t('Welke gegevens en vragen iemand invult bij het inschrijven.') : $t('Welke gegevens en vragen bestellers invullen bij het bestellen.') }}
@@ -291,7 +291,8 @@
                     </STListItem>
                 </STList>
 
-                <hr><h2>{{ $t('%ty') }}</h2>
+                <hr>
+                <h2>{{ $t('%ty') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EditPage)">
@@ -355,7 +356,8 @@
                     </STListItem>
                 </STList>
 
-                <hr><h2>{{ $t('%16X') }}</h2>
+                <hr>
+                <h2>{{ $t('%16X') }}</h2>
 
                 <STList>
                     <STListItem v-if="isOpen" :selectable="true" @click="closeWebshop()">
@@ -582,7 +584,6 @@ defineRoute({
 
 defineRoute({
     url: Routes.EditPage,
-    present: 'popup',
     component: async () => (await import('./edit/EditWebshopPageView.vue')).default,
     defaultProperties: loadWebshopProperties,
 });
@@ -603,7 +604,6 @@ defineRoute({
 
 defineRoute({
     url: Routes.EditProducts,
-    present: 'popup',
     component: async () => (await import('./edit/EditWebshopProductsView.vue')).default,
     defaultProperties: loadWebshopProperties,
 });

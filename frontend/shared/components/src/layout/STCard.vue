@@ -162,6 +162,18 @@ const elementName = computed(() => props.selectable ? 'button' : 'div');
         > .button {
             margin-top: 10px;
         }
+
+        // Parts of a form (e.g. OptionMenuBox) start with a line to separate them from what comes before, which is not needed at the top of the card
+        > hr:first-child,
+        > .container:first-child > hr:first-child,
+        > .st-errors-default:first-child + hr,
+        > .st-errors-default:first-child + .container > hr:first-child {
+            display: none;
+
+            + h2, + h3, + .container > h2:first-child, + .container > h3:first-child {
+                margin-top: 0;
+            }
+        }
     }
 
     .st-card-header + .st-card-body {

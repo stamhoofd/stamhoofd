@@ -469,6 +469,12 @@
         letter-spacing: normal;
     }
 
+    &.small {
+        font-size: 10.5px;
+        letter-spacing: normal;
+        gap: 2px;
+    }
+
     &.warn {
         color: $color-warning-dark;
         background: $color-warning-background;
@@ -1271,6 +1277,14 @@
 
             + p:not([class]), + p.style-description {
                 @extend %style-description-block;
+
+                + h2, + .st-errors-default + h2 {
+                    padding-top:  20px;
+                }
+            }
+
+            + h2, + .st-errors-default + h2 {
+                padding-top:  20px !important;
             }
         }
 
@@ -1279,6 +1293,14 @@
 
             + p:not([class]), + p.style-description {
                 @extend %style-description-block;
+
+                + h2 , + .st-errors-default + h2 {
+                    padding-top: 20px;
+                }
+            }
+
+            + h2 , + .st-errors-default + h2 {
+                padding-top:  20px;
             }
         }
 

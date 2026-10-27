@@ -3,7 +3,7 @@
     <div v-else class="st-view background category-view">
         <STNavigationBar :title="title" />
         <main>
-            <h1 class="style-navigation-title">
+            <h1 class="larger">
                 {{ title }}
             </h1>
             <STList>

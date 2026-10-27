@@ -3,7 +3,7 @@
         <STNavigationBar :title="$t('%1Wp')" />
 
         <main>
-            <h1 class="style-navigation-title">
+            <h1 class="larger">
                 {{ $t('%1Wp') }}
             </h1>
             <p class="style-description-block">

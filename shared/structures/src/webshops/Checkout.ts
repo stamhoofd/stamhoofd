@@ -571,10 +571,9 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         this.syncCustomerFromCartItem();
 
         if (user) {
-            if (user.firstName) {
+            // An account without a full name fills it in during the checkout instead
+            if (user.firstName && user.lastName) {
                 this.customer.firstName = user.firstName;
-            }
-            if (user.lastName) {
                 this.customer.lastName = user.lastName;
             }
             this.customer.email = user.email;
@@ -680,6 +679,16 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
                 }
             }
         }
+    }
+
+    /**
+     * A copy with the items with the same code combined (see Cart.grouped), with its prices calculated again
+     */
+    withGroupedItems(webshop: Webshop): Checkout {
+        const checkout = this.clone();
+        checkout.cart = checkout.cart.grouped();
+        checkout.update(webshop);
+        return checkout;
     }
 
     update(webshop: Webshop) {

@@ -1,6 +1,6 @@
 <template>
     <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save">
-        <h1 class="style-navigation-title">
+        <h1 class="larger">
             {{ title }}
         </h1>
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -34,17 +34,20 @@
         </p>
 
         <div v-for="category of recordCategories" :key="category.id" class="container">
-            <hr><FillRecordCategoryBox :category="category" :value="patched" :validator="errors.validator" :level="2" :all-optional="true" :force-mark-reviewed="false" @patch="patchAnswers" />
+            <hr>
+            <FillRecordCategoryBox :category="category" :value="patched" :validator="errors.validator" :level="2" :all-optional="true" :force-mark-reviewed="false" @patch="patchAnswers" />
         </div>
 
-        <hr><h2>{{ $t('%3G') }}</h2>
+        <hr>
+        <h2>{{ $t('%3G') }}</h2>
         <STList>
             <SelectOrganizationTagRow v-for="tag in rootTags.filter(isVisible)" :key="tag.id" :organization="patched" :tag="tag" :lock-value="canEditTags ? null : isSelected(tag)" @patch:organization="addPatch" />
         </STList>
 
         <div v-for="tag in allTagsWithChildren.filter(isVisible)" :key="tag.id" class="container">
             <JumpToContainer :visible="isSelected(tag)">
-                <hr><h2>{{ $t('%3G') }} → {{ tag.name }}</h2>
+                <hr>
+                <h2>{{ $t('%3G') }} → {{ tag.name }}</h2>
                 <STList>
                     <SelectOrganizationTagRow v-for="childTag in tagIdsToTags(tag.childTags).filter(isVisible)" :key="childTag.id" :organization="patched" :tag="childTag" :lock-value="canEditTags ? null : isSelected(childTag)" @patch:organization="addPatch" />
                 </STList>
@@ -52,7 +55,8 @@
         </div>
 
         <template v-if="auth.hasFullPlatformAccess()">
-            <hr><h2>{{ $t('%1H0') }}</h2>
+            <hr>
+            <h2>{{ $t('%1H0') }}</h2>
 
             <STList>
                 <CheckboxListItem v-model="active" :label="$t('%1H0')" :description="$t(`%Gj`)" />
@@ -169,8 +173,7 @@ const visibleTagIds = computed(() => {
     if (props.isNew) {
         const managed = allTags.filter(tag => auth.platformPermissions?.hasResourceAccessRight(PermissionsResourceType.OrganizationTags, tag.id, AccessRight.PlatformCreateOrganizations)).map(tag => tag.id);
         tagIds = [...managed, ...managed.flatMap(id => TagHelper.getAllDescendants(id, { allTags }))];
-    }
-    else {
+    } else {
         const accessible = auth.getPlatformAccessibleOrganizationTags(PermissionLevel.Read);
         if (accessible === 'all') {
             return null;
@@ -228,8 +231,7 @@ async function save() {
         await context.value.fetchPlatform();
 
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 

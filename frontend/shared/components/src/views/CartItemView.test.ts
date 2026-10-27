@@ -1,4 +1,4 @@
-import { CartItem, Checkout, Product, ProductPrice, Webshop, WebshopMetaData, WebshopOrderMode } from '@stamhoofd/structures';
+import { CartItem, Checkout, Product, ProductDateRange, ProductPrice, ProductType, Webshop, WebshopMetaData, WebshopOrderMode } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { expect, test, vi } from 'vitest';
 import { render } from 'vitest-browser-vue';
@@ -38,6 +38,8 @@ test('live editing stops saving when the item no longer changes, although saving
     const product = Product.create({
         name: 'Ticket',
         prices: [ProductPrice.create({ name: 'Volwassen', price: 1000 }), ProductPrice.create({ name: 'Kind', price: 500 })],
+        // Like the existing webshops that order one at a time: the amount can still be chosen
+        allowMultiple: true,
     });
     const webshop = Webshop.create({ products: [product], meta: WebshopMetaData.create({ orderMode: WebshopOrderMode.Single }) });
 
@@ -66,7 +68,8 @@ test('live editing stops saving when the item no longer changes, although saving
 test('live editing only stores UiTPAS numbers on the item while a UiTPAS price is selected', async () => {
     const basePrice = ProductPrice.create({ name: 'Volwassen', price: 1000 });
     const uitpasPrice = ProductPrice.create({ name: 'UiTPAS', price: 250, uitpasBaseProductPriceId: basePrice.id });
-    const product = Product.create({ name: 'Ticket', prices: [basePrice, uitpasPrice] });
+    // Like the existing webshops that order one at a time: the amount can still be chosen
+    const product = Product.create({ name: 'Ticket', prices: [basePrice, uitpasPrice], allowMultiple: true });
     const webshop = Webshop.create({ products: [product], meta: WebshopMetaData.create({ orderMode: WebshopOrderMode.Single }) });
 
     const checkout = reactive(Checkout.create({})) as Checkout;
@@ -86,4 +89,16 @@ test('live editing only stores UiTPAS numbers on the item while a UiTPAS price i
 
     cartItem.productPrice = basePrice.clone();
     await vi.waitFor(() => expect(cartItem.uitpasNumbers).toHaveLength(0));
+});
+
+test('a ticket without a location still shows its date', async () => {
+    const dateRange = ProductDateRange.create({ startDate: new Date(2026, 10, 14, 20), endDate: new Date(2026, 10, 14, 23) });
+    const product = Product.create({ name: 'Ticket', type: ProductType.Ticket, dateRange, location: null, prices: [ProductPrice.create({ price: 1000 })] });
+    const webshop = Webshop.create({ products: [product], meta: WebshopMetaData.create({ orderMode: WebshopOrderMode.Bulk }) });
+    const checkout = Checkout.create({});
+    const cartItem = CartItem.createDefault(product, checkout.cart, webshop, { admin: false });
+
+    const screen = renderCartItemView({ cartItem, checkout, webshop, saveHandler: vi.fn(), embedded: true });
+
+    await expect.element(screen.getByText(Formatter.capitalizeFirstLetter(dateRange.toString()))).toBeVisible();
 });

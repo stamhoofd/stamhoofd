@@ -1,84 +1,131 @@
 <template>
-    <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
-        <h1 class="style-navigation-title">
-            {{ viewTitle }}
-        </h1>
-        <p>{{ description }}</p>
-        <STErrorsDefault :error-box="errors.errorBox" />
+    <PreviewPanel v-model:wide="previewWide">
+        <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
+            <!-- The preview only fits next to the settings on large screens -->
+            <template v-if="showPreview && !previewWide" #navigation-buttons>
+                <button v-tooltip="$t('%jH')" class="button icon eye" type="button" data-testid="webshop-preview-button" @click="openPreview" />
+            </template>
+            <h1 class="larger">
+                {{ viewTitle }}
+            </h1>
+            <p v-if="!modernWebshopEnabled">
+                {{ description }}
+            </p>
+            <STErrorsDefault :error-box="errors.errorBox" />
 
-        <template v-if="webshop.categories.length > 0">
-            <STList v-model="draggableCategories" :draggable="true">
-                <template #item="{item: category}">
-                    <CategoryRow :category="category" :webshop="webshop" @patch="addPatch($event)" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)" />
+            <template v-if="modernWebshopEnabled">
+                <h2>{{ $t('Bestelwijze') }}</h2>
+                <p>
+                    {{ $t('Kies hoe bezoekers artikels selecteren en afrekenen.') }}
+                </p>
+
+                <OrderModeInput v-model="orderMode" :meta="webshop.meta" :show-single="showSingleOrderMode" />
+
+                <hr>
+                <template v-if="formProduct">
+                    <EditProductBox :key="formProduct.id" :product="formProduct" :webshop="webshop" :is-new="false" :form-mode="true" :error-box="errors.errorBox" :validator="errors.validator" @patch:product="addProductPatch" @patch:webshop="addPatch" />
+
+                    <hr>
+                    <p>
+                        <button class="button text" type="button" data-testid="add-product-button" @click="addProduct">
+                            <span class="icon add" />
+                            <span>{{ isTickets ? $t('%Rf') : $t('Product toevoegen') }}</span>
+                        </button>
+                    </p>
                 </template>
-            </STList>
-        </template>
-
-        <template v-else-if="webshop.products.length > 0">
-            <STList v-model="draggableProducts" :draggable="true">
-                <template #item="{item: product}">
-                    <ProductRow :product="product" :webshop="webshop" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
+                <template v-else>
+                    <h2>{{ isTickets ? $t('%1AU') : $t('%Rv') }}</h2>
+                    <p>{{ description }}</p>
                 </template>
-            </STList>
-        </template>
+            </template>
 
-        <p v-if="webshop.categories.length === 0">
-            <button class="button text" type="button" @click="addProduct">
-                <span class="icon add" />
-                <span v-if="isTickets">{{ $t('%Rf') }}</span>
-                <span v-else>{{ $t('%Rg') }}</span>
-            </button>
-        </p>
+            <template v-if="!formProduct && webshop.categories.length > 0">
+                <STList v-model="draggableCategories" :draggable="true">
+                    <template #item="{item: category}">
+                        <CategoryRow :category="category" :webshop="webshop" @patch="addPatch($event)" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)" />
+                    </template>
+                </STList>
+            </template>
 
-        <p>
-            <button class="button text" type="button" @click="addCategory">
-                <span class="icon add" />
-                <span v-if="webshop.categories.length === 0 && webshop.products.length > 0">{{ $t('%LO') }}</span>
-                <span v-else>{{ $t('%Rh') }}</span>
-            </button>
-        </p>
+            <template v-else-if="!formProduct && webshop.products.length > 0">
+                <STList v-model="draggableProducts" :draggable="true">
+                    <template #item="{item: product}">
+                        <ProductRow :product="product" :webshop="webshop" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
+                    </template>
+                </STList>
+            </template>
 
-        <template v-if="webshop.canEnableCart">
-            <hr><h2>{{ $t('%1DQ') }}</h2>
-            <p>
-                {{ $t('%Ri') }}
+            <p v-if="!formProduct && webshop.categories.length === 0">
+                <button class="button text" type="button" data-testid="add-product-button" @click="addProduct">
+                    <span class="icon add" />
+                    <span v-if="isTickets">{{ $t('%Rf') }}</span>
+                    <span v-else>{{ $t('%Rg') }}</span>
+                </button>
             </p>
 
-            <STList>
-                <STListItem :selectable="true" element-name="label" class="left-center">
-                    <template #left>
-                        <Checkbox v-model="cartEnabled" />
-                    </template>
-                    <h3 class="style-title-list">
-                        {{ $t('%Rj') }}
-                    </h3>
-                </STListItem>
-            </STList>
+            <p v-if="!formProduct">
+                <button class="button text" type="button" @click="addCategory">
+                    <span class="icon add" />
+                    <span v-if="webshop.categories.length === 0 && webshop.products.length > 0">{{ $t('%LO') }}</span>
+                    <span v-else>{{ $t('%Rh') }}</span>
+                </button>
+            </p>
+
+            <template v-if="!modernWebshopEnabled">
+                <hr>
+                <h2>{{ $t('%1DQ') }}</h2>
+                <p>
+                    {{ $t('%Ri') }}
+                </p>
+
+                <STList>
+                    <STListItem :selectable="true" element-name="label" class="left-center">
+                        <template #left>
+                            <Checkbox v-model="cartEnabled" />
+                        </template>
+                        <h3 class="style-title-list">
+                            {{ $t('%Rj') }}
+                        </h3>
+                    </STListItem>
+                </STList>
+            </template>
+        </SaveView>
+
+        <template v-if="showPreview" #preview>
+            <WebshopPreviewCard :webshop="webshop" />
         </template>
-    </SaveView>
+    </PreviewPanel>
 </template>
 
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@common/encoding';
-import { usePresent } from '@browser/navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+import { useFeatureFlagComputed } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import PreviewPanel from '@stamhoofd/components/layout/PreviewPanel.vue';
 import { Category, PrivateWebshop, Product, ProductType, WebshopMetaData, WebshopOrderMode, WebshopTicketType } from '@stamhoofd/structures';
 import CategoryRow from './categories/CategoryRow.vue';
+import OrderModeInput from './OrderModeInput.vue';
+import { usesSeatingPlan } from './orderModeOptions';
+import EditProductBox from './products/EditProductBox.vue';
 import ProductRow from './products/ProductRow.vue';
+import { getSingleFormProduct } from './singleForm';
 import type { UseEditWebshopProps } from './useEditWebshop';
 import { useEditWebshop } from './useEditWebshop';
-import { computed } from 'vue';
+import WebshopPreviewCard from './WebshopPreviewCard.vue';
+import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
+import { computed, ref } from 'vue';
 
 const props = defineProps<UseEditWebshopProps>();
 
 const present = usePresent();
 
-const { webshop, addPatch, errors, saving, save, hasChanges, shouldNavigateAway } = useEditWebshop({
+const { webshop, originalWebshop, addPatch, errors, saving, save, hasChanges, shouldNavigateAway } = useEditWebshop({
     getProps: () => props,
 });
 
 const description = computed(() => {
-    return webshop.value.meta.ticketType === WebshopTicketType.Tickets ? $t('%1Ov') : $t('%1Oq');
+    return webshop.value.meta.ticketType === WebshopTicketType.Tickets ? $t('Maak een apart ticket per voorstelling, evenement of drankkaart. Verschillende prijzen voor hetzelfde evenement (bv. volwassenen en kinderen) stel je best in als tarieven binnen één ticket.') : $t('%1Oq');
 });
 
 const viewTitle = computed(() => {
@@ -96,19 +143,70 @@ const viewTitle = computed(() => {
 
 const isTickets = computed(() => webshop.value.meta.ticketType === WebshopTicketType.Tickets);
 
+const modernWebshopEnabled = useFeatureFlagComputed('modern-webshop');
+
+// Not in the app: the webshop in the preview only talks to the dashboard on the web
+const showPreview = computed(() => modernWebshopEnabled.value && !AppManager.shared.isNative);
+const previewWide = ref(false);
+
+function openPreview() {
+    present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: AsyncComponent(() => import('./WebshopFullPreviewView.vue'), {
+                    webshop: webshop.value,
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
+}
+
+function setOrderMode(orderMode: WebshopOrderMode) {
+    addPatch(PrivateWebshop.patch({ meta: WebshopMetaData.patch({ orderMode }) }));
+}
+
 const cartEnabled = computed({
-    get: () => webshop.value.meta.orderMode === WebshopOrderMode.Cart,
-    set: (cartEnabled: boolean) => {
-        const patch = WebshopMetaData.patch({ orderMode: cartEnabled ? WebshopOrderMode.Cart : WebshopOrderMode.Single });
-        addPatch(PrivateWebshop.patch({ meta: patch }));
+    get: () => webshop.value.shouldEnableCart,
+    set: (cartEnabled: boolean) => setOrderMode(cartEnabled ? WebshopOrderMode.Cart : WebshopOrderMode.Single),
+});
+
+const orderMode = computed({
+    get: () => webshop.value.meta.orderMode,
+    set: (orderMode: WebshopOrderMode) => {
+        if (orderMode === WebshopOrderMode.Single && webshop.value.products.length === 0) {
+            // One at a time starts with a single form
+            const patch = PrivateWebshop.patch({ meta: WebshopMetaData.patch({ orderMode }) });
+            const product = createProduct();
+            product.name = webshop.value.meta.name;
+            patch.products.addPut(product);
+            addPatch(patch);
+            return;
+        }
+        setOrderMode(orderMode);
     },
 });
 
-function addProduct() {
-    const product = Product.create({
+// Not with a seating plan, unless the webshop already orders one at a time
+const showSingleOrderMode = computed(() => !usesSeatingPlan(webshop.value) || originalWebshop.meta.orderMode === WebshopOrderMode.Single || webshop.value.meta.orderMode === WebshopOrderMode.Single);
+
+const formProduct = computed(() => modernWebshopEnabled.value ? getSingleFormProduct(webshop.value) : null);
+
+function addProductPatch(patch: AutoEncoderPatchType<Product>) {
+    const p = PrivateWebshop.patch({});
+    p.products.addPatch(patch);
+    addPatch(p);
+}
+
+function createProduct() {
+    return Product.create({
         type: webshop.value.meta.ticketType === WebshopTicketType.Tickets ? ProductType.Ticket : ProductType.Product,
         showStockBelow: null,
     });
+}
+
+function addProduct() {
+    const product = createProduct();
     const p = PrivateWebshop.patch({});
     p.products.addPut(product);
 

@@ -66,6 +66,8 @@ export class ColorHelper {
     }
 
     static setDarkMode(darkMode: DarkMode) {
+        // Can change, e.g. in a preview of a webshop
+        document.body.classList.remove('dark', 'light');
         if (darkMode === DarkMode.On) {
             document.body.classList.add('dark');
         }

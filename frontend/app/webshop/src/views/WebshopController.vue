@@ -27,6 +27,7 @@ import type { ComponentWithProperties, NavigationController } from '@browser/nav
 import { FramedComponent } from '@browser/navigation';
 import { getWebshopSquareLogo } from '@stamhoofd/components/helpers/webshopIdentity.ts';
 import { useProvidePreviewColumnWidths } from '@stamhoofd/components/layout/usePreviewPanel.ts';
+import { WebshopOrderMode } from '@stamhoofd/structures';
 import { computed, onMounted, shallowRef } from 'vue';
 
 import { useProvideCheckoutContinue } from '../composables/useCheckoutContinue';
@@ -37,6 +38,7 @@ import { CheckoutStepsManager } from './checkout/CheckoutStepsManager';
 import { getCartComponent } from './checkout/getCartComponent';
 import WebshopNavigationBar from './components/WebshopNavigationBar.vue';
 import { isOrderComponent } from './orders/getOrderComponent';
+import { getVisibleProducts } from './products/visibleProducts';
 
 /**
  * Renders the webshop's navigation bar as an overlay on a full-screen navigation controller with the webshop as root.
@@ -67,6 +69,9 @@ const showingOrder = computed(() => {
     return !!top && isOrderComponent(top);
 });
 
+// The webshop itself has no url: marks it as a step in the progress
+const rootStepUrl = '';
+
 const progress = computed(() => {
     const url = navigationController.value?.components.at(-1)?.provide.reactive_navigation_url?.url;
     if (!url) {
@@ -79,9 +84,17 @@ const progress = computed(() => {
     if (cartEnabled.value || url === 'cart') {
         steps.unshift({ title: $t('%1DQ'), url: 'cart' });
     } else if (navigationController.value?.components.some(c => c.provide.reactive_navigation_url?.url === CheckoutStepsManager.productUrl)) {
-        // Opened with the order button of a webshop with one product: the product form is the first step
-        const product = webshopManager.webshop.products.find(p => !p.hidden);
+        // Opened with the order button in single mode: the product form is the first step. In single mode the cart only
+        // holds the item of that product. With several products the visitor picked it on the webshop itself.
+        const products = getVisibleProducts(webshopManager.webshop);
+        const product = checkoutManager.cart.items[0]?.product ?? products[0];
         steps.unshift({ title: product?.name ?? $t('%1DQ'), url: CheckoutStepsManager.productUrl });
+        if (products.length > 1) {
+            steps.unshift({ title: $t('%TE'), url: rootStepUrl });
+        }
+    } else if (webshopManager.webshop.orderMode === WebshopOrderMode.Bulk || getVisibleProducts(webshopManager.webshop).length > 1) {
+        // The product list on the webshop itself is the first step (single mode: the chosen product had nothing to choose)
+        steps.unshift({ title: $t('%TE'), url: rootStepUrl });
     }
     const current = steps.findIndex(s => s.url === url);
     if (current === -1) {
@@ -110,7 +123,12 @@ function selectStep(index: number) {
         continueCheckout.value?.();
         return;
     }
-    CheckoutStepsManager.popToUrl(navigationController.value, progress.value.steps[index].url).catch(console.error);
+    const url = progress.value.steps[index].url;
+    if (url === rootStepUrl) {
+        navigationController.value?.popToRoot().catch(console.error);
+        return;
+    }
+    CheckoutStepsManager.popToUrl(navigationController.value, url).catch(console.error);
 }
 
 function backToWebshop() {

@@ -47,6 +47,11 @@
         overflow: clip;
 
         --st-horizontal-padding: var(--split-view-detail-horizontal-padding, 40px);
+
+        // Same as the views in the detail (see st-view.scss), so wrappers around those views (e.g. PreviewPanel) use the same width
+        @media (min-width: 1300px) {
+            --st-view-max-width: 900px;
+        }
     }
 
     &[data-has-detail="true"] {

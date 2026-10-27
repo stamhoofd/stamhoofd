@@ -43,9 +43,9 @@ import { SimpleError } from '@common/errors';
 import { useCanDismiss, useDismiss } from '@browser/navigation';
 import type { Cart, CartItem, ReservedSeat, Webshop } from '@stamhoofd/structures';
 import { CartReservedSeat } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 
+import { getSeatSelectionDescription, getSeatSelectionTitle } from '#helpers/seatSelectionText.ts';
 import SeatSelectionBox from './SeatSelectionBox.vue';
 
 const props = withDefaults(defineProps<{
@@ -69,22 +69,11 @@ const canDismiss = useCanDismiss();
 const errorBox = ref<ErrorBox | null>(null);
 const amount = computed(() => props.cartItem.amount);
 const selectedAmount = computed(() => props.cartItem.seats.length);
-const remainingAmount = computed(() => amount.value - selectedAmount.value);
 const seatingPlan = computed(() => props.webshop.meta.seatingPlans.find(p => p.id === props.cartItem.product.seatingPlanId));
 const cartEnabled = computed(() => props.webshop.shouldEnableCart);
 
-const title = computed(() => {
-    if (remainingAmount.value === 0) {
-        return $t(`%12X`);
-    }
-
-    if (remainingAmount.value === amount.value) {
-        return `Kies ${Formatter.pluralText(remainingAmount.value, $t(`%12Y`), $t(`%UL`))}`;
-    }
-    return `Kies nog ${Formatter.pluralText(remainingAmount.value, $t(`%12Y`), $t(`%UL`))}`;
-});
-
-const description = computed(() => $t(`%12Z`) + ' ' + Formatter.pluralText(amount.value, $t(`%12Y`), $t(`%UL`)) + ' ' + $t(`%12a`));
+const title = computed(() => getSeatSelectionTitle(amount.value, selectedAmount.value));
+const description = computed(() => getSeatSelectionDescription(amount.value));
 
 function setSeats(seats: ReservedSeat[]) {
     props.cartItem.seats = seats.map(s => CartReservedSeat.create(s));

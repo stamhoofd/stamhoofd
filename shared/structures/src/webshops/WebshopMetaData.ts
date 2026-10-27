@@ -432,11 +432,19 @@ export function getWebshopTypeName(type: WebshopType): string {
     }
 }
 
-export function getWebshopOrderModeName(mode: WebshopOrderMode): string {
+export function getWebshopOrderModeName(mode: WebshopOrderMode, meta: WebshopMetaData): string {
     switch (mode) {
         case WebshopOrderMode.Cart: return $t('%1DQ');
-        case WebshopOrderMode.Single: return $t('%Zxs');
-        case WebshopOrderMode.Bulk: return $t('%Zxt');
+        case WebshopOrderMode.Single: {
+            if (meta.isTicketBased) {
+                return $t('Eén ticket per bestelling');
+            }
+            if (meta.isRegistrations) {
+                return $t('Eén inschrijving per bestelling');
+            }
+            return $t('Eén artikel per bestelling');
+        }
+        case WebshopOrderMode.Bulk: return $t('Aantallen kiezen');
     }
 }
 
@@ -591,7 +599,6 @@ export class WebshopMetaData extends AutoEncoder {
     customerSettings = CustomerSettings.create({
         name: CustomerFieldRequirement.Required,
         email: CustomerFieldRequirement.Required,
-        phone: CustomerFieldRequirement.Required,
     });
 
     @field({ decoder: BooleanDecoder, version: 242 })

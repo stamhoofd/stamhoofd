@@ -1,5 +1,6 @@
 import type { Decoder} from '@common/encoding';
 import { ArrayDecoder, ObjectData, VersionBox, VersionBoxDecoder } from '@common/encoding'
+import type { SimpleError, SimpleErrors } from '@common/errors';
 import { Checkout, DiscountCode, Version } from '@stamhoofd/structures'
 
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
@@ -10,6 +11,11 @@ import type { WebshopManager } from './WebshopManager'
  */
 export class CheckoutManager {
     private _checkout: Checkout | null = null
+
+    /**
+     * Cart error from the backend that the bulk details step should show per item after navigating back to it
+     */
+    pendingCartError: SimpleError | SimpleErrors | null = null
 
     $webshopManager: WebshopManager
 
@@ -90,6 +96,10 @@ export class CheckoutManager {
     }
 
     loadCheckout() {
+        // A preview starts empty and doesn't touch the cart of the visitor
+        if (this.$webshopManager.preview) {
+            return new Checkout()
+        }
         try {
             const json = localStorage.getItem(this.$webshopManager.webshop.id+'-checkout')
             if (json) {
@@ -107,6 +117,9 @@ export class CheckoutManager {
     saveCheckout() {
         try {
             this.checkout.update(this.$webshopManager.webshop)
+            if (this.$webshopManager.preview) {
+                return
+            }
             const data = new VersionBox(this.checkout).encode({ version: Version })
             const json = JSON.stringify(data)
             localStorage.setItem(this.$webshopManager.webshop.id+'-checkout', json)

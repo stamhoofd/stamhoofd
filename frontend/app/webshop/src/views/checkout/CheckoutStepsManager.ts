@@ -4,11 +4,12 @@ import { ComponentWithProperties, ReactiveUrl } from '@browser/navigation';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import type { CheckoutMethod, OrganizationMetaData, PatchAnswers, Webshop } from '@stamhoofd/structures';
-import { Checkout, CheckoutMethodType } from '@stamhoofd/structures';
+import type { CartItem, CheckoutMethod, OrganizationMetaData, PatchAnswers, Product, Webshop } from '@stamhoofd/structures';
+import { Checkout, CheckoutMethodType, WebshopOrderMode } from '@stamhoofd/structures';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 import { customerFieldKeys } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 import { Formatter } from '@stamhoofd/utility';
+import { getUnitName } from '@stamhoofd/components/helpers/webshopWording.ts';
 
 import { patchObject } from '@common/encoding';
 import type { CheckoutManager } from '../../classes/CheckoutManager';
@@ -19,6 +20,17 @@ export enum CheckoutStepType {
     Customer = 'Customer',
     Time = 'Time',
     Payment = 'Payment',
+    Details = 'Details',
+}
+
+/**
+ * Whether the bulk details step needs input for this item
+ */
+export function cartItemNeedsDetails(item: CartItem): boolean {
+    return item.product.optionMenus.length > 0
+        || item.product.customFields.length > 0
+        || item.product.enableCustomer
+        || item.productPrice.uitpasBaseProductPriceId !== null;
 }
 
 export class CheckoutStep {
@@ -74,12 +86,68 @@ export class CheckoutStepsManager {
         return new CheckoutStepsManager($checkoutManager);
     }
 
+    private static readonly seatsStepPrefix = 'seats-';
+
+    static seatsStepId(product: Product) {
+        return CheckoutStepsManager.seatsStepPrefix + product.id;
+    }
+
     /// Return all the steps that are confirmed with the current checkout configuration
     getSteps(): CheckoutStep[] {
         const webshop = this.$webshopManager.webshop;
         const checkout = this.$checkoutManager.checkout;
         const checkoutMethod = webshop.meta.checkoutMethods.find(m => m.id === checkout.checkoutMethod?.id) ?? (webshop.meta.checkoutMethods[0] as CheckoutMethod | undefined) ?? null;
         const steps: CheckoutStep[] = [];
+        const bulk = webshop.orderMode === WebshopOrderMode.Bulk;
+
+        // Bulk: seats per seated product, then the details of every item
+        const seatedProducts = bulk
+            ? webshop.products.filter(p => p.seatingPlanId !== null && checkout.cart.items.some(i => i.product.id === p.id))
+            : [];
+
+        for (const product of seatedProducts) {
+            const id = CheckoutStepsManager.seatsStepId(product);
+            // E.g. the same show on two dates: told apart by the date, and the url needs to stay unique
+            const sameName = seatedProducts.filter(p => p.name === product.name).length > 1;
+            const date = sameName && product.dateRange ? ' ' + Formatter.date(product.dateRange.startDate) : '';
+            steps.push(new CheckoutStep({
+                id,
+                // With more than one seated product, the steps are told apart by product
+                title: seatedProducts.length > 1 ? product.name + date : $t('%sB'),
+                url: '/checkout/seats/' + Formatter.slug(product.name) + (sameName ? '-' + product.id.slice(0, 8) : ''),
+                getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './BulkSeatsView.vue').then(m => new ComponentWithProperties(m.default, {
+                    product,
+                    continueCheckout: (navigate: NavigationActions) => this.goNext(id, navigate),
+                })),
+                validate: (checkout) => {
+                    const missing = checkout.cart.items.filter(i => i.product.id === product.id && i.seats.length !== i.amount);
+                    if (missing.length > 0) {
+                        throw new SimpleError({
+                            code: 'invalid_seats',
+                            message: 'Missing seats',
+                            human: $t('Kies eerst alle plaatsen voor {product}', { product: product.name }),
+                            field: 'cart',
+                        });
+                    }
+                },
+            }));
+        }
+
+        // Named after what the items are when they are all the same kind, e.g. "Deelnemers"
+        const detailsUnitNames = new Set(checkout.cart.items.filter(i => cartItemNeedsDetails(i)).map(i => getUnitName(webshop, i.product).plural));
+
+        steps.push(new CheckoutStep({
+            id: CheckoutStepType.Details,
+            title: detailsUnitNames.size === 1 ? Formatter.capitalizeFirstLetter([...detailsUnitNames][0]) : $t('Details'),
+            url: '/checkout/' + CheckoutStepType.Details.toLowerCase(),
+            active: bulk && detailsUnitNames.size > 0,
+            getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './BulkItemDetailsView.vue').then(m => new ComponentWithProperties(m.default, {
+                continueCheckout: (navigate: NavigationActions) => this.goNext(CheckoutStepType.Details, navigate),
+            })),
+            validate: () => {
+                // Items are validated by validateCart at the start of getNextStep
+            },
+        }));
 
         steps.push(
             new CheckoutStep({
@@ -242,8 +310,16 @@ export class CheckoutStepsManager {
             await this.$webshopManager.reload();
         }
 
+        const bulk = this.$webshopManager.webshop.orderMode === WebshopOrderMode.Bulk;
+
+        // Bulk: options, fields and customers are collected in the details step, so don't require them before it
+        const detailsPending = bulk && (stepId === undefined || stepId.startsWith(CheckoutStepsManager.seatsStepPrefix));
+
+        // Bulk: seats are checked as soon as every unit has one, so a taken seat is found when leaving the last seats step
+        const validateSeats = !bulk || this.allSeatsChosen;
+
         try {
-            this.$checkoutManager.checkout.validateCart(this.$webshopManager.webshop, this.$webshopManager.organization.meta);
+            this.$checkoutManager.checkout.validateCart(this.$webshopManager.webshop, this.$webshopManager.organization.meta, false, { validateSeats, validateDetails: !detailsPending });
         } finally {
             this.$checkoutManager.checkout.update(this.$webshopManager.webshop);
         }
@@ -277,6 +353,13 @@ export class CheckoutStepsManager {
     }
 
     /**
+     * Bulk: seats are only checked once every unit has one, before that the seats steps still have to collect them
+     */
+    private get allSeatsChosen() {
+        return this.$checkoutManager.cart.items.every(i => !i.product.seatingPlanId || i.seats.length === i.amount);
+    }
+
+    /**
      * Whether an error thrown while validating or placing the order is about the cart contents
      */
     static isCartError(error: unknown): error is SimpleError | SimpleErrors {
@@ -287,11 +370,39 @@ export class CheckoutStepsManager {
     }
 
     /**
-     * Reload the webshop and navigate back to where the user can fix the cart: the cart view, or the product view when there is no cart.
+     * Reload the webshop and navigate back to where the user can fix the cart.
+     * Bulk: to the details step when it is active, otherwise to the product list. Cart: the cart view. Single: the product view.
      */
     async handleCartError(error: SimpleError | SimpleErrors, navigate: NavigationActions) {
         await this.$webshopManager.reload();
         const webshop = this.$webshopManager.webshop;
+
+        if (webshop.orderMode === WebshopOrderMode.Bulk) {
+            try {
+                // Stores recoverable errors on the items for the details step and drops invalid ones. Missing details are
+                // not an error yet: the details step collects and shows them.
+                this.$checkoutManager.cart.validate(webshop, false, { validateDetails: false, validateSeats: this.allSeatsChosen });
+            } catch (e) {
+                console.error(e);
+            }
+            this.$checkoutManager.saveCart();
+
+            const steps = this.getSteps();
+
+            // A seat that is no longer available can only be chosen again in the seats step of its product
+            const seatItem = this.$checkoutManager.cart.items.find(i => isSimpleError(i.cartError) && ['seats_unavailable', 'invalid_seats'].includes(i.cartError.code));
+            const seatsStep = seatItem ? steps.find(s => s.id === CheckoutStepsManager.seatsStepId(seatItem.product)) : undefined;
+            if (seatsStep && await CheckoutStepsManager.popToUrl(navigate.navigationController, seatsStep.url, { force: true })) {
+                Toast.fromError(error).show();
+                return;
+            }
+
+            const detailsStep = steps.find(s => s.id === (CheckoutStepType.Details as string));
+            if (detailsStep?.active && await CheckoutStepsManager.popToUrl(navigate.navigationController, detailsStep.url, { force: true })) {
+                this.$checkoutManager.pendingCartError = error;
+                return;
+            }
+        }
 
         // Back to the cart, or to the webshop itself when there is no cart
         if (!webshop.shouldEnableCart || !(await CheckoutStepsManager.popToUrl(navigate.navigationController, 'cart', { force: true }))) {

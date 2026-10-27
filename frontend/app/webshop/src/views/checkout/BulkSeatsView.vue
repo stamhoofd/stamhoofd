@@ -1,0 +1,182 @@
+<template>
+    <form class="st-view bulk-seats-view shade" data-testid="bulk-seats-view" @submit.prevent="save">
+        <STNavigationBar :title="product.name" />
+        <main v-if="seatingPlan">
+            <h1>
+                {{ $t('Plaatsen voor {product}', { product: product.name }) }}
+                <span class="title-suffix">
+                    {{ selectedAmount }} / {{ amount }}
+                </span>
+            </h1>
+            <p v-if="productInfo" class="style-description-block">
+                {{ productInfo }}
+            </p>
+
+            <p class="inline-size style-description">
+                <strong>{{ title }}</strong> {{ description }}
+            </p>
+
+            <STErrorsDefault :error-box="errorBox" />
+
+            <div v-for="(seatingPlanSection, index) of seatingPlan.sections" :key="seatingPlanSection.id" class="container">
+                <hr v-if="index > 0">
+                <h2 v-if="seatingPlan.sections.length > 1 && seatingPlanSection.name">
+                    {{ seatingPlanSection.name }}
+                </h2>
+
+                <SeatSelectionBox :seating-plan="seatingPlan" :seating-plan-section="seatingPlanSection" :seats="seats" :amount="amount" :reserved-seats="reservedSeats" :set-seats="setSeats" />
+            </div>
+        </main>
+
+        <STToolbar>
+            <template #right>
+                <LoadingButton :loading="loading">
+                    <button class="button primary" type="submit" :disabled="selectedAmount !== amount" data-testid="confirm-seats-button">
+                        <span>{{ $t('%16p') }}</span>
+                        <span class="icon arrow-right" />
+                    </button>
+                </LoadingButton>
+            </template>
+        </STToolbar>
+    </form>
+</template>
+
+<script lang="ts" setup>
+import { SimpleError } from '@common/errors';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { getSeatSelectionDescription, getSeatSelectionTitle } from '@stamhoofd/components/helpers/seatSelectionText.ts';
+import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
+import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import SeatSelectionBox from '@stamhoofd/components/views/SeatSelectionBox.vue';
+import type { Product, ReservedSeat } from '@stamhoofd/structures';
+import { CartReservedSeat } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { computed, ref, watch } from 'vue';
+
+import { useCheckoutContinue } from '../../composables/useCheckoutContinue';
+import { useCheckoutManager } from '../../composables/useCheckoutManager';
+import { useWebshopManager } from '../../composables/useWebshopManager';
+
+const props = defineProps<{
+    product: Product;
+    continueCheckout: (navigate: NavigationActions) => Promise<void>;
+}>();
+
+const checkoutManager = useCheckoutManager();
+const webshopManager = useWebshopManager();
+const navigationActions = useNavigationActions();
+const errorBox = ref<ErrorBox | null>(null);
+const loading = ref(false);
+
+const webshop = computed(() => webshopManager.webshop);
+// Always read the live product: a reload replaces the webshop (and its reserved seats)
+const product = computed(() => webshop.value.products.find(p => p.id === props.product.id) ?? props.product);
+// Every bulk cart item is one unit, so one seat per item
+const items = computed(() => checkoutManager.cart.items.filter(i => i.product.id === props.product.id));
+const amount = computed(() => items.value.length);
+const seats = ref<CartReservedSeat[]>(items.value.flatMap(i => i.seats));
+const selectedAmount = computed(() => seats.value.length);
+const seatingPlan = computed(() => webshop.value.meta.seatingPlans.find(p => p.id === product.value.seatingPlanId));
+
+const title = computed(() => getSeatSelectionTitle(amount.value, selectedAmount.value) + '.');
+const description = computed(() => getSeatSelectionDescription(amount.value));
+
+// Date and location so the visitor knows which performance these seats are for
+const productInfo = computed(() => {
+    const parts: string[] = [];
+    if (product.value.dateRange) {
+        parts.push(Formatter.capitalizeFirstLetter(product.value.dateRange.toString()));
+    }
+    if (product.value.location) {
+        parts.push(product.value.location.name);
+    }
+    return parts.join(' • ');
+});
+
+// Seats reserved by this order (when editing) stay selectable
+const reservedSeats = computed(() => {
+    const ownReserved = items.value.flatMap(i => i.reservedSeats);
+    return product.value.reservedSeats.filter(r => !ownReserved.find(rr => rr.equals(r)));
+});
+
+function setSeats(newSeats: ReservedSeat[]) {
+    seats.value = newSeats.map(s => CartReservedSeat.create(s));
+}
+
+// Units can be dropped while this step stays mounted (e.g. when the stock dropped): keep one seat per unit
+watch(amount, (amount) => {
+    if (seats.value.length > amount) {
+        seats.value = seats.value.slice(0, amount);
+    }
+});
+
+// A reload (e.g. after a seat got taken during the checkout) can make selected seats unavailable while this step
+// stays mounted below the later steps: drop them, so they can't be confirmed again
+watch(reservedSeats, (reserved) => {
+    const plan = seatingPlan.value;
+    if (plan && seats.value.some(s => !plan.isValidSeat(s, reserved))) {
+        seats.value = seats.value.filter(s => plan.isValidSeat(s, reserved));
+    }
+});
+
+useCheckoutContinue(save);
+
+async function save() {
+    if (loading.value || !seatingPlan.value) {
+        return;
+    }
+
+    if (seatingPlan.value.requireOptimalReservation) {
+        const adjusted = seatingPlan.value.adjustSeatsForBetterFit(seats.value, reservedSeats.value);
+
+        if (adjusted) {
+            setSeats(adjusted);
+            errorBox.value = new ErrorBox(new SimpleError({
+                code: 'adjusted',
+                message: $t('%12b'),
+            }));
+            return;
+        }
+    }
+
+    if (seats.value.length !== amount.value) {
+        errorBox.value = new ErrorBox(new SimpleError({
+            code: 'invalid_seats',
+            message: 'Invalid seats',
+            human: getSeatSelectionTitle(amount.value, seats.value.length),
+        }));
+        return;
+    }
+
+    loading.value = true;
+    errorBox.value = null;
+
+    // Seat i belongs to item i
+    for (const [index, item] of items.value.entries()) {
+        const seat = seats.value[index];
+        seat.calculatePrice(seatingPlan.value);
+        item.seats = [seat];
+    }
+    checkoutManager.saveCart();
+
+    try {
+        await props.continueCheckout(navigationActions);
+    } catch (e) {
+        console.error(e);
+        errorBox.value = new ErrorBox(e);
+    }
+    loading.value = false;
+}
+</script>
+
+<style lang="scss">
+.sheet .bulk-seats-view, .popup .bulk-seats-view {
+    width: max-content !important;
+    min-width: min(100vw, var(--st-sheet-width, 400px));
+    max-width: 100vw;
+}
+</style>
