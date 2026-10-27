@@ -103,6 +103,36 @@ const resourcesPathMatchers = [
 ];
 
 /**
+ * The nonce changes on every response, so HTML must never be cached or revalidated: a 304 from
+ * the upstream (Vite sends ETags) makes the browser reuse the cached HTML with the old nonce under
+ * a CSP header with a new one. Limited to HTML because in Vite dev the non-resource paths also
+ * include every source module (.ts, .vue, /@vite/client), which should keep their 304s.
+ */
+function noHtmlCachingSubroute(): CaddyHandler {
+    return {
+        handler: 'subroute',
+        routes: [
+            {
+                match: [{ header: { Accept: ['*text/html*'] } }],
+                handle: [{ handler: 'headers', request: { delete: ['If-None-Match', 'If-Modified-Since'] } }],
+                terminal: false,
+            },
+            {
+                handle: [{
+                    handler: 'headers',
+                    response: {
+                        require: { headers: { 'Content-Type': ['text/html*'] } },
+                        set: { 'Cache-Control': ['no-store'] },
+                        delete: ['ETag', 'Last-Modified'],
+                    },
+                }],
+                terminal: false,
+            },
+        ],
+    };
+}
+
+/**
  * Subroute that applies the per-request-nonce CSP based on the request path, mirroring production
  * (devops buildCaddyConfig.ts). Documents (anything that is not a resource) get the strict-dynamic
  * nonce policy and the build-time placeholder is rewritten to the per-request nonce; resources
@@ -118,6 +148,7 @@ function cspNonceSubroute(): CaddyHandler {
                 match: [{ not: [{ path: [...resourcesPathMatchers] }] }],
                 handle: [
                     { handler: 'headers', response: { set: { 'Content-Security-Policy': [cspNonceHeaderValue] } } },
+                    noHtmlCachingSubroute(),
                     { handler: 'replace_response', replacements: [{ search: CSP_NONCE_PLACEHOLDER, replace: '{http.request.uuid}' }] },
                 ],
                 terminal: false,
@@ -156,9 +187,8 @@ function cspNoExternalScriptsSubroute(): CaddyHandler {
 
 /**
  * The full production CSP policy for a frontend, as handlers to prepend before the reverse_proxy.
- * Decides document vs. resource by file extension (not by the Accept header, unlike the CLI dev
- * config which proxies Vite and must not buffer the HMR websocket). Prefer this in environments
- * that serve static builds (e.g. the Playwright frontends). Pass `customDomain: true` for webshop
+ * Decides document vs. resource by file extension. Shared by the CLI dev config and the Playwright
+ * frontends; production mirrors it in devops buildCaddyConfig.ts. Pass `customDomain: true` for webshop
  * custom domains so the "no external scripts" hardening is omitted and admin custom code can run.
  */
 export function cspFrontendSubroutes(options: { customDomain: boolean }): CaddyRoute['handle'] {
