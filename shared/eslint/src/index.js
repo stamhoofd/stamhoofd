@@ -8,6 +8,9 @@ import tseslint from 'typescript-eslint';
 import vitest from '@vitest/eslint-plugin';
 import regexpPlugin from 'eslint-plugin-regexp';
 import securityPlugin from 'eslint-plugin-security';
+import secureCodingPlugin from 'eslint-plugin-secure-coding';
+import nodeSecurityPlugin from 'eslint-plugin-node-security';
+import noUnsanitizedPlugin from 'eslint-plugin-no-unsanitized';
 import unicornPlugin from 'eslint-plugin-unicorn';
 import defaultRules from './configs/default.js';
 import frontend from './configs/frontend.js';
@@ -36,6 +39,9 @@ const baseRules = [
     ...defaultRules,
     regexpPlugin.configs.recommended,
     securityPlugin.configs.recommended,
+    secureCodingPlugin.configs.recommended,
+    nodeSecurityPlugin.configs.recommended,
+    noUnsanitizedPlugin.configs.recommended,
     {
         plugins: {
             unicorn: unicornPlugin,

@@ -17,7 +17,7 @@
         "clear:shared": "pnpm run clear:global:shared && pnpm run clear:backend:shared",
         "dns": "export SERVER_IP=127.0.0.1 && cd .development && source loadenv.sh && coredns",
         "frontend:types": "wait-on shared/locales/dist-types/index.d.ts && pnpm --dir frontend/app/dashboard run typecheck",
-        "lint": "pnpm exec turbo run lint",
+        "lint": "pnpm exec turbo run lint --continue=always",
         "ship": "node ./.development/increase-structures-version.js && pnpm run clear:shared && pnpm run build:shared && lerna version --exact --force-publish --yes --no-private && lerna publish from-git --yes --no-private --otp $(op item get NPM --otp || :) && pnpm run stam release publish",
         "ship:fix": "lerna publish from-git --yes --no-private --otp $(op item get NPM --otp || :) && pnpm run stam release publish",
         "ship:force": "node ./.development/increase-structures-version.js --force && pnpm run clear:shared && pnpm run build:shared && npm login && lerna version --exact --force-publish --yes --no-private && lerna publish from-git --yes --no-private --otp $(op item get NPM --otp || :) && pnpm run stam release publish",

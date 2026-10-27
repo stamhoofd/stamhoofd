@@ -79,11 +79,11 @@ describe('check cache configuration', () => {
             'frontend/eslint.config.js',
             'backend/eslint.config.js',
         ]));
-        expect(readJson('package.json').scripts.lint).toBe('pnpm exec turbo run lint');
+        expect(readJson('package.json').scripts.lint).toBe('pnpm exec turbo run lint --continue=always');
     });
 
     it('keeps root checks on direct Turbo entrypoints', () => {
         expect(readJson('package.json').scripts.typecheck).toBe('pnpm exec turbo run typecheck');
-        expect(readJson('package.json').scripts.lint).toBe('pnpm exec turbo run lint');
+        expect(readJson('package.json').scripts.lint).toBe('pnpm exec turbo run lint --continue=always');
     });
 });
