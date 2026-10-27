@@ -115,7 +115,7 @@
 
 <script lang="ts" setup>
 import type { Decoder } from '@common/encoding';
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';

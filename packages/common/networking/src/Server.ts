@@ -1,5 +1,5 @@
-import { Request, RequestInitializer, RequestResult } from './Request';
-import { RequestMiddleware } from './RequestMiddleware';
+import { Request, RequestInitializer, RequestResult } from './Request.js';
+import { RequestMiddleware } from './RequestMiddleware.js';
 
 /** API host and middleware configuration; each built request copies the current middleware list. */
 export class Server {

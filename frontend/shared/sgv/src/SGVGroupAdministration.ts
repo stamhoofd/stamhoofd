@@ -3,8 +3,8 @@ import type {
     RequestInitializer,
     RequestMiddleware,
     RequestResult,
-} from '@simonbackx/simple-networking';
-import { Request, Server } from '@simonbackx/simple-networking';
+} from '@common/networking';
+import { Request, Server } from '@common/networking';
 import type { ComponentWithProperties, PushOptions } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';

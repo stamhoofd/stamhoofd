@@ -1,5 +1,5 @@
 import { SimpleError, SimpleErrors } from '@common/errors';
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { Toast } from '@stamhoofd/frontend-notifications/Toast';
 import { Version } from '@stamhoofd/structures';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';

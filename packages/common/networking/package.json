@@ -1,38 +1,32 @@
 {
-    "name": "@simonbackx/simple-networking",
-    "main": "./commonjs/dist/index.js",
-    "module": "./dist/index.js",
-    "types": "./dist/index.d.ts",
-    "sideEffects": false,
+    "name": "@common/networking",
     "version": "1.23.0",
-    "scripts": {
-        "test": "jest",
-        "build": " tsc -b . commonjs",
-        "build:full": "rm -r ./dist && rm -r ./commonjs/dist && tsc -b . commonjs",
-        "lint": "eslint"
+    "private": true,
+    "type": "module",
+    "main": "./dist/index.js",
+    "types": "./dist-types/index.d.ts",
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./dist-types/index.d.ts",
+            "default": "./dist/index.js"
+        }
     },
-    "files": [
-        "dist",
-        "commonjs/dist"
-    ],
-    "dependencies": {},
-    "peerDependencies": {
-        "@simonbackx/simple-encoding": "^2.9.2",
-        "@simonbackx/simple-errors": "^1.5.0"
+    "scripts": {
+        "build": "tsc --build tsconfig.build.json",
+        "build:types": "tsc --project tsconfig.types.json",
+        "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
+        "test": "vitest run",
+        "test:coverage": "vitest run --coverage",
+        "lint": "eslint . --quiet"
+    },
+    "dependencies": {
+        "@common/encoding": "workspace:*",
+        "@common/errors": "workspace:*",
+        "tslib": "2.8.1"
     },
     "devDependencies": {
-        "@eslint/js": "^9.11.1",
-        "@simonbackx/simple-encoding": "^2.20.0",
-        "@simonbackx/simple-errors": "^1.5.0",
-        "@types/jest": "^25.1.4",
-        "eslint": "^9.11.1",
-        "eslint-plugin-stamhoofd": "^2.74.0",
-        "jest": "^25.3.0",
-        "ts-jest": "^25.4.0",
-        "ts-node": "^8.6.2",
-        "tslib": "^2.8.1",
-        "typescript": "^4.9.4",
-        "uuid": "^9.0.0"
-    },
-    "packageManager": "pnpm@10.30.1+sha512.3590e550d5384caa39bd5c7c739f72270234b2f6059e13018f975c313b1eb9fefcc09714048765d4d9efe961382c312e624572c0420762bdc5d5940cdf9be73a"
+        "eslint-plugin-stamhoofd": "workspace:*",
+        "vitest": "4.1.12"
+    }
 }

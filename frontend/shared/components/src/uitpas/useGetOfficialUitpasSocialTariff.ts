@@ -1,5 +1,5 @@
 import { SimpleError } from '@common/errors';
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { UitpasPriceCheckRequest, UitpasPriceCheckResponse } from '@stamhoofd/structures';
 import { useContext } from '#hooks/useContext.ts';

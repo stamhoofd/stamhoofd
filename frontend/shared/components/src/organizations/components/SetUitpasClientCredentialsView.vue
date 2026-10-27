@@ -22,7 +22,7 @@
 <script lang="ts" setup>
 import type { Decoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';

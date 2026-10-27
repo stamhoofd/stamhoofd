@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { UitpasNumberDetails, UitpasNumbersGetDetailsRequest } from '@stamhoofd/structures';
 
 import type { Decoder } from '@common/encoding';

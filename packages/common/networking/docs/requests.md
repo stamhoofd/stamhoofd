@@ -1,6 +1,6 @@
 # Sending (authenticated) requests in the frontend
 
-When interacting with the network in our frontend, we use the `@simonbackx/simple-networking` library. This library handles a couple of things for us, such as providing middleware support (which enabled retry behaviour when there are network issues, auto renewing access tokens…). It also provides support for canceling requests and associating owners with requests.
+When interacting with the network in our frontend, we use the `@common/networking` library. This library handles a couple of things for us, such as providing middleware support (which enabled retry behaviour when there are network issues, auto renewing access tokens…). It also provides support for canceling requests and associating owners with requests.
 
 ## Servers
 

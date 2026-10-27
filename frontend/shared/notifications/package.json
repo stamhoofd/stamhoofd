@@ -15,7 +15,7 @@
     },
     "dependencies": {
         "@common/errors": "workspace:*",
-        "@simonbackx/simple-networking": "1.23.0",
+        "@common/networking": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "vue": "3.5.44"
     },

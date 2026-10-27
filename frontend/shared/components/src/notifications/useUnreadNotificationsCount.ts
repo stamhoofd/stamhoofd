@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { computed, reactive } from 'vue';
 import { useUser } from '#hooks/useUser.ts';
 import { useNotificationActions } from './useNotificationActions';

@@ -173,7 +173,7 @@ import { computed, ref, shallowRef, watch } from 'vue';
 import { useActivatePackages } from '../hooks/useActivatePackages';
 import type { OrganizationCheckoutViewModel } from '../OrganizationCheckoutViewModel';
 import { Formatter, sleep } from '@stamhoofd/utility';
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import PaymentItemsBox from '@stamhoofd/components/payments/PaymentItemsBox.vue';
 import InvoiceItemsBox from '@stamhoofd/components/payments/InvoiceItemsBox.vue';

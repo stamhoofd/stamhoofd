@@ -35,7 +35,7 @@
         "@capacitor/status-bar": "8.0.4",
         "@capgo/capacitor-updater": "8.53.0",
         "@common/encoding": "workspace:*",
-        "@simonbackx/simple-networking": "1.23.0",
+        "@common/networking": "workspace:*",
         "@simonbackx/vue-app-navigation": "2.25.1",
         "@stamhoofd/assets": "workspace:*",
         "@stamhoofd/components": "workspace:*",

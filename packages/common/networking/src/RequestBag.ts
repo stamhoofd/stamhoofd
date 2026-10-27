@@ -1,4 +1,4 @@
-import { Request } from './Request';
+import { Request } from './Request.js';
 
 /**
  * Group related requests so you can cancel them easily when they are no longer needed

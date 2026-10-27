@@ -151,7 +151,7 @@ import STInputBox from '#inputs/STInputBox.vue';
 import { Toast } from '#overlays/Toast.ts';
 import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import GroupAvatar from '#GroupAvatar.vue';
 import STGrid from '#layout/STGrid.vue';

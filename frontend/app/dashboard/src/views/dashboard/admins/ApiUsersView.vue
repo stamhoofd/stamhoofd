@@ -65,7 +65,7 @@
 <script lang="ts" setup>
 import type { Decoder } from '@common/encoding';
 import { ArrayDecoder } from '@common/encoding';
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';

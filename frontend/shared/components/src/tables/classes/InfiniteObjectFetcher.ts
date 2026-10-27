@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import type { SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { LimitedFilteredRequest, isEmptyFilter, isEqualFilter, mergeFilters } from '@stamhoofd/structures';
 import { onBeforeUnmount, reactive } from 'vue';

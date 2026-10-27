@@ -17,7 +17,7 @@
         "@stamhoofd/frontend-notifications": "workspace:*",
         "@common/encoding": "workspace:*",
         "@common/errors": "workspace:*",
-        "@simonbackx/simple-networking": "1.23.0",
+        "@common/networking": "workspace:*",
         "@simonbackx/vue-app-navigation": "2.25.1",
         "@stamhoofd/frontend-platform": "workspace:*",
         "@stamhoofd/frontend-storage": "workspace:*",

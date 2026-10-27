@@ -1,4 +1,4 @@
-import { Request, RequestResult } from '@simonbackx/simple-networking';
+import { Request, RequestResult } from '@common/networking';
 import { LoginHelper } from '@stamhoofd/frontend-application/LoginHelper';
 import { MFAManager } from '@stamhoofd/frontend-application/MFAManager';
 import { loadSessionLocale } from '@stamhoofd/frontend-application/SessionLocalization';

@@ -58,7 +58,7 @@
 
 <script lang="ts" setup>
 import type { Decoder } from '@common/encoding';
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { MailchimpSyncIssue } from '@stamhoofd/structures/mailchimp/MailchimpSync.js';
 import { MailchimpSync, MailchimpSyncIssueReason, MailchimpSyncStatus } from '@stamhoofd/structures/mailchimp/MailchimpSync.js';

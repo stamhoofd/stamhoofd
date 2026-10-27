@@ -116,7 +116,7 @@
 <script lang="ts" setup>
 import type { Decoder } from '@common/encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';

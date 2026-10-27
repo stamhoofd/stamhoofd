@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import { getWebshopOrderUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/orders.ts';
 import type { UIFilterBuilders } from '@stamhoofd/components/filters/UIFilter.ts';

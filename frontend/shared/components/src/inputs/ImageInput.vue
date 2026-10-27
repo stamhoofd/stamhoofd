@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import type { Decoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { Image, ResolutionRequest, Version } from '@stamhoofd/structures';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { computed, ref } from 'vue';

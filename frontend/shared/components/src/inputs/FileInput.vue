@@ -19,7 +19,7 @@
 
 <script lang="ts" setup>
 import { SimpleError } from '@common/errors';
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { File } from '@stamhoofd/structures';
 import { ref } from 'vue';
