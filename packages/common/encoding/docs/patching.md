@@ -98,7 +98,38 @@ implementation remains shallow.
 
 [Patching arrays](patching-arrays.md)
 
-Missing docs: patching maps
+### Patching maps
+
+Fields declared with `MapDecoder` support both full replacements and incremental
+patches. Pass a plain `Map` to replace the entire dictionary, including removing
+keys that are absent from the replacement:
+
+```typescript
+const patch = Settings.patch({ values: new Map([['card', 'active']]) });
+```
+
+Use the default `PatchMap` to insert, update, or delete individual entries:
+
+```typescript
+const patch = Settings.patch({});
+patch.values.set('card', 'active');
+patch.values.set('ideal', null); // Delete; omitted keys remain unchanged
+```
+
+Full Maps encode as JSON objects. Incremental patches encode as
+`{ _isPatch: true, changes: { ... } }`; only patch-field decoding interprets this
+wrapper. Boolean `_isPatch: true` selects incremental decoding. String dictionary
+entries remain data; historical `'true'`/`1` discriminators still select an
+incremental patch when accompanied by an object-valued `changes` wrapper. This
+Map-specific distinction leaves AutoEncoder patch discrimination unchanged.
+Always use the library encoder, not `JSON.stringify(map)` directly.
+
+When migrating a record field, test historical replacement payloads and defaults
+before changing its decoder. Empty Maps may be omitted as defaults where empty
+objects were previously encoded. A dictionary containing boolean `_isPatch: true`
+needs a separate compatibility review because that value is reserved on the
+patch-field path. Do not mix numeric and string Map keys: JSON property names can collide,
+and database encoding rejects mixed key types.
 
 ---
 

@@ -174,9 +174,10 @@ export class AutoEncoder implements Encodeable, Cloneable {
     /**
      * Creates an encodable patch containing only the supplied changes.
      * Array and map fields receive empty patch containers for adding operations.
+     * Plain field values, including Maps, replace their existing values.
      */
-    static patch<T extends typeof AutoEncoder>(this: T, object: PartialWithoutMethods<AutoEncoderPatchType<InstanceType<T>>>): AutoEncoderPatchType<InstanceType<T>> {
-        return this.patchType().create(object);
+    static patch<T extends typeof AutoEncoder>(this: T, object: PartialWithoutMethods<AutoEncoderPatchType<InstanceType<T>>> | PartialWithoutMethods<InstanceType<T>>): AutoEncoderPatchType<InstanceType<T>> {
+        return this.patchType().create(object as PartialWithoutMethods<AutoEncoderPatchType<InstanceType<T>>>);
     }
 
     patchOrPut<T extends AutoEncoder>(this: T, patch: AutoEncoderPatchType<T> | T) {

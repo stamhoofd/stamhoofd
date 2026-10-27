@@ -17,6 +17,19 @@ export class MapDecoder<A, B> implements Decoder<Map<A, B>> {
         this.valueDecoder = valueDecoder;
     }
 
+    /** String dictionary entries are not metadata; historical coerced flags still select valid patch wrappers. */
+    isPatchPayload(data: Data): boolean {
+        const flag: unknown = data.optionalField('_isPatch')?.value;
+        if (flag === true) {
+            return true;
+        }
+        if (flag === 'true' || flag === 1) {
+            const changes: unknown = data.optionalField('changes')?.value;
+            return typeof changes === 'object' && changes !== null;
+        }
+        return false;
+    }
+
     patchType() {
         const elementDecoder = this.valueDecoder;
         if ((elementDecoder as any).patchType) {

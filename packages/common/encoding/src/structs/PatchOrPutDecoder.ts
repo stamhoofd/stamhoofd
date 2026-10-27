@@ -3,7 +3,7 @@ import { Decoder } from '../classes/Decoder.js';
 import { Patchable } from '../classes/Patchable.js';
 
 /**
- * Uses the meta data of AutoEncoder to check if something is a patch or a put
+ * Uses AutoEncoder metadata or a container-specific discriminator to distinguish patches from puts.
  */
 export class PatchOrPutDecoder<Put extends Patchable<Patch>, Patch> implements Decoder<Patch | Put> {
     putDecoder: Decoder<Put>;
@@ -15,8 +15,10 @@ export class PatchOrPutDecoder<Put extends Patchable<Patch>, Patch> implements D
     }
 
     decode(data: Data): Put | Patch {
-        const isPatch = data.optionalField('_isPatch');
-        if (isPatch?.boolean ?? false) {
+        const isPatch = this.putDecoder.isPatchPayload
+            ? this.putDecoder.isPatchPayload(data)
+            : (data.optionalField('_isPatch')?.boolean ?? false);
+        if (isPatch) {
             return this.patchDecoder.decode(data);
         }
 

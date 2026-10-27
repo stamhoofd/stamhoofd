@@ -11,6 +11,9 @@ export interface Decoder<T> {
     /** Optional fast path used by AutoEncoder without constructing a Data wrapper. */
     decodeField?(data: unknown, context: EncodeContext, currentField?: string): T;
 
+    /** Optional patch/replacement discriminator for containers whose own keys are data. */
+    isPatchPayload?(data: Data): boolean;
+
     /**
      * Optional encoding override. Otherwise values use their own encode method
      * or the library's encoding of plain values, arrays, and maps.
