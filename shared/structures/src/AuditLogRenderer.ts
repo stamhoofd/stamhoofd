@@ -1,6 +1,7 @@
 export type RenderContext = {
     type: 'text' | 'html';
-    context: Record<string, any>;
+    /** Template variable names are literal Map keys; falsy values remain absent in output. */
+    context: ReadonlyMap<string, any>;
     helpers: Record<string, Helper>;
 };
 
@@ -42,8 +43,8 @@ class RendersState {
 
             if (this.quoteChar) {
                 this.currentHelperArgs.push(this.pendingString);
-            } else if (this.context.context[helperName]) {
-                this.currentHelperArgs.push(this.context.context[helperName]);
+            } else if (this.context.context.get(helperName)) {
+                this.currentHelperArgs.push(this.context.context.get(helperName));
             } else {
                 this.currentHelperArgs.push(undefined);
             }

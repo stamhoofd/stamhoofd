@@ -918,7 +918,7 @@ export class AuditLog extends AutoEncoder {
         try {
             return renderTemplate(getAuditLogTypeTitleTemplate(this.type), {
                 type: 'text',
-                context: Object.fromEntries(this.replacements.entries()),
+                context: this.replacements,
                 helpers,
             });
         } catch (e) {
@@ -936,7 +936,7 @@ export class AuditLog extends AutoEncoder {
         try {
             return renderTemplate(template, {
                 type: 'text',
-                context: Object.fromEntries(this.replacements.entries()),
+                context: this.replacements,
                 helpers,
             });
         } catch (e) {
