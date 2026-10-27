@@ -292,6 +292,21 @@ describe('Email.getCombinedHtml', () => {
 describe('getEmailBuilder replacement file attachments', () => {
     const from = { email: 'sender@example.com' };
 
+    test('converts recipient header Maps to transport objects', async () => {
+        const headers = new Map([['X-Custom', 'value']]);
+        const recipient = Recipient.create({ email: 'customer@example.com', headers });
+        const builder = await getEmailBuilder(null, {
+            recipients: [recipient],
+            from,
+            subject: 'Subject',
+            html: '<p>Content</p>',
+            headers: { 'X-Custom': 'value' },
+        });
+        expect(builder()!.headers).toMatchObject({ 'X-Custom': 'value', 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' });
+        expect(recipient.headers).toBeInstanceOf(Map);
+        expect(headers).toEqual(new Map([['X-Custom', 'value']]));
+    });
+
     const ownServer = () => 'https://' + STAMHOOFD.SPACES_BUCKET + '.' + STAMHOOFD.SPACES_ENDPOINT;
 
     const buildFile = (data: { id?: string; name?: string; size?: number; isPrivate?: boolean; server?: string }) => {

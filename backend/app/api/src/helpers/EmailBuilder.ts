@@ -388,11 +388,11 @@ export async function getEmailBuilder(organization: Organization | null, email: 
             }));
 
             // Override headers
-            recipient.headers = {
-                ...email.headers,
-                'List-Unsubscribe': STAMHOOFD.domains.defaultBroadcastEmail !== undefined ? '<mailto:unsubscribe+' + unsubscribe.id + '@' + STAMHOOFD.domains.defaultBroadcastEmail![''] + `>, <${unsubscribeUrl}>` : `<${unsubscribeUrl}>`,
-                'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
-            };
+            recipient.headers = new Map([
+                ...Object.entries(email.headers ?? {}),
+                ['List-Unsubscribe', STAMHOOFD.domains.defaultBroadcastEmail !== undefined ? '<mailto:unsubscribe+' + unsubscribe.id + '@' + STAMHOOFD.domains.defaultBroadcastEmail![''] + `>, <${unsubscribeUrl}>` : `<${unsubscribeUrl}>`],
+                ['List-Unsubscribe-Post', 'List-Unsubscribe=One-Click'],
+            ]);
             cleaned.push(recipient);
         } catch (e) {
             console.error(e);
@@ -494,7 +494,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
             subject: replacedSubject,
             html: replacedHtml ?? undefined,
             attachments,
-            headers: recipient.headers,
+            headers: recipient.headers === null ? null : Object.fromEntries(recipient.headers),
             type: email.type,
             callback: email.callback,
         };

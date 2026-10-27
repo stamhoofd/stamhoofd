@@ -1,6 +1,41 @@
 import { Language } from '@stamhoofd/types/Language';
+import { EncodeMedium, ObjectData } from '@common/encoding';
 import { File } from '../files/File.js';
 import { getUsedReplacementFiles, Recipient, Replacement } from './EmailRequest.js';
+
+describe('Recipient headers', () => {
+    for (const version of [208, 209, 423]) {
+        test(`preserves nullable header JSON and replacement patches at version ${version}`, () => {
+            const context = { version, medium: EncodeMedium.Database };
+            for (const headers of [undefined, null, {}, { 'X-Custom': 'value' }, { _isPatch: 'custom header' }]) {
+                const payload = { email: 'test@example.com', headers };
+                const recipient = Recipient.decode(new ObjectData(payload, context));
+                expect(recipient.headers).toEqual(version < 209 || headers == null ? null : new Map(Object.entries(headers)));
+                const encoded = JSON.parse(JSON.stringify(recipient.encode(context)));
+                if (version < 209) {
+                    expect(encoded).not.toHaveProperty('headers');
+                } else {
+                    expect(encoded.headers ?? null).toEqual(headers ?? null);
+                }
+                const patch = Recipient.patchType().decode(new ObjectData({ headers }, context));
+                const patched = Recipient.create({ email: payload.email, headers: new Map([['old', 'value']]) }).patch(patch);
+                if (version >= 209 && headers !== undefined) {
+                    expect(patched.headers).toEqual(headers === null ? null : new Map(Object.entries(headers)));
+                }
+            }
+        });
+    }
+
+    test('clones header Maps independently and applies incremental changes', () => {
+        const recipient = Recipient.create({ email: 'test@example.com', headers: new Map([['old', 'value']]) });
+        expect(recipient.clone().headers).toEqual(recipient.headers);
+        expect(recipient.clone().headers).not.toBe(recipient.headers);
+        const patch = Recipient.patch({});
+        patch.headers!.set('old', null);
+        patch.headers!.set('new', 'value');
+        expect(recipient.patch(patch).headers).toEqual(new Map([['new', 'value']]));
+    });
+});
 
 describe('Recipient.merge', () => {
     describe('language', () => {

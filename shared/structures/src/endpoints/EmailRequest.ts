@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EmailDecoder, EnumDecoder, field, RecordDecoder, StringDecoder } from '@common/encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EmailDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@common/encoding';
 import { Language } from '@stamhoofd/types/Language';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -153,8 +153,9 @@ export class Recipient extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(Replacement) })
     replacements: Replacement[] = [];
 
-    @field({ decoder: new RecordDecoder(StringDecoder, StringDecoder), version: 209, nullable: true })
-    headers: Record<string, string> | null = null;
+    /** Custom headers stay a JSON object on the wire and become an object at the mail transport boundary. */
+    @field({ decoder: new MapDecoder(StringDecoder, StringDecoder), version: 209, nullable: true })
+    headers: Map<string, string> | null = null;
 
     /**
      * Set this to create a replacement called signInUrl, which will auto sign in/sign up the user
