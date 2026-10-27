@@ -2,15 +2,15 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import chalk from 'chalk';
 import { Direction } from 'node:readline';
 
-type Modifier = (typeof chalk.Color | typeof chalk.Modifiers)
-type Writeable = {write: (msg: string) => void, clearLine: (dir: Direction) => void};
-type Context = {prefixes?: unknown[], tags?: string[]};
+type Modifier = (typeof chalk.Color | typeof chalk.Modifiers);
+type Writeable = { write: (msg: string) => void; clearLine: (dir: Direction) => void };
+type Context = { prefixes?: unknown[]; tags?: string[] };
 
 export class StyledText {
     text: unknown;
     style?: Modifier[];
-    classes: string[] = []
-    tags: string[] = []
+    classes: string[] = [];
+    tags: string[] = [];
 
     /**
      * Set the style for the text that is printed after this text
@@ -80,8 +80,8 @@ export class StyledText {
     }
 
     toStyledString(logger: Logger): string {
-        let text = this.toString(logger)
-        const styles = this.getStyles(logger)
+        let text = this.toString(logger);
+        const styles = this.getStyles(logger);
 
         for (const s of styles) {
             text = chalk[s](text);
@@ -102,10 +102,10 @@ export class StyledText {
     }
 }
 
-type RecursiveClassStyles = Map<string, {style: Modifier[], with: RecursiveClassStyles}>;
+type RecursiveClassStyles = Map<string, { style: Modifier[]; with: RecursiveClassStyles }>;
 
 function registerClass(name: string[], map: RecursiveClassStyles, style: Modifier[]) {
-    const first = name[0]
+    const first = name[0];
     if (!first) {
         return;
     }
@@ -113,19 +113,19 @@ function registerClass(name: string[], map: RecursiveClassStyles, style: Modifie
     if (name.length === 1) {
         map.set(first, {
             style: [...(map.get(first)?.style ?? []), ...style],
-            with: map.get(first)?.with ?? new Map() as RecursiveClassStyles
+            with: map.get(first)?.with ?? new Map() as RecursiveClassStyles,
         });
         return;
     }
 
     const w = (map.get(first)?.with ?? new Map()) as RecursiveClassStyles;
-    
+
     map.set(first, {
         style: map.get(first)?.style ?? [],
-        with: w
+        with: w,
     });
 
-    registerClass(name.slice(1), w, style)
+    registerClass(name.slice(1), w, style);
 }
 
 function getStylesForClasses(classes: string[], map: RecursiveClassStyles): Modifier[] {
@@ -138,7 +138,7 @@ function getStylesForClasses(classes: string[], map: RecursiveClassStyles): Modi
             }
 
             if (classStyles.with) {
-                styles.push(...getStylesForClasses(classes, classStyles.with))
+                styles.push(...getStylesForClasses(classes, classStyles.with));
             }
         }
     }
@@ -146,14 +146,14 @@ function getStylesForClasses(classes: string[], map: RecursiveClassStyles): Modi
 }
 
 export class Logger {
-    stdout: Writeable
-    stderr: Writeable
+    stdout: Writeable;
+    stderr: Writeable;
     asyncLocalStorage = new AsyncLocalStorage<Context>();
     classStyles: RecursiveClassStyles = new Map();
     afterClassStyles: RecursiveClassStyles = new Map();
     hiddenTags: Set<string> = new Set();
 
-    constructor({stdout, stderr}:  {stdout: Writeable, stderr: Writeable}) {
+    constructor({ stdout, stderr }: { stdout: Writeable; stderr: Writeable }) {
         this.stdout = stdout;
         this.stderr = stderr;
     }
@@ -195,18 +195,18 @@ export class Logger {
     getText(args: unknown[], context?: Context): string | undefined {
         for (const tag of context?.tags ?? []) {
             if (this.hiddenTags.has(tag)) {
-                return
+                return;
             }
         }
 
-        let stack = ''
+        let stack = '';
         let afterStyle: Modifier[] = [];
         let addSpace = false;
         for (const arg of [...(context?.prefixes ?? []), ...args]) {
             if (arg instanceof StyledText) {
                 for (const tag of arg.tags ?? []) {
                     if (this.hiddenTags.has(tag)) {
-                        return
+                        return;
                     }
                 }
 
@@ -234,46 +234,46 @@ export class Logger {
     }
 
     progress(...args: any[]): void {
-        const text = this.getText(args, this.getContext())
+        const text = this.getText(args, this.getContext());
         if (text === undefined) {
-            return
+            return;
         }
 
         if (this.isInProgress) {
-            this.stdout.clearLine(0)
+            this.stdout.clearLine(0);
         }
         this.isInProgress = true;
         this.stdout.write(text.replace(/\n/g, ' '));
     }
 
     log(...args: unknown[]): void {
-        const text = this.getText(args, this.getContext())
+        const text = this.getText(args, this.getContext());
         if (text === undefined) {
-            return
+            return;
         }
 
-        this.clearProgress()
-        this.stdout.write(text + "\n");
+        this.clearProgress();
+        this.stdout.write(text + '\n');
     }
 
     warn(...args: unknown[]): void {
-        const text = this.getText(args, this.getContext())
+        const text = this.getText(args, this.getContext());
         if (text === undefined) {
-            return
+            return;
         }
 
-        this.clearProgress()
-        this.stdout.write(text + "\n");
+        this.clearProgress();
+        this.stdout.write(text + '\n');
     }
 
     error(...args: unknown[]): void {
-        const text = this.getText(args, this.getContext())
+        const text = this.getText(args, this.getContext());
         if (text === undefined) {
-            return
+            return;
         }
 
-        this.clearProgress()
-        this.stderr.write(text + "\n");
+        this.clearProgress();
+        this.stderr.write(text + '\n');
     }
 
     /**
