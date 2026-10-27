@@ -38,7 +38,7 @@ export class WrapperHTTPRequest implements XMLHttpRequest {
     url = '';
     requestHeaders = new Map<string, string>();
 
-    responseHeaders: Record<string, string> = {};
+    responseHeaders = new Map<string, string>();
 
     constructor() {
         // nvt
@@ -50,11 +50,11 @@ export class WrapperHTTPRequest implements XMLHttpRequest {
 
     getAllResponseHeaders(): string {
         // Convert response headers to string
-        return Object.keys(this.responseHeaders).map(key => `${key}: ${this.responseHeaders[key]}`).join('\r\n');
+        return Array.from(this.responseHeaders, ([key, value]) => `${key}: ${value}`).join('\r\n');
     }
 
     getResponseHeader(name: string): string | null {
-        return this.responseHeaders[name] ?? null;
+        return this.responseHeaders.get(name) ?? null;
     }
 
     open(method: string, url: string): void;
@@ -103,7 +103,7 @@ export class WrapperHTTPRequest implements XMLHttpRequest {
             } else {
                 this.response = response.data;
             }
-            this.responseHeaders = response.headers;
+            this.responseHeaders = new Map(Object.entries(response.headers));
             (this.onreadystatechange as any)?.call(this);
         }).catch((e) => {
             console.log('received error');
