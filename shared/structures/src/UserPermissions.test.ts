@@ -1,4 +1,4 @@
-import { ObjectData } from '@simonbackx/simple-encoding';
+import { ObjectData } from '@common/encoding';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { AccessRightHelper } from './AccessRight.js';
 import { MemberResponsibility } from './MemberResponsibility.js';

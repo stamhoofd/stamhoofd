@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { Event, NamedObject } from './Event.js';
 import { EventNotificationStatus } from './EventNotificationStatus.js';

@@ -1,6 +1,6 @@
 import { Database } from '@simonbackx/simple-database';
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, AutoEncoder, field, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { ArrayDecoder, AutoEncoder, field, ObjectData, StringDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { City, PostalCode, Street } from '@stamhoofd/models';
 import type { Address } from '@stamhoofd/structures';

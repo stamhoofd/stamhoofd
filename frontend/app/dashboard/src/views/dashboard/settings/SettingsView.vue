@@ -322,7 +322,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import MollieWarningBox from '@stamhoofd/components/mollie/MollieWarningBox.vue';
 import StripeWarningBox from '@stamhoofd/components/stripe/StripeWarningBox.vue';
 
-import type { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder } from '@common/encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 
 import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';

@@ -1,4 +1,4 @@
-import { AutoEncoder, field } from '@simonbackx/simple-encoding';
+import { AutoEncoder, field } from '@common/encoding';
 import { BaseOrganization } from '../Organization.js';
 import { WebshopPreview } from './Webshop.js';
 

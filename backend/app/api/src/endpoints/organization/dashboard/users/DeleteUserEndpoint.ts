@@ -1,6 +1,6 @@
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { PatchMap } from '@simonbackx/simple-encoding';
+import { PatchMap } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { User } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

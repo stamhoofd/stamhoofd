@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';

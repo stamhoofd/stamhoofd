@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@common/encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import { Discount, DiscountCode, PrivateDiscountCode } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';

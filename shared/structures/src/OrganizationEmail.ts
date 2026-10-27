@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, field, StringDecoder } from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 export class OrganizationEmail extends AutoEncoder {

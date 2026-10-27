@@ -1,5 +1,5 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, AutoEncoder, field, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { ArrayDecoder, AutoEncoder, field, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@common/encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import { Request } from '@simonbackx/simple-networking';
 import type { Platform } from '@stamhoofd/structures';

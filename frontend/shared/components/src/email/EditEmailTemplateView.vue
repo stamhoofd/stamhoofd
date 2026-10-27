@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import type { Replacement } from '@stamhoofd/structures';
 import { EmailTemplate, EmailTemplateType } from '@stamhoofd/structures';

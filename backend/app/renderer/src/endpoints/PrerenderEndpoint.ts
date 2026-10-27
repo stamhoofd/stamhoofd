@@ -2,8 +2,8 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@common/errors';
 
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { AutoEncoder, field, URLDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { AutoEncoder, field, URLDecoder } from '@common/encoding';
 import { TrustedIPWhitelist } from '../classes/TrustedIPWhitelist.js';
 import { TTLFileCache } from '../helpers/TTLFileCache.js';
 import { HtmlToPdfEndpoint } from './HtmlToPdfEndpoint.js';

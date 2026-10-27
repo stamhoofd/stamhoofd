@@ -1,4 +1,4 @@
-import { AutoEncoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder } from '@common/encoding';
 import type { Model } from '@simonbackx/simple-database';
 import { LRUCache } from 'lru-cache';
 

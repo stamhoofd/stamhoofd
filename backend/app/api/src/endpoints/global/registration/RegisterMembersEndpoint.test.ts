@@ -1,4 +1,4 @@
-import { PatchMap } from '@simonbackx/simple-encoding';
+import { PatchMap } from '@common/encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import type { MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod, Token } from '@stamhoofd/models';

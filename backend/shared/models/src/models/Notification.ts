@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { AnyDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
+import { AnyDecoder, ArrayDecoder } from '@common/encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import { NamedObject } from '@stamhoofd/structures';
 import type { NotificationSubjectType } from '@stamhoofd/structures/notifications/NotificationSubjectType.js';

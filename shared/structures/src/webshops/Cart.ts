@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field } from '@common/encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
 
 import { ProductType } from './Product.js';

@@ -59,7 +59,7 @@ import { useErrors } from '#errors/useErrors.ts';
 import { usePatchMap } from '#hooks/usePatchMap.ts';
 import ArrayInput from '#inputs/ArrayInput.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import type { AutoEncoderPatchType, ConvertArrayToPatchableArray, PartialWithoutMethods } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, ConvertArrayToPatchableArray, PartialWithoutMethods } from '@common/encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import type { LoginMethod} from '@stamhoofd/structures';
 import { LoginMethodConfig } from '@stamhoofd/structures';

@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import type { BalanceItem, BalanceItemPaymentDetailed } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';

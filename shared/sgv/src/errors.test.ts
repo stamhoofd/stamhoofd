@@ -1,4 +1,4 @@
-import { ObjectData } from '@simonbackx/simple-encoding';
+import { ObjectData } from '@common/encoding';
 import { SGVErrorsDecoder } from './errors.js';
 
 describe('@stamhoofd/sgv errors', () => {

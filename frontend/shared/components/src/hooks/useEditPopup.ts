@@ -1,4 +1,4 @@
-import type { AutoEncoder, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoder, AutoEncoderPatchType } from '@common/encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';

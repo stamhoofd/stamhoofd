@@ -1,18 +1,16 @@
 {
-    // File used when building the package.
-    "extends": "./tsconfig.base.json",
+    "extends": "../../../tsconfig.test.json",
     "compilerOptions": {
-        "module": "nodenext",
-        "moduleResolution": "nodenext",
-        "outDir": "./dist/test",
-        "lib": ["es2022", "dom"],
-        "types": ["node", "vitest/globals"]
+        "rootDir": "."
     },
     "references": [
-        // Give access to build
         {
-            "path": "./tsconfig.esm.json"
+            "path": "./tsconfig.types.json"
         }
     ],
-    "include": ["./src/**/*.spec.ts", "./src/**/*.test.ts", "./tests"]
+    "include": [
+        "src/**/*.test.ts",
+        "src/**/*.spec.ts",
+        "tests/**/*.ts"
+    ]
 }

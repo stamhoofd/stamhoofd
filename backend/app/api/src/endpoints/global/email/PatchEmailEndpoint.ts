@@ -5,8 +5,8 @@ import type { EmailPreview } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { EmailRecipientsStatus, EmailStatus, Email as EmailStruct, validateEmailTranslations } from '@stamhoofd/structures';
 
-import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { patchObject } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
+import { patchObject } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { Context } from '../../../helpers/Context.js';
 import { EmailPreviewService } from '../../../services/EmailPreviewService.js';

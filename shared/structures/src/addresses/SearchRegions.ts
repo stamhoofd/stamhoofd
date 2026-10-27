@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field } from '@common/encoding';
 
 import { City } from './City.js';
 import { CountryDecoder } from './CountryDecoder.js';

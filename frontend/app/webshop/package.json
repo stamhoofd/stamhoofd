@@ -18,7 +18,7 @@
         "@stamhoofd/frontend-application": "workspace:*",
         "@stamhoofd/frontend-session": "workspace:*",
         "@stamhoofd/frontend-platform": "workspace:*",
-        "@simonbackx/simple-encoding": "2.26.11",
+        "@common/encoding": "workspace:*",
         "@common/errors": "workspace:*",
         "@simonbackx/vue-app-navigation": "2.25.1",
         "@stamhoofd/assets": "workspace:*",

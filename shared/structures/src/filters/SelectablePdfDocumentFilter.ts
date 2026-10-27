@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@common/encoding';
 
 export class SelectablePdfDataFilter extends AutoEncoder {
     @field({ decoder: StringDecoder })

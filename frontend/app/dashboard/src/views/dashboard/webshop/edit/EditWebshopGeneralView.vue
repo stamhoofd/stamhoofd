@@ -231,8 +231,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
+import { ArrayDecoder, PatchableArray } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import listIllustrationSrc from '@stamhoofd/assets/images/illustrations/list.svg';
 import scannerIllustrationSrc from '@stamhoofd/assets/images/illustrations/scanner.svg';

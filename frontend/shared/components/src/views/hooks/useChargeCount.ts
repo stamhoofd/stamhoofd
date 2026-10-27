@@ -1,4 +1,4 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { useContext } from '#hooks/useContext.ts';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';

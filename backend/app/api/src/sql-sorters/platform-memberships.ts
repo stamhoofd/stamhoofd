@@ -1,4 +1,4 @@
-import type { PlainObject } from '@simonbackx/simple-encoding';
+import type { PlainObject } from '@common/encoding';
 import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 import type { PlatformMembership } from '@stamhoofd/structures';

@@ -22,7 +22,7 @@
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
-        "@simonbackx/simple-encoding": "*",
+        "@common/encoding": "workspace:*",
         "pino": "10.4.0",
         "mysql2": "3.24.6"
     },

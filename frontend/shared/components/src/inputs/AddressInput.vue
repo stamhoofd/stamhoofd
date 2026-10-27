@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { isSimpleError, isSimpleErrors } from '@common/errors';
 import type { Server } from '@simonbackx/simple-networking';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';

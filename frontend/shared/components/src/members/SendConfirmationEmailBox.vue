@@ -12,8 +12,8 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
+import { ArrayDecoder } from '@common/encoding';
 import { Toast } from '#overlays/Toast.ts';
 import { useValidation } from '#errors/useValidation.ts';
 import type { Validator } from '#errors/Validator.ts';

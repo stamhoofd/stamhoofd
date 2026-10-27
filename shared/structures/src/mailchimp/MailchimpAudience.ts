@@ -1,4 +1,4 @@
-import { AutoEncoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
 
 export class MailchimpAudience extends AutoEncoder {
     @field({ decoder: StringDecoder })

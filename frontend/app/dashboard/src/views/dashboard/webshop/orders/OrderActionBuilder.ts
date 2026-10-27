@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
+import { ArrayDecoder, PatchableArray } from '@common/encoding';
 import type { usePresent } from '@simonbackx/vue-app-navigation';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent, LoadComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';

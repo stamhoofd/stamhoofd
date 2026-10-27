@@ -349,7 +349,7 @@ pnpm stam clean metabase
 
 ### Tests
 
-`pnpm stam test errors` runs the `@common/errors` suite without MySQL. Imported
+`pnpm stam test errors` and `pnpm stam test encoding` run the common library suites without MySQL. Imported
 libraries are registered as workspaces individually after integration; the other
 copied library folders remain inactive until their own migrations.
 

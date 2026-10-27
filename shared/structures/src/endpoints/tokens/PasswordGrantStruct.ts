@@ -1,4 +1,4 @@
-import type { Data } from '@simonbackx/simple-encoding';
+import type { Data } from '@common/encoding';
 
 export class PasswordGrantStruct {
     grantType: 'password';

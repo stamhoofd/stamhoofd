@@ -1,4 +1,4 @@
-import { ObjectData } from '@simonbackx/simple-encoding';
+import { ObjectData } from '@common/encoding';
 import { BalanceItem } from '../../BalanceItem.js';
 import { Organization } from '../../Organization.js';
 import { OrganizationRegistrationPeriod, RegistrationPeriod } from '../../RegistrationPeriod.js';

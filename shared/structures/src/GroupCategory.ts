@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AccessRight } from '@stamhoofd/types/AccessRight';

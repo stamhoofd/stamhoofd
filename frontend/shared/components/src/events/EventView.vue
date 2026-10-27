@@ -78,7 +78,7 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useChooseFamilyMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import ImageComponent from '#views/ImageComponent.vue';
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { useMemberManager } from '@stamhoofd/frontend-application/MemberManager';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Event, Organization, WebshopPreview } from '@stamhoofd/structures';

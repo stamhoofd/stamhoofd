@@ -1,6 +1,6 @@
 import { column } from '@simonbackx/simple-database';
-import type { PlainObject } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import type { PlainObject } from '@common/encoding';
+import { ArrayDecoder, StringDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { QueryableModel } from '@stamhoofd/sql';
 import { MollieRequiredScopes } from '@stamhoofd/structures/MollieScopes.js';

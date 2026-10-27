@@ -35,8 +35,8 @@ class SafeHouse extends AutoEncoder {
 }
 
 const STExpect = {
-    errorWithCode: (code: string) => expect.objectContaining({ code }) as jest.Constructable,
-    errorWithMessage: (message: string) => expect.objectContaining({ message }) as jest.Constructable,
+    errorWithCode: (code: string) => expect.objectContaining({ code }),
+    errorWithMessage: (message: string) => expect.objectContaining({ message }),
     simpleError: (data: {
         code?: string;
         message?: string | RegExp;
@@ -51,7 +51,7 @@ const STExpect = {
         if (!data.field) {
             delete d.field;
         }
-        return expect.objectContaining(d) as jest.Constructable;
+        return expect.objectContaining(d);
     },
     simpleErrors: (data: {
         code?: string;
@@ -60,7 +60,7 @@ const STExpect = {
     }[]) => {
         return expect.objectContaining({
             errors: data.map(d => STExpect.simpleError(d)),
-        }) as jest.Constructable;
+        });
     },
 };
 

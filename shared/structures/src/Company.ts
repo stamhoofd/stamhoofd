@@ -1,4 +1,4 @@
-import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, StringDecoder } from '@common/encoding';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';

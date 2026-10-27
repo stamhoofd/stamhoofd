@@ -1,4 +1,4 @@
-import { AutoEncoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, IntegerDecoder } from '@common/encoding';
 
 import type { PlatformMember } from './members/PlatformMember.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';

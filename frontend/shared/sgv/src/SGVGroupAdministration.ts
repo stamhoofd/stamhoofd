@@ -41,8 +41,8 @@ import {
     schrappen,
 } from './SGVSyncReport.ts';
 
-import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
+import { PatchableArray } from '@common/encoding';
 import { isSimpleError, isSimpleErrors } from '@common/errors';
 import { Sorter } from '@stamhoofd/utility';
 

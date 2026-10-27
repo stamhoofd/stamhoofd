@@ -1,4 +1,4 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { ComponentWithProperties, defineRoute, NavigationController, onCheckRoutes, ReactiveUrl, UrlHelper, useModalStackComponent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';

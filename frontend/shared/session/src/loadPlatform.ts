@@ -1,5 +1,5 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { ObjectData, VersionBox, VersionBoxDecoder } from '@common/encoding';
 import { AuditLogReplacementDependencies, Platform, Version } from '@stamhoofd/structures';
 import { uuidToName } from '@stamhoofd/structures/helpers/uuidToName.js';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';

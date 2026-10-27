@@ -1,4 +1,4 @@
-import { ArrayDecoder, field } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, field } from '@common/encoding';
 
 import { MemberPlatformMembershipHelper } from '../helpers/MemberPlatformMembershipHelper.js';
 import { User } from '../User.js';

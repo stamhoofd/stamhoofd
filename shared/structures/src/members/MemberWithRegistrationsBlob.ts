@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, field } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, DateDecoder, field } from '@common/encoding';
 
 import { GenericBalance } from '../GenericBalance.js';
 import type { Group } from '../Group.js';

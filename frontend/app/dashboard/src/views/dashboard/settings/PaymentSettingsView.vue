@@ -329,8 +329,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@common/encoding';
 import { SimpleError, SimpleErrors } from '@common/errors';
 import { useDismiss, useUrl } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';

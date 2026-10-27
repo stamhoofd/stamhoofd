@@ -1,5 +1,5 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { AnyDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { AnyDecoder, AutoEncoder, field, StringDecoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@common/errors';

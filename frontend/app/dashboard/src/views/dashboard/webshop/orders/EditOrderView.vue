@@ -182,8 +182,8 @@
     </SaveView>
 </template>
 <script lang="ts" setup>
-import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, PatchableArray, patchContainsChanges } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
+import { ArrayDecoder, PatchableArray, patchContainsChanges } from '@common/encoding';
 import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';

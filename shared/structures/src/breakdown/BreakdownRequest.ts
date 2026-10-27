@@ -1,5 +1,5 @@
-import type { Data, Decoder, EncodeContext, PlainObject } from '@simonbackx/simple-encoding';
-import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import type { Data, Decoder, EncodeContext, PlainObject } from '@common/encoding';
+import { ArrayDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { CountFilteredRequest, StamhoofdFilterJSONDecoder } from '../filters/FilteredRequest.js';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';

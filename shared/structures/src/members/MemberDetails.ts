@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, PatchableArray, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, PatchableArray, StringDecoder, SymbolDecoder } from '@common/encoding';
 import { DataValidator, Formatter, Sorter, StringCompare } from '@stamhoofd/utility';
 
 import { Language } from '@stamhoofd/types/Language';

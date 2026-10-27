@@ -1,18 +1,14 @@
 {
-    // File used by the editor.
-    "extends": "./tsconfig.base.json",
+    "extends": "../../../tsconfig.base.json",
     "compilerOptions": {
-        "outDir": "dist"
+        "target": "es2022"
     },
-    "files": [], // intentionally empty
+    "files": [],
     "references": [
-        // Project dependencies are added by nx sync
         {
-            // Normal build
-            "path": "./tsconfig.esm.json"
+            "path": "./tsconfig.types.json"
         },
         {
-            // Test files
             "path": "./tsconfig.test.json"
         }
     ]

@@ -1,5 +1,5 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@common/encoding';
 
 import { MembersBlob } from '../members/MemberWithRegistrationsBlob.js';
 import { PaymentGeneral } from '../members/PaymentGeneral.js';

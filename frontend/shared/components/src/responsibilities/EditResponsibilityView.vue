@@ -169,7 +169,7 @@ import DefaultAgeGroupIdsInput from '#inputs/DefaultAgeGroupIdsInput.vue';
 import TagIdsInput from '#inputs/TagIdsInput.vue';
 import SaveView from '#navigation/SaveView.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';

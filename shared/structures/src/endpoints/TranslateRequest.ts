@@ -1,5 +1,5 @@
-import type { Data, Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, AutoEncoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Data, Decoder } from '@common/encoding';
+import { ArrayDecoder, AutoEncoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { Language } from '@stamhoofd/types/Language';
 

@@ -20,6 +20,7 @@
         "vue": "3.5.44"
     },
     "devDependencies": {
+        "@common/encoding": "workspace:*",
         "@stamhoofd/vite-config": "workspace:*",
         "eslint-plugin-stamhoofd": "workspace:*",
         "vite": "8.3.4",

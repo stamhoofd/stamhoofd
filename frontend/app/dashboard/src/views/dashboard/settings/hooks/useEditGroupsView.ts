@@ -1,4 +1,4 @@
-import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { GroupCategory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 

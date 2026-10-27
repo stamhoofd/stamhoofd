@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
+import { PatchableArray } from '@common/encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, User } from '@stamhoofd/models';
 import { AuditLog, BalanceItem, BalanceItemFactory, MemberFactory, OrganizationFactory, UserFactory } from '@stamhoofd/models';

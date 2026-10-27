@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, field, IntegerDecoder } from '@common/encoding';
 
 export class MailchimpSyncPreview extends AutoEncoder {
     /**

@@ -130,7 +130,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext';

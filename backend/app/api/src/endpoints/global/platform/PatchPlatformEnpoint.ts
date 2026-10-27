@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { isPatchableArray, patchObject } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
+import { isPatchableArray, patchObject } from '@common/encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';

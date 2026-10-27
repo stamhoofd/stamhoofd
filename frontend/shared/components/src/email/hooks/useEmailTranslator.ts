@@ -1,4 +1,4 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { TranslateResponse } from '@stamhoofd/structures/endpoints/TranslateRequest.js';
 import type { TranslateRequest } from '@stamhoofd/structures/endpoints/TranslateRequest.js';
 import { useContext } from '#hooks/useContext.ts';

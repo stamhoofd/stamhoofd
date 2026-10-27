@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder, field } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, field } from '@common/encoding';
 
 export class CreateMandateSettings extends AutoEncoder {
     /**

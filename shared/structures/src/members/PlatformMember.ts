@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@common/encoding';
+import { deepSetArray, PatchableArray } from '@common/encoding';
 
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import type { Group } from '../Group.js';

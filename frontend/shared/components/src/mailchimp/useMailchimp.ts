@@ -1,4 +1,4 @@
-import type { PatchableArray } from '@simonbackx/simple-encoding';
+import type { PatchableArray } from '@common/encoding';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { Organization, Platform, RecordCategory, RecordSettings } from '@stamhoofd/structures';
 import { RecordType } from '@stamhoofd/structures';

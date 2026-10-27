@@ -1,4 +1,4 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PayableBalanceCollection } from '@stamhoofd/structures';

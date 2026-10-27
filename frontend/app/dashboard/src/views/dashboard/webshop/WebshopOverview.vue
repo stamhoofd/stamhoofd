@@ -475,8 +475,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
+import { ArrayDecoder, PatchableArray } from '@common/encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, defineRoute, NavigationController, useCanPop, useNavigate, usePop, useSplitViewController } from '@simonbackx/vue-app-navigation';
 

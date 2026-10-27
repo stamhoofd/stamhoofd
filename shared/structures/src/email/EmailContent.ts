@@ -1,4 +1,4 @@
-import { AnyDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AnyDecoder, AutoEncoder, field, StringDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import type { Language } from '@stamhoofd/types/Language';
 

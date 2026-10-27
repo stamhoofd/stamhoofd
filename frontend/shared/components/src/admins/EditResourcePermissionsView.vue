@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { usePatch } from '#hooks/usePatch.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';

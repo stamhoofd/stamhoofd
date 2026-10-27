@@ -61,7 +61,7 @@ import type { Validator } from '#errors/Validator.ts';
 import { PaymentCustomer } from '@stamhoofd/structures';
 import { computed, ref, watch } from 'vue';
 import PaymentCustomerInput from './PaymentCustomerInput.vue';
-import type { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PartialWithoutMethods } from '@common/encoding';
 
 const props = withDefaults(defineProps<{
     customers?: PaymentCustomer[];

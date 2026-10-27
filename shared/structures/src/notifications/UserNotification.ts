@@ -1,4 +1,4 @@
-import { AnyDecoder, ArrayDecoder, AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AnyDecoder, ArrayDecoder, AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
 import { NamedObject } from '../Event.js';
 import type { NotificationSubjectType } from './NotificationSubjectType.js';
 import type { NotificationType } from './NotificationType.js';

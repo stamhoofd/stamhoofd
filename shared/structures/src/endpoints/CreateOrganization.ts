@@ -1,4 +1,4 @@
-import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, StringDecoder } from '@common/encoding';
 
 import { Organization } from '../Organization.js';
 import { NewUser } from '../User.js';

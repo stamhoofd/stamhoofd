@@ -1,5 +1,5 @@
-import type { Data, Encodeable, EncodeContext } from '@simonbackx/simple-encoding';
-import { EncodeMedium } from '@simonbackx/simple-encoding';
+import type { Data, Encodeable, EncodeContext } from '@common/encoding';
+import { EncodeMedium } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { AuditLogReplacement, AuditLogReplacementType } from '../AuditLogReplacement.js';
 

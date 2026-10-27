@@ -1,5 +1,5 @@
 import { Migration } from '@simonbackx/simple-database';
-import { cloneObject } from '@simonbackx/simple-encoding';
+import { cloneObject } from '@common/encoding';
 import { Group, Organization } from '@stamhoofd/models';
 import type { OrganizationRecordsConfiguration, RecordCategory, StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
 import { mergeFilters, PropertyFilter } from '@stamhoofd/structures';

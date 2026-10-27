@@ -7,8 +7,8 @@ import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceTyp
 import { Address, BuckarooSettings, Company, MemberResponsibility, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PeppolEndointId, PermissionRoleDetailed, PermissionRoleForResponsibility, Permissions, PermissionsResourceKey, ResourcePermissions, Version } from '@stamhoofd/structures';
 import { SessionService } from '../../../../services/SessionService.js';
 
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
+import { PatchableArray, PatchMap } from '@common/encoding';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';

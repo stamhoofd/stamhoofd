@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, EnumDecoder, field, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, EnumDecoder, field, NumberDecoder, StringDecoder } from '@common/encoding';
 import { DataValidator } from '@stamhoofd/utility';
 import wordDictionary from './data/audit-log-words.js';
 

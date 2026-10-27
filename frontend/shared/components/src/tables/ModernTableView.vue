@@ -159,8 +159,8 @@ import type { TableAction, TableActionSelection } from '#tables/classes/TableAct
 import { AsyncTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
 import type { TableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
 import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@common/encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
 import { ComponentWithProperties, defineRoute, NavigationController, useCanPop, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';

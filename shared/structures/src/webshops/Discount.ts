@@ -1,5 +1,5 @@
-import type { Data, EncodeContext, PlainObject } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, IntegerDecoder, MapDecoder, ObjectData, StringDecoder, field } from '@simonbackx/simple-encoding';
+import type { Data, EncodeContext, PlainObject } from '@common/encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, IntegerDecoder, MapDecoder, ObjectData, StringDecoder, field } from '@common/encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';

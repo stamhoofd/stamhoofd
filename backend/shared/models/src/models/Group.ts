@@ -3,7 +3,7 @@ import type { GroupCategory, OrganizationRegistrationPeriodSettings } from '@sta
 import { GroupPrivateSettings, GroupSettings, GroupStatus, Group as GroupStruct, GroupType, StockReservation } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
-import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@common/encoding';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel } from '@stamhoofd/sql';
 

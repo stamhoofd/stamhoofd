@@ -4,7 +4,7 @@ import type { CountFilteredRequest, EmailPreview, StamhoofdFilter } from '@stamh
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { assertSort, EmailStatus, getSortFilter, LimitedFilteredRequest, mergeFilters, PaginatedResponse } from '@stamhoofd/structures';
 
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { Email, Platform } from '@stamhoofd/models';
 import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';

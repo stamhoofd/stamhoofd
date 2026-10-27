@@ -1,4 +1,4 @@
-import { field } from '@simonbackx/simple-encoding';
+import { field } from '@common/encoding';
 
 import { MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob.js';
 import { Registration } from './Registration.js';

@@ -336,8 +336,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { ObjectData, patchContainsChanges, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoder, AutoEncoderPatchType, Decoder } from '@common/encoding';
+import { ObjectData, patchContainsChanges, VersionBox, VersionBoxDecoder } from '@common/encoding';
 import { isSimpleError, SimpleError, SimpleErrors } from '@common/errors';
 import { Request } from '@simonbackx/simple-networking';
 import { useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';

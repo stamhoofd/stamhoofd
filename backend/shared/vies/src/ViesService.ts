@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import { ViesCachedResult } from '@stamhoofd/models/models/ViesCachedResult.js';
 import type { Company } from '@stamhoofd/structures';

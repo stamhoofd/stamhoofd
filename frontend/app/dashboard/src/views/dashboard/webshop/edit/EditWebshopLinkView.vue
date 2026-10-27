@@ -114,7 +114,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';

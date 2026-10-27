@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@common/encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { AuditLogReplacement } from '../AuditLogReplacement.js';
 

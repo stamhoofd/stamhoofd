@@ -33,7 +33,7 @@
     },
     "dependencies": {
         "@simonbackx/simple-database": "1.40.1",
-        "@simonbackx/simple-encoding": "2.26.11",
+        "@common/encoding": "workspace:*",
         "@common/errors": "workspace:*",
         "@simonbackx/simple-logging": "1.0.1",
         "@stamhoofd/backend-env": "workspace:*",

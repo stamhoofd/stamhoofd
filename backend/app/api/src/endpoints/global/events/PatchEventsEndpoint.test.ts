@@ -1,5 +1,5 @@
 import { Database } from '@simonbackx/simple-database';
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@common/encoding';
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { User } from '@stamhoofd/models';

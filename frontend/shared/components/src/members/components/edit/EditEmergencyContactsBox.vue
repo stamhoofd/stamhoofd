@@ -53,8 +53,8 @@
 import type { PlatformMember } from '@stamhoofd/structures';
 import { EmergencyContact } from '@stamhoofd/structures';
 
-import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@common/encoding';
+import { PatchableArray } from '@common/encoding';
 import { SimpleError, SimpleErrors } from '@common/errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';

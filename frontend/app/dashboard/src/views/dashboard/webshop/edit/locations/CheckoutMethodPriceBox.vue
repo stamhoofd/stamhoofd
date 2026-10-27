@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
 import type { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import type { Validator } from '@stamhoofd/components/errors/Validator';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';

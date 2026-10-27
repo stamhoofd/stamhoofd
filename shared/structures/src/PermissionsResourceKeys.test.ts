@@ -1,4 +1,4 @@
-import { ObjectData, PatchMap } from '@simonbackx/simple-encoding';
+import { ObjectData, PatchMap } from '@common/encoding';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionRoleDetailed } from './PermissionRole.js';
 import { Permissions } from './Permissions.js';

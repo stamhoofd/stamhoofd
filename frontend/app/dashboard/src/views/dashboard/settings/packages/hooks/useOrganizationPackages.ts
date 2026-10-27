@@ -1,4 +1,4 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { useGlobalEventListener } from '@stamhoofd/components/hooks/useGlobalEventListener';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';

@@ -1,4 +1,4 @@
-import { field } from '@simonbackx/simple-encoding';
+import { field } from '@common/encoding';
 import type { CellValue, XlsxTransformerColumn, XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { Order, StripeAccount } from '@stamhoofd/models';

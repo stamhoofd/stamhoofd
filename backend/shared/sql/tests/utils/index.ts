@@ -1,6 +1,6 @@
 import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { Database } from '@simonbackx/simple-database';
-import type { PlainObject } from '@simonbackx/simple-encoding';
+import type { PlainObject } from '@common/encoding';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import { TestUtils } from '@stamhoofd/test-utils';
 import type { SQLFilterDefinitions } from '../../src/filters/SQLFilterTypes.js';

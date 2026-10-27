@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import { patchObject } from '@simonbackx/simple-encoding';
+import { patchObject } from '@common/encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';

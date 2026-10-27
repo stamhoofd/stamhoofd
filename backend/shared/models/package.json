@@ -44,7 +44,7 @@
         "@aws-sdk/client-sesv2": "3.1153.0",
         "@bwip-js/node": "4.11.4",
         "@simonbackx/simple-database": "1.40.1",
-        "@simonbackx/simple-encoding": "2.26.11",
+        "@common/encoding": "workspace:*",
         "@simonbackx/simple-endpoints": "1.23.0",
         "@common/errors": "workspace:*",
         "argon2": "0.45.1",

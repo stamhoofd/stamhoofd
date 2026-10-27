@@ -172,7 +172,7 @@ import InvoiceRow from '#payments/components/InvoiceRow.vue';
 import PaymentRow from '#payments/components/PaymentRow.vue';
 
 import GroupedBalanceList from '#payments/GroupedBalanceList.vue';
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';

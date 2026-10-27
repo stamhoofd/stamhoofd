@@ -1,4 +1,4 @@
-import type { PlainObject } from '@simonbackx/simple-encoding';
+import type { PlainObject } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import type { SortList } from '@stamhoofd/filters/SortList';
 import type { SortDefinition } from '@stamhoofd/filters/Sorters';

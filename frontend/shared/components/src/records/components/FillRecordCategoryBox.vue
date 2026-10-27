@@ -59,7 +59,7 @@
 </template>
 
 <script lang="ts" setup generic="T extends ObjectWithRecords">
-import { PatchMap } from '@simonbackx/simple-encoding';
+import { PatchMap } from '@common/encoding';
 import type { ObjectWithRecords, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { computed } from 'vue';

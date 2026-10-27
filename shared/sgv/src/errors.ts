@@ -1,5 +1,5 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
-import type { ObjectData } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import type { ObjectData } from '@common/encoding';
 import { SimpleError, SimpleErrors } from '@common/errors';
 
 /** Error payload shape returned by SGV for validation and business-rule failures. */

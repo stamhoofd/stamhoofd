@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { AutoEncoder, BooleanDecoder, field, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
+import { AutoEncoder, BooleanDecoder, field, PatchableArrayDecoder, StringDecoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Invoice as InvoiceStruct } from '@stamhoofd/structures';

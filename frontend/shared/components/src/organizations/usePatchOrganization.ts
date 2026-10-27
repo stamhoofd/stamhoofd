@@ -1,5 +1,5 @@
 import { useOrganization } from '#hooks/useOrganization';
-import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { Organization } from '@stamhoofd/structures';

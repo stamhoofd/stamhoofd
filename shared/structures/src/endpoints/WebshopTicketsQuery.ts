@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, field, StringDecoder } from '@common/encoding';
 
 export class WebshopTicketsQuery extends AutoEncoder {
     /**

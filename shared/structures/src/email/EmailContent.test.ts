@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ObjectData, PatchableArray, PatchableArrayDecoder, PatchMap, StringDecoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
+import { ObjectData, PatchableArray, PatchableArrayDecoder, PatchMap, StringDecoder } from '@common/encoding';
 import { Language } from '@stamhoofd/types/Language';
 import { Version } from '../Version.js';
 import { Email, EmailRecipient } from './Email.js';

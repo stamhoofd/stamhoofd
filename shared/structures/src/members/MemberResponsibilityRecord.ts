@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, StringDecoder, field } from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { AuditLogReplacement } from '../AuditLogReplacement.js';
 import { Group } from '../Group.js';

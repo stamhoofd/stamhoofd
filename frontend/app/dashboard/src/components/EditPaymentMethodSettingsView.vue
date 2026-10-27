@@ -114,7 +114,7 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PartialWithoutMethods } from '@common/encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';

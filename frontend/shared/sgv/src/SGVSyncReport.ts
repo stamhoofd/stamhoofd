@@ -1,4 +1,4 @@
-import type { PartialWithoutMethods } from '@simonbackx/simple-encoding';
+import type { PartialWithoutMethods } from '@common/encoding';
 import type {
     SGVAdres,
     SGVContact,

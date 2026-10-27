@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, EnumDecoder, field, StringDecoder } from '@common/encoding';
 
 import { LoginProviderType } from './User.js';
 

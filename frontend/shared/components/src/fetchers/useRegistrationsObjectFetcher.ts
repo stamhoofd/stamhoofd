@@ -1,4 +1,4 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import type { CountFilteredRequest, SortList } from '@stamhoofd/structures';
 import { assertSort, CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, PlatformRegistration, RegistrationsBlob, SortItemDirection } from '@stamhoofd/structures';
 import { useContext } from '#hooks/useContext.ts';

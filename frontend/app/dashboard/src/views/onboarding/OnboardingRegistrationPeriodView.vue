@@ -86,9 +86,9 @@
 </template>
 
 <script setup lang="ts">
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
-import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { ArrayDecoder, PatchableArray } from '@common/encoding';
+import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';

@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
-import { PatchableArray, patchContainsChanges } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder} from '@common/encoding';
+import { PatchableArray, patchContainsChanges } from '@common/encoding';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';

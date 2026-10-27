@@ -10,7 +10,7 @@ import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.
 
 import { useSetUitpasEvent } from '@stamhoofd/components/uitpas/useSetUitpasEvent.ts';
 import type { Ref } from 'vue';
-import type { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PartialWithoutMethods } from '@common/encoding';
 
 export function useGoToUitpasConfiguration(patchedProduct: Ref<Product>, addProductPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<Product>>) => void) {
     const organization = useRequiredOrganization();

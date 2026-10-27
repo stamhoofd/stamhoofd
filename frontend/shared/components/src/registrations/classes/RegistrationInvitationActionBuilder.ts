@@ -1,8 +1,8 @@
 import { useContext } from '#hooks/useContext.ts';
 import type { TableAction } from '#tables/classes/TableAction.ts';
 import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
-import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@common/encoding';
+import { PatchableArray } from '@common/encoding';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { Group, OrganizationRegistrationPeriod, RegistrationInvitation, RegistrationInvitationRequest } from '@stamhoofd/structures';

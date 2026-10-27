@@ -1,4 +1,4 @@
-import type { Decoder, Data } from '@simonbackx/simple-encoding';
+import type { Decoder, Data } from '@common/encoding';
 
 export class StringNullableDecoder<T> implements Decoder<T | null> {
     decoder: Decoder<T>;

@@ -9,7 +9,7 @@ AutoEncoder uses the `@field` TypeScript decorator to mark all properties that s
 Here is an example:
 
 ```typescript
-import { Encodeable, StringDecoder, NumberDecoder, field } from '@simonbackx/simple-encoding';
+import { Encodeable, StringDecoder, NumberDecoder, field } from '@common/encoding';
 
 class MyClass extends AutoEncoder {
     @field({ decoder: NumberDecoder })

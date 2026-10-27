@@ -10,7 +10,7 @@ import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/Custome
 import { customerFieldKeys } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 import { Formatter } from '@stamhoofd/utility';
 
-import { patchObject } from '@simonbackx/simple-encoding';
+import { patchObject } from '@common/encoding';
 import type { CheckoutManager } from '../../classes/CheckoutManager';
 
 export enum CheckoutStepType {

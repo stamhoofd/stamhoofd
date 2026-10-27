@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@common/encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { BalanceItemRelation, BalanceItemRelationType } from './BalanceItem.js';
 import { StamhoofdFilterDecoder } from './filters/FilteredRequest.js';

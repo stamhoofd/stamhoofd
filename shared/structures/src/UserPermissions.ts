@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { AutoEncoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
+import { AutoEncoder, field, MapDecoder, StringDecoder } from '@common/encoding';
 
 import { AccessRightHelper } from './AccessRight.js';
 import { LoadedPermissions } from './LoadedPermissions.js';

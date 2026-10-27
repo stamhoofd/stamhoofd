@@ -1,4 +1,4 @@
-import { AutoEncoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
+import { AutoEncoder, EnumDecoder, field } from '@common/encoding';
 import { ReduceablePrice } from './ReduceablePrice.js';
 import type { PlatformMember } from './members/PlatformMember.js';
 import { Formatter } from '@stamhoofd/utility';

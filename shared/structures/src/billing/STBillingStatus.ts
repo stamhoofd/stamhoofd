@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field } from '@common/encoding';
 import { STCredit } from './STCredit.js';
 
 import { STInvoice } from './STInvoice.js';

@@ -1,4 +1,4 @@
-import { ObjectData } from '@simonbackx/simple-encoding';
+import { ObjectData } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 
 import { Group } from './Group.js';

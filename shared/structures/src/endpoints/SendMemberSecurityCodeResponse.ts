@@ -1,4 +1,4 @@
-import { AutoEncoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, EnumDecoder, field, StringDecoder } from '@common/encoding';
 
 import { SecurityCodeSendMethod } from '../members/SecurityCodeSendMethod.js';
 

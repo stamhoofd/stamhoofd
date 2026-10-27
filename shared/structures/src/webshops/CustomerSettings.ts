@@ -1,4 +1,4 @@
-import { AutoEncoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
+import { AutoEncoder, EnumDecoder, field } from '@common/encoding';
 
 import { RecordCategory } from '../members/records/RecordCategory.js';
 import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';

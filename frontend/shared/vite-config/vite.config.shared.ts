@@ -81,7 +81,7 @@ export async function buildConfig(options: { name: FrontendApp.WebApp | Frontend
             dedupe: [
                 // Linked packages can resolve dependencies from their local node_modules folder.
                 // this can cause type issues because multiple versions of the same package are loaded
-                '@simonbackx/simple-encoding',
+                '@common/encoding',
                 '@simonbackx/simple-database',
             ],
         },

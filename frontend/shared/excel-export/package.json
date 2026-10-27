@@ -19,7 +19,7 @@
         "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "dependencies": {
-        "@simonbackx/simple-encoding": "2.26.11",
+        "@common/encoding": "workspace:*",
         "@simonbackx/vue-app-navigation": "2.25.1",
         "@stamhoofd/excel-writer": "workspace:*",
         "@stamhoofd/structures": "workspace:*",

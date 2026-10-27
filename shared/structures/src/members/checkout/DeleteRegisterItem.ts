@@ -1,4 +1,4 @@
-import { AutoEncoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import type { RegisterContext } from './RegisterCheckout.js';
 import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';

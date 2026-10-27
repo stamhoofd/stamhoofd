@@ -1,7 +1,7 @@
 import type { CountFilteredRequest, PlatformMember, SortList } from '@stamhoofd/structures';
 import { assertSort, CountResponse, LimitedFilteredRequest, MembersBlob, PaginatedResponseDecoder, PlatformFamily, SortItemDirection } from '@stamhoofd/structures';
 import type { ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { useContext } from '#hooks/useContext.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 

@@ -1,4 +1,4 @@
-import { IntegerDecoder } from '@simonbackx/simple-encoding';
+import { IntegerDecoder } from '@common/encoding';
 
 export const upgradePriceFrom2To4DecimalPlaces = {
     decoder: IntegerDecoder,

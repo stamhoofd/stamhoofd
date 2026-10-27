@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder, DateDecoder, EmailDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, DateDecoder, EmailDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@common/encoding';
 import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
 

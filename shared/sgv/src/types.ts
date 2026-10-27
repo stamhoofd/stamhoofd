@@ -1,5 +1,5 @@
-import type { Decoder, ObjectData } from '@simonbackx/simple-encoding';
-import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, NumberDecoder, RecordDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder, ObjectData } from '@common/encoding';
+import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, NumberDecoder, RecordDecoder, StringDecoder } from '@common/encoding';
 import { SimpleError, SimpleErrors } from '@common/errors';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 

@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
 import { isSimpleError, SimpleError } from '@common/errors';
 import { Member } from '@stamhoofd/models';
 import type { MemberDetails, ReviewTimes } from '@stamhoofd/structures';

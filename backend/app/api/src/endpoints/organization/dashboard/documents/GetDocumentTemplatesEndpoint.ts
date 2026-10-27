@@ -4,7 +4,7 @@ import { DocumentTemplate } from '@stamhoofd/models';
 import type { CountFilteredRequest, DocumentTemplatePrivate, StamhoofdFilter } from '@stamhoofd/structures';
 import { assertSort, LimitedFilteredRequest, PaginatedResponse, SearchFilterFactory } from '@stamhoofd/structures';
 
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { applySQLSorter, compileToSQLFilter, SQL } from '@stamhoofd/sql';
 import { Context } from '../../../../helpers/Context.js';

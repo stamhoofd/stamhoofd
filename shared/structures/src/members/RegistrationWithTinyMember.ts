@@ -1,4 +1,4 @@
-import { field } from '@simonbackx/simple-encoding';
+import { field } from '@common/encoding';
 
 import { TinyMember } from './Member.js';
 import { Registration } from './Registration.js';

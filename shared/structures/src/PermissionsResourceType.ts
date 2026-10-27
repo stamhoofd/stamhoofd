@@ -1,4 +1,4 @@
-import { isPatchMap, PatchMap } from '@simonbackx/simple-encoding';
+import { isPatchMap, PatchMap } from '@common/encoding';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';

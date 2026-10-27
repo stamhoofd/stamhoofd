@@ -1,4 +1,4 @@
-import { ObjectData } from '@simonbackx/simple-encoding';
+import { ObjectData } from '@common/encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { Platform, PlatformConfig, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig } from './Platform.js';
 import { Version } from './Version.js';

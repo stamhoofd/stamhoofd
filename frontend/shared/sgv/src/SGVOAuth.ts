@@ -1,4 +1,4 @@
-import { AutoEncoder, encodeObject, field, IntegerDecoder, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, encodeObject, field, IntegerDecoder, ObjectData, StringDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import type { RequestResult } from '@simonbackx/simple-networking';
 import { Server } from '@simonbackx/simple-networking';

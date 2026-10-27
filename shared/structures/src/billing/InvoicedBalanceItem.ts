@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { Sorter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';

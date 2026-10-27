@@ -1,6 +1,6 @@
 import { Column, Database } from '@simonbackx/simple-database';
-import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@common/encoding';
+import { PatchableArray, PatchMap } from '@common/encoding';
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import { GroupFactory, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberResponsibilityRecordFactory, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, RegistrationPeriodFactory, User, UserFactory } from '@stamhoofd/models';

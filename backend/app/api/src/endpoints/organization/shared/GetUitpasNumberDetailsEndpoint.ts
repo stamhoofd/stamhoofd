@@ -2,7 +2,7 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { UitpasNumberDetails, UitpasNumbersGetDetailsRequest } from '@stamhoofd/structures';
 
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
 import { uitpasApiResponseToSocialTariff } from '../../../helpers/updateMemberDetailsUitpasNumber.js';
 import { throwIfInvalidUitpasNumber } from '../../../services/uitpas/checkUitpasNumbers.js';

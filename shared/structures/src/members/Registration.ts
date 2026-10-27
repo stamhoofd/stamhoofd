@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { AppliedRegistrationDiscount } from '../AppliedRegistrationDiscount.js';
 import { compileToInMemoryFilter } from '../filters/InMemoryFilter.js';

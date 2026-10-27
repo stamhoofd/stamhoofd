@@ -1,5 +1,5 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { ObjectData, VersionBox, VersionBoxDecoder } from '@common/encoding';
 import type { SimpleErrors } from '@common/errors';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import type { RequestMiddleware } from '@simonbackx/simple-networking';

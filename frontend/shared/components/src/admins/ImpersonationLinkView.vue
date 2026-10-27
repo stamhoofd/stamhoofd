@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { getAppHost, ImpersonationTicket, StartImpersonationRequest } from '@stamhoofd/structures';
 import type { User } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
