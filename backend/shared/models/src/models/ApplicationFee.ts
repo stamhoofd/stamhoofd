@@ -1,4 +1,4 @@
-import { column } from '@simonbackx/simple-database';
+import { column } from '@node/database';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { v4 as uuidv4 } from 'uuid';

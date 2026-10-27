@@ -19,7 +19,7 @@ if (new Date().getTimezoneOffset() !== 0) {
 export async function setup(project: TestProject) {
     TestUtils.globalSetup();
 
-    const { Database } = await import('@simonbackx/simple-database');
+    const { Database } = await import('@node/database');
 
     const { run } = await import('../src/migrate.js');
     await run();

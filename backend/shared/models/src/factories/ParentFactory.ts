@@ -1,4 +1,4 @@
-import { Factory } from '@simonbackx/simple-database';
+import { Factory } from '@node/database';
 import { Gender, Parent, ParentType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 

@@ -1,4 +1,4 @@
-import { Factory } from '@simonbackx/simple-database';
+import { Factory } from '@node/database';
 import { RecordSettings, RecordType, TranslatedString } from '@stamhoofd/structures';
 
 export class RecordOptions {

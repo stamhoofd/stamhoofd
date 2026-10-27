@@ -1,5 +1,5 @@
-import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { Migration } from '@simonbackx/simple-database';
+import type { SQLResultNamespacedRow } from '@node/database';
+import { Migration } from '@node/database';
 import { Member } from '@stamhoofd/models';
 import { SQL, SQLSelect } from '@stamhoofd/sql';
 import { mergeTwoMembers } from '../helpers/MemberMerger.js';

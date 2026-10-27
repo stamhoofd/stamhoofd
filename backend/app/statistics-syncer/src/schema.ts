@@ -1,4 +1,4 @@
-import { DatabaseInstance, Migration } from '@simonbackx/simple-database';
+import { DatabaseInstance, Migration } from '@node/database';
 import path from 'node:path';
 import { getStatisticsConnection, getStatisticsDatabaseConfig, getStatisticsPoolOptions } from './database.js';
 

@@ -1,4 +1,4 @@
-import { column } from '@simonbackx/simple-database';
+import { column } from '@node/database';
 import { QueryableModel, SQLWhereSign } from '@stamhoofd/sql';
 import crypto from 'crypto';
 

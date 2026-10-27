@@ -1,4 +1,4 @@
-import { Model } from '@simonbackx/simple-database';
+import { Model } from '@node/database';
 import { Organization, Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import type { RecordSettings } from '@stamhoofd/structures';

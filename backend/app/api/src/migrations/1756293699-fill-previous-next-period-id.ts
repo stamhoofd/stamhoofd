@@ -1,4 +1,4 @@
-import { Migration } from '@simonbackx/simple-database';
+import { Migration } from '@node/database';
 import { logger } from '@simonbackx/simple-logging';
 import { Organization, Platform } from '@stamhoofd/models';
 import { RegistrationPeriodService } from '@stamhoofd/models/services/RegistrationPeriodService.js';

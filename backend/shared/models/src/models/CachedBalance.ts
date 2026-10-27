@@ -1,4 +1,4 @@
-import { column, Database } from '@simonbackx/simple-database';
+import { column, Database } from '@node/database';
 import type { SQLWhere } from '@stamhoofd/sql';
 import { QueryableModel, SQL, SQLAlias, SQLMin, SQLSelectAs, SQLSum, SQLWhereSign } from '@stamhoofd/sql';
 import { BalanceItemStatus, BalanceItem as BalanceItemStruct, ReceivableBalanceType } from '@stamhoofd/structures';

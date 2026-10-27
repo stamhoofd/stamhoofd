@@ -31,7 +31,7 @@
         "postinstall": "node -e \"if (process.env.PUPPETEER_SKIP_DOWNLOAD !== 'true') require('node:child_process').execSync('puppeteer browsers install chrome', { stdio: 'inherit' })\""
     },
     "dependencies": {
-        "@simonbackx/simple-database": "1.40.1",
+        "@node/database": "workspace:*",
         "@common/encoding": "workspace:*",
         "@node/endpoints": "workspace:*",
         "@common/errors": "workspace:*",

@@ -15,7 +15,7 @@
         "lint": "eslint --quiet"
     },
     "dependencies": {
-        "@simonbackx/simple-database": "1.40.1",
+        "@node/database": "workspace:*",
         "@simonbackx/simple-logging": "1.0.1",
         "mysql2": "3.24.6"
     },

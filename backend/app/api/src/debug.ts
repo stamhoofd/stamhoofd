@@ -1,4 +1,4 @@
-import { Column } from '@simonbackx/simple-database';
+import { Column } from '@node/database';
 import type { ResponseMiddleware, RouterServer } from '@node/endpoints';
 import { EncodedResponse, Router } from '@node/endpoints';
 import { logger } from '@simonbackx/simple-logging';

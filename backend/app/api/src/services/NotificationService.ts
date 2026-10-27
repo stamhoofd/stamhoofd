@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import type { Member, User } from '@stamhoofd/models';
 import { Notification } from '@stamhoofd/models/models/Notification.js';
 import { NotificationPreference } from '@stamhoofd/models/models/NotificationPreference.js';

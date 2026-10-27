@@ -1,4 +1,4 @@
-import { Migration } from '@simonbackx/simple-database';
+import { Migration } from '@node/database';
 import { DocumentTemplate, Group, RegistrationPeriod, V1GroupMigrationData } from '@stamhoofd/models';
 import { GroupType, NamedObject } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

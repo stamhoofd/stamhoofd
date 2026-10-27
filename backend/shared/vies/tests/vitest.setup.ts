@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { TestUtils } from '@stamhoofd/test-utils';
 import nock from 'nock';

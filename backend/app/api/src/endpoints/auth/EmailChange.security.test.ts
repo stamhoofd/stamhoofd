@@ -1,4 +1,4 @@
-import { DatabaseInstance } from '@simonbackx/simple-database';
+import { DatabaseInstance } from '@node/database';
 import { Request } from '@node/endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import type { Organization, Token, User } from '@stamhoofd/models';

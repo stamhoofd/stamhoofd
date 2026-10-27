@@ -23,7 +23,7 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
-        "@simonbackx/simple-database": "1.40.1",
+        "@node/database": "workspace:*",
         "@node/endpoints": "workspace:*",
         "@simonbackx/simple-logging": "1.0.1",
         "@stamhoofd/backend-env": "workspace:*",

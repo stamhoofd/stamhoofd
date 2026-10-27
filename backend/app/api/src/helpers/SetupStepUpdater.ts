@@ -1,4 +1,4 @@
-import { Model } from '@simonbackx/simple-database';
+import { Model } from '@node/database';
 import { SimpleError } from '@common/errors';
 import {
     Group,

@@ -1,4 +1,4 @@
-import { column } from '@simonbackx/simple-database';
+import { column } from '@node/database';
 import { QueryableModel } from '@stamhoofd/sql';
 import { MemberDetails } from '@stamhoofd/structures';
 import type { Member } from './Member.js';

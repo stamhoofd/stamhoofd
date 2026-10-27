@@ -1,4 +1,4 @@
-import { Factory } from '@simonbackx/simple-database';
+import { Factory } from '@node/database';
 import type { PermissionRoleDetailed, STPackageBundle, STPackageType } from '@stamhoofd/structures';
 import { Address, OrganizationMetaData, OrganizationType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

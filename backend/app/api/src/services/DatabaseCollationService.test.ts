@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import { DatabaseCollationService } from './DatabaseCollationService.js';
 
 describe('DatabaseCollationService', () => {

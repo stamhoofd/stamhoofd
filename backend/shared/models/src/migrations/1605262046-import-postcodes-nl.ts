@@ -1,4 +1,4 @@
-import { Database, Migration } from '@simonbackx/simple-database';
+import { Database, Migration } from '@node/database';
 import { Country } from '@stamhoofd/types/Country';
 import { StringCompare } from '@stamhoofd/utility';
 import fs from 'fs';

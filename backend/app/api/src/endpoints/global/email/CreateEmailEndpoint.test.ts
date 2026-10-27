@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import { Request } from '@node/endpoints';
 import type { Organization, Token } from '@stamhoofd/models';
 import { OrganizationFactory, UserFactory, WebshopFactory } from '@stamhoofd/models';

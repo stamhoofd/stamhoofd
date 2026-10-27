@@ -1,4 +1,4 @@
-import type { Model } from '@simonbackx/simple-database';
+import type { Model } from '@node/database';
 import type { Decoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';

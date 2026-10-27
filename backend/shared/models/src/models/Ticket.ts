@@ -1,5 +1,5 @@
-import type { ManyToOneRelation } from '@simonbackx/simple-database';
-import { column } from '@simonbackx/simple-database';
+import type { ManyToOneRelation } from '@node/database';
+import { column } from '@node/database';
 import { QueryableModel } from '@stamhoofd/sql';
 import { CartReservedSeat } from '@stamhoofd/structures';
 import basex from 'base-x';

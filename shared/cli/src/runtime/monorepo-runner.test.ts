@@ -103,6 +103,7 @@ describe('shared build orchestration', () => {
             'errors',
             'encoding',
             'common-networking',
+            'database',
             'metabase',
             'filters',
             'structures',

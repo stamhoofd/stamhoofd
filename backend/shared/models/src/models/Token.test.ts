@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import { SessionClientType, SessionDeviceType, SessionLoginMethod } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 

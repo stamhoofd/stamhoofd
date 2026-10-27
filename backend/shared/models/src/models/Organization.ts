@@ -1,4 +1,4 @@
-import { column, Database } from '@simonbackx/simple-database';
+import { column, Database } from '@node/database';
 import { SimpleError } from '@common/errors';
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';

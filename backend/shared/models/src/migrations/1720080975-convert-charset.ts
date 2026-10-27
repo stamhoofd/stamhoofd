@@ -1,4 +1,4 @@
-import { Database, Migration } from '@simonbackx/simple-database';
+import { Database, Migration } from '@node/database';
 import { LoggingTools } from '@stamhoofd/utility';
 
 export default new Migration(async () => {

@@ -7,7 +7,7 @@ import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest, PaymentGeneral, StamhoofdFilter } from '@stamhoofd/structures';
 import { LimitedFilteredRequest, PaginatedResponse, assertSort, getSortFilter } from '@stamhoofd/structures';
 
-import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import type { SQLResultNamespacedRow } from '@node/database';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
 import { getPaymentSearchFilter, paymentFilterCompilers } from '../../../../sql-filters/payments.js';

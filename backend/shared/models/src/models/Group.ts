@@ -1,4 +1,4 @@
-import { column } from '@simonbackx/simple-database';
+import { column } from '@node/database';
 import type { GroupCategory, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { GroupPrivateSettings, GroupSettings, GroupStatus, Group as GroupStruct, GroupType, StockReservation } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';

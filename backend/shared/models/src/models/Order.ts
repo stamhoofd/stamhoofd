@@ -1,5 +1,5 @@
-import type { ManyToOneRelation } from '@simonbackx/simple-database';
-import { column } from '@simonbackx/simple-database';
+import type { ManyToOneRelation } from '@node/database';
+import { column } from '@node/database';
 import { SimpleError } from '@common/errors';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Language } from '@stamhoofd/types/Language';

@@ -1,4 +1,4 @@
-import { Migration } from '@simonbackx/simple-database';
+import { Migration } from '@node/database';
 import { User } from '@stamhoofd/models';
 import { UserPermissions } from '@stamhoofd/structures';
 import { SeedTools } from '../helpers/SeedTools.js';

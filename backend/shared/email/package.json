@@ -17,7 +17,7 @@
         "lint": "eslint --quiet"
     },
     "dependencies": {
-        "@simonbackx/simple-database": "1.40.1",
+        "@node/database": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
         "html-to-text": "10.0.1",
         "mysql2": "3.24.6",

@@ -1,4 +1,4 @@
-import { column } from '@simonbackx/simple-database';
+import { column } from '@node/database';
 import { QueryableModel, SQLCalculation, SQLColumnExpression, SQLScalar, SQLWhereSign } from '@stamhoofd/sql';
 import { SessionLoginMethod } from '@stamhoofd/structures';
 import crypto from 'crypto';

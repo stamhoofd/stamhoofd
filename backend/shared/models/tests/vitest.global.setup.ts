@@ -7,7 +7,7 @@ const emailPath = require.resolve('@stamhoofd/email');
 export async function setup() {
     TestUtils.globalSetup();
 
-    const { Database, Migration } = await import('@simonbackx/simple-database');
+    const { Database, Migration } = await import('@node/database');
 
     // External migrations
     if (!await Migration.runAll(path.dirname(modelsPath) + '/migrations')) {

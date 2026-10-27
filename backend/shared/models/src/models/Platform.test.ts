@@ -1,6 +1,6 @@
 import { PermissionRoleDetailed, PlatformConfig, PlatformMembershipType, PlatformPrivateConfig } from '@stamhoofd/structures';
 import { Platform } from './Platform.js';
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { QueueHandler } from '@stamhoofd/queues';
 

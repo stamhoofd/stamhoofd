@@ -72,7 +72,7 @@
         "@aws-sdk/client-sqs": "3.1153.0",
         "@aws-sdk/s3-request-presigner": "3.1153.0",
         "@bwip-js/node": "4.11.4",
-        "@simonbackx/simple-database": "1.40.1",
+        "@node/database": "workspace:*",
         "@common/encoding": "workspace:*",
         "@node/endpoints": "workspace:*",
         "@common/errors": "workspace:*",

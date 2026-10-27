@@ -1,4 +1,4 @@
-import { Factory } from '@simonbackx/simple-database';
+import { Factory } from '@node/database';
 import { OrganizationTag } from '@stamhoofd/structures';
 
 import { Platform } from '../models/Platform.js';

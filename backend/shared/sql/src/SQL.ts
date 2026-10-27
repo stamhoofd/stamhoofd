@@ -1,4 +1,4 @@
-import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import type { SQLResultNamespacedRow } from '@node/database';
 import { SQLDelete } from './SQLDelete.js';
 import type { SQLExpression } from './SQLExpression.js';
 import { isSQLExpression } from './SQLExpression.js';

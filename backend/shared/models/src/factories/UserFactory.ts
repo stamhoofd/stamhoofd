@@ -1,4 +1,4 @@
-import { Factory } from '@simonbackx/simple-database';
+import { Factory } from '@node/database';
 import type { Permissions } from '@stamhoofd/structures';
 import { NewUser, UserPermissions } from '@stamhoofd/structures';
 
