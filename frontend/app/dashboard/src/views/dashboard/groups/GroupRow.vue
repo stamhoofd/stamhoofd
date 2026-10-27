@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import type { Group, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';

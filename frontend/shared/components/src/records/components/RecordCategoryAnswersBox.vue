@@ -74,7 +74,7 @@
 </template>
 
 <script lang="ts" setup generic="T extends ObjectWithRecords">
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { ObjectWithRecords, RecordAnswer, RecordCategory } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

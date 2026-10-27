@@ -3,8 +3,8 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import type { OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct } from '@stamhoofd/structures';
 import { SetupStepType } from '@stamhoofd/structures';
 
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { AutoEncoder, BooleanDecoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { AutoEncoder, BooleanDecoder, EnumDecoder, field } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { OrganizationRegistrationPeriod } from '@stamhoofd/models';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';

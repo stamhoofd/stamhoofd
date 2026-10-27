@@ -1,7 +1,7 @@
 import { startAuthentication } from '@simplewebauthn/browser';
 import type { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/browser';
-import type { AutoEncoderPatchType, Decoder, EncodableObject } from '@simonbackx/simple-encoding';
-import { ObjectData } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, EncodableObject } from '@common/encoding';
+import { ObjectData } from '@common/encoding';
 import { isSimpleError, isSimpleErrors } from '@common/errors';
 import type { RequestResult } from '@simonbackx/simple-networking';
 import type { Organization } from '@stamhoofd/structures';

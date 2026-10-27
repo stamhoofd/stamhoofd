@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
+import { PatchableArray } from '@common/encoding';
 import { FileType, RecordCategory, RecordChoice, RecordSettings, RecordType, TranslatedString } from '@stamhoofd/structures';
 import { RecordAnswerHelper } from './RecordAnswerHelper.js';
 

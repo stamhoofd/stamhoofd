@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@common/encoding';
 import { DataValidator } from '@stamhoofd/utility';
 
 /**

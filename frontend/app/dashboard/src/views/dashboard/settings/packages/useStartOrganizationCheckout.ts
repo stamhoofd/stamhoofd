@@ -1,4 +1,4 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';

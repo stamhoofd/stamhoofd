@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import { patchObject } from '@simonbackx/simple-encoding';
+import { patchObject } from '@common/encoding';
 import type { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import type { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import FillRecordCategoryBox from '@stamhoofd/components/records/components/FillRecordCategoryBox.vue';

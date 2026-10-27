@@ -1,5 +1,5 @@
-import type { AutoEncoder, AutoEncoderPatchType, NonScalarIdentifiable, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import type { AutoEncoder, AutoEncoderPatchType, NonScalarIdentifiable, PatchableArrayAutoEncoder } from '@common/encoding';
+import { PatchableArray } from '@common/encoding';
 import type { Ref} from 'vue';
 import { computed, ref, unref } from 'vue';
 

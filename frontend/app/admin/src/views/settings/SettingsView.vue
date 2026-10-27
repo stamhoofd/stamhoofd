@@ -311,7 +311,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import eventNotificationsIllustration from '@stamhoofd/assets/images/illustrations/event-notifications.svg';
 import groupIllustration from '@stamhoofd/assets/images/illustrations/group.svg';

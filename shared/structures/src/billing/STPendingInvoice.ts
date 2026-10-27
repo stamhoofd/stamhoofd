@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, field, StringDecoder } from '@common/encoding';
 import { OrganizationSimple } from '../OrganizationSimple.js';
 import { STInvoice } from './STInvoice.js';
 import { STInvoiceMeta } from './STInvoiceMeta.js';

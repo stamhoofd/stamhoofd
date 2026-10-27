@@ -19,8 +19,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
-import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@common/encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
 import { useInvoicesObjectFetcher } from '@stamhoofd/components/fetchers/useInvoicesObjectFetcher.ts';
 import { getInvoicesUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/invoices.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext';

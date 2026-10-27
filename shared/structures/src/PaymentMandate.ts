@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@common/encoding';
 import { PaymentProvider } from './PaymentProvider.js';
 import { Formatter } from '@stamhoofd/utility';
 

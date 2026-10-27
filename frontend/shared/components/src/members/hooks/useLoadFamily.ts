@@ -1,4 +1,4 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { useContext } from '#hooks/useContext.ts';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';

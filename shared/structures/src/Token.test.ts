@@ -1,4 +1,4 @@
-import { ObjectData } from '@simonbackx/simple-encoding';
+import { ObjectData } from '@common/encoding';
 import { Token, Version } from '#/index.ts';
 
 const MINUTE = 60 * 1000;

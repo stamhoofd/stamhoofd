@@ -1,6 +1,6 @@
 import type { ManyToOneRelation } from '@simonbackx/simple-database';
 import { column } from '@simonbackx/simple-database';
-import { EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
+import { EnumDecoder, MapDecoder } from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';

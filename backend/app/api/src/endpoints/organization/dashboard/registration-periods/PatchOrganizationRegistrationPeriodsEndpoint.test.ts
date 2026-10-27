@@ -5,8 +5,8 @@ import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { GroupCategory, GroupSettings, Group as GroupStruct, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Permissions, TranslatedString, Version } from '@stamhoofd/structures';
 import { SessionService } from '../../../../services/SessionService.js';
 
-import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@common/encoding';
+import { PatchableArray } from '@common/encoding';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { PatchOrganizationRegistrationPeriodsEndpoint } from './PatchOrganizationRegistrationPeriodsEndpoint.js';

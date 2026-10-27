@@ -465,8 +465,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ObjectData, PatchableArray, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
+import { ObjectData, PatchableArray, VersionBoxDecoder } from '@common/encoding';
 import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';

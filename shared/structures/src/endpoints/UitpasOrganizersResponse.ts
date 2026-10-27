@@ -1,4 +1,4 @@
-import { AutoEncoder, StringDecoder, field, IntegerDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, StringDecoder, field, IntegerDecoder, ArrayDecoder } from '@common/encoding';
 
 export class UitpasOrganizerResponse extends AutoEncoder {
     @field({ decoder: StringDecoder })

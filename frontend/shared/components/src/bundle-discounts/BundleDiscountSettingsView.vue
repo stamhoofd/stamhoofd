@@ -53,7 +53,7 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
 import { defineRoute, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
 import { BundleDiscount, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';

@@ -3,8 +3,8 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { OrganizationPackagesStatus, STPackage as STPackageStruct } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context.js';
 import { STPackageService } from '../../../../services/STPackageService.js';
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { AutoEncoder, BooleanDecoder, field } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { AutoEncoder, BooleanDecoder, field } from '@common/encoding';
 
 type Params = Record<string, never>;
 class Query extends AutoEncoder {

@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, StringDecoder } from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 export class Category extends AutoEncoder {

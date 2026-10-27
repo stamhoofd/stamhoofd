@@ -188,6 +188,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
+  '@simonbackx/simple-encoding': workspace:@common/encoding@*
   '@types/node': 22.20.4
   axios: 1.20.0
   cookie: 2.0.1
@@ -220,15 +221,15 @@ importers:
 
   .:
     dependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:packages/common/encoding
       '@common/errors':
         specifier: workspace:*
         version: link:packages/common/errors
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
       '@simonbackx/simple-networking':
         specifier: 1.23.0
-        version: 1.23.0(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(@simonbackx/simple-errors@packages+common+errors)
+        version: 1.23.0(@simonbackx/simple-encoding@packages+common+encoding)(@simonbackx/simple-errors@packages+common+errors)
       '@simonbackx/vue-app-navigation':
         specifier: 2.25.1
         version: 2.25.1(tslib@2.8.1)(vue@3.5.44(typescript@6.0.3))
@@ -482,18 +483,18 @@ importers:
       '@bwip-js/node':
         specifier: 4.11.4
         version: 4.11.4
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@common/errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
       '@simonbackx/simple-database':
         specifier: 1.40.1
-        version: 1.40.1(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(mysql2@3.24.6(@types/node@22.20.4))
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
+        version: 1.40.1(@simonbackx/simple-encoding@packages+common+encoding)(mysql2@3.24.6(@types/node@22.20.4))
       '@simonbackx/simple-endpoints':
         specifier: 1.23.0
-        version: 1.23.0(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(@simonbackx/simple-errors@packages+common+errors)
+        version: 1.23.0(@simonbackx/simple-encoding@packages+common+encoding)(@simonbackx/simple-errors@packages+common+errors)
       '@simonbackx/simple-logging':
         specifier: 1.0.1
         version: 1.0.1
@@ -657,18 +658,18 @@ importers:
       '@aws-sdk/lib-storage':
         specifier: 3.1153.0
         version: 3.1153.0(@aws-sdk/client-s3@3.1153.0)
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@common/errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
       '@simonbackx/simple-database':
         specifier: 1.40.1
-        version: 1.40.1(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(mysql2@3.24.6(@types/node@22.20.4))
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
+        version: 1.40.1(@simonbackx/simple-encoding@packages+common+encoding)(mysql2@3.24.6(@types/node@22.20.4))
       '@simonbackx/simple-endpoints':
         specifier: 1.23.0
-        version: 1.23.0(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(@simonbackx/simple-errors@packages+common+errors)
+        version: 1.23.0(@simonbackx/simple-encoding@packages+common+encoding)(@simonbackx/simple-errors@packages+common+errors)
       '@simonbackx/simple-logging':
         specifier: 1.0.1
         version: 1.0.1
@@ -723,10 +724,10 @@ importers:
     dependencies:
       '@simonbackx/simple-database':
         specifier: 1.40.1
-        version: 1.40.1(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(mysql2@3.24.6(@types/node@22.20.4))
+        version: 1.40.1(@simonbackx/simple-encoding@packages+common+encoding)(mysql2@3.24.6(@types/node@22.20.4))
       '@simonbackx/simple-endpoints':
         specifier: 1.23.0
-        version: 1.23.0(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(@simonbackx/simple-errors@packages+common+errors)
+        version: 1.23.0(@simonbackx/simple-encoding@packages+common+encoding)(@simonbackx/simple-errors@packages+common+errors)
       '@simonbackx/simple-logging':
         specifier: 1.0.1
         version: 1.0.1
@@ -749,6 +750,9 @@ importers:
         specifier: 3.24.6
         version: 3.24.6(@types/node@22.20.4)
     devDependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@stamhoofd/test-utils':
         specifier: workspace:*
         version: link:../../../shared/test-utils
@@ -764,18 +768,18 @@ importers:
 
   backend/app/renderer:
     dependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@common/errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
       '@simonbackx/simple-database':
         specifier: 1.40.1
-        version: 1.40.1(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(mysql2@3.24.6(@types/node@22.20.4))
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
+        version: 1.40.1(@simonbackx/simple-encoding@packages+common+encoding)(mysql2@3.24.6(@types/node@22.20.4))
       '@simonbackx/simple-endpoints':
         specifier: 1.23.0
-        version: 1.23.0(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(@simonbackx/simple-errors@packages+common+errors)
+        version: 1.23.0(@simonbackx/simple-encoding@packages+common+encoding)(@simonbackx/simple-errors@packages+common+errors)
       '@simonbackx/simple-logging':
         specifier: 1.0.1
         version: 1.0.1
@@ -840,15 +844,15 @@ importers:
 
   backend/app/statistics-syncer:
     dependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@common/errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
       '@simonbackx/simple-database':
         specifier: 1.40.1
-        version: 1.40.1(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(mysql2@3.24.6(@types/node@22.20.4))
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
+        version: 1.40.1(@simonbackx/simple-encoding@packages+common+encoding)(mysql2@3.24.6(@types/node@22.20.4))
       '@simonbackx/simple-logging':
         specifier: 1.0.1
         version: 1.0.1
@@ -897,7 +901,7 @@ importers:
     dependencies:
       '@simonbackx/simple-database':
         specifier: 1.40.1
-        version: 1.40.1(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(mysql2@3.24.6(@types/node@22.20.4))
+        version: 1.40.1(@simonbackx/simple-encoding@packages+common+encoding)(mysql2@3.24.6(@types/node@22.20.4))
       '@simonbackx/simple-logging':
         specifier: 1.0.1
         version: 1.0.1
@@ -905,6 +909,9 @@ importers:
         specifier: 3.24.6
         version: 3.24.6(@types/node@22.20.4)
     devDependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@stamhoofd/types':
         specifier: workspace:*
         version: link:../../../shared/types
@@ -919,7 +926,7 @@ importers:
         version: link:../../../packages/common/errors
       '@simonbackx/simple-database':
         specifier: 1.40.1
-        version: 1.40.1(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(mysql2@3.24.6(@types/node@22.20.4))
+        version: 1.40.1(@simonbackx/simple-encoding@packages+common+encoding)(mysql2@3.24.6(@types/node@22.20.4))
       '@stamhoofd/test-utils':
         specifier: workspace:*
         version: link:../../../shared/test-utils
@@ -936,6 +943,9 @@ importers:
         specifier: 14.0.3
         version: 14.0.3
     devDependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@stamhoofd/backend-i18n':
         specifier: workspace:*
         version: link:../i18n
@@ -984,7 +994,7 @@ importers:
     dependencies:
       '@simonbackx/simple-endpoints':
         specifier: 1.23.0
-        version: 1.23.0(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(@simonbackx/simple-errors@packages+common+errors)
+        version: 1.23.0(@simonbackx/simple-encoding@packages+common+encoding)(@simonbackx/simple-errors@packages+common+errors)
       '@simonbackx/simple-logging':
         specifier: 1.0.1
         version: 1.0.1
@@ -1019,11 +1029,14 @@ importers:
         version: link:../../../packages/common/errors
       '@simonbackx/simple-endpoints':
         specifier: 1.23.0
-        version: 1.23.0(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(@simonbackx/simple-errors@packages+common+errors)
+        version: 1.23.0(@simonbackx/simple-encoding@packages+common+encoding)(@simonbackx/simple-errors@packages+common+errors)
       '@simonbackx/simple-logging':
         specifier: 1.0.1
         version: 1.0.1
     devDependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
@@ -1042,18 +1055,18 @@ importers:
       '@bwip-js/node':
         specifier: 4.11.4
         version: 4.11.4
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@common/errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
       '@simonbackx/simple-database':
         specifier: 1.40.1
-        version: 1.40.1(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(mysql2@3.24.6(@types/node@22.20.4))
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
+        version: 1.40.1(@simonbackx/simple-encoding@packages+common+encoding)(mysql2@3.24.6(@types/node@22.20.4))
       '@simonbackx/simple-endpoints':
         specifier: 1.23.0
-        version: 1.23.0(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(@simonbackx/simple-errors@packages+common+errors)
+        version: 1.23.0(@simonbackx/simple-encoding@packages+common+encoding)(@simonbackx/simple-errors@packages+common+errors)
       argon2:
         specifier: 0.45.1
         version: 0.45.1
@@ -1125,15 +1138,15 @@ importers:
 
   backend/shared/sql:
     dependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@common/errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
       '@simonbackx/simple-database':
         specifier: 1.40.1
-        version: 1.40.1(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(mysql2@3.24.6(@types/node@22.20.4))
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
+        version: 1.40.1(@simonbackx/simple-encoding@packages+common+encoding)(mysql2@3.24.6(@types/node@22.20.4))
       '@simonbackx/simple-logging':
         specifier: 1.0.1
         version: 1.0.1
@@ -1162,12 +1175,12 @@ importers:
 
   backend/shared/vies:
     dependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@common/errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
       '@stamhoofd/models':
         specifier: workspace:*
         version: link:../models
@@ -1186,7 +1199,7 @@ importers:
     devDependencies:
       '@simonbackx/simple-database':
         specifier: 1.40.1
-        version: 1.40.1(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(mysql2@3.24.6(@types/node@22.20.4))
+        version: 1.40.1(@simonbackx/simple-encoding@packages+common+encoding)(mysql2@3.24.6(@types/node@22.20.4))
       '@stamhoofd/backend-i18n':
         specifier: workspace:*
         version: link:../i18n
@@ -1236,15 +1249,15 @@ importers:
 
   frontend/app/admin:
     dependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@common/errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
       '@simonbackx/simple-networking':
         specifier: 1.23.0
-        version: 1.23.0(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(@simonbackx/simple-errors@packages+common+errors)
+        version: 1.23.0(@simonbackx/simple-encoding@packages+common+encoding)(@simonbackx/simple-errors@packages+common+errors)
       '@simonbackx/vue-app-navigation':
         specifier: 2.25.1
         version: 2.25.1(tslib@2.8.1)(vue@3.5.44(typescript@6.0.3))
@@ -1306,15 +1319,15 @@ importers:
 
   frontend/app/auto:
     dependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@common/errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
       '@simonbackx/simple-networking':
         specifier: 1.23.0
-        version: 1.23.0(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(@simonbackx/simple-errors@packages+common+errors)
+        version: 1.23.0(@simonbackx/simple-encoding@packages+common+encoding)(@simonbackx/simple-errors@packages+common+errors)
       '@simonbackx/vue-app-navigation':
         specifier: 2.25.1
         version: 2.25.1(tslib@2.8.1)(vue@3.5.44(typescript@6.0.3))
@@ -1437,15 +1450,15 @@ importers:
 
   frontend/app/dashboard:
     dependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@common/errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
       '@simonbackx/simple-networking':
         specifier: 1.23.0
-        version: 1.23.0(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(@simonbackx/simple-errors@packages+common+errors)
+        version: 1.23.0(@simonbackx/simple-encoding@packages+common+encoding)(@simonbackx/simple-errors@packages+common+errors)
       '@simonbackx/vue-app-navigation':
         specifier: 2.25.1
         version: 2.25.1(tslib@2.8.1)(vue@3.5.44(typescript@6.0.3))
@@ -1600,15 +1613,15 @@ importers:
       '@capgo/capacitor-updater':
         specifier: 8.53.0
         version: 8.53.0(@capacitor/core@8.5.3)
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@plausible-analytics/tracker':
         specifier: 0.4.6
         version: 0.4.6
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
       '@simonbackx/simple-networking':
         specifier: 1.23.0
-        version: 1.23.0(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(@simonbackx/simple-errors@packages+common+errors)
+        version: 1.23.0(@simonbackx/simple-encoding@packages+common+encoding)(@simonbackx/simple-errors@packages+common+errors)
       '@simonbackx/vue-app-navigation':
         specifier: 2.25.1
         version: 2.25.1(tslib@2.8.1)(vue@3.5.44(typescript@6.0.3))
@@ -1688,12 +1701,12 @@ importers:
 
   frontend/app/registration:
     dependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@common/errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
       '@simonbackx/vue-app-navigation':
         specifier: 2.25.1
         version: 2.25.1(tslib@2.8.1)(vue@3.5.44(typescript@6.0.3))
@@ -1774,15 +1787,15 @@ importers:
 
   frontend/app/web-app:
     dependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@common/errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
       '@plausible-analytics/tracker':
         specifier: 0.4.6
         version: 0.4.6
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
       '@simonbackx/vue-app-navigation':
         specifier: 2.25.1
         version: 2.25.1(tslib@2.8.1)(vue@3.5.44(typescript@6.0.3))
@@ -1871,12 +1884,12 @@ importers:
 
   frontend/app/webshop:
     dependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@common/errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
       '@simonbackx/vue-app-navigation':
         specifier: 2.25.1
         version: 2.25.1(tslib@2.8.1)(vue@3.5.44(typescript@6.0.3))
@@ -1935,15 +1948,15 @@ importers:
 
   frontend/shared/application:
     dependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@common/errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
       '@simonbackx/simple-networking':
         specifier: 1.23.0
-        version: 1.23.0(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(@simonbackx/simple-errors@packages+common+errors)
+        version: 1.23.0(@simonbackx/simple-encoding@packages+common+encoding)(@simonbackx/simple-errors@packages+common+errors)
       '@simplewebauthn/browser':
         specifier: 13.3.0
         version: 13.3.0
@@ -1998,15 +2011,15 @@ importers:
 
   frontend/shared/components:
     dependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@common/errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
       '@simonbackx/simple-networking':
         specifier: 1.23.0
-        version: 1.23.0(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(@simonbackx/simple-errors@packages+common+errors)
+        version: 1.23.0(@simonbackx/simple-encoding@packages+common+encoding)(@simonbackx/simple-errors@packages+common+errors)
       '@simonbackx/vue-app-navigation':
         specifier: 2.25.1
         version: 2.25.1(tslib@2.8.1)(vue@3.5.44(typescript@6.0.3))
@@ -2175,7 +2188,7 @@ importers:
         version: link:../../../packages/common/errors
       '@simonbackx/simple-networking':
         specifier: 1.23.0
-        version: 1.23.0(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(@simonbackx/simple-errors@packages+common+errors)
+        version: 1.23.0(@simonbackx/simple-encoding@packages+common+encoding)(@simonbackx/simple-errors@packages+common+errors)
       '@stamhoofd/assets':
         specifier: workspace:*
         version: link:../assets
@@ -2201,15 +2214,18 @@ importers:
         specifier: 3.10.2
         version: 3.10.2
     devDependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       eslint-plugin-stamhoofd:
         specifier: workspace:*
         version: link:../../../shared/eslint
 
   frontend/shared/excel-export:
     dependencies:
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@simonbackx/vue-app-navigation':
         specifier: 2.25.1
         version: 2.25.1(tslib@2.8.1)(vue@3.5.44(typescript@6.0.3))
@@ -2260,15 +2276,15 @@ importers:
 
   frontend/shared/networking:
     dependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@common/errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
       '@simonbackx/simple-networking':
         specifier: 1.23.0
-        version: 1.23.0(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(@simonbackx/simple-errors@packages+common+errors)
+        version: 1.23.0(@simonbackx/simple-encoding@packages+common+encoding)(@simonbackx/simple-errors@packages+common+errors)
       '@simonbackx/vue-app-navigation':
         specifier: 2.25.1
         version: 2.25.1(tslib@2.8.1)(vue@3.5.44(typescript@6.0.3))
@@ -2317,7 +2333,7 @@ importers:
         version: link:../../../packages/common/errors
       '@simonbackx/simple-networking':
         specifier: 1.23.0
-        version: 1.23.0(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(@simonbackx/simple-errors@packages+common+errors)
+        version: 1.23.0(@simonbackx/simple-encoding@packages+common+encoding)(@simonbackx/simple-errors@packages+common+errors)
       '@stamhoofd/types':
         specifier: workspace:*
         version: link:../../../shared/types
@@ -2325,6 +2341,9 @@ importers:
         specifier: 3.5.44
         version: 3.5.44(typescript@6.0.3)
     devDependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@stamhoofd/vite-config':
         specifier: workspace:*
         version: link:../vite-config
@@ -2402,15 +2421,15 @@ importers:
 
   frontend/shared/session:
     dependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@common/errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
       '@simonbackx/simple-networking':
         specifier: 1.23.0
-        version: 1.23.0(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(@simonbackx/simple-errors@packages+common+errors)
+        version: 1.23.0(@simonbackx/simple-encoding@packages+common+encoding)(@simonbackx/simple-errors@packages+common+errors)
       '@simonbackx/vue-app-navigation':
         specifier: 2.25.1
         version: 2.25.1(tslib@2.8.1)(vue@3.5.44(typescript@6.0.3))
@@ -2451,15 +2470,15 @@ importers:
 
   frontend/shared/sgv:
     dependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
       '@common/errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
       '@simonbackx/simple-networking':
         specifier: 1.23.0
-        version: 1.23.0(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(@simonbackx/simple-errors@packages+common+errors)
+        version: 1.23.0(@simonbackx/simple-encoding@packages+common+encoding)(@simonbackx/simple-errors@packages+common+errors)
       '@simonbackx/vue-app-navigation':
         specifier: 2.25.1
         version: 2.25.1(tslib@2.8.1)(vue@3.5.44(typescript@6.0.3))
@@ -2616,6 +2635,31 @@ importers:
         specifier: 4.1.12
         version: 4.1.12(@opentelemetry/api@1.9.1)(@types/node@22.20.4)(@vitest/browser-playwright@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@24.1.3(supports-color@10.2.2))(vite@8.3.4(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.2)(terser@5.51.2)(yaml@2.9.0))
 
+  packages/common/encoding:
+    dependencies:
+      '@common/errors':
+        specifier: workspace:*
+        version: link:../errors
+      tslib:
+        specifier: 2.8.1
+        version: 2.8.1
+    devDependencies:
+      '@types/uuid':
+        specifier: 9.0.8
+        version: 9.0.8
+      eslint-plugin-stamhoofd:
+        specifier: workspace:*
+        version: link:../../../shared/eslint
+      uuid:
+        specifier: 9.0.1
+        version: 9.0.1
+      vitest:
+        specifier: 4.1.12
+        version: 4.1.12(@opentelemetry/api@1.9.1)(@types/node@22.20.4)(@vitest/browser-playwright@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@24.1.3(supports-color@10.2.2))(vite@8.3.4(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.2)(terser@5.51.2)(yaml@2.9.0))
+      vue:
+        specifier: 3.5.44
+        version: 3.5.44(typescript@6.0.3)
+
   packages/common/errors:
     dependencies:
       tslib:
@@ -2751,12 +2795,12 @@ importers:
 
   shared/filters:
     dependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../packages/common/encoding
       '@common/errors':
         specifier: workspace:*
         version: link:../../packages/common/errors
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
     devDependencies:
       eslint-plugin-stamhoofd:
         specifier: workspace:*
@@ -2785,9 +2829,9 @@ importers:
 
   shared/object-differ:
     dependencies:
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../packages/common/encoding
       uuid:
         specifier: 14.0.3
         version: 14.0.3
@@ -2819,12 +2863,12 @@ importers:
 
   shared/sgv:
     dependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../packages/common/encoding
       '@common/errors':
         specifier: workspace:*
         version: link:../../packages/common/errors
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../structures
@@ -2847,9 +2891,9 @@ importers:
 
   shared/structures:
     dependencies:
-      '@simonbackx/simple-encoding':
-        specifier: 2.26.11
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../packages/common/encoding
       '@stamhoofd/filters':
         specifier: workspace:*
         version: link:../filters
@@ -2919,12 +2963,12 @@ importers:
 
   tests/playwright:
     dependencies:
+      '@common/encoding':
+        specifier: workspace:*
+        version: link:../../packages/common/encoding
       '@simonbackx/simple-database':
         specifier: 1.40.1
-        version: 1.40.1(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(mysql2@3.24.6(@types/node@22.20.4))
-      '@simonbackx/simple-encoding':
-        specifier: '*'
-        version: 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
+        version: 1.40.1(@simonbackx/simple-encoding@packages+common+encoding)(mysql2@3.24.6(@types/node@22.20.4))
       '@stamhoofd/backend':
         specifier: workspace:*
         version: link:../../backend/app/api
@@ -6352,19 +6396,13 @@ packages:
   '@simonbackx/simple-database@1.40.1':
     resolution: {integrity: sha512-dgWEHmF2SJHYxrr9Q+485sSnn2+/gVmKWz3PWjaGkNXg1oMxbubW/3WcmqMAo2iQLudoKYuiG5m5c7kf0UVKRw==}
     peerDependencies:
-      '@simonbackx/simple-encoding': ^2.25.0
+      '@simonbackx/simple-encoding': workspace:@common/encoding@*
       mysql2: ^3.14.1
-
-  '@simonbackx/simple-encoding@2.26.11':
-    resolution: {integrity: sha512-elAmHQMs6J0cmqOG3X7II9DbPg05wK7CP0n52hR5/hYVCIypCHkpM8aKsOdLQNfM17vSnNH9+O7vhDhpniOuJQ==}
-    peerDependencies:
-      '@simonbackx/simple-errors': workspace:@common/errors@*
-      tslib: ^2.8.1
 
   '@simonbackx/simple-endpoints@1.23.0':
     resolution: {integrity: sha512-8vcKabiumqzCFVsUlpjD23vuwDZ7y/SgoPc6f2wPxkwM02OtOcwDVcxfzMH6TjFr2FxHz6HfuaK7kPfxLjW2zw==}
     peerDependencies:
-      '@simonbackx/simple-encoding': ^2.26.0
+      '@simonbackx/simple-encoding': workspace:@common/encoding@*
       '@simonbackx/simple-errors': workspace:@common/errors@*
 
   '@simonbackx/simple-logging@1.0.1':
@@ -6373,7 +6411,7 @@ packages:
   '@simonbackx/simple-networking@1.23.0':
     resolution: {integrity: sha512-O0o3AQgfvAO3GBBPZmmD4fytaSSQiQ2bK6tyi4sTAjHVmpJYA6ydDdwRgnD516WgNoaqNWYgUFg02+q++c+q0Q==}
     peerDependencies:
-      '@simonbackx/simple-encoding': ^2.9.2
+      '@simonbackx/simple-encoding': workspace:@common/encoding@*
       '@simonbackx/simple-errors': workspace:@common/errors@*
 
   '@simonbackx/vue-app-navigation@2.25.1':
@@ -7074,6 +7112,9 @@ packages:
 
   '@types/uuid@8.3.4':
     resolution: {integrity: sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==}
+
+  '@types/uuid@9.0.8':
+    resolution: {integrity: sha512-jg+97EGIcY9AGHJJRaaPVgetKDsrTgbRjQ5Msgjh/DQKEFl0DtyRr/VCOyD1T2R1MNeWPK/u7JoGhlDZnKBAfA==}
 
   '@types/web-bluetooth@0.0.20':
     resolution: {integrity: sha512-g9gZnnXVq7gM7v3tJCWV/qw7w+KeOlSHAhgF9RytFyifW6AF61hdT2ucrYhPq9hLs5JIryeupHV3qGk95dH9ow==}
@@ -14017,6 +14058,11 @@ packages:
     resolution: {integrity: sha512-Sc5u1VVln93y1Xnz4R+CunOZc7R9LUcTmhj7Rc7Eg3HVcf7rVn2FOoa812fe0W8p3jD7xeoGSYbfqCGGH2B6xw==}
     hasBin: true
 
+  uuid@9.0.1:
+    resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+    hasBin: true
+
   validate-npm-package-license@3.0.4:
     resolution: {integrity: sha512-DpKm2Ui/xN7/HQKCtpZxoRWBhZ9Z0kqtygG8XCgNQ8ZlDnxuQmWhj566j8fN4Cu3/JmbhsDo7fcAJq4s9h27Ew==}
 
@@ -18618,29 +18664,24 @@ snapshots:
       '@sigstore/core': 3.2.1
       '@sigstore/protobuf-specs': 0.5.2
 
-  '@simonbackx/simple-database@1.40.1(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(mysql2@3.24.6(@types/node@22.20.4))':
+  '@simonbackx/simple-database@1.40.1(@simonbackx/simple-encoding@packages+common+encoding)(mysql2@3.24.6(@types/node@22.20.4))':
     dependencies:
-      '@simonbackx/simple-encoding': 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
+      '@simonbackx/simple-encoding': link:packages/common/encoding
       '@simonbackx/simple-logging': 1.0.1
       mysql2: 3.24.6(@types/node@22.20.4)
 
-  '@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)':
+  '@simonbackx/simple-endpoints@1.23.0(@simonbackx/simple-encoding@packages+common+encoding)(@simonbackx/simple-errors@packages+common+errors)':
     dependencies:
-      '@simonbackx/simple-errors': link:packages/common/errors
-      tslib: 2.8.1
-
-  '@simonbackx/simple-endpoints@1.23.0(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(@simonbackx/simple-errors@packages+common+errors)':
-    dependencies:
-      '@simonbackx/simple-encoding': 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
+      '@simonbackx/simple-encoding': link:packages/common/encoding
       '@simonbackx/simple-errors': link:packages/common/errors
 
   '@simonbackx/simple-logging@1.0.1':
     dependencies:
       chalk: 4.1.2
 
-  '@simonbackx/simple-networking@1.23.0(@simonbackx/simple-encoding@2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1))(@simonbackx/simple-errors@packages+common+errors)':
+  '@simonbackx/simple-networking@1.23.0(@simonbackx/simple-encoding@packages+common+encoding)(@simonbackx/simple-errors@packages+common+errors)':
     dependencies:
-      '@simonbackx/simple-encoding': 2.26.11(@simonbackx/simple-errors@packages+common+errors)(tslib@2.8.1)
+      '@simonbackx/simple-encoding': link:packages/common/encoding
       '@simonbackx/simple-errors': link:packages/common/errors
 
   '@simonbackx/vue-app-navigation@2.25.1(tslib@2.8.1)(vue@3.5.44(typescript@6.0.3))':
@@ -19337,6 +19378,8 @@ snapshots:
   '@types/unist@3.0.3': {}
 
   '@types/uuid@8.3.4': {}
+
+  '@types/uuid@9.0.8': {}
 
   '@types/web-bluetooth@0.0.20': {}
 
@@ -28525,6 +28568,8 @@ snapshots:
   uuid@11.1.1: {}
 
   uuid@14.0.3: {}
+
+  uuid@9.0.1: {}
 
   validate-npm-package-license@3.0.4:
     dependencies:

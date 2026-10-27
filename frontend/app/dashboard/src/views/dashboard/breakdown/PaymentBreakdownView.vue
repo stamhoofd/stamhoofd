@@ -130,7 +130,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import ScrollableSegmentedControl from '@stamhoofd/components/inputs/ScrollableSegmentedControl.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';

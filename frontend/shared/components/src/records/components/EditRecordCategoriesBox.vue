@@ -16,8 +16,8 @@
 </template>
 
 <script setup lang="ts">
-import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@common/encoding';
+import { PatchableArray } from '@common/encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { RecordCategory } from '@stamhoofd/structures';

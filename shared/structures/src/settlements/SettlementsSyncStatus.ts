@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder } from '@common/encoding';
 
 /**
  * Progress of a running settlements sync (see SettlementsSyncEndpoint).

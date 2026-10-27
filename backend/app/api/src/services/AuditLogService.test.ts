@@ -1,5 +1,5 @@
 import { column, Model } from '@simonbackx/simple-database';
-import { EnumDecoder } from '@simonbackx/simple-encoding';
+import { EnumDecoder } from '@common/encoding';
 import { PaymentStatus } from '@stamhoofd/structures';
 
 import { AuditLogService, modelLogDefinitions } from './AuditLogService.js';

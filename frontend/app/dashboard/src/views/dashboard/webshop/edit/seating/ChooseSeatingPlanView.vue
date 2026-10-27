@@ -79,8 +79,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
-import { ObjectData, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder} from '@common/encoding';
+import { ObjectData, VersionBoxDecoder } from '@common/encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';

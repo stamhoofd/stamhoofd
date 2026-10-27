@@ -26,8 +26,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
+import { PatchableArray } from '@common/encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';

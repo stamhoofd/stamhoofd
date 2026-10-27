@@ -1,5 +1,5 @@
-import type { PartialWithoutMethods } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import type { PartialWithoutMethods } from '@common/encoding';
+import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@common/encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';

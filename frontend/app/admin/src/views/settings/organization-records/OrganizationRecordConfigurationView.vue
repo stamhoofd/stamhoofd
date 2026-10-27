@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';

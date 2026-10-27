@@ -1,4 +1,4 @@
-import { PatchableArray, PatchMap, patchObject } from '@simonbackx/simple-encoding';
+import { PatchableArray, PatchMap, patchObject } from '@common/encoding';
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';

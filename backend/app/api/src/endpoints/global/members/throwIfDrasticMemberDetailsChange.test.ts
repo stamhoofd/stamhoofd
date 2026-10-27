@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
 import { isSimpleError } from '@common/errors';
 import { MemberDetails } from '@stamhoofd/structures';
 import { throwIfDrasticMemberDetailsChange } from './throwIfDrasticMemberDetailsChange.js';

@@ -1,5 +1,5 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { ArrayDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { useContext } from '../useContext';
 import type { Group} from '@stamhoofd/structures';

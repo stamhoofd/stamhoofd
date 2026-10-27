@@ -1,4 +1,4 @@
-import { field, StringDecoder } from '@simonbackx/simple-encoding';
+import { field, StringDecoder } from '@common/encoding';
 import { StringCompare } from '@stamhoofd/utility';
 
 import { SettlementReference } from '../members/Payment.js';

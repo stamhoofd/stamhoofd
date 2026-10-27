@@ -1,4 +1,4 @@
-import { AutoEncoder, field, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, NumberDecoder, StringDecoder } from '@common/encoding';
 import type { InMemoryFilterDefinitions } from '@stamhoofd/structures/filters/InMemoryFilter.js';
 import type { SortDefinitions } from '@stamhoofd/filters/Sorters';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilterTypes';

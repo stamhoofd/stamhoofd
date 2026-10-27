@@ -8,8 +8,8 @@ import formidable from 'formidable';
 import { promises as fs } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { AutoEncoder, BooleanDecoder, field } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { AutoEncoder, BooleanDecoder, field } from '@common/encoding';
 import { Context } from '../../../helpers/Context.js';
 import { limiter, organizationLimiter } from './UploadImage.js';
 import type { Organization } from '@stamhoofd/models';

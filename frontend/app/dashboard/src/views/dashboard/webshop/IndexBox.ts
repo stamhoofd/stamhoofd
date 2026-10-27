@@ -1,5 +1,5 @@
-import type { Data, Decoder, EncodableObject, Encodeable, EncodeContext} from '@simonbackx/simple-encoding';
-import { encodeObject } from '@simonbackx/simple-encoding';
+import type { Data, Decoder, EncodableObject, Encodeable, EncodeContext} from '@common/encoding';
+import { encodeObject } from '@common/encoding';
 
 export type IndexedDbIndexValue = string | number | null | undefined;
 export type IndexMap<Key = string> = Map<Key, IndexedDbIndexValue>;

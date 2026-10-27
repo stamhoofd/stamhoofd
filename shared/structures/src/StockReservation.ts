@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
 
 export class StockReservation extends AutoEncoder {
     @field({ decoder: StringDecoder, field: 'id' })

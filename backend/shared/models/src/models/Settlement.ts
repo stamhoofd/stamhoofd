@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@common/encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { PaymentProvider } from '@stamhoofd/structures';
 import { SettlementStatus } from '@stamhoofd/structures/settlements/SettlementStatus.js';

@@ -28,8 +28,8 @@
 
 <script setup lang="ts">
 import { useAuth } from '#hooks/useAuth.ts';
-import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@common/encoding';
+import { PatchableArray } from '@common/encoding';
 import type I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import type { PlatformMember } from '@stamhoofd/structures';

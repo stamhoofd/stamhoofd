@@ -1,4 +1,4 @@
-import { ObjectData } from '@simonbackx/simple-encoding';
+import { ObjectData } from '@common/encoding';
 import { Address } from '../addresses/Address.js';
 import { Group } from '../Group.js';
 import { GroupSettings } from '../GroupSettings.js';

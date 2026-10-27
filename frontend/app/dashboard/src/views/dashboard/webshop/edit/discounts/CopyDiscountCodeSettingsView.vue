@@ -44,8 +44,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@common/encoding';
+import { PatchableArray } from '@common/encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';

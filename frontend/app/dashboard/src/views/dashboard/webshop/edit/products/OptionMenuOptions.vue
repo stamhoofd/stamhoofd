@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import { useDraggableArray } from '@stamhoofd/components/hooks/useDraggableArray.ts';
 import type { Option} from '@stamhoofd/structures';

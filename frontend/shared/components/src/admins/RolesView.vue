@@ -78,7 +78,7 @@ import { useDraggableArray } from '#hooks/useDraggableArray.ts';
 import SaveView from '#navigation/SaveView.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
 import { defineRoute, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
 import type { PermissionRoleForResponsibility } from '@stamhoofd/structures';
 import { PermissionRoleDetailed } from '@stamhoofd/structures';

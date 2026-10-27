@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder, URLDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder, URLDecoder } from '@common/encoding';
 
 import { SimpleError } from '@common/errors';
 import { Formatter } from '@stamhoofd/utility';

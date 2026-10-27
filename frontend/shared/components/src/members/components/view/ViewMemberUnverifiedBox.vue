@@ -23,8 +23,8 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import type { AutoEncoder, PatchableArrayAutoEncoder } from '@common/encoding';
+import { PatchableArray } from '@common/encoding';
 import type { Address, PlatformMember } from '@stamhoofd/structures';
 import { CountryHelper, MemberDetails, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 import { computed } from 'vue';

@@ -1,6 +1,6 @@
 import type { OneToManyRelation } from '@simonbackx/simple-database';
-import type { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { isEmptyPatch, isPatchableArray, PatchableArray, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
+import { isEmptyPatch, isPatchableArray, PatchableArray, PatchableArrayDecoder, StringDecoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@common/errors';

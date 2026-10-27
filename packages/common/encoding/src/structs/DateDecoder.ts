@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Data } from '../classes/Data.js';
 import { Decoder } from '../classes/Decoder.js';
 import { EncodeContext } from '../classes/EncodeContext.js';

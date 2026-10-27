@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, StringDecoder, SymbolDecoder } from '@common/encoding';
 import { DataValidator, Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 

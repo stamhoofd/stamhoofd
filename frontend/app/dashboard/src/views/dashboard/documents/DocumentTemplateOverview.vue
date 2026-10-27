@@ -79,8 +79,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
+import { ArrayDecoder, PatchableArray, PatchMap } from '@common/encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';

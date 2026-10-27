@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import type { MemberDetails } from '@stamhoofd/structures';
 import { StringCompare } from '@stamhoofd/utility';

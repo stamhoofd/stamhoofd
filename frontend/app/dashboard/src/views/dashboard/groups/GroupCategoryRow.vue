@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import type { GroupCategory, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useGroupCategoryActions } from '../../members/useGroupCategoryActions';

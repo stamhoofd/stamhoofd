@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, field, StringDecoder } from '@common/encoding';
 
 /**
  * The account of the administrator behind an impersonated session. Everything the session

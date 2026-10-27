@@ -3,7 +3,7 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import type { CountFilteredRequest, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, StamhoofdFilter } from '@stamhoofd/structures';
 import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse } from '@stamhoofd/structures';
 
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { OrganizationRegistrationPeriod } from '@stamhoofd/models';
 import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';

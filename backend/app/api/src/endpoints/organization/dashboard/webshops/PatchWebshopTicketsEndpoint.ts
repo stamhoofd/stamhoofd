@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
+import { ArrayDecoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError, SimpleErrors } from '@common/errors';

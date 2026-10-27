@@ -1,4 +1,4 @@
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@common/encoding';
 import { PaymentStatus, PaymentGeneral } from '@stamhoofd/structures';
 import { PatchPaymentsEndpoint } from '../../src/endpoints/organization/dashboard/payments/PatchPaymentsEndpoint.js';
 import { testServer } from '../helpers/TestServer.js';

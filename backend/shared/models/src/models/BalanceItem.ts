@@ -3,7 +3,7 @@ import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, Ba
 import { Formatter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
+import { EnumDecoder, MapDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import { Payment } from './Payment.js';

@@ -56,7 +56,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { useDismiss, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';

@@ -81,8 +81,8 @@
 </template>
 
 <script setup lang="ts">
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { ArrayDecoder } from '@common/encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import Spinner from '@stamhoofd/components/Spinner.vue';

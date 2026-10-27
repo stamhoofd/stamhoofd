@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';

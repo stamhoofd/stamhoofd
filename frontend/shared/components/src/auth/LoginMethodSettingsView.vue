@@ -303,7 +303,7 @@ import type {
     ConvertArrayToPatchableArray,
     Decoder,
     PartialWithoutMethods,
-} from '@simonbackx/simple-encoding';
+} from '@common/encoding';
 import { SimpleError, SimpleErrors } from '@common/errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';

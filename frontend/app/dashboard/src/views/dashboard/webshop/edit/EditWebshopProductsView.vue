@@ -59,7 +59,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
 import { usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { Category, PrivateWebshop, Product, ProductType, WebshopMetaData, WebshopOrderMode, WebshopTicketType } from '@stamhoofd/structures';

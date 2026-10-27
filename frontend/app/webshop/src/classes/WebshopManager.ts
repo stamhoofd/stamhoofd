@@ -1,4 +1,4 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
 import { setFavicon } from '@stamhoofd/components/helpers/favicon.ts';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';

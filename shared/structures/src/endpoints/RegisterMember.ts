@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, StringDecoder } from '@common/encoding';
 
 import { PaymentMethod } from '../PaymentMethod.js';
 

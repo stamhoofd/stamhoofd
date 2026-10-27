@@ -101,6 +101,7 @@ describe('shared build orchestration', () => {
         expect(coverageTestPackages.map(pkg => pkg.name)).toEqual([
             'i18n-uuid',
             'errors',
+            'encoding',
             'metabase',
             'filters',
             'structures',

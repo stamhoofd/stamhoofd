@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, StringDecoder, field } from '@common/encoding';
 import { MemberPlatformMembership } from './MemberPlatformMembership.js';
 import { BalanceItem, BalanceItemWithPayments } from '../BalanceItem.js';
 

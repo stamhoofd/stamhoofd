@@ -1,4 +1,4 @@
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@common/encoding';
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, RegistrationPeriod, User, Token } from '@stamhoofd/models';

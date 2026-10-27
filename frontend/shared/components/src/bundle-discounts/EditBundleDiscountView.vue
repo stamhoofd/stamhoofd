@@ -139,8 +139,8 @@ import GroupPriceDiscountsInput from '#groups/components/GroupPriceDiscountsInpu
 import { useContext } from '#hooks/useContext.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
+import { ArrayDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';

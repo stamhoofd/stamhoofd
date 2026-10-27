@@ -109,7 +109,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PartialWithoutMethods } from '@common/encoding';
 import type { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors';
 import type { Validator } from '@stamhoofd/components/errors/Validator';

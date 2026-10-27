@@ -1,6 +1,6 @@
 import type { ModelEvent } from '@simonbackx/simple-database';
 import { Model } from '@simonbackx/simple-database';
-import { ArrayDecoder, EnumDecoder, MapDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, EnumDecoder, MapDecoder, SymbolDecoder } from '@common/encoding';
 import { getAuditLogEnumDecoderObject, getAuditLogEnumType } from '@stamhoofd/structures';
 import type { AuditLogSource } from '@stamhoofd/structures';
 import { AsyncLocalStorage } from 'node:async_hooks';
